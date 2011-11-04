@@ -129,6 +129,7 @@ public:
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
+	void singleRedraw();
 
   // Edit Mode management
 	// In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state 
@@ -209,7 +210,9 @@ public:
 	void drawGradient();
 	void drawLight();
 	float getFov() { return fov; }
-	
+	bool showInterruptButton() const;
+	void showInterruptButton(const bool& show);
+
 // the following pairs of slot/signal implements a very simple message passing mechanism.
 // a widget that has a pointer to the glarea call the sendViewDir() slot and 
 // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
@@ -272,7 +275,7 @@ private:
 	bool  hasToPick;							// has to pick during the next redraw.
 	bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
 	QString nameToGetPickPos;         // the name of the parameter that has asked for the point on the surface 
-	
+	bool interrbutshow;
 	vcg::Point2i pointToPick;
 
 	//shader support
@@ -475,8 +478,6 @@ private:
 	}
 	
 };
-
-
 
 
 #endif

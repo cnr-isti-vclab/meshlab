@@ -36,7 +36,7 @@ using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
-: QGLWidget()
+: QGLWidget(),interrbutshow(false)
 {
 
     this->setParent(mvcont);
@@ -1695,3 +1695,19 @@ MainWindow * GLArea::mw()
   return qobject_cast<MainWindow *>(curParent);
 }
 
+bool GLArea::showInterruptButton() const
+{
+	return interrbutshow;
+}
+
+void GLArea::showInterruptButton( const bool& show )
+{
+	interrbutshow = show;
+}
+
+void GLArea::singleRedraw()
+{
+	mvc()->meshDoc.setBusy(false);
+	repaint();
+	mvc()->meshDoc.setBusy(true);
+}

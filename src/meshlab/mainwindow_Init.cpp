@@ -63,6 +63,7 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
+	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
 	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&)),this,SLOT(scriptCodeExecuted(const QScriptValue&)));
 
 	httpReq=new QHttp(this);
@@ -90,7 +91,12 @@ MainWindow::MainWindow()
 	qb->setMaximum(100);
 	qb->setMinimum(0);
 	//qb->reset();
+	QCommonStyle st;
+	interruptbut = new QPushButton(st.standardIcon(QStyle::SP_MediaPause),"",this);
+	interruptbut->setVisible(false);
+	connect(interruptbut,SIGNAL(clicked()),this,SLOT(interruptFilterExecution()));
 	statusBar()->addPermanentWidget(qb,0);
+	statusBar()->addPermanentWidget(interruptbut,0);
 	updateMenus();
   newProject();
 	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());

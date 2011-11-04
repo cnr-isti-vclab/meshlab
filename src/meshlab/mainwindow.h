@@ -64,6 +64,7 @@ public:
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
+	static bool DICallBack();
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
   const QString appVer() const {return tr("1.3.1Beta"); }
 
@@ -91,7 +92,6 @@ public:
   bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
   bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
   bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
-
 
 private slots:
 
@@ -155,6 +155,10 @@ private slots:
   void viewFromCurrentRasterShot();
   void copyViewToClipBoard();
 	void pasteViewFromClipboard();
+	void filterUpdateRequest(const bool&,bool*);
+	void interruptFilterExecution();
+	void interruptButtonVisibility();
+	void showInterruptButton(const bool& visible);
 
 	///////////Slot PopUp Menu Handles /////////////////////
 	void splitFromHandle(QAction * qa);
@@ -208,6 +212,8 @@ private:
 	MeshlabStdDialog *stddialog;
 	MeshLabXMLStdDialog* xmldialog;
 	static QProgressBar *qb;
+	QPushButton* interruptbut;
+
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;
 	PluginGeneratorGUI* plugingui;
@@ -443,7 +449,6 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 };
-
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject

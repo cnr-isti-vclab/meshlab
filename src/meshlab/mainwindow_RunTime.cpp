@@ -89,7 +89,8 @@ void MainWindow::updateRecentProjActions()
 void MainWindow::createStdPluginWnd()
 {
 	//checks if a MeshlabStdDialog is already open and closes it
-	if (stddialog!=0){
+	if (stddialog!=0)
+	{
 		stddialog->close();
 		delete stddialog;
 	}
@@ -1089,7 +1090,19 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
   iFilter->glContext->create(filterWidget->context());
 	try
 	{
+		GLArea * ar = GLA();
+		bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
+		if (isinter)
+		{
+			showInterruptButton(true);
+			connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
+		}
 		ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+		if (isinter)
+		{
+			showInterruptButton(false);
+			disconnect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)));
+		}
 	}
 	catch(MeshLabException& e)
 	{
@@ -1155,6 +1168,44 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	if(mvc)
 		mvc->updateAllViewer();
 
+}
+
+void MainWindow::filterUpdateRequest(const bool& redraw,bool* interrupted)
+{
+	GLArea* ar = GLA();
+	if (ar != NULL && redraw)
+		ar->singleRedraw();
+	*interrupted = !(ar->showInterruptButton());
+}
+
+void MainWindow::interruptFilterExecution()
+{
+	GLArea* ar = GLA();
+	if (ar != NULL)
+	{
+		showInterruptButton(false);
+		if (meshDoc()->isBusy())
+			meshDoc()->setBusy(false);
+	}
+}
+
+void MainWindow::interruptButtonVisibility()
+{
+	GLArea* ar = GLA();
+	if (ar != NULL)
+		interruptbut->setVisible(ar->showInterruptButton());
+	else
+		interruptbut->setVisible(false);
+}
+
+void MainWindow::showInterruptButton(const bool& visible)
+{
+	GLArea* ar = GLA();
+	if (ar != NULL)
+	{
+		ar->showInterruptButton(visible);
+		interruptbut->setVisible(ar->showInterruptButton());
+	}
 }
 
 void MainWindow::scriptCodeExecuted( const QScriptValue& val )
@@ -2045,6 +2096,17 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	qb->setValue(pos);
 	MainWindow::globalStatusBar()->update();
 	qApp->processEvents();
+	return true;
+}
+
+//redraw request and interrupt syncrhonizing position
+bool MainWindow::DICallBack()
+{
+	/*GLA()->getId();
+	currgla->update();
+	if (listinter[findIndex(currgla)].isInterr())
+		return false;	
+	qApp->processEvents();*/
 	return true;
 }
 
