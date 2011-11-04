@@ -1,23 +1,23 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
 	<PLUGIN pluginName="FilterMeasure" pluginAuthor="Guido Ranzuglia" pluginEmail="guido.ranzuglia@isti.cnr.it">
-	<FILTER filterName="Compute Topological Measures" filterFunction="computeTopoMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Compute Topological Measures" filterFunction="computeTopoMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP> Compute a set of topological measures over a mesh. </FILTER_HELP>
 	</FILTER>
-	<FILTER filterName="Compute Topological Measures for Quad Meshes" filterFunction="computeTopoMeasureQuad" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Compute Topological Measures for Quad Meshes" filterFunction="computeTopoMeasureQuad" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP> Compute a set of geometric measures over a mesh. </FILTER_HELP>
 	</FILTER>
-	<FILTER filterName="Compute Geometric Measures" filterFunction="computeGeomMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Compute Geometric Measures" filterFunction="computeGeomMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP> Compute a set of geometric measures over a mesh.
 		It computes: bounding box volume and diagonal, surface area, thin shell barycenter, and an Inertia Matrix.
 		Open the layer dialog to see the results. </FILTER_HELP>
 	</FILTER>
-	<FILTER filterName="Per Vertex Quality Stat" filterFunction="computeVertQualityStat" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Per Vertex Quality Stat" filterFunction="computeVertQualityStat" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP> Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance. </FILTER_HELP>
 	</FILTER>
-	<FILTER filterName="Per Face Quality Stat" filterFunction="computeFaceQualityStat" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Per Face Quality Stat" filterFunction="computeFaceQualityStat" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP> Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance. </FILTER_HELP>
 	</FILTER>
-	<FILTER filterName="Per Vertex Quality Histogram" filterFunction="computeVertQualityHistogram" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Per Vertex Quality Histogram" filterFunction="computeVertQualityHistogram" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 		<FILTER_HELP>Compute an histogram of the values of the per-vertex quality. </FILTER_HELP>
 		<PARAM parType="Real" parName="HistMin" parDefault="meshDoc.current().computeMinVQ()" parIsImportant="true">
 			<PARAM_HELP> The vertex are displaced of a vector whose norm is bounded by this value </PARAM_HELP>
@@ -32,7 +32,7 @@
 			<EDIT_GUI guiLabel="Bin number" />
 		</PARAM>
 	</FILTER>
-	<FILTER filterName="Per Face Quality Histogram" filterFunction="computeFaceQualityHistogram" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh">
+	<FILTER filterName="Per Face Quality Histogram" filterFunction="computeFaceQualityHistogram" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterIsInterruptible="false">
 	<FILTER_HELP>Compute an histogram of the values of the per-vertex quality. </FILTER_HELP>
 	<PARAM parType="Real" parName="HistMin" parDefault="meshDoc.current().computeMinFQ()" parIsImportant="true">
 		<PARAM_HELP> The vertex are displaced of a vector whose norm is bounded by this value </PARAM_HELP>
