@@ -34,21 +34,18 @@ add sampleplugins
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <QObject>
-
 #include <common/interfaces.h>
-class QScriptEngine;
+//class QScriptEngine;
 
-class SampleXMLFilterPlugin : public QObject, public MeshLabFilterInterface
+class SampleXMLFilterPlugin : public MeshLabFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshLabFilterInterface)
-
 public:
 
 	SampleXMLFilterPlugin();
 
-    bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb) ;
+	bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) ;
 };
 
 

@@ -32,7 +32,7 @@ SampleXMLFilterPlugin::SampleXMLFilterPlugin()
 { 
 }
 
-bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb )
+bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
 	if (filterName == "Random vertex displacement")
 	{
@@ -49,7 +49,14 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 			float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 			float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 			float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-			m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);		
+			m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);	
+			bool red = false;
+			if (i % 500 == 0)
+				red = true;
+			else
+				red = false;
+			if (hasInterruptRequested(red))
+				return true;
 		}
 
 		//// Log function dump textual info in the lower part of the MeshLab screen. 
