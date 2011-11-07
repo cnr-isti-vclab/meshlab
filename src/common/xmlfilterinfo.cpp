@@ -428,6 +428,11 @@ QString MLXMLPluginInfo::pluginName() const
 	return QString();
 }
 
+void MLXMLPluginInfo::destroyXMLPluginInfo( MLXMLPluginInfo* plug )
+{
+	delete plug;
+}
+
 
 bool MLXMLUtilityFunctions::getEnumNamesValuesFromString( const QString& st,QMap<int,QString>& mp )
 {
@@ -490,7 +495,8 @@ QString MLXMLUtilityFunctions::generateXMLFilter( const MLXMLFilterSubTree& filt
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterClass) + " "
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterPreCond) + " "
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterPostCond) + " "
-		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterArity) + ">";
+		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterArity) + " "
+		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterIsInterruptible) + ">";
 	result += "<" + MLXMLElNames::filterHelpTag + ">" + filter.filterinfo[MLXMLElNames::filterHelpTag] + "</" + MLXMLElNames::filterHelpTag + ">";
 	if (!(filter.filterinfo[MLXMLElNames::filterJSCodeTag].isEmpty()))
 		result += "<" + MLXMLElNames::filterJSCodeTag + ">" + filter.filterinfo[MLXMLElNames::filterJSCodeTag] + "</" + MLXMLElNames::filterJSCodeTag + ">";
@@ -783,7 +789,7 @@ void MLXMLElNames::initMLXMLPluginAttributesTag( QStringList& ls )
 
 void MLXMLElNames::initMLXMLFilterAttributesTag( QStringList& ls )
 {
-	ls << MLXMLElNames::filterName << MLXMLElNames::filterScriptFunctName << MLXMLElNames::filterClass << MLXMLElNames::filterArity << MLXMLElNames::filterPreCond << MLXMLElNames::filterPostCond;
+	ls << MLXMLElNames::filterName << MLXMLElNames::filterScriptFunctName << MLXMLElNames::filterClass << MLXMLElNames::filterArity << MLXMLElNames::filterPreCond << MLXMLElNames::filterPostCond << MLXMLElNames::filterIsInterruptible;
 }
 
 void MLXMLElNames::initMLXMLFilterElemsTag( QStringList& ls )

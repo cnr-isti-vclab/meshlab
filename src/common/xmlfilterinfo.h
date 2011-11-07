@@ -167,9 +167,9 @@ public:
 	typedef QMap<QString,QString> XMLMap;
 	typedef QList< XMLMap > XMLMapList;
 	static MLXMLPluginInfo* createXMLPluginInfo( const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML);
+	static void destroyXMLPluginInfo(MLXMLPluginInfo* plug);
 	static XMLMap mapFromString(const QString& st,const QRegExp& extsep = extSep(),const QRegExp& intsep = intSep());
 	static XMLMapList mapListFromStringList(const QStringList& list);
-	inline static void deleteXMLFileInfo(MLXMLPluginInfo* xmlInfo) {delete xmlInfo;}
 	
 	QString interfaceAttribute(const QString& attribute) const;
 
