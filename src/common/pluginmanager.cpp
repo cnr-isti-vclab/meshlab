@@ -15,6 +15,24 @@ PluginManager::PluginManager()
 	//qApp->addLibraryPath(getBaseDirPath());
 }
 
+PluginManager::~PluginManager()
+{
+	for(int ii = 0;ii < meshIOPlug.size();++ii)
+		delete meshIOPlug[ii];
+	for(int ii = 0;ii < meshFilterPlug.size();++ii)
+		delete meshFilterPlug[ii];
+	for(int ii = 0;ii < meshRenderPlug.size();++ii)
+		delete meshRenderPlug[ii];
+	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
+		delete meshDecoratePlug[ii];
+	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
+		delete meshEditInterfacePlug[ii];
+	for(QMap<QString,MeshLabXMLFilterContainer>::iterator it = stringXMLFilterMap.begin();it != stringXMLFilterMap.end();++it)
+		MLXMLPluginInfo::destroyXMLPluginInfo(it.value().xmlInfo);
+}
+
+
+
 void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 {
 	pluginsDir=QDir(getPluginDirPath());

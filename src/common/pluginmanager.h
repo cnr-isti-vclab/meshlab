@@ -41,6 +41,7 @@ private:
 	MeshDocumentScriptInterface* currentDocInterface;
 public:
   PluginManager();
+  ~PluginManager();
   enum TypeIO{IMPORT,EXPORT};
   void loadPlugins(RichParameterSet& defaultGlobal);
   QString pluginsCode() const;
