@@ -209,6 +209,10 @@ void FilterGeneratorGUI::collectInfo( MLXMLFilterSubTree& filter )
 	filter.filterinfo[MLXMLElNames::filterPostCond] = ui->postcond->selectedItemsString();
 	filter.filterinfo[MLXMLElNames::filterClass] = ui->category->selectedItemsString();
 	filter.filterinfo[MLXMLElNames::filterHelpTag] = ui->helpedit->toPlainText();
+	QString isint("false");
+	if (ui->isinterr->isChecked())
+		isint = "true";
+	filter.filterinfo[MLXMLElNames::filterIsInterruptible] = isint;
 	QList<QTreeWidgetItem*> items = ui->paramviewer->findItems(QString(".*"),Qt::MatchRegExp);
 	for(int ii = 0;ii < items.size();++ii)
 	{
@@ -387,6 +391,8 @@ void FilterGeneratorGUI::importInfo( const MLXMLFilterSubTree& tree )
 	ui->precond->setCurrentValue(tree.filterinfo[MLXMLElNames::filterPreCond].split(" | "));
 	ui->postcond->setCurrentValue(tree.filterinfo[MLXMLElNames::filterPostCond].split(" | "));
 	ui->helpedit->setPlainText(tree.filterinfo[MLXMLElNames::filterHelpTag]);
+	if (tree.filterinfo[MLXMLElNames::filterIsInterruptible] == "true")
+		ui->isinterr->setCheckState(Qt::Checked);
 	for(int ii = 0;ii < tree.params.size();++ii)
 		addParam(tree.params[ii]);
 }
@@ -885,6 +891,7 @@ void PluginGeneratorGUI::loadXMLPlugin()
 			MLXMLUtilityFunctions::loadMeshLabXML(tree,*plug);
 			importInfo(tree);
 		}
+		MLXMLPluginInfo::destroyXMLPluginInfo(plug);
 	}
 }
 
