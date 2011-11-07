@@ -422,7 +422,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="2" rowspan="7">
+   <item row="0" column="2" rowspan="8">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Parameters Viewer</string>
@@ -490,7 +490,7 @@
    <item row="5" column="1">
     <widget class="CheckBoxList" name="postcond"/>
    </item>
-   <item row="6" column="0" colspan="2">
+   <item row="7" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Filter Help</string>
@@ -500,6 +500,13 @@
        <widget class="QPlainTextEdit" name="helpedit"/>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QCheckBox" name="isinterr">
+     <property name="text">
+      <string>Is Interruptible</string>
+     </property>
     </widget>
    </item>
   </layout>
