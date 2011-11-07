@@ -140,6 +140,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 										QStringList fn = fc.xmlInfo->filterNames();
 										addItems(pluginItem,fn);	
 									}
+									MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
 								}
 								MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 								if (iRender){
@@ -223,6 +224,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 				foreach(QString fn,ls)
 					labelInfo->setText(fc.xmlInfo->filterHelp(fn));	
 			}
+			MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
 		}
 		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
 		if (iRender){
