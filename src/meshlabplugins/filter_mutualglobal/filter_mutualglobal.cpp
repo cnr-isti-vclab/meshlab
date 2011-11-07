@@ -172,15 +172,16 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	this->glContext->makeCurrent();
 
 	this->initGL();
-	for (int i=0; i<par.getInt("Number of refinement steps"); i++)
+	if (par.getInt("Number of refinement steps")!=0)
 	{
-
 		std::vector<SubGraph> Graphs;
 		Graphs=buildGraph(md);
 		Log(0, "BuildGraph completed");
-		
-		AlignGlobal(md, Graphs);
-		Log(0, "AlignGlobal completed");
+		for (int i=0; i<par.getInt("Number of refinement steps"); i++)
+		{
+			AlignGlobal(md, Graphs);
+			Log(0, "AlignGlobal %d of %d completed",i,par.getInt("Number of refinement steps"));
+		}
 	}
 	
 	//for(int i = 0; i < Graphs.size(); i++)
@@ -476,7 +477,10 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 	if (solver.fine_alignment)
 		solver.optimize(&align, &mutual, align.shot);
 	else
+	{
 		solver.iterative(&align, &mutual, align.shot);
+		Log(0, "Vado di rough",r);
+	}
 	//align.renderScene(align.shot, 3);
 	//align.readRender(0);
 		
