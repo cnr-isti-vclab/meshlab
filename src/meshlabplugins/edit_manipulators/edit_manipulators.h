@@ -49,6 +49,7 @@ public:
   virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );
   virtual void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea * );
+  virtual void keyPressEvent(QKeyEvent *, MeshModel &, GLArea *);
 
   void DrawManipulators(MeshModel &model, GLArea *gla, bool onlyActive);
   void DrawMeshBox(MeshModel &model);
@@ -61,6 +62,14 @@ private:
 
   ManipulatorType current_manip;
   ManipulatorMode current_manip_mode;
+
+  bool aroundOrigin;
+
+  bool isSnapping;
+  float  snapto;
+
+  QString inputnumberstring;
+  float   inputnumber;
 
   bool isMoving;
   vcg::Point2i startdrag;
@@ -98,7 +107,7 @@ private:
 
   void resetOffsets();
 
-  void UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset);
+  void UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset, bool useinputnumber=false);
 
   void applyMotion(MeshModel &model, GLArea *gla);
   void cancelMotion(MeshModel &model, GLArea *gla);

@@ -34,7 +34,12 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
   current_manip = ManipulatorType::ManNone;
   current_manip_mode = ManipulatorMode::ModNone;
   isMoving = false;
+  isSnapping = false;
+  aroundOrigin = true;
+  snapto = 1;
   resetOffsets();
+  inputnumberstring= "";
+  inputnumber=0;
 
   original_Transform = vcg::Matrix44f::Identity();
   delta_Transform = vcg::Matrix44f::Identity();
@@ -86,7 +91,13 @@ void EditManipulatorsPlugin::applyMotion(MeshModel &model, GLArea *gla)
   current_manip = ManipulatorType::ManNone;
   current_manip_mode = ManipulatorMode::ModNone;
   isMoving = false;
+  isSnapping = false;
+  aroundOrigin = true;
+  snapto = 1.0;
   resetOffsets();
+
+  inputnumberstring= "";
+  inputnumber=0;
 
   // storing start matrix
   original_Transform = model.cm.Tr;
@@ -105,13 +116,29 @@ void EditManipulatorsPlugin::cancelMotion(MeshModel &model, GLArea *gla)
   current_manip = ManipulatorType::ManNone;
   current_manip_mode = ManipulatorMode::ModNone;
   isMoving = false;
+  isSnapping = false;
+  aroundOrigin = true;
+  snapto=1.0;
   resetOffsets();
+
+  inputnumberstring= "";
+  inputnumber=0;
 
   // storing start matrix
   original_Transform = model.cm.Tr;
   delta_Transform = vcg::Matrix44f::Identity();
 
   gla->update();
+}
+
+// keyboard press
+void EditManipulatorsPlugin::keyPressEvent(QKeyEvent *e, MeshModel &model, GLArea *gla)
+{
+  // shift pressed, entering snapping mode
+  if(e->key() == Qt::Key_Shift)
+  {
+    isSnapping = true;
+  }
 }
 
 // keyboard commands, just like Blender
@@ -127,6 +154,20 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
 	  if (e->key() == Qt::Key_Backspace) 
     {
       cancelMotion(model, gla);
+    }
+  }
+
+  // shift released, exit snapping mode
+  if(e->key() == Qt::Key_Shift)
+  {
+    isSnapping = false;
+  }
+
+  if((current_manip == ManipulatorType::ManRotate) || (current_manip == ManipulatorType::ManScale))
+  {
+    if(e->key() == Qt::Key_Space)
+    {
+      aroundOrigin = !aroundOrigin;
     }
   }
 
@@ -208,6 +249,36 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
   {
     currOffset -= 5;
     UpdateMatrix(model,gla,false);
+  }
+
+
+  // numerical input
+  if(current_manip_mode != ManipulatorMode::ModNone)  // transform on one axis only
+  {
+    if (e->key() == Qt::Key_1) {inputnumberstring += "1"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_2) {inputnumberstring += "2"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_3) {inputnumberstring += "3"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_4) {inputnumberstring += "4"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_5) {inputnumberstring += "5"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_6) {inputnumberstring += "6"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_7) {inputnumberstring += "7"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    if (e->key() == Qt::Key_8) {inputnumberstring += "8"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}    
+    if (e->key() == Qt::Key_9) {inputnumberstring += "9"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}   
+
+    if (e->key() == Qt::Key_0) 
+    {
+      if(inputnumberstring.length() == 0)
+        {inputnumberstring = "0"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+      if((inputnumberstring.length() >= 2) || (inputnumberstring[0]!=0))
+        {inputnumberstring += "0"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    }    
+    if (e->key() == Qt::Key_Period)
+    {
+      if(inputnumberstring.length() == 0)
+        {inputnumberstring = "0."; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+      else if(!inputnumberstring.contains("."))
+        {inputnumberstring += "."; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+    }    
   }
 
   //else e->ignore();
@@ -297,7 +368,14 @@ void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
 	glColor3f(1.0, 0.5, 0.5); glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]-d3[0],ma[1]+zz[1],ma[2]+zz[2]);
 	glColor3f(0.5, 1.0, 0.5); glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]-d3[1],ma[2]+zz[2]);
 	glColor3f(0.5, 0.5, 1.0); glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]+zz[1],ma[2]-d3[2]);
+	glEnd();
 
+
+  //drawing mesh origin
+ 	glBegin(GL_LINES);
+	glColor3f(1.0, 0.5, 0.5); glVertex3f(-2.0*d3[0],0.0,0.0); glVertex3f(2.0*d3[0],0.0,0.0);
+	glColor3f(0.5, 1.0, 0.5); glVertex3f(0.0,-2.0*d3[1],0.0); glVertex3f(0.0,2.0*d3[1],0.0);
+	glColor3f(0.5, 0.5, 1.0); glVertex3f(0.0,0.0,-2.0*d3[2]); glVertex3f(0.0,0.0,2.0*d3[2]);
 	glEnd();
 
   // restore
@@ -483,9 +561,10 @@ void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea
 {  
   glPushMatrix ();
 
-  Point3f mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
-  new_mesh_origin = model.cm.Tr.GetColumn3(3);
+  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
+  mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
+  new_mesh_origin = model.cm.Tr.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
@@ -551,8 +630,8 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
 {  
   glPushMatrix ();
 
-  Point3f mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
-  new_mesh_origin = model.cm.Tr.GetColumn3(3);
+  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
@@ -566,7 +645,10 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
   switch(current_manip_mode) 
   {
     case ManipulatorMode::ModNone: 
-      glTranslate(mesh_origin);
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
       glMultMatrix(Inverse(track_rotation));
 	    glRotatef (90, 0, 1, 0);
@@ -575,35 +657,50 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
 	    DrawCubes(1.0,0.8,0.5);
       break;
     case ManipulatorMode::ModX: 
-      glTranslate(mesh_origin);
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
 	    glRotatef (90, 0, 1, 0);
 	    DrawCubes(1.0,0,0);
       break;
     case ManipulatorMode::ModY: 
-      glTranslate(mesh_origin);
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
 	    glRotatef (90, 1, 0, 0);
 	    DrawCubes(0,1.0,0);
       break;
     case ManipulatorMode::ModZ: 
-      glTranslate(mesh_origin);
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
 	    DrawCubes(0,0,1.0);
       break;
     case ManipulatorMode::ModXX: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
 	    glRotatef (90, 0, 1, 0);
 	    DrawCubes(1.0,0.5,0.5);
       break;
     case ManipulatorMode::ModYY: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
 	    glRotatef (90, 1, 0, 0);
 	    DrawCubes(0.5,1.0,0.5);
       break;
     case ManipulatorMode::ModZZ: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
 	    DrawCubes(0.5,0.5,1.0);
@@ -619,9 +716,10 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 {  
   glPushMatrix ();
 
-  Point3f mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
-  new_mesh_origin = model.cm.Tr.GetColumn3(3);
+  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
+  mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
+  new_mesh_origin = model.cm.Tr.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
@@ -633,42 +731,60 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 
   switch(current_manip_mode) 
   {
-    case ManipulatorMode::ModNone:     
-      glTranslate(mesh_origin);
+    case ManipulatorMode::ModNone:
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
       glMultMatrix(Inverse(track_rotation));
 	    DrawCircle(1.0,0.8,0.5);
       break;
     case ManipulatorMode::ModX: 
-      glTranslate(mesh_origin);
+       if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
 	    glRotatef (90, 0, 1, 0);
 	    DrawCircle(1.0,0,0);
       break;
     case ManipulatorMode::ModY: 
-      glTranslate(mesh_origin);
+       if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
-	    glRotatef (90, 1, 0, 0);
+	    glRotatef (-90, 1, 0, 0);
 	    DrawCircle(0,1.0,0);
       break;
     case ManipulatorMode::ModZ: 
-      glTranslate(mesh_origin);
+      if(!aroundOrigin)
+        glTranslate(mesh_boxcenter);
+      else
+        glTranslate(mesh_origin);
       glScale(manipsize);
 	    DrawCircle(0,0,1.0);
       break;
     case ManipulatorMode::ModXX: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
 	    glRotatef (90, 0, 1, 0);
 	    DrawCircle(1.0,0.5,0.5);
       break;
     case ManipulatorMode::ModYY: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
-	    glRotatef (90, 1, 0, 0);
+	    glRotatef (-90, 1, 0, 0);
 	    DrawCircle(0.5,1.0,0.5);
       break;
     case ManipulatorMode::ModZZ: 
+      if(!aroundOrigin)
+        glTranslate(model.cm.bbox.Center());
       glMultMatrix(original_Transform);
       glScale(manipsize);
 	    DrawCircle(0.5,0.5,1.0);
@@ -682,8 +798,8 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 
 void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, bool onlyActive)
 {
-  Point3f mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
-  new_mesh_origin = model.cm.Tr.GetColumn3(3);
+  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
@@ -718,27 +834,81 @@ void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, boo
     {
       case ManipulatorMode::ModX: 
         glColor3f(1.0,0,0);
-        glVertex(mesh_origin + Point3f(-10.0, 0.0, 0.0)); 	glVertex(mesh_origin + Point3f(10.0, 0.0, 0.0));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + Point3f(-10.0, 0.0, 0.0)); 	
+          glVertex(mesh_origin + Point3f(10.0, 0.0, 0.0));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + Point3f(-10.0, 0.0, 0.0)); 	
+          glVertex(mesh_boxcenter + Point3f(10.0, 0.0, 0.0));
+        }
         break;
       case ManipulatorMode::ModY: 
         glColor3f(0,1.0,0);
-        glVertex(mesh_origin + Point3f(0.0, -10.0, 0.0)); 	glVertex(mesh_origin + Point3f(0.0, 10.0, 0.0));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + Point3f(0.0, -10.0, 0.0)); 	
+          glVertex(mesh_origin + Point3f(0.0, 10.0, 0.0));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + Point3f(0.0, -10.0, 0.0)); 	
+          glVertex(mesh_boxcenter + Point3f(0.0, 10.0, 0.0));
+        }
         break;
       case ManipulatorMode::ModZ: 
         glColor3f(0,0,1.0);
-        glVertex(mesh_origin + Point3f(0.0, 0.0, -10.0)); 	glVertex(mesh_origin + Point3f(0.0, 0.0, 10.0));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + Point3f(0.0, 0.0, -10.0)); 	
+          glVertex(mesh_origin + Point3f(0.0, 0.0, 10.0));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + Point3f(0.0, 0.0, -10.0)); 	
+          glVertex(mesh_boxcenter + Point3f(0.0, 0.0, 10.0));
+        }
         break;
       case ManipulatorMode::ModXX: 
         glColor3f(1.0,0.5,0.5);
-        glVertex(mesh_origin + (mesh_xaxis * -10.0f)); 	glVertex(mesh_origin + (mesh_xaxis * 10.0f));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + (mesh_xaxis * -10.0f)); 	
+          glVertex(mesh_origin + (mesh_xaxis * 10.0f));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + (mesh_xaxis * -10.0f)); 	
+          glVertex(mesh_boxcenter + (mesh_xaxis * 10.0f));
+        }
         break;
       case ManipulatorMode::ModYY: 
         glColor3f(0.5,1.0,0.5);
-        glVertex(mesh_origin + (mesh_yaxis * -10.0f)); 	glVertex(mesh_origin + (mesh_yaxis * 10.0f));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + (mesh_yaxis * -10.0f)); 	
+          glVertex(mesh_origin + (mesh_yaxis * 10.0f));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + (mesh_yaxis * -10.0f)); 	
+          glVertex(mesh_boxcenter + (mesh_yaxis * 10.0f));
+        }
         break;
       case ManipulatorMode::ModZZ: 
         glColor3f(0.5,0.5,1.0);
-        glVertex(mesh_origin + (mesh_zaxis * -10.0f)); 	glVertex(mesh_origin + (mesh_zaxis * 10.0f));
+        if(aroundOrigin || (current_manip == ManipulatorType::ManMove))
+        {
+          glVertex(mesh_origin + (mesh_zaxis * -10.0f)); 	
+          glVertex(mesh_origin + (mesh_zaxis * 10.0f));
+        }
+        else
+        {
+          glVertex(mesh_boxcenter + (mesh_zaxis * -10.0f)); 	
+          glVertex(mesh_boxcenter + (mesh_zaxis * 10.0f));
+        }
         break;
       default: ;
     }
@@ -764,26 +934,58 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
   screen_yaxis = (top - center)   * 2.0;
   screen_zaxis = (front - center) * 2.0;
 
+  float diag = sqrt(screen_xaxis.Norm()*screen_xaxis.Norm() + screen_yaxis.Norm()*screen_yaxis.Norm());
+
+  // calculate snapping factor
+  if(current_manip != ManipulatorType::ManNone)
+  {
+    switch(current_manip) 
+    {
+      case ManipulatorType::ManMove: 
+        snapto = powf(10.f,ceil(log10(diag))-2);
+        break;
+      case ManipulatorType::ManRotate: 
+        snapto = 1.0;
+        break;
+      case ManipulatorType::ManScale: 
+        snapto = 0.1;
+        break;
+      default: ;
+    }
+  }
+
   // write manipulator data
   int ln=0;
-  QString StatusString = "MANIPULATOR:";
+  QString StatusString1 = "MANIPULATOR:";
+  QString StatusString2 = "";
+  QString HelpString1   = "";
+  QString HelpString2   = "";
+  QString HelpString3   = "";
 
   if(current_manip == ManipulatorType::ManNone)
   {
-    StatusString += "  none ";
+    StatusString1 += "  NONE ";
   }
   else
   {
     switch(current_manip) 
     {
       case ManipulatorType::ManMove: 
-        StatusString += "  Translate";
+        StatusString1 += "  Translate";
         break;
       case ManipulatorType::ManRotate: 
-        StatusString += "  Rotate   ";
+        StatusString1 += "  Rotate";
+        if(aroundOrigin)
+          StatusString1 += "  -  around Origin";
+        else
+          StatusString1 += "  -  around BBox center";
         break;
       case ManipulatorType::ManScale: 
-        StatusString += "  Scale    ";
+        StatusString1 += "  Scale";
+        if(aroundOrigin)
+          StatusString1 += "  -  around Origin";
+        else
+          StatusString1 += "  -  around BBox center";
         break;
       default: ;
     }
@@ -791,73 +993,125 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
     switch(current_manip_mode) 
     {
       case ManipulatorMode::ModX: 
-        StatusString += "  X global";
+        StatusString2 += "X global";
         break;
       case ManipulatorMode::ModY: 
-        StatusString += "  Y global";
+        StatusString2 += "Y global";
         break;
       case ManipulatorMode::ModZ: 
-        StatusString += "  Z global";
+        StatusString2 += "Z global";
         break;
       case ManipulatorMode::ModXX: 
-        StatusString += "  X local";
+        StatusString2 += "X local";
         break;
       case ManipulatorMode::ModYY: 
-        StatusString += "  Y local";
+        StatusString2 += "Y local";
         break;
       case ManipulatorMode::ModZZ: 
-        StatusString += "  Z local";
+        StatusString2 += "Z local";
         break;
       default: 
         if((current_manip == ManipulatorType::ManMove) || (current_manip == ManipulatorType::ManRotate))
-          StatusString += "  viewport";
+          StatusString2 += "viewport";
         else if(current_manip == ManipulatorType::ManScale)
-          StatusString += "  uniform";
+          StatusString2 += "uniform";
         break;
     }
 
     // display offset factor in single axis 
     if(current_manip_mode != ManipulatorMode::ModNone)
     {
-      StatusString += QString("  %1").arg(displayOffset);
+      StatusString2 += QString("  -  %1").arg(displayOffset);
     }
 
     // viewport translation, display the XYZ offsets
     if((current_manip_mode == ManipulatorMode::ModNone) && (current_manip == ManipulatorType::ManMove))
     {
-      StatusString += QString("  %1   %2   %3").arg(displayOffset_X).arg(displayOffset_Y).arg(displayOffset_Z);
+      StatusString2 += QString("  -  %1  %2  %3").arg(displayOffset_X).arg(displayOffset_Y).arg(displayOffset_Z);
     }
 
     // viewport rotation, display rotation angle
     if((current_manip_mode == ManipulatorMode::ModNone) && (current_manip == ManipulatorType::ManRotate))
     {
-      StatusString += QString("  %1").arg(displayOffset);      
+      StatusString2 += QString("  -  %1").arg(displayOffset);      
     }
 
     // uniform scale, display scale factor
     if((current_manip_mode == ManipulatorMode::ModNone) && (current_manip == ManipulatorType::ManScale))
     {
-      StatusString += QString("  %1").arg(displayOffset);      
+      StatusString2 += QString("  -  %1").arg(displayOffset);      
+    }
+
+    if(isSnapping)
+    {
+      StatusString2 += QString("  -  Snapping: %1").arg(snapto); 
     }
   }
-
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, StatusString);
+  // write status of the manipulator 
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, StatusString1);
+  if(StatusString2.length()>0)
+    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, StatusString2);
 
   if(current_manip == ManipulatorType::ManNone)   
   {
-    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "G to translate, R to rotate, S to scale");
+    HelpString1 = "press G to translate, R to rotate, S to scale";
   }
   else
   {
     if(current_manip == ManipulatorType::ManMove)
-      glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "LEFT CLICK and DRAG to move");
+      HelpString1 = "LEFT CLICK and DRAG to move";
     else if(current_manip == ManipulatorType::ManRotate)
-      glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "LEFT CLICK and DRAG to rotate");
+      HelpString1 = "LEFT CLICK and DRAG to rotate";
     else if(current_manip == ManipulatorType::ManScale)
-      glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "LEFT CLICK and DRAG to scale");
-    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "RETURN to apply, BACKSPACE to cancel");
-  }
+      HelpString1 = "LEFT CLICK and DRAG to scale";
 
+    if((current_manip != ManipulatorType::ManMove) || (current_manip_mode != ManipulatorMode::ModNone))
+      HelpString1 += "  -  hold SHIFT to snap";
+
+    switch(current_manip_mode) 
+    {
+      case ManipulatorMode::ModX: 
+        HelpString2 = "press X to switch to X local";
+        break;
+      case ManipulatorMode::ModY: 
+        HelpString2 = "press Y to switch to Y local";
+        break;
+      case ManipulatorMode::ModZ: 
+        HelpString2 = "press Z to switch to Z local";
+        break;
+      case ManipulatorMode::ModXX: 
+        HelpString2 = "press X to switch to X global";
+        break;
+      case ManipulatorMode::ModYY: 
+        HelpString2 = "press Y to switch to Y global";
+        break;
+      case ManipulatorMode::ModZZ: 
+        HelpString2 = "press Z to switch to Z global";
+        break;
+      default: 
+        HelpString2 = "press X Y Z to select an axis";
+        break;
+    }
+    
+    if((current_manip == ManipulatorType::ManRotate) || (current_manip == ManipulatorType::ManScale))
+    {
+      if(aroundOrigin)
+        HelpString2 += "  -  press SPACE to pivot on BBox center";
+      else
+        HelpString2 += "  -  press SPACE to pivot on Mesh Origin";
+    }
+
+    HelpString3 = "press RETURN to apply, BACKSPACE to cancel";
+  }
+  // write available commands for manipulator 
+  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString1);
+  if(HelpString2.length()>0)
+    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString2);
+  if(HelpString3.length()>0)
+    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString3);
+
+  //debug debug
+  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("string - %1 - number - %2 -").arg(inputnumberstring).arg(inputnumber));
 
   //
   //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("screenOff - %1 %2").arg(currScreenOffset_X).arg(currScreenOffset_Y));
@@ -877,17 +1131,22 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
   assert(!glGetError());
 }
 
-void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset)
+void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset, bool useinputnumber)
 {  
   Matrix44f newmatrix;
-  Matrix44f old_rot;
-  Point3f old_trasl;
+
+  Matrix44f old_rotation;  
+  Matrix44f old_translation;  
+  Matrix44f old_meshcenter;
+  Matrix44f old_meshuncenter;
+
   Point3f new_scale;
   Point3f axis;
   float mouseXoff;
   float mouseYoff;
 
-  Point3f mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  mesh_boxcenter = model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
@@ -938,6 +1197,17 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         mouseYoff = ysign * screen_yaxis.Norm() * (currScreenOffset_Y/float(gla->height()));
         displayOffset = currOffset + mouseXoff + mouseYoff;
 
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset /= snapto; 
+          displayOffset = floor(displayOffset+0.5);
+          displayOffset *= snapto; 
+        }
+
+        if(useinputnumber)
+          displayOffset = inputnumber;
+
         delta_Transform.SetTranslate(axis * displayOffset);  
         newmatrix = delta_Transform * original_Transform;
       }
@@ -947,16 +1217,30 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         mouseXoff = (currScreenOffset_X/float(gla->width()));
         mouseYoff = (currScreenOffset_Y/float(gla->height()));
         displayOffset = currOffset + (360.0 * (mouseXoff + mouseYoff));
-
         if((displayOffset > 360.0) || (displayOffset < -360.0))
           displayOffset = 360.0;
 
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset = floor(displayOffset+0.5);
+        }
+
+        if(useinputnumber)
+          displayOffset = inputnumber;
+
         delta_Transform.SetRotateDeg(displayOffset, axis);
-        old_trasl = original_Transform.GetColumn3(3);
-        old_rot= original_Transform;
-        old_rot.SetColumn(3, Point3f(0.0, 0.0, 0.0));
-        newmatrix = delta_Transform * old_rot;
-        newmatrix.SetColumn(3, old_trasl);
+
+        old_rotation = original_Transform;
+        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_translation.SetTranslate(original_Transform.GetColumn3(3));
+        old_meshcenter.SetTranslate(old_rotation * (-mesh_boxcenter));
+        old_meshuncenter.SetTranslate(old_rotation * mesh_boxcenter);
+
+        if(aroundOrigin)
+          newmatrix = old_translation * delta_Transform * old_rotation;
+        else
+          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
       }
       else if(current_manip == ManipulatorType::ManScale)
       {       
@@ -965,15 +1249,33 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         mouseYoff = (currScreenOffset_Y/float(gla->height()));
         displayOffset = currOffset + (2.0 * (mouseXoff + mouseYoff));
 
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset /= snapto; 
+          displayOffset = floor(displayOffset+0.5);
+          displayOffset *= snapto; 
+        }
+
+        if(useinputnumber)
+          displayOffset = inputnumber;
+
         new_scale[0] = (axis[0]==0)?1.0:(axis[0] * displayOffset);
         new_scale[1] = (axis[1]==0)?1.0:(axis[1] * displayOffset);
         new_scale[2] = (axis[2]==0)?1.0:(axis[2] * displayOffset);
+
         delta_Transform.SetScale(new_scale);
-        old_trasl = original_Transform.GetColumn3(3);
-        old_rot= original_Transform;
-        old_rot.SetColumn(3, Point3f(0.0, 0.0, 0.0));
-        newmatrix = delta_Transform * old_rot;
-        newmatrix.SetColumn(3, old_trasl);
+
+        old_rotation = original_Transform;
+        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_translation.SetTranslate(original_Transform.GetColumn3(3));
+        old_meshcenter.SetTranslate(-mesh_boxcenter);
+        old_meshuncenter.SetTranslate(mesh_boxcenter);
+
+        if(aroundOrigin)
+          newmatrix = old_translation * delta_Transform * old_rotation;
+        else
+          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
       }
       else
         newmatrix = original_Transform;  // it should never arrive here, anyway
@@ -993,6 +1295,20 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         displayOffset_Y = currOffset_Y + (screen_xaxis[1] * mouseXoff) + (screen_yaxis[1] * mouseYoff);        
         displayOffset_Z = currOffset_Z + (screen_xaxis[2] * mouseXoff) + (screen_yaxis[2] * mouseYoff);
 
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset_X /= snapto; 
+          displayOffset_X = floor(displayOffset_X+0.5);
+          displayOffset_X *= snapto; 
+          displayOffset_Y /= snapto; 
+          displayOffset_Y = floor(displayOffset_Y+0.5);
+          displayOffset_Y *= snapto; 
+          displayOffset_Z /= snapto; 
+          displayOffset_Z = floor(displayOffset_Z+0.5);
+          displayOffset_Z *= snapto; 
+        }
+
         delta_Transform.SetTranslate(Point3f(displayOffset_X,displayOffset_Y,displayOffset_Z));  
         newmatrix = delta_Transform * original_Transform;
       }
@@ -1003,13 +1319,30 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         mouseXoff = (currScreenOffset_X/float(gla->width()));
         mouseYoff = (currScreenOffset_Y/float(gla->height()));
         displayOffset = currOffset + (360.0 * (mouseXoff + mouseYoff));
+        if((displayOffset > 360.0) || (displayOffset < -360.0))
+          displayOffset = 360.0;
+
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset = floor(displayOffset+0.5);
+        }
+
+        if(useinputnumber)
+          displayOffset = inputnumber;
 
         delta_Transform.SetRotateDeg(displayOffset, screen_zaxis);
-        old_trasl = original_Transform.GetColumn3(3);
-        old_rot= original_Transform;
-        old_rot.SetColumn(3, Point3f(0.0, 0.0, 0.0));
-        newmatrix = delta_Transform * old_rot;
-        newmatrix.SetColumn(3, old_trasl);
+
+        old_rotation = original_Transform;
+        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_translation.SetTranslate(original_Transform.GetColumn3(3));
+        old_meshcenter.SetTranslate(-mesh_boxcenter);
+        old_meshuncenter.SetTranslate(mesh_boxcenter);
+
+        if(aroundOrigin)
+          newmatrix = old_translation * delta_Transform * old_rotation;
+        else
+          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
       }
 
       if(current_manip == ManipulatorType::ManScale)
@@ -1019,15 +1352,33 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         mouseYoff = (-currScreenOffset_Y/float(gla->height()));
         displayOffset = currOffset + (2.0 * (mouseXoff + mouseYoff));
 
+        // snapping
+        if(isSnapping)
+        {
+          displayOffset /= snapto; 
+          displayOffset = floor(displayOffset+0.5);
+          displayOffset *= snapto; 
+        }
+
+        if(useinputnumber)
+          displayOffset = inputnumber;
+
         new_scale[0] = displayOffset;
         new_scale[1] = displayOffset;
         new_scale[2] = displayOffset;
+
         delta_Transform.SetScale(new_scale);
-        old_trasl = original_Transform.GetColumn3(3);
-        old_rot= original_Transform;
-        old_rot.SetColumn(3, Point3f(0.0, 0.0, 0.0));
-        newmatrix = delta_Transform * old_rot;
-        newmatrix.SetColumn(3, old_trasl);
+
+        old_rotation = original_Transform;
+        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_translation.SetTranslate(original_Transform.GetColumn3(3));
+        old_meshcenter.SetTranslate(-mesh_boxcenter);
+        old_meshuncenter.SetTranslate(mesh_boxcenter);
+
+        if(aroundOrigin)
+          newmatrix = old_translation * delta_Transform * old_rotation;
+        else
+          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
       }
 
     }
@@ -1067,7 +1418,13 @@ bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
   current_manip = ManipulatorType::ManNone;
   current_manip_mode = ManipulatorMode::ModNone;
   isMoving = false;
+  isSnapping = false;
+  aroundOrigin = true;
+  snapto = 1.0;
   resetOffsets();
+
+  inputnumberstring= "";
+  inputnumber=0;
 
   // storing start matrix
   original_Transform = model.cm.Tr;
