@@ -171,9 +171,9 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
     }
   }
 
-  if(current_manip == ManipulatorType::ManNone)   // if no active manipulator, listen to G R S to select one
+  if(current_manip == ManipulatorType::ManNone)   // if no active manipulator, listen to T R S to select one
   {
-	  if (e->key() == Qt::Key_G) // grab
+	  if (e->key() == Qt::Key_T) // translate
     {
       current_manip = ManipulatorType::ManMove;
       resetOffsets();
@@ -230,28 +230,6 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
     }
   }
 	
-  if (e->key() == Qt::Key_Q) // DEBUG DEBUG
-  {
-    currOffset += 0.05;
-    UpdateMatrix(model,gla,false);
-  }
-  if (e->key() == Qt::Key_A) // DEBUG DEBUG
-  {
-    currOffset -= 0.05;
-    UpdateMatrix(model,gla,false);
-  }
-  if (e->key() == Qt::Key_W) // DEBUG DEBUG
-  {
-    currOffset += 5;
-    UpdateMatrix(model,gla,false);
-  }
-  if (e->key() == Qt::Key_E) // DEBUG DEBUG
-  {
-    currOffset -= 5;
-    UpdateMatrix(model,gla,false);
-  }
-
-
   // numerical input
   if(current_manip_mode != ManipulatorMode::ModNone)  // transform on one axis only
   {
@@ -535,7 +513,7 @@ void EditManipulatorsPlugin::DrawCircle(float r, float g, float b)
     glNormal3d (cos (i * pi2 / nside), sin (i * pi2 / nside), 0.0);
     glVertex3d (cos (i * pi2 / nside), sin (i * pi2 / nside), 0.0);
   }
-  glEnd ();
+  glEnd();
 
   glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f), 0.5);
   glBegin (GL_TRIANGLE_FAN);
@@ -550,7 +528,7 @@ void EditManipulatorsPlugin::DrawCircle(float r, float g, float b)
   {
     glVertex3d (cos (i * pi2 / 360.0), sin (i * pi2 / 360.0), 0.0);
   }
-  glEnd ();
+  glEnd();
 
 
 }
@@ -559,7 +537,7 @@ void EditManipulatorsPlugin::DrawCircle(float r, float g, float b)
 
 void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea *gla)
 {  
-  glPushMatrix ();
+  glPushMatrix();
 
   Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
@@ -623,12 +601,12 @@ void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea
   }
 	
   glLineWidth(1.0);
-	glPopMatrix ();
+	glPopMatrix();
 }
 
 void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gla)
 {  
-  glPushMatrix ();
+  glPushMatrix();
 
   Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
@@ -714,7 +692,7 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
 
 void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *gla)
 {  
-  glPushMatrix ();
+  glPushMatrix();
 
   Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
@@ -793,7 +771,7 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
   }
 	
   glLineWidth(1.0);
-	glPopMatrix ();
+	glPopMatrix();
 }
 
 void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, bool onlyActive)
@@ -976,14 +954,14 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
       case ManipulatorType::ManRotate: 
         StatusString1 += "  Rotate";
         if(aroundOrigin)
-          StatusString1 += "  -  around Origin";
+          StatusString1 += "  -  around Mesh Origin";
         else
           StatusString1 += "  -  around BBox center";
         break;
       case ManipulatorType::ManScale: 
         StatusString1 += "  Scale";
         if(aroundOrigin)
-          StatusString1 += "  -  around Origin";
+          StatusString1 += "  -  around Mesh Origin";
         else
           StatusString1 += "  -  around BBox center";
         break;
@@ -1054,7 +1032,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
 
   if(current_manip == ManipulatorType::ManNone)   
   {
-    HelpString1 = "press G to translate, R to rotate, S to scale";
+    HelpString1 = "press T to translate, R to rotate, S to scale";
   }
   else
   {
