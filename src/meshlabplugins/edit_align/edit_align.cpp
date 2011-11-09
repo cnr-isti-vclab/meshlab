@@ -184,6 +184,7 @@ void EditAlignPlugin::glueByPicking()
  md->mm()->cm.Tr.SetIdentity();
  AlignPairDialog *dd=new AlignPairDialog();
  dd->aa->initMesh(currentNode(), &meshTree);
+ dd->aa->isUsingVertexColor = !alignDialog->ui.falseColorCB->isChecked();
  dd->exec();	
  
  if(dd->result()==QDialog::Rejected) return;

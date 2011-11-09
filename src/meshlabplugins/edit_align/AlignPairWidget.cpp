@@ -41,7 +41,8 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	freeMesh=0;
 	gluedTree=0;
 	tt[0]=&trackLeft;
-	tt[1]=&trackRight;	
+	tt[1]=&trackRight;
+  isUsingVertexColor = false;
 	
 	freePickedPointVec.clear();
 	gluedPickedPointVec.clear();
@@ -102,7 +103,7 @@ void AlignPairWidget::paintGL ()
 				else	   bb=gluedTree->gluedBBox();
         vcg::GLW::DrawMode localDM=vcg::GLW::DMFlat;
         vcg::GLW::ColorMode localCM = vcg::GLW::CMPerMesh;
-        if(freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR)) localCM = vcg::GLW::CMPerVert;
+        if((freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR))&&(isUsingVertexColor)) localCM = vcg::GLW::CMPerVert;
         if(freeMesh->m->cm.fn==0) localDM=vcg::GLW::DMPoints;
 				glPushMatrix();
 					bool allowScaling = qobject_cast<AlignPairDialog *>(parent())->allowScalingCB->isChecked();
@@ -111,11 +112,11 @@ void AlignPairWidget::paintGL ()
 					vcg::glTranslate(-bb.Center());
 					if(i==0)
 						{
-              freeMesh->m->Render(localDM,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
+              freeMesh->m->Render(localDM,localCM,vcg::GLW::TMNone);
 							drawPickedPoints(freePickedPointVec,vcg::Color4b(vcg::Color4b::Red));	
 						} else				{
 							foreach(MeshNode *mn, gluedTree->nodeList) 
-                if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(localDM,vcg::GLW::CMPerMesh,vcg::GLW::TMNone);
+                if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(localDM,localCM,vcg::GLW::TMNone);
 							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(vcg::Color4b::Blue));	
 						}
 								

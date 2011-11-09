@@ -71,9 +71,12 @@ public:
 	std::vector<vcg::Point3f> gluedPickedPointVec;
 		
   /// mesh data structure initializer
-		bool hasToPick;
-    bool hasToDelete;
-		vcg::Point2i pointToPick;
+	bool hasToPick;
+  bool hasToDelete;
+	vcg::Point2i pointToPick;
+
+  // use mesh vertex colors
+  bool isUsingVertexColor;
 public:
 			void initMesh(MeshNode *left, MeshTree *right);
 };
