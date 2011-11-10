@@ -301,7 +301,7 @@ void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
 { 
 	//WARNING!
 	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
-	currentDocInterface = new MeshDocumentScriptInterface(&doc);
+	currentDocInterface = new MeshDocumentSI(&doc);
 	QScriptValue val = env.newQObject(currentDocInterface);
 	env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
 }

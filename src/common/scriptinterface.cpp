@@ -196,7 +196,7 @@ QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine,
 		return false;
 	}
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
+	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
@@ -216,7 +216,7 @@ QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine
 		return false;
 	}
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
+	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
 
 	MeshFilterInterface * mi = it.value();
@@ -234,7 +234,7 @@ QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *eng
 	if (it == pm->stringXMLFilterMap.end())
 		return false;
 
-	MeshDocumentScriptInterface* md = qscriptvalue_cast<MeshDocumentScriptInterface*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
+	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
 	EnvWrap* envWrap = qscriptvalue_cast<EnvWrap*>(context->argument(1));
 
 	MeshLabFilterInterface * mi = it->filterInterface;
@@ -294,35 +294,37 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* /*c*/,QScriptEngine* e)
 
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se)
 {
-	// do what you want
-  qDebug("%s",qPrintable(sc->argument(0).toString()));
+	QString st = sc->argument(0).toString();
+	Env* myenv = qobject_cast<Env*>(se);
+	if (myenv)
+		myenv->appendOutput(st); 
 	return QScriptValue(se, 0);
 }
 
-MeshDocumentScriptInterface::MeshDocumentScriptInterface( MeshDocument* doc )
+MeshDocumentSI::MeshDocumentSI( MeshDocument* doc )
 :QObject(doc),md(doc)
 {
 }
 
-Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::getMesh( int meshId )
+Q_INVOKABLE MeshModelSI* MeshDocumentSI::getMesh( int meshId )
 {
 	MeshModel* model = md->getMesh(meshId);
 	if (model != NULL)
-		return new MeshModelScriptInterface(*model,this);
+		return new MeshModelSI(*model,this);
 	else
 		return NULL;
 }
 
-Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::current()
+Q_INVOKABLE MeshModelSI* MeshDocumentSI::current()
 {
 	MeshModel* model = md->mm();
 	if (model != NULL)
-		return new MeshModelScriptInterface(*model,this);
+		return new MeshModelSI(*model,this);
 	else
 		return NULL;
 }
 
-Q_INVOKABLE int MeshDocumentScriptInterface::currentId()
+Q_INVOKABLE int MeshDocumentSI::currentId()
 {
 	MeshModel* model = md->mm();
 	if (model != NULL)
@@ -331,7 +333,7 @@ Q_INVOKABLE int MeshDocumentScriptInterface::currentId()
 		return -1;
 }
 
-Q_INVOKABLE int MeshDocumentScriptInterface::setCurrent(const int meshId)
+Q_INVOKABLE int MeshDocumentSI::setCurrent(const int meshId)
 {
 	int id = md->mm()->id();
 	if (md->getMesh(meshId) != NULL)
@@ -343,142 +345,235 @@ Q_INVOKABLE int MeshDocumentScriptInterface::setCurrent(const int meshId)
 		return -1;
 }
 
-Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::operator[]( const QString& name )
+Q_INVOKABLE MeshModelSI* MeshDocumentSI::operator[]( const QString& name )
 {
 	MeshModel* mym = md->getMesh(name);
 	if (mym != NULL)
-		return new MeshModelScriptInterface(*mym,this);
+		return new MeshModelSI(*mym,this);
 	else
 		return NULL;
 }
 
-Q_INVOKABLE MeshModelScriptInterface* MeshDocumentScriptInterface::getMeshByName( const QString& name )
+Q_INVOKABLE MeshModelSI* MeshDocumentSI::getMeshByName( const QString& name )
 {
 	return (*this)[name];
 }
 
 
-MeshModelScriptInterface::MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* parent)
+MeshModelSI::MeshModelSI(MeshModel& meshModel,MeshDocumentSI* parent)
 :QObject(parent),mm(meshModel)
 {
 
 }
 
-Q_INVOKABLE float MeshModelScriptInterface::bboxDiag() const
+Q_INVOKABLE float MeshModelSI::bboxDiag() const
 {
 	return mm.cm.bbox.Diag();
 }
 
-Q_INVOKABLE QVector<float> MeshModelScriptInterface::bboxMin() const
+Q_INVOKABLE QVector<float> MeshModelSI::bboxMin() const
 {
 	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.min);
 }
 
-Q_INVOKABLE QVector<float> MeshModelScriptInterface::bboxMax() const
+Q_INVOKABLE QVector<float> MeshModelSI::bboxMax() const
 {
 	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.max);
 }
 
-Q_INVOKABLE int MeshModelScriptInterface::id() const
+Q_INVOKABLE int MeshModelSI::id() const
 {
 	return mm.id();
 }
 
-VCGVertexScriptInterface::VCGVertexScriptInterface( CMeshO::VertexType& v )
+VCGVertexSI::VCGVertexSI( CMeshO::VertexType& v )
 :QObject(),vv(v)
 {
 }
 
-Q_INVOKABLE VCGVertexScriptInterface* MeshModelScriptInterface::v( const int ind )
+Q_INVOKABLE VCGVertexSI* MeshModelSI::v( const int ind )
 {
 	unsigned int ii(ind);
 	if (ii < mm.cm.vert.size())
-		return new VCGVertexScriptInterface(mm.cm.vert[ii]);
+		return new VCGVertexSI(mm.cm.vert[ii]);
 	else
 		return NULL;
 }
 
-Q_INVOKABLE ShotScriptInterface* MeshModelScriptInterface::shot()
+Q_INVOKABLE ShotSI* MeshModelSI::shot()
 {
-	return new ShotScriptInterface(mm.cm.shot);
+	return new ShotSI(mm.cm.shot);
 }
 
-Q_INVOKABLE int MeshModelScriptInterface::vn() const
+Q_INVOKABLE int MeshModelSI::vn() const
 {
 	return mm.cm.vn;
 }
 
-Q_INVOKABLE int MeshModelScriptInterface::fn() const
+Q_INVOKABLE int MeshModelSI::fn() const
 {
 	return mm.cm.fn;
 }
 
+Q_INVOKABLE QVector<VCGVertexSI*> MeshModelSI::vert()
+{
+	QVector<VCGVertexSI*> v;
+	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+		v.push_back(new VCGVertexSI(mm.cm.vert[ii]));
+	return v;
+}
 
-Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getP() 
+Q_INVOKABLE Point3Vector MeshModelSI::getVertPosArray()
+{
+	Point3Vector pv;
+	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	{
+		Point3 p;
+		p << mm.cm.vert[ii].P().X() << mm.cm.vert[ii].P().Y() << mm.cm.vert[ii].P().Z();
+		pv << p;
+	}
+	return pv;
+}
+
+Q_INVOKABLE void MeshModelSI::setVertPosArray( const Point3Vector& pa )
+{
+	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+		mm.cm.vert[ii].P() = vcg::Point3f(pa[ii][0],pa[ii][1],pa[ii][2]);
+}
+
+Q_INVOKABLE void MeshModelSI::setVertNormArray( const Point3Vector& na )
+{
+	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+		mm.cm.vert[ii].N() = vcg::Point3f(na[ii][0],na[ii][1],na[ii][2]);
+}
+
+Q_INVOKABLE Point3Vector MeshModelSI::getVertNormArray()
+{
+	Point3Vector pv;
+	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	{
+		Point3 p;
+		p << mm.cm.vert[ii].N().X() << mm.cm.vert[ii].N().Y() << mm.cm.vert[ii].N().Z();
+		pv << p;
+	}
+	return pv;
+}
+
+//Q_INVOKABLE void MeshModelSI::setV( const QVector<VCGVertexSI*>& v )
+//{
+//	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+//		mm.cm.vert[ii] = v[ii]->;
+//}
+
+
+Q_INVOKABLE Point3 VCGVertexSI::getP() 
 {
 	return ScriptInterfaceUtilities::vcgPointToVector(vv.P());
 }
 
-Q_INVOKABLE void VCGVertexScriptInterface::setP( const float x,const float y,const float z )
+Q_INVOKABLE void VCGVertexSI::setPC( const float x,const float y,const float z )
 {
 	vv.P() = vcg::Point3f(x,y,z);
 }
 
-Q_INVOKABLE QVector<float> VCGVertexScriptInterface::getN()
+Q_INVOKABLE void VCGVertexSI::setP( const Point3& p )
+{
+	for (int ii = 0; ii < 3;++ii)
+		vv.P()[ii] = p[ii];
+}
+
+Q_INVOKABLE Point3 VCGVertexSI::getN()
 {
 	return ScriptInterfaceUtilities::vcgPointToVector(vv.N());
 }
 
-Q_INVOKABLE void VCGVertexScriptInterface::setN( const float x,const float y,const float z )
+Q_INVOKABLE void VCGVertexSI::setN( const float x,const float y,const float z )
 {
 	vv.N() = vcg::Point3f(x,y,z);
 }
 
-QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in)
+Q_INVOKABLE VCGPoint3SI VCGVertexSI::getPoint()
+{
+	return vv.P();
+}
+
+Q_INVOKABLE void VCGVertexSI::setPoint( const VCGPoint3SI& p )
+{
+	vv.P() = p;
+}
+
+Q_INVOKABLE VCGPoint3SI VCGVertexSI::getNormal()
+{
+	return vv.N();
+}
+
+Q_INVOKABLE void VCGVertexSI::setNormal( const VCGPoint3SI& p )
+{
+	vv.N() = p;
+}
+
+QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelSI* const& in)
 {
 	return eng->newQObject(in);
 }
 
-void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out)
+void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelSI*& out)
 {
-	out = qobject_cast<MeshModelScriptInterface*>(val.toQObject());
+	out = qobject_cast<MeshModelSI*>(val.toQObject());
 }
 
-QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDocumentScriptInterface* const& in )
-{
-	return eng->newQObject(in);
-}
-
-void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentScriptInterface*& out )
-{
-	out = qobject_cast<MeshDocumentScriptInterface*>(val.toQObject());
-}
-
-
-QScriptValue VCGVertexScriptInterfaceToScriptValue( QScriptEngine* eng,VCGVertexScriptInterface* const& in )
+QScriptValue MeshDocumentScriptInterfaceToScriptValue( QScriptEngine* eng,MeshDocumentSI* const& in )
 {
 	return eng->newQObject(in);
 }
 
-void VCGVertexScriptInterfaceFromScriptValue( const QScriptValue& val,VCGVertexScriptInterface*& out )
+void MeshDocumentScriptInterfaceFromScriptValue( const QScriptValue& val,MeshDocumentSI*& out )
 {
-	out = qobject_cast<VCGVertexScriptInterface*>(val.toQObject());
+	out = qobject_cast<MeshDocumentSI*>(val.toQObject());
 }
 
-QScriptValue ShotScriptInterfaceToScriptValue( QScriptEngine* eng,ShotScriptInterface* const& in )
+
+QScriptValue VCGVertexScriptInterfaceToScriptValue( QScriptEngine* eng,VCGVertexSI* const& in )
 {
 	return eng->newQObject(in);
 }
 
-void ShotScriptInterfaceFromScriptValue( const QScriptValue& val,ShotScriptInterface*& out )
+void VCGVertexScriptInterfaceFromScriptValue( const QScriptValue& val,VCGVertexSI*& out )
 {
-	out = qobject_cast<ShotScriptInterface*>(val.toQObject());
+	out = qobject_cast<VCGVertexSI*>(val.toQObject());
 }
+
+QScriptValue ShotScriptInterfaceToScriptValue( QScriptEngine* eng,ShotSI* const& in )
+{
+	return eng->newQObject(in);
+}
+
+void ShotScriptInterfaceFromScriptValue( const QScriptValue& val,ShotSI*& out )
+{
+	out = qobject_cast<ShotSI*>(val.toQObject());
+}
+
+//QScriptValue VCGPoint3fScriptInterfaceToScriptValue( QScriptEngine* eng,VCGPoint3fSI* const& in )
+//{
+//	return eng->newQObject(in);
+//}
+//
+//void VCGPoint3fScriptInterfaceFromScriptValue( const QScriptValue& val,VCGPoint3fSI*& out )
+//{
+//	out = qobject_cast<VCGPoint3fSI*>(val.toQObject());
+//}
 
 QScriptValue EnvWrap_ctor( QScriptContext* c,QScriptEngine* e )
 {
 	Env* env = qscriptvalue_cast<Env*>(c->argument(0));
 	EnvWrap* p = new EnvWrap(*env);
+	QScriptValue res = e->toScriptValue(*p);
+	return res;
+}
+
+QScriptValue VCGPoint3ScriptInterface_ctor( QScriptContext *c, QScriptEngine *e )
+{
+	VCGPoint3SI* p = new VCGPoint3SI(float(c->argument(0).toNumber()),float(c->argument(1).toNumber()),float(c->argument(2).toNumber()));
 	QScriptValue res = e->toScriptValue(*p);
 	return res;
 }
@@ -567,7 +662,7 @@ MeshModel* EnvWrap::evalMesh(const QString& nm)
 {
 	int ii = evalInt(nm);
 	QScriptValue mdsv = env->globalObject().property(ScriptAdapterGenerator::meshDocVarName());
-	MeshDocumentScriptInterface* mdsi = dynamic_cast<MeshDocumentScriptInterface*>(mdsv.toQObject());
+	MeshDocumentSI* mdsi = dynamic_cast<MeshDocumentSI*>(mdsv.toQObject());
 	if (mdsi != NULL) 
 		return mdsi->md->getMesh(ii);
 	return NULL;
@@ -641,6 +736,11 @@ QString EnvWrap::evalString( const QString& nm )
 	return result.toString();
 }
 
+//vcg::Shotf EnvWrap::evalShot( const QString& nm )
+//{
+//	return vcg::Shot
+//}
+
 Q_DECLARE_METATYPE(EnvWrap)
 Q_DECLARE_METATYPE(EnvWrap*)
 
@@ -653,12 +753,20 @@ QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
 
 Env::Env()
 {
-	qScriptRegisterSequenceMetaType<QVector<float> >(this);
+	qScriptRegisterSequenceMetaType<Point3>(this);
+	qScriptRegisterSequenceMetaType<Point3Vector>(this);
+	qScriptRegisterSequenceMetaType<QVector<VCGVertexSI*> >(this);
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
 	qScriptRegisterMetaType(this,VCGVertexScriptInterfaceToScriptValue,VCGVertexScriptInterfaceFromScriptValue);
-	//qScriptRegisterMetaType(this,VCGPoint3fScriptInterfaceToScriptValue,VCGPoint3fScriptInterfaceFromScriptValue);
-	globalObject().setProperty("print", newFunction(myprint, 1));
+	QScriptValue fun = newFunction(myprint, 1);	
+	globalObject().setProperty("print", fun);
 
+	QScriptValue addfun = newFunction(VCGPoint3SI_addV3, 2);	
+	globalObject().setProperty("addV3", addfun);
+
+	QScriptValue multfun = newFunction(VCGPoint3SI_multV3S, 2);	
+	globalObject().setProperty("multV3S", multfun);
+	
 	QScriptValue envwrap_ctor = newFunction(EnvWrap_ctor);
 	//eng->setDefaultPrototype(qMetaTypeId<EnvWrap>(), envwrap_ctor.property("prototype"));
 	globalObject().setProperty("EnvWrap",envwrap_ctor);
@@ -666,7 +774,12 @@ Env::Env()
 	QScriptValue env_ctor = newFunction(Env_ctor);
 	QScriptValue metaObject = newQMetaObject(&Env::staticMetaObject, env_ctor);
 	globalObject().setProperty("Env", metaObject);
-	/*qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);*/
+
+	QScriptValue point_ctor = newFunction(VCGPoint3ScriptInterface_ctor);
+	//QScriptValue pointmetaObject = newQMetaObject(&VCGPoint3fSI::staticMetaObject, point_ctor);
+	setDefaultPrototype(qMetaTypeId<VCGPoint3SI>(), point_ctor.property("prototype"));
+	globalObject().setProperty("VCGPoint3", point_ctor);
+	//qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )
@@ -677,12 +790,28 @@ void Env::insertExpressionBinding( const QString& nm,const QString& exp )
 		throw JavaScriptException(res.toString());
 }
 
+QString Env::output()
+{
+	return out;
+}
 
-ShotScriptInterface::ShotScriptInterface( vcg::Shotf& st )
+void Env::appendOutput( const QString& output )
+{
+	out = out + output;
+}
+
+
+ShotSI::ShotSI( vcg::Shotf& st )
 :shot(st)
 {
 
 }
+
+vcg::Shotf ShotSI::getShot()
+{
+	return shot;
+}
+
 
 QVector<float> ScriptInterfaceUtilities::vcgPointToVector( const vcg::Point3f& p )
 {

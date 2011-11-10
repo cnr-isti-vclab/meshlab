@@ -65,59 +65,71 @@ public:
 	static QVector<float> vcgPointToVector(const vcg::Point3f& p);
 };
 
-//class VCGPoint3fScriptInterface : public QObject
+//class VCGPoint3fSI : public QObject
 //{
 //	Q_OBJECT
 //public:
-//	static QString getterSetterCode();
-//	VCGPoint3fScriptInterface(vcg::Point3f& p);
 //
-//	float operator[](const int ii);
-//	vcg::Point3f& pp;
+//	VCGPoint3fSI& operator =(const VCGPoint3fSI& b);
+//	VCGPoint3fSI();
+//	VCGPoint3fSI(const float x,const float y,const float z);
+//	Q_INVOKABLE void add(const VCGPoint3fSI& p);
+//	Q_INVOKABLE void mult(const float s);
+//	//Q_INVOKABLE VCGPoint3fSI& set(const float x,const float y,const float z);
+//	vcg::Point3f pp;
 //};
-//
-//QScriptValue VCGPoint3fScriptInterface_ctor(QScriptContext *context, QScriptEngine *engine);
 
-class VCGVertexScriptInterface : public QObject
+
+
+typedef vcg::Point3f VCGPoint3SI;
+typedef QVector<float> Point3;
+typedef QVector<Point3> Point3Vector;
+
+class VCGVertexSI : public QObject
 {
 	Q_OBJECT 
 public:
-	VCGVertexScriptInterface(CMeshO::VertexType& v);
+	VCGVertexSI(CMeshO::VertexType& v);
 
 	//Q_INVOKABLE vcg::Point3f* p();
-	Q_INVOKABLE QVector<float> getP();
-	Q_INVOKABLE void setP(const float x,const float y,const float z);
-	Q_INVOKABLE QVector<float> getN();
+	Q_INVOKABLE Point3 getP();
+	Q_INVOKABLE VCGPoint3SI getPoint();
+	Q_INVOKABLE void setPC(const float x,const float y,const float z);
+	Q_INVOKABLE void setP(const Point3& p);
+	Q_INVOKABLE void setPoint(const VCGPoint3SI& p);
+	Q_INVOKABLE Point3 getN();
+	Q_INVOKABLE VCGPoint3SI getNormal();
+	Q_INVOKABLE void setNormal(const VCGPoint3SI& p);
 	Q_INVOKABLE void setN(const float x,const float y,const float z);
 
 	CMeshO::VertexType& vv;
 };
 
-class MeshDocumentScriptInterface : public QObject
+class MeshDocumentSI : public QObject
 {
 	Q_OBJECT
 
 public:
-	MeshDocumentScriptInterface(MeshDocument* doc);
-	~MeshDocumentScriptInterface(){}
+	MeshDocumentSI(MeshDocument* doc);
+	~MeshDocumentSI(){}
 
-	Q_INVOKABLE MeshModelScriptInterface* getMesh(const int meshId);
-	Q_INVOKABLE MeshModelScriptInterface* operator[](const QString& name);
-	Q_INVOKABLE MeshModelScriptInterface* getMeshByName(const QString& name);
-	Q_INVOKABLE MeshModelScriptInterface* current();
+	Q_INVOKABLE MeshModelSI* getMesh(const int meshId);
+	Q_INVOKABLE MeshModelSI* operator[](const QString& name);
+	Q_INVOKABLE MeshModelSI* getMeshByName(const QString& name);
+	Q_INVOKABLE MeshModelSI* current();
 	Q_INVOKABLE int currentId();
 	Q_INVOKABLE int setCurrent(const int meshId);
 	MeshDocument* md;
 };
 
-class ShotScriptInterface;
+class ShotSI;
 
-class MeshModelScriptInterface : public QObject
+class MeshModelSI : public QObject
 {
 	Q_OBJECT
 
 public:
-	MeshModelScriptInterface(MeshModel& meshModel,MeshDocumentScriptInterface* mdsi);
+	MeshModelSI(MeshModel& meshModel,MeshDocumentSI* mdsi);
 	
 	Q_INVOKABLE int id() const;
 	Q_INVOKABLE float bboxDiag() const;
@@ -128,40 +140,62 @@ Q_INVOKABLE inline float computeMaxVQ() const {  return vcg::tri::Stat<CMeshO>::
 Q_INVOKABLE inline float computeMinFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).first;  }
 Q_INVOKABLE inline float computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).second; }
 
+	Q_INVOKABLE QVector<VCGVertexSI*> vert();
+	Q_INVOKABLE Point3Vector getVertPosArray();
+	Q_INVOKABLE Point3Vector getVertNormArray();
+	Q_INVOKABLE void setVertPosArray(const Point3Vector& pa);
+	Q_INVOKABLE void setVertNormArray(const Point3Vector& na);
+	//Q_INVOKABLE void setV(const QVector<VCGVertexSI*>& v);
+
 	Q_INVOKABLE int vn() const;
 	Q_INVOKABLE int fn() const;
-	Q_INVOKABLE VCGVertexScriptInterface* v(const int ind);
-	Q_INVOKABLE ShotScriptInterface* shot();
+	Q_INVOKABLE VCGVertexSI* v(const int ind);
+	Q_INVOKABLE ShotSI* shot();
 
 	MeshModel& mm;
 }; 
 
-Q_DECLARE_METATYPE(MeshDocumentScriptInterface*)
-QScriptValue MeshDocumentScriptInterfaceToScriptValue(QScriptEngine* eng,MeshDocumentScriptInterface* const& in);
+Q_DECLARE_METATYPE(MeshDocumentSI*)
+QScriptValue MeshDocumentScriptInterfaceToScriptValue(QScriptEngine* eng,MeshDocumentSI* const& in);
 
-void MeshDocumentScriptInterfaceFromScriptValue(const QScriptValue& val,MeshDocumentScriptInterface*& out);
+void MeshDocumentScriptInterfaceFromScriptValue(const QScriptValue& val,MeshDocumentSI*& out);
 
-Q_DECLARE_METATYPE(MeshModelScriptInterface*)
+Q_DECLARE_METATYPE(MeshModelSI*)
 
-QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelScriptInterface* const& in);
+QScriptValue MeshModelScriptInterfaceToScriptValue(QScriptEngine* eng,MeshModelSI* const& in);
 
-void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelScriptInterface*& out);
+void MeshModelScriptInterfaceFromScriptValue(const QScriptValue& val,MeshModelSI*& out);
 
-Q_DECLARE_METATYPE(VCGVertexScriptInterface*)
+Q_DECLARE_METATYPE(VCGVertexSI*)
 
-QScriptValue VCGVertexScriptInterfaceToScriptValue(QScriptEngine* eng,VCGVertexScriptInterface* const& in);
+QScriptValue VCGVertexScriptInterfaceToScriptValue(QScriptEngine* eng,VCGVertexSI* const& in);
 
-void VCGVertexScriptInterfaceFromScriptValue(const QScriptValue& val,VCGVertexScriptInterface*& out);
+void VCGVertexScriptInterfaceFromScriptValue(const QScriptValue& val,VCGVertexSI*& out);
 
-Q_DECLARE_METATYPE(QVector<float>)
+
+
+Q_DECLARE_METATYPE(Point3)
+Q_DECLARE_METATYPE(Point3Vector)
+Q_DECLARE_METATYPE(QVector<VCGVertexSI*>)
+
+Q_DECLARE_METATYPE(VCGPoint3SI*)
+Q_DECLARE_METATYPE(VCGPoint3SI)
+
+QScriptValue VCGPoint3ScriptInterface_ctor(QScriptContext *context, QScriptEngine *engine);
+
+//QScriptValue VCGPoint3fScriptInterfaceToScriptValue(QScriptEngine* eng,VCGPoint3fSI* const& in);
+//void VCGPoint3fScriptInterfaceFromScriptValue(const QScriptValue& val,VCGPoint3fSI*& out);
 
 class Env :public QScriptEngine
 {
 	Q_OBJECT
 
+	QString out;
 public:
 	Env();
 	Q_INVOKABLE void insertExpressionBinding(const QString& nm,const QString& exp);
+	QString output();
+	void appendOutput(const QString& output);
 };
 
 QScriptValue Env_ctor(QScriptContext *context,QScriptEngine *engine);
@@ -187,25 +221,42 @@ public:
 	QString evalString(const QString& nm);
 	int evalEnum( const QString& nm );
 	MeshModel* evalMesh(const QString& nm);
+	//vcg::Shotf evalShot(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
 
-class ShotScriptInterface : public QObject
+class ShotSI : public QObject
 {
 	Q_OBJECT
 public:
-	ShotScriptInterface(vcg::Shotf& st);
-	~ShotScriptInterface() {};
+	ShotSI(vcg::Shotf& st);
+	~ShotSI() {};
+
+	//only for c++
+	vcg::Shotf getShot();
 
 private:
 	vcg::Shotf& shot; 
 };
 
-Q_DECLARE_METATYPE(ShotScriptInterface*)
-QScriptValue ShotScriptInterfaceToScriptValue(QScriptEngine* eng,ShotScriptInterface* const& in);
+Q_DECLARE_METATYPE(ShotSI*)
+QScriptValue ShotScriptInterfaceToScriptValue(QScriptEngine* eng,ShotSI* const& in);
+void ShotScriptInterfaceFromScriptValue(const QScriptValue& val,ShotSI*& out);
 
-void ShotScriptInterfaceFromScriptValue(const QScriptValue& val,ShotScriptInterface*& out);
+
+	inline QScriptValue VCGPoint3SI_addV3(QScriptContext * c,QScriptEngine *e )
+	{
+		return e->toScriptValue(*qscriptvalue_cast<VCGPoint3SI*>(c->argument(0)) + *qscriptvalue_cast<VCGPoint3SI*>(c->argument(1)));
+	}
+
+	inline QScriptValue VCGPoint3SI_multV3S( QScriptContext * c,QScriptEngine *e )
+	{
+		return e->toScriptValue(*qscriptvalue_cast<VCGPoint3SI*>(c->argument(0)) * (float) c->argument(1).toNumber());
+	}
+
+
+//QScriptValue VCGPoint3SI_multV3S(QScriptContext * c,QScriptEngine *e );
 //class EnvWrap : protected virtual QScriptEngine
 //{
 //private:

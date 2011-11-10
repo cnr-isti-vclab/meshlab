@@ -412,7 +412,7 @@ public:
 }; // end class RenderMode
 
 
-class MeshModelScriptInterface;
+class MeshModelSI;
 
 class MeshDocument : public QObject
 {
