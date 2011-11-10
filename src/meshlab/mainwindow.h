@@ -182,7 +182,7 @@ private slots:
 
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);
-	void scriptCodeExecuted(const QScriptValue& val);
+	void scriptCodeExecuted(const QScriptValue& val,const QString& output);
 private:
     void createStdPluginWnd(); // this one is
 	void createXMLStdPluginWnd();

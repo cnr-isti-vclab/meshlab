@@ -1208,7 +1208,7 @@ void MainWindow::showInterruptButton(const bool& visible)
 	}
 }
 
-void MainWindow::scriptCodeExecuted( const QScriptValue& val )
+void MainWindow::scriptCodeExecuted( const QScriptValue& val,const QString& output )
 {
 	if (val.isError())
 	{
@@ -1216,7 +1216,10 @@ void MainWindow::scriptCodeExecuted( const QScriptValue& val )
 		layerDialog->updateLog(meshDoc()->Log);
 	}
 	else
+	{
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Output:\n%s",qPrintable(output));
 		GLA()->update();
+	}
 }
 
 // Edit Mode Managment

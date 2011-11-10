@@ -64,7 +64,7 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
-	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&)),this,SLOT(scriptCodeExecuted(const QScriptValue&)));
+	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const QString&)));
 
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));

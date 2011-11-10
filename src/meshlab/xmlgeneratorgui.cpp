@@ -485,7 +485,7 @@ QScriptValue FilterGeneratorTab::executeCode(MeshDocument* doc)
 	if (doc != NULL)
 	{
 		env.pushContext();
-		MeshDocumentScriptInterface* currentDocInterface = new MeshDocumentScriptInterface(doc);
+		MeshDocumentSI* currentDocInterface = new MeshDocumentSI(doc);
 		QScriptValue val = env.newQObject(currentDocInterface);
 		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
 		QScriptValue result = env.evaluate(getCode());
@@ -690,7 +690,7 @@ void PluginGeneratorGUI::executeCurrentCode()
 	if (doc != NULL)
 	{
 		QString code;
-		MeshDocumentScriptInterface* currentDocInterface = new MeshDocumentScriptInterface(doc);
+		MeshDocumentSI* currentDocInterface = new MeshDocumentSI(doc);
 		QScriptValue val = env.newQObject(currentDocInterface);
 		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
 		QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
@@ -718,7 +718,7 @@ void PluginGeneratorGUI::executeCurrentCode()
 		if (ftab != NULL)
 		{
 			QScriptValue result = env.evaluate(code + ftab->getCode());
-			emit scriptCodeExecuted(result);
+			emit scriptCodeExecuted(result,env.output());
 		}
 		else
 			throw MeshLabException("System Error: A FilterGeneratorTab object has been expected.");
