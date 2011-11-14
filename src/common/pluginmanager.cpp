@@ -25,7 +25,7 @@ PluginManager::~PluginManager()
 		delete meshRenderPlug[ii];
 	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
 		delete meshDecoratePlug[ii];
-	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
+	for(int ii = 0;ii < meshEditInterfacePlug.size();++ii)
 		delete meshEditInterfacePlug[ii];
 	for(int ii = 0;ii < xmlpluginfo.size();++ii)
 		MLXMLPluginInfo::destroyXMLPluginInfo(xmlpluginfo[ii]);
