@@ -289,9 +289,8 @@ public:
 	XMLComboWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLComboWidget();
 	void updateVisibility(const bool vis);
-	void Init(QWidget *p,QString lab,int newEnum, QStringList values);
-	void set(const QString& /*nwExpStr*/) {}
 	virtual QString getWidgetExpression();
+	virtual void set(const QString &) {}
 
 private:
 	//WHY WE NEED THIS FUNCTION?
@@ -328,6 +327,46 @@ public:
 
 private:
 	MeshDocument* md;
+};
+
+class XMLShotWidget : public XMLMeshLabWidget
+{
+	Q_OBJECT
+
+public:
+	XMLShotWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
+	~XMLShotWidget(){};
+	void updateVisibility(const bool vis);
+	void set(const QString &) {}
+
+	QString paramName;
+
+	QString getWidgetExpression();
+
+public slots:
+	void  getShot();
+	void  setShotValue(QString name, vcg::Shotf val);
+signals:
+	void askRasterShot(QString);
+	void askMeshShot(QString);
+	void askViewerShot(QString);
+
+protected:
+	QWidget *gla_curr;
+	vcg::Shotf curShot;
+	//QLineEdit * shotLE;
+	QComboBox *getShotCombo;
+	QLabel* descLab;
+	QPushButton* getShotButton;
+private:
+	//WHY WE NEED THIS FUNCTION?
+	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
+	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
+	//THIS THING HAS AS CONSEQUENCE THAT I HAVE TO PASTE AND COPY THE updateVisibility CODE INSIDE THE CONSTRUCTOR.
+	//TO AVOID THIS FOR EACH WIDGET WE ADD A setVisibility FUNCTION (OBVIOUSLY NOT VIRTUAL) WITH THE CODE THAT WE SHOULD PUT INSIDE THE
+	//updateVisibility. 
+	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
+	void setVisibility(const bool vis);
 };
 
 //class XMLShotfWidget : public MeshLabWidget

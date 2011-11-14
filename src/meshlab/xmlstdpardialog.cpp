@@ -491,6 +491,9 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap&
 
 	if (guiType == MLXMLElNames::meshWidgetTag)
 		return new XMLMeshWidget(md,widgetTable,env,parent);
+
+	if (guiType == MLXMLElNames::shotWidgetTag)
+		return new XMLShotWidget(widgetTable,env,parent);
 	return NULL;
 }
 
@@ -951,7 +954,16 @@ XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
 	enumLabel = new QLabel(p);
 	enumLabel->setText(xmlWidgetTag[MLXMLElNames::guiLabel]);
 	enumCombo = new QComboBox(p);
-	//enumCombo->setCurrentIndex(newEnum);
+	int def;
+	try
+	{
+		def = envir.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	}
+	catch (ExpressionHasNotThisTypeException& ex)
+	{
+		def = 0;
+	}
+	enumCombo->setCurrentIndex(def);
 	//int row = gridLay->rowCount() - 1;
 	gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
 	gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
@@ -1012,4 +1024,147 @@ XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& 
 
 
 
+
+
+XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
+:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+{
+	XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
+	if (par == NULL)
+		throw MeshLabException("Critical Error: A widget must have an instance of XMLStdParFrame as parent.");
+	gla_curr = par->curr_gla;
+	//int row = gridLay->rowCount() - 1;
+	this->setShotValue(paramName,vcg::Shotf());
+	paramName = xmlWidgetTag[MLXMLElNames::paramName];
+	descLab = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],p);
+	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	QHBoxLayout* lay = new QHBoxLayout();
+	getShotButton = new QPushButton("Get shot",p);
+	lay->addWidget(getShotButton);
+	getShotCombo = new QComboBox(p);
+	int def;
+	try
+	{
+		def = envir.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+	}
+	catch (ExpressionHasNotThisTypeException& ex)
+	{
+		def = 0;
+	}
+	getShotCombo->setCurrentIndex(def);
+	//int row = gridLay->rowCount() - 1;
+	QStringList names;
+	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+	{
+		names << "Current Trackball";
+		names << "Current Mesh";
+		names << "Current Raster";
+		connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+		connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
+		connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
+		connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
+	}
+	names << "From File";
+	getShotCombo->addItems(names);
+	lay->addWidget(getShotCombo);
+	connect(getShotCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
+	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+	connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
+	connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
+	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	setVisibility(isImportant);
+}
+
+QString XMLShotWidget::getWidgetExpression()
+{
+	vcg::Matrix44f m = curShot.Extrinsics.Rot();
+	vcg::Point3f t = curShot.Extrinsics.Tra();
+	float foc = curShot.Intrinsics.FocalMm;
+	vcg::Point2f pxs = curShot.Intrinsics.PixelSizeMm;
+	vcg::Point2f cp = curShot.Intrinsics.CenterPx;
+	vcg::Point2i vw = curShot.Intrinsics.ViewportPx;
+	vcg::Point2f dist = curShot.Intrinsics.DistorCenterPx;
+	float* k = curShot.Intrinsics.k;
+	QString ms = "new Shot([";
+	for(int ii = 0;ii < 4;++ii)
+		for(int jj = 0;jj < 4;++jj)
+			ms = ms + QString::number(m[ii][jj]) + ",";
+	ms += "],[";
+	for(int ii = 0;ii < 3;++ii)
+		ms = ms + QString::number(t[ii]) + ",";
+	ms += "]," + QString::number(foc) + ",[";
+	for(int ii = 0;ii < 2;++ii)
+		ms = ms + QString::number(pxs[ii]) + ",";
+	ms += "],[";
+	for(int ii = 0;ii < 2;++ii)
+		ms = ms + QString::number(cp[ii]) + ",";
+	ms += "],[";
+	for(int ii = 0;ii < 2;++ii)
+		ms = ms + QString::number(vw[ii]) + ",";
+	ms += "],[";
+	for(int ii = 0;ii < 2;++ii)
+		ms = ms + QString::number(dist[ii]) + ",";
+	ms += "],[";
+	for(int ii = 0;ii < 4;++ii)
+		ms = ms + QString::number(k[ii]) + ",";
+	ms += "])";
+	//no ; it will be added by the addExpressionBinding
+	return ms;
+}
+
+void XMLShotWidget::getShot()
+{
+	int index = getShotCombo->currentIndex();
+	switch(index)  {
+	case 0 : emit askViewerShot(paramName); break;
+	case 1 : emit askMeshShot(paramName); break;
+	case 2 : emit askRasterShot(paramName); break;
+	case 3:
+		{
+			QString filename = QFileDialog::getOpenFileName(this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
+			QFile qf(filename);
+			QFileInfo qfInfo(filename);
+
+			if( !qf.open(QIODevice::ReadOnly ) )
+				return ;
+
+			QDomDocument doc("XmlDocument");    //It represents the XML document
+			if(!doc.setContent( &qf ))     return;
+			qf.close();
+
+			QString type = doc.doctype().name();
+
+			//TextAlign file project
+			//if(type == "RegProjectML")   loadShotFromTextAlignFile(doc);
+			//View State file
+			//else if(type == "ViewState") loadViewFromViewStateFile(doc);
+
+			//qDebug("End file reading");
+
+
+			// return true;
+		}
+	default : assert(0);
+	}
+}
+
+void XMLShotWidget::setShotValue(QString name,vcg::Shotf newVal)
+{
+	if(name==paramName)
+	{
+		curShot=newVal;
+	}
+}
+
+void XMLShotWidget::updateVisibility( const bool vis )
+{
+	setVisibility(vis);
+}
+
+void XMLShotWidget::setVisibility( const bool vis )
+{
+	descLab->setVisible(vis);
+	getShotCombo->setVisible(vis);
+	getShotButton->setVisible(vis);
+}
 
