@@ -59,10 +59,23 @@ QScriptValue IRichParameterSet_ctor(QScriptContext* c,QScriptEngine* e);
 
 QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
+
+typedef vcg::Point3f VCGPoint3SI;
+typedef QVector<QVector<float>> Point3Vector;
+
+
 class ScriptInterfaceUtilities
 {
 public:
-	static QVector<float> vcgPointToVector(const vcg::Point3f& p);
+	static QVector<float> vcgPoint2ToVector2(const vcg::Point2f& p);
+	static vcg::Point2f vector2ToVcgPoint2(const QVector<float>& v);
+	static vcg::Point2i vector2ToVcgPoint2i(const QVector<float>& v);
+	static QVector<float> vcgPoint3ToVector3(const vcg::Point3f& p);
+	static vcg::Point3f vector3ToVcgPoint3(const QVector<float>& v);
+	static QVector<float> vcgPoint4ToVector4(const vcg::Point4f& p);
+	static vcg::Point4f vector4ToVcgPoint4(const QVector<float>& v);
+	static QVector<float> vcgMatrix44ToVector16(const vcg::Matrix44f& m);
+	static vcg::Matrix44f vector16ToVcgMatrix44(const QVector<float>& v);
 };
 
 //class VCGPoint3fSI : public QObject
@@ -81,10 +94,6 @@ public:
 
 
 
-typedef vcg::Point3f VCGPoint3SI;
-typedef QVector<float> Point3;
-typedef QVector<Point3> Point3Vector;
-
 class VCGVertexSI : public QObject
 {
 	Q_OBJECT 
@@ -92,12 +101,12 @@ public:
 	VCGVertexSI(CMeshO::VertexType& v);
 
 	//Q_INVOKABLE vcg::Point3f* p();
-	Q_INVOKABLE Point3 getP();
+	Q_INVOKABLE QVector<float> getP();
 	Q_INVOKABLE VCGPoint3SI getPoint();
 	Q_INVOKABLE void setPC(const float x,const float y,const float z);
-	Q_INVOKABLE void setP(const Point3& p);
+	Q_INVOKABLE void setP(const QVector<float>& p);
 	Q_INVOKABLE void setPoint(const VCGPoint3SI& p);
-	Q_INVOKABLE Point3 getN();
+	Q_INVOKABLE QVector<float> getN();
 	Q_INVOKABLE VCGPoint3SI getNormal();
 	Q_INVOKABLE void setNormal(const VCGPoint3SI& p);
 	Q_INVOKABLE void setN(const float x,const float y,const float z);
@@ -173,8 +182,8 @@ QScriptValue VCGVertexScriptInterfaceToScriptValue(QScriptEngine* eng,VCGVertexS
 void VCGVertexScriptInterfaceFromScriptValue(const QScriptValue& val,VCGVertexSI*& out);
 
 
-
-Q_DECLARE_METATYPE(Point3)
+Q_DECLARE_METATYPE(QVector<float>)
+Q_DECLARE_METATYPE(QVector<float>*)
 Q_DECLARE_METATYPE(Point3Vector)
 Q_DECLARE_METATYPE(QVector<VCGVertexSI*>)
 
@@ -221,28 +230,31 @@ public:
 	QString evalString(const QString& nm);
 	int evalEnum( const QString& nm );
 	MeshModel* evalMesh(const QString& nm);
-	//vcg::Shotf evalShot(const QString& nm);
+	vcg::Shotf evalShot(const QString& nm);
 };
 
 QScriptValue EnvWrap_ctor(QScriptContext* c,QScriptEngine* e);
+
 
 class ShotSI : public QObject
 {
 	Q_OBJECT
 public:
-	ShotSI(vcg::Shotf& st);
+	ShotSI();
+	ShotSI(const vcg::Shotf& st);
 	~ShotSI() {};
 
-	//only for c++
-	vcg::Shotf getShot();
+	Q_INVOKABLE ShotSI* itSelf();
 
-private:
-	vcg::Shotf& shot; 
+	vcg::Shotf shot; 
 };
 
 Q_DECLARE_METATYPE(ShotSI*)
 QScriptValue ShotScriptInterfaceToScriptValue(QScriptEngine* eng,ShotSI* const& in);
 void ShotScriptInterfaceFromScriptValue(const QScriptValue& val,ShotSI*& out);
+QScriptValue ShotSI_ctor(QScriptContext* c,QScriptEngine* e);
+
+
 
 
 	inline QScriptValue VCGPoint3SI_addV3(QScriptContext * c,QScriptEngine *e )

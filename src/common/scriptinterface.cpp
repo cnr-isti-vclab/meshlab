@@ -373,12 +373,12 @@ Q_INVOKABLE float MeshModelSI::bboxDiag() const
 
 Q_INVOKABLE QVector<float> MeshModelSI::bboxMin() const
 {
-	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.min);
+	return ScriptInterfaceUtilities::vcgPoint3ToVector3(mm.cm.bbox.min);
 }
 
 Q_INVOKABLE QVector<float> MeshModelSI::bboxMax() const
 {
-	return ScriptInterfaceUtilities::vcgPointToVector(mm.cm.bbox.max);
+	return ScriptInterfaceUtilities::vcgPoint3ToVector3(mm.cm.bbox.max);
 }
 
 Q_INVOKABLE int MeshModelSI::id() const
@@ -428,7 +428,7 @@ Q_INVOKABLE Point3Vector MeshModelSI::getVertPosArray()
 	Point3Vector pv;
 	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
 	{
-		Point3 p;
+		QVector<float> p;
 		p << mm.cm.vert[ii].P().X() << mm.cm.vert[ii].P().Y() << mm.cm.vert[ii].P().Z();
 		pv << p;
 	}
@@ -452,7 +452,7 @@ Q_INVOKABLE Point3Vector MeshModelSI::getVertNormArray()
 	Point3Vector pv;
 	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
 	{
-		Point3 p;
+		QVector<float> p;
 		p << mm.cm.vert[ii].N().X() << mm.cm.vert[ii].N().Y() << mm.cm.vert[ii].N().Z();
 		pv << p;
 	}
@@ -466,9 +466,9 @@ Q_INVOKABLE Point3Vector MeshModelSI::getVertNormArray()
 //}
 
 
-Q_INVOKABLE Point3 VCGVertexSI::getP() 
+Q_INVOKABLE QVector<float> VCGVertexSI::getP() 
 {
-	return ScriptInterfaceUtilities::vcgPointToVector(vv.P());
+	return ScriptInterfaceUtilities::vcgPoint3ToVector3(vv.P());
 }
 
 Q_INVOKABLE void VCGVertexSI::setPC( const float x,const float y,const float z )
@@ -476,15 +476,15 @@ Q_INVOKABLE void VCGVertexSI::setPC( const float x,const float y,const float z )
 	vv.P() = vcg::Point3f(x,y,z);
 }
 
-Q_INVOKABLE void VCGVertexSI::setP( const Point3& p )
+Q_INVOKABLE void VCGVertexSI::setP( const QVector<float>& p )
 {
 	for (int ii = 0; ii < 3;++ii)
 		vv.P()[ii] = p[ii];
 }
 
-Q_INVOKABLE Point3 VCGVertexSI::getN()
+Q_INVOKABLE QVector<float> VCGVertexSI::getN()
 {
-	return ScriptInterfaceUtilities::vcgPointToVector(vv.N());
+	return ScriptInterfaceUtilities::vcgPoint3ToVector3(vv.N());
 }
 
 Q_INVOKABLE void VCGVertexSI::setN( const float x,const float y,const float z )
@@ -736,10 +736,17 @@ QString EnvWrap::evalString( const QString& nm )
 	return result.toString();
 }
 
-//vcg::Shotf EnvWrap::evalShot( const QString& nm )
-//{
-//	return vcg::Shot
-//}
+vcg::Shotf EnvWrap::evalShot( const QString& nm )
+{
+	QScriptValue result = evalExp(nm);
+	ShotSI* shot = qscriptvalue_cast<ShotSI*>(result);
+	if (shot != NULL)
+		return shot->shot;
+	else
+		throw ExpressionHasNotThisTypeException("Shotf",nm);
+	return vcg::Shotf();
+
+}
 
 Q_DECLARE_METATYPE(EnvWrap)
 Q_DECLARE_METATYPE(EnvWrap*)
@@ -750,10 +757,55 @@ QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
 	return engine->newQObject(env, QScriptEngine::ScriptOwnership);
 }
 
+QScriptValue ShotSI_ctor( QScriptContext* c,QScriptEngine* e )
+{	
+	if (c->argumentCount() != 8)
+		return e->nullValue();
+	ShotSI* shot = new ShotSI();
+	QVector<float> m = qscriptvalue_cast< QVector<float> >(c->argument(0));
+	if (m.size() != 16)
+		return e->nullValue();
+	QVector<float> tr = qscriptvalue_cast< QVector<float> >(c->argument(1));
+	if (tr.size() != 3)
+		return e->nullValue();
+	float focal(c->argument(2).toNumber());
+	QVector<float> pixelsize = qscriptvalue_cast< QVector<float> >(c->argument(3));
+	if (pixelsize.size() != 2)
+		return e->nullValue();
+	QVector<float> centerpx = qscriptvalue_cast< QVector<float> >(c->argument(4));
+	if (centerpx.size() != 2)
+		return e->nullValue();
+	QVector<float> viewportpx = qscriptvalue_cast< QVector<float> >(c->argument(5));
+	if (viewportpx.size() != 2)
+		return e->nullValue();
+	QVector<float> distpx = qscriptvalue_cast< QVector<float> >(c->argument(6));
+	if (distpx.size() != 2)
+		return e->nullValue();
+	QVector<float> k = qscriptvalue_cast< QVector<float> >(c->argument(7));
+	if (k.size() != 4)
+		return e->nullValue();
+	vcg::Matrix44f mat = ScriptInterfaceUtilities::vector16ToVcgMatrix44(m);
+	shot->shot.Extrinsics.SetRot(mat);
+	vcg::Point3f tra = ScriptInterfaceUtilities::vector3ToVcgPoint3(tr); 
+	shot->shot.Extrinsics.SetTra(tra);
+	shot->shot.Intrinsics.FocalMm = focal;
+	vcg::Point2f pxsize = ScriptInterfaceUtilities::vector2ToVcgPoint2(pixelsize);
+	shot->shot.Intrinsics.PixelSizeMm = pxsize;
+	vcg::Point2f cent = ScriptInterfaceUtilities::vector2ToVcgPoint2(centerpx);
+	shot->shot.Intrinsics.CenterPx = cent;
+	vcg::Point2i vw = ScriptInterfaceUtilities::vector2ToVcgPoint2i(viewportpx);
+	shot->shot.Intrinsics.ViewportPx = vw;
+	vcg::Point2f d = ScriptInterfaceUtilities::vector2ToVcgPoint2(distpx);
+	shot->shot.Intrinsics.DistorCenterPx = d;
+	for (int ii = 0; ii < 4; ++ii)
+		shot->shot.Intrinsics.k[ii] = k[ii];
+	return e->newQObject(shot, QScriptEngine::ScriptOwnership);
+}
+
 
 Env::Env()
 {
-	qScriptRegisterSequenceMetaType<Point3>(this);
+	qScriptRegisterSequenceMetaType<QVector<float>>(this);
 	qScriptRegisterSequenceMetaType<Point3Vector>(this);
 	qScriptRegisterSequenceMetaType<QVector<VCGVertexSI*> >(this);
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
@@ -780,6 +832,8 @@ Env::Env()
 	setDefaultPrototype(qMetaTypeId<VCGPoint3SI>(), point_ctor.property("prototype"));
 	globalObject().setProperty("VCGPoint3", point_ctor);
 	//qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
+	QScriptValue shot_ctor = newFunction(ShotSI_ctor);
+	globalObject().setProperty("Shot", shot_ctor);
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )
@@ -800,23 +854,99 @@ void Env::appendOutput( const QString& output )
 	out = out + output;
 }
 
+ShotSI::ShotSI( const vcg::Shotf& st )
+:shot()
+{
+	shot.Intrinsics = st.Intrinsics;
+	shot.Extrinsics = st.Extrinsics;
+}
 
-ShotSI::ShotSI( vcg::Shotf& st )
-:shot(st)
+ShotSI::ShotSI()
+:shot()
 {
 
 }
 
-vcg::Shotf ShotSI::getShot()
+Q_INVOKABLE ShotSI* ShotSI::itSelf()
 {
-	return shot;
+	return this;
+}
+
+QVector<float> ScriptInterfaceUtilities::vcgPoint2ToVector2( const vcg::Point2f& p )
+{
+	QVector<float> vfl(2);
+	for (int ii = 0;ii < 2;++ii)
+		vfl[ii] = p[ii];
+	return vfl;
+}
+
+vcg::Point2f ScriptInterfaceUtilities::vector2ToVcgPoint2( const QVector<float>& v )
+{
+	vcg::Point2f p;
+	for (int ii = 0;ii < 2;++ii)
+		p[ii] = v[ii];
+	return p;
 }
 
 
-QVector<float> ScriptInterfaceUtilities::vcgPointToVector( const vcg::Point3f& p )
+QVector<float> ScriptInterfaceUtilities::vcgPoint3ToVector3( const vcg::Point3f& p )
 {
 	QVector<float> vfl(3);
 	for (int ii = 0;ii < 3;++ii)
 		vfl[ii] = p[ii];
 	return vfl;
 }
+
+vcg::Point3f ScriptInterfaceUtilities::vector3ToVcgPoint3( const QVector<float>& v )
+{
+	vcg::Point3f p;
+	for (int ii = 0;ii < 3;++ii)
+		p[ii] = v[ii];
+	return p;
+}
+
+QVector<float> ScriptInterfaceUtilities::vcgPoint4ToVector4( const vcg::Point4f& p )
+{
+	QVector<float> vfl(4);
+	for (int ii = 0;ii < 4;++ii)
+		vfl[ii] = p[ii];
+	return vfl;
+}
+
+vcg::Point4f ScriptInterfaceUtilities::vector4ToVcgPoint4( const QVector<float>& v )
+{
+	vcg::Point4f p;
+	for (int ii = 0;ii < 4;++ii)
+		p[ii] = v[ii];
+	return p;
+}
+
+QVector<float> ScriptInterfaceUtilities::vcgMatrix44ToVector16( const vcg::Matrix44f& m )
+{
+	QVector<float> vfl(16);
+	for (int ii = 0;ii < 16;++ii)
+		vfl[ii] = m[ii / 4][ii % 4];
+	return vfl;
+}
+
+vcg::Matrix44f ScriptInterfaceUtilities::vector16ToVcgMatrix44( const QVector<float>& v )
+{
+	vcg::Matrix44f m;
+	for (int ii = 0;ii < 4;++ii)
+		for (int jj = 0;jj < 4;++jj)
+			m[ii][jj] = v[ii * 4 + jj];
+	return m;
+}
+
+vcg::Point2i ScriptInterfaceUtilities::vector2ToVcgPoint2i( const QVector<float>& v )
+{
+	vcg::Point2i p;
+	for (int ii = 0;ii < 2;++ii)
+		p[ii] = int(v[ii]);
+	return p;
+}
+
+
+
+
+

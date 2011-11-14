@@ -67,7 +67,8 @@ namespace MLXMLElNames
 	const QString sliderWidgetTag("SLIDER_GUI");
 	const QString enumWidgetTag("ENUM_GUI");
 	const QString meshWidgetTag("MESH_GUI");	
-	
+	const QString shotWidgetTag("SHOT_GUI");
+
 	const QString mfiVersion("mfiVersion");
 
 	const QString pluginScriptName("pluginName");
@@ -106,6 +107,7 @@ namespace MLXMLElNames
 	const QString colorType("Color");
 	const QString enumType("Enum");
 	const QString meshType("Mesh");
+	const QString shotType("Shot");
 
 	//ariety values
 	const QString singleMeshArity("SingleMesh");

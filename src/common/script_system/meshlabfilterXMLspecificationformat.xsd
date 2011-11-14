@@ -67,6 +67,7 @@
 	 <xs:element ref='SLIDER_GUI'/>
 	 <xs:element ref='ENUM_GUI'/>
 	 <xs:element ref='MESH_GUI'/>
+	 <xs:element ref='SHOT_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
@@ -78,6 +79,7 @@
 	  <xs:pattern value='Vec3'/>
 	  <xs:pattern value='Color'/>
 	  <xs:pattern value='Mesh'/>
+	  <xs:pattern value='Shot'/>
 	  <xs:pattern value='Enum \{(\s*\S+\s*\:\s*\d+\s*(\|)?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
@@ -140,6 +142,12 @@
  </xs:element>
  
   <xs:element name='MESH_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='SHOT_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
   </xs:complexType>
