@@ -31,6 +31,8 @@ ParamGeneratorGUI::~ParamGeneratorGUI()
 void ParamGeneratorGUI::collectInfo( MLXMLParamSubTree& param )
 {
 	param.paraminfo[MLXMLElNames::paramType] = ptype->currentText();
+	if (ptype->currentText() == MLXMLElNames::enumType)
+		param.paraminfo[MLXMLElNames::paramType] += " " + enumnames->text();
 	param.paraminfo[MLXMLElNames::paramName] = pname->text();
 	param.paraminfo[MLXMLElNames::paramDefExpr] = pdefault->text();
 	QString isimp("false");
@@ -47,8 +49,10 @@ void ParamGeneratorGUI::collectInfo( MLXMLParamSubTree& param )
 void ParamGeneratorGUI::initConnections()
 {
 	connect(ptype,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateGUIType(const QString&)));
+	connect(ptype,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateOptionalWidgetVisibility(const QString&)));
 	connect(pguitype,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateGUIWidgetInterface(const QString&)));
 	connect(pname,SIGNAL(textChanged(const QString&)),this,SLOT(updateItemLabel(const QString&)));
+	connect(pname,SIGNAL(textChanged(const QString&)),this,SLOT(updateGUILabel(const QString&)));
 	connect(pname,SIGNAL(editingFinished()),this,SLOT(validateName()));
 }
 
@@ -60,6 +64,11 @@ void ParamGeneratorGUI::initUI()
 	QStringList ptypelist;
 	MLXMLElNames::initMLXMLTypeList(ptypelist);
 	ptype->addItems(ptypelist);
+	
+	enumlab = new QLabel("Enum Values",this);
+	enumnames = new QLineEdit("{ enumval_0 : 0 | enumval_1 : 1}",this);
+	enumnames->setToolTip("Enum Values Format: { enumval_0 : n0 | enumval_1 : n1 | ... | enumval_n : nn }");
+	updateOptionalWidgetVisibility(ptype->currentText());
 
 	QLabel* nlab = new QLabel("Name",this);
 	pname = new QLineEdit(this);
@@ -73,57 +82,44 @@ void ParamGeneratorGUI::initUI()
 	phel = new QPlainTextEdit(this);
 	laybox->addWidget(phel);
 	gpbox->setLayout(laybox);
+	
+	QGroupBox* gpguibox = new QGroupBox("GUI",this);
+	QGridLayout* layguibox = new QGridLayout();
+	QLabel* wlab = new QLabel("Widget Type",this);
+	pguitype = new QComboBox(this);
+	pguitype->view()->setAlternatingRowColors(true);
+	QLabel* llab = new QLabel("Label",this);
+	pguilab = new QLineEdit(this);
+
+	pguiminlab = new QLabel("Min",this);
+	pguimin = new QLineEdit(this);
+	pguimaxlab = new QLabel("Max",this);
+	pguimax = new QLineEdit(this);
+	layguibox->addWidget(wlab,0,0);
+	layguibox->addWidget(pguitype,0,1);
+	layguibox->addWidget(llab,1,0);
+	layguibox->addWidget(pguilab,1,1);
+	layguibox->addWidget(pguiminlab,2,0);
+	layguibox->addWidget(pguimin,2,1);
+	layguibox->addWidget(pguimaxlab,3,0);
+	layguibox->addWidget(pguimax,3,1);
+	gpguibox->setLayout(layguibox);
+
 	/*QLabel* glab = new QLabel("GUI",this);*/
-	pguitree = new QTreeWidget(this);
-	pguitree->header()->hide();
 	QGridLayout* layout = new QGridLayout(this);
 	layout->addWidget(tlab,0,0);
 	layout->addWidget(ptype,0,1);
-	layout->addWidget(nlab,1,0);
-	layout->addWidget(pname,1,1);
-	layout->addWidget(dlab,2,0);
-	layout->addWidget(pdefault,2,1);
-	layout->addWidget(pisimp,3,0);
+	layout->addWidget(enumlab,1,0);
+	layout->addWidget(enumnames,1,1);
+	layout->addWidget(nlab,2,0);
+	layout->addWidget(pname,2,1);
+	layout->addWidget(dlab,3,0);
+	layout->addWidget(pdefault,3,1);
+	layout->addWidget(pisimp,4,0);
 	//layout->addWidget(hlab,4,0);
-	layout->addWidget(gpbox,4,0,1,2);
-	layout->addWidget(pguitree,5,0,1,2);
-	QTreeWidgetItem* item = new QTreeWidgetItem();
-	item->setText(0,"GUI");
-	pguitree->setColumnCount(2);
-	
-	QTreeWidgetItem* ptChildItem = new QTreeWidgetItem();
-	item->addChild(ptChildItem);	
-	QLabel* wlab = new QLabel("Widget",this);
-	pguitree->setItemWidget(ptChildItem,0,wlab);
-	pguitype = new QComboBox(this);
-	pguitype->view()->setAlternatingRowColors(true);
-	pguitree->setItemWidget(ptChildItem,1,pguitype);
-
-	QTreeWidgetItem* childItem = new QTreeWidgetItem();
-	item->addChild(childItem);	
-	QLabel* llab = new QLabel("Label",this);
-	pguitree->setItemWidget(childItem,0,llab);
-	pguilab = new QLineEdit(this);
-	pguitree->setItemWidget(childItem,1,pguilab);
-
-	pguiminitem = new QTreeWidgetItem();
-	item->addChild(pguiminitem);
-	pguiminlab = new QLabel("Min",this);
-	pguitree->setItemWidget(pguiminitem,0,pguiminlab);
-	pguimin = new QLineEdit(this);
-	pguitree->setItemWidget(pguiminitem,1,pguimin);
-
-	pguimaxitem = new QTreeWidgetItem();
-	item->addChild(pguimaxitem);
-	pguimaxlab = new QLabel("Max",this);
-	pguitree->setItemWidget(pguimaxitem,0,pguimaxlab);
-	pguimax = new QLineEdit(this);
-	pguitree->setItemWidget(pguimaxitem,1,pguimax);
-	
-	pguitree->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-	pguitree->insertTopLevelItem(0,item);
+	layout->addWidget(gpbox,5,0,1,2);
+	layout->addWidget(gpguibox,6,0,1,2);
 	updateGUIType(ptype->currentText());
-	//updateGUIWidgetInterface(pguitype->currentText());
 }
 
 void ParamGeneratorGUI::updateGUIType( const QString& paramtype )
@@ -137,8 +133,10 @@ void ParamGeneratorGUI::updateGUIType( const QString& paramtype )
 void ParamGeneratorGUI::updateGUIWidgetInterface( const QString& guitype )
 {
 	bool show = ((guitype == MLXMLElNames::absPercTag) || (guitype == MLXMLElNames::sliderWidgetTag));
-	pguiminitem->setHidden(!show);
-	pguimaxitem->setHidden(!show);
+	pguiminlab->setVisible(show);
+	pguimin->setVisible(show);
+	pguimaxlab->setVisible(show);
+	pguimax->setVisible(show);
 }
 
 void ParamGeneratorGUI::setParamName( const QString& name )
@@ -161,7 +159,14 @@ void ParamGeneratorGUI::updateItemLabel( const QString& text)
 void ParamGeneratorGUI::importInfo( const MLXMLParamSubTree& tree )
 {
 	QString typ = tree.paraminfo[MLXMLElNames::paramType];
-	ptype->setCurrentIndex(ptype->findText(tree.paraminfo[MLXMLElNames::paramType]));
+	if (typ.contains(MLXMLElNames::enumType))
+	{
+		QString enumexp = typ;
+		enumexp.remove(MLXMLElNames::enumType);
+		enumnames->setText(enumexp.trimmed());
+		typ = MLXMLElNames::enumType;
+	}
+	ptype->setCurrentIndex(ptype->findText(typ));
 	pname->setText(tree.paraminfo[MLXMLElNames::paramName]);
 	pdefault->setText(tree.paraminfo[MLXMLElNames::paramDefExpr]);
 	phel->setPlainText(tree.paraminfo[MLXMLElNames::paramHelpTag]);
@@ -177,6 +182,18 @@ void ParamGeneratorGUI::importInfo( const MLXMLParamSubTree& tree )
 		pguimin->setText(tree.gui.guiinfo[MLXMLElNames::guiMinExpr]);
 		pguimax->setText(tree.gui.guiinfo[MLXMLElNames::guiMaxExpr]);
 	}
+}
+
+void ParamGeneratorGUI::updateOptionalWidgetVisibility( const QString& tname)
+{
+	bool b = (tname == MLXMLElNames::enumType);
+	enumlab->setVisible(b);
+	enumnames->setVisible(b);
+}
+
+void ParamGeneratorGUI::updateGUILabel( const QString& lab )
+{
+	pguilab->setText(lab);
 }
 
 FilterGeneratorGUI::FilterGeneratorGUI( QWidget* parent /*= NULL*/ )
@@ -891,6 +908,8 @@ void PluginGeneratorGUI::loadXMLPlugin()
 			MLXMLUtilityFunctions::loadMeshLabXML(tree,*plug);
 			importInfo(tree);
 		}
+		else
+			QMessageBox::warning(0,"MeshLab XML Plugin Import","File " + file + " has not a valid a MeshLab XML Plugin File Format's Syntax.\nError in line " + QString::number(msg.line()) + " column " + QString::number(msg.column()) + " : " + msg.statusMessage());
 		MLXMLPluginInfo::destroyXMLPluginInfo(plug);
 	}
 }

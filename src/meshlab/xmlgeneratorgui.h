@@ -35,6 +35,8 @@ public:
 
 private slots:
 	void updateGUIType(const QString& paramtype);
+	void updateGUILabel(const QString& lab);
+	void updateOptionalWidgetVisibility(const QString&);
 	void updateGUIWidgetInterface(const QString& guitype);
 	void validateName();
 	void updateItemLabel(const QString&);
@@ -52,15 +54,18 @@ private:
 	QLineEdit* pdefault;
 	QCheckBox* pisimp;
 	QPlainTextEdit* phel;
-	QTreeWidget* pguitree;
+	//QTreeWidget* pguitree;
 	QLineEdit* pguilab;
-	QTreeWidgetItem* pguiminitem;
-	QTreeWidgetItem* pguimaxitem;
+	//QTreeWidgetItem* pguiminitem;
+	//QTreeWidgetItem* pguimaxitem;
 	QLabel* pguiminlab;
 	QLabel* pguimaxlab;
 	QLineEdit* pguimin;
 	QLineEdit* pguimax;
 	QComboBox* pguitype;
+	QLabel* enumlab;
+	QLineEdit* enumnames;
+
 	
 	QString currentname;
 signals:
