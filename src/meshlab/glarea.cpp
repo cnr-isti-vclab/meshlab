@@ -1161,8 +1161,10 @@ void GLArea::sendViewerShot(QString name)
 }
 void GLArea::sendRasterShot(QString name)
 {
-  Shotf curShot= this->md()->rm()->shot;
-  emit transmitShot(name, curShot);
+	Shotf curShot = vcg::Shotf();
+	if (this->md()->rm() != NULL)
+		curShot = this->md()->rm()->shot;
+	emit transmitShot(name, curShot);
 }
 
 void GLArea::sendCameraPos( QString name )
