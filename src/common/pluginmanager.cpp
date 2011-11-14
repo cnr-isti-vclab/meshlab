@@ -27,8 +27,8 @@ PluginManager::~PluginManager()
 		delete meshDecoratePlug[ii];
 	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
 		delete meshEditInterfacePlug[ii];
-	for(QMap<QString,MeshLabXMLFilterContainer>::iterator it = stringXMLFilterMap.begin();it != stringXMLFilterMap.end();++it)
-		MLXMLPluginInfo::destroyXMLPluginInfo(it.value().xmlInfo);
+	for(int ii = 0;ii < xmlpluginfo.size();++ii)
+		MLXMLPluginInfo::destroyXMLPluginInfo(xmlpluginfo[ii]);
 }
 
 
@@ -85,9 +85,12 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				else
 				{
 					XMLMessageHandler xmlErr;
-					fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-					if (fc.xmlInfo != NULL)
+					MLXMLPluginInfo* pluginfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
+					//fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
+					if (pluginfo != NULL)
 					{
+						xmlpluginfo << pluginfo;
+						fc.xmlInfo = pluginfo;
 						QStringList fn = fc.xmlInfo->filterNames();
 						foreach(QString filtName,fn)
 						{

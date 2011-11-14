@@ -75,6 +75,8 @@ public:
 	QVector<MeshRenderInterface*> meshRenderPlug;
 	QVector<MeshDecorateInterface*> meshDecoratePlug;
 	QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
+	//only useful for an easy destruction of the MLXMLPluginInfos
+	QVector<MLXMLPluginInfo*> xmlpluginfo;
 	QVector<QAction *> editActionList;
 	QVector<QAction *> decoratorActionList;
 
