@@ -821,11 +821,11 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 	saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
 #endif
 	QLabel* namelab = new QLabel(tr("JScript Plugin Name"),saveDiag);
-	QLineEdit* jsline= new QLineEdit(saveDiag);
+	QLineEdit* jsline= new QLineEdit(plugname,saveDiag);
 	QLabel* authlab = new QLabel(tr("Author Name"),saveDiag);
-	QLineEdit* authline= new QLineEdit(saveDiag);
+	QLineEdit* authline= new QLineEdit(author,saveDiag);
 	QLabel* maillab = new QLabel(tr("Author e-Mail"),saveDiag);
-	QLineEdit* mailline= new QLineEdit(saveDiag);
+	QLineEdit* mailline= new QLineEdit(mail,saveDiag);
 	QCheckBox* cpp = new QCheckBox(tr("Generate *.cpp,*.h"),saveDiag);
 	cpp->setChecked(false);
 
@@ -840,6 +840,9 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
 	saveDiag->exec();
+	plugname = jsline->text();
+	author = authline->text();
+	mail = mailline->text();
 	QStringList files = saveDiag->selectedFiles();
 	if (files.size() != 1)
 		return;
@@ -874,7 +877,7 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 		QString hcode = MLXMLUtilityFunctions::generateH(finfo.baseName(),tree);	
 		QFileInfo hinfo(finfo.absolutePath() + "/" +finfo.baseName() + ".h");
 		QString holdfilename = UsefulGUIFunctions::generateBackupName(hinfo);
-		dir.rename(cppinfo.fileName(),holdfilename);
+		dir.rename(hinfo.fileName(),holdfilename);
 		QFile hfile(hinfo.absoluteFilePath());
 		if (!hfile.open(QIODevice::WriteOnly | QIODevice::Text))
 			return;

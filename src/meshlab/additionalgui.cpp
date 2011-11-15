@@ -225,7 +225,9 @@ QString UsefulGUIFunctions::generateBackupName( const QFileInfo& finfo )
 {
 	QDir dir = finfo.absoluteDir();
 	QFileInfoList list = dir.entryInfoList(QDir::Files);
-	QRegExp oldexp(finfo.fileName() + "\\.old(\\d+)");
+	QString oldnm = finfo.fileName();
+	oldnm.replace('.',"\\.");
+	QRegExp oldexp(oldnm + "\\.old(\\d+)");
 	int max = 0;
 	for (int ii = 0;ii < list.size();++ii)
 	{
@@ -238,7 +240,7 @@ QString UsefulGUIFunctions::generateBackupName( const QFileInfo& finfo )
 				max = ver;
 		}
 	}
-	return QString(finfo.absolutePath() + "/" + finfo.completeBaseName() + ".old" + QString::number(max));
+	return QString(finfo.absolutePath() + "/" + finfo.fileName() + ".old" + QString::number(max + 1));
 }
 
 
@@ -259,7 +261,6 @@ ExpandButtonWidget::~ExpandButtonWidget()
 
 void ExpandButtonWidget::changeIcon()
 {
-
 	isExpanded = !isExpanded;
 	if (isExpanded)
 		exp->setPrimitiveElement(QStyle::PE_IndicatorArrowUp);
