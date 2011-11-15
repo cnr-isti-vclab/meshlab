@@ -253,6 +253,7 @@ Q_DECLARE_METATYPE(ShotSI*)
 QScriptValue ShotScriptInterfaceToScriptValue(QScriptEngine* eng,ShotSI* const& in);
 void ShotScriptInterfaceFromScriptValue(const QScriptValue& val,ShotSI*& out);
 QScriptValue ShotSI_ctor(QScriptContext* c,QScriptEngine* e);
+QScriptValue ShotSI_defctor(QScriptContext* c,QScriptEngine* e);
 
 
 

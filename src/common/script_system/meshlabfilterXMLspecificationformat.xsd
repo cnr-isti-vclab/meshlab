@@ -80,7 +80,7 @@
 	  <xs:pattern value='Color'/>
 	  <xs:pattern value='Mesh'/>
 	  <xs:pattern value='Shot'/>
-	  <xs:pattern value='Enum \{(\s*\S+\s*\:\s*\d+\s*(\|)?)+\}'/>
+	  <xs:pattern value='Enum \{(\s*\S+(\s*\S*)*\s*\:\s*\d+\s*(\|)?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
    </xs:attribute>

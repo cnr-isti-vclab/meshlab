@@ -802,6 +802,11 @@ QScriptValue ShotSI_ctor( QScriptContext* c,QScriptEngine* e )
 	return e->newQObject(shot, QScriptEngine::ScriptOwnership);
 }
 
+QScriptValue ShotSI_defctor( QScriptContext* c,QScriptEngine* e )
+{
+	ShotSI* shot = new ShotSI();
+	return e->newQObject(shot, QScriptEngine::ScriptOwnership);
+}
 
 Env::Env()
 {
@@ -834,6 +839,8 @@ Env::Env()
 	//qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
 	QScriptValue shot_ctor = newFunction(ShotSI_ctor);
 	globalObject().setProperty("Shot", shot_ctor);
+	QScriptValue shot_defctor = newFunction(ShotSI_defctor);
+	globalObject().setProperty("ShotDefCtor", shot_defctor);
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )

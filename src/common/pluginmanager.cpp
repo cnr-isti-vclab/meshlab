@@ -22,7 +22,7 @@ PluginManager::~PluginManager()
 	for(int ii = 0;ii < meshFilterPlug.size();++ii)
 		delete meshFilterPlug[ii];
 	for(int ii = 0;ii < meshRenderPlug.size();++ii)
-		delete meshRenderPlug[ii];
+		delete meshRenderPlug[ii]; 
 	for(int ii = 0;ii < meshDecoratePlug.size();++ii)
 		delete meshDecoratePlug[ii];
 	for(int ii = 0;ii < meshEditInterfacePlug.size();++ii)
