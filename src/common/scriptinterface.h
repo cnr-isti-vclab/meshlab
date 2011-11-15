@@ -61,7 +61,7 @@ QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
 
 typedef vcg::Point3f VCGPoint3SI;
-typedef QVector<QVector<float>> Point3Vector;
+typedef QVector<QVector<float> > Point3Vector;
 
 
 class ScriptInterfaceUtilities
