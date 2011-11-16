@@ -810,7 +810,7 @@ QScriptValue ShotSI_defctor( QScriptContext* c,QScriptEngine* e )
 
 Env::Env()
 {
-	qScriptRegisterSequenceMetaType<QVector<float>>(this);
+	qScriptRegisterSequenceMetaType< QVector<float> >(this);
 	qScriptRegisterSequenceMetaType<Point3Vector>(this);
 	qScriptRegisterSequenceMetaType<QVector<VCGVertexSI*> >(this);
 	qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
