@@ -548,7 +548,7 @@ QString MLXMLUtilityFunctions::generateH(const QString& basefilename,const MLXML
 	result += "public:\n";
 	result += "\t" + classname + "(){}\n";
 	result += "\tbool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );\n";
-	result += "};";
+	result += "};\n";
 	result += "#endif\n";
 	return result;
 }
@@ -557,7 +557,6 @@ QString MLXMLUtilityFunctions::generateCPP(const QString& basefilename,const MLX
 {
 	QString result = MLXMLUtilityFunctions::generateMeshLabCodeFilePreamble();
 	result += "#include \"" + basefilename + ".h\n";
-	result += "#include <../../common/.h>\n";
 
 	QString classname = MLXMLUtilityFunctions::generateNameClassPlugin(tree.plugin); 
 	QString envname("env");
