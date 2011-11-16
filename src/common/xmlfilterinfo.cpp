@@ -541,12 +541,12 @@ QString MLXMLUtilityFunctions::generateH(const QString& basefilename,const MLXML
 
 	result += "#include <common/interfaces.h>\n\n";
 	QString classname = MLXMLUtilityFunctions::generateNameClassPlugin(tree.plugin);
-	result += "class " + classname + "	: public QObject, public MeshLabFilterInterface\n";
+	result += "class " + classname + "	: public MeshLabFilterInterface\n";
 	result += "{\n";
 	result += "\tQ_OBJECT\n";
 	result += "\tQ_INTERFACES(MeshLabFilterInterface)\n";
 	result += "public:\n";
-	result += "\t" + classname + "(){}\n";
+	result += "\t" + classname + "(): MeshLabFilterInterface() {}\n";
 	result += "\tbool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );\n";
 	result += "};\n";
 	result += "#endif\n";
@@ -555,8 +555,8 @@ QString MLXMLUtilityFunctions::generateH(const QString& basefilename,const MLXML
 
 QString MLXMLUtilityFunctions::generateCPP(const QString& basefilename,const MLXMLTree& tree )
 {
-	QString result = MLXMLUtilityFunctions::generateMeshLabCodeFilePreamble();
-	result += "#include \"" + basefilename + ".h\n";
+	QString result = MLXMLUtilityFunctions::generateMeshLabCodeFilePreamble() + "\n";
+	result += "#include \"" + basefilename + ".h\"\n";
 
 	QString classname = MLXMLUtilityFunctions::generateNameClassPlugin(tree.plugin); 
 	QString envname("env");
@@ -571,9 +571,12 @@ QString MLXMLUtilityFunctions::generateCPP(const QString& basefilename,const MLX
 		QList<MLXMLParamSubTree> paramlist = tree.plugin.filters[ii].params;
 		for(int jj = 0;jj < paramlist.size();++jj)
 			result += "\t\t" + MLXMLUtilityFunctions::generateEvalParam(paramlist[jj],envname) + "\n";
+		result += "\t\treturn true;";
 		result += "\t}\n";
 	}
+	result += "\treturn false;\n";
 	result += "}\n";
+	result += "Q_EXPORT_PLUGIN(" + classname + ")\n";
 	return result;
 }
 
@@ -584,10 +587,10 @@ QString MLXMLUtilityFunctions::generateMeshLabCodeFilePreamble()
 	result += "* MeshLab                                                           o o     *\n";
 	result += "* A versatile mesh processing toolbox                             o     o   *\n";
 	result += "*                                                                _   O  _   *\n";
-	result += "* Copyright(C) 2005                                                \/)\/    *\n";
-	result += "* Visual Computing Lab                                            /\/|      *\n";
+	result += "* Copyright(C) 2005                                                \\/)\\/    *\n";
+	result += "* Visual Computing Lab                                            /\\/|      *\n";
 	result += "* ISTI - Italian National Research Council                           |      *\n";
-	result += "*                                                                    \      *\n";
+	result += "*                                                                    \\      *\n";
 	result += "* All rights reserved.                                                      *\n";
 	result += "*                                                                           *\n";
 	result += "* This program is free software; you can redistribute it and/or modify      *\n";   
