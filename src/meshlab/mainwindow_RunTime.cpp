@@ -1206,6 +1206,7 @@ void MainWindow::showInterruptButton(const bool& visible)
 		ar->showInterruptButton(visible);
 		interruptbut->setVisible(ar->showInterruptButton());
 	}
+	repaint();
 }
 
 void MainWindow::scriptCodeExecuted( const QScriptValue& val,const QString& output )
