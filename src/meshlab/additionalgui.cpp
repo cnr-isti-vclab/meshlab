@@ -148,6 +148,7 @@ void CheckBoxList::setDefaultValue( const QString& defaultValue )
 void CheckBoxList::setCurrentValue( const QStringList& st )
 {
 	sel = st;
+	sel.removeAll(defaultval);
 }
 
 QPixmap UsefulGUIFunctions::pixmapGeneratorFromQtPrimitiveElement(const QSize& pixmapsize,const QStyle::PrimitiveElement primitive, QStyle *style,const QStyleOption& opt)
@@ -243,6 +244,10 @@ QString UsefulGUIFunctions::generateBackupName( const QFileInfo& finfo )
 	return QString(finfo.absolutePath() + "/" + finfo.fileName() + ".old" + QString::number(max + 1));
 }
 
+QString UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML( const QString& text )
+{
+	return "<![CDATA[" + text + "]]>";
+}
 
 ExpandButtonWidget::ExpandButtonWidget( QWidget* parent )
 :QWidget(parent),isExpanded(false)

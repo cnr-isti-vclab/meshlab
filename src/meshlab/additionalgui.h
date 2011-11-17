@@ -103,6 +103,8 @@ public:
 	static QString changeNameIfAlreadyInList(const QString& name,const QStringList& allnames);
 
 	static QString generateBackupName(const QFileInfo& finfo);
+	//put <![CDATA[text]]> around text in order you can put html tag inside xml document without having problems with validation.
+	static QString avoidProblemsWithHTMLTagInsideXML( const QString& text );
 };
 
 #endif // CHECKBOXLIST_H

@@ -39,7 +39,7 @@ void ParamGeneratorGUI::collectInfo( MLXMLParamSubTree& param )
 	if (pisimp->isChecked())
 		isimp = "true";
 	param.paraminfo[MLXMLElNames::paramIsImportant] = isimp;
-	param.paraminfo[MLXMLElNames::paramHelpTag] = phel->toPlainText();
+	param.paraminfo[MLXMLElNames::paramHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(phel->toPlainText());
 	param.gui.guiinfo[MLXMLElNames::guiType] = pguitype->currentText();
 	param.gui.guiinfo[MLXMLElNames::guiLabel] = pguilab->text();
 	param.gui.guiinfo[MLXMLElNames::guiMinExpr] = pguimin->text();
@@ -225,7 +225,7 @@ void FilterGeneratorGUI::collectInfo( MLXMLFilterSubTree& filter )
 	filter.filterinfo[MLXMLElNames::filterPreCond] = ui->precond->selectedItemsString();
 	filter.filterinfo[MLXMLElNames::filterPostCond] = ui->postcond->selectedItemsString();
 	filter.filterinfo[MLXMLElNames::filterClass] = ui->category->selectedItemsString();
-	filter.filterinfo[MLXMLElNames::filterHelpTag] = ui->helpedit->toPlainText();
+	filter.filterinfo[MLXMLElNames::filterHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(ui->helpedit->toPlainText());
 	QString isint("false");
 	if (ui->isinterr->isChecked())
 		isint = "true";
