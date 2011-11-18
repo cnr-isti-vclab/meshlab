@@ -196,6 +196,6 @@ private:
 	MeshDocument* doc;
 	PluginManager& PM;
 signals:
-	void scriptCodeExecuted(const QScriptValue& val,const QString&);
+	void scriptCodeExecuted(const QScriptValue& val,const int time,const QString&);
 };
 #endif

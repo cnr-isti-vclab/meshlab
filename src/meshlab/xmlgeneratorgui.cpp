@@ -734,8 +734,11 @@ void PluginGeneratorGUI::executeCurrentCode()
 		FilterGeneratorTab* ftab = tab(tabs->currentIndex());
 		if (ftab != NULL)
 		{
+			QTime t;
+			t.start();
 			QScriptValue result = env.evaluate(code + ftab->getCode());
-			emit scriptCodeExecuted(result,env.output());
+			int time = t.elapsed();
+			emit scriptCodeExecuted(result,time,env.output());
 		}
 		else
 			throw MeshLabException("System Error: A FilterGeneratorTab object has been expected.");
