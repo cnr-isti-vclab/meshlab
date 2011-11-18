@@ -41,5 +41,6 @@ void main()
 	vpos = vec3(gl_ModelViewMatrix * gl_Vertex);
 	
 	gl_Position = ftransform();
-
+	gl_FrontColor = gl_Color;
+	gl_BackColor = gl_Color;	
 } 
