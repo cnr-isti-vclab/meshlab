@@ -32,4 +32,7 @@ void main() {
   depth  = log(-(gl_ModelViewMatrix*gl_Vertex).z);
 
   gl_Position = ftransform();
+  
+  gl_FrontColor = gl_Color;
+  gl_BackColor = gl_Color;  
 }

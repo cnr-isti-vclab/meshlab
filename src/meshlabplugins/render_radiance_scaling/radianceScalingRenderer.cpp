@@ -47,6 +47,7 @@ RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
     _depthTex(NULL), 
     _gradTex(NULL), 
     _normTex(NULL),
+    _colorTex(NULL),
     _convexLS(NULL),
     _concavLS(NULL) {
 
@@ -97,7 +98,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, RenderMo
 
   // first pass: buffers 
   _fbo->bind();
-  glDrawBuffers(2,FramebufferObject::buffers(0));
+  glDrawBuffers(3,FramebufferObject::buffers(0));
   glClearColor(0.0,0.0,0.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   _buffPass->enable();
@@ -212,8 +213,9 @@ void RadianceScalingRendererPlugin::initShaders(bool reload) {
   _rsPass->setUniform1i("twoLS",_sDialog->getTwoLS());
   _rsPass->setUniformTexture("grad",0,_gradTex->format().target(),_gradTex->id());
   _rsPass->setUniformTexture("norm",1,_normTex->format().target(),_normTex->id());
-  _rsPass->setUniformTexture("convexLS",2,_convexLS->format().target(),_convexLS->id());
-  _rsPass->setUniformTexture("concavLS",3,_concavLS->format().target(),_concavLS->id());
+  _rsPass->setUniformTexture("colormap",2,_colorTex->format().target(),_colorTex->id());
+  _rsPass->setUniformTexture("convexLS",3,_convexLS->format().target(),_convexLS->id());
+  _rsPass->setUniformTexture("concavLS",4,_concavLS->format().target(),_concavLS->id());
   _rsPass->disable();
   GL_TEST_ERR
 }
@@ -231,6 +233,7 @@ void RadianceScalingRendererPlugin::initFBOs() {
     _depthTex = new FloatTexture2D(TextureFormat(GL_TEXTURE_2D,_w,_h,GL_DEPTH_COMPONENT24,GL_DEPTH_COMPONENT,GL_FLOAT),TextureParams(filter,filter));
     _gradTex  = new FloatTexture2D(TextureFormat(GL_TEXTURE_2D,_w,_h,format,GL_RGBA,GL_FLOAT),TextureParams(filter,filter));
     _normTex  = new FloatTexture2D(_gradTex->format(),_gradTex->params());
+    _colorTex  = new UbyteTexture2D(TextureFormat(GL_TEXTURE_2D,_w,_h,GL_RGBA8,GL_RGBA,GL_UNSIGNED_BYTE),TextureParams(GL_LINEAR,GL_LINEAR));//new FloatTexture2D(_gradTex->format(),_gradTex->params());
   }
 
   _fbo->bind();
@@ -241,6 +244,8 @@ void RadianceScalingRendererPlugin::initFBOs() {
   _fbo->attachTexture(_gradTex->format().target(),_gradTex->id(),GL_COLOR_ATTACHMENT0_EXT);
   _normTex->bind();
   _fbo->attachTexture(_normTex->format().target(),_normTex->id(),GL_COLOR_ATTACHMENT1_EXT);
+  _colorTex->bind();
+  _fbo->attachTexture(_colorTex->format().target(),_colorTex->id(),GL_COLOR_ATTACHMENT2_EXT);
   _fbo->isValid();
 
   FramebufferObject::unbind();
@@ -262,11 +267,13 @@ void RadianceScalingRendererPlugin::cleanFBOs() {
     delete _depthTex;
     delete _gradTex;
     delete _normTex;
+    delete _colorTex;
     
     _fbo      = NULL;
     _depthTex = NULL;
     _gradTex  = NULL;
     _normTex  = NULL;
+    _colorTex = NULL;
   }
 }
 

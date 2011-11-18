@@ -75,6 +75,7 @@ class RadianceScalingRendererPlugin : public QObject, public MeshRenderInterface
     FloatTexture2D    *_depthTex;
     FloatTexture2D    *_gradTex;
     FloatTexture2D    *_normTex;
+    UbyteTexture2D    *_colorTex;
     UbyteTexture2D    *_convexLS;
     UbyteTexture2D    *_concavLS;
     int                _w,_h;

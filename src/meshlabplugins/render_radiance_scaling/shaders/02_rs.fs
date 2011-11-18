@@ -23,8 +23,9 @@
 #version 120
 #extension GL_EXT_gpu_shader4 : enable
 
-uniform sampler2D grad; // (gx,gy,depth,1.0)
-uniform sampler2D norm; // (nx,ny,nz,depth)
+uniform sampler2D grad;  // (gx,gy,depth,1.0)
+uniform sampler2D norm;  // (nx,ny,nz,depth)
+uniform sampler2D colormap; // (r,g,b,1.0)
 uniform float     sw;
 uniform float     sh;
 uniform float     enhancement;
@@ -203,31 +204,38 @@ void main(void) {
   vec3  h = hessian();
   float c = curvature(w,h,enhancement);
   vec3  l = normalize(gl_LightSource[0].position.xyz);
-  vec4  m = gl_FrontMaterial.diffuse;
+  //vec4  m = vec4(0.5,0.1,0.7,1.0);
+  //vec4  m = vec4(n,1.0);
+  vec4  m = vec4(texture2D(colormap,gl_TexCoord[0].st).xyz,1.0);
+  //vec4  m = gl_FrontMaterial.diffuse;
 
   //Initialize the depth of the fragment with the just saved depth
   gl_FragDepth = texture2D(norm,gl_TexCoord[0].st).w;
 
-  if(display==0) {
+  if(display==0) 
+  {
     // lambertian lighting
     float cosineTerm = max(dot(n,l),0.0);
     float warpedTerm = enabled ? cosineTerm*warp(cosineTerm,c) : cosineTerm;
     gl_FragColor = m*warpedTerm;
-  } else if(display==1) {
+  } 
+  else if(display==1) 
+  {
     // using lit spheres 
     if(twoLS) {
       gl_FragColor = twoLitSphere(n,w,h,c);
     } else {
       gl_FragColor = oneLitSphere(n,c);
     }
-
-  } else if(display==2) {
+  } 
+  else if(display==2)
+  {
     // colored descriptor
     gl_FragColor = coloredDescriptor(c,w);
-
-  } else if(display==3) {
+  } 
+  else if(display==3) 
+  {
     // grey descriptor
     gl_FragColor = greyDescriptor(c,w);
-  
   }
 }
