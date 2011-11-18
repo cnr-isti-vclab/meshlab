@@ -605,8 +605,11 @@ public:
 	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
 	static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
 	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) =0;
+	const QString &errorMsg() {return this->errorMessage;}
 protected:
 	bool hasInterruptRequested(const bool& redraw);
+	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
+	QString errorMessage;
 
 signals:
 	void filterUpdateRequest(const bool& redraw,bool* interrupt);
