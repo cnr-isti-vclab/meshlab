@@ -1209,7 +1209,7 @@ void MainWindow::showInterruptButton(const bool& visible)
 	repaint();
 }
 
-void MainWindow::scriptCodeExecuted( const QScriptValue& val,const QString& output )
+void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,const QString& output )
 {
 	if (val.isError())
 	{
@@ -1218,7 +1218,7 @@ void MainWindow::scriptCodeExecuted( const QScriptValue& val,const QString& outp
 	}
 	else
 	{
-		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Output:\n%s",qPrintable(output));
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Code executed in %d millisecs.\nOutput:\n%s",time,qPrintable(output));
 		GLA()->update();
 	}
 }

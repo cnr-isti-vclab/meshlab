@@ -64,7 +64,7 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
-	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const QString&)));
+	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
 
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
@@ -371,9 +371,9 @@ void MainWindow::createActions()
 	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
 
 
-	/*showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
-	showFilterEditAct->setEnabled(true);
-	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));*/
+	//showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
+	//showFilterEditAct->setEnabled(true);
+	//connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
