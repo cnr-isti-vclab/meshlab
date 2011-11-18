@@ -68,7 +68,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 					iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
 				}
 			}
-
 			MeshLabFilterInterface* iXMLfilter = qobject_cast<MeshLabFilterInterface *>(plugin);
 			if (iXMLfilter)
 			{
@@ -78,7 +77,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 				QString withoutext = fileName.left(res); 
 				QString xmlFile = getPluginDirPath() + "/" + withoutext + QObject::tr(".xml");
 				qDebug("Loading XMLFile: %s",qPrintable(xmlFile));
-				if(!QFileInfo(xmlFile).exists())
+				QFileInfo finfo(xmlFile);
+				if(!finfo.exists())
 				{
 					qDebug("Error XMLFile: %s does not exist",qPrintable(xmlFile));
 				}
@@ -176,15 +176,12 @@ void PluginManager::loadPluginsCode()
 		if (pname != "")
 		{
 			scriptplugcode += "Plugins." + pname + " = { };\n";
-			foreach(QString filterName,mi.xmlInfo->filterNames())
+			QString filterFunction = mi.xmlInfo->filterAttribute(mi.act->text(),MLXMLElNames::filterScriptFunctName);
+			if (filterFunction != "")
 			{
-				QString filterFunction = mi.xmlInfo->filterAttribute(filterName,MLXMLElNames::filterScriptFunctName);
-				if (filterFunction != "")
-				{
 
-					QString gencode = gen.funCodeGenerator(filterName,*mi.xmlInfo);
-					scriptplugcode += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
-				}
+				QString gencode = gen.funCodeGenerator(mi.act->text(),*mi.xmlInfo);
+				scriptplugcode += "Plugins." + pname + "." + filterFunction + " = " + gencode + "\n";
 			}
 		}
 	}

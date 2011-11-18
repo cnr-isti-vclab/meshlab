@@ -16,7 +16,7 @@ QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 	return names;
 }
 
-QString ScriptAdapterGenerator::parNames( const QString& filterName,const MLXMLPluginInfo& xmlInfo ) const
+QString ScriptAdapterGenerator::parNames( const QString& filterName,MLXMLPluginInfo& xmlInfo ) const
 {
 	QString names;
 	//the order is important !!! 
@@ -56,7 +56,7 @@ QString ScriptAdapterGenerator::funCodeGenerator(const QString&  filtername,cons
 	return code;
 }
 
-QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,const MLXMLPluginInfo& xmlInfo ) const
+QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,MLXMLPluginInfo& xmlInfo ) const
 {
 	QString code;
 	QString names = parNames(filterName,xmlInfo);

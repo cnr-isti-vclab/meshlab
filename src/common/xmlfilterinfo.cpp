@@ -1,9 +1,5 @@
 #include <QFile>
 #include <QResource>
-#include <QtXmlPatterns/QXmlSchema>
-#include <QtXmlPatterns/QXmlSchemaValidator>
-#include <QtXmlPatterns/QXmlQuery>
-#include <QUrl>
 #include "xmlfilterinfo.h"
 #include "mlexception.h"
 #include <assert.h>
@@ -68,7 +64,7 @@ QString MLXMLPluginInfo::guiTypeSwitchQueryText(const QString& var)
 	return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + caseSLIDER + " " + caseENUM + " " + caseMESH + " " + caseSHOT + " " + errorMsg;
 }
 
-QStringList MLXMLPluginInfo::filterNames() const
+QStringList MLXMLPluginInfo::filterNames()
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER/<p>{data(@name)}</p>/string()";
 	QString namesQuery = docMFIPluginFilter(fileName) + "/<p>"+ attrVal(MLXMLElNames::filterName)+"</p>/string()";
@@ -85,7 +81,7 @@ QStringList MLXMLPluginInfo::filterNames() const
   return QStringList();
 }
 
-QString MLXMLPluginInfo::filterHelp( const QString& filterName) const
+QString MLXMLPluginInfo::filterHelp( const QString& filterName)
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
 	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/" + MLXMLElNames::filterHelpTag + "/string()";
@@ -104,7 +100,7 @@ QString MLXMLPluginInfo::filterHelp( const QString& filterName) const
   return QString();
 }
 
-QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString& filterElement) const
+QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString& filterElement)
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
 	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/" + filterElement + "/string()";
@@ -124,7 +120,7 @@ QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString&
 }
 
 
-QString MLXMLPluginInfo::filterAttribute( const QString& filterName,const QString& attribute) const
+QString MLXMLPluginInfo::filterAttribute( const QString& filterName,const QString& attribute)
 {	
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/@" + attribute + "/string()";
 	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/@" + attribute + "/string()";
@@ -143,10 +139,9 @@ QString MLXMLPluginInfo::filterAttribute( const QString& filterName,const QStrin
   return QString();
 }
 
-QStringList MLXMLPluginInfo::query( const QString& qry) const
+QStringList MLXMLPluginInfo::query( const QString& qry)
 {
 	XMLMessageHandler errQuery; 
-	QXmlQuery xmlq;
 	xmlq.setQuery(qry);
 	QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
 	xmlq.setMessageHandler(&errQuery);
@@ -167,7 +162,7 @@ QStringList MLXMLPluginInfo::query( const QString& qry) const
 }
 
 
-MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParametersExtendedInfo( const QString& filterName) const
+MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParametersExtendedInfo( const QString& filterName)
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM/<p>{data(@name)}</p>/string()";
 	//QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>{data(@" + MLXMLElNames::paramName + ")}</p>/string()";
@@ -194,7 +189,7 @@ MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParametersExtendedInfo( const
   return MLXMLPluginInfo::XMLMapList();
 }
 
-MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParameters( const QString& filterName) const
+MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParameters( const QString& filterName)
 {
   QString namesQuery = docMFIPluginFilterNameParam(fileName,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + externalSep() + attrNameAttrVal(MLXMLElNames::paramName) + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr) + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant) + "</p>/string()";
   QStringList res = query(namesQuery);
@@ -226,7 +221,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::mapFromString(const QString& st,const Q
 	return attrValue;
 }
 
-MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filterName,const QString& parameterName) const
+MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filterName,const QString& parameterName)
 { 
 	QString var("$gui");
 	//QString totQuery("for " + var + " in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + parameterName + "\"]/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
@@ -252,7 +247,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filt
   return MLXMLPluginInfo::XMLMap();
 }
 
-QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QString& paramName ) const
+QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QString& paramName )
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
 	QString namesQuery = docMFIPluginFilterNameParamName(filterName,fileName,paramName) + "/PARAM_HELP/string()";
@@ -271,7 +266,7 @@ QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QS
   return QString();
 }
 
-QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName ) const
+QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName )
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
 	QString namesQuery = docMFIPluginFilterNameParamName(fileName,filterName,paramName) + "/" + elemName + "/string()";
@@ -290,7 +285,7 @@ QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const
 	return QString();
 }
 
-MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName ) const
+MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName )
 {
 	//QString namesQuery = "for $x in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name=\"" + filterName + "\"]/PARAM[@name=\"" + paramName + "\"] return <p>type={data($x/@type)}|name={data($x/@name)}|defaultExpression={data($x/@defaultExpression)}|help={$x/PARAM_HELP}</p>/string()";
 	QString namesQuery = "for $x in " + docMFIPluginFilterNameParamName(fileName,filterName,paramName) + " return <p>" + attrNameAttrVal(MLXMLElNames::paramType,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramName,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr,"$x/") + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant,"$x/") + externalSep() + MLXMLElNames::paramHelpTag + "={$x/" + MLXMLElNames::paramHelpTag + "}</p>/string()";
@@ -351,7 +346,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QStr
 //	}
 //}
 
-QString MLXMLPluginInfo::filterParameterAttribute( const QString& filterName,const QString& paramName,const QString& attribute ) const
+QString MLXMLPluginInfo::filterParameterAttribute( const QString& filterName,const QString& paramName,const QString& attribute )
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/@" + attribute + "/string()";
 	QString namesQuery = docMFIPluginFilterNameParamName(fileName,filterName,paramName) + "/@" + attribute + "/string()";
@@ -370,7 +365,7 @@ QString MLXMLPluginInfo::filterParameterAttribute( const QString& filterName,con
   return QString();
 }
 
-QString MLXMLPluginInfo::interfaceAttribute( const QString& attribute ) const
+QString MLXMLPluginInfo::interfaceAttribute( const QString& attribute )
 {
 	QString namesQuery = docMFI(fileName) + "/<p>" +attrVal(attribute)+"</p>/string()";
 	try
@@ -390,7 +385,7 @@ QString MLXMLPluginInfo::interfaceAttribute( const QString& attribute ) const
 }
 
 
-QString MLXMLPluginInfo::pluginAttribute(const QString& attribute ) const
+QString MLXMLPluginInfo::pluginAttribute(const QString& attribute )
 {
 	QString namesQuery = docMFIPlugin(fileName) + "/<p>" +attrVal(attribute)+"</p>/string()";
 	try
@@ -410,7 +405,7 @@ QString MLXMLPluginInfo::pluginAttribute(const QString& attribute ) const
 }
 
 
-QString MLXMLPluginInfo::pluginName() const
+QString MLXMLPluginInfo::pluginName()
 {
 	QString namesQuery = docMFIPlugin(fileName) + "/<p>" +attrVal(MLXMLElNames::pluginScriptName)+"</p>/string()";
 	try
@@ -432,6 +427,28 @@ QString MLXMLPluginInfo::pluginName() const
 void MLXMLPluginInfo::destroyXMLPluginInfo( MLXMLPluginInfo* plug )
 {
 	delete plug;
+}
+
+MLXMLPluginInfo::MLXMLPluginInfo( const QString& file ) 
+:fileName("inputDocument")
+{
+	QFile sourceDocument(file);
+	QString text;
+	if (sourceDocument.open(QIODevice::ReadOnly))
+	{
+		text = QString(sourceDocument.readAll());
+		sourceDocument.close();
+	}
+	else
+		throw MeshLabException("File " + file + " has not been opened.");
+	document.setData(text.toUtf8());
+	document.open(QIODevice::ReadOnly);
+	xmlq.bindVariable(fileName, &document);
+}
+
+MLXMLPluginInfo::~MLXMLPluginInfo()
+{
+	document.close();
 }
 
 
@@ -645,13 +662,13 @@ QString MLXMLUtilityFunctions::generateEvalParam( const MLXMLParamSubTree& param
 	return result;
 }
 
-void MLXMLUtilityFunctions::loadMeshLabXML(MLXMLTree& tree,const MLXMLPluginInfo& pinfo)
+void MLXMLUtilityFunctions::loadMeshLabXML(MLXMLTree& tree,MLXMLPluginInfo& pinfo)
 {
 	tree.interfaceinfo[MLXMLElNames::mfiVersion] = pinfo.interfaceAttribute(MLXMLElNames::mfiVersion);
 	loadXMLPlugin(tree.plugin,pinfo);
 }
 
-void MLXMLUtilityFunctions::loadXMLPlugin( MLXMLPluginSubTree& plugin,const MLXMLPluginInfo& pinfo )
+void MLXMLUtilityFunctions::loadXMLPlugin( MLXMLPluginSubTree& plugin,MLXMLPluginInfo& pinfo )
 {
 	QStringList tag;
 	MLXMLElNames::initMLXMLPluginAttributesTag(tag);
@@ -666,7 +683,7 @@ void MLXMLUtilityFunctions::loadXMLPlugin( MLXMLPluginSubTree& plugin,const MLXM
 	}
 }
 
-void MLXMLUtilityFunctions::loadXMLFilter( const QString& filterName,MLXMLFilterSubTree& filter,const MLXMLPluginInfo& pinfo )
+void MLXMLUtilityFunctions::loadXMLFilter( const QString& filterName,MLXMLFilterSubTree& filter,MLXMLPluginInfo& pinfo )
 {
 	QStringList tag;
 	MLXMLElNames::initMLXMLFilterAttributesTag(tag);
@@ -696,7 +713,7 @@ void MLXMLUtilityFunctions::loadXMLFilter( const QString& filterName,MLXMLFilter
 	}
 }
 
-void MLXMLUtilityFunctions::loadXMLParam(const QString& filtername,const QString& paramname,MLXMLParamSubTree& param,const MLXMLPluginInfo& pinfo )
+void MLXMLUtilityFunctions::loadXMLParam(const QString& filtername,const QString& paramname,MLXMLParamSubTree& param,MLXMLPluginInfo& pinfo )
 {
 	QStringList tag;
 	MLXMLElNames::initMLXMLParamAttributesTag(tag);
@@ -709,7 +726,7 @@ void MLXMLUtilityFunctions::loadXMLParam(const QString& filtername,const QString
 	loadXMLGUI(filtername,paramname,param.gui,pinfo);
 }
 
-void MLXMLUtilityFunctions::loadXMLGUI(const QString& filtername,const QString& paramname,MLXMLGUISubTree& gui,const MLXMLPluginInfo& pinfo )
+void MLXMLUtilityFunctions::loadXMLGUI(const QString& filtername,const QString& paramname,MLXMLGUISubTree& gui,MLXMLPluginInfo& pinfo )
 {
 	//XMLPluginInfo::   pinfo.filterParameterExtendedInfo(filtername,paramname)[MLXMLElNames::guiType],tag);
 	MLXMLPluginInfo::XMLMap map = pinfo.filterParameterExtendedInfo(filtername,paramname);

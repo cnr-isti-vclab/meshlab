@@ -3,7 +3,12 @@
 
 #include<QStringList>
 #include<QtXmlPatterns/QAbstractMessageHandler>
+#include <QtXmlPatterns/QXmlSchema>
+#include <QtXmlPatterns/QXmlSchemaValidator>
+#include <QtXmlPatterns/QXmlQuery>
+#include <QUrl>
 #include<QAction>
+#include<QBuffer>
 
 class XMLMessageHandler : public QAbstractMessageHandler
 {
@@ -142,8 +147,8 @@ namespace MLXMLElNames
 class MLXMLPluginInfo
 {
 private:
-	MLXMLPluginInfo(const QString& file)
-		:fileName(file){}
+	MLXMLPluginInfo(const QString& file);
+	~MLXMLPluginInfo();
 
 	static QString defaultGuiInfo(const QString& guiType,const QString& xmlvariable);
 	static QString floatGuiInfo(const QString& guiType,const QString& xmlvariable);
@@ -152,7 +157,7 @@ private:
 	inline static const QString externalSep() {return QString("^");}
 	inline static const QRegExp extSep() {return QRegExp("\\" + externalSep());}
 	inline static const QRegExp intSep() {return QRegExp("\\s*=\\s*");}
-	inline static QString doc(const QString& file) {return QString("doc(\"" + file + "\")");}
+	inline static QString doc(const QString& file) {return QString("doc($" + file + ")");}
 	inline static QString docMFI(const QString& file) {return doc(file) + "/" + MLXMLElNames::mfiTag;}
 	inline static QString docMFIPlugin(const QString& file) {return docMFI(file) + "/" + MLXMLElNames::pluginTag;}
 	inline static QString docMFIPluginFilter(const QString& file) {return docMFIPlugin(file) + "/" + MLXMLElNames::filterTag;}
@@ -164,6 +169,8 @@ private:
 	inline static QString attrVal(const QString& attr,const QString& var = QString("")) {return QString("{data(" + var + "@" + attr + ")}");}
 	inline static QString attrNameAttrVal(const QString& attr,const QString& var = QString("")) {return QString(attr + "=" + attrVal(attr,var));}
 	QString fileName;
+	QXmlQuery xmlq;
+	QBuffer document;
 public:
 
 	typedef QMap<QString,QString> XMLMap;
@@ -173,27 +180,27 @@ public:
 	static XMLMap mapFromString(const QString& st,const QRegExp& extsep = extSep(),const QRegExp& intsep = intSep());
 	static XMLMapList mapListFromStringList(const QStringList& list);
 	
-	QString interfaceAttribute(const QString& attribute) const;
+	QString interfaceAttribute(const QString& attribute);
 
-	QString pluginName() const;
-	QString pluginAttribute(const QString& attribute ) const;
+	QString pluginName();
+	QString pluginAttribute(const QString& attribute );
 	
-	QStringList filterNames() const;
-	QString	filterHelp(const QString& filterName) const;
-	QString filterElement(const QString& filterName,const QString& filterElement) const;
+	QStringList filterNames();
+	QString	filterHelp(const QString& filterName);
+	QString filterElement(const QString& filterName,const QString& filterElement);
 	
 	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
-	XMLMapList filterParameters(const QString& filterName) const;
-	XMLMapList filterParametersExtendedInfo( const QString& filterName) const;
-	QString filterAttribute(const QString& filterName,const QString& attribute) const;
+	XMLMapList filterParameters(const QString& filterName);
+	XMLMapList filterParametersExtendedInfo( const QString& filterName);
+	QString filterAttribute(const QString& filterName,const QString& attribute);
 
-	QString filterParameterHelp(const QString& filterName,const QString& paramName) const;
-	XMLMap filterParameterGui(const QString& filter,const QString& parameter) const;
-	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter) const;
-	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute) const;
-	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName ) const;
+	QString filterParameterHelp(const QString& filterName,const QString& paramName);
+	XMLMap filterParameterGui(const QString& filter,const QString& parameter);
+	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter);
+	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute);
+	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName );
 
-	QStringList query(const QString& qry) const;
+	QStringList query(const QString& qry);
 };
 
 struct MLXMLGUISubTree
@@ -241,11 +248,11 @@ public:
 	static QString generateXMLParam(const MLXMLParamSubTree& param);
 	static QString generateXMLGUI(const MLXMLGUISubTree& gui);
 
-	static void loadMeshLabXML(MLXMLTree& tree,const MLXMLPluginInfo& pinfo);
-	static void loadXMLPlugin(MLXMLPluginSubTree& plugin,const MLXMLPluginInfo& pinfo);
-	static void loadXMLFilter(const QString& name,MLXMLFilterSubTree& filter,const MLXMLPluginInfo& pinfo);
-	static void loadXMLParam(const QString& filtername,const QString& paramname,MLXMLParamSubTree& param,const MLXMLPluginInfo& pinfo );
-	static void loadXMLGUI(const QString& filtername,const QString& paramname,MLXMLGUISubTree& gui,const MLXMLPluginInfo& pinfo);
+	static void loadMeshLabXML(MLXMLTree& tree,MLXMLPluginInfo& pinfo);
+	static void loadXMLPlugin(MLXMLPluginSubTree& plugin,MLXMLPluginInfo& pinfo);
+	static void loadXMLFilter(const QString& name,MLXMLFilterSubTree& filter,MLXMLPluginInfo& pinfo);
+	static void loadXMLParam(const QString& filtername,const QString& paramname,MLXMLParamSubTree& param,MLXMLPluginInfo& pinfo );
+	static void loadXMLGUI(const QString& filtername,const QString& paramname,MLXMLGUISubTree& gui,MLXMLPluginInfo& pinfo);
 
 	static QString generateH(const QString& basefilename,const MLXMLTree& tree );
 	static QString generateCPP(const QString& basefilename,const MLXMLTree& tree );
