@@ -250,7 +250,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filt
 QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QString& paramName )
 {
 	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
-	QString namesQuery = docMFIPluginFilterNameParamName(filterName,fileName,paramName) + "/PARAM_HELP/string()";
+	QString namesQuery = docMFIPluginFilterNameParamName(filterName,fileName,paramName) + "/" + MLXMLElNames::paramHelpTag + "/string()";
 	try
 	{
 		QStringList res = query(namesQuery);
@@ -449,6 +449,24 @@ MLXMLPluginInfo::MLXMLPluginInfo( const QString& file )
 MLXMLPluginInfo::~MLXMLPluginInfo()
 {
 	document.close();
+}
+
+QString MLXMLPluginInfo::filterScriptCode( const QString& filterName )
+{
+	QString namesQuery = docMFIPluginFilterName(fileName,filterName) + "/" + MLXMLElNames::filterJSCodeTag + "/string()";
+	try
+	{
+		QStringList res = query(namesQuery);
+		if (res.size() == 0)
+			return QString();
+		return res[0];
+	}
+	catch (QueryException e)
+	{
+		qDebug("Caught a QueryException %s",e.what());
+	}
+	assert(0);
+	return QString();
 }
 
 

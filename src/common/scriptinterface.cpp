@@ -239,7 +239,7 @@ QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *eng
 
 	MeshLabFilterInterface * mi = it->filterInterface;
 	const bool res = mi->applyFilter(filterName, *(md->md), *envWrap, TestCallback);
-	return res;
+	return QScriptValue(res);
 }
 
 Q_DECLARE_METATYPE(RichParameterSet)
@@ -728,7 +728,6 @@ bool EnvWrap::constStatement( const QString& statement ) const
 	int ii = statement.indexOf(exp);
 	return (ii == -1);
 }
-
 
 QString EnvWrap::evalString( const QString& nm )
 {

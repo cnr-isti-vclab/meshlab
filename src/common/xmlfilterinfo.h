@@ -187,6 +187,7 @@ public:
 	
 	QStringList filterNames();
 	QString	filterHelp(const QString& filterName);
+	QString filterScriptCode(const QString& filterName);
 	QString filterElement(const QString& filterName,const QString& filterElement);
 	
 	//The function returns a QList<QMap<QString,QString>>. Each map contains "type", "name" and "defaultExpression" of a single parameter.
