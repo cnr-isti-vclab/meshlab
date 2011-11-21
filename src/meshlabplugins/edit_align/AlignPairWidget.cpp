@@ -222,11 +222,23 @@ void AlignPairWidget::mousePressEvent (QMouseEvent * e)
 
 void AlignPairWidget::mouseMoveEvent (QMouseEvent * e)
 {
-	if(!currentTrack) {
-			qDebug("Warning useless mousemove");
-			return;
-		}
-	if (e->buttons ()) {
+	if(!currentTrack) 
+  {
+    qDebug("Warning useless mousemove");
+    return;
+	}
+
+  if ((e->buttons()&Qt::LeftButton) && (e->modifiers()&Qt::ControlModifier) && (e->modifiers()&Qt::ControlModifier))
+  {
+    float lx,ly;
+    lx = (e->x() / (float(width())/2.0f)) - 1.0;
+    ly = ((height()-e->y()) / (float(height())/2.0f)) - 1.0;
+	  float lightPosF[]={lx,ly,1.0,0.0};
+	  glLightfv(GL_LIGHT0,GL_POSITION,lightPosF);
+    updateGL ();
+  }
+	else if (e->buttons()&Qt::LeftButton)
+  {
     currentTrack->MouseMove (e->x (), height () - e->y ());
     updateGL ();
   }
