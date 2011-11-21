@@ -32,8 +32,8 @@
   <xs:complexType name='filterType'>
    <xs:sequence>
     <xs:element ref='FILTER_HELP'/>
-    <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
 	<xs:element ref='FILTER_JSCODE' minOccurs='0' maxOccurs='1'/>
+    <xs:element ref='PARAM' minOccurs='0' maxOccurs='unbounded'/>
    </xs:sequence>
    <xs:attribute name='filterName' type='xs:string' use='required'/>
    <xs:attribute name='filterFunction' type='xs:string' use='required'/>
