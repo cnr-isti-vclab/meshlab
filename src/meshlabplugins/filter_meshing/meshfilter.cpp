@@ -784,7 +784,7 @@ case FP_ROTATE_FIT:
       PlaneFittingPoints(selected_pts,plane);
       float errorSum=0;
       for(size_t i=0;i<selected_pts.size();++i)
-        errorSum+=fabs(Distance(plane,selected_pts[i]));
+        errorSum+=fabs(DistancePlanePoint(plane,selected_pts[i]));
 
       Log("Fitting Plane avg error is %f",errorSum/float(selected_pts.size()));
 
