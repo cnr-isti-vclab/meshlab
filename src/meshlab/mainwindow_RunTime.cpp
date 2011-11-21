@@ -911,7 +911,8 @@ void MainWindow::startFilter()
 				}
 				if(currentViewContainer())
 				{
-					iXMLFilter->setLog(currentViewContainer()->LogPtr());
+					if (iXMLFilter)
+						iXMLFilter->setLog(currentViewContainer()->LogPtr());
 					currentViewContainer()->LogPtr()->SetBookmark();
 				}
 				// just to be sure...
@@ -1050,11 +1051,13 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
 {
-
 	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
+	bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
+	bool filtercpp = (iFilter != NULL) && (!jscode);
 	QString fname = mfc->act->text();
 	qb->show();
-	iFilter->setLog(&meshDoc()->Log);
+	if (filtercpp)
+		iFilter->setLog(&meshDoc()->Log);
 
 	//// Ask for filter requirements (eg a filter can need topology, border flags etc)
 	//// and statisfy them
@@ -1076,7 +1079,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	//else
 	//	meshDoc()->Log.BackToBookmark();
 	//// (4) Apply the Filter
-	bool ret;
+	bool ret = true;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
 	meshDoc()->setBusy(true);
@@ -1086,8 +1089,11 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	////GLA() is only the parent
 	QGLWidget* filterWidget = new QGLWidget(GLA());
 	QGLFormat defForm = QGLFormat::defaultFormat();
-	iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
-  iFilter->glContext->create(filterWidget->context());
+	if (filtercpp)
+	{
+		iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
+		iFilter->glContext->create(filterWidget->context());
+	}
 	try
 	{
 		GLArea * ar = GLA();
@@ -1095,13 +1101,33 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 		if (isinter)
 		{
 			showInterruptButton(true);
-			connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
+			if (filtercpp)
+				connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
 		}
-		ret=iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+		if (filtercpp)
+			ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+		else
+		{
+			QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
+			MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
+			for(int ii = 0;ii < ml.size();++ii)
+			{
+				funcall = funcall + env.evalString(ml[ii][MLXMLElNames::paramName]);
+				if (ii != ml.size() - 1)
+					funcall = funcall + ",";
+			}
+			funcall = funcall + ");";
+			PM.env.pushContext();
+			QScriptValue result = PM.env.evaluate(funcall);
+			PM.env.popContext();
+			scriptCodeExecuted(result,0,"");
+			
+		}
 		if (isinter)
 		{
 			showInterruptButton(false);
-			disconnect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)));
+			if (filtercpp)
+				disconnect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)));
 		}
 	}
 	catch(MeshLabException& e)

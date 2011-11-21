@@ -115,8 +115,8 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 
 bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
 {
-	if (mfc.filterInterface == NULL)
-		return false;
+	/*if (mfc.filterInterface == NULL)
+		return false;*/
 	if (mfc.xmlInfo == NULL)
 		return false;
 	if (mfc.act == NULL)
