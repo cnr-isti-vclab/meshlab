@@ -28,6 +28,8 @@ PluginManager::~PluginManager()
 		delete meshDecoratePlug[ii];
 	for(int ii = 0;ii < meshEditInterfacePlug.size();++ii)
 		delete meshEditInterfacePlug[ii];
+	for(int ii = 0;ii < meshlabXMLFilterPlug.size();++ii)
+		delete meshlabXMLFilterPlug[ii];
 	for(int ii = 0;ii < xmlpluginfo.size();++ii)
 		MLXMLPluginInfo::destroyXMLPluginInfo(xmlpluginfo[ii]);
 }
@@ -57,43 +59,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 		QFileInfo fin(absfilepath);
 		if (fin.suffix() == "xml")
-		{
-			QString dllfile = fin.completeBaseName() + ".dll";
-			MeshLabXMLFilterContainer fc;
-			fc.filterInterface = NULL;
-			XMLMessageHandler xmlErr;
-			MLXMLPluginInfo* pluginfo = MLXMLPluginInfo::createXMLPluginInfo(absfilepath,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-			if (pluginfo != NULL)
-			{
-				xmlpluginfo << pluginfo;
-				fc.xmlInfo = pluginfo;
-				QStringList fn = fc.xmlInfo->filterNames();
-				QObject* par;
-				if (pluginsDir.exists(dllfile))
-				{
-					QPluginLoader loader(fin.absoluteDir().absolutePath() + "/" + dllfile);
-					QObject* plugin = loader.instance();
-					MeshLabFilterInterface* iXMLfilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-					if (iXMLfilter != NULL)
-					{
-						fc.filterInterface = iXMLfilter;
-						par = plugin;
-					}
-					else
-						par = new QObject();
-				}
-				foreach(QString filtName,fn)
-				{
-					fc.act = new QAction(filtName,par);
-					stringXMLFilterMap.insert(filtName,fc);
-				}
-			}
-			else
-			{
-				QString err = xmlErr.statusMessage();
-				qDebug("Error in XMLFile: %s - line: %d, column: %d - %s",qPrintable(fileName),xmlErr.line(),xmlErr.column(),qPrintable(err));
-			}
-		}
+			loadXMLPlugin(fileName);
 		else
 		{
 			QPluginLoader loader(absfilepath);
@@ -176,7 +142,7 @@ void PluginManager::loadPluginsCode()
 	for(int ii = 0;ii < xmlpluginfo.size();++ii)
 	{
 		MLXMLPluginInfo* mi = xmlpluginfo[ii];
-		QString pname = mi->pluginName();
+		QString pname = mi->pluginScriptName();
 		if (pname != "")
 		{
 			scriptplugcode += "Plugins." + pname + " = { };\n";
@@ -314,5 +280,99 @@ void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
 QString PluginManager::pluginsCode() const
 {
 	return scriptplugcode;
+}
+
+void PluginManager::loadXMLPlugin( const QString& fileName )
+{
+	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
+	QFileInfo fin(absfilepath);
+	if (fin.suffix() == "xml")
+	{
+		QString dllfile = fin.completeBaseName() + ".dll";
+		MeshLabXMLFilterContainer fc;
+		//fc.filterInterface = NULL;
+		XMLMessageHandler xmlErr;
+		MLXMLPluginInfo* pluginfo = MLXMLPluginInfo::createXMLPluginInfo(absfilepath,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
+		if (pluginfo != NULL)
+		{
+			xmlpluginfo << pluginfo;
+			fc.xmlInfo = xmlpluginfo[xmlpluginfo.size() - 1]; 
+			QStringList fn = fc.xmlInfo->filterNames();
+			QObject* par = NULL;
+			if (pluginsDir.exists(dllfile))
+			{
+				QPluginLoader loader(fin.absoluteDir().absolutePath() + "/" + dllfile);
+				QObject* plugin = loader.instance();
+				MeshLabFilterInterface* iXMLfilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+				if (iXMLfilter != NULL)
+				{
+					meshlabXMLFilterPlug << iXMLfilter;
+					fc.filterInterface = meshlabXMLFilterPlug[meshlabXMLFilterPlug.size() - 1];
+					par = plugin;
+				}
+			}
+			else
+				par = new QObject();
+			foreach(QString filtName,fn)
+			{
+				fc.act = new QAction(filtName,par);
+				stringXMLFilterMap.insert(filtName,fc);
+			}
+		}
+		else
+		{
+			QString err = xmlErr.statusMessage();
+			qDebug("Error in XMLFile: %s - line: %d, column: %d - %s",qPrintable(fileName),xmlErr.line(),xmlErr.column(),qPrintable(err));
+		}
+	}
+}
+
+//MLXMLPluginInfo* PluginManager::getXMLPluginInfo( const QString& plugname )
+//{
+//	for(int ii = 0;ii < xmlpluginfo.size();++ii)
+//		if (xmlpluginfo[ii]->pluginFilePath() != plugname)
+//			return xmlpluginfo[ii];
+//	return NULL;
+//}
+
+void PluginManager::deleteXMLPlugin( const QString& plugscriptname )
+{
+	bool found = false;
+	int ii = 0;
+	while ((ii < xmlpluginfo.size()) && !found)
+	{
+		if (xmlpluginfo[ii]->pluginScriptName() == plugscriptname)
+			found = true;
+		else
+			++ii;
+	}
+	if (found)
+	{
+		QStringList removefilters;
+		QSet<MeshLabFilterInterface*> tobedeleted;
+		for(QMap<QString,MeshLabXMLFilterContainer>::iterator it = stringXMLFilterMap.begin();it != stringXMLFilterMap.end();)
+		{
+			if (xmlpluginfo[ii] == it.value().xmlInfo)
+			{
+				QString rem = it.key();
+				if (it.value().filterInterface != NULL)
+					tobedeleted.insert(it.value().filterInterface);
+				++it;
+				stringXMLFilterMap.remove(rem);
+			}
+			else
+				++it;
+		}
+		MLXMLPluginInfo* tmp = xmlpluginfo[ii];
+		xmlpluginfo.remove(ii);
+		MLXMLPluginInfo::destroyXMLPluginInfo(tmp);
+		for(QSet<MeshLabFilterInterface*>::iterator it = tobedeleted.begin();it != tobedeleted.end();++it)
+		{
+			int ii = meshlabXMLfilterPlugins().indexOf(*it);
+			MeshLabFilterInterface* fi = meshlabXMLfilterPlugins()[ii];
+			meshlabXMLfilterPlugins().remove(ii);
+			delete fi;
+		}
+	}
 }
 

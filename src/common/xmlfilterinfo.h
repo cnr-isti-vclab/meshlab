@@ -168,6 +168,7 @@ private:
 	inline static QString docMFIPluginFilterNameParamName(const QString& file,const QString& fname,const QString& pname) {return docMFIPluginFilterNameParam(file,fname) + "[@" + MLXMLElNames::paramName + " = \"" + pname + "\"]";}
 	inline static QString attrVal(const QString& attr,const QString& var = QString("")) {return QString("{data(" + var + "@" + attr + ")}");}
 	inline static QString attrNameAttrVal(const QString& attr,const QString& var = QString("")) {return QString(attr + "=" + attrVal(attr,var));}
+	QString filevarname;
 	QString fileName;
 	QXmlQuery xmlq;
 	QBuffer document;
@@ -182,7 +183,7 @@ public:
 	
 	QString interfaceAttribute(const QString& attribute);
 
-	QString pluginName();
+	QString pluginScriptName();
 	QString pluginAttribute(const QString& attribute );
 	
 	QStringList filterNames();
@@ -200,7 +201,9 @@ public:
 	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter);
 	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute);
 	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName );
-
+	
+	QString pluginFilePath() const;
+	
 	QStringList query(const QString& qry);
 };
 
@@ -264,6 +267,13 @@ class MeshLabFilterInterface;
 
 struct MeshLabXMLFilterContainer
 {
+	MeshLabXMLFilterContainer()
+	{
+		act = NULL;
+		xmlInfo = NULL;
+		filterInterface = NULL;
+	}
+
 	QAction* act;
 	MLXMLPluginInfo* xmlInfo;
 	MeshLabFilterInterface* filterInterface;

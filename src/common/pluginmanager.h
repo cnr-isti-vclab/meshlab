@@ -33,56 +33,61 @@
 
 class QScriptEngine;
 /**
-  \brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
-  */
+\brief This class provides the basic tools for managing all the plugins. It is used by both meshlab and meshlab server.
+*/
 class PluginManager
 {
 private:
 	MeshDocumentSI* currentDocInterface;
 public:
-  PluginManager();
-  ~PluginManager();
-  enum TypeIO{IMPORT,EXPORT};
-  void loadPlugins(RichParameterSet& defaultGlobal);
-  QString pluginsCode() const;
+	PluginManager();
+	~PluginManager();
+	enum TypeIO{IMPORT,EXPORT};
+	void loadPlugins(RichParameterSet& defaultGlobal);
+	QString pluginsCode() const;
+	void loadXMLPlugin(const QString& filename);
+	MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
+	void deleteXMLPlugin(const QString& plugscriptname);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
 	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
 	inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
 	inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
 	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
+	inline QVector<MeshLabFilterInterface*>& meshlabXMLfilterPlugins()  {return meshlabXMLFilterPlug;}
 	void knownIOFormats();
 	static QString getPluginDirPath();
-  static QString getBaseDirPath();
+	static QString getBaseDirPath();
 
-  QMap<QString,RichParameterSet> generateFilterParameterMap();
+	QMap<QString,RichParameterSet> generateFilterParameterMap();
 
 	QDir pluginsDir;
-  QMap<QString, QAction*> actionFilterMap;
-  QMap<QString, MeshFilterInterface*> stringFilterMap;
+	QMap<QString, QAction*> actionFilterMap;
+	QMap<QString, MeshFilterInterface*> stringFilterMap;
 
-  //QMap<QString, QAction*> xmlActionFilterMap;
-  QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
-  QMap<QString,MeshIOInterface*> allKnowInputFormats;
-  QMap<QString,MeshIOInterface*> allKnowOutputFormats;
-  QStringList inpFilters;
-  QStringList outFilters;
-  //QMap<QString, XMLFilterInfo*> filterXMLFileMap;
-  
-	
-  QVector<MeshIOInterface*> meshIOPlug;
+	//QMap<QString, QAction*> xmlActionFilterMap;
+	QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
+	QMap<QString,MeshIOInterface*> allKnowInputFormats;
+	QMap<QString,MeshIOInterface*> allKnowOutputFormats;
+	QStringList inpFilters;
+	QStringList outFilters;
+	//QMap<QString, XMLFilterInfo*> filterXMLFileMap;
+
+
+	QVector<MeshIOInterface*> meshIOPlug;
 	QVector<MeshFilterInterface*> meshFilterPlug;
 	QVector<MeshRenderInterface*> meshRenderPlug;
 	QVector<MeshDecorateInterface*> meshDecoratePlug;
 	QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
 	//only useful for an easy destruction of the MLXMLPluginInfos
 	QVector<MLXMLPluginInfo*> xmlpluginfo;
+	QVector<MeshLabFilterInterface*> meshlabXMLFilterPlug;
 	QVector<QAction *> editActionList;
 	QVector<QAction *> decoratorActionList;
 
-  QStringList pluginsLoaded;
-  Env env;
- 
+	QStringList pluginsLoaded;
+	Env env;
+
 	void updateDocumentScriptBindings(MeshDocument& doc);
 private:
 	void loadPluginsCode();
