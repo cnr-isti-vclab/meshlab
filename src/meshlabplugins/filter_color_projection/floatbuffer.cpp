@@ -140,10 +140,10 @@ int floatbuffer::applysobel(floatbuffer *from)
 				accum=0;
 				accum += -1.0 * from->getval(xx-1, yy-1);
 				accum += -2.0 * from->getval(xx-1, yy  );
-				accum += -1.0 * from->getval(xx-1, yy-1);
+				accum += -1.0 * from->getval(xx-1, yy+1);
 				accum += +1.0 * from->getval(xx+1, yy-1);
 				accum += +2.0 * from->getval(xx+1, yy  );
-				accum += +1.0 * from->getval(xx+1, yy-1);
+				accum += +1.0 * from->getval(xx+1, yy+1);
 
 				data[(yy * sx) + xx] += abs(accum);
 			}
@@ -156,8 +156,8 @@ int floatbuffer::applysobel(floatbuffer *from)
 				accum=0;
 				accum += -1.0 * from->getval(xx-1, yy-1);
 				accum += -2.0 * from->getval(xx  , yy-1);
-				accum += -1.0 * from->getval(xx-1, yy-1);
-				accum += +1.0 * from->getval(xx+1, yy+1);
+				accum += -1.0 * from->getval(xx+1, yy-1);
+				accum += +1.0 * from->getval(xx-1, yy+1);
 				accum += +2.0 * from->getval(xx  , yy+1);
 				accum += +1.0 * from->getval(xx+1, yy+1);
 
@@ -216,11 +216,13 @@ int floatbuffer::initborder(floatbuffer* zerofrom)
 	 if(data[kk] != 0)
 		myhist.Add(data[kk]);
 
+ float bthreshold = myhist.Percentile(0.90);
+
  for(int kk=0; kk< sx*sy; kk++)
  {
 	if (zerofrom->data[kk] == 0)					// outside
 		data[kk] = -1;
-	else if(data[kk] > myhist.Percentile(0.90) )	// is border
+	else if(data[kk] > bthreshold)	// is border
 		data[kk] = 0;
 	else 											// to be filled
 		data[kk] = 10000000;						
