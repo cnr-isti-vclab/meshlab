@@ -71,7 +71,11 @@ int main(int argc, char *argv[])
 			"Look at http://meshlab.sourceforge.net/wiki\n"
 			"for a longer documentation\n"
 		);
-    window.importMesh(argv[1]);
+
+    if(QString(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString(argv[1]).endsWith("aln",Qt::CaseInsensitive))
+      window.openProject(argv[1]);
+    else
+      window.importMesh(argv[1]);
 	}
 	//else 	if(filterObj->noEvent) window.open();
  

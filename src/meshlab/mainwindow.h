@@ -73,20 +73,20 @@ signals:
 
 private slots:
   GLArea* newProject(const QString& projName = QString());
-  bool openProject(QString fileName=QString());
   void saveProject();
-
   bool importRaster(const QString& fileImg = QString());
+
 public slots:
   bool importMesh(QString fileName=QString());
+  bool openProject(QString fileName=QString());
   void updateCustomSettings();
+
 private slots:
   void delCurrentMesh();
   void delCurrentRaster();
   void endEdit();
   void updateDocumentScriptBindings();
   //void evaluateExpression(const Expression& exp,Value** res);
-
 
 public:
   bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);

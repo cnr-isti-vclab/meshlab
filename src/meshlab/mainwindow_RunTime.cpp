@@ -649,7 +649,11 @@ void MainWindow::dropEvent ( QDropEvent * event )
       {
         this->newProject();
       }
-      importMesh(path);
+
+      if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive))
+        openProject(path);
+      else
+        importMesh(path);
     }
   }
 }
