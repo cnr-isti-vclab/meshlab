@@ -65,7 +65,7 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
 	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
-
+	connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
 	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
@@ -371,9 +371,9 @@ void MainWindow::createActions()
 	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
 
 
-	//showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
-	//showFilterEditAct->setEnabled(true);
-	//connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
+	/*showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
+	showFilterEditAct->setEnabled(true);
+	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));*/
 
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
@@ -495,11 +495,13 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
 	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
-	filterMenu->addAction(lastFilterAct);
-	filterMenu->addAction(showFilterScriptAct);
-	filterMenu->addAction(showScriptEditAct);
+	fillFilterMenu();
+	//filterMenu = menuBar()->addMenu(tr("Fi&lters"));
+	//filterMenu->addAction(lastFilterAct);
+	//filterMenu->addAction(showFilterScriptAct);
+	//filterMenu->addAction(showScriptEditAct);
 	//filterMenu->addAction(showFilterEditAct);
-	filterMenu->addSeparator();
+	//filterMenu->addSeparator();
 
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -583,7 +585,7 @@ void MainWindow::createMenus()
 	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
 
-	fillFilterMenu();
+	//fillFilterMenu();
 	fillEditMenu();
 	fillRenderMenu();
 	fillDecorateMenu();
@@ -596,6 +598,12 @@ void MainWindow::createMenus()
 
 void MainWindow::fillFilterMenu()
 {
+	filterMenu->clear();
+	filterMenu->addAction(lastFilterAct);
+	filterMenu->addAction(showFilterScriptAct);
+	filterMenu->addAction(showScriptEditAct);
+	//filterMenu->addAction(showFilterEditAct);
+	filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip
 	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
 	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));

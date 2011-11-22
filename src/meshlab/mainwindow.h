@@ -86,6 +86,7 @@ private slots:
   void delCurrentRaster();
   void endEdit();
   void updateDocumentScriptBindings();
+  void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
   //void evaluateExpression(const Expression& exp,Value** res);
 
 public:

@@ -20,6 +20,9 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#ifndef FILTER_SCRIPT_DIALOG_H
+#define FILTER_SCRIPT_DIALOG_H
+
 #include <QDialog>
 #include "../common/filterscript.h"
 
@@ -80,3 +83,5 @@ private:
 	Ui::scriptEditor* ui;
 	QString code;
 };
+
+#endif

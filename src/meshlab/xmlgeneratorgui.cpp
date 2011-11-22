@@ -428,8 +428,8 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
 	ui->jsframe->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QTextEdit {background-color: white;}");
+	//ui->jscode->setAutoFormatting(QTextEdit::AutoAll);
 	layout()->setAlignment(Qt::AlignTop);
-
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));
 	connect(ui->jsbut,SIGNAL(released()),this,SLOT(jsButtonClicked()));
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
@@ -477,7 +477,7 @@ void FilterGeneratorTab::paintEvent( QPaintEvent* p )
 
 void FilterGeneratorTab::collectInfo( MLXMLFilterSubTree& filter )
 {
-	filter.filterinfo[MLXMLElNames::filterJSCodeTag] = ui->jscode->toPlainText ();
+	filter.filterinfo[MLXMLElNames::filterJSCodeTag] = "<![CDATA[" + ui->jscode->toPlainText () + "]]>";
 	ui->guiframe->collectInfo(filter);
 }
 
@@ -497,54 +497,10 @@ void FilterGeneratorTab::setCode( const QString& code )
 	ui->jscode->setPlainText(code);
 }
 
-QScriptValue FilterGeneratorTab::executeCode(MeshDocument* doc)
-{
-	if (doc != NULL)
-	{
-		env.pushContext();
-		MeshDocumentSI* currentDocInterface = new MeshDocumentSI(doc);
-		QScriptValue val = env.newQObject(currentDocInterface);
-		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
-		QScriptValue result = env.evaluate(getCode());
-		env.popContext();
-		return result;
-	}
-	else
-		throw MeshLabException("System Error: A valid MeshLabDocument has not correctly been associated with PluginGeneratorGUI. Code cannot be executed.");
-
-	return QScriptValue();
-}
-
-void FilterGeneratorTab::initLibInEnv(PluginManager& pm )
-{
-	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-	int ii = 0;
-	while(ii < liblist.size())
-	{
-		QFile lib(liblist[ii]);
-		if (!lib.open(QFile::ReadOnly))
-			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-		QByteArray libcode = lib.readAll();
-		QScriptValue res = env.evaluate(QString(libcode));
-		if (res.isError())
-			throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");
-		++ii;
-	} 
-	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, &pm);
-	env.globalObject().setProperty("_applyFilter", applyFun);
-
-	QString st = pm.pluginsCode();
-	QScriptValue res = env.evaluate(QString(pm.pluginsCode()));
-	if (res.isError())
-		throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");
-}
-
 /*" + gaycolor.red() + "," + gaycolor.green() + "," + gaycolor.blue() + "*/
 PluginGeneratorGUI::PluginGeneratorGUI(PluginManager& pman,QWidget* parent )
-:QDockWidget(parent),init(false),plugname(),author(),mail(),doc(NULL),PM(pman)
+:QDockWidget(parent),init(false),plugscriptname(),author(),mail(),doc(NULL),PM(pman),finfo(QApplication::applicationDirPath())
 {
-	QFileInfo fi(QApplication::applicationFilePath());
-	directory.setCurrent(fi.absolutePath());
 	QFrame* f = new QFrame(this);
 	QGridLayout* lay = new QGridLayout();
 	tabs = new QTabWidget(this);
@@ -635,11 +591,6 @@ void PluginGeneratorGUI::menuSelection( QAction* act)
 				removeFilter();
 				break;
 			}
-			case MN_EXPORTFILTERINPLUGIN:
-			{
-				exportFilterInPlugin();
-				break;
-			}
 			case MN_NEWXMLPLUGIN:
 			{
 				newXMLPlugin();
@@ -683,9 +634,6 @@ void PluginGeneratorGUI::createContextMenu()
 	actnewfilt->setData(QVariant(MN_ADDFILTER));
 	QAction* actremfilt = menu->addAction("Remove Current Filter");
 	actremfilt->setData(QVariant(MN_REMOVEFILTER));
-	menu->addSeparator();
-	QAction* actexpfilt = menu->addAction("Export Filter Inside Existing Plugin...");
-	actexpfilt->setData(QVariant(MN_EXPORTFILTERINPLUGIN));
 	menu->addSeparator();
 	QAction* actnewplug = menu->addAction("New XML Plugin");
 	actnewplug->setData(QVariant(MN_NEWXMLPLUGIN));
@@ -754,7 +702,7 @@ void PluginGeneratorGUI::addNewFilter()
 		namelist.push_back(tabs->tabText(ii));
 	QString tmpname = UsefulGUIFunctions::generateUniqueDefaultName("Filter",namelist);
 	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this);
-	tb->initLibInEnv(PM);
+	//tb->initLibInEnv(PM);
 	tabs->addTab(tb,tmpname);
 	connect(tb,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SLOT(updateTabTitle(const QString&,QWidget*)));
 	connect(tb,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)),this,SLOT(validateFilterName(const QString&,FilterGeneratorGUI*)));
@@ -765,35 +713,44 @@ void PluginGeneratorGUI::removeFilter()
 	tabs->removeTab(tabs->currentIndex());
 }
 
-void PluginGeneratorGUI::exportFilterInPlugin()
-{
-        //throw std::exception("The method or operation is not implemented.");
-}
-
 void PluginGeneratorGUI::newXMLPlugin()
 {
-        //throw std::exception("The method or operation is not implemented.");
+	QMessageBox::StandardButton ret=QMessageBox::question(this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(finfo.fileName()),
+		QMessageBox::Yes|QMessageBox::No,
+		QMessageBox::No);
+	if(ret==QMessageBox::No)	// don't close please!
+		return;
+	int count = tabs->count();
+	for(int ii = 0;ii < count;++ii)
+		removeFilter();
+	this->author ="";
+	this->mail = "";
+	this->plugscriptname ="";
+	finfo.setFile(QApplication::applicationDirPath());
+	addNewFilter();
 }
 
 void PluginGeneratorGUI::saveXMLPlugin()
 {
-        //throw std::exception("The method or operation is not implemented.");
+	if (finfo.isFile())
+		save(finfo.absoluteFilePath(),false);
+	else
+		saveAsXMLPlugin();
 }
 
 void PluginGeneratorGUI::loadScriptCode()
 {
-	QFileDialog* lddiag = new QFileDialog(this,tr("Load Script File"),directory.absolutePath(), tr("Script File (*.js)"));
+	QFileDialog* lddiag = new QFileDialog(this,tr("Load Script File"),finfo.absolutePath(), tr("Script File (*.js)"));
 	lddiag->setAcceptMode(QFileDialog::AcceptOpen);
 	lddiag->exec();
 	QStringList files = lddiag->selectedFiles();
 	delete lddiag;
 	if (files.size() != 1)
 		return;
-	QString fileName = files[0];
-	QFileInfo finfo(files[0]);
-	QFile file(fileName);
+	QFile file(files[0]);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-		qDebug("Warning: File %s has not been loaded.",qPrintable(fileName));
+		qDebug("Warning: File %s has not been loaded.",qPrintable(files[0]));
+	finfo.setFile(files[0]);
 	QByteArray code = file.readAll();
 	file.close();
 	FilterGeneratorTab* tb = tab(tabs->currentIndex());
@@ -804,10 +761,11 @@ void PluginGeneratorGUI::loadScriptCode()
 
 void PluginGeneratorGUI::saveScriptCode()
 {
-	QString filename = QFileDialog::getSaveFileName(this,tr("Save Script File"),directory.absolutePath(),tr("Script File (*.js)"));
+	QString filename = QFileDialog::getSaveFileName(this,tr("Save Script File"),finfo.absolutePath(),tr("Script File (*.js)"));
 	QFile file(filename);
 	if (!file.open(QFile::WriteOnly | QIODevice::Text))
 		qDebug("Warning: File %s has not been saved.",qPrintable(filename));
+	finfo.setFile(filename);
 	FilterGeneratorTab* tb = tab(tabs->currentIndex());
 	if (tb != NULL)
 	{
@@ -819,12 +777,12 @@ void PluginGeneratorGUI::saveScriptCode()
 
 void PluginGeneratorGUI::saveAsXMLPlugin()
 {
-	QFileDialog* saveDiag = new QFileDialog(this,tr("Save XML Plugin File"),directory.absolutePath(), tr("MeshLab XML Plugin (*.xml)"));
+	QFileDialog* saveDiag = new QFileDialog(this,tr("Save XML Plugin File"),finfo.absolutePath(), tr("MeshLab XML Plugin (*.xml)"));
 #if defined(Q_OS_MAC)
 	saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
 #endif
 	QLabel* namelab = new QLabel(tr("JScript Plugin Name"),saveDiag);
-	QLineEdit* jsline= new QLineEdit(plugname,saveDiag);
+	QLineEdit* jsline= new QLineEdit(plugscriptname,saveDiag);
 	QLabel* authlab = new QLabel(tr("Author Name"),saveDiag);
 	QLineEdit* authline= new QLineEdit(author,saveDiag);
 	QLabel* maillab = new QLabel(tr("Author e-Mail"),saveDiag);
@@ -843,33 +801,35 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
 	saveDiag->exec();
-	plugname = jsline->text();
+	plugscriptname = jsline->text();
 	author = authline->text();
 	mail = mailline->text();
 	QStringList files = saveDiag->selectedFiles();
 	if (files.size() != 1)
 		return;
 	QString fileName = files[0];
-	QFileInfo finfo(files[0]);
-	MLXMLPluginInfo::XMLMapList ls;
+	save(fileName,cpp->isChecked());
 	/*for(int ii = 0;ii < tabs->count();++ii)
 	{
 		XMLFilterInfo::XMLMap mp;
 		collectFilterInfo(mp);
 		ls.push_back(mp);
 	}*/
+	delete saveDiag;
+}
+
+void PluginGeneratorGUI::save( const QString& filepath,const bool generatecpp)
+{
 	MLXMLTree tree;
 	collectInfo(tree);
-	QString xml = generateXML(tree);
-
-	if (cpp->isChecked())
+	if (generatecpp)
 	{
 		QDir dir(finfo.absolutePath());
 		QString cppcode = MLXMLUtilityFunctions::generateCPP(finfo.baseName(),tree);
 		QFileInfo cppinfo(finfo.absolutePath() + "/" +finfo.baseName() + ".cpp");	
 		QString cppoldfilename = UsefulGUIFunctions::generateBackupName(cppinfo);
 		dir.rename(cppinfo.fileName(),cppoldfilename);
-	
+
 		QFile cppfile(cppinfo.absoluteFilePath());
 		if (!cppfile.open(QIODevice::WriteOnly | QIODevice::Text))
 			return;
@@ -888,22 +848,24 @@ void PluginGeneratorGUI::saveAsXMLPlugin()
 		outh << hcode;
 		hfile.close();
 	}
+	QString xml = generateXML(tree);
 	//QDomDocument has been introduced only in order to indent the xml code
 	QDomDocument doc;
 	bool ret = doc.setContent(xml,false);
 	xml = doc.toString();
-	QFile file(fileName);
+	QFile file(filepath);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return;
 	QTextStream out(&file);
 	out << xml;
 	file.close();
-	delete saveDiag;
+	finfo.setFile(filepath);
 }
+
 
 void PluginGeneratorGUI::loadXMLPlugin()
 {
-	QString file = QFileDialog::getOpenFileName(this,"Load XML Plugin",directory.absolutePath(),QString("*.xml"));
+	QString file = QFileDialog::getOpenFileName(this,"Load XML Plugin",finfo.absolutePath(),QString("*.xml"));
 	if (!file.isEmpty())
 	{
 		MLXMLTree tree;
@@ -911,6 +873,7 @@ void PluginGeneratorGUI::loadXMLPlugin()
 		MLXMLPluginInfo* plug = MLXMLPluginInfo::createXMLPluginInfo(file,MLXMLUtilityFunctions::xmlSchemaFile(),msg);
 		if (plug != NULL)
 		{
+			finfo.setFile(file);
 			MLXMLUtilityFunctions::loadMeshLabXML(tree,*plug);
 			importInfo(tree);
 		}
@@ -922,13 +885,14 @@ void PluginGeneratorGUI::loadXMLPlugin()
 
 void PluginGeneratorGUI::insertPluginInMeshLab()
 {
-        //throw std::exception("The method or operation is not implemented.");
+	saveXMLPlugin();
+	emit insertXMLPluginRequested(finfo.absoluteFilePath(),plugscriptname);
 }
 
 void PluginGeneratorGUI::collectInfo(MLXMLTree& tree )
 {
 	tree.interfaceinfo[MLXMLElNames::mfiVersion] = MLXMLElNames::mfiCurrentVersion;
-	tree.plugin.pluginfo[MLXMLElNames::pluginScriptName] = plugname;
+	tree.plugin.pluginfo[MLXMLElNames::pluginScriptName] = plugscriptname;
 	tree.plugin.pluginfo[MLXMLElNames::pluginAuthor] = author;
 	tree.plugin.pluginfo[MLXMLElNames::pluginEmail] = mail;
 	for(int ii = 0;ii < tabs->count();++ii)
@@ -982,7 +946,7 @@ int PluginGeneratorGUI::getPageIndexOfWidget( QWidget* wid )
 
 void PluginGeneratorGUI::importInfo( const MLXMLTree& tree )
 {
-	plugname = tree.plugin.pluginfo[MLXMLElNames::pluginScriptName];
+	plugscriptname = tree.plugin.pluginfo[MLXMLElNames::pluginScriptName];
 	author = tree.plugin.pluginfo[MLXMLElNames::pluginAuthor];
 	mail = tree.plugin.pluginfo[MLXMLElNames::pluginEmail];
 	int nwtab = tree.plugin.filters.size() - tabs->count();

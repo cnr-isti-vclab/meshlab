@@ -2165,3 +2165,12 @@ void MainWindow::updateDocumentScriptBindings()
 		PM.updateDocumentScriptBindings(*meshDoc());
 	}
 }
+
+void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname)
+{
+	if ((xmldialog != NULL) && (xmldialog->isVisible()))
+		this->xmldialog->close();
+	PM.deleteXMLPlugin(scriptname);
+	PM.loadXMLPlugin(xmlpath);
+	fillFilterMenu();
+}

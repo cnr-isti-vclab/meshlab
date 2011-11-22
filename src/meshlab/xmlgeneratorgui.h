@@ -123,27 +123,22 @@ public:
 
 	void collectInfo(MLXMLFilterSubTree& filter);
 	void importInfo(const MLXMLFilterSubTree& tree);
-	void initLibInEnv(PluginManager& pm);
 	QString getCode() const;
 	void setCode(const QString& code);
-	QScriptValue executeCode(MeshDocument* md);
 
 protected:
 	void paintEvent(QPaintEvent* p);
 private slots:
 	void jsButtonClicked();
 	void guiButtonClicked();
-	//void filterNameValidationRequest(const QString& name);
-	//void parentDocked( Qt::DockWidgetArea area);
+
 signals:
 	void filterNameUpdated(const QString& fname,QWidget* wid);
 	void validateFilterName(const QString& fname,FilterGeneratorGUI* wid);
 
 private:	
-	//void expandCollapse(bool& exp,PrimitiveButton* pb,QFrame* fr );
 	void expandCollapse(const bool exp,PrimitiveButton* pb,QFrame* fr );
 
-	Env env;
 	bool jsexp;
 	bool guiexp;
 	Ui::FilterCreatorTab* ui;
@@ -166,14 +161,13 @@ private slots:
 	void updateTabTitle(const QString& name,QWidget* wid);
 	void validateFilterName(const QString& name,FilterGeneratorGUI* wid);
 private:
-	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXPORTFILTERINPLUGIN,MN_EXECUTECODE,MN_LOADCODE,MN_SAVECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_INSERTPLUGINMESHLAB};
+	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXECUTECODE,MN_LOADCODE,MN_SAVECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_INSERTPLUGINMESHLAB};
 	void createContextMenu();
 	void executeCurrentCode();
 	void loadScriptCode();
 	void saveScriptCode();
 	void addNewFilter();
 	void removeFilter();
-	void exportFilterInPlugin();
 	void newXMLPlugin();
 	void saveXMLPlugin();
 	void saveAsXMLPlugin();
@@ -183,19 +177,21 @@ private:
 	QString generateXML(const MLXMLTree& tree);
 	void collectInfo(MLXMLTree& tree);
 	void importInfo(const MLXMLTree& tree);
+	void save( const QString& filepath,const bool generatecpp);
 	FilterGeneratorTab* tab(int ii);
 
-	QString plugname;
+	QString plugscriptname;
 	QString author;
 	QString mail;
 
 	QMenu* menu;
 	QTabWidget* tabs;
 	bool init;
-	QDir directory;
+	QFileInfo finfo;
 	MeshDocument* doc;
 	PluginManager& PM;
 signals:
 	void scriptCodeExecuted(const QScriptValue& val,const int time,const QString&);
+	void insertXMLPluginRequested(const QString& filename,const QString& plugscriptname);
 };
 #endif
