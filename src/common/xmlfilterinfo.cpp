@@ -66,8 +66,7 @@ QString MLXMLPluginInfo::guiTypeSwitchQueryText(const QString& var)
 
 QStringList MLXMLPluginInfo::filterNames()
 {
-	//QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER/<p>{data(@name)}</p>/string()";
-	QString namesQuery = docMFIPluginFilter(filevarname) + "/<p>"+ attrVal(MLXMLElNames::filterName)+"</p>/string()";
+	QString namesQuery = "for $a in " + docMFIPluginFilter(filevarname) + " return <p>{data($a/@" + MLXMLElNames::filterName + ")}</p>/string()";
 	try
 	{
 		return query(namesQuery);
@@ -602,6 +601,8 @@ QString MLXMLUtilityFunctions::generateCPP(const QString& basefilename,const MLX
 	QString envname("env");
 	result += "bool " + classname + "::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap&" + envname + ", vcg::CallBackPos * cb )\n";
 	result += "{\n";
+	result += "\tif (md.mm() == NULL)\n";
+	result += "\t\treturn false;\n";
 	result += "\tCMeshO &m=md.mm()->cm;\n";
 	QList<MLXMLFilterSubTree> treelist = tree.plugin.filters;
 	for(int ii = 0; ii < treelist.size();++ii)
@@ -611,7 +612,7 @@ QString MLXMLUtilityFunctions::generateCPP(const QString& basefilename,const MLX
 		QList<MLXMLParamSubTree> paramlist = tree.plugin.filters[ii].params;
 		for(int jj = 0;jj < paramlist.size();++jj)
 			result += "\t\t" + MLXMLUtilityFunctions::generateEvalParam(paramlist[jj],envname) + "\n";
-		result += "\t\treturn true;";
+		result += "\t\treturn true;\n";
 		result += "\t}\n";
 	}
 	result += "\treturn false;\n";
@@ -658,30 +659,31 @@ QString MLXMLUtilityFunctions::generateEvalParam( const MLXMLParamSubTree& param
 	QString result;
 	QString ptype = param.paraminfo[MLXMLElNames::paramType];
 	QString varname = param.paraminfo[MLXMLElNames::paramName];
+	QString lowvarname = varname.toLower();
 	if (ptype == MLXMLElNames::intType)
-		result += "int " + varname + " = " + envname + ".evalInt(\"" + varname + "\");";
+		result += "int " + lowvarname + " = " + envname + ".evalInt(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::realType)
-		result += "float " + varname + " = " + envname + ".evalFloat(\"" + varname + "\");";
+		result += "float " + lowvarname + " = " + envname + ".evalFloat(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::vec3Type)
-		result += "vcg::Point3f " + varname + " = " + envname + ".evalVec3(\"" + varname + "\");";
+		result += "vcg::Point3f " + lowvarname + " = " + envname + ".evalVec3(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::colorType)
-		result += "QColor " + varname + " = " + envname + ".evalColor(\"" + varname + "\");";
+		result += "QColor " + lowvarname + " = " + envname + ".evalColor(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::meshType)
-		result += "MeshModel* " + varname + " = " + envname + ".evalMesh(\"" + varname + "\");";
+		result += "MeshModel* " + lowvarname + " = " + envname + ".evalMesh(\"" + varname + "\");";
 
 	//Enum has also the values declaration
 	if (ptype.contains(MLXMLElNames::enumType))
-		result += "int " + varname + " = " + envname + ".evalEnum(\"" + varname + "\");";
+		result += "int " + lowvarname + " = " + envname + ".evalEnum(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::boolType)
-		result += "bool " + varname + " = " + envname + ".evalBool(\"" + varname + "\");";
+		result += "bool " + lowvarname + " = " + envname + ".evalBool(\"" + varname + "\");";
 
 	if (ptype == MLXMLElNames::shotType)
-		result += "vcg::Shotf " + varname + " = " + envname + ".evalShot(\"" + varname + "\");";
+		result += "vcg::Shotf " + lowvarname + " = " + envname + ".evalShot(\"" + varname + "\");";
 	return result;
 }
 
