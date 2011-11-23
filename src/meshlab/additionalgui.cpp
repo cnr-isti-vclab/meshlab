@@ -331,7 +331,6 @@ MLScriptEditor::MLScriptEditor( QWidget* par /*= NULL*/ )
 :QPlainTextEdit(par)
 {
 	narea = new MLNumberArea(this);
-
 	connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
 	connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 	connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
@@ -345,10 +344,10 @@ MLScriptEditor::~MLScriptEditor()
 
 }
 
-void MLScriptEditor::lineNumberAreaPaintEvent( QPaintEvent *event )
+void MLScriptEditor::lineNumberAreaPaintEvent( QPaintEvent *event,const QColor& col)
 {
 	QPainter painter(narea);
-	painter.fillRect(event->rect(), Qt::lightGray);
+	painter.fillRect(event->rect(),col);
 	QTextBlock block = firstVisibleBlock();
 	int blockNumber = block.blockNumber();
 	int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
@@ -438,5 +437,5 @@ QSize MLNumberArea::sizeHint() const
 
 void MLNumberArea::paintEvent(QPaintEvent* e)
 {
-	mledit->lineNumberAreaPaintEvent(e);
+	mledit->lineNumberAreaPaintEvent(e,UsefulGUIFunctions::editorMagicColor());
 }

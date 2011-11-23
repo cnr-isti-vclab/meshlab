@@ -151,6 +151,7 @@ public:
 	PluginGeneratorGUI(PluginManager& pman,QWidget* parent = NULL);
 	~PluginGeneratorGUI();
 	void setDocument(MeshDocument* mdoc);
+	//static QColor editorMagicColor(){return QColor(189,215,255);}
 public slots:
 	void getHistory(const QStringList& hist);
 protected:

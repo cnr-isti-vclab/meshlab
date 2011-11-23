@@ -201,7 +201,9 @@ FilterGeneratorGUI::FilterGeneratorGUI( QWidget* parent /*= NULL*/ )
 {
 	ui = new Ui::FilterCreatorGUI();
 	ui->setupUi(this);
-	this->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; }  QPlainText { background-color: white;} QTreeWidget  { background-color: white;} QComboBox QAbstractItemView{qproperty-alternatingRowColors:true;alternate-background-color: white;}");
+	//QPlainText { background-color: white;} 
+	QColor col = UsefulGUIFunctions::editorMagicColor();
+	this->setStyleSheet("QFrame { background-color:rgb(" + QString::number(col.red()) + "," + QString::number(col.green()) + "," + QString::number(col.blue()) + "); border-radius: 4px; } QAbstractScrollArea { background-color: white;}  QTreeWidget  { background-color: white;} QComboBox QAbstractItemView{qproperty-alternatingRowColors:true;alternate-background-color: white;}");
 	fillComboBoxes();
 	createContextMenu();
 	ui->paramviewer->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -427,7 +429,8 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setVisible(false);
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
-	ui->jsframe->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QTextEdit {background-color: white;}");
+	QColor col = UsefulGUIFunctions::editorMagicColor();
+	ui->jsframe->setStyleSheet("QFrame {"  + QString::number(col.red()) + "," + QString::number(col.green()) + "," + QString::number(col.blue()) + "); border-radius: 4px; } QAbstractScrollArea {background-color: white;}");
 	//ui->jscode->setAutoFormatting(QTextEdit::AutoAll);
 	layout()->setAlignment(Qt::AlignTop);
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));

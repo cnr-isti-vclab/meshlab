@@ -105,6 +105,8 @@ public:
 	static QString generateBackupName(const QFileInfo& finfo);
 	//put <![CDATA[text]]> around text in order you can put html tag inside xml document without having problems with validation.
 	static QString avoidProblemsWithHTMLTagInsideXML( const QString& text );
+
+	static QColor editorMagicColor(){return QColor(189,215,255);}
 };
 
 class MLScriptEditor;
@@ -129,7 +131,7 @@ public:
 	MLScriptEditor(QWidget* par = NULL);
 	~MLScriptEditor();
 
-	void lineNumberAreaPaintEvent(QPaintEvent *event);
+	void lineNumberAreaPaintEvent(QPaintEvent *event,const QColor& col);
 	int lineNumberAreaWidth();
 
 protected:
