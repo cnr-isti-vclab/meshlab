@@ -430,7 +430,7 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	ui->guiframe->setFilterName(filtername);
 	ui->jsframe->setVisible(true);
 	QColor col = UsefulGUIFunctions::editorMagicColor();
-	ui->jsframe->setStyleSheet("QFrame {"  + QString::number(col.red()) + "," + QString::number(col.green()) + "," + QString::number(col.blue()) + "); border-radius: 4px; } QAbstractScrollArea {background-color: white;}");
+	ui->jsframe->setStyleSheet("QFrame {background-color:rgb("  + QString::number(col.red()) + "," + QString::number(col.green()) + "," + QString::number(col.blue()) + "); border-radius: 4px; } QAbstractScrollArea {background-color: white;}");
 	//ui->jscode->setAutoFormatting(QTextEdit::AutoAll);
 	layout()->setAlignment(Qt::AlignTop);
 	connect(ui->guibut,SIGNAL(released()),this,SLOT(guiButtonClicked()));
