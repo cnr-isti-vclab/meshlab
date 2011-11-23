@@ -158,6 +158,7 @@
     <xs:enumeration value="SingleMesh"/>
     <xs:enumeration value="Fixed"/>
     <xs:enumeration value="Variable"/>
+	<xs:enumeration value="FunctionDefined"/>
   </xs:restriction>
  </xs:simpleType>
 </xs:schema>

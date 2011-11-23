@@ -420,7 +420,7 @@ class MeshDocument : public QObject
 
 public:
 
-	MeshDocument(): QObject()
+	MeshDocument(): QObject(),xmlhistory()
 	{
     tagIdCounter=0;
     meshIdCounter=0;
@@ -496,6 +496,7 @@ private:
   int tagIdCounter;
   int meshIdCounter;
   int rasterIdCounter;
+
   /**
   All the files referred in a document are relative to the folder containing the project file.
   this is the full path to the document.
@@ -512,6 +513,7 @@ public:
  void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
   GLLogStream Log;
   FilterScript filterHistory;
+  QStringList xmlhistory;
 
 	int size() const {return meshList.size();}
   bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread

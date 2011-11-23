@@ -118,6 +118,7 @@ namespace MLXMLElNames
 	const QString singleMeshArity("SingleMesh");
 	const QString fixedArity("Fixed");
 	const QString variableArity("Variable");
+	const QString functionDefinedArity("FunctionDefined");
 
 	void initMLXMLTypeList(QStringList& ls);
 	void initMLXMLGUITypeList(QStringList& ls);
