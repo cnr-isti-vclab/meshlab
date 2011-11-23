@@ -26,7 +26,7 @@
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
-{
+{	 
   MeshLabApplication app(argc, argv);
   QLocale::setDefault(QLocale::C);
   QCoreApplication::setOrganizationName("VCG");
@@ -78,6 +78,5 @@ int main(int argc, char *argv[])
       window.importMesh(argv[1]);
 	}
 	//else 	if(filterObj->noEvent) window.open();
- 
 	return app.exec();
 }

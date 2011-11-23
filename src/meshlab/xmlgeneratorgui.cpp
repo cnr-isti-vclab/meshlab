@@ -201,7 +201,7 @@ FilterGeneratorGUI::FilterGeneratorGUI( QWidget* parent /*= NULL*/ )
 {
 	ui = new Ui::FilterCreatorGUI();
 	ui->setupUi(this);
-	this->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; } QPlainTextEdit{ background-color: white;} QTreeWidget  { background-color: white;} QComboBox QAbstractItemView{qproperty-alternatingRowColors:true;alternate-background-color: white;}");
+	this->setStyleSheet("QFrame { background-color:rgb(189,215,255); border-radius: 4px; }  QPlainText { background-color: white;} QTreeWidget  { background-color: white;} QComboBox QAbstractItemView{qproperty-alternatingRowColors:true;alternate-background-color: white;}");
 	fillComboBoxes();
 	createContextMenu();
 	ui->paramviewer->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
@@ -477,13 +477,13 @@ void FilterGeneratorTab::paintEvent( QPaintEvent* p )
 
 void FilterGeneratorTab::collectInfo( MLXMLFilterSubTree& filter )
 {
-	filter.filterinfo[MLXMLElNames::filterJSCodeTag] = "<![CDATA[" + ui->jscode->toPlainText () + "]]>";
+	filter.filterinfo[MLXMLElNames::filterJSCodeTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(ui->jscode->toPlainText ());
 	ui->guiframe->collectInfo(filter);
 }
 
 void FilterGeneratorTab::importInfo( const MLXMLFilterSubTree& tree )
 {
-	ui->jscode->setText(tree.filterinfo[MLXMLElNames::filterJSCodeTag]);
+	ui->jscode->setPlainText(tree.filterinfo[MLXMLElNames::filterJSCodeTag]);
 	ui->guiframe->importInfo(tree);
 }
 
@@ -611,6 +611,11 @@ void PluginGeneratorGUI::menuSelection( QAction* act)
 				loadXMLPlugin();
 				break;
 			}
+			case MN_GETHISTORY:
+			{
+				importHistory();
+				break;
+			}
 			case MN_INSERTPLUGINMESHLAB:
 			{
 				insertPluginInMeshLab();
@@ -643,6 +648,9 @@ void PluginGeneratorGUI::createContextMenu()
 	actsaveplug->setData(QVariant(MN_SAVEXMLPLUGIN));
 	QAction* actsaveasplug = menu->addAction("Save XML Plugin As...");
 	actsaveasplug->setData(QVariant(MN_SAVEASXMLPLUGIN));
+	menu->addSeparator();
+	QAction* acthistory = menu->addAction("Import XML filters history");
+	acthistory->setData(QVariant(MN_GETHISTORY));
 	menu->addSeparator();
 	QAction* actloadmeshlabsplug = menu->addAction("Load Plugin In MeshLab");
 	actloadmeshlabsplug->setData(QVariant(MN_INSERTPLUGINMESHLAB));
@@ -968,6 +976,16 @@ void PluginGeneratorGUI::setDocument( MeshDocument* mdoc )
 FilterGeneratorTab* PluginGeneratorGUI::tab(int ii)
 {
 	return qobject_cast<FilterGeneratorTab*>(tabs->widget(ii));
+}
+
+void PluginGeneratorGUI::importHistory()
+{
+	emit historyRequest();
+}
+
+void PluginGeneratorGUI::getHistory( const QStringList& hist )
+{
+	tab(tabs->currentIndex())->setCode(hist.join("\n"));
 }
 
 

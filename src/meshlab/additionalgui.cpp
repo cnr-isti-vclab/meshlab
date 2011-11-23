@@ -326,3 +326,117 @@ void TreeWidgetWithMenu::insertInMenu(const QString& st,const QVariant& data)
 	QAction* act = menu->addAction(st);
 	act->setData(data);
 }
+
+MLScriptEditor::MLScriptEditor( QWidget* par /*= NULL*/ )
+:QPlainTextEdit(par)
+{
+	narea = new MLNumberArea(this);
+
+	connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+	connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+	connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+
+	updateLineNumberAreaWidth(0);
+	highlightCurrentLine();
+}
+
+MLScriptEditor::~MLScriptEditor()
+{
+
+}
+
+void MLScriptEditor::lineNumberAreaPaintEvent( QPaintEvent *event )
+{
+	QPainter painter(narea);
+	painter.fillRect(event->rect(), Qt::lightGray);
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+	int bottom = top + (int) blockBoundingRect(block).height();
+	while (block.isValid() && top <= event->rect().bottom()) 
+	{
+		if (block.isVisible() && bottom >= event->rect().top()) 
+		{
+			QString number = QString::number(blockNumber + 1);
+			painter.setPen(Qt::black);
+			painter.drawText(0, top, narea->width(), fontMetrics().height(),Qt::AlignRight, number);
+		}
+
+		block = block.next();
+		top = bottom;
+		bottom = top + (int) blockBoundingRect(block).height();
+		++blockNumber;
+	}
+}
+
+int MLScriptEditor::lineNumberAreaWidth()
+{
+	int digits = 1;
+	int max = qMax(1, blockCount());
+	while (max >= 10) {
+		max /= 10;
+		++digits;
+	}
+
+	int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+
+	return space;
+}
+
+void MLScriptEditor::resizeEvent( QResizeEvent* e)
+{
+	QPlainTextEdit::resizeEvent(e);
+
+	QRect cr = contentsRect();
+	narea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void MLScriptEditor::updateLineNumberAreaWidth( int /*newBlockCount*/ )
+{
+	setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+void MLScriptEditor::highlightCurrentLine()
+{
+	QList<QTextEdit::ExtraSelection> extraSelections;
+
+	if (!isReadOnly()) {
+		QTextEdit::ExtraSelection selection;
+
+		QColor lineColor = QColor(Qt::yellow).lighter(160);
+
+		selection.format.setBackground(lineColor);
+		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+		selection.cursor = textCursor();
+		selection.cursor.clearSelection();
+		extraSelections.append(selection);
+	}
+
+	setExtraSelections(extraSelections);
+}
+
+void MLScriptEditor::updateLineNumberArea( const QRect & r, int dy)
+{
+	if (dy)
+		narea->scroll(0, dy);
+	else
+		narea->update(0, r.y(), narea->width(), r.height());
+
+	if (r.contains(viewport()->rect()))
+		updateLineNumberAreaWidth(0);
+}
+
+MLNumberArea::MLNumberArea( MLScriptEditor* editor ) : QWidget(editor)
+{
+	mledit = editor;
+}
+
+QSize MLNumberArea::sizeHint() const
+{
+	return QSize(mledit->lineNumberAreaWidth(), 0);
+}
+
+void MLNumberArea::paintEvent(QPaintEvent* e)
+{
+	mledit->lineNumberAreaPaintEvent(e);
+}

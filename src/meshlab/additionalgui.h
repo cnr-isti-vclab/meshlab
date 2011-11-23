@@ -107,4 +107,40 @@ public:
 	static QString avoidProblemsWithHTMLTagInsideXML( const QString& text );
 };
 
+class MLScriptEditor;
+
+class MLNumberArea : public QWidget
+{
+public:
+	MLNumberArea(MLScriptEditor* editor);
+	QSize sizeHint() const;
+
+protected:
+	void paintEvent(QPaintEvent *event);
+
+private:
+	MLScriptEditor* mledit;
+};
+
+class MLScriptEditor : public QPlainTextEdit
+{
+	Q_OBJECT
+public:
+	MLScriptEditor(QWidget* par = NULL);
+	~MLScriptEditor();
+
+	void lineNumberAreaPaintEvent(QPaintEvent *event);
+	int lineNumberAreaWidth();
+
+protected:
+	void resizeEvent(QResizeEvent *event);
+
+private slots:
+	void updateLineNumberAreaWidth(int newBlockCount);
+	void highlightCurrentLine();
+	void updateLineNumberArea(const QRect& r, int dy);
+private:
+	MLNumberArea* narea;
+};
+
 #endif // CHECKBOXLIST_H

@@ -1083,6 +1083,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	//else
 	//	meshDoc()->Log.BackToBookmark();
 	//// (4) Apply the Filter
+
+
+
 	bool ret = true;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
@@ -1108,19 +1111,27 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			if (filtercpp)
 				connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
 		}
+		MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
+		QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
+		if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity)
+		{
+			funcall = funcall + QString::number(meshDoc()->mm()->id());
+			if (ml.size() != 0)
+				funcall = funcall + ",";
+		}
+		for(int ii = 0;ii < ml.size();++ii)
+		{
+			funcall = funcall + env.evalString(ml[ii][MLXMLElNames::paramName]);
+			if (ii != ml.size() - 1)
+				funcall = funcall + ",";
+		}
+		funcall = funcall + ");";
+		if (meshDoc() != NULL)
+			meshDoc()->xmlhistory << funcall;
 		if (filtercpp)
 			ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 		else
 		{
-			QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
-			MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
-			for(int ii = 0;ii < ml.size();++ii)
-			{
-				funcall = funcall + env.evalString(ml[ii][MLXMLElNames::paramName]);
-				if (ii != ml.size() - 1)
-					funcall = funcall + ",";
-			}
-			funcall = funcall + ");";
 			PM.env.pushContext();
 			QScriptValue result = PM.env.evaluate(funcall);
 			PM.env.popContext();
@@ -2173,4 +2184,9 @@ void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& sc
 	PM.deleteXMLPlugin(scriptname);
 	PM.loadXMLPlugin(xmlpath);
 	fillFilterMenu();
+}
+
+void MainWindow::sendHistory()
+{
+	plugingui->getHistory(meshDoc()->xmlhistory);
 }

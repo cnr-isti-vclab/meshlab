@@ -180,6 +180,7 @@ private slots:
 	void dropEvent ( QDropEvent * event );
 	void dragEnterEvent(QDragEnterEvent *);
 	void connectionDone(bool status);
+	void sendHistory();
 
 	///////////Solt Wrapper for QMdiArea //////////////////
 	void wrapSetActiveSubWindow(QWidget* window);

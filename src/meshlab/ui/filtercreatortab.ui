@@ -65,14 +65,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QTextEdit" name="jscode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="MLScriptEditor" name="jscode"/>
       </item>
      </layout>
     </widget>
@@ -129,6 +122,11 @@
    <extends>QFrame</extends>
    <header>xmlgeneratorgui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MLScriptEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>additionalgui.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

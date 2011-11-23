@@ -151,7 +151,8 @@ public:
 	PluginGeneratorGUI(PluginManager& pman,QWidget* parent = NULL);
 	~PluginGeneratorGUI();
 	void setDocument(MeshDocument* mdoc);
-
+public slots:
+	void getHistory(const QStringList& hist);
 protected:
 	void paintEvent(QPaintEvent *event);
 	void contextMenuEvent ( QContextMenuEvent * event );
@@ -161,7 +162,7 @@ private slots:
 	void updateTabTitle(const QString& name,QWidget* wid);
 	void validateFilterName(const QString& name,FilterGeneratorGUI* wid);
 private:
-	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXECUTECODE,MN_LOADCODE,MN_SAVECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_INSERTPLUGINMESHLAB};
+	enum MenuOption {MN_ADDFILTER,MN_REMOVEFILTER,MN_EXECUTECODE,MN_LOADCODE,MN_SAVECODE,MN_NEWXMLPLUGIN,MN_SAVEXMLPLUGIN,MN_SAVEASXMLPLUGIN,MN_LOADXMLPLUGIN,MN_GETHISTORY,MN_INSERTPLUGINMESHLAB};
 	void createContextMenu();
 	void executeCurrentCode();
 	void loadScriptCode();
@@ -178,6 +179,7 @@ private:
 	void collectInfo(MLXMLTree& tree);
 	void importInfo(const MLXMLTree& tree);
 	void save( const QString& filepath,const bool generatecpp);
+	void importHistory();
 	FilterGeneratorTab* tab(int ii);
 
 	QString plugscriptname;
@@ -193,5 +195,6 @@ private:
 signals:
 	void scriptCodeExecuted(const QScriptValue& val,const int time,const QString&);
 	void insertXMLPluginRequested(const QString& filename,const QString& plugscriptname);
+	void historyRequest();
 };
 #endif
