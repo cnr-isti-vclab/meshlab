@@ -124,25 +124,62 @@ private:
 	MLScriptEditor* mledit;
 };
 
+class MLSyntaxHighlighter : public  QSyntaxHighlighter
+{
+protected:
+	void highlightBlock (const QString& text);
+
+	struct HighlightingRule
+	{
+		QRegExp pattern;
+		QTextCharFormat format;
+	};
+	
+	QList<HighlightingRule> highlightingRules;
+
+	static QString addIDBoundary(const QString& st);
+	MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist, QObject* parent);
+
+	QStringList reserved;
+	QStringList langfuncs;
+	QStringList mlnmspace;
+	QStringList mlfun;
+	QStringList vcgbridgetype;
+	QStringList vcgbridgefun;
+
+	QString plugvar;
+};
+
+class JavaScriptSyntaxHighLighter : public MLSyntaxHighlighter
+{
+public:
+	JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent);
+
+};
+
 class MLScriptEditor : public QPlainTextEdit
 {
 	Q_OBJECT
 public:
 	MLScriptEditor(QWidget* par = NULL);
 	~MLScriptEditor();
-
 	void lineNumberAreaPaintEvent(QPaintEvent *event,const QColor& col);
 	int lineNumberAreaWidth();
+	void setSyntaxHighlighter(MLSyntaxHighlighter* high);
 
 protected:
 	void resizeEvent(QResizeEvent *event);
+	void keyPressEvent(QKeyEvent * e);
 
 private slots:
 	void updateLineNumberAreaWidth(int newBlockCount);
+	//void updateCursorPos(int newBlockCount);
 	void highlightCurrentLine();
 	void updateLineNumberArea(const QRect& r, int dy);
 private:
 	MLNumberArea* narea;
+	QStringList regexps;
+	MLSyntaxHighlighter* slh;
 };
 
 #endif // CHECKBOXLIST_H

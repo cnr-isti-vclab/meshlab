@@ -328,10 +328,16 @@ void TreeWidgetWithMenu::insertInMenu(const QString& st,const QVariant& data)
 }
 
 MLScriptEditor::MLScriptEditor( QWidget* par /*= NULL*/ )
-:QPlainTextEdit(par)
+:QPlainTextEdit(par),regexps()
 {
+	QTextDocument* mydoc = new QTextDocument(this);
+	QPlainTextDocumentLayout* ld = new QPlainTextDocumentLayout(mydoc);
+	mydoc->setDocumentLayout(ld);
+	setDocument(mydoc);
+
 	narea = new MLNumberArea(this);
 	connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+	//connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateCursorPos(int)));
 	connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 	connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
@@ -349,6 +355,7 @@ void MLScriptEditor::lineNumberAreaPaintEvent( QPaintEvent *event,const QColor& 
 	QPainter painter(narea);
 	painter.fillRect(event->rect(),col);
 	QTextBlock block = firstVisibleBlock();
+	int indent = block.blockFormat().indent();
 	int blockNumber = block.blockNumber();
 	int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
 	int bottom = top + (int) blockBoundingRect(block).height();
@@ -390,7 +397,7 @@ void MLScriptEditor::resizeEvent( QResizeEvent* e)
 	narea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void MLScriptEditor::updateLineNumberAreaWidth( int /*newBlockCount*/ )
+void MLScriptEditor::updateLineNumberAreaWidth( int newBlockCount)
 {
 	setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
@@ -425,6 +432,41 @@ void MLScriptEditor::updateLineNumberArea( const QRect & r, int dy)
 		updateLineNumberAreaWidth(0);
 }
 
+void MLScriptEditor::keyPressEvent( QKeyEvent * e )
+{
+	switch(e->key())
+	{
+		case (Qt::Key_Return):
+		case (Qt::Key_Enter):
+		{
+			QTextBlock b = textCursor().block();
+			QRegExp tab("(\\t)+\\w");
+			bool tabfound = (b.text().indexOf(tab) == 0);
+			textCursor().insertText("\n");
+			if (tabfound)
+			{
+				QString cap = tab.cap();
+				int tabcount = cap.lastIndexOf(QRegExp("\\t")) + 1;
+				QString tabst;
+				for(int ii = 0;ii < tabcount;++ii)
+					tabst += '\t';
+				textCursor().insertText(tabst);
+			}
+			return;
+			break;
+		}
+
+	}
+	QPlainTextEdit::keyPressEvent(e);
+}
+
+void MLScriptEditor::setSyntaxHighlighter( MLSyntaxHighlighter* high )
+{
+	slh = high;
+	if (slh != NULL)
+		slh->setDocument(document());
+}
+
 MLNumberArea::MLNumberArea( MLScriptEditor* editor ) : QWidget(editor)
 {
 	mledit = editor;
@@ -439,3 +481,87 @@ void MLNumberArea::paintEvent(QPaintEvent* e)
 {
 	mledit->lineNumberAreaPaintEvent(e,UsefulGUIFunctions::editorMagicColor());
 }
+
+MLSyntaxHighlighter::MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent )
+:QSyntaxHighlighter(parent),reserved(),langfuncs(),vcgbridgefun(),vcgbridgetype(),mlfun(),mlnmspace()
+{
+	HighlightingRule pvar;
+	pvar.format.setForeground(Qt::red);
+	pvar.pattern = QRegExp(pluginvar);
+	highlightingRules << pvar;
+	foreach(const QString& s,namespacelist)
+	{
+		//pvar.format.setForeground(Qt::magenta);
+		pvar.pattern = QRegExp(s);
+		highlightingRules << pvar;
+	}
+	foreach(const QString& s,filterlist)
+	{
+		pvar.pattern = QRegExp(s);
+		highlightingRules << pvar;
+	}
+
+}
+
+void MLSyntaxHighlighter::highlightBlock( const QString& text )
+{
+	foreach (const HighlightingRule &rule, highlightingRules) 
+	{
+		QRegExp expression(rule.pattern);
+		int index = expression.indexIn(text);
+		while (index >= 0) 
+		{
+			int length = expression.matchedLength();
+			setFormat(index, length, rule.format);
+			index = expression.indexIn(text, index + length);
+		}
+	}
+	setCurrentBlockState(0);
+}
+
+QString MLSyntaxHighlighter::addIDBoundary( const QString& st )
+{
+	return "\\b" + st + "\\b";
+}
+
+JavaScriptSyntaxHighLighter::JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent )
+:MLSyntaxHighlighter(pluginvar,namespacelist,filterlist,parent)
+{
+	HighlightingRule res;
+	res.format.setForeground(Qt::darkBlue);
+	res.format.setFontWeight(QFont::Bold);
+	reserved << addIDBoundary("break");
+	reserved << addIDBoundary("case");	
+	reserved << addIDBoundary("catch");	
+	reserved << addIDBoundary("continue");
+	reserved << addIDBoundary("default");
+	reserved << addIDBoundary("delete");
+	reserved << addIDBoundary("do");
+	reserved << addIDBoundary("else");
+	reserved << addIDBoundary("finally");
+	reserved << addIDBoundary("for");
+	reserved << addIDBoundary("function");
+	reserved << addIDBoundary("if");
+	reserved << addIDBoundary("in");
+	reserved << addIDBoundary("instanceof");
+	reserved << addIDBoundary("new");
+	reserved << addIDBoundary("return");
+	reserved << addIDBoundary("switch");
+	reserved << addIDBoundary("this");
+	reserved << addIDBoundary("throw");
+	reserved << addIDBoundary("try");
+	reserved << addIDBoundary("typeof");
+	reserved << addIDBoundary("var");
+	reserved << addIDBoundary("void");
+	reserved << addIDBoundary("while");
+	reserved << addIDBoundary("with");
+	reserved << addIDBoundary("true");
+	reserved << addIDBoundary("false");
+	reserved << addIDBoundary("null");
+	foreach(QString st,reserved)
+	{
+		res.pattern = QRegExp(st);
+		highlightingRules << res;
+	}
+}
+

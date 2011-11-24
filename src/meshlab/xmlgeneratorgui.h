@@ -118,7 +118,7 @@ class FilterGeneratorTab : public QFrame
 {
 	Q_OBJECT
 public:
-	FilterGeneratorTab(const QString& filtername,QWidget* parent = NULL);
+	FilterGeneratorTab(const QString& filtername,QWidget* parent = NULL,const QString& pluginvar = QString(),const QStringList& namespacelist = QStringList(),const QStringList& filterlist = QStringList());
 	~FilterGeneratorTab();
 
 	void collectInfo(MLXMLFilterSubTree& filter);
