@@ -86,11 +86,17 @@ public:
 	QVector<QAction *> decoratorActionList;
 
 	QStringList pluginsLoaded;
+
+	static QString pluginNameSpace();
+	//highlight and autocomplete
+	QStringList pluginnamespaces;
+	QStringList filterscriptnames;
+	QStringList filtersign;
 	Env env;
 
 	void updateDocumentScriptBindings(MeshDocument& doc);
 private:
-	void loadPluginsCode();
+	/*void loadPluginsCode();*/
 	QString scriptplugcode;
 
 };

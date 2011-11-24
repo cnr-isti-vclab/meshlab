@@ -54,6 +54,10 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	pluginsDir.setNameFilters(pluginfilters);
 
 	qDebug( "Current Plugins Dir is: %s ",qPrintable(pluginsDir.absolutePath()));
+	scriptplugcode = "";
+	ScriptAdapterGenerator gen;
+	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
+	scriptplugcode += pluginNameSpace() + " = { };\n";
 	foreach (QString fileName, pluginsDir.entryList(QDir::Files)) 
 	{
 		QString absfilepath = pluginsDir.absoluteFilePath(fileName);
@@ -122,7 +126,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
 		++ii;
 	} 
-	loadPluginsCode();
+	//loadPluginsCode();
 	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
 	env.globalObject().setProperty("_applyFilter", applyFun);
 	QScriptValue res = env.evaluate(scriptplugcode);
@@ -132,31 +136,31 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 }
 
 
-void PluginManager::loadPluginsCode()
-{
-	scriptplugcode = "";
-	ScriptAdapterGenerator gen;
-	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
-	scriptplugcode += "Plugins = { };\n";
-	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
-	for(int ii = 0;ii < xmlpluginfo.size();++ii)
-	{
-		MLXMLPluginInfo* mi = xmlpluginfo[ii];
-		QString pname = mi->pluginScriptName();
-		if (pname != "")
-		{
-			scriptplugcode += "Plugins." + pname + " = { };\n";
-			QStringList filters = mi->filterNames();
-			foreach(QString filter,filters)
-			{
-				QString filterFunction = mi->filterScriptCode(filter);
-				if (filterFunction == "")
-					filterFunction = gen.funCodeGenerator(filter,*mi);
-				scriptplugcode += "Plugins." + pname + "." + mi->filterAttribute(filter,MLXMLElNames::filterScriptFunctName) + " = " + filterFunction + "\n";
-			}
-		}
-	}
-}
+//void PluginManager::loadPluginsCode()
+//{
+//	scriptplugcode = "";
+//	ScriptAdapterGenerator gen;
+//	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
+//	scriptplugcode += pluginNameSpace() + " = { };\n";
+//	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
+//	for(int ii = 0;ii < xmlpluginfo.size();++ii)
+//	{
+//		MLXMLPluginInfo* mi = xmlpluginfo[ii];
+//		QString pname = mi->pluginScriptName();
+//		if (pname != "")
+//		{
+//			scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
+//			QStringList filters = mi->filterNames();
+//			foreach(QString filter,filters)
+//			{
+//				QString filterFunction = mi->filterScriptCode(filter);
+//				if (filterFunction == "")
+//					filterFunction = gen.funCodeGenerator(filter,*mi);
+//				scriptplugcode += pluginNameSpace() + "." + pname + "." + mi->filterAttribute(filter,MLXMLElNames::filterScriptFunctName) + " = " + filterFunction + "\n";
+//			}
+//		}
+//	}
+//}
 
 /*
 This function create a map from filtername to dummy RichParameterSet.
@@ -284,6 +288,7 @@ QString PluginManager::pluginsCode() const
 
 void PluginManager::loadXMLPlugin( const QString& fileName )
 {
+	ScriptAdapterGenerator gen;
 	QString absfilepath = pluginsDir.absoluteFilePath(fileName);
 	QFileInfo fin(absfilepath);
 	if (fin.suffix() == "xml")
@@ -313,10 +318,27 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
 			}
 			else
 				par = new QObject();
-			foreach(QString filtName,fn)
+
+			QString pname = pluginfo->pluginScriptName();
+			if (pname != "")
 			{
-				fc.act = new QAction(filtName,par);
-				stringXMLFilterMap.insert(filtName,fc);
+				pluginnamespaces << pname;
+				scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
+				QStringList filters = pluginfo->filterNames();
+				foreach(QString filter,filters)
+				{
+					fc.act = new QAction(filter,par);
+					stringXMLFilterMap.insert(filter,fc);
+					QString filterFunction = pluginfo->filterScriptCode(filter);
+					if (filterFunction == "")
+						filterFunction = gen.funCodeGenerator(filter,*pluginfo);
+					QString jname = pluginfo->filterAttribute(filter,MLXMLElNames::filterScriptFunctName);
+					QString completename = pluginNameSpace() + "." + pname + "." + jname;
+					filterscriptnames << jname;
+					scriptplugcode += completename + " = " + filterFunction + "\n";
+					completename += "(" + gen.parNames(filter,*pluginfo) + ")";
+					filtersign << completename;
+				}
 			}
 		}
 		else
@@ -374,5 +396,10 @@ void PluginManager::deleteXMLPlugin( const QString& plugscriptname )
 			delete fi;
 		}
 	}
+}
+
+QString PluginManager::pluginNameSpace()
+{
+	return "Plugins";
 }
 

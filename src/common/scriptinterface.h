@@ -34,13 +34,14 @@ class ScriptAdapterGenerator
 {
 private:
 	QString parNames(const RichParameterSet& set) const;
-	QString parNames(const QString&  filterName,MLXMLPluginInfo& xmlInfo) const;
 	static inline QString optName() {return QString("optional");}
+	static inline QString meshID() {return QString ("meshID");}
 public:
 	inline static const QString meshDocVarName() {return QString("meshDoc");}
 	static const QStringList javaScriptLibraryFiles();
-
+	
 	QString mergeOptParamsCodeGenerator() const;
+	QString parNames(const QString&  filterName,MLXMLPluginInfo& xmlInfo) const;
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,MLXMLPluginInfo& xmlInfo) const;
 };

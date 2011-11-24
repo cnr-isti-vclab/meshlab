@@ -23,6 +23,15 @@ QString ScriptAdapterGenerator::parNames( const QString& filterName,MLXMLPluginI
 	MLXMLPluginInfo::XMLMapList params = xmlInfo.filterParametersExtendedInfo(filterName);
 	int ii;
 	bool optional = false;
+	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterArity);
+
+	bool isSingle = (ariet == MLXMLElNames::singleMeshArity);
+	QString mid = meshID();
+	if ((names.isEmpty()) && isSingle && (xmlInfo.filterScriptCode(filterName) == ""))
+		names = mid;
+	else
+		if (isSingle && (xmlInfo.filterScriptCode(filterName) == ""))
+			names = mid + ", " + names;
 	for(ii = 0;ii < params.size();++ii)
 	{
 		bool isImp = (params[ii][MLXMLElNames::paramIsImportant] == "true");
@@ -60,15 +69,6 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,MLXM
 {
 	QString code;
 	QString names = parNames(filterName,xmlInfo);
-	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterArity);
-
-	bool isSingle = (ariet == MLXMLElNames::singleMeshArity);
-	QString mid("meshID");
-	if ((names.isEmpty()) && isSingle)
-		names = mid;
-	else
-		if (isSingle)
-			names = mid + ", " + names;
 
 	code += "function (" + names + ")\n";
 	code += "{\n";
@@ -86,7 +86,9 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,MLXM
 	}
 	
 	code += "\tvar environ = new Env;\n";
-	
+
+	QString ariet = xmlInfo.filterAttribute(filterName,MLXMLElNames::filterArity);
+	bool isSingle = (ariet == MLXMLElNames::singleMeshArity);
 	//if is singleMeshAriety i have to jump the first argument because is the meshID
 	int arg = (int) isSingle;
 	for(int ii = 0; ii < mplist.size();++ii)
@@ -149,7 +151,7 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,MLXM
 	code += "\tvar environWrap = new EnvWrap(environ);\n";
 	if (isSingle)
 	{
-		code += "\tvar oldInd=" + meshDocVarName() + ".setCurrent(" + mid + ");\n";
+		code += "\tvar oldInd=" + meshDocVarName() + ".setCurrent(" + meshID() + ");\n";
 		code += "\tif (oldInd == -1) return false;\n"; 
 	}
 	code += "\tvar result = _applyFilter(\"" + filterName + "\",environWrap);\n";
