@@ -49,9 +49,7 @@ MainWindow::MainWindow()
 	layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,layerDialog);
 
-	plugingui = new PluginGeneratorGUI(PM,this);
-	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
+
 	//setCentralWidget(workspace);
 	setCentralWidget(mdiarea);
 	windowMapper = new QSignalMapper(this);
@@ -64,18 +62,15 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
-	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
-	connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
-	connect(plugingui,SIGNAL(historyRequest()),this,SLOT(sendHistory()));
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
 	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
 
-        QIcon icon;
-        icon.addPixmap(QPixmap(":images/eye48.png"));
-        setWindowIcon(icon);
+	QIcon icon;
+	icon.addPixmap(QPixmap(":images/eye48.png"));
+	setWindowIcon(icon);
 
-        PM.loadPlugins(defaultGlobalParams);
+	PM.loadPlugins(defaultGlobalParams);
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
@@ -99,7 +94,14 @@ MainWindow::MainWindow()
 	statusBar()->addPermanentWidget(qb,0);
 	statusBar()->addPermanentWidget(interruptbut,0);
 	updateMenus();
-  newProject();
+	newProject();
+	//PM should be initialized before passing it to PluginGeneratorGUI
+	plugingui = new PluginGeneratorGUI(PM,this);
+	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
+	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
+	connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
+	connect(plugingui,SIGNAL(historyRequest()),this,SLOT(sendHistory()));
 	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
 	//wid->showMaximized();
 	//ar->update();
@@ -113,12 +115,12 @@ MainWindow::MainWindow()
 void MainWindow::createActions()
 {
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
-  newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
-  newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
-  newProjectAct->setShortcut(Qt::CTRL+Qt::Key_N);
-  connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newProject()));
+	newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
+	newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
+	newProjectAct->setShortcut(Qt::CTRL+Qt::Key_N);
+	connect(newProjectAct, SIGNAL(triggered()), this, SLOT(newProject()));
 
-  openProjectAct = new QAction(QIcon(":/images/open_project.png"),tr("&Open project..."), this);
+	openProjectAct = new QAction(QIcon(":/images/open_project.png"),tr("&Open project..."), this);
 	openProjectAct->setShortcutContext(Qt::ApplicationShortcut);
 	openProjectAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
@@ -136,26 +138,26 @@ void MainWindow::createActions()
 	//closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
 	connect(closeProjectAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
 	//connect(closeProjectAct, SIGNAL(triggered()),this, SLOT(closeProjectWindow()));
-  importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
-  importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-  importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
-  connect(importMeshAct, SIGNAL(triggered()), this, SLOT(importMesh()));
+	importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
+	importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+	importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
+	connect(importMeshAct, SIGNAL(triggered()), this, SLOT(importMesh()));
 
-  exportMeshAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
-  exportMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-  exportMeshAct->setShortcut(Qt::CTRL+Qt::Key_E);
-  connect(exportMeshAct, SIGNAL(triggered()), this, SLOT(save()));
+	exportMeshAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
+	exportMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+	exportMeshAct->setShortcut(Qt::CTRL+Qt::Key_E);
+	connect(exportMeshAct, SIGNAL(triggered()), this, SLOT(save()));
 
-  exportMeshAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
-  connect(exportMeshAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+	exportMeshAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
+	connect(exportMeshAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-  reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
-  reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-  reloadMeshAct->setShortcut(Qt::CTRL+Qt::Key_R);
-  connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
+	reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+	reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+	reloadMeshAct->setShortcut(Qt::CTRL+Qt::Key_R);
+	connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
 
-  importRasterAct = new QAction(QIcon(":/images/open.png"),tr("Import Raster..."), this);
-  connect(importRasterAct, SIGNAL(triggered()), this, SLOT(importRaster()));
+	importRasterAct = new QAction(QIcon(":/images/open.png"),tr("Import Raster..."), this);
+	connect(importRasterAct, SIGNAL(triggered()), this, SLOT(importRaster()));
 
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
@@ -169,10 +171,10 @@ void MainWindow::createActions()
 		recentFileActs[i] = new QAction(this);
 		recentFileActs[i]->setVisible(true);
 		recentFileActs[i]->setEnabled(false);
-    recentFileActs[i]->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1+i));
+		recentFileActs[i]->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1+i));
 		connect(recentProjActs[i],SIGNAL(triggered()),this,SLOT(openRecentProj()));
-    connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentMesh()));
-		
+		connect(recentFileActs[i], SIGNAL(triggered()),this, SLOT(openRecentMesh()));
+
 	}
 
 	exitAct = new QAction(tr("E&xit"), this);
@@ -331,13 +333,13 @@ void MainWindow::createActions()
 	viewFrontAct	  = new QAction(tr("Front"),viewFromGroupAct);
 	viewBackAct	    = new QAction(tr("Back"),viewFromGroupAct);
 
-  // keyboard shortcuts for canonical viewdirections, blender style
-  viewFrontAct->setShortcut(Qt::Key_End);
-  viewBackAct->setShortcut(Qt::CTRL + Qt::Key_End);
-  viewRightAct->setShortcut(Qt::Key_PageDown);
-  viewLeftAct->setShortcut(Qt::SHIFT + Qt::Key_PageDown);
-  viewTopAct->setShortcut(Qt::Key_Home);
-  viewBottomAct->setShortcut(Qt::SHIFT + Qt::Key_Home);
+	// keyboard shortcuts for canonical viewdirections, blender style
+	viewFrontAct->setShortcut(Qt::Key_End);
+	viewBackAct->setShortcut(Qt::CTRL + Qt::Key_End);
+	viewRightAct->setShortcut(Qt::Key_PageDown);
+	viewLeftAct->setShortcut(Qt::SHIFT + Qt::Key_PageDown);
+	viewTopAct->setShortcut(Qt::Key_Home);
+	viewBottomAct->setShortcut(Qt::SHIFT + Qt::Key_Home);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 
@@ -422,11 +424,11 @@ void MainWindow::createToolBars()
 {
 	mainToolBar = addToolBar(tr("Standard"));
 	mainToolBar->setIconSize(QSize(32,32));
-  mainToolBar->addAction(this->newProjectAct);
-  mainToolBar->addAction(this->openProjectAct);
-  mainToolBar->addAction(importMeshAct);
-  mainToolBar->addAction(reloadMeshAct);
-  mainToolBar->addAction(exportMeshAct);
+	mainToolBar->addAction(this->newProjectAct);
+	mainToolBar->addAction(this->openProjectAct);
+	mainToolBar->addAction(importMeshAct);
+	mainToolBar->addAction(reloadMeshAct);
+	mainToolBar->addAction(exportMeshAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
 
@@ -461,25 +463,25 @@ void MainWindow::createMenus()
 {
 	//////////////////// Menu File ////////////////////////////////////////////////////////////////////////////
 	fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(newProjectAct);
+	fileMenu->addAction(newProjectAct);
 	fileMenu->addAction(openProjectAct);
 	fileMenu->addAction(saveProjectAct);
 	fileMenu->addAction(closeProjectAct);
 	fileMenu->addSeparator();
 
-  fileMenu->addAction(importMeshAct);
-  fileMenu->addAction(exportMeshAct);
-  fileMenu->addAction(exportMeshAsAct);
-  fileMenu->addAction(reloadMeshAct);
+	fileMenu->addAction(importMeshAct);
+	fileMenu->addAction(exportMeshAct);
+	fileMenu->addAction(exportMeshAsAct);
+	fileMenu->addAction(reloadMeshAct);
 	fileMenu->addSeparator();
-  fileMenu->addAction(importRasterAct);
-  fileMenu->addSeparator();
+	fileMenu->addAction(importRasterAct);
+	fileMenu->addSeparator();
 
 	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
 	recentProjMenu = fileMenu->addMenu(tr("Recent Projects"));
 	recentFileMenu = fileMenu->addMenu(tr("Recent Files"));
-	
+
 
 	for (int i = 0; i < MAXRECENTFILES; ++i) 
 	{
@@ -629,7 +631,7 @@ void MainWindow::fillFilterMenu()
 	{
 		MeshFilterInterface * iFilter= msi.value();
 		QAction *filterAction = iFilter->AC((msi.key()));
-			filterAction->setToolTip(iFilter->filterInfo(filterAction));
+		filterAction->setToolTip(iFilter->filterInfo(filterAction));
 		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
@@ -649,7 +651,7 @@ void MainWindow::fillFilterMenu()
 		if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
 		if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
 		if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
-    if( filterClass & MeshFilterInterface::Camera)          filterMenuCamera->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::Camera)          filterMenuCamera->addAction(filterAction);
 		//  MeshFilterInterface::Generic :
 		if(filterClass == 0)                                    filterMenu->addAction(filterAction);
 		if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
@@ -658,7 +660,7 @@ void MainWindow::fillFilterMenu()
 	QMap<QString,MeshLabXMLFilterContainer>::iterator xmlit;
 	for(xmlit =  PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end();++xmlit)
 	{
-    //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
+		//MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
 		QAction *filterAction = xmlit.value().act;
 		MLXMLPluginInfo* info = xmlit.value().xmlInfo;
 		QString filterName = xmlit.key();
@@ -688,8 +690,8 @@ void MainWindow::fillFilterMenu()
 				if( nameClass == QString("Sampling")) filterMenuSampling->addAction(filterAction);
 				if( nameClass == QString("Texture")) filterMenuTexture->addAction(filterAction);
 				if( nameClass == QString("Polygonal")) filterMenuPolygonal->addAction(filterAction);
-        if( nameClass == QString("Camera")) filterMenuCamera->addAction(filterAction);
-			  //  //  MeshFilterInterface::Generic :
+				if( nameClass == QString("Camera")) filterMenuCamera->addAction(filterAction);
+				//  //  MeshFilterInterface::Generic :
 				if(	nameClass == QString("Generic")) filterMenu->addAction(filterAction);
 				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
 			}
@@ -708,7 +710,7 @@ void MainWindow::fillDecorateMenu()
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
 			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
-      decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
+			decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
 			renderMenu->addAction(decorateAction);
 		}
 	}
@@ -724,7 +726,7 @@ void MainWindow::fillRenderMenu()
 
 void MainWindow::fillEditMenu()
 {
-  foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
+	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
 	{		
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
@@ -737,63 +739,63 @@ void MainWindow::fillEditMenu()
 
 void MainWindow::loadMeshLabSettings()
 {
-  // I have already loaded the plugins so the default parameters for the settings
-  // of the plugins are already in the <defaultGlobalParams> .
-  // we just miss the globals default of meshlab itself
-  GLArea::initGlobalParameterSet(& defaultGlobalParams);
+	// I have already loaded the plugins so the default parameters for the settings
+	// of the plugins are already in the <defaultGlobalParams> .
+	// we just miss the globals default of meshlab itself
+	GLArea::initGlobalParameterSet(& defaultGlobalParams);
 
-  QSettings settings;
-  QStringList klist = settings.allKeys();
+	QSettings settings;
+	QStringList klist = settings.allKeys();
 
-  // 1) load saved values into the <currentGlobalParams>
-  for(int ii = 0;ii < klist.size();++ii)
-  {
-    QDomDocument doc;
-    doc.setContent(settings.value(klist.at(ii)).toString());
+	// 1) load saved values into the <currentGlobalParams>
+	for(int ii = 0;ii < klist.size();++ii)
+	{
+		QDomDocument doc;
+		doc.setContent(settings.value(klist.at(ii)).toString());
 
-    QString st = settings.value(klist.at(ii)).toString();
-    QDomElement docElem = doc.firstChild().toElement();
+		QString st = settings.value(klist.at(ii)).toString();
+		QDomElement docElem = doc.firstChild().toElement();
 
-    RichParameter* rpar = NULL;
-    if(!docElem.isNull())
-    {
-      bool ret = RichParameterFactory::create(docElem,&rpar);
-      if (!ret)
-      {
-        //  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
-        continue;
-      }
-      if (!defaultGlobalParams.hasParameter(rpar->name))
-      {
-        //  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-        //         "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
-      }
-      else currentGlobalParams.addParam(rpar);
-    }
-  }
+		RichParameter* rpar = NULL;
+		if(!docElem.isNull())
+		{
+			bool ret = RichParameterFactory::create(docElem,&rpar);
+			if (!ret)
+			{
+				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
+				continue;
+			}
+			if (!defaultGlobalParams.hasParameter(rpar->name))
+			{
+				//  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
+				//         "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
+			}
+			else currentGlobalParams.addParam(rpar);
+		}
+	}
 
-  // 2) eventually fill missing values with the hardwired defaults
-  for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
-  {
-    //		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
-    if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
-    {
-      qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
-      RichParameterCopyConstructor v;
-      defaultGlobalParams.paramList.at(ii)->accept(v);
-      currentGlobalParams.paramList.push_back(v.lastCreated);
+	// 2) eventually fill missing values with the hardwired defaults
+	for(int ii = 0;ii < defaultGlobalParams.paramList.size();++ii)
+	{
+		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
+		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
+		{
+			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
+			RichParameterCopyConstructor v;
+			defaultGlobalParams.paramList.at(ii)->accept(v);
+			currentGlobalParams.paramList.push_back(v.lastCreated);
 
-      QDomDocument doc("MeshLabSettings");
-      RichParameterXMLVisitor vxml(doc);
-      v.lastCreated->accept(vxml);
-      doc.appendChild(vxml.parElem);
-      QString docstring =  doc.toString();
-      QSettings setting;
-      setting.setValue(v.lastCreated->name,QVariant(docstring));
-    }
-  }
+			QDomDocument doc("MeshLabSettings");
+			RichParameterXMLVisitor vxml(doc);
+			v.lastCreated->accept(vxml);
+			doc.appendChild(vxml.parElem);
+			QString docstring =  doc.toString();
+			QSettings setting;
+			setting.setValue(v.lastCreated->name,QVariant(docstring));
+		}
+	}
 
-  emit dispatchCustomSettings(currentGlobalParams);
+	emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
@@ -834,24 +836,24 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 	int lastComunicatedValue = settings.value("lastComunicatedValue",0).toInt();
 
 	if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
-  {
+	{
 #if not defined(__DISABLE_AUTO_STATS__)
 		checkForUpdates(false);
 #endif
-    int congratsMeshCounter = settings.value("congratsMeshCounter",50).toInt();
-    if(loadedMeshCounter > congratsMeshCounter * 2 )
-			{
-        // This preference values store when you did the last request for a mail
-				settings.setValue("congratsMeshCounter",loadedMeshCounter);
+		int congratsMeshCounter = settings.value("congratsMeshCounter",50).toInt();
+		if(loadedMeshCounter > congratsMeshCounter * 2 )
+		{
+			// This preference values store when you did the last request for a mail
+			settings.setValue("congratsMeshCounter",loadedMeshCounter);
 
-				QDialog *congratsDialog = new QDialog();
-				Ui::CongratsDialog temp;
-				temp.setupUi(congratsDialog);
-        temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
-				congratsDialog->exec();
-				if(congratsDialog->result()==QDialog::Accepted)
-          QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
-			}
+			QDialog *congratsDialog = new QDialog();
+			Ui::CongratsDialog temp;
+			temp.setupUi(congratsDialog);
+			temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+			congratsDialog->exec();
+			if(congratsDialog->result()==QDialog::Accepted)
+				QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
+		}
 	}
 }
 
@@ -894,23 +896,23 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	}
 
 #ifdef _DEBUG_PHP
-    QString BaseCommand("/~cignoni/meshlab_d.php");
+	QString BaseCommand("/~cignoni/meshlab_d.php");
 #else
-    QString BaseCommand("/~cignoni/meshlab.php");
+	QString BaseCommand("/~cignoni/meshlab.php");
 #endif
 
 #ifdef Q_WS_WIN
-    QString OS="Win";
+	QString OS="Win";
 #elif defined( Q_WS_MAC)
-    QString OS="Mac";
+	QString OS="Mac";
 #else
-    QString OS="Lin";
+	QString OS="Lin";
 #endif
-    QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(appVer()).arg(OS);
-    idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
-    bool ret=myLocalBuf.open(QBuffer::WriteOnly);
-    if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
-    idGet=httpReq->get(message,&myLocalBuf);     // id == 2
+	QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(appVer()).arg(OS);
+	idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
+	bool ret=myLocalBuf.open(QBuffer::WriteOnly);
+	if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
+	idGet=httpReq->get(message,&myLocalBuf);     // id == 2
 
 }
 
@@ -935,15 +937,15 @@ void MainWindow::submitBug()
 	QPushButton *submitBug = mb.addButton("Submit Bug",QMessageBox::AcceptRole);
 	mb.addButton(QMessageBox::Cancel);
 	mb.setText(tr("If Meshlab closed in unexpected way (e.g. it crashed badly) and"
-						 "if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
-						  ) );
+		"if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
+		) );
 	mb.setInformativeText(	tr(
-	         "Hints for a good, useful bug report:\n"
-					 "- Be verbose and descriptive\n"
-					 "- Report meshlab version and OS\n"
-					 "- Describe the sequence of actions that bring you to the crash.\n"
-					 "- Consider submitting the mesh file causing a particular crash.\n"
-					 ) );
+		"Hints for a good, useful bug report:\n"
+		"- Be verbose and descriptive\n"
+		"- Report meshlab version and OS\n"
+		"- Describe the sequence of actions that bring you to the crash.\n"
+		"- Consider submitting the mesh file causing a particular crash.\n"
+		) );
 
 	mb.exec();
 

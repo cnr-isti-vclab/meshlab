@@ -1113,7 +1113,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 		}
 		MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
 		QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
-		if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity)
+		if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity && !jscode)
 		{
 			funcall = funcall + QString::number(meshDoc()->mm()->id());
 			if (ml.size() != 0)
@@ -1132,10 +1132,12 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 		else
 		{
+			QTime t;
+			t.start();
 			PM.env.pushContext();
 			QScriptValue result = PM.env.evaluate(funcall);
 			PM.env.popContext();
-			scriptCodeExecuted(result,0,"");
+			scriptCodeExecuted(result,t.elapsed(),"");
 			
 		}
 		if (isinter)

@@ -487,17 +487,17 @@ MLSyntaxHighlighter::MLSyntaxHighlighter(const QString& pluginvar,const QStringL
 {
 	HighlightingRule pvar;
 	pvar.format.setForeground(Qt::red);
-	pvar.pattern = QRegExp(pluginvar);
+	pvar.pattern = QRegExp(addIDBoundary(pluginvar));
 	highlightingRules << pvar;
 	foreach(const QString& s,namespacelist)
 	{
 		//pvar.format.setForeground(Qt::magenta);
-		pvar.pattern = QRegExp(s);
+		pvar.pattern = QRegExp(addIDBoundary(s));
 		highlightingRules << pvar;
 	}
 	foreach(const QString& s,filterlist)
 	{
-		pvar.pattern = QRegExp(s);
+		pvar.pattern = QRegExp(addIDBoundary(s));
 		highlightingRules << pvar;
 	}
 

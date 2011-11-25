@@ -148,7 +148,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 	if(isPreviewable())
 	{
 		meshState.create(curmask, curModel);
-		connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
+		//connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 		connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 	}
 	connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
@@ -170,18 +170,18 @@ void MeshLabXMLStdDialog::applyClick()
 	if(curmask)	
 		meshState.apply(curModel);
 
-	applyContext = env.currentContext()->toString();
-	//PreView Caching: if the apply parameters are the same to those used in the preview mode
-	//we don't need to reapply the filter to the mesh
-	bool isEqual = (applyContext == previewContext);
-	if ((isEqual) && (validcache))
-		meshCacheState.apply(curModel);
-	else
-	{
+	//applyContext = env.currentContext()->toString();
+	////PreView Caching: if the apply parameters are the same to those used in the preview mode
+	////we don't need to reapply the filter to the mesh
+	//bool isEqual = (applyContext == previewContext);
+	//if ((isEqual) && (validcache))
+	//	meshCacheState.apply(curModel);
+	//else
+	//{
 		QString nm = curmfc->act->text();
 		EnvWrap wrap(env);
 		curmwi->executeFilter(curmfc,wrap,false);
-	}
+	/*}*/
 	env.popContext();
 
 	if(curmask)	
@@ -262,10 +262,10 @@ void MeshLabXMLStdDialog::applyDynamic()
 
 void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 {
-	if(isPreviewable())
+	if(isPreviewable() && (curModel) && (curModel->id() != meshInd))
 	{
 		meshState.apply(curModel);
-		curModel=curMeshDoc->meshList.at(meshInd);
+		curModel=curMeshDoc->getMesh(meshInd);
 		meshState.create(curmask, curModel);
 		applyDynamic();
 	}
