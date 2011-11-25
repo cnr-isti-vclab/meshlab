@@ -337,7 +337,9 @@ Q_INVOKABLE int MeshDocumentSI::currentId()
 
 Q_INVOKABLE int MeshDocumentSI::setCurrent(const int meshId)
 {
-	int id = md->mm()->id();
+	int id = -1;
+	if (md->mm() != NULL)
+		id = md->mm()->id();
 	if (md->getMesh(meshId) != NULL)
 	{
 		md->setCurrentMesh(meshId);

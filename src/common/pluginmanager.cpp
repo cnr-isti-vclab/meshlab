@@ -322,19 +322,21 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
 			QString pname = pluginfo->pluginScriptName();
 			if (pname != "")
 			{
-				pluginnamespaces << pname;
+				QString plugnamespace = pluginNameSpace() + "." + pname;
+				pluginnamespaces << plugnamespace;
 				scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
 				QStringList filters = pluginfo->filterNames();
 				foreach(QString filter,filters)
 				{
+					QString completename = plugnamespace;
 					fc.act = new QAction(filter,par);
 					stringXMLFilterMap.insert(filter,fc);
 					QString filterFunction = pluginfo->filterScriptCode(filter);
 					if (filterFunction == "")
 						filterFunction = gen.funCodeGenerator(filter,*pluginfo);
 					QString jname = pluginfo->filterAttribute(filter,MLXMLElNames::filterScriptFunctName);
-					QString completename = pluginNameSpace() + "." + pname + "." + jname;
-					filterscriptnames << jname;
+					completename += "." + jname;
+					filterscriptnames << completename;
 					scriptplugcode += completename + " = " + filterFunction + "\n";
 					completename += "(" + gen.parNames(filter,*pluginfo) + ")";
 					filtersign << completename;
