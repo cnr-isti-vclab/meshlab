@@ -55,7 +55,6 @@ FORMS = ui/layerDialog.ui \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
-	ui/scriptEditor.ui \
 	ui/filtergui.ui \
 	ui/filtercreatortab.ui
 	

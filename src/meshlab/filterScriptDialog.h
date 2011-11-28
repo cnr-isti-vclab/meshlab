@@ -67,21 +67,4 @@ private:
 
 };
 
-class EditorScriptDialog : public QDialog
-{
-	Q_OBJECT
-public:
-	EditorScriptDialog(QWidget *parent = 0);
-	~EditorScriptDialog();
-	private slots:
-		void applyScript();
-		void saveScript();	
-		void openScript();	
-	public:
-		const QString& scriptCode() const;
-private:
-	Ui::scriptEditor* ui;
-	QString code;
-};
-
 #endif

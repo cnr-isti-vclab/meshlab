@@ -24,7 +24,6 @@
 #include <QFileDialog>
 
 #include "ui_filterScriptDialog.h"
-#include "ui_scriptEditor.h"
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
 
@@ -233,44 +232,4 @@ void FilterScriptDialog::editSelectedFilterParameters()
 FilterScriptDialog::~FilterScriptDialog()
 {
 	delete ui;
-}
-
-
-
-EditorScriptDialog::EditorScriptDialog( QWidget * /* parent = 0*/ )
-:code()
-{
-	ui = new Ui::scriptEditor();
-	EditorScriptDialog::ui->setupUi(this);
-	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(applyScript()));
-	connect(ui->saveScriptButton, SIGNAL(clicked()), this, SLOT(saveScript()));
-	connect(ui->openScriptButton, SIGNAL(clicked()), this, SLOT(openScript()));
-}
-
-EditorScriptDialog::~EditorScriptDialog()
-{
-	delete ui;
-}
-
-void EditorScriptDialog::applyScript()
-{
-	code.clear();
-	code = ui->textEditor->toPlainText();
-	accept();
-}
-
-
-void EditorScriptDialog::saveScript()
-{
-	
-}
-
-void EditorScriptDialog::openScript()
-{
-
-}
-
-const QString& EditorScriptDialog::scriptCode() const
-{
-	return code;
 }
