@@ -39,11 +39,13 @@ private:
 public:
 	inline static const QString meshDocVarName() {return QString("meshDoc");}
 	static const QStringList javaScriptLibraryFiles();
+	static QString loadExternalLibraries();
 	
 	QString mergeOptParamsCodeGenerator() const;
 	QString parNames(const QString&  filterName,MLXMLPluginInfo& xmlInfo) const;
 	QString funCodeGenerator(const QString&  filtername,const RichParameterSet& set) const;
 	QString funCodeGenerator(const QString&  filtername,MLXMLPluginInfo& xmlInfo) const;
+
 };
 
 
@@ -196,6 +198,8 @@ QScriptValue VCGPoint3ScriptInterface_ctor(QScriptContext *context, QScriptEngin
 //QScriptValue VCGPoint3fScriptInterfaceToScriptValue(QScriptEngine* eng,VCGPoint3fSI* const& in);
 //void VCGPoint3fScriptInterfaceFromScriptValue(const QScriptValue& val,VCGPoint3fSI*& out);
 
+class PluginManager;
+
 class Env :public QScriptEngine
 {
 	Q_OBJECT
@@ -206,6 +210,7 @@ public:
 	Q_INVOKABLE void insertExpressionBinding(const QString& nm,const QString& exp);
 	QString output();
 	void appendOutput(const QString& output);
+	QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm);
 };
 
 QScriptValue Env_ctor(QScriptContext *context,QScriptEngine *engine);

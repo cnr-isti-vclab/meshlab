@@ -92,9 +92,9 @@ public:
 	QStringList pluginnamespaces;
 	QStringList filterscriptnames;
 	QStringList filtersign;
-	Env env;
+	//Env env;
 
-	void updateDocumentScriptBindings(MeshDocument& doc);
+	//void updateDocumentScriptBindings(MeshDocument& doc);
 private:
 	/*void loadPluginsCode();*/
 	QString scriptplugcode;

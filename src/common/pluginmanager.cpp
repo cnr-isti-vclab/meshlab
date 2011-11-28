@@ -8,7 +8,7 @@
 
 
 PluginManager::PluginManager()
-:currentDocInterface(NULL),env(),scriptplugcode()
+:currentDocInterface(NULL),scriptplugcode()
 {
 	//pluginsDir=QDir(getPluginDirPath());
 	// without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
@@ -113,26 +113,26 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 		}
 	}
 	knownIOFormats();
-	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-	int ii = 0;
-	while(ii < liblist.size())
-	{
-		QFile lib(liblist[ii]);
-		if (!lib.open(QFile::ReadOnly))
-			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-		QByteArray libcode = lib.readAll();
-		QScriptValue res = env.evaluate(QString(libcode));
-		if (res.isError())
-			qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
-		++ii;
-	} 
-	//loadPluginsCode();
-	QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
-	env.globalObject().setProperty("_applyFilter", applyFun);
-	QScriptValue res = env.evaluate(scriptplugcode);
-	//qDebug("Code:\n %s",qPrintable(code));
-	if (env.hasUncaughtException())
-		qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
+	//QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+	//int ii = 0;
+	//while(ii < liblist.size())
+	//{
+	//	QFile lib(liblist[ii]);
+	//	if (!lib.open(QFile::ReadOnly))
+	//		qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+	//	QByteArray libcode = lib.readAll();
+	//	QScriptValue res = env.evaluate(QString(libcode));
+	//	if (res.isError())
+	//		qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
+	//	++ii;
+	//} 
+	////loadPluginsCode();
+	//QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
+	//env.globalObject().setProperty("_applyFilter", applyFun);
+	//QScriptValue res = env.evaluate(scriptplugcode);
+	////qDebug("Code:\n %s",qPrintable(code));
+	//if (env.hasUncaughtException())
+	//	qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
 }
 
 
@@ -272,14 +272,14 @@ void PluginManager::knownIOFormats()
 	}
 }
 
-void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
-{ 
-	//WARNING!
-	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
-	currentDocInterface = new MeshDocumentSI(&doc);
-	QScriptValue val = env.newQObject(currentDocInterface);
-	env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
-}
+//void PluginManager::updateDocumentScriptBindings(MeshDocument& doc )
+//{ 
+//	//WARNING!
+//	//all the currentDocInterface created will be destroyed by QT when the MeshDocument destructor has been called
+//	currentDocInterface = new MeshDocumentSI(&doc);
+//	QScriptValue val = env.newQObject(currentDocInterface);
+//	env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
+//}
 
 QString PluginManager::pluginsCode() const
 {

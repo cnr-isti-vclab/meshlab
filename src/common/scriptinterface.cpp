@@ -4,6 +4,7 @@
 #include "filterparameter.h"
 #include "meshmodel.h"
 #include "mlexception.h"
+#include "pluginmanager.h"
 
 QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 {
@@ -178,6 +179,26 @@ QString ScriptAdapterGenerator::mergeOptParamsCodeGenerator() const
 	code += "\tfor (var p in defaultOptions)\n";
 	code += "\t\tret[p] = argOptions.hasOwnProperty(p) ? argOptions[p] : defaultOptions[p];\n";
 	code += "\treturn ret;\n}";
+	return code;
+}
+
+QString ScriptAdapterGenerator::loadExternalLibraries()
+{
+	QString code;
+	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
+	int ii = 0;
+	while(ii < liblist.size())
+	{
+		QFile lib(liblist[ii]);
+		if (!lib.open(QFile::ReadOnly))
+			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
+		QByteArray libcode = lib.readAll();
+		/*QScriptValue res = env.evaluate(QString(libcode));
+		if (res.isError())
+		throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");*/
+		code += QString(libcode);
+		++ii;
+	} 
 	return code;
 }
 
@@ -864,6 +885,22 @@ void Env::appendOutput( const QString& output )
 	out = out + output;
 }
 
+QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm )
+{
+	QString code;
+	MeshDocumentSI* mi = new MeshDocumentSI(&md);
+	QScriptValue val = newQObject(mi);
+	globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
+	code += ScriptAdapterGenerator::loadExternalLibraries();
+	QScriptValue applyFun = newFunction(PluginInterfaceApplyXML, &pm);
+	globalObject().setProperty("_applyFilter", applyFun);
+
+	//QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
+	code += pm.pluginsCode();
+	QScriptValue res = evaluate(code);
+	return res;
+}
+
 ShotSI::ShotSI( const vcg::Shotf& st )
 :shot()
 {
@@ -955,6 +992,7 @@ vcg::Point2i ScriptInterfaceUtilities::vector2ToVcgPoint2i( const QVector<float>
 		p[ii] = int(v[ii]);
 	return p;
 }
+
 
 
 
