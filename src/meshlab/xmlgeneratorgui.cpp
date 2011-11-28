@@ -667,37 +667,15 @@ void PluginGeneratorGUI::executeCurrentCode()
 	Env env;
 	if (doc != NULL)
 	{
-		QString code;
-		MeshDocumentSI* currentDocInterface = new MeshDocumentSI(doc);
-		QScriptValue val = env.newQObject(currentDocInterface);
-		env.globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
-		QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-		int ii = 0;
-		while(ii < liblist.size())
-		{
-			QFile lib(liblist[ii]);
-			if (!lib.open(QFile::ReadOnly))
-				qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-			QByteArray libcode = lib.readAll();
-			/*QScriptValue res = env.evaluate(QString(libcode));
-			if (res.isError())
-				throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");*/
-			code += QString(libcode);
-			++ii;
-		} 
-		QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, &PM);
-		env.globalObject().setProperty("_applyFilter", applyFun);
-
-		//QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
-		code += PM.pluginsCode();
-		/*if (res.isError())
-			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");*/
+		QScriptValue res = env.loadMLScriptEnv(*doc,PM);
+		if (res.isError())
+			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + res.toString() + "\n");
 		FilterGeneratorTab* ftab = tab(tabs->currentIndex());
 		if (ftab != NULL)
 		{
 			QTime t;
 			t.start();
-			QScriptValue result = env.evaluate(code + ftab->getCode());
+			QScriptValue result = env.evaluate(ftab->getCode());
 			int time = t.elapsed();
 			emit scriptCodeExecuted(result,time,env.output());
 		}

@@ -111,7 +111,7 @@ void MainWindow::createXMLStdPluginWnd()
 		xmldialog->close();
 		delete xmldialog;
 	}
-	xmldialog = new MeshLabXMLStdDialog(PM.env,this);
+	xmldialog = new MeshLabXMLStdDialog(this);
 	//connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 	xmldialog->setAllowedAreas (    Qt::RightDockWidgetArea);
 	addDockWidget(Qt::RightDockWidgetArea,xmldialog);
@@ -248,7 +248,6 @@ void MainWindow::setColorMode(QAction *qa)
 void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
 {
 	showFilterScriptAct->setEnabled(act);
-	showScriptEditAct->setEnabled(act);
 	filterMenuSelect->setEnabled(act);
 	filterMenuClean->setEnabled(act);
 	//menu create is always activated
@@ -694,29 +693,6 @@ void MainWindow::showFilterScript()
 
 }
 
-void MainWindow::showScriptEditor()
-{
-	EditorScriptDialog dialog(this);
-
-	if (dialog.exec()==QDialog::Accepted)
-	{
-		//QScriptValue val = PM.env.newQObject(meshDoc());
-		//PM.env.globalObject().setProperty("md",val);
-		PM.updateDocumentScriptBindings(*meshDoc());
-		//PM.env.globalObject().setProperty("md.current",QScriptValue(meshDoc()->mm()->id()));
-		QString code = dialog.scriptCode();
-		QScriptValue result = PM.env.evaluate(code);
-		if (result.isError())
-		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",result.property("lineNumber").toInt32(),qPrintable(result.toString()));
-			layerDialog->updateLog(meshDoc()->Log);
-		}
-		else
-			GLA()->update();
-
-	}
-}
-
 void MainWindow::runFilterScript()
 {
   FilterScript::iterator ii;
@@ -815,6 +791,8 @@ void MainWindow::startFilter()
 	QStringList missingPreconditions;
 	QAction *action = qobject_cast<QAction *>(sender());
 	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+	if (meshDoc() == NULL)
+		return;
 	//OLD FILTER PHILOSOPHY
 	if (iFilter != NULL)
 	{
@@ -900,19 +878,10 @@ void MainWindow::startFilter()
 			//- or in the executeFilter if the filter will be executed
 			//- or in the close Event of stdDialog window if the filter will NOT be executed
 			//- or in the catch exception if something went wrong during parsing/scanning
-			PM.env.pushContext();
+			
 			try
 			{
-					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
-				for(MLXMLPluginInfo::XMLMapList::const_iterator it = params.constBegin();it != params.constEnd();++it)
-				{	
-					MLXMLPluginInfo::XMLMap mp = *(it);
-						//Initilize the parameters inside the environment
-					//Expression* exp = ExpressionFactory::create(mp[MLXMLElNames::paramType],mp[MLXMLElNames::paramDefExpr]);
 
-					PM.env.insertExpressionBinding(mp[MLXMLElNames::paramName],mp[MLXMLElNames::paramDefExpr]);
-					//ExpressionFactory::destroy(exp);	
-				}
 				if(currentViewContainer())
 				{
 					if (iXMLFilter)
@@ -925,16 +894,19 @@ void MainWindow::startFilter()
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 				// if no dialog is created the filter must be executed immediately
-				if(! xmldialog->showAutoDialog(filt, meshDoc(),  this, GLA()) )
+				if(! xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()) )
 				{
-					EnvWrap envwrap(PM.env);
+					Env env;
+					env.loadMLScriptEnv(*meshDoc(),PM);
+					//each map inside the list contains info (type,name,def_expr) on each parameter inside the filter
+					EnvWrap envwrap(env);
 					executeFilter(&filt, envwrap, false);
 				}
+				//delete env;
 			}
 			catch (MeshLabException& e)
 			{
-				meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());	
-				PM.env.popContext();		
+				meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());		
 			}
 		}
 		catch(ParsingException e)
@@ -1134,9 +1106,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 		{
 			QTime t;
 			t.start();
-			PM.env.pushContext();
-			QScriptValue result = PM.env.evaluate(funcall);
-			PM.env.popContext();
+			Env env;
+			env.loadMLScriptEnv(*meshDoc(),PM);
+			QScriptValue result = env.evaluate(funcall);
 			scriptCodeExecuted(result,t.elapsed(),"");
 			
 		}
@@ -2175,7 +2147,7 @@ void MainWindow::updateDocumentScriptBindings()
 	if(currentViewContainer()) 
 	{
 		plugingui->setDocument(meshDoc());
-		PM.updateDocumentScriptBindings(*meshDoc());
+		//PM.updateDocumentScriptBindings(*meshDoc());
 	}
 }
 

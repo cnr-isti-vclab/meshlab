@@ -369,11 +369,6 @@ void MainWindow::createActions()
 	showFilterScriptAct->setEnabled(false);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 
-	showScriptEditAct = new QAction(tr("Script Editor"),this);
-	showScriptEditAct->setEnabled(false);
-	connect(showScriptEditAct, SIGNAL(triggered()), this, SLOT(showScriptEditor()));
-
-
 	/*showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
 	showFilterEditAct->setEnabled(true);
 	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));*/
@@ -604,7 +599,6 @@ void MainWindow::fillFilterMenu()
 	filterMenu->clear();
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
-	filterMenu->addAction(showScriptEditAct);
 	//filterMenu->addAction(showFilterEditAct);
 	filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip

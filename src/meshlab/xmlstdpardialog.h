@@ -437,14 +437,14 @@ class MeshLabXMLStdDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	MeshLabXMLStdDialog(Env& envir,QWidget *p);
+	MeshLabXMLStdDialog(QWidget *p);
 	~MeshLabXMLStdDialog();
 
 	void clearValues();
 	void createFrame();
 	void loadFrameContent();
 
-	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
+	bool showAutoDialog(MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
 	bool isPreviewable() const;
 	void closeEvent ( QCloseEvent * event ); 
 	void resetPointers();
@@ -465,7 +465,7 @@ private slots:
 	void extendedView(bool ext);
 
 private:
-	Env& env;
+	Env env;
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
 	//QAction *curAction;

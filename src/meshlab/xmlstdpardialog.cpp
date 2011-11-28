@@ -2,13 +2,13 @@
 #include <climits>
 #include <QtGui>
 
-MeshLabXMLStdDialog::MeshLabXMLStdDialog( Env& envir,QWidget *p )
-:QDockWidget(QString("Plugin"), p),env(envir),showHelp(false)
+MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p )
+:QDockWidget(QString("Plugin"), p),showHelp(false),env()
 {
 	curmask = 0;
 	qf = NULL;
 	stdParFrame=NULL;
-	clearValues();
+	clearValues();	
 }
 
 MeshLabXMLStdDialog::~MeshLabXMLStdDialog()
@@ -113,10 +113,14 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	//setSizePolicy(QSizePolicy::Minimum,QSizePolicy::MinimumExpanding);
 }
 
-bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
+bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginManager& pm,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
 {
 	/*if (mfc.filterInterface == NULL)
 		return false;*/
+	curMeshDoc = md;
+	if (curMeshDoc == NULL)
+		return false;
+	env.loadMLScriptEnv(*curMeshDoc,pm);
 	if (mfc.xmlInfo == NULL)
 		return false;
 	if (mfc.act == NULL)
@@ -129,7 +133,6 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,MeshDocu
 	curParMap.clear();
 	//prevParMap.clear();
 	curModel = md->mm();
-	curMeshDoc = md;
 	curgla=gla;
 
 	QString fname = mfc.act->text();
