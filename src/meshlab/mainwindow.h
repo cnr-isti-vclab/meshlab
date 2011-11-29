@@ -111,7 +111,6 @@ private slots:
 	void applyLastFilter();
 	void runFilterScript();
 	void showFilterScript();
-	void showScriptEditor();
 	void showXMLPluginEditorGui();
   void showTooltip(QAction*);
   /////////// Slot Menu Render /////////////////////
@@ -362,7 +361,6 @@ private:
   QAction *lastFilterAct;
   QAction *runFilterScriptAct;
   QAction *showFilterScriptAct;
-  QAction* showScriptEditAct;
   QAction* showFilterEditAct;
   /////////// Actions Menu Edit  /////////////////////
   QAction *suspendEditModeAct;

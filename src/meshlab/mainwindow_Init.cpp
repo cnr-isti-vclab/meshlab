@@ -369,10 +369,6 @@ void MainWindow::createActions()
 	showFilterScriptAct->setEnabled(false);
 	connect(showFilterScriptAct, SIGNAL(triggered()), this, SLOT(showFilterScript()));
 
-	/*showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
-	showFilterEditAct->setEnabled(true);
-	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));*/
-
 	//////////////Action Menu Preferences /////////////////////////////////////////////////////////////////////
 	setCustomizeAct	  = new QAction(tr("&Options..."),this);
 	connect(setCustomizeAct, SIGNAL(triggered()), this, SLOT(setCustomize()));
@@ -413,6 +409,11 @@ void MainWindow::createActions()
 	connect(splitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(splitFromHandle(QAction *)));
 
 	connect(unsplitGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(unsplitFromHandle(QAction *)));
+
+	//TOOL MENU
+	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
+	showFilterEditAct->setEnabled(true);
+	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
 }
 
 void MainWindow::createToolBars()
@@ -572,7 +573,10 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
+	//preferencesMenu->addAction(showFilterEditAct);
+	//preferencesMenu->addSeparator();
 	preferencesMenu->addAction(setCustomizeAct);
+	
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -599,7 +603,6 @@ void MainWindow::fillFilterMenu()
 	filterMenu->clear();
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
-	//filterMenu->addAction(showFilterEditAct);
 	filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip
 	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
