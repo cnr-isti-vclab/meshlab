@@ -1,0 +1,102 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+#include "VisibleSet.h"
+#include "VisibilityCheck.h"
+#include <wrap/gl/shot.h>
+
+
+
+
+VisibleSet::VisibleSet( CMeshO &mesh, QList<RasterModel*> &rasterList, int weightMask ) :
+    m_Mesh(mesh),
+    m_FaceVis(mesh.fn),
+    m_WeightMask(weightMask)
+{
+    VisibilityCheck &visibility = *VisibilityCheck::GetInstance();
+    visibility.setMesh( &mesh );
+
+
+    float depthMin =  std::numeric_limits<float>::max();
+    m_DepthMax = -std::numeric_limits<float>::max();
+
+    foreach( RasterModel *rm, rasterList )
+    {
+        float zNear, zFar;
+        GlShot< vcg::Shot<float> >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
+
+        if( zNear < depthMin )
+            depthMin = zNear;
+        if( zFar > m_DepthMax )
+            m_DepthMax = zFar;
+    }
+
+    if( depthMin < 0.0001f )
+        depthMin = 0.1f;
+    if( m_DepthMax < depthMin )
+        m_DepthMax = depthMin + 1000.0f;
+
+    m_DepthRangeInv = 1.0f / (m_DepthMax-depthMin);
+
+
+    foreach( RasterModel *rm, rasterList )
+    {
+        visibility.setRaster( rm );
+        visibility.checkVisibility();
+        
+        for( int f=0; f<mesh.fn; ++f )
+            if( visibility.isFaceVisible(f) )
+            {
+                float w = getWeight( rm, mesh.face[f] );
+                if( w >= 0.0f )
+                    m_FaceVis[f].add( w, rm );
+            }
+    }
+
+    VisibilityCheck::ReleaseInstance();
+}
+
+
+float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
+{
+    vcg::Point3f centroid = (f.V(0)->P() +
+                             f.V(1)->P() +
+                             f.V(2)->P()) / 3.0f;
+
+    float weight = 1.0f;
+
+    if( m_WeightMask & W_ORIENTATION )
+        weight *= vcg::Normalize(rm->shot.GetViewPoint()-centroid) * f.N();
+
+    if( (m_WeightMask & W_DISTANCE) && weight>0.0f )
+        weight *= (m_DepthMax - (rm->shot.GetViewPoint()-centroid).Norm()) * m_DepthRangeInv;
+
+    if( (m_WeightMask & W_IMG_BORDER) && weight>0.0f )
+    {
+        vcg::Point2f cam = rm->shot.Project( centroid );
+        weight *= 1.0f - std::max( std::abs(2.0f*cam.X()/rm->shot.Intrinsics.ViewportPx.X()-1.0f),
+                                   std::abs(2.0f*cam.Y()/rm->shot.Intrinsics.ViewportPx.Y()-1.0f) );
+    }
+
+    return weight;
+}
