@@ -416,7 +416,7 @@ void FilterGeneratorGUI::importInfo( const MLXMLFilterSubTree& tree )
 		addParam(tree.params[ii]);
 }
 
-FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent /*= NULL*/,const QString& pluginvar /*= QString()*/,const QStringList& namespacelist /*= QStringList()*/,const QStringList& filterlist /*= QStringList()*/)
+FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent /*= NULL*/,const QString& pluginvar /*= QString()*/,const QStringList& namespacelist /*= QStringList()*/,const QStringList& filterlist /*= QStringList()*/,const QStringList& filtersign /*= QStringList()*/)
 :QFrame(parent),jsexp(true),guiexp(false)
 {
 	//filtereditor = new FilterEditorFrame(this);
@@ -438,7 +438,7 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
 	connect(ui->guiframe,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)),this,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)));
 	//disconnect(this,SIGNAL(itemExpanded(QTreeWidgetItem*)),this,SLOT(expandItem(QTreeWidgetItem*)));
-	JavaScriptSyntaxHighLighter* js = new JavaScriptSyntaxHighLighter(pluginvar,namespacelist,filterlist,this);
+	JavaScriptSyntaxHighLighter* js = new JavaScriptSyntaxHighLighter(pluginvar,namespacelist,filterlist,filtersign,ui->jscode);
 	ui->jscode->setSyntaxHighlighter(js);
 }
 
@@ -692,7 +692,7 @@ void PluginGeneratorGUI::addNewFilter()
 	for(int ii = 0;ii < tabs->count();++ii)
 		namelist.push_back(tabs->tabText(ii));
 	QString tmpname = UsefulGUIFunctions::generateUniqueDefaultName("Filter",namelist);
-	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this,PM.pluginNameSpace(),PM.pluginnamespaces,PM.filterscriptnames);
+	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this,PM.pluginNameSpace(),PM.pluginnamespaces,PM.filterscriptnames,PM.filtersign);
 	//tb->initLibInEnv(PM);
 	tabs->addTab(tb,tmpname);
 	connect(tb,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SLOT(updateTabTitle(const QString&,QWidget*)));

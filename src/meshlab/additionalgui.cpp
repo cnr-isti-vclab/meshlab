@@ -432,6 +432,13 @@ void MLScriptEditor::updateLineNumberArea( const QRect & r, int dy)
 		updateLineNumberAreaWidth(0);
 }
 
+QString MLScriptEditor::currentLine() const
+{
+	QTextCursor cur = textCursor();
+	cur.select(QTextCursor::LineUnderCursor);
+	return cur.selectedText();
+}
+
 void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 {
 	switch(e->key())
@@ -453,18 +460,58 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 				textCursor().insertText(tabst);
 			}
 			return;
-			break;
 		}
-
 	}
 	QPlainTextEdit::keyPressEvent(e);
+	//!(e->text().isEmpty) is meaningful: you need it when a modifier (SHIFT/CTRL) is pressed in order to avoid the autocompleter to be visualized
+	if (!(e->text().isEmpty()) && (e->text().indexOf(slh->worddelimiter) == -1))
+		showAutoComplete(e);
 }
 
 void MLScriptEditor::setSyntaxHighlighter( MLSyntaxHighlighter* high )
 {
 	slh = high;
 	if (slh != NULL)
+	{
 		slh->setDocument(document());
+		connect(&slh->comp,SIGNAL(activated(const QString &)),this,SLOT(insertSuggestedWord( const QString &)));
+	}
+}
+
+void MLScriptEditor::showAutoComplete( QKeyEvent * e )
+{	
+	QString w = lastInsertedWord();
+	QCompleter& comp = slh->comp;
+	AutoCompleterModel& mod = slh->mod;
+	comp.setCompletionPrefix(w);
+	comp.popup()->setModel(comp.completionModel());
+	QRect rect = cursorRect();
+	rect.setWidth(comp.popup()->sizeHintForColumn(0) + comp.popup()->verticalScrollBar()->sizeHint().width());
+	comp.complete(rect);
+}
+
+void MLScriptEditor::insertSuggestedWord( const QString& str )
+{
+	QTextCursor tc = textCursor();
+	int extra = str.length() - slh->comp.completionPrefix().length();
+	tc.insertText(str.right(extra));
+	setTextCursor(tc);
+}
+
+void MLScriptEditor::insertSuggestedWord( const QModelIndex& str )
+{
+	QTextCursor tc = textCursor();
+	AutoCompleterItem* it = reinterpret_cast<AutoCompleterItem*>(str.internalPointer());
+	QString re = it->data(0).toString();
+}
+
+QString MLScriptEditor::lastInsertedWord() const
+{
+	QString cur = currentLine();
+	QStringList ls = cur.split(slh->worddelimiter,QString::SkipEmptyParts);
+	if (ls.size() > 0)
+		return ls[ls.size() - 1];
+	return QString();
 }
 
 MLNumberArea::MLNumberArea( MLScriptEditor* editor ) : QWidget(editor)
@@ -482,8 +529,8 @@ void MLNumberArea::paintEvent(QPaintEvent* e)
 	mledit->lineNumberAreaPaintEvent(e,UsefulGUIFunctions::editorMagicColor());
 }
 
-MLSyntaxHighlighter::MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent )
-:QSyntaxHighlighter(parent),reserved(),langfuncs(),vcgbridgefun(),vcgbridgetype(),mlfun(),mlnmspace()
+MLSyntaxHighlighter::MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist, const QStringList& filtersign,QAbstractScrollArea* parent )
+:QSyntaxHighlighter(parent),reserved(),langfuncs(),vcgbridgefun(),vcgbridgetype(),mlfun(filterlist),mlnmspace(namespacelist),mlfunsign(filtersign),comp(parent),mod(parent),plugvar(pluginvar)
 {
 	HighlightingRule pvar;
 	pvar.format.setForeground(Qt::red);
@@ -524,8 +571,14 @@ QString MLSyntaxHighlighter::addIDBoundary( const QString& st )
 	return "\\b" + st + "\\b";
 }
 
-JavaScriptSyntaxHighLighter::JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent )
-:MLSyntaxHighlighter(pluginvar,namespacelist,filterlist,parent)
+void MLSyntaxHighlighter::autoCompleteModel(AutoCompleterModel& mod)
+{
+	mod.addCompleteSubTree(mlfunsign);
+	mod.addCompleteSubTree(vcgbridgefun);
+}
+
+JavaScriptSyntaxHighLighter::JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,const QStringList& filtersign,QAbstractScrollArea* parent )
+:MLSyntaxHighlighter(pluginvar,namespacelist,filterlist,filtersign,parent)
 {
 	HighlightingRule res;
 	res.format.setForeground(Qt::darkBlue);
@@ -563,5 +616,285 @@ JavaScriptSyntaxHighLighter::JavaScriptSyntaxHighLighter(const QString& pluginva
 		res.pattern = QRegExp(st);
 		highlightingRules << res;
 	}
+	worddelimiter.setPattern("[\\s|\\t|\\n|\\r|=|;|,|\\(|\\)|{|}|\\[|\\]|\\||\\&|\\?|\\!|\\+|\\*|\\\|\\-|%|\"|<|>]");
+	autoCompleteModel(mod);
+	//comp.setModel(&ls);
+	comp.setCaseSensitivity(Qt::CaseSensitive);
+	comp.setWidget(parent);
+	comp.setCompletionMode(QCompleter::PopupCompletion);
+	comp.setModel(&mod);
 }
 
+AutoCompleterModel::AutoCompleterModel(QObject *parent)
+: QAbstractItemModel(parent)
+{
+	QList<QVariant> dt;
+	dt << QVariant("");
+	rootItem = new AutoCompleterItem(dt);
+}
+
+AutoCompleterModel::~AutoCompleterModel()
+{
+	delete rootItem;
+}
+
+int AutoCompleterModel::columnCount(const QModelIndex &parent) const
+{
+	if (parent.isValid())
+		return static_cast<AutoCompleterItem*>(parent.internalPointer())->columnCount();
+	else
+		return rootItem->columnCount();
+}
+
+QVariant AutoCompleterModel::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid())
+		return QVariant();
+
+	if (role != Qt::DisplayRole)
+		return QVariant();
+
+	AutoCompleterItem *item = static_cast<AutoCompleterItem*>(index.internalPointer());
+
+	return item->data(index.column());
+}
+
+Qt::ItemFlags AutoCompleterModel::flags(const QModelIndex &index) const
+{
+	if (!index.isValid())
+		return 0;
+
+	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+//QVariant AutoCompleterModel::headerData(int section, Qt::Orientation orientation,int role) const
+//{
+//	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+//		return rootItem->data(section);
+//
+//	return QVariant();
+//}
+
+QModelIndex AutoCompleterModel::index(int row, int column, const QModelIndex &parent) const
+{
+	if (!hasIndex(row, column, parent))
+		return QModelIndex();
+
+	AutoCompleterItem *parentItem;
+
+	if (!parent.isValid())
+		parentItem = rootItem;
+	else
+		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
+
+	AutoCompleterItem *childItem = parentItem->child(row);
+	if (childItem)
+		return createIndex(row, column, childItem);
+	else
+		return QModelIndex();
+}
+
+QModelIndex AutoCompleterModel::parent(const QModelIndex &index) const
+{
+	if (!index.isValid())
+		return QModelIndex();
+
+	AutoCompleterItem *childItem = static_cast<AutoCompleterItem*>(index.internalPointer());
+	AutoCompleterItem *parentItem = childItem->parent();
+
+	if (parentItem == rootItem)
+		return QModelIndex();
+
+	return createIndex(parentItem->row(), 0, parentItem);
+}
+
+int AutoCompleterModel::rowCount(const QModelIndex &parent) const
+{
+	AutoCompleterItem *parentItem;
+	if (parent.column() > 0)
+		return 0;
+
+	if (!parent.isValid())
+		parentItem = rootItem;
+	else
+		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
+
+	return parentItem->childCount();
+}
+
+void AutoCompleterModel::addCompleteSubTree(const QStringList &signatures)
+{
+	QStringList signs = signatures;
+	foreach(QString sg,signs)
+		createAndAppendBranch(sg,rootItem);
+}
+
+void AutoCompleterModel::createAndAppendBranch( QString& st,AutoCompleterItem* parent )
+{
+	if (st.isEmpty() || (parent == NULL))
+		return;
+	QList<QVariant> dt;
+	int indexpoint = st.indexOf(".");
+	if (indexpoint == -1)
+	{
+		int indexpar = st.indexOf("(");
+		if (indexpar == -1)
+		{
+			//is a member
+			dt << st;
+		}
+		else 
+		{
+			//is a function. I will add the name of the function and the signature for the tooltip
+			dt << st.left(indexpar)/* << st*/;
+		}
+		AutoCompleterItem* ch = parent->findChild(dt);
+		//Search if the node is already in the tree
+		if (ch == NULL)
+		{
+			ch = new AutoCompleterItem(dt,parent);
+			parent->appendChild(ch);
+		}
+		return;
+	}
+	else
+	{
+		//+1 so I will take also the .
+		QString tmp  = st.left(indexpoint + 1);
+		st.remove(tmp);
+		tmp.remove(".");
+		dt << tmp;
+		int ind = 0;
+
+		AutoCompleterItem* ch = parent->findChild(dt);
+		//Search if the node is already in the tree
+		if (ch == NULL)
+		{
+			ch = new AutoCompleterItem(dt,parent);
+			parent->appendChild(ch);
+		}
+		createAndAppendBranch(st,ch);
+	}
+}
+
+QModelIndexList AutoCompleterModel::matched( const QString& val,const QModelIndex& start /*= QModelIndex()*/ )
+{
+	QModelIndexList ls;
+	if (!val.isEmpty())
+		matched(val,ls,start);
+	return ls;
+}
+
+void AutoCompleterModel::matched( const QString& val,QModelIndexList& mil,const QModelIndex& ind )
+{
+	if (ind.isValid())
+	{
+		AutoCompleterItem* item = reinterpret_cast<AutoCompleterItem*>(ind.internalPointer());
+		for (int ii = 0;ii < item->columnCount();++ii)
+			if (item->data(ii).toString().startsWith(val))
+				mil << ind;
+			else
+				return;
+	}
+	for(int ii = 0;ii < rowCount(ind);++ii)
+			matched(val,mil,index(ii,0,ind));
+}
+
+
+AutoCompleterItem::AutoCompleterItem(const QList<QVariant> &data, AutoCompleterItem *parent)
+{
+	parentItem = parent;
+	itemData = data;
+}
+
+AutoCompleterItem::~AutoCompleterItem()
+{
+	qDeleteAll(childItems);
+}
+
+void AutoCompleterItem::appendChild(AutoCompleterItem *item)
+{
+	childItems.append(item);
+}
+
+AutoCompleterItem *AutoCompleterItem::child(int row)
+{
+	return childItems.value(row);
+}
+
+int AutoCompleterItem::childCount() const
+{
+	return childItems.count();
+}
+
+int AutoCompleterItem::columnCount() const
+{
+	return itemData.count();
+}
+
+QVariant AutoCompleterItem::data(int column) const
+{
+	return itemData.value(column);
+}
+
+QList<QVariant> AutoCompleterItem::data() const
+{
+	return itemData;
+}
+
+AutoCompleterItem *AutoCompleterItem::parent()
+{
+	return parentItem;
+}
+
+int AutoCompleterItem::row() const
+{
+	if (parentItem)
+		return parentItem->childItems.indexOf(const_cast<AutoCompleterItem*>(this));
+
+	return 0;
+}
+
+AutoCompleterItem* AutoCompleterItem::findChild( const QList<QVariant>& dt )
+{
+	AutoCompleterItem* ch = NULL;
+	int ind = 0;
+	while ((ch == NULL) && (ind < childCount()))
+	{
+		AutoCompleterItem* tmp = child(ind);
+		if (tmp->data() == dt)
+			ch = tmp;
+		else
+			++ind;
+	}
+	return ch;
+}
+
+MLAutoCompleter::MLAutoCompleter( AutoCompleterModel* comp,QObject* parent )
+:QCompleter(comp,parent)
+{
+	setCompletionRole(Qt::DisplayRole);
+}
+
+MLAutoCompleter::MLAutoCompleter( QObject* parent )
+:QCompleter(parent)
+{
+	setCompletionRole(Qt::DisplayRole);
+}
+
+QStringList MLAutoCompleter::splitPath( const QString &path ) const
+{
+	QString tmp = path;
+	QRegExp par("\\(.\\)");
+	tmp.remove(par);
+	QStringList res = path.split(".");
+	return res;
+}
+
+QString MLAutoCompleter::pathFromIndex( const QModelIndex &index ) const
+{
+	QStringList dataList;
+	for (QModelIndex i = index; i.isValid(); i = i.parent()) 
+		dataList.prepend(model()->data(i, completionRole()).toString());
+	return dataList.join(".");
+}

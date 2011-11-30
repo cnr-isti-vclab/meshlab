@@ -89,6 +89,63 @@ signals:
 	void selectedAction(QAction* act);
 };
 
+class AutoCompleterItem
+{
+public:
+	AutoCompleterItem(const QList<QVariant> &data, AutoCompleterItem *parent = 0);
+	~AutoCompleterItem();
+
+	void appendChild(AutoCompleterItem *child);
+	AutoCompleterItem *child(int row);
+	int childCount() const;
+	int columnCount() const;
+	QVariant data(int column) const;
+	QList<QVariant> data() const;
+	AutoCompleterItem* findChild(const QList<QVariant>& data);
+	int row() const;
+	AutoCompleterItem *parent();
+
+private:
+	QList<AutoCompleterItem*> childItems;
+	QList<QVariant> itemData;
+	AutoCompleterItem *parentItem;
+};
+
+class AutoCompleterModel : public QAbstractItemModel
+{
+	Q_OBJECT
+
+public:
+	AutoCompleterModel(QObject *parent);
+	~AutoCompleterModel();
+
+	QVariant data(const QModelIndex &index, int role) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const;
+	//QVariant headerData(int section, Qt::Orientation orientation,int role = Qt::DisplayRole) const;
+	QModelIndex index(int row, int column,const QModelIndex &parent = QModelIndex()) const;
+	QModelIndex parent(const QModelIndex &index) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	QModelIndexList matched(const QString& value,const QModelIndex& start = QModelIndex());
+	void addCompleteSubTree(const QStringList &signatures);
+private:
+	void matched(const QString& value,QModelIndexList& mil,const QModelIndex& index);
+	void createAndAppendBranch(QString& st,AutoCompleterItem* parent);
+
+	AutoCompleterItem *rootItem;
+};
+
+class MLAutoCompleter : public QCompleter
+{
+public:
+	MLAutoCompleter(AutoCompleterModel* comp,QObject* parent);
+	MLAutoCompleter(QObject* parent);
+
+protected:
+	QStringList splitPath(const QString &path) const;
+	QString pathFromIndex(const QModelIndex &index) const;
+};
+
 class UsefulGUIFunctions
 {
 public:
@@ -138,22 +195,27 @@ protected:
 	QList<HighlightingRule> highlightingRules;
 
 	static QString addIDBoundary(const QString& st);
-	MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist, QObject* parent);
-
+	MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist, const QStringList& filtersigns, QAbstractScrollArea* parent);
+	void autoCompleteModel(AutoCompleterModel& mod);
 	QStringList reserved;
 	QStringList langfuncs;
 	QStringList mlnmspace;
 	QStringList mlfun;
+	QStringList mlfunsign;
 	QStringList vcgbridgetype;
 	QStringList vcgbridgefun;
 
 	QString plugvar;
+public:
+	MLAutoCompleter comp;
+	AutoCompleterModel mod;
+	QRegExp worddelimiter;
 };
 
 class JavaScriptSyntaxHighLighter : public MLSyntaxHighlighter
 {
 public:
-	JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,QObject* parent);
+	JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,const QStringList& filtersign,QAbstractScrollArea* parent);
 
 };
 
@@ -176,7 +238,13 @@ private slots:
 	//void updateCursorPos(int newBlockCount);
 	void highlightCurrentLine();
 	void updateLineNumberArea(const QRect& r, int dy);
+	void showAutoComplete(QKeyEvent * e);
+	void insertSuggestedWord(const QString& st);
+	void insertSuggestedWord( const QModelIndex& str );
 private:
+	QString currentLine() const;
+	QString lastInsertedWord() const;
+
 	MLNumberArea* narea;
 	QStringList regexps;
 	MLSyntaxHighlighter* slh;
