@@ -404,4 +404,3 @@ QString PluginManager::pluginNameSpace()
 {
 	return "Plugins";
 }
-
