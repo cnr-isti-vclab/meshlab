@@ -44,7 +44,7 @@ DominancyClassifier::DominancyClassifier( CMeshO &mesh, QList<OOCRaster> &raster
     {
         projectiveTexMatrices( *r );
         setupShadowTexture( *r );
-        generateWeightsAndShadowMap();
+        generateWeightsAndShadowMap( *r );
         checkDominancy( *r );
     }
 
@@ -216,7 +216,7 @@ void DominancyClassifier::setupShadowTexture( OOCRaster &rr )
 }
 
 
-void DominancyClassifier::generateWeightsAndShadowMap()
+void DominancyClassifier::generateWeightsAndShadowMap( OOCRaster &rr )
 {
     // Backup the previous OpenGL states.
     glPushAttrib( GL_VIEWPORT_BIT     |
@@ -295,6 +295,20 @@ delete [] b;
         buffer1.init( fbuffer.Width(), fbuffer.Height() );
         buffer2.init( fbuffer.Width(), fbuffer.Height() );
         fbuffer.DumpTo( GL_DEPTH_ATTACHMENT, buffer1.data, GL_DEPTH_COMPONENT, GL_FLOAT );  // WARNING: leads to a GL error.
+
+
+        float zNear, zFar;
+        GlShot< vcg::Shot<float> >::GetNearFarPlanes( rr.shot, m_Mesh.bbox, zNear, zFar );
+        if( zNear < 0.0001f )
+            zNear = 0.1f;
+        if( zFar < zNear )
+            zFar = zNear + 1000.0f;
+
+        float range = zFar - zNear;
+        for( unsigned int i=0; i<fbuffer.Width()*fbuffer.Height(); ++i )
+            if( buffer1.data[i] < 1.0f )
+    	        buffer1.data[i] = zNear*zFar / ((zFar - buffer1.data[i]*range)*range);
+
 
         // Detect step discontinuities and compute the distance of each pixel to the closest one.
         buffer2.applysobel( &buffer1 );
@@ -383,10 +397,18 @@ void DominancyClassifier::checkDominancy( OOCRaster &rr )
     fbuffer.DumpTo( GL_COLOR_ATTACHMENT0, weightBuffer, GL_LUMINANCE, GL_FLOAT );
 
     for( int v=0; v<m_Mesh.vn; ++v )
-        if( weightBuffer[v] > m_VertexDom[v].weight )
+        if( weightBuffer[v] > m_VertexDom[v].weight1 )
         {
-            m_VertexDom[v].weight   = weightBuffer[v];
-            m_VertexDom[v].dominant = &rr;
+            m_VertexDom[v].weight2   = m_VertexDom[v].weight1;
+            m_VertexDom[v].dominant2 = m_VertexDom[v].dominant1;
+
+            m_VertexDom[v].weight1   = weightBuffer[v];
+            m_VertexDom[v].dominant1 = &rr;
+        }
+        else if( weightBuffer[v] > m_VertexDom[v].weight2 )
+        {
+            m_VertexDom[v].weight2   = weightBuffer[v];
+            m_VertexDom[v].dominant2 = &rr;
         }
 
     delete [] weightBuffer;
@@ -403,62 +425,33 @@ void DominancyClassifier::releaseAll()
 }
 
 
-void DominancyClassifier::facesWithDominant( FaceVec &faces,
-                                             const OOCRaster *rr,
-                                             FaceDomMode mode ) const
+void DominancyClassifier::dominancyCoverage( RasterFaceMap &rpatches ) const
 {
-    faces.clear();
+    rpatches.clear();
 
-    if( mode == FD_AGRESSIVE )
+    for( CMeshO::FaceIterator f=m_Mesh.face.begin(); f!=m_Mesh.face.end(); ++f )
     {
-        for( CMeshO::FaceIterator f=m_Mesh.face.begin(); f!=m_Mesh.face.end(); ++f )
-            if( (*this)[f->V(0)].dominant == rr ||
-                (*this)[f->V(1)].dominant == rr ||
-                (*this)[f->V(2)].dominant == rr )
-                faces.push_back( &*f );
-    }
-    else
-    {
-        for( CMeshO::FaceIterator f=m_Mesh.face.begin(); f!=m_Mesh.face.end(); ++f )
-            if( (*this)[f->V(0)].dominant == rr &&
-                (*this)[f->V(1)].dominant == rr &&
-                (*this)[f->V(2)].dominant == rr )
-                faces.push_back( &*f );
-    }
-}
+        const VDominancy &d0 = (*this)[f->V(0)];
+        const VDominancy &d1 = (*this)[f->V(1)];
+        const VDominancy &d2 = (*this)[f->V(2)];
 
+        std::set<OOCRaster*> rastersFBelongsTo;
 
-void DominancyClassifier::dominancyCoverage( RasterFaceMap &faces,
-                                             FaceDomMode mode ) const
-{
-    faces.clear();
+        if( d0.dominant1 )
+            rastersFBelongsTo.insert( d0.dominant1 );
+        if( d1.dominant1 )
+            rastersFBelongsTo.insert( d1.dominant1 );
+        if( d2.dominant1 )
+            rastersFBelongsTo.insert( d2.dominant1 );
 
-    if( mode == FD_AGRESSIVE )
-    {
-        for( CMeshO::FaceIterator f=m_Mesh.face.begin(); f!=m_Mesh.face.end(); ++f )
-        {
-            OOCRaster *d0 = (*this)[f->V(0)].dominant;
-            OOCRaster *d1 = (*this)[f->V(1)].dominant;
-            OOCRaster *d2 = (*this)[f->V(2)].dominant;
+        if( d0.isOnBoundary() )
+            rastersFBelongsTo.insert( d0.dominant2 );
+        if( d1.isOnBoundary() )
+            rastersFBelongsTo.insert( d1.dominant2 );
+        if( d2.isOnBoundary() )
+            rastersFBelongsTo.insert( d2.dominant2 );
 
-            if( d0 )
-                faces[d0].push_back( &*f );
-            if( d1 && d1!=d0 )
-                faces[d1].push_back( &*f );
-            if( d2 && d2!=d0 && d2!=d1 )
-                faces[d2].push_back( &*f );
-        }
-    }
-    else
-    {
-        for( CMeshO::FaceIterator f=m_Mesh.face.begin(); f!=m_Mesh.face.end(); ++f )
-        {
-            OOCRaster *d0 = (*this)[f->V(0)].dominant;
-            OOCRaster *d1 = (*this)[f->V(1)].dominant;
-            OOCRaster *d2 = (*this)[f->V(2)].dominant;
-
-            if( d0 && d0==d1 && d0==d2 )
-                faces[d0].push_back( &*f );
-        }
+        for( std::set<OOCRaster*>::iterator r=rastersFBelongsTo.begin(); r!=rastersFBelongsTo.end(); ++r )
+            rpatches[*r].push_back( &*f );
     }
 }

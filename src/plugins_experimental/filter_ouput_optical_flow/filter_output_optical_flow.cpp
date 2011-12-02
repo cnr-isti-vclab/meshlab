@@ -109,10 +109,10 @@ void FilterOutputOpticalFlowPlugin::initParameterSet( QAction *act,
                                        true,
                                        "Use orientation weight",
                                        "Includes a weight accounting for the orientation of the surface wrt. the camera during the computation of reference images") );
-            par.addParam( new RichInt("dominantAreaExpansion",
-                                      4,
-                                      "Area expansion",
-                                      "Width (in triangles) of the border to add to each dominant area.") );
+            //par.addParam( new RichInt("dominantAreaExpansion",
+            //                          4,
+            //                          "Area expansion",
+            //                          "Width (in triangles) of the border to add to each dominant area.") );
             par.addParam( new RichFloat("minCoverage",
                                         2.0f,
                                         "Min coverage (%)",
@@ -167,10 +167,7 @@ bool FilterOutputOpticalFlowPlugin::applyFilter( QAction *act,
 		case FP_OUTPUT_OPTICAL_FLOW:
 		{
             for( CMeshO::FaceIterator f=m_Mesh->face.begin(); f!=m_Mesh->face.end(); ++f )
-            {
                 f->ClearV();
-                f->ClearS();
-            }
 
             int weightMask = 0;
             if( par.getBool("useDistanceWeight") )
@@ -182,47 +179,42 @@ bool FilterOutputOpticalFlowPlugin::applyFilter( QAction *act,
             if( par.getBool("useOrientationWeight") )
                 weightMask |= DominancyClassifier::W_ORIENTATION;
 
-            RasterFaceMap facesByDomImg;
             DominancyClassifier *set = new DominancyClassifier( *m_Mesh, rasters, weightMask );
 
             if( par.getBool("colorFromDominancy") )
             {
                 md.mm()->updateDataMask( MeshModel::MM_VERTCOLOR );
 
-                QMap<OOCRaster*,vcg::Color4b> rasterCol;
-                for( QList<OOCRaster>::iterator r=rasters.begin(); r!=rasters.end(); ++r )
-                    rasterCol[&*r] = vcg::Color4b( (rand()&127)+128, (rand()&127)+128, (rand()&127)+128, 255 );
-
                 for( CMeshO::VertexIterator v=m_Mesh->vert.begin(); v!=m_Mesh->vert.end(); ++v )
-                {
-                    OOCRaster *dom = (*set)[v].dominant;
-                    if( dom )
-                        v->C() = rasterCol[dom];
+                    if( (*set)[v].isOnBoundary() )
+                    {
+                        unsigned char c = (unsigned char)( 255.0f*(*set)[v].borderWeight() );
+                        v->C() = vcg::Color4b( 255-c, 255-c, 255-c, 255 );
+                    }
                     else
-                        v->C() = vcg::Color4b( 0, 0, 0, 255 );
-                }
+                        v->C() = vcg::Color4b( 0, 0, 255, 255 );
 
                 delete set;
-                break;
             }
-
-            set->dominancyCoverage( facesByDomImg, DominancyClassifier::FD_AGRESSIVE );
-            delete set;
-
-
-            int n = par.getInt("dominantAreaExpansion");
-            if( n )
+            else
             {
-                md.mm()->updateDataMask( MeshModel::MM_FACEFACETOPO );
-                md.mm()->updateDataMask( MeshModel::MM_VERTFACETOPO );
+                RasterFaceMap facesByDomImg;
+                set->dominancyCoverage( facesByDomImg );
+                delete set;
 
-                for( RasterFaceMap::iterator rm=facesByDomImg.begin(); rm!=facesByDomImg.end(); ++rm )
-                    expands( rm.value(), n );
+                //if( int n = par.getInt("dominantAreaExpansion") )
+                //{
+                //    md.mm()->updateDataMask( MeshModel::MM_FACEFACETOPO );
+                //    md.mm()->updateDataMask( MeshModel::MM_VERTFACETOPO );
+
+                //    for( RasterFaceMap::iterator rm=facesByDomImg.begin(); rm!=facesByDomImg.end(); ++rm )
+                //        expands( rm.value(), n );
+                //}
+
+                QMap<int,QVector<int>> validPairs;
+                retroProjection( facesByDomImg, 0.01f*par.getFloat("minCoverage"), validPairs );
+                saveXMLProject( par.getString("xmlFileName"), md.mm(), facesByDomImg, validPairs );
             }
-
-            QMap<int,QVector<int>> validPairs;
-            retroProjection( facesByDomImg, 0.01f*par.getFloat("minCoverage"), validPairs );
-            saveXMLProject( par.getString("xmlFileName"), md.mm(), facesByDomImg, validPairs );
 
             break;
 		}
@@ -300,7 +292,7 @@ bool FilterOutputOpticalFlowPlugin::loadRasterList( QString &mlpFilename,
 
 void FilterOutputOpticalFlowPlugin::saveXMLProject( const QString &filename,
                                                     MeshModel *mm,
-                                                    RasterFaceMap &rasters,
+                                                    RasterFaceMap &rpatches,
                                                     QMap<int,QVector<int>> &validPairs )
 {
     std::ofstream xmlFile( filename.toAscii() );
@@ -313,7 +305,7 @@ void FilterOutputOpticalFlowPlugin::saveXMLProject( const QString &filename,
             << "\" aligned=\"0\" type=\"GlModelWidget\" numPoints=\"0\" id=\"0\"/>"
             << std::endl;
 
-    for( RasterFaceMap::iterator r=rasters.begin(); r!=rasters.end(); ++r )
+    for( RasterFaceMap::iterator r=rpatches.begin(); r!=rpatches.end(); ++r )
     {
         vcg::Shotf &shot = r.key()->shot;
         
@@ -386,65 +378,80 @@ void FilterOutputOpticalFlowPlugin::getNeighbors( CFaceO *f,
 }
 
 
-void FilterOutputOpticalFlowPlugin::expands( FaceVec &faces,
-                                             int n )
+void FilterOutputOpticalFlowPlugin::expands( Patch &patch,
+                                             int nbGrows )
 {
-    for( FaceVec::iterator f=faces.begin(); f!=faces.end(); ++f )
+    patch.boundary.clear();
+    patch.bWeight.clear();
+
+
+    // Mark all faces that belong to the current patch as "VISITED".
+    for( FaceVec::iterator f=patch.faces.begin(); f!=patch.faces.end(); ++f )
         (*f)->SetV();
 
 
-    FaceVec *boundary = new FaceVec(), *boundaryOld = new FaceVec();
-    for( FaceVec::iterator f=faces.begin(); f!=faces.end(); ++f )
-        if( ((*f)->FFp(0) && !(*f)->FFp(0)->IsV()) ||
-            ((*f)->FFp(1) && !(*f)->FFp(1)->IsV()) ||
-            ((*f)->FFp(2) && !(*f)->FFp(2)->IsV()) )
-            boundaryOld->push_back( *f );
+    // Get vertices that belong to the boundary of the patch by checking all triangle edges.
+    std::set<CVertexO*> candidates;
 
-
-    for( int nbGrow=0; nbGrow<n; ++nbGrow )
+    for( FaceVec::iterator f=patch.faces.begin(); f!=patch.faces.end(); ++f )
     {
-        boundary->clear();
-
-        for( FaceVec::iterator f=boundaryOld->begin(); f!=boundaryOld->end(); ++f )
+        vcg::face::Pos<CFaceO> pos( *f, (*f)->V(0) );
+        for( int i=0; i<3; ++i )
         {
-            vcg::face::Pos<CFaceO> pos( *f, (*f)->V(0) );
+            if( pos.FFlip() && !pos.FFlip()->IsV() )
+            {
+                candidates.insert( pos.V() );
+                candidates.insert( pos.VFlip() );
+            }
+            pos.FlipV();
+            pos.FlipE();
+        }
+    }
+
+
+    // For each round of region growing...
+    for( int n=0; n<nbGrows; ++n )
+    {
+        int k = patch.boundary.size();
+
+        // For each vertex marked as belonging to the patch boundary, its 1-ring neighborhood is added
+        // to the patch neighborhood and marked as visited.
+        for( std::set<CVertexO*>::iterator v=candidates.begin(); v!=candidates.end(); ++v )
+        {
+            NeighbSet neighb;
+            getNeighbors( *v, neighb );
+            for( NeighbSet::iterator nn=neighb.begin(); nn!=neighb.end(); ++nn )
+                if( !(*nn)->IsV() )
+                {
+                    (*nn)->SetV();
+                    patch.boundary.push_back( *nn );
+                }
+        }
+
+        // Vertices of the new boundary are recovered from the triangles that have juste been extracted
+        // in order to prepare the next region growing round.
+        for( candidates.clear(); k<patch.boundary.size(); ++k )
+        {
+            vcg::face::Pos<CFaceO> pos( patch.boundary[k], patch.boundary[k]->V(0) );
             for( int i=0; i<3; ++i )
             {
-                const CFaceO *f2 = pos.FFlip();
-                if( f2 && !f2->IsV() )
+                if( pos.FFlip() && !pos.FFlip()->IsV() )
                 {
-                    NeighbSet neighb;
-                    getNeighbors( pos.V(), neighb );
-                    getNeighbors( pos.VFlip(), neighb );
-                    for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
-                        if( !(*n)->IsS() && !(*n)->IsV() )
-                        {
-                            boundary->push_back( *n );
-                            (*n)->SetS();
-                        }
+                    candidates.insert( pos.V() );
+                    candidates.insert( pos.VFlip() );
                 }
                 pos.FlipV();
                 pos.FlipE();
             }
         }
-
-        for( FaceVec::iterator f=boundary->begin(); f!=boundary->end(); ++f )
-        {
-            (*f)->SetV();
-            (*f)->ClearS();
-            faces.push_back( *f );
-        }
-
-        FaceVec *tmp = boundary;
-        boundary = boundaryOld;
-        boundaryOld = tmp;
     }
 
-    delete boundary;
-    delete boundaryOld;
 
+    // Unmark all marked faces, for other futur processing.
+    for( FaceVec::iterator f=patch.faces.begin(); f!=patch.faces.end(); ++f )
+        (*f)->ClearV();
 
-    for( FaceVec::iterator f=faces.begin(); f!=faces.end(); ++f )
+    for( FaceVec::iterator f=patch.boundary.begin(); f!=patch.boundary.end(); ++f )
         (*f)->ClearV();
 }
 
@@ -492,6 +499,7 @@ void FilterOutputOpticalFlowPlugin::shadowTextureMatrices( OOCRaster *rr,
     float l, r, b, t, focal;
     rr->shot.Intrinsics.GetFrustum( l, r, b, t, focal );
 
+
     // Compute from the frustum values the camera projection matrix.
     proj.SetZero();
     proj[0][0] = 2.0f*focal / (r-l);
@@ -525,11 +533,11 @@ void FilterOutputOpticalFlowPlugin::setupShadowAndColorTextures( GPU::Texture2D 
     glPushAttrib( GL_TEXTURE_BIT );
 
 
+    // Create and initialize the OpenGL texture object used to store the shadow map.
     if( !shadowMap.IsInstantiated() ||
         shadowMap.Width() !=vp.X()  ||
         shadowMap.Height()!=vp.Y()  )
     {
-        // Create and initialize the OpenGL texture object used to store the shadow map.
         shadowMap.Create( GL_DEPTH_COMPONENT,
                           vp.X(),
                           vp.Y(),
@@ -544,7 +552,7 @@ void FilterOutputOpticalFlowPlugin::setupShadowAndColorTextures( GPU::Texture2D 
     }
 
 
-    // Loads the raster into the GPU as a texture image.
+    // Loads the raster to the GPU as a texture image.
     rr->bind();
     QImage &img = rr->plane->image;
     GLubyte *rasterData = new GLubyte [ 3*img.width()*img.height() ];
@@ -569,9 +577,6 @@ void FilterOutputOpticalFlowPlugin::setupShadowAndColorTextures( GPU::Texture2D 
 }
 
 
-#if 0
-int aaaaa = 0;
-#endif
 void FilterOutputOpticalFlowPlugin::paintShadowTexture( GPU::Texture2D &shadowMap,
                                                         vcg::Matrix44f &proj,
                                                         vcg::Matrix44f &pose )
@@ -603,20 +608,6 @@ void FilterOutputOpticalFlowPlugin::paintShadowTexture( GPU::Texture2D &shadowMa
     m_MeshVBO.Unbind();
 
     fbuffer.Unbind();
-#if 0
-float *bf = new float [ fbuffer.Width()*fbuffer.Height() ];
-fbuffer.DumpTo( GL_DEPTH_ATTACHMENT, bf, GL_DEPTH_COMPONENT, GL_FLOAT );
-QImage img( fbuffer.Width(), fbuffer.Height(), QImage::Format_RGB888 );
-for( int y=fbuffer.Height()-1, n=0; y>=0; --y )
-    for( int x=0; x<fbuffer.Width(); ++x, ++n )
-    {
-        int c = (unsigned char)(255.0f*bf[n]);
-        img.setPixel( x, y, qRgb(c,c,c) );
-    }
-img.save( QString().sprintf("test%03i.png",aaaaa) );
-aaaaa ++;
-delete [] bf;
-#endif
 
     glPopMatrix();
     glMatrixMode( GL_PROJECTION );
@@ -626,7 +617,7 @@ delete [] bf;
 }
 
 
-void FilterOutputOpticalFlowPlugin::retroProjection( RasterFaceMap &rasters,
+void FilterOutputOpticalFlowPlugin::retroProjection( RasterFaceMap &rpatches,
                                                      float coverageThreshold,
                                                      QMap<int,QVector<int>> &validPairs )
 {
@@ -642,15 +633,14 @@ void FilterOutputOpticalFlowPlugin::retroProjection( RasterFaceMap &rasters,
     setupShader( reprojShader );
     validPairs.clear();
 
-    for( RasterFaceMap::iterator rproj=rasters.begin(); rproj!=rasters.end(); ++rproj )
+    for( RasterFaceMap::iterator rproj=rpatches.begin(); rproj!=rpatches.end(); ++rproj )
     {
         vcg::Matrix44f proj, pose, shadowProj;
         shadowTextureMatrices( rproj.key(), proj, pose, shadowProj );
         setupShadowAndColorTextures( shadowMap, colorMap, rproj.key() );
         paintShadowTexture( shadowMap, proj, pose );
 
-#if 1
-        for( RasterFaceMap::iterator rref=rasters.begin(); rref!=rasters.end(); ++rref )
+        for( RasterFaceMap::iterator rref=rpatches.begin(); rref!=rpatches.end(); ++rref )
             if( rref != rproj )
             {
                 const vcg::Point2i vp = rref.key()->shot.Intrinsics.ViewportPx;
@@ -726,7 +716,6 @@ void FilterOutputOpticalFlowPlugin::retroProjection( RasterFaceMap &rasters,
 
                 delete [] buffer;
             }
-#endif
     }
 
     m_MeshVBO.Release();

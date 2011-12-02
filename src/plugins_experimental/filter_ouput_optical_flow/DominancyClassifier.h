@@ -33,6 +33,16 @@
 
 
 typedef QVector<CFaceO*> FaceVec;
+typedef QVector<vcg::Point3f> WeightVec;
+
+struct Patch
+{
+    OOCRaster   *ref;
+    FaceVec     faces;
+    FaceVec     boundary;
+    WeightVec   bWeight;
+};
+
 typedef QMap<OOCRaster*,FaceVec> RasterFaceMap;
 
 
@@ -48,21 +58,22 @@ public:
         W_ALL           = 0x0F,
     };
 
-    enum FaceDomMode
-    {
-        FD_STRICT       ,
-        FD_AGRESSIVE    ,
-    };
-
     struct VDominancy
     {
-        float       weight;
-        OOCRaster   *dominant;
+        float       weight1;
+        float       weight2;
+        OOCRaster   *dominant1;
+        OOCRaster   *dominant2;
 
         inline VDominancy() :
-        weight(-1.0f),
-        dominant(NULL)
+        weight1(-1.0f),
+        weight2(-1.0f),
+        dominant1(NULL),
+        dominant2(NULL)
         {}
+
+        inline bool isOnBoundary() const    { return dominant1 && dominant2 && borderWeight()<=1.0f; }
+        inline float borderWeight() const   { return (std::sqrt(weight1/weight2) - 1.0f) / 0.2; }
     };
 
 private:
@@ -101,13 +112,13 @@ private:
     void                        updateDepthRange();
     void                        updateMeshVBO();
     bool                        initShaders();
-    void                        generateWeightsAndShadowMap();
+    void                        generateWeightsAndShadowMap( OOCRaster &rr );
     void                        projectiveTexMatrices( OOCRaster &rr );
     void                        setupShadowTexture( OOCRaster &rr );
     void                        checkDominancy( OOCRaster &rr );
     void                        releaseAll();
 
-    inline int                  id( const CVertexO& v ) const                           { return &v - &m_Mesh.vert[0]; }
+    inline int                  id( const CVertexO& v ) const                       { return &v - &m_Mesh.vert[0]; }
 
 public:
     DominancyClassifier( CMeshO &mesh, QList<OOCRaster> &rasterList, int weightMask );
@@ -121,12 +132,7 @@ public:
     inline const VDominancy&    operator[]( const CMeshO::VertexIterator& v ) const { return m_VertexDom[id(*v)]; }
     inline VDominancy&          operator[]( const CMeshO::VertexIterator& v )       { return m_VertexDom[id(*v)]; }
 
-    void                        facesWithDominant( FaceVec &faces,
-                                                   const OOCRaster *rr,
-                                                   FaceDomMode mode = FD_AGRESSIVE ) const;
-
-    void                        dominancyCoverage( RasterFaceMap &faces,
-                                                   FaceDomMode mode = FD_AGRESSIVE ) const;
+    void                        dominancyCoverage( RasterFaceMap &rpatches ) const;
 };
 
 

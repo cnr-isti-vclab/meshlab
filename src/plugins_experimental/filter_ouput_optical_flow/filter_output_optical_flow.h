@@ -56,8 +56,8 @@ class FilterOutputOpticalFlowPlugin : public QObject, public MeshFilterInterface
                                       NeighbSet &neighb ) const;
     void                getNeighbors( CFaceO *f,
                                       NeighbSet &neighb ) const;
-    void                expands( FaceVec &faces,
-                                 int n );
+    void                expands( Patch &patch,
+                                 int nbGrows );
 
     void                setupMeshVBO();
     void                setupShader( GPU::Shader &shader );
@@ -71,7 +71,7 @@ class FilterOutputOpticalFlowPlugin : public QObject, public MeshFilterInterface
     void                paintShadowTexture( GPU::Texture2D &shadowMap,
                                             vcg::Matrix44f &proj,
                                             vcg::Matrix44f &pose );
-    void                retroProjection( RasterFaceMap &faces,
+    void                retroProjection( RasterFaceMap &rpatches,
                                          float coverageThreshold,
                                          QMap<int,QVector<int>> &validPairs );
     bool                loadRasterList( QString &filename,
@@ -79,7 +79,7 @@ class FilterOutputOpticalFlowPlugin : public QObject, public MeshFilterInterface
 
     void                saveXMLProject( const QString &filename,
                                         MeshModel *mm,
-                                        RasterFaceMap &rasters,
+                                        RasterFaceMap &rpatches,
                                         QMap<int,QVector<int>> &validPairs );
 
 
