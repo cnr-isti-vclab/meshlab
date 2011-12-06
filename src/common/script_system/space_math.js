@@ -1,480 +1,481 @@
+SGL = {};
 
-function sglUndefV2(v) {
+SGL.undefV2 = function(v) {
 	return new Array(2);
 }
 
-function sglV2V(v) {
+SGL.v2V = function(v) {
 	return v.slice(0, 2);
 }
 
-function sglV2S(s) {
+SGL.v2S = function(s) {
 	return [ s, s ];
 }
 
-function sglV2C(x, y) {
+SGL.v2C = function(x, y) {
 	return [ x, y ];
 }
 
-function sglZeroV2() {
-	return sglV2S(0.0);
+SGL.zeroV2 = function() {
+	return SGL.v2S(0.0);
 }
 
-function sglOneV2() {
-	return sglV2S(1.0);
+SGL.oneV2 = function() {
+	return SGL.v2S(1.0);
 }
 
-function sglV2() {
+SGL.v2 = function() {
 	var n = arguments.length;
 	var s;
 	switch (n) {
 		case 1:
 			if (arguments[0] instanceof Array) {
-				return sglV2V(arguments[0]);
+				return SGL.v2V(arguments[0]);
 			}
-			return sglV2S(arguments[0]);
+			return SGL.v2S(arguments[0]);
 		break;
 
 		case 2:
-			return sglV2V(arguments);
+			return SGL.v2V(arguments);
 		break;
 
 		default:
-			return sglZeroV2();
+			return SGL.zeroV2();
 		break;
 	}
 	return null;
 }
 
-function sglDupV2(v) {
+SGL.dupV2 = function(v) {
 	return v.slice(0, 2);
 }
 
-function sglNegV2(v) {
-	return sglV2C(-v[0], -v[1]);
+SGL.negV2 = function(v) {
+	return SGL.v2C(-v[0], -v[1]);
 }
 
-function sglAddV2(u, v) {
-	return sglV2C(u[0]+v[0], u[1]+v[1]);
+SGL.addV2 = function(u, v) {
+	return SGL.v2C(u[0]+v[0], u[1]+v[1]);
 }
 
-function sglAddV2S(v, s) {
-	return sglV2C(v[0]+s, v[1]+s);
+SGL.addV2S = function(v, s) {
+	return SGL.v2C(v[0]+s, v[1]+s);
 }
 
-function sglAddSV2(s, v) {
-	return sglAddV2S(v, s)
+SGL.addSV2 = function(s, v) {
+	return SGL.addV2S(v, s)
 }
 
-function sglSubV2(u, v) {
-	return sglV2C(u[0]-v[0], u[1]-v[1]);
+SGL.subV2 = function(u, v) {
+	return SGL.v2C(u[0]-v[0], u[1]-v[1]);
 }
 
-function sglSubV2S(v, s) {
-	return sglV2C(v[0]-s, v[1]-s);
+SGL.subV2S = function(v, s) {
+	return SGL.v2C(v[0]-s, v[1]-s);
 }
 
-function sglSubSV2(v, s) {
-	return sglV2C(s-v[0], s-v[1]);
+SGL.subSV2 = function(v, s) {
+	return SGL.v2C(s-v[0], s-v[1]);
 }
 
-function sglMulV2(u, v) {
-	return sglV2C(u[0]*v[0], u[1]*v[1]);
+SGL.mulV2 = function(u, v) {
+	return SGL.v2C(u[0]*v[0], u[1]*v[1]);
 }
 
-function sglMulV2S(v, s) {
-	return sglV2C(v[0]*s, v[1]*s);
+SGL.mulV2S = function(v, s) {
+	return SGL.v2C(v[0]*s, v[1]*s);
 }
 
-function sglMulSV2(s, v) {
-	return sglMulV2S(v, s);
+SGL.mulSV2 = function(s, v) {
+	return SGL.mulV2S(v, s);
 }
 
-function sglDivV2(u, v) {
-	return sglV2C(u[0]/v[0], u[1]/v[1]);
+SGL.divV2 = function(u, v) {
+	return SGL.v2C(u[0]/v[0], u[1]/v[1]);
 }
 
-function sglDivV2S(v, s) {
-	return sglV2C(v[0]/s, v[1]/s);
+SGL.divV2S = function(v, s) {
+	return SGL.v2C(v[0]/s, v[1]/s);
 }
 
-function sglDivSV2(s, v) {
-	return sglV2C(s/v[0], s/v[1]);
+SGL.divSV2 = function(s, v) {
+	return SGL.v2C(s/v[0], s/v[1]);
 }
 
-function sglRcpV2(v) {
-	return sglDivSV2(1.0, v);
+SGL.rcpV2 = function(v) {
+	return SGL.divSV2(1.0, v);
 }
 
-function sglDotV2(u, v) {
+SGL.dotV2 = function(u, v) {
 	return (u[0]*v[0] + u[1]*v[1]);
 }
 
-function sglCrossV2(u, v) {
+SGL.crossV2 = function(u, v) {
 	return (u[0]*v[1] - u[1]*v[0]);
 }
 
-function sglSqLengthV2(v) {
-	return sglDotV2(v, v);
+SGL.sqLengthV2 = function(v) {
+	return SGL.dotV2(v, v);
 }
 
-function sglLengthV2(v) {
-	return sglSqrt(sglSqLengthV2(v));
+SGL.lengthV2 = function(v) {
+	return SGL.sqrt(sglSqLengthV2(v));
 }
 
-function sglNormalizedV2(v) {
-	var f = 1.0 / sglLengthV2(v);
-	return sglMulV2S(v, f);
+SGL.normalizedV2 = function(v) {
+	var f = 1.0 / SGL.lengthV2(v);
+	return SGL.mulV2S(v, f);
 }
 
-function sglSelfNegV2(v) {
+SGL.selfNegV2 = function(v) {
 	v[0] = -v[0];
 	v[1] = -v[1];
 	return v;
 }
 
-function sglSelfAddV2(u, v) {
+SGL.selfAddV2 = function(u, v) {
 	u[0] += v[0];
 	u[1] += v[1];
 	return u;
 }
 
-function sglSelfAddV2S(v, s) {
+SGL.selfAddV2S = function(v, s) {
 	v[0] += s;
 	v[1] += s;
 	return v;
 }
 
-function sglSelfAddSV2(s, v) {
+SGL.selfAddSV2 = function(s, v) {
 	v[0] += s;
 	v[1] += s;
 	return v;
 }
 
-function sglSelfSubV2(u, v) {
+SGL.selfSubV2 = function(u, v) {
 	u[0] -= v[0];
 	u[1] -= v[1];
 	return u;
 }
 
-function sglSelfSubV2S(v, s) {
+SGL.selfSubV2S = function(v, s) {
 	v[0] -= s;
 	v[1] -= s;
 	return v;
 }
 
-function sglSelfSubSV2(v, s) {
+SGL.selfSubSV2 = function(v, s) {
 	v[0] = s - v[0];
 	v[1] = s - v[1];
 	return v;
 }
 
-function sglSelfMulV2(u, v) {
+SGL.selfMulV2 = function(u, v) {
 	u[0] *= v[0];
 	u[1] *= v[1];
 	return u;
 }
 
-function sglSelfMulV2S(v, s) {
+SGL.selfMulV2S = function(v, s) {
 	v[0] *= s;
 	v[1] *= s;
 	return v;
 }
 
-function sglSelfMulSV2(s, v) {
+SGL.selfMulSV2 = function(s, v) {
 	v[0] *= s;
 	v[1] *= s;
 	return v;
 }
 
-function sglSelfDivV2(u, v) {
+SGL.selfDivV2 = function(u, v) {
 	u[0] /= v[0];
 	u[1] /= v[1];
 	return u;
 }
 
-function sglSelfDivV2S(v, s) {
+SGL.selfDivV2S = function(v, s) {
 	u[0] /= s;
 	u[1] /= s;
 	return u;
 }
 
-function sglSelfDivSV2(s, v) {
+SGL.selfDivSV2 = function(s, v) {
 	v[0] = s / v[0];
 	v[1] = s / v[1];
 	return v;
 }
 
-function sglSelfRcpV2(v) {
-	return sglSelfDivSV2(1.0, v);
+SGL.selfRcpV2 = function(v) {
+	return SGL.selfDivSV2(1.0, v);
 }
 
-function sglSelfNormalizeV2(v) {
-	var f = 1.0 / sglLengthV2(v);
-	return sglSelfMulV2S(v, f);
+SGL.selfNormalizeV2 = function(v) {
+	var f = 1.0 / SGL.lengthV2(v);
+	return SGL.selfMulV2S(v, f);
 }
 
-function sglMinV2(u, v) {
+SGL.minV2 = function(u, v) {
 	return [
 		((u[0] < v[0]) ? (u[0]) : (v[0])),
 		((u[1] < v[1]) ? (u[1]) : (v[1]))
 	];
 }
 
-function sglMaxV2(u, v) {
+SGL.maxV2 = function(u, v) {
 	return [
 		((u[0] > v[0]) ? (u[0]) : (v[0])),
 		((u[1] > v[1]) ? (u[1]) : (v[1]))
 	];
 }
 
-function sglV2toV3(v, z) {
-	return sglV3C(v[0], v[1], z);
+SGL.v2toV3 = function(v, z) {
+	return SGL.v3C(v[0], v[1], z);
 }
 
-function sglV2toV4(v, z, w) {
-	return sglV4C(v[0], v[1], z, w);
+SGL.v2toV4 = function(v, z, w) {
+	return SGL.v4C(v[0], v[1], z, w);
 }
 /***********************************************************************/
 
 
 // 3-dimensional vector
 /***********************************************************************/
-function sglUndefV3(v) {
+SGL.undefV3 = function(v) {
 	return new Array(3);
 }
 
-function sglV3V(v) {
+SGL.v3V = function(v) {
 	return v.slice(0, 3);
 }
 
-function sglV3S(s) {
+SGL.v3S = function(s) {
 	return [ s, s, s ];
 }
 
-function sglV3C(x, y, z) {
+SGL.v3C = function(x, y, z) {
 	return [ x, y, z ];
 }
 
-function sglZeroV3() {
-	return sglV3S(0.0);
+SGL.zeroV3 = function() {
+	return SGL.v3S(0.0);
 }
 
-function sglOneV3() {
-	return sglV3S(1.0);
+SGL.oneV3 = function() {
+	return SGL.v3S(1.0);
 }
 
-function sglV3() {
+SGL.v3 = function() {
 	var n = arguments.length;
 	var s;
 	switch (n) {
 		case 1:
 			if (arguments[0] instanceof Array) {
-				return sglV3V(arguments[0]);
+				return SGL.v3V(arguments[0]);
 			}
-			return sglV3S(arguments[0]);
+			return SGL.v3S(arguments[0]);
 		break;
 
 		case 3:
-			return sglV3V(arguments);
+			return SGL.v3V(arguments);
 		break;
 
 		default:
-			return sglZeroV3();
+			return SGL.zeroV3();
 		break;
 	}
 	return null;
 }
 
-function sglDupV3(v) {
+SGL.dupV3 = function(v) {
 	return v.slice(0, 3);
 }
 
-function sglNegV3(v) {
-	return sglV3C(-v[0], -v[1], -v[2]);
+SGL.negV3 = function(v) {
+	return SGL.v3C(-v[0], -v[1], -v[2]);
 }
 
-function sglAddV3(u, v) {
-	return sglV3C(u[0]+v[0], u[1]+v[1], u[2]+v[2]);
+SGL.addV3 = function(u, v) {
+	return SGL.v3C(u[0]+v[0], u[1]+v[1], u[2]+v[2]);
 }
 
-function sglAddV3S(v, s) {
-	return sglV3C(v[0]+s, v[1]+s, v[2]+s);
+SGL.addV3S = function(v, s) {
+	return SGL.v3C(v[0]+s, v[1]+s, v[2]+s);
 }
 
-function sglAddSV3(s, v) {
-	return sglAddV3S(v, s)
+SGL.addSV3 = function(s, v) {
+	return SGL.addV3S(v, s)
 }
 
-function sglSubV3(u, v) {
-	return sglV3C(u[0]-v[0], u[1]-v[1], u[2]-v[2]);
+SGL.subV3 = function(u, v) {
+	return SGL.v3C(u[0]-v[0], u[1]-v[1], u[2]-v[2]);
 }
 
-function sglSubV3S(v, s) {
-	return sglV3C(v[0]-s, v[1]-s, v[2]-s);
+SGL.subV3S = function(v, s) {
+	return SGL.v3C(v[0]-s, v[1]-s, v[2]-s);
 }
 
-function sglSubSV3(v, s) {
-	return sglV3C(s-v[0], s-v[1], s-v[2]);
+SGL.subSV3 = function(v, s) {
+	return SGL.v3C(s-v[0], s-v[1], s-v[2]);
 }
 
-function sglMulV3(u, v) {
-	return sglV3C(u[0]*v[0], u[1]*v[1], u[2]*v[2]);
+SGL.mulV3 = function(u, v) {
+	return SGL.v3C(u[0]*v[0], u[1]*v[1], u[2]*v[2]);
 }
 
-function sglMulV3S(v, s) {
-	return sglV3C(v[0]*s, v[1]*s, v[2]*s);
+SGL.mulV3S = function(v, s) {
+	return SGL.v3C(v[0]*s, v[1]*s, v[2]*s);
 }
 
-function sglMulSV3(s, v) {
-	return sglMulV3S(v, s);
+SGL.mulSV3 = function(s, v) {
+	return SGL.mulV3S(v, s);
 }
 
-function sglDivV3(u, v) {
-	return sglV3C(u[0]/v[0], u[1]/v[1], u[2]/v[2]);
+SGL.divV3 = function(u, v) {
+	return SGL.v3C(u[0]/v[0], u[1]/v[1], u[2]/v[2]);
 }
 
-function sglDivV3S(v, s) {
-	return sglV3C(v[0]/s, v[1]/s, v[2]/s);
+SGL.divV3S = function(v, s) {
+	return SGL.v3C(v[0]/s, v[1]/s, v[2]/s);
 }
 
-function sglDivSV3(s, v) {
-	return sglV3C(s/v[0], s/v[1], s/v[2]);
+SGL.divSV3 = function(s, v) {
+	return SGL.v3C(s/v[0], s/v[1], s/v[2]);
 }
 
-function sglRcpV3(v) {
-	return sglDivSV3(1.0, v);
+SGL.rcpV3 = function(v) {
+	return SGL.divSV3(1.0, v);
 }
 
-function sglDotV3(u, v) {
+SGL.dotV3 = function(u, v) {
 	return (u[0]*v[0] + u[1]*v[1] + u[2]*v[2]);
 }
 
-function sglCrossV3(u, v) {
-	return sglV3C(u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]);
+SGL.crossV3 = function(u, v) {
+	return SGL.v3C(u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]);
 }
 
-function sglSqLengthV3(v) {
-	return sglDotV3(v, v);
+SGL.sqLengthV3 = function(v) {
+	return SGL.dotV3(v, v);
 }
 
-function sglLengthV3(v) {
-	return sglSqrt(sglSqLengthV3(v));
+SGL.lengthV3 = function(v) {
+	return SGL.sqrt(sglSqLengthV3(v));
 }
 
-function sglNormalizedV3(v) {
-	var f = 1.0 / sglLengthV3(v);
-	return sglMulV3S(v, f);
+SGL.normalizedV3 = function(v) {
+	var f = 1.0 / SGL.lengthV3(v);
+	return SGL.mulV3S(v, f);
 }
 
-function sglSelfNegV3(v) {
+SGL.selfNegV3 = function(v) {
 	v[0] = -v[0];
 	v[1] = -v[1];
 	v[2] = -v[2];
 	return v;
 }
 
-function sglSelfAddV3(u, v) {
+SGL.selfAddV3 = function(u, v) {
 	u[0] += v[0];
 	u[1] += v[1];
 	u[2] += v[2];
 	return u;
 }
 
-function sglSelfAddV3S(v, s) {
+SGL.selfAddV3S = function(v, s) {
 	v[0] += s;
 	v[1] += s;
 	v[2] += s;
 	return v;
 }
 
-function sglSelfAddSV3(s, v) {
+SGL.selfAddSV3 = function(s, v) {
 	v[0] += s;
 	v[1] += s;
 	v[2] += s;
 	return v;
 }
 
-function sglSelfSubV3(u, v) {
+SGL.selfSubV3 = function(u, v) {
 	u[0] -= v[0];
 	u[1] -= v[1];
 	u[2] -= v[2];
 	return u;
 }
 
-function sglSelfSubV3S(v, s) {
+SGL.selfSubV3S = function(v, s) {
 	v[0] -= s;
 	v[1] -= s;
 	v[2] -= s;
 	return v;
 }
 
-function sglSelfSubSV3(v, s) {
+SGL.selfSubSV3 = function(v, s) {
 	v[0] = s - v[0];
 	v[1] = s - v[1];
 	v[2] = s - v[2];
 	return v;
 }
 
-function sglSelfMulV3(u, v) {
+SGL.selfMulV3 = function(u, v) {
 	u[0] *= v[0];
 	u[1] *= v[1];
 	u[2] *= v[2];
 	return u;
 }
 
-function sglSelfMulV3S(v, s) {
+SGL.selfMulV3S = function(v, s) {
 	v[0] *= s;
 	v[1] *= s;
 	v[2] *= s;
 	return v;
 }
 
-function sglSelfMulSV3(s, v) {
+SGL.selfMulSV3 = function(s, v) {
 	v[0] *= s;
 	v[1] *= s;
 	v[2] *= s;
 	return v;
 }
 
-function sglSelfDivV3(u, v) {
+SGL.selfDivV3 = function(u, v) {
 	u[0] /= v[0];
 	u[1] /= v[1];
 	u[2] /= v[2];
 	return u;
 }
 
-function sglSelfDivV3S(v, s) {
+SGL.selfDivV3S = function(v, s) {
 	u[0] /= s;
 	u[1] /= s;
 	u[2] /= s;
 	return u;
 }
 
-function sglSelfDivSV3(s, v) {
+SGL.selfDivSV3 = function(s, v) {
 	v[0] = s / v[0];
 	v[1] = s / v[1];
 	v[2] = s / v[2];
 	return v;
 }
 
-function sglSelfRcpV3(v) {
-	return sglSelfDivSV3(1.0, v);
+SGL.selfRcpV3 = function(v) {
+	return SGL.selfDivSV3(1.0, v);
 }
 
-function sglSelfCrossV3(u, v) {
-	var t = sglV3C(u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]);
+SGL.selfCrossV3 = function(u, v) {
+	var t = SGL.v3C(u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]);
 	u[0] = t[0];
 	u[1] = t[1];
 	u[2] = t[2];
 	return u;
 }
 
-function sglSelfNormalizeV3(v) {
-	var f = 1.0 / sglLengthV3(v);
-	return sglSelfMulV3S(v, f);
+SGL.selfNormalizeV3 = function(v) {
+	var f = 1.0 / SGL.lengthV3(v);
+	return SGL.selfMulV3S(v, f);
 }
 
-function sglMinV3(u, v) {
+SGL.minV3 = function(u, v) {
 	return [
 		((u[0] < v[0]) ? (u[0]) : (v[0])),
 		((u[1] < v[1]) ? (u[1]) : (v[1])),
@@ -482,7 +483,7 @@ function sglMinV3(u, v) {
 	];
 }
 
-function sglMaxV3(u, v) {
+SGL.maxV3 = function(u, v) {
 	return [
 		((u[0] > v[0]) ? (u[0]) : (v[0])),
 		((u[1] > v[1]) ? (u[1]) : (v[1])),
@@ -490,147 +491,147 @@ function sglMaxV3(u, v) {
 	];
 }
 
-function sglV3toV2(v) {
+SGL.v3toV2 = function(v) {
 	return v.slice(0, 2);
 }
 
-function sglV3toV4(v, w) {
-	return sglV4C(v[0], v[1], v[2], w);
+SGL.v3toV4 = function(v, w) {
+	return SGL.v4C(v[0], v[1], v[2], w);
 }
 /***********************************************************************/
 
 
 // 4-dimensional vector
 /***********************************************************************/
-function sglUndefV4(v) {
+SGL.undefV4 = function(v) {
 	return new Array(4);
 }
 
-function sglV4V(v) {
+SGL.v4V = function(v) {
 	return v.slice(0, 4);
 }
 
-function sglV4S(s) {
+SGL.v4S = function(s) {
 	return [ s, s, s, s ];
 }
 
-function sglV4C(x, y, z, w) {
+SGL.v4C = function(x, y, z, w) {
 	return [ x, y, z, w ];
 }
 
-function sglZeroV4() {
-	return sglV4S(0.0);
+SGL.zeroV4 = function() {
+	return SGL.v4S(0.0);
 }
 
-function sglOneV4() {
-	return sglV4S(1.0);
+SGL.oneV4 = function() {
+	return SGL.v4S(1.0);
 }
 
-function sglV4() {
+SGL.v4 = function() {
 	var n = arguments.length;
 	var s;
 	switch (n) {
 		case 1:
 			if (arguments[0] instanceof Array) {
-				return sglV4V(arguments[0]);
+				return SGL.v4V(arguments[0]);
 			}
-			return sglV4S(arguments[0]);
+			return SGL.v4S(arguments[0]);
 		break;
 
 		case 4:
-			return sglV4V(arguments);
+			return SGL.v4V(arguments);
 		break;
 
 		default:
-			return sglZeroV4();
+			return SGL.zeroV4();
 		break;
 	}
 	return null;
 }
 
-function sglDupV4(v) {
+SGL.dupV4 = function(v) {
 	return v.slice(0, 4);
 }
 
-function sglNegV4(v) {
-	return sglV4C(-v[0], -v[1], -v[2], -v[3]);
+SGL.negV4 = function(v) {
+	return SGL.v4C(-v[0], -v[1], -v[2], -v[3]);
 }
 
-function sglAddV4(u, v) {
-	return sglV4C(u[0]+v[0], u[1]+v[1], u[2]+v[2], u[3]+v[3]);
+SGL.addV4 = function(u, v) {
+	return SGL.v4C(u[0]+v[0], u[1]+v[1], u[2]+v[2], u[3]+v[3]);
 }
 
-function sglAddV4S(v, s) {
-	return sglV4C(v[0]+s, v[1]+s, v[2]+s, v[3]+s);
+SGL.addV4S = function(v, s) {
+	return SGL.v4C(v[0]+s, v[1]+s, v[2]+s, v[3]+s);
 }
 
-function sglAddSV4(s, v) {
-	return sglAddV4S(v, s)
+SGL.addSV4 = function(s, v) {
+	return SGL.addV4S(v, s)
 }
 
-function sglSubV4(u, v) {
-	return sglV4C(u[0]-v[0], u[1]-v[1], u[2]-v[2], u[3]-v[3]);
+SGL.subV4 = function(u, v) {
+	return SGL.v4C(u[0]-v[0], u[1]-v[1], u[2]-v[2], u[3]-v[3]);
 }
 
-function sglSubV4S(v, s) {
-	return sglV4C(v[0]-s, v[1]-s, v[2]-s, v[3]-s);
+SGL.subV4S = function(v, s) {
+	return SGL.v4C(v[0]-s, v[1]-s, v[2]-s, v[3]-s);
 }
 
-function sglSubSV4(v, s) {
-	return sglV4C(s-v[0], s-v[1], s-v[2], s-v[3]);
+SGL.subSV4 = function(v, s) {
+	return SGL.v4C(s-v[0], s-v[1], s-v[2], s-v[3]);
 }
 
-function sglMulV4(u, v) {
-	return sglV4C(u[0]*v[0], u[1]*v[1], u[2]*v[2], u[3]*v[3]);
+SGL.mulV4 = function(u, v) {
+	return SGL.v4C(u[0]*v[0], u[1]*v[1], u[2]*v[2], u[3]*v[3]);
 }
 
-function sglMulV4S(v, s) {
-	return sglV4C(v[0]*s, v[1]*s, v[2]*s, v[3]*s);
+SGL.mulV4S = function(v, s) {
+	return SGL.v4C(v[0]*s, v[1]*s, v[2]*s, v[3]*s);
 }
 
-function sglMulSV4(s, v) {
-	return sglMulV4S(v, s);
+SGL.mulSV4 = function(s, v) {
+	return SGL.mulV4S(v, s);
 }
 
-function sglDivV4(u, v) {
-	return sglV4C(u[0]/v[0], u[1]/v[1], u[2]/v[2], u[3]/v[3]);
+SGL.divV4 = function(u, v) {
+	return SGL.v4C(u[0]/v[0], u[1]/v[1], u[2]/v[2], u[3]/v[3]);
 }
 
-function sglDivV4S(v, s) {
-	return sglV4C(v[0]/s, v[1]/s, v[2]/s, v[3]/s);
+SGL.divV4S = function(v, s) {
+	return SGL.v4C(v[0]/s, v[1]/s, v[2]/s, v[3]/s);
 }
 
-function sglDivSV4(s, v) {
-	return sglV4C(s/v[0], s/v[1], s/v[2], s/v[3]);
+SGL.divSV4 = function(s, v) {
+	return SGL.v4C(s/v[0], s/v[1], s/v[2], s/v[3]);
 }
 
-function sglRcpV4(v) {
-	return sglDivSV4(1.0, v);
+SGL.rcpV4 = function(v) {
+	return SGL.divSV4(1.0, v);
 }
 
-function sglDotV4(u, v) {
+SGL.dotV4 = function(u, v) {
 	return (u[0]*v[0] + u[1]*v[1] + u[2]*v[2] + u[3]*v[3]);
 }
 
-function sglSqLengthV4(v) {
-	return sglDotV4(v, v);
+SGL.sqLengthV4 = function(v) {
+	return SGL.dotV4(v, v);
 }
 
-function sglLengthV4(v) {
-	return sglSqrt(sglSqLengthV4(v));
+SGL.lengthV4 = function(v) {
+	return SGL.sqrt(sglSqLengthV4(v));
 }
 
-function sglNormalizedV4(v) {
-	var f = 1.0 / sglLengthV4(v);
-	return sglMulV4S(v, f);
+SGL.normalizedV4 = function(v) {
+	var f = 1.0 / SGL.lengthV4(v);
+	return SGL.mulV4S(v, f);
 }
 
-function sglProjectV4(v) {
+SGL.projectV4 = function(v) {
 	var f = 1.0 / v[3];
-	return sglV4C(v[0]*f, v[1]*f, v[2]*f, 1.0);
+	return SGL.v4C(v[0]*f, v[1]*f, v[2]*f, 1.0);
 }
 
-function sglSelfNegV4(v) {
+SGL.selfNegV4 = function(v) {
 	v[0] = -v[0];
 	v[1] = -v[1];
 	v[2] = -v[2];
@@ -638,7 +639,7 @@ function sglSelfNegV4(v) {
 	return v;
 }
 
-function sglSelfAddV4(u, v) {
+SGL.selfAddV4 = function(u, v) {
 	u[0] += v[0];
 	u[1] += v[1];
 	u[2] += v[2];
@@ -646,7 +647,7 @@ function sglSelfAddV4(u, v) {
 	return u;
 }
 
-function sglSelfAddV4S(v, s) {
+SGL.selfAddV4S = function(v, s) {
 	v[0] += s;
 	v[1] += s;
 	v[2] += s;
@@ -654,7 +655,7 @@ function sglSelfAddV4S(v, s) {
 	return v;
 }
 
-function sglSelfAddSV4(s, v) {
+SGL.selfAddSV4 = function(s, v) {
 	v[0] += s;
 	v[1] += s;
 	v[2] += s;
@@ -662,7 +663,7 @@ function sglSelfAddSV4(s, v) {
 	return v;
 }
 
-function sglSelfSubV4(u, v) {
+SGL.selfSubV4 = function(u, v) {
 	u[0] -= v[0];
 	u[1] -= v[1];
 	u[2] -= v[2];
@@ -670,7 +671,7 @@ function sglSelfSubV4(u, v) {
 	return u;
 }
 
-function sglSelfSubV4S(v, s) {
+SGL.selfSubV4S = function(v, s) {
 	v[0] -= s;
 	v[1] -= s;
 	v[2] -= s;
@@ -678,7 +679,7 @@ function sglSelfSubV4S(v, s) {
 	return v;
 }
 
-function sglSelfSubSV4(v, s) {
+SGL.selfSubSV4 = function(v, s) {
 	v[0] = s - v[0];
 	v[1] = s - v[1];
 	v[2] = s - v[2];
@@ -686,7 +687,7 @@ function sglSelfSubSV4(v, s) {
 	return v;
 }
 
-function sglSelfMulV4(u, v) {
+SGL.selfMulV4 = function(u, v) {
 	u[0] *= v[0];
 	u[1] *= v[1];
 	u[2] *= v[2];
@@ -694,7 +695,7 @@ function sglSelfMulV4(u, v) {
 	return u;
 }
 
-function sglSelfMulV4S(v, s) {
+SGL.selfMulV4S = function(v, s) {
 	v[0] *= s;
 	v[1] *= s;
 	v[2] *= s;
@@ -702,7 +703,7 @@ function sglSelfMulV4S(v, s) {
 	return v;
 }
 
-function sglSelfMulSV4(s, v) {
+SGL.selfMulSV4 = function(s, v) {
 	v[0] *= s;
 	v[1] *= s;
 	v[2] *= s;
@@ -710,7 +711,7 @@ function sglSelfMulSV4(s, v) {
 	return v;
 }
 
-function sglSelfDivV4(u, v) {
+SGL.selfDivV4 = function(u, v) {
 	u[0] /= v[0];
 	u[1] /= v[1];
 	u[2] /= v[2];
@@ -718,7 +719,7 @@ function sglSelfDivV4(u, v) {
 	return u;
 }
 
-function sglSelfDivV4S(v, s) {
+SGL.selfDivV4S = function(v, s) {
 	u[0] /= s;
 	u[1] /= s;
 	u[2] /= s;
@@ -726,7 +727,7 @@ function sglSelfDivV4S(v, s) {
 	return u;
 }
 
-function sglSelfDivSV4(s, v) {
+SGL.selfDivSV4 = function(s, v) {
 	v[0] = s / v[0];
 	v[1] = s / v[1];
 	v[2] = s / v[2];
@@ -734,16 +735,16 @@ function sglSelfDivSV4(s, v) {
 	return v;
 }
 
-function sglSelfRcpV4(v) {
-	return sglSelfDivSV4(1.0, v);
+SGL.selfRcpV4 = function(v) {
+	return SGL.selfDivSV4(1.0, v);
 }
 
-function sglSelfNormalizeV4(v) {
-	var f = 1.0 / sglLengthV4(v);
-	return sglSelfMulV4S(v, f);
+SGL.selfNormalizeV4 = function(v) {
+	var f = 1.0 / SGL.lengthV4(v);
+	return SGL.selfMulV4S(v, f);
 }
 
-function sglSelfProjectV4(v) {
+SGL.selfProjectV4 = function(v) {
 	var f = 1.0 / v[3];
 	v[0] *= f;
 	v[1] *= f;
@@ -752,7 +753,7 @@ function sglSelfProjectV4(v) {
 	return v;
 }
 
-function sglMinV4(u, v) {
+SGL.minV4 = function(u, v) {
 	return [
 		((u[0] < v[0]) ? (u[0]) : (v[0])),
 		((u[1] < v[1]) ? (u[1]) : (v[1])),
@@ -761,7 +762,7 @@ function sglMinV4(u, v) {
 	];
 }
 
-function sglMaxV4(u, v) {
+SGL.maxV4 = function(u, v) {
 	return [
 		((u[0] > v[0]) ? (u[0]) : (v[0])),
 		((u[1] > v[1]) ? (u[1]) : (v[1])),
@@ -770,11 +771,11 @@ function sglMaxV4(u, v) {
 	];
 }
 
-function sglV4toV2(v) {
+SGL.v4toV2 = function(v) {
 	return v.slice(0, 2);
 }
 
-function sglV4toV3(v) {
+SGL.v4toV3 = function(v) {
 	return v.slice(0, 3);
 }
 /***********************************************************************/
@@ -782,24 +783,24 @@ function sglV4toV3(v) {
 
 // 4x4 matrix
 /***********************************************************************/
-function sglUndefM4() {
+SGL.undefM4 = function() {
 	return new Array(16);
 }
 
-function sglM4V(v) {
+SGL.m4V = function(v) {
 	return v.slice(0, 16);
 }
 
-function sglM4S(s) {
-	var m = sglUndefM4();
+SGL.m4S = function(s) {
+	var m = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		m[i] = s;
 	}
 	return m;
 }
 
-function sglDiagM4V(d) {
-	var m = sglM4S(0.0);
+SGL.diagM4V = function(d) {
+	var m = SGL.m4S(0.0);
 	m[ 0] = d[0];
 	m[ 5] = d[1];
 	m[10] = d[2];
@@ -807,8 +808,8 @@ function sglDiagM4V(d) {
 	return m;
 }
 
-function sglDiagM4S(s) {
-	var m = sglM4S(0.0);
+SGL.diagM4S = function(s) {
+	var m = SGL.m4S(0.0);
 	m[ 0] = s;
 	m[ 5] = s;
 	m[10] = s;
@@ -816,62 +817,62 @@ function sglDiagM4S(s) {
 	return m;
 }
 
-function sglDiagM4C(m00, m11, m22, m33) {
-	return sglDiagM4V(arguments);
+SGL.diagM4C = function(m00, m11, m22, m33) {
+	return SGL.diagM4V(arguments);
 }
 
-function sglZeroM4() {
-	return sglM4S(0.0);
+SGL.zeroM4 = function() {
+	return SGL.m4S(0.0);
 }
 
-function sglOneM4() {
-	return sglM4S(1.0);
+SGL.oneM4 = function() {
+	return SGL.m4S(1.0);
 }
 
-function sglIdentityM4() {
-	return sglDiagM4S(1.0);
+SGL.identityM4 = function() {
+	return SGL.diagM4S(1.0);
 }
 
-function sglM4() {
+SGL.m4 = function() {
 	var n = arguments.length;
 	switch (n) {
 		case 1:
 			if (arguments[0] instanceof Array) {
 				switch (arguments[0].length) {
 					case 1:
-						return sglDiagM4S(arguments[0]);
+						return SGL.diagM4S(arguments[0]);
 					break;
 					case 4:
-						return sglDiagM4V(arguments[0]);
+						return SGL.diagM4V(arguments[0]);
 					break;
 					case 16:
-						return sglM4V(arguments[0]);
+						return SGL.m4V(arguments[0]);
 					break;
 					default:
-						return sglIdentityM4();
+						return SGL.identityM4();
 					break;
 				}
 			}
-			return sglM4S(arguments[0]);
+			return SGL.m4S(arguments[0]);
 		break;
 
 		case 4:
-			return sglDiagM4V(arguments);
+			return SGL.diagM4V(arguments);
 		break;
 
 		case 16:
-			return sglM4V(arguments);
+			return SGL.m4V(arguments);
 		break;
 
 		default:
-			return sglIdentityM4();
+			return SGL.identityM4();
 		break;
 	}
 	return null;
 }
 
-function sglDupM4(m) {
-	var r = sglUndefM4();
+SGL.dupM4 = function(m) {
+	var r = SGL.undefM4();
 
 	r[ 0] = m[ 0];
 	r[ 1] = m[ 1];
@@ -899,45 +900,45 @@ function sglDupM4(m) {
 	//return m.slice();
 }
 
-function sglGetElemM4(m, row, col) {
+SGL.getElemM4 = function(m, row, col) {
 	return m[row+col*4];
 }
 
-function sglSetElemM4(m, row, col, value) {
+SGL.setElemM4 = function(m, row, col, value) {
 	m[row+col*4] = value;
 }
 
-function sglGetRowM4(m, r) {
-	return sglV4C(m[r+0], m[r+4], m[r+8], m[r+12]);
+SGL.getRowM4 = function(m, r) {
+	return SGL.v4C(m[r+0], m[r+4], m[r+8], m[r+12]);
 }
 
-function sglSetRowM4V(m, r, v) {
+SGL.setRowM4V = function(m, r, v) {
 	m[r+ 0] = v[0];
 	m[r+ 4] = v[1];
 	m[r+ 8] = v[2];
 	m[r+12] = v[3];
 }
 
-function sglSetRowM4S(m, r, s) {
+SGL.setRowM4S = function(m, r, s) {
 	m[r+ 0] = s;
 	m[r+ 4] = s;
 	m[r+ 8] = s;
 	m[r+12] = s;
 }
 
-function sglSetRowM4C(m, r, x, y, z, w) {
+SGL.setRowM4C = function(m, r, x, y, z, w) {
 	m[r+ 0] = x;
 	m[r+ 4] = y;
 	m[r+ 8] = z;
 	m[r+12] = w;
 }
 
-function sglGetColM4(m, c) {
+SGL.getColM4 = function(m, c) {
 	var i = c * 4;
-	return sglV4C(m[i+0], m[i+1], m[i+2], m[i+3]);
+	return SGL.v4C(m[i+0], m[i+1], m[i+2], m[i+3]);
 }
 
-function sglSetColM4V(m, c, v) {
+SGL.setColM4V = function(m, c, v) {
 	var i = c * 4;
 	m[i+0] = v[0];
 	m[i+1] = v[1];
@@ -945,7 +946,7 @@ function sglSetColM4V(m, c, v) {
 	m[i+3] = v[3];
 }
 
-function sglSetColM4S(m, c, s) {
+SGL.setColM4S = function(m, c, s) {
 	var i = c * 4;
 	m[i+0] = s;
 	m[i+1] = s;
@@ -953,7 +954,7 @@ function sglSetColM4S(m, c, s) {
 	m[i+3] = s;
 }
 
-function sglSetColM4C(m, c, x, y, z, w) {
+SGL.setColM4C = function(m, c, x, y, z, w) {
 	var i = c * 4;
 	m[i+0] = x;
 	m[i+1] = y;
@@ -961,7 +962,7 @@ function sglSetColM4C(m, c, x, y, z, w) {
 	m[i+3] = w;
 }
 
-function sglM4toM3(m) {
+SGL.m4toM3 = function(m) {
 	return [
 		m[ 0], m[ 1], m[ 2],
 		m[ 4], m[ 5], m[ 6],
@@ -969,7 +970,7 @@ function sglM4toM3(m) {
 	];
 }
 
-function sglIsIdentityM4(m) {
+SGL.isIdentityM4 = function(m) {
 	var i = 0;
 	var j = 0;
 	var s = 0.0;
@@ -991,60 +992,60 @@ function sglIsIdentityM4(m) {
 	return true;
 }
 
-function sglNegM4(m) {
-	var r = sglUndefM4();
+SGL.negM4 = function(m) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = -m[i];
 	}
 	return r;
 }
 
-function sglAddM4(a, b) {
-	var r = sglUndefM4();
+SGL.addM4 = function(a, b) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = a[i] + b[i];
 	}
 	return r;
 }
 
-function sglAddM4S(m, s)
+SGL.addM4S = function(m, s)
 {
-	var r = sglUndefM4();
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = m[i] + s;
 	}
 	return r;
 }
 
-function sglAddSM4(s, m) {
-	return sglAddM4S(m, s);
+SGL.addSM4 = function(s, m) {
+	return SGL.addM4S(m, s);
 }
 
-function sglSubM4(a, b) {
-	var r = sglUndefM4();
+SGL.subM4 = function(a, b) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = a[i] - b[i];
 	}
 	return r;
 }
 
-function sglSubM4S(m, s) {
-	var r = sglUndefM4();
+SGL.subM4S = function(m, s) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = m[i] - s;
 	}
 	return r;
 }
 
-function sglSubSM4(s, m) {
-	var r = sglUndefM4();
+SGL.subSM4 = function(s, m) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = s - m[i];
 	}
 	return r;
 }
 
-function sglMulM4(a, b) {
+SGL.mulM4 = function(a, b) {
 	var a0  = a[ 0], a1  = a[ 1],  a2 = a[ 2], a3  = a[ 3],
 	    a4  = a[ 4], a5  = a[ 5],  a6 = a[ 6], a7  = a[ 7],
 	    a8  = a[ 8], a9  = a[ 9], a10 = a[10], a11 = a[11],
@@ -1055,7 +1056,7 @@ function sglMulM4(a, b) {
 	    b8  = b[ 8], b9  = b[ 9], b10 = b[10], b11 = b[11],
 	    b12 = b[12], b13 = b[13], b14 = b[14], b15 = b[15];
 
-	var r = sglUndefM4();
+	var r = SGL.undefM4();
 
 	r[ 0] = a0*b0 + a4*b1 + a8*b2  + a12*b3;
 	r[ 1] = a1*b0 + a5*b1 + a9*b2  + a13*b3;
@@ -1102,7 +1103,7 @@ function sglMulM4(a, b) {
 	return r;
 
 	/*
-	var r = sglUndefM4();
+	var r = SGL.undefM4();
 
 	r[ 0] = a[ 0]*b[ 0] + a[ 4]*b[ 1] + a[ 8]*b[ 2] + a[12]*b[ 3];
 	r[ 1] = a[ 1]*b[ 0] + a[ 5]*b[ 1] + a[ 9]*b[ 2] + a[13]*b[ 3];
@@ -1128,19 +1129,19 @@ function sglMulM4(a, b) {
 	*/
 }
 
-function sglMulM4S(m, s) {
-	var r = sglUndefM4();
+SGL.mulM4S = function(m, s) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = m[i] * s;
 	}
 	return r;
 }
 
-function sglMulSM4(s, m) {
-	return sglMulM4S(m, s);
+SGL.mulSM4 = function(s, m) {
+	return SGL.mulM4S(m, s);
 }
 
-function sglMulM4V3(m, v, w) {
+SGL.mulM4V3 = function(m, v, w) {
 	return [
 		m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * w,
 		m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * w,
@@ -1149,7 +1150,7 @@ function sglMulM4V3(m, v, w) {
 	];
 }
 
-function sglMulM4V4(m, v) {
+SGL.mulM4V4 = function(m, v) {
 	return [
 		m[ 0] * v[0] + m[ 4] * v[1] + m[ 8] * v[2] + m[12] * v[3],
 		m[ 1] * v[0] + m[ 5] * v[1] + m[ 9] * v[2] + m[13] * v[3],
@@ -1158,44 +1159,44 @@ function sglMulM4V4(m, v) {
 	];
 }
 
-function sglDivM4S(m, s) {
-	var r = sglUndefM4();
+SGL.divM4S = function(m, s) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = m[i] / s;
 	}
 	return r;
 }
 
-function sglDivSM4(s, m) {
-	var r = sglUndefM4();
+SGL.divSM4 = function(s, m) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = s / m[i];
 	}
 	return r;
 }
 
-function sglRcpM4(m) {
-	return sglDivSM4(1.0, m);
+SGL.rcpM4 = function(m) {
+	return SGL.divSM4(1.0, m);
 }
 
-function sglCompMulM4(a, b) {
-	var r = sglUndefM4();
+SGL.compMulM4 = function(a, b) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = a[i] * b[i];
 	}
 	return r;
 }
 
-function sglCompDivM4(a, b) {
-	var r = sglUndefM4();
+SGL.compDivM4 = function(a, b) {
+	var r = SGL.undefM4();
 	for (var i=0; i<16; ++i) {
 		r[i] = a[i] / b[i];
 	}
 	return r;
 }
 
-function sglTransposeM4(m) {
-	var r = sglUndefM4();
+SGL.transposeM4 = function(m) {
+	var r = SGL.undefM4();
 
 	r[ 0] = m[ 0];
 	r[ 1] = m[ 4];
@@ -1220,7 +1221,7 @@ function sglTransposeM4(m) {
 	return r;
 }
 
-function sglDeterminantM4(m) {
+SGL.determinantM4 = function(m) {
 	var m0  = m[ 0], m1  = m[ 1], m2  = m[ 2], m3  = m[ 3],
 	    m4  = m[ 4], m5  = m[ 5], m6  = m[ 6], m7  = m[ 7],
 	    m8  = m[ 8], m9  = m[ 9], m10 = m[10], m11 = m[11],
@@ -1236,13 +1237,13 @@ function sglDeterminantM4(m) {
 	);
 }
 
-function sglInverseM4(m) {
+SGL.inverseM4 = function(m) {
 	var m0  = m[ 0], m1  = m[ 1], m2  = m[ 2], m3  = m[ 3],
 	    m4  = m[ 4], m5  = m[ 5], m6  = m[ 6], m7  = m[ 7],
 	    m8  = m[ 8], m9  = m[ 9], m10 = m[10], m11 = m[11],
 	    m12 = m[12], m13 = m[13], m14 = m[14], m15 = m[15]
 
-	var t = sglUndefM4();
+	var t = SGL.undefM4();
 
 	t[ 0] = (m9*m14*m7-m13*m10*m7+m13*m6*m11-m5*m14*m11-m9*m6*m15+m5*m10*m15);
 	t[ 1] = (m13*m10*m3-m9*m14*m3-m13*m2*m11+m1*m14*m11+m9*m2*m15-m1*m10*m15);
@@ -1278,30 +1279,30 @@ function sglInverseM4(m) {
 	return t;
 }
 
-function sglTraceM4(m) {
+SGL.traceM4 = function(m) {
 	return (m[0] + m[5] + m[10] + m[15]);
 }
 
-function sglTranslationM4V(v) {
-	var m = sglIdentityM4();
+SGL.translationM4V = function(v) {
+	var m = SGL.identityM4();
 	m[12] = v[0];
 	m[13] = v[1];
 	m[14] = v[2];
 	return m;
 }
 
-function sglTranslationM4C(x, y, z) {
-	return sglTranslationM4V([x, y, z]);
+SGL.translationM4C = function(x, y, z) {
+	return SGL.translationM4V([x, y, z]);
 }
 
-function sglTranslationM4S(s) {
-	return sglTranslationM4C(s, s, s);
+SGL.translationM4S = function(s) {
+	return SGL.translationM4C(s, s, s);
 }
 
-function sglRotationAngleAxisM4V(angleRad, axis) {
-	var ax = sglNormalizedV3(axis);
-	var s  = sglSin(angleRad);
-	var c  = sglCos(angleRad);
+SGL.rotationAngleAxisM4V = function(angleRad, axis) {
+	var ax = SGL.normalizedV3(axis);
+	var s  = SGL.sin(angleRad);
+	var c  = SGL.cos(angleRad);
 	var q   = 1.0 - c;
 
 	var x = ax[0];
@@ -1320,7 +1321,7 @@ function sglRotationAngleAxisM4V(angleRad, axis) {
 	ys = y * s;
 	zs = z * s;
 
-	var m = sglUndefM4();
+	var m = SGL.undefM4();
 
 	m[ 0] = (q * xx) + c;
 	m[ 1] = (q * xy) + zs;
@@ -1345,34 +1346,34 @@ function sglRotationAngleAxisM4V(angleRad, axis) {
 	return m;
 }
 
-function sglRotationAngleAxisM4C(angleRad, ax, ay, az) {
-	return sglRotationAngleAxisM4V(angleRad, [ax, ay, az]);
+SGL.rotationAngleAxisM4C = function(angleRad, ax, ay, az) {
+	return SGL.rotationAngleAxisM4V(angleRad, [ax, ay, az]);
 }
 
-function sglScalingM4V(v) {
-	var m = sglIdentityM4();
+SGL.scalingM4V = function(v) {
+	var m = SGL.identityM4();
 	m[ 0] = v[0];
 	m[ 5] = v[1];
 	m[10] = v[2];
 	return m;
 }
 
-function sglScalingM4C(x, y, z) {
-	return sglScalingM4V([x, y, z]);
+SGL.scalingM4C = function(x, y, z) {
+	return SGL.scalingM4V([x, y, z]);
 }
 
-function sglScalingM4S(s) {
-	return sglScalingM4C(s, s, s);
+SGL.scalingM4S = function(s) {
+	return SGL.scalingM4C(s, s, s);
 }
 
-function sglLookAtM4V(position, target, up) {
-	var v = sglNormalizedV3(sglSubV3(target, position));
-	var u = sglNormalizedV3(up);
-	var s = sglNormalizedV3(sglCrossV3(v, u));
+SGL.lookAtM4V = function(position, target, up) {
+	var v = SGL.normalizedV3(sglSubV3(target, position));
+	var u = SGL.normalizedV3(up);
+	var s = SGL.normalizedV3(sglCrossV3(v, u));
 
-	u = sglNormalizedV3(sglCrossV3(s, v));
+	u = SGL.normalizedV3(sglCrossV3(s, v));
 
-	var m = sglUndefM4();
+	var m = SGL.undefM4();
 
 	m[ 0] =  s[0];
 	m[ 1] =  u[0];
@@ -1394,20 +1395,20 @@ function sglLookAtM4V(position, target, up) {
 	m[14] =   0.0;
 	m[15] =   1.0;
 
-	m = sglMulM4(m, sglTranslationM4V(sglNegV3(position)));
+	m = SGL.mulM4(m, SGL.translationM4V(sglNegV3(position)));
 
 	return m;
 }
 
-function sglLookAtM4C(positionX, positionY, positionZ, targetX, targetY, targetZ, upX, upY, upZ) {
-	return sglLookAtM4V([positionX, positionY, positionZ], [targetX, targetY, targetZ], [upX, upY, upZ]);
+SGL.lookAtM4C = function(positionX, positionY, positionZ, targetX, targetY, targetZ, upX, upY, upZ) {
+	return SGL.lookAtM4V([positionX, positionY, positionZ], [targetX, targetY, targetZ], [upX, upY, upZ]);
 }
 
-function sglOrthoM4V(omin, omax) {
-	var sum   = sglAddV3(omax, omin);
-	var dif   = sglSubV3(omax, omin);
+SGL.orthoM4V = function(omin, omax) {
+	var sum   = SGL.addV3(omax, omin);
+	var dif   = SGL.subV3(omax, omin);
 
-	var m = sglUndefM4();
+	var m = SGL.undefM4();
 
 	m[ 0] =      2.0 / dif[0];
 	m[ 1] =               0.0;
@@ -1432,16 +1433,16 @@ function sglOrthoM4V(omin, omax) {
 	return m;
 }
 
-function sglOrthoM4C(left, right, bottom, top, zNear, zFar) {
-	return sglOrthoM4V([left, bottom, zNear], [right, top, zFar]);
+SGL.orthoM4C = function(left, right, bottom, top, zNear, zFar) {
+	return SGL.orthoM4V([left, bottom, zNear], [right, top, zFar]);
 }
 
-function sglFrustumM4V(fmin, fmax) {
-	var sum   = sglAddV3(fmax, fmin);
-	var dif   = sglSubV3(fmax, fmin);
+SGL.frustumM4V = function(fmin, fmax) {
+	var sum   = SGL.addV3(fmax, fmin);
+	var dif   = SGL.subV3(fmax, fmin);
 	var t     = 2.0 * fmin[2];
 
-	var m = sglUndefM4();
+	var m = SGL.undefM4();
 	
 	m[ 0] =            t / dif[0];
 	m[ 1] =                   0.0;
@@ -1466,94 +1467,93 @@ function sglFrustumM4V(fmin, fmax) {
 	return m;
 }
 
-function sglFrustumM4C(left, right, bottom, top, zNear, zFar) {
-	return sglFrustumM4V([left, bottom, zNear], [right, top, zFar]);
+SGL.frustumM4C = function(left, right, bottom, top, zNear, zFar) {
+	return SGL.frustumM4V([left, bottom, zNear], [right, top, zFar]);
 }
 
-function sglPerspectiveM4(fovYRad, aspectRatio, zNear, zFar) {
-	var pmin = sglUndefV4();
-	var pmax = sglUndefV4();
+SGL.perspectiveM4 = function(fovYRad, aspectRatio, zNear, zFar) {
+	var pmin = SGL.undefV4();
+	var pmax = SGL.undefV4();
 
 	pmin[2] = zNear;
 	pmax[2] = zFar;
 
-	pmax[1] = pmin[2] * sglTan(fovYRad / 2.0);
+	pmax[1] = pmin[2] * SGL.tan(fovYRad / 2.0);
 	pmin[1] = -pmax[1];
 
 	pmax[0] = pmax[1] * aspectRatio;
 	pmin[0] = -pmax[0];
 
-	return sglFrustumM4V(pmin, pmax);
+	return SGL.frustumM4V(pmin, pmax);
 }
 /***********************************************************************/
 
 
 // quaternion
 /***********************************************************************/
-function sglUndefQuat(v) {
+SGL.undefQuat = function(v) {
 	return new Array(4);
 }
 
-function sglQuatV(v) {
+SGL.quatV = function(v) {
 	return v.slice(0, 4);
 }
 
-function sglIdentityQuat() {
+SGL.identityQuat = function() {
 	return [ 0.0, 0.0, 0.0, 1.0 ];
 }
 
-function sglAngleAxisQuat(angleRad, axis) {
+SGL.angleAxisQuat = function(angleRad, axis) {
 	var halfAngle = angleRad / 2.0;
-	var fsin = sglSin(halfAngle);
+	var fsin = SGL.sin(halfAngle);
 	return [
 		fsin * axis[0],
 		fsin * axis[1],
-		fsin * axis[2],
-		sglCos(halfAngle)
+		fsin * axis[2], SGL.cos(halfAngle)
 	];
 }
 
-function sglM4Quat(m) {
-	var trace = sglGetElemM4(m, 0, 0) + sglGetElemM4(m, 1, 1) + sglGetElemM4(m, 2, 2);
+SGL.m4Quat = function(m) {
+	var trace = SGL.getElemM4(m, 0, 0) + SGL.getElemM4(m, 1, 1) + SGL.getElemM4(m, 2, 2);
 	var root = null;
-	var q = sglUndefQuat();
+	var q = SGL.undefQuat();
 
 	if (trace > 0.0) {
-		root = sglSqrt(trace + 1.0);
+		root = SGL.sqrt(trace + 1.0);
 		q[3] = root / 2.0;
 		root = 0.5 / root;
-		q[0] = (sglGetElemM4(m, 2, 1) - sglGetElemM4(m, 1, 2)) * root;
-		q[1] = (sglGetElemM4(m, 0, 2) - sglGetElemM4(m, 2, 0)) * root;
-		q[2] = (sglGetElemM4(m, 1, 0) - sglGetElemM4(m, 0, 1)) * root;
+		q[0] = (sglGetElemM4(m, 2, 1) - SGL.getElemM4(m, 1, 2)) * root;
+		q[1] = (sglGetElemM4(m, 0, 2) - SGL.getElemM4(m, 2, 0)) * root;
+		q[2] = (sglGetElemM4(m, 1, 0) - SGL.getElemM4(m, 0, 1)) * root;
 	}
 	else {
 		var i = 0;
 
-		if (sglGetElemM4(m, 1, 1) > sglGetElemM4(m, 0, 0)) i = 1;
-		if (sglGetElemM4(m, 2, 2) > sglGetElemM4(m, i, i)) i = 2;
+		if (sglGetElemM4(m, 1, 1) > SGL.getElemM4(m, 0, 0)) i = 1;
+		if (sglGetElemM4(m, 2, 2) > SGL.getElemM4(m, i, i)) i = 2;
 
 		var j = (i + 1) % 3;
 		var k = (j + 1) % 3;
 
-		root = sglSqrt(sglGetElemM4(m, i, i) - sglGetElemM4(m, j, j) - sglGetElemM4(m, k, k) + 1.0);
+		root = SGL.sqrt(sglGetElemM4(m, i, i) - SGL.getElemM4(m, j, j) - SGL.getElemM4(m, k, k) + 1.0);
 
 		q[i] = root / 2.0;
 		root = 0.5 / root;
-		q[3] = (sglGetElemM4(m, k, j) - sglGetElemM4(m, j, k)) * root;
-		q[j] = (sglGetElemM4(m, j, i) + sglGetElemM4(m, i, j)) * root;
-		q[k] = (sglGetElemM4(m, k, i) + sglGetElemM4(m, i, k)) * root;
+		q[3] = (sglGetElemM4(m, k, j) - SGL.getElemM4(m, j, k)) * root;
+		q[j] = (sglGetElemM4(m, j, i) + SGL.getElemM4(m, i, j)) * root;
+		q[k] = (sglGetElemM4(m, k, i) + SGL.getElemM4(m, i, k)) * root;
 	}
 	return q;
 }
 
-function sglGetQuatAngleAxis(q) {
+SGL.getQuatAngleAxis = function(q) {
 	var v = new Array(4);
 
-	var sqLen = sglSqLengthV4(q);
+	var sqLen = SGL.sqLengthV4(q);
 	var angle = null;
 
 	if (sqLen > 0.0) {
-		var invLen = 1.0 / sglSqrt(sqLen);
+		var invLen = 1.0 / SGL.sqrt(sqLen);
 		v[0] = q[0] * invLen;
 		v[1] = q[1] * invLen;
 		v[2] = q[2] * invLen;
@@ -1570,7 +1570,7 @@ function sglGetQuatAngleAxis(q) {
 	return v;
 }
 
-function sglGetQuatRotationM4(q) {
+SGL.getQuatRotationM4 = function(q) {
 	var tx  = 2.0 * q[0];
 	var ty  = 2.0 * q[1];
 	var tz  = 2.0 * q[2];
@@ -1584,27 +1584,17 @@ function sglGetQuatRotationM4(q) {
 	var tyz = tz * q[1];
 	var tzz = tz * q[2];
 
-	var m = sglIdentityM4();
-
-	sglSetElemM4(m, 0, 0, 1.0 - (tyy + tzz));
-	sglSetElemM4(m, 0, 1, txy - twz);
-	sglSetElemM4(m, 0, 2, txz + twy);
-	sglSetElemM4(m, 1, 0, txy + twz);
-	sglSetElemM4(m, 1, 1, 1.0 - (txx + tzz));
-	sglSetElemM4(m, 1, 2, tyz - twx);
-	sglSetElemM4(m, 2, 0, txz - twy);
-	sglSetElemM4(m, 2, 1, tyz + twx);
-	sglSetElemM4(m, 2, 2, 1.0 - (txx + tyy));
+	var m = SGL.identityM4(); SGL.setElemM4(m, 0, 0, 1.0 - (tyy + tzz)); SGL.setElemM4(m, 0, 1, txy - twz); SGL.setElemM4(m, 0, 2, txz + twy); SGL.setElemM4(m, 1, 0, txy + twz); SGL.setElemM4(m, 1, 1, 1.0 - (txx + tzz)); SGL.setElemM4(m, 1, 2, tyz - twx); SGL.setElemM4(m, 2, 0, txz - twy); SGL.setElemM4(m, 2, 1, tyz + twx); SGL.setElemM4(m, 2, 2, 1.0 - (txx + tyy));
 
 	return m;
 }
 
-function sglNormalizedQuat(q) {
-	return sglNormalizedV4(q);
+SGL.normalizedQuat = function(q) {
+	return SGL.normalizedV4(q);
 }
 
-function sglMulQuat(q1, q2) {
-	var r = sglUndefQuat();
+SGL.mulQuat = function(q1, q2) {
+	var r = SGL.undefQuat();
 
 	r[0] = p[3] * q[0] + p[0] * q[3] + p[1] * q[2] - p[2] * q[1];
 	r[1] = p[3] * q[1] + p[1] * q[3] + p[2] * q[0] - p[0] * q[2];

@@ -5,6 +5,7 @@
 #include "meshmodel.h"
 #include "mlexception.h"
 #include "pluginmanager.h"
+#include "scriptsyntax.h"
 
 QString ScriptAdapterGenerator::parNames(const RichParameterSet& set) const
 {
@@ -163,12 +164,12 @@ QString ScriptAdapterGenerator::funCodeGenerator( const QString& filterName,MLXM
 	return code;
 }
 
-const QStringList ScriptAdapterGenerator::javaScriptLibraryFiles()
-{
-	QStringList res;
-	res.push_back(":/script_system/space_math.js");
-	return res;
-}
+//const QStringList ScriptAdapterGenerator::javaScriptLibraryFiles()
+//{
+//	QStringList res;
+//	res.push_back(":/script_system/space_math.js");
+//	return res;
+//}
 
 QString ScriptAdapterGenerator::mergeOptParamsCodeGenerator() const
 {
@@ -182,25 +183,6 @@ QString ScriptAdapterGenerator::mergeOptParamsCodeGenerator() const
 	return code;
 }
 
-QString ScriptAdapterGenerator::loadExternalLibraries()
-{
-	QString code;
-	QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-	int ii = 0;
-	while(ii < liblist.size())
-	{
-		QFile lib(liblist[ii]);
-		if (!lib.open(QFile::ReadOnly))
-			qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-		QByteArray libcode = lib.readAll();
-		/*QScriptValue res = env.evaluate(QString(libcode));
-		if (res.isError())
-		throw JavaScriptException("Library " + liblist[ii] + " generated a JavaScript Error: " + res.toString() + "\n");*/
-		code += QString(libcode);
-		++ii;
-	} 
-	return code;
-}
 
 Q_DECLARE_METATYPE(MeshDocument*)
 
@@ -891,7 +873,8 @@ QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm )
 	MeshDocumentSI* mi = new MeshDocumentSI(&md);
 	QScriptValue val = newQObject(mi);
 	globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
-	code += ScriptAdapterGenerator::loadExternalLibraries();
+	JavaScriptLanguage lang;
+	code += lang.getExternalLibrariesCode();
 	QScriptValue applyFun = newFunction(PluginInterfaceApplyXML, &pm);
 	globalObject().setProperty("_applyFilter", applyFun);
 

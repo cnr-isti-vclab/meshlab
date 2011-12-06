@@ -37,9 +37,8 @@ private:
 	static inline QString optName() {return QString("optional");}
 	static inline QString meshID() {return QString ("meshID");}
 public:
+
 	inline static const QString meshDocVarName() {return QString("meshDoc");}
-	static const QStringList javaScriptLibraryFiles();
-	static QString loadExternalLibraries();
 	
 	QString mergeOptParamsCodeGenerator() const;
 	QString parNames(const QString&  filterName,MLXMLPluginInfo& xmlInfo) const;
