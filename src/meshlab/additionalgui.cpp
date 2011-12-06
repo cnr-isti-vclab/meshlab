@@ -464,8 +464,8 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 	}
 	QPlainTextEdit::keyPressEvent(e);
 	//!(e->text().isEmpty) is meaningful: you need it when (only) a modifier (SHIFT/CTRL) has been pressed in order to avoid the autocompleter to be visualized
-	/*if (!(e->text().isEmpty()) && (e->text().indexOf(slh->worddelimiter) == -1))
-		showAutoComplete(e);*/
+	if (!(e->text().isEmpty()) && (e->text().indexOf(synt->worddelimiter) == -1))
+		showAutoComplete(e);
 }
 
 //void MLScriptEditor::setSyntaxHighlighter( MLSyntaxHighlighter* high )
@@ -480,30 +480,28 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 
 void MLScriptEditor::showAutoComplete( QKeyEvent * e )
 {	
-	/*QString w = lastInsertedWord();
-	QCompleter& comp = slh->comp;
-	AutoCompleterModel& mod = slh->mod;
-	comp.setCompletionPrefix(w);
-	comp.popup()->setModel(comp.completionModel());
+	QString w = lastInsertedWord();
+	comp->setCompletionPrefix(w);
+	comp->popup()->setModel(comp->completionModel());
 	QRect rect = cursorRect();
-	rect.setWidth(comp.popup()->sizeHintForColumn(0) + comp.popup()->verticalScrollBar()->sizeHint().width());
-	comp.complete(rect);*/
+	rect.setWidth(comp->popup()->sizeHintForColumn(0) + comp->popup()->verticalScrollBar()->sizeHint().width());
+	comp->complete(rect);
 }
 
 void MLScriptEditor::insertSuggestedWord( const QString& str )
 {
-	/*QTextCursor tc = textCursor();
-	int extra = str.length() - slh->comp.completionPrefix().length();
+	QTextCursor tc = textCursor();
+	int extra = str.length() - comp->completionPrefix().length();
 	tc.insertText(str.right(extra));
-	setTextCursor(tc);*/
+	setTextCursor(tc);
 }
 
 QString MLScriptEditor::lastInsertedWord() const
 {
-	//QString cur = currentLine();
-	//QStringList ls = cur.split(slh->worddelimiter,QString::SkipEmptyParts);
-	//if (ls.size() > 0)
-	//	return ls[ls.size() - 1];
+	QString cur = currentLine();
+	QStringList ls = cur.split(synt->worddelimiter,QString::SkipEmptyParts);
+	if (ls.size() > 0)
+		return ls[ls.size() - 1];
 	return QString();
 }
 
@@ -516,8 +514,14 @@ void MLScriptEditor::setScriptLanguage( MLScriptLanguage* syntax )
 		delete synhigh;
 		synhigh = new MLSyntaxHighlighter(*synt,this);
 		synhigh->setDocument(document());
-		/*delete comp;
-		comp = new MLAutoCompleter()*/
+		delete comp;
+		comp = new MLAutoCompleter(*synt,this);
+		comp->setCaseSensitivity(Qt::CaseSensitive);
+		comp->setWidget(this);
+		comp->setCompletionMode(QCompleter::PopupCompletion);
+		comp->setModel(synt->functionsLibrary());
+		connect(comp,SIGNAL(activated(const QString &)),this,SLOT(insertSuggestedWord( const QString &)));
+
 	}
 }
 
@@ -578,21 +582,6 @@ QString MLSyntaxHighlighter::addIDBoundary( const QString& st )
 //given a generic line from input matchLine will recursevely color all the known functions in the libraries forest.
 void MLSyntaxHighlighter::matchLine(const QString& text,const QTextCharFormat& format)
 {
-	//int nextmatchstart = 0;
-	//do 
-	//{
-	//	bool matched = false;
-	//	QModelIndex mi = ind;		
-	//	while (!matched && mi.isValid())
-	//	{
-	//		nextmatchstart = match(mi,text,nextmatchstart,"",format);
-	//		if (nextmatchstart != -1)
-	//			matched = true;
-	//		else
-	//			mi = mi.sibling(mi.row() + 1,mi.column());
-	//	}
-	//} while ((nextmatchstart >= 0) && (nextmatchstart < text.size()));
-
 	SyntaxTreeNode* root = syntax.functionsLibrary()->getItem(QModelIndex());
 	int nextmatchstart = 0;
 	do 
