@@ -328,7 +328,7 @@ void TreeWidgetWithMenu::insertInMenu(const QString& st,const QVariant& data)
 }
 
 MLScriptEditor::MLScriptEditor( QWidget* par /*= NULL*/ )
-:QPlainTextEdit(par),regexps()
+:QPlainTextEdit(par),regexps(),synt(NULL),synhigh(NULL),comp(NULL)
 {
 	QTextDocument* mydoc = new QTextDocument(this);
 	QPlainTextDocumentLayout* ld = new QPlainTextDocumentLayout(mydoc);
@@ -463,55 +463,62 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 		}
 	}
 	QPlainTextEdit::keyPressEvent(e);
-	//!(e->text().isEmpty) is meaningful: you need it when a modifier (SHIFT/CTRL) is pressed in order to avoid the autocompleter to be visualized
-	if (!(e->text().isEmpty()) && (e->text().indexOf(slh->worddelimiter) == -1))
-		showAutoComplete(e);
+	//!(e->text().isEmpty) is meaningful: you need it when (only) a modifier (SHIFT/CTRL) has been pressed in order to avoid the autocompleter to be visualized
+	/*if (!(e->text().isEmpty()) && (e->text().indexOf(slh->worddelimiter) == -1))
+		showAutoComplete(e);*/
 }
 
-void MLScriptEditor::setSyntaxHighlighter( MLSyntaxHighlighter* high )
-{
-	slh = high;
-	if (slh != NULL)
-	{
-		slh->setDocument(document());
-		connect(&slh->comp,SIGNAL(activated(const QString &)),this,SLOT(insertSuggestedWord( const QString &)));
-	}
-}
+//void MLScriptEditor::setSyntaxHighlighter( MLSyntaxHighlighter* high )
+//{
+//	slh = high;
+//	if (slh != NULL)
+//	{
+//		slh->setDocument(document());
+//		connect(&slh->comp,SIGNAL(activated(const QString &)),this,SLOT(insertSuggestedWord( const QString &)));
+//	}
+//}
 
 void MLScriptEditor::showAutoComplete( QKeyEvent * e )
 {	
-	QString w = lastInsertedWord();
+	/*QString w = lastInsertedWord();
 	QCompleter& comp = slh->comp;
 	AutoCompleterModel& mod = slh->mod;
 	comp.setCompletionPrefix(w);
 	comp.popup()->setModel(comp.completionModel());
 	QRect rect = cursorRect();
 	rect.setWidth(comp.popup()->sizeHintForColumn(0) + comp.popup()->verticalScrollBar()->sizeHint().width());
-	comp.complete(rect);
+	comp.complete(rect);*/
 }
 
 void MLScriptEditor::insertSuggestedWord( const QString& str )
 {
-	QTextCursor tc = textCursor();
+	/*QTextCursor tc = textCursor();
 	int extra = str.length() - slh->comp.completionPrefix().length();
 	tc.insertText(str.right(extra));
-	setTextCursor(tc);
-}
-
-void MLScriptEditor::insertSuggestedWord( const QModelIndex& str )
-{
-	QTextCursor tc = textCursor();
-	AutoCompleterItem* it = reinterpret_cast<AutoCompleterItem*>(str.internalPointer());
-	QString re = it->data(0).toString();
+	setTextCursor(tc);*/
 }
 
 QString MLScriptEditor::lastInsertedWord() const
 {
-	QString cur = currentLine();
-	QStringList ls = cur.split(slh->worddelimiter,QString::SkipEmptyParts);
-	if (ls.size() > 0)
-		return ls[ls.size() - 1];
+	//QString cur = currentLine();
+	//QStringList ls = cur.split(slh->worddelimiter,QString::SkipEmptyParts);
+	//if (ls.size() > 0)
+	//	return ls[ls.size() - 1];
 	return QString();
+}
+
+void MLScriptEditor::setScriptLanguage( MLScriptLanguage* syntax )
+{
+	if (syntax != NULL)
+	{
+		delete synt;
+		synt = syntax;
+		delete synhigh;
+		synhigh = new MLSyntaxHighlighter(*synt,this);
+		synhigh->setDocument(document());
+		/*delete comp;
+		comp = new MLAutoCompleter()*/
+	}
 }
 
 MLNumberArea::MLNumberArea( MLScriptEditor* editor ) : QWidget(editor)
@@ -529,25 +536,19 @@ void MLNumberArea::paintEvent(QPaintEvent* e)
 	mledit->lineNumberAreaPaintEvent(e,UsefulGUIFunctions::editorMagicColor());
 }
 
-MLSyntaxHighlighter::MLSyntaxHighlighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist, const QStringList& filtersign,QAbstractScrollArea* parent )
-:QSyntaxHighlighter(parent),reserved(),langfuncs(),vcgbridgefun(),vcgbridgetype(),mlfun(filterlist),mlnmspace(namespacelist),mlfunsign(filtersign),comp(parent),mod(parent),plugvar(pluginvar)
+MLSyntaxHighlighter::MLSyntaxHighlighter(const MLScriptLanguage& synt, QWidget* parent)
+:QSyntaxHighlighter(parent),highlightingRules(),syntax(synt)
 {
 	HighlightingRule pvar;
 	pvar.format.setForeground(Qt::red);
-	pvar.pattern = QRegExp(addIDBoundary(pluginvar));
-	highlightingRules << pvar;
-	foreach(const QString& s,namespacelist)
+	HighlightingRule res;
+	res.format.setForeground(Qt::darkBlue);
+	res.format.setFontWeight(QFont::Bold);
+	foreach(QString word,synt.reserved)
 	{
-		//pvar.format.setForeground(Qt::magenta);
-		pvar.pattern = QRegExp(addIDBoundary(s));
-		highlightingRules << pvar;
+		res.pattern = QRegExp(addIDBoundary(word));
+		highlightingRules << res;
 	}
-	foreach(const QString& s,filterlist)
-	{
-		pvar.pattern = QRegExp(addIDBoundary(s));
-		highlightingRules << pvar;
-	}
-
 }
 
 void MLSyntaxHighlighter::highlightBlock( const QString& text )
@@ -563,6 +564,9 @@ void MLSyntaxHighlighter::highlightBlock( const QString& text )
 			index = expression.indexIn(text, index + length);
 		}
 	}
+	QTextCharFormat form;
+	form.setForeground(Qt::red);
+	matchLine(text,form);
 	setCurrentBlockState(0);
 }
 
@@ -571,101 +575,140 @@ QString MLSyntaxHighlighter::addIDBoundary( const QString& st )
 	return "\\b" + st + "\\b";
 }
 
-void MLSyntaxHighlighter::autoCompleteModel(AutoCompleterModel& mod)
+//given a generic line from input matchLine will recursevely color all the known functions in the libraries forest.
+void MLSyntaxHighlighter::matchLine(const QString& text,const QTextCharFormat& format)
 {
-	mod.addCompleteSubTree(mlfunsign);
-	mod.addCompleteSubTree(vcgbridgefun);
-}
+	//int nextmatchstart = 0;
+	//do 
+	//{
+	//	bool matched = false;
+	//	QModelIndex mi = ind;		
+	//	while (!matched && mi.isValid())
+	//	{
+	//		nextmatchstart = match(mi,text,nextmatchstart,"",format);
+	//		if (nextmatchstart != -1)
+	//			matched = true;
+	//		else
+	//			mi = mi.sibling(mi.row() + 1,mi.column());
+	//	}
+	//} while ((nextmatchstart >= 0) && (nextmatchstart < text.size()));
 
-JavaScriptSyntaxHighLighter::JavaScriptSyntaxHighLighter(const QString& pluginvar,const QStringList& namespacelist,const QStringList& filterlist,const QStringList& filtersign,QAbstractScrollArea* parent )
-:MLSyntaxHighlighter(pluginvar,namespacelist,filterlist,filtersign,parent)
-{
-	HighlightingRule res;
-	res.format.setForeground(Qt::darkBlue);
-	res.format.setFontWeight(QFont::Bold);
-	reserved << addIDBoundary("break");
-	reserved << addIDBoundary("case");	
-	reserved << addIDBoundary("catch");	
-	reserved << addIDBoundary("continue");
-	reserved << addIDBoundary("default");
-	reserved << addIDBoundary("delete");
-	reserved << addIDBoundary("do");
-	reserved << addIDBoundary("else");
-	reserved << addIDBoundary("finally");
-	reserved << addIDBoundary("for");
-	reserved << addIDBoundary("function");
-	reserved << addIDBoundary("if");
-	reserved << addIDBoundary("in");
-	reserved << addIDBoundary("instanceof");
-	reserved << addIDBoundary("new");
-	reserved << addIDBoundary("return");
-	reserved << addIDBoundary("switch");
-	reserved << addIDBoundary("this");
-	reserved << addIDBoundary("throw");
-	reserved << addIDBoundary("try");
-	reserved << addIDBoundary("typeof");
-	reserved << addIDBoundary("var");
-	reserved << addIDBoundary("void");
-	reserved << addIDBoundary("while");
-	reserved << addIDBoundary("with");
-	reserved << addIDBoundary("true");
-	reserved << addIDBoundary("false");
-	reserved << addIDBoundary("null");
-	foreach(QString st,reserved)
+	SyntaxTreeNode* root = syntax.functionsLibrary()->getItem(QModelIndex());
+	int nextmatchstart = 0;
+	do 
 	{
-		res.pattern = QRegExp(st);
-		highlightingRules << res;
+		nextmatchstart = match(root,text,nextmatchstart,"",format);
+	} while ((nextmatchstart >= 0) && (nextmatchstart < text.size()));
+
+}
+
+int MLSyntaxHighlighter::match(SyntaxTreeNode* node,const QString& text,int start,const QString& matchedstring,const QTextCharFormat& format)
+{	
+	
+	QRegExp exp;
+	//int nextmatchstart = start;
+	if (node != NULL)
+	{
+		//it's the root. The root is not meaningful
+		if (node->parent() == NULL)
+		{
+			int ii = 0;
+			while(ii < node->childCount())
+			{
+				int tmp = match(node->child(ii),text,start,matchedstring,format);
+				if (tmp != -1)
+					return tmp;
+				++ii;
+			}	
+		}
+		QString cumulated = matchedstring + "\\s*" + addIDBoundary(node->data(0).toString());
+		exp.setPattern(cumulated);
+		int matched = -1;
+
+		int index = exp.indexIn(text,start);
+		//input string: Plugins.ExtraSamplePlugins.randomVerticesDisplacement() + Plugins.Scemo.funzioneCogliona()
+		//string start: ^
+		//tree:      Plugins
+		//          /       \
+		//       Scemo       ExtraSamplePlugins
+		//In the recursive step I have to check that the index I'm currently getting from exp.indexIn is equal to the starting point of the substring I accumulated in the previous step.
+		//Otherwise I will jump to Plugins.Scemo without taking care at all of Plugin.ExtraSamplePlugin
+		//!matchedstring.isEmpty is only in the case I have not still read nothing from the input text. i.e. I need it to read the starting element of a hirarchy (Plugins) every time.
+		if	((index == -1) || (!matchedstring.isEmpty() && (index != start)))
+		{
+			setCurrentBlockState(0);
+			return -1;
+		}			
+		setFormat(index, exp.matchedLength(), format);
+		//I have completely matched a branch of the tree. The leaf is a name of function and it hasn't more children.
+		if (node->childCount() == 0 )
+			return index + exp.matchedLength();
+	
+		QString rs = text.right(text.size() - (index));
+		QString sepcolumn = node->data(2).toString();
+		/*if (sepcolumn.isValid())
+		{*/
+			cumulated += "\\s*" + sepcolumn;
+			exp.setPattern(cumulated);
+			int indexdot = exp.indexIn(text,index);
+			if (indexdot == index)
+			{
+				//I'm sure Plugins. it's a continuing of previous string and not a new one
+				int ii = 0;
+				bool matchfound = false;
+				while ((matched < 0) && (node->child(ii) != NULL))
+				{
+					matched = match(node->child(ii),text,index,cumulated,format);
+					if (matched > 0)
+						return matched;
+					++ii;
+				}
+			}
+		/*}*/
 	}
-	worddelimiter.setPattern("[\\s|\\t|\\n|\\r|=|;|,|\\(|\\)|{|}|\\[|\\]|\\||\\&|\\?|\\!|\\+|\\*|\\\|\\-|%|\"|<|>]");
-	autoCompleteModel(mod);
-	//comp.setModel(&ls);
-	comp.setCaseSensitivity(Qt::CaseSensitive);
-	comp.setWidget(parent);
-	comp.setCompletionMode(QCompleter::PopupCompletion);
-	comp.setModel(&mod);
+	return -1;
 }
-
-AutoCompleterModel::AutoCompleterModel(QObject *parent)
-: QAbstractItemModel(parent)
-{
-	QList<QVariant> dt;
-	dt << QVariant("");
-	rootItem = new AutoCompleterItem(dt);
-}
-
-AutoCompleterModel::~AutoCompleterModel()
-{
-	delete rootItem;
-}
-
-int AutoCompleterModel::columnCount(const QModelIndex &parent) const
-{
-	if (parent.isValid())
-		return static_cast<AutoCompleterItem*>(parent.internalPointer())->columnCount();
-	else
-		return rootItem->columnCount();
-}
-
-QVariant AutoCompleterModel::data(const QModelIndex &index, int role) const
-{
-	if (!index.isValid())
-		return QVariant();
-
-	if (role != Qt::DisplayRole)
-		return QVariant();
-
-	AutoCompleterItem *item = static_cast<AutoCompleterItem*>(index.internalPointer());
-
-	return item->data(index.column());
-}
-
-Qt::ItemFlags AutoCompleterModel::flags(const QModelIndex &index) const
-{
-	if (!index.isValid())
-		return 0;
-
-	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
+//AutoCompleterModel::AutoCompleterModel(QObject *parent)
+//: QAbstractItemModel(parent)
+//{
+//	QList<QVariant> dt;
+//	dt << QVariant("");
+//	rootItem = new AutoCompleterItem(dt);
+//}
+//
+//AutoCompleterModel::~AutoCompleterModel()
+//{
+//	delete rootItem;
+//}
+//
+//int AutoCompleterModel::columnCount(const QModelIndex &parent) const
+//{
+//	if (parent.isValid())
+//		return static_cast<AutoCompleterItem*>(parent.internalPointer())->columnCount();
+//	else
+//		return rootItem->columnCount();
+//}
+//
+//QVariant AutoCompleterModel::data(const QModelIndex &index, int role) const
+//{
+//	if (!index.isValid())
+//		return QVariant();
+//
+//	if (role != Qt::DisplayRole)
+//		return QVariant();
+//
+//	AutoCompleterItem *item = static_cast<AutoCompleterItem*>(index.internalPointer());
+//
+//	return item->data(index.column());
+//}
+//
+//Qt::ItemFlags AutoCompleterModel::flags(const QModelIndex &index) const
+//{
+//	if (!index.isValid())
+//		return 0;
+//
+//	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+//}
 
 //QVariant AutoCompleterModel::headerData(int section, Qt::Orientation orientation,int role) const
 //{
@@ -675,209 +718,155 @@ Qt::ItemFlags AutoCompleterModel::flags(const QModelIndex &index) const
 //	return QVariant();
 //}
 
-QModelIndex AutoCompleterModel::index(int row, int column, const QModelIndex &parent) const
-{
-	if (!hasIndex(row, column, parent))
-		return QModelIndex();
+//QModelIndex AutoCompleterModel::index(int row, int column, const QModelIndex &parent) const
+//{
+//	if (!hasIndex(row, column, parent))
+//		return QModelIndex();
+//
+//	AutoCompleterItem *parentItem;
+//
+//	if (!parent.isValid())
+//		parentItem = rootItem;
+//	else
+//		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
+//
+//	AutoCompleterItem *childItem = parentItem->child(row);
+//	if (childItem)
+//		return createIndex(row, column, childItem);
+//	else
+//		return QModelIndex();
+//}
+//
+//QModelIndex AutoCompleterModel::parent(const QModelIndex &index) const
+//{
+//	if (!index.isValid())
+//		return QModelIndex();
+//
+//	AutoCompleterItem *childItem = static_cast<AutoCompleterItem*>(index.internalPointer());
+//	AutoCompleterItem *parentItem = childItem->parent();
+//
+//	if (parentItem == rootItem)
+//		return QModelIndex();
+//
+//	return createIndex(parentItem->row(), 0, parentItem);
+//}
+//
+//int AutoCompleterModel::rowCount(const QModelIndex &parent) const
+//{
+//	AutoCompleterItem *parentItem;
+//	if (parent.column() > 0)
+//		return 0;
+//
+//	if (!parent.isValid())
+//		parentItem = rootItem;
+//	else
+//		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
+//
+//	return parentItem->childCount();
+//}
+//
+//void AutoCompleterModel::addCompleteSubTree(const QStringList &signatures)
+//{
+//	QStringList signs = signatures;
+//	foreach(QString sg,signs)
+//		createAndAppendBranch(sg,rootItem);
+//}
 
-	AutoCompleterItem *parentItem;
+//QModelIndexList AutoCompleterModel::matched( const QString& val,const QModelIndex& start /*= QModelIndex()*/ )
+//{
+//	QModelIndexList ls;
+//	if (!val.isEmpty())
+//		matched(val,ls,start);
+//	return ls;
+//}
+//
+//void AutoCompleterModel::matched( const QString& val,QModelIndexList& mil,const QModelIndex& ind )
+//{
+//	if (ind.isValid())
+//	{
+//		AutoCompleterItem* item = reinterpret_cast<AutoCompleterItem*>(ind.internalPointer());
+//		for (int ii = 0;ii < item->columnCount();++ii)
+//			if (item->data(ii).toString().startsWith(val))
+//				mil << ind;
+//			else
+//				return;
+//	}
+//	for(int ii = 0;ii < rowCount(ind);++ii)
+//			matched(val,mil,index(ii,0,ind));
+//}
+//
+//
+//AutoCompleterItem::AutoCompleterItem(const QList<QVariant> &data, AutoCompleterItem *parent)
+//{
+//	parentItem = parent;
+//	itemData = data;
+//}
+//
+//AutoCompleterItem::~AutoCompleterItem()
+//{
+//	qDeleteAll(childItems);
+//}
+//
+//void AutoCompleterItem::appendChild(AutoCompleterItem *item)
+//{
+//	childItems.append(item);
+//}
+//
+//AutoCompleterItem *AutoCompleterItem::child(int row)
+//{
+//	return childItems.value(row);
+//}
+//
+//int AutoCompleterItem::childCount() const
+//{
+//	return childItems.count();
+//}
+//
+//int AutoCompleterItem::columnCount() const
+//{
+//	return itemData.count();
+//}
+//
+//QVariant AutoCompleterItem::data(int column) const
+//{
+//	return itemData.value(column);
+//}
+//
+//QList<QVariant> AutoCompleterItem::data() const
+//{
+//	return itemData;
+//}
+//
+//AutoCompleterItem *AutoCompleterItem::parent()
+//{
+//	return parentItem;
+//}
+//
+//int AutoCompleterItem::row() const
+//{
+//	if (parentItem)
+//		return parentItem->childItems.indexOf(const_cast<AutoCompleterItem*>(this));
+//
+//	return 0;
+//}
+//
+//AutoCompleterItem* AutoCompleterItem::findChild( const QList<QVariant>& dt )
+//{
+//	AutoCompleterItem* ch = NULL;
+//	int ind = 0;
+//	while ((ch == NULL) && (ind < childCount()))
+//	{
+//		AutoCompleterItem* tmp = child(ind);
+//		if (tmp->data() == dt)
+//			ch = tmp;
+//		else
+//			++ind;
+//	}
+//	return ch;
+//}
 
-	if (!parent.isValid())
-		parentItem = rootItem;
-	else
-		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
-
-	AutoCompleterItem *childItem = parentItem->child(row);
-	if (childItem)
-		return createIndex(row, column, childItem);
-	else
-		return QModelIndex();
-}
-
-QModelIndex AutoCompleterModel::parent(const QModelIndex &index) const
-{
-	if (!index.isValid())
-		return QModelIndex();
-
-	AutoCompleterItem *childItem = static_cast<AutoCompleterItem*>(index.internalPointer());
-	AutoCompleterItem *parentItem = childItem->parent();
-
-	if (parentItem == rootItem)
-		return QModelIndex();
-
-	return createIndex(parentItem->row(), 0, parentItem);
-}
-
-int AutoCompleterModel::rowCount(const QModelIndex &parent) const
-{
-	AutoCompleterItem *parentItem;
-	if (parent.column() > 0)
-		return 0;
-
-	if (!parent.isValid())
-		parentItem = rootItem;
-	else
-		parentItem = static_cast<AutoCompleterItem*>(parent.internalPointer());
-
-	return parentItem->childCount();
-}
-
-void AutoCompleterModel::addCompleteSubTree(const QStringList &signatures)
-{
-	QStringList signs = signatures;
-	foreach(QString sg,signs)
-		createAndAppendBranch(sg,rootItem);
-}
-
-void AutoCompleterModel::createAndAppendBranch( QString& st,AutoCompleterItem* parent )
-{
-	if (st.isEmpty() || (parent == NULL))
-		return;
-	QList<QVariant> dt;
-	int indexpoint = st.indexOf(".");
-	if (indexpoint == -1)
-	{
-		int indexpar = st.indexOf("(");
-		if (indexpar == -1)
-		{
-			//is a member
-			dt << st;
-		}
-		else 
-		{
-			//is a function. I will add the name of the function and the signature for the tooltip
-			dt << st.left(indexpar)/* << st*/;
-		}
-		AutoCompleterItem* ch = parent->findChild(dt);
-		//Search if the node is already in the tree
-		if (ch == NULL)
-		{
-			ch = new AutoCompleterItem(dt,parent);
-			parent->appendChild(ch);
-		}
-		return;
-	}
-	else
-	{
-		//+1 so I will take also the .
-		QString tmp  = st.left(indexpoint + 1);
-		st.remove(tmp);
-		tmp.remove(".");
-		dt << tmp;
-		int ind = 0;
-
-		AutoCompleterItem* ch = parent->findChild(dt);
-		//Search if the node is already in the tree
-		if (ch == NULL)
-		{
-			ch = new AutoCompleterItem(dt,parent);
-			parent->appendChild(ch);
-		}
-		createAndAppendBranch(st,ch);
-	}
-}
-
-QModelIndexList AutoCompleterModel::matched( const QString& val,const QModelIndex& start /*= QModelIndex()*/ )
-{
-	QModelIndexList ls;
-	if (!val.isEmpty())
-		matched(val,ls,start);
-	return ls;
-}
-
-void AutoCompleterModel::matched( const QString& val,QModelIndexList& mil,const QModelIndex& ind )
-{
-	if (ind.isValid())
-	{
-		AutoCompleterItem* item = reinterpret_cast<AutoCompleterItem*>(ind.internalPointer());
-		for (int ii = 0;ii < item->columnCount();++ii)
-			if (item->data(ii).toString().startsWith(val))
-				mil << ind;
-			else
-				return;
-	}
-	for(int ii = 0;ii < rowCount(ind);++ii)
-			matched(val,mil,index(ii,0,ind));
-}
-
-
-AutoCompleterItem::AutoCompleterItem(const QList<QVariant> &data, AutoCompleterItem *parent)
-{
-	parentItem = parent;
-	itemData = data;
-}
-
-AutoCompleterItem::~AutoCompleterItem()
-{
-	qDeleteAll(childItems);
-}
-
-void AutoCompleterItem::appendChild(AutoCompleterItem *item)
-{
-	childItems.append(item);
-}
-
-AutoCompleterItem *AutoCompleterItem::child(int row)
-{
-	return childItems.value(row);
-}
-
-int AutoCompleterItem::childCount() const
-{
-	return childItems.count();
-}
-
-int AutoCompleterItem::columnCount() const
-{
-	return itemData.count();
-}
-
-QVariant AutoCompleterItem::data(int column) const
-{
-	return itemData.value(column);
-}
-
-QList<QVariant> AutoCompleterItem::data() const
-{
-	return itemData;
-}
-
-AutoCompleterItem *AutoCompleterItem::parent()
-{
-	return parentItem;
-}
-
-int AutoCompleterItem::row() const
-{
-	if (parentItem)
-		return parentItem->childItems.indexOf(const_cast<AutoCompleterItem*>(this));
-
-	return 0;
-}
-
-AutoCompleterItem* AutoCompleterItem::findChild( const QList<QVariant>& dt )
-{
-	AutoCompleterItem* ch = NULL;
-	int ind = 0;
-	while ((ch == NULL) && (ind < childCount()))
-	{
-		AutoCompleterItem* tmp = child(ind);
-		if (tmp->data() == dt)
-			ch = tmp;
-		else
-			++ind;
-	}
-	return ch;
-}
-
-MLAutoCompleter::MLAutoCompleter( AutoCompleterModel* comp,QObject* parent )
-:QCompleter(comp,parent)
-{
-	setCompletionRole(Qt::DisplayRole);
-}
-
-MLAutoCompleter::MLAutoCompleter( QObject* parent )
-:QCompleter(parent)
+MLAutoCompleter::MLAutoCompleter( const MLScriptLanguage& synt,QObject* parent )
+:QCompleter(parent),syntax(synt)
 {
 	setCompletionRole(Qt::DisplayRole);
 }
@@ -885,16 +874,27 @@ MLAutoCompleter::MLAutoCompleter( QObject* parent )
 QStringList MLAutoCompleter::splitPath( const QString &path ) const
 {
 	QString tmp = path;
-	QRegExp par("\\(.\\)");
+	QString parst = "\\s*" + syntax.openpar.pattern() + "." + syntax.closepar.pattern();
+	QRegExp par(parst);
 	tmp.remove(par);
-	QStringList res = path.split(".");
+	QStringList res = path.split(syntax.sep);
 	return res;
 }
 
 QString MLAutoCompleter::pathFromIndex( const QModelIndex &index ) const
 {
-	QStringList dataList;
+	QString completename;
 	for (QModelIndex i = index; i.isValid(); i = i.parent()) 
-		dataList.prepend(model()->data(i, completionRole()).toString());
-	return dataList.join(".");
+	{
+		QString tmp = model()->data(i, completionRole()).toString();
+		QModelIndex sepindex = i.sibling(i.row(),2);
+		if (sepindex.isValid())
+			tmp = tmp + model()->data(sepindex).toString();
+		completename = tmp + completename;
+
+	}
+	return completename;
 }
+
+
+

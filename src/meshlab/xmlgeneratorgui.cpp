@@ -437,9 +437,14 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	connect(ui->jsbut,SIGNAL(released()),this,SLOT(jsButtonClicked()));
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
 	connect(ui->guiframe,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)),this,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)));
+	JavaScriptLanguage* js = new JavaScriptLanguage();
+	js->addFunctionsLibrary(filtersign);
+	js->addFunctionsLibrary(js->getExternalLibrariesFunctionsSignature());
+	ui->jscode->setScriptLanguage(js);
+	
 	//disconnect(this,SIGNAL(itemExpanded(QTreeWidgetItem*)),this,SLOT(expandItem(QTreeWidgetItem*)));
-	JavaScriptSyntaxHighLighter* js = new JavaScriptSyntaxHighLighter(pluginvar,namespacelist,filterlist,filtersign,ui->jscode);
-	ui->jscode->setSyntaxHighlighter(js);
+	//JavaScriptSyntaxHighLighter* js = new JavaScriptSyntaxHighLighter(pluginvar,namespacelist,filterlist,filtersign,ui->jscode);
+	//ui->jscode->setSyntaxHighlighter(js);
 }
 
 FilterGeneratorTab::~FilterGeneratorTab()
