@@ -154,7 +154,9 @@ class ImporterXYZ
 			if (options.onlyMaskFlag)
       {
         // check the first line
-        line = (buf = stream.readLine(1024)).split(QRegExp("[ |\t]"));
+        buf = stream.readLine(0);
+        buf = buf.trimmed();
+        line = buf.split(QRegExp("[ |\t]"));
 
         if (line.size()==6)
         {
@@ -172,7 +174,10 @@ class ImporterXYZ
       CoordType p,n;
       while(!stream.atEnd())
       {
-        line = (buf = stream.readLine(1024)).split(QRegExp("[ |\t]"));
+        buf = stream.readLine(0);
+        buf = buf.trimmed();
+        line = buf.split(QRegExp("[ |\t]"));
+
         if (line.size()==6)
         {
           loadmask |= Mask::IOM_VERTCOORD;

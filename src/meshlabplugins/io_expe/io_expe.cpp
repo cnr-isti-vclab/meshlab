@@ -31,6 +31,7 @@
 
 #include "import_expe.h"
 #include "import_xyz.h"
+#include "export_xyz.h"
 // #include "export_expe.h"
 
 #include <QMessageBox>
@@ -38,13 +39,6 @@
 using namespace std;
 using namespace vcg;
 
-
-// initialize importing parameters
-// void ExpeIOPlugin::initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst)
-// {
-// 	parlst.addBool("pointsonly",false,"Keep only points","Just import points, without triangulation");
-// 	parlst.addBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles");
-// }
 
 
 bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
@@ -121,6 +115,18 @@ bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, Mesh
 // 		}
 // 		return true;
 // 	}
+
+  if(formatName.toLower() == tr("xyz"))
+  {
+    int result = vcg::tri::io::ExporterXYZ<CMeshO>::Save(m.cm,filename.c_str(),mask);
+    if(result!=0)
+    {
+      QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterXYZ<CMeshO>::ErrorMsg(result)));
+      return false;
+    }
+    return true;
+  }
+
 	assert(0); // unknown format
 	return false;
 }
@@ -133,7 +139,7 @@ QList<MeshIOInterface::Format> ExpeIOPlugin::importFormats() const
 	QList<Format> formatList;
 	formatList << Format("Expe's point set (binary)"		,tr("pts"));
 	formatList << Format("Expe's point set (ascii)"			,tr("apts"));
-	formatList << Format("XYZ point with normal"				,tr("xyz"));
+	formatList << Format("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
 	return formatList;
 }
 
@@ -145,7 +151,7 @@ QList<MeshIOInterface::Format> ExpeIOPlugin::exportFormats() const
 	QList<Format> formatList;
 // 	formatList << Format("Expe's point set (binary)"		,tr("pts"));
 // 	formatList << Format("Expe's point set (ascii)"			,tr("apts"));
-// 	formatList << Format("XYZ point with normal"				,tr("xyz"));
+	formatList << Format("XYZ Point Cloud (with or without normal)"				,tr("xyz"));
 	return formatList;
 }
 
@@ -157,6 +163,7 @@ void ExpeIOPlugin::GetExportMaskCapability(QString &format, int &capability, int
 {
 // 	if(format.toLower() == tr("apts")){capability=defaultBits= vcg::tri::io::ExporterExpeAPTS<CMeshO>::GetExportMaskCapability();}
 // 	if(format.toLower() == tr("pts")){capability=defaultBits= vcg::tri::io::ExporterExpePTS<CMeshO>::GetExportMaskCapability();}
+ 	if(format.toLower() == tr("xyz")){capability=defaultBits= vcg::tri::io::ExporterXYZ<CMeshO>::GetExportMaskCapability();}
 	return;
 }
 
