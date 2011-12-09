@@ -355,7 +355,7 @@ bool SyntaxTreeModel::setHeaderData(int section, Qt::Orientation orientation,
 //}
 
 MLScriptLanguage::MLScriptLanguage()
-:libraries(),reserved(),langfuncs(),worddelimiter(),sep(),openpar(),closepar()
+:libraries(),reserved(),langfuncs(),worddelimiter(),wordsjoiner(),openpar(),closepar()
 {
 	initLibrary();
 }
@@ -388,7 +388,7 @@ void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent 
 		return;
 	QString st = funname;
 	QVector<QVariant> dt(3,QVariant(QString()));
-	int indexpoint = st.indexOf(sep);
+	int indexpoint = st.indexOf(wordsjoiner);
 	if (indexpoint == -1)
 	{
 		int indexpar = st.indexOf(openpar);
@@ -420,8 +420,8 @@ void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent 
 		//+1 so I will take also the sep
 		QString tmp  = st.left(indexpoint + 1);
 		st.remove(tmp);
-		QString specificsep = sep.cap();
-		tmp.remove(sep);
+		QString specificsep = wordsjoiner.cap();
+		tmp.remove(wordsjoiner);
 		dt[0] = tmp;
 		dt[2] = specificsep;
 		SyntaxTreeNode* ch = parent->findChild(dt);
@@ -472,21 +472,26 @@ QStringList MLScriptLanguage::getExternalLibrariesFunctionsSignature()
 	return res;
 }
 
-//QStringList MLScriptSyntax::splitTextInWords( const QString& st ) const
-//{
-//	QString tmp = st;
-//	st
-//	QStringList stlist = st.split(sep,QString::SkipEmptyParts);
-//	for(int ii =0;ii < stlist.size();++ii)
-//	{
-//		if (qualifier.indexIn(stlist[ii]) != -1)
-//		{
-//			if()
-//			
-//		}
-//
-//	}
-//}
+QRegExp MLScriptLanguage::matchIdentifiersButNotReservedWords() const
+{
+	QString res = reserved.join("|");
+	QRegExp name("([a-z]|[A-Z])+\\w*");
+	QRegExp nokey("\\b(?!(?:" + res + ")\\b)");
+	return QRegExp(nokey.pattern() + name.pattern() + "\\b(\\s*" + wordsjoiner.pattern() + "\\s*" + nokey.pattern() + name.pattern() + "\\b)*");
+}
+
+QRegExp MLScriptLanguage::matchOnlyReservedWords() const
+{
+	QString res = reserved.join("|");
+	return QRegExp("\\b(" + res + ")\\b"); 
+}
+
+QRegExp MLScriptLanguage::matchIdentifier() const
+{
+	QRegExp name("([a-z]|[A-Z])+\\w*");
+	return QRegExp(name.pattern() + "(\\s*" + wordsjoiner.pattern() +"\\s*\\w*)*");
+	
+}
 
 JavaScriptLanguage::JavaScriptLanguage()
 :MLScriptLanguage()
@@ -494,7 +499,7 @@ JavaScriptLanguage::JavaScriptLanguage()
 	//HighlightingRule res;
 	//res.format.setForeground(Qt::darkBlue);
 	//res.format.setFontWeight(QFont::Bold);
-	sep.setPattern("\\.");
+	wordsjoiner.setPattern("\\.");
 	openpar.setPattern("\\(");
 	closepar.setPattern("\\)");
 	reserved << "break";
@@ -550,6 +555,17 @@ const QList<ExternalLib*> JavaScriptLanguage::scriptLibraryFiles()
 	return res;
 }
 
+//QStringList JavaScriptLanguage::splitLineInWords( const QStringList& line )
+//{
+//	//Regular expression matching all the identifiers but not keywords
+//	QRegExp exp = matchIdentifiersButNotReservedWords();
+//	int index = 0;
+//	while (index >= 0)
+//	{
+//		line 
+//	}
+//}
+
 QString ExternalLib::libCode() const
 {
 	QFile lib(name);
@@ -568,7 +584,7 @@ ExternalLib::ExternalLib( const QString& filename )
 }
 
 SGLMathLib::SGLMathLib()
-:ExternalLib(":/script_system/space_math.js")
+:ExternalLib(":/script_system/math.js")
 {
 	
 }
@@ -580,7 +596,8 @@ QStringList SGLMathLib::functionsSignatures() const
 	int index = 0;
 	QRegExp parameter("\\w*");
 	QRegExp parameterlist(parameter.pattern() + "(\\s*,\\s*" + parameter.pattern() + ")*");
-	QRegExp exp("SGL.\\w+\\s*=\\s*function\\(" + parameterlist.pattern() + "\\)");
+	QRegExp namespacelist(parameter.pattern() + "(\\s*\\.\\s*" + parameter.pattern() + ")*\\$?");
+	QRegExp exp(namespacelist.pattern() + "\\s*=\\s*function\\s*\\(" + parameterlist.pattern() + "\\)");
 	while(index >= 0)
 	{
 		index = code.indexOf(exp,index) + exp.matchedLength();

@@ -98,17 +98,21 @@ public:
 	//Everything used in the language syntax dividing two different "words" for example a=b or a|b or a,b or a<b or a+b or a;b or a b (whitespace) or a\nb (carriage return) etc
 	QRegExp worddelimiter;
 
-	QRegExp sep;
+	QRegExp wordsjoiner;
 	QRegExp openpar;
 	QRegExp closepar;
 	//For instance in C++ a qualifier is . or ->
 	QRegExp qualifier;
 
+	QRegExp matchIdentifier() const;
+	QRegExp matchIdentifiersButNotReservedWords() const;
+	QRegExp matchOnlyReservedWords() const;
+	
 	virtual const QList<ExternalLib*> scriptLibraryFiles() = 0;
 	QString getExternalLibrariesCode();
 	QStringList getExternalLibrariesFunctionsSignature();
 	//QStringList splitTextInWords(const QString& st) const;
-
+	
 private:
 	void initLibrary();
 	void addBranch(const QString& funname,SyntaxTreeNode* parent);
