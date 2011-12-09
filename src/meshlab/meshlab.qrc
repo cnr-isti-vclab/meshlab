@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
 		<file alias="script_system/meshlabfilterXMLspecificationformat.xsd">../common/script_system/meshlabfilterXMLspecificationformat.xsd</file>
-		<file alias="script_system/space_math.js">../common/script_system/space_math.js</file>
+		<file alias="script_system/math.js">../common/script_system/math.js</file>
         <file>images/backlines.png</file>
         <file>images/bbox.png</file>
         <file>images/cursors/plain.png</file>
