@@ -534,9 +534,7 @@ void MLScriptEditor::setScriptLanguage( MLScriptLanguage* syntax )
 		synhigh->setDocument(document());
 		delete comp;
 		comp = new MLAutoCompleter(*synt,this);
-		comp->setCaseSensitivity(Qt::CaseSensitive);
 		comp->setWidget(this);
-		comp->setCompletionMode(QCompleter::PopupCompletion);
 		comp->setModel(synt->functionsLibrary());
 		connect(comp,SIGNAL(activated(const QString &)),this,SLOT(insertSuggestedWord( const QString &)));
 		connect(comp,SIGNAL(highlighted(const QModelIndex&)),comp,SLOT(changeCurrent(const QModelIndex&)));
@@ -693,6 +691,8 @@ MLAutoCompleter::MLAutoCompleter( const MLScriptLanguage& synt,QWidget* parent )
 :QCompleter(parent),syntax(synt)
 {
 	setCompletionRole(Qt::DisplayRole);
+	setCaseSensitivity(Qt::CaseSensitive);
+	setCompletionMode(QCompleter::PopupCompletion);
 	MLAutoCompleterPopUp* pop = new MLAutoCompleterPopUp(parent);
 	setPopup(pop);
 }
@@ -757,5 +757,5 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 		}
 		return true;
 	}
-	return QWidget::event(event);
+	return QListView::event(event);
 }
