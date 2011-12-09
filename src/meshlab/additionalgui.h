@@ -142,8 +142,8 @@ private:
 		QRegExp pattern;
 		QTextCharFormat format;
 	};
-	int match(SyntaxTreeNode* node,const QString& text,int start,const QString& matchedstring,const QTextCharFormat& format);
-	void matchLine(const QString& text,const QTextCharFormat& format);
+
+	bool colorTextIfInsideTree(const QString& text,SyntaxTreeNode* node,int start);
 	const MLScriptLanguage& syntax;
 	QList<HighlightingRule> highlightingRules;
 
@@ -151,10 +151,13 @@ private:
 
 class MLAutoCompleter : public QCompleter
 {
+	Q_OBJECT
 public:
 	MLAutoCompleter(const MLScriptLanguage& synt,QObject* parent);
 	//MLAutoCompleter(QObject* parent);
 
+public slots:
+	void changeCurrent(const QModelIndex& ind);
 protected:
 	QStringList splitPath(const QString &path) const;
 	QString pathFromIndex(const QModelIndex &index) const;
@@ -186,6 +189,7 @@ private slots:
 private:
 	QString currentLine() const;
 	QString lastInsertedWord() const;
+	QString wordUnderTextCursor() const;
 
 	MLNumberArea* narea;
 	QStringList regexps;
