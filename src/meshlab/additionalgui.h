@@ -149,11 +149,21 @@ private:
 
 };
 
+class MLAutoCompleterPopUp : public QListView
+{
+	Q_OBJECT
+public:
+	MLAutoCompleterPopUp(QWidget* parent);
+	~MLAutoCompleterPopUp();
+protected:
+	bool event(QEvent *event);
+};
+
 class MLAutoCompleter : public QCompleter
 {
 	Q_OBJECT
 public:
-	MLAutoCompleter(const MLScriptLanguage& synt,QObject* parent);
+	MLAutoCompleter(const MLScriptLanguage& synt,QWidget* parent);
 	//MLAutoCompleter(QObject* parent);
 
 public slots:

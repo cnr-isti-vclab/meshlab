@@ -556,7 +556,6 @@ QString MLScriptEditor::wordUnderTextCursor() const
 	while ((index >= 0) && (index < line.size()))
 	{
 		int tmp = line.indexOf(id,index);
-		QString word = id.cap();
 		index = tmp + id.matchedLength();
 	}
 
@@ -690,51 +689,12 @@ bool MLSyntaxHighlighter::colorTextIfInsideTree(const QString& text,SyntaxTreeNo
 	return false;
 }
 
-//int MLSyntaxHighlighter::match(const QString& text,SyntaxTreeNode* node,const int alreadymatchedchar)
-//{
-//	QRegExp exp;
-//	//int nextmatchstart = start;
-//	if (node != NULL)
-//	{
-//		//it's the root. The root is not meaningful
-//		if (node->parent() == NULL)
-//		{
-//			int ii = 0;
-//			while(ii < node->childCount())
-//			{
-//				int matchedchar = match(text,node->child(ii),alreadymatchedchar);
-//				if (matchedchar > 0)
-//					return matchedchar;
-//				++ii;
-//			}	
-//		}
-//		QString nodevalue =  addIDBoundary(node->data(0).toString());
-//		exp.setPattern( nodevalue + "(\\s*\\" + node->data(2).toString() + "\\s*)?");
-//
-//		int index = exp.indexIn(text);
-//		if (index < 0)
-//			return alreadymatchedchar;
-//		if (text.size() == exp.matchedLength())
-//			return alreadymatchedchar + exp.matchedLength();
-//		int ii = 0;
-//		int matchedchar = 0;
-//		while(ii < node->childCount())
-//		{
-//			matchedchar = match(text.right(text.size() - (exp.matchedLength())),node->child(ii),alreadymatchedchar + exp.matchedLength());
-//			if (matchedchar == text.size())
-//				return matchedchar;
-//			++ii;
-//		}
-//		return matchedchar;
-//	}
-//	return alreadymatchedchar;
-//}
-
-
-MLAutoCompleter::MLAutoCompleter( const MLScriptLanguage& synt,QObject* parent )
+MLAutoCompleter::MLAutoCompleter( const MLScriptLanguage& synt,QWidget* parent )
 :QCompleter(parent),syntax(synt)
 {
 	setCompletionRole(Qt::DisplayRole);
+	MLAutoCompleterPopUp* pop = new MLAutoCompleterPopUp(parent);
+	setPopup(pop);
 }
 
 QStringList MLAutoCompleter::splitPath( const QString &path ) const
@@ -771,4 +731,31 @@ void MLAutoCompleter::changeCurrent( const QModelIndex& ind )
 }
 
 
+MLAutoCompleterPopUp::MLAutoCompleterPopUp( QWidget* parent )
+:QListView(parent)
+{
+}
 
+MLAutoCompleterPopUp::~MLAutoCompleterPopUp()
+{
+}
+
+bool MLAutoCompleterPopUp::event( QEvent *event )
+{
+	if (event->type() == QEvent::ToolTip) 
+	{
+		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
+		QModelIndex indexid = indexAt(helpEvent->pos());
+		QModelIndex indexsign = indexid.sibling(indexid.row(),1);
+	
+		if (indexsign.isValid()) 
+			QToolTip::showText(helpEvent->globalPos(), indexsign.data().toString());
+		else 
+		{
+			QToolTip::hideText();
+			event->ignore();
+		}
+		return true;
+	}
+	return QWidget::event(event);
+}
