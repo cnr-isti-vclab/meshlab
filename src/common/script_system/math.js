@@ -4281,13 +4281,6 @@ SpiderGL.Math.Quat.normalize$ = function (q) {
 	return SpiderGL.Math.Quat.muls$(q, s);
 }
 
-/*---------------------------------------------------------*/
-
-
-
-// general
-/*---------------------------------------------------------*/
-
 SpiderGL.Math.project = function (xyzw, modelViewProjectionMatrix, viewport, depthRange) {
 	var v3 = SpiderGL.Math.Vec3;
 	var m4 = SpiderGL.Math.Mat4;
@@ -4326,4 +4319,3 @@ SpiderGL.Math.unproject = function (xyz, modelViewProjectionMatrixInverse, viewp
 	return r;
 };
 
-/*---------------------------------------------------------*/
