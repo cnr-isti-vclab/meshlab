@@ -30,6 +30,7 @@
 #include "interfaces.h"
 #include "xmlfilterinfo.h"
 #include "scriptinterface.h"
+#include "scriptsyntax.h"
 
 class QScriptEngine;
 /**
@@ -89,9 +90,9 @@ public:
 
 	static QString pluginNameSpace();
 	//highlight and autocomplete
-	QStringList pluginnamespaces;
-	QStringList filterscriptnames;
-	QStringList filtersign;
+	/*QStringList pluginnamespaces;
+	QStringList filterscriptnames;*/
+	QList<LibraryElementInfo> libinfolist;
 	//Env env;
 
 	//void updateDocumentScriptBindings(MeshDocument& doc);

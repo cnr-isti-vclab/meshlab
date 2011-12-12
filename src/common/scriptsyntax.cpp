@@ -372,22 +372,22 @@ SyntaxTreeModel* MLScriptLanguage::functionsLibrary()
 	return libraries;
 }
 
-void MLScriptLanguage::addFunctionsLibrary( const QStringList& funsigns )
+void MLScriptLanguage::addLibrary( const QList<LibraryElementInfo>& funsigns )
 {
 	if (libraries != NULL)
 	{
 		SyntaxTreeNode* root = libraries->getItem(QModelIndex());
-		foreach(QString st,funsigns)
+		foreach(LibraryElementInfo st,funsigns)
 			addBranch(st,root);
 	}
 }
 
-void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent )
+void MLScriptLanguage::addBranch( const LibraryElementInfo& mi,SyntaxTreeNode* parent )
 {
-	if (funname.isEmpty() || (parent == NULL))
+	if (mi.completename.isEmpty() || (parent == NULL))
 		return;
-	QString st = funname;
-	QVector<QVariant> dt(3,QVariant(QString()));
+	QString st = mi.completename;
+	QVector<QVariant> dt(5,QVariant(QString()));
 	int indexpoint = st.indexOf(wordsjoiner);
 	if (indexpoint == -1)
 	{
@@ -396,12 +396,16 @@ void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent 
 		{
 			//is a member
 			dt[0] = st;
+			dt[1] = mi.help;
+			dt[4] = QString::number(MLScriptLanguage::CONSTANT);
 		}
 		else 
 		{
 			//is a function. I will add the name of the function and the signature for the tooltip
 			dt[0] = st.left(indexpar);
-			dt[1] = st;
+			dt[1] = mi.help;
+			dt[3] = st;
+			dt[4] = QString::number(MLScriptLanguage::FUNCTION);
 		}
 		SyntaxTreeNode* ch = parent->findChild(dt);
 
@@ -410,8 +414,8 @@ void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent 
 		{
 			parent->insertChildren(parent->childCount(),1,parent->columnCount());
 			ch = parent->child(parent->childCount() - 1);
-			ch->setData(0,dt[0]);
-			ch->setData(1,dt[1]);
+			for(int ii = 0;ii < 5;++ii)
+				ch->setData(ii,dt[ii]);
 		}
 		return;
 	}
@@ -424,16 +428,20 @@ void MLScriptLanguage::addBranch( const QString& funname,SyntaxTreeNode* parent 
 		tmp.remove(wordsjoiner);
 		dt[0] = tmp;
 		dt[2] = specificsep;
+		dt[4] = QString::number(MLScriptLanguage::NAMESPACE);
 		SyntaxTreeNode* ch = parent->findChild(dt);
 		//Search if the node is already in the tree
 		if (ch == NULL)
 		{
 			parent->insertChildren(parent->childCount(),1,parent->columnCount());
 			ch = parent->child(parent->childCount() - 1);
-			ch->setData(0,dt[0]);
-			ch->setData(2,dt[2]);
+			for(int ii = 0;ii < 5;++ii)
+				ch->setData(ii,dt[ii]);
 		}
-		addBranch(st,ch);
+		LibraryElementInfo minext;
+		minext.completename = st;
+		minext.help = mi.help; 
+		addBranch(minext,ch);
 	}
 }
 
@@ -457,18 +465,20 @@ void MLScriptLanguage::initLibrary()
 	delete libraries;
 	QVector<QVariant> v;
 	v.push_back("partial function ID");
-	v.push_back("tooltip");
+	v.push_back("help");
 	v.push_back("separator");
+	v.push_back("signature");
+	v.push_back("token");
 	SyntaxTreeNode* root = new SyntaxTreeNode(v,NULL);
 	libraries = new SyntaxTreeModel(root,NULL);
 }
 
-QStringList MLScriptLanguage::getExternalLibrariesFunctionsSignature()
+QList<LibraryElementInfo> MLScriptLanguage::getExternalLibrariesMembersInfo() const
 {
-	QStringList res;
+	QList<LibraryElementInfo> res;
 	QList<ExternalLib*> liblist = this->scriptLibraryFiles();
 	for(int ii = 0;ii <liblist.size();++ii)
-		res.append(liblist[ii]->functionsSignatures());
+		res.append(liblist[ii]->libraryMembersInfo());
 	return res;
 }
 
@@ -547,7 +557,7 @@ JavaScriptLanguage::JavaScriptLanguage()
 	//comp.setModel(&mod);
 }
 
-const QList<ExternalLib*> JavaScriptLanguage::scriptLibraryFiles()
+const QList<ExternalLib*> JavaScriptLanguage::scriptLibraryFiles() const
 {
 	QList<ExternalLib*> res;
 	SGLMathLib* lib = new SGLMathLib();
@@ -589,22 +599,36 @@ SGLMathLib::SGLMathLib()
 	
 }
 
-QStringList SGLMathLib::functionsSignatures() const
+QList<LibraryElementInfo> SGLMathLib::libraryMembersInfo() const
 {
 	QString code = libCode();
-	QStringList res;
+	QList<LibraryElementInfo> res;
 	int index = 0;
 	QRegExp parameter("\\w*");
 	QRegExp parameterlist(parameter.pattern() + "(\\s*,\\s*" + parameter.pattern() + ")*");
 	QRegExp namespacelist(parameter.pattern() + "(\\s*\\.\\s*" + parameter.pattern() + ")*\\$?");
-	QRegExp exp(namespacelist.pattern() + "\\s*=\\s*function\\s*\\(" + parameterlist.pattern() + "\\)");
-	while(index >= 0)
+	QRegExp help("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/");
+	QRegExp exp("(" + help.pattern() + ")?" + "\\s*" + namespacelist.pattern() + "\\s*=\\s*function\\s*\\(" + parameterlist.pattern() + "\\)");
+	int ii = 0;
+	do
 	{
 		index = code.indexOf(exp,index) + exp.matchedLength();
-		QString fun = exp.cap();
-		fun.remove(QRegExp("\\s*")).remove("=").remove("function");
-		res << fun;
-	}
+		if (index >= 0)
+		{
+			QString fun = exp.cap();
+			LibraryElementInfo mi; 
+			int helpind = fun.indexOf(help);
+			if (helpind >= 0)
+			{
+				mi.help = help.cap();
+				fun.remove(help.cap());
+			}
+			fun.remove(QRegExp("\\s*")).remove("=").remove("function");
+			mi.completename = fun;
+			res << mi;
+			++ii;
+		}
+	}while(index >= 0);
 	return res;
 }
 

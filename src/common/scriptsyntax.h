@@ -66,12 +66,18 @@ private:
 	SyntaxTreeNode *rootItem;
 };
 
+struct LibraryElementInfo
+{
+	QString completename;
+	QString help;
+};
+
 class ExternalLib
 {
 public:
 	ExternalLib(const QString& filename);
 	QString name;
-	virtual QStringList functionsSignatures() const = 0;
+	virtual QList<LibraryElementInfo> libraryMembersInfo() const = 0;
 	QString libCode() const;
 };
 
@@ -79,17 +85,19 @@ class SGLMathLib : public ExternalLib
 {
 public:
 	SGLMathLib();
-	QStringList functionsSignatures() const;
+	QList<LibraryElementInfo> libraryMembersInfo() const;
 };
 
 class MLScriptLanguage
 {
 public:
+	enum LANG_TOKEN {NAMESPACE,FUNCTION,CONSTANT};
+
 	MLScriptLanguage();
 	~MLScriptLanguage();
 	//a Library of functions is a list of functions expressed as NameSpace0.NameSpace1.----.NameSpaceN.fun(par0,par1,....,park) (if sep = "." openpar = "(") with NameSpace0 common to all the functions of a single library 
 	//the function will generate a SyntaxTree in order to easy manage SyntaxHighlighting and Auto-Completing.
-	void addFunctionsLibrary(const QStringList& funsigns);
+	void addLibrary(const QList<LibraryElementInfo>& funsigns);
 	const SyntaxTreeModel* functionsLibrary() const;
 	SyntaxTreeModel* functionsLibrary();
 	QStringList reserved;
@@ -108,14 +116,14 @@ public:
 	QRegExp matchIdentifiersButNotReservedWords() const;
 	QRegExp matchOnlyReservedWords() const;
 	
-	virtual const QList<ExternalLib*> scriptLibraryFiles() = 0;
+	virtual const QList<ExternalLib*> scriptLibraryFiles() const = 0;
 	QString getExternalLibrariesCode();
-	QStringList getExternalLibrariesFunctionsSignature();
+	QList<LibraryElementInfo> getExternalLibrariesMembersInfo() const;
 	//QStringList splitTextInWords(const QString& st) const;
 	
 private:
 	void initLibrary();
-	void addBranch(const QString& funname,SyntaxTreeNode* parent);
+	void addBranch(const LibraryElementInfo& mi,SyntaxTreeNode* parent);
 	SyntaxTreeModel* libraries;
 };
 
@@ -123,7 +131,7 @@ class JavaScriptLanguage : public MLScriptLanguage
 {
 public:
 	JavaScriptLanguage();
-	const QList<ExternalLib*> scriptLibraryFiles();
+	const QList<ExternalLib*> scriptLibraryFiles() const;
 };
 
 #endif

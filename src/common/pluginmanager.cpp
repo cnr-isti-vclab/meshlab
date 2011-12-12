@@ -323,7 +323,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
 			if (pname != "")
 			{
 				QString plugnamespace = pluginNameSpace() + "." + pname;
-				pluginnamespaces << plugnamespace;
+				//pluginnamespaces << plugnamespace;
 				scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
 				QStringList filters = pluginfo->filterNames();
 				foreach(QString filter,filters)
@@ -336,10 +336,13 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
 						filterFunction = gen.funCodeGenerator(filter,*pluginfo);
 					QString jname = pluginfo->filterAttribute(filter,MLXMLElNames::filterScriptFunctName);
 					completename += "." + jname;
-					filterscriptnames << completename;
+					//filterscriptnames << completename;
 					scriptplugcode += completename + " = " + filterFunction + "\n";
 					completename += "(" + gen.parNames(filter,*pluginfo) + ")";
-					filtersign << completename;
+					LibraryElementInfo li;
+					li.completename = completename;
+					li.help = pluginfo->filterHelp(filter);
+					libinfolist << li;
 				}
 			}
 		}
