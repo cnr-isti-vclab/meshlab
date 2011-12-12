@@ -416,7 +416,7 @@ void FilterGeneratorGUI::importInfo( const MLXMLFilterSubTree& tree )
 		addParam(tree.params[ii]);
 }
 
-FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent /*= NULL*/,const QString& pluginvar /*= QString()*/,const QStringList& namespacelist /*= QStringList()*/,const QStringList& filterlist /*= QStringList()*/,const QStringList& filtersign /*= QStringList()*/)
+FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent /*= NULL*/,const QList<LibraryElementInfo>& libinfolist /*= QStringList()*/)
 :QFrame(parent),jsexp(true),guiexp(false)
 {
 	//filtereditor = new FilterEditorFrame(this);
@@ -438,8 +438,8 @@ FilterGeneratorTab::FilterGeneratorTab(const QString& filtername,QWidget* parent
 	connect(ui->guiframe,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SIGNAL(filterNameUpdated(const QString&,QWidget*)));
 	connect(ui->guiframe,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)),this,SIGNAL(validateFilterName(const QString&,FilterGeneratorGUI*)));
 	JavaScriptLanguage* js = new JavaScriptLanguage();
-	js->addFunctionsLibrary(filtersign);
-	js->addFunctionsLibrary(js->getExternalLibrariesFunctionsSignature());
+	js->addLibrary(libinfolist);
+	js->addLibrary(js->getExternalLibrariesMembersInfo());
 	ui->jscode->setScriptLanguage(js);
 	
 	//disconnect(this,SIGNAL(itemExpanded(QTreeWidgetItem*)),this,SLOT(expandItem(QTreeWidgetItem*)));
@@ -697,7 +697,7 @@ void PluginGeneratorGUI::addNewFilter()
 	for(int ii = 0;ii < tabs->count();++ii)
 		namelist.push_back(tabs->tabText(ii));
 	QString tmpname = UsefulGUIFunctions::generateUniqueDefaultName("Filter",namelist);
-	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this,PM.pluginNameSpace(),PM.pluginnamespaces,PM.filterscriptnames,PM.filtersign);
+	FilterGeneratorTab* tb = new FilterGeneratorTab(tmpname,this,PM.libinfolist);
 	//tb->initLibInEnv(PM);
 	tabs->addTab(tb,tmpname);
 	connect(tb,SIGNAL(filterNameUpdated(const QString&,QWidget*)),this,SLOT(updateTabTitle(const QString&,QWidget*)));
