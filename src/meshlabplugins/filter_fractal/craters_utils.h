@@ -147,7 +147,7 @@ public:
     static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
     {
         tri::UpdateNormals<MeshType>::PerFaceNormalized(*target);
-        tri::UpdateFlags<MeshType>::FaceProjection(*target);
+//        tri::UpdateFlags<MeshType>::FaceProjection(*target);
 
         MetroMeshGrid mmg;
         mmg.Set(target->face.begin(), target->face.end());
@@ -280,7 +280,7 @@ public:
         if(args.save_as_quality)
             args.target_model->updateDataMask(MeshModel::MM_VERTQUALITY);
 
-        tri::UpdateFlags<MeshType>::FaceProjection(args.target_model->cm);
+//        tri::UpdateFlags<MeshType>::FaceProjection(args.target_model->cm);
         // smoothes vertex normals
         cb(0, "Smoothing vertex normals..");
         tri::Smooth<MeshType>::VertexNormalLaplacian(*(args.target_mesh), args.smoothingSteps, false);

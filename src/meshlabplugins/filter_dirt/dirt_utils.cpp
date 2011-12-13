@@ -581,7 +581,6 @@ void prepareMesh(MeshModel* m){
     tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
     tri::UpdateTopology<CMeshO>::VertexFace(m->cm);
     tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
-    tri::UpdateFlags<CMeshO>::FaceProjection(m->cm);
 
     CMeshO::FaceIterator fi;
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){

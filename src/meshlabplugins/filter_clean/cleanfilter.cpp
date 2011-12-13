@@ -343,7 +343,6 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
   typedef tri::FaceTmark<CMeshO> MarkerFace;
   MarkerFace markerFunctor;
   vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
-  tri::UpdateFlags<CMeshO>::FaceProjection(m);
   tri::UpdateFlags<CMeshO>::FaceClearV(m);
   unifGridFace.Set(m.face.begin(),m.face.end());
 
