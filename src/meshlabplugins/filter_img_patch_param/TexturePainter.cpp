@@ -21,6 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <cmath>
 #include "TexturePainter.h"
 #include <common/pluginmanager.h>
 
@@ -63,7 +64,7 @@ bool TexturePainter::init( int texSize )
                                  .AttachAndLink( fpg, &logs ) )
 
     {
-        qWarning( (__FUNCTION__": "+logs).c_str() );
+        qWarning( (std::string(__func__)+": "+logs).c_str() );
         return false;
     }
 
@@ -141,8 +142,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
         for( PatchVec::const_iterator p=rp->begin(); p!=rp->end(); ++p )
         {
-            glLoadMatrixf( vcg::Transpose(vcg::Matrix44f(p->img2tex)).V() );
-
+            vcg::glLoadMatrix( p->img2tex);
             glBegin( GL_QUADS );
                 vcg::Point2f boxCorners[4];
                 boxCorners[0] = p->bbox.min;

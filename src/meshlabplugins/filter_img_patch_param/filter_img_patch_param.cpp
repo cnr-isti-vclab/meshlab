@@ -28,6 +28,7 @@
 #include "VisibleSet.h"
 #include "VisibilityCheck.h"
 #include "TexturePainter.h"
+#include <cmath>
 
 
 

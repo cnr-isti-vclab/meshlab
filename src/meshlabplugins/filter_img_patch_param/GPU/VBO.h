@@ -76,7 +76,7 @@ namespace GPU
                                                           D< InterlacedBuffers,
                                                           C< InterlacedBuffers,
                                                           B< InterlacedBuffers,
-                                                          A< InterlacedBuffers,DefaultVBO >>>>>>>>,
+                                                          A< InterlacedBuffers,DefaultVBO > > > > > > > >,
                                                    public InstantiatedObject
     {
     private:
@@ -87,7 +87,7 @@ namespace GPU
                 D< InterlacedBuffers,
                 C< InterlacedBuffers,
                 B< InterlacedBuffers,
-                A< InterlacedBuffers,DefaultVBO >>>>>>>>  Super;
+                A< InterlacedBuffers,DefaultVBO > > > > > > > >  Super;
 
         GLuint  m_DataVBOId;
 
@@ -165,7 +165,7 @@ namespace GPU
                                                         D< DistinctBuffers,
                                                         C< DistinctBuffers,
                                                         B< DistinctBuffers,
-                                                        A< DistinctBuffers,DefaultVBO >>>>>>>>,
+                                                        A< DistinctBuffers,DefaultVBO > > > > > > > >,
                                                  public InstantiatedObject
     {
     private:
@@ -176,7 +176,7 @@ namespace GPU
                 D< DistinctBuffers,
                 C< DistinctBuffers,
                 B< DistinctBuffers,
-                A< DistinctBuffers,DefaultVBO >>>>>>>>  Super;
+                A< DistinctBuffers,DefaultVBO > > > > > > > >  Super;
 
     protected:
         inline bool Allocate()                      { return Super::Alloc();   }
@@ -346,11 +346,11 @@ namespace GPU
         inline void Disable()   { Normal.Disable(); T::Disable(); }
     };
 
-    template <typename TStoreMode,typename T> class Normal3b : public NormalVBOComponent<typename TStoreMode,GL_BYTE  ,T> {};
-    template <typename TStoreMode,typename T> class Normal3s : public NormalVBOComponent<typename TStoreMode,GL_SHORT ,T> {};
-    template <typename TStoreMode,typename T> class Normal3i : public NormalVBOComponent<typename TStoreMode,GL_INT   ,T> {};
-    template <typename TStoreMode,typename T> class Normal3f : public NormalVBOComponent<typename TStoreMode,GL_FLOAT ,T> {};
-    template <typename TStoreMode,typename T> class Normal3d : public NormalVBOComponent<typename TStoreMode,GL_DOUBLE,T> {};
+    template <typename TStoreMode,typename T> class Normal3b : public NormalVBOComponent< TStoreMode,GL_BYTE  ,T> {};
+    template <typename TStoreMode,typename T> class Normal3s : public NormalVBOComponent< TStoreMode,GL_SHORT ,T> {};
+    template <typename TStoreMode,typename T> class Normal3i : public NormalVBOComponent< TStoreMode,GL_INT   ,T> {};
+    template <typename TStoreMode,typename T> class Normal3f : public NormalVBOComponent< TStoreMode,GL_FLOAT ,T> {};
+    template <typename TStoreMode,typename T> class Normal3d : public NormalVBOComponent< TStoreMode,GL_DOUBLE,T> {};
 
 
     template <typename TStoreMode,int TSize,int TGLType,typename T>
@@ -375,22 +375,22 @@ namespace GPU
         inline void Disable()   { Color.Disable(); T::Disable(); }
     };
 
-    template <typename TStoreMode,typename T> class Color3b  : public ColorVBOComponent<typename TStoreMode,3,GL_BYTE          ,T> {};
-    template <typename TStoreMode,typename T> class Color3ub : public ColorVBOComponent<typename TStoreMode,3,GL_UNSIGNED_BYTE ,T> {};
-    template <typename TStoreMode,typename T> class Color3s  : public ColorVBOComponent<typename TStoreMode,3,GL_SHORT         ,T> {};
-    template <typename TStoreMode,typename T> class Color3us : public ColorVBOComponent<typename TStoreMode,3,GL_UNSIGNED_SHORT,T> {};
-    template <typename TStoreMode,typename T> class Color3i  : public ColorVBOComponent<typename TStoreMode,3,GL_INT           ,T> {};
-    template <typename TStoreMode,typename T> class Color3ui : public ColorVBOComponent<typename TStoreMode,3,GL_UNSIGNED_INT  ,T> {};
-    template <typename TStoreMode,typename T> class Color3f  : public ColorVBOComponent<typename TStoreMode,3,GL_FLOAT         ,T> {};
-    template <typename TStoreMode,typename T> class Color3d  : public ColorVBOComponent<typename TStoreMode,3,GL_DOUBLE        ,T> {};
-    template <typename TStoreMode,typename T> class Color4b  : public ColorVBOComponent<typename TStoreMode,4,GL_BYTE          ,T> {};
-    template <typename TStoreMode,typename T> class Color4ub : public ColorVBOComponent<typename TStoreMode,4,GL_UNSIGNED_BYTE ,T> {};
-    template <typename TStoreMode,typename T> class Color4s  : public ColorVBOComponent<typename TStoreMode,4,GL_SHORT         ,T> {};
-    template <typename TStoreMode,typename T> class Color4us : public ColorVBOComponent<typename TStoreMode,4,GL_UNSIGNED_SHORT,T> {};
-    template <typename TStoreMode,typename T> class Color4i  : public ColorVBOComponent<typename TStoreMode,4,GL_INT           ,T> {};
-    template <typename TStoreMode,typename T> class Color4ui : public ColorVBOComponent<typename TStoreMode,4,GL_UNSIGNED_INT  ,T> {};
-    template <typename TStoreMode,typename T> class Color4f  : public ColorVBOComponent<typename TStoreMode,4,GL_FLOAT         ,T> {};
-    template <typename TStoreMode,typename T> class Color4d  : public ColorVBOComponent<typename TStoreMode,4,GL_DOUBLE        ,T> {};
+    template <typename TStoreMode,typename T> class Color3b  : public ColorVBOComponent<TStoreMode,3,GL_BYTE          ,T> {};
+    template <typename TStoreMode,typename T> class Color3ub : public ColorVBOComponent<TStoreMode,3,GL_UNSIGNED_BYTE ,T> {};
+    template <typename TStoreMode,typename T> class Color3s  : public ColorVBOComponent<TStoreMode,3,GL_SHORT         ,T> {};
+    template <typename TStoreMode,typename T> class Color3us : public ColorVBOComponent<TStoreMode,3,GL_UNSIGNED_SHORT,T> {};
+    template <typename TStoreMode,typename T> class Color3i  : public ColorVBOComponent<TStoreMode,3,GL_INT           ,T> {};
+    template <typename TStoreMode,typename T> class Color3ui : public ColorVBOComponent<TStoreMode,3,GL_UNSIGNED_INT  ,T> {};
+    template <typename TStoreMode,typename T> class Color3f  : public ColorVBOComponent<TStoreMode,3,GL_FLOAT         ,T> {};
+    template <typename TStoreMode,typename T> class Color3d  : public ColorVBOComponent<TStoreMode,3,GL_DOUBLE        ,T> {};
+    template <typename TStoreMode,typename T> class Color4b  : public ColorVBOComponent<TStoreMode,4,GL_BYTE          ,T> {};
+    template <typename TStoreMode,typename T> class Color4ub : public ColorVBOComponent<TStoreMode,4,GL_UNSIGNED_BYTE ,T> {};
+    template <typename TStoreMode,typename T> class Color4s  : public ColorVBOComponent<TStoreMode,4,GL_SHORT         ,T> {};
+    template <typename TStoreMode,typename T> class Color4us : public ColorVBOComponent<TStoreMode,4,GL_UNSIGNED_SHORT,T> {};
+    template <typename TStoreMode,typename T> class Color4i  : public ColorVBOComponent<TStoreMode,4,GL_INT           ,T> {};
+    template <typename TStoreMode,typename T> class Color4ui : public ColorVBOComponent<TStoreMode,4,GL_UNSIGNED_INT  ,T> {};
+    template <typename TStoreMode,typename T> class Color4f  : public ColorVBOComponent<TStoreMode,4,GL_FLOAT         ,T> {};
+    template <typename TStoreMode,typename T> class Color4d  : public ColorVBOComponent<TStoreMode,4,GL_DOUBLE        ,T> {};
 
 
     template <typename TStoreMode,int TSize,int TGLType,typename T>
@@ -415,22 +415,22 @@ namespace GPU
         inline void Disable()   { TexCoord.Disable(); T::Disable(); }
     };
 
-    template <typename TStoreMode,typename T> class TexCoord1s : public TexCoordVBOComponent<typename TStoreMode,1,GL_SHORT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord1i : public TexCoordVBOComponent<typename TStoreMode,1,GL_INT   ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord1f : public TexCoordVBOComponent<typename TStoreMode,1,GL_FLOAT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord1d : public TexCoordVBOComponent<typename TStoreMode,1,GL_DOUBLE,T> {};
-    template <typename TStoreMode,typename T> class TexCoord2s : public TexCoordVBOComponent<typename TStoreMode,2,GL_SHORT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord2i : public TexCoordVBOComponent<typename TStoreMode,2,GL_INT   ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord2f : public TexCoordVBOComponent<typename TStoreMode,2,GL_FLOAT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord2d : public TexCoordVBOComponent<typename TStoreMode,2,GL_DOUBLE,T> {};
-    template <typename TStoreMode,typename T> class TexCoord3s : public TexCoordVBOComponent<typename TStoreMode,3,GL_SHORT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord3i : public TexCoordVBOComponent<typename TStoreMode,3,GL_INT   ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord3f : public TexCoordVBOComponent<typename TStoreMode,3,GL_FLOAT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord3d : public TexCoordVBOComponent<typename TStoreMode,3,GL_DOUBLE,T> {};
-    template <typename TStoreMode,typename T> class TexCoord4s : public TexCoordVBOComponent<typename TStoreMode,4,GL_SHORT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord4i : public TexCoordVBOComponent<typename TStoreMode,4,GL_INT   ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord4f : public TexCoordVBOComponent<typename TStoreMode,4,GL_FLOAT ,T> {};
-    template <typename TStoreMode,typename T> class TexCoord4d : public TexCoordVBOComponent<typename TStoreMode,4,GL_DOUBLE,T> {};
+    template <typename TStoreMode,typename T> class TexCoord1s : public TexCoordVBOComponent<TStoreMode,1,GL_SHORT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord1i : public TexCoordVBOComponent<TStoreMode,1,GL_INT   ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord1f : public TexCoordVBOComponent<TStoreMode,1,GL_FLOAT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord1d : public TexCoordVBOComponent<TStoreMode,1,GL_DOUBLE,T> {};
+    template <typename TStoreMode,typename T> class TexCoord2s : public TexCoordVBOComponent<TStoreMode,2,GL_SHORT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord2i : public TexCoordVBOComponent<TStoreMode,2,GL_INT   ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord2f : public TexCoordVBOComponent<TStoreMode,2,GL_FLOAT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord2d : public TexCoordVBOComponent<TStoreMode,2,GL_DOUBLE,T> {};
+    template <typename TStoreMode,typename T> class TexCoord3s : public TexCoordVBOComponent<TStoreMode,3,GL_SHORT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord3i : public TexCoordVBOComponent<TStoreMode,3,GL_INT   ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord3f : public TexCoordVBOComponent<TStoreMode,3,GL_FLOAT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord3d : public TexCoordVBOComponent<TStoreMode,3,GL_DOUBLE,T> {};
+    template <typename TStoreMode,typename T> class TexCoord4s : public TexCoordVBOComponent<TStoreMode,4,GL_SHORT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord4i : public TexCoordVBOComponent<TStoreMode,4,GL_INT   ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord4f : public TexCoordVBOComponent<TStoreMode,4,GL_FLOAT ,T> {};
+    template <typename TStoreMode,typename T> class TexCoord4d : public TexCoordVBOComponent<TStoreMode,4,GL_DOUBLE,T> {};
 
 
     template <typename TRealType,int TGLType,typename T>

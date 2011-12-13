@@ -24,6 +24,7 @@
 #include "VisibleSet.h"
 #include "VisibilityCheck.h"
 #include <wrap/gl/shot.h>
+#include <cmath>
 
 
 
@@ -86,7 +87,7 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
     float weight = 1.0f;
 
     if( m_WeightMask & W_ORIENTATION )
-        weight *= vcg::Normalize(rm->shot.GetViewPoint()-centroid) * f.N();
+      weight *= (rm->shot.GetViewPoint()-centroid).Normalize() * f.N();
 
     if( (m_WeightMask & W_DISTANCE) && weight>0.0f )
         weight *= (m_DepthMax - (rm->shot.GetViewPoint()-centroid).Norm()) * m_DepthRangeInv;

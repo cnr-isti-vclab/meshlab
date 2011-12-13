@@ -20,7 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
+#include <cmath>
 #include "VisibilityCheck.h"
 #include <wrap/gl/shot.h>
 #include <common/pluginmanager.h>
@@ -265,7 +265,7 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
 
 
     // Extract the pose matrix from the current raster.
-    m_Pose = vcg::Transpose( m_Raster->shot.GetWorldToExtrinsicsMatrix() );
+    m_Pose = m_Raster->shot.GetWorldToExtrinsicsMatrix().transpose();
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
@@ -370,7 +370,7 @@ bool VisibilityCheck_ShadowMap::initShaders()
         !fpg.CompileSrcFile( basename+"visibility_detection.frag", &logs ) ||
         !m_VisDetectionShader.Attach( vpg ).AttachAndLink( fpg, &logs )     )
     {
-        qWarning( (__FUNCTION__": "+logs).c_str() );
+        qWarning( (  std::string(__func__)+ ": "+logs).c_str() );
         return false;
     }
 
