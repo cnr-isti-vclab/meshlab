@@ -119,8 +119,8 @@ class CFaceO    : public vcg::Face<  CUsedTypesO,
 
 class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> > {
 public :
-  int sfn; //The number of selected faces.
-  int svn; //The number of selected faces.
+  int sfn;    //The number of selected faces.
+  int svn;    //The number of selected vertices.
   vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 
   const vcg::Box3f &trBB()
