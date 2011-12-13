@@ -955,7 +955,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     else tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
     tri::SelectionStack<CMeshO> ss(m->cm);
     ss.push();
-    tri::UpdateSelection<CMeshO>::ClearVertex(m->cm);
+    tri::UpdateSelection<CMeshO>::VertexClear(m->cm);
     tri::Clean<CMeshO>::CountNonManifoldVertexFF(m->cm,true);
     Color4b bCol=Color4b(255,0,255,0);
     Color4b vCol=Color4b(255,0,255,64);

@@ -175,7 +175,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 
       GLPickTri<CMeshO>::PickVert(mid.x(), mid.y(), m.cm, NewSelVert, wid.x(), wid.y());
       glPopMatrix();
-      tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+      tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 
       switch(composingSelMode)
       {
@@ -202,7 +202,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 //    qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
 //    qDebug("Pickface: Got  %i on %i",int(NewSelFace.size()),int(m.cm.face.size()));
 		glPopMatrix();
-    tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+    tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
     switch(composingSelMode)
     { 
       case SMSub :  // Subtract mode : The faces in the rect must be de-selected
