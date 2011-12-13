@@ -77,11 +77,7 @@ public:
 
         // Convert point to barycentric coords
         vcg::Point3f interp;
-        int axis;
-        if (nearestF->Flags() & CMeshO::FaceType::NORMX ) axis = 0;
-        else if (nearestF->Flags() & CMeshO::FaceType::NORMY ) axis = 1;
-        else axis = 2;
-        bool ret = InterpolationParameters(*nearestF, axis, closestPt, interp);
+        bool ret = InterpolationParameters(*nearestF, nearestF->cN(), closestPt, interp);
         assert(ret);
         interp[2]=1.0-interp[1]-interp[0];
 

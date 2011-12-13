@@ -816,7 +816,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             // Rasterizing faces
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
             tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-            tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
             if (vertexSampling)
             {
                 TransferColorSampler sampler(srcMesh->cm, img, upperbound,vertexMode); // color sampling
@@ -888,7 +887,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
             tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-            tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
 
             // Colorizing vertices
             VertexSampler vs(srcMesh->cm, srcImg, upperbound);

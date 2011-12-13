@@ -1519,10 +1519,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	tri::UnMarkAll(b->cm);
 
 	tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);
-	tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);
 	tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
 	tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);
-	tri::UpdateFlags<CMeshO>::FaceProjection(b->cm);
 	tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
 	//fixed eps 
 	eps = 0.00001f;
@@ -1597,7 +1595,6 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 		tri::UpdateFlags<CMeshO>::FaceClear(a->cm);
 		tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   
-		tri::UpdateFlags<CMeshO>::FaceProjection(a->cm);  
 		tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
 
 		//create grid on mesh A
