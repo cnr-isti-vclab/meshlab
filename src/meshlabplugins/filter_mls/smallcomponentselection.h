@@ -99,7 +99,7 @@ public:
 			}
 			++faceSeed;
 		}
-		UpdateSelection<MeshType>::ClearFace(m);
+		UpdateSelection<MeshType>::FaceClear(m);
 
 		// now the segmentation is done, let's compute the absolute face count threshold
 		int total_selected = 0;
@@ -130,7 +130,7 @@ public:
 	{
 		typename MeshType::FaceIterator fi;
 		typename MeshType::VertexIterator vi;
-		UpdateSelection<MeshType>::ClearVertex(m);
+		UpdateSelection<MeshType>::VertexClear(m);
 		UpdateSelection<MeshType>::VertexFromFaceStrict(m);
 		
 		for(fi=m.face.begin();fi!=m.face.end();++fi)

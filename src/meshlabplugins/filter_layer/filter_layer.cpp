@@ -134,19 +134,19 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             MeshModel *destMesh= md.addNewMesh("","SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
 			// select all points involved
-			tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
+			tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
 
 			tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
 
-			numFacesSel = tri::UpdateSelection<CMeshO>::CountFace(currentMesh->cm);
-			numVertSel  = tri::UpdateSelection<CMeshO>::CountVertex(currentMesh->cm);
+			numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentMesh->cm);
+			numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentMesh->cm);
 
 			if(par.getBool("DeleteOriginal"))	// delete original faces
 			{
 				CMeshO::VertexIterator vi;
 				CMeshO::FaceIterator   fi;
-				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
 				tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);
 				for(fi=currentMesh->cm.face.begin();fi!=currentMesh->cm.face.end();++fi)
 					if(!(*fi).IsD() && (*fi).IsS() )
@@ -155,8 +155,8 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 					if(!(*vi).IsD() && (*vi).IsS() )
 						tri::Allocator<CMeshO>::DeleteVertex(currentMesh->cm,*vi);
 
-				tri::UpdateSelection<CMeshO>::ClearVertex(currentMesh->cm);
-				tri::UpdateSelection<CMeshO>::ClearFace(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
+				tri::UpdateSelection<CMeshO>::FaceClear(currentMesh->cm);
 
 				currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
 

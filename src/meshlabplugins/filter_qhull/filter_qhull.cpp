@@ -261,7 +261,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
 						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-						tri::UpdateSelection<CMeshO>::ClearFace(pm.cm);
+						tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
 					}
 
 					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
@@ -444,7 +444,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 				m.updateDataMask(MeshModel::MM_VERTFLAGSELECT);
 
 				//Clear old selection
-				tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+				tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 				
 				int dim= 3;				/* dimension of points */
 				int numpoints= m.cm.vn;	/* number of mesh vertices */
@@ -493,7 +493,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
 						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
 						//Clear all face because,somewhere, they have been selected
-						tri::UpdateSelection<CMeshO>::ClearFace(pm.cm);
+						tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
 					}
 					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
 					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
@@ -520,7 +520,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm2.cm);
 						pm2.clearDataMask(MeshModel::MM_FACEFACETOPO);
 						//Clear all face because,somewhere, they have been selected
-						tri::UpdateSelection<CMeshO>::ClearFace(pm2.cm);
+						tri::UpdateSelection<CMeshO>::FaceClear(pm2.cm);
 					}
 
 					vcg::tri::UpdateBounding<CMeshO>::Box(pm2.cm);

@@ -215,7 +215,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 	switch(ID(action))
   {
   case FP_SELECT_DELETE_VERT :
-      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+      tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
       tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
       for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
           if(!(*fi).IsD() && (*fi).IsS() ) tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
@@ -230,7 +230,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
       m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
     break;
   case FP_SELECT_DELETE_FACEVERT :
-		tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);  
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() )
@@ -275,16 +275,16 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   }
   break;
   case FP_SELECT_ALL    :
-      tri::UpdateSelection<CMeshO>::AllVertex(m.cm);
-      tri::UpdateSelection<CMeshO>::AllFace(m.cm);     break;
+      tri::UpdateSelection<CMeshO>::VertexAll(m.cm);
+      tri::UpdateSelection<CMeshO>::FaceAll(m.cm);     break;
   case FP_SELECT_NONE   :
-      tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
-      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);   break;
+      tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+      tri::UpdateSelection<CMeshO>::FaceClear(m.cm);   break;
   case FP_SELECT_INVERT :
 	  if (par.getBool("InvVerts"))
-		tri::UpdateSelection<CMeshO>::InvertVertex(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);
 	  if (par.getBool("InvFaces"))
-		tri::UpdateSelection<CMeshO>::InvertFace(m.cm);  break;
+		tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);  break;
   case FP_SELECT_VERT_FROM_FACE  :
     if(par.getBool("Inclusive"))
          tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
@@ -339,8 +339,8 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 			float valueGS = par.getDynamicFloat("PercentGS");
 			float valueBV = par.getDynamicFloat("PercentBV");
 
-            tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
-            tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+            tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
+            tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 
 			//now loop through all the faces
             for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
@@ -389,7 +389,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
       std::vector<CFaceO *> IntersFace;
       std::vector<CFaceO *>::iterator fpi;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
-      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+      tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
       for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
         (*fpi)->SetS();
     break;
