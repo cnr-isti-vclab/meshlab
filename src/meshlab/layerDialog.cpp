@@ -393,6 +393,13 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
   parent->addChild(faceItem);
   updateColumnNumber(faceItem);
 
+  if(meshModel->cm.en>0){
+    QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
+    edgeItem->setText(2, QString("Edges"));
+    edgeItem->setText(3, QString::number(meshModel->cm.en));
+    parent->addChild(edgeItem);
+    updateColumnNumber(edgeItem);
+  }
   QTreeWidgetItem *vertItem = new QTreeWidgetItem();
   vertItem->setText(2, QString("Vertices"));
   vertItem->setText(3, QString::number(meshModel->cm.vn));
