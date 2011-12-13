@@ -123,7 +123,7 @@ class HausdorffSampler
 	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
 public:
   
-	HausdorffSampler(CMeshO* _m=0,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
+  HausdorffSampler(CMeshO* _m=0,CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 ) :markerFunctor(_m)
 	{
 		init(_m,_sampleMesh,_closestMesh);
 	};
@@ -165,7 +165,6 @@ public:
 		if(m) 
 		{
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
-			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
       if(m->fn==0) useVertexSampling = true;
               else useVertexSampling = false;
 
@@ -251,7 +250,7 @@ class RedetailSampler
 
 public:
 
-	RedetailSampler()
+	RedetailSampler():markerFunctor(0)
 	{
 		m=0;		
 	};
@@ -286,7 +285,6 @@ public:
 		if(m) 
 		{
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
-			tri::UpdateFlags<CMeshO>::FaceProjection(*m);
 			if(m->fn==0) useVertexSampling = true;
 							else useVertexSampling = false;
 							
@@ -898,7 +896,6 @@ case FP_CLUSTERED_SAMPLING :
             mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
 			mm1->updateDataMask(MeshModel::MM_FACEMARK);
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm1->cm);
-			tri::UpdateFlags<CMeshO>::FaceProjection(mm1->cm);
 
 			MeshModel *samplePtMesh =0; 
 			MeshModel *closestPtMesh =0; 
@@ -950,7 +947,6 @@ case FP_CLUSTERED_SAMPLING :
 			float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 			srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
-			tri::UpdateFlags<CMeshO>::FaceProjection(srcMesh->cm);
 
 		  RedetailSampler rs;
 			rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
@@ -1131,7 +1127,6 @@ case FP_CLUSTERED_SAMPLING :
 			tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
 
 			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mmM->cm);
-			tri::UpdateFlags<CMeshO>::FaceProjection(mmM->cm);
 			std::vector<Point3f> pvec;
 	
 			tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);

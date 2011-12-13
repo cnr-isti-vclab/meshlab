@@ -72,8 +72,7 @@ bool SdfPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallB
   tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
   tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m);
   tri::UpdateNormals<CMeshO>::NormalizeVertex(m);
-  tri::UpdateFlags<CMeshO>::FaceProjection(m);
-    
+
   //--- Enable & Reset the necessary attributes
   switch(onPrimitive){
     case ON_VERTICES:   
