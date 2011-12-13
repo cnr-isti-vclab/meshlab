@@ -101,29 +101,29 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParam
 // Move Vertex of a random quantity
 bool ExtraSamplePlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    MeshModel &m=*md.mm();
+	CMeshO &m = md.mm()->cm;
 	srand(time(NULL)); 
 	const float max_displacement =par.getAbsPerc("Displacement");
 
- 	for(unsigned int i = 0; i< m.cm.vert.size(); i++){
+	for(unsigned int i = 0; i< m.vert.size(); i++){
 		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
 		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-		  cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
+		  cb(100*i/m.vert.size(), "Randomly Displacing...");
 
 		float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 		float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 		float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);		
+		m.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);
 	}
 	
 	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log("Successfully displaced %i vertices",m.cm.vn);
+	Log("Successfully displaced %i vertices",m.vn);
 	
 	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 	if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
 	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);
+	vcg::tri::UpdateBounding<CMeshO>::Box(m);
   
 	return true;
 }
