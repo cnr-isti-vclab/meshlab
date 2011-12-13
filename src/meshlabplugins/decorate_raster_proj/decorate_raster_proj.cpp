@@ -40,7 +40,7 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow()
         glPushAttrib( GL_TRANSFORM_BIT );
         glMatrixMode( GL_MODELVIEW );
         glPushMatrix();
-        glMultMatrixf( vcg::Transpose( vcg::Matrix44f(m_Mesh->cm.Tr) ).V() );
+        glMultMatrix(m_Mesh->cm.Tr);
 
         m_VBO.Normal.Disable();
         m_VBO.Bind();
@@ -66,7 +66,7 @@ void DecorateRasterProjPlugin::MeshDrawer::draw()
         glPushAttrib( GL_TRANSFORM_BIT );
         glMatrixMode( GL_MODELVIEW );
         glPushMatrix();
-        glMultMatrixf( vcg::Transpose( vcg::Matrix44f(m_Mesh->cm.Tr) ).V() );
+        glMultMatrix(m_Mesh->cm.Tr);
 
         m_VBO.Bind();
         m_VBO.DrawElements( GL_TRIANGLES, 0, 3*m_Mesh->cm.fn );
@@ -295,7 +295,7 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 
 
     // Extract the pose matrix from the current raster.
-    m_RasterPose = vcg::Transpose( m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix() );
+    m_RasterPose =  m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix().transpose() ;
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
@@ -598,7 +598,7 @@ void DecorateRasterProjPlugin::decorate( QAction           *act,
                 m_ShadowMapShader.SetSampler( "u_DepthMap" , 1 );
                 m_ShadowMapShader.SetUniform( "u_ProjMat"  , m_ShadowProj.V() );
                 m_ShadowMapShader.SetUniform( "u_Viewpoint", m_CurrentRaster->shot.GetViewPoint().V() );
-                vcg::Matrix44f lightToObj = vcg::Transpose( gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() );
+                vcg::Matrix44f lightToObj = ( gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
                 m_ShadowMapShader.SetUniform( "u_LightToObj", lightToObj.V() );
                 GLint islightActivated = rm.lighting && par->getBool("MeshLab::Decoration::ProjRasterLighting");
                 m_ShadowMapShader.SetUniform( "u_IsLightActivated", &islightActivated );
@@ -609,7 +609,7 @@ void DecorateRasterProjPlugin::decorate( QAction           *act,
                 {
                     if( rm.drawMode == vcg::GLW::DMPoints )
                         setPointParameters( m.value(), par );
-                    m_ShadowMapShader.SetUniform( "u_ModelXf", vcg::Transpose( vcg::Matrix44f(m->mm()->cm.Tr) ).V() );
+                    m_ShadowMapShader.SetUniform( "u_ModelXf", vcg::Matrix44f(m->mm()->cm.Tr).transpose().V() );
                     m->draw();
                 }
 

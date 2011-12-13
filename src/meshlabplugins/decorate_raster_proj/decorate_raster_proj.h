@@ -28,7 +28,7 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include "GPU/GPU.h"
+#include "../filter_img_patch_param/GPU/GPU.h"
 
 
 
