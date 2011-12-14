@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Math
  */
@@ -7,6 +8,7 @@
  *
  * @namespace The SpiderGL.Math namespace.
  */
+SpiderGL = {};
 SpiderGL.Math = { };
 
 // constants
