@@ -397,7 +397,7 @@ void MLScriptLanguage::addBranch( const LibraryElementInfo& mi,SyntaxTreeNode* p
 			//is a member
 			dt[0] = st;
 			dt[1] = mi.help;
-			dt[4] = QString::number(MLScriptLanguage::CONSTANT);
+			dt[4] = QString::number(MLScriptLanguage::MEMBERFIELD);
 		}
 		else 
 		{
@@ -621,6 +621,7 @@ QList<LibraryElementInfo> SGLMathLib::libraryMembersInfo() const
 			if (helpind >= 0)
 			{
 				mi.help = help.cap();
+				mi.help.remove(QRegExp("\\*\\s+\\n"));
 				fun.remove(help.cap());
 			}
 			fun.remove(QRegExp("\\s*")).remove("=").remove("function");

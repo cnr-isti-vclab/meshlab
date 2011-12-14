@@ -91,7 +91,7 @@ public:
 class MLScriptLanguage
 {
 public:
-	enum LANG_TOKEN {NAMESPACE,FUNCTION,CONSTANT};
+	enum LANG_TOKEN {RESERVED,NAMESPACE,FUNCTION,MEMBERFIELD};
 
 	MLScriptLanguage();
 	~MLScriptLanguage();
