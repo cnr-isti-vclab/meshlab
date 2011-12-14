@@ -93,7 +93,6 @@ class IsoTransfer
 		vcg::tri::UpdateNormals<ParamMesh>::PerVertexAngleWeighted(*IsoParam.ParaMesh());
 		vcg::tri::UpdateNormals<ParamMesh>::NormalizeVertex(*IsoParam.ParaMesh());
 		vcg::tri::UpdateEdges<ParamMesh>::Set(*IsoParam.ParaMesh());
-		vcg::tri::UpdateFlags<ParamMesh>::FaceProjection(*IsoParam.ParaMesh());
 		
 		TRGrid.Set(IsoParam.ParaMesh()->face.begin(),IsoParam.ParaMesh()->face.end());
 		ScalarType maxDist=IsoParam.ParaMesh()->bbox.Diag();

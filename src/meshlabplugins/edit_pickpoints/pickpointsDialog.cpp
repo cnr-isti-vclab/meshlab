@@ -738,7 +738,6 @@ PickedPoints * PickPointsDialog::getPickedPoints()
 }
 
 void PickPointsDialog::loadPoints(QString filename){
-	vcg::tri::UpdateFlags<CMeshO>::FaceProjection(meshModel->cm);
 	//clear the points tree and template in case it was loaded
 	clearTemplate();
 		
