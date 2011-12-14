@@ -552,11 +552,12 @@ QString MLScriptEditor::wordUnderTextCursor() const
 	tc.select(QTextCursor::LineUnderCursor);
 	QString line = tc.selectedText();
 	line = line.left(endpos);
-	QRegExp id = synt->matchIdentifier();
+	QRegExp id = synt->joinedWordExpression();
 	int index = 0; 
 	while ((index >= 0) && (index < line.size()))
 	{
 		int tmp = line.indexOf(id,index);
+		QString cap = id.cap();
 		index = tmp + id.matchedLength();
 	}
 
@@ -565,6 +566,12 @@ QString MLScriptEditor::wordUnderTextCursor() const
 	tc.select(QTextCursor::WordUnderCursor);
 	return tc.selectedText();
 }
+
+//void MLScriptEditor::setToolTip( const QString& st )
+//{
+//}
+
+
 
 MLNumberArea::MLNumberArea( MLScriptEditor* editor ) : QWidget(editor)
 {
@@ -686,6 +693,8 @@ bool MLSyntaxHighlighter::colorTextIfInsideTree(const QString& text,SyntaxTreeNo
 			setCurrentBlockState(0);
 			return false;
 		}
+		/*if (node->childCount() == 0)
+			emit functionRecognized(node->data(3).toString());*/
 		setFormat(start + index, exp.matchedLength(), form);
 		if (text.size() == exp.matchedLength())
 			return true;
@@ -701,6 +710,11 @@ bool MLSyntaxHighlighter::colorTextIfInsideTree(const QString& text,SyntaxTreeNo
 	}
 	return false;
 }
+
+//void MLSyntaxHighlighter::functionRecognized( const QString& sign )
+//{
+//
+//}
 
 MLAutoCompleter::MLAutoCompleter( const MLScriptLanguage& synt,QWidget* parent )
 :QCompleter(parent),syntax(synt)

@@ -129,6 +129,7 @@ private:
 
 class MLSyntaxHighlighter : public  QSyntaxHighlighter
 {
+	Q_OBJECT
 public:
 	MLSyntaxHighlighter(const MLScriptLanguage& synt, QWidget* parent);
 
@@ -146,6 +147,8 @@ private:
 	bool colorTextIfInsideTree(const QString& text,SyntaxTreeNode* node,int start);
 	const MLScriptLanguage& syntax;
 	QList<HighlightingRule> highlightingRules;
+//signals:
+//	void functionRecognized(const QString& sign);
 
 };
 
@@ -197,6 +200,7 @@ private slots:
 	void updateLineNumberArea(const QRect& r, int dy);
 	void showAutoComplete(QKeyEvent * e);
 	void insertSuggestedWord(const QString& st);
+	//void setToolTip(const QString& st);
 private:
 	QString currentLine() const;
 	QString lastInsertedWord() const;
