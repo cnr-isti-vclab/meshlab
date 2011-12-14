@@ -496,10 +496,14 @@ QRegExp MLScriptLanguage::matchOnlyReservedWords() const
 	return QRegExp("\\b(" + res + ")\\b"); 
 }
 
-QRegExp MLScriptLanguage::matchIdentifier() const
+QRegExp MLScriptLanguage::joinedWordExpression() const
 {
-	QRegExp name("([a-z]|[A-Z])+\\w*");
-	return QRegExp(name.pattern() + "(\\s*" + wordsjoiner.pattern() +"\\s*\\w*)*");
+	//*\\*/(\\(\\w*\\))?
+	QRegExp parameter("(\\w*|\\d*(\\.\\d+)*)");
+	QRegExp parameterlist(parameter.pattern() + "(\\s*,\\s*" + parameter.pattern() + ")*");
+	QRegExp name("([a-z]|[A-Z])+\\w*(\\(" + parameterlist.pattern() + "\\))?");
+	QString st(name.pattern() + "(\\s*" + wordsjoiner.pattern() +"\\s*|\\s*" + wordsjoiner.pattern() +"\\s*"  + name.pattern() + ")*");
+	return QRegExp(st);
 	
 }
 

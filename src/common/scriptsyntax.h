@@ -112,7 +112,7 @@ public:
 	//For instance in C++ a qualifier is . or ->
 	QRegExp qualifier;
 
-	QRegExp matchIdentifier() const;
+	QRegExp joinedWordExpression() const;
 	QRegExp matchIdentifiersButNotReservedWords() const;
 	QRegExp matchOnlyReservedWords() const;
 	
