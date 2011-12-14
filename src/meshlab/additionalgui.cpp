@@ -499,9 +499,12 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 void MLScriptEditor::showAutoComplete( QKeyEvent * e )
 {	
 	QString w = wordUnderTextCursor();
+	QTextCursor tc = textCursor();
 	comp->setCompletionPrefix(w);
 	comp->popup()->setModel(comp->completionModel());
 	QRect rect = cursorRect();
+	int row = comp->popup()->model()->rowCount();
+	QFontMetrics met(comp->popup()->font());
 	rect.setWidth(comp->popup()->sizeHintForColumn(0) + comp->popup()->verticalScrollBar()->sizeHint().width());
 	comp->complete(rect);
 }
@@ -581,7 +584,7 @@ void MLNumberArea::paintEvent(QPaintEvent* e)
 MLSyntaxHighlighter::MLSyntaxHighlighter(const MLScriptLanguage& synt, QWidget* parent)
 :QSyntaxHighlighter(parent),highlightingRules(),syntax(synt)
 {
-	HighlightingRule pvar;
+	/*HighlightingRule pvar;
 	pvar.format.setForeground(Qt::red);
 	HighlightingRule res;
 	res.format.setForeground(Qt::darkBlue);
@@ -590,7 +593,23 @@ MLSyntaxHighlighter::MLSyntaxHighlighter(const MLScriptLanguage& synt, QWidget* 
 	{
 		res.pattern = QRegExp(addIDBoundary(word));
 		highlightingRules << res;
-	}
+	}*/
+	QTextCharFormat f;
+	QTextCharFormat res;
+	res.setForeground(Qt::darkBlue);
+	res.setFontWeight(QFont::Bold);
+	tokenformat[MLScriptLanguage::RESERVED] = res;
+	QTextCharFormat nmspace;
+	nmspace.setForeground(Qt::red);
+	res.setFontWeight(QFont::Bold);
+	tokenformat[MLScriptLanguage::NAMESPACE] = nmspace;
+	QTextCharFormat fun;
+	fun.setForeground(Qt::darkCyan);
+	//fun.setFontItalic(true);
+	tokenformat[MLScriptLanguage::FUNCTION] = fun;
+	QTextCharFormat memfield;
+	memfield.setForeground(Qt::darkGreen);
+	tokenformat[MLScriptLanguage::MEMBERFIELD] = memfield;
 }
 
 void MLSyntaxHighlighter::highlightBlock( const QString& text )
@@ -607,16 +626,13 @@ void MLSyntaxHighlighter::highlightBlock( const QString& text )
 			index = expression.indexIn(text, index + length);
 		}
 	}*/
-	HighlightingRule rule;
-	rule.format.setForeground(Qt::darkBlue);
-	rule.format.setFontWeight(QFont::Bold);
 	QRegExp keyword = syntax.matchOnlyReservedWords();
 	int index = keyword.indexIn(text);
 	while(index >=0)
 	{
 		
 		int length = keyword.matchedLength();
-		setFormat(index, length, rule.format);
+		setFormat(index, length, tokenformat[MLScriptLanguage::RESERVED]);
 		index = keyword.indexIn(text, index + length);
 	}
 	QRegExp nokeyword = syntax.matchIdentifiersButNotReservedWords();
@@ -644,12 +660,11 @@ QString MLSyntaxHighlighter::addIDBoundary( const QString& st )
 
 bool MLSyntaxHighlighter::colorTextIfInsideTree(const QString& text,SyntaxTreeNode* node,int start)
 {
-	QTextCharFormat form;
-	form.setForeground(Qt::red);
-	QRegExp exp;
-	//int nextmatchstart = start;
 	if (node != NULL)
 	{
+		QRegExp exp;
+		QTextCharFormat form;
+		form = tokenformat[MLScriptLanguage::LANG_TOKEN(node->data(4).toInt())]; 
 		//it's the root. The root is not meaningful
 		if (node->parent() == NULL)
 		{
@@ -668,7 +683,7 @@ bool MLSyntaxHighlighter::colorTextIfInsideTree(const QString& text,SyntaxTreeNo
 		int index = exp.indexIn(text);
 		if (index < 0)
 		{
-			//setCurrentBlockState(0);
+			setCurrentBlockState(0);
 			return false;
 		}
 		setFormat(start + index, exp.matchedLength(), form);
@@ -746,10 +761,14 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 	{
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 		QModelIndex indexid = indexAt(helpEvent->pos());
-		QModelIndex indexsign = indexid.sibling(indexid.row(),1);
-	
+		QModelIndex indexhelp = indexid.sibling(indexid.row(),1);
+		QModelIndex indexsign = indexid.sibling(indexid.row(),3);
+		QString tooltiptext = indexsign.data().toString();
+		QString help = indexhelp.data().toString();
+		if (!help.isEmpty())
+			tooltiptext = tooltiptext + "\n" + help;
 		if (indexsign.isValid()) 
-			QToolTip::showText(helpEvent->globalPos(), indexsign.data().toString());
+			QToolTip::showText(helpEvent->globalPos(), tooltiptext);
 		else 
 		{
 			QToolTip::hideText();

@@ -142,7 +142,7 @@ private:
 		QRegExp pattern;
 		QTextCharFormat format;
 	};
-
+	QMap<MLScriptLanguage::LANG_TOKEN,QTextCharFormat> tokenformat;
 	bool colorTextIfInsideTree(const QString& text,SyntaxTreeNode* node,int start);
 	const MLScriptLanguage& syntax;
 	QList<HighlightingRule> highlightingRules;
@@ -171,6 +171,7 @@ public slots:
 protected:
 	QStringList splitPath(const QString &path) const;
 	QString pathFromIndex(const QModelIndex &index) const;
+
 private:
 	const MLScriptLanguage& syntax;
 };
