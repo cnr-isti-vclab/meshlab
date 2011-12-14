@@ -28,7 +28,7 @@
 
 #include <common/interfaces.h>
 
-class FilterMeasurePlugin : public QObject, public MeshLabFilterInterface
+class FilterMeasurePlugin : public MeshLabFilterInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshLabFilterInterface)

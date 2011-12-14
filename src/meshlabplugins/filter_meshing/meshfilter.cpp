@@ -769,7 +769,7 @@ case FP_ROTATE_FIT:
 
       if(m.cm.svn==0 || m.cm.sfn!=0 )
       {
-        tri::UpdateSelection<CMeshO>::ClearVertex(m.cm);
+        tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
         tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
       }
 
@@ -1244,7 +1244,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
     m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
     if(NewFaceSelectedFlag)
     {
-      tri::UpdateSelection<CMeshO>::ClearFace(m.cm);
+      tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
       for(size_t i=OriginalSize;i<m.cm.face.size();++i)
         if(!m.cm.face[i].IsD()) m.cm.face[i].SetS();
     }

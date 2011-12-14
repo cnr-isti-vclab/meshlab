@@ -78,8 +78,8 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 
 			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
 			int faceEdgeManif = tri::UpdateSelection<CMeshO>::CountFace(m);
-			tri::UpdateSelection<CMeshO>::ClearVertex(m);
-			tri::UpdateSelection<CMeshO>::ClearFace(m);
+			tri::UpdateSelection<CMeshO>::VertexClear(m);
+			tri::UpdateSelection<CMeshO>::FaceClear(m);
 			tag->edgeManifNum = edgeManifNum;
 			tag->faceEdgeManif = faceEdgeManif;
 
