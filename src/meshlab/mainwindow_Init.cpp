@@ -337,9 +337,9 @@ void MainWindow::createActions()
 	viewFrontAct->setShortcut(Qt::Key_End);
 	viewBackAct->setShortcut(Qt::CTRL + Qt::Key_End);
 	viewRightAct->setShortcut(Qt::Key_PageDown);
-	viewLeftAct->setShortcut(Qt::SHIFT + Qt::Key_PageDown);
+	viewLeftAct->setShortcut(Qt::CTRL + Qt::Key_PageDown);
 	viewTopAct->setShortcut(Qt::Key_Home);
-	viewBottomAct->setShortcut(Qt::SHIFT + Qt::Key_Home);
+	viewBottomAct->setShortcut(Qt::CTRL + Qt::Key_Home);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 
