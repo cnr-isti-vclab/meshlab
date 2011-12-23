@@ -317,7 +317,7 @@ void FilterOutputOpticalFlowPlugin::saveXMLProject( const QString &filename,
                 << std::endl;
 
         vcg::Matrix44f rot = shot.Extrinsics.Rot();
-        vcg::Point3f tra = shot.Extrinsics.Tra();
+        vcg::Point3f tra = -shot.Extrinsics.Tra();
 
         xmlFile << "  <CamParam SimRot=\"";
         for( int i=0; i<4; ++i )

@@ -54,7 +54,7 @@ public:
     inline OOCRaster( RasterModel *r ) :
         nbBind(0),
         isOOC(false),
-        imgFilename(QString()),
+		imgFilename(r->currentPlane->shortName()),
         plane(r->currentPlane),
         shot(r->shot),
         id(r->id())
