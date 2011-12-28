@@ -1,4 +1,6 @@
 include (../general.pri)
+include (../../../vcglib/wrap/Exif/exif.pri)
+
 GLEWCODE = $$GLEWDIR/src/glew.c
 
 win32-msvc2005:DESTDIR = ../distrib
