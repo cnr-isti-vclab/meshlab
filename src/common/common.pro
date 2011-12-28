@@ -104,7 +104,8 @@ SOURCES += filterparameter.cpp \
 	mlapplication.cpp \
 	scriptsyntax.cpp \
     $$GLEWCODE \
-    meshlabdocumentxml.cpp
+    meshlabdocumentxml.cpp \
+    meshlabdocumentbundler.cpp
 
 #	win32-msvc2005: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2008: RCC_DIR = $(ConfigurationName)
