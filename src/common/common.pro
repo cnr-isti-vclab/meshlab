@@ -1,4 +1,5 @@
 include (../general.pri)
+EXIF_DIR = ../../../vcglib/wrap/Exif
 include (../../../vcglib/wrap/Exif/exif.pri)
 
 GLEWCODE = $$GLEWDIR/src/glew.c
