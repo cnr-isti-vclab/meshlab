@@ -40,7 +40,7 @@ FilterColorProc::FilterColorProc()
 //           << CP_BRIGHTNESS
 //           << CP_CONTRAST
            << CP_CONTR_BRIGHT
-           << CP_GAMMA
+//           << CP_GAMMA
            << CP_LEVELS
            << CP_COLOURISATION
            << CP_DESATURATION
@@ -70,10 +70,10 @@ FilterColorProc::~FilterColorProc()
     case CP_THRESHOLDING : return "Vertex Color Thresholding";
     case CP_BRIGHTNESS : return "Vertex Color Brightness";
     case CP_CONTRAST : return "Vertex Color Contrast";
-    case CP_CONTR_BRIGHT : return "Vertex Color Brightness and Contrast";
+    case CP_CONTR_BRIGHT : return "Vertex Color Brightness Contrast Gamma";
     case CP_GAMMA : return "Vertex Color Gamma Correction";
     case CP_INVERT : return "Vertex Color Invert";
-    case CP_LEVELS : return "Vertex Color Levels Adjoustement";
+    case CP_LEVELS : return "Vertex Color Levels Adjustement";
     case CP_COLOURISATION : return "Vertex Color Colourisation";
     case CP_DESATURATION : return "Vertex Color Desaturation";
     case CP_EQUALIZE : return "Equalize Vertex Color ";
@@ -92,9 +92,9 @@ FilterColorProc::~FilterColorProc()
   {
     case CP_FILLING : return "Fills the color of the vertexes of the mesh  with a color choosed by the user.";
     case CP_THRESHOLDING : return "Reduces the color the vertexes of the mesh to two colors according to a threshold.";
-    case CP_BRIGHTNESS : return "Change the color the vertexes of the mesh adjusting the overall brightness of the mesh.";
-    case CP_CONTRAST : return "Change the color the vertexes of the mesh adjusting the contrast of the mesh.";
-    case CP_CONTR_BRIGHT : return "Change the color the vertexes of the mesh adjusting both brightness and contrast of the mesh.";
+    case CP_BRIGHTNESS : return "Change the color the vertexes of the mesh adjusting the overall brightness.";
+    case CP_CONTRAST : return "Change the color the vertexes of the mesh adjusting the contrast.";
+    case CP_CONTR_BRIGHT : return "Change the color the vertexes of the mesh adjusting brightness, contrast and gamma.";
     case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertexes of the mesh.";
     case CP_INVERT : return "Inverts the colors of the vertexes of the mesh.";
     case CP_LEVELS : return "The filter allows adjustment of color levels. It is a custom way to map an interval of color into another one. The user can set the input minimum and maximum levels, gamma and the output minimum and maximum levels (many tools call them respectively input black point, white point, gray point, output black point and white point).";
@@ -157,8 +157,10 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     {
       float brightness = 0.0f;
       float contrast = 0.0f;
+      float gamma = 1.0f;
       par.addParam(new RichDynamicFloat("brightness", brightness, -255.0f, 255.0f, "Brightness:", "Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
       par.addParam(new RichDynamicFloat("contrast", contrast, -255.0f, 255.0f, "Contrast factor:", "Sets the amount of contrast of the mesh."));
+      par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f, "Gamma:", "Sets the values of the exponent gamma."));
       break;
     }
     case CP_GAMMA :
@@ -170,8 +172,8 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     case CP_LEVELS:
     {
 			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-			par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", ""));
 			par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,  "Gamma:", ""));
+			par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", ""));
 			par.addParam(new RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,  "Max input level:", ""));
 			par.addParam(new RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
 			par.addParam(new RichDynamicFloat("out_max", out_max, 0.0f, 255.0f,"Max output level:", ""));
@@ -281,12 +283,14 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     }
     case CP_CONTR_BRIGHT:
     {
-      float brightness =par.getDynamicFloat("brightness");
+      float brightness = par.getDynamicFloat("brightness");
       float contrast = par.getDynamicFloat("contrast");
+      float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
 
       bool selected = false;
       if(m->cm.sfn!=0) selected = true;
 
+      vcg::tri::UpdateColor<CMeshO>::Gamma(m->cm, gamma, selected);
       vcg::tri::UpdateColor<CMeshO>::BrightnessContrast(m->cm, brightness/256.0f,contrast/256.0f , selected);
       return true;
     }
