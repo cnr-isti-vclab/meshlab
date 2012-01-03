@@ -149,8 +149,8 @@ const QString PerFaceAttributeString("It's possibile to use per-face variables l
   {
     case FF_FACE_SELECTION : 
 		case FF_VERT_SELECTION	: return MeshFilterInterface::Selection;
-		case FF_FACE_QUALITY		: return FilterClass(MeshFilterInterface::FaceColoring + MeshFilterInterface::Quality);
-		case FF_VERT_QUALITY		: return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
+		case FF_FACE_QUALITY		: return MeshFilterInterface::Quality;
+		case FF_VERT_QUALITY		: return MeshFilterInterface::Quality;
 		case FF_VERT_COLOR			:	return MeshFilterInterface::VertexColoring;
     case FF_VERT_NORMAL			:	return MeshFilterInterface::Normal;
 		case FF_FACE_COLOR			: return MeshFilterInterface::FaceColoring;
