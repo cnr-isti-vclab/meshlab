@@ -1402,8 +1402,12 @@ void MainWindow::saveProject()
 #endif
 	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
   saveAllFile->setCheckState(Qt::Unchecked);
-	QGridLayout* layout = (QGridLayout*) saveDiag->layout();
+	QCheckBox* onlyVisibleLayers = new QCheckBox(QString("Only Visible Layers"),saveDiag);
+  onlyVisibleLayers->setCheckState(Qt::Unchecked);
+  QGridLayout* layout = (QGridLayout*) saveDiag->layout();
 	layout->addWidget(saveAllFile,4,2);
+	layout->addWidget(onlyVisibleLayers,4,1);
+
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
 	saveDiag->exec();
 	QStringList files = saveDiag->selectedFiles();
@@ -1447,21 +1451,27 @@ void MainWindow::saveProject()
     vector<Matrix44f> transfVector;
 
     foreach(MeshModel * mp, meshDoc()->meshList)
-	{	
-      meshNameVector.push_back(qPrintable(mp->relativePathName()));
-      transfVector.push_back(mp->cm.Tr);
+    {	
+      if((!onlyVisibleLayers->isChecked()) || (mp->visible))
+      {
+        meshNameVector.push_back(qPrintable(mp->relativePathName()));
+        transfVector.push_back(mp->cm.Tr);
+      }
     }
     ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
   }
   else
-	ret = MeshDocumentToXMLFile(*meshDoc(),fileName);
+	ret = MeshDocumentToXMLFile(*meshDoc(),fileName,onlyVisibleLayers->isChecked());
  
   if (saveAllFile->isChecked())
   {
 	  for(int ii = 0; ii < meshDoc()->meshList.size();++ii)
 	  {
 		  MeshModel* mp = meshDoc()->meshList[ii];
-		  ret |= exportMesh(mp->fullName(),mp,true);
+      if((!onlyVisibleLayers->isChecked()) || (mp->visible))
+      {
+    	  ret |= exportMesh(mp->fullName(),mp,true);
+      }
 	  }
   }
 	if(!ret)

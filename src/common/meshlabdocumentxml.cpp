@@ -7,13 +7,13 @@
 #include "meshlabdocumentxml.h"
 #include <wrap/qt/shot_qt.h>
 
-bool MeshDocumentToXMLFile(MeshDocument &md, QString filename)
+bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers)
 {
   md.setFileName(filename);
   QFileInfo fi(filename);
 	QDir tmpDir = QDir::current();
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
-	QDomDocument doc = MeshDocumentToXML(md);
+	QDomDocument doc = MeshDocumentToXML(md, onlyVisibleLayers);
   QFile file(filename);
   file.open(QIODevice::WriteOnly);
   QTextStream qstream(&file);
@@ -148,7 +148,7 @@ QDomElement PlaneToXML(Plane* pl,QDomDocument& doc)
 	return planeElem;
 }
 
-QDomDocument MeshDocumentToXML(MeshDocument &md)
+QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers)
 {
   QDomDocument ddoc("MeshLabDocument");
 
@@ -158,8 +158,11 @@ QDomDocument MeshDocumentToXML(MeshDocument &md)
 
   foreach(MeshModel *mmp, md.meshList)
   {
-    QDomElement meshElem = MeshModelToXML(mmp, ddoc);
-    mgroot.appendChild(meshElem);
+    if((!onlyVisibleLayers) || (mmp->visible))
+    {
+      QDomElement meshElem = MeshModelToXML(mmp, ddoc);
+      mgroot.appendChild(meshElem);
+    }
   }
   root.appendChild(mgroot);
 
