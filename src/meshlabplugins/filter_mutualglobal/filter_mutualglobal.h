@@ -49,7 +49,7 @@ class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_IMAGE_GLOBALIGN  } ;
+	enum { FP_IMAGE_GLOBALIGN, FP_GRAPH_ANALYSIS  } ;
 
 	FilterMutualInfoPlugin();
 
@@ -63,8 +63,8 @@ public:
     FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
 	bool preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-	std::vector<SubGraph> buildGraph(MeshDocument &md);
-	std::vector<AlignPair> CalcPairs(MeshDocument &md);
+	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
+	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);
 	std::vector<SubGraph> CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs);
 	bool AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs);
 	int getTheRightNode(SubGraph graph);

@@ -46,6 +46,7 @@ AlignSet align;
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
 { 
 	typeList << FP_IMAGE_GLOBALIGN;
+	typeList << FP_GRAPH_ANALYSIS;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -57,6 +58,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information"); 
+		case FP_GRAPH_ANALYSIS :  return QString("Graph analysis: selection of outlier, best subset"); 
 		default : assert(0); 
 	}
   return QString();
@@ -68,6 +70,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_IMAGE_GLOBALIGN :  return QString("Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009"); 
+		case FP_GRAPH_ANALYSIS :  return QString("Graph analysis: selection of outlier, best subset"); 
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -81,6 +84,7 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
   switch(ID(a))
 	{
 		case FP_IMAGE_GLOBALIGN :  return MeshFilterInterface::Camera; 
+		case FP_GRAPH_ANALYSIS :  return MeshFilterInterface::Camera; 
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -136,6 +140,29 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 												"Max displacement",
 												"The vertex are displaced of a vector whose norm is bounded by this value"));*/
 											break;
+
+
+		case FP_GRAPH_ANALYSIS :  
+			parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+												"The mesh on which the image must be aligned"));
+			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
+												"The mesh on which the image must be aligned"));*/
+			
+			
+			rendList.push_back("Combined");
+			rendList.push_back("Normal map");
+			rendList.push_back("Color per vertex");
+			rendList.push_back("Specular");
+			rendList.push_back("Silhouette");
+			rendList.push_back("Specular combined");
+
+			//rendList.push_back("ABS Curvature");
+			parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
+                                QString("Rendering modes")));
+			
+			parlst.addParam(new RichBool("Outlier analysis",true,"Outlier analysis","Outlier analysis"));
+			parlst.addParam(new RichBool("Best subset",false,"Best subset","Best subset"));
+								break;
 											
 		default : assert(0); 
 	}
@@ -143,161 +170,76 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-
+	std::vector<SubGraph> Graphs;
 	/// Preliminary singular alignment using classic MI
-	
+	switch(ID(action))	 {
+		case FP_IMAGE_GLOBALIGN :  
+			/// Building of the graph of images
+			if (md.rasterList.size()==0)
+			{
+				 Log(0, "You need a Raster Model to apply this filter!");
+				 return false;
+				 
+			}
 
-		
-	/// Building of the graph of images
-	if (md.rasterList.size()==0)
-	{
-		 Log(0, "You need a Raster Model to apply this filter!");
-		 return false;
-		 
+			this->glContext->makeCurrent();
+
+			this->initGL();
+
+			if (par.getBool("Pre-alignment"))
+			{
+				preAlignment(md, par, cb);
+			}
+
+			this->glContext->doneCurrent();
+
+			this->glContext->makeCurrent();
+
+			this->initGL();
+			if (par.getInt("Number of refinement steps")!=0)
+			{
+				
+				Graphs=buildGraph(md);
+				Log(0, "BuildGraph completed");
+				for (int i=0; i<par.getInt("Number of refinement steps"); i++)
+				{
+					AlignGlobal(md, Graphs);
+					Log(0, "AlignGlobal %d of %d completed",i,par.getInt("Number of refinement steps"));
+				}
+			}
+			
+			this->glContext->doneCurrent();
+			Log(0, "Done!");
+			break;
+		case FP_GRAPH_ANALYSIS : 
+						/// Building of the graph of images
+			if (md.rasterList.size()==0)
+			{
+				 Log(0, "You need a Raster Model to apply this filter!");
+				 return false;
+				 
+			}
+
+			this->glContext->makeCurrent();
+
+			this->initGL();
+			
+			Graphs=buildGraph(md, false);
+			Log(0, "BuildGraph completed");
+				
+						 
+			this->glContext->doneCurrent();
+			Log(0, "Done!");
+			break;
+		default : assert(0); 
 	}
 
-	this->glContext->makeCurrent();
-
-	this->initGL();
-
-	if (par.getBool("Pre-alignment"))
-	{
-		preAlignment(md, par, cb);
-	}
-
-	this->glContext->doneCurrent();
-
-	this->glContext->makeCurrent();
-
-	this->initGL();
-	if (par.getInt("Number of refinement steps")!=0)
-	{
-		std::vector<SubGraph> Graphs;
-		Graphs=buildGraph(md);
-		Log(0, "BuildGraph completed");
-		for (int i=0; i<par.getInt("Number of refinement steps"); i++)
-		{
-			AlignGlobal(md, Graphs);
-			Log(0, "AlignGlobal %d of %d completed",i,par.getInt("Number of refinement steps"));
-		}
-	}
-	
-	//for(int i = 0; i < Graphs.size(); i++)
-	//{
-	//  //delete Graphs[i];
-	//}
-
-	//Graphs.clear();
-	 
-	this->glContext->doneCurrent();
-	Log(0, "Done!");
-
-	return true;
+		return true;
 
 
 
-	//Solver solver;
-	//MutualInfo mutual;
-	//if (md.rasterList.size()==0)
-	//{
-	//	 Log(0, "You need a Raster Model to apply this filter!");
-	//	 return false;
-	//}
-	//else for (int i=0; i<md.rasterList.size();i++)
-	//{
-	//	align.image=&md.rasterList[i]->currentPlane->image;
-	//	align.shot=md.rasterList[i]->shot;
-
-	//align.mesh=&md.mm()->cm;
-	//
-	//solver.optimize_focal=par.getBool("Estimate Focal");
-	//solver.fine_alignment=par.getBool("Fine");
-
-	//int rendmode= par.getEnum("RenderingMode");
-	//		
-	//		switch(rendmode){ 
-	//			case 0: 
-	//				align.mode=AlignSet::COMBINE;
-	//				break;
-	//			case 1: 
-	//				align.mode=AlignSet::NORMALMAP;
-	//				break;
-	//			case 2: 
-	//				align.mode=AlignSet::COLOR;
-	//				break;
-	//			case 3: 
-	//				align.mode=AlignSet::SPECULAR;
-	//				break;
-	//			case 4: 
-	//				align.mode=AlignSet::SILHOUETTE;
-	//				break;
-	//			case 5: 
-	//				align.mode=AlignSet::SPECAMB;
-	//				break;
-	//			default:
-	//				align.mode=AlignSet::COMBINE;
-	//				break;
-	//		}
-
-	//this->glContext->makeCurrent();
-	//this->initGL();
-
-	//vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
- // vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
- // vcg::Color4b *colors = new vcg::Color4b[align.mesh->vn];
- // unsigned int *indices = new unsigned int[align.mesh->fn*3];
-
- // for(int i = 0; i < align.mesh->vn; i++) {
- //   vertices[i] = align.mesh->vert[i].P();
- //   normals[i] = align.mesh->vert[i].N();
- //   colors[i] = align.mesh->vert[i].C();
- // }
-
- // for(int i = 0; i < align.mesh->fn; i++) 
- //   for(int k = 0; k < 3; k++) 
- //     indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
-
- // glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
- // glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
- //                 vertices, GL_STATIC_DRAW_ARB);
- // glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
- // glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), 
- //                 normals, GL_STATIC_DRAW_ARB);
- // glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
- // glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), 
- //                 colors, GL_STATIC_DRAW_ARB);
- // glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
- // glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
- // glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int), 
- //                 indices, GL_STATIC_DRAW_ARB);
- // glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-
-
- // // it is safe to delete after copying data to VBO
- // delete []vertices;
- // delete []normals;
- // delete []colors;
-	//
- //   //align.shot=par.getShotf("Shot");
-	//	
-	//align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
-	//align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
-	//
-	//if (solver.fine_alignment)
-	//	solver.optimize(&align, &mutual, align.shot);
-	//else
-	//	solver.iterative(&align, &mutual, align.shot);
-	////align.renderScene(align.shot, 3);
-	////align.readRender(0);
-	//	
-	////md.rasterList[i]->shot=align.shot;
-	//this->glContext->doneCurrent();
-	////emit md.rasterSetChanged();
-	//}
-	//return true;
 }
 
 void FilterMutualInfoPlugin::initGL()
@@ -370,6 +312,7 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 {
 	switch(filterID) {
 		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment"); 
+		case FP_GRAPH_ANALYSIS :  return QString("graphanalysis"); 
 		default : assert(0); 
 	}
 	return QString();
@@ -503,18 +446,18 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 	return true;
 }
 
-std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md)
+std::vector<SubGraph> FilterMutualInfoPlugin::buildGraph(MeshDocument &md, bool globalign)
 {
 		
 	std::vector<AlignPair> allArcs;
 		
-	allArcs=CalcPairs(md);
+	allArcs=CalcPairs(md, globalign);
 	Log(0, "Calcpairs completed");
 	return CreateGraphs(md, allArcs);
 		 
 }
 
-std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md)
+std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool globalign)
 {
 	Solver solver;
 	MutualInfo mutual;
@@ -631,54 +574,72 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md)
 		}
 
 		Log(0, "Image %d completed",r);
-		std::sort(weightList.begin(), weightList.end(), orderingW());
-
-		///////////////////////////////////////7
-		for (int i=0; i<weightList.size(); i++)
+		if (!globalign)
 		{
-			int p=weightList[i].projId;
-			align.mode=AlignSet::PROJIMG;
-			align.shotPro=md.rasterList[p]->shot;
-			align.imagePro=&md.rasterList[p]->currentPlane->image;
-			align.ProjectedImageChanged(*align.imagePro);
-			float countTot=0.0;
-			float countCol=0.0;
-			float countCov=0.0;
-			align.RenderShadowMap();
-			align.renderScene(align.shot, 2, true);
-			//align.readRender(1);
-			for (int x=0; x<align.wt; x++)
-				for (int y=0; y<align.ht; y++)
-				{
-					QColor color;
-					color.setRgb(align.comb.pixel(x,y));
-					if (color!=qRgb(0,0,0))
+			for (int i=0; i<weightList.size(); i++)
+			{
+				Log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
+				list.push_back(weightList[i]);
+
+			}
+
+			//Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
+			//return list;
+
+		}
+		else
+		{
+
+
+			std::sort(weightList.begin(), weightList.end(), orderingW());
+
+			///////////////////////////////////////7
+			for (int i=0; i<weightList.size(); i++)
+			{
+				int p=weightList[i].projId;
+				align.mode=AlignSet::PROJIMG;
+				align.shotPro=md.rasterList[p]->shot;
+				align.imagePro=&md.rasterList[p]->currentPlane->image;
+				align.ProjectedImageChanged(*align.imagePro);
+				float countTot=0.0;
+				float countCol=0.0;
+				float countCov=0.0;
+				align.RenderShadowMap();
+				align.renderScene(align.shot, 2, true);
+				//align.readRender(1);
+				for (int x=0; x<align.wt; x++)
+					for (int y=0; y<align.ht; y++)
 					{
-						countTot++;
-						if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
+						QColor color;
+						color.setRgb(align.comb.pixel(x,y));
+						if (color!=qRgb(0,0,0))
 						{
-							if (covered.pixel(x,y)!=qRgb(255,0,0))
+							countTot++;
+							if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
 							{
-								countCov++;
-								covered.setPixel(x,y,qRgb(255,0,0));
+								if (covered.pixel(x,y)!=qRgb(255,0,0))
+								{
+									countCov++;
+									covered.setPixel(x,y,qRgb(255,0,0));
+								}
+								countCol++;
 							}
-							countCol++;
 						}
 					}
+					pair.area=countCol/countTot;
+					/*covered.save("covered.jpg");
+					align.rend.save("rend.jpg");
+					align.comb.save("comb.jpg");*/
+					
+					pair.area*=countCov/countTot;
+					pair.mutual=mutual.info(align.wt,align.ht,align.target,align.render);
+					pair.imageId=r;
+					pair.projId=p;
+					pair.weight=weightList[i].weight;
+					list.push_back(pair);
+					Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
 				}
-				pair.area=countCol/countTot;
-				/*covered.save("covered.jpg");
-				align.rend.save("rend.jpg");
-				align.comb.save("comb.jpg");*/
-				
-				pair.area*=countCov/countTot;
-				pair.mutual=mutual.info(align.wt,align.ht,align.target,align.render);
-				pair.imageId=r;
-				pair.projId=p;
-				pair.weight=weightList[i].weight;
-				list.push_back(pair);
-				Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
-			}
+		}
 			
 		}
 //////////////////////////////////////////////////////
