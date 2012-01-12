@@ -148,6 +148,10 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 				true,
 				"use depth discontinuities weight",
 				"If true, color contribution is weighted by pixel distance from depth discontinuities (external and internal silhouettes)"));
+			parlst.addParam(new RichBool ("usealpha",
+				false,
+				"use image alpha weight",
+				"If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
 		}
 		break;
 
@@ -191,6 +195,10 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
 				true,
 				"use depth discontinuities weight",
 				"If true, color contribution is weighted by pixel distance from depth discontinuities (external and internal silhouettes)"));
+			parlst.addParam(new RichBool ("usealpha",
+				false,
+				"use image alpha weight",
+				"If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
 		}
 		break;
 
@@ -295,6 +303,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       bool  usedistance = par.getBool("usedistance"); 
       bool  useborders = par.getBool("useborders");
       bool  usesilhouettes = par.getBool("usesilhouettes");
+      bool  usealphamask =  par.getBool("usealpha");
 
       Point2f  pp;        // projected point
       float  depth=0;     // depth of point (distance from camera)
@@ -485,6 +494,11 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                     pweight *= silw;
                   }
 
+                  if(usealphamask) //alpha channel of image is an additional mask
+                  {
+                    pweight *= (qAlpha(pcolor) / 255.0);
+                  }
+
                   weights[buff_ind] += pweight;
                   acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
                   acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
@@ -547,6 +561,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       bool  usedistance = par.getBool("usedistance"); 
       bool  useborders = par.getBool("useborders");
       bool  usesilhouettes = par.getBool("usesilhouettes");
+      bool  usealphamask =  par.getBool("usealpha");
       QString textName = par.getString("textName");
       
       
@@ -761,6 +776,11 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                   silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
                   pweight *= silw;
                 } 
+
+                if(usealphamask) //alpha channel of image is an additional mask
+                {
+                  pweight *= (qAlpha(pcolor) / 255.0);
+                }
 
                 accums[texcount].weights += pweight;
                 accums[texcount].acc_red += (qRed(pcolor) * pweight / 255.0);
