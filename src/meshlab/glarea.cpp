@@ -817,7 +817,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
   float notch = e->delta()/ float(WHEEL_STEP);
   switch(e->modifiers())
 		{
-		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50.0f); break;
+		case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,5000.0f); break;
 		case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
     case Qt::AltModifier													: glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
       foreach(MeshModel * mp, this->md()->meshList)
