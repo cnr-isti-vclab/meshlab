@@ -42,6 +42,7 @@
 
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
+#include "../common/meshlabdocumentbundler.h"
 
 using namespace std;
 using namespace vcg;
@@ -1481,14 +1482,14 @@ void MainWindow::saveProject()
 bool MainWindow::openProject(QString fileName)
 {
   if (fileName.isEmpty())
-    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
+    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out)");
 
   if (fileName.isEmpty()) return false;
 
   QFileInfo fi(fileName);
   lastUsedDirectory = fi.absoluteDir();
 
-  if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") )
+  if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp")  && (fi.suffix().toLower()!="out"))
   {
     QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
     return false;
@@ -1544,6 +1545,45 @@ bool MainWindow::openProject(QString fileName)
       loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
     }
   }
+
+  if (QString(fi.suffix()).toLower() == "out"){
+
+	QString cameras_filename = fileName;
+	QString image_list_filename;
+	QString model_filename;
+
+    image_list_filename = QFileDialog::getOpenFileName(
+                this  ,  tr("Open image list file"),
+                QFileInfo(fileName).absolutePath(),
+                 tr("Bundler images list file (*.txt)")
+                );
+	if(image_list_filename.isEmpty())
+      return false;
+
+	//model_filename = QFileDialog::getOpenFileName(
+	//			this, tr("Open 3D model file"),
+	//			QFileInfo(fileName).absolutePath(),
+	//			tr("Bunler 3D model file (*.ply)")
+	//			);
+	//if(model_filename.isEmpty())
+    //  return false;
+
+	if(!MeshDocumentFromBundler(*meshDoc(),cameras_filename,image_list_filename,model_filename)){
+      QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
+      return false;
+	}
+	//else{
+	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
+	//		{
+	//		  QString fullPath = meshDoc()->meshList[i]->fullName();
+	//		  meshDoc()->setBusy(true);
+	//		  loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+	//		}
+	//}
+
+
+  }
+
 
   meshDoc()->setBusy(false);
   if(this->GLA() == 0)  return false;
