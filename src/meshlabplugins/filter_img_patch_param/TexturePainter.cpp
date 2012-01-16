@@ -64,7 +64,7 @@ bool TexturePainter::init( int texSize )
                                  .AttachAndLink( fpg, &logs ) )
 
     {
-        qWarning( (std::string(__func__)+": "+logs).c_str() );
+    //    qWarning( (std::string(__func__)+": "+logs).c_str() );
         return false;
     }
 

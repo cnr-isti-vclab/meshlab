@@ -38,6 +38,7 @@ public:
         W_ORIENTATION   = 0x01,
         W_DISTANCE      = 0x02,
         W_IMG_BORDER    = 0x04,
+        W_IMG_ALPHA     = 0x08,
     };
 
 

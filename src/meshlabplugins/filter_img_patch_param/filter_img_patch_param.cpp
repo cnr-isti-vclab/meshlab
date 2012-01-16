@@ -147,6 +147,10 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                         true,
                                         "Use image border weight",
                                         "Includes a weight accounting for the distance to the image border during the computation of reference images") );
+			      par.addParam(new RichBool ( "useAlphaWeight",
+				                                false,
+				                                "use image alpha weight",
+				                                "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
             par.addParam( new RichBool( "cleanIsolatedTriangles",
                                         true,
                                         "Clean isolated triangles",
@@ -832,6 +836,8 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
         weightMask |= VisibleSet::W_DISTANCE;
     if( par.getBool("useImgBorderWeight") )
         weightMask |= VisibleSet::W_IMG_BORDER;
+    if( par.getBool("useAlphaWeight") )
+        weightMask |= VisibleSet::W_IMG_ALPHA;
     VisibleSet *faceVis = new VisibleSet( mesh, rasterList, weightMask );
     Log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
 

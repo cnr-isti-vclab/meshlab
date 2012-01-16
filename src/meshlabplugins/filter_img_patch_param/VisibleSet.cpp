@@ -99,5 +99,34 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
                                    std::abs(2.0f*cam.Y()/rm->shot.Intrinsics.ViewportPx.Y()-1.0f) );
     }
 
+    if( (m_WeightMask & W_IMG_ALPHA) && weight>0.0f )
+    {
+        vcg::Point2f ppoint0 = rm->shot.Project( f.V(0)->P() );
+        vcg::Point2f ppoint1 = rm->shot.Project( f.V(0)->P() );
+        vcg::Point2f ppoint2 = rm->shot.Project( f.V(0)->P() );
+
+        float aweight = 1.0;
+        float wt;
+        QRgb pcolor;
+        
+        // vertex 0
+        pcolor = rm->currentPlane->image.pixel(ppoint0[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint0[1]);
+        wt = (qAlpha(pcolor) / 255.0);
+        if(aweight > wt)
+          aweight = wt;
+        // vertex 0
+        pcolor = rm->currentPlane->image.pixel(ppoint1[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint1[1]);
+        wt = (qAlpha(pcolor) / 255.0);
+        if(aweight > wt)
+          aweight = wt;
+        // vertex 0
+        pcolor = rm->currentPlane->image.pixel(ppoint2[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint2[1]);
+        wt = (qAlpha(pcolor) / 255.0);
+        if(aweight > wt)
+          aweight = wt;
+
+        weight *= aweight;
+    }
+
     return weight;
 }
