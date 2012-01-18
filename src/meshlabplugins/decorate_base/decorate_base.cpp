@@ -52,6 +52,7 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
     case DP_SHOW_FACE_NORMALS:					return tr("Draws object face normals");
     case DP_SHOW_QUOTED_BOX:						return tr("Draws quoted box");
     case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+    case DP_SHOW_EDGE_LABEL:						return tr("Draws all the edge indexes<br> Useful for debugging<br>(do not use it on large meshes)");
     case DP_SHOW_VERT_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per vertex quality");
     case DP_SHOW_FACE_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per face quality");
     case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
@@ -80,6 +81,7 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_AXIS         :			return QString("Show Axis");
     case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
     case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
+    case DP_SHOW_EDGE_LABEL:		return tr("Show Edge Label");
     case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
     case DP_SHOW_CAMERA:			return tr("Show Camera");
     case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
@@ -190,6 +192,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
       }break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
     case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter);break;
+    case DP_SHOW_EDGE_LABEL:	DrawEdgeLabel(m,painter);break;
     case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter);break;
     case DP_SHOW_VERT:	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
@@ -1097,6 +1100,21 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
                 glLabel::render(painter, bar,tr("%1").arg(i));
 							}
 	glPopAttrib();
+}
+
+void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
+{
+  glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+  glDepthFunc(GL_ALWAYS);
+  glDisable(GL_LIGHTING);
+  glColor3f(.4f,.4f,.4f);
+  for(size_t i=0;i<m.cm.edge.size();++i)
+    if(!m.cm.edge[i].IsD())
+    {
+      Point3f bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
+      glLabel::render(painter, bar,tr("%1").arg(i));
+    }
+  glPopAttrib();
 }
 
 
