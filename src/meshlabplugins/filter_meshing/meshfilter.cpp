@@ -631,7 +631,7 @@ case FP_REORIENT:
         errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness"; // text
         return false; // can't continue, mesh can't be processed
       }
-      tri::Clean<CMeshO>::IsOrientedMesh(m.cm, oriented,orientable);
+      tri::Clean<CMeshO>::OrientCoherentlyMesh(m.cm, oriented,orientable);
       tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
       tri::UpdateTopology<CMeshO>::TestFaceFace(m.cm);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
@@ -784,7 +784,7 @@ case FP_ROTATE_FIT:
       PlaneFittingPoints(selected_pts,plane);
       float errorSum=0;
       for(size_t i=0;i<selected_pts.size();++i)
-        errorSum+=fabs(DistancePlanePoint(plane,selected_pts[i]));
+        errorSum+=fabs(SignedDistancePlanePoint(plane,selected_pts[i]));
 
       Log("Fitting Plane avg error is %f",errorSum/float(selected_pts.size()));
 

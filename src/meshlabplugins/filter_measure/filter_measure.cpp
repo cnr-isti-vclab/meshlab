@@ -77,7 +77,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			MeasureTopoTag *tag = new MeasureTopoTag(md, md.mm(), filterName );
 
 			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-			int faceEdgeManif = tri::UpdateSelection<CMeshO>::CountFace(m);
+			int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
 			tri::UpdateSelection<CMeshO>::VertexClear(m);
 			tri::UpdateSelection<CMeshO>::FaceClear(m);
 			tag->edgeManifNum = edgeManifNum;
@@ -85,7 +85,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 
 			int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-			int faceVertManif = tri::UpdateSelection<CMeshO>::CountFace(m);
+			int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
 			int edgeNum=0,borderNum=0;
 			tri::Clean<CMeshO>::CountEdges(m, edgeNum, borderNum);
 			int holeNum;

@@ -257,7 +257,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
 						bool oriented, orientable;
 
-						tri::Clean<CMeshO>::IsOrientedMesh(pm.cm, oriented,orientable);
+						tri::Clean<CMeshO>::OrientCoherentlyMesh(pm.cm, oriented,orientable);
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
 						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
@@ -488,7 +488,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
 						bool oriented,orientable;
 						
-						tri::Clean<CMeshO>::IsOrientedMesh(pm.cm, oriented,orientable);
+						tri::Clean<CMeshO>::OrientCoherentlyMesh(pm.cm, oriented,orientable);
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
 						pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
@@ -515,7 +515,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 								return false; // can't continue, mesh can't be processed
 						}
 						
-						tri::Clean<CMeshO>::IsOrientedMesh(pm2.cm, oriented,orientable);
+						tri::Clean<CMeshO>::OrientCoherentlyMesh(pm2.cm, oriented,orientable);
 						vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm2.cm);
 						vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm2.cm);
 						pm2.clearDataMask(MeshModel::MM_FACEFACETOPO);
