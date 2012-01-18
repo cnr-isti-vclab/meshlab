@@ -90,7 +90,9 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
       weight *= (rm->shot.GetViewPoint()-centroid).Normalize() * f.N();
 
     if( (m_WeightMask & W_DISTANCE) && weight>0.0f )
+    {
         weight *= (m_DepthMax - (rm->shot.GetViewPoint()-centroid).Norm()) * m_DepthRangeInv;
+    }
 
     if( (m_WeightMask & W_IMG_BORDER) && weight>0.0f )
     {
@@ -125,7 +127,14 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
         if(aweight > wt)
           aweight = wt;
 
-        weight *= aweight;
+        // if alpha weight is zero, that image part should not be used at all, 
+        // so, we set the weight below zero in order to force the visibility check to fail
+        // just setting weight to zero would result passing visibility check with a 0 weight,
+        // making the piece usable if nothing else is available
+        if(aweight == 0.0)
+          weight = -1.0;
+        else
+          weight *= aweight;
     }
 
     return weight;
