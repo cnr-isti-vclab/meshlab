@@ -355,7 +355,7 @@ bool SyntaxTreeModel::setHeaderData(int section, Qt::Orientation orientation,
 //}
 
 MLScriptLanguage::MLScriptLanguage()
-:libraries(),reserved(),langfuncs(),worddelimiter(),wordsjoiner(),openpar(),closepar()
+:reserved(),langfuncs(),worddelimiter(),wordsjoiner(),openpar(),closepar(),libraries()
 {
 	initLibrary();
 }
