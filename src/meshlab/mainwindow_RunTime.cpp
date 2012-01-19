@@ -1560,6 +1560,7 @@ bool MainWindow::openProject(QString fileName)
 	if(image_list_filename.isEmpty())
       return false;
 
+
 	//model_filename = QFileDialog::getOpenFileName(
 	//			this, tr("Open 3D model file"),
 	//			QFileInfo(fileName).absolutePath(),
