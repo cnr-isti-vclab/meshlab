@@ -1569,6 +1569,8 @@ bool MainWindow::openProject(QString fileName)
 	//if(model_filename.isEmpty())
     //  return false;
 
+	GLA()->setColorMode(GLW::CMPerVert);
+	GLA()->setDrawMode(GLW::DMPoints);
 	if(!MeshDocumentFromBundler(*meshDoc(),cameras_filename,image_list_filename,model_filename)){
       QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
       return false;
