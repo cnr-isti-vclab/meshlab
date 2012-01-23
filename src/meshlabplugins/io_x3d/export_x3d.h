@@ -173,9 +173,9 @@ namespace io {
 			bool bHasPerWedgeTexCoord = (mask & Mask::IOM_WEDGTEXCOORD) && HasPerWedgeTexCoord(m);
 			bool bHasPerWedgeNormal = (mask & Mask::IOM_WEDGNORMAL) && HasPerWedgeNormal(m);
 			bool bHasPerWedgeColor = (mask & Mask::IOM_WEDGCOLOR) && HasPerWedgeColor(m);
-			bool bHasPerVertexColor	= (mask & Mask::IOM_VERTCOLOR) && m.HasPerVertexColor();
-			bool bHasPerVertexNormal = (mask & Mask::IOM_VERTNORMAL) && m.HasPerVertexNormal();
-			bool bHasPerVertexTexCoord = (mask & Mask::IOM_VERTTEXCOORD) && m.HasPerVertexTexCoord();
+			bool bHasPerVertexColor	= (mask & Mask::IOM_VERTCOLOR) && HasPerVertexColor(m);
+			bool bHasPerVertexNormal = (mask & Mask::IOM_VERTNORMAL) && HasPerVertexNormal(m);
+			bool bHasPerVertexTexCoord = (mask & Mask::IOM_VERTTEXCOORD) && HasPerVertexTexCoord(m);
 			bool bHasPerFaceColor = (mask & Mask::IOM_FACECOLOR) && HasPerFaceColor(m);
 			bool bHasPerFaceNormal = (mask & Mask::IOM_FACENORMAL) && HasPerFaceNormal(m);
 			if (bHasPerWedgeTexCoord && bHasPerVertexTexCoord)
