@@ -98,6 +98,7 @@ private slots:
 
 	//////////// Slot Menu File //////////////////////
   void reload();
+  void reloadAllMesh();
   void openRecentMesh();
 	void openRecentProj();
 	bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
@@ -352,6 +353,7 @@ private:
   QAction  *importRasterAct;
   QAction *closeProjectAct;
   QAction *reloadMeshAct;
+  QAction *reloadAllMeshAct;
   QAction *saveSnapshotAct;
   QAction *recentFileActs[MAXRECENTFILES];
   QAction *recentProjActs[MAXRECENTFILES];

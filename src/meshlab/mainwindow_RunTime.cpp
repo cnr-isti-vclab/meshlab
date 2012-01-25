@@ -280,6 +280,7 @@ void MainWindow::updateMenus()
   exportMeshAct->setEnabled(activeDocNotEmpty);
   exportMeshAsAct->setEnabled(activeDocNotEmpty);
   reloadMeshAct->setEnabled(activeDocNotEmpty);
+  reloadAllMeshAct->setEnabled(activeDocNotEmpty);
   importRasterAct->setEnabled(activeDoc);
 
   saveProjectAsAct->setEnabled(activeDoc);
@@ -1757,8 +1758,15 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
   }
   vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 
-  if(mm->cm.fn==0){
+  if(mm->cm.fn==0 && mm->cm.en==0){
     GLA()->setDrawMode(vcg::GLW::DMPoints);
+    if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
+      GLA()->setLight(false);
+    else
+      mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+  }
+  if(mm->cm.fn==0 && mm->cm.en>0){
+    GLA()->setDrawMode(vcg::GLW::DMWire);
     if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
       GLA()->setLight(false);
     else
@@ -1868,6 +1876,7 @@ void MainWindow::openRecentProj()
 bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
 {
 	bool ret = false;
+	mm->Clear();
 	QFileInfo fi(fullPath);
 	QString extension = fi.suffix();
 	MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
@@ -1894,6 +1903,18 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
 	return ret;
 }
 
+void MainWindow::reloadAllMesh()
+{
+  // Discards changes and reloads current file
+  // save current file name
+  qb->show();
+  foreach(MeshModel *mmm,meshDoc()->meshList)
+  {
+  QString fileName = mmm->fullName();
+  loadMeshWithStandardParams(fileName,mmm);
+  }
+  qb->reset();
+}
 
 void MainWindow::reload()
 {
@@ -1901,7 +1922,7 @@ void MainWindow::reload()
 	// save current file name
 	qb->show();
 	QString fileName = meshDoc()->mm()->fullName();
-  loadMeshWithStandardParams(fileName,meshDoc()->mm());
+	loadMeshWithStandardParams(fileName,meshDoc()->mm());
 	qb->reset();
 }
 

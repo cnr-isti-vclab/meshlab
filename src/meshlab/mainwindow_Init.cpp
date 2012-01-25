@@ -151,10 +151,15 @@ void MainWindow::createActions()
 	exportMeshAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
 	connect(exportMeshAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
-	reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-	reloadMeshAct->setShortcut(Qt::CTRL+Qt::Key_R);
-	connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
+  reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+  reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+  reloadMeshAct->setShortcut(Qt::CTRL+Qt::Key_R);
+  connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
+
+  reloadAllMeshAct = new QAction(tr("&Reload All"), this);
+  reloadAllMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+  reloadAllMeshAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_R);
+  connect(reloadAllMeshAct, SIGNAL(triggered()), this, SLOT(reloadAllMesh()));
 
 	importRasterAct = new QAction(QIcon(":/images/open.png"),tr("Import Raster..."), this);
 	connect(importRasterAct, SIGNAL(triggered()), this, SLOT(importRaster()));
@@ -424,6 +429,7 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(this->openProjectAct);
 	mainToolBar->addAction(importMeshAct);
 	mainToolBar->addAction(reloadMeshAct);
+//  mainToolBar->addAction(reloadAllMeshAct);
 	mainToolBar->addAction(exportMeshAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
@@ -469,6 +475,7 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exportMeshAct);
 	fileMenu->addAction(exportMeshAsAct);
 	fileMenu->addAction(reloadMeshAct);
+  fileMenu->addAction(reloadAllMeshAct);
 	fileMenu->addSeparator();
 	fileMenu->addAction(importRasterAct);
 	fileMenu->addSeparator();
