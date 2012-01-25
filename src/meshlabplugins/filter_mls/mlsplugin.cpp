@@ -472,7 +472,7 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
 					vcg::tri::UpdateNormals<CMeshO>::NormalizeFace(mesh->cm);
 					//vcg::RefineE<CMeshO,vcg::MidPoint<CMeshO> >(m.cm, vcg::MidPoint<CMeshO>(), edgePred, false, cb);
 					vcg::tri::RefineOddEvenE<CMeshO, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO> >
-							(mesh->cm, tri::OddPointLoop<CMeshO>(), tri::EvenPointLoop<CMeshO>(), edgePred, selectionOnly, cb);
+							(mesh->cm, tri::OddPointLoop<CMeshO>(mesh->cm), tri::EvenPointLoop<CMeshO>(), edgePred, selectionOnly, cb);
 				}
 				// project all vertices onto the MLS surface
 				for (unsigned int i = 0; i< mesh->cm.vert.size(); i++)
