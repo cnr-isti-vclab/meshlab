@@ -527,7 +527,7 @@ public:
 	static const QString Info();
 
   // Called when the user press the first time the button
-	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;};
+    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;}
 	virtual bool StartEdit(MeshDocument &md, GLArea *parent)
 	{
 		//assert(NULL != md.mm());
@@ -536,7 +536,7 @@ public:
 		else return false;
 	}
 	// Called when the user press the second time the button 
-	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
+	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){}
     
 	// Called when the user changes the selected layer
 	//by default it calls end edit with the layer that was selected and start with the new layer that is
@@ -557,6 +557,7 @@ public:
 	//virtual void wheelEvent     (QWheelEvent*e, MeshModel &/*m*/, GLArea * );
   virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
   virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
+  virtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * ){}
   virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();}
 };
 
