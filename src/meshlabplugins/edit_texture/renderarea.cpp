@@ -179,7 +179,7 @@ void RenderArea::paintEvent(QPaintEvent *)
 	tb->Apply(true);
 	maxX = 0; maxY = 0; minX = 0; minY = 0;
 	
-	if (model != NULL && model->cm.HasPerWedgeTexCoord() && image != QImage())
+	if (model != NULL && HasPerWedgeTexCoord(model->cm) && image != QImage())
 	{
 	    glEnable(GL_COLOR_LOGIC_OP);
 		glEnable(GL_DEPTH_TEST);

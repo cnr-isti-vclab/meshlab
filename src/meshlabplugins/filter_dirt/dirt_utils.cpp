@@ -232,7 +232,7 @@ CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,float m,CM
 }
 
 void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
-    if(base_mesh->cm.HasPerWedgeTexCoord() && base_mesh->cm.textures.size()>0){
+    if(tri::HasPerWedgeTexCoord(base_mesh->cm) && base_mesh->cm.textures.size()>0){
         QImage img;
         //QFileInfo text_file=QFileInfo(base_mesh->cm.textures[0].c_str());
         img.load(base_mesh->cm.textures[0].c_str());

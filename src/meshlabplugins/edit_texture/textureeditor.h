@@ -89,7 +89,7 @@ class TextureEditor : public QWidget
 template<class MESH_TYPE>
 void SmoothTextureWEdgeCoords(MESH_TYPE &m, bool smoothWholeModel)
 {
-	assert(m.HasPerWedgeTexCoord());
+	assert(HasPerWedgeTexCoord(m));
 	
 	for (int i = 0; i < m.face.size(); i++)
 	{

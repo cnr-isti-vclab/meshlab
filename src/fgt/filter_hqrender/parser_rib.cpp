@@ -447,7 +447,7 @@ QString FilterHighQualityRender::convertObject(int currentFrame, QString destDir
 	//shader
 	fprintf(fout,"%s\n",qPrintable(surfaceShaderStack.top()));
 	//texture mapping (are TexCoord needed for texture mapping?)
-	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cm.HasPerVertexTexCoord())) {
+	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cHasPerVertexTexCoord(m))) {
 		//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
 		//foreach(QString textureName, *textureList) {
 

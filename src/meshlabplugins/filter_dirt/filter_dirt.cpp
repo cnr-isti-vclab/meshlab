@@ -156,7 +156,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             return false;
         }
 
-        if(draw && !currMM->cm.HasPerWedgeTexCoord()){
+        if(draw && !tri::HasPerWedgeTexCoord(currMM->cm)){
             errorMessage = "Current Mesh does not have per Wedge Tex Coordinates";
             return false;
 

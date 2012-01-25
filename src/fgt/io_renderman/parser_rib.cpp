@@ -170,7 +170,7 @@ bool IORenderman::makeScene(MeshModel* m,
 			case ribParser::WORLDBEGIN:
 			{
         //make the conversion of texture mesh before the first WorldBegin statement
-        if(numOfWorldBegin == 0 && !textureList->empty() && (m->cm.HasPerWedgeTexCoord() || m->cm.HasPerVertexTexCoord())) {
+        if(numOfWorldBegin == 0 && !textureList->empty() && (m->cm.HasPerWedgeTexCoord() || m->cHasPerVertexTexCoord(m))) {
           QString textureName = QFileInfo(textureList->first()).completeBaseName();
           fprintf(fout,"MakeTexture \"%s.tiff\" \"%s.tx\" \"periodic\" \"periodic\" \"box\" 1 1\n", qPrintable(textureName),qPrintable(textureName));
         }
@@ -453,7 +453,7 @@ QString IORenderman::convertObject(int currentFrame, QString destDir, MeshModel*
 	//shader
 	fprintf(fout,"%s\n",qPrintable(surfaceShaderStack.top()));
 	//texture mapping (are TexCoord needed for texture mapping?)
-	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cm.HasPerVertexTexCoord())) {
+	if(!textureList->empty() > 0 && (m->cm.HasPerWedgeTexCoord() || m->cHasPerVertexTexCoord(m))) {
 		//multi-texture don't work!I need ad-hoc shader and to read the texture index for vertex..
 		//foreach(QString textureName, *textureList) {
 

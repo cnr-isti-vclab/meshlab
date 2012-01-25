@@ -133,7 +133,7 @@ bool IORenderman::save(const QString &formatName, const QString &fileName, MeshM
 	qDebug("Copied needed file at %i",tt.elapsed());
 	
   //***convert the texture mesh to tiff format 
-  if(!textureListPath.empty() && (m.cm.HasPerWedgeTexCoord() || m.cm.HasPerVertexTexCoord())) {
+  if(!textureListPath.empty() && (m.cm.HasPerWedgeTexCoord() || m.cHasPerVertexTexCoord(m))) {
     QString textureName = QFileInfo(textureListPath.first()).completeBaseName(); //just texture name
     QFile srcFile(m.pathName() + QDir::separator() + textureListPath.first());
 
