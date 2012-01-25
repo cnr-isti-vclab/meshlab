@@ -202,8 +202,6 @@ public:
 
 public:
   vcg::GlTrimesh<CMeshO> glw;
-  QSemaphore meshSem;
-
 
 	/*
 	Bitmask denoting what fields are currently used in the mesh
@@ -228,7 +226,7 @@ private:
   bool modified;
 
 public:
-
+  void Clear();
   inline int id() const {return _id;}
 
   // Some notes about the files and naming.

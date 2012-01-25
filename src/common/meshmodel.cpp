@@ -269,24 +269,27 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
+void MeshModel::Clear()
+{
+  meshModified() = false;
+  glw.m=&cm;
+  // These data are always active on the mesh
+  currentDataMask = MM_NONE;
+  currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
+  currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
+
+  visible=true;
+  cm.Tr.SetIdentity();
+  cm.sfn=0;
+  cm.svn=0;
+}
+
 MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName) 
 {
-	meshModified() = false;
+  Clear();
   parent=_parent;
-	glw.m=&cm;
-	_id=parent->newMeshId();
-	// These data are always active on the mesh
-	currentDataMask = MM_NONE;
-	currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
-	currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
-
-	visible=true;
-	cm.Tr.SetIdentity();
-	cm.sfn=0;
-	cm.svn=0;
-
+  _id=parent->newMeshId();
   if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
-
   if(!labelName.isEmpty())     this->_label=labelName;
 }
 
