@@ -860,7 +860,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				// check parsing errors while creating two func obj
 				// display error message
-				MidPointCustom<CMeshO> mid = MidPointCustom<CMeshO>(expr1,expr2,expr3,errorMidPoint,msg);
+				MidPointCustom<CMeshO> mid = MidPointCustom<CMeshO>(m.cm,expr1,expr2,expr3,errorMidPoint,msg);
 				CustomEdge<CMeshO> edge = CustomEdge<CMeshO>(condSelect,errorEdgePred,msg);
 				if(errorMidPoint || errorEdgePred) 
 				{

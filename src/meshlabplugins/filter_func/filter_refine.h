@@ -31,8 +31,9 @@ using namespace mu;
 template<class MESH_TYPE>
 struct MidPointCustom : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType >
 {
+  MESH_TYPE &m;
 public :
-	MidPointCustom(std::string expr1, std::string expr2, std::string expr3, bool &error, std::string &msg)
+  MidPointCustom(MESH_TYPE &_m,std::string expr1, std::string expr2, std::string expr3, bool &error, std::string &msg):m(_m)
 	{
 		// expr1, expr2, expr3 are parameters for x,y and z coord respectively
 		this->p1.SetExpr(expr1);
@@ -80,7 +81,7 @@ public :
 		nv.P() = Point3f(p1.Eval(),p2.Eval(),p3.Eval());
 
 
-		if( MESH_TYPE::HasPerVertexColor())
+		if( tri::HasPerVertexColor(m))
 		{
 			// calculate new R,G,B component for midpoint based on the distance of two vertices
 			// and color distance.
@@ -109,7 +110,7 @@ public :
 			else nv.C()[2] = ep.V()->C()[2] -b;
 		}
 		
-		if( MESH_TYPE::HasPerVertexQuality()) 
+		if( tri::HasPerVertexQuality(m))
 		{
 			// calculate new quality for midpoint based on the distance of two vertices
 			// and quality distance

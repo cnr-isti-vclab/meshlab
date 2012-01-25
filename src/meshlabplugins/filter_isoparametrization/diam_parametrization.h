@@ -204,11 +204,11 @@ template <class FaceType>
 		typedef typename MESH_TYPE::VertexType VertexType;
 		typedef typename MESH_TYPE::FaceType FaceType;
 		typedef typename MESH_TYPE::CoordType CoordType;
-
+		MESH_TYPE &m;
 		std::map<EdgeKey,InterpData> *alphaMap;
 		IsoParametrization *isoParam;
 
-
+		SplitMidPoint (MESH_TYPE &_m):m(_m){}
 
 		void operator()(typename MESH_TYPE::VertexType &nv, vcg::face::Pos<typename MESH_TYPE::FaceType>  ep)
 		{
@@ -244,9 +244,9 @@ template <class FaceType>
 			nv.P()= v0->P()*alpha+v1->P()*(1.0-alpha);
 			nv.RPos= v0->RPos*alpha+v1->RPos*(1.0-alpha);
 
-			if( MESH_TYPE::HasPerVertexNormal())
+			if( vcg::tri::HasPerVertexNormal(m))
 				nv.N()=v0->N()*alpha+v1->N()*((ScalarType)1.0-alpha);
-			if( MESH_TYPE::HasPerVertexColor())
+			if( vcg::tri::HasPerVertexColor(m))
 			{
 				CoordType color=CoordType(v0->C().X(),v0->C().Y(),v0->C().Z());
 				color=color*alpha+color*((ScalarType)1.0-alpha);
@@ -349,7 +349,7 @@ template <class FaceType>
 
 		typedef ParamMesh::VertexType VertexType;
 		typedef ParamMesh::FaceType FaceType;
-		SplitMidPoint<ParamMesh> splMd;
+		SplitMidPoint<ParamMesh> splMd(*to_param);
 		EdgePredicate<ParamMesh> eP;
 
 		///second step.. test the split if needed
