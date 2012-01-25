@@ -1002,7 +1002,7 @@ case FP_CLUSTERED_SAMPLING :
 			
 			Point3i volumeDim;
 			Box3f volumeBox = baseMesh->cm.bbox;
-			volumeBox.Offset(volumeBox.Diag()/10.0f);
+			volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
 			BestDim(volumeBox , voxelSize, volumeDim );
 			
 			Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
