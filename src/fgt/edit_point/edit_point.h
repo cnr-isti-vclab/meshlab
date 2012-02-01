@@ -33,7 +33,9 @@ class EditPointPlugin : public QObject, public MeshEditInterface
 	Q_INTERFACES(MeshEditInterface)
 		
 public:
-    EditPointPlugin();
+    enum {SELECT_DEFAULT_MODE, SELECT_FITTING_PLANE_MODE};
+
+    EditPointPlugin(int _editType);
     virtual ~EditPointPlugin() {}
 
     static const QString Info();
@@ -45,9 +47,16 @@ public:
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
     void mouseReleaseEvent(QMouseEvent *, MeshModel &/*m*/, GLArea * );
     void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
+    void keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
+    void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * );
 
 
-private:    
+private:
+        typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
+        ComposingSelMode composingSelMode;
+
+        int editType;
+
         bool isMousePressed;
         bool haveToPick;
 
@@ -56,12 +65,17 @@ private:
 
         float dist;
         float maxHop;
+        float fittingRadiusPerc;
+        float fittingRadius;
+        float planeDist;
 
         std::vector<CMeshO::VertexPointer> ComponentVector;
         std::vector<CMeshO::VertexPointer> BorderVector;
         std::vector<CMeshO::VertexPointer> NotReachableVector;
+        std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
+        //QTime timer;
 };
 
 #endif

@@ -26,12 +26,14 @@
 
 PointEditFactory::PointEditFactory()
 {
-        editPoint = new QAction(QIcon(":/images/icon_info.png"),"Point", this);
+        editPoint = new QAction(QIcon(":/images/select_vertex.png"),"Point", this);
+        editPointFittingPlane = new QAction(QIcon(":/images/select_vertex.png"),"PointFitting", this);
 	
         actionList << editPoint;
+        actionList << editPointFittingPlane;
 	
 	foreach(QAction *editAction, actionList)
-		editAction->setCheckable(true); 	
+                editAction->setCheckable(true);
 }
 	
 //gets a list of actions available from this plugin
@@ -44,9 +46,11 @@ QList<QAction *> PointEditFactory::actions() const
 MeshEditInterface* PointEditFactory::getMeshEditInterface(QAction *action)
 {
         if(action == editPoint)
-	{
-                return new EditPointPlugin();
-        } else assert(0); //should never be asked for an action that isn't here
+            return new EditPointPlugin(EditPointPlugin::SELECT_DEFAULT_MODE);
+        else if (action == editPointFittingPlane)
+            return new EditPointPlugin(EditPointPlugin::SELECT_FITTING_PLANE_MODE);
+
+        assert(0); //should never be asked for an action that isn't here
 }
 
 QString PointEditFactory::getEditToolDescription(QAction *)

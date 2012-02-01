@@ -1,6 +1,8 @@
 #ifndef KNNGRAPH_H
 #define KNNGRAPH_H
 
+#include <QTime>
+
 #include <Vector>
 
 #include <vcg/complex/complex.h>
@@ -48,7 +50,10 @@ void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfN
     }
     ConstDataWrapper<typename _MyMeshType::CoordType> DW(&(input[0]), input.size());
 
+    //QTime t2;
+    //t2.start();
     KdTree<float> tree(DW);
+    //printf("KdTree Creation: %d ms\n", t2.elapsed());
 
     tree.setMaxNofNeighbors(neighboursVectSize);
 
@@ -56,6 +61,8 @@ void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfN
     //If the number of the found vertices is less than the required we exclude the point with
     //the highest value (inserted by the doQueryK function of the vcg library). Moreover
     //we have to exclude the queryPoint!
+
+    //t2.restart();
     int neightId = -1;
     for (int j = 0; j < m.vn; j++) {
         tree.doQueryK(m.vert[j].cP());
@@ -67,6 +74,7 @@ void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfN
                 kNeighboursVect[m.vert[j]]->push_back(&(m.vert[neightId]));
         }
     }
+    //printf("KdTree Creation (knn-query): %d ms\n", t2.elapsed());
 
     return;
 }

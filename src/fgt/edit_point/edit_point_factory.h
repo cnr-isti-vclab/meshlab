@@ -50,6 +50,7 @@ private:
 	QList <QAction *> actionList;
 	
         QAction *editPoint;
+        QAction *editPointFittingPlane;
 };
 
 #endif
