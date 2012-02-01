@@ -30,32 +30,31 @@
 #include "ui_v3dImportDialog.h"
 #include "epoch_reconstruction.h"
 
-class v3dImportDialog : public QDialog, public Ui::v3dImportDialog {
+class GLArea;
 
+class EditEpochPlugin;
+class MeshModel;
+
+class v3dImportDialog : public QDockWidget 
+{
 Q_OBJECT
 
 public:
-  v3dImportDialog() : QDialog()
-  {
-    setupUi( this );
-    subsampleSpinBox->setValue(2);
-    minCountSpinBox->setValue(3);
-
-		// connections
-		connect(dilationSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(dilationSizeChanged(int)));
-		connect(erosionSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(erosionSizeChanged(int)));
-
-    er=0;
-		exportToPLY=false;
-
-	fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select v3D File"), ".", "*.v3d");
-	}
+  v3dImportDialog(QWidget *parent, EditEpochPlugin *_edit);
+ 
+    	
 
 public:
   void setEpochReconstruction(EpochReconstruction *_er);
 	bool exportToPLY;  /// when true all the selected range maps are exported as separated ply
 	QString fileName;
+	Ui::DockWidget ui;
+	GLArea *gla; 
 
+virtual void closeEvent ( QCloseEvent * event )	;
+signals:
+	void closing();
+	
 public slots:
 void on_selectButton_clicked();
 void on_imageTableWidget_itemClicked(QTableWidgetItem * item );
@@ -63,6 +62,7 @@ void on_imageTableWidget_itemSelectionChanged();
 void on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * item );
 void on_plyButton_clicked();
 private:
+EditEpochPlugin *edit;
 EpochReconstruction *er;
 QString erCreated;
 

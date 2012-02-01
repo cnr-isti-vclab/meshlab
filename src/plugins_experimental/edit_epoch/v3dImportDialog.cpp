@@ -46,6 +46,42 @@ QPixmap generateColorRamp()
   
   return QPixmap::fromImage(newImage);
 }
+
+// This signal is used to make a connection between the closure of the align dialog and the end of the editing in the GLArea
+void v3dImportDialog::closeEvent ( QCloseEvent * /*event*/ )
+{
+  emit closing();
+}
+
+
+v3dImportDialog::v3dImportDialog(QWidget *parent,EditEpochPlugin *_edit )    : QDockWidget(parent)
+{
+	v3dImportDialog::ui.setupUi(this);
+	//this->setWidget(ui.frame);
+	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
+	this->setAllowedAreas(Qt::LeftDockWidgetArea);
+	QPoint p=parent->mapToGlobal(QPoint(0,0));
+	this->setFloating(true);
+	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
+    this->edit = _edit;
+
+	ui.subsampleSpinBox->setValue(2);
+    ui.minCountSpinBox->setValue(3);
+
+		// connections
+		connect(ui.dilationSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(ui.dilationSizeChanged(int)));
+		connect(ui.erosionSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(ui.erosionSizeChanged(int)));
+		connect(ui.cancelButton, SIGNAL(pressed()), this, SIGNAL(closing()));
+				
+    er=0;
+		exportToPLY=false;
+
+	fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select v3D File"), ".", "*.v3d");
+
+	
+}
+
+
 /* 
 Main function that populate the dialog, loading all the images and eventually creating the thumbs.
 called directly by the open before invoking this dialog.
@@ -61,22 +97,22 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
   
   er=_er;
   erCreated=er->created;
-  infoLabel->setText(er->name + " - " + er->author + " - " + er->created);
+  ui.infoLabel->setText(er->name + " - " + er->author + " - " + er->created);
   
-  imageTableWidget->clear();
-  imageTableWidget->setRowCount(er->modelList.size());
-  imageTableWidget->setColumnCount(4);
+  ui.imageTableWidget->clear();
+  ui.imageTableWidget->setRowCount(er->modelList.size());
+  ui.imageTableWidget->setColumnCount(4);
   //imageTableWidget->setColumnWidth (1,64);
-  imageTableWidget->setSelectionBehavior (QAbstractItemView::SelectRows);
-  imageTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  imageTableWidget->setMinimumWidth(64*8);
+  ui.imageTableWidget->setSelectionBehavior (QAbstractItemView::SelectRows);
+  ui.imageTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  ui.imageTableWidget->setMinimumWidth(64*8);
   
-  rangeLabel->setPixmap(generateColorRamp());
-  rangeLabel->setMaximumHeight(10);
-	rangeLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-	rangeLabel->setScaledContents(true);
+  ui.rangeLabel->setPixmap(generateColorRamp());
+  ui.rangeLabel->setMaximumHeight(10);
+	ui.rangeLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+	ui.rangeLabel->setScaledContents(true);
 	
-  minCountSlider->setMaximumHeight(12);
+  ui.minCountSlider->setMaximumHeight(12);
     
   int i;
   for(i=0; i<er->modelList.size() ;++i)
@@ -86,12 +122,12 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
     QString ThumbImgName=EpochModel::ThumbName(er->modelList[i].textureName);
     QString ThumbCntName=EpochModel::ThumbName(er->modelList[i].countName);
 
-    imageTableWidget->setRowHeight (i,64);
+    ui.imageTableWidget->setRowHeight (i,64);
     QTableWidgetItem *emptyHeaderItem = new QTableWidgetItem(i*2);
     QTableWidgetItem *texNameHeaderItem = new QTableWidgetItem(er->modelList[i].textureName,i);
-    imageTableWidget->setItem(i, 0, texNameHeaderItem);
-    imageTableWidget->setItem(i, 1, emptyHeaderItem);
-    QLabel *imageLabel = new QLabel(imageTableWidget);
+    ui.imageTableWidget->setItem(i, 0, texNameHeaderItem);
+    ui.imageTableWidget->setItem(i, 1, emptyHeaderItem);
+    QLabel *imageLabel = new QLabel(ui.imageTableWidget);
     if(!QFile::exists(ThumbImgName))
     {
       QPixmap(er->modelList[i].textureName).scaledToHeight(64).save(ThumbImgName,"jpg");
@@ -101,19 +137,19 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
     }
 
     imageLabel->setPixmap(QPixmap(EpochModel::ThumbName(er->modelList[i].textureName)));
-    imageTableWidget->setCellWidget(i,1,imageLabel);
+    ui.imageTableWidget->setCellWidget(i,1,imageLabel);
     if(QFile::exists(er->modelList[i].maskName))
     {
       QTableWidgetItem *emptyHeaderItem = new QTableWidgetItem(i*4);
-      imageTableWidget->setItem(i, 2, emptyHeaderItem);
-      QLabel *maskLabel = new QLabel(imageTableWidget);
+      ui.imageTableWidget->setItem(i, 2, emptyHeaderItem);
+      QLabel *maskLabel = new QLabel(ui.imageTableWidget);
       maskLabel->setPixmap(QPixmap(er->modelList[i].maskName).scaledToHeight(64));
-      imageTableWidget->setCellWidget(i,2,maskLabel);     
+      ui.imageTableWidget->setCellWidget(i,2,maskLabel);     
     }
     else
     {
       QTableWidgetItem *maskHeaderItem = new QTableWidgetItem(QString("double click for\nediting the mask"),i*3);
-      imageTableWidget->setItem(i, 2, maskHeaderItem);
+      ui.imageTableWidget->setItem(i, 2, maskHeaderItem);
     }
 
     if(!QFile::exists(ThumbCntName))
@@ -126,62 +162,62 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
         if(!QFile::exists(ThumbCntName)) 
             QMessageBox::warning(this,"Error in Thumb creation",QString("Unable to create '%1' from '%2'").arg(ThumbCntName,er->modelList[i].textureName));
       }
-    QLabel *countLabel = new QLabel(imageTableWidget);
+    QLabel *countLabel = new QLabel(ui.imageTableWidget);
     countLabel->setPixmap(QPixmap(ThumbCntName));
     QPixmap tmp(ThumbCntName);
     if(tmp.isNull())
        QMessageBox::warning(this,"Error in Thumb creation",QString("Null Pixmap '%1'").arg(ThumbCntName));
-    imageTableWidget->setCellWidget(i,3,countLabel);
+    ui.imageTableWidget->setCellWidget(i,3,countLabel);
   }  
 
 //cb(100,"Completed Image Reading.");   
     
 show(); // necessary to make the size of the image preview correct.
-imageTableWidget->setItemSelected(imageTableWidget->item(0,0),true);    
-imageTableWidget->setItemSelected(imageTableWidget->item(0,1),true);    
-imageTableWidget->setItemSelected(imageTableWidget->item(0,2),true);    
+ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,0),true);    
+ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,1),true);    
+ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,2),true);    
 //on_imageTableWidget_itemSelectionChanged();
 
 }
 
 void v3dImportDialog::on_imageTableWidget_itemSelectionChanged()
 {
-  if(imageTableWidget->selectedItems().size()==3)
+  if(ui.imageTableWidget->selectedItems().size()==3)
   {
-    int row= imageTableWidget->row(imageTableWidget->selectedItems().first());
+    int row= ui.imageTableWidget->row(ui.imageTableWidget->selectedItems().first());
     QPixmap tmp(er->modelList[row].textureName);
     imgSize=tmp.size();
-    previewLabel->setPixmap(tmp.scaled(previewLabel->size(),Qt::KeepAspectRatio) );
-    on_subsampleSpinBox_valueChanged(subsampleSpinBox->value());
+    ui.previewLabel->setPixmap(tmp.scaled(ui.previewLabel->size(),Qt::KeepAspectRatio) );
+    on_subsampleSpinBox_valueChanged(ui.subsampleSpinBox->value());
   }
 }
 void v3dImportDialog::on_plyButton_clicked()
 {
 	exportToPLY = true;
-	accept();
+	//accept();
 }
 void v3dImportDialog::on_selectButton_clicked()
 {
-  int itemNum=imageTableWidget->rowCount();
-  int modVal=subsampleSequenceSpinBox->value();
+  int itemNum=ui.imageTableWidget->rowCount();
+  int modVal=ui.subsampleSequenceSpinBox->value();
   if(modVal==0) return;
 
   for(int i=0;i<itemNum;i+=modVal)
-     imageTableWidget->setRangeSelected(QTableWidgetSelectionRange(i,0,i,2),true);
+     ui.imageTableWidget->setRangeSelected(QTableWidgetSelectionRange(i,0,i,2),true);
 }
 
 void v3dImportDialog::on_imageTableWidget_itemClicked(QTableWidgetItem * item )
 {
-    int row= imageTableWidget->row(item);
-    previewLabel->setPixmap(
-      QPixmap(er->modelList[row].textureName).scaled(previewLabel->size(),Qt::KeepAspectRatio) );
+    int row= ui.imageTableWidget->row(item);
+    ui.previewLabel->setPixmap(
+      QPixmap(er->modelList[row].textureName).scaled(ui.previewLabel->size(),Qt::KeepAspectRatio) );
 
 }
 
 void v3dImportDialog::on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * item )
 {
-  int row= imageTableWidget->row(item);
-  int col= imageTableWidget->column(item);
+  int row= ui.imageTableWidget->row(item);
+  int col= ui.imageTableWidget->column(item);
   if(col!=2) return;
   qDebug("DoubleClicked on image %s",qPrintable(er->modelList[row].textureName));
 	QImage ttt(er->modelList[row].textureName);
@@ -196,10 +232,10 @@ void v3dImportDialog::on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * i
 	if (!mymask.isNull())	
   {
     mymask.save(er->modelList[row].maskName,"png");
-    QLabel *imageLabel = new QLabel(imageTableWidget);
+    QLabel *imageLabel = new QLabel(ui.imageTableWidget);
     imageLabel->setPixmap(QPixmap(er->modelList[row].maskName).scaledToHeight(64));
-    imageTableWidget->itemAt(row,2)->setText("");
-    imageTableWidget->setCellWidget(row,2,imageLabel);
+    ui.imageTableWidget->itemAt(row,2)->setText("");
+    ui.imageTableWidget->setCellWidget(row,2,imageLabel);
   }
 }
 
@@ -207,40 +243,40 @@ void v3dImportDialog::on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * i
 
 void v3dImportDialog::on_minCountSpinBox_valueChanged(int val)
 {
- if(minCountSlider->value()!=val) minCountSlider->setValue(val);
+ if(ui.minCountSlider->value()!=val) ui.minCountSlider->setValue(val);
 }
 
 void v3dImportDialog::on_minCountSlider_valueChanged(int val)
 {
- if(minCountSpinBox->value()!=val) minCountSpinBox->setValue(val);
+ if(ui.minCountSpinBox->value()!=val) ui.minCountSpinBox->setValue(val);
 }
 
 void v3dImportDialog::on_subsampleSpinBox_valueChanged(int)
 {
-  int ss=subsampleSpinBox->value();
+  int ss=ui.subsampleSpinBox->value();
   if(ss==0) 
   {
-    subsampleSpinBox->setValue(1);
+    ui.subsampleSpinBox->setValue(1);
     return;
   }
-  imgSizeLabel->setText(QString("(%1 x %2) -> (%3 x %4)").arg(imgSize.width()).arg(imgSize.height()).arg(imgSize.width()/ss).arg(imgSize.height()/ss) );
+  ui.imgSizeLabel->setText(QString("(%1 x %2) -> (%3 x %4)").arg(imgSize.width()).arg(imgSize.height()).arg(imgSize.width()/ss).arg(imgSize.height()/ss) );
 }
 
 void v3dImportDialog::on_mergeResolutionSpinBox_valueChanged(int)
 {
-	fastMergeCheckBox->setChecked(true); // if someone touch the slider check the fast merging box
+	ui.fastMergeCheckBox->setChecked(true); // if someone touch the slider check the fast merging box
 }
 
 void v3dImportDialog::dilationSizeChanged(int size)
 {
 	int winsize = size * 2 + 1;
 	QString str = QString("%1 x %2").arg(winsize).arg(winsize);
-	lblDilationSizeValue->setText(str);
+	ui.lblDilationSizeValue->setText(str);
 }
 
 void v3dImportDialog::erosionSizeChanged(int size)
 {
 	int winsize = size * 2 + 1;
 	QString str = QString("%1 x %2").arg(winsize).arg(winsize);
-	lblErosionSizeValue->setText(str);
+	ui.lblErosionSizeValue->setText(str);
 }

@@ -27,7 +27,7 @@
 #include <QObject>
 #include <common/interfaces.h>
 #include "epoch_io.h"
-
+#include "v3dImportDialog.h"
 
 
 class EditEpochPlugin : public QObject, public MeshEditInterface
@@ -35,19 +35,11 @@ class EditEpochPlugin : public QObject, public MeshEditInterface
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
 	
-	enum 
-	{
-		ALIGN_IDLE = 0x01,
-		ALIGN_INSPECT_ARC = 0x02,
-		ALIGN_MOVE = 0x03
-	};
-		
-	void Pick( MeshModel &m, GLArea * gla);
-
+	
 public:
     EditEpochPlugin();
 		virtual ~EditEpochPlugin() {
-			mode=ALIGN_IDLE;
+			
 		}
 
     static const QString Info();
@@ -64,7 +56,8 @@ public:
 
     v3dImportDialog *epochDialog; //the widget with the list of the meshes. 
 		
-		void toggleButtons();
+	
+	void toggleButtons();
 
 		
 		
@@ -82,16 +75,8 @@ public:
 	}
 
 public slots:
-		void process();
-		void recalcCurrentArc();
-		void glueHere();
-		void glueHereAll();
-		void glueManual();
-		void glueByPicking();
-		void alignParam();
-		void alignParamCurrent();
-    void setBaseMesh();
-    void hideRevealGluedMesh();
+	void ExportPly();	
+		
 		
 		
 signals:
