@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
+    <width>968</width>
     <height>640</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>8</x>
       <y>11</y>
-      <width>417</width>
+      <width>441</width>
       <height>601</height>
      </rect>
     </property>
@@ -569,26 +569,6 @@
      <item>
       <layout class="QHBoxLayout" name="_12">
        <item>
-        <spacer>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>131</width>
-           <height>31</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="okButton">
-         <property name="text">
-          <string>OK</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="plyButton">
          <property name="toolTip">
           <string>Process all selected range maps and save them as separated ply</string>
@@ -605,6 +585,19 @@
          </property>
         </widget>
        </item>
+       <item>
+        <spacer>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>131</width>
+           <height>31</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
     </layout>
@@ -612,9 +605,9 @@
    <widget class="QTableWidget" name="imageTableWidget">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>460</x>
       <y>7</y>
-      <width>351</width>
+      <width>501</width>
       <height>601</height>
      </rect>
     </property>

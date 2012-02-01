@@ -502,7 +502,7 @@ bool EpochModel::Init(QDomNode &node)
 
 						// camera position
 						fscanf(lvcam,"%lf %lf %lf",&(cam[0]),&(cam[1]),&(cam[2]));
-						shot.Extrinsics.SetTra(Point3f(-cam[0], -cam[1], -cam[2]));
+						shot.Extrinsics.SetTra(Point3f(cam[0], cam[1], cam[2]));
 		//				shot.Extrinsics.sca = 1.0f;
 
 

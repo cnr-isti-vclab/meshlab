@@ -55,10 +55,6 @@ EditEpochPlugin::EditEpochPlugin() {
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10); 
 	//connect(epochDialog, SLOT(reject()), this, SLOT(endEdit()) );
-
-	
-	
-		
 	
 }
 
@@ -78,9 +74,9 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	gla=_gla;
 	///////
 	epochDialog=new v3dImportDialog(gla->window(),this);
-	MeshModel *m;// = md->mm();
-	MeshModel* mm = _md.addNewMesh("","dummy",true);
-	
+	//MeshModel *m;// = md->mm();
+	MeshModel* mm=_md.addNewMesh("","dummy",true);
+
 	
 	QString fileName=epochDialog->fileName;
 
@@ -133,161 +129,7 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	//// OK till here
 	
 	epochDialog->exportToPLY=false;
-	//  do
-	//{
-	//		epochDialog->exportToPLY=false;
-	//		
-	//		//Here we invoke the modal dialog and wait for its termination
-	//		int continueValue = epochDialog->exec();
 
-	//		// The user has pressed the ok button: now start the real processing:
-	//		
-	//		if(epochDialog->exportToPLY == true) qDebug("Starting the ply exporting process");
-	//		
-	//		int t0=clock();
-	//		logFP=fopen("epoch.log","w");
-
-	//		int subSampleVal = epochDialog->subsampleSpinBox->value();
-	//		int minCountVal= epochDialog->minCountSpinBox->value();
-	//		float maxCCDiagVal= epochDialog->maxCCDiagSpinBox->value();
-	//		int mergeResolution=epochDialog->mergeResolutionSpinBox->value();
-	//		int smoothSteps=epochDialog->smoothSpinBox->value();
-	//		bool closeHole = epochDialog->holeCheckBox->isChecked();
-	//		int maxHoleSize = epochDialog->holeSpinBox->value();
-	//		/*if (continueValue == QDialog::Rejected)
-	//		{
-	//				QMessageBox::warning(parent, "Open V3d format","Aborted");    
-	//				return false;
-	//		}*/
-	//		CMeshO mm;
-	//		QTableWidget *qtw=epochDialog->imageTableWidget;
-	//		float MinAngleCos=cos(vcg::math::ToRad(epochDialog->qualitySpinBox->value()));
-	//		bool clustering=epochDialog->fastMergeCheckBox->isChecked();
-	//		bool removeSmallCC=epochDialog->removeSmallCCCheckBox->isChecked();
-	//		vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > Grid;
-
-	//		int selectedNum=0,selectedCount=0;
-	//		int i;
-	//		 for(i=0;i<qtw->rowCount();++i) if(qtw->isItemSelected(qtw->item(i,0))) ++selectedNum;
-	//		/*if(selectedNum==0)
-	//			{
-	//				QMessageBox::warning(parent, "Open V3d format","No range map selected. Nothing loaded");    
-	//				return false;
-	//		}*/
-
-	//		bool dilationFlag = epochDialog->dilationCheckBox->isChecked();
-	//		int dilationN = epochDialog->dilationNumPassSpinBox->value();
-	//		int dilationSz = epochDialog->dilationSizeSlider->value() * 2 + 1;
-	//		bool erosionFlag = epochDialog->erosionCheckBox->isChecked();
-	//		int erosionN = epochDialog->erosionNumPassSpinBox->value();
-	//		int erosionSz = epochDialog->erosionSizeSlider->value() * 2 + 1;
-	//		float scalingFactor = epochDialog->scaleLineEdit->text().toFloat();
-	//		std::vector<string> savedMeshVector;
-
-	//		bool firstTime=true;
-	//		QList<EpochModel>::iterator li;
-	//		for(li=er.modelList.begin(), i=0;li!=er.modelList.end();++li,++i)
-	//		{
-	//				if(qtw->isItemSelected(qtw->item(i,0)))
-	//				{
-	//					++selectedCount;
-	//					mm.Clear();
-	//					int tt0=clock();
-	//					(*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
-	//						dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz,scalingFactor);
-	//					int tt1=clock();
-	//					if(logFP) fprintf(logFP,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
-
-	//					if(epochDialog->exportToPLY) 
-	//							{
-	//								QString plyFilename =(*li).textureName.left((*li).textureName.length()-4);
-	//								plyFilename.append(".x.ply");	
-	//								savedMeshVector.push_back(qPrintable(plyFilename));
-	//								int mask= tri::io::Mask::IOM_VERTCOORD + tri::io::Mask::IOM_VERTCOLOR + tri::io::Mask::IOM_VERTQUALITY;
- //                                   tri::io::ExporterPLY<CMeshO>::Save(mm,qPrintable(plyFilename),mask);
-	//							}
-	//					else 
-	//							{
-	//							if(clustering)
-	//								{
-	//									if (firstTime) 
-	//										{
-	//											//Grid.Init(mm.bbox,100000);
-	//											vcg::tri::UpdateBounding<CMeshO>::Box(mm);	
-	//											//Grid.Init(mm.bbox,1000.0*pow(10.0,mergeResolution),mm.bbox.Diag()/1000.0f);
-	//											Grid.Init(mm.bbox,100000.0*pow(10.0,mergeResolution));
-	//											firstTime=false;
-	//										}
- //                                                                               Grid.AddMesh(mm);
-	//								}
-	//							else  
-	//								tri::Append<CMeshO,CMeshO>::Mesh(m->cm,mm); // append mesh mr to ml
-	//						}
-	//						int tt2=clock();
-	//						if(logFP) fprintf(logFP,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
-
-	//				}
-	//				//if (cb)(*cb)(selectedCount*90/selectedNum, "Building meshes");
-	//		}
-	//		 
-	//		//if (cb != NULL) (*cb)(90, "Final Processing: clustering");
-	//		if(clustering)  
-	//		{
- //                               Grid.ExtractPointSet(m->cm);
-	//		}
-	//		
-	//		if(epochDialog->exportToPLY) 
-	//		{
-	//			QString ALNfilename = fileName.left(fileName.length()-4).append(".aln");
-	//			ALNParser::SaveALN(qPrintable(ALNfilename), savedMeshVector);
-	//		}
-	//		int t1=clock();
-	//		if(logFP) fprintf(logFP,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
-
-	//		//if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
-	//		if(removeSmallCC)
-	//		{
-	//			vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
-	//			m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
-	//			tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m->cm,m->cm.bbox.Diag()*maxCCDiagVal/100.0);
-	//		}
-
-	//		int t2=clock();
-	//		if(logFP) fprintf(logFP,"Topology and removed CC in %i\n",t2-t1);
-
-	//		vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
-	//		
-	//		//if (cb != NULL) (*cb)(97, "Final Processing: Closing Holes");
-	//		if(closeHole)
-	//		{
-	//			m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
-	//			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);	    
-	//			vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m->cm,maxHoleSize,false);
-	//		}
-
-	//		//if (cb != NULL) (*cb)(100, "Done");
-	//	//  vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
-	//		 
-	//			m->updateDataMask(MeshModel::MM_VERTCOLOR);
-
-	//		int t3=clock();
-	//		if(logFP) fprintf(logFP,"---------- Total Processing Time%i\n\n\n",t3-t0);
-	//		if(logFP) fclose(logFP);
-	//		logFP=0;
-
-
-	////// Importing rasters
-
- //           //QList<EpochModel>::iterator li;
-	//		for(li=er.modelList.begin(), i=0;li!=er.modelList.end();++li,++i)
-	//		{
-	//			//RasterModel &pm =addNewRaster("","Poisson mesh");
-
-
-	//		}
-
-
-	//} while(epochDialog->exportToPLY);
 
 	connect(epochDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	connect(epochDialog->ui.plyButton, SIGNAL(clicked()),this,SLOT(ExportPly()) );
@@ -297,6 +139,7 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 
 void EditEpochPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 {
+	gla->update();
 	assert(epochDialog);
     delete epochDialog;
     epochDialog=0;
@@ -306,7 +149,7 @@ void EditEpochPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 void EditEpochPlugin::ExportPly()
 {
 	MeshModel* m=md->mm();
-	MeshModel* mm=md->mm();
+//	MeshModel* mm;
 
 	  do
 	{
@@ -451,19 +294,27 @@ void EditEpochPlugin::ExportPly()
 			if(logFP) fclose(logFP);
 			logFP=0;
 
+			m->setLabel(er.name);
+			gla->update();
+	        
 
 	//// Importing rasters
 
             //QList<EpochModel>::iterator li;
-			for(li=er.modelList.begin(), i=0;li!=er.modelList.end();++li,++i)
+			for(int i=0; i<er.modelList.size(); ++i)
 			{
-				//RasterModel &pm =addNewRaster("","Poisson mesh");
+				RasterModel* rm=md->addNewRaster();
+				rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
+				rm->setLabel(er.modelList[i].textureName);
+				rm->shot=er.modelList[i].shot;
 
 
 			}
 
 
 	} while(epochDialog->exportToPLY);
+	md->mm()->visible=true;
+	
 	
 }    
 
