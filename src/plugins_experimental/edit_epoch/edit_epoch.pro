@@ -4,6 +4,8 @@ TEMPLATE      = lib
 
 FORMS         = ui/v3dImportDialog.ui
 HEADERS       += epoch_io.h \
+				edit_epoch.h   \
+				edit_epoch_factory.h   \
 				epoch_reconstruction.h \
 				epoch_camera.h \		
 				radial_distortion.h\
@@ -14,6 +16,8 @@ HEADERS       += epoch_io.h \
                 fillImage.h
 				
 SOURCES       += epoch_io.cpp \
+				edit_epoch.cpp   \
+				edit_epoch_factory.cpp   \
                 epoch_camera.cpp \
                 radial_distortion.cpp \
                 scalar_image.cpp \
@@ -25,6 +29,7 @@ SOURCES       += epoch_io.cpp \
                 
 TARGET        = edit_epoch
 QT           += xml
+RESOURCES     = edit_epoch.qrc
 
 win32-msvc2005:LIBS	   += ../../external/lib/win32-msvc2005/bz2.lib
 win32-msvc2008:LIBS	   += ../../external/lib/win32-msvc2008/bz2.lib
