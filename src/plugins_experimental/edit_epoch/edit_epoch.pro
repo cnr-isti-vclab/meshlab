@@ -3,8 +3,7 @@ include (../../shared.pri)
 TEMPLATE      = lib
 
 FORMS         = ui/v3dImportDialog.ui
-HEADERS       += epoch_io.h \
-				edit_epoch.h   \
+HEADERS       += edit_epoch.h   \
 				edit_epoch_factory.h   \
 				epoch_reconstruction.h \
 				epoch_camera.h \		
