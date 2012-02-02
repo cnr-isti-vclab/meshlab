@@ -1543,7 +1543,9 @@ bool MainWindow::openProject(QString fileName)
     {
       QString fullPath = meshDoc()->meshList[i]->fullName();
       meshDoc()->setBusy(true);
+      Matrix44f trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
       loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+      this->meshDoc()->meshList[i]->cm.Tr=trm;
     }
   }
 
