@@ -38,9 +38,7 @@ class EditEpochPlugin : public QObject, public MeshEditInterface
 	
 public:
     EditEpochPlugin();
-		virtual ~EditEpochPlugin() {
-			
-		}
+        virtual ~EditEpochPlugin() {}
 
     static const QString Info();
 
@@ -50,8 +48,9 @@ public:
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+    bool isSingleMeshEdit() const {return false;}
 
-		QFont qFont;
+    QFont qFont;
   	int mode;			
 
     v3dImportDialog *epochDialog; //the widget with the list of the meshes. 
@@ -81,6 +80,7 @@ public slots:
 		
 signals:
 	void suspendEditToggle();
+	void resetTrackBall();
 
 };
 

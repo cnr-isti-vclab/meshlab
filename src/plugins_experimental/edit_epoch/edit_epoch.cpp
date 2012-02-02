@@ -75,7 +75,7 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	///////
 	epochDialog=new v3dImportDialog(gla->window(),this);
 	//MeshModel *m;// = md->mm();
-	MeshModel* mm=_md.addNewMesh("","dummy",true);
+	//MeshModel* mm=_md.addNewMesh("","dummy",true);
 
 	
 	QString fileName=epochDialog->fileName;
@@ -133,7 +133,8 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 
 	connect(epochDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	connect(epochDialog->ui.plyButton, SIGNAL(clicked()),this,SLOT(ExportPly()) );
-    
+	connect(this,SIGNAL(resetTrackBall()),gla,SLOT(resetTrackBall()));
+
 	return true;
 }
 
@@ -148,10 +149,10 @@ void EditEpochPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 
 void EditEpochPlugin::ExportPly()
 {
+	md->setBusy(true);
+	md->addNewMesh("",er.name,true);
 	MeshModel* m=md->mm();
-//	MeshModel* mm;
-
-	  do
+	do
 	{
 			epochDialog->exportToPLY=false;
 			
@@ -266,7 +267,6 @@ void EditEpochPlugin::ExportPly()
 			//if (cb != NULL) (*cb)(95, "Final Processing: Removing Small Connected Components");
 			if(removeSmallCC)
 			{
-				vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
 				m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
 				tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m->cm,m->cm.bbox.Diag()*maxCCDiagVal/100.0);
 			}
@@ -294,8 +294,8 @@ void EditEpochPlugin::ExportPly()
 			if(logFP) fclose(logFP);
 			logFP=0;
 
-			m->setLabel(er.name);
-			gla->update();
+			vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
+			tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 	        
 
 	//// Importing rasters
@@ -307,14 +307,15 @@ void EditEpochPlugin::ExportPly()
 				rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
 				rm->setLabel(er.modelList[i].textureName);
 				rm->shot=er.modelList[i].shot;
-
-
 			}
 
 
 	} while(epochDialog->exportToPLY);
 	md->mm()->visible=true;
-	
+	md->setBusy(false);
+	emit this->resetTrackBall();
+	gla->update();
+
 	
 }    
 
