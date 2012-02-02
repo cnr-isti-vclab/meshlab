@@ -124,7 +124,6 @@ public:
 	void saveSnapshot();
 	void setLightModel();
 	void setView();
-  void resetTrackBall();
   QList<QAction *> iDecoratorsList;
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
@@ -139,7 +138,8 @@ public:
 	  
 public slots:
 	void updateTexture(); // slot for forcing the texture reload. 
-		
+	void resetTrackBall();
+
 	//slots for changing the draw rendering and texturing mode
 	void setDrawMode(vcg::GLW::DrawMode mode); 
 	void setColorMode(vcg::GLW::ColorMode mode);

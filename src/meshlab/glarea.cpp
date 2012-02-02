@@ -648,7 +648,10 @@ void GLArea::updateLayer()
     //if we have an edit tool open, notify it that the current layer has changed
 	if(iEdit)
 	{
-		assert(lastModelEdited);  //if there is an editor last model edited should always be set when start edit is called
+	if(iEdit->isSingleMeshEdit())
+	  assert(lastModelEdited);  // if there is an editor that works on a single mesh
+								// last model edited should always be set when start edit is called
+
     iEdit->LayerChanged(*this->md(), *lastModelEdited, this);
 
 		//now update the last model edited
@@ -686,7 +689,9 @@ void GLArea::setCurrentEditAction(QAction *editAction)
   else
   {
     log->Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
-	mm()->meshModified() = true;
+    if(mm()!=NULL)
+      mm()->meshModified() = true;
+    else assert(!iEdit->isSingleMeshEdit());
   }
 }
 
@@ -1114,9 +1119,9 @@ void GLArea::updateFps(float deltaTime)
 
 void GLArea::resetTrackBall()
 {
-	trackball.Reset();
+  trackball.Reset();
   float newScale= 3.0f/this->md()->bbox().Diag();
-	trackball.track.sca = newScale;
+  trackball.track.sca = newScale;
   trackball.track.tra =  -this->md()->bbox().Center();
   update();
 }

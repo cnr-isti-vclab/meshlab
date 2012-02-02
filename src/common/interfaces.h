@@ -538,12 +538,20 @@ public:
 	// Called when the user press the second time the button 
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){}
     
+
+	// There are two classes of editing tools, the one that works on a single layer at a time
+	// and the ones that works on all layers and have to manage in a correct way the action of changing the current layer.
+	// For the edit tools that works ona single layer changing the layer means the restart of the edit tool.
+	virtual bool isSingleMeshEdit() const { return true; }
+
 	// Called when the user changes the selected layer
 	//by default it calls end edit with the layer that was selected and start with the new layer that is
 	//selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
-	//they are not expecting
+	//they are not expecting.
+	// If your editing plugins is not singleMesh you MUST reimplement this to correctly handle the change of layer.
 	virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
 	{
+		assert(this->isSingleMeshEdit());
 		EndEdit(oldMeshModel, parent);
 		StartEdit(md, parent);
 	}
@@ -554,8 +562,7 @@ public:
 	virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
 	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	//virtual void wheelEvent     (QWheelEvent*e, MeshModel &/*m*/, GLArea * );
-  virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
+	  virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
   virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
   virtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * ){}
   virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();}
