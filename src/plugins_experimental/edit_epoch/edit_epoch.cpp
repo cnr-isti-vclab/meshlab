@@ -60,12 +60,7 @@ EditEpochPlugin::EditEpochPlugin() {
 
 const QString EditEpochPlugin::Info() 
 {
-	return tr("Culo.");
-}
-
-void EditEpochPlugin::Decorate(MeshModel &m, GLArea * gla)
-{
-	
+	return tr("This edit can be used to extract 3D models from Arc3D results");
 }
 
 bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
@@ -299,23 +294,30 @@ void EditEpochPlugin::ExportPly()
 	        
 
 	//// Importing rasters
-
-            //QList<EpochModel>::iterator li;
-			for(int i=0; i<er.modelList.size(); ++i)
+			if (epochDialog->ui.shotExport->isChecked())
 			{
-				RasterModel* rm=md->addNewRaster();
-				rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
-				rm->setLabel(er.modelList[i].textureName);
-				rm->shot=er.modelList[i].shot;
+				int saveSelected=epochDialog->ui.saveShotCombo->currentIndex();
+            //QList<EpochModel>::iterator li;
+				for(int i=0; i<er.modelList.size(); ++i)
+				{
+					if (saveSelected==0 || (qtw->isItemSelected(qtw->item(i,0))))
+					{
+						RasterModel* rm=md->addNewRaster();
+						rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
+						rm->setLabel(er.modelList[i].textureName);
+						rm->shot=er.modelList[i].shot;
+						rm->shot.RescalingWorld(scalingFactor, false);
+					}
+				}
 			}
 
 
 	} while(epochDialog->exportToPLY);
 	md->mm()->visible=true;
 	md->setBusy(false);
+	gla->rm.colorMode=GLW::CMPerVert;
 	emit this->resetTrackBall();
 	gla->update();
-
 	
 }    
 

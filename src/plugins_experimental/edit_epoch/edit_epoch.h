@@ -44,7 +44,6 @@ public:
 
     bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
