@@ -14,8 +14,7 @@ HEADERS       += edit_epoch.h   \
                 maskImageWidget.h \
                 fillImage.h
 				
-SOURCES       += epoch_io.cpp \
-				edit_epoch.cpp   \
+SOURCES       += edit_epoch.cpp   \
 				edit_epoch_factory.cpp   \
                 epoch_camera.cpp \
                 radial_distortion.cpp \

@@ -70,7 +70,6 @@ QSize imgSize;
 
 
 private slots:
-  void on_mergeResolutionSpinBox_valueChanged(int);
   void on_subsampleSpinBox_valueChanged(int);
   void on_minCountSlider_valueChanged(int);
   void on_minCountSpinBox_valueChanged(int);

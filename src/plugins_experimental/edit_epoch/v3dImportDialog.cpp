@@ -57,7 +57,6 @@ void v3dImportDialog::closeEvent ( QCloseEvent * /*event*/ )
 v3dImportDialog::v3dImportDialog(QWidget *parent,EditEpochPlugin *_edit )    : QDockWidget(parent)
 {
 	v3dImportDialog::ui.setupUi(this);
-	//this->setWidget(ui.frame);
 	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
 	this->setAllowedAreas(Qt::LeftDockWidgetArea);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
@@ -117,8 +116,7 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
   int i;
   for(i=0; i<er->modelList.size() ;++i)
   {
-    //cb(i*100/er->modelList.size(),"Reading images");   
-    
+        
     QString ThumbImgName=EpochModel::ThumbName(er->modelList[i].textureName);
     QString ThumbCntName=EpochModel::ThumbName(er->modelList[i].countName);
 
@@ -170,13 +168,12 @@ void v3dImportDialog::setEpochReconstruction(EpochReconstruction *_er)
     ui.imageTableWidget->setCellWidget(i,3,countLabel);
   }  
 
-//cb(100,"Completed Image Reading.");   
     
 show(); // necessary to make the size of the image preview correct.
 ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,0),true);    
 ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,1),true);    
 ui.imageTableWidget->setItemSelected(ui.imageTableWidget->item(0,2),true);    
-//on_imageTableWidget_itemSelectionChanged();
+
 
 }
 
@@ -260,11 +257,6 @@ void v3dImportDialog::on_subsampleSpinBox_valueChanged(int)
     return;
   }
   ui.imgSizeLabel->setText(QString("(%1 x %2) -> (%3 x %4)").arg(imgSize.width()).arg(imgSize.height()).arg(imgSize.width()/ss).arg(imgSize.height()/ss) );
-}
-
-void v3dImportDialog::on_mergeResolutionSpinBox_valueChanged(int)
-{
-	ui.fastMergeCheckBox->setChecked(true); // if someone touch the slider check the fast merging box
 }
 
 void v3dImportDialog::dilationSizeChanged(int size)

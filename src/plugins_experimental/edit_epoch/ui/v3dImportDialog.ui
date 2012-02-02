@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>968</width>
-    <height>666</height>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>8</x>
       <y>11</y>
       <width>443</width>
-      <height>621</height>
+      <height>571</height>
      </rect>
     </property>
     <layout class="QVBoxLayout">
@@ -426,53 +426,6 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="_9">
-       <item>
-        <widget class="QCheckBox" name="fastMergeCheckBox">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;/head&gt;&lt;body style=&quot; white-space: pre-wrap; font-style:normal; text-decoration:none;&quot;&gt;&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Perform a fast, fixed resolution merging of all the range maps. If unchecked all the rangemaps are simply put in the same space without merging them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="layoutDirection">
-          <enum>Qt::RightToLeft</enum>
-         </property>
-         <property name="text">
-          <string>Fast merge</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Resolution: Min</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSlider" name="mergeResolutionSpinBox">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>5</number>
-         </property>
-         <property name="value">
-          <number>3</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Max</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="_10">
        <item>
         <widget class="QPushButton" name="selectButton">
@@ -684,7 +637,7 @@
       <x>460</x>
       <y>7</y>
       <width>501</width>
-      <height>621</height>
+      <height>571</height>
      </rect>
     </property>
     <property name="sizePolicy">

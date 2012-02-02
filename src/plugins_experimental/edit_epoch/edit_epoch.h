@@ -26,8 +26,16 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include "epoch_io.h"
 #include "v3dImportDialog.h"
+
+#include "epoch_reconstruction.h"
+#include <vcg/complex/append.h>
+#include <vcg/math/histogram.h>
+#include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/clustering.h>
+#include <vcg/complex/algorithms/hole.h>
+#include <wrap/io_trimesh/export_ply.h>
+#include <meshlab/alnParser.h>
 
 
 class EditEpochPlugin : public QObject, public MeshEditInterface
@@ -64,7 +72,15 @@ public:
     	GLArea * gla;
 
 public:
-	
+
+	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
+														 bool dilation, int dilationNumPasses, int dilationWinsize,
+														 bool erosion, int erosionNumPasses, int erosionWinsize);
+	float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
+	bool CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName );
+    void SmartSubSample(int factor, FloatImage &fli, CharImage &chi, FloatImage &subD, FloatImage &subQ, int minCount);
+	void Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minCount, CharImage &featureMask, float depthThr);
+	void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
 	
 	// this callback MUST be redefined because we are able to manage internally the layer change.
   virtual void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
