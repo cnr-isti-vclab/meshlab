@@ -1,6 +1,6 @@
 include (../general.pri)
-EXIF_DIR = ../../../vcglib/wrap/Exif
-include (../../../vcglib/wrap/Exif/exif.pri)
+EXIF_DIR = $$VCGDIR/wrap/Exif
+include ($$VCGDIR/wrap/Exif/exif.pri)
 
 GLEWCODE = $$GLEWDIR/src/glew.c
 
@@ -92,7 +92,7 @@ HEADERS += filterparameter.h \
 	mlexception.h \
 	mlapplication.h \
 	scriptsyntax.h \
-    ../../../vcglib/wrap/gl/trimesh.h \
+	$$VCGDIR/wrap/gl/trimesh.h \
     meshlabdocumentxml.h 
 SOURCES += filterparameter.cpp \
     interfaces.cpp \
