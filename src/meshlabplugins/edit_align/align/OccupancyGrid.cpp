@@ -248,6 +248,8 @@ void OccupancyGrid::Dump(FILE *fp)
 	fprintf(fp,"Computed %i Arcs :\n",SVA.size());
 	for(int i=0;i<SVA.size() && SVA[i].norm_area > .1; ++i)
 		fprintf(fp,"%4i -> %4i Area:%5i NormArea:%5.3f\n",SVA[i].s,SVA[i].t,SVA[i].area,SVA[i].norm_area);
+
+	fprintf(fp,"End OG Dump\n");
 }
 
 // sceglie gli archi da fare che abbiano una sovrapposizione di almeno <normarea>

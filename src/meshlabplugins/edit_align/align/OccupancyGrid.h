@@ -71,13 +71,15 @@ class MeshCounterV
 	short last;
 	short cnt[_MAX_MCV_SIZE];
 public:
-	MeshCounterV(){last=0;}
-	bool Empty() const {return last==0;};
-	void Clear() {last=0;}
-	bool IsSet(short const i) const {
-		if(last==0) return false;
-    const short *pt=std::lower_bound(cnt,cnt+last,i);
-		return *pt==i;
+	MeshCounterV(){last=0;cnt[last]=-1;}
+	inline bool Empty() const {return last==0;}
+	inline void Clear() {last=0;}
+	inline bool IsSet(short const i) const
+	{
+	  if(last==0) return false;
+	  const short *pt=std::lower_bound(cnt,cnt+last,i);
+	  return pt != (cnt+last);
+//	  return *pt==i;
 	}
 	
 	int Count() const { return last; }
@@ -87,14 +89,16 @@ public:
 		if(last==0) {
 			cnt[0]=i;
 			++last;
+			cnt[last]=-1;
 			return;
 		}
 		short *pt=std::lower_bound(cnt,cnt+last,i);
 		if(*pt==i) return;
-		if(pt-cnt<last) 
-			memmove(pt+1,pt,(pt-cnt)*2);
+		if(pt-cnt<last)
+		  memmove(pt+1,pt,(pt-cnt)*sizeof(short));
 		*pt=i;
 		++last;
+		cnt[last]=-1;
 		assert(last>=0);
 		
 		if(last>=_MAX_MCV_SIZE) {
