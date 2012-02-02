@@ -159,13 +159,13 @@ void EditAlignPlugin::hideRevealGluedMesh()
 
 void EditAlignPlugin::setBaseMesh()
 {
-  Matrix44f oldTr = md->mm()->cm.Tr;
-  Matrix44f inv = Inverse(oldTr);
+  Matrix44d oldTr = Matrix44d::Construct(md->mm()->cm.Tr);
+  Matrix44d inv = Inverse(oldTr);
   md->mm()->cm.Tr.SetIdentity();
 
   foreach(MeshNode *mn, meshTree.nodeList)
         if(mn->glued && (mn->m != md->mm()) )
-              mn->m->cm.Tr *= inv;
+          mn->m->cm.Tr.Import(inv*Matrix44d::Construct(mn->m->cm.Tr));
 
   alignDialog->rebuildTree();
   gla->update();
