@@ -10,7 +10,6 @@ SUBDIRS       = common \
                 meshlabplugins/io_bre\
                 meshlabplugins/io_collada \
 				meshlabplugins/io_ctm \
-                meshlabplugins/io_epoch \
                 meshlabplugins/io_json \
                 meshlabplugins/io_u3d\
                 meshlabplugins/io_tri\
@@ -72,6 +71,7 @@ SUBDIRS       = common \
                 meshlabplugins/edit_paint\
                 meshlabplugins/edit_quality \
                 meshlabplugins/edit_texture \
+                meshlabplugins/edit_arc3D \
 # Sample plugins
                 sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
