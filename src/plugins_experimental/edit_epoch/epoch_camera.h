@@ -27,7 +27,9 @@ class EpochCamera
 {
 public:
   Matrix33d K;      // parametri intriseci camera
-  Matrix33d Kinv;   
+  Matrix33d Kundist;      // parametri intriseci camera non distorta
+  Matrix33d Kinv; 
+  Matrix33d Kinvundist;
 
   std::vector<double> k;
   Matrix33d R;
@@ -38,7 +40,7 @@ public:
 
   RadialDistortion rd;
 
-  void DepthTo3DPoint(double x, double y, double depth, Point3d &M) const;
+  Point3f DepthTo3DPoint(double x, double y, double depth, Point3d &M) const;
 
   bool Open(const char * filename);
 };

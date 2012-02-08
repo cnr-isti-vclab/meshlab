@@ -41,7 +41,7 @@ Epoch Camera
 // This function take in input a point in image space (e.g. with coords in range [0..1024]x[0..768]
 // a depth value and it returns the point in absolute 3D coords
 // 
-void EpochCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M) const
+Point3f EpochCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M) const
 {
     Point3d m_temp = Kinv * Point3d(x,y,1);
     
@@ -54,6 +54,22 @@ void EpochCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M) c
     Point3d dir =fp-end;
     dir.Normalize();
     M = fp-dir*depth; 
+
+	Point3d Mundist;
+
+	m_temp = Kinvundist * Point3d(x,y,1);
+    
+    rd.ComputeOldXY(m_temp[0] / m_temp[2], m_temp[1] / m_temp[2], oldx, oldy);
+    
+    m_temp=Point3d(oldx,oldy,1);
+    fp=t;    
+    end = TRinv*m_temp;    
+    dir =fp-end;
+    dir.Normalize();
+    Mundist = fp-dir*depth; 
+
+	Point3f correct((float)Mundist[0]-M[0],(float)Mundist[1]-M[1],(float)Mundist[2]-M[2]);
+	return correct; 
 }
 
 
@@ -80,7 +96,16 @@ bool EpochCamera::Open(const char *filename)
   fscanf(fp,"%i %i",&width,&height);
 
   fclose(fp);
+
+  Kundist=K;
+
+  ///////
+  Kundist[0][2]=(double)width/2.0;
+  Kundist[1][2]=(double)height/2.0;
+
+  ///////
   Kinv=Inverse(K);
+  Kinvundist=Inverse(Kundist);
   
   rd.SetParameters(k);
 
@@ -88,7 +113,7 @@ bool EpochCamera::Open(const char *filename)
   // on the right the rotated translation -Rt and 0001 in the 
   // lower line.
 
-  R.transposeInPlace();
+  R=Inverse(R);
   #ifndef VCG_USE_EIGEN
   for(int i=0;i<3;++i)
     for(int j=0;j<3;++j)

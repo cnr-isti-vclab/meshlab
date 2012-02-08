@@ -49,6 +49,7 @@ public:
 
 	bool BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
 		bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize,float scalingFactor);
+	vcg::Point3f TraCorrection(CMeshO &m, int subsampleFactor, int minCount, int smoothSteps);
   void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
   void AddCameraIcon(CMeshO &m);
   bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );

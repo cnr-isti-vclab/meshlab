@@ -104,7 +104,9 @@ bool EditEpochPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
               {
                 EpochModel em;
                 em.Init(n);
+				//em.cam.TR
                 er.modelList.push_back(em);
+
               }
           }
         }
@@ -236,11 +238,66 @@ void EditEpochPlugin::ExportPly()
 		{
 			if (saveSelected==0 || (qtw->isItemSelected(qtw->item(i,0))))
 			{
+				er.modelList[i].cam.Open(er.modelList[i].cameraName.toAscii());
+				mm.Clear();
+				Point3f corr=er.modelList[i].TraCorrection(mm,subSampleVal*2,minCountVal,0);
+				er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
 				RasterModel* rm=md->addNewRaster();
 				rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
 				rm->setLabel(er.modelList[i].textureName);
 				rm->shot=er.modelList[i].shot;
 				rm->shot.RescalingWorld(scalingFactor, false);
+
+				//// Undistort
+
+				QImage originalImg=rm->currentPlane->image;
+				//originalImg.load(imageName);
+				QFileInfo qfInfo(rm->currentPlane->fullPathFileName);
+				QString suffix = "." + qfInfo.completeSuffix();
+				QString path = qfInfo.absoluteFilePath().remove(suffix);
+				path.append("Undist" + suffix);
+				qDebug(path.toLatin1());
+
+				QImage undistImg(originalImg.width(),originalImg.height(),originalImg.format()); 
+				undistImg.fill(qRgba(0,0,0,255));
+
+				vcg::Camera<float> &cam = rm->shot.Intrinsics;
+				
+
+				QRgb value;
+				for(int x=0; x<originalImg.width();x++)
+					for(int y=0; y<originalImg.height();y++){
+						value = originalImg.pixel(x,y);
+						///////
+						
+						Point3d m_temp = er.modelList[i].cam.Kinv * Point3d(x,y,1);
+    
+						double oldx, oldy;
+						//Point3d orig;
+						//er.modelList[i].cam.DepthTo3DPoint(600,486,0,orig);
+						er.modelList[i].cam.rd.ComputeOldXY(m_temp[0] / m_temp[2], m_temp[1] / m_temp[2], oldx, oldy);
+						/////////////
+						m_temp=er.modelList[i].cam.K * Point3d(oldx,oldy,1);
+						 vcg::Point2<float> newPoint(m_temp.X(),m_temp.Y());
+
+									if((newPoint.X()- (int)newPoint.X())>0,5)
+													newPoint.X()++;
+											if((newPoint.Y()- (int)newPoint.Y())>0,5)
+													newPoint.Y()++;
+									if(newPoint.X()>=0 && newPoint.X()<undistImg.width() && newPoint.Y()>=0 && newPoint.Y()< undistImg.height())
+							undistImg.setPixel((int)newPoint.X(),(int)newPoint.Y(),qRgba(qRed(value),qGreen(value),qBlue(value), qAlpha(value)));
+					}
+
+				//vcg::PullPush(undistImg,qRgba(0,0,0,255));
+				undistImg.save(path);
+				rm->currentPlane->image= undistImg;
+
+
+				//// end undistort
+
+
+
+
 			}
 		}
 	}
@@ -581,15 +638,16 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
     }
 
   cam.Open(cameraName.toAscii());
+
   CMeshO::VertexIterator vi;
   Matrix33d Rinv= Inverse(cam.R);
-
+ 
   for(vi=m.vert.begin();vi!=m.vert.end();++vi)if(!(*vi).IsD())
   {
     Point3f in=(*vi).P();
     Point3d out;
     cam.DepthTo3DPoint(in[0], in[1], in[2], out);
-    
+	    
     (*vi).P().Import(out);
     QRgb c = TextureImg.pixel(int(in[0]), int(in[1]));
     (*vi).C().SetRGB(qRed(c),qGreen(c),qBlue(c));
@@ -597,7 +655,7 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
     else (*vi).Q()=1; 
     (*vi).Q()=float(FeatureMask.Val(in[0]/subsampleFactor, in[1]/subsampleFactor))/255.0;
   }
-    
+
   int ttt5=clock();
 
   CMeshO::FaceIterator fi;
@@ -633,6 +691,71 @@ bool EpochModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 
     return true;
 }
+
+Point3f EpochModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, int smoothSteps)
+{
+  FloatImage depthImgf;
+  CharImage countImgc;
+  depthImgf.Open(depthName.toAscii());
+  countImgc.Open(countName.toAscii());
+  
+  QImage TextureImg;
+  TextureImg.load(textureName);
+
+  CombineHandMadeMaskAndCount(countImgc,maskName);  // set count to zero for all masked points
+  
+  FloatImage depthSubf;  // the subsampled depth image 
+  FloatImage countSubf;  // the subsampled quality image (quality == count)
+  
+  SmartSubSample(subsampleFactor,depthImgf,countImgc,depthSubf,countSubf,minCount);
+  
+  CharImage FeatureMask; // the subsampled image with (quality == features)
+  GenerateGradientSmoothingMask(subsampleFactor, TextureImg, FeatureMask);
+
+  depthSubf.convertToQImage().save("tmp_depth.jpg", "jpg");
+
+  float depthThr = ComputeDepthJumpThr(depthSubf,0.8f);
+  for(int ii=0;ii<smoothSteps;++ii) 
+    Laplacian2(depthSubf,countSubf,minCount,FeatureMask,depthThr);
+
+  vcg::tri::Grid<CMeshO>(m,depthSubf.w,depthSubf.h,depthImgf.w,depthImgf.h,&*depthSubf.v.begin());
+
+  	// The depth is filtered and the minimum count mask is update accordingly.
+	// To be more specific the border of the depth map are identified by erosion
+	// and the relative vertex removed (by setting mincount equal to 0).
+  float depthThr2 = ComputeDepthJumpThr(depthSubf,0.95f);
+	
+	int vn = m.vn;
+  for(int i=0;i<vn;++i)
+    if(countSubf.v[i]<minCount) 
+    {
+      m.vert[i].SetD();
+      m.vn--;
+    }
+
+  cam.Open(cameraName.toAscii());
+
+  CMeshO::VertexIterator vi;
+  Matrix33d Rinv= Inverse(cam.R);
+  Point3f correction(0.0,0.0,0.0);
+  int numSamp=0;
+
+  for(vi=m.vert.begin();vi!=m.vert.end();++vi)if(!(*vi).IsD())
+  {
+    Point3f in=(*vi).P();
+    Point3d out;
+    correction+=cam.DepthTo3DPoint(in[0], in[1], in[2], out);
+	numSamp++;
+    
+    }
+	if (numSamp!=0)
+		correction/=(double)numSamp;
+
+  return correction;
+  
+}
+
+
 void EpochModel::AddCameraIcon(CMeshO &m)
 {
     tri::Allocator<CMeshO>::AddVertices(m,3);
@@ -681,11 +804,13 @@ bool EpochModel::Init(QDomNode &node)
 						fscanf(lvcam,"%lf %lf %lf",&(cam[3]),&(cam[4]),&(cam[5]));
 						fscanf(lvcam,"%lf %lf %lf",&(cam[6]),&(cam[7]),&(cam[8]));
 
-						shot.Intrinsics.CenterPx[0] = cam[2];
-						shot.Intrinsics.CenterPx[1] = cam[5];
-						focus = cam[0];
+						shot.Intrinsics.DistorCenterPx[0] = cam[2];
+						shot.Intrinsics.DistorCenterPx[1] = cam[5];
+						//shot.Intrinsics.CenterPx[0] = cam[2];
+						//shot.Intrinsics.CenterPx[1] = cam[5];
+						focus = cam[4];
 						scale = 1.0f;
-						while(focus>10.0f)
+						while(focus>80.0f)
 						{
 							focus /= 10.0f;
 							scale /= 10.0f;
@@ -698,6 +823,8 @@ bool EpochModel::Init(QDomNode &node)
 						fscanf(lvcam,"%lf %lf %lf",&(cam[0]),&(cam[1]),&(cam[2]));
 						shot.Intrinsics.k[0] = cam[0];
 						shot.Intrinsics.k[1] = cam[1];
+						//shot.Intrinsics.k[0] = 0.0;
+						//shot.Intrinsics.k[1] = 0.0;
 
 						// orientation axis
 						fscanf(lvcam,"%lf %lf %lf",&(cam[0]),&(cam[1]),&(cam[2]));
@@ -710,7 +837,8 @@ bool EpochModel::Init(QDomNode &node)
 						myrot[1][0] = -cam[1];	myrot[1][1] = -cam[4];	myrot[1][2] = -cam[7];	myrot[1][3] = 0.0f;
 						myrot[2][0] = -cam[2];	myrot[2][1] = -cam[5];	myrot[2][2] = -cam[8];	myrot[2][3] = 0.0f;
 						myrot[3][0] = 0.0f;			myrot[3][1] = 0.0f;			myrot[3][2] = 0.0f;			myrot[3][3] = 1.0;
-
+						
+						
 						shot.Extrinsics.SetRot(myrot);
 
 						// camera position
@@ -723,7 +851,12 @@ bool EpochModel::Init(QDomNode &node)
 						fscanf(lvcam,"%lf %lf",&(cam[0]),&(cam[1]));
 						shot.Intrinsics.ViewportPx.X() = (int)(cam[0]);
 						shot.Intrinsics.ViewportPx.Y() = (int)(cam[1]);
+						shot.Intrinsics.CenterPx[0] = (double)shot.Intrinsics.ViewportPx[0]/2.0;
+						shot.Intrinsics.CenterPx[1] = (double)shot.Intrinsics.ViewportPx[1]/2.0;
+						//shot.Intrinsics.DistorCenterPx[0]=shot.Intrinsics.CenterPx[0];
+						//shot.Intrinsics.DistorCenterPx[1]=shot.Intrinsics.CenterPx[1];
 
+						
 						fclose(lvcam);			
 					}
             }
