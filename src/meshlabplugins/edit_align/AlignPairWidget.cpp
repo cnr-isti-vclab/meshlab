@@ -228,16 +228,20 @@ void AlignPairWidget::mouseMoveEvent (QMouseEvent * e)
     return;
 	}
 
-  if ((e->buttons()&Qt::LeftButton) && (e->modifiers()&Qt::ControlModifier) && (e->modifiers()&Qt::ControlModifier))
+  if(e->buttons()&Qt::RightButton)
   {
     float lx,ly;
     lx = (e->x() / (float(width())/2.0f)) - 1.0;
     ly = ((height()-e->y()) / (float(height())/2.0f)) - 1.0;
 	  float lightPosF[]={lx,ly,1.0,0.0};
+    glPushMatrix();
+    glLoadIdentity();
 	  glLightfv(GL_LIGHT0,GL_POSITION,lightPosF);
+    glPopMatrix();
     updateGL ();
   }
-	else if (e->buttons()&Qt::LeftButton)
+
+  if (e->buttons()&Qt::LeftButton)
   {
     currentTrack->MouseMove (e->x (), height () - e->y ());
     updateGL ();
