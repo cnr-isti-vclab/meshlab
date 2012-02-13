@@ -224,6 +224,17 @@ void EditArc3DPlugin::ExportPly()
 
 	m->updateDataMask(MeshModel::MM_VERTCOLOR);
 
+	Matrix44f transf;
+	transf.SetRotateDeg(180,Point3f(1.0,0.0,0.0));
+	
+	m->cm.Tr=transf;
+	tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr);
+	tri::UpdateNormals<CMeshO>::PerVertexMatrix(m->cm,m->cm.Tr);
+	tri::UpdateNormals<CMeshO>::PerFaceMatrix(m->cm,m->cm.Tr);
+	tri::UpdateBounding<CMeshO>::Box(m->cm);
+	m->cm.Tr.SetIdentity();
+	m->cm.shot.ApplyRigidTransformation(transf);
+
 	int t3=clock();
 	gla->log->Logf(GLLogStream::SYSTEM,"---------- Total Processing Time%i\n\n\n",t3-t0);
 	
@@ -264,6 +275,7 @@ void EditArc3DPlugin::ExportPly()
 					undistImg.fill(qRgba(0,0,0,255));
 
 					vcg::Camera<float> &cam = rm->shot.Intrinsics;
+					rm->shot.ApplyRigidTransformation(transf);
 					
 					QRgb value;
 					for(int x=0; x<originalImg.width();x++)
@@ -286,6 +298,8 @@ void EditArc3DPlugin::ExportPly()
 										if(newPoint.X()>=0 && newPoint.X()<undistImg.width() && newPoint.Y()>=0 && newPoint.Y()< undistImg.height())
 								undistImg.setPixel((int)newPoint.X(),(int)newPoint.Y(),qRgba(qRed(value),qGreen(value),qBlue(value), qAlpha(value)));
 						}
+
+
 
 					PullPush(undistImg,qRgba(0,0,0,255));
 					undistImg.save(path);
