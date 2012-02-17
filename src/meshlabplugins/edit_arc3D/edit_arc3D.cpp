@@ -275,7 +275,7 @@ void EditArc3DPlugin::ExportPly()
 					undistImg.fill(qRgba(0,0,0,255));
 
 					vcg::Camera<float> &cam = rm->shot.Intrinsics;
-					rm->shot.ApplyRigidTransformation(transf);
+					
 					
 					QRgb value;
 					for(int x=0; x<originalImg.width();x++)
@@ -311,6 +311,7 @@ void EditArc3DPlugin::ExportPly()
 					rm->setLabel(newLabel);
 
 				}
+				rm->shot.ApplyRigidTransformation(transf);
 				//// end undistort
 
 			}
