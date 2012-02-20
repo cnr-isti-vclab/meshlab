@@ -1,5 +1,5 @@
 
-#line 90 "js_parser.g"
+#line 28 "js_parser.g"
 
 #ifndef JS_PARSER_H
 #define JS_PARSER_H
@@ -31,15 +31,7 @@ public:
 protected:
 	QSet<QString> string_repository;
     QSet<const QString*> types;
-	
+	QSet<QString> functions;
 };
 
 #endif // JS_PARSER_H
-
-#line 192 "js_parser.g"
-
-#define Q_SCRIPT_REGEXPLITERAL_RULE1 7
-
-#line 201 "js_parser.g"
-
-#define Q_SCRIPT_REGEXPLITERAL_RULE2 8

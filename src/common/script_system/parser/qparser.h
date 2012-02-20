@@ -98,7 +98,7 @@ bool QParser<_Parser, _Table, _Value>::parse()
 
         else if (act < 0) {
             int r = - act - 1;
-            qDebug() << "reducing using rule: " << spell[rule_info[rule_index[r]]] << "\n";
+            //qDebug() << "reducing using rule: " << spell[rule_info[rule_index[r]]] << "\n";
 			d->tos -= _Table::rhs[r];
             act = d->stateStack[d->tos++];
             consumeRule(r);
