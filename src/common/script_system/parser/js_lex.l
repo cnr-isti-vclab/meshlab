@@ -2,11 +2,16 @@
 %option noyywrap 
 %option nounistd
 %{
-#include "js_parser.h"
+#include "js_parser.tab.hh"
 #include <cstdlib>
+#include <cstdio>
 #include <io.h>
 
-#define YY_DECL int JSParser::nextToken()
+
+#define YY_DECL int yylex(yy::JSParser::semantic_type* yylval,yy::JSParser::location_type* yylloc)
+#define YY_USER_ACTION yylloc->columns(yyleng);
+
+typedef yy::JSParser::token token;
 %}
 
 hex [0-9a-fA-F]
@@ -25,28 +30,32 @@ icst ({dec}|0{oct}*|0[xX]{hex}+)
 
 %%
 
+%{
+	yylloc->step();
+%}
+
 "&&"							{}
 "&="							{}
 "&" 							{}
 "break"							{}
 "case"							{}
 "catch"							{}
-":"								{return T_COLON;}
-","								{return T_COMMA;}
+":"								{return token::T_COLON;}
+","								{return token::T_COMMA;}
 "continue"						{}
 "default" 						{}
 "delete"						{}
 "/="							{}
 "/"								{}
 "do"							{}
-"."								{return T_DOT;}
+"."								{return token::T_DOT;}
 "else"							{}
 "==="							{}
 "=="							{}
-"="								{return T_EQ;}
+"="								{return token::T_EQ;}
 "finally"						{}
 "for"							{}
-"function"						{return T_FUNCTION;}
+"function"						{return token::T_FUNCTION;}
 ">>>="							{}
 ">>="							{}
 ">="							{}
@@ -55,17 +64,17 @@ icst ({dec}|0{oct}*|0[xX]{hex}+)
 "if"							{}
 "in"							{}
 "instanceof"					{}
-"{"								{return T_LBRACKET;}
-"["								{return T_LBRACE;}
+"{"								{return token::T_LBRACKET;}
+"["								{return token::T_LBRACE;}
 "<<="							{}
 "<<"							{}
 "<="							{}
 "<"								{}
-"("								{return T_LPAREN;}
+"("								{return token::T_LPAREN;}
 "--"							{}
 "-="							{}
 "-"								{}
-"new"							{return T_NEW;}
+"new"							{return token::T_NEW;}
 "!=="							{}
 "!="							{} 
 "!"								{}
@@ -76,46 +85,47 @@ icst ({dec}|0{oct}*|0[xX]{hex}+)
 "++"							{}
 "+"								{}
 "?"								{}
-"}"								{return T_RBRACKET;}
-"]"								{return T_RBRACE;}
+"}"								{return token::T_RBRACKET;}
+"]"								{return token::T_RBRACE;}
 "%="							{}
 "%"								{}
 "return"						{}
-")"								{return T_RPAREN;}
-";"								{return T_SEMICOLON;}
+")"								{return token::T_RPAREN;}
+";"								{return token::T_SEMICOLON;}
 "*="							{}
 "*"								{}
-"/"([^"\\]|\\.)*"/"				{return T_STRING_LITERAL;}
+"/"([^"\\]|\\.)*"/"				{return token::T_STRING_LITERAL;}
 "switch"						{}
-"this"							{return T_THIS;}
+"this"							{return token::T_THIS;}
 "throw"							{}
 "~"								{}
 "try"							{}
 "typeof"						{}
-"var"							{return T_VAR;}
+"var"							{return token::T_VAR;}
 "void"							{}
 "while"							{}
 "with"							{}
 "^="							{}
 "^"								{}
-"null"							{return T_NULL;}
+"null"							{return token::T_NULL;}
 "true"							{}
 "false"							{}	
-"const"							{return T_CONST;}
-
-{icst}							{yyval.i = QString(yytext).toInt();return T_NUMERIC_LITERAL;}
-{icst}[uU]						{yyval.u = QString(yytext).toUInt();return T_NUMERIC_LITERAL;}
-{icst}[uU][lL]					{yyval.ul = QString(yytext).toULong();return T_NUMERIC_LITERAL;}
-{icst}[lL][uU]					{yyval.ul = QString(yytext).toULong();return T_NUMERIC_LITERAL;}
-{icst}[lL]						{yyval.l = QString(yytext).toLong();return T_NUMERIC_LITERAL;}
-{icst}[uU](ll|LL)				{yyval.l = QString(yytext).toULongLong();return T_NUMERIC_LITERAL;}
-{icst}(ll|LL)					{yyval.l = QString(yytext).toLongLong();return T_NUMERIC_LITERAL;}
-{icst}(ll|LL)[uU]				{yyval.l = QString(yytext).toULongLong();return T_NUMERIC_LITERAL;}
-{fract}{exp}?[flFL]?			{yyval.f = QString(yytext).toFloat();return T_NUMERIC_LITERAL;}
-{digit}+{exp}[flFL]?			{yyval.f = QString(yytext).toFloat();return T_NUMERIC_LITERAL;}
-0[xX]{hexfract}{binexp}[flFL]?	{yyval.f = QString(yytext).toFloat();return T_NUMERIC_LITERAL;}
-0[xX]{hex}+{binexp}[flFL]?		{yyval.f = QString(yytext).toFloat();return T_NUMERIC_LITERAL;}
-({letter}|"_")+({letter}|{digit}|"_")* {yyval.s = insert(yytext);return T_IDENTIFIER;}
+"const"							{return token::T_CONST;}
+"debugger"						{}
+"reserved"						{}
+{icst}							{yylval->i = QString(yytext).toInt();return token::T_NUMERIC_LITERAL;}
+{icst}[uU]						{yylval->u = QString(yytext).toUInt();return token::T_NUMERIC_LITERAL;}
+{icst}[uU][lL]					{yylval->ul = QString(yytext).toULong();return token::T_NUMERIC_LITERAL;}
+{icst}[lL][uU]					{yylval->ul = QString(yytext).toULong();return token::T_NUMERIC_LITERAL;}
+{icst}[lL]						{yylval->l = QString(yytext).toLong();return token::T_NUMERIC_LITERAL;}
+{icst}[uU](ll|LL)				{yylval->l = QString(yytext).toULongLong();return token::T_NUMERIC_LITERAL;}
+{icst}(ll|LL)					{yylval->l = QString(yytext).toLongLong();return token::T_NUMERIC_LITERAL;}
+{icst}(ll|LL)[uU]				{yylval->l = QString(yytext).toULongLong();return token::T_NUMERIC_LITERAL;}
+{fract}{exp}?[flFL]?			{yylval->f = QString(yytext).toFloat();return token::T_NUMERIC_LITERAL;}
+{digit}+{exp}[flFL]?			{yylval->f = QString(yytext).toFloat();return token::T_NUMERIC_LITERAL;}
+0[xX]{hexfract}{binexp}[flFL]?	{yylval->f = QString(yytext).toFloat();return token::T_NUMERIC_LITERAL;}
+0[xX]{hex}+{binexp}[flFL]?		{yylval->f = QString(yytext).toFloat();return token::T_NUMERIC_LITERAL;}
+({letter}|"_")+({letter}|{digit}|"_")* {yylval->s = new QString(yytext);return token::T_IDENTIFIER;}
 [ \t\n]     					{}
 
 %%
