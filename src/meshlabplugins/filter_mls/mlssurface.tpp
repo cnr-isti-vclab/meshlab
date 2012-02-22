@@ -22,8 +22,7 @@
 ****************************************************************************/
 
 #include "mlssurface.h"
-#include "kdtree.h"
-#include "mlsutils.h"
+#include <vcg/space/index/kdtree/kdtree.h>
 #include <iostream>
 #include <limits>
 #include <vcg/space/index/octree.h>

@@ -22,8 +22,7 @@
 ****************************************************************************/
 
 #include "apss.h"
-#include "kdtree.h"
-#include "mlsutils.h"
+#include <vcg/space/index/kdtree/kdtree.h>
 #include <iostream>
 
 namespace GaelMls {
@@ -219,7 +218,7 @@ typename APSS<_MeshType>::VectorType APSS<_MeshType>::project(const VectorType& 
 		if (mGradientHint==MLS_DERIVATIVE_ACCURATE)
 		{
 			VectorType grad;
-			mlsGradient(vcg::Point3Cast<Scalar>(position), grad);
+			mlsGradient(vcg::Point3<Scalar>::Construct(position), grad);
 			grad.Normalize();
 			*pNormal = grad;
 		}
@@ -250,8 +249,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 	else if (nofSamples==1)
 	{
 		int id = mNeighborhood.index(0);
-		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+		LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
+		LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
 
 		uLinear = n;
 		uConstant = -vcg::Dot(p, uLinear);
@@ -268,8 +267,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 	for (unsigned int i=0; i<nofSamples; i++)
 	{
 		int id = mNeighborhood.index(i);
-		LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-		LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+		LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
+		LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
 		LScalar w = mCachedWeights.at(i);
 
 		sumP += p * w;
@@ -350,8 +349,8 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 		for (unsigned int i=0; i<nofSamples; i++)
 		{
 			int id = mNeighborhood.index(i);
-			LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-			LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+			LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
+			LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
 			LScalar dw = mCachedWeightGradients.at(i)[k];
 
 			dSumW += dw;
@@ -380,7 +379,7 @@ bool APSS<_MeshType>::fit(const VectorType& x) const
 		dVecU13 = ((dSumN - (dSumP*uQuad + sumP*dVecU4)*2.0) - uLinear * dSumW) * invSumW;
 		dVecU0 = -invSumW*( vcg::Dot(dVecU13,sumP) + dVecU4*sumDotPP + vcg::Dot(uLinear,dSumP) + uQuad*dSumDotPP + dSumW*uConstant);
 
-		grad[k] = dVecU0 + vcg::Dot(dVecU13,vcg::Point3Cast<LScalar>(x)) + dVecU4*vcg::SquaredNorm(x) + uLinear[k] + 2.*x[k]*uQuad;
+		grad[k] = dVecU0 + vcg::Dot(dVecU13,vcg::Point3<LScalar>::Construct(x)) + dVecU4*vcg::SquaredNorm(x) + uLinear[k] + 2.*x[k]*uQuad;
 
 		mCachedGradDeno[k] = dDeno;
 		mCachedGradNume[k] = dNume;
@@ -439,8 +438,8 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 			for (unsigned int i=0; i<nofSamples; i++)
 			{
 				int id = mNeighborhood.index(i);
-				LVector p = vcg::Point3Cast<LScalar>(mPoints[id].cP());
-				LVector n = vcg::Point3Cast<LScalar>(mPoints[id].cN());
+				LVector p = vcg::Point3<LScalar>::Construct(mPoints[id].cP());
+				LVector n = vcg::Point3<LScalar>::Construct(mPoints[id].cN());
 				LScalar dw = mCachedWeightGradients.at(i)[j];
 				LScalar d2w = ((x[k]-p[k]))*((x[j]-p[j])) * mCachedWeightSecondDerivatives.at(i);
 
@@ -490,7 +489,7 @@ bool APSS<_MeshType>::mlsHessian(const VectorType& x, MatrixType& hessian) const
 
 			hessian[j][k] =
 							dVecU13[j] + 2.*dVecU4*x[j]
-						+ d2u0 + vcg::Dot(d2u13,vcg::Point3Cast<LScalar>(x)) + d2u4*vcg::Dot(x,x)
+						+ d2u0 + vcg::Dot(d2u13,vcg::Point3<LScalar>::Construct(x)) + d2u4*vcg::Dot(x,x)
 						+ mCachedGradULinear[j][k] + (j==k ? 2.*uQuad : 0.) + 2.*x[k]*mCachedGradUQuad[j];
 
 		}

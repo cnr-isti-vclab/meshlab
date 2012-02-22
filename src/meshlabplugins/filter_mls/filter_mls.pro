@@ -10,16 +10,13 @@ HEADERS +=	apss.h\
 		rimls.h \
 		implicits.h \			
 		mlssurface.h \			
-		smallcomponentselection.h \
-		kdtree.h \			
-		mlsutils.h 
+		smallcomponentselection.h
 
 SOURCES +=	apss.cpp \
 		balltree.cpp \	
 		mlsplugin.cpp \		
 		rimls.cpp \
 		apss.tpp \		
-		kdtree.cpp \	
 		mlssurface.tpp \
 		rimls.tpp 
 

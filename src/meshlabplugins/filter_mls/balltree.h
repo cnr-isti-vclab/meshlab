@@ -26,7 +26,7 @@
 
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>
-#include "mlsutils.h"
+#include <vcg/space/index/kdtree/kdtree.h>
 
 namespace GaelMls {
 

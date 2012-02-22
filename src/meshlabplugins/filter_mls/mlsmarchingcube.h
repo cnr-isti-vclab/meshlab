@@ -28,7 +28,6 @@
 #include <vcg/space/box3.h>
 #include <map>
 #include "mlssurface.h"
-#include "mlsutils.h"
 
 namespace vcg {
 namespace tri {

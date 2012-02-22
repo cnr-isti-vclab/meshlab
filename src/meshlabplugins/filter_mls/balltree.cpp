@@ -20,7 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
+#include <vcg/space/distance3.h>
 #include "balltree.h"
 
 namespace GaelMls {
@@ -68,6 +68,12 @@ void BallTree<_Scalar>::queryNode(Node& node, Neighborhood<Scalar>* pNei) const
 	}
 }
 
+template <typename Scalar>
+inline vcg::Point3<Scalar> CwiseAdd(vcg::Point3<Scalar> const & p1, Scalar s)
+{
+	return vcg::Point3<Scalar>(p1.X() + s, p1.Y() + s, p1.Z() + s);
+}
+
 template<typename _Scalar>
 void BallTree<_Scalar>::rebuild(void)
 {
@@ -80,8 +86,9 @@ void BallTree<_Scalar>::rebuild(void)
 		for (unsigned int i=0 ; i<mPoints.size() ; ++i)
 		{
 				indices[i] = i;
-				aabb.min = Min(aabb.min, CwiseAdd(mPoints[i], -mRadii[i]*mRadiusScale));
-				aabb.max = Max(aabb.max, CwiseAdd(mPoints[i],  mRadii[i]*mRadiusScale));
+				aabb.Add(mPoints[i],mRadii[i]*mRadiusScale);
+//				aabb.min = Min(aabb.min, CwiseAdd(mPoints[i], -mRadii[i]*mRadiusScale));
+//				aabb.max = Max(aabb.max, CwiseAdd(mPoints[i],  mRadii[i]*mRadiusScale));
 		}
 		buildNode(*mRootNode, indices, aabb, 0);
 
@@ -94,10 +101,10 @@ void BallTree<_Scalar>::split(const IndexArray& indices, const AxisAlignedBoxTyp
 	for (std::vector<int>::const_iterator it=indices.begin(), end=indices.end() ; it!=end ; ++it)
 	{
 		unsigned int i = *it;
-		if (vcg::Distance(mPoints[i], aabbLeft) < mRadii[i]*mRadiusScale)
+		if (vcg::PointFilledBoxDistance(mPoints[i], aabbLeft) < mRadii[i]*mRadiusScale)
 			iLeft.push_back(i);
 
-		if (vcg::Distance(mPoints[i], aabbRight) < mRadii[i]*mRadiusScale)
+		if (vcg::PointFilledBoxDistance(mPoints[i], aabbRight) < mRadii[i]*mRadiusScale)
 			iRight.push_back(i);
 	}
 }

@@ -22,8 +22,7 @@
 ****************************************************************************/
 
 #include "rimls.h"
-#include "kdtree.h"
-#include "mlsutils.h"
+#include<vcg/space/index/kdtree/kdtree.h>
 #include <iostream>
 
 using namespace vcg;
