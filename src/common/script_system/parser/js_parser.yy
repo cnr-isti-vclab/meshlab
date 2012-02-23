@@ -18,7 +18,7 @@
 	long l;
 	double d;
 	float f;
-	const QString *s;
+	QString *s;
 };
 
 %token T_COLON
@@ -47,6 +47,7 @@
 %}
 
 %%
+		 
 Program: StatementList;
 
 StatementList:
@@ -54,10 +55,10 @@ StatementList:
 				;
 
 Statement: 	Block
-			| VariableDecl
 			| FunctionDecl
-			| FunctionCallStatement
-			| error T_SEMICOLON; 
+			| VariableDeclStatement
+			| AssignmentStatement
+			| error T_SEMICOLON 
 			;
 			
 Block: OpenBlock StatementList CloseBlock;
@@ -66,9 +67,9 @@ OpenBlock: T_LBRACKET;
 
 CloseBlock: T_RBRACKET;
 
-VariableDecl: DeclTok IdTok InitOpt OtherDeclOpt T_SEMICOLON;
+VariableDeclStatement: DeclTok IdTok InitOpt OtherDeclOpt T_SEMICOLON;
 
-FunctionCallStatement: FunctionCall T_SEMICOLON;
+AssignmentStatement: LeftSideExpr Assignment T_SEMICOLON;
 
 OtherDeclOpt:
 				| OtherDeclOpt T_COMMA IdTok InitOpt
@@ -78,8 +79,10 @@ DeclTok: 	T_VAR
 			| T_CONST
 			;
 
+Assignment: T_EQ Expression;
+			
 InitOpt: 
-			| T_EQ Expression
+			| Assignment
 			;
 
 FunctionDecl: T_FUNCTION IdTok OpenBracket OptParamList CloseBracket OpenBlock StatementList CloseBlock;
@@ -91,9 +94,8 @@ OptParamList:
 OtherOptParamList:
 					| OtherOptParamList T_COMMA IdTok
 					;
-
-Expression: MemberExpr
-			| ThisExpr
+					
+Expression: LeftSideExpr
 			| NewExpr
 			| FunctionExpr
 			| FunctionCall
@@ -104,6 +106,10 @@ Expression: MemberExpr
 			| T_NUMERIC_LITERAL
 			;
 
+LeftSideExpr: 	MemberExpr
+				| ThisExpr
+				;
+			
 OptIdTok:
 			| IdTok
 			;

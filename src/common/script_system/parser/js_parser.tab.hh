@@ -96,7 +96,7 @@ namespace yy {
 	long l;
 	double d;
 	float f;
-	const QString *s;
+	QString *s;
 
 
 

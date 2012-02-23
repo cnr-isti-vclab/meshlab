@@ -1,10 +1,13 @@
 
 %option noyywrap 
 %option nounistd
+%x MLCOMMENTSTATE
+
 %{
 #include "js_parser.tab.hh"
 #include <cstdlib>
 #include <cstdio>
+#include <QtCore>
 #include <io.h>
 
 
@@ -33,7 +36,13 @@ icst ({dec}|0{oct}*|0[xX]{hex}+)
 %{
 	yylloc->step();
 %}
-
+				
+<MLCOMMENTSTATE>"*/"			{BEGIN(INITIAL);}
+<MLCOMMENTSTATE>[^*\n]+   		{}
+<MLCOMMENTSTATE>"*"       		{}
+<MLCOMMENTSTATE>\n        		{}
+"//"(.)*						{}
+"/*"							{BEGIN(MLCOMMENTSTATE);}
 "&&"							{}
 "&="							{}
 "&" 							{}
@@ -94,7 +103,7 @@ icst ({dec}|0{oct}*|0[xX]{hex}+)
 ";"								{return token::T_SEMICOLON;}
 "*="							{}
 "*"								{}
-"/"([^"\\]|\\.)*"/"				{return token::T_STRING_LITERAL;}
+\"([^"\\]|\\.)*\"				{return token::T_STRING_LITERAL;}
 "switch"						{}
 "this"							{return token::T_THIS;}
 "throw"							{}
