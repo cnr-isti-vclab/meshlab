@@ -50,6 +50,8 @@ public:
     void keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
     void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * );
 
+signals:
+    void setSelectionRendering(bool);
 
 private:
         typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
@@ -75,7 +77,7 @@ private:
         std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
-        //QTime timer;
+        QTime timer;
 };
 
 #endif

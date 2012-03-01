@@ -27,8 +27,6 @@ public:
     static void DeletePerVertexAttribute(_MyMeshType& m);
 
     static void Dijkstra(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, float maxHopDist, vector<_MyVertexType*> &notReachableVect);
-//    static void DijkstraMod(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, float maxHopDist, vector<_MyVertexType*> &notReachableVect, bool fitting = false, float planeDim = 0.0, float distanceFromPlane = 0.0);
-
 };
 
 
@@ -121,6 +119,8 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
     if (hasDistParam) distFromCenter = vcg::tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<float>(m, std::string("DistParam"));
     else return *resultVect;
 
+    QTime t;
+    t.start();
     for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
         if (fitting) {
             if (distFromCenter[vi] < planeDim) {
@@ -129,12 +129,17 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
         }
         else if (distFromCenter[vi] < dim) resultVect->push_back(&*vi);
     }
+    //printf("FindComponent linear: %d ms\n", t.elapsed());
+
 
     typename vector<_MyVertexType*>::iterator it;
     if (fitting) {
         Plane3<typename _MyMeshType::ScalarType> fittingPlane = Plane3<typename _MyMeshType::ScalarType>();
 
+        //QTime t2;
+        //t2.start();
         vcg::PlaneFittingPoints(pointToFit, fittingPlane);
+        //printf("plane fitting: %d ms\n", t2.elapsed());
 
         for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
             if (distFromCenter[vi] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(fittingPlane, vi->cP())) < distanceFromPlane) resultVect->push_back(&*vi);
@@ -142,6 +147,7 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
         for (it = notReachableVect.begin(); it != notReachableVect.end(); it++) {
             if (distFromCenter[*it] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(fittingPlane, (*it)->cP())) < distanceFromPlane) borderVect.push_back(*it);
         }
+        //printf("FindComponent FITTING: %d ms\n", t.elapsed());
     }
     else {
         for (it = notReachableVect.begin(); it != notReachableVect.end(); it++) {

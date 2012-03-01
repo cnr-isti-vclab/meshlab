@@ -34,10 +34,12 @@
 #include "connectedComponent.h"
 
 
+#define k 6
+
 using namespace std;
 using namespace vcg;
 
-EditPointPlugin::EditPointPlugin(int _editType) : editType(_editType){}
+EditPointPlugin::EditPointPlugin(int _editType) : editType(_editType) {}
 
 const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
@@ -55,7 +57,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
             startingVertex = NewSel.front();
 
             //timer.start();
-            ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, 6, this->maxHop, this->NotReachableVector);
+            ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
 
             //printf("ComponentFinder in Decorate::Dijkstra: %d ms\n", timer.elapsed());
 
@@ -131,12 +133,20 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
     }
 }
 
-bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla ) {
-    BorderVector = std::vector<CVertexO*>();
-    NotReachableVector = std::vector<CVertexO*>();
-    OldComponentVector = std::vector<CVertexO*>();
+bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
+    connect(this, SIGNAL(setSelectionRendering(bool)), gla, SLOT(setSelectVertRendering(bool)));
+    setSelectionRendering(true);
 
-    composingSelMode = SMClear;
+    composingSelMode = SMAdd;
+    for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {
+        if (vi->IsS()) OldComponentVector.push_back(&*vi);
+    }
+
+    startingVertex = NULL;
+
+    ComponentVector.clear();
+    BorderVector.clear();
+    NotReachableVector.clear();
 
     this->maxHop = m.cm.bbox.Diag() / 100.0;
     this->planeDist = m.cm.bbox.Diag() / 100.0;
@@ -170,7 +180,6 @@ void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla
         }
     }
 
-
     composingSelMode = SMClear;
     if(ev->modifiers() & Qt::ControlModifier) composingSelMode = SMAdd;
     if(ev->modifiers() & Qt::ShiftModifier) composingSelMode = SMSub;
@@ -192,10 +201,10 @@ void EditPointPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla 
         BorderVector.clear();
 
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE) {
             this->fittingRadius = dist * fittingRadiusPerc;
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
         }
 
         gla->update();
@@ -290,9 +299,9 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
 
         BorderVector.clear();
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
     }
 
     gla->update();
@@ -318,16 +327,16 @@ void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla) {
 
     if (hopDistModified) {
         //timer.restart();
-        ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, 6, this->maxHop, this->NotReachableVector);
+        ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
 
         //printf("ComponentFinder in ChangeHop::Dijkstra: %d ms\n", timer.elapsed());
 
         BorderVector.clear();
 
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, 6, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
     }
 
     gla->update();
