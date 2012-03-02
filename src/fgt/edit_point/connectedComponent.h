@@ -22,7 +22,7 @@ template <typename _MyMeshType, typename _MyVertexType>
 class ComponentFinder {
 public:
     static std::vector<_MyVertexType*> &FindComponent(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, int numOfHop);
-    static std::vector<_MyVertexType*> &FindComponent(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, float dim, float maxHopDist, vector<_MyVertexType*> &borderVect, vector<_MyVertexType*> &notReachableVect, bool fitting = false, float planeDim = 0.0, float distanceFromPlane = 0.0);
+    static std::vector<_MyVertexType*> &FindComponent(_MyMeshType& m, float dim, vector<_MyVertexType*> &borderVect, vector<_MyVertexType*> &notReachableVect, bool fitting = false, float planeDim = 0.0, float distanceFromPlane = 0.0, Plane3<typename _MyMeshType::ScalarType> *fittingPlane = NULL);
 
     static void DeletePerVertexAttribute(_MyMeshType& m);
 
@@ -81,9 +81,6 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
 }
 
 
-
-
-
 template <typename _MyMeshType, typename _MyVertexType>
 class Compare {
 private:
@@ -106,7 +103,7 @@ public:
   * maximum distance we want between two vertex (with the Shortest Path we also compute the geodesic distance)
   **/
 template <typename _MyMeshType, typename _MyVertexType>
-std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindComponent(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, float dim, float maxHopDist, vector<_MyVertexType*> &borderVect, vector<_MyVertexType*> &notReachableVect, bool fitting, float planeDim, float distanceFromPlane) {
+std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindComponent(_MyMeshType& m, float dim, vector<_MyVertexType*> &borderVect, vector<_MyVertexType*> &notReachableVect, bool fitting, float planeDim, float distanceFromPlane, Plane3<typename _MyMeshType::ScalarType> *fittingPlane) {
     vector<_MyVertexType*> *resultVect = new vector<_MyVertexType*>();
     vector<typename _MyMeshType::CoordType> pointToFit = vector<typename _MyMeshType::CoordType>();
 
@@ -119,8 +116,6 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
     if (hasDistParam) distFromCenter = vcg::tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<float>(m, std::string("DistParam"));
     else return *resultVect;
 
-    QTime t;
-    t.start();
     for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
         if (fitting) {
             if (distFromCenter[vi] < planeDim) {
@@ -129,25 +124,17 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
         }
         else if (distFromCenter[vi] < dim) resultVect->push_back(&*vi);
     }
-    //printf("FindComponent linear: %d ms\n", t.elapsed());
-
 
     typename vector<_MyVertexType*>::iterator it;
     if (fitting) {
-        Plane3<typename _MyMeshType::ScalarType> fittingPlane = Plane3<typename _MyMeshType::ScalarType>();
-
-        //QTime t2;
-        //t2.start();
-        vcg::PlaneFittingPoints(pointToFit, fittingPlane);
-        //printf("plane fitting: %d ms\n", t2.elapsed());
+        vcg::PlaneFittingPoints(pointToFit, *fittingPlane);
 
         for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
-            if (distFromCenter[vi] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(fittingPlane, vi->cP())) < distanceFromPlane) resultVect->push_back(&*vi);
+            if (distFromCenter[vi] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(*fittingPlane, vi->cP())) < distanceFromPlane) resultVect->push_back(&*vi);
         }
         for (it = notReachableVect.begin(); it != notReachableVect.end(); it++) {
-            if (distFromCenter[*it] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(fittingPlane, (*it)->cP())) < distanceFromPlane) borderVect.push_back(*it);
+            if (distFromCenter[*it] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(*fittingPlane, (*it)->cP())) < distanceFromPlane) borderVect.push_back(*it);
         }
-        //printf("FindComponent FITTING: %d ms\n", t.elapsed());
     }
     else {
         for (it = notReachableVect.begin(); it != notReachableVect.end(); it++) {
@@ -172,12 +159,9 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
     }
     else distFromCenter = vcg::tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<float>(m, std::string("DistParam"));
 
-    //QTime t;
-    //t.start();
     if (!hasKNNGraph) {
         KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(m, numOfNeighbours);
     }
-    //printf("KNNGraph Creation: %d ms\n", t.elapsed());
 
     typename _MyMeshType::template PerVertexAttributeHandle<vector<_MyVertexType*>* > neighboursVect = vcg::tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<vector<_MyVertexType*>* >(m,"KNNGraph");
 

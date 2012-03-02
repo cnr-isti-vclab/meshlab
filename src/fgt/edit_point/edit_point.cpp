@@ -31,6 +31,8 @@
 #include <wrap/qt/gl_label.h>
 #include <vcg/space/fitting3.h>
 
+#include <vcg/complex/algorithms/create/platonic.h>
+
 #include "connectedComponent.h"
 
 
@@ -56,10 +58,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         if(NewSel.size() > 0) {
             startingVertex = NewSel.front();
 
-            //timer.start();
             ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
-
-            //printf("ComponentFinder in Decorate::Dijkstra: %d ms\n", timer.elapsed());
 
             ComponentVector.push_back(startingVertex);
         }
@@ -110,7 +109,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         }
 
         glBegin(GL_POINTS);
-        glColor4f(1,0,0,.6f);
+        glColor4f(1,0,0,.5f);
 
         for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); vi++) {
             if (vi->IsS()) glVertex(vi->cP());
@@ -119,7 +118,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         glEnd();
 
         glBegin(GL_POINTS);
-        glColor4f(1,1,0,.6f);
+        glColor4f(1,1,0,.5f);
 
         for(vector<CMeshO::VertexPointer>::iterator vi = BorderVector.begin(); vi != BorderVector.end(); ++vi)
         {
@@ -127,6 +126,24 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         }
 
         glEnd();
+
+        if (editType == SELECT_FITTING_PLANE_MODE) {
+            fittingCircle.Clear();
+            vcg::tri::OrientedDisk<CMeshO>(fittingCircle, 192, fittingPlane.Projection(startingVertex->cP()), fittingPlane.Direction(), this->fittingRadius);
+
+            glBegin(GL_TRIANGLE_FAN);
+            glColor4f(0.69,0.93,0.93,.7f);
+
+            CMeshO::VertexIterator vi;
+            for (vi = fittingCircle.vert.begin(); vi != fittingCircle.vert.end(); vi++) {
+                glVertex(vi->cP());
+            }
+            vi = fittingCircle.vert.begin();
+            vi++;
+            glVertex(vi->cP());
+
+            glEnd();
+        }
 
         glPopAttrib();
         glPopMatrix();
@@ -156,11 +173,12 @@ bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
 }
 
 void EditPointPlugin::EndEdit(MeshModel &m, GLArea *gla) {
+    fittingCircle.Clear();
     ComponentFinder<CMeshO, CVertexO>::DeletePerVertexAttribute(m.cm);
 }
 
 
-void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla ) {
+void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
     startingVertex = NULL;
 
     cur = ev->pos();
@@ -201,10 +219,10 @@ void EditPointPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla 
         BorderVector.clear();
 
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE) {
             this->fittingRadius = dist * fittingRadiusPerc;
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector, true, fittingRadius, planeDist, &fittingPlane);
         }
 
         gla->update();
@@ -288,20 +306,14 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
 
 
     if (hopDistModified) {
-        //timer.restart();
         ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, 6, this->maxHop, this->NotReachableVector);
-
-        //printf("ComponentFinder in ChangeHop::Dijkstra: %d ms\n", timer.elapsed());
     }
     if (parameterModified) {
-        //printf("fittingRadius: %f\n", fittingRadius);
-        //printf("planeDist: %f\n", planeDist);
-
         BorderVector.clear();
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector, true, fittingRadius, planeDist, &fittingPlane);
     }
 
     gla->update();
@@ -326,17 +338,14 @@ void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla) {
     }
 
     if (hopDistModified) {
-        //timer.restart();
         ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
-
-        //printf("ComponentFinder in ChangeHop::Dijkstra: %d ms\n", timer.elapsed());
 
         BorderVector.clear();
 
         if (editType == SELECT_DEFAULT_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector);
         else if (editType == SELECT_FITTING_PLANE_MODE)
-            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, *startingVertex, k, this->dist, this->maxHop, BorderVector, NotReachableVector, true, fittingRadius, planeDist);
+            ComponentVector = ComponentFinder<CMeshO, CVertexO>::FindComponent(m.cm, this->dist, BorderVector, NotReachableVector, true, fittingRadius, planeDist, &fittingPlane);
     }
 
     gla->update();

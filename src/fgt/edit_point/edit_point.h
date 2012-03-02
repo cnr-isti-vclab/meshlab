@@ -71,6 +71,9 @@ private:
         float fittingRadius;
         float planeDist;
 
+        vcg::Plane3<CMeshO::ScalarType> fittingPlane;
+        CMeshO fittingCircle;
+
         std::vector<CMeshO::VertexPointer> ComponentVector;
         std::vector<CMeshO::VertexPointer> BorderVector;
         std::vector<CMeshO::VertexPointer> NotReachableVector;
