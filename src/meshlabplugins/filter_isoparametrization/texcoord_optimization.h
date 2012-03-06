@@ -148,7 +148,7 @@ AREA PRESERVING TEXTURE OPTIMIZATION
 
 as in: Degener, P., Meseth, J., Klein, R. 
        "An adaptable surface parameterization method."
-       Proc. of the 12th International Meshing oundtable, 201–213 [2003].
+       Proc. of the 12th International Meshing Roundtable, 201-213 [2003].
 
 Features:
   
@@ -893,7 +893,7 @@ public:
 template<class MESH_TYPE>
 bool IsTexCoordFoldFree(MESH_TYPE &m){
   
-  assert(m.HasPerVertexTexCoord());
+  assert(HasPerVertexTexCoord(m));
   
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType::ScalarType ScalarType;
@@ -914,7 +914,7 @@ bool IsTexCoordFoldFree(MESH_TYPE &m){
 template<class MESH_TYPE>
 int MarkTexCoordFolds(MESH_TYPE &m){
   
-  assert(m.HasPerVertexTexCoord());
+  assert(HasPerVertexTexCoord(m));
   assert(m.HasPerFaceQuality());
   
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
@@ -953,7 +953,7 @@ int MarkTexCoordFolds(MESH_TYPE &m){
 template<class MESH_TYPE>
 void SmoothTexCoords(MESH_TYPE &m){
   
-  assert(m.HasPerVertexTexCoord());
+  assert(HasPerVertexTexCoord(m));
   
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
   typedef typename MESH_TYPE::VertexType::TexCoordType::ScalarType ScalarType;
