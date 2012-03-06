@@ -159,7 +159,12 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
     case 1 :
     case 2 :
     case 3 :
-      mw->meshDoc()->setCurrentRaster(clickedId);
+          if(mw->meshDoc()->rm()->id() != clickedId )
+          {
+            mw->meshDoc()->setCurrentRaster(clickedId);
+            if(mw->GLA()->isRaster())
+              mw->GLA()->loadRaster(clickedId);
+          }
       break;
 
 		}
