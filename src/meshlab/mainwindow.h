@@ -141,6 +141,7 @@ private slots:
 	void showTrackBall();
 	void resetTrackBall();
 	void showLayerDlg();
+	void showRaster();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
@@ -396,6 +397,7 @@ private:
 	QAction *showTrackBallAct;
 	QAction *resetTrackBallAct;
 	QAction *showLayerDlgAct;
+	QAction *showRasterAct;
 	///////////Actions Menu Windows /////////////////////
 	QAction *windowsTileAct;
 	QAction *windowsCascadeAct;

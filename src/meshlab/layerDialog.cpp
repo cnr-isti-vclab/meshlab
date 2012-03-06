@@ -147,24 +147,12 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 		{
 		case 0 :
 			{
-				//the user has clicked on one of the eyes
-        MeshDocument  *md= mw->meshDoc();
-
-				//Only one raster could be visible
-				foreach(RasterModel *rm, md->rasterList)
-					if(rm->id()!= clickedId)
-						rm->visible=false;
-
 				if(rItem->r->visible){
 					rItem->r->visible = false;
-					mw->GLA()->setIsRaster(false);
 				}
 				else{
 					rItem->r->visible = true;
-					mw->GLA()->setIsRaster(true);
-					mw->GLA()->loadRaster(clickedId);
 				}
-
 				//Update current GLArea visibility 
 				mw->GLA()->updateRasterSetVisibilities( );
 			}

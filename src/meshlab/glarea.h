@@ -139,6 +139,7 @@ public:
 public slots:
 	void updateTexture(); // slot for forcing the texture reload. 
 	void resetTrackBall();
+	void showRaster();
 
 	//slots for changing the draw rendering and texturing mode
 	void setDrawMode(vcg::GLW::DrawMode mode); 

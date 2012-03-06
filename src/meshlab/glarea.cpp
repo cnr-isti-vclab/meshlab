@@ -1259,6 +1259,16 @@ void GLArea::setIsRaster(bool viewMode){
 	_isRaster= viewMode;
 }
 
+// this slot is called when someone press the showraster button on the toolbar
+void GLArea::showRaster()
+{
+  if(!this->isRaster())
+  {
+    setIsRaster(true);
+    loadRaster(md()->rm()->id() );
+  } else this->setIsRaster(false);
+}
+
 void GLArea::loadRaster(int id)
 {
   foreach(RasterModel *rm, this->md()->rasterList)

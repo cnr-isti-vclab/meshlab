@@ -602,14 +602,14 @@ class MeshModelState
 {
 private:
   int changeMask; // a bit mask indicating what have been changed. Composed of MeshModel::MeshElement (e.g. stuff like MeshModel::MM_VERTCOLOR)
-	MeshModel *m; // the mesh which the changes refers to.
+  MeshModel *m; // the mesh which the changes refers to.
   std::vector<float> vertQuality;
   std::vector<vcg::Color4b> vertColor;
-	std::vector<vcg::Point3f> vertCoord;
-	std::vector<vcg::Point3f> vertNormal;
-	std::vector<bool> faceSelection;
-	std::vector<bool> vertSelection;
-	vcg::Matrix44f Tr;
+  std::vector<vcg::Point3f> vertCoord;
+  std::vector<vcg::Point3f> vertNormal;
+  std::vector<bool> faceSelection;
+  std::vector<bool> vertSelection;
+  vcg::Matrix44f Tr;
   vcg::Shotf shot;
 public:
   // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;

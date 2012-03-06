@@ -295,6 +295,12 @@ void MainWindow::createActions()
 	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
 
 
+	showRasterAct =  new QAction (QIcon(":/images/view_raster.png"),tr("Show Current Raster Mode"), this);
+	showRasterAct->setCheckable(true);
+	showRasterAct->setChecked(true);
+	connect(showRasterAct, SIGNAL(triggered()), this, SLOT(showRaster()));
+
+
 	//////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
 	suspendEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
 	suspendEditModeAct->setShortcut(Qt::Key_Escape);
@@ -433,6 +439,7 @@ void MainWindow::createToolBars()
 	mainToolBar->addAction(exportMeshAct);
 	mainToolBar->addAction(saveSnapshotAct);
 	mainToolBar->addAction(showLayerDlgAct);
+	mainToolBar->addAction(showRasterAct);
 
 	renderToolBar = addToolBar(tr("Render"));
 	//renderToolBar->setIconSize(QSize(32,32));
@@ -560,6 +567,7 @@ void MainWindow::createMenus()
 	viewMenu		= menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction(fullScreenAct);
 	viewMenu->addAction(showLayerDlgAct);
+	viewMenu->addAction(showRasterAct);
 
 	trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
 	trackBallMenu->addAction(showTrackBallAct);

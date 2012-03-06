@@ -424,7 +424,7 @@ RasterModel::RasterModel(MeshDocument *parent, QString _rasterName) {
   _id=parent->newRasterId(); 
   par = parent;
   this->_label= _rasterName;
-	visible=false;
+  visible=true;
 }
 
 void RasterModel::addPlane(Plane *plane)

@@ -394,6 +394,8 @@ void MainWindow::updateMenus()
 	if(GLA())
 	{
 		showLayerDlgAct->setChecked(layerDialog->isVisible());
+		showRasterAct->setChecked(GLA()->isRaster());
+		showRasterAct->setEnabled(meshDoc()->rm() != 0);
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
 		layerDialog->updateLog(*GLA()->log);
@@ -2105,6 +2107,7 @@ void MainWindow::showToolbarRender(){
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
+void MainWindow::showRaster()    {if(GLA() != 0)	GLA()->showRaster();}
 void MainWindow::showLayerDlg() {if(GLA() != 0) 	layerDialog->setVisible( !layerDialog->isVisible() );}
 void MainWindow::showXMLPluginEditorGui(){if(GLA() != 0) 	plugingui->setVisible( !plugingui->isVisible() );}
 
