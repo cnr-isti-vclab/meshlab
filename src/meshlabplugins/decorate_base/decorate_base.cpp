@@ -173,13 +173,16 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           }
         }
 
-        // draw all raster cameras
+        // draw all visible raster cameras
+        // current camera also.
         if(rm->getBool(ShowRasterCameras()))
         {
           foreach(RasterModel *raster, md.rasterList)
           {
-            if(raster != md.rm() || !showCameraDetails)   // non-selected raster
-              DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+            if(raster != md.rm() || !showCameraDetails )   // non-selected raster
+            {
+              if(raster->visible) DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+            }
             else
             {
               DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
