@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/select_vertex_geodesic.png</file>
+        <file>images/select_vertex_plane.png</file>
+    </qresource>
+</RCC>

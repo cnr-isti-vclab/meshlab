@@ -26,8 +26,8 @@
 
 PointEditFactory::PointEditFactory()
 {
-        editPoint = new QAction(QIcon(":/images/select_vertex.png"),"Point", this);
-        editPointFittingPlane = new QAction(QIcon(":/images/select_vertex.png"),"PointFitting", this);
+        editPoint = new QAction(QIcon(":/images/select_vertex_geodesic.png"),"Select Vertex Clusters", this);
+        editPointFittingPlane = new QAction(QIcon(":/images/select_vertex_plane.png"),"Select Vertexes on a Plane", this);
 	
         actionList << editPoint;
         actionList << editPointFittingPlane;
