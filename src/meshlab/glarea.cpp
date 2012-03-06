@@ -828,13 +828,13 @@ void GLArea::wheelEvent(QWheelEvent*e)
     float notch = e->delta()/ float(WHEEL_STEP);
     switch(e->modifiers())
     {
-    case Qt::ShiftModifier + Qt::ControlModifier	: clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,5000.0f); break;
-    case Qt::ControlModifier											: clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
-    case Qt::AltModifier													: glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
+    case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,5000.0f); break;
+    case Qt::ControlModifier                       : clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,50.0f); break;
+    case Qt::ShiftModifier                         : fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
+    case Qt::AltModifier                           : glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
       foreach(MeshModel * mp, this->md()->meshList)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
       break;
-    case Qt::ShiftModifier												: fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
     default:
       if(isRaster())
         this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
@@ -1050,10 +1050,11 @@ void GLArea::setView()
 	// This parameter is the one that controls:
 	// HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
 	float viewRatio = 1.75f;
-  float cameraDist = viewRatio / tanf(math::ToRad(fov*.5f));
 
- if(fov==5)
-   cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
+	float cameraDist = viewRatio / tanf(math::ToRad(fov*.5f));  // the distance between the center of the trackball and the viewer.
+
+	if(fov==5) cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
+
 	nearPlane = cameraDist - 2.f*clipRatioNear;
 	farPlane =  cameraDist + 10.f*clipRatioFar;
 	if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
@@ -1061,7 +1062,7 @@ void GLArea::setView()
 	if (!takeSnapTile)
 	{
 		if(fov==5)	glOrtho( -viewRatio*fAspect, viewRatio*fAspect, -viewRatio, viewRatio, cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
-		else    		gluPerspective(fov, fAspect, nearPlane, farPlane);
+		else		gluPerspective(fov, fAspect, nearPlane, farPlane);
 	}
 	else	setTiledView(fov, viewRatio, fAspect, nearPlane, farPlane, cameraDist);
 
@@ -1264,9 +1265,16 @@ void GLArea::showRaster()
 {
   if(!this->isRaster())
   {
+    lastViewBeforeRasterMode = this->viewToText();
     setIsRaster(true);
     loadRaster(md()->rm()->id() );
-  } else this->setIsRaster(false);
+  } else
+  {
+    this->setIsRaster(false);
+    QDomDocument doc("StringDoc");
+    doc.setContent(lastViewBeforeRasterMode);
+    this->loadViewFromViewStateFile(doc);
+  }
 }
 
 void GLArea::loadRaster(int id)
@@ -1528,10 +1536,10 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 
   loadShot(QPair<Shotf, float> (shot,trackball.track.sca));
 }
-
-void GLArea::viewToClipboard()
+QString GLArea::viewToText()
 {
-	QClipboard *clipboard = QApplication::clipboard();
+  QString docString;
+
   Shotf shot = shotFromTrackball().first;
 
 	QDomDocument doc("ViewState");
@@ -1539,7 +1547,7 @@ void GLArea::viewToClipboard()
 	doc.appendChild( root );
 
   QDomElement shotElem = WriteShotToQDomNode(shot,doc);
-	root.appendChild(shotElem);
+    root.appendChild(shotElem);
 
 	QDomElement settingsElem = doc.createElement( "ViewSettings" );
 	settingsElem.setAttribute( "TrackScale", trackball.track.sca);
@@ -1559,7 +1567,12 @@ void GLArea::viewToClipboard()
 	renderElem.setAttribute("SelectedVert",rm.selectedVert);
 	root.appendChild(renderElem);
 
-	clipboard->setText(doc.toString()); //.remove(QChar('\n')));
+  return doc.toString();
+}
+
+void GLArea::viewToClipboard()
+{
+  QApplication::clipboard()->setText(this->viewToText());
 }
 
 void GLArea::viewFromClipboard()

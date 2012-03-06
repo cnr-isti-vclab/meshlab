@@ -417,14 +417,13 @@ void MainWindow::setSplit(QAction *qa)
 	if(mvc) 
 	{
 		GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);	
-		bool isRaster = GLA()->isRaster();
 		if(qa->text() == tr("&Horizontally"))	
 			mvc->addView(glwClone, Qt::Vertical);
 		else if(qa->text() == tr("&Vertically"))
 			mvc->addView(glwClone, Qt::Horizontal);
 
 		//The loading of the raster must be here
-		if(isRaster){
+		if(GLA()->isRaster()){
 			glwClone->setIsRaster(true);
       if(this->meshDoc()->rm()->id()>=0)
         glwClone->loadRaster(this->meshDoc()->rm()->id());
@@ -1079,7 +1078,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	}
 	try
 	{
-		GLArea * ar = GLA();
 		bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
 		if (isinter)
 		{

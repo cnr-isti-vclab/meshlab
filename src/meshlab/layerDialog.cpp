@@ -247,32 +247,32 @@ void LayerDialog::updateTable()
 {
 	//TODO:Check if the current viewer is a GLArea
 	if(!isVisible()) return;
-  if(isVisible() && !mw->GLA())
+	if(isVisible() && !mw->GLA())
 	{
 		setVisible(false);
 		//The layer dialog cannot be opened unless a new document is opened
 		return;
 	}
-  MeshDocument *md=mw->meshDoc();
+	MeshDocument *md=mw->meshDoc();
 	this->setWindowTitle(md->docLabel());
 
 	ui->meshTreeWidget->clear();
 	ui->meshTreeWidget->setColumnCount(4);
-  ui->meshTreeWidget->setColumnWidth(0,40);
-  ui->meshTreeWidget->setColumnWidth(1,40);
-  //ui->meshTreeWidget->setColumnWidth(2,40);
+	ui->meshTreeWidget->setColumnWidth(0,40);
+	ui->meshTreeWidget->setColumnWidth(1,40);
+	//ui->meshTreeWidget->setColumnWidth(2,40);
 	ui->meshTreeWidget->header()->hide();
 	foreach(MeshModel* mmd, md->meshList)
 	{
-		//Restore mesh visibility according to the current visibility map
-		//very good to keep viewer state consistent
-		if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
-      mmd->visible = mw->GLA()->meshVisibilityMap.value(mmd->id());
-    else
-    {
-      mw->GLA()->meshVisibilityMap[mmd->id()]=true;
-      mmd->visible=true;
-    }
+	  //Restore mesh visibility according to the current visibility map
+	  //very good to keep viewer state consistent
+	  if( mw->GLA()->meshVisibilityMap.contains(mmd->id()))
+		mmd->visible = mw->GLA()->meshVisibilityMap.value(mmd->id());
+	  else
+	  {
+		mw->GLA()->meshVisibilityMap[mmd->id()]=true;
+		mmd->visible=true;
+	  }
 
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd);
 		if(mmd== mw->GLA()->mm()) {
@@ -315,12 +315,12 @@ void LayerDialog::updateTable()
 			rmd->visible =mw->GLA()->rasterVisibilityMap.value(rmd->id());
 
 		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
-    if(rmd== mw->meshDoc()->rm()) {
+		if(rmd== mw->meshDoc()->rm()) {
 			item->setBackground(1,QBrush(Qt::yellow));
 			item->setForeground(1,QBrush(Qt::blue));
-      item->setBackground(2,QBrush(Qt::yellow));
+			item->setBackground(2,QBrush(Qt::yellow));
 			item->setForeground(2,QBrush(Qt::blue));
-      item->setBackground(3,QBrush(Qt::yellow));
+			item->setBackground(3,QBrush(Qt::yellow));
 			item->setForeground(3,QBrush(Qt::blue));
 		}
 		ui->rasterTreeWidget->addTopLevelItem(item);
@@ -331,8 +331,6 @@ void LayerDialog::updateTable()
 
 	for(int i=2; i< ui->rasterTreeWidget->columnCount(); i++)
 		ui->rasterTreeWidget->resizeColumnToContents(i);
-
-
 }
 
 //Reconstruct the correct layout of the treewidget after updating the main table. It is necessary to keep the changing 
@@ -530,36 +528,29 @@ void LayerDialog::updateDecoratorParsView()
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
-	if(meshModel->visible)  
-    setIcon(0,QIcon(":/images/layer_eye_open.png"));                 
-  else 
-    setIcon(0,QIcon(":/images/layer_eye_close.png"));
-
-//	setIcon(1,QIcon(":/images/layer_edit_unlocked.png"));
-
+  if(meshModel->visible) setIcon(0,QIcon(":/images/layer_eye_open.png"));
+                    else setIcon(0,QIcon(":/images/layer_eye_close.png"));
   setText(1, QString::number(meshModel->id()));
 
   QString meshName = meshModel->label();
   if (meshModel->meshModified())
-	  meshName += " *";
+    meshName += " *";
   setText(2, meshName);
 
-	m=meshModel;
+  this->m=meshModel;
 }
 
 RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 {
-	if(rasterModel->visible)  
-    setIcon(0,QIcon(":/images/layer_eye_open.png"));
-	else 
-    setIcon(0,QIcon(":/images/layer_eye_close.png"));
+  if(rasterModel->visible) setIcon(0,QIcon(":/images/layer_eye_open.png"));
+                      else setIcon(0,QIcon(":/images/layer_eye_close.png"));
 
-	setText(1, QString::number(rasterModel->id()));
+  setText(1, QString::number(rasterModel->id()));
 
   QString rasterName = rasterModel->label();
-	setText(2, rasterName);	
+  setText(2, rasterName);
 
-	r=rasterModel;
+  this->r=rasterModel;
 }
 
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)
@@ -583,22 +574,17 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			dialoglayout = new QGridLayout(parent);
 
 			frame = new StdParFrame(parent,mw->GLA());
-      frame->loadFrameContent(tmpSet,mw->meshDoc());
+			frame->loadFrameContent(tmpSet,mw->meshDoc());
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
-			//applybut = new QPushButton("Apply",parent);
 			loadbut = new QPushButton("Load",parent);
 
 			dialoglayout->addWidget(savebut,1,0);
 			dialoglayout->addWidget(resetbut,1,1);
 			dialoglayout->addWidget(loadbut,1,2);
-			//dialoglayout->addWidget(applybut,1,3);
 			dialoglayout->addWidget(frame,0,0,1,3);
 			this->setLayout(dialoglayout);
-			//connect(applybut,SIGNAL(clicked()),this,SLOT(apply()));
-			//for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
 			connect(frame,SIGNAL(parameterChanged()),this,SLOT(apply()));
-
 			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 			connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
 			connect(loadbut,SIGNAL(clicked()),this,SLOT(load()));

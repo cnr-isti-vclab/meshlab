@@ -79,11 +79,10 @@ public slots:
 
 private:
 	MainWindow* mainWin;
-  StdParFrame* frame;
-  RichParameterSet tmpSet;
+	StdParFrame* frame;
+	RichParameterSet tmpSet;
 	QPushButton* savebut;
 	QPushButton* resetbut;
-	//QPushButton* applybut;
 	QPushButton* loadbut;
 	QGridLayout* dialoglayout;
 };

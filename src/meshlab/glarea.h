@@ -339,15 +339,16 @@ private:
 
 	int zoomx, zoomy;
 	bool zoom;
-  float opacity;
+	float opacity;
 	GLuint targetTex;           // here we store the reference image. The raster image is rendered as a texture
+	QString lastViewBeforeRasterMode; // keep the view immediately before switching to raster mode
 
 public:
 	bool isRaster() {return _isRaster;}
 	void setIsRaster(bool viewMode);
 	void loadRaster(int id);
 
-  void setTarget(QImage &image);
+	void setTarget(QImage &image);
 
 private:
 	void drawTarget();
@@ -359,6 +360,7 @@ public:
   bool viewFromFile();
 	void createOrthoView(QString);
 	void viewToClipboard();
+	QString viewToText();
 	void viewFromClipboard();
   void loadShot(const QPair<vcg::Shotf, float> &) ;
 
