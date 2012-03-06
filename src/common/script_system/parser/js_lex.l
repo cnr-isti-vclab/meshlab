@@ -11,10 +11,10 @@
 #include <io.h>
 
 
-#define YY_DECL int yylex(yy::JSParser::semantic_type* yylval,yy::JSParser::location_type* yylloc)
+#define YY_DECL int yylex(yy::JSCacheParser::semantic_type* yylval,yy::JSCacheParser::location_type* yylloc)
 #define YY_USER_ACTION yylloc->columns(yyleng);
 
-typedef yy::JSParser::token token;
+typedef yy::JSCacheParser::token token;
 %}
 
 hex [0-9a-fA-F]

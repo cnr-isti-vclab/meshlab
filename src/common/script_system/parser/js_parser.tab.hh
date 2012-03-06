@@ -38,14 +38,15 @@
 /* "%code requires" blocks.  */
 
 /* Line 35 of lalr1.cc  */
-#line 9 "js_parser.yy"
+#line 7 "js_parser.yy"
 
 	#include <QtCore>
+	#include "../../scriptsyntax.h"
 
 
 
 /* Line 35 of lalr1.cc  */
-#line 49 "js_parser.tab.hh"
+#line 50 "js_parser.tab.hh"
 
 
 #include <string>
@@ -75,10 +76,10 @@
 namespace yy {
 
 /* Line 35 of lalr1.cc  */
-#line 79 "js_parser.tab.hh"
+#line 80 "js_parser.tab.hh"
 
   /// A Bison parser.
-  class JSParser
+  class JSCacheParser
   {
   public:
     /// Symbol semantic values.
@@ -87,7 +88,7 @@ namespace yy {
     {
 
 /* Line 35 of lalr1.cc  */
-#line 13 "js_parser.yy"
+#line 15 "js_parser.yy"
 
 	int i;
 	unsigned u;
@@ -97,11 +98,13 @@ namespace yy {
 	double d;
 	float f;
 	QString *s;
+	JSFunctionTypeDescriptor* ftd;
+	JSVarDescriptor* vd;
 
 
 
 /* Line 35 of lalr1.cc  */
-#line 105 "js_parser.tab.hh"
+#line 108 "js_parser.tab.hh"
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -140,8 +143,8 @@ namespace yy {
     typedef token::yytokentype token_type;
 
     /// Build a parser object.
-    JSParser ();
-    virtual ~JSParser ();
+    JSCacheParser (JSSymbolsCache& symb_yyarg, QList<JSVarDescriptor>& tmp_yyarg);
+    virtual ~JSCacheParser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -260,7 +263,7 @@ namespace yy {
     /// For each rule, the index of the first RHS symbol in \a yyrhs_.
     static const unsigned char yyprhs_[];
     /// For each rule, its source line number.
-    static const unsigned char yyrline_[];
+    static const unsigned short int yyrline_[];
     /// For each scanner token number, its symbol number.
     static const unsigned short int yytoken_number_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
@@ -302,12 +305,15 @@ namespace yy {
     static const unsigned int yyuser_token_number_max_;
     static const token_number_type yyundef_token_;
 
+    /* User arguments.  */
+    JSSymbolsCache& symb;
+    QList<JSVarDescriptor>& tmp;
   };
 
 } // yy
 
 /* Line 35 of lalr1.cc  */
-#line 311 "js_parser.tab.hh"
+#line 317 "js_parser.tab.hh"
 
 
 

@@ -43,9 +43,9 @@
 /* User implementation prologue.  */
 
 /* Line 299 of lalr1.cc  */
-#line 45 "js_parser.yy"
+#line 52 "js_parser.yy"
 
-	extern int yylex(yy::JSParser::semantic_type *yylval,yy::JSParser::location_type *yylloc);	
+	extern int yylex(yy::JSCacheParser::semantic_type *yylval,yy::JSCacheParser::location_type *yylloc);	
 
 
 /* Line 299 of lalr1.cc  */
@@ -138,15 +138,18 @@ namespace yy {
 #line 139 "js_parser.tab.cc"
 
   /// Build a parser object.
-  JSParser::JSParser ()
+  JSCacheParser::JSCacheParser (JSSymbolsCache& symb_yyarg, QList<JSVarDescriptor>& tmp_yyarg)
+    :
 #if YYDEBUG
-     :yydebug_ (false),
-      yycdebug_ (&std::cerr)
+      yydebug_ (false),
+      yycdebug_ (&std::cerr),
 #endif
+      symb (symb_yyarg),
+      tmp (tmp_yyarg)
   {
   }
 
-  JSParser::~JSParser ()
+  JSCacheParser::~JSCacheParser ()
   {
   }
 
@@ -156,7 +159,7 @@ namespace yy {
   `--------------------------------*/
 
   inline void
-  JSParser::yy_symbol_value_print_ (int yytype,
+  JSCacheParser::yy_symbol_value_print_ (int yytype,
 			   const semantic_type* yyvaluep, const location_type* yylocationp)
   {
     YYUSE (yylocationp);
@@ -170,7 +173,7 @@ namespace yy {
 
 
   void
-  JSParser::yy_symbol_print_ (int yytype,
+  JSCacheParser::yy_symbol_print_ (int yytype,
 			   const semantic_type* yyvaluep, const location_type* yylocationp)
   {
     *yycdebug_ << (yytype < yyntokens_ ? "token" : "nterm")
@@ -182,7 +185,7 @@ namespace yy {
 #endif
 
   void
-  JSParser::yydestruct_ (const char* yymsg,
+  JSCacheParser::yydestruct_ (const char* yymsg,
 			   int yytype, semantic_type* yyvaluep, location_type* yylocationp)
   {
     YYUSE (yylocationp);
@@ -200,7 +203,7 @@ namespace yy {
   }
 
   void
-  JSParser::yypop_ (unsigned int n)
+  JSCacheParser::yypop_ (unsigned int n)
   {
     yystate_stack_.pop (n);
     yysemantic_stack_.pop (n);
@@ -209,45 +212,45 @@ namespace yy {
 
 #if YYDEBUG
   std::ostream&
-  JSParser::debug_stream () const
+  JSCacheParser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  JSParser::set_debug_stream (std::ostream& o)
+  JSCacheParser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  JSParser::debug_level_type
-  JSParser::debug_level () const
+  JSCacheParser::debug_level_type
+  JSCacheParser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  JSParser::set_debug_level (debug_level_type l)
+  JSCacheParser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif
 
   inline bool
-  JSParser::yy_pact_value_is_default_ (int yyvalue)
+  JSCacheParser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  JSParser::yy_table_value_is_error_ (int yyvalue)
+  JSCacheParser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  JSParser::parse ()
+  JSCacheParser::parse ()
   {
     /// Lookahead and lookahead in internal form.
     int yychar = yyempty_;
@@ -393,10 +396,267 @@ namespace yy {
     YY_REDUCE_PRINT (yyn);
     switch (yyn)
       {
-	
+	  case 9:
 
 /* Line 690 of lalr1.cc  */
-#line 400 "js_parser.tab.cc"
+#line 69 "js_parser.yy"
+    {
+				qDebug() << "Parsing Error Recovery!!!\n";
+			}
+    break;
+
+  case 11:
+
+/* Line 690 of lalr1.cc  */
+#line 77 "js_parser.yy"
+    {
+				symb.pushFrame();
+			}
+    break;
+
+  case 12:
+
+/* Line 690 of lalr1.cc  */
+#line 83 "js_parser.yy"
+    {
+				symb.popFrame();
+			}
+    break;
+
+  case 13:
+
+/* Line 690 of lalr1.cc  */
+#line 89 "js_parser.yy"
+    {
+							JSVarDescriptor vd(*(yysemantic_stack_[(5) - (2)].s),(yysemantic_stack_[(5) - (3)].ftd));
+							symb.currentFrame()[*(yysemantic_stack_[(5) - (2)].s)] = vd;
+						}
+    break;
+
+  case 14:
+
+/* Line 690 of lalr1.cc  */
+#line 96 "js_parser.yy"
+    {
+							
+						}
+    break;
+
+  case 15:
+
+/* Line 690 of lalr1.cc  */
+#line 100 "js_parser.yy"
+    {
+							
+						}
+    break;
+
+  case 20:
+
+/* Line 690 of lalr1.cc  */
+#line 114 "js_parser.yy"
+    {
+					(yyval.ftd) = (yysemantic_stack_[(2) - (2)].ftd);
+				}
+    break;
+
+  case 21:
+
+/* Line 690 of lalr1.cc  */
+#line 120 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 24:
+
+/* Line 690 of lalr1.cc  */
+#line 129 "js_parser.yy"
+    {
+				JSFunctionTypeDescriptor ftd(*(yysemantic_stack_[(6) - (2)].s));
+				symb.globalFunType()[*(yysemantic_stack_[(6) - (2)].s)] = ftd;
+			}
+    break;
+
+  case 25:
+
+/* Line 690 of lalr1.cc  */
+#line 136 "js_parser.yy"
+    {
+					QString nm;
+					if (*(yysemantic_stack_[(5) - (2)].s) == "")
+						nm = QUuid::createUuid().toString();
+					JSFunctionTypeDescriptor ftd(nm);
+				}
+    break;
+
+  case 27:
+
+/* Line 690 of lalr1.cc  */
+#line 146 "js_parser.yy"
+    {
+						symb.currentFrame()[*(yysemantic_stack_[(2) - (1)].s)] = JSVarDescriptor(*(yysemantic_stack_[(2) - (1)].s),NULL);
+				}
+    break;
+
+  case 29:
+
+/* Line 690 of lalr1.cc  */
+#line 153 "js_parser.yy"
+    {
+						symb.currentFrame()[*(yysemantic_stack_[(3) - (3)].s)] = JSVarDescriptor(*(yysemantic_stack_[(3) - (3)].s),NULL);
+					}
+    break;
+
+  case 30:
+
+/* Line 690 of lalr1.cc  */
+#line 159 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 31:
+
+/* Line 690 of lalr1.cc  */
+#line 163 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 32:
+
+/* Line 690 of lalr1.cc  */
+#line 167 "js_parser.yy"
+    {
+			
+				(yyval.ftd) = (yysemantic_stack_[(1) - (1)].ftd);
+			}
+    break;
+
+  case 33:
+
+/* Line 690 of lalr1.cc  */
+#line 172 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 34:
+
+/* Line 690 of lalr1.cc  */
+#line 176 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 35:
+
+/* Line 690 of lalr1.cc  */
+#line 180 "js_parser.yy"
+    {
+				JSFunctionTypeDescriptor ftd(QUuid::createUuid().toString());
+				for(int ii = 0;ii < tmp.size();++ii)
+					ftd.varmember[tmp[ii].name] = tmp[ii];
+				tmp.clear();
+				symb.globalFunType()[ftd.name] = ftd;
+				(yyval.ftd) = &symb.globalFunType()[ftd.name];
+			}
+    break;
+
+  case 36:
+
+/* Line 690 of lalr1.cc  */
+#line 189 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 37:
+
+/* Line 690 of lalr1.cc  */
+#line 193 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 38:
+
+/* Line 690 of lalr1.cc  */
+#line 197 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 39:
+
+/* Line 690 of lalr1.cc  */
+#line 201 "js_parser.yy"
+    {
+				(yyval.ftd) = NULL;
+			}
+    break;
+
+  case 40:
+
+/* Line 690 of lalr1.cc  */
+#line 207 "js_parser.yy"
+    {
+				(yyval.s) = NULL;
+			}
+    break;
+
+  case 48:
+
+/* Line 690 of lalr1.cc  */
+#line 226 "js_parser.yy"
+    {
+				(yyval.ftd) = symb.getFunctionType(*(yysemantic_stack_[(5) - (2)].s));
+			}
+    break;
+
+  case 49:
+
+/* Line 690 of lalr1.cc  */
+#line 233 "js_parser.yy"
+    {
+					
+					
+				}
+    break;
+
+  case 60:
+
+/* Line 690 of lalr1.cc  */
+#line 263 "js_parser.yy"
+    {
+					JSVarDescriptor vd(*(yysemantic_stack_[(6) - (2)].s),(yysemantic_stack_[(6) - (4)].ftd));
+					tmp.push_back(vd);
+				}
+    break;
+
+  case 62:
+
+/* Line 690 of lalr1.cc  */
+#line 271 "js_parser.yy"
+    {
+					JSVarDescriptor vd(*(yysemantic_stack_[(5) - (3)].s),(yysemantic_stack_[(5) - (5)].ftd));
+					tmp.push_back(vd);
+				}
+    break;
+
+
+
+/* Line 690 of lalr1.cc  */
+#line 660 "js_parser.tab.cc"
 	default:
           break;
       }
@@ -574,7 +834,7 @@ namespace yy {
 
   // Generate an error message.
   std::string
-  JSParser::yysyntax_error_ (int, int)
+  JSCacheParser::yysyntax_error_ (int, int)
   {
     return YY_("syntax error");
   }
@@ -582,131 +842,129 @@ namespace yy {
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-  const signed char JSParser::yypact_ninf_ = -88;
+  const signed char JSCacheParser::yypact_ninf_ = -46;
   const signed char
-  JSParser::yypact_[] =
+  JSCacheParser::yypact_[] =
   {
-       -88,     8,    38,   -88,    -3,     6,   -88,   -88,   -88,   -88,
-     -88,   -88,   -88,   -88,   -88,   -88,     6,   -88,     9,   -88,
-     -88,    11,    13,   -88,    10,   109,     9,    61,    17,     6,
-       6,   -88,     6,   -88,   -88,   -88,   -88,     6,   -88,   -88,
-     -88,   -88,   -88,     6,   -88,   -88,    10,    10,     6,   -88,
-     -88,   -88,   -88,   -88,    61,   -88,   -88,   -88,    19,   -88,
-       1,    10,   -88,    34,    61,    61,    10,   -88,   -88,    30,
-      47,     6,   -88,     6,    61,   -88,    19,    19,     6,    31,
-     -88,     6,     9,    19,   -88,    49,   -88,   -88,   -88,    19,
-      61,   -88,   -88,   109,   -88,   -88,    30,    18,    50,   -88,
-     -88,   -88,   -88,     6,   -88,     6,   109,    54,   -88,   -88,
-      61,   -88
+       -46,    17,    85,   -46,     5,    32,   -46,   -46,   -46,   -46,
+     -46,   -46,   -46,   -46,   -46,   -46,    32,   -46,   -46,     8,
+      37,    29,   -46,   -46,    40,    47,    37,    47,    32,   100,
+      42,    43,    32,   -46,    32,   -46,   -46,   -46,   -46,   -46,
+     -46,    32,   -46,   -46,   -46,   -46,   -46,     2,   -46,   -46,
+      13,    40,    32,   -46,   -46,   -46,   -46,   -46,   100,   -46,
+     -46,    48,    45,   -46,     3,    40,   -46,   -46,    60,    47,
+     100,   100,    40,   -46,   -46,    54,    62,    32,   -46,    32,
+     100,   -46,   -46,    45,    45,    32,    28,   -46,    32,    37,
+      45,   -46,    67,   -46,   -46,   -46,    45,   100,   -46,   -46,
+     -46,   -46,   -46,    11,    69,   -46,   -46,    32,   -46,    32,
+      74,   -46,   100,   -46
   };
 
   /* YYDEFACT[S] -- default reduction number in state S.  Performed when
      YYTABLE doesn't specify something else to do.  Zero means the
      default is an error.  */
   const unsigned char
-  JSParser::yydefact_[] =
+  JSCacheParser::yydefact_[] =
   {
-         3,     0,     0,     1,     0,     0,    44,    11,    43,    17,
-      18,     4,     5,     3,     7,     8,     0,     6,     0,    36,
-      37,     0,    40,     9,     0,     0,    20,     0,     0,     0,
-       0,    61,    23,    12,    10,    21,    15,    38,    63,    45,
-      34,    33,    35,     0,    19,    27,    36,    37,     0,    28,
-      29,    30,    31,    32,     0,    14,    42,    41,     0,    25,
-       0,     0,    39,     0,     0,     0,     0,    51,    62,     0,
-      24,     0,    13,    23,     0,    51,     0,     0,    53,     0,
-       3,     0,    20,     0,    58,    50,    48,    49,    55,     0,
-       0,    64,    60,     0,    26,    16,     0,     0,    54,    46,
-      52,    22,     3,     0,    57,     0,     0,     0,    56,    47,
-       0,    59
+         3,     0,     0,     1,     0,     0,    46,    11,    45,    18,
+      19,     4,     5,     3,     7,     8,     0,     6,     3,     0,
+       0,     0,    42,     9,     0,     0,    21,     0,     0,     0,
+       0,     0,     0,    64,    26,    12,    10,    22,    16,    23,
+      43,    40,    66,    47,    38,    37,    39,     0,     3,    20,
+      30,    31,     0,    32,    33,    34,    35,    36,     0,    14,
+      15,    44,     0,    28,     0,     0,    41,    59,     0,     0,
+       0,     0,     0,    53,    65,     0,    27,     0,    13,    26,
+       0,    49,    53,     0,     0,    55,     0,    24,     0,    21,
+       0,    61,    52,    50,    51,    57,     0,     0,    67,    63,
+      29,    17,    25,     0,    56,    48,    54,     0,    60,     0,
+       0,    58,     0,    62
   };
 
   /* YYPGOTO[NTERM-NUM].  */
   const signed char
-  JSParser::yypgoto_[] =
+  JSCacheParser::yypgoto_[] =
   {
-       -88,   -88,    -6,   -88,   -88,    -2,   -87,   -88,   -88,   -88,
-     -88,    42,   -21,   -88,   -11,   -88,   -24,     0,   -88,    -1,
-       2,   -88,     4,   -88,   -88,   -88,   -88,     7,   -12,   -88,
-     -88,   -88,   -88,   -88,   -35,   -34,   -88,   -88
+       -46,   -46,    -9,   -46,   -46,     1,   -25,   -46,   -46,   -46,
+     -46,    26,    -8,   -46,   -46,   -46,     9,   -46,   -28,   -46,
+       6,    10,   -46,    -5,   -46,   -46,   -46,   -46,    16,     0,
+     -46,   -46,   -46,   -46,   -46,   -45,   -34,   -46,   -46
   };
 
   /* YYDEFGOTO[NTERM-NUM].  */
   const signed char
-  JSParser::yydefgoto_[] =
+  JSCacheParser::yydefgoto_[] =
   {
-        -1,     1,     2,    11,    12,    43,    34,    14,    15,    60,
-      16,    35,    36,    17,    58,    70,    75,    45,    61,    46,
-      47,    21,    22,    48,    49,    50,    51,    76,    79,    89,
-      98,    52,    97,    53,    32,    69,    54,    92
+        -1,     1,     2,    11,    12,    47,    36,    14,    15,    64,
+      16,    37,    38,    17,    18,    48,    62,    76,    82,    65,
+      50,    51,    21,    22,    52,    53,    54,    55,    83,    86,
+      96,   104,    56,   103,    57,    34,    75,    58,    99
   };
 
   /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule which
      number is the opposite.  If YYTABLE_NINF_, syntax error.  */
-  const signed char JSParser::yytable_ninf_ = -3;
+  const signed char JSCacheParser::yytable_ninf_ = -3;
   const signed char
-  JSParser::yytable_[] =
+  JSCacheParser::yytable_[] =
   {
-        13,    19,    18,    44,    20,    71,   101,    25,     3,    24,
-     104,    64,    65,    23,     6,    27,    29,    72,    30,   109,
-      26,    31,   103,    13,    19,    18,    73,    20,    56,    57,
-      67,    78,    33,    55,    68,    90,    59,    74,    -2,     4,
-       7,    62,    86,    87,    91,     5,     6,    63,     7,    96,
-      84,    81,    66,    90,   105,    99,     8,   110,     9,    10,
-      28,    95,    83,    85,     0,     0,   100,    80,    37,     6,
-      38,     7,    77,    39,    93,    82,     0,    59,    40,     8,
-      41,     0,    88,    42,     0,    94,   111,     0,     0,     0,
-       0,    13,    19,    18,   102,    20,   106,     0,     0,     0,
-       0,     0,     0,     0,    13,    19,    18,   107,    20,   108,
-       4,     0,     0,     0,     0,     0,     5,     6,     0,     7,
-       0,     0,     0,    33,     0,     0,     0,     8,     0,     9,
-      10
+        24,    49,    39,    13,    25,    70,    71,    77,    19,    27,
+       6,    26,    20,    28,    29,   107,    35,     3,    28,    78,
+      79,    23,    67,    40,    33,    35,    13,    85,    13,    63,
+      73,    19,    97,    19,    32,    20,    66,    20,    61,    69,
+       6,    98,    68,    29,    81,    30,    31,    72,     4,    93,
+      94,    33,    91,    28,     5,     6,   102,     7,    59,    60,
+      74,    35,   105,    80,     7,     8,    88,     9,    10,   106,
+      13,    97,    89,   109,    63,    19,    87,   112,   108,    20,
+      95,   101,    92,   100,   113,    -2,     4,    84,    90,     0,
+       0,     0,     5,     6,     0,     7,     0,     0,     0,     0,
+       0,     0,   110,     8,   111,     9,    10,    41,     6,    42,
+       7,     0,    43,     0,     0,     0,     0,    44,     8,    45,
+       0,     0,    46
   };
 
   /* YYCHECK.  */
   const signed char
-  JSParser::yycheck_[] =
+  JSCacheParser::yycheck_[] =
   {
-         2,     2,     2,    27,     2,     4,    93,    13,     0,     5,
-      97,    46,    47,    16,     8,     6,     5,    16,     5,   106,
-      16,    11,     4,    25,    25,    25,    61,    25,    29,    30,
-      54,    66,    14,    16,    15,     4,    32,     3,     0,     1,
-      10,    37,    76,    77,    13,     7,     8,    43,    10,    83,
-      74,     4,    48,     4,     4,    89,    18,     3,    20,    21,
-      18,    82,    73,    75,    -1,    -1,    90,    69,     7,     8,
-       9,    10,    65,    12,    80,    71,    -1,    73,    17,    18,
-      19,    -1,    78,    22,    -1,    81,   110,    -1,    -1,    -1,
-      -1,    93,    93,    93,    96,    93,   102,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,   106,   106,   106,   103,   106,   105,
-       1,    -1,    -1,    -1,    -1,    -1,     7,     8,    -1,    10,
-      -1,    -1,    -1,    14,    -1,    -1,    -1,    18,    -1,    20,
-      21
+         5,    29,    27,     2,    13,    50,    51,     4,     2,    18,
+       8,    16,     2,     5,     6,     4,    14,     0,     5,    16,
+      65,    16,    47,    28,    11,    14,    25,    72,    27,    34,
+      58,    25,     4,    27,     5,    25,    41,    27,    32,    48,
+       8,    13,    47,     6,    69,    19,    20,    52,     1,    83,
+      84,    11,    80,     5,     7,     8,    90,    10,    16,    16,
+      15,    14,    96,     3,    10,    18,     4,    20,    21,    97,
+      69,     4,    77,     4,    79,    69,    75,     3,   103,    69,
+      85,    89,    82,    88,   112,     0,     1,    71,    79,    -1,
+      -1,    -1,     7,     8,    -1,    10,    -1,    -1,    -1,    -1,
+      -1,    -1,   107,    18,   109,    20,    21,     7,     8,     9,
+      10,    -1,    12,    -1,    -1,    -1,    -1,    17,    18,    19,
+      -1,    -1,    22
   };
 
   /* STOS_[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
   const unsigned char
-  JSParser::yystos_[] =
+  JSCacheParser::yystos_[] =
   {
          0,    24,    25,     0,     1,     7,     8,    10,    18,    20,
-      21,    26,    27,    28,    30,    31,    33,    36,    40,    42,
-      43,    44,    45,    16,    45,    25,    45,     6,    34,     5,
-       5,    11,    57,    14,    29,    34,    35,     7,     9,    12,
-      17,    19,    22,    28,    39,    40,    42,    43,    46,    47,
-      48,    49,    54,    56,    59,    16,    42,    42,    37,    45,
-      32,    41,    45,    45,    57,    57,    45,    39,    15,    58,
-      38,     4,    16,    57,     3,    39,    50,    50,    57,    51,
-      28,     4,    45,    37,    39,    51,    58,    58,    45,    52,
-       4,    13,    60,    25,    45,    35,    58,    55,    53,    58,
-      39,    29,    28,     4,    29,     4,    25,    45,    45,    29,
-       3,    39
+      21,    26,    27,    28,    30,    31,    33,    36,    37,    43,
+      44,    45,    46,    16,    46,    25,    46,    25,     5,     6,
+      34,    34,     5,    11,    58,    14,    29,    34,    35,    29,
+      46,     7,     9,    12,    17,    19,    22,    28,    38,    41,
+      43,    44,    47,    48,    49,    50,    55,    57,    60,    16,
+      16,    43,    39,    46,    32,    42,    46,    29,    46,    25,
+      58,    58,    46,    41,    15,    59,    40,     4,    16,    58,
+       3,    29,    41,    51,    51,    58,    52,    28,     4,    46,
+      39,    41,    52,    59,    59,    46,    53,     4,    13,    61,
+      46,    35,    59,    56,    54,    59,    41,     4,    29,     4,
+      46,    46,     3,    41
   };
 
 #if YYDEBUG
   /* TOKEN_NUMBER_[YYLEX-NUM] -- Internal symbol number corresponding
      to YYLEX-NUM.  */
   const unsigned short int
-  JSParser::yytoken_number_[] =
+  JSCacheParser::yytoken_number_[] =
   {
          0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -716,35 +974,35 @@ namespace yy {
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
   const unsigned char
-  JSParser::yyr1_[] =
+  JSCacheParser::yyr1_[] =
   {
          0,    23,    24,    25,    25,    26,    26,    26,    26,    26,
-      27,    28,    29,    30,    31,    32,    32,    33,    33,    34,
-      35,    35,    36,    37,    37,    38,    38,    39,    39,    39,
-      39,    39,    39,    39,    39,    39,    40,    40,    41,    41,
-      42,    42,    43,    44,    45,    46,    47,    48,    49,    49,
-      50,    51,    51,    52,    52,    53,    53,    54,    55,    55,
-      56,    57,    58,    59,    60
+      27,    28,    29,    30,    31,    31,    32,    32,    33,    33,
+      34,    35,    35,    36,    37,    38,    39,    39,    40,    40,
+      41,    41,    41,    41,    41,    41,    41,    41,    41,    41,
+      42,    42,    43,    43,    44,    45,    46,    47,    48,    49,
+      50,    50,    51,    52,    52,    53,    53,    54,    54,    55,
+      55,    56,    56,    57,    58,    59,    60,    61
   };
 
   /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
   const unsigned char
-  JSParser::yyr2_[] =
+  JSCacheParser::yyr2_[] =
   {
          0,     2,     1,     0,     2,     1,     1,     1,     1,     2,
-       3,     1,     1,     5,     3,     0,     4,     1,     1,     2,
-       0,     1,     8,     0,     2,     0,     3,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1,     0,     1,
-       1,     3,     3,     1,     1,     1,     5,     8,     4,     4,
-       2,     0,     3,     0,     2,     0,     3,     6,     0,     5,
-       4,     1,     1,     1,     1
+       3,     1,     1,     5,     3,     3,     0,     4,     1,     1,
+       2,     0,     1,     3,     6,     5,     0,     2,     0,     3,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       0,     1,     1,     3,     3,     1,     1,     1,     5,     3,
+       4,     4,     2,     0,     3,     0,     2,     0,     3,     2,
+       6,     0,     5,     4,     1,     1,     1,     1
   };
 
 #if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
   /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
      First, the terminals, then, starting at \a yyntokens_, nonterminals.  */
   const char*
-  const JSParser::yytname_[] =
+  const JSCacheParser::yytname_[] =
   {
     "$end", "error", "$undefined", "T_COLON", "T_COMMA", "T_DOT", "T_EQ",
   "T_FUNCTION", "T_IDENTIFIER", "T_LBRACE", "T_LBRACKET", "T_LPAREN",
@@ -753,8 +1011,8 @@ namespace yy {
   "T_NUMERIC_LITERAL", "$accept", "Program", "StatementList", "Statement",
   "Block", "OpenBlock", "CloseBlock", "VariableDeclStatement",
   "AssignmentStatement", "OtherDeclOpt", "DeclTok", "Assignment",
-  "InitOpt", "FunctionDecl", "OptParamList", "OtherOptParamList",
-  "Expression", "LeftSideExpr", "OptIdTok", "MemberExpr", "ThisExpr",
+  "InitOpt", "FunctionDecl", "StartFun", "StartOptFun", "OptParamList",
+  "OtherOptParamList", "Expression", "OptIdTok", "MemberExpr", "ThisExpr",
   "ThisTok", "IdTok", "NewTok", "NewExpr", "FunctionExpr", "FunctionCall",
   "OptExpressionList", "OtherOptExpressionList", "OptArgumentList",
   "OtherOptArgumentList", "ObjConstExpr", "OtherOptFields", "ArrayExpr",
@@ -764,60 +1022,60 @@ namespace yy {
 
 #if YYDEBUG
   /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
-  const JSParser::rhs_number_type
-  JSParser::yyrhs_[] =
+  const JSCacheParser::rhs_number_type
+  JSCacheParser::yyrhs_[] =
   {
         24,     0,    -1,    25,    -1,    -1,    25,    26,    -1,    27,
       -1,    36,    -1,    30,    -1,    31,    -1,     1,    16,    -1,
-      28,    25,    29,    -1,    10,    -1,    14,    -1,    33,    45,
-      35,    32,    16,    -1,    40,    34,    16,    -1,    -1,    32,
-       4,    45,    35,    -1,    20,    -1,    21,    -1,     6,    39,
-      -1,    -1,    34,    -1,     7,    45,    57,    37,    58,    28,
-      25,    29,    -1,    -1,    45,    38,    -1,    -1,    38,     4,
-      45,    -1,    40,    -1,    47,    -1,    48,    -1,    49,    -1,
-      54,    -1,    56,    -1,    19,    -1,    17,    -1,    22,    -1,
-      42,    -1,    43,    -1,    -1,    45,    -1,    45,    -1,    45,
-       5,    42,    -1,    44,     5,    42,    -1,    18,    -1,     8,
-      -1,    12,    -1,    46,    45,    57,    52,    58,    -1,     7,
-      41,    57,    37,    58,    28,    25,    29,    -1,    42,    57,
-      50,    58,    -1,    43,    57,    50,    58,    -1,    39,    51,
-      -1,    -1,    51,     4,    39,    -1,    -1,    45,    53,    -1,
-      -1,    53,     4,    45,    -1,    28,    45,     3,    39,    55,
-      29,    -1,    -1,    55,     4,    45,     3,    39,    -1,    59,
-      39,    51,    60,    -1,    11,    -1,    15,    -1,     9,    -1,
-      13,    -1
+      28,    25,    29,    -1,    10,    -1,    14,    -1,    33,    46,
+      35,    32,    16,    -1,    43,    34,    16,    -1,    44,    34,
+      16,    -1,    -1,    32,     4,    46,    35,    -1,    20,    -1,
+      21,    -1,     6,    41,    -1,    -1,    34,    -1,    37,    25,
+      29,    -1,     7,    46,    58,    39,    59,    28,    -1,     7,
+      42,    58,    39,    59,    -1,    -1,    46,    40,    -1,    -1,
+      40,     4,    46,    -1,    43,    -1,    44,    -1,    48,    -1,
+      49,    -1,    50,    -1,    55,    -1,    57,    -1,    19,    -1,
+      17,    -1,    22,    -1,    -1,    46,    -1,    46,    -1,    43,
+       5,    46,    -1,    45,     5,    43,    -1,    18,    -1,     8,
+      -1,    12,    -1,    47,    46,    58,    53,    59,    -1,    38,
+      25,    29,    -1,    43,    58,    51,    59,    -1,    44,    58,
+      51,    59,    -1,    41,    52,    -1,    -1,    52,     4,    41,
+      -1,    -1,    46,    54,    -1,    -1,    54,     4,    46,    -1,
+      28,    29,    -1,    28,    46,     3,    41,    56,    29,    -1,
+      -1,    56,     4,    46,     3,    41,    -1,    60,    41,    52,
+      61,    -1,    11,    -1,    15,    -1,     9,    -1,    13,    -1
   };
 
   /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
      YYRHS.  */
   const unsigned char
-  JSParser::yyprhs_[] =
+  JSCacheParser::yyprhs_[] =
   {
          0,     0,     3,     5,     6,     9,    11,    13,    15,    17,
-      20,    24,    26,    28,    34,    38,    39,    44,    46,    48,
-      51,    52,    54,    63,    64,    67,    68,    72,    74,    76,
-      78,    80,    82,    84,    86,    88,    90,    92,    94,    95,
-      97,    99,   103,   107,   109,   111,   113,   119,   128,   133,
-     138,   141,   142,   146,   147,   150,   151,   155,   162,   163,
-     169,   174,   176,   178,   180
+      20,    24,    26,    28,    34,    38,    42,    43,    48,    50,
+      52,    55,    56,    58,    62,    69,    75,    76,    79,    80,
+      84,    86,    88,    90,    92,    94,    96,    98,   100,   102,
+     104,   105,   107,   109,   113,   117,   119,   121,   123,   129,
+     133,   138,   143,   146,   147,   151,   152,   155,   156,   160,
+     163,   170,   171,   177,   182,   184,   186,   188
   };
 
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-  const unsigned char
-  JSParser::yyrline_[] =
+  const unsigned short int
+  JSCacheParser::yyrline_[] =
   {
-         0,    51,    51,    53,    54,    57,    58,    59,    60,    61,
-      64,    66,    68,    70,    72,    74,    75,    78,    79,    82,
-      84,    85,    88,    90,    91,    94,    95,    98,    99,   100,
-     101,   102,   103,   104,   105,   106,   109,   110,   113,   114,
-     117,   118,   121,   123,   125,   127,   129,   131,   133,   134,
-     139,   142,   143,   147,   148,   151,   152,   155,   157,   158,
-     161,   163,   165,   167,   169
+         0,    58,    58,    60,    61,    64,    65,    66,    67,    68,
+      74,    76,    82,    88,    95,    99,   105,   106,   109,   110,
+     113,   120,   123,   127,   128,   135,   144,   145,   151,   152,
+     158,   162,   166,   171,   175,   179,   188,   192,   196,   200,
+     207,   210,   213,   214,   217,   219,   221,   223,   225,   232,
+     239,   240,   245,   248,   249,   253,   254,   257,   258,   261,
+     262,   269,   270,   277,   279,   281,   283,   285
   };
 
   // Print the state stack on the debug stream.
   void
-  JSParser::yystack_print_ ()
+  JSCacheParser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (state_stack_type::const_iterator i = yystate_stack_.begin ();
@@ -828,7 +1086,7 @@ namespace yy {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  JSParser::yy_reduce_print_ (int yyrule)
+  JSCacheParser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -845,8 +1103,8 @@ namespace yy {
 #endif // YYDEBUG
 
   /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
-  JSParser::token_number_type
-  JSParser::yytranslate_ (int t)
+  JSCacheParser::token_number_type
+  JSCacheParser::yytranslate_ (int t)
   {
     static
     const token_number_type
@@ -887,32 +1145,32 @@ namespace yy {
       return yyundef_token_;
   }
 
-  const int JSParser::yyeof_ = 0;
-  const int JSParser::yylast_ = 130;
-  const int JSParser::yynnts_ = 38;
-  const int JSParser::yyempty_ = -2;
-  const int JSParser::yyfinal_ = 3;
-  const int JSParser::yyterror_ = 1;
-  const int JSParser::yyerrcode_ = 256;
-  const int JSParser::yyntokens_ = 23;
+  const int JSCacheParser::yyeof_ = 0;
+  const int JSCacheParser::yylast_ = 122;
+  const int JSCacheParser::yynnts_ = 39;
+  const int JSCacheParser::yyempty_ = -2;
+  const int JSCacheParser::yyfinal_ = 3;
+  const int JSCacheParser::yyterror_ = 1;
+  const int JSCacheParser::yyerrcode_ = 256;
+  const int JSCacheParser::yyntokens_ = 23;
 
-  const unsigned int JSParser::yyuser_token_number_max_ = 277;
-  const JSParser::token_number_type JSParser::yyundef_token_ = 2;
+  const unsigned int JSCacheParser::yyuser_token_number_max_ = 277;
+  const JSCacheParser::token_number_type JSCacheParser::yyundef_token_ = 2;
 
 
 } // yy
 
 /* Line 1136 of lalr1.cc  */
-#line 907 "js_parser.tab.cc"
+#line 1165 "js_parser.tab.cc"
 
 
 /* Line 1138 of lalr1.cc  */
-#line 171 "js_parser.yy"
+#line 287 "js_parser.yy"
 
 
 namespace yy 
 {
-	void JSParser::error(location const& loc, const std::string& s)
+	void JSCacheParser::error(location const& loc, const std::string& s)
 	{
 		//std::cerr << "error at " << loc << ": " << s << "\n";
 	}
