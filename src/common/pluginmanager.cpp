@@ -7,6 +7,19 @@
 #include "mlexception.h"
 
 
+static QString DLLExtension() {
+#if defined(Q_OS_WIN)
+  return QString("dll");
+#elif defined(Q_OS_MAC)
+  return QString("dylib");
+#else
+  return QString("so");
+#endif
+  assert(0 && "Unknown Operative System. Please Define the appropriate dynamic library extension");
+  return QString();
+}
+
+
 PluginManager::PluginManager()
 :currentDocInterface(NULL),scriptplugcode()
 {
@@ -43,14 +56,10 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
   qApp->addLibraryPath(getPluginDirPath());
   qApp->addLibraryPath(getBaseDirPath());
   QStringList pluginfilters;
-#if defined(Q_OS_WIN)
-  pluginfilters << "*.dll";
-#elif defined(Q_OS_MAC)
-  pluginfilters << "*.dylib";
-#else
-  pluginfilters << "*.so";
-#endif
+
+  pluginfilters << QString("*." + DLLExtension());
   pluginfilters << "*.xml";
+
   //only the file with extension pluginfilters will be listed by function entryList()
   pluginsDir.setNameFilters(pluginfilters);
 
@@ -295,7 +304,9 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
   QFileInfo fin(absfilepath);
   if (fin.suffix() == "xml")
   {
-    QString dllfile = fin.completeBaseName() + ".dll";
+
+    QString dllfile = fin.completeBaseName() + "."+DLLExtension();
+
     MeshLabXMLFilterContainer fc;
     //fc.filterInterface = NULL;
     XMLMessageHandler xmlErr;
