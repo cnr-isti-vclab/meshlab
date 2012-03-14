@@ -910,7 +910,7 @@ case FP_CLUSTERED_SAMPLING :
 				}
 			else hs.init(&(mm1->cm));
 				
-			hs.dist_upper_bound = mm1->cm.bbox.Diag()/10;
+			hs.dist_upper_bound = distUpperBound;
 			
 			qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
 			qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
