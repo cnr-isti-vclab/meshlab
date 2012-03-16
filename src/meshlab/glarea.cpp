@@ -31,6 +31,8 @@
 #include <wrap/qt/shot_qt.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
+#include <wrap/io_trimesh/export_ply.h>
+#include <wrap/io_trimesh/import_ply.h>
 
 using namespace std;
 using namespace vcg;
@@ -85,6 +87,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
   connect(this->md(), SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
   connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
   connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
+  connect(this->md(),SIGNAL(meshUpdated()),this,SLOT(update()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -345,14 +348,20 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
         mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
         mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
-        if(meshVisibilityMap[mp->id()]) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+        if(meshVisibilityMap[mp->id()])
+		{
+			if (!md()->renderState().isMeshInRenderingState(id))
+				mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
+		}
       }
+	  md()->renderState().render(rm.drawMode,rm.colorMode,rm.textureMode);
+
     }
     if(iEdit) iEdit->Decorate(*mm(),this,&painter);
 
     // Draw the selection
-    if(rm.selectedFace && (mm() != NULL))  mm()->RenderSelectedFace();
-    if(rm.selectedVert && (mm() != NULL))  mm()->RenderSelectedVert();
+    if(rm.selectedFace && (mm() != NULL))  mm()->renderSelectedFace();
+    if(rm.selectedVert && (mm() != NULL))  mm()->renderSelectedVert();
     foreach(QAction * p , iDecoratorsList)
         {
           MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
