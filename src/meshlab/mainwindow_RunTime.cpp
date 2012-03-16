@@ -1248,9 +1248,10 @@ void MainWindow::postFilterExecution()
 void MainWindow::filterUpdateRequest(const bool& redraw,bool* interrupted)
 {
 	GLArea* ar = GLA();
-	if (ar != NULL && redraw)
-		ar->singleRedraw();
-	*interrupted = !(ar->showInterruptButton());
+	//if (ar != NULL && redraw)
+	//	ar->singleRedraw();
+	if (ar != NULL)
+		*interrupted = !(ar->showInterruptButton());
 }
 
 void MainWindow::interruptFilterExecution()
@@ -1677,6 +1678,8 @@ GLArea* MainWindow::newProject(const QString& projName)
 		mvcont->meshDoc.setDocLabel(projName);
 	mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
 	//if(mdiarea->isVisible()) 
+	if (gla->mvc() == NULL)
+		return NULL;
   gla->mvc()->showMaximized();
 	return gla;
 }

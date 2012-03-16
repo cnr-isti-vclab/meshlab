@@ -110,7 +110,7 @@ public:
 
 	void updateFps(float deltaTime);
 	
-  bool isCurrent() { return mvc()->currentId == this->id;}
+  bool isCurrent() { if (mvc() == NULL) return false;return mvc()->currentId == this->id;}
 	
   void showTrackBall(bool b)		{trackBallVisible = b; update();}
 	bool isHelpVisible()      {return helpVisible;}  
@@ -128,7 +128,6 @@ public:
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
-	void singleRedraw();
 
   // Edit Mode management
 	// In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state 
