@@ -272,8 +272,11 @@ bool MeshDocument::hasBeenModified()
 
 void MeshDocument::updateRenderMesh( MeshModel& mm )
 {
+  static QTime currTime;
+  if(currTime.elapsed()< 100) return;
 	renderState().updateMesh(mm.id(),mm.cm);
 	emit meshUpdated();
+	currTime.start();
 }
 
 void MeshModel::Clear()
@@ -708,8 +711,10 @@ MeshLabRenderMesh::~MeshLabRenderMesh()
 {
 	glw.m = NULL;
 	cm.Clear();
-	cm.vert.swap(CMeshO::VertContainer());
-	cm.face.swap(CMeshO::FaceContainer());
+	CMeshO::VertContainer tempVert;
+	CMeshO::FaceContainer tempFace;
+	cm.vert.swap(tempVert);
+	cm.face.swap(tempFace);
 }
 
 MeshLabRenderState::MeshLabRenderState()
@@ -723,7 +728,7 @@ MeshLabRenderState::~MeshLabRenderState()
 	clearState();
 }
 
-bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm )
+bool MeshLabRenderState::updateMesh(const int id, CMeshO& mm )
 {
 	acquireRenderDocumentWrite();
 	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.find(id);
@@ -774,10 +779,10 @@ void MeshLabRenderState::clearState()
 
 void MeshLabRenderState::copyBack( const int id,CMeshO& mm ) const
 {
-	mm.Clear();
-	mm.vert.swap(CMeshO::VertContainer());
-	mm.face.swap(CMeshO::FaceContainer());
-	vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(mm,_rendermap[id]->cm);
+//	mm.Clear();
+//	mm.vert.swap(CMeshO::VertContainer());
+//	mm.face.swap(CMeshO::FaceContainer());
+//	vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(mm,_rendermap[id]->cm);
 }
 
 void MeshLabRenderState::render( const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
