@@ -160,14 +160,13 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 
 void MeshLabXMLStdDialog::applyClick()
 {
-	env.pushContext();
+	//env.pushContext();
 	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
 	for(int ii = 0;ii < curParMap.size();++ii)	
 	{
 		XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
 		QString exp = wid->getWidgetExpression();
 		env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
-		//delete exp;
 	}
 	////int mask = 0;//curParSet.getDynamicFloatMask();
 	if(curmask)	
@@ -182,10 +181,10 @@ void MeshLabXMLStdDialog::applyClick()
 	//else
 	//{
 		QString nm = curmfc->act->text();
-		EnvWrap wrap(env);
-		curmwi->executeFilter(curmfc,wrap,false);
+		EnvWrap* wrap = new EnvWrap(env);
+		curmwi->executeFilter(curmfc,*wrap,false);
 	/*}*/
-	env.popContext();
+	//env.popContext();
 
 	if(curmask)	
 		meshState.create(curmask, curModel);

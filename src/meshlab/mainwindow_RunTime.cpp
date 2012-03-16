@@ -38,6 +38,7 @@
 #include "alnParser.h"
 #include <exception>
 #include "xmlgeneratorgui.h"
+#include "filterthread.h"
 
 
 #include "../common/scriptinterface.h"
@@ -1030,10 +1031,46 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
 {
+	if (mfc == NULL)
+		return;
 	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
 	bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
 	bool filtercpp = (iFilter != NULL) && (!jscode);
 	QString fname = mfc->act->text();
+	QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
+	MeshDocument* mmmmd = meshDoc();
+	if (ar == MLXMLElNames::singleMeshArity)
+		meshDoc()->renderState().addMesh(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
+
+	if (ar == MLXMLElNames::fixedArity)
+	{
+		//I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
+		MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
+		for(int ii = 0;ii < params.size();++ii)
+		{
+			if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
+			{
+				try
+				{
+					MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
+					if (tmp != NULL)
+						meshDoc()->renderState().addMesh(tmp->id(),tmp->cm);
+				}
+				catch (ExpressionHasNotThisTypeException& e)
+				{
+					QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
+					meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+				}
+			}
+		}
+	}
+	
+	//In this case I can only copy all the meshes in the document!
+	if (ar == MLXMLElNames::variableArity)
+	{
+		for(int ii = 0;meshDoc()->meshList.size();++ii)
+			meshDoc()->renderState().addMesh(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
+	}
 	qb->show();
 	if (filtercpp)
 		iFilter->setLog(&meshDoc()->Log);
@@ -1064,7 +1101,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	bool ret = true;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	QTime tt; tt.start();
-	meshDoc()->setBusy(true);
+	//meshDoc()->setBusy(true);
 	//RichParameterSet MergedEnvironment(params);
 	//MergedEnvironment.join(currentGlobalParams);
 
@@ -1079,12 +1116,12 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	try
 	{
 		bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
-		if (isinter)
+		/*if (isinter)
 		{
 			showInterruptButton(true);
 			if (filtercpp)
 				connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
-		}
+		}*/
 		MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
 		QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
 		if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity && !jscode)
@@ -1103,7 +1140,13 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 		if (meshDoc() != NULL)
 			meshDoc()->xmlhistory << funcall;
 		if (filtercpp)
-			ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+		{
+			//I'm using PM.stringXMLFilterMap[fname] instead of mfc passed like parameter because i'm sure that the first one is still alive after the function will exit. 
+			FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env,this);
+			connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
+			ft->start();
+			//ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
+		}
 		else
 		{
 			QTime t;
@@ -1114,32 +1157,46 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			scriptCodeExecuted(result,t.elapsed(),"");
 			
 		}
-		if (isinter)
+		/*if (isinter)
 		{
 			showInterruptButton(false);
 			if (filtercpp)
 				disconnect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)));
-		}
+		}*/
 	}
 	catch(MeshLabException& e)
 	{
 		meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
 		ret = false;
 	}
-	meshDoc()->setBusy(false);
+
+}
+
+void MainWindow::postFilterExecution()
+{	
+	//meshDoc()->renderState().clearState();
+	FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
+	if (obj == NULL)
+		return;
+	MeshLabXMLFilterContainer* mfc = obj->_mfc;
+	if (mfc == NULL)
+		return;
+	
+	QString fname = mfc->act->text();
+	//meshDoc()->setBusy(false);
 
 	qApp->restoreOverrideCursor();
 
 	//// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
-	if(ret)
+	if(obj->_ret)
 	{
-		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),tt.elapsed());
+		//meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),tt.elapsed());
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
 		if(GLA())
 		{
-			GLA()->setWindowModified(true);
 			GLA()->setLastAppliedFilter(mfc->act);
+			GLA()->setWindowModified(true);
 		}
 		lastFilterAct->setText(QString("Apply filter ") + fname);
 		lastFilterAct->setEnabled(true);
@@ -1185,6 +1242,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	if(mvc)
 		mvc->updateAllViewer();
 
+	delete obj;
 }
 
 void MainWindow::filterUpdateRequest(const bool& redraw,bool* interrupted)
@@ -2241,3 +2299,4 @@ void MainWindow::sendHistory()
 {
 	plugingui->getHistory(meshDoc()->xmlhistory);
 }
+

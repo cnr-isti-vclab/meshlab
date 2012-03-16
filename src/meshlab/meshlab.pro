@@ -26,7 +26,8 @@ HEADERS = ../common/interfaces.h \
 	xmlgeneratorgui.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
-    $$VCGDIR/wrap/gl/trimesh.h 
+    $$VCGDIR/wrap/gl/trimesh.h \
+	filterthread.h
 SOURCES = main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
@@ -45,7 +46,8 @@ SOURCES = main.cpp \
 	xmlgeneratorgui.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
-    glarea_setting.cpp
+    glarea_setting.cpp \
+		filterthread.cpp
 
 FORMS = ui/layerDialog.ui \
     ui/filterScriptDialog.ui \
