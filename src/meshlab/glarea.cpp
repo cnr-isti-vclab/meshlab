@@ -106,7 +106,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 GLArea::~GLArea()
 {
 	// warn any iRender plugin that we're deleting glarea
-	if (iRenderer)
+	MeshDocument* md = this->md();
+	if (iRenderer && (md != NULL)) 
 		iRenderer->Finalize(currentShader, *this->md(), this);
 	if(targetTex) glDeleteTextures(1, &targetTex);
 }

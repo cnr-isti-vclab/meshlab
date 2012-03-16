@@ -91,8 +91,8 @@ public:
 
   MultiViewer_Container *mvc();
   MainWindow *mw();
-  MeshModel *mm(){ return mvc()->meshDoc.mm();}
-  inline MeshDocument *md() {return &(mvc()->meshDoc);}
+  MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
+  inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
 
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
