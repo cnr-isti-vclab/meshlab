@@ -1174,7 +1174,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 
 void MainWindow::postFilterExecution()
 {	
-	//meshDoc()->renderState().clearState();
+	meshDoc()->renderState().clearState();
 	FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
 	if (obj == NULL)
 		return;
