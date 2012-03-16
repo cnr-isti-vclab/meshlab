@@ -443,14 +443,14 @@ public:
 	void render(const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  );
 	void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
 	void clearState();
-	inline void acquireRenderDocumentWrite() {_mutdoc.lock();}
-	inline void acquireRenderDocumentRead() {_mutdoc.lock();}
+	inline void acquireRenderDocumentWrite() {_mutdoc.lockForWrite();}
+	inline void acquireRenderDocumentRead() {_mutdoc.lockForRead();}
 	inline void releaseRenderDocument() {_mutdoc.unlock();}
 	bool isMeshInRenderingState(const int id);
 
 	QMap<int,MeshLabRenderMesh*> _rendermap;
 private:
-	QMutex _mutdoc;
+	QReadWriteLock _mutdoc;
 };
 
 class MeshModelSI;

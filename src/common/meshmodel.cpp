@@ -718,7 +718,7 @@ MeshLabRenderMesh::~MeshLabRenderMesh()
 }
 
 MeshLabRenderState::MeshLabRenderState()
-:_rendermap(),_mutdoc(QMutex::Recursive)
+:_rendermap(),_mutdoc(QReadWriteLock::Recursive)
 {
 
 }
