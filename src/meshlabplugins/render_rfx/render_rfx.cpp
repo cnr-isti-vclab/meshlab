@@ -184,7 +184,7 @@ void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWi
 				}
 				else{
 					if(mp->visible) 
-						mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+						mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 				
 			}
