@@ -132,13 +132,33 @@ public :
 	}
 };
 
+/*An ack in order to avoid to duplicate code. Should be used as MeshLabRenderMesh class itself ONLY inside MeshLabRenderState and as DERIVED class in MeshModel*/
+
+class MeshLabRenderMesh
+{
+public:
+	MeshLabRenderMesh();
+	~MeshLabRenderMesh();
+
+	//WARNING!!!!!: the constructor create a copy of the mesh passed as parameter. 
+	//The parameter should be const but this is impossible cause of vcg::tri::Append::MeshCopy implementation in the vcglib
+	MeshLabRenderMesh(CMeshO& mesh);
+
+	bool render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
+	bool renderSelectedFace();
+	bool renderSelectedVert();
+
+	vcg::GlTrimesh<CMeshO> glw;
+	CMeshO cm;
+};
+
 /*
 MeshModel Class
 The base class for representing a single mesh.
 It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has.
 */
 
-class MeshModel 
+class MeshModel : public MeshLabRenderMesh
 {
 public:
 /*
@@ -195,14 +215,10 @@ public:
         MM_ALL				= 0xffffffff
 };
 
-
-  CMeshO cm;
   MeshDocument *parent;
 
 
 public:
-  vcg::GlTrimesh<CMeshO> glw;
-
 	/*
 	Bitmask denoting what fields are currently used in the mesh
     it is composed by MeshElement enums.
@@ -268,9 +284,9 @@ public:
    bool visible; // used in rendering; Needed for toggling on and off the meshes
 
   MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
-  bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
-  bool RenderSelectedFace();
-  bool RenderSelectedVert();
+  //bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
+  //bool RenderSelectedFace();
+  //bool RenderSelectedVert();
 
 
   // This function is roughly equivalent to the updateDataMask,
@@ -409,6 +425,33 @@ public:
 		
 }; // end class RenderMode
 
+class MeshLabRenderState : public QObject
+{
+	Q_OBJECT
+public:
+	MeshLabRenderState();
+	~MeshLabRenderState();
+
+	//copy the _rendermap[id] model in the mm model
+	void copyBack(const int id,CMeshO& mm) const;
+
+	//the add/update functions should have const parameters. This could NOT be possible cause of the implementation of vcg::tri::Append::MeshCopy function in the vcglib
+	void addMesh(const int id,CMeshO& mm);
+	bool updateMesh(const int id,CMeshO& mm);
+	QMap<int,MeshLabRenderMesh*>::iterator removeMesh(QMap<int,MeshLabRenderMesh*>::iterator it );
+
+	void render(const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  );
+	void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
+	void clearState();
+	inline void acquireRenderDocumentWrite() {_mutdoc.lock();}
+	inline void acquireRenderDocumentRead() {_mutdoc.lock();}
+	inline void releaseRenderDocument() {_mutdoc.unlock();}
+	bool isMeshInRenderingState(const int id);
+
+	QMap<int,MeshLabRenderMesh*> _rendermap;
+private:
+	QMutex _mutdoc;
+};
 
 class MeshModelSI;
 
@@ -418,7 +461,7 @@ class MeshDocument : public QObject
 
 public:
 
-	MeshDocument(): QObject(),xmlhistory()
+	MeshDocument(): QObject(),xmlhistory(),rendstate()
 	{
     tagIdCounter=0;
     meshIdCounter=0;
@@ -490,6 +533,9 @@ public:
   int newMeshId() {return meshIdCounter++;}
   int newRasterId() {return rasterIdCounter++;}
 
+  //this function copy the mesh in the meshList on the renderState and emit a signal to 
+  void updateRenderMesh(MeshModel& mm);
+
 private:
   int tagIdCounter;
   int meshIdCounter;
@@ -503,8 +549,10 @@ private:
 
   //it is the label of the document. it should only be something like Project_n (a temporary name for a new empty document) or the fullPathFilename.
   QString documentLabel;
-
+	MeshLabRenderState rendstate;
 public:
+
+	inline MeshLabRenderState& renderState() {return rendstate;};
 	void setDocLabel(const QString& docLb) {documentLabel = docLb;}
 	QString docLabel() const {return documentLabel;}
  QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
@@ -589,6 +637,9 @@ public:
 
 	///whenever the rasterList is changed
 		void rasterSetChanged();
+
+	//this signal is emitted when a filter request to update the mesh in the renderingState
+	void meshUpdated();
 };// end class MeshDocument
 
 /*

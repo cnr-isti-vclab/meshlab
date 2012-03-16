@@ -28,6 +28,8 @@
 #include "meshmodel.h"
 #include <wrap/gl/math.h>
 #include "scriptinterface.h"
+#include <vcg/complex/append.h>
+
 
 using namespace vcg;
 
@@ -179,7 +181,6 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
   MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
   meshList.push_back(newMesh);
-
   emit meshSetChanged();
 
   if(setAsCurrent)
@@ -269,6 +270,12 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
+void MeshDocument::updateRenderMesh( MeshModel& mm )
+{
+	renderState().updateMesh(mm.id(),mm.cm);
+	emit meshUpdated();
+}
+
 void MeshModel::Clear()
 {
   meshModified() = false;
@@ -284,84 +291,15 @@ void MeshModel::Clear()
   cm.svn=0;
 }
 
-MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName) 
+MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName)
+:MeshLabRenderMesh()
 {
+
   Clear();
   parent=_parent;
   _id=parent->newMeshId();
   if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
   if(!labelName.isEmpty())     this->_label=labelName;
-}
-
-
-bool MeshModel::Render(GLW::DrawMode _dm, GLW::ColorMode _cm, GLW::TextureMode _tm)
-  {
-      // Needed to be defined here for splatrender as long there is no "MeshlabCore" library.
-      using namespace vcg;
-      glPushMatrix();
-      glMultMatrix(cm.Tr);
-      if( (_cm == GLW::CMPerFace)  && (!tri::HasPerFaceColor(cm)) ) _cm=GLW::CMNone;
-      if( (_tm == GLW::TMPerWedge )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-      if( (_tm == GLW::TMPerWedgeMulti )&& (!tri::HasPerWedgeTexCoord(cm)) ) _tm=GLW::TMNone;
-      glw.Draw(_dm,_cm,_tm);
-      glPopMatrix();
-      return true;
-  }
-
-bool MeshModel::RenderSelectedFace()
-{
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glEnable(GL_POLYGON_OFFSET_FILL);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
-  glDepthMask(GL_FALSE);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-  glColor4f(1.0f,0.0,0.0,.3f);
-  glPolygonOffset(-1.0, -1);
-  CMeshO::FaceIterator fi;
-	glPushMatrix();
-	glMultMatrix(cm.Tr);glBegin(GL_TRIANGLES);
-	cm.sfn=0;
-	for(fi=cm.face.begin();fi!=cm.face.end();++fi)
-    if(!(*fi).IsD() && (*fi).IsS())
-    {
-  		glVertex((*fi).cP(0));
-  		glVertex((*fi).cP(1));
-  		glVertex((*fi).cP(2));
-			++cm.sfn;
-    }
-  glEnd();
-	glPopMatrix();
-	glPopAttrib();
-  return true;
-}
-bool MeshModel::RenderSelectedVert()
-{
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glEnable(GL_BLEND);
-  glDepthMask(GL_FALSE);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-  glColor4f(1.0f,0.0,0.0,.3f);
-  glDepthRange(0.00,0.999);
-  glPointSize(3.0);
-  glPushMatrix();
-  glMultMatrix(cm.Tr);
-  glBegin(GL_POINTS);
-  cm.svn=0;
-  CMeshO::VertexIterator vi;
-  for(vi=cm.vert.begin();vi!=cm.vert.end();++vi)
-    if(!(*vi).IsD() && (*vi).IsS())
-    {
-      glVertex((*vi).cP());
-      ++cm.svn;
-    }
-  glEnd();
-  glPopMatrix();
-  glPopAttrib();
-  return true;
 }
 
 QString MeshModel::relativePathName() const
@@ -659,4 +597,209 @@ void MeshModel::Enable(int openingFileMask)
 bool& MeshModel::meshModified()
 {
 	return this->modified;
+}
+
+MeshLabRenderMesh::MeshLabRenderMesh()
+:glw(),cm()
+{
+}
+
+MeshLabRenderMesh::MeshLabRenderMesh(CMeshO& mesh )
+:glw(),cm()
+{
+	vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(cm,mesh);
+	//cm.Tr = mesh.Tr;
+	cm.Tr.SetIdentity();
+	cm.sfn = mesh.sfn;
+	cm.svn = mesh.svn;
+	glw.m = &cm; 
+}
+
+bool MeshLabRenderMesh::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode colm,vcg::GLW::TextureMode tm )
+{
+	if (glw.m != NULL)
+	{
+		glPushMatrix();
+		glMultMatrix(glw.m->Tr);
+		if( (colm == vcg::GLW::CMPerFace)  && (!vcg::tri::HasPerFaceColor(*glw.m)) ) 
+			colm=vcg::GLW::CMNone;
+		if( (tm == vcg::GLW::TMPerWedge )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) ) 
+			tm=vcg::GLW::TMNone;
+		if( (tm == vcg::GLW::TMPerWedgeMulti )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) ) 
+			tm=vcg::GLW::TMNone;
+		glw.Draw(dm,colm,tm);
+		glPopMatrix();
+		return true;
+	}
+	return false;
+}
+
+bool MeshLabRenderMesh::renderSelectedFace()
+{
+	if (glw.m != NULL)
+	{
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+		glColor4f(1.0f,0.0,0.0,.3f);
+		glPolygonOffset(-1.0, -1);
+		CMeshO::FaceIterator fi;
+		glPushMatrix();
+		glMultMatrix(glw.m->Tr);
+		glBegin(GL_TRIANGLES);
+		glw.m->sfn=0;
+		for(fi=glw.m->face.begin();fi!=glw.m->face.end();++fi)
+		{
+			if(!(*fi).IsD() && (*fi).IsS())
+			{
+				glVertex((*fi).cP(0));
+				glVertex((*fi).cP(1));
+				glVertex((*fi).cP(2));
+				++glw.m->sfn;
+			}
+		}
+		glEnd();
+		glPopMatrix();
+		glPopAttrib();
+		return true;
+	}
+	return false;
+}
+
+bool MeshLabRenderMesh::renderSelectedVert()
+{
+	if (glw.m != NULL)
+	{
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+		glColor4f(1.0f,0.0,0.0,.3f);
+		glDepthRange(0.00,0.999);
+		glPointSize(3.0);
+		glPushMatrix();
+		glMultMatrix(glw.m->Tr);
+		glBegin(GL_POINTS);
+		glw.m->svn=0;
+		CMeshO::VertexIterator vi;
+		for(vi=glw.m->vert.begin();vi!=glw.m->vert.end();++vi)
+		{
+			if(!(*vi).IsD() && (*vi).IsS())
+			{
+				glVertex((*vi).cP());
+				++glw.m->svn;
+			}
+		}
+		glEnd();
+		glPopMatrix();
+		glPopAttrib();
+		return true;
+	}
+	return false;
+}
+
+MeshLabRenderMesh::~MeshLabRenderMesh()
+{
+	glw.m = NULL;
+	cm.Clear();
+	cm.vert.swap(CMeshO::VertContainer());
+	cm.face.swap(CMeshO::FaceContainer());
+}
+
+MeshLabRenderState::MeshLabRenderState()
+:_rendermap(),_mutdoc(QMutex::Recursive)
+{
+
+}
+
+MeshLabRenderState::~MeshLabRenderState()
+{
+	clearState();
+}
+
+bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm )
+{
+	acquireRenderDocumentWrite();
+	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.find(id);
+	if (it != _rendermap.end())
+	{
+		removeMesh(it);
+		_rendermap[id] = new MeshLabRenderMesh(mm);
+		releaseRenderDocument();
+		return true;
+	}
+	releaseRenderDocument();
+	return false;
+}
+
+void MeshLabRenderState::addMesh(const int id,CMeshO& mm )
+{
+	acquireRenderDocumentWrite();
+	if (!_rendermap.contains(id))
+	{
+		_rendermap[id] = new MeshLabRenderMesh(mm);
+	}
+	releaseRenderDocument();
+}
+
+QMap<int,MeshLabRenderMesh*>::iterator MeshLabRenderState::removeMesh(QMap<int,MeshLabRenderMesh*>::iterator it )
+{	
+	acquireRenderDocumentWrite();
+	if (it != _rendermap.end())
+	{
+		MeshLabRenderMesh* tmp = it.value();
+		delete tmp;
+		QMap<int,MeshLabRenderMesh*>::iterator tmpit = _rendermap.erase(it);
+		releaseRenderDocument();
+		return tmpit;
+	}
+	releaseRenderDocument();
+	return _rendermap.end();
+}
+
+void MeshLabRenderState::clearState()
+{
+	acquireRenderDocumentWrite();
+	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.begin();
+	while(it != _rendermap.end())
+		it = removeMesh(it);
+	releaseRenderDocument();
+}
+
+void MeshLabRenderState::copyBack( const int id,CMeshO& mm ) const
+{
+	mm.Clear();
+	mm.vert.swap(CMeshO::VertContainer());
+	mm.face.swap(CMeshO::FaceContainer());
+	vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(mm,_rendermap[id]->cm);
+}
+
+void MeshLabRenderState::render( const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
+{
+	acquireRenderDocumentRead();
+	_rendermap[id]->render(dm,cm,tm);
+	releaseRenderDocument();
+}
+
+void MeshLabRenderState::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
+{
+	acquireRenderDocumentRead();
+	for(QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.begin();it != _rendermap.end();++it)
+		(*it)->render(dm,cm,tm);
+	releaseRenderDocument();
+}
+
+bool MeshLabRenderState::isMeshInRenderingState( const int id )
+{
+	bool found = false;
+	acquireRenderDocumentRead();
+	found = _rendermap.contains(id);
+	releaseRenderDocument();
+	return found;
 }
