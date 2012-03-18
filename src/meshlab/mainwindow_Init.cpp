@@ -636,7 +636,20 @@ void MainWindow::fillFilterMenu()
 	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
 	filterMenuCamera = filterMenu->addMenu(tr("Camera"));
 
-	connect(filterMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
 	QMap<QString,MeshFilterInterface *>::iterator msi;
 	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
