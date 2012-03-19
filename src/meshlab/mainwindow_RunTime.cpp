@@ -769,9 +769,10 @@ void MainWindow::runFilterScript()
 // on screen at the current mouse position.
 // TODO: have the tooltip always display with fixed width at the right
 //       hand side of the menu entry (not invasive)
-void MainWindow::showTooltip(QAction* q){
+void MainWindow::showTooltip(QAction* q)
+{
   QString tip = q->toolTip();
-  QToolTip::showText(QCursor::pos(), tip);
+	QToolTip::showText(QCursor::pos(), tip);
 }
 
 // /////////////////////////////////////////////////
@@ -1382,6 +1383,7 @@ void MainWindow::applyRenderMode()
       GLA()->log->Logf(GLLogStream::WARNING,"Shader not supported!");
 		}
 	}
+	GLA()->update();
 }
 
 
