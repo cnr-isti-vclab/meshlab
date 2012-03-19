@@ -64,7 +64,7 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 			glPushMatrix();
 			trackball.GetView();
 			trackball.Apply(true);
-			m.Render(GLW::DMFlat,GLW::CMPerMesh,gla->rm.textureMode);
+			m.render(GLW::DMFlat,GLW::CMPerMesh,gla->rm.textureMode);
 			glPopMatrix();
 			break;
 			
@@ -75,7 +75,7 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 			else
 				gla->rm.colorMode=GLW::CMPerVert;
 				
-			m.Render(GLW::DMBox,GLW::CMNone,GLW::TMNone);
+			m.render(GLW::DMBox,GLW::CMNone,GLW::TMNone);
 			if(alignDialog->currentArc!=0)
 			     DrawArc(alignDialog->currentArc);
 		}

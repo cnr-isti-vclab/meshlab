@@ -112,11 +112,11 @@ void AlignPairWidget::paintGL ()
 					vcg::glTranslate(-bb.Center());
 					if(i==0)
 						{
-              freeMesh->m->Render(localDM,localCM,vcg::GLW::TMNone);
+              freeMesh->m->render(localDM,localCM,vcg::GLW::TMNone);
 							drawPickedPoints(freePickedPointVec,vcg::Color4b(vcg::Color4b::Red));	
 						} else				{
 							foreach(MeshNode *mn, gluedTree->nodeList) 
-                if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->Render(localDM,localCM,vcg::GLW::TMNone);
+                if(mn->glued && mn != freeMesh && mn->m->visible) mn->m->render(localDM,localCM,vcg::GLW::TMNone);
 							drawPickedPoints(gluedPickedPointVec,vcg::Color4b(vcg::Color4b::Blue));	
 						}
 								

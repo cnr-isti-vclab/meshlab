@@ -89,7 +89,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {
-        m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m->render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
       }
 
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -128,7 +128,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {
-        m->Render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m->render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
       }
 
     glDisable(GL_BLEND);

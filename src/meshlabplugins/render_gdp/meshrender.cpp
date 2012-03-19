@@ -457,7 +457,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm
 	glGetError();
 	foreach(MeshModel * mp, md.meshList)
 				{
-					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+					if(mp->visible) mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 	glUseProgramObjectARB(0);
 }

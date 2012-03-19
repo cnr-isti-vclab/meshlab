@@ -35,7 +35,7 @@ class FilterMeasurePlugin : public MeshLabFilterInterface
 
 public:
 
-	FilterMeasurePlugin(){}
+	FilterMeasurePlugin():MeshLabFilterInterface(){}
 	bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
 	QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0);
 };

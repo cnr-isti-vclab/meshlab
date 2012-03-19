@@ -52,7 +52,7 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow()
         glPopAttrib();
     }
     else
-        m_Mesh->Render( vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone );
+        m_Mesh->render( vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone );
 }
 
 
@@ -76,7 +76,7 @@ void DecorateRasterProjPlugin::MeshDrawer::draw()
         glPopAttrib();
     }
     else
-        m_Mesh->Render( vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone );
+        m_Mesh->render( vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone );
 }
 
 

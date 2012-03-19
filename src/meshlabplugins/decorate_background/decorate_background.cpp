@@ -294,7 +294,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     scale[axis]=0;
     glTranslate(trans);
     glScale(scale);
-    m.Render(GLW::DMFlat,GLW::CMNone,GLW::TMNone);
+    m.render(GLW::DMFlat,GLW::CMNone,GLW::TMNone);
     glPopMatrix();
     glPopAttrib();
 }

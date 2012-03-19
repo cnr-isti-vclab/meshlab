@@ -127,7 +127,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla){
         foreach(MeshModel *m, md.meshList)
         if(m->visible)
           {
-            m->Render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
+            m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone);
           }
         glUseProgram(0);
 
