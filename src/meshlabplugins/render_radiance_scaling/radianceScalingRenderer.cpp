@@ -103,7 +103,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, RenderMo
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   _buffPass->enable();
   foreach(MeshModel *mp,md.meshList) {
-    if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+    if(mp->visible) mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
   }
   _buffPass->disable();
   
