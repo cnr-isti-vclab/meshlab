@@ -173,6 +173,8 @@ void RadianceScalingRendererPlugin::initShaders(bool reload) {
   
   if(!reload) {
     string path = ":/RadianceScalingRenderer/shaders/";
+	delete _buffPass;
+	delete _rsPass;
     _buffPass = new GPUProgram(path+"01_buffer.vs",path+"01_buffer.fs");
     _rsPass   = new GPUProgram(path+"02_rs.vs"  ,path+"02_rs.fs");
     GL_TEST_ERR

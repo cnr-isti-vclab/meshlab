@@ -143,12 +143,12 @@ inline void RadianceScalingRendererPlugin::setEnable(bool enabled) {
   _rsPass->disable();
 }
 
-inline void RadianceScalingRendererPlugin::setLit(bool lit) {
-  _rsPass->enable();
-  _rsPass->setUniform1i("lit",lit);
-  _rsPass->disable();
-
-  initShaders(false);
+inline void RadianceScalingRendererPlugin::setLit(bool lit) 
+{
+	  initShaders(false);
+		_rsPass->enable();
+	  _rsPass->setUniform1i("lit",lit);
+	  _rsPass->disable();
 }
 
 inline void RadianceScalingRendererPlugin::setInvert(int invert) {
@@ -158,13 +158,12 @@ inline void RadianceScalingRendererPlugin::setInvert(int invert) {
 }
 
 inline void RadianceScalingRendererPlugin::setDisplay(int index) {
+	if(index==1) {
+		initShaders(false);
+	}
   _rsPass->enable();
   _rsPass->setUniform1i("display",index);
   _rsPass->disable();
-
-  if(index==1) {
-    initShaders(false);
-  }
 }
 
 inline void RadianceScalingRendererPlugin::setEnhancement(float enhancement) {
@@ -180,13 +179,14 @@ inline void RadianceScalingRendererPlugin::setTransition(float transition) {
 }
 
 inline void RadianceScalingRendererPlugin::setConvexLit(const QString &filename) {
-  createLit(filename,0);
   initShaders(false);
+	createLit(filename,0);
+  
 }
 
 inline void RadianceScalingRendererPlugin::setConcavLit(const QString &filename) {
+ initShaders(false);
   createLit(filename,1);
-  initShaders(false);
 }
 
 #endif
