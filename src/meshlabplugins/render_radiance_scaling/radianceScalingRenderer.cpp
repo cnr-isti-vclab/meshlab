@@ -169,8 +169,8 @@ void RadianceScalingRendererPlugin::createLit(const QString &filename,int type) 
   }
 }
 
-void RadianceScalingRendererPlugin::initShaders(bool reload) {
-  
+void RadianceScalingRendererPlugin::initShaders(bool reload)
+{
   if(!reload) {
     string path = ":/RadianceScalingRenderer/shaders/";
 	delete _buffPass;
@@ -192,6 +192,7 @@ void RadianceScalingRendererPlugin::initShaders(bool reload) {
     _rsPass->addUniform("norm");
     _rsPass->addUniform("convexLS");
     _rsPass->addUniform("concavLS");
+    _rsPass->addUniform("colormap");
     _rsPass->disable();
 
     GL_TEST_ERR    
