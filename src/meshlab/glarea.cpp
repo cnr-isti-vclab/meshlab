@@ -1277,7 +1277,7 @@ void GLArea::setIsRaster(bool viewMode){
 }
 
 // this slot is called when someone press the showraster button on the toolbar
-void GLArea::showRaster()
+void GLArea::showRaster(bool resetViewFlag)
 {
 	if(!this->isRaster())
 	{
@@ -1289,7 +1289,8 @@ void GLArea::showRaster()
 		this->setIsRaster(false);
 		QDomDocument doc("StringDoc");
 		doc.setContent(lastViewBeforeRasterMode);
-		this->loadViewFromViewStateFile(doc);
+		if(resetViewFlag) this->loadViewFromViewStateFile(doc);
+		else this->update();
 	}
 }
 

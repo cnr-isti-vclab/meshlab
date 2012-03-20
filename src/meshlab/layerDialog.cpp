@@ -159,7 +159,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
     case 1 :
     case 2 :
     case 3 :
-          if(mw->meshDoc()->rm()->id() != clickedId )
+          if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
           {
             mw->meshDoc()->setCurrentRaster(clickedId);
             if(mw->GLA()->isRaster())
@@ -193,11 +193,11 @@ void LayerDialog::showLayerMenu()
 void LayerDialog::showContextMenu(const QPoint& pos)
 {
 	// switch layer
-	MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-	QTreeWidgetItem *tItem = dynamic_cast<QTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+  MeshTreeWidgetItem   *mItem = dynamic_cast<MeshTreeWidgetItem   *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+  RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+    QTreeWidgetItem *qtItem = dynamic_cast<QTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
 	if(mItem){ 
-		if (mItem->m)
-      mw->meshDoc()->setCurrentMesh(mItem->m->id());
+		if (mItem->m) mw->meshDoc()->setCurrentMesh(mItem->m->id());
 
 		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
@@ -208,9 +208,9 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 			}
 		}
 	}
-	else if(tItem){
+	else if(qtItem){
 		bool ok;
-		int idToRemove = tItem->text(2).toInt(&ok);
+		int idToRemove = qtItem->text(2).toInt(&ok);
 		if(ok){
 			removeTagAct->setData(idToRemove);
 			tagMenu->popup(mapToGlobal(pos));
