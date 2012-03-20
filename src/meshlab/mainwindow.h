@@ -66,7 +66,7 @@ public:
 	static bool QCallBack(const int pos, const char * str);
 	static bool DICallBack();
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.1Beta"); }
+  const QString appVer() const {return tr("1.3.2Beta_64bit"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);

@@ -342,7 +342,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-		if (iRenderer) iRenderer->Render(currentShader, *this->md(), rm, this);
+		if (iRenderer) 
+			iRenderer->Render(currentShader, *this->md(), rm, this);
 		else
 		{
 			foreach(MeshModel * mp, this->md()->meshList)

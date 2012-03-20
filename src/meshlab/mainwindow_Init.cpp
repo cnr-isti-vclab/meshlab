@@ -743,6 +743,10 @@ void MainWindow::fillDecorateMenu()
 
 void MainWindow::fillRenderMenu()
 {
+	QAction * qaNone = new QAction("None", this); 
+	qaNone->setCheckable(false);
+	shadersMenu->addAction(qaNone);
+	connect(qaNone,SIGNAL(triggered()),this,SLOT(applyRenderMode()));
 	foreach(MeshRenderInterface *iRender,PM.meshRenderPlugins())
 	{
 		addToMenu(iRender->actions(), shadersMenu, SLOT(applyRenderMode()));

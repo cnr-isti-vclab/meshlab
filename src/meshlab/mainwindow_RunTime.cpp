@@ -1365,24 +1365,27 @@ void MainWindow::applyRenderMode()
 
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
-  iRenderTemp->Init(action,*(meshDoc()),GLA()->getCurrentRenderMode(),GLA());
-
-	if(action->text() == tr("None"))
+	bool initsupport = false;
+	if (iRenderTemp != NULL)
 	{
-    GLA()->log->Logf(GLLogStream::SYSTEM,"No Shader");
-		GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-	} else {
-		if(iRenderTemp->isSupported())
+		iRenderTemp->Init(action,*(meshDoc()),GLA()->getCurrentRenderMode(),GLA());
+		if (iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
-      GLA()->log->Logf(GLLogStream::SYSTEM,"%s",qPrintable(action->text()));	// Prints out action name
-		}
-		else
-		{
-			GLA()->setRenderer(0,0); //vertex and fragment programs not supported
-      GLA()->log->Logf(GLLogStream::WARNING,"Shader not supported!");
+			initsupport = true;
 		}
 	}
+
+	/*I clicked None in renderMenu */
+	if ((action->parent() == this) || (!initsupport))
+	{
+		QString msg("No Shader.");
+		if (!initsupport)
+			msg = "The selected shader is not supported by your graphic hardware!";
+			
+		GLA()->log->Logf(GLLogStream::SYSTEM,qPrintable(msg));
+		GLA()->setRenderer(0,0); //default opengl pipeline or vertex and fragment programs not supported
+	} 
 	GLA()->update();
 }
 
