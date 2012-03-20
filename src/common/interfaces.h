@@ -388,6 +388,10 @@ public:
 	      BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
 	  int previewOnCreatedAttributes(QAction* act,const MeshModel& mm);
 	QString generatedScriptCode;
+
+	/** If you need to init your QGLContext in order to use GPU redefine this function. */
+	virtual bool initGLContext() {return true;}
+
 	QGLContext* glContext;
 protected:
     // Each plugins exposes a set of filtering possibilities. 
@@ -431,7 +435,7 @@ public:
 		
   virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){}
 	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
-  virtual void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/){}
+  virtual void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/){}
 	virtual bool isSupported() = 0;
 	virtual QList<QAction *> actions() = 0;
 };
