@@ -35,9 +35,9 @@ using namespace vcg;
 
 void MeshShaderRenderPlugin::initActionList() {
 
-	QAction * qaNone = new QAction("None", this); 
+	/*QAction * qaNone = new QAction("None", this); 
 	qaNone->setCheckable(false);
-	actionList << qaNone;
+	actionList << qaNone;*/
 
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
