@@ -116,7 +116,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, RenderMo
   swapToWorldMode();
 }
 
-void RadianceScalingRendererPlugin::Finalize(QAction *, MeshDocument &, GLArea *) {
+void RadianceScalingRendererPlugin::Finalize(QAction *, MeshDocument *, GLArea *) {
   cleanShaders();
   cleanFBOs();
 

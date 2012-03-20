@@ -54,7 +54,7 @@ public:
 	bool isSupported() {return splat_renderer.isSupported();}
 	void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
 	void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
-	void Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/) ;
+	void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/) ;
 
 };
 

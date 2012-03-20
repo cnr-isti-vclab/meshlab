@@ -62,9 +62,10 @@ public:
 
   void initActionList();
 
-	virtual bool isSupported() {return supported;}
-	virtual void Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
-	virtual void Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
+	bool isSupported() {return supported;}
+	void Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
+	void Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
+	void Finalize(QAction*, MeshDocument*, GLArea*);
 
 };
 

@@ -70,7 +70,7 @@ void SplatRendererPlugin::Render(QAction *, MeshDocument &md, RenderMode &rm, QG
 
 }
 
-void SplatRendererPlugin::Finalize(QAction * /*mode*/, MeshDocument &/*m*/, GLArea * /*parent*/) {
+void SplatRendererPlugin::Finalize(QAction * /*mode*/, MeshDocument */* &*//*m*/, GLArea * /*parent*/) {
   splat_renderer.Destroy();
 }
 

@@ -462,4 +462,10 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, RenderMode &rm
 	glUseProgramObjectARB(0);
 }
 
+void MeshShaderRenderPlugin::Finalize( QAction*, MeshDocument*, GLArea* )
+{
+	delete sDialog;
+	sDialog = 0;
+}
+
 Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)

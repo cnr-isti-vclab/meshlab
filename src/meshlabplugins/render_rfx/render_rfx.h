@@ -43,7 +43,7 @@ public:
 	~RenderRFX();
 	void Init(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
 	void Render(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
-	void Finalize(QAction*, MeshDocument&, GLArea*);
+	void Finalize(QAction*, MeshDocument*, GLArea*);
 	bool isSupported()         { return shadersSupported; }
 	bool AlternativeRender(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
 	QList<QAction*> actions();

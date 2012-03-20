@@ -193,7 +193,7 @@ void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWi
 
 }
 
-void RenderRFX::Finalize(QAction * /*act*/, MeshDocument &/*md*/, GLArea */*gla*/)
+void RenderRFX::Finalize(QAction * /*act*/, MeshDocument */*md*/, GLArea */*gla*/)
 {
 	// close any open dialog
 	if (dialog) {
