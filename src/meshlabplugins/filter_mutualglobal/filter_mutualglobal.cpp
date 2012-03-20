@@ -46,7 +46,6 @@ AlignSet align;
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
 { 
 	typeList << FP_IMAGE_GLOBALIGN;
-	typeList << FP_GRAPH_ANALYSIS;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -58,7 +57,6 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information"); 
-		case FP_GRAPH_ANALYSIS :  return QString("Graph analysis: selection of outlier, best subset"); 
 		default : assert(0); 
 	}
   return QString();
@@ -70,7 +68,6 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_IMAGE_GLOBALIGN :  return QString("Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009"); 
-		case FP_GRAPH_ANALYSIS :  return QString("Graph analysis: selection of outlier, best subset"); 
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -84,7 +81,6 @@ FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
   switch(ID(a))
 	{
 		case FP_IMAGE_GLOBALIGN :  return MeshFilterInterface::Camera; 
-		case FP_GRAPH_ANALYSIS :  return MeshFilterInterface::Camera; 
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -142,27 +138,7 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 											break;
 
 
-		case FP_GRAPH_ANALYSIS :  
-			parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
-												"The mesh on which the image must be aligned"));
-			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
-												"The mesh on which the image must be aligned"));*/
-			
-			
-			rendList.push_back("Combined");
-			rendList.push_back("Normal map");
-			rendList.push_back("Color per vertex");
-			rendList.push_back("Specular");
-			rendList.push_back("Silhouette");
-			rendList.push_back("Specular combined");
-
-			//rendList.push_back("ABS Curvature");
-			parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
-                                QString("Rendering modes")));
-			
-			parlst.addParam(new RichBool("Outlier analysis",true,"Outlier analysis","Outlier analysis"));
-			parlst.addParam(new RichBool("Best subset",false,"Best subset","Best subset"));
-								break;
+		
 											
 		default : assert(0); 
 	}
@@ -213,26 +189,7 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 			this->glContext->doneCurrent();
 			Log(0, "Done!");
 			break;
-		case FP_GRAPH_ANALYSIS : 
-						/// Building of the graph of images
-			if (md.rasterList.size()==0)
-			{
-				 Log(0, "You need a Raster Model to apply this filter!");
-				 return false;
-				 
-			}
-
-			this->glContext->makeCurrent();
-
-			this->initGL();
-			
-			Graphs=buildGraph(md, false);
-			Log(0, "BuildGraph completed");
-				
-						 
-			this->glContext->doneCurrent();
-			Log(0, "Done!");
-			break;
+		
 		default : assert(0); 
 	}
 
@@ -312,7 +269,6 @@ QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID 
 {
 	switch(filterID) {
 		case FP_IMAGE_GLOBALIGN :  return QString("imagealignment"); 
-		case FP_GRAPH_ANALYSIS :  return QString("graphanalysis"); 
 		default : assert(0); 
 	}
 	return QString();

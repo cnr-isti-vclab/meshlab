@@ -49,7 +49,7 @@ class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_IMAGE_GLOBALIGN, FP_GRAPH_ANALYSIS  } ;
+	enum { FP_IMAGE_GLOBALIGN} ;
 
 	FilterMutualInfoPlugin();
 
