@@ -40,7 +40,8 @@ FilterFractal::FilterFractal()
 
 QString FilterFractal::filterName(FilterIDType filterId) const
 {
-    switch (filterId) {
+    switch (filterId) 
+	{
     case CR_FRACTAL_TERRAIN:
         return QString("Fractal Terrain");
         break;
