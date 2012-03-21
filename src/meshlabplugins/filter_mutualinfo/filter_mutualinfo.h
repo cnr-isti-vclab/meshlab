@@ -37,6 +37,7 @@ add sampleplugins
 #include <QObject>
 
 #include <common/interfaces.h>
+#include "alignset.h"
 
 
 
@@ -62,7 +63,9 @@ public:
     FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
 
-	void initGL();
+	bool initGL();
+private:
+	AlignSet align;
 
 };
 

@@ -23,8 +23,6 @@
 
 #include "filter_mutualinfo.h"
 #include <QtScript>
-
-#include "alignset.h"
 #include "solver.h"
 #include "mutual.h"
 
@@ -38,7 +36,7 @@
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
-AlignSet align;
+//AlignSet align;
 
 
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
@@ -96,8 +94,8 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 	QStringList rendList; 
 	switch(ID(action))	 {
 		case FP_IMAGE_ALIGN :  
-			parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
-												"The mesh on which the image must be aligned"));
+			/*parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+												"The mesh on which the image must be aligned"));*/
 			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
 												"The mesh on which the image must be aligned"));*/
 			
@@ -179,7 +177,8 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 			}
 
 	this->glContext->makeCurrent();
-	this->initGL();
+	if (this->initGL() == false)
+		return false;
 
 	vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
   vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
@@ -245,18 +244,18 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	return true;
 }
 
-void FilterMutualInfoPlugin::initGL()
+bool FilterMutualInfoPlugin::initGL()
 {
   GLenum err = glewInit();
   Log(0, "GL Initialization");
   if (GLEW_OK != err) {
     Log(0, "GLEW initialization error!");
-    exit(-1);
+    return false;
   }
 
   if (!glewIsSupported("GL_EXT_framebuffer_object")) {
     Log(0, "Graphics hardware does not support FBOs");
-    exit(0);
+    return false;
   }
   if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
       !glewIsSupported("GL_ARB_shader_objects") || !glewIsSupported("GL_ARB_shading_language")) {
@@ -266,48 +265,49 @@ void FilterMutualInfoPlugin::initGL()
 
   if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
     Log(0,"Graphics hardware does not support non-power-of-two textures");
-    exit(0);
+    return false;
   }
   if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
     Log(0, "Graphics hardware does not support vertex buffer objects");
-    exit(0);
+    return false;
   }
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  GLfloat light_position[] = {-600.0f, 500.0f, 700.0f, 0.0f};
-  GLfloat light_ambient[]  = {0.1f,  0.1f, 0.1f, 1.0f};
-  GLfloat light_diffuse[]  = {0.8f,  0.8f, 0.8f, 1.0f};
-  GLfloat light_specular[] = {0.9f,  0.9f, 0.9f, 1.0f};
+  //GLfloat light_position[] = {-600.0f, 500.0f, 700.0f, 0.0f};
+  //GLfloat light_ambient[]  = {0.1f,  0.1f, 0.1f, 1.0f};
+  //GLfloat light_diffuse[]  = {0.8f,  0.8f, 0.8f, 1.0f};
+  //GLfloat light_specular[] = {0.9f,  0.9f, 0.9f, 1.0f};
 
-  glEnable(GL_LIGHTING);
-  glLightfv (GL_LIGHT0, GL_POSITION, light_position);
-  glLightfv (GL_LIGHT0, GL_AMBIENT,  light_ambient);
-  glLightfv (GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-  glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
-  glEnable  (GL_LIGHT0);
-  glDisable(GL_LIGHTING);
+  //glEnable(GL_LIGHTING);
+  //glLightfv (GL_LIGHT0, GL_POSITION, light_position);
+  //glLightfv (GL_LIGHT0, GL_AMBIENT,  light_ambient);
+  //glLightfv (GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
+  //glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
+  //glEnable  (GL_LIGHT0);
+  //glDisable(GL_LIGHTING);
 
-  glEnable(GL_DEPTH_TEST);
-   glEnable(GL_CULL_FACE);
+  //glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_CULL_FACE);
 
-  glEnable(GL_NORMALIZE);
-  glDepthRange (0.0, 1.0);
+  //glEnable(GL_NORMALIZE);
+  //glDepthRange (0.0, 1.0);
 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //glEnable(GL_BLEND);
 
-  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_POLYGON_SMOOTH);
-  glShadeModel(GL_SMOOTH);
-  glDisable(GL_POLYGON_SMOOTH);
+  //glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+  //glEnable(GL_POLYGON_SMOOTH);
+  //glShadeModel(GL_SMOOTH);
+  //glDisable(GL_POLYGON_SMOOTH);
 
   //AlignSet &align = Autoreg::instance().align;
   align.initializeGL();
   align.resize(800);
-  assert(glGetError() == 0);
+  //assert(glGetError() == 0);
 
   Log(0, "GL Initialization done");
+  return true;
 
 }
 
