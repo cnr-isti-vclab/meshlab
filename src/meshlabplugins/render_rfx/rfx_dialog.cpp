@@ -194,6 +194,8 @@ void RfxDialog::PassSelected(int idx)
 	selPass = idx;
 	CleanTab(ALL_TABS);
 	setupTabs();
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 void RfxDialog::AddUniformBox(RfxUniform *uni, int uniIndex)
@@ -318,6 +320,7 @@ void RfxDialog::DrawIFace(QGridLayout *parent, RfxUniform *u, int uidx, int rows
 		RfxColorBox* mycolorBox = new RfxColorBox(100, 25, QColor(val[0] * 255, val[1] * 255, val[2] * 255, val[3] * 255));
 		uniLayout->addWidget(mycolorBox, 0,0);
 		connect(mycolorBox, SIGNAL(colorChanged()), valMapper, SLOT(map()));
+		connect(mycolorBox,SIGNAL(colorChanged()),mGLWin, SLOT(update()));
 		valMapper->setMapping(mycolorBox,
 			                      QString().setNum(uidx) + '-' +
 			                      QString().setNum(1)  + '-' +
@@ -453,6 +456,8 @@ void RfxDialog::mapSliderLineEdit(QWidget *w)
 		else
 			qslide->setValue((int)(val * DECTOINT));
 	}
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 void RfxDialog::CleanTab(int tabIdx)
@@ -489,6 +494,8 @@ void RfxDialog::extendRange(double newVal)
 		else
 			sender->setMaximum(newVal + 50);
 	}
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 void RfxDialog::extendRange(int newVal)
@@ -500,6 +507,8 @@ void RfxDialog::extendRange(int newVal)
 		else
 			sender->setMaximum(newVal + 50);
 	}
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 void RfxDialog::ChangeTexture(int unifIdx)
@@ -521,6 +530,8 @@ void RfxDialog::ChangeTexture(int unifIdx)
 		ui.comboTextures->setCurrentIndex(0);
 		ui.comboTextures->setCurrentIndex(unifIdx);
 	}
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 void RfxDialog::ChangeValue(const QString& val)
@@ -570,7 +581,8 @@ void RfxDialog::ChangeValue(const QString& val)
 
 	oldVal[unif[1].toInt()] = newVal;
 	uni->PassToShader();
-	mGLWin->updateGL();
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 void RfxDialog::TextureSelected(int idx)
 {
@@ -690,6 +702,8 @@ void RfxDialog::TextureSelected(int idx)
 	}
 	ui.TexStatesTable->resizeColumnToContents(0);
 	ui.TexStatesTable->resizeColumnToContents(1);
+	if (mGLWin != NULL)
+		mGLWin->update();
 }
 
 

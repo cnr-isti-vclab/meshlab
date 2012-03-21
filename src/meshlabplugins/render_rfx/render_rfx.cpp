@@ -102,7 +102,11 @@ void RenderRFX::initActionList()
 void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWidget *parent)
 {
 
-	assert(actionList.contains(action));
+	if (!actionList.contains(action))
+	{
+		shadersSupported = false;
+		return;
+	}
 	if (activeShader) {
 		delete activeShader;
 		activeShader = NULL;
@@ -138,6 +142,7 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
       delete activeShader;
       activeShader = NULL;
     }
+		shadersSupported = false;
 		return;
   }
   activeShader = tmp;
