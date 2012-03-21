@@ -223,7 +223,7 @@ bool FilterFractal::applyFilter(QAction* filter, MeshDocument &md, RichParameter
 
             CMeshO* samples = &(par.getMesh("samples_mesh")->cm);
             if (samples->face.size() > 0) {
-                errorMessage = "The sample layer selected is not a sample layer.";
+                errorMessage = "The sample layer selected should be a points cloud.";
                 return false;
             }
             CMeshO* target = &(par.getMesh("target_mesh")->cm);
@@ -295,6 +295,8 @@ int FilterFractal::postCondition(QAction *filter) const
     switch(ID(filter))
     {
     case CR_FRACTAL_TERRAIN:
+		return MeshModel::MM_UNKNOWN;
+		break;
     case FP_FRACTAL_MESH:
     case FP_CRATERS:
         return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEFLAG;

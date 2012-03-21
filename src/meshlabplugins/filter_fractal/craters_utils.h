@@ -195,7 +195,7 @@ public:
             f = fl.back();
             fl.pop_back();
 
-            if(!f->IsV())
+            if((f != NULL) && (!f->IsV()))
             {
                 f->SetV();
                 if(vcg::IntersectionSphereTriangle<ScalarType, FaceType>

@@ -40,17 +40,17 @@ public:
     FilterFractal();
     ~FilterFractal(){}
 
-    virtual QString filterName(FilterIDType filter) const;
-    virtual QString filterInfo(FilterIDType filter) const;
+    QString filterName(FilterIDType filter) const;
+    QString filterInfo(FilterIDType filter) const;
 
-    virtual int getRequirements(QAction *);
-    virtual void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
-    virtual void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
+    int getRequirements(QAction *);
+    void initParameterSet(QAction*, MeshModel&, RichParameterSet &){assert(0);}
+    void initParameterSet(QAction *, MeshDocument &, RichParameterSet &);
 
-    virtual bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    bool applyFilter (QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
-    virtual int postCondition(QAction *action) const;
-    virtual FilterClass getClass(QAction *);
+    int postCondition(QAction *action) const;
+    FilterClass getClass(QAction *);
 
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
