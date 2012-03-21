@@ -21,7 +21,7 @@
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />
   <TexturedUsed NumberUsedTU="1">
-    <TextureUnit0 Filename="chrome.png" FilenameX="" Filename_X="" FilenameY="" Filename_Y="" FilenameZ="" Filename_Z="" MinFilter="9729" MagFilter="9729" Target="3553" WrapS="10497" WrapT="10497" WrapR="10497" Custom="False" Width="0" Height="0" Deep="0" />
+    <TextureUnit0 Filename="../textures/chrome.png" FilenameX="" Filename_X="" FilenameY="" Filename_Y="" FilenameZ="" Filename_Z="" MinFilter="9729" MagFilter="9729" Target="3553" WrapS="10497" WrapT="10497" WrapR="10497" Custom="False" Width="0" Height="0" Deep="0" />
   </TexturedUsed>
   <UniformVariables NumberOfVariables="7">
     <Uniform0 Type="7" Name="Xunitvec" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.005">
