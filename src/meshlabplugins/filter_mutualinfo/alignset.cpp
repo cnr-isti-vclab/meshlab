@@ -50,7 +50,7 @@ void AlignSet::initializeGL() {
     "normal = gl_NormalMatrix * gl_Normal; gl_Position = ftransform(); color = gl_Color; }",
     "varying vec3 normal; varying vec4 color; void main() { "
     "vec3 ncolor = normalize(normal); ncolor = ncolor * 0.5 + 0.5; "
-    "float t = color.x*color.x; gl_FragColor = (1-t)*color + t*(vec4(ncolor, 1.0)); }");
+    "float t = color.x*color.x; gl_FragColor = (1.0-t)*color + t*(vec4(ncolor, 1.0)); }");
   programs[SPECULAR] = createShaders("varying vec3 reflection; void main() { "
     "vec3 normal = normalize(gl_NormalMatrix * gl_Normal); vec4 position = gl_ModelViewMatrix * gl_Vertex; "
     "reflection = reflect(position.xyz, normal); gl_Position = ftransform(); }",
@@ -64,7 +64,7 @@ void AlignSet::initializeGL() {
     "reflection = reflect(position.xyz, normal); gl_Position = ftransform(); color = gl_Color; }",
     "varying vec3 reflection; varying vec4 color; void main() { "
     "vec3 ncolor = normalize(reflection); ncolor = ncolor * 0.5 + 0.5; "
-    "float t = color.x*color.x; gl_FragColor = (1-t)*color + t*(vec4(ncolor, 1.0)); }");
+    "float t = color.x*color.x; gl_FragColor = (1.0-t)*color + t*(vec4(ncolor, 1.0)); }");
 
 
   // generate a new VBO and get the associated ID
