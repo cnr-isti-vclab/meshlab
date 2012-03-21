@@ -128,6 +128,7 @@ public:
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
+	QAction* getCurrentShaderAction() {return currentShader;}
 
   // Edit Mode management
 	// In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state 

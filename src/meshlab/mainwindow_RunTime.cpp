@@ -1362,7 +1362,11 @@ void MainWindow::applyEditMode()
 void MainWindow::applyRenderMode()
 {
 	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
-
+	if ((GLA()!= NULL) && (GLA()->getRenderer() != NULL))
+	{
+		GLA()->getRenderer()->Finalize(GLA()->getCurrentShaderAction(),meshDoc(),GLA());
+		GLA()->setRenderer(NULL,NULL);
+	}
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	bool initsupport = false;
@@ -1374,6 +1378,8 @@ void MainWindow::applyRenderMode()
 			GLA()->setRenderer(iRenderTemp,action);
 			initsupport = true;
 		}
+		else
+			iRenderTemp->Finalize(action,meshDoc(),GLA());
 	}
 
 	/*I clicked None in renderMenu */
