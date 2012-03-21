@@ -105,11 +105,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 
 GLArea::~GLArea()
 {
-	if (iRenderer) 
-		iRenderer->Finalize(currentShader, this->md(), this);
-	if(targetTex) glDeleteTextures(1, &targetTex);
 }
-
 
 /*
 This member returns the information of the Mesh in terms of VC,VQ,FC,FQ,WT
@@ -724,6 +720,9 @@ bool GLArea::readyToClose()
 	}
 	if(getCurrentEditAction()) 
 		endEdit();
+	if (iRenderer) 
+		iRenderer->Finalize(currentShader, this->md(), this);
+	if(targetTex) glDeleteTextures(1, &targetTex);
 	emit glareaClosed();
 	return true;
 }

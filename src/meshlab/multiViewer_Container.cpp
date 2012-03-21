@@ -73,10 +73,6 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 
 MultiViewer_Container::~MultiViewer_Container()
 {
-  //foreach(GLArea* viewer, viewerList)
-  //{
-		//delete viewer;
-  //}
 }
 
 int MultiViewer_Container::getNextViewerId(){

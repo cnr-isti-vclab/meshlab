@@ -81,6 +81,7 @@ public:
     GLArea(MultiViewer_Container *mvcont, RichParameterSet *current);
 	~GLArea();
 	static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
+
 private:
   int id;  //the very important unique id of each subwindow.
 

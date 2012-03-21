@@ -84,8 +84,10 @@ public:
 	int getViewerByPicking(QPoint);
 
 	void updateTrackballInViewers();
-	void closeEvent(QCloseEvent *event);
 
+protected:
+	void closeEvent(QCloseEvent *event);
+public:
 	MeshDocument meshDoc;
   int currentId;
 
@@ -98,7 +100,6 @@ public slots:
 
 	// Called when we change viewer, set the current viewer
     void updateCurrent(int current);
-	
 private:
   QList<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
 };
