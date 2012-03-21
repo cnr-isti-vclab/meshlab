@@ -178,17 +178,18 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         if(rm->getBool(ShowRasterCameras()))
         {
           foreach(RasterModel *raster, md.rasterList)
-          {
-            if(raster != md.rm() || !showCameraDetails )   // non-selected raster
+          if(raster->visible)
             {
-              if(raster->visible) DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+              if(raster != md.rm() || !showCameraDetails )   // non-selected raster
+              {
+                if(raster->visible) DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+              }
+              else
+              {
+                DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
+                DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
+              }
             }
-            else
-            {
-              DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
-              DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
-            }
-          }
         }
 
 
@@ -1442,8 +1443,8 @@ case DP_SHOW_CAMERA :{
     QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
     QStringList scale; scale << "No Scale" << "Fixed Factor" << "Adaptive";
           parset.addParam(new RichEnum(this->CameraScaleParam(), 1, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
-          parset.addParam(new RichFloat(this->FixedScaleParam(), 10.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
-          parset.addParam(new RichBool(this->ShowMeshCameras(), true, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
+          parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
+          parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
           parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
           parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
         } break;
