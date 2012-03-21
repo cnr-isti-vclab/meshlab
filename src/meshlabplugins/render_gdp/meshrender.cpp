@@ -316,10 +316,16 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, RenderMode &
 				
 
 					std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
-					while (tIter != shaders[a->text()].textureInfo.end()) {
+					while (tIter != shaders[a->text()].textureInfo.end()) 
+					{
 						glEnable(tIter->Target);
 						QImage img, imgScaled, imgGL;
-						img.load(tIter->path);
+						bool opened = img.load(tIter->path);
+						if (!opened)
+						{
+							supported = false;
+							return;
+						}
 						// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
 						int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
 						int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
