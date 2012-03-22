@@ -400,7 +400,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             Log("init Buffers");
 
             // render normal & depth
-            rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, my_near[cam_ind]*0.99, my_far[cam_ind]*1.01);
+            rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
 
             buff_ind=0;
 
@@ -693,7 +693,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             Log("init Buffers");
 
             // render normal & depth
-            rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, my_near[cam_ind]*0.99, my_far[cam_ind]*1.01);
+            rendermanager->renderScene(raster->shot, model, RenderHelper::NORMAL, my_near[cam_ind]*0.5, my_far[cam_ind]*1.25);
 
             // If should be used silhouette weighting, it is needed to compute depth discontinuities
             // and per-pixel distance from detected borders on the entire image here
@@ -996,7 +996,7 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
           viewaxis = raster->shot.GetViewPoint() - (*vi).P();
           viewaxis.Normalize();
           
-          if(viewaxis * raster->shot.GetViewDir() > 0.0)     // if facing
+          //if(viewaxis * raster->shot.GetViewDir() > 0.0)     // if facing
             if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1]) // if inside image
             {
               // then update near and far

@@ -208,7 +208,7 @@ void RenderHelper::renderScene(vcg::Shotf &view, MeshModel *mesh, RenderingMode 
     _far=20000;
 
     GlShot< vcg::Shot<float> >::GetNearFarPlanes(view, mesh->cm.bbox, _near, _far);
-    if(_near <= 0) _near = 0.1;
+    if(_near <= 0) _near = 0.01;
     if(_far < _near) _far = 1000;
   }
   else
