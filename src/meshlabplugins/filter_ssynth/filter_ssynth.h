@@ -34,7 +34,6 @@
 class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInterface{
     Q_OBJECT
     Q_INTERFACES(MeshFilterInterface)
-        Q_INTERFACES(MeshIOInterface)
     public:
             enum {CR_SSYNTH} ;
 
