@@ -328,11 +328,11 @@ void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla) {
 
     if (startingVertex != NULL) {
         if (wheelDirection > 0) {
-            this->maxHop *= pow(1.2, wheelDirection / 120.f);
+            this->maxHop *= pow(1.2f, wheelDirection / 120.f);
             hopDistModified = true;
         }
         else if (wheelDirection < 0) {
-            this->maxHop /= pow(1.2, (-1*wheelDirection) / 120.f);
+            this->maxHop /= pow(1.2f, (-1*wheelDirection) / 120.f);
             hopDistModified = true;
         }
     }
