@@ -2,15 +2,15 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.3.1"
-!define PRODUCT_PUBLISHER "Paolo Cignoni VCG - ISTI - CNR"
+!define PRODUCT_VERSION "1.3.2"
+!define PRODUCT_PUBLISHER "Paolo Cignoni, Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\2011.03"
-!define MINGW_BASE "C:\Qt\qtcreator-2.1.0\mingw"
+!define QT_BASE "C:\QtSDK\Desktop\Qt\4.7.4\mingw"
+!define MINGW_BASE "C:\QtSDK\mingw"
 !define DISTRIB_FOLDER "../distrib"
 
 ; MUI 1.67 compatible ------
@@ -47,7 +47,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v130BETA_${NOW}.exe"
+OutFile "MeshLabDevel_v132BETA_${NOW}.exe"
 InstallDir "$PROGRAMFILES\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -93,7 +93,6 @@ Section "MainSection" SEC01
   ; IO Plugins (9)
   File "${DISTRIB_FOLDER}/plugins\io_base.dll"
   File "${DISTRIB_FOLDER}/plugins\io_bre.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_epoch.dll"
   File "${DISTRIB_FOLDER}/plugins\io_ctm.dll"
   File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
   File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
@@ -111,6 +110,8 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_aging.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_autoalign.dll"
 
+  File "${DISTRIB_FOLDER}/plugins\filter_bnpts.dll"
+  
   File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
@@ -125,8 +126,10 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_layer.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_measure.xml"
   File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_mutualinfo.dll"
   
   File "${DISTRIB_FOLDER}/plugins\filter_photosynth.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_plymc.dll"
@@ -159,8 +162,10 @@ Section "MainSection" SEC01
 
   ; edit plugins (14)
   File "${DISTRIB_FOLDER}/plugins\edit_align.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_arc3D.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_measure.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_paint.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_point.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
   ;File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
 
@@ -171,6 +176,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\edit_select.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_texture.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_hole.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_manipulators.dll"
   ;File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
 
   ; decorate plugins (2)
@@ -178,6 +184,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\decorate_background.dll"
   ;File "${DISTRIB_FOLDER}/plugins\sampledecoration.dll"
   File "${DISTRIB_FOLDER}/plugins\decorate_shadow.dll"
+  File "${DISTRIB_FOLDER}/plugins\decorate_raster_proj.dll"
   
   ; render plugins (1)
   File "${DISTRIB_FOLDER}/plugins\render_splatting.dll"
