@@ -10,16 +10,20 @@
 # Note that sometimes you have to copy by hand the icons in the meshlab.app/Contents/Resources directory
 
 cd ../distrib
-QTPATH="/Library/Frameworks"
+QTPATH="/Users/robertoscopigno/QtSDK/Desktop/Qt/4.8.0/gcc"
 APPNAME="meshlab.app"
 
 BUNDLE="MeshLabBundle"
 
 QTCOMPONENTS="QtCore QtGui QtOpenGL QtNetwork QtXml QtXmlPatterns QtScript"
 
-QTCORE=QtCore.framework/Versions/4.0/QtCore
-QTGUI=QtGui.framework/Versions/4.0/QtGui
-QTNETWORK=QtNetwork.framework/Versions/4.0/QtNetwork
+QTCORE=QtCore.framework/Versions/4/QtCore
+QTGUI=QtGui.framework/Versions/4/QtGui
+QTNETWORK=QtNetwork.framework/Versions/4/QtNetwork
+QTSCRIPT=QtScript.framework/Versions/4/QtScript
+QTXMLPATTERNS=QtXmlPatterns.framework/Versions/4/QtXmlPatterns
+QTXML=QtXml.framework/Versions/4/QtXml
+QTOPENGL=QtOpenGL.framework/Versions/4/QtOpenGL
 
 if [ -e $APPNAME -a -d $APPNAME ]
 then
@@ -92,38 +96,61 @@ cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
 for x in $QTCOMPONENTS
 do
-#    cp -R $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
-rsync -quiet -avu --exclude='*debug*' $QTPATH/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks
+#    cp -R $QTPATH/lib/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks 
+rsync -quiet -avu --exclude='*debug*' $QTPATH/lib/$x.framework $BUNDLE/$APPNAME/Contents/Frameworks
 done
 
 echo "now trying to change the paths in the meshlab executable"
 
   for x in $QTCOMPONENTS
   do
-   install_name_tool -id  @executable_path/../Frameworks/$x.framework/Versions/4.0/$x $BUNDLE/meshlab.app/Contents/Frameworks/$x.framework/Versions/4.0/$x
+   install_name_tool -id  @executable_path/../Frameworks/$x.framework/Versions/4/$x $BUNDLE/meshlab.app/Contents/Frameworks/$x.framework/Versions/4/$x
   done
 
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtGui.framework/Versions/4.0/QtGui
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtXml.framework/Versions/4.0/QtXml
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtXmlPatterns.framework/Versions/4.0/QtXmlPatterns
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtNetwork.framework/Versions/4.0/QtNetwork
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtOpenGL.framework/Versions/4.0/QtOpenGL
-install_name_tool -change QtCore.framework/Versions/4/QtCore @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/QtScript.framework/Versions/4.0/QtScript
-install_name_tool -change QtGui.framework/Versions/4/QtGui   @executable_path/../Frameworks/$QTGUI  $BUNDLE/meshlab.app/Contents/Frameworks/QtOpenGL.framework/Versions/4.0/QtOpenGL
-install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork @executable_path/../Frameworks/$QTNETWORK $BUNDLE/meshlab.app/Contents/Frameworks/QtXmlPatterns.framework/Versions/4.0/QtXmlPatterns
+#----------GUI-DEP------------------------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTGUI
+
+#----------XML-DEP------------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTXML
+
+#----------XMLPATTERNS-DEP--------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTXMLPATTERNS
+
+install_name_tool -change $QTPATH/lib/$QTNETWORK @executable_path/../Frameworks/$QTNETWORK $BUNDLE/meshlab.app/Contents/Frameworks/$QTXMLPATTERNS
+
+#---------NETWORK-DEP-------------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTNETWORK
+
+
+#---------SCRIPT-DEP---------------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTSCRIPT
+
+#---------OPENGL-DEP----------------------
+
+install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE $BUNDLE/meshlab.app/Contents/Frameworks/$QTOPENGL
+
+install_name_tool -change $QTPATH/lib/$QTGUI @executable_path/../Frameworks/$QTGUI $BUNDLE/meshlab.app/Contents/Frameworks/$QTOPENGL
 
 echo "Copying the plugins in the meshlab package" #--------------------------
 
-PLUGINSNAMES="\
+PLUGINSNAMESLIB="\
 plugins/libfilter_aging.dylib \
 plugins/libfilter_ao.dylib \
 plugins/libfilter_autoalign.dylib \
+plugins/libfilter_bnpts.dylib \
 plugins/libfilter_camera.dylib \
 plugins/libfilter_clean.dylib \
 plugins/libfilter_colorize.dylib \
 plugins/libfilter_colorproc.dylib \
+plugins/libfilter_color_projection.dylib \
 plugins/libfilter_create.dylib \
 plugins/libfilter_csg.dylib \
+plugins/libfilter_dirt.dylib \
 plugins/libfilter_fractal.dylib \
 plugins/libfilter_func.dylib \
 plugins/libfilter_isoparametrization.dylib \
@@ -131,12 +158,16 @@ plugins/libfilter_layer.dylib \
 plugins/libfilter_measure.dylib \
 plugins/libfilter_meshing.dylib \
 plugins/libfilter_mls.dylib \
+plugins/libfilter_mutualinfo.dylib \
 plugins/libfilter_photosynth.dylib \
 plugins/libfilter_plymc.dylib \
 plugins/libfilter_poisson.dylib \
 plugins/libfilter_qhull.dylib \
 plugins/libfilter_quality.dylib \
+plugins/libfilter_samplefilter.dylib \
+plugins/libfilter_samplefilterdyn.dylib \
 plugins/libfilter_sampling.dylib \
+plugins/libfilter_sdfgpu.dylib \
 plugins/libfilter_select.dylib \
 plugins/libfilter_slice.dylib \
 plugins/libfilter_ssynth.dylib \
@@ -150,7 +181,7 @@ plugins/libio_3ds.dylib \
 plugins/libio_base.dylib \
 plugins/libio_bre.dylib \
 plugins/libio_collada.dylib \
-plugins/libio_epoch.dylib \
+plugins/libio_ctm.dylib \
 plugins/libio_expe.dylib \
 plugins/libio_gts.dylib \
 plugins/libio_json.dylib \
@@ -159,53 +190,62 @@ plugins/libio_pdb.dylib \
 plugins/libio_tri.dylib \
 plugins/libio_u3d.dylib \
 plugins/libio_x3d.dylib \
+plugins/libedit_align.dylib \
+plugins/libedit_arc3D.dylib \
 plugins/libedit_hole.dylib \
+plugins/libedit_measure.dylib \
+plugins/libedit_paint.dylib \
 plugins/libedit_pickpoints.dylib \
+plugins/libedit_point.dylib \
 plugins/libedit_quality.dylib \
 plugins/libedit_select.dylib \
 plugins/libedit_texture.dylib \
-plugins/libeditalign.dylib \
-plugins/libeditmeasure.dylib \
-plugins/libeditpaint.dylib \
 plugins/libdecorate_base.dylib \
 plugins/libdecorate_background.dylib \
+plugins/libdecorate_raster_proj.dylib \
 plugins/libdecorate_shadow.dylib \
 plugins/librender_gdp.dylib \
 plugins/librender_radiance_scaling.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
 plugins/libsampleedit.dylib \
-plugins/libsamplefilter.dylib \
-plugins/libsamplefilterdyn.dylib
 "
+
+PLUGINSNAMESXML="\
+plugins/libfilter_measure.xml \
+"
+
 pwd
-for x in $PLUGINSNAMES
+for x in $PLUGINSNAMESLIB
+do
+cp ./$x $BUNDLE/meshlab.app/Contents/plugins/
+done
+for x in $PLUGINSNAMESXML
 do
 cp ./$x $BUNDLE/meshlab.app/Contents/plugins/
 done
 
-
 IMAGEFORMATSPLUGINS="libqjpeg.dylib libqgif.dylib libqtiff.dylib"
 for x in $IMAGEFORMATSPLUGINS
 do
-cp /Developer/Applications/Qt/plugins/imageformats/$x $BUNDLE/meshlab.app/Contents/plugins/imageformats
-install_name_tool -change QtCore.framework/Versions/4/QtCore  @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore  $BUNDLE/meshlab.app/Contents/plugins/imageformats/$x 
-install_name_tool -change QtGui.framework/Versions/4/QtGui    @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui    $BUNDLE/meshlab.app/Contents/plugins/imageformats/$x 
+cp $QTPATH/plugins/imageformats/$x $BUNDLE/meshlab.app/Contents/plugins/imageformats
+install_name_tool -change $QTPATH/lib/$QTCORE  @executable_path/../Frameworks/$QTCORE  $BUNDLE/meshlab.app/Contents/plugins/imageformats/$x 
+install_name_tool -change $QTPATH/lib/$QTGUI   @executable_path/../Frameworks/$QTGUI   $BUNDLE/meshlab.app/Contents/plugins/imageformats/$x 
 done
 
 echo "Now Changing " #--------------------------
 
-EXECNAMES="MacOS/libcommon.1.dylib MacOS/meshlab $PLUGINSNAMES" 
+EXECNAMES="MacOS/libcommon.1.dylib MacOS/meshlab $PLUGINSNAMESLIB" 
 for x in $EXECNAMES
 do
-  install_name_tool -change QtCore.framework/Versions/4/QtCore               @executable_path/../Frameworks/QtCore.framework/Versions/4/QtCore       $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtGui.framework/Versions/4/QtGui                 @executable_path/../Frameworks/QtGui.framework/Versions/4/QtGui         $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtNetwork.framework/Versions/4/QtNetwork         @executable_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtOpenGL.framework/Versions/4/QtOpenGL           @executable_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL   $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtXml.framework/Versions/4/QtXml                 @executable_path/../Frameworks/QtXml.framework/Versions/4/QtXml         $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtXmlPatterns.framework/Versions/4/QtXmlPatterns @executable_path/../Frameworks/QtXmlPatterns.framework/Versions/4/QtXmlPatterns $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change QtScript.framework/Versions/4/QtScript           @executable_path/../Frameworks/QtScript.framework/Versions/4/QtScript   $BUNDLE/meshlab.app/Contents/$x
-  install_name_tool -change libcommon.1.dylib                                @executable_path/libcommon.1.dylib         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTCORE @executable_path/../Frameworks/$QTCORE       $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTGUI @executable_path/../Frameworks/$QTGUI         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTNETWORK @executable_path/../Frameworks/$QTNETWORK $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTOPENGL @executable_path/../Frameworks/$QTOPENGL   $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTXML @executable_path/../Frameworks/$QTXML         $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTXMLPATTERNS @executable_path/../Frameworks/$QTXMLPATTERNS $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change $QTPATH/lib/$QTSCRIPT @executable_path/../Frameworks/$QTSCRIPT   $BUNDLE/meshlab.app/Contents/$x
+  install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib         $BUNDLE/meshlab.app/Contents/$x
 done
 
 cd ../install
