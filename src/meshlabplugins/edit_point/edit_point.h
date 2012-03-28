@@ -47,7 +47,6 @@ public:
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
     void mouseReleaseEvent(QMouseEvent *, MeshModel &/*m*/, GLArea * );
     void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
-    void keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
     void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * );
 
 signals:

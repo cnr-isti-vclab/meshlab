@@ -36,7 +36,8 @@
 #include "connectedComponent.h"
 
 
-#define k 6
+/* defining the numbers of neighbours in the graph. Six seems to be good enough for our purpose */
+#define K 6
 
 using namespace std;
 using namespace vcg;
@@ -49,6 +50,9 @@ const QString EditPointPlugin::Info() {
   
 void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
+    /* When the user first click we have to find the point under the mouse pointer.
+       At the same time we need to compute the Dijkstra algorithm over the knn-graph in order
+       to find the distance between the selected point and the others. */
     if(haveToPick)
     {
         glPushMatrix();
@@ -58,7 +62,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         if(NewSel.size() > 0) {
             startingVertex = NewSel.front();
 
-            ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
+            ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, K, this->maxHop, this->NotReachableVector);
 
             ComponentVector.push_back(startingVertex);
         }
@@ -67,6 +71,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
         glPopMatrix();
     }
 
+    /* When at least a point is selected we need to draw the selection */
     if (startingVertex != NULL) {
         glPushMatrix();
         glMultMatrix(m.cm.Tr);
@@ -82,6 +87,9 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 
         tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 
+        /* In OldComponentVector we find all the points selected until the last click of the mouse.
+           The other points are saved in ComponentVector. With two different structures for old and new
+           selection we can add or subtract one from each other. */
         switch (composingSelMode) {
         case SMSub:
             for(vector<CMeshO::VertexPointer>::iterator vi = OldComponentVector.begin(); vi != OldComponentVector.end(); ++vi) {
@@ -108,6 +116,8 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
             break;
         }
 
+        /* The actual selection is drawn in red (instead of the automatic drawing of selected vertex
+           of MeshLab) */
         glBegin(GL_POINTS);
         glColor4f(1,0,0,.5f);
 
@@ -117,6 +127,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 
         glEnd();
 
+        /* Borders points are drawn in yellow. */
         glBegin(GL_POINTS);
         glColor4f(1,1,0,.5f);
 
@@ -127,6 +138,8 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 
         glEnd();
 
+        /* If the "fitting plane" plugin is selected we draw a light blue circle to visualize the
+           actual plane found by the algorithm (and the fitted points). */
         if (editType == SELECT_FITTING_PLANE_MODE) {
             fittingCircle.Clear();
             vcg::tri::OrientedDisk<CMeshO>(fittingCircle, 192, fittingPlane.Projection(startingVertex->cP()), fittingPlane.Direction(), this->fittingRadius);
@@ -151,10 +164,10 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 }
 
 bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
+    // Needed by MeshLab to colorize the selected points (for istance when we exit the plugin)
     connect(this, SIGNAL(setSelectionRendering(bool)), gla, SLOT(setSelectVertRendering(bool)));
     setSelectionRendering(true);
 
-    composingSelMode = SMAdd;
     for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi) {
         if (vi->IsS()) OldComponentVector.push_back(&*vi);
     }
@@ -169,10 +182,13 @@ bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
     this->planeDist = m.cm.bbox.Diag() / 100.0;
     this->fittingRadiusPerc = 0.1;
 
+    composingSelMode = SMClear;
+
     return true;
 }
 
 void EditPointPlugin::EndEdit(MeshModel &m, GLArea *gla) {
+    //delete the circle if present.
     fittingCircle.Clear();
     ComponentFinder<CMeshO, CVertexO>::DeletePerVertexAttribute(m.cm);
 }
@@ -210,6 +226,7 @@ void EditPointPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla 
     if (this->isMousePressed && startingVertex != NULL) {
         float distFromCenter = math::Sqrt((startingClick.X() - ev->x())*(startingClick.X() - ev->x()) + (startingClick.Y() - ev->y()) * (startingClick.Y() - ev->y()));
 
+        // TO DO: find a better approximation for the dist parameter
         float perim = 2 * m.cm.bbox.DimX() + 2 * m.cm.bbox.DimY();
         perim = (perim < 2 * m.cm.bbox.DimY() + 2 * m.cm.bbox.DimZ()) ? 2 * m.cm.bbox.DimY() + 2 * m.cm.bbox.DimZ() : perim;
         perim = (perim < 2 * m.cm.bbox.DimX() + 2 * m.cm.bbox.DimZ()) ? 2 * m.cm.bbox.DimX() + 2 * m.cm.bbox.DimZ() : perim;
@@ -305,6 +322,9 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
     }
 
 
+    /* If the hop dist has been modified we need to recompute the distances because we may have some
+       new arcs to consider in the Dijkstra algorithm.
+       If we modified other parameters we need only to find the new selected component. */
     if (hopDistModified) {
         ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, 6, this->maxHop, this->NotReachableVector);
     }
@@ -319,8 +339,6 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
     gla->update();
     return;
 }
-
-void EditPointPlugin::keyReleaseEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {}
 
 void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla) {
     bool hopDistModified = false;
@@ -338,7 +356,7 @@ void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla) {
     }
 
     if (hopDistModified) {
-        ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, k, this->maxHop, this->NotReachableVector);
+        ComponentFinder<CMeshO, CVertexO>::Dijkstra(m.cm, *startingVertex, K, this->maxHop, this->NotReachableVector);
 
         BorderVector.clear();
 
