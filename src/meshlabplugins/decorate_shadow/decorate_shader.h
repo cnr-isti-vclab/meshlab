@@ -80,7 +80,6 @@ protected:
     void bind()
     {
         assert(_initOk);
-
         glClearDepth(1.0);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
@@ -144,7 +143,6 @@ protected:
     void printDepthMap(GLuint map, const QString &fname){
         if (!this->_initOk)
                 return;
-
         QImage img(this->_texW, this->_texH, QImage::Format_RGB32);
 
         float *tempFBuf = new float[this->_texW * this->_texH *1 ];
@@ -188,7 +186,7 @@ protected:
         }
 
         delete[] tempBuf;
-
+		
         img.mirrored().save(fname, "PNG");
     }
 
@@ -260,7 +258,7 @@ protected:
         QByteArray bArray = vertexShaderFile.readAll();
         GLint ShaderLen = (GLint) bArray.length();
         GLubyte* ShaderSource = (GLubyte *)bArray.data();
-
+		
         //create a new vertex shader
         if(vertex==0)
           vertex= glCreateShader(GL_VERTEX_SHADER);
@@ -298,12 +296,16 @@ protected:
         //create a new shader program with the vertex and fragment shader loaded/compiled above
         if(program==0)
           program = glCreateProgram();
+		else
+		{
+			glDetachShader(program,vertex);
+			glDetachShader(program,fragment);
+		}
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
         glLinkProgram(program);
         if(!this->printProgramInfoLog(program))
             return false;
-
         return true;
     }
 
@@ -314,6 +316,7 @@ protected:
       * @param attachement the FBO attachment target.
       */
     void genColorTextureEXT(GLuint& tex, GLenum attachment){
+
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -325,6 +328,7 @@ protected:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texW, this->_texH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_2D, tex, 0);
 
+
     }
 
     /**
@@ -333,10 +337,12 @@ protected:
       * @param tex the render buffer handler
       */
     void genDepthRenderBufferEXT(GLuint& tex){
+
         glGenRenderbuffersEXT(1, &tex);
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, tex);
         glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texW, this->_texH);
         glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, tex);
+
     }
     
     /**
