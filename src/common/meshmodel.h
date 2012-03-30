@@ -327,6 +327,21 @@ public:
 	Plane(RasterModel *parent, const QString pathName, const QString _semantic);
 }; //end class Plane
 
+class Raster 
+{
+public:
+	Raster();
+	Raster(const Raster& rst);
+	~Raster();
+
+	vcg::Shotf shot;
+	bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
+
+	///The list of the registered images
+	QList<Plane *> planeList;
+	Plane *currentPlane;
+};
+
 /*
 RasterModel Class
 The base class for keeping a set of "registered" images (e.g. images that can be projected onto a 3D space).
@@ -334,12 +349,12 @@ Each Raster model is composed by a list of registered images, each image with it
 and with all the images sharing the same shot. 
 */
 
-class RasterModel 
+class RasterModel
 {
-
 public:
-  vcg::Shotf shot;
-  bool visible; // used in rendering; Needed for switching from mesh view mode to raster view mode and vice versa.
+	RasterModel();
+
+	vcg::Shotf shot;
 
 	///The list of the registered images
 	QList<Plane *> planeList;
@@ -351,6 +366,7 @@ private:
   QString _label;
 
 public:
+	bool visible;
 	inline int id() const {return _id;}
 	
   RasterModel(MeshDocument *parent, QString _rasterName=QString());
@@ -437,7 +453,7 @@ public:
 
 	//the add/update functions should have const parameters. This could NOT be possible cause of the implementation of vcg::tri::Append::MeshCopy function in the vcglib
 	void addMesh(const int id,CMeshO& mm);
-	bool updateMesh(const int id,CMeshO& mm);
+	bool updateMesh(const int id,CMeshO& mm,const int updateattributesmask);
 	QMap<int,MeshLabRenderMesh*>::iterator removeMesh(QMap<int,MeshLabRenderMesh*>::iterator it );
 
 	void render(const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  );
@@ -452,6 +468,20 @@ public:
 private:
 	QReadWriteLock _mutdoc;
 };
+
+
+//class RasterModelState : public QObject
+//{
+//	Q_OBJECT
+//public:
+//	MeshLabRenderState();
+//	~MeshLabRenderState();
+//
+//private:
+//	//for quickness I added a RasterModel, but should be something less.
+//	QMap<int,RasterModel*> _rendermap;
+//	QReadWriteLock _mutdoc;
+//};
 
 class MeshModelSI;
 
@@ -534,7 +564,7 @@ public:
   int newRasterId() {return rasterIdCounter++;}
 
   //this function copy the mesh in the meshList on the renderState and emit a signal to 
-  void updateRenderMesh(MeshModel& mm);
+  void updateRenderMesh(MeshModel& mm,const int updatemask);
 
 private:
   int tagIdCounter;
@@ -625,7 +655,7 @@ public:
 		//the current raster model 
 		RasterModel* currentRaster;
 
-	signals:
+signals:
     ///when ever the current mesh changed this will send out the index of the newest mesh
 		void currentMeshChanged(int index);
 
@@ -668,5 +698,6 @@ public:
     bool apply(MeshModel *_m);
 	bool isValid(MeshModel *m);
 };
+
 
 #endif

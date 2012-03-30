@@ -270,11 +270,11 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
-void MeshDocument::updateRenderMesh( MeshModel& mm )
+void MeshDocument::updateRenderMesh( MeshModel& mm,const int updatemask)
 {
   static QTime currTime;
   if(currTime.elapsed()< 100) return;
-	renderState().updateMesh(mm.id(),mm.cm);
+	renderState().updateMesh(mm.id(),mm.cm,updatemask);
 	emit meshUpdated();
 	currTime.start();
 }
@@ -728,14 +728,136 @@ MeshLabRenderState::~MeshLabRenderState()
 	clearState();
 }
 
-bool MeshLabRenderState::updateMesh(const int id, CMeshO& mm )
+bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattributesmask)
 {
 	acquireRenderDocumentWrite();
 	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.find(id);
 	if (it != _rendermap.end())
 	{
-		removeMesh(it);
-		_rendermap[id] = new MeshLabRenderMesh(mm);
+		MeshLabRenderMesh* rm = *it;
+
+		if (!(updateattributesmask & MeshModel::MM_VERTCOLOR) &
+			!(updateattributesmask & MeshModel::MM_VERTCOORD) &
+			!(updateattributesmask & MeshModel::MM_VERTQUALITY) &
+			!(updateattributesmask & MeshModel::MM_VERTNORMAL) &
+			!(updateattributesmask & MeshModel::MM_FACEFLAGSELECT) &
+			!(updateattributesmask & MeshModel::MM_VERTFLAGSELECT) &
+			!(updateattributesmask & MeshModel::MM_TRANSFMATRIX) &
+			!(updateattributesmask & MeshModel::MM_CAMERA))
+		{
+			removeMesh(it);
+			_rendermap[id] = new MeshLabRenderMesh(mm);
+			releaseRenderDocument();
+			return true;
+		}
+
+		if (updateattributesmask & MeshModel::MM_VERTCOLOR)
+		{		
+			if(mm.vert.size() != (rm->cm.vert.size())) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			else
+			{
+				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+					if(!(*mmvi).IsD()) 
+						(*rmvi).C()=(*mmvi).cC();
+			}
+		}
+
+		if (updateattributesmask & MeshModel::MM_VERTCOORD)
+		{
+			if(mm.vert.size() != (rm->cm.vert.size())) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			else
+			{
+				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+					if(!(*mmvi).IsD()) 
+						(*rmvi).P()=(*mmvi).cP();
+			}
+		}
+
+		if (updateattributesmask & MeshModel::MM_VERTQUALITY)
+		{
+			if(mm.vert.size() != (rm->cm.vert.size())) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			else
+			{
+				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+					if(!(*mmvi).IsD()) 
+						(*rmvi).Q()=(*mmvi).cQ();
+			}
+		}
+
+		if	(updateattributesmask & MeshModel::MM_VERTNORMAL)
+		{
+			if(mm.vert.size() != (rm->cm.vert.size())) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			else
+			{
+				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+					if(!(*mmvi).IsD()) 
+						(*rmvi).N()=(*mmvi).cN();
+			}
+		}
+		
+		if(updateattributesmask & MeshModel::MM_FACEFLAGSELECT)
+		{
+			if(mm.face.size() != rm->cm.face.size()) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			CMeshO::FaceIterator rmfi = rm->cm.face.begin();
+			for(CMeshO::ConstFaceIterator mmfi = mm.face.begin(); mmfi != mm.face.end(); ++mmfi, ++rmfi)
+			{
+				if ((!(*mmfi).IsD()) && ((*mmfi).IsS()))
+					(*rmfi).SetS();
+				else
+					if (!(*mmfi).IsS())
+						(*rmfi).ClearS();
+			}
+		}
+
+		if(updateattributesmask & MeshModel::MM_VERTFLAGSELECT)
+		{
+			if(mm.vert.size() != (rm->cm.vert.size())) 
+			{
+				releaseRenderDocument();
+				return false;
+			}
+			else
+			{
+				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+				{
+					if ((!(*mmvi).IsD()) && ((*mmvi).IsS()))
+						(*rmvi).SetS();
+					else
+						if (!(*mmvi).IsS())
+							(*rmvi).ClearS();
+				}
+			}
+		}
+
+		if(updateattributesmask & MeshModel::MM_TRANSFMATRIX)
+			rm->cm.Tr = mm.Tr;
+		if(updateattributesmask & MeshModel::MM_CAMERA)
+			rm->cm.shot = mm.shot;
 		releaseRenderDocument();
 		return true;
 	}
