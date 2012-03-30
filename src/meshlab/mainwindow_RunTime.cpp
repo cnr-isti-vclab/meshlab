@@ -1145,6 +1145,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			//I'm using PM.stringXMLFilterMap[fname] instead of mfc passed like parameter because i'm sure that the first one is still alive after the function will exit. 
 			FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env,this);
 			connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
+			connect(ft,SIGNAL(ThreadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
 			ft->start();
 			//ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 		}
@@ -1175,6 +1176,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 
 void MainWindow::postFilterExecution()
 {	
+	emit filterExecuted();
 	meshDoc()->renderState().clearState();
 	FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
 	if (obj == NULL)
@@ -2267,15 +2269,9 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	return true;
 }
 
-//redraw request and interrupt syncrhonizing position
-bool MainWindow::DICallBack()
+void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
-	/*GLA()->getId();
-	currgla->update();
-	if (listinter[findIndex(currgla)].isInterr())
-		return false;	
-	qApp->processEvents();*/
-	return true;
+	this->QCallBack(pos,qPrintable(text));
 }
 
 //void MainWindow::evaluateExpression(const Expression& exp,Value** res )

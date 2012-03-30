@@ -64,12 +64,12 @@ public:
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
-	static bool DICallBack();
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.2Beta_64bit"); }
+  const QString appVer() const {return tr("1.3.2Beta"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
+	void filterExecuted();
 
 private slots:
   GLArea* newProject(const QString& projName = QString());
@@ -89,6 +89,7 @@ private slots:
   void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
   void postFilterExecution(/*MeshLabXMLFilterContainer* mfc*/);
   //void evaluateExpression(const Expression& exp,Value** res);
+  void updateProgressBar(const int pos,const QString& text);
 
 public:
   bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
@@ -454,6 +455,7 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 };
+
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject
