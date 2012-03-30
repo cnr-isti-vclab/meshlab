@@ -14,7 +14,6 @@ public:
 	MeshLabXMLFilterContainer *_mfc;
 	QString _fname;
 	MeshDocument& _md;
-	//vcg::CallBackPos *_qc;
 	EnvWrap & _env;
 	bool _ret;
 	static bool QCallBackLocal(const int pos, const char * str);
@@ -23,7 +22,7 @@ protected:
 	void run();
 
 signals:
-	void ThreadCB(const int pos, QString str);
+	void ThreadCB(const int pos,const QString& str);
 
 
 	public slots:
