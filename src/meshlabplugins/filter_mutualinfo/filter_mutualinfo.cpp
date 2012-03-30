@@ -272,34 +272,13 @@ bool FilterMutualInfoPlugin::initGL()
     return false;
   }
 
-  //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glEnable(GL_NORMALIZE);
+  glDepthRange (0.0, 1.0);
 
-  //GLfloat light_position[] = {-600.0f, 500.0f, 700.0f, 0.0f};
-  //GLfloat light_ambient[]  = {0.1f,  0.1f, 0.1f, 1.0f};
-  //GLfloat light_diffuse[]  = {0.8f,  0.8f, 0.8f, 1.0f};
-  //GLfloat light_specular[] = {0.9f,  0.9f, 0.9f, 1.0f};
-
-  //glEnable(GL_LIGHTING);
-  //glLightfv (GL_LIGHT0, GL_POSITION, light_position);
-  //glLightfv (GL_LIGHT0, GL_AMBIENT,  light_ambient);
-  //glLightfv (GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-  //glLightfv (GL_LIGHT0, GL_SPECULAR, light_specular);
-  //glEnable  (GL_LIGHT0);
-  //glDisable(GL_LIGHTING);
-
-  //glEnable(GL_DEPTH_TEST);
-  // glEnable(GL_CULL_FACE);
-
-  //glEnable(GL_NORMALIZE);
-  //glDepthRange (0.0, 1.0);
-
-  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //glEnable(GL_BLEND);
-
-  //glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-  //glEnable(GL_POLYGON_SMOOTH);
-  //glShadeModel(GL_SMOOTH);
-  //glDisable(GL_POLYGON_SMOOTH);
+  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+  glEnable(GL_POLYGON_SMOOTH);
+  glShadeModel(GL_SMOOTH);
+  glDisable(GL_POLYGON_SMOOTH);
 
   //AlignSet &align = Autoreg::instance().align;
   align.initializeGL();
