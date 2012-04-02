@@ -72,46 +72,54 @@ double MutualInfo::infoNCC(int width, int height,
 		}
 	}
 
-	r1mean /= Npixels;
-	g1mean /= Npixels;
-	b1mean /= Npixels;
-	r2mean /= Npixels;
-	g2mean /= Npixels;
-	b2mean /= Npixels;
-
-	float sum = 0.0f;
-	float sum1r,sum1g,sum1b;
-	sum1r = sum1g = sum1b = 0.0f;
-	float sum2r, sum2g, sum2b;
-	sum2r = sum2g = sum2b = 0.0f;
-	for (int y = 0; y < height; y++)
+	if (Npixels == 0)
 	{
-		for (int x = 0; x < width; x++)
-		{
-			if (rendered.pixel(x,y) != combined.pixel(x,y))
-			{
-				offset = (x + y * width)*3;
-				r1 = target[offset];
-				g1 = target[offset+1];
-				b1 = target[offset+2];
-				r2 = render[offset];
-				g2 = render[offset+1];
-				b2 = render[offset+2];
+		return 0.0;
+	}
+	else
+	{
+		r1mean /= Npixels;
+		g1mean /= Npixels;
+		b1mean /= Npixels;
+		r2mean /= Npixels;
+		g2mean /= Npixels;
+		b2mean /= Npixels;
 
-				sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
-				sum1r += (r1-r1mean)*(r1-r1mean);
-				sum1g += (g1-g1mean)*(g1-g1mean);
-				sum1b += (b1-b1mean)*(b1-b1mean);
-				sum2r += (r2-r2mean)*(r2-r2mean);
-				sum2g += (g2-g2mean)*(g2-g2mean);
-				sum2b += (b2-b2mean)*(b2-b2mean);
+		float sum = 0.0f;
+		float sum1r,sum1g,sum1b;
+		sum1r = sum1g = sum1b = 0.0f;
+		float sum2r, sum2g, sum2b;
+		sum2r = sum2g = sum2b = 0.0f;
+		for (int y = starty; y < endy; y++)
+		{
+			for (int x = startx; x < endx; x++)
+			{
+				if (rendered.pixel(x,y) != combined.pixel(x,y))
+				{
+					offset = (x + y * width)*3;
+					r1 = target[offset];
+					g1 = target[offset+1];
+					b1 = target[offset+2];
+					r2 = render[offset];
+					g2 = render[offset+1];
+					b2 = render[offset+2];
+
+					sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
+					sum1r += (r1-r1mean)*(r1-r1mean);
+					sum1g += (g1-g1mean)*(g1-g1mean);
+					sum1b += (b1-b1mean)*(b1-b1mean);
+					sum2r += (r2-r2mean)*(r2-r2mean);
+					sum2g += (g2-g2mean)*(g2-g2mean);
+					sum2b += (b2-b2mean)*(b2-b2mean);
+				}
 			}
 		}
+
+		ncc = sum / ((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
+
+		return ncc;
 	}
 
-	ncc = sum / ((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
-
-	return ncc;
 }
 
 double MutualInfo::info(int width, int height, 

@@ -212,7 +212,7 @@ double Solver::operator()(int ndim, double *x) {
          int jend = j+hstep;
          if(jend > h) jend = h;
 
-         double m = mutual->infoNCC(w, h, align->target, align->render, align->rend, align->comb, i, iend, j, jend);
+         double m = 1.0 - mutual->infoNCC(w, h, align->targetRGB, align->renderRGB, align->rend, align->comb, i, iend, j, jend);
          
 				 info += m;
        }

@@ -885,10 +885,15 @@ void AlignSet::resize(int max_side) {
   wt=w;
   ht=h;
 
-  if(target) delete []target;
-  if(render) delete []render;
+  if (target) delete [] target;
+  if (render) delete [] render;
   target = new unsigned char[w*h];
   render = new unsigned char[w*h];
+
+	if (targetRGB) delete [] targetRGB;
+	if (renderRGB) delete [] renderRGB;
+	targetRGB = new unsigned char[w*h*3];
+	renderRGB = new unsigned char[w*h*3];
 
 
   if(image->isNull()) return;
