@@ -30,6 +30,8 @@ AlignSet::AlignSet()
 	: mode(COMBINE)
 	, target(NULL)
 	, render(NULL)
+	, targetRGB(NULL)
+	, renderRGB(NULL)
 	, vbo(0)
 	, nbo(0)
 	, cbo(0)
@@ -909,6 +911,9 @@ void AlignSet::resize(int max_side) {
       color.setRgb(im.pixel(x, y));
       unsigned char c = (unsigned char)(color.red() * 0.3f + color.green() * 0.59f + color.blue() * 0.11f);
       target[offset] = c;
+			targetRGB[offset*3] = color.red();
+			targetRGB[offset*3+1] = color.green();
+			targetRGB[offset*3+2] = color.blue();
       histo[c]++;
       offset++;
     }
@@ -1231,8 +1236,25 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component, bool save) {
   else
 	  rend=fbo.toImage();
 
-  fbo.release();
+	delete [] renderRGB;
+	renderRGB = new unsigned char [wt*ht*3];
 
+	int ww = rend.width();
+	int offset;
+	QRgb rgb;
+	for (int y = 0; y < rend.height(); y++)
+	{
+		for (int x = 0; x < rend.width(); x++)
+		{
+			offset = (x + y * ww)*3;
+			rgb = rend.pixel(x,y);
+			renderRGB[offset] = qRed(rgb);
+			renderRGB[offset+1] = qGreen(rgb);
+			renderRGB[offset+2] = qBlue(rgb);
+		}
+	}
+
+  fbo.release();
 }
 
 void AlignSet::readRender(int component) {

@@ -211,8 +211,10 @@ double Solver::operator()(int ndim, double *x) {
        for(int j =0; j < h; j+= hstep) {
          int jend = j+hstep;
          if(jend > h) jend = h;
-         double m =8-mutual->info(w, h, align->target, align->render, i, iend, j, jend);
-         info += m;
+
+         double m = mutual->infoNCC(w, h, align->target, align->render, align->rend, align->comb, i, iend, j, jend);
+         
+				 info += m;
        }
      }
    

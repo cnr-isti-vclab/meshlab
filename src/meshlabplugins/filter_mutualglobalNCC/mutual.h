@@ -10,6 +10,9 @@ class MutualInfo {
   ~MutualInfo();
 
   void setBins(unsigned int nbins);
+	double infoNCC(int width, int height, unsigned char *target, unsigned char *render, 
+		QImage & rendered, QImage & combined,
+		int startx = 0, int endx = 0, int starty = 0, int endy = 0);
   double info(int width, int height, unsigned char *target, unsigned char *render, 
               int startx = 0, int endx = 0, int starty = 0, int endy = 0);
   void histogram(int width, int height, unsigned char *target, unsigned char *render, 

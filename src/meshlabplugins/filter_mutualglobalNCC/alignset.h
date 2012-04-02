@@ -67,7 +67,8 @@ class AlignSet {
 
   GLint programs[RENDERING_MODE_LAST];
 
-  unsigned char *target, *render; //buffers for rendered images 
+  unsigned char *target, *render;        // buffers for rendered images 
+	unsigned char *targetRGB, *renderRGB;  // buffers for color rendered images
 
   AlignSet();
   ~AlignSet();

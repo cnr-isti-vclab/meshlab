@@ -33,6 +33,87 @@ void MutualInfo::setBins(unsigned int _nbins) {
   histoB = new unsigned int[nbins];
 }
 
+double MutualInfo::infoNCC(int width, int height,
+	                         unsigned char *target, unsigned char *render, 
+													 QImage & rendered , QImage & combined,
+													 int startx, int endx,
+													 int starty, int endy)
+{
+	double ncc = 0.0;
+
+	float r1,g1,b1,r2,g2,b2;
+	float r1mean, g1mean, b1mean, r2mean, g2mean, b2mean;
+	int offset;
+
+	if (endx == 0)
+		endx = width;
+
+	if (endy == 0)
+		endy = height;
+
+	r1mean = g1mean = b1mean = 0.0f;
+	r2mean = g2mean = b2mean = 0.0f;
+	int Npixels=0;
+	for (int y = starty; y < endy; y++)
+	{
+		for (int x = startx; x < endx; x++)
+		{
+			if (rendered.pixel(x,y) != combined.pixel(x,y))
+			{
+				offset = (x + y * width)*3;
+				r1mean += static_cast<float>(target[offset]);
+				g1mean += static_cast<float>(target[offset+1]);
+				b1mean += static_cast<float>(target[offset+2]);
+				r2mean += static_cast<float>(render[offset]);
+				g2mean += static_cast<float>(render[offset+1]);
+				b2mean += static_cast<float>(render[offset+2]);
+				Npixels++;
+			}
+		}
+	}
+
+	r1mean /= Npixels;
+	g1mean /= Npixels;
+	b1mean /= Npixels;
+	r2mean /= Npixels;
+	g2mean /= Npixels;
+	b2mean /= Npixels;
+
+	float sum = 0.0f;
+	float sum1r,sum1g,sum1b;
+	sum1r = sum1g = sum1b = 0.0f;
+	float sum2r, sum2g, sum2b;
+	sum2r = sum2g = sum2b = 0.0f;
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			if (rendered.pixel(x,y) != combined.pixel(x,y))
+			{
+				offset = (x + y * width)*3;
+				r1 = target[offset];
+				g1 = target[offset+1];
+				b1 = target[offset+2];
+				r2 = render[offset];
+				g2 = render[offset+1];
+				b2 = render[offset+2];
+
+				sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
+				sum1r += (r1-r1mean)*(r1-r1mean);
+				sum1g += (g1-g1mean)*(g1-g1mean);
+				sum1b += (b1-b1mean)*(b1-b1mean);
+				sum2r += (r2-r2mean)*(r2-r2mean);
+				sum2g += (g2-g2mean)*(g2-g2mean);
+				sum2b += (b2-b2mean)*(b2-b2mean);
+			}
+		}
+	}
+
+	ncc = sum / ((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
+
+	return ncc;
+}
+
 double MutualInfo::info(int width, int height, 
                         unsigned char *target, unsigned char *render, 
                         int startx, int endx, 
