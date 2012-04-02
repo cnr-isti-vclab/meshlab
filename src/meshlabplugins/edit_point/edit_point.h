@@ -53,9 +53,11 @@ signals:
     void setSelectionRendering(bool);
 
 private:
-        typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
+        // How the selections are composed
+        typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode;
         ComposingSelMode composingSelMode;
 
+        // Could be SELECT_DEFAULT_MODE or SELECT_FITTING_PLANE_MODE
         int editType;
 
         bool isMousePressed;
@@ -64,22 +66,27 @@ private:
         CMeshO::VertexPointer startingVertex;
         vcg::Point2f startingClick;
 
-        float dist;
-        float maxHop;
-        float fittingRadiusPerc;
-        float fittingRadius;
-        float planeDist;
+        float dist;                 // the selection's radius
+        float maxHop;               // the maximus hop distance allowed between 2 adjacent points
+        float fittingRadiusPerc;    // the percentage of the selection's radius used to interpolate points to find the plane
+        float fittingRadius;        // fittingRadiusPerc * dist
+        float planeDist;            // maximus distance that a point has from the plane in order to be selected
 
         vcg::Plane3<CMeshO::ScalarType> fittingPlane;
+
+        // Used to draw the circle that shows how the plane is inclinated
         CMeshO fittingCircle;
 
+        // ComponentVector: the points in the actual selection (red colored)
+        // BorderVector: the points in the actual border (yellow colored)
+        // NotReachableVector: points not reachable from the actual startingVertex (used to find the BorderVector)
+        // OldComponentVector: the previous selection: used to compose different selections
         std::vector<CMeshO::VertexPointer> ComponentVector;
         std::vector<CMeshO::VertexPointer> BorderVector;
         std::vector<CMeshO::VertexPointer> NotReachableVector;
         std::vector<CMeshO::VertexPointer> OldComponentVector;
 
         QPoint cur;
-        QTime timer;
 };
 
 #endif

@@ -29,27 +29,14 @@ public:
 };
 
 
-template <typename _MyMeshType, typename _MyVertexType>
-class Compare {
-private:
-    typename _MyMeshType::template PerVertexAttributeHandle<float> *distFromCenter;
-
-public:
-    Compare(typename _MyMeshType::template PerVertexAttributeHandle<float> *distFromCenter) {
-        this->distFromCenter = distFromCenter;
-    }
-
-    bool operator() (const _MyVertexType* lhs, const _MyVertexType* rhs) const {
-        return (*distFromCenter)[*lhs] > (*distFromCenter)[*rhs];
-    }
-};
-
-
-/** This function returns a vector which stores pointers to the vertex of the connected component with
-  * center v and max distance 'dim' from v.
-  * It uses the knnGraph with k = numOfNeighbours to find the component.
-  * In order to compute the connected component it is used a Shortest Path algorithm where maxHopDist is the
-  * maximum distance we want between two vertex (with the Shortest Path we also compute the geodesic distance)
+/** This function returns a vector which stores pointers to the vertices of the connected component with
+  * max distance 'dim' from the center. It assumes that the vertices have the DistParam attribute, so
+  * we don't have to know where is the center.
+  * The border is also computed, using the notReachableVect parameter, which stores the vertices we
+  * couldn't reach because of the hop distance.
+  *
+  * We can specify to fit some points: in this case first we compute the fitting plane (vcg library method),
+  * then we calculate the connected component and the border.
   **/
 template <typename _MyMeshType, typename _MyVertexType>
 std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindComponent(_MyMeshType& m, float dim, vector<_MyVertexType*> &borderVect, vector<_MyVertexType*> &notReachableVect, bool fitting, float planeDim, float distanceFromPlane, Plane3<typename _MyMeshType::ScalarType> *fittingPlane) {
@@ -95,6 +82,32 @@ std::vector<_MyVertexType*> &ComponentFinder<_MyMeshType, _MyVertexType>::FindCo
 }
 
 
+
+
+/* This class is used in the priority queue to order the nodes */
+template <typename _MyMeshType, typename _MyVertexType>
+class Compare {
+private:
+    typename _MyMeshType::template PerVertexAttributeHandle<float> *distFromCenter;
+
+public:
+    Compare(typename _MyMeshType::template PerVertexAttributeHandle<float> *distFromCenter) {
+        this->distFromCenter = distFromCenter;
+    }
+
+    bool operator() (const _MyVertexType* lhs, const _MyVertexType* rhs) const {
+        return (*distFromCenter)[*lhs] > (*distFromCenter)[*rhs];
+    }
+};
+
+
+/** This function is used to calculate the minimum distances between one point (v) and all the others
+  * in the mesh. We use the Dijkstra algorithm with one change: only arcs with a cost less or equal
+  * of maxHopDist will be taken into account.
+  * In the first call of this method, when neither DistParam or KNNGraph are present, we create these
+  * attributes and we construct the KNNGraph.
+  * The notReachableVect is returned in order to calculate the border in other methods.
+  **/
 template <typename _MyMeshType, typename _MyVertexType>
 void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVertexType& v, int numOfNeighbours, float maxHopDist, vector<_MyVertexType*> &notReachableVect) {
     bool hasKNNGraph = vcg::tri::HasPerVertexAttribute(m, "KNNGraph");
@@ -116,6 +129,7 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
 
     typename vector<_MyVertexType*>::iterator it;
 
+    // For Dijkstra algorithm we use a Priority Queue
     typedef priority_queue<_MyVertexType*, vector<_MyVertexType*>, Compare<_MyMeshType, _MyVertexType> > VertPriorityQueue;
     Compare<_MyMeshType, _MyVertexType> Comparator(&distFromCenter);
     VertPriorityQueue prQueue (Comparator);
@@ -133,7 +147,6 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
     float distance;
     _MyVertexType* element;
 
-
     while (!prQueue.empty()) {
         element = prQueue.top();
         prQueue.pop();
@@ -141,6 +154,7 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
         for (it = neighboursVect[element]->begin(); it != neighboursVect[element]->end(); it++) {
             distance = vcg::Distance((*it)->P(), element->P());
 
+            // we take into account only the arcs with a distance less or equal to maxHopDist
             if (distance <= maxHopDist) {
                 if (distFromCenter[*element] + distance < distFromCenter[*it])
                     distFromCenter[*it] = distFromCenter[*element] + distance;
@@ -150,12 +164,16 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
                     (*it)->SetV();
                 }
             }
+            // all the other are the notReachable arcs
             else if (distance > maxHopDist) notReachableVect.push_back(element);
         }
     }
 }
 
 
+/**
+  * Used to free memory
+  **/
 template <typename _MyMeshType, typename _MyVertexType>
 void ComponentFinder<_MyMeshType, _MyVertexType>::DeletePerVertexAttribute(_MyMeshType& m) {
     KNNTree<_MyMeshType, _MyVertexType>::DeleteKNNTree(m);
