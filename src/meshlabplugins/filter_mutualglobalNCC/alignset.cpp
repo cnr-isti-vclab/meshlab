@@ -911,7 +911,7 @@ void AlignSet::resize(int max_side) {
   //equalize image
   int histo[256];
   memset(histo, 0, 256*sizeof(int));
-  for (int y = h-1; y >= 0; y--) {
+  for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {
       color.setRgb(im.pixel(x, y));
       unsigned char c = (unsigned char)(color.red() * 0.3f + color.green() * 0.59f + color.blue() * 0.11f);

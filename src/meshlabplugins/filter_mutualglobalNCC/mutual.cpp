@@ -39,8 +39,6 @@ double MutualInfo::infoNCC(int width, int height,
 													 int startx, int endx,
 													 int starty, int endy)
 {
-	double ncc = 0.0;
-
 	float r1,g1,b1,r2,g2,b2;
 	float r1mean, g1mean, b1mean, r2mean, g2mean, b2mean;
 	int offset;
@@ -72,9 +70,16 @@ double MutualInfo::infoNCC(int width, int height,
 		}
 	}
 
+	float ncc;
+	float sum = 0.0f;
+	float sum1r,sum1g,sum1b;
+	sum1r = sum1g = sum1b = 0.0f;
+	float sum2r, sum2g, sum2b;
+	sum2r = sum2g = sum2b = 0.0f;
+
 	if (Npixels == 0)
 	{
-		return 0.0;
+		ncc = -1.0f;
 	}
 	else
 	{
@@ -85,11 +90,6 @@ double MutualInfo::infoNCC(int width, int height,
 		g2mean /= Npixels;
 		b2mean /= Npixels;
 
-		float sum = 0.0f;
-		float sum1r,sum1g,sum1b;
-		sum1r = sum1g = sum1b = 0.0f;
-		float sum2r, sum2g, sum2b;
-		sum2r = sum2g = sum2b = 0.0f;
 		for (int y = starty; y < endy; y++)
 		{
 			for (int x = startx; x < endx; x++)
@@ -97,12 +97,12 @@ double MutualInfo::infoNCC(int width, int height,
 				if (rendered.pixel(x,y) != combined.pixel(x,y))
 				{
 					offset = (x + y * width)*3;
-					r1 = target[offset];
-					g1 = target[offset+1];
-					b1 = target[offset+2];
-					r2 = render[offset];
-					g2 = render[offset+1];
-					b2 = render[offset+2];
+					r1 = static_cast<float>(target[offset]);
+					g1 = static_cast<float>(target[offset+1]);
+					b1 = static_cast<float>(target[offset+2]);
+					r2 = static_cast<float>(render[offset]);
+					g2 = static_cast<float>(render[offset+1]);
+					b2 = static_cast<float>(render[offset+2]);
 
 					sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
 					sum1r += (r1-r1mean)*(r1-r1mean);
@@ -115,11 +115,27 @@ double MutualInfo::infoNCC(int width, int height,
 			}
 		}
 
-		ncc = sum / ((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
-
-		return ncc;
+		ncc = sum / sqrt((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
 	}
 
+	QImage img1(width,height,QImage::Format_RGB32);
+	QImage img2(width,height,QImage::Format_RGB32);
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++) 
+		{
+			offset = (x + y * width) * 3;
+			img1.setPixel(x,y,qRgb(target[offset], target[offset+1], target[offset+2]));
+			img2.setPixel(x,y,qRgb(render[offset], render[offset+1], render[offset+2]));
+		}
+
+	QString str = QString("C:/temp/renderRGB_%1.png").arg(ncc);
+	img1.save("C:/temp/targetRGB.png");
+	img2.save(str);
+
+	rendered.save("C:/temp/rendered.png");
+	combined.save("C:/temp/combined.png");
+
+	return static_cast<double>(ncc);
 }
 
 double MutualInfo::info(int width, int height, 

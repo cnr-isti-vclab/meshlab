@@ -121,10 +121,12 @@ double Solver::operator()(int ndim, double *x) {
    case AlignSet::NODE: {
 		assert(glGetError() == 0);
 		//QImage comb; std::vector<QImage> projimg;
-		/*align->mode=AlignSet::COMBINE;
-		align->renderScene(shot,1,true);
+		
+		align->mode=AlignSet::COMBINE;
+		align->renderScene(shot,3,true);
 		assert(glGetError() == 0);
-		comb=align->rend;*/
+		align->comb = align->rend;
+
 		align->mode=AlignSet::PROJMULTIIMG;
 		
 		//for (int n=0; n<align->arcShots.size(); n++)
