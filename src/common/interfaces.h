@@ -618,13 +618,26 @@ public:
 	static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
 	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) =0;
 	const QString &errorMsg() {return this->errorMessage;}
+public slots:
+	inline void setInterrupt(const bool& inter) {intteruptreq = inter;};
+
 protected:
-	bool hasInterruptRequested(const bool& redraw);
+	////This function has two different aims: 
+	////1) should be invoked by filters in order to request a redraw of a subset of meshes and/or rasters inside the MeshDocument. 
+	////2) like a synchronization point where the filter can safely stop is execution.
+	////if filter has not a pending interrupt request a render state update request will be sent to the framework.
+	////return value: true if the request has been sent, false otherwise (filter has an interrupt request).
+
+	//bool sendUpdateRequest(const MeshDocument& md,);
+
+	//QList<int> meshestobeupdated;
+	//int meshmaskattributestobeupdated;
+	//QList<int> rasterstobeupdated;
+	//int rastermaskattributestobeupdated;
+
 	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
 	QString errorMessage;
-
-signals:
-	void filterUpdateRequest(const bool& redraw,bool* interrupt);
+	bool intteruptreq;
 };
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")

@@ -178,7 +178,7 @@ void MeshLabFilterInterface::initConvertingMap(QMap<QString,MeshModel::MeshEleme
 }
 
 MeshLabFilterInterface::MeshLabFilterInterface()
-:MeshLabInterface()
+:MeshLabInterface(),intteruptreq(false)
 {
 	//if (!init)
 	//{
@@ -221,12 +221,13 @@ int MeshLabFilterInterface::convertStringListToCategoryEnum( const QStringList& 
 	return res;
 }
 
-bool MeshLabFilterInterface::hasInterruptRequested( const bool& redraw )
-{
-	bool interrupt = false;
-	emit filterUpdateRequest(redraw,&interrupt);
-	return interrupt;
-}
+//bool MeshLabFilterInterface::sendUpdateRequest( const MeshDocument& md,const QList<int>& meshid,const int meshmaskupdate,const QList<int>& rasterid,const int rastermaskupdate )
+//{
+//	if (intteruptreq)
+//		return false;
+//	md.updateRenderState(meshid,meshmaskupdate,rasterid,rastermaskupdate);
+//	return true;
+//}
 
 //QMap<QString,MeshModel::MeshElement> MeshLabFilterInterface::convertingMap;
 //
