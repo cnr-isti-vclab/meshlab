@@ -57,8 +57,10 @@ AlignSet::AlignSet()
 }
 
 AlignSet::~AlignSet() {
-  if(target) delete []target;
-  if(render) delete []render;
+  if (target) delete [] target;
+  if (render) delete [] render;
+	if (targetRGB) delete [] targetRGB;
+	if (renderRGB) delete [] renderRGB;
   delete correspList;
 }
 

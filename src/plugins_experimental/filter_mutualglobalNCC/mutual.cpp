@@ -72,11 +72,9 @@ double MutualInfo::infoNCC(int width, int height,
 
 	float ncc;
 	float sum = 0.0f;
-	float sum1r,sum1g,sum1b;
-	sum1r = sum1g = sum1b = 0.0f;
-	float sum2r, sum2g, sum2b;
-	sum2r = sum2g = sum2b = 0.0f;
-
+	float sum1, sum2;
+	sum1 = sum2 = 0.0f;
+	
 	if (Npixels == 0)
 	{
 		ncc = -1.0f;
@@ -105,19 +103,16 @@ double MutualInfo::infoNCC(int width, int height,
 					b2 = static_cast<float>(render[offset+2]);
 
 					sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
-					sum1r += (r1-r1mean)*(r1-r1mean);
-					sum1g += (g1-g1mean)*(g1-g1mean);
-					sum1b += (b1-b1mean)*(b1-b1mean);
-					sum2r += (r2-r2mean)*(r2-r2mean);
-					sum2g += (g2-g2mean)*(g2-g2mean);
-					sum2b += (b2-b2mean)*(b2-b2mean);
+					sum1 += (r1-r1mean)*(r1-r1mean) + (g1-g1mean)*(g1-g1mean) + (b1-b1mean)*(b1-b1mean);
+					sum2 += (r2-r2mean)*(r2-r2mean) + (g2-g2mean)*(g2-g2mean) + (b2-b2mean)*(b2-b2mean);
 				}
 			}
 		}
 
-		ncc = sum / sqrt((sum1r * sum2r) + (sum1g * sum2g) + (sum1b * sum2b));
+		ncc = sum / (sqrt(sum1) * sqrt(sum2));
 	}
 
+/* save data for debug purposes
 	QImage img1(width,height,QImage::Format_RGB32);
 	QImage img2(width,height,QImage::Format_RGB32);
 	for (int y = 0; y < height; y++)
@@ -134,6 +129,7 @@ double MutualInfo::infoNCC(int width, int height,
 
 	rendered.save("C:/temp/rendered.png");
 	combined.save("C:/temp/combined.png");
+*/
 
 	return static_cast<double>(ncc);
 }
