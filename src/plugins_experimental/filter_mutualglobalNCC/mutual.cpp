@@ -67,6 +67,17 @@ double MutualInfo::infoNCC(int width, int height,
 				b2mean += static_cast<float>(render[offset+2]);
 				Npixels++;
 			}
+			else
+			{
+				offset = (x + y * width)*3;
+				r1mean += static_cast<float>(target[offset]);
+				g1mean += static_cast<float>(target[offset+1]);
+				b1mean += static_cast<float>(target[offset+2]);
+				r2mean += static_cast<float>(target[offset]);
+				g2mean += static_cast<float>(target[offset+1]);
+				b2mean += static_cast<float>(target[offset+2]);
+				Npixels++;			
+			}
 		}
 	}
 
@@ -105,6 +116,20 @@ double MutualInfo::infoNCC(int width, int height,
 					sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
 					sum1 += (r1-r1mean)*(r1-r1mean) + (g1-g1mean)*(g1-g1mean) + (b1-b1mean)*(b1-b1mean);
 					sum2 += (r2-r2mean)*(r2-r2mean) + (g2-g2mean)*(g2-g2mean) + (b2-b2mean)*(b2-b2mean);
+				}
+				else
+				{
+					offset = (x + y * width)*3;
+					r1 = static_cast<float>(target[offset]);
+					g1 = static_cast<float>(target[offset+1]);
+					b1 = static_cast<float>(target[offset+2]);
+					r2 = static_cast<float>(target[offset]);
+					g2 = static_cast<float>(target[offset+1]);
+					b2 = static_cast<float>(target[offset+2]);
+
+					sum += (r1-r1mean)*(r2-r2mean) + (g1-g1mean)*(g2-g2mean) + (b1-b1mean)*(b2-b2mean);
+					sum1 += (r1-r1mean)*(r1-r1mean) + (g1-g1mean)*(g1-g1mean) + (b1-b1mean)*(b1-b1mean);
+					sum2 += (r2-r2mean)*(r2-r2mean) + (g2-g2mean)*(g2-g2mean) + (b2-b2mean)*(b2-b2mean);				
 				}
 			}
 		}

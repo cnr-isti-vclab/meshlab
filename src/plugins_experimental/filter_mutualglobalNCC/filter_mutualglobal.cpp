@@ -56,7 +56,7 @@ FilterMutualInfoPlugin::FilterMutualInfoPlugin()
 QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information"); 
+		case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information NCC"); 
 		default : assert(0); 
 	}
   return QString();
