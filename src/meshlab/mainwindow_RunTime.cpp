@@ -928,6 +928,8 @@ void MainWindow::startFilter()
 	from the automatic dialog
 	from the user defined dialog
 */
+
+
 void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
 {
 
@@ -1028,8 +1030,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
-
-
 void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
 {
 	if (mfc == NULL)
@@ -1039,7 +1039,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	bool filtercpp = (iFilter != NULL) && (!jscode);
 	QString fname = mfc->act->text();
 	QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
-	MeshDocument* mmmmd = meshDoc();
 	if (ar == MLXMLElNames::singleMeshArity)
 		meshDoc()->renderState().addMesh(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
 
@@ -1146,6 +1145,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env,this);
 			connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
 			connect(ft,SIGNAL(ThreadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
+			connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
 			ft->start();
 			//ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 		}
@@ -1184,6 +1184,8 @@ void MainWindow::postFilterExecution()
 	MeshLabXMLFilterContainer* mfc = obj->_mfc;
 	if (mfc == NULL)
 		return;
+
+	mfc->filterInterface->setInterrupt(false);
 	
 	QString fname = mfc->act->text();
 	//meshDoc()->setBusy(false);
@@ -1246,46 +1248,6 @@ void MainWindow::postFilterExecution()
 		mvc->updateAllViewer();
 
 	delete obj;
-}
-
-void MainWindow::filterUpdateRequest(const bool& redraw,bool* interrupted)
-{
-	GLArea* ar = GLA();
-	//if (ar != NULL && redraw)
-	//	ar->singleRedraw();
-	if (ar != NULL)
-		*interrupted = !(ar->showInterruptButton());
-}
-
-void MainWindow::interruptFilterExecution()
-{
-	GLArea* ar = GLA();
-	if (ar != NULL)
-	{
-		showInterruptButton(false);
-		if (meshDoc()->isBusy())
-			meshDoc()->setBusy(false);
-	}
-}
-
-void MainWindow::interruptButtonVisibility()
-{
-	GLArea* ar = GLA();
-	if (ar != NULL)
-		interruptbut->setVisible(ar->showInterruptButton());
-	else
-		interruptbut->setVisible(false);
-}
-
-void MainWindow::showInterruptButton(const bool& visible)
-{
-	GLArea* ar = GLA();
-	if (ar != NULL)
-	{
-		ar->showInterruptButton(visible);
-		interruptbut->setVisible(ar->showInterruptButton());
-	}
-	repaint();
 }
 
 void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,const QString& output )

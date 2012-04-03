@@ -159,10 +159,6 @@ private slots:
   void viewFromCurrentRasterShot();
   void copyViewToClipBoard();
 	void pasteViewFromClipboard();
-	void filterUpdateRequest(const bool&,bool*);
-	void interruptFilterExecution();
-	void interruptButtonVisibility();
-	void showInterruptButton(const bool& visible);
 
 	///////////Slot PopUp Menu Handles /////////////////////
 	void splitFromHandle(QAction * qa);
@@ -217,7 +213,6 @@ private:
 	MeshlabStdDialog *stddialog;
 	MeshLabXMLStdDialog* xmldialog;
 	static QProgressBar *qb;
-	QPushButton* interruptbut;
 
 	QMdiArea *mdiarea;
 	LayerDialog *layerDialog;

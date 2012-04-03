@@ -369,7 +369,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	} ///end if busy
 
 	glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
-
+	
 	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor))
 		trackball.DrawPostApply();
 

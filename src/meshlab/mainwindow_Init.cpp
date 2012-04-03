@@ -61,7 +61,6 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(interruptButtonVisibility()));
 	httpReq=new QHttp(this);
 	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
 	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
@@ -87,12 +86,7 @@ MainWindow::MainWindow()
 	qb->setMaximum(100);
 	qb->setMinimum(0);
 	//qb->reset();
-	QCommonStyle st;
-	interruptbut = new QPushButton(st.standardIcon(QStyle::SP_MediaPause),"",this);
-	interruptbut->setVisible(false);
-	connect(interruptbut,SIGNAL(clicked()),this,SLOT(interruptFilterExecution()));
 	statusBar()->addPermanentWidget(qb,0);
-	statusBar()->addPermanentWidget(interruptbut,0);
 	updateMenus();
 	newProject();
 	//PM should be initialized before passing it to PluginGeneratorGUI

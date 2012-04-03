@@ -3,7 +3,7 @@
 #include <QtGui>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p )
-:QDockWidget(QString("Plugin"), p),showHelp(false),env()
+:QDockWidget(QString("Plugin"), p),showHelp(false),env(),isfilterexecuting(false)
 {
 	curmask = 0;
 	qf = NULL;
@@ -59,17 +59,17 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 
 	//int buttonRow = 2;  // the row where the line of buttons start
 
-	QPushButton *helpButton = new QPushButton("Help", qf);
+	helpButton = new QPushButton("Help", qf);
 	//helpButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *closeButton = new QPushButton("Close", qf);
+	closeButton = new QPushButton("Close", qf);
 	//closeButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *applyButton = new QPushButton("Apply", qf);
+	applyButton = new QPushButton("Apply", qf);
 	//applyButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
-	QPushButton *defaultButton = new QPushButton("Default", qf);
+	defaultButton = new QPushButton("Default", qf);
 	//defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
 	ExpandButtonWidget* exp = new ExpandButtonWidget(qf);
 	connect(exp,SIGNAL(expandView(bool)),this,SLOT(extendedView(bool)));
-
+	connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
 #ifdef Q_WS_MAC
 	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
 	helpButton->setMinimumSize(100, 25);
@@ -89,6 +89,11 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 		//buttonRow++;
 	}
 
+	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
+	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
+	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetExpressions()));
+	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
+
 	gridLayout->addWidget(exp,gridLayout->rowCount(),0,1,2,Qt::AlignJustify);
 	int firstButLine =  gridLayout->rowCount();
 	gridLayout->addWidget(helpButton,   firstButLine,1,Qt::AlignBottom);
@@ -97,11 +102,6 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	gridLayout->addWidget(closeButton,  secButLine,0,Qt::AlignBottom);
 	gridLayout->addWidget(applyButton,  secButLine,1,Qt::AlignBottom);
 
-
-	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
-	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
-	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
-	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetExpressions()));
 
 	qf->showNormal();
 	qf->adjustSize();
@@ -161,6 +161,12 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 void MeshLabXMLStdDialog::applyClick()
 {
 	//env.pushContext();
+	if ((isfilterexecuting) && (curmfc->xmlInfo->filterAttribute(curmfc->act->text(),MLXMLElNames::filterIsInterruptible) == "true"))
+	{
+		emit filterInterrupt(true);
+		return;
+	}
+
 	assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
 	for(int ii = 0;ii < curParMap.size();++ii)	
 	{
@@ -171,7 +177,6 @@ void MeshLabXMLStdDialog::applyClick()
 	////int mask = 0;//curParSet.getDynamicFloatMask();
 	if(curmask)	
 		meshState.apply(curModel);
-
 	//applyContext = env.currentContext()->toString();
 	////PreView Caching: if the apply parameters are the same to those used in the preview mode
 	////we don't need to reapply the filter to the mesh
@@ -182,6 +187,7 @@ void MeshLabXMLStdDialog::applyClick()
 	//{
 		QString nm = curmfc->act->text();
 		EnvWrap* wrap = new EnvWrap(env);
+		startFilterExecution();
 		curmwi->executeFilter(curmfc,*wrap,false);
 	/*}*/
 	//env.popContext();
@@ -301,6 +307,46 @@ void MeshLabXMLStdDialog::resetPointers()
 	curMeshDoc = NULL;
 	curgla = NULL;
 	curModel = NULL;
+}
+
+void MeshLabXMLStdDialog::postFilterExecution()
+{
+	setDialogStateRelativeToFilterExecution(false);
+}
+
+void MeshLabXMLStdDialog::startFilterExecution()
+{
+	setDialogStateRelativeToFilterExecution(true);
+}
+
+void MeshLabXMLStdDialog::setDialogStateRelativeToFilterExecution( const bool isfilterinexecution )
+{
+	isfilterexecuting = isfilterinexecution;
+	if (curmfc == NULL)
+		return;
+	QString inter = curmfc->xmlInfo->filterAttribute(curmfc->act->text(),MLXMLElNames::filterIsInterruptible);
+
+	if (inter == "true")
+	{
+		applyButton->setEnabled(true);
+		//during filter execution Stop label should appear, otherwise the apply button is in the usual apply state 
+		applyButton->setText(MeshLabXMLStdDialog::applyButtonLabel(!isfilterinexecution));
+	}
+	else
+	{
+		applyButton->setText(MeshLabXMLStdDialog::applyButtonLabel(true));
+		applyButton->setEnabled(!isfilterexecuting);
+	}
+	stdParFrame->setEnabled(!isfilterexecuting);
+}
+
+QString MeshLabXMLStdDialog::applyButtonLabel( const bool applystate )
+{
+	if (applystate) 
+		return QString("Apply"); 
+	else 
+		return QString("Stop"); 
+	return QString();
 }
 
 XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )

@@ -449,7 +449,6 @@ public:
 	void closeEvent ( QCloseEvent * event ); 
 	void resetPointers();
 	MeshModel *curModel;
-//signals:
 	//void dialogEvaluateExpression(const Expression& exp,Value** res);
 	//void expandView(bool exp);
 
@@ -463,8 +462,14 @@ private slots:
 	void applyDynamic();
 	void changeCurrentMesh(int meshInd);
 	void extendedView(bool ext);
+	void postFilterExecution();
 
 private:
+	void startFilterExecution();
+	void setDialogStateRelativeToFilterExecution(const bool isfilterinexecution);
+	static QString applyButtonLabel(const bool applystate);
+	bool isfilterexecuting;
+
 	Env env;
 	QFrame *qf;
 	XMLStdParFrame *stdParFrame;
@@ -482,6 +487,15 @@ private:
 	QString previewContext;
 	bool validcache;
 	bool showHelp;
+
+	//we have to change the button caption when the filter has been launched for execution
+	QPushButton *applyButton;
+	QPushButton *helpButton;
+	QPushButton *closeButton;
+	QPushButton *defaultButton;
+
+signals:
+	void filterInterrupt(const bool isinterruptrequested);
 };
 
 #endif
