@@ -1,0 +1,27 @@
+#--------------------------------
+# jhead makefile for Win32
+#--------------------------------
+
+CC=cl /nologo
+CFLAGS=-c -G3 -Ox -W3 -Zp -Zd
+LINKER=link
+LINKCON = /nologo
+
+all:jhead.exe
+
+OBJ = .
+
+OBJECTS_JHEAD = $(OBJ)\jhead.obj  \
+                $(OBJ)\jpgfile.obj \
+                $(OBJ)\myglob.obj \
+                $(OBJ)\paths.obj \
+                $(OBJ)\exif.obj \
+                $(OBJ)\iptc.obj \
+                $(OBJ)\gpsinfo.obj \
+                $(OBJ)\makernote.obj
+
+$(OBJECTS_JHEAD): $(@B).c jhead.h
+    $(CC) /Fo$(OBJ)\ $(CFLAGS) $(@B).c
+
+jhead.exe: $(OBJECTS_JHEAD)
+    $(LINKER) $(LINKCON) -OUT:jhead.exe $(OBJECTS_JHEAD)
