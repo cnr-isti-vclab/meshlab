@@ -1,6 +1,6 @@
 include (../general.pri)
-EXIF_DIR = $$VCGDIR/wrap/Exif
-include ($$VCGDIR/wrap/Exif/exif.pri)
+EXIF_DIR = ../external/jhead-2.95
+include ($$EXIF_DIR/exif.pri)
 
 GLEWCODE = $$GLEWDIR/src/glew.c
 
