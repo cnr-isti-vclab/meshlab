@@ -1,6 +1,6 @@
 include (../general.pri)
 EXIF_DIR = ../external/jhead-2.95
-include ($$EXIF_DIR/exif.pri)
+
 
 GLEWCODE = $$GLEWDIR/src/glew.c
 
@@ -74,7 +74,7 @@ QT += script
 
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . $$EXIF_DIR
 DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
@@ -111,5 +111,16 @@ SOURCES += filterparameter.cpp \
 #	win32-msvc2005: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2008: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2010: RCC_DIR = $(ConfigurationName)
+
+macx:LIBS		+= -L../external/lib/macx -ljhead
+macx32:LIBS		+= -L../external/lib/macx32 -ljhead
+macx64:LIBS		+= -L../external/lib/macx64 -ljhead
+win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
+win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
+win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
+win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
+linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
+linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead
+linux-g++-64:LIBS		+= -L../external/lib/linux-g++-64 -ljhead
 	
 #RESOURCES = common.qrc
