@@ -113,16 +113,15 @@ INCLUDEPATH += . \
     $$GLEWDIR/include
 CONFIG += stl
 
-macx:LIBS += ../common/libcommon.dylib
+macx:LIBS		+= -L../external/lib/macx -ljhead ../common/libcommon.dylib
+macx32:LIBS		+= -L../external/lib/macx32 -ljhead ../common/libcommon.dylib
+macx64:LIBS		+= -L../external/lib/macx64 -ljhead ../common/libcommon.dylib
 macx:QMAKE_POST_LINK ="cp -P ../common/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlab"
 
-
-
-
-win32-msvc2005:LIBS		+= -L../distrib -lcommon
-win32-msvc2008:LIBS		+= -L../distrib -lcommon
-win32-msvc2010:LIBS		+= -L../distrib -lcommon
-win32-g++:LIBS        	+= -L../distrib -lcommon
+win32-msvc2005:LIBS		+= -L../external/lib/win32-msvc2005 -ljhead -L../distrib -lcommon 
+win32-msvc2008:LIBS		+= -L../external/lib/win32-msvc2008 -ljhead -L../distrib -lcommon 
+win32-msvc2010:LIBS		+= -L../external/lib/win32-msvc2010 -ljhead -L../distrib -lcommon
+win32-g++:LIBS        	+= -L../external/lib/win32-gcc -L../distrib -lcommon
 
 #CONFIG(release,debug | release) {
 #	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
@@ -130,13 +129,12 @@ win32-g++:LIBS        	+= -L../distrib -lcommon
 #	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 #}
 
-linux-g++:LIBS += -L../distrib -lcommon
+linux-g++:LIBS += -L../external/lib/linux-g++ -ljhead -L../distrib -lcommon
 linux-g++:QMAKE_RPATHDIR += ../distrib
-linux-g++-32:LIBS += -L../distrib -lcommon
+linux-g++-32:LIBS += -L../external/lib/linux-g++-32 -L../distrib -lcommon
 linux-g++-32:QMAKE_RPATHDIR += ../distrib
-linux-g++-64:LIBS += -L../distrib -lcommon
+linux-g++-64:LIBS += -L../external/lib/linux-g++-64 -L../distrib -lcommon
 linux-g++-64:QMAKE_RPATHDIR += ../distrib
-
 
 # uncomment in your local copy only in emergency cases.
 # We should never be too permissive
