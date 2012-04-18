@@ -1100,7 +1100,7 @@ void SlicedPPMQ( const char * filename,const char *tag,int SliceNum)
 		int ix,iy,iz;
 		Color4b Tab[100];
 		for(int ii=1;ii<100;++ii)
-			Tab[ii].ColorRamp(0,100,ii);
+			Tab[ii].SetColorRamp(0,100,ii);
 		Tab[0]=Color4b::Gray;
 		
     int ZStep=sz[2]/(SliceNum+1);

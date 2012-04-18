@@ -40,7 +40,7 @@ QPixmap generateColorRamp()
   for(int x=0;x<width;++x)
      for(int y=0;y<height;++y)
         {
-          ramp.ColorRamp(0,width,x);          
+          ramp.SetColorRamp(0,width,x);
           newImage.setPixel(x,y,qRgb(ramp.V(0),ramp.V(1),ramp.V(2)));
         }
   

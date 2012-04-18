@@ -135,7 +135,7 @@ public:
                 sum+=  fli.Val(j*factor+sj,i*factor+si);
           sum/=factor*factor;
 					sum=std::min(sum,colormax);
-					vcg::Color4b avgcolor; avgcolor.ColorRamp(0,colormax,sum);
+					vcg::Color4b avgcolor; avgcolor.SetColorRamp(0,colormax,sum);
           newImage.setPixel(j,i,qRgb(avgcolor.V(0),avgcolor.V(1),avgcolor.V(2)));
         }
         return QPixmap::fromImage(newImage);
