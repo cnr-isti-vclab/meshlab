@@ -190,9 +190,8 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
-	if(meshList.size()==1) return false;
   if(!meshList.removeOne(mmToDel)) return false;
-  if(currentMesh == mmToDel)
+  if((currentMesh == mmToDel) && (meshList.size() != 0))
         setCurrentMesh(this->meshList.at(0)->id());
 
   delete mmToDel;
