@@ -109,12 +109,20 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 
 			//rendList.push_back("ABS Curvature");
 			parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"),
-                                QString("Rendering modes")));
+                                QString("Rendering mode used for Mutual Information maximization")));
 			
-			parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+			parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Set Shot", "The shot that will be used as a starting position"));
 			
 			parlst.addParam(new RichBool("Estimate Focal",false,"Estimate focal length","Estimate focal length"));
 			parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
+
+			parlst.addParam(new RichInt("Num. of Iterations",100,"Max iterations","Maximum number of iterations"));
+			parlst.addParam(new RichFloat("Tolerance",0.1,"Tolerance","Threshold to stop convergence"));
+
+			parlst.addParam(new RichFloat("Expected Variance",2.0,"Expected Variance","Expected Variance"));
+			parlst.addParam(new RichInt("Background weight",2,"Background weight","Weight of background pixels"));
+
+
 
  		  /*parlst.addParam(new RichBool ("UpdateNormals",
 											true,
@@ -149,6 +157,11 @@ bool FilterMutualInfoPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	
 	solver.optimize_focal=par.getBool("Estimate Focal");
 	solver.fine_alignment=par.getBool("Fine");
+	solver.variance=par.getFloat("Expected Variance");
+	solver.tolerance=par.getFloat("Tolerance");
+	solver.maxiter=par.getInt("Num. of Iterations");
+
+	mutual.bweight=par.getInt("Background weight");
 
 	int rendmode= par.getEnum("RenderingMode");
 			
