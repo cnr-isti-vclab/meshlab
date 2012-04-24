@@ -1,10 +1,12 @@
 include (../general.pri)
 #CONFIG += debug_and_release
 DESTDIR = ../distrib
+EXIF_DIR = ../external/jhead-2.95
 
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
-    $$GLEWDIR/include
+    $$GLEWDIR/include \
+	$$EXIF_DIR
 DEPENDPATH += $$VCGDIR \
     $$VCGDIR/vcg \
     $$VCGDIR/wrap

@@ -1703,6 +1703,52 @@ bool MainWindow::importRaster(const QString& fileImg)
 			rm->addPlane(new Plane(rm,fileName,QString("")));		
 			meshDoc()->setBusy(false);
 
+/// Intrinsics extraction from EXIF
+///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
+/// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
+
+		::ResetJpgfile();
+		QFile img(fileName);
+		img.open(QIODevice::ReadWrite);
+		int FileDescriptor = img.handle();
+		FILE* pFile = fdopen(FileDescriptor, "rb");
+		
+
+        int ret = ::ReadJpegSections (pFile, READ_METADATA);
+		img.close();
+		if (!ret || (ImageInfo.CCDWidth==0.0f && ImageInfo.FocalLength35mmEquiv==0.0f))
+		{
+			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
+		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
+			rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
+			rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
+			rm->shot.Intrinsics.FocalMm = 50.0f;
+		}
+		else if (ImageInfo.CCDWidth!=0)
+		{
+			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
+		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+			float ratio;
+			if (ImageInfo.Width>ImageInfo.Height)
+				ratio=(float)ImageInfo.Width/(float)ImageInfo.Height;
+			else
+				ratio=(float)ImageInfo.Height/(float)ImageInfo.Width;
+			rm->shot.Intrinsics.PixelSizeMm[0]=ImageInfo.CCDWidth/(float)ImageInfo.Width;
+			rm->shot.Intrinsics.PixelSizeMm[1]=ImageInfo.CCDWidth/((float)ImageInfo.Height*ratio);
+			rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
+		}
+		else
+		{
+			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
+		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+			float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLength35mmEquiv;
+			rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.Width;
+			rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.Height;
+			rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
+		}
+		
+// End of EXIF reading
+
 //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
 			updateMenus();
 		}

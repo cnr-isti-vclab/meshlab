@@ -8,7 +8,6 @@
 
 #include "meshmodel.h"
 #include "meshlabdocumentbundler.h"
-#include <wrap/io_trimesh/import_out.h>
 
 #include <wrap/qt/shot_qt.h>
 
@@ -38,6 +37,11 @@ bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString imag
 			md.rm()->addPlane(new Plane(md.rm(),fullpath_image_filename,QString("")));
 			md.rm()->setLabel(image_filenames_q[i].section('/',1,2));
 			md.rm()->shot = shots[i];
+			md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();
+			md.rm()->shot.Intrinsics.ViewportPx[1]=md.rm()->currentPlane->image.height();
+			md.rm()->shot.Intrinsics.CenterPx[0]=(int)((double)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0f);
+			md.rm()->shot.Intrinsics.CenterPx[1]=(int)((double)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0f);
+
 	}
         QDir::setCurrent(curr_path);
 
