@@ -1633,6 +1633,92 @@ bool MainWindow::openProject(QString fileName)
   return true;
 }
 
+bool MainWindow::appendProject(QString fileName)
+{
+  QStringList fileNameList;
+
+  if (fileName.isEmpty())
+    fileNameList = QFileDialog::getOpenFileNames(this,tr("Append Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
+  else
+    fileNameList.append(fileName);
+
+  if (fileNameList.isEmpty()) return false;
+
+  // Common Part: init a Doc if necessary, and
+  bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+  bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
+
+  if (activeEmpty)  // it is wrong to try appending to an empty project, even if it is possible
+  {
+    QMessageBox::critical(this, tr("Meshlab Opening Error"), "Current project is empty, cannot append");
+    return false;
+  }
+
+  meshDoc()->setBusy(true);
+
+  // load all projects
+	foreach(fileName,fileNameList)
+	{
+    QFileInfo fi(fileName);
+    lastUsedDirectory = fi.absoluteDir();
+
+    if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp"))
+    {
+      QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
+      return false;
+    }
+
+    // this change of dir is needed for subsequent textures/materials loading
+    QDir::setCurrent(fi.absoluteDir().absolutePath());
+    qb->show();
+
+    if (QString(fi.suffix()).toLower() == "aln")
+    {
+      vector<RangeMap> rmv;
+      int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
+      if(retVal != ALNParser::NoError)
+      {
+        QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
+        return false;
+      }
+
+      bool openRes=true;
+      vector<RangeMap>::iterator ir;
+      for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
+      {
+        QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
+        meshDoc()->addNewMesh(relativeToProj,relativeToProj);
+        loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
+        if(openRes) meshDoc()->mm()->cm.Tr=(*ir).trasformation;
+      }
+    }
+
+    if (QString(fi.suffix()).toLower() == "mlp")
+    {
+      if (!MeshDocumentFromXML(*meshDoc(),fileName))
+      {
+        QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
+        return false;
+      }
+      for (int i=0; i<meshDoc()->meshList.size(); i++)
+      {
+        QString fullPath = meshDoc()->meshList[i]->fullName();
+        meshDoc()->setBusy(true);
+        Matrix44f trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+        loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+        this->meshDoc()->meshList[i]->cm.Tr=trm;
+      }
+    }
+  }
+
+  meshDoc()->setBusy(false);
+  if(this->GLA() == 0)  return false;
+  this->currentViewContainer()->resetAllTrackBall();
+  qb->reset();
+  saveRecentProjectList(fileName);
+  return true;
+}
+
 GLArea* MainWindow::newProject(const QString& projName)
 {
 	filterMenu->setEnabled(!filterMenu->actions().isEmpty());

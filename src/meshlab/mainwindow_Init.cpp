@@ -119,6 +119,9 @@ void MainWindow::createActions()
 	openProjectAct->setShortcut(Qt::CTRL+Qt::Key_O);
 	connect(openProjectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
+	appendProjectAct = new QAction(tr("Append project to current..."), this);
+	connect(appendProjectAct, SIGNAL(triggered()), this, SLOT(appendProject()));
+
 	saveProjectAct = new QAction(QIcon(":/images/save.png"),tr("&Save Project"), this);
 	saveProjectAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveProjectAct->setShortcut(Qt::CTRL+Qt::Key_S);
@@ -468,6 +471,7 @@ void MainWindow::createMenus()
 	fileMenu = menuBar()->addMenu(tr("&File"));
 	fileMenu->addAction(newProjectAct);
 	fileMenu->addAction(openProjectAct);
+	fileMenu->addAction(appendProjectAct);
 	fileMenu->addAction(saveProjectAct);
 	fileMenu->addAction(closeProjectAct);
 	fileMenu->addSeparator();

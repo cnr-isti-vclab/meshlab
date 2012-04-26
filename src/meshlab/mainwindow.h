@@ -79,6 +79,7 @@ private slots:
 public slots:
   bool importMesh(QString fileName=QString());
   bool openProject(QString fileName=QString());
+  bool appendProject(QString fileName=QString());
   void updateCustomSettings();
 
 private slots:
@@ -346,7 +347,7 @@ private:
 
 	//////////// Actions Menu File ///////////////////////
   QAction *newProjectAct;
-  QAction *openProjectAct,*saveProjectAct,*saveProjectAsAct;
+  QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
   QAction  *importMeshAct,   *exportMeshAct,  *exportMeshAsAct;
   QAction  *importRasterAct;
   QAction *closeProjectAct;
