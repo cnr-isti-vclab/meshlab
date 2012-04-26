@@ -269,20 +269,54 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
-void MeshDocument::updateRenderState(QList<MeshModel*>& mm,const int meshupdatemask,const QList<RasterModel*>& rm,const int rasterupdatemask)
+void MeshDocument::updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask)
 {
 	static QTime currTime;
 	if(currTime.elapsed()< 100) 
 		return;
-	for (QList<MeshModel*>::iterator mit = mm.begin();mit != mm.end();++mit)
+	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
 	{
-		if (*mit != NULL)
-			renderState().update((*mit)->id(),(*mit)->cm,meshupdatemask);
+		MeshModel* mesh = getMesh(*mit);
+		if (mesh != NULL)
+			renderState().update(mesh->id(),mesh->cm,meshupdatemask);
 	}
-    for (QList<RasterModel*>::const_iterator rit = rm.begin();rit != rm.end();++rit)
+	if ((mm.size() > 0) && !(meshupdatemask & MeshModel::MM_NONE))
+		emit documentUpdated();
+	currTime.start();
+}
+
+void MeshDocument::updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask)
+{
+	static QTime currTime;
+	if(currTime.elapsed()< 100) 
+		return;
+	for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
 	{
-		if (*rit != NULL)
-			renderState().update((*rit)->id(),(**rit),rasterupdatemask);
+		RasterModel* raster = getRaster(*rit);
+		if (raster != NULL)
+			renderState().update(raster->id(),*raster,rasterupdatemask);
+	}
+	if ((rm.size() > 0) && !(rasterupdatemask & RasterModel::RM_NONE))
+		emit documentUpdated();
+	currTime.start();
+}
+
+void MeshDocument::updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask)
+{
+	static QTime currTime;
+	if(currTime.elapsed()< 100) 
+		return;
+	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
+	{
+		MeshModel* mesh = getMesh(*mit);
+		if (mesh != NULL)
+			renderState().update(mesh->id(),mesh->cm,meshupdatemask);
+	}
+    for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
+	{
+		RasterModel* raster = getRaster(*rit);
+		if (raster != NULL)
+			renderState().update(raster->id(),*raster,rasterupdatemask);
 	}
 	if (((mm.size() > 0) && !(meshupdatemask & MeshModel::MM_NONE)) || (rm.size() > 0 && !(rasterupdatemask & RasterModel::RM_NONE)))
 		emit documentUpdated();

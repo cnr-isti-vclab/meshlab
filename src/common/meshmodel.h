@@ -576,9 +576,15 @@ public:
 	int newTagId() {return tagIdCounter++;}
 	int newMeshId() {return meshIdCounter++;}
 	int newRasterId() {return rasterIdCounter++;}
+	
+	//functions to update the document entities (meshes and/or rasters) during the filters execution
+	//WARNING! please note that if you have to update both meshes and rasters calling updateRenderState function it's far more efficient 
+	//than calling in sequence updateRenderRasterStateMeshes and updateRenderStateRasters. Use them only if you have to update only rasters or only meshes.
+	void updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask);
 
-	//this function copy the mesh in the meshList on the renderState and emit a signal to 
-    void updateRenderState(QList<MeshModel*>& mm,const int meshupdatemask,const QList<RasterModel*>& rm = QList<RasterModel*>(),const int rasterupdatemask = RasterModel::RM_NONE);
+	void updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask);
+    void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);
+	
 
 private:
 	int tagIdCounter;
