@@ -732,7 +732,8 @@ OctNode<NodeData,Real>& OctNode<NodeData,Real>::operator = (const OctNode<NodeDa
 	if(children){delete[] children;}
 	children=NULL;
 
-	depth=node.depth;
+	//depth =node.depth();
+	d = node.d;
 	for(i=0;i<DIMENSION;i++){this->offset[i] = node.offset[i];}
 	if(node.children){
 		initChildren();

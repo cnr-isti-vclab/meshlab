@@ -124,7 +124,7 @@ int FilterSSynth::getRequirements(QAction *)
             QString output=renderer.getOutput();
 			(*cb)(0, "Temp");
 			QFile file(QDir::tempPath() + "/output.x3d");
-            if(!file.open(QFile::WriteOnly | QFile::Text)){(*cb)(0, "PORCO DIO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");; return QString("");}
+            if(!file.open(QFile::WriteOnly | QFile::Text)){(*cb)(0, "File has not been opened"); return QString("");}
             QTextStream outp(&file);
             outp << output;
             file.close();

@@ -370,7 +370,7 @@ bool VisibilityCheck_ShadowMap::initShaders()
         !fpg.CompileSrcFile( basename+"visibility_detection.frag", &logs ) ||
         !m_VisDetectionShader.Attach( vpg ).AttachAndLink( fpg, &logs )     )
     {
-       // qWarning( (  std::string(__func__)+ ": "+logs).c_str() );
+       qWarning( ( ": "+logs).c_str() );
         return false;
     }
 
