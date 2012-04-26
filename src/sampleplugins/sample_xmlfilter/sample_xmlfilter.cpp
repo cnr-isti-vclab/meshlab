@@ -51,7 +51,9 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 			float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
 			m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);
 			//if ( i % 1000 == 0)
-			md.updateRenderMesh(m,int(MeshModel::MM_VERTCOORD));
+			QList<int> meshlist;
+			meshlist << m.id();
+			md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOORD));
 			if (intteruptreq)
 				return true;
 		}
