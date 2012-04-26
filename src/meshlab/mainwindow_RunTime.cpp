@@ -1030,17 +1030,18 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
+void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env ) 
 {
-	if (mfc == NULL)
+	if (meshDoc() == NULL)
 		return;
-	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
-	bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
-	bool filtercpp = (iFilter != NULL) && (!jscode);
 	QString fname = mfc->act->text();
 	QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
-	if (ar == MLXMLElNames::singleMeshArity)
-		meshDoc()->renderState().addMesh(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
+
+	if ((ar == MLXMLElNames::singleMeshArity)&& (meshDoc()->mm() != NULL))
+	{
+		meshDoc()->renderState().add(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
+		return;
+	}
 
 	if (ar == MLXMLElNames::fixedArity)
 	{
@@ -1054,7 +1055,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 				{
 					MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
 					if (tmp != NULL)
-						meshDoc()->renderState().addMesh(tmp->id(),tmp->cm);
+						meshDoc()->renderState().add(tmp->id(),tmp->cm);
 				}
 				catch (ExpressionHasNotThisTypeException& e)
 				{
@@ -1063,14 +1064,79 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 				}
 			}
 		}
+		return;
 	}
-	
+
 	//In this case I can only copy all the meshes in the document!
 	if (ar == MLXMLElNames::variableArity)
 	{
 		for(int ii = 0;meshDoc()->meshList.size();++ii)
-			meshDoc()->renderState().addMesh(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
+			meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
+		return;
 	}
+}
+
+void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env ) 
+{
+	if (meshDoc() == NULL)
+		return;
+	QString fname = mfc->act->text();
+	QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterRasterArity);
+
+	if ((ar == MLXMLElNames::singleRasterArity)&& (meshDoc()->rm() != NULL))
+	{
+		RasterModel* rm = meshDoc()->rm();
+		meshDoc()->renderState().add(meshDoc()->rm()->id(),*meshDoc()->rm());
+		return;
+	}
+
+	if (ar == MLXMLElNames::fixedRasterArity)
+	{
+	// TO DO!!!!!! I have to add RasterType in order to understand which are the parameters working on Raster!!!
+
+	//	//I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
+	//	MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
+	//	for(int ii = 0;ii < params.size();++ii)
+	//	{
+	//		if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
+	//		{
+	//			try
+	//			{
+	//				MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
+	//				if (tmp != NULL)
+	//					meshDoc()->renderState().add(tmp->id(),tmp->cm);
+	//			}
+	//			catch (ExpressionHasNotThisTypeException& e)
+	//			{
+	//				QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
+	//				meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+	//			}
+	//		}
+	//	}
+		return;
+	}
+
+	//In this case I can only copy all the meshes in the document!
+	if (ar == MLXMLElNames::variableRasterArity)
+	{
+		for(int ii = 0;meshDoc()->rasterList.size();++ii)
+			if (meshDoc()->rasterList[ii] != NULL)
+				meshDoc()->renderState().add(meshDoc()->rasterList[ii]->id(),*meshDoc()->rasterList[ii]);
+		return;
+	}
+}
+
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool /*isPreview*/)
+{
+	if (mfc == NULL)
+		return;
+	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
+	bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
+	bool filtercpp = (iFilter != NULL) && (!jscode);
+	initDocumentMeshRenderState(mfc,env);
+	initDocumentRasterRenderState(mfc,env);
+
+	QString fname = mfc->act->text();
 	qb->show();
 	if (filtercpp)
 		iFilter->setLog(&meshDoc()->Log);
@@ -1786,7 +1852,7 @@ bool MainWindow::importRaster(const QString& fileImg)
       this->meshDoc()->setBusy(true);
             RasterModel *rm= meshDoc()->addNewRaster();
 			rm->setLabel(fileImg);
-			rm->addPlane(new Plane(rm,fileName,QString("")));		
+			rm->addPlane(new Plane(fileName,QString("")));		
 			meshDoc()->setBusy(false);
 
 /// Intrinsics extraction from EXIF

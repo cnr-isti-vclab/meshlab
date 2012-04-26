@@ -753,6 +753,7 @@ public:
 	RichParameterSet curParSet;
 	RichParameterSet prevParSet;
 	bool validcache;
+
 };
 
 //QWidget* parent parameter says to the class who will destroy the MeshLabWidget object that it had created

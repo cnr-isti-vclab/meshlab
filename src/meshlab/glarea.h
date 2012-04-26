@@ -142,6 +142,9 @@ public slots:
 	void resetTrackBall();
 	void showRaster(bool resetViewFlag);
 
+	//current raster will be reloaded and repaint function will be called
+	void completeUpdateRequested();
+
 	//slots for changing the draw rendering and texturing mode
 	void setDrawMode(vcg::GLW::DrawMode mode); 
 	void setColorMode(vcg::GLW::ColorMode mode);

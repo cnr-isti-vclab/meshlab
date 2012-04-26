@@ -34,6 +34,7 @@
 #include <QMdiArea>
 #include <QStringList>
 #include <QColorDialog>
+#include <QHttp>
 #include "../common/pluginmanager.h"
 #include "../common/scriptinterface.h"
 #include "glarea.h"
@@ -204,6 +205,9 @@ private:
   void saveRecentFileList(const QString &fileName);
 	void saveRecentProjectList(const QString &projName);
 	void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
+
+	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc,EnvWrap &env );
+	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env );
 
 	QHttp *httpReq;
 	QBuffer myLocalBuf;

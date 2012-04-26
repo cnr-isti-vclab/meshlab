@@ -87,7 +87,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	connect(this->md(), SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
 	connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
 	connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
-	connect(this->md(),SIGNAL(meshUpdated()),this,SLOT(update()));
+	connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -285,6 +285,8 @@ void GLArea::drawLight()
 
 void GLArea::paintEvent(QPaintEvent */*event*/)
 {
+	int static count = 0;
+	++count;
 	if (mvc() == NULL)
 		return;
 	QPainter painter(this);
@@ -348,7 +350,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 				mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
 				if(meshVisibilityMap[mp->id()])
 				{
-					if (!md()->renderState().isMeshInRenderingState(id))
+					if (!md()->renderState().isEntityInRenderingState(id,MeshLabRenderState::MESH))
 						mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 			}
@@ -388,7 +390,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	glPopMatrix(); // We restore the state to immediately before the trackball
 
 	//If it is a raster viewer draw the image as a texture
-	if(isRaster()) drawTarget();
+	if(isRaster()) 
+		drawTarget();
 
 	// Double click move picked point to center
 	// It has to be done in the before trackball space (we MOVE the trackball itself...)
@@ -1295,7 +1298,8 @@ void GLArea::showRaster(bool resetViewFlag)
 void GLArea::loadRaster(int id)
 {
 	foreach(RasterModel *rm, this->md()->rasterList)
-		if(rm->id()==id){
+		if(rm->id()==id)
+		{
 			this->md()->setCurrentRaster(id);
 			setTarget(rm->currentPlane->image);
 			//load his shot or a default shot
@@ -1320,7 +1324,8 @@ void GLArea::loadRaster(int id)
 		}
 }
 
-void GLArea::drawTarget() {
+void GLArea::drawTarget() 
+{
 	if(!targetTex) return;
 
 	if(this->md()->rm()==0) return;
@@ -1758,4 +1763,13 @@ bool GLArea::showInterruptButton() const
 void GLArea::showInterruptButton( const bool& show )
 {
 	interrbutshow = show;
+}
+
+void GLArea::completeUpdateRequested()
+{
+	if ((this->md() != NULL) && (this->md()->rm() != NULL))
+		loadRaster(this->md()->rm()->id());
+	//if (md()->mm() != NULL)
+	//	trackball.center = md()->mm()->cm.bbox.Center();
+	update();
 }

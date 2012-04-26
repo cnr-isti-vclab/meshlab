@@ -1071,9 +1071,6 @@ XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& 
 }
 
 
-
-
-
 XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
@@ -1133,7 +1130,7 @@ QString XMLShotWidget::getWidgetExpression()
 	vcg::Point2i vw = curShot.Intrinsics.ViewportPx;
 	vcg::Point2f dist = curShot.Intrinsics.DistorCenterPx;
 	float* k = curShot.Intrinsics.k;
-	QString ms = "new Shot([";
+	QString ms = "new " + MLXMLElNames::shotType + "([";
 	for(int ii = 0;ii < 4;++ii)
 		for(int jj = 0;jj < 4;++jj)
 			ms = ms + QString::number(m[ii][jj]) + ",";
