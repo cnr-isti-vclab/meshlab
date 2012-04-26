@@ -3,7 +3,9 @@ include (../general.pri)
 DESTDIR = ../distrib
 EXIF_DIR = ../external/jhead-2.95
 
-INCLUDEPATH *= ../.. \
+INCLUDEPATH *= . \
+	.. \
+	../.. \
     $$VCGDIR \
     $$GLEWDIR/include \
 	$$EXIF_DIR
@@ -109,10 +111,6 @@ win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
 # macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
 # macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
-INCLUDEPATH += . \
-    .. \
-    ../../../vcglib \
-    $$GLEWDIR/include
 CONFIG += stl
 
 macx:LIBS		+= -L../external/lib/macx -ljhead ../common/libcommon.dylib
