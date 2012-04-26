@@ -41,6 +41,7 @@
    <xs:attribute name='filterPre' type='xs:string' use='required'/>
    <xs:attribute name='filterPost' type='xs:string' use='required'/>
    <xs:attribute name='filterArity' type='ArityType' use='required'/>
+   <xs:attribute name='filterRasterArity' type='ArityRasterType' use='required'/>
    <xs:attribute name='filterIsInterruptible' type='xs:string' use='required'/>
   </xs:complexType>
 
@@ -79,7 +80,7 @@
 	  <xs:pattern value='Vec3'/>
 	  <xs:pattern value='Color'/>
 	  <xs:pattern value='Mesh'/>
-	  <xs:pattern value='Shot'/>
+	  <xs:pattern value='CameraShot'/>
 	  <xs:pattern value='Enum \{(\s*\S+(\s*\S*)*\s*\:\s*\d+\s*(\|)?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
@@ -156,6 +157,16 @@
  <xs:simpleType name="ArityType">
   <xs:restriction base="xs:string">
     <xs:enumeration value="SingleMesh"/>
+    <xs:enumeration value="Fixed"/>
+    <xs:enumeration value="Variable"/>
+	<xs:enumeration value="FunctionDefined"/>
+  </xs:restriction>
+ </xs:simpleType>
+
+ <xs:simpleType name="ArityRasterType">
+  <xs:restriction base="xs:string">
+	<xs:enumeration value="NoRaster"/>
+    <xs:enumeration value="SingleRaster"/>
     <xs:enumeration value="Fixed"/>
     <xs:enumeration value="Variable"/>
 	<xs:enumeration value="FunctionDefined"/>
