@@ -75,10 +75,10 @@ signals:
 private slots:
   GLArea* newProject(const QString& projName = QString());
   void saveProject();
-  bool importRaster(const QString& fileImg = QString());
 
 public slots:
   bool importMesh(QString fileName=QString());
+  bool importRaster(const QString& fileImg = QString());
   bool openProject(QString fileName=QString());
   bool appendProject(QString fileName=QString());
   void updateCustomSettings();

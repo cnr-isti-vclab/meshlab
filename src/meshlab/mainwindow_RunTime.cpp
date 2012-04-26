@@ -1860,18 +1860,14 @@ bool MainWindow::importRaster(const QString& fileImg)
 /// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
 
 		::ResetJpgfile();
-		QFile img(fileName);
-		img.open(QIODevice::ReadWrite);
-		int FileDescriptor = img.handle();
-		FILE* pFile = fdopen(FileDescriptor, "rb");
-		
+		FILE * pFile = fopen(qPrintable(fileName), "rb");
 
-        int ret = ::ReadJpegSections (pFile, READ_METADATA);
-		img.close();
+    int ret = ::ReadJpegSections (pFile, READ_METADATA);
+    fclose(pFile);
 		if (!ret || (ImageInfo.CCDWidth==0.0f && ImageInfo.FocalLength35mmEquiv==0.0f))
 		{
 			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
-		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
+      rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
 			rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
 			rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
 			rm->shot.Intrinsics.FocalMm = 50.0f;
@@ -1879,7 +1875,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 		else if (ImageInfo.CCDWidth!=0)
 		{
 			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+      rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
 			float ratio;
 			if (ImageInfo.Width>ImageInfo.Height)
 				ratio=(float)ImageInfo.Width/(float)ImageInfo.Height;
@@ -1892,7 +1888,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 		else
 		{
 			rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-		    rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+      rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
 			float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLength35mmEquiv;
 			rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.Width;
 			rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.Height;
@@ -2285,7 +2281,6 @@ bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
 
 bool MainWindow::saveSnapshot()
 {
-
 	SaveSnapshotDialog dialog(this);
 
   dialog.setValues(GLA()->ss);
@@ -2294,6 +2289,18 @@ bool MainWindow::saveSnapshot()
 	{
     GLA()->ss=dialog.getValues();
     GLA()->saveSnapshot();
+
+    // if user ask to add the snapshot to raster layers
+    /*
+    if(dialog.addToRasters())
+    {
+      QString savedfile = QString("%1/%2%3.png")
+        .arg(GLA()->ss.outdir).arg(GLA()->ss.basename)
+        .arg(GLA()->ss.counter,2,10,QChar('0'));
+			
+      importRaster(savedfile);
+    }
+*/
 		return true;
 	}
 

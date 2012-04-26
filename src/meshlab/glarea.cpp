@@ -210,8 +210,28 @@ void GLArea::pasteTile()
 			if(!ss.tiledSave)
 			{
 				bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
-				if (ret) log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-				else log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+				if (ret) 
+        {
+          log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+          if(ss.addToRasters)
+          {
+            mw()->importRaster(outfile);
+            
+            RasterModel *rastm = md()->rm();
+            rastm->shot = shotFromTrackball().first;
+       			float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
+      			rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
+			      rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
+			      rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+			      rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+			      rastm->shot.Intrinsics.CenterPx[0]=(int)((float)rastm->shot.Intrinsics.ViewportPx[0]/2.0);
+			      rastm->shot.Intrinsics.CenterPx[1]=(int)((float)rastm->shot.Intrinsics.ViewportPx[1]/2.0);
+          }
+        }
+				else
+        {
+          log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+        }
 			}
 			takeSnapTile=false;
 			snapBuffer=QImage();

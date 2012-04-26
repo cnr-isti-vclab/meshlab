@@ -56,6 +56,7 @@ public:
   bool transparentBackground;
   bool snapAllLayers;
   bool tiledSave; // if true all the tiles are saved as separated files and not joined.
+  bool addToRasters;
 		
 	SnapshotSetting()
 	{
@@ -66,6 +67,7 @@ public:
     transparentBackground=true;
     snapAllLayers=false;
     tiledSave=false;
+    addToRasters=false;
 	};
 };
 

@@ -38,7 +38,7 @@ void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
 {
 	settings=ss;
 	ui->baseNameLineEdit->setText(settings.basename);
-    ui->outDirLineEdit->setText(settings.outdir);
+  ui->outDirLineEdit->setText(settings.outdir);
 	ui->resolutionSpinBox->setValue(settings.resolution);
 	ui->counterSpinBox->setValue(settings.counter);		
 }
@@ -52,6 +52,7 @@ SnapshotSetting SaveSnapshotDialog::getValues()
   settings.transparentBackground=ui->backgroundCheckBox->isChecked();
   settings.snapAllLayers=ui->alllayersCheckBox->isChecked();
   settings.tiledSave=ui->tiledSaveCheckBox->isChecked();
+  settings.addToRasters=ui->addToRastersCheckBox->isChecked();
 	return settings;
 }
 
