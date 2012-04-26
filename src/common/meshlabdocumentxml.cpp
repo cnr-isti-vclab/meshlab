@@ -106,7 +106,7 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 						QFileInfo fi(filen);
 						QString sem = el.attribute("semantic");
 						QString nm = fi.absoluteFilePath();
-						md.rm()->addPlane(new Plane(md.rm(),fi.absoluteFilePath(),sem));
+						md.rm()->addPlane(new Plane(fi.absoluteFilePath(),sem));
 						el = node.nextSiblingElement("Plane");
 					}	
 					raster=raster.nextSibling();
@@ -135,14 +135,14 @@ QDomElement RasterModelToXML(RasterModel *mp,QDomDocument &doc)
   rasterElem.setAttribute("label",mp->label());
   rasterElem.appendChild(WriteShotToQDomNode(mp->shot,doc));
   for(int ii = 0;ii < mp->planeList.size();++ii)
-	rasterElem.appendChild(PlaneToXML(mp->planeList[ii],doc));
+	rasterElem.appendChild(PlaneToXML(mp->planeList[ii],mp->par->pathName(),doc));
   return rasterElem;
 }
 
-QDomElement PlaneToXML(Plane* pl,QDomDocument& doc)
+QDomElement PlaneToXML(Plane* pl,const QString& basePath,QDomDocument& doc)
 {
 	QDomElement planeElem = doc.createElement("Plane");
-	QDir dir(pl->parent->par->pathName());
+	QDir dir(basePath);
 	planeElem.setAttribute("fileName",dir.relativeFilePath(pl->fullPathFileName));
 	planeElem.setAttribute("semantic",pl->semantic);
 	return planeElem;

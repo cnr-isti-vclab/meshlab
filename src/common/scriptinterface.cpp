@@ -844,9 +844,9 @@ Env::Env()
 	globalObject().setProperty("VCGPoint3", point_ctor);
 	//qScriptRegisterMetaType(this,Point3fToScriptValue,Point3fFromScriptValue);
 	QScriptValue shot_ctor = newFunction(ShotSI_ctor);
-	globalObject().setProperty("Shot", shot_ctor);
+	globalObject().setProperty(MLXMLElNames::shotType, shot_ctor);
 	QScriptValue shot_defctor = newFunction(ShotSI_defctor);
-	globalObject().setProperty("ShotDefCtor", shot_defctor);
+	globalObject().setProperty(MLXMLElNames::shotType + "DefCtor", shot_defctor);
 }
 
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )

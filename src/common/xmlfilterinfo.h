@@ -86,6 +86,7 @@ namespace MLXMLElNames
 	const QString filterPreCond("filterPre");
 	const QString filterPostCond("filterPost");
 	const QString filterArity("filterArity");
+	const QString filterRasterArity("filterRasterArity");
 	const QString filterIsInterruptible("filterIsInterruptible");
 
 	//filterHelp == name to access to the value of FILTER_HELP inside the Map produced by the XMLFilterInfo 
@@ -112,13 +113,20 @@ namespace MLXMLElNames
 	const QString colorType("Color");
 	const QString enumType("Enum");
 	const QString meshType("Mesh");
-	const QString shotType("Shot");
+	const QString shotType("CameraShot");
 
 	//ariety values
 	const QString singleMeshArity("SingleMesh");
 	const QString fixedArity("Fixed");
 	const QString variableArity("Variable");
 	const QString functionDefinedArity("FunctionDefined");
+
+	//raster ariety values
+	const QString zeroRasterArity("NoRaster");
+	const QString singleRasterArity("SingleRaster");
+	const QString fixedRasterArity("Fixed");
+	const QString variableRasterArity("Variable");
+	const QString functionDefinedRasterArity("FunctionDefined");
 
 	void initMLXMLTypeList(QStringList& ls);
 	void initMLXMLGUITypeList(QStringList& ls);

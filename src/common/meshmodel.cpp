@@ -269,12 +269,23 @@ bool MeshDocument::hasBeenModified()
 	return false;
 }
 
-void MeshDocument::updateRenderMesh( MeshModel& mm,const int updatemask)
+void MeshDocument::updateRenderState(QList<MeshModel*>& mm,const int meshupdatemask,const QList<RasterModel*>& rm,const int rasterupdatemask)
 {
-  static QTime currTime;
-  if(currTime.elapsed()< 100) return;
-	renderState().updateMesh(mm.id(),mm.cm,updatemask);
-	emit meshUpdated();
+	static QTime currTime;
+	if(currTime.elapsed()< 100) 
+		return;
+	for (QList<MeshModel*>::iterator mit = mm.begin();mit != mm.end();++mit)
+	{
+		if (*mit != NULL)
+			renderState().update((*mit)->id(),(*mit)->cm,meshupdatemask);
+	}
+    for (QList<RasterModel*>::const_iterator rit = rm.begin();rit != rm.end();++rit)
+	{
+		if (*rit != NULL)
+			renderState().update((*rit)->id(),(**rit),rasterupdatemask);
+	}
+	if (((mm.size() > 0) && !(meshupdatemask & MeshModel::MM_NONE)) || (rm.size() > 0 && !(rasterupdatemask & RasterModel::RM_NONE)))
+		emit documentUpdated();
 	currTime.start();
 }
 
@@ -352,25 +363,64 @@ int MeshModel::io2mm(int single_iobit)
 	} ;
 }
 
-Plane::Plane(RasterModel *_parent, const QString pathName, const QString _semantic){
-	parent = _parent;
+Plane::Plane(const Plane& pl)
+{
+	semantic = pl.semantic;
+	fullPathFileName = pl.fullPathFileName;
+	image = QImage(pl.image);
+}
+
+Plane::Plane(const QString pathName, const QString _semantic)
+{
 	semantic =_semantic;
 	fullPathFileName = pathName;
 
 	image = QImage(pathName);
 }
 
-RasterModel::RasterModel(MeshDocument *parent, QString _rasterName) {
+RasterModel::RasterModel(MeshDocument *parent, QString _rasterName)
+: MeshLabRenderRaster() 
+{
   _id=parent->newRasterId(); 
   par = parent;
   this->_label= _rasterName;
   visible=true;
 }
 
-void RasterModel::addPlane(Plane *plane)
+RasterModel::RasterModel()
+: MeshLabRenderRaster() 
+{
+
+}
+
+
+MeshLabRenderRaster::MeshLabRenderRaster()
+{
+
+}
+
+MeshLabRenderRaster::MeshLabRenderRaster( const MeshLabRenderRaster& rm )
+:shot(rm.shot),planeList()
+{
+	for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)	
+	{
+		planeList.push_back(new Plane(**it));
+		if (rm.currentPlane == *it)
+			currentPlane = planeList[planeList.size() - 1];
+	}
+}
+
+void MeshLabRenderRaster::addPlane(Plane *plane)
 {
 	planeList.append(plane);
 	currentPlane = plane;
+}
+
+MeshLabRenderRaster::~MeshLabRenderRaster()
+{
+	currentPlane = NULL;
+	for(int ii = 0;ii < planeList.size();++ii)
+		delete planeList[ii];
 }
 
 void MeshModelState::create(int _mask, MeshModel* _m)
@@ -717,7 +767,7 @@ MeshLabRenderMesh::~MeshLabRenderMesh()
 }
 
 MeshLabRenderState::MeshLabRenderState()
-:_rendermap(),_mutdoc(QReadWriteLock::Recursive)
+:_meshmap(),_meshmut(QReadWriteLock::Recursive),_rastermut(QReadWriteLock::Recursive)
 {
 
 }
@@ -727,11 +777,13 @@ MeshLabRenderState::~MeshLabRenderState()
 	clearState();
 }
 
-bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattributesmask)
+bool MeshLabRenderState::update(const int id,CMeshO& mm,const int updateattributesmask)
 {
-	acquireRenderDocumentWrite();
-	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.find(id);
-	if (it != _rendermap.end())
+	if (updateattributesmask & MeshModel::MM_NONE)
+		return false;
+	lockRenderState(MESH,WRITE);
+	QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.find(id);
+	if (it != _meshmap.end())
 	{
 		MeshLabRenderMesh* rm = *it;
 
@@ -744,9 +796,9 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 			!(updateattributesmask & MeshModel::MM_TRANSFMATRIX) &
 			!(updateattributesmask & MeshModel::MM_CAMERA))
 		{
-			removeMesh(it);
-			_rendermap[id] = new MeshLabRenderMesh(mm);
-			releaseRenderDocument();
+			remove(it);
+			_meshmap[id] = new MeshLabRenderMesh(mm);
+			unlockRenderState(MESH);
 			return true;
 		}
 
@@ -754,7 +806,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{		
 			if(mm.vert.size() != (rm->cm.vert.size())) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			else
@@ -770,7 +822,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{
 			if(mm.vert.size() != (rm->cm.vert.size())) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			else
@@ -786,7 +838,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{
 			if(mm.vert.size() != (rm->cm.vert.size())) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			else
@@ -802,7 +854,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{
 			if(mm.vert.size() != (rm->cm.vert.size())) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			else
@@ -818,7 +870,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{
 			if(mm.face.size() != rm->cm.face.size()) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			CMeshO::FaceIterator rmfi = rm->cm.face.begin();
@@ -836,7 +888,7 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 		{
 			if(mm.vert.size() != (rm->cm.vert.size())) 
 			{
-				releaseRenderDocument();
+				unlockRenderState(MESH);
 				return false;
 			}
 			else
@@ -857,45 +909,50 @@ bool MeshLabRenderState::updateMesh(const int id,CMeshO& mm,const int updateattr
 			rm->cm.Tr = mm.Tr;
 		if(updateattributesmask & MeshModel::MM_CAMERA)
 			rm->cm.shot = mm.shot;
-		releaseRenderDocument();
+		unlockRenderState(MESH);
 		return true;
 	}
-	releaseRenderDocument();
+	unlockRenderState(MESH);
 	return false;
 }
 
-void MeshLabRenderState::addMesh(const int id,CMeshO& mm )
+void MeshLabRenderState::add(const int id,CMeshO& mm )
 {
-	acquireRenderDocumentWrite();
-	if (!_rendermap.contains(id))
+	lockRenderState(MESH,WRITE);
+	if (!_meshmap.contains(id))
 	{
-		_rendermap[id] = new MeshLabRenderMesh(mm);
+		_meshmap[id] = new MeshLabRenderMesh(mm);
 	}
-	releaseRenderDocument();
+	unlockRenderState(MESH);
 }
 
-QMap<int,MeshLabRenderMesh*>::iterator MeshLabRenderState::removeMesh(QMap<int,MeshLabRenderMesh*>::iterator it )
+QMap<int,MeshLabRenderMesh*>::iterator MeshLabRenderState::remove(QMap<int,MeshLabRenderMesh*>::iterator it )
 {	
-	acquireRenderDocumentWrite();
-	if (it != _rendermap.end())
+	lockRenderState(MESH,WRITE);
+	if (it != _meshmap.end())
 	{
 		MeshLabRenderMesh* tmp = it.value();
 		delete tmp;
-		QMap<int,MeshLabRenderMesh*>::iterator tmpit = _rendermap.erase(it);
-		releaseRenderDocument();
+		QMap<int,MeshLabRenderMesh*>::iterator tmpit = _meshmap.erase(it);
+		unlockRenderState(MESH);
 		return tmpit;
 	}
-	releaseRenderDocument();
-	return _rendermap.end();
+	unlockRenderState(MESH);
+	return _meshmap.end();
 }
 
 void MeshLabRenderState::clearState()
 {
-	acquireRenderDocumentWrite();
-	QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.begin();
-	while(it != _rendermap.end())
-		it = removeMesh(it);
-	releaseRenderDocument();
+	lockRenderState(MESH,WRITE);
+	QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();
+	while(it != _meshmap.end())
+		it = remove(it);
+	unlockRenderState(MESH);
+	lockRenderState(RASTER,WRITE);
+	QMap<int,MeshLabRenderRaster*>::iterator itr = _rastermap.begin();
+	while(itr != _rastermap.end())
+		itr = remove(itr);
+	unlockRenderState(RASTER);
 }
 
 void MeshLabRenderState::copyBack( const int id,CMeshO& mm ) const
@@ -908,24 +965,131 @@ void MeshLabRenderState::copyBack( const int id,CMeshO& mm ) const
 
 void MeshLabRenderState::render( const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
 {
-	acquireRenderDocumentRead();
-	_rendermap[id]->render(dm,cm,tm);
-	releaseRenderDocument();
+	lockRenderState(MESH,READ);
+	_meshmap[id]->render(dm,cm,tm);
+	unlockRenderState(MESH);
 }
 
 void MeshLabRenderState::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
 {
-	acquireRenderDocumentRead();
-	for(QMap<int,MeshLabRenderMesh*>::iterator it = _rendermap.begin();it != _rendermap.end();++it)
+	lockRenderState(MESH,READ);
+	for(QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();it != _meshmap.end();++it)
 		(*it)->render(dm,cm,tm);
-	releaseRenderDocument();
+	unlockRenderState(MESH);
 }
 
-bool MeshLabRenderState::isMeshInRenderingState( const int id )
+bool MeshLabRenderState::isEntityInRenderingState( const int id,const MESHLAB_RENDER_ENTITY ent)
 {
 	bool found = false;
-	acquireRenderDocumentRead();
-	found = _rendermap.contains(id);
-	releaseRenderDocument();
+	switch(ent)
+	{
+		case (MESH):
+		{
+			lockRenderState(MESH,READ);
+			found = _meshmap.contains(id);
+			unlockRenderState(MESH);
+		}
+
+		case (RASTER):
+		{
+			lockRenderState(RASTER,READ);
+			found = _meshmap.contains(id);
+			unlockRenderState(RASTER);
+		}	
+	}
 	return found;
+}
+
+void MeshLabRenderState::add( const int id,const MeshLabRenderRaster& rm )
+{
+	lockRenderState(RASTER,WRITE);
+	if (!_rastermap.contains(id))
+	{
+		_rastermap[id] = new MeshLabRenderRaster(rm);
+	}
+	unlockRenderState(RASTER);
+}
+
+bool MeshLabRenderState::update( const int id,const MeshLabRenderRaster& rm,const int updateattributesmask)
+{
+	if (updateattributesmask & RasterModel::RM_NONE)
+		return false;
+	lockRenderState(RASTER,WRITE);
+	QMap<int,MeshLabRenderRaster*>::iterator it = _rastermap.find(id);
+	if (it != _rastermap.end())
+	{
+		MeshLabRenderRaster* rrst = *it;
+		remove(it);
+		_rastermap[id] = new MeshLabRenderRaster(rm);
+		unlockRenderState(RASTER);
+		return true;
+	}
+	unlockRenderState(RASTER);
+	return false;
+}
+
+QMap<int,MeshLabRenderRaster*>::iterator MeshLabRenderState::remove( QMap<int,MeshLabRenderRaster*>::iterator it )
+{
+	lockRenderState(RASTER,WRITE);
+	if (it != _rastermap.end())
+	{
+		MeshLabRenderRaster* tmp = it.value();
+		delete tmp;
+		QMap<int,MeshLabRenderRaster*>::iterator tmpit = _rastermap.erase(it);
+		unlockRenderState(RASTER);
+		return tmpit;
+	}
+	unlockRenderState(RASTER);
+	return _rastermap.end();
+}
+
+void MeshLabRenderState::lockRenderState( const MESHLAB_RENDER_ENTITY ent,const MESHLAB_RENDER_STATE_ACTION act )
+{
+	switch(ent)
+	{
+		case (MESH):
+		{
+			lockReadOrWrite(_meshmut,act);
+			break;
+		}
+		case (RASTER):
+		{
+			lockReadOrWrite(_rastermut,act);
+			break;
+		}
+	}
+}
+
+void MeshLabRenderState::unlockRenderState( const MESHLAB_RENDER_ENTITY ent )
+{
+	switch(ent)
+	{
+		case (MESH):
+		{
+			_meshmut.unlock();
+			break;
+		}
+		case (RASTER):
+		{
+			_rastermut.unlock();
+			break;
+		}
+	}
+}
+
+void MeshLabRenderState::lockReadOrWrite( QReadWriteLock& mutex,const MESHLAB_RENDER_STATE_ACTION act )
+{
+	switch(act)
+	{
+		case (READ):
+		{
+			mutex.lockForRead();
+			break;
+		}
+		case (WRITE):
+		{
+			mutex.lockForWrite();
+			break;
+		}
+	}
 }
