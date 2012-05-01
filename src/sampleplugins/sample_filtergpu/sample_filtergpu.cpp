@@ -22,12 +22,14 @@
 ****************************************************************************/
 
 #include "sample_filtergpu.h"
-#include <QGLFramebufferObject>
+#include <wrap/glw/glw.h>
 #include <QImage>
 
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+
+using namespace glw;
 
 ExtraSampleGPUPlugin::ExtraSampleGPUPlugin() 
 { 
@@ -79,15 +81,18 @@ ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst) 
 {
-	switch(ID(action))	 
+	(void)m;
+
+	switch(ID(action))
 	{
 		case FP_GPU_EXAMPLE :
 		{
-			QColor col(100,50,240);
-			parlst.addParam(new RichColor ("ClearColor",col,"Clear Color","Color used to clear the gl color buffer."));
-			parlst.addParam(new RichBool ("LogFBOBuffer",false,"Log FBOBuffer","Produce a log of the current FBO status in the Layer Log window."));
+			parlst.addParam(new RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
+			parlst.addParam(new RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
+			parlst.addParam(new RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
+			parlst.addParam(new RichSaveFile ("ImageFileName",        "gpu_generated_image.png", "*.png", "Image File Name",        "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0); 
@@ -96,29 +101,159 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument &/*md*/, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
 	switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE :
+		case FP_GPU_EXAMPLE:
 		{
-			glContext->makeCurrent();
-			QSize fbosize(4,4);
-			QGLFramebufferObject fbo(fbosize);
-			QColor clcolor = par.getColor("ClearColor");
-			fbo.bind();
-			glClearColor(clcolor.redF(),clcolor.greenF(),clcolor.blueF(),1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			fbo.release();
-			if (par.getBool("LogFBOBuffer"))
-			{
-				QImage img(fbo.toImage());
+			CMeshO & mesh = md.mm()->cm;
+			if ((mesh.vn < 3) || (mesh.fn < 1)) return false;
 
-				for(int ii = 0; ii < fbosize.height() * fbosize.width();++ii)
-					this->Log("Pixel[%d][%d] = [%f,%f,%f]",ii / fbosize.height(),ii % fbosize.height(),clcolor.redF(),clcolor.greenF(),clcolor.blueF());
-					
+			const unsigned char * p0      = (const unsigned char *)(&(mesh.vert[0].P()));
+			const unsigned char * p1      = (const unsigned char *)(&(mesh.vert[1].P()));
+			const void *          pbase   = p0;
+			GLsizei               pstride = GLsizei(p1 - p0);
+
+			const unsigned char * n0      = (const unsigned char *)(&(mesh.vert[0].N()));
+			const unsigned char * n1      = (const unsigned char *)(&(mesh.vert[1].N()));
+			const void *          nbase   = n0;
+			GLsizei               nstride = GLsizei(n1 - n0);
+
+			glContext->makeCurrent();
+			glewInit();
+
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+			Context ctx;
+			ctx.acquire();
+
+			const GLsizeiptr psize = GLsizeiptr(GLsizei(mesh.vn) * pstride);
+			BufferHandle hPositionBuffer = createBuffer(ctx, psize, pbase);
+
+			const GLsizeiptr nsize = GLsizeiptr(GLsizei(mesh.vn) * nstride);
+			BufferHandle hNormalBuffer = createBuffer(ctx, nsize, nbase);
+
+			const GLsizeiptr isize = GLsizeiptr(mesh.fn * 3 * sizeof(GLuint));
+			BufferHandle hIndexBuffer = createBuffer(ctx, isize);
+
+			{
+				BoundBuffer indexBuffer = ctx.bindIndexBuffer(hIndexBuffer);
+
+				const CMeshO::VertexType * vbase   = &(mesh.vert[0]);
+				GLuint *                   indices = (GLuint *)indexBuffer->map(GL_WRITE_ONLY);
+				for (size_t i=0; i<mesh.face.size(); ++i)
+				{
+					const CMeshO::FaceType & f = mesh.face[i];
+					if (f.IsD()) continue;
+					for (int v=0; v<3; ++v)
+					{
+						*indices++ = GLuint(f.V(v) - vbase);
+					}
+				}
+				indexBuffer->unmap();
+
+				ctx.unbindIndexBuffer();
 			}
+
+			const GLsizei width  = GLsizei(par.getInt("ImageWidth" ));
+			const GLsizei height = GLsizei(par.getInt("ImageHeight"));
+
+			RenderbufferHandle hDepth       = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, width, height);
+			Texture2DHandle    hColor       = createTexture2D(ctx, GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+			FramebufferHandle  hFramebuffer = createFramebuffer(ctx, renderbufferTarget(hDepth), texture2DTarget(hColor));
+
+			const std::string vertSrc = GLW_STRINGFY
+			(
+				varying vec3 vNormalVS;
+				void main(void)
+				{
+					vNormalVS   = gl_NormalMatrix * gl_Normal;
+					gl_Position = ftransform();
+				}
+			);
+
+			const std::string fragSrc = GLW_STRINGFY
+			(
+				uniform vec3 uLightDirectionVS;
+				varying vec3 vNormalVS;
+				void main(void)
+				{
+					vec3  normal  = normalize(vNormalVS);
+					float lambert = max(0.0, dot(normal, -uLightDirectionVS));
+					gl_FragColor  = vec4(vec3(lambert), 1.0);
+				}
+			);
+
+			ProgramHandle hProgram = createProgram(ctx, "", vertSrc, fragSrc);
+			GLW_ASSERT(hProgram->isLinked());
+
+			const QColor       backgroundColor  = par.getColor("ImageBackgroundColor");
+			const vcg::Point3f lightDirectionVS = vcg::Point3f(0.0f, 0.0f, -1.0f).Normalize();
+
+			glEnable(GL_DEPTH_TEST);
+			glClearColor(GLfloat(backgroundColor.red())/255.0f, GLfloat(backgroundColor.green())/255.0f, GLfloat(backgroundColor.blue())/255.0f, 0.0f);
+
+			glViewport(0, 0, width, height);
+
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			gluPerspective(50.0f, float(width) / float(height), 0.1f, 2.0f);
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+			gluLookAt(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
+			const vcg::Point3f center = mesh.bbox.Center();
+			const float        scale  = 1.0f / mesh.bbox.Diag();
+
+			glScalef(scale, scale, scale);
+			glTranslatef(-center[0], -center[1], -center[2]);
+
+			QImage image(int(width), int(height), QImage::Format_ARGB32);
+
+			ctx.bindFramebuffer(hFramebuffer);
+				GLW_CHECK_GL_FRAMEBUFFER_STATUS;
+
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				BoundProgram program = ctx.bindProgram(hProgram);
+					program->setUniform("uLightDirectionVS", lightDirectionVS[0], lightDirectionVS[1], lightDirectionVS[2]);
+
+					glEnableClientState(GL_VERTEX_ARRAY);
+					ctx.bindVertexBuffer(hPositionBuffer);
+					glVertexPointer(3, GL_FLOAT, pstride, 0);
+
+					glEnableClientState(GL_NORMAL_ARRAY);
+					ctx.bindVertexBuffer(hNormalBuffer);
+					glNormalPointer(GL_FLOAT, nstride, 0);
+
+					ctx.unbindVertexBuffer();
+
+					ctx.bindIndexBuffer(hIndexBuffer);
+					glDrawElements(GL_TRIANGLES, GLsizei(mesh.fn * 3), GL_UNSIGNED_INT, 0);
+					ctx.unbindIndexBuffer();
+
+					glDisableClientState(GL_VERTEX_ARRAY);
+					glDisableClientState(GL_NORMAL_ARRAY);
+				ctx.unbindProgram();
+
+				glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+			ctx.unbindFramebuffer();
+
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+
+			glMatrixMode(GL_MODELVIEW);
+			glPopMatrix();
+
+			ctx.release();
+			glPopAttrib();
 			glContext->doneCurrent();
+
+			image.rgbSwapped().mirrored().save(par.getSaveFileName("ImageFileName"));
+
 			break;
 		}
 	}
