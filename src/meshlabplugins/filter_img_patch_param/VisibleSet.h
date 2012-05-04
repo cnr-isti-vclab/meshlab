@@ -28,6 +28,7 @@
 
 
 #include <common/meshmodel.h>
+#include <wrap/glw/glw.h>
 
 
 class VisibleSet
@@ -77,7 +78,10 @@ private:
     inline int          id( const CFaceO& f ) const                         { return &f - &m_Mesh.face[0]; }
 
 public:
-    VisibleSet( CMeshO &mesh, QList<RasterModel*> &rasterList, int weightMask );
+    VisibleSet( glw::Context &ctx,
+                CMeshO &mesh,
+                QList<RasterModel*> &rasterList,
+                int weightMask );
 
     float               getWeight( const RasterModel *rm, CFaceO &f );
 

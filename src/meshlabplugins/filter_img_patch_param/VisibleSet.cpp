@@ -29,12 +29,15 @@
 
 
 
-VisibleSet::VisibleSet( CMeshO &mesh, QList<RasterModel*> &rasterList, int weightMask ) :
+VisibleSet::VisibleSet( glw::Context &ctx,
+                        CMeshO &mesh,
+                        QList<RasterModel*> &rasterList,
+                        int weightMask ) :
     m_Mesh(mesh),
     m_FaceVis(mesh.fn),
     m_WeightMask(weightMask)
 {
-    VisibilityCheck &visibility = *VisibilityCheck::GetInstance();
+    VisibilityCheck &visibility = *VisibilityCheck::GetInstance( ctx );
     visibility.setMesh( &mesh );
 
 

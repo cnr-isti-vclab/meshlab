@@ -32,6 +32,7 @@
 #include <vcg/math/similarity2.h>
 #include "GPU/GPU.h"
 #include "Patch.h"
+#include <wrap/glw/glw.h>
 class VisibleSet;
 
 
@@ -49,6 +50,7 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
     };
 
     typedef std::set<CFaceO*> NeighbSet;
+	glw::Context        *m_Context;
 
 
     void                getNeighbors( CVertexO *v,
@@ -93,6 +95,7 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
 
 public:
 	FilterImgPatchParamPlugin();
+	~FilterImgPatchParamPlugin();
 
 	virtual QString     filterName( FilterIDType id ) const;
 	virtual QString     filterInfo( FilterIDType id ) const;

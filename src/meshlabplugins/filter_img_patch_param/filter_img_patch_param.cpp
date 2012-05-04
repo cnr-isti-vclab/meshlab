@@ -33,7 +33,7 @@
 
 
 
-FilterImgPatchParamPlugin::FilterImgPatchParamPlugin()
+FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
 {
     typeList << FP_PATCH_PARAM_ONLY
              << FP_PATCH_PARAM_AND_TEXTURING
@@ -42,6 +42,13 @@ FilterImgPatchParamPlugin::FilterImgPatchParamPlugin()
 
 	foreach( FilterIDType tt , types() )
 		actionList << new QAction(filterName(tt), this);
+}
+
+
+FilterImgPatchParamPlugin::~FilterImgPatchParamPlugin()
+{
+    delete m_Context;
+    m_Context = NULL;
 }
 
 
@@ -123,42 +130,42 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
             par.addParam( new RichInt( "textureSize",
                                        1024,
                                        "Texture size",
-                                       "Specifies the dimension of the generated texture") );
+                                       "Specifies the dimension of the generated texture" ) );
             par.addParam( new RichString( "textureName",
                                           "texture.png",
                                           "Texture name",
-                                          "Specifies the name of the file into which the texture image will be saved") );
+                                          "Specifies the name of the file into which the texture image will be saved" ) );
             par.addParam( new RichBool( "colorCorrection",
                                         true,
                                         "Color correction",
-                                        "If true, the final texture is corrected so as to ensure seamless transitions") );
+                                        "If true, the final texture is corrected so as to ensure seamless transitions" ) );
             par.addParam( new RichInt( "colorCorrectionFilterSize",
                                        1,
                                        "Color correction filter",
-                                       "Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments") );
+                                       "Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
         }
         case FP_PATCH_PARAM_ONLY:
 		{
             par.addParam( new RichBool( "useDistanceWeight",
                                         true,
                                         "Use distance weight",
-                                        "Includes a weight accounting for the distance to the camera during the computation of reference images") );
+                                        "Includes a weight accounting for the distance to the camera during the computation of reference images" ) );
             par.addParam( new RichBool( "useImgBorderWeight",
                                         true,
                                         "Use image border weight",
-                                        "Includes a weight accounting for the distance to the image border during the computation of reference images") );
-			      par.addParam(new RichBool ( "useAlphaWeight",
-				                                false,
-				                                "use image alpha weight",
-				                                "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
+                                        "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
+		    par.addParam( new RichBool( "useAlphaWeight",
+				                        false,
+				                        "Use image alpha weight",
+				                        "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
             par.addParam( new RichBool( "cleanIsolatedTriangles",
                                         true,
                                         "Clean isolated triangles",
-                                        "Remove all patches compound of a single triangle by aggregating them to adjacent patches") );
+                                        "Remove all patches compound of a single triangle by aggregating them to adjacent patches" ) );
             par.addParam( new RichBool( "stretchingAllowed",
                                         false,
                                         "UV stretching",
-                                        "If true, texture coordinates are stretched so as to cover the full interval [0,1] for both directions") );
+                                        "If true, texture coordinates are stretched so as to cover the full interval [0,1] for both directions" ) );
             par.addParam( new RichInt( "textureGutter",
                                        4,
                                        "Texture gutter",
@@ -171,7 +178,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
             par.addParam( new RichBool( "normalizeQuality",
                                         false,
                                         "Normalize",
-                                        "Rescale quality values to the range [0,1]") );
+                                        "Rescale quality values to the range [0,1]" ) );
             break;
         }
 	}
@@ -183,9 +190,20 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
-    if( glewInit()!=GLEW_OK || !VisibilityCheck::GetInstance() )
+	glContext->makeCurrent();
+    if( glewInit() != GLEW_OK )
+        return false;
+
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    delete m_Context;
+    m_Context = new glw::Context();
+    m_Context->acquire();
+
+    if( !VisibilityCheck::GetInstance(*m_Context) )
         return false;
     VisibilityCheck::ReleaseInstance();
+
 
 
     bool retValue = true;
@@ -253,7 +271,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 		}
         case FP_RASTER_VERT_COVERAGE:
         {
-            VisibilityCheck &visibility = *VisibilityCheck::GetInstance();
+            VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
             visibility.setMesh( &mesh );
 
             for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
@@ -279,7 +297,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
         }
         case FP_RASTER_FACE_COVERAGE:
         {
-            VisibilityCheck &visibility = *VisibilityCheck::GetInstance();
+            VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
             visibility.setMesh( &mesh );
 
             for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
@@ -313,6 +331,14 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     }
 
     VisibilityCheck::ReleaseInstance();
+
+
+    delete m_Context;
+    m_Context = NULL;
+
+    glPopAttrib();
+    glContext->doneCurrent();
+
 
     return retValue;
 }
@@ -378,7 +404,7 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
 
     // The optimization is a greedy approach that changes the reference image of a face in order to reduce
     // the number of different images adjacent to that face.
-    do
+    while( !toOptim.empty() )
     {
         // Extract a face from the queue.
         CFaceO *f = *toOptim.begin();
@@ -479,7 +505,7 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
                         toOptim.insert( *n );
             }
         }
-    } while( !toOptim.empty() );
+    }
 }
 
 
@@ -766,6 +792,9 @@ void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
             totalArea += p->bbox.Area();
         }
 
+    if( patchRect.empty() )
+        return;
+
     float edgeLen = std::sqrt( totalArea );
 
 
@@ -838,7 +867,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
         weightMask |= VisibleSet::W_IMG_BORDER;
     if( par.getBool("useAlphaWeight") )
         weightMask |= VisibleSet::W_IMG_ALPHA;
-    VisibleSet *faceVis = new VisibleSet( mesh, rasterList, weightMask );
+    VisibleSet *faceVis = new VisibleSet( *m_Context, mesh, rasterList, weightMask );
     Log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
 
 

@@ -184,7 +184,7 @@ void GPU::FrameBuffer::Bind() const
     glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_Id );
 
     if( !m_EnabledBuffers.empty() )
-        glDrawBuffersARB( m_EnabledBuffers.size(), &m_EnabledBuffers.front() );
+        glDrawBuffersARB( (GLsizei) m_EnabledBuffers.size(), &m_EnabledBuffers.front() );
     else
         glDrawBuffersARB( 0, NULL );
 

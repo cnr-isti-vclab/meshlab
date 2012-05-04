@@ -28,7 +28,7 @@
 
 
 #include <common/meshmodel.h>
-#include "GPU/GPU.h"
+#include <wrap/glw/glw.h>
 
 #define USE_VBO
 
@@ -45,17 +45,18 @@ protected:
         V_VISIBLE   ,
     };
 
+    glw::Context                &m_Context;
     CMeshO                      *m_Mesh;
     RasterModel                 *m_Raster;
     std::vector<unsigned char>  m_VertFlag;
 
     static VisibilityCheck      *s_Instance;
 
-    inline                  VisibilityCheck() : m_Mesh(NULL), m_Raster(NULL)        {}
-    virtual                 ~VisibilityCheck()                                      {}
+    inline                  VisibilityCheck( glw::Context &ctx ) : m_Context(ctx), m_Mesh(NULL), m_Raster(NULL) {}
+    virtual                 ~VisibilityCheck()                                                                  {}
 
 public:
-    static VisibilityCheck* GetInstance();
+    static VisibilityCheck* GetInstance( glw::Context &ctx );
     static void             ReleaseInstance();
 
     virtual void            setMesh( CMeshO *mesh )                                 = 0;
@@ -77,22 +78,25 @@ class VisibilityCheck_VMV2002 : public VisibilityCheck
     friend class VisibilityCheck;
 
 private:
-    GPU::FrameBuffer    m_FrameBuffer;
-    vcg::Point2i        m_ViewportMin;
-    vcg::Point2i        m_ViewportMax;
+	glw::RenderbufferHandle m_ColorRB;
+	glw::RenderbufferHandle m_DepthRB;
+	glw::FramebufferHandle  m_FrameBuffer;
+
+    vcg::Point2i            m_ViewportMin;
+    vcg::Point2i            m_ViewportMax;
 
     void        init( std::vector<unsigned char> &visBuffer );
     bool        iteration( std::vector<unsigned char> &visBuffer );
     void        release();
 
-    inline      VisibilityCheck_VMV2002() : VisibilityCheck()   {}
-    inline      ~VisibilityCheck_VMV2002()                      {}
+    inline      VisibilityCheck_VMV2002( glw::Context &ctx ) : VisibilityCheck(ctx) {}
+    inline      ~VisibilityCheck_VMV2002()                                          {}
 
 public:
     static bool isSupported();
 
-    void        setMesh( CMeshO *mesh )                         { m_Mesh = mesh; }
-    void        setRaster( RasterModel *rm )                    { m_Raster = rm; }
+    void        setMesh( CMeshO *mesh )                                             { m_Mesh = mesh; }
+    void        setRaster( RasterModel *rm )                                        { m_Raster = rm; }
     void        checkVisibility();
 };
 
@@ -102,23 +106,21 @@ class VisibilityCheck_ShadowMap : public VisibilityCheck
     friend class VisibilityCheck;
 
 private:
-    typedef GPU::VBO< GPU::DistinctBuffers,
-                      GPU::Vertex3f       ,
-                      GPU::Indexui        > MyVBO;
+    vcg::Matrix44f          m_Pose;
+    vcg::Matrix44f          m_Proj;
+    vcg::Matrix44f          m_ShadowProj;
+	glw::Texture2DHandle    m_ShadowMap;
 
-    vcg::Matrix44f      m_Pose;
-    vcg::Matrix44f      m_Proj;
-    vcg::Matrix44f      m_ShadowProj;
-    GPU::Texture2D      m_ShadowMap;
+    glw::Texture2DHandle    m_VertexMap;
+    glw::Texture2DHandle    m_NormalMap;
+    glw::RenderbufferHandle m_ColorBuffer;
+    glw::FramebufferHandle  m_FBuffer;
 
-    GPU::Texture2D      m_VertexMap;
-    GPU::Texture2D      m_NormalMap;
-    GPU::FrameBuffer    m_FBuffer;
+    glw::ProgramHandle      m_VisDetectionShader;
 
-    GPU::Shader         m_VisDetectionShader;
-
-    static bool         s_AreVBOSupported;
-    MyVBO               m_ShadowVBO;
+    static bool             s_AreVBOSupported;
+    glw::BufferHandle       m_ShadowVBOVertices;
+    glw::BufferHandle       m_ShadowVBOIndices;
 
     void        shadowProjMatrices();
     void        setupShadowTexture();
@@ -126,7 +128,7 @@ private:
     void        initMeshTextures();
     bool        initShaders();
 
-                VisibilityCheck_ShadowMap();
+                VisibilityCheck_ShadowMap( glw::Context &ctx );
     inline      ~VisibilityCheck_ShadowMap()    {}
 
 public:

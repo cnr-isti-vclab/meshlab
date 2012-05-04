@@ -31,14 +31,14 @@
 VisibilityCheck* VisibilityCheck::s_Instance = NULL;
 
 
-VisibilityCheck* VisibilityCheck::GetInstance()
+VisibilityCheck* VisibilityCheck::GetInstance( glw::Context &ctx )
 {
     if( !s_Instance )
     {
-        if( VisibilityCheck_ShadowMap::isSupported() )
-            s_Instance = new VisibilityCheck_ShadowMap();
-        else if( VisibilityCheck_VMV2002::isSupported() )
-            s_Instance = new VisibilityCheck_VMV2002();
+        /*if( VisibilityCheck_ShadowMap::isSupported() )
+            s_Instance = new VisibilityCheck_ShadowMap( ctx );
+        else */if( VisibilityCheck_VMV2002::isSupported() )
+            s_Instance = new VisibilityCheck_VMV2002( ctx );
     }
 
     return s_Instance;
@@ -75,15 +75,16 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
     // Initialize the visibility check context.
     vcg::Point2i &vp = m_Raster->shot.Intrinsics.ViewportPx;
 
-    if( !m_FrameBuffer.IsCreated()       ||
-        m_FrameBuffer.Width()  != vp.X() ||
-        m_FrameBuffer.Height() != vp.Y() )
+    if( m_FrameBuffer.isNull()        ||
+        m_ColorRB->width()  != vp.X() ||
+        m_ColorRB->height() != vp.Y() )
     {
-        m_FrameBuffer.Create( vp.X(), vp.Y() );
-        m_FrameBuffer.Attach( GL_COLOR_ATTACHMENT0, GL_RGBA );
-        m_FrameBuffer.Attach( GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT );
+        m_ColorRB     = glw::createRenderbuffer( m_Context, GL_RGBA, vp.X(), vp.Y() );
+        m_DepthRB     = glw::createRenderbuffer( m_Context, GL_DEPTH_COMPONENT, vp.X(), vp.Y() );
+		m_FrameBuffer = glw::createFramebuffer ( m_Context, glw::renderbufferTarget(m_DepthRB), glw::renderbufferTarget(m_ColorRB) );
     }
-    m_FrameBuffer.Bind();
+
+    m_Context.bindFramebuffer( m_FrameBuffer );
 
     m_ViewportMin = vcg::Point2i( 0, 0 );
     m_ViewportMax = vcg::Point2i( vp.X()-1, vp.Y()-1 );
@@ -107,6 +108,8 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
 
 
     // Perform the first rendering pass that initializes the depth buffer.
+    glViewport( 0, 0, vp.X(), vp.Y() );
+
     glEnable( GL_DEPTH_TEST );
     glDisable( GL_LIGHTING );
     glEnable( GL_POLYGON_OFFSET_FILL );
@@ -159,14 +162,13 @@ bool VisibilityCheck_VMV2002::iteration( std::vector<unsigned char> &visBuffer )
     // as visible from the current raster.
     // The viewport is progressively restricted to the screen area covered by the last
     // rendering so as to speed up computations.
-    m_FrameBuffer.DumpTo( GL_COLOR_ATTACHMENT0,
-                          &visBuffer[0],
-                          m_ViewportMin.X(),
-                          m_ViewportMin.Y(),
-                          m_ViewportMax.X()-m_ViewportMin.X()+1,
-                          m_ViewportMax.Y()-m_ViewportMin.Y()+1,
-                          GL_RGBA,
-                          GL_UNSIGNED_BYTE );
+    glReadPixels( m_ViewportMin.X(),
+                  m_ViewportMin.Y(),
+                  m_ViewportMax.X()-m_ViewportMin.X()+1,
+                  m_ViewportMax.Y()-m_ViewportMin.Y()+1,
+                  GL_RGBA,
+                  GL_UNSIGNED_BYTE,
+                  &visBuffer[0] );
 
     int xMin = m_ViewportMax.X(), xMax = m_ViewportMin.X()-1;
     int yMin = m_ViewportMax.Y(), yMax = m_ViewportMin.X()-1;
@@ -206,7 +208,7 @@ bool VisibilityCheck_VMV2002::iteration( std::vector<unsigned char> &visBuffer )
 void VisibilityCheck_VMV2002::release()
 {
     GlShot< vcg::Shot<float> >::UnsetView();
-    m_FrameBuffer.Unbind();
+    m_Context.unbindFramebuffer();
     glPopAttrib();
 }
 
@@ -227,7 +229,7 @@ void VisibilityCheck_VMV2002::checkVisibility()
 bool VisibilityCheck_ShadowMap::s_AreVBOSupported = false;
 
 
-VisibilityCheck_ShadowMap::VisibilityCheck_ShadowMap() : VisibilityCheck()
+VisibilityCheck_ShadowMap::VisibilityCheck_ShadowMap( glw::Context &ctx ) : VisibilityCheck(ctx)
 {
     std::string ext( (char*) glGetString(GL_EXTENSIONS) );
     s_AreVBOSupported = ext.find( "ARB_vertex_buffer_object" ) != std::string::npos;
@@ -283,17 +285,19 @@ void VisibilityCheck_ShadowMap::setupShadowTexture()
     glPushAttrib( GL_TEXTURE_BIT );
 
     // Create and initialize the OpenGL texture object used to store the shadow map.
-    m_ShadowMap.Create( GL_DEPTH_COMPONENT,
-                        m_Raster->shot.Intrinsics.ViewportPx.X(),
-                        m_Raster->shot.Intrinsics.ViewportPx.Y(),
-                        GL_DEPTH_COMPONENT,
-                        GL_INT,
-                        NULL );
+    m_ShadowMap = glw::createTexture2D( m_Context,
+                                        GL_DEPTH_COMPONENT,
+                                        m_Raster->shot.Intrinsics.ViewportPx.X(),
+                                        m_Raster->shot.Intrinsics.ViewportPx.Y(),
+                                        GL_DEPTH_COMPONENT,
+                                        GL_INT );
 
-    m_ShadowMap.SetFiltering( GL_NEAREST );
-    m_ShadowMap.SetParam( GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE );
-    m_ShadowMap.SetParam( GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL );
-    m_ShadowMap.SetParam( GL_DEPTH_TEXTURE_MODE_ARB, GL_INTENSITY );
+    glw::BoundTexture2D boundShadowMap = m_Context.bindTexture2D( 0, m_ShadowMap );
+        boundShadowMap->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL               );
+        glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB  , GL_INTENSITY            );
+    m_Context.unbindTexture2D( 0 );
 
     glPopAttrib();
 }
@@ -319,9 +323,10 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
 
     // Perform an off-screen rendering pass so as to generate the a depth map of the model
     // from the viewpoint of the current raster's camera.
-    GPU::FrameBuffer fbuffer( m_ShadowMap.Width(), m_ShadowMap.Height() );
-    fbuffer.Attach( GL_DEPTH_ATTACHMENT_EXT, m_ShadowMap );
-    fbuffer.Bind();
+    glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::texture2DTarget(m_ShadowMap) );
+    m_Context.bindFramebuffer( fbuffer );
+
+    glViewport( 0, 0, m_ShadowMap->width(), m_ShadowMap->height() );
 
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_POLYGON_OFFSET_FILL );
@@ -330,9 +335,18 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     glClear( GL_DEPTH_BUFFER_BIT );
     if( s_AreVBOSupported )
     {
-        m_ShadowVBO.Bind();
-        m_ShadowVBO.DrawElements( GL_TRIANGLES, 0, 3*m_Mesh->fn );
-        m_ShadowVBO.Unbind();
+        glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
+		glEnableClientState( GL_VERTEX_ARRAY );
+
+        m_Context.bindVertexBuffer( m_ShadowVBOVertices );
+		glVertexPointer( 3, GL_FLOAT, 0, 0 );
+		m_Context.unbindVertexBuffer();
+
+        m_Context.bindIndexBuffer( m_ShadowVBOIndices );
+		glDrawElements( GL_TRIANGLES, 3*m_Mesh->fn, GL_UNSIGNED_INT, 0 );
+		m_Context.unbindIndexBuffer();
+
+        glPopClientAttrib();
     }
     else
     {
@@ -346,7 +360,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glEnd();
     }
 
-    fbuffer.Unbind();
+    m_Context.unbindFramebuffer();
 
 
     // Restore the previous OpenGL state.
@@ -360,21 +374,52 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
 
 bool VisibilityCheck_ShadowMap::initShaders()
 {
-    std::string basename = PluginManager::getBaseDirPath().append("/shaders/img_patch_param/").toStdString();
-    std::string logs;
+    const std::string vertSrc = GLW_STRINGFY
+    (
+        void main()
+        {
+            gl_Position = gl_Vertex;
+        }
+    );
 
-    GPU::Shader::VertPg vpg;
-    GPU::Shader::FragPg fpg;
+    const std::string fragSrc = GLW_STRINGFY
+    (
+        uniform sampler2D       u_VertexMap;
+        uniform sampler2D       u_NormalMap;
+        uniform sampler2DShadow u_SadowMap;
+        uniform mat4            u_ShadowProj;
+        uniform vec3            u_Viewpoint;
 
-    if( !vpg.CompileSrcFile( basename+"visibility_detection.vert", &logs ) ||
-        !fpg.CompileSrcFile( basename+"visibility_detection.frag", &logs ) ||
-        !m_VisDetectionShader.Attach( vpg ).AttachAndLink( fpg, &logs )     )
-    {
-       qWarning( ( ": "+logs).c_str() );
-        return false;
-    }
+        const float             V_UNDEFINED = 0.0;
+        const float             V_BACKFACE  = 1.0 / 255.0;
+        const float             V_VISIBLE   = 2.0 / 255.0;
 
-    return true;
+
+        void main()
+        {
+            vec3 pos = texelFetch( u_VertexMap, ivec2(gl_FragCoord.xy), 0 ).xyz;
+            vec3 nor = texelFetch( u_NormalMap, ivec2(gl_FragCoord.xy), 0 ).xyz;
+
+            if( dot(u_Viewpoint-pos,nor) < 0.0 )
+                gl_FragColor = vec4( V_BACKFACE );
+            else
+            {
+                vec4 projVert = u_ShadowProj * vec4(pos,1.0);
+                vec2 clipCoord = projVert.xy / projVert.w;
+
+                if( clipCoord.x>=0.0 && clipCoord.x<=1.0 &&
+                    clipCoord.y>=0.0 && clipCoord.y<=1.0 &&
+                    shadow2DProj( u_SadowMap, projVert ).r > 0.5 )
+                    gl_FragColor = vec4( V_VISIBLE );
+                else
+                    gl_FragColor = vec4( V_UNDEFINED );
+            }
+        }
+    );
+
+
+	m_VisDetectionShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
+    return m_VisDetectionShader->isLinked();
 }
 
 
@@ -396,33 +441,38 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
     for( int i=0; i<m_Mesh->vn; ++i )
         mapData[i] = m_Mesh->vert[i].N();
 
-    m_NormalMap.Create( GL_RGB32F,
-                        2048,
-                        mapH,
-                        GL_RGB,
-                        GL_FLOAT,
-                        mapData );
-    m_NormalMap.SetFiltering( GL_NEAREST );
+    m_NormalMap = glw::createTexture2D( m_Context,
+                                        GL_RGB32F,
+                                        2048,
+                                        mapH,
+                                        GL_RGB,
+                                        GL_FLOAT,
+                                        mapData );
+    glw::BoundTexture2D boundTex = m_Context.bindTexture2D( 0, m_NormalMap );
+        boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
 
 
     // Does the same with a second texture to store the mesh vertices.
     for( int i=0; i<m_Mesh->vn; ++i )
         mapData[i] = m_Mesh->vert[i].P();
 
-    m_VertexMap.Create( GL_RGB32F,
-                        2048,
-                        mapH,
-                        GL_RGB,
-                        GL_FLOAT,
-                        mapData );
-    m_VertexMap.SetFiltering( GL_NEAREST );
+    m_VertexMap = glw::createTexture2D( m_Context,
+                                        GL_RGB32F,
+                                        2048,
+                                        mapH,
+                                        GL_RGB,
+                                        GL_FLOAT,
+                                        mapData );
+    boundTex = m_Context.bindTexture2D( 0, m_VertexMap );
+        boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
 
 
     // Creates the VBO that will be used for the generation of the shadow map.
     if( s_AreVBOSupported )
     {
-        m_ShadowVBO.Create();
-        m_ShadowVBO.Vertex.LoadData( GL_STATIC_DRAW, mapData, m_Mesh->vn );
+        m_ShadowVBOVertices = glw::createBuffer( m_Context, m_Mesh->vn*sizeof(vcg::Point3f), mapData );
         delete [] mapData;
 
         unsigned int *indices = new unsigned int [ 3*m_Mesh->fn ];
@@ -430,7 +480,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
             for( int v=0; v<3; ++v, ++n )
                 indices[n] = m_Mesh->face[f].V(v) - &m_Mesh->vert[0];
 
-        m_ShadowVBO.LoadIndices( GL_STATIC_DRAW, indices, 3*m_Mesh->fn );
+        m_ShadowVBOIndices = glw::createBuffer( m_Context, 3*m_Mesh->fn*sizeof(unsigned int), indices );
         delete [] indices;
     }
     else
@@ -440,39 +490,28 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
 
 void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
 {
-    if( mesh == m_Mesh )
-        return;
-    if( !mesh )
+    if( mesh && mesh!=m_Mesh )
     {
-        m_ShadowVBO.Release();
-        m_VertexMap.Release();
-        m_NormalMap.Release();
-        m_FBuffer.Release();
-        return;
+        m_Mesh = mesh;
+
+        initMeshTextures();
+
+        // Create the framebuffer into which the result of the visibility computation will be stored.
+        m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RED, m_VertexMap->width(), m_VertexMap->height() );
+        m_FBuffer = glw::createFramebuffer( m_Context, glw::renderbufferTarget(m_ColorBuffer) );
     }
-
-    m_Mesh = mesh;
-
-    initMeshTextures();
-
-
-    // Create the framebuffer into which the result of the visibility computation will be stored.
-    m_FBuffer.Create( m_VertexMap.Width(), m_VertexMap.Height() );
-    m_FBuffer.Attach( GL_COLOR_ATTACHMENT0, GL_RED );
 }
 
 
 void VisibilityCheck_ShadowMap::setRaster( RasterModel *rm )
 {
-    if( rm == m_Raster )
-        return;
-    if( !rm )
-        m_ShadowMap.Release();
+    if( rm && rm!=m_Raster )
+    {
+        m_Raster = rm;
 
-    m_Raster = rm;
-
-    shadowProjMatrices();
-    setupShadowTexture();
+        shadowProjMatrices();
+        setupShadowTexture();
+    }
 }
 
 
@@ -481,18 +520,19 @@ void VisibilityCheck_ShadowMap::checkVisibility()
     updateShadowTexture();
 
 
-    m_FBuffer.Bind();
+    m_Context.bindFramebuffer( m_FBuffer );
+    glViewport( 0, 0, m_ColorBuffer->width(), m_ColorBuffer->height() );
 
-    m_VertexMap.Bind( 0 );
-    m_NormalMap.Bind( 1 );
-    m_ShadowMap.Bind( 2 );
+    m_Context.bindTexture2D( 0, m_VertexMap );
+    m_Context.bindTexture2D( 1, m_NormalMap );
+    m_Context.bindTexture2D( 2, m_ShadowMap );
 
-    m_VisDetectionShader.Bind();
-    m_VisDetectionShader.SetSampler( "u_VertexMap" , 0 );
-    m_VisDetectionShader.SetSampler( "u_NormalMap" , 1 );
-    m_VisDetectionShader.SetSampler( "u_SadowMap"  , 2 );
-    m_VisDetectionShader.SetUniform( "u_ShadowProj", m_ShadowProj.V() );
-    m_VisDetectionShader.SetUniform( "u_Viewpoint" , m_Raster->shot.GetViewPoint().V() );
+    glw::BoundProgram boundShader = m_Context.bindProgram( m_VisDetectionShader );
+    boundShader->setUniform( "u_VertexMap", 0 );
+    boundShader->setUniform( "u_NormalMap", 1 );
+    boundShader->setUniform( "u_SadowMap" , 2 );
+    boundShader->setUniform4x4( "u_ShadowProj", m_ShadowProj.V(), false );
+    boundShader->setUniform3( "u_Viewpoint", m_Raster->shot.GetViewPoint().V() );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -501,31 +541,19 @@ void VisibilityCheck_ShadowMap::checkVisibility()
         glVertex2i( -1,  1 );
     glEnd();
 
-    m_VisDetectionShader.Unbind();
-    m_ShadowMap.Unbind();
-    m_NormalMap.Unbind();
-    m_VertexMap.Unbind();
-    m_FBuffer.Unbind();
+    m_Context.unbindProgram();
+    m_Context.unbindTexture2D( 0 );
+    m_Context.unbindTexture2D( 1 );
+    m_Context.unbindTexture2D( 2 );
 
+    m_VertFlag.resize( m_ColorBuffer->width() * m_ColorBuffer->height() );
+    glReadPixels( 0,
+                  0,
+                  m_ColorBuffer->width(),
+                  m_ColorBuffer->height(),
+                  GL_RED,
+                  GL_UNSIGNED_BYTE,
+                  &m_VertFlag[0] );
 
-    m_VertFlag.resize( m_FBuffer.Width()*m_FBuffer.Height() );
-    m_FBuffer.DumpTo( GL_COLOR_ATTACHMENT0,
-                      &m_VertFlag[0],
-                      GL_RED,
-                      GL_UNSIGNED_BYTE );
-
-
-#if 0
-glGetError();
-GL_NO_ERROR
-GL_OUT_OF_MEMORY
-    There is not enough memory left to execute the command.
-    The state of the GL is undefined,
-    except for the state of the error flags,
-    after this error is recorded.
-GL_TABLE_TOO_LARGE
-    The specified table exceeds the implementation's maximum supported table
-    size.  The offending command is ignored and has no other side effect
-    than to set the error flag.
-#endif
+    m_Context.unbindFramebuffer();
 }
