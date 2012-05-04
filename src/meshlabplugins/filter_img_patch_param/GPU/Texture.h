@@ -33,7 +33,7 @@ namespace GPU
         | Constructor(s) / destructor |
         \*****************************/
     public:
-        inline              Texture2D() : InstantiatedObject(), m_Id(0), m_Width(0), m_Height(0)  {}
+        inline              Texture2D() : InstantiatedObject(), m_Id(0), m_Width(0), m_Height(0), m_TexUnit(GL_TEXTURE0_ARB)  {}
         inline              ~Texture2D()                                    { Release(); }
 
         /********************\

@@ -123,10 +123,11 @@ void TexturePainter::paint( RasterPatchMap &patches )
                 rasterData[n+1] = qGreen(p);
                 rasterData[n+2] = qBlue (p);
             }
+        glActiveTextureARB( 0 );
         rasterTex.Create( GL_RGB, rmImg.width(), rmImg.height(), GL_RGB, GL_UNSIGNED_BYTE, rasterData );
         delete [] rasterData;
         rasterTex.SetFiltering( GL_LINEAR );
-        rasterTex.Bind();
+        rasterTex.Bind( 0 );
 
 
         // Set the texture matrix up so as to rescale UV coordinates from [0,w]x[0,h] to [0,1]x[0,1].
@@ -142,7 +143,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
         for( PatchVec::const_iterator p=rp->begin(); p!=rp->end(); ++p )
         {
-            vcg::glLoadMatrix( p->img2tex);
+            vcg::glLoadMatrix( p->img2tex );
             glBegin( GL_QUADS );
                 vcg::Point2f boxCorners[4];
                 boxCorners[0] = p->bbox.min;

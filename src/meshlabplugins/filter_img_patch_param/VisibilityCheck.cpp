@@ -35,9 +35,9 @@ VisibilityCheck* VisibilityCheck::GetInstance( glw::Context &ctx )
 {
     if( !s_Instance )
     {
-        /*if( VisibilityCheck_ShadowMap::isSupported() )
+        if( VisibilityCheck_ShadowMap::isSupported() )
             s_Instance = new VisibilityCheck_ShadowMap( ctx );
-        else */if( VisibilityCheck_VMV2002::isSupported() )
+        else if( VisibilityCheck_VMV2002::isSupported() )
             s_Instance = new VisibilityCheck_VMV2002( ctx );
     }
 
@@ -427,8 +427,8 @@ bool VisibilityCheck_ShadowMap::isSupported()
 {
     std::string ext( (char*) glGetString(GL_EXTENSIONS) );
     return ext.find("ARB_framebuffer_object") != std::string::npos &&
-           ext.find("ARB_shader_objects") != std::string::npos     &&
-           ext.find("ARB_texture_float") != std::string::npos;
+           ext.find("ARB_shader_objects")     != std::string::npos &&
+           ext.find("ARB_texture_float")      != std::string::npos;
 }
 
 
@@ -448,6 +448,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
                                         GL_RGB,
                                         GL_FLOAT,
                                         mapData );
+
     glw::BoundTexture2D boundTex = m_Context.bindTexture2D( 0, m_NormalMap );
         boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
@@ -464,6 +465,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
                                         GL_RGB,
                                         GL_FLOAT,
                                         mapData );
+
     boundTex = m_Context.bindTexture2D( 0, m_VertexMap );
         boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
@@ -498,7 +500,7 @@ void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
 
         // Create the framebuffer into which the result of the visibility computation will be stored.
         m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RED, m_VertexMap->width(), m_VertexMap->height() );
-        m_FBuffer = glw::createFramebuffer( m_Context, glw::renderbufferTarget(m_ColorBuffer) );
+        m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
     }
 }
 
