@@ -30,7 +30,6 @@
 #include <QObject>
 #include <common/interfaces.h>
 #include <vcg/math/similarity2.h>
-#include "GPU/GPU.h"
 #include "Patch.h"
 #include <wrap/glw/glw.h>
 class VisibleSet;

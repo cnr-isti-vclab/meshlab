@@ -28,39 +28,41 @@
 
 
 #include "Patch.h"
-#include "GPU/GPU.h"
+#include <wrap/glw/glw.h>
 
 
 class TexturePainter
 {
 protected:
-    bool                m_IsInitialized;
-    GPU::Texture2D      m_TexImg;
-    GPU::FrameBuffer    m_TexFB;
-    GPU::Shader         m_PushPullShader_Init;
-    GPU::Shader         m_PushPullShader_Push;
-    GPU::Shader         m_PushPullShader_Pull;
-    GPU::Shader         m_PushPullShader_Combine;
+    glw::Context            &m_Context;
+    bool                    m_IsInitialized;
+    glw::Texture2DHandle    m_TexImg;
+    glw::FramebufferHandle  m_TexFB;
+    glw::ProgramHandle      m_PushPullShader_Init;
+    glw::ProgramHandle      m_PushPullShader_Push;
+    glw::ProgramHandle      m_PushPullShader_Pull;
+    glw::ProgramHandle      m_PushPullShader_Combine;
 
     virtual bool    init( int texSize );
 
     void            pushPullInit( RasterPatchMap &patches,
-                                  GPU::Texture2D &diffTex,
+                                  glw::Texture2DHandle &diffTex,
                                   int filterSize );
-    void            push( GPU::Texture2D &higherLevel,
-                          GPU::Texture2D &lowerLevel );
-    void            pull( GPU::Texture2D &lowerLevel,
-                          GPU::Texture2D &higherLevel );
-    void            apply( GPU::Texture2D &color,
-                           GPU::Texture2D &correction );
+    void            push( glw::Texture2DHandle &higherLevel,
+                          glw::Texture2DHandle &lowerLevel );
+    void            pull( glw::Texture2DHandle &lowerLevel,
+                          glw::Texture2DHandle &higherLevel );
+    void            apply( glw::Texture2DHandle &color,
+                           glw::Texture2DHandle &correction );
 
 public:
-    inline          TexturePainter( int texSize )   { m_IsInitialized = init(texSize); }
+    inline          TexturePainter( glw::Context &ctx,
+                                    int texSize ) : m_Context(ctx)  { m_IsInitialized = init(texSize); }
 
     void            paint( RasterPatchMap &patches );
     void            rectifyColor( RasterPatchMap &patches,
                                   int filterSize );
-    inline bool     isInitialized() const           { return m_IsInitialized; }
+    inline bool     isInitialized() const                           { return m_IsInitialized; }
 
     QImage          getTexture();
 };

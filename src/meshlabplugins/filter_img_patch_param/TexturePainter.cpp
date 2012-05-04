@@ -31,38 +31,126 @@
 bool TexturePainter::init( int texSize )
 {
     // Init the off-screen rendering buffer.
-    m_TexImg.Create( GL_RGB, texSize, texSize );
-    m_TexImg.SetFiltering( GL_NEAREST );
+    m_TexImg = glw::createTexture2D( m_Context, GL_RGB, texSize, texSize, GL_RGB, GL_UNSIGNED_BYTE );
+    glw::BoundTexture2D boundTex = m_Context.bindTexture2D( 0, m_TexImg );
+    boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
 
-    m_TexFB.Create( texSize, texSize );
-    m_TexFB.Attach( GL_COLOR_ATTACHMENT0, m_TexImg );
+    m_TexFB = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(m_TexImg) );
 
 
     // Init shaders used for color correction.
-    std::string basename = PluginManager::getBaseDirPath().append("/shaders/img_patch_param/").toStdString();
-    std::string logs;
+    const std::string initVertSrc = GLW_STRINGFY
+    (
+        void main()
+        {
+            gl_Position = ftransform();
+            gl_TexCoord[0] = gl_Vertex;
+            gl_TexCoord[1] = gl_MultiTexCoord0;
+        }
+    );
 
-    GPU::Shader::VertPg vpg;
-    GPU::Shader::FragPg fpg;
+    const std::string initFragSrc = GLW_STRINGFY
+    (
+        uniform sampler2D   u_Tex;
+        uniform int         u_Radius;
+        vec2                c_PixelSize = 1.0 / vec2(textureSize(u_Tex,0));
 
-    if( !vpg.CompileSrcFile( basename+"color_correction_init.vert", &logs )     ||
-        !fpg.CompileSrcFile( basename+"color_correction_init.frag", &logs )     ||
-        !m_PushPullShader_Init.Attach( vpg )
-                              .AttachAndLink( fpg, &logs ) ||
+        vec3 fetch( int texUnit, int x, int y )
+        {
+            return texture2D( u_Tex, gl_TexCoord[texUnit].xy + c_PixelSize.x * vec2(x,y) ).xyz;
+        }
 
-        !vpg.CompileSrcFile( basename+"color_correction.vert", &logs )     ||
-        !fpg.CompileSrcFile( basename+"color_correction_push.frag", &logs )     ||
-        !m_PushPullShader_Push.Attach( vpg )
-                              .AttachAndLink( fpg, &logs ) ||
+        void main()
+        {
+            vec3 finalColor = vec3(0.0);
 
-        !fpg.CompileSrcFile( basename+"color_correction_pull.frag", &logs )     ||
-        !m_PushPullShader_Pull.Attach( vpg )
-                              .AttachAndLink( fpg, &logs )                      ||
+            for( int y=-u_Radius; y<=u_Radius; ++y )
+                for( int x=-u_Radius; x<=u_Radius; ++x )
+                {
+                    vec3 c1 = fetch( 0, x, y );
+                    vec3 c2 = fetch( 1, x, y );
+                    finalColor += 0.5*( c2 - c1 );
+                }
+    
+            int diameter = 2*u_Radius + 1;
+            finalColor /= diameter * diameter;
 
-        !fpg.CompileSrcFile( basename+"color_correction_combine.frag", &logs )  ||
-        !m_PushPullShader_Combine.Attach( vpg )
-                                 .AttachAndLink( fpg, &logs ) )
+            gl_FragColor = vec4( finalColor, 1.0 );
+        }
+    );
 
+    const std::string correctionVertSrc = GLW_STRINGFY
+    (
+        void main()
+        {
+            gl_Position = gl_Vertex;
+        }
+    );
+
+    const std::string pushFragSrc = GLW_STRINGFY
+    (
+        uniform sampler2D u_Tex;
+
+        void main()
+        {
+            ivec2 pos = ivec2( gl_FragCoord.xy );
+
+            vec4 avg = vec4( 0.0 );
+            for( int y=0; y<2; ++y )
+                for( int x=0; x<2; ++x )
+                    avg += texelFetch( u_Tex, 2*pos+ivec2(x,y), 0 );
+
+            if( avg.w < 0.5 )
+                gl_FragColor = vec4( 0.0 );
+            else
+                gl_FragColor = vec4( avg.xyz/avg.w, 1.0 );
+        }
+    );
+
+    const std::string pullFragSrc = GLW_STRINGFY
+    (
+        uniform sampler2D u_TexLower;
+        uniform sampler2D u_TexUpper;
+
+        void main()
+        {
+            vec4 color = texelFetch( u_TexUpper, ivec2(gl_FragCoord.xy), 0 );
+            if( color.w < 0.5 )
+            {
+                vec2 pos = gl_FragCoord.xy / vec2(textureSize(u_TexUpper,0).xy);
+                color = texture2D( u_TexLower, pos );
+            }
+
+            gl_FragColor = color;
+        }
+    );
+
+    const std::string combineFragSrc = GLW_STRINGFY
+    (
+        uniform sampler2D u_TexColor;
+        uniform sampler2D u_TexCorrection;
+
+        void main()
+        {
+            ivec2 pos = ivec2( gl_FragCoord.xy );
+
+            vec4 color = texelFetch( u_TexColor, pos, 0 );
+            color += texelFetch( u_TexCorrection, pos, 0 );
+    
+            gl_FragColor = vec4( clamp(color.xyz,0.0,1.0), 1.0 );
+        }
+    );
+
+    m_PushPullShader_Init    = glw::createProgram( m_Context, "", initVertSrc      , initFragSrc    );
+    m_PushPullShader_Push    = glw::createProgram( m_Context, "", correctionVertSrc, pushFragSrc    );
+    m_PushPullShader_Pull    = glw::createProgram( m_Context, "", correctionVertSrc, pullFragSrc    );
+    m_PushPullShader_Combine = glw::createProgram( m_Context, "", correctionVertSrc, combineFragSrc );
+
+    if( !m_PushPullShader_Init   ->isLinked() ||
+        !m_PushPullShader_Push   ->isLinked() ||
+        !m_PushPullShader_Pull   ->isLinked() ||
+        !m_PushPullShader_Combine->isLinked() )
     {
     //    qWarning( (std::string(__func__)+": "+logs).c_str() );
         return false;
@@ -101,9 +189,14 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
 
     // Initializes the off-screen rendering context.
-    m_TexFB.Bind();
+    m_Context.bindFramebuffer( m_TexFB );
+    glViewport( 0, 0, m_TexImg->width(), m_TexImg->height() );
+
     glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT );
+
+    glActiveTexture( GL_TEXTURE0_ARB );
+    glEnable( GL_TEXTURE_2D );
 
 
     // TEXTURE PAINTING.
@@ -113,7 +206,6 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
 
         // Loads the raster into the GPU as a texture image.
-        GPU::Texture2D rasterTex;
         GLubyte *rasterData = new GLubyte [ 3*rmImg.width()*rmImg.height() ];
         for( int y=rmImg.height()-1, n=0; y>=0; --y )
             for( int x=0; x<rmImg.width(); ++x, n+=3 )
@@ -123,11 +215,12 @@ void TexturePainter::paint( RasterPatchMap &patches )
                 rasterData[n+1] = qGreen(p);
                 rasterData[n+2] = qBlue (p);
             }
-        glActiveTextureARB( 0 );
-        rasterTex.Create( GL_RGB, rmImg.width(), rmImg.height(), GL_RGB, GL_UNSIGNED_BYTE, rasterData );
+        
+        glw::Texture2DHandle rasterTex = glw::createTexture2D( m_Context, GL_RGB, rmImg.width(), rmImg.height(), GL_RGB, GL_UNSIGNED_BYTE, rasterData );
         delete [] rasterData;
-        rasterTex.SetFiltering( GL_LINEAR );
-        rasterTex.Bind( 0 );
+
+        glw::BoundTexture2D t = m_Context.bindTexture2D( 0, rasterTex );
+        t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
 
 
         // Set the texture matrix up so as to rescale UV coordinates from [0,w]x[0,h] to [0,1]x[0,1].
@@ -159,12 +252,12 @@ void TexturePainter::paint( RasterPatchMap &patches )
             glEnd();
         }
 
-        rasterTex.Unbind();
+        m_Context.unbindTexture2D( 0 );
         glMatrixMode( GL_TEXTURE );
         glPopMatrix();
     }
 
-    m_TexFB.Unbind();
+    m_Context.unbindFramebuffer();
 
 
     // Restore the previous OpenGL state.
@@ -177,7 +270,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
 
 void TexturePainter::pushPullInit( RasterPatchMap &patches,
-                                   GPU::Texture2D &diffTex,
+                                   glw::Texture2DHandle &diffTex,
                                    int filterSize )
 {
     glMatrixMode( GL_PROJECTION );
@@ -189,15 +282,15 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
     glPushMatrix();
     glLoadIdentity();
 
+    glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(diffTex) );
 
-    GPU::FrameBuffer fbuffer( diffTex.Width(), diffTex.Height() );
-    fbuffer.Attach( GL_COLOR_ATTACHMENT0, diffTex );
-    fbuffer.Bind();
-    m_TexImg.Bind( 0 );
-    m_PushPullShader_Init.Bind();
-    m_PushPullShader_Init.SetSampler( "u_Tex", 0 );
-    m_PushPullShader_Init.SetUniform( "u_Radius", &filterSize );
+    m_Context.bindFramebuffer( fbuffer );
+    m_Context.bindTexture2D( 0, m_TexImg );
+    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Init );
+    p->setUniform( "u_Tex", 0 );
+    p->setUniform1( "u_Radius", &filterSize );
 
+    glViewport( 0, 0, diffTex->width(), diffTex->height() );
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glClear( GL_COLOR_BUFFER_BIT );
 
@@ -223,9 +316,9 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
                     }
     glEnd();
 
-    m_PushPullShader_Init.Unbind();
-    m_TexImg.Unbind();
-    fbuffer.Unbind();
+    m_Context.unbindProgram();
+    m_Context.unbindTexture2D( 0 );
+    m_Context.unbindFramebuffer();
 
 
     glPopMatrix();
@@ -234,15 +327,16 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
 }
 
 
-void TexturePainter::push( GPU::Texture2D &higherLevel,
-                           GPU::Texture2D &lowerLevel )
+void TexturePainter::push( glw::Texture2DHandle &higherLevel,
+                           glw::Texture2DHandle &lowerLevel )
 {
-    GPU::FrameBuffer fbuffer( lowerLevel.Width(), lowerLevel.Height() );
-    fbuffer.Attach( GL_COLOR_ATTACHMENT0, lowerLevel );
-    fbuffer.Bind();
-    higherLevel.Bind( 0 );
-    m_PushPullShader_Push.Bind();
-    m_PushPullShader_Push.SetSampler( "u_Tex", 0 );
+    glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(lowerLevel) );
+    glViewport( 0, 0, lowerLevel->width(), lowerLevel->height() );
+
+    m_Context.bindFramebuffer( fbuffer );
+    m_Context.bindTexture2D( 0, higherLevel );
+    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Push );
+    p->setUniform( "u_Tex", 0 );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -251,29 +345,29 @@ void TexturePainter::push( GPU::Texture2D &higherLevel,
         glVertex2i( -1,  1 );
     glEnd();
 
-    m_PushPullShader_Push.Unbind();
-    higherLevel.Unbind();
-    fbuffer.Unbind();
+    m_Context.unbindProgram();
+    m_Context.unbindTexture2D( 0 );
+    m_Context.unbindFramebuffer();
 }
 
 
-void TexturePainter::pull( GPU::Texture2D &lowerLevel,
-                           GPU::Texture2D &higherLevel )
+void TexturePainter::pull( glw::Texture2DHandle &lowerLevel,
+                           glw::Texture2DHandle &higherLevel )
 {
-    GPU::Texture2D tmp;
-    tmp.Create( GL_RGBA32F, higherLevel.Width(), higherLevel.Height() );
-    tmp.SetFiltering( GL_LINEAR );
-    tmp.SetParam( GL_TEXTURE_WRAP_S, GL_CLAMP );
-    tmp.SetParam( GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glw::Texture2DHandle tmp = glw::createTexture2D( m_Context, GL_RGBA32F, higherLevel->width(), higherLevel->height(), GL_RGBA, GL_FLOAT );
+    glw::BoundTexture2D boundTmp = m_Context.bindTexture2D( 0, tmp );
+        boundTmp->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
 
-    GPU::FrameBuffer fbuffer( tmp.Width(), tmp.Height() );
-    fbuffer.Attach( GL_COLOR_ATTACHMENT0, tmp );
-    fbuffer.Bind();
-    lowerLevel.Bind( 0 );
-    higherLevel.Bind( 1 );
-    m_PushPullShader_Pull.Bind();
-    m_PushPullShader_Pull.SetSampler( "u_TexLower", 0 );
-    m_PushPullShader_Pull.SetSampler( "u_TexUpper", 1 );
+    glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(tmp) );
+    glViewport( 0, 0, tmp->width(), tmp->height() );
+
+    m_Context.bindFramebuffer( fbuffer );
+    m_Context.bindTexture2D( 0, lowerLevel );
+    m_Context.bindTexture2D( 1, higherLevel );
+    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Pull );
+    p->setUniform( "u_TexLower", 0 );
+    p->setUniform( "u_TexUpper", 1 );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -282,30 +376,32 @@ void TexturePainter::pull( GPU::Texture2D &lowerLevel,
         glVertex2i( -1,  1 );
     glEnd();
 
-    m_PushPullShader_Pull.Unbind();
-    lowerLevel.Unbind();
-    higherLevel.Unbind();
-    fbuffer.Unbind();
+    m_Context.unbindProgram();
+    m_Context.unbindTexture2D( 0 );
+    m_Context.unbindTexture2D( 1 );
+    m_Context.unbindFramebuffer();
 
     higherLevel = tmp;
 }
 
 
-void TexturePainter::apply( GPU::Texture2D &color,
-                            GPU::Texture2D &correction )
+void TexturePainter::apply( glw::Texture2DHandle &color,
+                            glw::Texture2DHandle &correction )
 {
-    GPU::Texture2D tmp;
-    tmp.Create( GL_RGB, color.Width(), color.Height() );
-    tmp.SetFiltering( GL_NEAREST );
-    m_TexFB.Attach( GL_COLOR_ATTACHMENT0, tmp );
-    m_TexFB.Bind();
+    glw::Texture2DHandle tmp = glw::createTexture2D( m_Context, GL_RGB, color->width(), color->height(), GL_RGB, GL_UNSIGNED_BYTE );
+    glw::BoundTexture2D t = m_Context.bindTexture2D( 0, tmp );
+        t->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
 
-    color.Bind( 0 );
-    correction.Bind( 1 );
+    m_TexFB = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(tmp) );
+    glViewport( 0, 0, tmp->width(), tmp->height() );
 
-    m_PushPullShader_Combine.Bind();
-    m_PushPullShader_Combine.SetSampler( "u_TexColor", 0 );
-    m_PushPullShader_Combine.SetSampler( "u_TexCorrection", 1 );
+    m_Context.bindFramebuffer( m_TexFB );
+    m_Context.bindTexture2D( 0, color );
+    m_Context.bindTexture2D( 1, correction );
+    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Combine );
+    p->setUniform( "u_TexColor", 0 );
+    p->setUniform( "u_TexCorrection", 1 );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -314,10 +410,10 @@ void TexturePainter::apply( GPU::Texture2D &color,
         glVertex2i( -1,  1 );
     glEnd();
 
-    correction.Unbind();
-    color.Unbind();
-    m_PushPullShader_Combine.Unbind();
-    m_TexFB.Unbind();
+    m_Context.unbindProgram();
+    m_Context.unbindTexture2D( 0 );
+    m_Context.unbindTexture2D( 1 );
+    m_Context.unbindFramebuffer();
 
     color = tmp;
 }
@@ -331,27 +427,28 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
 
-    int nbLevels = std::ceil( std::log((float)m_TexImg.Width()) / std::log(2.0f) );
-    std::vector<GPU::Texture2D> pushPullStack;
+    int nbLevels = std::ceil( std::log((float)m_TexImg->width()) / std::log(2.0f) );
+
+    std::vector<glw::Texture2DHandle> pushPullStack;
     pushPullStack.reserve( nbLevels+1 );
 
-
     pushPullStack.resize( 1 );
-    pushPullStack[0].Create( GL_RGBA32F, m_TexImg.Width(), m_TexImg.Height() );
-    pushPullStack[0].SetFiltering( GL_LINEAR );
-    pushPullStack[0].SetParam( GL_TEXTURE_WRAP_S, GL_CLAMP );
-    pushPullStack[0].SetParam( GL_TEXTURE_WRAP_T, GL_CLAMP );
+    pushPullStack[0] = glw::createTexture2D( m_Context, GL_RGBA32F, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE );
+    glw::BoundTexture2D t = m_Context.bindTexture2D( 0, pushPullStack[0] );
+        t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+    m_Context.unbindTexture2D( 0 );
+
     pushPullInit( patches, pushPullStack[0], filterSize );
 
 
-    while( pushPullStack.back().Width() > 1 )
+    while( pushPullStack.back()->width() > 1 )
     {
-        unsigned int newDim = (pushPullStack.back().Width()/2) + (pushPullStack.back().Width()&1);
-        GPU::Texture2D newLevel;
-        newLevel.Create( GL_RGBA32F, newDim, newDim );
-        newLevel.SetFiltering( GL_LINEAR );
-        newLevel.SetParam( GL_TEXTURE_WRAP_S, GL_CLAMP );
-        newLevel.SetParam( GL_TEXTURE_WRAP_T, GL_CLAMP );
+        unsigned int newDim = (pushPullStack.back()->width()/2) + (pushPullStack.back()->width()&1);
+
+        glw::Texture2DHandle newLevel = glw::createTexture2D( m_Context, GL_RGBA32F, newDim, newDim, GL_RGB, GL_UNSIGNED_BYTE );
+        glw::BoundTexture2D t = m_Context.bindTexture2D( 0, newLevel );
+            t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+        m_Context.unbindTexture2D( 0 );
 
         push( pushPullStack.back(), newLevel );
         pushPullStack.push_back( newLevel );
@@ -359,10 +456,7 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
 
 
     for( int i=(int)pushPullStack.size()-2; i>=0; --i )
-    {
         pull( pushPullStack[i+1], pushPullStack[i] );
-        pushPullStack[i+1].Release();
-    }
 
 
     apply( m_TexImg, pushPullStack[0] );
@@ -379,12 +473,15 @@ QImage TexturePainter::getTexture()
 
 
     // Recovers the content of the off-screen painting buffer and returns it as a QImage object.
-    GLubyte *texData = new GLubyte [ 3*m_TexFB.Width()*m_TexFB.Height() ];
-    m_TexFB.DumpTo( GL_COLOR_ATTACHMENT0, texData, GL_RGB, GL_UNSIGNED_BYTE );
+    m_Context.bindFramebuffer( m_TexFB );
+    glReadBuffer( GL_COLOR_ATTACHMENT0 );
 
-    QImage tex( m_TexFB.Width(), m_TexFB.Height(), QImage::Format_ARGB32 );
-    for( int y=(int)m_TexFB.Height()-1, n=0; y>=0; --y )
-        for( int x= 0; x<(int)m_TexFB .Width(); ++x, n+=3 )
+    GLubyte *texData = new GLubyte [ 3*m_TexImg->width()*m_TexImg->height() ];
+    glReadPixels( 0, 0, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE, texData );
+
+    QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
+    for( int y=(int)m_TexImg->height()-1, n=0; y>=0; --y )
+        for( int x= 0; x<(int)m_TexImg->width(); ++x, n+=3 )
             tex.setPixel( x, y, qRgb(texData[n+0],texData[n+1],texData[n+2]) );
 
     delete [] texData;

@@ -249,7 +249,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                                    md.rasterList,
                                                    par );
 
-                TexturePainter painter( par.getInt("textureSize") );
+                TexturePainter painter( *m_Context, par.getInt("textureSize") );
                 if( (retValue = painter.isInitialized()) )
                 {
                     QTime t; t.start();
