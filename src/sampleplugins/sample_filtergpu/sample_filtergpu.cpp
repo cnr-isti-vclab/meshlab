@@ -163,7 +163,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			Texture2DHandle    hColor       = createTexture2D(ctx, GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
 			FramebufferHandle  hFramebuffer = createFramebuffer(ctx, renderbufferTarget(hDepth), texture2DTarget(hColor));
 
-			const std::string vertSrc = GLW_STRINGFY
+			const std::string vertSrc = GLW_STRINGIFY
 			(
 				varying vec3 vNormalVS;
 				void main(void)
@@ -173,7 +173,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 				}
 			);
 
-			const std::string fragSrc = GLW_STRINGFY
+			const std::string fragSrc = GLW_STRINGIFY
 			(
 				uniform vec3 uLightDirectionVS;
 				varying vec3 vNormalVS;
