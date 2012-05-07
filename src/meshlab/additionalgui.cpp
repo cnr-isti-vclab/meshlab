@@ -503,8 +503,6 @@ void MLScriptEditor::showAutoComplete( QKeyEvent * /*e*/ )
 	comp->setCompletionPrefix(w);
 	comp->popup()->setModel(comp->completionModel());
 	QRect rect = cursorRect();
-	int row = comp->popup()->model()->rowCount();
-	QFontMetrics met(comp->popup()->font());
 	rect.setWidth(comp->popup()->sizeHintForColumn(0) + comp->popup()->verticalScrollBar()->sizeHint().width());
 	comp->complete(rect);
 }

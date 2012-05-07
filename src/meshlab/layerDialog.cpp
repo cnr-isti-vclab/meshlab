@@ -195,7 +195,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	// switch layer
   MeshTreeWidgetItem   *mItem = dynamic_cast<MeshTreeWidgetItem   *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
   RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-    QTreeWidgetItem *qtItem = dynamic_cast<QTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+  QTreeWidgetItem     *qtItem = dynamic_cast<QTreeWidgetItem *>     (ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
 	if(mItem){ 
 		if (mItem->m) mw->meshDoc()->setCurrentMesh(mItem->m->id());
 
