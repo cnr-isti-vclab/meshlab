@@ -989,7 +989,7 @@ void MeshLabRenderState::clearState()
 	unlockRenderState(RASTER);
 }
 
-void MeshLabRenderState::copyBack( const int id,CMeshO& mm ) const
+void MeshLabRenderState::copyBack( const int /*id*/,CMeshO& /*mm*/ ) const
 {
 //	mm.Clear();
 //	mm.vert.swap(CMeshO::VertContainer());

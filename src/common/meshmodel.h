@@ -505,7 +505,7 @@ class MeshDocument : public QObject
 
 public:
 
-	MeshDocument(): QObject(),xmlhistory(),rendstate()
+	MeshDocument(): QObject(),rendstate(),xmlhistory()
 	{
 		tagIdCounter=0;
 		meshIdCounter=0;

@@ -808,7 +808,7 @@ QScriptValue ShotSI_ctor( QScriptContext* c,QScriptEngine* e )
 	return e->newQObject(shot, QScriptEngine::ScriptOwnership);
 }
 
-QScriptValue ShotSI_defctor( QScriptContext* c,QScriptEngine* e )
+QScriptValue ShotSI_defctor( QScriptContext* /*c*/,QScriptEngine* e )
 {
 	ShotSI* shot = new ShotSI();
 	return e->newQObject(shot, QScriptEngine::ScriptOwnership);
