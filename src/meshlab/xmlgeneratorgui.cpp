@@ -9,7 +9,7 @@
 #include <QSplitter>
 
 ParamGeneratorGUI::ParamGeneratorGUI(QWidget* parent /*= NULL*/ )
-:QFrame(parent),currentname(),parentitem(NULL)
+:QFrame(parent),parentitem(NULL),currentname()
 {
 	initUI();
 	initConnections();
@@ -379,7 +379,7 @@ void FilterGeneratorGUI::updateItemText( QTreeWidgetItem* parent,const QString& 
 	parent->setText(0,text);
 }
 
-void FilterGeneratorGUI::updateFunctionName( const QString& fun )
+void FilterGeneratorGUI::updateFunctionName( const QString& /*fun*/ )
 {
 	QString nm = UsefulGUIFunctions::generateFunctionName(ui->nameLine->text());
 	ui->functionLine->setText(nm);
@@ -479,7 +479,7 @@ void FilterGeneratorTab::expandCollapse(const bool exp,PrimitiveButton* pb,QFram
 		pb->setPrimitiveElement(QStyle::PE_IndicatorArrowRight);
 }
 
-void FilterGeneratorTab::paintEvent( QPaintEvent* p )
+void FilterGeneratorTab::paintEvent( QPaintEvent* /*p*/ )
 {
 	expandCollapse(jsexp,ui->jsbut,ui->jsframe);
 	expandCollapse(guiexp,ui->guibut,ui->guiframe);	
@@ -509,7 +509,7 @@ void FilterGeneratorTab::setCode( const QString& code )
 
 /*" + gaycolor.red() + "," + gaycolor.green() + "," + gaycolor.blue() + "*/
 PluginGeneratorGUI::PluginGeneratorGUI(PluginManager& pman,QWidget* parent )
-:QDockWidget(parent),init(false),plugscriptname(),author(),mail(),doc(NULL),PM(pman),finfo(QApplication::applicationDirPath())
+:QDockWidget(parent),plugscriptname(),author(),mail(),init(false),finfo(QApplication::applicationDirPath()),doc(NULL),PM(pman)
 {
 	QFrame* f = new QFrame(this);
 	QGridLayout* lay = new QGridLayout();
@@ -536,7 +536,7 @@ PluginGeneratorGUI::PluginGeneratorGUI(PluginManager& pman,QWidget* parent )
 }
 
 
-void PluginGeneratorGUI::addNewFilter( const MLXMLPluginInfo::XMLMap& filter )
+void PluginGeneratorGUI::addNewFilter( const MLXMLPluginInfo::XMLMap& /*filter*/ )
 {
 
 }
@@ -546,7 +546,7 @@ PluginGeneratorGUI::~PluginGeneratorGUI()
 
 }
 
-void PluginGeneratorGUI::paintEvent( QPaintEvent *event )
+void PluginGeneratorGUI::paintEvent( QPaintEvent */*event*/ )
 {
 	if (!init)
 	{
@@ -847,7 +847,7 @@ void PluginGeneratorGUI::save( const QString& filepath,const bool generatecpp)
 	QString xml = generateXML(tree);
 	//QDomDocument has been introduced only in order to indent the xml code
 	QDomDocument doc;
-	bool ret = doc.setContent(xml,false);
+	doc.setContent(xml,false);
 	xml = doc.toString();
 	QFile file(filepath);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -918,7 +918,7 @@ void PluginGeneratorGUI::updateTabTitle( const QString& name,QWidget* wid)
 void PluginGeneratorGUI::validateFilterName( const QString& name,FilterGeneratorGUI* wid )
 {
 	QStringList ls;
-	int widind = getPageIndexOfWidget(wid);
+//	int widind = getPageIndexOfWidget(wid);
 	for(int ii = 0;ii < tabs->count();++ii)
 		ls.push_back(tabs->tabText(ii));
 	QString res = UsefulGUIFunctions::changeNameIfAlreadyInList(name,ls);

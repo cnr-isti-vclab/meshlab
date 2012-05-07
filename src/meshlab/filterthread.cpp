@@ -7,7 +7,7 @@
 #include "filterthread.h"
 
 FilterThread::FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env,QObject *parent) 
-:QThread(parent), _fname(fname), _mfc(mfc),_md(md),_env(env)
+:QThread(parent), _mfc(mfc), _fname(fname),_md(md),_env(env)
 {
 }
 

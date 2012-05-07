@@ -1076,7 +1076,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env
 	}
 }
 
-void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env ) 
+void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &/*env*/ )
 {
 	if (meshDoc() == NULL)
 		return;
@@ -1085,7 +1085,6 @@ void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, E
 
 	if ((ar == MLXMLElNames::singleRasterArity)&& (meshDoc()->rm() != NULL))
 	{
-		RasterModel* rm = meshDoc()->rm();
 		meshDoc()->renderState().add(meshDoc()->rm()->id(),*meshDoc()->rm());
 		return;
 	}
@@ -1181,7 +1180,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	}
 	try
 	{
-		bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
+		/*bool isinter = */(mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
 		/*if (isinter)
 		{
 			showInterruptButton(true);

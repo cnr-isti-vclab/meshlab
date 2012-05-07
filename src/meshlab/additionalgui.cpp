@@ -290,7 +290,7 @@ PrimitiveButton::~PrimitiveButton()
 
 }
 
-void PrimitiveButton::paintEvent( QPaintEvent * event )
+void PrimitiveButton::paintEvent( QPaintEvent * /*event*/ )
 {
 	QStylePainter painter(this);
 	QStyleOptionButton option;
@@ -397,7 +397,7 @@ void MLScriptEditor::resizeEvent( QResizeEvent* e)
 	narea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void MLScriptEditor::updateLineNumberAreaWidth( int newBlockCount)
+void MLScriptEditor::updateLineNumberAreaWidth( int /*newBlockCount*/)
 {
 	setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
@@ -496,7 +496,7 @@ void MLScriptEditor::keyPressEvent( QKeyEvent * e )
 //	}
 //}
 
-void MLScriptEditor::showAutoComplete( QKeyEvent * e )
+void MLScriptEditor::showAutoComplete( QKeyEvent * /*e*/ )
 {	
 	QString w = wordUnderTextCursor();
 	QTextCursor tc = textCursor();
@@ -589,7 +589,7 @@ void MLNumberArea::paintEvent(QPaintEvent* e)
 }
 
 MLSyntaxHighlighter::MLSyntaxHighlighter(const MLScriptLanguage& synt, QWidget* parent)
-:QSyntaxHighlighter(parent),highlightingRules(),syntax(synt)
+:QSyntaxHighlighter(parent),syntax(synt),highlightingRules()
 {
 	/*HighlightingRule pvar;
 	pvar.format.setForeground(Qt::red);
