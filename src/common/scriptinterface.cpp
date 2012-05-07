@@ -425,7 +425,7 @@ Q_INVOKABLE int MeshModelSI::fn() const
 Q_INVOKABLE QVector<VCGVertexSI*> MeshModelSI::vert()
 {
 	QVector<VCGVertexSI*> v;
-	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	for(int ii = 0; ii < mm.cm.vn;++ii)
 		v.push_back(new VCGVertexSI(mm.cm.vert[ii]));
 	return v;
 }
@@ -433,7 +433,7 @@ Q_INVOKABLE QVector<VCGVertexSI*> MeshModelSI::vert()
 Q_INVOKABLE Point3Vector MeshModelSI::getVertPosArray()
 {
 	Point3Vector pv;
-	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	for(int ii = 0; ii < mm.cm.vn;++ii)
 	{
 		QVector<float> p;
 		p << mm.cm.vert[ii].P().X() << mm.cm.vert[ii].P().Y() << mm.cm.vert[ii].P().Z();
@@ -444,20 +444,20 @@ Q_INVOKABLE Point3Vector MeshModelSI::getVertPosArray()
 
 Q_INVOKABLE void MeshModelSI::setVertPosArray( const Point3Vector& pa )
 {
-	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	for(int ii = 0; ii < mm.cm.vn;++ii)
 		mm.cm.vert[ii].P() = vcg::Point3f(pa[ii][0],pa[ii][1],pa[ii][2]);
 }
 
 Q_INVOKABLE void MeshModelSI::setVertNormArray( const Point3Vector& na )
 {
-	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	for(int ii = 0; ii < mm.cm.vn;++ii)
 		mm.cm.vert[ii].N() = vcg::Point3f(na[ii][0],na[ii][1],na[ii][2]);
 }
 
 Q_INVOKABLE Point3Vector MeshModelSI::getVertNormArray()
 {
 	Point3Vector pv;
-	for(unsigned int ii = 0; ii < mm.cm.vn;++ii)
+	for(int ii = 0; ii < mm.cm.vn;++ii)
 	{
 		QVector<float> p;
 		p << mm.cm.vert[ii].N().X() << mm.cm.vert[ii].N().Y() << mm.cm.vert[ii].N().Z();
