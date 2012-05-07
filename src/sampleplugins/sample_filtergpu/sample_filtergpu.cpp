@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -25,63 +25,63 @@
 #include <wrap/glw/glw.h>
 #include <QImage>
 
-// Constructor usually performs only two simple tasks of filling the two lists 
+// Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
 using namespace glw;
 
-ExtraSampleGPUPlugin::ExtraSampleGPUPlugin() 
-{ 
+ExtraSampleGPUPlugin::ExtraSampleGPUPlugin()
+{
 	typeList << FP_GPU_EXAMPLE;
-  
+
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
+// ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
 QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_GPU_EXAMPLE :  return QString("GPU Filter Example "); 
-		default : assert(0); 
+		case FP_GPU_EXAMPLE :  return QString("GPU Filter Example ");
+		default : assert(0);
 	}
   return QString();
 }
 
-// Info() must return the longer string describing each filtering action 
+// Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
  QString ExtraSampleGPUPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_GPU_EXAMPLE :  return QString("Small useless filter added only to show how to work with a gl render context inside a filter."); 
-		default : assert(0); 
+		case FP_GPU_EXAMPLE :  return QString("Small useless filter added only to show how to work with a gl render context inside a filter.");
+		default : assert(0);
 	}
 	return QString("Unknown Filter");
 }
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
+// The FilterClass describes in which generic class of filters it fits.
+// This choice affect the submenu in which each filter will be placed
 // More than a single class can be choosen.
 ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE :  return MeshFilterInterface::Generic; 
-		default : assert(0); 
+		case FP_GPU_EXAMPLE :  return MeshFilterInterface::Generic;
+		default : assert(0);
 	}
 	return MeshFilterInterface::Generic;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
+// For each parameter you need to define,
+// - the name of the parameter,
+// - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst) 
+void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst)
 {
 	(void)m;
 
@@ -95,7 +95,7 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 			parlst.addParam(new RichSaveFile ("ImageFileName",        "gpu_generated_image.png", "*.png", "Image File Name",        "The file name used to save the image."      ));
 			break;
 		}
-		default : assert(0); 
+		default : assert(0);
 	}
 }
 
@@ -138,7 +138,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			BufferHandle hIndexBuffer = createBuffer(ctx, isize);
 
 			{
-				BoundBuffer indexBuffer = ctx.bindIndexBuffer(hIndexBuffer);
+				BoundIndexBufferHandle indexBuffer = ctx.bindIndexBuffer(hIndexBuffer);
 
 				const CMeshO::VertexType * vbase   = &(mesh.vert[0]);
 				GLuint *                   indices = (GLuint *)indexBuffer->map(GL_WRITE_ONLY);
@@ -214,11 +214,11 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 
 			QImage image(int(width), int(height), QImage::Format_ARGB32);
 
-			ctx.bindFramebuffer(hFramebuffer);
-				GLW_CHECK_GL_FRAMEBUFFER_STATUS;
+			ctx.bindReadDrawFramebuffer(hFramebuffer);
+				GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
 
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				BoundProgram program = ctx.bindProgram(hProgram);
+				BoundProgramHandle program = ctx.bindProgram(hProgram);
 					program->setUniform("uLightDirectionVS", lightDirectionVS[0], lightDirectionVS[1], lightDirectionVS[2]);
 
 					glEnableClientState(GL_VERTEX_ARRAY);
@@ -240,7 +240,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 				ctx.unbindProgram();
 
 				glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-			ctx.unbindFramebuffer();
+			ctx.unbindReadDrawFramebuffer();
 
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
