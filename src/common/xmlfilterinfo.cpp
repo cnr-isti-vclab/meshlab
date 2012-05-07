@@ -725,7 +725,7 @@ void MLXMLUtilityFunctions::loadXMLFilter( const QString& filterName,MLXMLFilter
 		catch (ParsingException& e)
 		{
 			//Should happen for example when a filter has not a jsscriptcode element defined inside. it should not block the execution.
-			qDebug(e.what());
+			qDebug("loadXMLFilter Parsing Exception: %s",e.what());
 		}
 	}
 

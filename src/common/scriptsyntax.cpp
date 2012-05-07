@@ -545,7 +545,7 @@ JavaScriptLanguage::JavaScriptLanguage()
 	reserved << "false";
 	reserved << "null";
 
-	worddelimiter.setPattern("[\\s|\\t|\\n|\\r|=|;|,|\\(|\\)|{|}|\\[|\\]|\\||\\&|\\?|\\!|\\+|\\*|\\\|\\-|%|\"|<|>]");
+	worddelimiter.setPattern("[\\s|\\t|\\n|\\r|=|;|,|\\(|\\)|{|}|\\[|\\]|\\||\\&|\\?|\\!|\\+|\\*|\\\\|\\-|%|\"|<|>]");
 
 	//foreach(QString st,reserved)
 	//{

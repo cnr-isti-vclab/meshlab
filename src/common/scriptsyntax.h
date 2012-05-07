@@ -94,7 +94,7 @@ public:
 	enum LANG_TOKEN {RESERVED,NAMESPACE,FUNCTION,MEMBERFIELD};
 
 	MLScriptLanguage();
-	~MLScriptLanguage();
+	virtual ~MLScriptLanguage();
 	//a Library of functions is a list of functions expressed as NameSpace0.NameSpace1.----.NameSpaceN.fun(par0,par1,....,park) (if sep = "." openpar = "(") with NameSpace0 common to all the functions of a single library 
 	//the function will generate a SyntaxTree in order to easy manage SyntaxHighlighting and Auto-Completing.
 	void addLibrary(const QList<LibraryElementInfo>& funsigns);
@@ -131,6 +131,7 @@ class JavaScriptLanguage : public MLScriptLanguage
 {
 public:
 	JavaScriptLanguage();
+	~JavaScriptLanguage(){}
 	const QList<ExternalLib*> scriptLibraryFiles() const;
 };
 
