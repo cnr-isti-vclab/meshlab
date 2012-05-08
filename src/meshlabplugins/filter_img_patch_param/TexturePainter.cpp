@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -32,7 +32,7 @@ bool TexturePainter::init( int texSize )
 {
     // Init the off-screen rendering buffer.
     m_TexImg = glw::createTexture2D( m_Context, GL_RGB, texSize, texSize, GL_RGB, GL_UNSIGNED_BYTE );
-    glw::BoundTexture2D boundTex = m_Context.bindTexture2D( 0, m_TexImg );
+    glw::BoundTexture2DHandle boundTex = m_Context.bindTexture2D( m_TexImg, 0 );
     boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
@@ -40,7 +40,7 @@ bool TexturePainter::init( int texSize )
 
 
     // Init shaders used for color correction.
-    const std::string initVertSrc = GLW_STRINGFY
+    const std::string initVertSrc = GLW_STRINGIFY
     (
         void main()
         {
@@ -50,7 +50,7 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    const std::string initFragSrc = GLW_STRINGFY
+    const std::string initFragSrc = GLW_STRINGIFY
     (
         uniform sampler2D   u_Tex;
         uniform int         u_Radius;
@@ -72,7 +72,7 @@ bool TexturePainter::init( int texSize )
                     vec3 c2 = fetch( 1, x, y );
                     finalColor += 0.5*( c2 - c1 );
                 }
-    
+
             int diameter = 2*u_Radius + 1;
             finalColor /= diameter * diameter;
 
@@ -80,7 +80,7 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    const std::string correctionVertSrc = GLW_STRINGFY
+    const std::string correctionVertSrc = GLW_STRINGIFY
     (
         void main()
         {
@@ -88,7 +88,7 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    const std::string pushFragSrc = GLW_STRINGFY
+    const std::string pushFragSrc = GLW_STRINGIFY
     (
         uniform sampler2D u_Tex;
 
@@ -108,7 +108,7 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    const std::string pullFragSrc = GLW_STRINGFY
+    const std::string pullFragSrc = GLW_STRINGIFY
     (
         uniform sampler2D u_TexLower;
         uniform sampler2D u_TexUpper;
@@ -126,7 +126,7 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    const std::string combineFragSrc = GLW_STRINGFY
+    const std::string combineFragSrc = GLW_STRINGIFY
     (
         uniform sampler2D u_TexColor;
         uniform sampler2D u_TexCorrection;
@@ -137,7 +137,7 @@ bool TexturePainter::init( int texSize )
 
             vec4 color = texelFetch( u_TexColor, pos, 0 );
             color += texelFetch( u_TexCorrection, pos, 0 );
-    
+
             gl_FragColor = vec4( clamp(color.xyz,0.0,1.0), 1.0 );
         }
     );
@@ -189,7 +189,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
 
 
     // Initializes the off-screen rendering context.
-    m_Context.bindFramebuffer( m_TexFB );
+    m_Context.bindReadDrawFramebuffer( m_TexFB );
     glViewport( 0, 0, m_TexImg->width(), m_TexImg->height() );
 
     glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -215,11 +215,11 @@ void TexturePainter::paint( RasterPatchMap &patches )
                 rasterData[n+1] = qGreen(p);
                 rasterData[n+2] = qBlue (p);
             }
-        
+
         glw::Texture2DHandle rasterTex = glw::createTexture2D( m_Context, GL_RGB, rmImg.width(), rmImg.height(), GL_RGB, GL_UNSIGNED_BYTE, rasterData );
         delete [] rasterData;
 
-        glw::BoundTexture2D t = m_Context.bindTexture2D( 0, rasterTex );
+        glw::BoundTexture2DHandle t = m_Context.bindTexture2D( rasterTex, 0 );
         t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
 
 
@@ -257,7 +257,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
         glPopMatrix();
     }
 
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
 
     // Restore the previous OpenGL state.
@@ -284,9 +284,9 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
 
     glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(diffTex) );
 
-    m_Context.bindFramebuffer( fbuffer );
-    m_Context.bindTexture2D( 0, m_TexImg );
-    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Init );
+    m_Context.bindReadDrawFramebuffer( fbuffer );
+    m_Context.bindTexture2D( m_TexImg, 0 );
+    glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Init );
     p->setUniform( "u_Tex", 0 );
     p->setUniform1( "u_Radius", &filterSize );
 
@@ -318,7 +318,7 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
 
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
 
     glPopMatrix();
@@ -333,9 +333,9 @@ void TexturePainter::push( glw::Texture2DHandle &higherLevel,
     glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(lowerLevel) );
     glViewport( 0, 0, lowerLevel->width(), lowerLevel->height() );
 
-    m_Context.bindFramebuffer( fbuffer );
-    m_Context.bindTexture2D( 0, higherLevel );
-    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Push );
+    m_Context.bindReadDrawFramebuffer( fbuffer );
+    m_Context.bindTexture2D( higherLevel, 0 );
+    glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Push );
     p->setUniform( "u_Tex", 0 );
 
     glBegin( GL_QUADS );
@@ -347,7 +347,7 @@ void TexturePainter::push( glw::Texture2DHandle &higherLevel,
 
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 }
 
 
@@ -355,17 +355,17 @@ void TexturePainter::pull( glw::Texture2DHandle &lowerLevel,
                            glw::Texture2DHandle &higherLevel )
 {
     glw::Texture2DHandle tmp = glw::createTexture2D( m_Context, GL_RGBA32F, higherLevel->width(), higherLevel->height(), GL_RGBA, GL_FLOAT );
-    glw::BoundTexture2D boundTmp = m_Context.bindTexture2D( 0, tmp );
+    glw::BoundTexture2DHandle boundTmp = m_Context.bindTexture2D( tmp, 0 );
         boundTmp->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
     glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(tmp) );
     glViewport( 0, 0, tmp->width(), tmp->height() );
 
-    m_Context.bindFramebuffer( fbuffer );
-    m_Context.bindTexture2D( 0, lowerLevel );
-    m_Context.bindTexture2D( 1, higherLevel );
-    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Pull );
+    m_Context.bindReadDrawFramebuffer( fbuffer );
+    m_Context.bindTexture2D( lowerLevel,  0 );
+    m_Context.bindTexture2D( higherLevel, 1 );
+    glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Pull );
     p->setUniform( "u_TexLower", 0 );
     p->setUniform( "u_TexUpper", 1 );
 
@@ -379,7 +379,7 @@ void TexturePainter::pull( glw::Texture2DHandle &lowerLevel,
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindTexture2D( 1 );
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
     higherLevel = tmp;
 }
@@ -389,17 +389,17 @@ void TexturePainter::apply( glw::Texture2DHandle &color,
                             glw::Texture2DHandle &correction )
 {
     glw::Texture2DHandle tmp = glw::createTexture2D( m_Context, GL_RGB, color->width(), color->height(), GL_RGB, GL_UNSIGNED_BYTE );
-    glw::BoundTexture2D t = m_Context.bindTexture2D( 0, tmp );
+    glw::BoundTexture2DHandle t = m_Context.bindTexture2D( tmp, 0 );
         t->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
     m_TexFB = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(tmp) );
     glViewport( 0, 0, tmp->width(), tmp->height() );
 
-    m_Context.bindFramebuffer( m_TexFB );
-    m_Context.bindTexture2D( 0, color );
-    m_Context.bindTexture2D( 1, correction );
-    glw::BoundProgram p = m_Context.bindProgram( m_PushPullShader_Combine );
+    m_Context.bindReadDrawFramebuffer( m_TexFB );
+    m_Context.bindTexture2D( color,      0 );
+    m_Context.bindTexture2D( correction, 1 );
+    glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Combine );
     p->setUniform( "u_TexColor", 0 );
     p->setUniform( "u_TexCorrection", 1 );
 
@@ -413,7 +413,7 @@ void TexturePainter::apply( glw::Texture2DHandle &color,
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindTexture2D( 1 );
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
     color = tmp;
 }
@@ -434,7 +434,7 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
 
     pushPullStack.resize( 1 );
     pushPullStack[0] = glw::createTexture2D( m_Context, GL_RGBA32F, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE );
-    glw::BoundTexture2D t = m_Context.bindTexture2D( 0, pushPullStack[0] );
+    glw::BoundTexture2DHandle t = m_Context.bindTexture2D( pushPullStack[0], 0 );
         t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
@@ -446,7 +446,7 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
         unsigned int newDim = (pushPullStack.back()->width()/2) + (pushPullStack.back()->width()&1);
 
         glw::Texture2DHandle newLevel = glw::createTexture2D( m_Context, GL_RGBA32F, newDim, newDim, GL_RGB, GL_UNSIGNED_BYTE );
-        glw::BoundTexture2D t = m_Context.bindTexture2D( 0, newLevel );
+        glw::BoundTexture2DHandle t = m_Context.bindTexture2D( newLevel, 0 );
             t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
         m_Context.unbindTexture2D( 0 );
 
@@ -473,13 +473,15 @@ QImage TexturePainter::getTexture()
 
 
     // Recovers the content of the off-screen painting buffer and returns it as a QImage object.
-    m_Context.bindFramebuffer( m_TexFB );
+    m_Context.bindReadDrawFramebuffer( m_TexFB );
     glReadBuffer( GL_COLOR_ATTACHMENT0 );
 
     GLubyte *texData = new GLubyte [ 3*m_TexImg->width()*m_TexImg->height() ];
     glReadPixels( 0, 0, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE, texData );
 
-    QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
+	m_Context.unbindReadDrawFramebuffer();
+
+	QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
     for( int y=(int)m_TexImg->height()-1, n=0; y>=0; --y )
         for( int x= 0; x<(int)m_TexImg->width(); ++x, n+=3 )
             tex.setPixel( x, y, qRgb(texData[n+0],texData[n+1],texData[n+2]) );

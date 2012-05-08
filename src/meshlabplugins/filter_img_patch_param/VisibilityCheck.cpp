@@ -84,7 +84,7 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
 		m_FrameBuffer = glw::createFramebuffer ( m_Context, glw::renderbufferTarget(m_DepthRB), glw::renderbufferTarget(m_ColorRB) );
     }
 
-    m_Context.bindFramebuffer( m_FrameBuffer );
+    m_Context.bindReadDrawFramebuffer( m_FrameBuffer );
 
     m_ViewportMin = vcg::Point2i( 0, 0 );
     m_ViewportMax = vcg::Point2i( vp.X()-1, vp.Y()-1 );
@@ -208,7 +208,7 @@ bool VisibilityCheck_VMV2002::iteration( std::vector<unsigned char> &visBuffer )
 void VisibilityCheck_VMV2002::release()
 {
     GlShot< vcg::Shot<float> >::UnsetView();
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
     glPopAttrib();
 }
 
@@ -292,7 +292,7 @@ void VisibilityCheck_ShadowMap::setupShadowTexture()
                                         GL_DEPTH_COMPONENT,
                                         GL_INT );
 
-    glw::BoundTexture2D boundShadowMap = m_Context.bindTexture2D( 0, m_ShadowMap );
+    glw::BoundTexture2DHandle boundShadowMap = m_Context.bindTexture2D(m_ShadowMap, 0);
         boundShadowMap->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL               );
@@ -324,7 +324,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     // Perform an off-screen rendering pass so as to generate the a depth map of the model
     // from the viewpoint of the current raster's camera.
     glw::FramebufferHandle fbuffer = glw::createFramebuffer( m_Context, glw::texture2DTarget(m_ShadowMap) );
-    m_Context.bindFramebuffer( fbuffer );
+    m_Context.bindReadDrawFramebuffer( fbuffer );
 
     glViewport( 0, 0, m_ShadowMap->width(), m_ShadowMap->height() );
 
@@ -360,7 +360,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glEnd();
     }
 
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
 
     // Restore the previous OpenGL state.
@@ -374,7 +374,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
 
 bool VisibilityCheck_ShadowMap::initShaders()
 {
-    const std::string vertSrc = GLW_STRINGFY
+    const std::string vertSrc = GLW_STRINGIFY
     (
         void main()
         {
@@ -382,7 +382,7 @@ bool VisibilityCheck_ShadowMap::initShaders()
         }
     );
 
-    const std::string fragSrc = GLW_STRINGFY
+    const std::string fragSrc = GLW_STRINGIFY
     (
         uniform sampler2D       u_VertexMap;
         uniform sampler2D       u_NormalMap;
@@ -449,7 +449,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
                                         GL_FLOAT,
                                         mapData );
 
-    glw::BoundTexture2D boundTex = m_Context.bindTexture2D( 0, m_NormalMap );
+    glw::BoundTexture2DHandle boundTex = m_Context.bindTexture2D( m_NormalMap, 0 );
         boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
@@ -466,7 +466,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
                                         GL_FLOAT,
                                         mapData );
 
-    boundTex = m_Context.bindTexture2D( 0, m_VertexMap );
+    boundTex = m_Context.bindTexture2D( m_VertexMap, 0 );
         boundTex->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
@@ -522,14 +522,14 @@ void VisibilityCheck_ShadowMap::checkVisibility()
     updateShadowTexture();
 
 
-    m_Context.bindFramebuffer( m_FBuffer );
+    m_Context.bindReadDrawFramebuffer( m_FBuffer );
     glViewport( 0, 0, m_ColorBuffer->width(), m_ColorBuffer->height() );
 
-    m_Context.bindTexture2D( 0, m_VertexMap );
-    m_Context.bindTexture2D( 1, m_NormalMap );
-    m_Context.bindTexture2D( 2, m_ShadowMap );
+    m_Context.bindTexture2D( m_VertexMap, 0 );
+    m_Context.bindTexture2D( m_NormalMap, 1 );
+    m_Context.bindTexture2D( m_ShadowMap, 2 );
 
-    glw::BoundProgram boundShader = m_Context.bindProgram( m_VisDetectionShader );
+    glw::BoundProgramHandle boundShader = m_Context.bindProgram( m_VisDetectionShader );
     boundShader->setUniform( "u_VertexMap", 0 );
     boundShader->setUniform( "u_NormalMap", 1 );
     boundShader->setUniform( "u_SadowMap" , 2 );
@@ -557,5 +557,5 @@ void VisibilityCheck_ShadowMap::checkVisibility()
                   GL_UNSIGNED_BYTE,
                   &m_VertFlag[0] );
 
-    m_Context.unbindFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 }
