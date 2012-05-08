@@ -501,6 +501,15 @@ void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
         // Create the framebuffer into which the result of the visibility computation will be stored.
         m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RED, m_VertexMap->width(), m_VertexMap->height() );
         m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
+		glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
+		if(!hfb->isComplete());
+		{
+			m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RGBA8, m_VertexMap->width(), m_VertexMap->height() );
+			m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
+			glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
+
+		}
+		m_Context.unbindReadDrawFramebuffer();
     }
 }
 

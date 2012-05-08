@@ -190,6 +190,11 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
+	if ( vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0 ) 
+	{
+        errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+        return false; // can't continue, mesh can't be processed
+      }
 	glContext->makeCurrent();
     if( glewInit() != GLEW_OK )
         return false;
@@ -890,6 +895,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 
     // Recovers patches by extracting connected components of faces having the same reference image.
     t.start();
+	float oldArea = computeTotalPatchArea( patches );
     int nbPatches = extractPatches( patches, nullPatches, mesh, *faceVis, rasterList );
     Log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
     Log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
@@ -897,6 +903,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 
     // Extends each patch so as to include faces that belong to the other side of its boundary.
     t.start();
+	oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
             constructPatchBoundary( *p, *faceVis );
@@ -907,6 +914,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     // Compute the UV coordinates of all patches by projecting them onto their reference images.
     // UV are then defined in image space, ranging from [0,0] to [w,h].
     t.start();
+	oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         computePatchUV( mesh, rp.key(), rp.value() );
     Log( "PATCHES UV COMPUTATION: %.3f sec.", 0.001f*t.elapsed() );
@@ -914,7 +922,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 
     // Merge patches so as to reduce the occupied texture area when their bounding boxes overlap.
     t.start();
-    float oldArea = computeTotalPatchArea( patches );
+    oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         mergeOverlappingPatches( *rp );
     Log( "PATCH MERGING: %.3f sec.", 0.001f*t.elapsed() );
