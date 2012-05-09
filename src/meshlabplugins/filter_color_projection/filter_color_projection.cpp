@@ -262,21 +262,26 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
         if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
         {
           pp = raster->shot.Project((*vi).P());
-          
+          // pray is the vector from the point-to-be-colored to the camera center
+          Point3f pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
+
           //if inside image
           if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
           {
-
-            if(use_depth)
+            if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
             {
-              depth  = raster->shot.Depth((*vi).P());
-              pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1]));//rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
-            }
 
-            if(!use_depth || (depth <= (pdepth + eta)))
-            {
-              QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-              (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);          
+              if(use_depth)
+              {
+                depth  = raster->shot.Depth((*vi).P());
+                pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1]));//rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])];           
+              }
+
+              if(!use_depth || (depth <= (pdepth + eta)))
+              {
+                QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+                (*vi).C() = vcg::Color4b(qRed(pcolor), qGreen(pcolor), qBlue(pcolor), 255);          
+              }
             }
           }
         }
@@ -431,79 +436,86 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             {
               if(!(*vi).IsD() && (!onselection || (*vi).IsS()))
               {
+                // pp is the projected point in image space
                 pp = raster->shot.Project((*vi).P());
-                
+                // pray is the vector from the point-to-be-colored to the camera center
+	              Point3f pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
+
+
                 //if inside image
                 if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
                 {
-
-                  depth  = raster->shot.Depth((*vi).P());
-                  pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])]; 
-
-                  if(depth <= (pdepth + eta))
+                  if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
                   {
-                    // determine color
-                    QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-                    // determine weight
-                    pweight = 1.0;
-                    
-                    if(useangle)
+
+                    depth  = raster->shot.Depth((*vi).P());
+                    pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])]; 
+
+                    if(depth <= (pdepth + eta))
                     {
-                      Point3f pixnorm;
-                      Point3f viewaxis;
+                      // determine color
+                      QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+                      // determine weight
+                      pweight = 1.0;
+                      
+                      if(useangle)
+                      {
+                        Point3f pixnorm;
+                        Point3f viewaxis;
 
-                      pixnorm = (*vi).N();
-                      pixnorm.Normalize();
+                        pixnorm = (*vi).N();
+                        pixnorm.Normalize();
 
-                      viewaxis = raster->shot.GetViewPoint() - (*vi).P();
-                      viewaxis.Normalize();
+                        viewaxis = raster->shot.GetViewPoint() - (*vi).P();
+                        viewaxis.Normalize();
 
-                      float ang = abs(pixnorm * viewaxis);
-                      ang = min(1.0f, ang);
+                        float ang = abs(pixnorm * viewaxis);
+                        ang = min(1.0f, ang);
 
-                      pweight *= ang;
+                        pweight *= ang;
+                      }
+                      
+                      if(usedistance)
+                      {
+                        float distw = depth;
+                        distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99)); 
+
+                        pweight *= distw;
+                        pweight *= distw;
+                      }
+
+                      if(useborders)
+                      {
+                        double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
+                        double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+                        double borderw = min (xdist , ydist);
+                        //borderw = min(1.0,borderw); //debug debug
+                        //borderw = max(0.0,borderw); //debug debug
+
+                        pweight *= borderw;
+                      }                  
+
+                      if(usesilhouettes)
+                      {
+                        // here the silhouette weight is applied, but it is calculated before, on a per-image basis
+                        float silw = 1.0;
+                        silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
+                        //silw = min(1.0f,silw); //debug debug
+                        //silw = max(0.0f,silw); //debug debug 
+
+                        pweight *= silw;
+                      }
+
+                      if(usealphamask) //alpha channel of image is an additional mask
+                      {
+                        pweight *= (qAlpha(pcolor) / 255.0);
+                      }
+
+                      weights[buff_ind] += pweight;
+                      acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
+                      acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
+                      acc_blu[buff_ind] += (qBlue(pcolor) * pweight / 255.0);
                     }
-                    
-                    if(usedistance)
-                    {
-                      float distw = depth;
-                      distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99)); 
-
-                      pweight *= distw;
-                      pweight *= distw;
-                    }
-
-                    if(useborders)
-                    {
-                      double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-                      double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
-                      double borderw = min (xdist , ydist);
-                      //borderw = min(1.0,borderw); //debug debug
-                      //borderw = max(0.0,borderw); //debug debug
-
-                      pweight *= borderw;
-                    }                  
-
-                    if(usesilhouettes)
-                    {
-                      // here the silhouette weight is applied, but it is calculated before, on a per-image basis
-                      float silw = 1.0;
-                      silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
-                      //silw = min(1.0f,silw); //debug debug
-                      //silw = max(0.0f,silw); //debug debug 
-
-                      pweight *= silw;
-                    }
-
-                    if(usealphamask) //alpha channel of image is an additional mask
-                    {
-                      pweight *= (qAlpha(pcolor) / 255.0);
-                    }
-
-                    weights[buff_ind] += pweight;
-                    acc_red[buff_ind] += (qRed(pcolor) * pweight / 255.0);
-                    acc_grn[buff_ind] += (qGreen(pcolor) * pweight / 255.0);
-                    acc_blu[buff_ind] += (qBlue(pcolor) * pweight / 255.0);
                   }
                 }
               }
@@ -721,73 +733,78 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             for(texcount=0; texcount < texels.size(); texcount++)
             {
               pp = raster->shot.Project(texels[texcount].meshpoint);
-              
+              // pray is the vector from the point-to-be-colored to the camera center
+              Point3f pray = (raster->shot.GetViewPoint() - texels[texcount].meshpoint).Normalize();
+
               //if inside image
               if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
               {
-
-                depth  = raster->shot.Depth(texels[texcount].meshpoint);
-                pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])]; 
-
-                if(depth <= (pdepth + eta))
+                if((pray.dot(-raster->shot.Axis(2))) <= 0.0)
                 {
-                  // determine color
-                  QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
-                  // determine weight
-                  pweight = 1.0;
-                  
-                  if(useangle)
+
+                  depth  = raster->shot.Depth(texels[texcount].meshpoint);
+                  pdepth = rendermanager->depth->getval(int(pp[0]), int(pp[1])); //  rendermanager->depth[(int(pp[1]) * raster->shot.Intrinsics.ViewportPx[0]) + int(pp[0])]; 
+
+                  if(depth <= (pdepth + eta))
                   {
-                    Point3f pixnorm;
-                    Point3f viewaxis;
+                    // determine color
+                    QRgb pcolor = raster->currentPlane->image.pixel(pp[0],raster->shot.Intrinsics.ViewportPx[1] - pp[1]);
+                    // determine weight
+                    pweight = 1.0;
+                    
+                    if(useangle)
+                    {
+                      Point3f pixnorm;
+                      Point3f viewaxis;
 
-                    pixnorm = texels[texcount].meshnormal;
-                    pixnorm.Normalize();
+                      pixnorm = texels[texcount].meshnormal;
+                      pixnorm.Normalize();
 
-                    viewaxis = raster->shot.GetViewPoint() - texels[texcount].meshpoint;
-                    viewaxis.Normalize();
+                      viewaxis = raster->shot.GetViewPoint() - texels[texcount].meshpoint;
+                      viewaxis.Normalize();
 
-                    float ang = abs(pixnorm * viewaxis);
-                    ang = min(1.0f, ang);
+                      float ang = abs(pixnorm * viewaxis);
+                      ang = min(1.0f, ang);
 
-                    pweight *= ang;
+                      pweight *= ang;
+                    }
+                    
+                    if(usedistance)
+                    {
+                      float distw = depth;
+                      distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99)); 
+
+                      pweight *= distw;
+                      pweight *= distw;
+                    }
+
+                    if(useborders)
+                    {
+                      double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
+                      double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
+                      double borderw = min (xdist , ydist);
+
+                      pweight *= borderw;
+                    }                  
+
+                    if(usesilhouettes)
+                    {
+                      // here the silhouette weight is applied, but it is calculated before, on a per-image basis
+                      float silw = 1.0;
+                      silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
+                      pweight *= silw;
+                    } 
+
+                    if(usealphamask) //alpha channel of image is an additional mask
+                    {
+                      pweight *= (qAlpha(pcolor) / 255.0);
+                    }
+
+                    accums[texcount].weights += pweight;
+                    accums[texcount].acc_red += (qRed(pcolor) * pweight / 255.0);
+                    accums[texcount].acc_grn += (qGreen(pcolor) * pweight / 255.0);
+                    accums[texcount].acc_blu += (qBlue(pcolor) * pweight / 255.0);
                   }
-                  
-                  if(usedistance)
-                  {
-                    float distw = depth;
-                    distw = 1.0 - (distw - (allcammindepth*0.99)) / ((allcammaxdepth*1.01) - (allcammindepth*0.99)); 
-
-                    pweight *= distw;
-                    pweight *= distw;
-                  }
-
-                  if(useborders)
-                  {
-                    double xdist = 1.0 - (abs(pp[0] - (raster->shot.Intrinsics.ViewportPx[0] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[0] / 2.0));
-                    double ydist = 1.0 - (abs(pp[1] - (raster->shot.Intrinsics.ViewportPx[1] / 2.0)) / (raster->shot.Intrinsics.ViewportPx[1] / 2.0));
-                    double borderw = min (xdist , ydist);
-
-                    pweight *= borderw;
-                  }                  
-
-                  if(usesilhouettes)
-                  {
-                    // here the silhouette weight is applied, but it is calculated before, on a per-image basis
-                    float silw = 1.0;
-                    silw = silhouette_buff->getval(int(pp[0]), int(pp[1])) / maxsildist;
-                    pweight *= silw;
-                  } 
-
-                  if(usealphamask) //alpha channel of image is an additional mask
-                  {
-                    pweight *= (qAlpha(pcolor) / 255.0);
-                  }
-
-                  accums[texcount].weights += pweight;
-                  accums[texcount].acc_red += (qRed(pcolor) * pweight / 255.0);
-                  accums[texcount].acc_grn += (qGreen(pcolor) * pweight / 255.0);
-                  accums[texcount].acc_blu += (qBlue(pcolor) * pweight / 255.0);
                 }
               }
               
