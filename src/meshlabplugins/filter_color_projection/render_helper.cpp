@@ -202,7 +202,7 @@ void RenderHelper::renderScene(vcg::Shotf &view, MeshModel *mesh, RenderingMode 
 
   float _near, _far;
 
-  if((camNear == 0) || (camFar == 0))  // if not provided by caller, then evaluate using bbox
+  if((camNear <= 0) || (camFar == 0))  // if not provided by caller, then evaluate using bbox
   {
     _near=0.1;
     _far=20000;
