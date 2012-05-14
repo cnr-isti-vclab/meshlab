@@ -54,11 +54,11 @@ bool TexturePainter::init( int texSize )
     (
         uniform sampler2D   u_Tex;
         uniform int         u_Radius;
-        vec2                c_PixelSize = 1.0 / vec2(textureSize(u_Tex,0));
+        uniform vec2        u_PixelSize;
 
         vec3 fetch( int texUnit, int x, int y )
         {
-            return texture2D( u_Tex, gl_TexCoord[texUnit].xy + c_PixelSize.x * vec2(x,y) ).xyz;
+            return texture2D( u_Tex, gl_TexCoord[texUnit].xy + u_PixelSize * vec2(x,y) ).xyz;
         }
 
         void main()
@@ -90,16 +90,17 @@ bool TexturePainter::init( int texSize )
 
     const std::string pushFragSrc = GLW_STRINGIFY
     (
-        uniform sampler2D u_Tex;
+        uniform sampler2D   u_TexHigher;
+        uniform vec2        u_PixelSize;
 
         void main()
         {
-            ivec2 pos = ivec2( gl_FragCoord.xy );
+            vec2 pos = 2.0 * ivec2( gl_FragCoord.xy );
 
             vec4 avg = vec4( 0.0 );
             for( int y=0; y<2; ++y )
                 for( int x=0; x<2; ++x )
-                    avg += texelFetch( u_Tex, 2*pos+ivec2(x,y), 0 );
+                    avg += texture2D( u_TexHigher, (pos+vec2(x,y))*u_PixelSize );
 
             if( avg.w < 0.5 )
                 gl_FragColor = vec4( 0.0 );
@@ -110,17 +111,17 @@ bool TexturePainter::init( int texSize )
 
     const std::string pullFragSrc = GLW_STRINGIFY
     (
-        uniform sampler2D u_TexLower;
-        uniform sampler2D u_TexUpper;
+        uniform sampler2D   u_TexLower;
+        uniform sampler2D   u_TexHigher;
+        uniform vec2        u_PixelSize;
 
         void main()
         {
-            vec4 color = texelFetch( u_TexUpper, ivec2(gl_FragCoord.xy), 0 );
+            vec2 texCoord = u_PixelSize * gl_FragCoord.xy;
+
+            vec4 color = texture2D( u_TexHigher, texCoord );
             if( color.w < 0.5 )
-            {
-                vec2 pos = gl_FragCoord.xy / vec2(textureSize(u_TexUpper,0).xy);
-                color = texture2D( u_TexLower, pos );
-            }
+                color = texture2D( u_TexLower, texCoord );
 
             gl_FragColor = color;
         }
@@ -128,15 +129,16 @@ bool TexturePainter::init( int texSize )
 
     const std::string combineFragSrc = GLW_STRINGIFY
     (
-        uniform sampler2D u_TexColor;
-        uniform sampler2D u_TexCorrection;
+        uniform sampler2D   u_TexColor;
+        uniform sampler2D   u_TexCorrection;
+        uniform vec2        u_PixelSize;
 
         void main()
         {
-            ivec2 pos = ivec2( gl_FragCoord.xy );
+            vec2 texCoord = gl_FragCoord.xy * u_PixelSize;
 
-            vec4 color = texelFetch( u_TexColor, pos, 0 );
-            color += texelFetch( u_TexCorrection, pos, 0 );
+            vec4 color = texture2D( u_TexColor,      texCoord ) +
+                         texture2D( u_TexCorrection, texCoord );
 
             gl_FragColor = vec4( clamp(color.xyz,0.0,1.0), 1.0 );
         }
@@ -289,6 +291,7 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
     glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Init );
     p->setUniform( "u_Tex", 0 );
     p->setUniform1( "u_Radius", &filterSize );
+    p->setUniform( "u_PixelSize", 1.0f/m_TexImg->width(), 1.0f/m_TexImg->height() );
 
     glViewport( 0, 0, diffTex->width(), diffTex->height() );
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -336,7 +339,8 @@ void TexturePainter::push( glw::Texture2DHandle &higherLevel,
     m_Context.bindReadDrawFramebuffer( fbuffer );
     m_Context.bindTexture2D( higherLevel, 0 );
     glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Push );
-    p->setUniform( "u_Tex", 0 );
+    p->setUniform( "u_TexHigher", 0 );
+    p->setUniform( "u_PixelSize", 1.0f/higherLevel->width(), 1.0f/higherLevel->height() );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -367,7 +371,8 @@ void TexturePainter::pull( glw::Texture2DHandle &lowerLevel,
     m_Context.bindTexture2D( higherLevel, 1 );
     glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Pull );
     p->setUniform( "u_TexLower", 0 );
-    p->setUniform( "u_TexUpper", 1 );
+    p->setUniform( "u_TexHigher", 1 );
+    p->setUniform( "u_PixelSize", 1.0f/tmp->width(), 1.0f/tmp->height() );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -390,7 +395,7 @@ void TexturePainter::apply( glw::Texture2DHandle &color,
 {
     glw::Texture2DHandle tmp = glw::createTexture2D( m_Context, GL_RGB, color->width(), color->height(), GL_RGB, GL_UNSIGNED_BYTE );
     glw::BoundTexture2DHandle t = m_Context.bindTexture2D( tmp, 0 );
-        t->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+        t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
     m_TexFB = glw::createFramebuffer( m_Context, glw::RenderTarget(), glw::texture2DTarget(tmp) );
@@ -402,6 +407,7 @@ void TexturePainter::apply( glw::Texture2DHandle &color,
     glw::BoundProgramHandle p = m_Context.bindProgram( m_PushPullShader_Combine );
     p->setUniform( "u_TexColor", 0 );
     p->setUniform( "u_TexCorrection", 1 );
+    p->setUniform( "u_PixelSize", 1.0f/color->width(), 1.0f/color->height() );
 
     glBegin( GL_QUADS );
         glVertex2i( -1, -1 );
@@ -435,7 +441,7 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
     pushPullStack.resize( 1 );
     pushPullStack[0] = glw::createTexture2D( m_Context, GL_RGBA32F, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE );
     glw::BoundTexture2DHandle t = m_Context.bindTexture2D( pushPullStack[0], 0 );
-        t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+        t->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
     m_Context.unbindTexture2D( 0 );
 
     pushPullInit( patches, pushPullStack[0], filterSize );
@@ -447,7 +453,7 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
 
         glw::Texture2DHandle newLevel = glw::createTexture2D( m_Context, GL_RGBA32F, newDim, newDim, GL_RGB, GL_UNSIGNED_BYTE );
         glw::BoundTexture2DHandle t = m_Context.bindTexture2D( newLevel, 0 );
-            t->setSampleMode( glw::TextureSampleMode(GL_LINEAR,GL_LINEAR,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
+            t->setSampleMode( glw::TextureSampleMode(GL_NEAREST,GL_NEAREST,GL_CLAMP,GL_CLAMP,GL_CLAMP) );
         m_Context.unbindTexture2D( 0 );
 
         push( pushPullStack.back(), newLevel );

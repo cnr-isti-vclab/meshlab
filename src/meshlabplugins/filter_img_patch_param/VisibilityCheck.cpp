@@ -390,16 +390,17 @@ bool VisibilityCheck_ShadowMap::initShaders()
         uniform mat4            u_ShadowProj;
         uniform vec3            u_Viewpoint;
 		uniform vec3            u_ZAxis;
+        uniform vec2            u_PixelSize;
 
         const float             V_UNDEFINED = 0.0;
         const float             V_BACKFACE  = 1.0 / 255.0;
         const float             V_VISIBLE   = 2.0 / 255.0;
 
-
         void main()
         {
-            vec3 pos = texelFetch( u_VertexMap, ivec2(gl_FragCoord.xy), 0 ).xyz;
-            vec3 nor = texelFetch( u_NormalMap, ivec2(gl_FragCoord.xy), 0 ).xyz;
+            vec2 texCoord = gl_FragCoord.xy * u_PixelSize;
+            vec3 pos = texture2D( u_VertexMap, texCoord ).xyz;
+            vec3 nor = texture2D( u_NormalMap, texCoord ).xyz;
 
             if( dot(u_Viewpoint-pos,nor) < 0.0 || dot(u_Viewpoint-pos,-u_ZAxis) > 0.0 )
                 gl_FragColor = vec4( V_BACKFACE );
@@ -546,6 +547,7 @@ void VisibilityCheck_ShadowMap::checkVisibility()
     boundShader->setUniform4x4( "u_ShadowProj", m_ShadowProj.V(), false );
     boundShader->setUniform3( "u_Viewpoint", m_Raster->shot.GetViewPoint().V() );
 	boundShader->setUniform3( "u_ZAxis", m_Raster->shot.Axis(2).V() );
+    boundShader->setUniform( "u_PixelSize", 1.0f/m_VertexMap->width(), 1.0f/m_VertexMap->height() );
 
 
     glBegin( GL_QUADS );

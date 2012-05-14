@@ -147,11 +147,11 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
         case FP_PATCH_PARAM_ONLY:
 		{
             par.addParam( new RichBool( "useDistanceWeight",
-                                        true,
+                                        false,
                                         "Use distance weight",
                                         "Includes a weight accounting for the distance to the camera during the computation of reference images" ) );
             par.addParam( new RichBool( "useImgBorderWeight",
-                                        true,
+                                        false,
                                         "Use image border weight",
                                         "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
 		    par.addParam( new RichBool( "useAlphaWeight",
