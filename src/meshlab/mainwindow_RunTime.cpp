@@ -2065,7 +2065,8 @@ bool MainWindow::importMesh(QString fileName)
 		}
 		int mask = 0;
 		//MeshModel *mm= new MeshModel(gla->meshDoc);
-    MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),"");
+    QFileInfo info(fileName);
+    MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),info.fileName());
 		qb->show();
 		QTime t;t.start();
     bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
