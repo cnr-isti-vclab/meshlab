@@ -69,11 +69,13 @@ void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla,QPainter* p)
   {
     Point3f a,b;
     rubberband.GetPoints(a,b);
-    //rubberband.RenderLabel(QString("%1").arg(Distance(a,b)),gla);
-	vcg::glLabel::render(p,b,QString("%1").arg(Distance(a,b)));
+	  vcg::glLabel::render(p,b,QString("%1").arg(Distance(a,b)));
 
     if(!was_ready)
+    {
       suspendEditToggle();
+      gla->log->Logf(GLLogStream::FILTER, "Distance: %f",Distance(a,b));
+    }
     was_ready=true;
   }
   assert(!glGetError());
