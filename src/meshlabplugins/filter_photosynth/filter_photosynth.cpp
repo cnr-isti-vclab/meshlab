@@ -203,7 +203,7 @@ bool FilterPhotosynthPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, 
 	          //this way the user can choose which point cloud the raster has to align with
 	          RasterModel *rm = md.addNewRaster();
 	          QString imgName = imageDir.filePath(QString("IMG_%1.jpg").arg(img._ID) );
-	          rm->addPlane(new Plane(rm,imgName,QString("")));
+	          rm->addPlane(new Plane(imgName,QString("")));
 	          rm->shot = s;
 	          rm->setLabel(QString("IMG_%1_%2.jpg").arg(int(img._ID),3,10,QLatin1Char('0')).arg(sys->_id));
 	        }
