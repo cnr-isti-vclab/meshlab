@@ -547,8 +547,8 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 
 RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 {
-  if(rasterModel->visible) setIcon(0,QIcon(":/images/layer_eye_open.png"));
-                      else setIcon(0,QIcon(":/images/layer_eye_close.png"));
+  if(rasterModel->visible) setIcon(0,QIcon(":/images/ok.png"));
+                      else setIcon(0,QIcon(":/images/stop.png"));
 
   setText(1, QString::number(rasterModel->id()));
 
