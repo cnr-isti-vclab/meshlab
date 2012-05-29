@@ -216,11 +216,17 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     CMeshO &mesh = md.mm()->cm;
 
     std::list<vcg::Shotf> initialShots;
+    QList<RasterModel*> activeRasters;
     foreach( RasterModel *rm, md.rasterList )
     {
         initialShots.push_back( rm->shot );
         rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
+        if( rm->visible )
+          activeRasters.push_back( rm );
     }
+
+    if( activeRasters.empty() )
+      return false;
 
 
     switch( ID(act) )
@@ -232,7 +238,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
             patchBasedTextureParameterization( patches,
                                                nullPatches,
                                                mesh,
-                                               md.rasterList,
+                                               activeRasters,
                                                par );
 
             break;
@@ -251,7 +257,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                 patchBasedTextureParameterization( patches,
                                                    nullPatches,
                                                    mesh,
-                                                   md.rasterList,
+                                                   activeRasters,
                                                    par );
 
                 TexturePainter painter( *m_Context, par.getInt("textureSize") );
@@ -282,7 +288,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
             for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
                 vi->Q() = 0.0f;
 
-            foreach( RasterModel *rm, md.rasterList )
+            foreach( RasterModel *rm, activeRasters )
             {
                 visibility.setRaster( rm );
                 visibility.checkVisibility();
@@ -308,7 +314,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
             for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
                 fi->Q() = 0.0f;
 
-            foreach( RasterModel *rm, md.rasterList )
+            foreach( RasterModel *rm, activeRasters )
             {
                 visibility.setRaster( rm );
                 visibility.checkVisibility();
