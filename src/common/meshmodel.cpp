@@ -298,7 +298,7 @@ void MeshDocument::updateRenderStateMeshes(const QList<int>& mm,const int meshup
 		if (mesh != NULL)
 			renderState().update(mesh->id(),mesh->cm,meshupdatemask);
 	}
-	if ((mm.size() > 0) && !(meshupdatemask & MeshModel::MM_NONE))
+	if ((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE))
 		emit documentUpdated();
 	currTime.start();
 }
@@ -314,7 +314,7 @@ void MeshDocument::updateRenderStateRasters(const QList<int>& rm,const int raste
 		if (raster != NULL)
 			renderState().update(raster->id(),*raster,rasterupdatemask);
 	}
-	if ((rm.size() > 0) && !(rasterupdatemask & RasterModel::RM_NONE))
+	if ((rm.size() > 0) && (rasterupdatemask != RasterModel::RM_NONE))
 		emit documentUpdated();
 	currTime.start();
 }
@@ -336,7 +336,7 @@ void MeshDocument::updateRenderState(const QList<int>& mm,const int meshupdatema
 		if (raster != NULL)
 			renderState().update(raster->id(),*raster,rasterupdatemask);
 	}
-	if (((mm.size() > 0) && !(meshupdatemask & MeshModel::MM_NONE)) || (rm.size() > 0 && !(rasterupdatemask & RasterModel::RM_NONE)))
+	if (((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE)) || (rm.size() > 0 && (rasterupdatemask != RasterModel::RM_NONE)))
 		emit documentUpdated();
 	currTime.start();
 }
@@ -541,7 +541,8 @@ void MeshModelState::create(int _mask, MeshModel* _m)
 
 bool MeshModelState::apply(MeshModel *_m)
 {
-  if(_m != m) return false;
+  if(_m != m) 
+	  return false;
     if(changeMask & MeshModel::MM_VERTCOLOR)
     {
         if(vertColor.size() != m->cm.vert.size()) return false;
@@ -831,7 +832,7 @@ MeshLabRenderState::~MeshLabRenderState()
 
 bool MeshLabRenderState::update(const int id,CMeshO& mm,const int updateattributesmask)
 {
-	if (updateattributesmask & MeshModel::MM_NONE)
+	if (updateattributesmask == MeshModel::MM_NONE)
 		return false;
 	lockRenderState(MESH,WRITE);
 	QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.find(id);
