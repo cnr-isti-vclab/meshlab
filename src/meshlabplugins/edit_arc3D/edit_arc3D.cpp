@@ -255,7 +255,7 @@ void EditArc3DPlugin::ExportPly()
 				Point3f corr=er.modelList[i].TraCorrection(mm,subSampleVal*2,minCountVal,0);
 				er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
 				RasterModel* rm=md->addNewRaster();
-				rm->addPlane(new Plane(md->rm(),er.modelList[i].textureName,QString("RGB")));
+				rm->addPlane(new Plane(er.modelList[i].textureName,QString("RGB")));
 				rm->setLabel(er.modelList[i].textureName);
 				rm->shot=er.modelList[i].shot;
 				rm->shot.RescalingWorld(scalingFactor, false);
