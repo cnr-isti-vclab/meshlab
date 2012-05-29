@@ -1132,10 +1132,16 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
 	bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
 	bool filtercpp = (iFilter != NULL) && (!jscode);
-	initDocumentMeshRenderState(mfc,env);
-	initDocumentRasterRenderState(mfc,env);
 
 	QString fname = mfc->act->text();
+	QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+	int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
+	if (postCondMask != MeshModel::MM_NONE)
+		initDocumentMeshRenderState(mfc,env);
+
+	initDocumentRasterRenderState(mfc,env);
+
 	qb->show();
 	if (filtercpp)
 		iFilter->setLog(&meshDoc()->Log);
@@ -1145,9 +1151,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
 	MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
 	//int req=iFilter->getRequirements(action);
-	QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
-	QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-	int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
 	meshDoc()->mm()->updateDataMask(postCondMask);
 	qApp->restoreOverrideCursor();
 
