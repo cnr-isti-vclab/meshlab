@@ -11,9 +11,10 @@ HEADERS += jhead.h
 
 SOURCES += 		jpgfile.c \
 				jhead.c  \
-                myglob.c \
                 paths.c \
                 exif.c \
                 iptc.c \
                 gpsinfo.c \
                 makernote.c
+
+win32:SOURCES += myglob.c
