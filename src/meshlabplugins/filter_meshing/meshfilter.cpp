@@ -1389,6 +1389,7 @@ case FP_COMPUTE_PRINC_CURV_DIR:
   m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	float AngleDeg = par.getFloat("AngleDeg");
 	tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
+	m.updateDataMask(MeshModel::MM_POLYGONAL);
   } break;
 
   case FP_VATTR_SEAM :
