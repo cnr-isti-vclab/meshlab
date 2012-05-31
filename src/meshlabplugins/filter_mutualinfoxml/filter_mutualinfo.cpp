@@ -78,9 +78,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 			break;
 		}
 
-		this->glContext->makeCurrent();
-		if (this->initGL() == false)
-			return false;
+		
 
 		vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
 		vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
@@ -93,24 +91,56 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 			normals[i] = align.mesh->vert[i].N();
 			colors[i] = align.mesh->vert[i].C();
 		}
+		
+		align.shot = env.evalShot("Shot");
 
-		for(int i = 0; i < align.mesh->fn; i++) 
-			for(int k = 0; k < 3; k++) 
-				indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
+		align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
+		align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
+		
+		for (int i=0; i<(int)(solver.maxiter/30); i++)
+		{
+			Log( "Step %i of %i.", i+1, (int)(solver.maxiter/30) );
+		
+			this->glContext->makeCurrent();
+			if (this->initGL() == false)
+				return false;
 
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), vertices, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), normals, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), colors, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+			for(int i = 0; i < align.mesh->fn; i++) 
+				for(int k = 0; k < 3; k++) 
+					indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
 
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
-		glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int), 
-			indices, GL_STATIC_DRAW_ARB);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), vertices, GL_STATIC_DRAW_ARB);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), normals, GL_STATIC_DRAW_ARB);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), colors, GL_STATIC_DRAW_ARB);
+			glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
+			glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int), 
+				indices, GL_STATIC_DRAW_ARB);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+
+
+			if (solver.fine_alignment)
+				solver.optimize(&align, &mutual, align.shot);
+			else
+				solver.iterative(&align, &mutual, align.shot);
+
+			md.rm()->shot=align.shot;
+			float ratio=(float)md.rm()->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
+			md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();
+			md.rm()->shot.Intrinsics.ViewportPx[1]=md.rm()->currentPlane->image.height();
+			md.rm()->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+			md.rm()->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+			md.rm()->shot.Intrinsics.CenterPx[0]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0);
+			md.rm()->shot.Intrinsics.CenterPx[1]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0);
+			this->glContext->doneCurrent();
+			QList<int> rl;
+			rl << md.rm()->id();
+			md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
+		}
 
 		// it is safe to delete after copying data to VBO
 		delete []vertices;
@@ -118,29 +148,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 		delete []colors;
 		delete []indices;
 
-		align.shot = env.evalShot("Shot");
 
-		align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
-		align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
-
-
-		if (solver.fine_alignment)
-			solver.optimize(&align, &mutual, align.shot);
-		else
-			solver.iterative(&align, &mutual, align.shot);
-
-		md.rm()->shot=align.shot;
-		float ratio=(float)md.rm()->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
-		md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();
-		md.rm()->shot.Intrinsics.ViewportPx[1]=md.rm()->currentPlane->image.height();
-		md.rm()->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-		md.rm()->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-		md.rm()->shot.Intrinsics.CenterPx[0]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0);
-		md.rm()->shot.Intrinsics.CenterPx[1]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0);
-		this->glContext->doneCurrent();
-		QList<int> rl;
-		rl << md.rm()->id();
-		md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
 		return true;
 	}
 	return false;

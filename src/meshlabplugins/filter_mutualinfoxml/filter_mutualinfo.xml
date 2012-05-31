@@ -1,23 +1,23 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
  <PLUGIN pluginName="MutualInfo" pluginAuthor="Matteo Dellepiane" pluginEmail="matteo.dellepiane@isti.cnr.it">
-  <FILTER filterFunction="filterMutualInfo" filterName="FilterMutualInfo" filterPre="MM_NONE" filterClass="Camera" filterPost="MM_UNKNOWN" filterArity="SingleMesh" filterRasterArity="SingleRaster" filterIsInterruptible="true">
-   <FILTER_HELP><![CDATA[Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009]]></FILTER_HELP>
+  <FILTER filterFunction="filterMutualInfo" filterName="Image alignment: Mutual Information" filterPre="MM_NONE" filterClass="Camera" filterPost="MM_UNKNOWN" filterArity="SingleMesh" filterRasterArity="SingleRaster" filterIsInterruptible="true">
+   <FILTER_HELP><![CDATA[Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009, <a href="http://vcg.isti.cnr.it/Publications/2009/CDPS09/" target="_blank">Get link</a>]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
    <PARAM parName="RenderingMode" parIsImportant="true" parType="Enum { Combined : 0 | Normal_Map : 1 | Color_per_vertex : 2 | Specular : 3 | Silhouette : 4 | Specular_combined : 5 }" parDefault="0">
     <PARAM_HELP><![CDATA[Rendering modes.]]></PARAM_HELP>
     <ENUM_GUI guiLabel="Rendering Mode:"/>
    </PARAM>
    <PARAM parName="Shot" parIsImportant="true" parType="CameraShot" parDefault="0">
-    <PARAM_HELP><![CDATA[The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated.
+    <PARAM_HELP><![CDATA[If the point of view has been set by hand, it must be retrieved from current trackball. 
 ]]></PARAM_HELP>
-    <SHOT_GUI guiLabel="Smoothing steps"/>
+    <SHOT_GUI guiLabel="Starting shot"/>
    </PARAM>
    <PARAM parName="EstimateFocal" parIsImportant="true" parType="Boolean" parDefault="false">
-    <PARAM_HELP><![CDATA[Estimate focal length]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[Estimate focal length: if not checked, only extrinsic parameters are estimated]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Estimate focal length"/>
    </PARAM>
    <PARAM parName="Fine" parIsImportant="true" parType="Boolean" parDefault="true">
-    <PARAM_HELP><![CDATA[Fine alignment]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[Fine alignment: the perturbations applied to reach the alignment are smaller]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Fine Alignment"/>
    </PARAM>
    <PARAM parName="NumOfIterations" parIsImportant="true" parType="Int" parDefault="100">
@@ -33,7 +33,7 @@
     <EDIT_GUI guiLabel="Expected Variance"/>
    </PARAM>
    <PARAM parName="BackgroundWeight" parIsImportant="true" parType="Int" parDefault="2">
-    <PARAM_HELP><![CDATA[Weight of background pixels]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[Weight of background pixels (1, as all the other pixels; 2, one half of the other pixels etc etc)]]></PARAM_HELP>
     <EDIT_GUI guiLabel="BackgroundWeight"/>
    </PARAM>
   </FILTER>
