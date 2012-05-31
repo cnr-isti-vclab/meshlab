@@ -124,10 +124,12 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
 ///// Mutual info calculation: every 30 iterations, the mail glarea is updated
-
-		for (int i=0; i<(int)(solver.maxiter/30); i++)
+		int rounds=(int)(solver.maxiter/30);
+		for (int i=0; i<rounds; i++)
 		{
-			Log( "Step %i of %i.", i+1, (int)(solver.maxiter/30) );
+			Log( "Step %i of %i.", i+1, rounds );
+
+			solver.maxiter=30;
 
 			if (solver.fine_alignment)
 				solver.optimize(&align, &mutual, align.shot);
