@@ -31,7 +31,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 {
 	if (md.mm() == NULL)
 		return false;
-	if (filterName == "FilterMutualInfo")
+	if (filterName == "Image alignment: Mutual Information")
 	{
 		Solver solver;
 		MutualInfo mutual;
@@ -78,7 +78,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 			break;
 		}
 
-		
+///// Loading geometry		
 
 		vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
 		vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
@@ -96,14 +96,15 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 
 		align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
 		align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
-		
-		for (int i=0; i<(int)(solver.maxiter/30); i++)
-		{
-			Log( "Step %i of %i.", i+1, (int)(solver.maxiter/30) );
-		
-			this->glContext->makeCurrent();
+
+///// Initialize GLContext
+
+		Log( "Initialize GL");
+		this->glContext->makeCurrent();
 			if (this->initGL() == false)
 				return false;
+
+			Log( "Done");
 
 			for(int i = 0; i < align.mesh->fn; i++) 
 				for(int k = 0; k < 3; k++) 
@@ -122,6 +123,11 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 				indices, GL_STATIC_DRAW_ARB);
 			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 
+///// Mutual info calculation: every 30 iterations, the mail glarea is updated
+
+		for (int i=0; i<(int)(solver.maxiter/30); i++)
+		{
+			Log( "Step %i of %i.", i+1, (int)(solver.maxiter/30) );
 
 			if (solver.fine_alignment)
 				solver.optimize(&align, &mutual, align.shot);
@@ -136,11 +142,12 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 			md.rm()->shot.Intrinsics.PixelSizeMm[0]/=ratio;
 			md.rm()->shot.Intrinsics.CenterPx[0]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0);
 			md.rm()->shot.Intrinsics.CenterPx[1]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0);
-			this->glContext->doneCurrent();
+			
 			QList<int> rl;
 			rl << md.rm()->id();
 			md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
 		}
+		this->glContext->doneCurrent();
 
 		// it is safe to delete after copying data to VBO
 		delete []vertices;
