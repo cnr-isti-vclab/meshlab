@@ -36,7 +36,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_layer \
                 meshlabplugins/filter_measure \
                 meshlabplugins/filter_meshing \
-				meshlabplugins/filter_mutualinfo \
+				meshlabplugins/filter_mutualinfoxml \
                 meshlabplugins/filter_mls \
                 meshlabplugins/filter_photosynth \
                 meshlabplugins/filter_plymc \
