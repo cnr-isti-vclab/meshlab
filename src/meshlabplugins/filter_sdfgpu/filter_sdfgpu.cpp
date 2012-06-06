@@ -1008,7 +1008,7 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
         glEndQueryARB( GL_SAMPLES_PASSED_ARB );
 
         glGetQueryObjectuivARB( mOcclusionQuery, GL_QUERY_RESULT_ARB, &mPixelCount);
-         // Log(0, "Pixel Count %i \n", mPixelCount );
+          Log(0, "Pixel Count %i \n", mPixelCount );
         if(mPixelCount > PIXEL_COUNT_THRESHOLD )
         {
             mTempDepthComplexity++;
@@ -1016,18 +1016,15 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
             return true;
         }
         else return false;
-
-   }
-
-
-
+	}
+	
     return true;
 }
 
 bool SdfGpuPlugin::postCalculate(unsigned int peelingIteration)
 {
 
-    if( /*mAction == SDF_DEPTH_COMPLEXITY &&*/ peelingIteration != 0)
+   /* if( mAction == SDF_DEPTH_COMPLEXITY && peelingIteration != 0)
     {
      /*   glGetQueryObjectuivARB( mOcclusionQuery, GL_QUERY_RESULT_ARB, &mPixelCount);
          // Log(0, "Pixel Count %i \n", mPixelCount );
@@ -1036,8 +1033,8 @@ bool SdfGpuPlugin::postCalculate(unsigned int peelingIteration)
             mTempDepthComplexity++;
             return true;
         }
-        else return false;*/
-    }
+        else return false;
+    }*/
 
     return true;
 }
@@ -1067,9 +1064,6 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         fillFrameBuffer(i%2==0, mm);
 
-        mFboArray[j]->unbind();
-
-
         //Cut off useless passes
         if(!postRender(i))
             return;
@@ -1077,7 +1071,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
             if(i==(peelingIteration-1))
                 Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
 
-
+		  mFboArray[j]->unbind();
              // Log(0,"i %i j %i",i,j);
          //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)
          if(i%2)
