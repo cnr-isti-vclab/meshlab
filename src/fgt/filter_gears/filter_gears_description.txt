@@ -1,0 +1,6 @@
+according to the standards for the tooth profile. Hence: <ul>
+<li>addendum = module: height of the tooth top from the radius; </li
+<li>dedendum = 1.25*module: depth of the tooth bottom from the radius; </li>
+<li>fillet radius = module/3: radius of the circle that connects the profile to the root; </li>
+<li>root radius = radius - dedendum; </li>
+<li>base radius = radius*cos(pressure angle): the start point of the involute that defines the profile.</li></ul>
