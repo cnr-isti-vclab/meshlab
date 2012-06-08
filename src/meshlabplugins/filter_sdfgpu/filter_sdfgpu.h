@@ -26,11 +26,9 @@ public:
 
     QString filterInfo(FilterIDType filterId) const;
 
-    int     getRequirements(QAction *action);
-
-    virtual FilterClass getClass()
+    FilterClass getClass(QAction *)
     {
-      return MeshFilterInterface::Generic;
+      return MeshFilterInterface::VertexColoring;
     }
 
     //Main plugin function
@@ -69,10 +67,10 @@ public:
     void calculateSdfHW(FramebufferObject* fboFront, FramebufferObject* fboBack, FramebufferObject* fboPrevBack, const vcg::Point3f& cameraDir );
 
     //Copy sdf values from result texture to the mesh (vertex quality)
-    void applySdfPerVertex(MeshModel &m, float numberOfRays);
+    void applySdfPerVertex(MeshModel &m);
 
     //Copy sdf values from result texture to the mesh (face quality)
-    void applySdfPerFace(MeshModel &m, float numberOfRays);
+    void applySdfPerFace(MeshModel &m);
 
 
     //Obscurance calculation for each depth peeling iteration
@@ -87,8 +85,6 @@ public:
     void preRender(unsigned int peelingIteration);
 
     bool postRender(unsigned int peelingIteration);
-
-    bool postCalculate(unsigned int peelingIteration);
 
   protected:
 
