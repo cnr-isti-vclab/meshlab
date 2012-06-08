@@ -780,8 +780,8 @@ void GLArea::keyPressEvent ( QKeyEvent * e )
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
-	e->accept();
-	setFocus();
+	e->accept();	
+	if(!this->hasFocus()) this->setFocus();
 
 	if(!isRaster() || isRaster())
 	{
