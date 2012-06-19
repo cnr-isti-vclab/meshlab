@@ -95,10 +95,17 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	gla=_gla;
 
 	int id=0;
+  int numOfMeshes = md->meshList.size();
   meshTree.clear();
   foreach(MeshModel *mm, md->meshList)
 	{
-		mm->cm.C()=Color4b::Scatter(100, id,.2f,.7f);
+    // assigns random color: if less than 50 meshes, color is truly unique, and the less meshes, the more different they will be
+    // if above 50, truly unique color would geenrate too similar colors, so total number of unique color
+    // is capped to 50 and the color reused, id that are close will have different color anyway
+    if(numOfMeshes < 50)
+		  mm->cm.C()=Color4b::Scatter(numOfMeshes+1, id, .2f, .7f);
+    else
+		  mm->cm.C()=Color4b::Scatter(51, id%50, .2f, .7f);
 		meshTree.nodeList.push_back(new MeshNode(mm,id));
 		++id;
 	}
