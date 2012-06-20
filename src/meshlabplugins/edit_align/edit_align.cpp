@@ -192,6 +192,7 @@ void EditAlignPlugin::glueByPicking()
  AlignPairDialog *dd=new AlignPairDialog();
  dd->aa->initMesh(currentNode(), &meshTree);
  dd->aa->isUsingVertexColor = !alignDialog->ui.falseColorCB->isChecked();
+ dd->aa->usePointRendering = alignDialog->ui.pointRenderingCB->isChecked();
  dd->exec();	
  
  if(dd->result()==QDialog::Rejected) return;

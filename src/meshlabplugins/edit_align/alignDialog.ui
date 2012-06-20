@@ -215,10 +215,17 @@
           <item>
            <widget class="QCheckBox" name="falseColorCB">
             <property name="text">
-             <string>False Colors</string>
+             <string>use False Colors</string>
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="pointRenderingCB">
+            <property name="text">
+             <string>use Point Rendering</string>
             </property>
            </widget>
           </item>

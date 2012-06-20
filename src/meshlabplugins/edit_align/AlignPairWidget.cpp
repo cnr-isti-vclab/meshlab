@@ -43,6 +43,7 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	tt[0]=&trackLeft;
 	tt[1]=&trackRight;
   isUsingVertexColor = false;
+  usePointRendering = false;
 	
 	freePickedPointVec.clear();
 	gluedPickedPointVec.clear();
@@ -104,7 +105,7 @@ void AlignPairWidget::paintGL ()
         vcg::GLW::DrawMode localDM=vcg::GLW::DMFlat;
         vcg::GLW::ColorMode localCM = vcg::GLW::CMPerMesh;
         if((freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR))&&(isUsingVertexColor)) localCM = vcg::GLW::CMPerVert;
-        if(freeMesh->m->cm.fn==0) localDM=vcg::GLW::DMPoints;
+        if((freeMesh->m->cm.fn==0)||(usePointRendering)) localDM=vcg::GLW::DMPoints;
 				glPushMatrix();
 					bool allowScaling = qobject_cast<AlignPairDialog *>(parent())->allowScalingCB->isChecked();
 					if(allowScaling)  vcg::glScale(3.0f/bb.Diag());

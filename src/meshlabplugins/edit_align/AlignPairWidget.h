@@ -77,6 +77,9 @@ public:
 
   // use mesh vertex colors
   bool isUsingVertexColor;
+
+  // force point rendering
+  bool usePointRendering;
 public:
 			void initMesh(MeshNode *left, MeshTree *right);
 };
