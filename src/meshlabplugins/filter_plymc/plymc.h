@@ -223,7 +223,7 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
         }
     }
 
-    tri::UpdatePosition<SMesh>::Matrix(m,Tr,false);
+    tri::UpdatePosition<SMesh>::Matrix(m,Tr,true);
     tri::UpdateBounding<SMesh>::Box(m);
     printf("Init Mesh %s (%ivn,%ifn)\n",filename,m.vn,m.fn);
 
@@ -389,11 +389,12 @@ void Process(vcg::CallBackPos *cb=0)
 		}
 		/********** Grande loop di scansione di tutte le mesh *********/
 		bool res=false;
-		for(int i=0;i<MP.size();++i)
+    if(!cb) printf("Step 1: Converting meshes into volume\n");
+    for(int i=0;i<MP.size();++i)
 		{
 		  Box3f bbb= MP.bb(i);
       /**********************/
-      cb((i+1)/MP.size(),"Step 1: Converting meshes into volume");
+      if(cb) cb((i+1)/MP.size(),"Step 1: Converting meshes into volume");
       /**********************/
       // if bbox of mesh #i is part of the subblock, then process it
 		  if(bbb.Collide(VV.SubBoxSafe))
@@ -465,7 +466,8 @@ void Process(vcg::CallBackPos *cb=0)
 		  Box3i currentSubBox=VV.SubPartSafe;
 		  Point3i currentSubBoxRes=VV.ssz;
       /**********************/
-      cb(50,"Step 2: Marching Cube...");
+      if(cb) cb(50,"Step 2: Marching Cube...");
+      else printf("Step 2: Marching Cube...\n");
       /**********************/
       walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
 
@@ -494,7 +496,8 @@ void Process(vcg::CallBackPos *cb=0)
         if(p.SimplificationFlag)
         {
           /**********************/
-          cb(50,"Step 3: Simplify mesh...");
+          if(cb) cb(50,"Step 3: Simplify mesh...");
+          else printf("Step 3: Simplify mesh...\n");
           /**********************/
           p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
           me.face.EnableVFAdjacency();

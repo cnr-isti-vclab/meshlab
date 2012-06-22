@@ -86,7 +86,7 @@ template<class TriMeshType>
 {
     std::vector< std::string > meshnames;
     std::vector<vcg::Matrix44f> TrV;
-    std::vector<float> WV;		    // vettore con i pesi da applicare alla mesh.
+    std::vector<float> WV;		        // vettore con i pesi da applicare alla mesh.
     std::vector<vcg::Box3f> BBV;	    // vettore con i bbox trasformati delle mesh da scannare.
     vcg::Box3f fullBBox;
     MeshCache<TriMeshType> MC;
@@ -157,17 +157,17 @@ template<class TriMeshType>
 
     bool InitBBox()
     {
-	fullBBox.SetNull();
+      fullBBox.SetNull();
 
-        for(int i=0;i<int(meshnames.size());++i)
-    {
+      for(int i=0;i<int(meshnames.size());++i)
+      {
             Box3d b;
             bool ret;
             Matrix44f mt;
             Matrix44f Id; Id.SetIdentity();
             mt.Import(TrV[i]);
             printf("bbox scanning %4i/%i [%16s]      \r",i+1,(int)meshnames.size(), meshnames[i].c_str());
-            if(tri::io::Importer<TriMeshType>::FileExtension(meshnames[i],"PLY"))
+            if(tri::io::Importer<TriMeshType>::FileExtension(meshnames[i],"PLY") || tri::io::Importer<TriMeshType>::FileExtension(meshnames[i],"ply"))
             {
                 if(!(TrV[i]==Id))
                     ret=ply::ScanBBox(meshnames[i].c_str(),BBV[i],mt,true,0);
