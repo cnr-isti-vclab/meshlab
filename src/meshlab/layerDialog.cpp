@@ -240,10 +240,13 @@ void LayerDialog::updateLog(GLLogStream &log)
 	QString post   = "</font>";
     QString logText;
 	foreach(logElem, logStringList){
-		 logText += logElem.second;
-		if(logElem.first == GLLogStream::SYSTEM)  logText = preSystem + logText + post;
-		if(logElem.first == GLLogStream::WARNING) logText = preWarn + logText + post;
-		if(logElem.first == GLLogStream::FILTER)  logText = preFilter + logText + post;
+		 logText += logElem.second + "<BR>";
+		if(logElem.first == GLLogStream::SYSTEM)  
+			logText = preSystem + logText + post;
+		if(logElem.first == GLLogStream::WARNING) 
+			logText = preWarn + logText + post;
+		if(logElem.first == GLLogStream::FILTER)  
+			logText = preFilter + logText + post;
 	}
 	ui->logPlainTextEdit->appendHtml(logText);
 }
