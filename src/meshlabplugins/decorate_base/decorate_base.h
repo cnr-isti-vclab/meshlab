@@ -135,6 +135,7 @@ public:
 
   inline QString ShowNonRegular() const     { return  "MeshLab::Decoration::ShowNonRegular" ; }
   inline QString ShowSeparatrix() const     { return  "MeshLab::Decoration::ShowSeparatrix" ; }
+  inline QString ShowBorderFlag() const     { return  "MeshLab::Decoration::ShowBorderFlag" ; }
 
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }

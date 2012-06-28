@@ -834,56 +834,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     qDebug("Found %i vertices with valence 3",val3cnt);
     qDebug("Found %i vertices with valence 5",val5cnt);
 
-#if 1
-    CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"SeparatrixGraph");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,sgH))
-      sgH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m->cm,std::string("SeparatrixGraph"));
-    vector<PointPC> *sgP = &sgH();
-    sgP->clear();
-
-    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-
-    SimpleTempData<CMeshO::FaceContainer, Point3i > VisitedEdges(m->cm.face,Point3i(0,0,0));
-
-
-    for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
-    {
-      for(int i=0;i<3;++i)
-      {
-        if(ValencyCounter[(*fi).V(i)] != 8)
-        {
-          if(VisitedEdges[*fi][i]==0 && !(*fi).IsF(i))
-          {
-            CVertexO* startV=(*fi).V(i);
-            face::Pos <CFaceO> sp(&*fi,i,startV);
-            do
-            {
-              VisitedEdges[sp.F()][sp.E()]=1;
-              sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
-              sp.FlipV();
-              sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
-              sp.FlipE();
-              if(!sp.F()->IsF(sp.E())) sp.FlipF();
-              else
-              {
-                sp.FlipF();sp.FlipE();sp.FlipF();
-                assert(!sp.F()->IsF(sp.E()));
-              }
-              sp.FlipE();
-              if(!sp.F()->IsF(sp.E())) sp.FlipF();
-              else
-              {
-                sp.FlipF();sp.FlipE();sp.FlipF();
-                assert(!sp.F()->IsF(sp.E()));
-              }
-            }
-            while(ValencyCounter[sp.V()]==8 && VisitedEdges[sp.F()][sp.E()]==0);
-          }
-        }
-      } // end for i in 1..3
-    }  // end foreach face
-
-#endif
   } break;
 
 
@@ -986,6 +936,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
   }break;
   case DP_SHOW_NON_MANIF_EDGE :
   {
+    bool showBorderFlag = rm->getBool(ShowBorderFlag());
     MeshModel *m=md.mm();
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"NonManifEdgeVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"NonManifFaceVector");
@@ -1016,7 +967,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
           const int faceOnEdgeNum =  min(pos.NumberOfFacesOnEdge(),4);
 
           if(faceOnEdgeNum == 2) continue;
-
+          if(faceOnEdgeNum == 1 && showBorderFlag==false) continue;
           BVp->push_back(make_pair((*fi).V0(i)->P(),edgeCol[faceOnEdgeNum]));
           BVp->push_back(make_pair((*fi).V1(i)->P(),edgeCol[faceOnEdgeNum]));
           FVp->push_back(make_pair((*fi).V0(i)->P(),faceCol[faceOnEdgeNum]));
@@ -1423,6 +1374,10 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
           parset.addParam(new RichFloat(NormalLength(),0.05,"Normal Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         }
       } break;
+    case DP_SHOW_NON_MANIF_EDGE :{
+       assert(!parset.hasParameter(ShowBorderFlag()));
+       parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Edges","If true also the edges and the faces involved in border edges are shown in green"));
+    } break;
     case DP_SHOW_FACE_QUALITY_HISTOGRAM :
     case DP_SHOW_VERT_QUALITY_HISTOGRAM :{
         if(!parset.hasParameter(HistBinNumParam()))
