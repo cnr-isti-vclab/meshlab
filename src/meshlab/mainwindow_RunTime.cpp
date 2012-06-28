@@ -263,7 +263,8 @@ void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
 	filterMenuSmoothing->setEnabled(act);
 	filterMenuQuality->setEnabled(act); 
 	filterMenuNormal->setEnabled(act);
-	filterMenuLayer->setEnabled(act);
+	filterMenuMeshLayer->setEnabled(act);
+	filterMenuRasterLayer->setEnabled(act);
 	filterMenuRangeMap->setEnabled(act);
 	filterMenuPointSet->setEnabled(act);
 	filterMenuSampling->setEnabled(act);

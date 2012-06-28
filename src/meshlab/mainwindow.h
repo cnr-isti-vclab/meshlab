@@ -291,7 +291,7 @@ public:
     static QStatusBar *_qsb=0;
     return _qsb;
   }
-	QMenu* layerMenu() { return filterMenuLayer; }
+    QMenu* layerMenu() { return filterMenuMeshLayer; }
 	
 
 private:
@@ -315,7 +315,8 @@ private:
   QMenu *filterMenuColorize;
   QMenu *filterMenuSmoothing;
   QMenu *filterMenuQuality; 
-  QMenu *filterMenuLayer;
+  QMenu *filterMenuMeshLayer;
+  QMenu *filterMenuRasterLayer;
   QMenu *filterMenuNormal;
   QMenu *filterMenuRangeMap;
   QMenu *filterMenuPointSet;
