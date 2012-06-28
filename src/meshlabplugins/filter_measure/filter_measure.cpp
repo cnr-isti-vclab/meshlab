@@ -62,7 +62,7 @@ MeasureTopoTag::MeasureTopoTag(MeshDocument &parent, MeshModel *mm, QString name
 
 
 // Core Function doing the actual mesh processing.
-bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb )
+bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
 {
 	if (filterName == "Compute Topological Measures")
 		{
@@ -90,7 +90,9 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			tri::Clean<CMeshO>::CountEdges(m, edgeNum, borderNum);
 			int holeNum;
 			Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
-			Log("Boundary Edges %i",borderNum); 
+			int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
+			Log("Unreferenced Vertices %i",unrefVertNum);
+			Log("Boundary Edges %i",borderNum);
 			tag->edges = edgeNum;
 			tag->boundaryEdges=borderNum;
 			tag->vertManifNum= vertManifNum;
@@ -98,7 +100,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 
 
 			int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
-			Log("Mesh is composed by %i connected component(s)",connectedComponentsNum);
+			Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
 			tag->connectComp=connectedComponentsNum;
 
 			if(edgeManifNum==0 && vertManifNum==0){
@@ -117,7 +119,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 				Log("Mesh has %i holes",holeNum);
 				tag->holes=holeNum;
 
-				int genus = tri::Clean<CMeshO>::MeshGenus(m.vn, edgeNum, m.fn, holeNum, connectedComponentsNum);
+				int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
 				Log("Genus is %i",genus);
 				tag->genus=genus;
 			}
@@ -276,7 +278,6 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 	if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
 		{
 			CMeshO &m=md.mm()->cm;
-			("minVal");
 			float RangeMin = env.evalFloat("HistMin");
 			float RangeMax = env.evalFloat("HistMax");
 			int binNum     = env.evalInt("binNum");
@@ -299,12 +300,11 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 						H.Add((*fi).Q());
 					}
 			}
-      Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
+			Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
 			for(int i=1;i<=binNum;++i)
-        Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
-
-      Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
-      return true;
+			  Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
+			Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
+			return true;
         }
     return false;
 }
