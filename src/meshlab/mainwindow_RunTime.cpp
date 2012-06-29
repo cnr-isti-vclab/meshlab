@@ -1940,7 +1940,8 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 	pCurrentIOPlugin->setLog(GLA()->log);
 	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,*prePar,QCallBack,this /*gla*/))
 	{
-		QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text
+		QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text+
+		pCurrentIOPlugin->clearErrorString();
     meshDoc()->setBusy(false);
 		return false;
 	}
@@ -1954,7 +1955,11 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
   QString err = pCurrentIOPlugin->errorMsg();
   if (!err.isEmpty())
-    QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
+  {
+	QMessageBox::warning(this, tr("Opening Problems"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg());
+	pCurrentIOPlugin->clearErrorString();
+  }
+
 
   saveRecentFileList(fileName);
 
