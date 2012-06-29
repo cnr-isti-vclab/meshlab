@@ -103,7 +103,6 @@ public slots:
   void meshItemClicked(QTreeWidgetItem * , int );
   void showEvent ( QShowEvent * event );
   void showContextMenu(const QPoint& pos);
-  void showLayerMenu();
 	void adaptLayout(QTreeWidgetItem * item);
 	void removeTag();
 
@@ -115,7 +114,9 @@ private:
 	QMenu *tagMenu;
 	QAction *removeTagAct;
 	QAction *updateTagAct;
-
+	QMenu *rasterMenu;
+	QAction* addNewRasterAct;
+	QAction* removeCurrentRasterAct;
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
 

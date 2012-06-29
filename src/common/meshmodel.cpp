@@ -253,8 +253,12 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 	}
 
 	if(currentRaster == rasterToDel)
-		setCurrentRaster(-1);
-
+	{
+		if (rasterList.size() > 0)
+			setCurrentRaster(rasterList.at(0)->id());
+		else
+			setCurrentRaster(-1);
+	}
 	emit rasterSetChanged();
 
 	return true;

@@ -65,7 +65,7 @@ public:
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.2Beta"); }
+  const QString appVer() const {return tr("1.3.2"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
@@ -82,9 +82,10 @@ public slots:
   bool appendProject(QString fileName=QString());
   void updateCustomSettings();
 
-private slots:
+
   void delCurrentMesh();
   void delCurrentRaster();
+private slots:
   void endEdit();
   void updateDocumentScriptBindings();
   void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);

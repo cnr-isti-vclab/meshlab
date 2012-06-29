@@ -45,6 +45,15 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	LayerDialog::ui->setupUi(this);
 	mw=qobject_cast<MainWindow *>(parent);
 
+	rasterMenu = new QMenu(this);
+	addNewRasterAct = new QAction(tr("Add New Raster"),this);
+	rasterMenu->addAction(addNewRasterAct);
+	connect(addNewRasterAct,SIGNAL(triggered()),mw,SLOT(importRaster()));
+	removeCurrentRasterAct = new QAction(tr("Remove Current Raster"),this);
+	rasterMenu->addAction(removeCurrentRasterAct);
+	connect(removeCurrentRasterAct,SIGNAL(triggered()),mw,SLOT(delCurrentRaster()));
+
+
 	tagMenu = new QMenu(this);
 	removeTagAct = new QAction(tr("&Remove Tag"),this);
 	tagMenu->addAction(removeTagAct);
@@ -63,15 +72,16 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	// The following connection is used to associate the click with the switch between raster and mesh view. 
   connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
-  connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(importMesh()) );
-	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );
+  /*connect(ui->addButton, SIGNAL(clicked()), mw, SLOT(importMesh()) );
+	connect(ui->deleteButton, SIGNAL(clicked()), mw, SLOT(delCurrentMesh()) );*/
 
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui->rasterTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),
-            this, SLOT(showContextMenu(const QPoint&)));
-	connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
+	connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
+	connect(ui->rasterTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
+	//connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
 }
@@ -178,45 +188,60 @@ void LayerDialog::showEvent ( QShowEvent * /* event*/ )
 	updateTable();
 }
 
-void LayerDialog::showLayerMenu()
-{
-	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
-		MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
-		if (mainwindow)
-		{
-			mainwindow->layerMenu()->popup(ui->menuButton->mapToGlobal(QPoint(10,10)));
-			return;
-		}
-	}
-}
-
 void LayerDialog::showContextMenu(const QPoint& pos)
 {
-	// switch layer
-  MeshTreeWidgetItem   *mItem = dynamic_cast<MeshTreeWidgetItem   *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-  RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-  QTreeWidgetItem     *qtItem = dynamic_cast<QTreeWidgetItem *>     (ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-	if(mItem){ 
-		if (mItem->m) mw->meshDoc()->setCurrentMesh(mItem->m->id());
+	QObject* sigsender = sender();
+	if (sigsender == ui->meshTreeWidget)
+	{
+		MeshTreeWidgetItem   *mItem = dynamic_cast<MeshTreeWidgetItem   *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
+		QTreeWidgetItem     *qtItem = dynamic_cast<QTreeWidgetItem *>     (ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
 
-		foreach (QWidget *widget, QApplication::topLevelWidgets()) {
-			MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
-			if (mainwindow)
+		if(mItem)
+		{ 
+			if (mItem->m) mw->meshDoc()->setCurrentMesh(mItem->m->id());
+
+			foreach (QWidget *widget, QApplication::topLevelWidgets()) 
 			{
-				mainwindow->layerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
-				return;
+				MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
+				if (mainwindow)
+				{
+					mainwindow->layerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
+					return;
+				}
+			}
+		}
+		else 
+		{
+			if(qtItem)
+			{
+				bool ok;
+				int idToRemove = qtItem->text(2).toInt(&ok);
+				if(ok)
+				{
+					removeTagAct->setData(idToRemove);
+					tagMenu->popup(mapToGlobal(pos));
+				}
 			}
 		}
 	}
-	else if(qtItem){
-		bool ok;
-		int idToRemove = qtItem->text(2).toInt(&ok);
-		if(ok){
-			removeTagAct->setData(idToRemove);
-			tagMenu->popup(mapToGlobal(pos));
+	// switch layer
+	else
+	{
+		if (sigsender == ui->rasterTreeWidget)
+		{
+			RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->rasterTreeWidget->itemAt(pos.x(),pos.y()));
+	
+			if (rItem)
+			{ 
+				if (rItem->r)
+				{
+					mw->meshDoc()->setCurrentRaster(rItem->r->id());
+					rasterMenu->popup(ui->rasterTreeWidget->mapToGlobal(pos));
+					return;
+				}
+			}
 		}
 	}
-	else return; // user clicked on other info 
 }
 
 void LayerDialog::removeTag()
@@ -240,13 +265,14 @@ void LayerDialog::updateLog(GLLogStream &log)
 	QString post   = "</font>";
     QString logText;
 	foreach(logElem, logStringList){
-		 logText += logElem.second + "<BR>";
+		 logText += logElem.second;
 		if(logElem.first == GLLogStream::SYSTEM)  
 			logText = preSystem + logText + post;
 		if(logElem.first == GLLogStream::WARNING) 
 			logText = preWarn + logText + post;
 		if(logElem.first == GLLogStream::FILTER)  
 			logText = preFilter + logText + post;
+		logText += "<BR>";
 	}
 	ui->logPlainTextEdit->appendHtml(logText);
 }
