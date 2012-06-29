@@ -292,7 +292,8 @@ public:
     static QStatusBar *_qsb=0;
     return _qsb;
   }
-    QMenu* layerMenu() { return filterMenuMeshLayer; }
+    QMenu* meshLayerMenu() { return filterMenuMeshLayer; }
+	QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
 	
 
 private:

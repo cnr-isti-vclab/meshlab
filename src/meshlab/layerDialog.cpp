@@ -45,14 +45,6 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	LayerDialog::ui->setupUi(this);
 	mw=qobject_cast<MainWindow *>(parent);
 
-	rasterMenu = new QMenu(this);
-	addNewRasterAct = new QAction(tr("Add New Raster"),this);
-	rasterMenu->addAction(addNewRasterAct);
-	connect(addNewRasterAct,SIGNAL(triggered()),mw,SLOT(importRaster()));
-	removeCurrentRasterAct = new QAction(tr("Remove Current Raster"),this);
-	rasterMenu->addAction(removeCurrentRasterAct);
-	connect(removeCurrentRasterAct,SIGNAL(triggered()),mw,SLOT(delCurrentRaster()));
-
 
 	tagMenu = new QMenu(this);
 	removeTagAct = new QAction(tr("&Remove Tag"),this);
@@ -205,7 +197,7 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 				MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
 				if (mainwindow)
 				{
-					mainwindow->layerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
+					mainwindow->meshLayerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
 					return;
 				}
 			}
@@ -236,8 +228,16 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 				if (rItem->r)
 				{
 					mw->meshDoc()->setCurrentRaster(rItem->r->id());
-					rasterMenu->popup(ui->rasterTreeWidget->mapToGlobal(pos));
-					return;
+
+					foreach (QWidget *widget, QApplication::topLevelWidgets()) 
+					{
+						MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
+						if (mainwindow)
+						{
+							mainwindow->rasterLayerMenu()->popup(ui->rasterTreeWidget->mapToGlobal(pos));
+							return;
+						}
+					}
 				}
 			}
 		}
