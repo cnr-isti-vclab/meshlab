@@ -196,7 +196,6 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 
 void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
-
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
     vLayout->setAlignment(Qt::AlignTop);
@@ -211,7 +210,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
 		stdfieldwidgets.push_back(rwc.lastCreated);
 		helpList.push_back(rwc.lastCreated->helpLab);
 	} // end for each parameter
-
+	
 	this->setMinimumSize(vLayout->sizeHint());
 	this->showNormal();
 	this->adjustSize();
@@ -1266,7 +1265,6 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
 		gridLay = qobject_cast<QGridLayout*>(p->layout());
 		assert(gridLay != 0);
-
 		row = gridLay->rowCount();
 		//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
 		if ((row == 1) && (rpar->val->isBool()))	
@@ -1293,6 +1291,13 @@ MeshLabWidget::~MeshLabWidget()
 	delete helpLab;
 }
 
+void MeshLabWidget::setEqualSpaceForEachColumn()
+{
+	int singlewidth = gridLay->geometry().width() / gridLay->columnCount();
+	for (int ii = 0;ii < gridLay->columnCount();++ii)
+		gridLay->setColumnMinimumWidth(ii,singlewidth);
+}
+
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
 BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 :MeshLabWidget(p,rb)
@@ -1314,7 +1319,6 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
-
 }
 
 void BoolWidget::collectWidgetValue()
@@ -1350,6 +1354,7 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 	gridLay->addWidget(lab,row,0,Qt::AlignTop);
 	gridLay->addWidget(lned,row,1,Qt::AlignTop);
 	connect(lned,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
+	lned->setAlignment(Qt::AlignLeft);
 }
 
 LineEditWidget::~LineEditWidget()
@@ -1381,7 +1386,6 @@ void IntWidget::setWidgetValue( const Value& nv )
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
 :LineEditWidget(p,rpar)
 {
-  this->lned->setAlignment(Qt::AlignRight);
 	lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
 

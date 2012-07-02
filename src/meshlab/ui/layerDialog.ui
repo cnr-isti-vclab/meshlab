@@ -55,6 +55,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="verticalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
         <attribute name="headerVisible">
          <bool>false</bool>
         </attribute>

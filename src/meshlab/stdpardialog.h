@@ -56,6 +56,8 @@ public:
 signals:
 	void parameterChanged();
 protected:
+	void setEqualSpaceForEachColumn();
+
 	int row;
 	QGridLayout* gridLay;
 	void InitRichParameter(RichParameter* rpar);
