@@ -183,7 +183,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
       tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
       tri::UpdateSelection<CMeshO>::FaceClear(currentMesh->cm);
 
-      currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+      currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO );
 
       Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
     }
