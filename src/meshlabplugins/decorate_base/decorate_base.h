@@ -147,8 +147,6 @@ public:
   inline QString AreaHistParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
 
-  bool textureWireParam;
-
 signals:
   void askViewerShot(QString);
 

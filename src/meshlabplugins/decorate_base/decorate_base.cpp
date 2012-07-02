@@ -1246,7 +1246,10 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
   float maxWide = ch.MaxCount();
   float histWide=maxWide;
   if(par->getBool(this->UseFixedHistParam()))
+  {
     histWide = par->getFloat(this->FixedHistWidthParam());
+    if(histWide ==0 ) histWide = maxWide;
+  }
   float bn = ch.BinNum();
 
   float border = 0.1;
@@ -1315,7 +1318,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,painter,qf,90.0f);
 
 
-    glPushAttrib(GL_ENABLE_BIT);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
