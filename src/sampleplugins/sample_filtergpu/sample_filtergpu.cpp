@@ -192,8 +192,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			const vcg::Point3f lightDirectionVS = vcg::Point3f(0.0f, 0.0f, -1.0f).Normalize();
 
 			glEnable(GL_DEPTH_TEST);
-			glClearColor(GLfloat(backgroundColor.red())/255.0f, GLfloat(backgroundColor.green())/255.0f, GLfloat(backgroundColor.blue())/255.0f, 1.0f);
-			//glFragColor(1.0f, 0.0f, 0.0f, 
+			glClearColor(GLfloat(backgroundColor.red())/255.0f, GLfloat(backgroundColor.green())/255.0f, GLfloat(backgroundColor.blue())/255.0f, 0.0f);
 
 			glViewport(0, 0, width, height);
 
