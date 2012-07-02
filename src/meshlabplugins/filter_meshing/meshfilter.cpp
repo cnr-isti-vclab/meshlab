@@ -523,7 +523,9 @@ case  FP_BUTTERFLY_SS:
 case  FP_MIDPOINT:
 case  FP_REFINE_LS3_LOOP:
       {
-        m.updateDataMask( MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
+        m.updateDataMask( MeshModel::MM_FACEFACETOPO);
+        tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+
         if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
         {
           errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
@@ -606,7 +608,7 @@ case FP_SELECT_FACES_BY_AREA:
 	  {
 		int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
 		Log( "Removed %d null faces", nullFaces);
-	  m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
     } break;
 
 case FP_REMOVE_UNREFERENCED_VERTEX:
@@ -645,7 +647,7 @@ case FP_CLUSTERING:
       ClusteringGrid.AddMesh(m.cm);
       ClusteringGrid.ExtractMesh(m.cm);
 			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
     } break;
 
 case FP_INVERT_FACES:
@@ -669,7 +671,7 @@ case FP_INVERT_FACES:
       }
     }
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-	m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	m.clearDataMask(MeshModel::MM_FACEFACETOPO);
   } break;
 
 case FP_FREEZE_TRANSFORM:
@@ -682,7 +684,9 @@ case FP_FREEZE_TRANSFORM:
 
 case FP_QUADRIC_SIMPLIFICATION:
   {
-    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK);
+    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+
 		int TargetFaceNum = par.getInt("TargetFaceNum");
 		if(par.getFloat("TargetPerc")!=0) TargetFaceNum = m.cm.fn*par.getFloat("TargetPerc");
 
@@ -707,7 +711,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 			if(deldupvert) Log( "PostSimplification Cleaning: Removed %d duplicated vertices", deldupvert);
 			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			if(delvert) Log( "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
-			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO );
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		}
@@ -718,7 +722,9 @@ case FP_QUADRIC_SIMPLIFICATION:
 
 case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
   {
-    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTMARK);
+    m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+
 		if(!tri::HasPerWedgeTexCoord(m.cm))
 		{
 			errorMessage="Warning: nothing have been done. Mesh has no Texture.";
@@ -1241,7 +1247,6 @@ case FP_COMPUTE_PRINC_CURV_DIR:
     tri::UpdateNormals<CMeshO>::PerVertexNormalized(m.cm);
 
     // hole filling filter does not correctly update the border flags (but the topology is still ok!)
-    m.clearDataMask(MeshModel::MM_FACEFLAGBORDER);
     if(NewFaceSelectedFlag)
     {
       tri::UpdateSelection<CMeshO>::FaceClear(m.cm);

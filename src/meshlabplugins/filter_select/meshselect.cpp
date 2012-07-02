@@ -222,12 +222,12 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
           if(!(*vi).IsD() && (*vi).IsS() )
                   tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO );
     break;
   case FP_SELECT_DELETE_FACE :
         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD() && (*fi).IsS() ) tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO );
     break;
   case FP_SELECT_DELETE_FACEVERT :
 		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
@@ -238,7 +238,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
         for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
             if(!(*vi).IsD() && (*vi).IsS() )
                     tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-			m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+            m.clearDataMask(MeshModel::MM_FACEFACETOPO );
     break;
 
   case FP_SELECTBYANGLE :
@@ -301,8 +301,11 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   case FP_SELECT_DILATE : tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
                           tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm); 
   break;
-  case FP_SELECT_BORDER: tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
-                         tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
+  case FP_SELECT_BORDER:
+                          tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+                          tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+                          tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
+                          tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
   break;
   case FP_SELECT_BY_VERT_QUALITY:
     {
@@ -426,7 +429,6 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
   {
   case CP_SELECT_NON_MANIFOLD_FACE:
   case CP_SELECT_NON_MANIFOLD_VERTEX:       return MeshModel::MM_FACEFACETOPO;
-   case FP_SELECT_BORDER:   return  MeshModel::MM_FACEFLAGBORDER;
   case CP_SELECT_TEXBORDER:                   return MeshModel::MM_FACEFACETOPO;
   case CP_SELFINTERSECT_SELECT:
               return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
