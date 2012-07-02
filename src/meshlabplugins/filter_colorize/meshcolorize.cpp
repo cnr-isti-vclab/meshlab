@@ -26,6 +26,7 @@
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/update/curvature.h>
+#include <vcg/complex/algorithms/parametrization/distortion.h>
 
 
 
@@ -111,9 +112,12 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
     par.addParam(new RichInt("iteration",1,QString("Iteration"),QString("the number ofiteration of the smoothing algorithm")));
     break;
   case CP_TRIANGLE_QUALITY:
-      metrics.push_back("area/max side");
+            metrics.push_back("area/max side");
 			metrics.push_back("inradius/circumradius");
 			metrics.push_back("mean ratio");
+			metrics.push_back("Area");
+			metrics.push_back("Texture Angle Distortion");
+			metrics.push_back("Texture Area Distortion");
 			par.addParam(new RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
 			break;
   case CP_DISCRETE_CURVATURE:
@@ -228,8 +232,9 @@ break;
 
   case CP_DISCRETE_CURVATURE:
     {
-      m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTCURV);
+      m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);
       m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+      tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
       if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
 				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
@@ -256,35 +261,84 @@ break;
       Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
     break;
     }  
-  case CP_TRIANGLE_QUALITY:
-    {
+   case CP_TRIANGLE_QUALITY:
+   {
      m.updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
-			CMeshO::FaceIterator fi;
-			float min = 0;
-			float max = 1.0;
-			int metric = par.getEnum("Metric");
-			switch(metric){ 
-			case 0: { //area / max edge
-          max = sqrt(3.0f)/2.0f;
-          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-            if(!(*fi).IsD())
-              (*fi).Q() = vcg::Quality((*fi).P(0), (*fi).P(1),(*fi).P(2));
-        } break;
-			case 1: { //inradius / circumradius
-          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-            if(!(*fi).IsD())
-              (*fi).Q() = vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2));
-        } break;
-			case 2: { //mean ratio
-          for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-            if(!(*fi).IsD())
-              (*fi).Q() = vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2));
-        } break;
-			default: assert(0);
-			} 
-      tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,min,max,false);
-		break;
-    }
+     CMeshO::FaceIterator fi;
+     Distribution<float> distrib;
+     float minV = 0;
+     float maxV = 1.0;
+     int metric = par.getEnum("Metric");
+     if(metric ==4 || metric ==5 )
+     {
+       if(!m.hasDataMask(MeshModel::MM_VERTTEXCOORD) && !m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+       {
+         this->errorMessage = "This metric need Texture Coordinate";
+         return false;
+       }
+     }
+     switch(metric){
+
+       case 0: { //area / max edge
+         minV = 0;
+         maxV = sqrt(3.0f)/2.0f;
+         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = vcg::Quality((*fi).P(0), (*fi).P(1),(*fi).P(2));
+       } break;
+
+       case 1: { //inradius / circumradius
+         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2));
+       } break;
+
+       case 2: { //mean ratio
+         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2));
+       } break;
+
+       case 3: { // AREA
+         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+           (*fi).Q() = vcg::DoubleArea((*fi))*0.5f;
+         tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm,minV,maxV);
+       } break;
+
+       case 4: { //TEXTURE Angle Distortion
+         if(m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+         {
+           for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = Distortion<CMeshO,true>::AngleDistortion(&*fi);
+         } else {
+           for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = Distortion<CMeshO,false>::AngleDistortion(&*fi);
+         }
+         tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
+         minV = distrib.Percentile(0.05);
+         maxV = distrib.Percentile(0.95);
+       } break;
+
+       case 5: { //TEXTURE Area Distortion
+         float areaScaleVal, edgeScaleVal;
+         if(m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+         {
+           Distortion<CMeshO,true>::MeshScalingFactor(m.cm, areaScaleVal,edgeScaleVal);
+           for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = Distortion<CMeshO,true>::AreaDistortion(&*fi,areaScaleVal);
+         } else {
+           Distortion<CMeshO,false>::MeshScalingFactor(m.cm, areaScaleVal,edgeScaleVal);
+           for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+             (*fi).Q() = Distortion<CMeshO,false>::AreaDistortion(&*fi,areaScaleVal);
+
+         }
+         tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
+         minV = distrib.Percentile(0.05);
+         maxV = distrib.Percentile(0.95);
+       } break;
+
+       default: assert(0);
+     }
+     tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,minV,maxV,false);
+     break;
+   }
 
 
   case CP_RANDOM_CONNECTED_COMPONENT:
