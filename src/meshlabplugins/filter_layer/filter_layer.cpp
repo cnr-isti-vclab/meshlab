@@ -45,7 +45,8 @@ FilterLayerPlugin::FilterLayerPlugin()
               FP_DELETE_RASTER <<
               FP_SPLITSELECT <<
               FP_SPLITCONNECTED <<
-              FP_RENAME <<
+              FP_RENAME_MESH <<
+			  FP_RENAME_RASTER <<
               FP_DUPLICATE <<
               FP_SELECTCURRENT;
 
@@ -63,7 +64,8 @@ FilterLayerPlugin::FilterLayerPlugin()
    case FP_DELETE_MESH :  return QString("Delete Current Mesh");
    case FP_DELETE_RASTER :  return QString("Delete Current Raster");
    case FP_FLATTEN :  return QString("Flatten Visible Layers");
-   case FP_RENAME :  return QString("Rename Current Layer");
+   case FP_RENAME_MESH :  return QString("Rename Current Mesh");
+   case FP_RENAME_RASTER :  return QString("Rename Current Raster");
    case FP_SELECTCURRENT :  return QString("Change the current layer");
    default : assert(0);
    }
@@ -79,7 +81,8 @@ FilterLayerPlugin::FilterLayerPlugin()
    case FP_SPLITCONNECTED:  return QString("Split current Layer into many layers, one for each connected components");
    case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
    case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted");
-   case FP_RENAME :  return QString("Explicitly change the label shown for a given mesh");
+   case FP_RENAME_MESH :  return QString("Explicitly change the label shown for a given mesh");
+   case FP_RENAME_RASTER :  return QString("Explicitly change the label shown for a given raster");
    case FP_SELECTCURRENT :  return QString("Change the current layer from its name");
    default : assert(0);
    }
@@ -89,6 +92,7 @@ FilterLayerPlugin::FilterLayerPlugin()
 void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
   MeshModel *mm=md.mm();
+  RasterModel *rm=md.rm();
 	 switch(ID(action))
 	 {
 		case FP_SPLITSELECT :
@@ -113,11 +117,17 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
                        "Do not discard unreferenced vertices from source layers\n\n"
                        "Necessary for point-only layers"));
      break;
-   case FP_RENAME :
+   case FP_RENAME_MESH :
        parlst.addParam(new RichString ("newName",
                        mm->label(),
                        "New Label",
                        "New Label for the mesh"));
+       break;
+   case FP_RENAME_RASTER :
+       parlst.addParam(new RichString ("newName",
+                       rm->label(),
+                       "New Label",
+                       "New Label for the raster"));
        break;
    case FP_SELECTCURRENT :
 			parlst.addParam(new RichMesh ("mesh",md.mm(),&md, "Mesh",
@@ -135,7 +145,8 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
   switch(ID(filter))
   {
-  case  FP_RENAME:          md.mm()->setLabel(par.getString("newName"));  break;
+  case  FP_RENAME_MESH:          md.mm()->setLabel(par.getString("newName"));  break;
+  case  FP_RENAME_RASTER:          md.rm()->setLabel(par.getString("newName"));  break;
   case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("mesh"));           break;
   case  FP_DELETE_MESH :    if(md.mm()) md.delMesh(md.mm());              break;
   case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm());            break;
@@ -291,7 +302,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
-    case FP_RENAME :
+    case FP_RENAME_MESH :
     case FP_SPLITSELECT :
     case FP_DUPLICATE :
     case FP_FLATTEN :
@@ -299,6 +310,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     case FP_SPLITCONNECTED :
     case FP_DELETE_MESH :
       return MeshFilterInterface::Layer;
+	case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
       return MeshFilterInterface::RasterLayer;
 

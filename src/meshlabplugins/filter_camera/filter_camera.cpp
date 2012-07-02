@@ -513,9 +513,13 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   case FP_CAMERA_EDIT :
   case FP_CAMERA_TRANSFORM:
   case FP_SET_MESH_CAMERA :
-  case FP_SET_RASTER_CAMERA :
   case FP_QUALITY_FROM_CAMERA :
       return MeshFilterInterface::Camera;
+  case FP_SET_RASTER_CAMERA :
+	  return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
+
+
+
   }
   assert(0);
 }
