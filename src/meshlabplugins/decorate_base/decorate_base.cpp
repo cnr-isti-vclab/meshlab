@@ -321,14 +321,20 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         glEnableClientState (GL_COLOR_ARRAY);
 
         glEnable(GL_POINT_SMOOTH);
-        glPointSize(6.f);
-        glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
-        glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
-        glDrawArrays(GL_POINTS,0,vvP->size());
+		if (vvP->size() > 0)
+		{
+			glPointSize(6.f);
+			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
+			glDrawArrays(GL_POINTS,0,vvP->size());
+		}
 
-        glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(tvP->begin()[0].first));
-        glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(tvP->begin()[0].second));
-        glDrawArrays(GL_TRIANGLES,0,tvP->size());
+		if (tvP->size() > 0)
+		{
+			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(tvP->begin()[0].first));
+			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(tvP->begin()[0].second));
+			glDrawArrays(GL_TRIANGLES,0,tvP->size());
+		}
 
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_VERTEX_ARRAY);
