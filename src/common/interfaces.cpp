@@ -168,8 +168,8 @@ void MeshLabFilterInterface::initConvertingMap(QMap<QString,MeshModel::MeshEleme
 	convertingMap["MM_UNKNOWN"]          = MeshModel::MeshElement(MeshModel::MM_UNKNOWN);
 	convertingMap["MM_VERTFLAGSELECT"]   = MeshModel::MeshElement(MeshModel::MM_VERTFLAGSELECT);
 	convertingMap["MM_FACEFLAGSELECT"]   = MeshModel::MeshElement(MeshModel::MM_FACEFLAGSELECT);
-	convertingMap["MM_VERTFLAGBORDER"]   =	MeshModel::MeshElement(MeshModel::MM_VERTFLAGBORDER);
-	convertingMap["MM_FACEFLAGBORDER"]   = MeshModel::MeshElement(MeshModel::MM_FACEFLAGBORDER);
+//	convertingMap["MM_VERTFLAGBORDER"]   =	MeshModel::MeshElement(MeshModel::MM_VERTFLAGBORDER);
+//	convertingMap["MM_FACEFLAGBORDER"]   = MeshModel::MeshElement(MeshModel::MM_FACEFLAGBORDER);
 	convertingMap["MM_CAMERA"]			= MeshModel::MeshElement(MeshModel::MM_CAMERA);
 	convertingMap["MM_TRANSFMATRIX"]     = MeshModel::MeshElement(MeshModel::MM_TRANSFMATRIX);
 	convertingMap["MM_COLOR"]            = MeshModel::MeshElement(MeshModel::MM_COLOR);

@@ -655,14 +655,14 @@ void MeshModel::updateDataMask(int neededDataMask)
   if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
   if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
 
-  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
-       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
-  {
-    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
-         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
-    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
-  }
+//  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
+//       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
+//  {
+//    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
+//         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+//    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+//    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+//  }
 
   currentDataMask |= neededDataMask;
  }
