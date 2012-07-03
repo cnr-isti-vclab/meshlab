@@ -24,13 +24,15 @@
 #ifndef _FILTER_TEXTURE_H
 #define _FILTER_TEXTURE_H
 
+
 #include <QObject>
 #include <QTime>
 
+#include <common/interfaces.h>
+#include <vcg/complex/append.h>
 #include <vcg/complex/algorithms/attribute_seam.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>
-#include <common/interfaces.h>
 
 class FilterTexturePlugin : public QObject, public MeshFilterInterface
 {
@@ -39,7 +41,7 @@ class FilterTexturePlugin : public QObject, public MeshFilterInterface
 
 public:
 	enum {
-		FP_UV_TO_COLOR,
+		FP_VORONOI_ATLAS,
 		FP_UV_WEDGE_TO_VERTEX,
     FP_UV_VERTEX_TO_WEDGE,
 		FP_BASIC_TRIANGLE_MAPPING,

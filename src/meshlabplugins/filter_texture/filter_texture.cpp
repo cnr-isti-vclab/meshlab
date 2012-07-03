@@ -20,20 +20,28 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#include <vcg/math/base.h>
 #include <QtGui>
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+#include <eigenlib/Eigen/Sparse>
+#include <eigenlib/Eigen/src/Sparse/SparseMatrix.h>
+#include <eigenlib/Eigen/src/Sparse/DynamicSparseMatrix.h>
+#include <eigenlib/unsupported/Eigen/SparseExtra>
 
-#include <math.h>
 #include <float.h>
 #include <stdlib.h>
 #include "filter_texture.h"
 #include "pushpull.h"
 #include "rastering.h"
 #include <vcg/complex/algorithms/update/texture.h>
+#include<wrap/io_trimesh/export_ply.h>
+#include <vcg/complex/algorithms/parametrization/voronoi_atlas.h>
+
 using namespace vcg;
 
 FilterTexturePlugin::FilterTexturePlugin() 
 { 
-    typeList << FP_UV_TO_COLOR
+    typeList << FP_VORONOI_ATLAS
             << FP_UV_WEDGE_TO_VERTEX
             << FP_UV_VERTEX_TO_WEDGE
             << FP_BASIC_TRIANGLE_MAPPING
@@ -51,11 +59,11 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 {
     switch(filterId)
     {
-    case FP_UV_TO_COLOR : return QString("UV to Color");
+    case FP_VORONOI_ATLAS : return QString("Parametrization: Voronoi Atlas");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Convert PerWedge UV into PerVertex UV");
     case FP_UV_VERTEX_TO_WEDGE : return QString("Convert PerVertex UV into PerWedge UV");
-    case FP_BASIC_TRIANGLE_MAPPING : return QString("Trivial Per-Triangle Parametrization");
-    case FP_PLANAR_MAPPING : return QString("Flat Plane Parametrization");
+    case FP_BASIC_TRIANGLE_MAPPING : return QString("Parametrization: Trivial Per-Triangle ");
+    case FP_PLANAR_MAPPING : return QString("Parametrization: Flat Plane ");
     case FP_SET_TEXTURE : return QString("Set Texture");
     case FP_COLOR_TO_TEXTURE : return QString("Vertex Color to Texture");
     case FP_TRANSFER_TO_TEXTURE : return QString("Transfer Vertex Attributes to Texture (between 2 meshes)");
@@ -70,7 +78,9 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId)
     {
-    case FP_UV_TO_COLOR :  return QString("Maps the UV Space into a color space, thus colorizing mesh vertices according to UV coords.");
+    case FP_VORONOI_ATLAS :  return QString("Build an atlased parametrization based on a geodesic voronoi partitioning of the surface and parametrizing each region using Harmonic Mapping. For the  parametrization of the disk like voronoi regions the used method is: <br><b>Ulrich Pinkall, Konrad Polthier</b><br>\
+                                            <i>Computing Discrete Minimal Surfaces and Their Conjugates</i> <br>\
+                                            Experimental Mathematics, Vol 2 (1), 1993<br> .");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
     case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluos vertices...");
     case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
@@ -89,10 +99,10 @@ int FilterTexturePlugin::getPreConditions(QAction *a) const
 {
     switch (ID(a))
     {
-    case FP_UV_TO_COLOR : return MeshModel::MM_VERTTEXCOORD;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_WEDGTEXCOORD;
     case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_VERTTEXCOORD;
-    case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_FACENUMBER;
+    case FP_BASIC_TRIANGLE_MAPPING :
+    case FP_VORONOI_ATLAS :
     case FP_PLANAR_MAPPING : return MeshModel::MM_FACENUMBER;
     case FP_SET_TEXTURE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_COLOR_TO_TEXTURE : return MeshModel::MM_VERTCOLOR | MeshModel::MM_WEDGTEXCOORD;
@@ -107,7 +117,7 @@ int FilterTexturePlugin::getRequirements(QAction *a)
 {
     switch (ID(a))
     {
-    case FP_UV_TO_COLOR :
+    case FP_VORONOI_ATLAS :
     case FP_UV_WEDGE_TO_VERTEX :
     case FP_UV_VERTEX_TO_WEDGE :
     case FP_BASIC_TRIANGLE_MAPPING :
@@ -125,7 +135,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 {
     switch (ID(a))
     {
-    case FP_UV_TO_COLOR : return MeshModel::MM_VERTCOLOR;
+    case FP_VORONOI_ATLAS : return MeshModel::MM_UNKNOWN;
     case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
     case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
@@ -146,7 +156,7 @@ FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
     switch(ID(a))
     {
-    case FP_UV_TO_COLOR : return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
+    case FP_VORONOI_ATLAS :
     case FP_UV_WEDGE_TO_VERTEX :
     case FP_UV_VERTEX_TO_WEDGE :
     case FP_BASIC_TRIANGLE_MAPPING :
@@ -176,8 +186,9 @@ static QString extractFilenameWOExt(MeshModel* mm)
 void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst) 
 {
     switch(ID(action)) {
-    case FP_UV_TO_COLOR :
-        parlst.addParam(new RichEnum("colorspace", 0, QStringList("Red-Green") << "Hue-Saturation", "Color Space", "The color space used to mapping UV to"));
+    case FP_VORONOI_ATLAS :
+      parlst.addParam(new RichInt("regionNum", 10, "Approx. Region Num", "An estimation of the number of regions that must be generated. Smaller regions could lead to parametrizations with smaller distortion."));
+      parlst.addParam(new RichBool("overlapFlag", false, "Overlap", "If checked the resulting parametrization will be composed by <i>overlapping</i> regions, e.g. the resulting mesh will have duplicated faces: each region will have a ring of ovelapping duplicate faces that will ensure that border regions will be parametrized in the atlas twice. This is quite useful for building mipmap robust atlases"));
         break;
     case FP_UV_WEDGE_TO_VERTEX :
         break;
@@ -332,40 +343,41 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))     {
-    case FP_UV_TO_COLOR : {
-            int vcount = m.cm.vert.size();
-            int colsp = par.getEnum("colorspace");
-            if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
-                m.updateDataMask(MeshModel::MM_VERTCOLOR);
-            for (int i=0; i<vcount; ++i)
-            {
-                CMeshO::VertexType &v = m.cm.vert[i];
-                if (!v.IsD())
-                {
-                    // 'Normalized' 0..1
-                    float normU, normV;
-                    normU = v.T().U() - (int)v.T().U();
-                    if (normU < 0.) normU += 1.;
-                    normV = v.T().V() - (int)v.T().V();
-                    if (normV < 0.) normV += 1.;
+    case FP_VORONOI_ATLAS : {
+      MeshModel *baseModel=md.mm();
+      baseModel->updateDataMask(MeshModel::MM_FACEFACETOPO);
+      tri::UpdateTopology<CMeshO>::FaceFace(baseModel->cm);
+      int nonManifVertNum=tri::Clean<CMeshO>::CountNonManifoldVertexFF(baseModel->cm,false);
+      int nonManifEdgeNum=tri::Clean<CMeshO>::CountNonManifoldEdgeFF(baseModel->cm,false);
 
-                    switch(colsp) {
-                        // Red-Green color space
-                    case 0 : v.C() = Color4b((int)floor((normU*255)+0.5), (int)floor((normV*255)+0.5), 0, 255); break;
-                        // Hue-Saturation color space
-                    case 1 : {
-                            Color4f c;
-                            c.SetHSVColor(normU, normV, 1.0);
-                            v.C().Import(c);
-                        }
-                        break;
-                    default : assert(0);
-                };
-                }
-                cb(i*100/vcount, "Colorizing vertices from UV coordinates ...");
-            }
-        }
-        break;
+      if(nonManifVertNum>0 || nonManifEdgeNum>0)
+      {
+        Log("Mesh is not manifold\n:%i non manifold Vertices\n%i nonmanifold Edges\n",nonManifVertNum,nonManifEdgeNum);
+        this->errorMessage = "Mesh is not manifold. See Log for details";
+        return false;
+      }
+
+      MeshModel *paraModel=md.addNewMesh("","VoroAtlas",false);
+      tri::VoronoiAtlas<CMeshO>::VoronoiAtlasParam pp;
+      pp.sampleNum =par.getInt("regionNum");
+      pp.overlap=par.getBool("overlapFlag");
+
+      paraModel->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+      // Note that CMesh has ocf texcoord and the append inside VoronoiAtlas class need that.
+      // This is a design bug of the VCGLib...
+      int bitToBeCleared =0;
+      if(!baseModel->hasDataMask(MeshModel::MM_WEDGTEXCOORD)) bitToBeCleared |=MeshModel::MM_WEDGTEXCOORD;
+      if(!baseModel->hasDataMask(MeshModel::MM_VERTTEXCOORD)) bitToBeCleared |=MeshModel::MM_VERTTEXCOORD;
+      baseModel->updateDataMask(MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD);
+      tri::VoronoiAtlas<CMeshO>::Build(baseModel->cm,paraModel->cm, pp);
+      if(pp.overlap==false)
+        tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
+
+      tri::UpdateNormals<CMeshO>::PerVertexPerFace(paraModel->cm);
+
+      baseModel->clearDataMask(bitToBeCleared);
+      }
+      break;
 
     case FP_UV_WEDGE_TO_VERTEX : {
             int vn = m.cm.vn;
