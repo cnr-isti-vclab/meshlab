@@ -146,10 +146,10 @@ CleanFilter::~CleanFilter() {
   switch(ID(action))
   {
     case FP_REMOVE_WRT_Q:
-    case FP_BALL_PIVOTING:	return MeshModel::MM_FACEFLAGBORDER  | MeshModel::MM_VERTMARK;
+    case FP_BALL_PIVOTING: MeshModel::MM_VERTMARK;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
-      return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK;
+      return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK;
     case FP_REMOVE_TVERTEX_COLLAPSE: return MeshModel::MM_VERTMARK;
     case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_REMOVE_NON_MANIF_EDGE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
@@ -208,30 +208,29 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     MeshModel &m=*(md.mm());
     switch(ID(filter))
   {
-	 case FP_BALL_PIVOTING:
-	  {
-      float Radius = par.getAbsPerc("BallRadius");		
-      float Clustering = par.getFloat("Clustering");		      
-			float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
-			bool DeleteFaces = par.getBool("DeleteFaces");
+    case FP_BALL_PIVOTING:
+    {
+      float Radius = par.getAbsPerc("BallRadius");
+      float Clustering = par.getFloat("Clustering") / 100.0f;
+      float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
+      bool DeleteFaces = par.getBool("DeleteFaces");
       if(DeleteFaces) {
-				m.cm.fn=0;
-				m.cm.face.resize(0);
+        m.cm.fn=0;
+        m.cm.face.resize(0);
       }
 
-			int startingFn=m.cm.fn;			
-		  Clustering /= 100.0;
-			tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr); 
+      int startingFn=m.cm.fn;
+      tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr);
       // the main processing
       pivot.BuildMesh(cb);
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-			Log("Reconstructed surface. Added %i faces",m.cm.fn-startingFn); 		
-	  } break;
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+      Log("Reconstructed surface. Added %i faces",m.cm.fn-startingFn);
+    } break;
     case FP_REMOVE_ISOLATED_DIAMETER:
-	  {
-      float minCC= par.getAbsPerc("MinComponentDiag");		
+    {
+      float minCC= par.getAbsPerc("MinComponentDiag");
       std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
-			Log("Removed %2 connected components out of %1", delInfo.second, delInfo.first); 		
+      Log("Removed %2 connected components out of %1", delInfo.second, delInfo.first);
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
 	  {
@@ -260,7 +259,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 								deletedFN++;
 						 }
 								 
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
 
 	  }break;
