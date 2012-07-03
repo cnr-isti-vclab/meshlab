@@ -870,7 +870,7 @@ case FP_ROTATE :
 		m.cm.Tr=trTran*trRot*trTranInv;
 
     if(par.getBool("Freeze")&& !par.getBool("ToAll")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,false);
       tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
       tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
@@ -881,7 +881,7 @@ case FP_ROTATE :
 		  for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr=transf;
-				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,false);
 				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
