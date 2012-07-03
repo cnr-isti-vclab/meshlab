@@ -1067,6 +1067,8 @@ case FP_CLUSTERED_SAMPLING :
 			vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh; 
 			tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
 			Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
+			tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV);
+
 			for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
 		  tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
 		} break;
