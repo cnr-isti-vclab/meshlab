@@ -204,7 +204,7 @@ void EditArc3DPlugin::ExportPly()
 
 	if(removeSmallCC)
 	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
+		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK);
 		tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m->cm,m->cm.bbox.Diag()*maxCCDiagVal/100.0);
 	}
 
@@ -217,7 +217,7 @@ void EditArc3DPlugin::ExportPly()
 
 	if(closeHole)
 	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEMARK);
+		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK);
 		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);	    
 		vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m->cm,maxHoleSize,false);
 	}

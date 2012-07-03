@@ -95,7 +95,7 @@ QString FilterGeodesic::filterName(FilterIDType filter) const
   switch(ID(action))
   {
 		case FP_QUALITY_BORDER_GEODESIC :
-    case FP_QUALITY_POINT_GEODESIC :	return MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTFLAGBORDER;
+	case FP_QUALITY_POINT_GEODESIC :	return MeshModel::MM_VERTFACETOPO ;
     default: assert(0);
   }
   return 0;
@@ -111,13 +111,13 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 			{
 				m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 				m.updateDataMask(MeshModel::MM_VERTMARK);
-				m.updateDataMask(MeshModel::MM_VERTFLAGBORDER);
 				m.updateDataMask(MeshModel::MM_VERTQUALITY);
 				m.updateDataMask(MeshModel::MM_VERTCOLOR);
-
+				tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+				tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
 				Point3f startPoint = par.getPoint3f("startPoint");
 				// first search the closest point on the surface;
-        CMeshO::VertexPointer startVertex=0;
+				CMeshO::VertexPointer startVertex=0;
 				float minDist= std::numeric_limits<float>::max();
 
 				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
@@ -130,9 +130,9 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 						
 				// Now actually compute the geodesic distnace from the closest point		
-        tri::Geo<CMeshO> g;
-        float dist_thr = par.getAbsPerc("maxDistance");
-        g.FarthestVertex(m.cm, startVertex,dist_thr);
+				tri::Geo<CMeshO> g;
+				float dist_thr = par.getAbsPerc("maxDistance");
+				g.FarthestVertex(m.cm, startVertex,dist_thr);
 
 				// Cleaning Quality value of the unrefernced vertices
 				// Unreached vertexes has a quality that is maxfloat
@@ -154,12 +154,13 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 			{
 				m.updateDataMask(MeshModel::MM_VERTFACETOPO);
 				m.updateDataMask(MeshModel::MM_VERTMARK);
-				m.updateDataMask(MeshModel::MM_VERTFLAGBORDER);
 				m.updateDataMask(MeshModel::MM_VERTQUALITY);
 				m.updateDataMask(MeshModel::MM_VERTCOLOR);
+				tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+				tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
 
-        tri::Geo<CMeshO> g;
-        bool ret = g.DistanceFromBorder(m.cm);
+				tri::Geo<CMeshO> g;
+				bool ret = g.DistanceFromBorder(m.cm);
 
 				// Cleaning Quality value of the unrefernced vertices
 				// Unreached vertexes has a quality that is maxfloat
