@@ -59,7 +59,7 @@ public:
 					if (nonClosedOnly)
 					{
 						for (int k=0; k<3; ++k)
-							if (f.IsB(k))
+							if (face::IsBorder(f,k))
 							{
 								foundSeed = true;
 								break;
@@ -90,7 +90,7 @@ public:
 				components.back().push_back(f);
 				for (int k=0; k<3; ++k)
 				{
-					if (f->IsB(k))
+					if (face::IsBorder(*f,k))
 						continue;
 					FacePointer of = f->FFp(k);
 					if (!of->IsS())

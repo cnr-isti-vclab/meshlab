@@ -44,14 +44,14 @@ public:
   enum { FP_SINGLE_PLANE, FP_PLANE_CUT};
   enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 	ExtraFilter_SlicePlugin();
-	~ExtraFilter_SlicePlugin(){};
+	~ExtraFilter_SlicePlugin(){}
 
 	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
   virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
+	virtual int getRequirements(QAction *){return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFLAG | MeshModel::MM_VERTMARK | MeshModel::MM_VERTCOORD;}
 private:
 	SVGProperties pr;
 };

@@ -141,10 +141,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 		case FP_CURVATURE_EDGE_FLIP:
 			return MeshModel::MM_FACEFACETOPO |
 			       MeshModel::MM_VERTFACETOPO | 
-			       MeshModel::MM_VERTMARK | 
-			       MeshModel::MM_FACEFLAGBORDER;
-		case FP_NEAR_LAPLACIAN_SMOOTH:
-			return MeshModel::MM_FACEFLAGBORDER;
+				   MeshModel::MM_VERTMARK;
 	}
 	
 	return 0;
