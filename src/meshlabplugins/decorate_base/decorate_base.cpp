@@ -1335,6 +1335,8 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    bool faceColor = rm->getBool(this->TextureFaceColorParam());
+
     if(!m.glw.TMId.empty())
     {
       glEnable(GL_TEXTURE_2D);
@@ -1345,12 +1347,13 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
       for(size_t i=0;i<m.cm.face.size();++i)
         if(!m.cm.face[i].IsD())
         {
-        glTexCoord(m.cm.face[i].WT(0).P());
-        glVertex(m.cm.face[i].WT(0).P());
-        glTexCoord(m.cm.face[i].WT(1).P());
-        glVertex(m.cm.face[i].WT(1).P());
-        glTexCoord(m.cm.face[i].WT(2).P());
-        glVertex(m.cm.face[i].WT(2).P());
+          if(faceColor) glColor(m.cm.face[i].C());
+          glTexCoord(m.cm.face[i].WT(0).P());
+          glVertex(m.cm.face[i].WT(0).P());
+          glTexCoord(m.cm.face[i].WT(1).P());
+          glVertex(m.cm.face[i].WT(1).P());
+          glTexCoord(m.cm.face[i].WT(2).P());
+          glVertex(m.cm.face[i].WT(2).P());
         }
     glEnd();
     glDisable(GL_TEXTURE_2D);
@@ -1371,6 +1374,7 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
     case DP_SHOW_TEXPARAM : {
             assert(!parset.hasParameter(TextureStyleParam()));
             parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
+            parset.addParam(new RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
         } break;
     case DP_SHOW_VERT : {
             assert(!parset.hasParameter(VertDotSizeParam()));

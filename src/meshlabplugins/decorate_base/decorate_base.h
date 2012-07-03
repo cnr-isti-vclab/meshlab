@@ -138,6 +138,7 @@ public:
   inline QString ShowBorderFlag() const     { return  "MeshLab::Decoration::ShowBorderFlag" ; }
 
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
+  inline QString TextureFaceColorParam() const   { return  "MeshLab::Decoration::TextureFaceColor" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
   inline QString UseFixedHistParam() const   { return  "MeshLab::Decoration::UseFixedHistParam" ; }
