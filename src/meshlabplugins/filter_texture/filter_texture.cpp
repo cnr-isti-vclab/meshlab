@@ -376,10 +376,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
       tri::UpdateNormals<CMeshO>::PerVertexPerFace(paraModel->cm);
 
       baseModel->clearDataMask(bitToBeCleared);
-      Log("Completed Processing\n");
-      Log("Unwrap Time   %6i ms\n", 1000*pp.vas.unwrapTime / CLOCKS_PER_SEC);
-      Log("Voronoi Time  %6i ms\n", 1000*pp.vas.voronoiTime / CLOCKS_PER_SEC);
-      Log("Sampling Time %6i ms\n", 1000*pp.vas.samplingTime / CLOCKS_PER_SEC);
+      Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
+      Log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
+      Log("Unwrap Time   %6.3f s", float(pp.vas.unwrapTime) / CLOCKS_PER_SEC);
+      Log("Voronoi Time  %6.3f s", float(pp.vas.voronoiTime) / CLOCKS_PER_SEC);
+      Log("Sampling Time %6.3f s", float(pp.vas.samplingTime) / CLOCKS_PER_SEC);
       }
       break;
 
