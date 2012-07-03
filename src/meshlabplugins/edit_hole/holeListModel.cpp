@@ -33,8 +33,7 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	mesh = m;
 	pickedAbutment.SetNull();
 		
-	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO);
-	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
+	tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
 	holesManager.Init(&m->cm);
 	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
 	emit SGN_needUpdateGLA();
@@ -188,9 +187,8 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 
 void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
-	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO );
-	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
-	if(holesManager.Fill(mode))
+  tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
+    if(holesManager.Fill(mode))
 	{
 		state = HoleListModel::Filled;
 		emit layoutChanged();
@@ -225,9 +223,7 @@ void HoleListModel::acceptFilling(bool accept)
 void HoleListModel::autoBridge(bool singleHole, double distCoeff)
 {
 	holesManager.DiscardBridges();
-	
-	mesh->clearDataMask(MeshModel::MM_FACEFLAGBORDER | MeshModel::MM_FACEFACETOPO );
-	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER );
+	tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
 
 	if(singleHole)
 		holesManager.AutoSelfBridging(distCoeff, 0);
