@@ -247,30 +247,32 @@ int FilterUnsharp::postCondition(QAction *a) const
 {
   switch(ID(action))
   {
-		case FP_HC_LAPLACIAN_SMOOTH:  
-    case FP_SD_LAPLACIAN_SMOOTH:  
-    case FP_TAUBIN_SMOOTH:  
-    case FP_DEPTH_SMOOTH:  
-    case FP_LAPLACIAN_SMOOTH:     return MeshModel::MM_FACEFLAGBORDER;
     case FP_TWO_STEP_SMOOTH:      return MeshModel::MM_VERTFACETOPO;
-		case FP_UNSHARP_GEOMETRY:	
-		case FP_UNSHARP_QUALITY:	
-		case FP_VERTEX_QUALITY_SMOOTHING:
-		case FP_UNSHARP_VERTEX_COLOR:	return MeshModel::MM_FACEFLAGBORDER;
-    case FP_CREASE_CUT :	return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
-		case FP_UNSHARP_NORMAL:		return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
-		case FP_RECOMPUTE_QUADFACE_NORMAL :
-		case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER;
-		case FP_RECOMPUTE_FACE_NORMAL :
-		case FP_RECOMPUTE_VERTEX_NORMAL :
-		case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
-		case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
-		case FP_FACE_NORMAL_NORMALIZE:
-		case FP_VERTEX_NORMAL_NORMALIZE:
-		case FP_DIRECTIONAL_PRESERVATION:
-		case FP_LINEAR_MORPH :
-											return 0; 
-			
+
+    case FP_CREASE_CUT :
+    case FP_UNSHARP_NORMAL:
+    case FP_RECOMPUTE_QUADFACE_NORMAL :
+    case FP_FACE_NORMAL_SMOOTHING : return MeshModel::MM_FACEFACETOPO;
+
+    case FP_RECOMPUTE_FACE_NORMAL :
+    case FP_RECOMPUTE_VERTEX_NORMAL :
+    case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
+    case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
+    case FP_FACE_NORMAL_NORMALIZE:
+    case FP_VERTEX_NORMAL_NORMALIZE:
+    case FP_DIRECTIONAL_PRESERVATION:
+    case FP_LINEAR_MORPH :
+    case FP_HC_LAPLACIAN_SMOOTH:
+    case FP_SD_LAPLACIAN_SMOOTH:
+    case FP_TAUBIN_SMOOTH:
+    case FP_DEPTH_SMOOTH:
+    case FP_LAPLACIAN_SMOOTH:
+    case FP_UNSHARP_GEOMETRY:
+    case FP_UNSHARP_QUALITY:
+    case FP_VERTEX_QUALITY_SMOOTHING:
+    case FP_UNSHARP_VERTEX_COLOR:
+      return 0;
+
     default: assert(0);
   }
   return 0;
@@ -372,19 +374,22 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 
 				float angleDeg = par.getFloat("angleDeg");
 				tri::CreaseCut(m.cm, math::ToRad(angleDeg));
-				m.clearDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEFLAGBORDER);
-		}
+				m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+	}
 			break;
 		
   case FP_FACE_NORMAL_SMOOTHING :
-				 tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
+      tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+                 tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
 			 break;
   case FP_VERTEX_QUALITY_SMOOTHING :
-				 tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
+      tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+                 tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
 			 break;
 			 
 	case FP_LAPLACIAN_SMOOTH :
 	  {
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
       bool Selected=par.getBool("Selected");
       if(Selected && m.cm.svn==0)
@@ -457,6 +462,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 		break;
 	case FP_SD_LAPLACIAN_SMOOTH:
 	  {
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			// Small hack 
@@ -469,6 +475,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 		break;
 	case FP_HC_LAPLACIAN_SMOOTH:
 	  {
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
       tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
@@ -497,6 +504,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 		break;
 	case FP_TAUBIN_SMOOTH :
 	  {
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			float lambda=par.getFloat("lambda");
 			float mu=par.getFloat("mu");
@@ -531,6 +539,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	
 	case FP_UNSHARP_NORMAL:			
 			{	
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
@@ -548,7 +557,9 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 				
 			}	break;
 	case FP_UNSHARP_GEOMETRY:			
-			{	
+			{
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+				tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
@@ -568,6 +579,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 			}	break;
 	case FP_UNSHARP_VERTEX_COLOR:			
 			{	
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
@@ -589,6 +601,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 			}	break;
 	case FP_UNSHARP_QUALITY:			
 	{	
+	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
