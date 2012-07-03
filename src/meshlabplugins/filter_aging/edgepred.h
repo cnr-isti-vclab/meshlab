@@ -103,7 +103,7 @@ class AngleEdgePred
 		
 		// tests angle predicate over current edge
 		bool operator()(face::Pos<CMeshO::FaceType> ep) const {
-			if(ep.f->IsB(ep.z)) return true;
+			if(ep.IsBorder()) return true;
 
 			// the angle between the two face normals in degrees
 			double ffangle = math::ToDeg(vcg::Angle(ep.f->N(), ep.f->FFp(ep.z)->N()));
