@@ -40,10 +40,10 @@
 #include "xmlgeneratorgui.h"
 #include "filterthread.h"
 
-
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
+
 
 using namespace std;
 using namespace vcg;
@@ -1215,6 +1215,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
 			connect(ft,SIGNAL(ThreadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
 			connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
+			
 			ft->start();
 			//ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
 		}
