@@ -231,9 +231,7 @@ for (i=0; i < nr_faces; i++){
 //	Build(m.cm,mesh.inCorePoints,mesh.triangles);
 	Log("Successfully created a mesh of %i faces",pm.cm.vn);
 	
-	vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-  vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-  
+	pm.UpdateBoxAndNormals();
 	return true;
 }
  PoissonPlugin::FilterClass PoissonPlugin::getClass(QAction *action)
