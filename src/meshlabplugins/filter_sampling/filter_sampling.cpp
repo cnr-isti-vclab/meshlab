@@ -404,8 +404,14 @@ FilterDocSampling::FilterDocSampling()
 		case FP_MONTECARLO_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh."); 
 		case FP_STRATIFIED_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i> stratified</i> strategies. Distribution is often biased by triangle shape."); 
 		case FP_CLUSTERED_SAMPLING   :  return QString("Create a new layer populated with a  subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy."); 
-		case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
-		case FP_VARIABLEDISK_SAMPLING:  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution");
+		case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh;"
+													   "samples are generated according to a Poisson-disk distribution.  using the algorithm described in:<br>"
+													   "<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
+													   " Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
+		case FP_VARIABLEDISK_SAMPLING:  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated according to a Poisson-disk distribution"
+													   "samples are generated according to a Poisson-disk distribution.  using the algorithm described in:<br>"
+													   "<b>Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes</b><br>"
+													   " Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
 		case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh."); 
 		case FP_TEXEL_SAMPLING       :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated"); 
 		case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
