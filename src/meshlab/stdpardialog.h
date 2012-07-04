@@ -80,11 +80,18 @@ public:
 
 class LineEditWidget : public MeshLabWidget
 {
+  Q_OBJECT
 protected:
 	QLabel* lab;
 	QLineEdit* lned;
-public:
+	QString lastVal;
 
+	private slots:
+		void changeChecker();
+	signals:
+		void lineEditChanged();
+
+public:
 	LineEditWidget(QWidget* p,RichParameter* rpar);
 	~LineEditWidget();
 	virtual void collectWidgetValue() = 0;
@@ -673,7 +680,6 @@ public:
 	~StdParFrame();
 signals:
 
-		void dynamicFloatChanged(int mask);
 		void parameterChanged();
 };
 

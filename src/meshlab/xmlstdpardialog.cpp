@@ -151,7 +151,6 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 	if(isPreviewable())
 	{
 		meshState.create(curmask, curModel);
-		//connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 		connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 	}
 	connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));

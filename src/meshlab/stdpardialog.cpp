@@ -63,7 +63,6 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 		if(isPreviewable())
 		{
 			meshState.create(curmask, curModel);
-			connect(stdParFrame,SIGNAL(dynamicFloatChanged(int)), this, SLOT(applyDynamic()));
 			connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 		}
         connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
@@ -1353,7 +1352,8 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 	lab->setToolTip(rp->pd->tooltip);
 	gridLay->addWidget(lab,row,0,Qt::AlignTop);
 	gridLay->addWidget(lned,row,1,Qt::AlignTop);
-	connect(lned,SIGNAL(editingFinished()),p,SIGNAL(parameterChanged()));
+	connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
+	connect(this,SIGNAL(lineEditChanged()),p,SIGNAL(parameterChanged()));
 	lned->setAlignment(Qt::AlignLeft);
 }
 
@@ -1362,6 +1362,17 @@ LineEditWidget::~LineEditWidget()
 	delete lned;
 	delete lab;
 }
+
+void LineEditWidget::changeChecker()
+{
+  if(lned->text() != this->lastVal)
+  {
+    this->lastVal = lned->text();
+    if(!this->lastVal.isEmpty())
+      emit lineEditChanged();
+  }
+}
+
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
 :LineEditWidget(p,rpar)
 {
@@ -1425,60 +1436,6 @@ void StringWidget::setWidgetValue( const Value& nv )
 	lned->setText(nv.getString());
 }
 
-//Matrix44fWidget::Matrix44fWidget( QWidget* p,RichMatrix44f* rpar )
-//:MeshLabWidget(p,rb)
-//{
-//}
-//
-//void Matrix44fWidget::collectWidgetValue()
-//{
-//}
-//
-//void Matrix44fWidget::resetWidgetValue()
-//{
-//}
-
-
-/*
-FloatListWidget::FloatListWidget( QWidget* p,RichMesh* rpar )
-:MeshLabWidget(p,rb)
-{
-}
-
-
-void FloatListWidget::collectWidgetValue()
-{
-}
-
-void FloatListWidget::resetWidgetValue()
-{
-}
-
-OpenFileWidget::OpenFileWidget( QWidget* p,RichMesh* rpar )
-:MeshLabWidget(p,rb)
-{
-}
-
-void OpenFileWidget::collectWidgetValue()
-{
-}
-
-void OpenFileWidget::resetWidgetValue()
-{
-}
-*/
-
-/*
-ql = new QLabel(fpi.fieldDesc,this);
-ql->setToolTip(fpi.fieldToolTip);
-
-qcbt = new QColorButton(this,QColor(fpi.fieldVal.toUInt()));
-gridLayout->addWidget(ql,i,0,Qt::AlignTop);
-gridLayout->addLayout(qcbt,i,1,Qt::AlignTop);
-
-stdfieldwidgets.push_back(qcbt);
-connect(qcbt,SIGNAL(dialogParamChanged()),this,SIGNAL(parameterChanged()));
-*/
 
 /******************************************/
 // ColorWidget Implementation
@@ -1701,25 +1658,6 @@ void OpenFileWidget::selectFile()
 	emit dialogParamChanged();
 }
 
-//void OpenFileWidget::collectWidgetValue()
-//{
-//	rp->val->set(FileValue(fl));
-//}
-//
-//void OpenFileWidget::resetWidgetValue()
-//{
-//	QString fle = rp->pd->defVal->getFileName();
-//	fl = fle;
-//	updateFileName(fle);
-//}
-//
-//
-//void OpenFileWidget::setWidgetValue(const Value& nv)
-//{
-//	QString fle = nv.getFileName();
-//	fl = fle;
-//	updateFileName(QString());
-//}
 
 OpenFileWidget::~OpenFileWidget()
 {
@@ -1745,31 +1683,3 @@ void SaveFileWidget::selectFile()
 	updateFileName(fl);
 	emit dialogParamChanged();
 }
-
-//XMLBoolWidget::XMLBoolWidget( QWidget* parent,const QStringList& xmlWidgetTag )
-//{
-//
-//}
-
-//XMLMeshLabWidget::XMLMeshLabWidget( QWidget* p )
-//:QObject(parent)
-//{
-//	helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",p);
-//	helpLab->setTextFormat(Qt::RichText);
-//	helpLab->setWordWrap(true);
-//	helpLab->setVisible(false);
-//	helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-//	helpLab->setMinimumWidth(250);
-//	helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
-//	gridLay = qobject_cast<QGridLayout*>(p->layout());
-//	assert(gridLay != 0);
-//	row = gridLay->rowCount();
-//	gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
-//}
-
-
-//XMLMeshLabWidget::XMLMeshLabWidget( Expression* expr,QWidget* parent )
-//:exp(expr),QObject(parent)
-//{
-//
-//}

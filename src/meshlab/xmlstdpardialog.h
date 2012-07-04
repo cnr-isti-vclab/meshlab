@@ -428,8 +428,6 @@ private:
 	QGridLayout * vLayout;
 	bool extended;
 
-	/*void dynamicFloatChanged(int mask);
-	void parameterChanged();*/
 };
 
 class MeshLabXMLStdDialog : public QDockWidget
