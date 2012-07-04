@@ -360,6 +360,15 @@ void MeshModel::Clear()
   cm.svn=0;
 }
 
+void MeshModel::UpdateBoxAndNormals()
+{
+  tri::UpdateBounding<CMeshO>::Box(cm);
+  if(cm.fn>0) {
+    tri::UpdateNormals<CMeshO>::PerFaceNormalized(cm);
+    tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(cm);
+  }
+}
+
 MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName)
 :MeshLabRenderMesh()
 {

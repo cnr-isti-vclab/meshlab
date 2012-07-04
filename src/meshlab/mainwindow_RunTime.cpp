@@ -1991,10 +1991,9 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
   } // standard case
   else
   {
-    if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-      vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm->cm);
-    else
-      vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm->cm);
+    vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm->cm);
+    if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
+       vcg::tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(mm->cm);
   }
   vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 
