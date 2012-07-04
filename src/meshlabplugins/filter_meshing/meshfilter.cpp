@@ -716,8 +716,7 @@ case FP_QUADRIC_SIMPLIFICATION:
 			tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 		}
 
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		tri::UpdateBounding<CMeshO>::Box(m.cm);
+        m.UpdateBoxAndNormals();
   } break;
 
 case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
@@ -751,8 +750,7 @@ case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 		lastq_Selected = par.getBool("Selected");
 
     QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-		tri::UpdateBounding<CMeshO>::Box(m.cm);
+        m.UpdateBoxAndNormals();
   } break;
 
 case FP_RESET_TRANSFORM :
@@ -804,9 +802,7 @@ case FP_ROTATE_FIT:
       m.cm.Tr = rt*tr1;
     } 
 	if(par.getBool("Freeze")&& !par.getBool("ToAll")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+	  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
 		}
@@ -815,9 +811,7 @@ case FP_ROTATE_FIT:
 		  for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr=transf;
-				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
@@ -870,9 +864,7 @@ case FP_ROTATE :
 		m.cm.Tr=trTran*trRot*trTranInv;
 
     if(par.getBool("Freeze")&& !par.getBool("ToAll")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,false);
-      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
 		}
@@ -881,9 +873,7 @@ case FP_ROTATE :
 		  for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr=transf;
-				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,false);
-				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
@@ -954,9 +944,7 @@ case FP_PRINCIPAL_AXIS:
 	  }
 	  if (par.getBool("Freeze") && !par.getBool("ToAll"))
 	  {
-		  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-		  tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-		  tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+		  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
 		  tri::UpdateBounding<CMeshO>::Box(m.cm);
 		  m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
 		  m.cm.Tr.SetIdentity();
@@ -967,9 +955,7 @@ case FP_PRINCIPAL_AXIS:
 		  for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr=transf;
-				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
@@ -1009,9 +995,7 @@ case FP_CENTER:
 
 		m.cm.Tr=trTran;
     if(par.getBool("Freeze") && !par.getBool("ToAll")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
     }
@@ -1021,9 +1005,7 @@ case FP_CENTER:
 		  for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr=transf;
-				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-				tri::UpdateNormals<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+				tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
 				tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
 				md.meshList[i]->cm.Tr.SetIdentity();
 				md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
@@ -1124,9 +1106,7 @@ case FP_SCALE:
 
 			m.cm.Tr=trTran*trScale*trTranInv;
 			if(par.getBool("Freeze")){
-			  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-			  tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-			  tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+			  tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
 			  tri::UpdateBounding<CMeshO>::Box(m.cm);
 			  m.cm.Tr.SetIdentity();
 			}
@@ -1156,9 +1136,7 @@ case FP_FLIP_AND_SWAP:
 		m.cm.Tr=tr;
 
     if(par.getBool("Freeze")){
-      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerVertexMatrix(m.cm,m.cm.Tr);
-      tri::UpdateNormals<CMeshO>::PerFaceMatrix(m.cm,m.cm.Tr);
+      tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
       tri::UpdateBounding<CMeshO>::Box(m.cm);
       m.cm.Tr.SetIdentity();
     }
