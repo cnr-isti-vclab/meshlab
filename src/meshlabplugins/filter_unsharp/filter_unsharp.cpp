@@ -315,7 +315,8 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 		break;
 		case FP_LAPLACIAN_SMOOTH:
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-			parlst.addParam(new RichBool ("Boundary",true,"1D Boundary Smoothing", "if true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries."));
+			parlst.addParam(new RichBool ("Boundary",true,"1D Boundary Smoothing", "If true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries."));
+			parlst.addParam(new RichBool ("cotangentWeight",true,"Cotangent weighting", "If true the cotangente weighting scheme is computed for the averaging of the position. Otherwise (false) the simpler umbrella scheme (1 if the edge is present) is used."));
 			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_DEPTH_SMOOTH:
@@ -390,18 +391,18 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	case FP_LAPLACIAN_SMOOTH :
 	  {
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-			int stepSmoothNum = par.getInt("stepSmoothNum");
+	  int stepSmoothNum = par.getInt("stepSmoothNum");
       bool Selected=par.getBool("Selected");
       if(Selected && m.cm.svn==0)
           m.cm.svn=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 			
-			bool boundarySmooth = par.getBool("Boundary");
-			if(boundarySmooth) 
-					tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
+	  bool boundarySmooth = par.getBool("Boundary");
+	  bool cotangentWeight = par.getBool("cotangentWeight");
+	  if(!boundarySmooth) tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 					
-      tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cb);
+	  tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
       Log( "Smoothed %d vertices", Selected>0 ? m.cm.svn : m.cm.vn);
-	    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	    
+      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	  }
 		break;
 	case FP_DEPTH_SMOOTH :
