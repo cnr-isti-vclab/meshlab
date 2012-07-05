@@ -44,7 +44,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	setVisible(false);
 	LayerDialog::ui->setupUi(this);
 	mw=qobject_cast<MainWindow *>(parent);
-
+	this->layout();
 
 	tagMenu = new QMenu(this);
 	removeTagAct = new QAction(tr("&Remove Tag"),this);
@@ -329,11 +329,16 @@ void LayerDialog::updateTable()
 		foreach( TagBase *tag, tags)
 			addTreeWidgetItem(item, tag, *md, mmd);
 	}
-
+		
   for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
 		ui->meshTreeWidget->resizeColumnToContents(i);
 
 	//RasterTreewWidget
+
+	if (md->rasterList.size() > 0)
+		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	else
+		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 	ui->rasterTreeWidget->clear();
 	ui->rasterTreeWidget->setColumnCount(4);
 	ui->rasterTreeWidget->setColumnWidth(0,40);
