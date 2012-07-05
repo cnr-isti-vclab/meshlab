@@ -27,9 +27,9 @@ linux-g++-64:LIBS += -L../../distrib -lcommon
 #	win32-g++:  LIBS += -L../../common/debug -lcommon
 #}
 
-win32-msvc2005:DEFINES += GLEW_STATIC
-win32-msvc2008:DEFINES += GLEW_STATIC 
-win32-msvc2010:DEFINES += GLEW_STATIC 
+win32-msvc2005:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
+win32-msvc2008:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
+win32-msvc2010:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
