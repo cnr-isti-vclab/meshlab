@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>345</width>
-    <height>448</height>
+    <width>490</width>
+    <height>578</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -126,7 +126,7 @@
          <item>
           <widget class="QTreeView" name="holeTree">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
