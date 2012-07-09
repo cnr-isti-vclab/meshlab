@@ -28,7 +28,7 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include "GPU/GPU.h"
+#include <wrap/glw/glw.h>
 
 
 
@@ -42,23 +42,19 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
     // Types.
     enum { DP_PROJECT_RASTER };
 
-    typedef GPU::VBO< GPU::InterlacedBuffers,
-                      GPU::Vertex3f         ,
-                      GPU::Normal3f         ,
-                      GPU::Indexui          >   MyVBO;
-
     class MeshDrawer
     {
-        MyVBO               m_VBO;
+        glw::BufferHandle   m_VBOVertices;
+        glw::BufferHandle   m_VBOIndices;
         MeshModel           *m_Mesh;
 
     public:
         inline              MeshDrawer() : m_Mesh(NULL)                 {}
         inline              MeshDrawer( MeshModel *mm ) : m_Mesh(mm)    {}
 
-        void                update( bool useVBO );
-        void                drawShadow();
-        void                draw();
+        void                update( glw::Context &context, bool useVBO );
+        void                drawShadow( glw::Context &context );
+        void                draw( glw::Context &context );
 
         inline MeshModel*   mm()                                        { return m_Mesh; }
     };
@@ -69,6 +65,7 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
 
 
     // Member variables.
+    glw::Context            m_Context;
     bool                    m_ProjectOnAllMeshes;
 
     vcg::Box3f              m_SceneBox;
@@ -80,9 +77,9 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
     vcg::Matrix44f          m_RasterPose;
 
     vcg::Matrix44f          m_ShadowProj;
-    GPU::Texture2D          m_DepthTexture;
-    GPU::Texture2D          m_ColorTexture;
-    GPU::Shader             m_ShadowMapShader;
+    glw::Texture2DHandle    m_DepthTexture;
+    glw::Texture2DHandle    m_ColorTexture;
+    glw::ProgramHandle      m_ShadowMapShader;
 
 
     // Constructors / destructor.
