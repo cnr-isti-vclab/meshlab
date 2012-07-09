@@ -30,7 +30,7 @@
 #include<string>
 
 #include<QImage>
-#include<QtOpenGL>
+#include<QGLWidget>
 #include <wrap/qt/checkGLError.h>
 
 using namespace vcg;

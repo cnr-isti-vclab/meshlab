@@ -65,7 +65,7 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParam
   if(!parset.hasParameter(CubeMapPathParam()))
       {
     QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-    parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
+    //parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
   }
   break;
   case DP_SHOW_GRID :

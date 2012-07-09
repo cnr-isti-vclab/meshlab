@@ -68,7 +68,7 @@ public:
 	SampleMeshDecoratePlugin()
 	{
     typeList
-    << DP_SHOW_CUBEMAPPED_ENV
+    /*<< DP_SHOW_CUBEMAPPED_ENV*/
     << DP_SHOW_GRID;
 
     FilterIDType tt;
