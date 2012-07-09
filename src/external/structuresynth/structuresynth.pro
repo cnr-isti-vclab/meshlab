@@ -86,18 +86,18 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/StructureSynth/Parser/Tokenizer.cpp \
            ssynth/SyntopiaCore/GLEngine/Box.cpp \
            ssynth/SyntopiaCore/GLEngine/Dot.cpp \
-           ssynth/SyntopiaCore/GLEngine/EngineWidget.cpp \
+#           ssynth/SyntopiaCore/GLEngine/EngineWidget.cpp \
            ssynth/SyntopiaCore/GLEngine/Grid.cpp \
            ssynth/SyntopiaCore/GLEngine/Line.cpp \
            ssynth/SyntopiaCore/GLEngine/Mesh.cpp \
            ssynth/SyntopiaCore/GLEngine/Object3D.cpp \
            ssynth/SyntopiaCore/GLEngine/Raytracer/AtomicCounter.cpp \
-           ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.cpp \
+#           ssynth/SyntopiaCore/GLEngine/Raytracer/RayTracer.cpp \
            ssynth/SyntopiaCore/GLEngine/Raytracer/RenderThread.cpp \
            ssynth/SyntopiaCore/GLEngine/Raytracer/Sampler.cpp \
            ssynth/SyntopiaCore/GLEngine/Raytracer/VoxelStepper.cpp \
            ssynth/SyntopiaCore/GLEngine/RaytraceTriangle.cpp \
-           ssynth/SyntopiaCore/GLEngine/Sphere.cpp \
+#           ssynth/SyntopiaCore/GLEngine/Sphere.cpp \
            ssynth/SyntopiaCore/GLEngine/Triangle.cpp \
            ssynth/SyntopiaCore/Logging/ListWidgetLogger.cpp \
            ssynth/SyntopiaCore/Logging/Logging.cpp \
@@ -108,7 +108,7 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/SyntopiaCore/Misc/MiniParser.cpp \
            ssynth/SyntopiaCore/Misc/Persistence.cpp \
            ssynth/SyntopiaCore/Misc/Version.cpp \
-           ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp \
+#           ssynth/StructureSynth/Model/Rendering/OpenGLRenderer.cpp \
            ssynth/StructureSynth/Model/Rendering/Renderer.cpp \
            ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp
 CONFIG+=opengl
