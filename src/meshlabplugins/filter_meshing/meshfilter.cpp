@@ -34,6 +34,7 @@
 #include <vcg/complex/algorithms/update/curvature_fitting.h>
 #include <vcg/space/normal_extrapolation.h>
 #include <vcg/space/fitting3.h>
+#include <wrap/gl/glu_tessellator_cap.h>
 #include "quadric_tex_simp.h"
 #include "quadric_simp.h"
 
@@ -76,6 +77,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 		<< FP_FAUX_CREASE
 		<< FP_VATTR_SEAM
 		<< FP_REFINE_LS3_LOOP
+		<< FP_SLICE_WITH_A_PLANE
 	;
 
 	FilterIDType tt;
@@ -134,6 +136,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 
 		case FP_FREEZE_TRANSFORM                 :
 		case FP_RESET_TRANSFORM                  : return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
+	case FP_SLICE_WITH_A_PLANE                  : return  MeshFilterInterface::Measure;
 
 		case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Smoothing;
 
@@ -166,6 +169,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
 	case FP_QUAD_PAIRING                     :
 	case FP_FAUX_CREASE                      :
 	case FP_VATTR_SEAM                       :
+	case FP_SLICE_WITH_A_PLANE                       :
 	case FP_REFINE_LS3_LOOP									 : return MeshModel::MM_FACENUMBER;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
@@ -218,6 +222,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 		case FP_FAUX_CREASE                      : return tr("Crease Marking with NonFaux Edges");
 		case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
 		case FP_REFINE_LS3_LOOP									 : return tr("Subdivision Surfaces: LS3 Loop");
+	case FP_SLICE_WITH_A_PLANE									 : return tr("Compute Planar Section");
 
 		default                                  : assert(0);
 	}
@@ -282,6 +287,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
 		                                                     "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 		                                                     "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
+	case FP_SLICE_WITH_A_PLANE                       : return tr("Compute the polyline representing a planar section of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
 
 		default                                  : assert(0);
 	}
@@ -507,6 +513,18 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 				}
 			}
 			break;
+	case FP_SLICE_WITH_A_PLANE:
+	{
+	  QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis";
+	  parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+//	  parlst.addParam(new RichSaveFile ("filename","output.svg",QString("svg"),QString("Output File"),QString("Name of the svg files and of the folder containing them, it is automatically created in the Sample folder of the Meshlab tree")));
+//	  parlst.addParam(new RichFloat("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
+	  parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
+	  parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+	  // BBox min=0, BBox center=1, Origin=2
+	  parlst.addParam(new RichEnum   ("relativeTo",0,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
+	  }
+	  break;
 
 		default:
 			break;
@@ -1422,6 +1440,49 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
       return r;
 		}
+  } break;
+case FP_SLICE_WITH_A_PLANE:
+  {
+    Point3f planeAxis(0,0,0);
+    int ind = par.getEnum("planeAxis");
+    if(ind>=0 && ind<3)   planeAxis[ind] = 1.0f;
+    else planeAxis=par.getPoint3f("customAxis");
+
+    planeAxis.Normalize();
+
+    float planeOffset = par.getFloat("planeOffset");
+    Point3f planeCenter;
+    Plane3f slicingPlane;
+
+    Box3f bbox=m.cm.bbox;
+    MeshModel* base=&m;
+    MeshModel* orig=&m;
+
+    //actual cut of the mesh
+    if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
+    {
+      Log("Mesh is not two manifold, cannot apply filter");
+      return false;
+    }
+
+    switch(RefPlane(par.getEnum("relativeTo")))
+    {
+      case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);      break;
+      case REF_MIN:     planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);    break;
+      case REF_ORIG:    planeCenter = planeAxis*planeOffset;  break;
+    }
+
+    //planeCenter+=planeAxis*planeDist ;
+    slicingPlane.Init(planeCenter,planeAxis);
+
+    //this is used to generate svg slices
+    MeshModel* cap= md.addNewMesh("","Section PolyLine");
+    vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(orig->cm, slicingPlane, cap->cm );
+    tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
+
+    MeshModel* cap2= md.addNewMesh("","Section Mesh");
+    tri::CapEdgeMesh(cap->cm, cap2->cm);
+    cap2->UpdateBoxAndNormals();
   } break;
 }
 	return true;

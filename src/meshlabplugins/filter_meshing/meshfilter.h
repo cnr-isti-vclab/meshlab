@@ -30,6 +30,7 @@ class ExtraMeshFilterPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
  Q_INTERFACES(MeshFilterInterface)
+  enum RefPlane { REF_CENTER,REF_MIN,REF_ORIG};
 
 public:
          /* naming convention :
@@ -49,6 +50,7 @@ public:
      FP_NORMAL_EXTRAPOLATION,
      FP_NORMAL_SMOOTH_POINTCLOUD,
      FP_COMPUTE_PRINC_CURV_DIR,
+     FP_SLICE_WITH_A_PLANE,
      FP_MIDPOINT,
      FP_REORIENT ,
      FP_FLIP_AND_SWAP,
