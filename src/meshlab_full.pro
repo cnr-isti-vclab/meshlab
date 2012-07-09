@@ -45,9 +45,8 @@ SUBDIRS       = common \
 				meshlabplugins/filter_quality \
                 meshlabplugins/filter_sampling \
 				meshlabplugins/filter_sdfgpu \
-                meshlabplugins/filter_slice \
                 meshlabplugins/filter_select \
-				meshlabplugins/filter_ssynth \
+                meshlabplugins/filter_ssynth \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
