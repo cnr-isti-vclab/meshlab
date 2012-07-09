@@ -148,9 +148,14 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 		QStringList shotType;
         shotType.push_back("Raster Camera");
         shotType.push_back("Mesh Camera");
+		QStringList behaviour;
+        behaviour.push_back("The matrix is the transformation to apply to the extrinsics");
+        behaviour.push_back("The matrix represent the new extrinsics");
+
 		vcg::Matrix44f mat; mat.SetIdentity();
-	    parlst.addParam(new RichMatrix44f("TransformMatrix",mat,"Matrix to apply to camera extrinsics"));
+	    parlst.addParam(new RichMatrix44f("TransformMatrix",mat,""));
 	    parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
+	    parlst.addParam(new RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
 		parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
 	    parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
 	
@@ -389,10 +394,22 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
   break;
   case FP_CAMERA_TRANSFORM :
 	  {
-		vcg::Matrix44f mat = par.getMatrix44("TransformMatrix");
-	   		
+		vcg::Matrix44f mat,inv; 
+		inv.SetIdentity();
+		vcg::Point3f tra;
+	   	mat = par.getMatrix44("TransformMatrix"); 
+		if(par.getEnum("behaviour") == 1){
+			inv = rm->shot.Extrinsics.Rot();
+			tra =  inv * rm->shot.Extrinsics.Tra();
+			inv[0][3] = -tra[0];
+			inv[1][3] = -tra[1];
+			inv[2][3] = -tra[2];
+			mat = mat * inv;
+			mat = inv;
+		}
+
 	  if (par.getBool("toall"))
-		{
+	  {
 			for (int i=0; i<md.meshList.size(); i++)
 			{
 				md.meshList[i]->cm.Tr = mat;
