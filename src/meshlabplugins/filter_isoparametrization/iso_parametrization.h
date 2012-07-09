@@ -99,7 +99,6 @@ class ParamFace: public vcg::Face <  ParamUsedTypes,
   vcg::face::Normal3f,
 	vcg::face::WedgeTexCoord2f,
 	vcg::face::Mark,
-	vcg::face::EdgePlane,
 	vcg::face::Quality3f>
 {
 public:

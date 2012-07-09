@@ -92,7 +92,6 @@ class IsoTransfer
 		vcg::tri::UpdateNormals<ParamMesh>::PerFaceNormalized(*IsoParam.ParaMesh());
 		vcg::tri::UpdateNormals<ParamMesh>::PerVertexAngleWeighted(*IsoParam.ParaMesh());
 		vcg::tri::UpdateNormals<ParamMesh>::NormalizeVertex(*IsoParam.ParaMesh());
-		vcg::tri::UpdateEdges<ParamMesh>::Set(*IsoParam.ParaMesh());
 		
 		TRGrid.Set(IsoParam.ParaMesh()->face.begin(),IsoParam.ParaMesh()->face.end());
 		ScalarType maxDist=IsoParam.ParaMesh()->bbox.Diag();
@@ -105,7 +104,8 @@ class IsoTransfer
 				ScalarType dist;
 				CoordType closest,norm,bary;
 				ParamMesh::FaceType * f=NULL;
-				f=GetClosestFace(*IsoParam.ParaMesh(),TRGrid,vert->P(), maxDist,dist,closest,norm,bary);
+				f=GetClosestFaceBase(*IsoParam.ParaMesh(),TRGrid,vert->P(), maxDist,dist,closest);
+				vcg::InterpolationParameters<typename ParamMesh::FaceType,typename ParamMesh::ScalarType>(*f,f->N(),closest, bary);
 				assert(f!=NULL);
 				
 				///then find back the coordinates
