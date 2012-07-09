@@ -368,7 +368,7 @@ bool AlignPair::Align(
         }
         else // using the standard faces and grid
         {
-          A2Mesh::FacePointer f=vcg::tri::GetClosestFace<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint,closestNormal,ip);
+          A2Mesh::FacePointer f=vcg::tri::GetClosestFaceEP<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint,closestNormal,ip);
           if(error>=StartMinDist) {
             ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
           }
