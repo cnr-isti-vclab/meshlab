@@ -678,7 +678,7 @@ void Matrix44fWidget::pasteMatrix(){
 	QClipboard *clipboard = QApplication::clipboard();
 	QString shotString = clipboard->text();
 	QStringList list1 = shotString.split(" ");
-	if(list1.size() < 16) return;
+	if(list1.size() != 16) return;
 	int id = 0;
 	for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
 		bool ok = true;
