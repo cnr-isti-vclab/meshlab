@@ -1966,7 +1966,6 @@ void RenderArea::UpdateUnifyTopology()
 	// Update the topology needed for unify of edge
 	vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(model->cm);
 	vcg::tri::UpdateTopology<CMeshO>::VertexFace(model->cm);
-	model->clearDataMask(MeshModel::MM_FACEFLAGBORDER);
 	vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(model->cm);
 	vcg::tri::UpdateFlags<CMeshO>::VertexBorderFromFace(model->cm);
 }
