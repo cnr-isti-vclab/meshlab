@@ -95,7 +95,8 @@ public:
         this->distFromCenter = distFromCenter;
     }
 
-    bool operator() (const _MyVertexType* lhs, const _MyVertexType* rhs) const {
+    bool operator() (const _MyVertexType* lhs, const _MyVertexType* rhs) const 
+	{
         return (*distFromCenter)[*lhs] > (*distFromCenter)[*rhs];
     }
 };
@@ -151,21 +152,27 @@ void ComponentFinder<_MyMeshType, _MyVertexType>::Dijkstra(_MyMeshType& m, _MyVe
         element = prQueue.top();
         prQueue.pop();
 
-        for (it = neighboursVect[element]->begin(); it != neighboursVect[element]->end(); it++) {
-            distance = vcg::Distance((*it)->P(), element->P());
+        for (it = neighboursVect[element]->begin(); it != neighboursVect[element]->end(); it++) 
+		{
+			//I have not to compute the arches connecting vertices already visited.
+			if (!(*it)->IsV())
+			{
+				distance = vcg::Distance((*it)->P(), element->P());
 
-            // we take into account only the arcs with a distance less or equal to maxHopDist
-            if (distance <= maxHopDist) {
-                if (distFromCenter[*element] + distance < distFromCenter[*it])
-                    distFromCenter[*it] = distFromCenter[*element] + distance;
+				// we take into account only the arcs with a distance less or equal to maxHopDist
+				if (distance <= maxHopDist) 
+				{
+					if ((distFromCenter[*element] + distance) < distFromCenter[*it])
+						distFromCenter[*it] = distFromCenter[*element] + distance;
 
-                if (!(*it)->IsV()) {
-                    prQueue.push(*it);
-                    (*it)->SetV();
-                }
-            }
-            // all the other are the notReachable arcs
-            else if (distance > maxHopDist) notReachableVect.push_back(element);
+					if (!(*it)->IsV()) {
+						prQueue.push(*it);
+						(*it)->SetV();
+					}
+				}
+				// all the other are the notReachable arcs
+				else if (distance > maxHopDist) notReachableVect.push_back(element);
+			}
         }
     }
 }
