@@ -44,13 +44,9 @@ AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 	tt[1]=&trackRight;
   isUsingVertexColor = false;
   usePointRendering = false;
-	
 	freePickedPointVec.clear();
 	gluedPickedPointVec.clear();
 
-	//resize(800,400);
-	QRect rr= QApplication::desktop()->screenGeometry ( this );
-	setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 	hasToPick=false;
   hasToDelete=false;
 	pointToPick=vcg::Point2i(-1,-1);
@@ -68,6 +64,10 @@ void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
 
 void AlignPairWidget::initializeGL ()
 {
+	/*QRect rr= QApplication::desktop()->screenGeometry ( this );
+	resize(rr.width()*0.8,rr.width()*0.5);
+	int ii = width();
+	int zz = height();*/
   glClearColor(0, 0, 0, 0); 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
@@ -86,8 +86,10 @@ void AlignPairWidget::paintGL ()
 	
 	for(int i=0;i<2;++i)
 		{
-			if(i==0)  glViewport (0, 0, (GLsizei) width()/2, (GLsizei) height()); 
-       else			glViewport (width()/2, 0, (GLsizei) width()/2, (GLsizei) height()); 
+			if(i==0)  
+				glViewport (0, 0, (GLsizei) width()/2, (GLsizei) height()); 
+			else
+				glViewport (width()/2, 0, (GLsizei) width()/2, (GLsizei) height()); 
 			 
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();

@@ -38,29 +38,33 @@ class AlignPairDialog: public QDialog
 	Q_OBJECT 
 public:
 	AlignPairWidget *aa;
-  QCheckBox * allowScalingCB;
-  AlignPairDialog (QWidget * parent = 0) : QDialog(parent)
+	QCheckBox * allowScalingCB;
+	AlignPairDialog (QWidget * parent = 0) : QDialog(parent)
 	{
 		QVBoxLayout *layout = new QVBoxLayout(this);
-	
+
 		aa=new AlignPairWidget(this);
+		aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 		QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
 		allowScalingCB = new QCheckBox("Allow Scaling");
 		allowScalingCB->setChecked(false);
-		
+
 		QLabel *helpLabel = new QLabel("Choose at least 4 matching pair of points on the two meshes. <br>Double Click over each mesh to add new points. Choose points in consistent order");
+		helpLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		layout->addWidget(helpLabel);
 		layout->addWidget(aa);
 		layout->addWidget(allowScalingCB);
 		layout->addWidget(buttonBox);
-	
+
 		setLayout(layout);
 		adjustSize();
 		connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 		connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+		QRect rr= QApplication::desktop()->screenGeometry ( this );
+		setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 	}
 
-	
-//	public slots:	
+
+	//	public slots:	
 };
 #endif

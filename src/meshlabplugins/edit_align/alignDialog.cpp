@@ -71,8 +71,6 @@ AlignDialog::AlignDialog(QWidget *parent,EditAlignPlugin *_edit )    : QDockWidg
   this->edit = _edit;
 	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
-  connect(	ui.alignTreeWidget, SIGNAL(updateMeshSetVisibilities()) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
-
 	globalLogTextEdit=ui.logTextEdit;
   currentArc=0;
 	meshTree=0;
