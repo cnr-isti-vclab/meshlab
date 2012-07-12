@@ -61,13 +61,13 @@ AlignDialog::AlignDialog(QWidget *parent,EditAlignPlugin *_edit )    : QDockWidg
 { 
  // setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow);
 	//setVisible(false);
-	AlignDialog::ui.setupUi(this);
-	this->setWidget(ui.frame);
+    AlignDialog::ui.setupUi(this);
+    this->setWidget(ui.frame);
 	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
 	this->setAllowedAreas(Qt::LeftDockWidgetArea);
-	QPoint p=parent->mapToGlobal(QPoint(0,0));
+    QPoint p=parent->mapToGlobal(QPoint(0,0));
 	this->setFloating(true);
-	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
+    this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
   this->edit = _edit;
 	// The following connection is used to associate the click with the change of the current mesh. 
 	connect(	ui.alignTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(onClickItem(QTreeWidgetItem * , int ) ) );
