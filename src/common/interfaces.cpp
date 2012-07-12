@@ -27,6 +27,19 @@ void MeshLabInterface::Log(int Level, const char * f, ... )
   }
 }
 
+void MeshLabInterface::RealTimeLog(QString Id, const char * f, ... )
+{
+  if(log)
+  {
+    char buf[4096];
+    va_list marker;
+    va_start( marker, f );
+    vsprintf(buf,f,marker);
+    va_end( marker );
+    log->RealTimeLog(Id,buf);
+  }
+}
+
 bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const
 {
   int preMask = getPreConditions(act);

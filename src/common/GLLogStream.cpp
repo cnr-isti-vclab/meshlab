@@ -45,6 +45,23 @@ void GLLogStream::Logf(int Level, const char * f, ... )
 	Log(Level,buf);
 }
 
+void GLLogStream::RealTimeLogf(QString Id, const char * f, ... )
+{
+	char buf[4096];
+	va_list marker;
+	va_start( marker, f );
+
+	vsprintf(buf,f,marker);
+	va_end( marker );
+	RealTimeLog(Id,buf);
+}
+
+void GLLogStream::RealTimeLog(QString Id, QString text)
+{
+  this->RealTimeLogText[Id]=text;
+}
+
+
 void GLLogStream::Save(int /*Level*/, const char * filename )
 {
 	FILE *fp=fopen(filename,"wb");

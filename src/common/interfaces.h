@@ -94,6 +94,7 @@ public:
 	// NEVER EVER use a msgbox to say something to the user.
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
+  void RealTimeLog(QString Id, const char * f, ... ) ;
 };
 
 class MeshCommonInterface : public MeshLabInterface

@@ -130,6 +130,20 @@ QString GLArea::GetMeshInfoString()
 	return info;
 }
 
+
+void GLArea::Logf(int Level, const char * f, ... )
+{
+  if(this->log==0) return;
+
+	char buf[4096];
+	va_list marker;
+	va_start( marker, f );
+
+	vsprintf(buf,f,marker);
+	va_end( marker );
+	this->log->Log(Level,buf);
+}
+
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
 QSize GLArea::sizeHint() const				{return QSize(400,300);}
 
@@ -377,7 +391,10 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 			md()->renderState().render(rm.drawMode,rm.colorMode,rm.textureMode);
 
 		}
-		if(iEdit) iEdit->Decorate(*mm(),this,&painter);
+		if(iEdit) {
+		  iEdit->setLog(this->log);
+		  iEdit->Decorate(*mm(),this,&painter);
+		}
 
 		// Draw the selection
 		if(rm.selectedFace && (mm() != NULL))  mm()->renderSelectedFace();
@@ -385,6 +402,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		foreach(QAction * p , iDecoratorsList)
 		{
 			MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+			decorInterface->setLog(this->log);
 			decorInterface->decorate(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter);
 		}
 		glPopAttrib();
@@ -438,6 +456,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_DEPTH_TEST);
 		displayInfo(&painter);
+		displayRealTimeLog(&painter);
 		updateFps(time.elapsed());
 		glPopAttrib();
 	}
@@ -495,6 +514,35 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 	TO.setTabs(TabList);
 	painter->drawText(areaRect, tableText, TO);
 	painter->restore();
+}
+void GLArea::displayRealTimeLog(QPainter *painter)
+{
+  painter->endNativePainting();
+  painter->save();
+  painter->setRenderHint(QPainter::TextAntialiasing);
+  painter->setPen(Qt::white);
+  Color4b logAreaColor = glas.logAreaColor;
+  glas.logAreaColor[3]=128;
+  if(mvc()->currentId!=id) logAreaColor /=2.0;
+
+  qFont.setStyleStrategy(QFont::NoAntialias);
+  qFont.setFamily("Helvetica");
+  qFont.setPixelSize(12);
+  painter->setFont(qFont);
+  float barHeight = qFont.pixelSize()*2;
+  QFontMetrics metrics = QFontMetrics(font());
+  int border = qMax(4, metrics.leading());
+  QRect curRect(border, border, width()/5, barHeight);
+  foreach(QString logText, md()->Log.RealTimeLogText)
+  {
+    painter->fillRect(curRect, ColorConverter::ToQColor(logAreaColor));
+    painter->drawText(curRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, logText);
+    curRect.moveBottom(curRect.bottom()+ barHeight);
+  }
+
+  md()->Log.RealTimeLogText.clear();
+  painter->restore();
+  painter->beginNativePainting();
 }
 
 void GLArea::displayInfo(QPainter *painter)
@@ -935,13 +983,26 @@ void GLArea::updateTexture()
 	hasToUpdateTexture = true;
 }
 
+// compute the next highest power of 2 of 32-bit v
+int GLArea::RoundUpToTheNextHighestPowerOf2(unsigned int v)
+{
+  v--;
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v++;
+return v;
+}
 /** initTexture loads all the required textures (if necessary).
-It is called every time in the glpaint. 
+It is called every time in the glpaint.
 It assumes that:
 - there is a shared gl wrapper for all the contexts (same texture id for different glareas)
 - the values stored in the glwrapper for the texture id are an indicator if there is the need of loading a texture (0 means load that texture)
 
 */
+
 void GLArea::initTexture()
 {
 	if(hasToUpdateTexture)
@@ -968,8 +1029,8 @@ void GLArea::initTexture()
 					// Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
 					QString ConvertedName = QString(mp->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
 					res = img.load(ConvertedName);
-					if(!res) qDebug("Failure of loading texture %s",mp->cm.textures[i].c_str());
-					else qDebug("Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
+					if(!res) this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
+					else this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
 				}
 				if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
 				{
@@ -977,16 +1038,16 @@ void GLArea::initTexture()
 					int newTexId = bindTexture(QString(mp->cm.textures[i].c_str()));
 					mp->glw.TMId.push_back(newTexId);
 				}
-				else
+				if(res)
 				{
-					// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
-					int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
-					int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
+					// image has to be scaled to a 2^n size. We choose the first 2^N >= picture size.
+					int bestW=RoundUpToTheNextHighestPowerOf2(img.width()  );
+					int bestH=RoundUpToTheNextHighestPowerOf2(img.height() );
 					while(bestW>MaxTextureSize) bestW /=2;
 					while(bestH>MaxTextureSize) bestH /=2;
 
-					log->Log(GLLogStream::SYSTEM,"Loading textures");
-					log->Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
+					Logf(GLLogStream::SYSTEM,"Loading textures");
+					Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
 					imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 					imgGL=convertToGLFormat(imgScaled);
 					mp->glw.TMId.push_back(0);

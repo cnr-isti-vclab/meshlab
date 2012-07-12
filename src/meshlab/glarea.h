@@ -100,7 +100,9 @@ public:
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
 	GLLogStream *log;
-  GLAreaSetting glas;
+	void Logf(int Level, const char * f, ... );
+
+	GLAreaSetting glas;
 	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
@@ -251,8 +253,12 @@ public:
 protected:
 
 	void initializeGL();
+	int RoundUpToTheNextHighestPowerOf2(unsigned int v);
+
 	void initTexture();
   void displayInfo(QPainter *painter);
+  void displayRealTimeLog(QPainter *painter);
+
   void displayMatrix(QPainter *painter, QRect areaRect);
 	void displayViewerHighlight();
   void displayHelp(QPainter *painter);

@@ -27,6 +27,7 @@
 
 #include <list>
 #include <utility>
+#include <QMap>
 /**
   This is the logging class.
   One for each document. Responsible of getting an history of the logging message printed out by filters.
@@ -60,6 +61,12 @@ public:
 
 //private:
   QList<std::pair<int,QString> > S;
+  QMap<QString,QString> RealTimeLogText;
+  
+
+  void RealTimeLogf(QString Id, const char * f, ... );
+  void RealTimeLog(QString Id, QString text);
+
 
 private:
   int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing
