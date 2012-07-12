@@ -154,7 +154,12 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
             glEnd();
             glPopAttrib();
         } break;
-    case DP_SHOW_BOX_CORNERS:	DrawBBoxCorner(m); break;
+    case DP_SHOW_BOX_CORNERS:
+      {
+        DrawBBoxCorner(m);
+        this->RealTimeLog("BBoxCorners","BB: %7.4f %7.4f %7.4f - %7.4f %7.4f %7.4f",m.cm.bbox.min[0],m.cm.bbox.min[1],m.cm.bbox.min[2],m.cm.bbox.max[0],m.cm.bbox.max[1],m.cm.bbox.max[2]);
+      }
+      break;
     case DP_SHOW_CAMERA:
       {
         // draw all mesh cameras
@@ -321,12 +326,14 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
         glEnableClientState (GL_COLOR_ARRAY);
 
         glEnable(GL_POINT_SMOOTH);
-		if (vvP->size() > 0)
+        if (vvP->size() > 0)
 		{
 			glPointSize(6.f);
 			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
 			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
 			glDrawArrays(GL_POINTS,0,vvP->size());
+			this->RealTimeLog("Non Manifold Vert","Non Manif Vert: %i",vvP->size()/2);
+
 		}
 
 		if (tvP->size() > 0)
@@ -922,13 +929,18 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     tri::Clean<CMeshO>::CountNonManifoldVertexFF(m->cm,true);
     Color4b bCol=Color4b(255,0,255,0);
     Color4b vCol=Color4b(255,0,255,64);
+    tri::UpdateFlags<CMeshO>::VertexClearV(m->cm);
     for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
     {
       for(int i=0;i<3;++i)
         {
           if((*fi).V(i)->IsS())
           {
-            BVp->push_back(make_pair((*fi).V0(i)->P(),Color4b::Magenta));
+            if(!(*fi).V0(i)->IsV())
+            {
+               BVp->push_back(make_pair((*fi).V0(i)->P(),Color4b::Magenta));
+               (*fi).V0(i)->SetV();
+            }
 
             Point3f P1=((*fi).V0(i)->P()+(*fi).V1(i)->P())/2.0f;
             Point3f P2=((*fi).V0(i)->P()+(*fi).V2(i)->P())/2.0f;
