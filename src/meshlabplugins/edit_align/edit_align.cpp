@@ -37,6 +37,8 @@ $Log: meshedit.cpp,v $
 #include "AlignPairDialog.h"
 #include "align/align_parameter.h"
 #include <meshlab/stdpardialog.h>
+#include <QMetaObject>
+
 using namespace vcg;
 
 EditAlignPlugin::EditAlignPlugin() {
@@ -112,13 +114,11 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	}
 	gla->rm.colorMode=GLW::CMPerMesh;
 
-	//MainWindow *mainW=qobject_cast<MainWindow *> (gla->parentWidget()->parentWidget());
-	//assert(mainW);
 	gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));	
 	if(alignDialog==0)
 	{
 		//alignDialog=new AlignDialog(gla->parentWidget()->parentWidget());
-		alignDialog=new AlignDialog(gla->window(),this);
+        alignDialog=new AlignDialog(gla->window(),this);
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
 		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
@@ -287,7 +287,8 @@ void EditAlignPlugin:: alignParam()
 	AlignParameter::buildRichParameterSet(defaultAP, alignParamSet);
 
 	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
-	int result=ad.exec();
+    ad.setWindowModality(Qt::WindowModal);
+    int result=ad.exec();
 	if(result != QDialog::Accepted) return;
 
 	// Dialog accepted. get back the values
