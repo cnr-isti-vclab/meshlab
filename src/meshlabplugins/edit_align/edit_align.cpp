@@ -41,7 +41,7 @@ $Log: meshedit.cpp,v $
 
 using namespace vcg;
 
-EditAlignPlugin::EditAlignPlugin() {
+EditAlignPlugin::EditAlignPlugin(){
 	alignDialog=0;
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);      
@@ -117,7 +117,6 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));	
 	if(alignDialog==0)
 	{
-		//alignDialog=new AlignDialog(gla->parentWidget()->parentWidget());
         alignDialog=new AlignDialog(gla->window(),this);
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
@@ -274,6 +273,8 @@ void EditAlignPlugin:: alignParamCurrent()
 	AlignParameter::buildRichParameterSet(currentArc()->ap, alignParamSet);
 
 	GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
+	ad.setWindowFlags(Qt::Dialog);
+	ad.setWindowModality(Qt::WindowModal);
 	int result=ad.exec();
 	if(result != QDialog::Accepted) return;
 
@@ -286,11 +287,13 @@ void EditAlignPlugin:: alignParam()
 	RichParameterSet alignParamSet;
 	AlignParameter::buildRichParameterSet(defaultAP, alignParamSet);
 
+	//alignDialog->setWindowFlags(~Qt::WindowCloseButtonHint);
 	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
-    ad.setWindowModality(Qt::WindowModal);
+	ad.setWindowFlags(Qt::Dialog);
+	ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();
+	//alignDialog->setWindowFlags(Qt::WindowCloseButtonHint);
 	if(result != QDialog::Accepted) return;
-
 	// Dialog accepted. get back the values
 	AlignParameter::buildAlignParameters(alignParamSet, defaultAP);
 }
