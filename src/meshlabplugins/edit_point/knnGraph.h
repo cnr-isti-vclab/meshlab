@@ -10,22 +10,21 @@
 
 #include <vcg/space/index/kdtree/kdtree.h>
 
-using namespace std;
-using namespace vcg;
+namespace vcg {
+namespace tri {
 
-template <typename _MyMeshType, typename _MyVertexType>
-class KNNTree {
+template <typename _MyMeshType>
+class KNNGraph {
 public:
-    static void MakeKNNTree(_MyMeshType& m, int numOfNeighbours);
-    static void DeleteKNNTree(_MyMeshType& m);
-};
 
-/**
+typedef typename _MyMeshType::VertexType _MyVertexType;
+
+  /**
  * Static function to create and fill the PerVertexAttribute KNNGraph, which stores the k-nearest
  * neighbours via vertex pointers
  */
-template <typename _MyMeshType, typename _MyVertexType>
-void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfNeighbours) {
+static void MakeKNNTree(_MyMeshType& m, int numOfNeighbours)
+{
     //we search k+1 neighbours in order to exclude the queryPoint from the returned heap
     int neighboursVectSize = numOfNeighbours + 1;
 
@@ -35,15 +34,15 @@ void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfN
     tri::Allocator<_MyMeshType>::CompactVertexVector(m);
 
     //the PerVertexAttribute handles is create and each of the vector capacity set to the maximum possible
-    typename _MyMeshType::template PerVertexAttributeHandle<vector<_MyVertexType*>* > kNeighboursVect;
-    kNeighboursVect = vcg::tri::Allocator<_MyMeshType>::template AddPerVertexAttribute<vector<_MyVertexType*>* >(m, std::string("KNNGraph"));
+    typename _MyMeshType::template PerVertexAttributeHandle<std::vector<_MyVertexType*>* > kNeighboursVect;
+    kNeighboursVect = tri::Allocator<_MyMeshType>::template AddPerVertexAttribute<std::vector<_MyVertexType*>* >(m, std::string("KNNGraph"));
     for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
-        kNeighboursVect[vi] = new vector<_MyVertexType*>();
+        kNeighboursVect[vi] = new std::vector<_MyVertexType*>();
         kNeighboursVect[vi]->reserve(neighboursVectSize);
     }
 
     //we create and fill the DataWrapper we need to pass the points to the KdTree
-    vector<typename _MyMeshType::CoordType> input(m.vn);
+    std::vector<typename _MyMeshType::CoordType> input(m.vn);
     int i = 0;
     for (typename _MyMeshType::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++, ++i) {
         input[i] = vi->cP();
@@ -77,15 +76,19 @@ void KNNTree<_MyMeshType, _MyVertexType>::MakeKNNTree(_MyMeshType& m, int numOfN
 /**
  * Static function which removes the KNNGraph PerVertex attribute
  */
-template <typename _MyMeshType, typename _MyVertexType>
-void KNNTree<_MyMeshType, _MyVertexType>::DeleteKNNTree(_MyMeshType& m) {
+static void DeleteKNNTree(_MyMeshType& m)
+{
     bool hasKNNGraph = tri::HasPerVertexAttribute(m, "KNNGraph");
 
     if (hasKNNGraph) {
-        vcg::tri::Allocator<_MyMeshType>::DeletePerVertexAttribute(m, "KNNGraph");
+        tri::Allocator<_MyMeshType>::DeletePerVertexAttribute(m, "KNNGraph");
     }
 
     return;
 }
+
+}; // end knnGraph Class
+} //end namespace tri
+} // end namespace vcg;
 
 #endif // KNNGRAPH_H
