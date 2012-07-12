@@ -332,7 +332,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
 			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
 			glDrawArrays(GL_POINTS,0,vvP->size());
-			this->RealTimeLog("Non Manifold Vert","Non Manif Vert: %i",vvP->size()/2);
+			this->RealTimeLog("Non Manifold Vert","Non Manif Vert: %i",vvP->size());
 
 		}
 
@@ -381,6 +381,8 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           glDisableClientState (GL_COLOR_ARRAY);
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
+          this->RealTimeLog("Non Manifold Tri","Non Manifold Edges: %i",BVp->size()/2);
+          this->RealTimeLog("Non Manifold Edge","Faces Over Non Manifold Edges: %i",FVp->size()/3);
         }
       }
     }
@@ -407,6 +409,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           glDrawArrays(GL_LINES,0,BVp->size());
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
+          this->RealTimeLog("Boundary","Boundary Edges: %i",BVp->size()/2);
         }
       }
     } break;
@@ -976,7 +979,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     Color4b faceVer[5];
     for(int i=0;i<5;++i) faceCol[i]=Color4b(faceCol[i][0],faceCol[i][1],faceCol[i][2],96);
     for(int i=0;i<5;++i) faceVer[i]=Color4b(faceCol[i][0],faceCol[i][1],faceCol[i][2],0);
-
+    std::set<std::pair<CVertexO*,CVertexO*> > edgeSet; // this set is used to unique count the number of non manifold edges
     for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
     {
       for(int i=0;i<3;++i)
@@ -986,8 +989,15 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
 
           if(faceOnEdgeNum == 2) continue;
           if(faceOnEdgeNum == 1 && showBorderFlag==false) continue;
-          BVp->push_back(make_pair((*fi).V0(i)->P(),edgeCol[faceOnEdgeNum]));
-          BVp->push_back(make_pair((*fi).V1(i)->P(),edgeCol[faceOnEdgeNum]));
+
+          bool edgeNotPresent; // true if the edge was not present in the set
+          if ( (*fi).V0(i)<(*fi).V1(i)) edgeNotPresent = edgeSet.insert(make_pair((*fi).V0(i),(*fi).V1(i))).second;
+                                   else edgeNotPresent = edgeSet.insert(make_pair((*fi).V1(i),(*fi).V0(i))).second;
+
+          if(edgeNotPresent){
+            BVp->push_back(make_pair((*fi).V0(i)->P(),edgeCol[faceOnEdgeNum]));
+            BVp->push_back(make_pair((*fi).V1(i)->P(),edgeCol[faceOnEdgeNum]));
+          }
           FVp->push_back(make_pair((*fi).V0(i)->P(),faceCol[faceOnEdgeNum]));
           FVp->push_back(make_pair((*fi).V1(i)->P(),faceCol[faceOnEdgeNum]));
           FVp->push_back(make_pair((*fi).V2(i)->P(),faceVer[faceOnEdgeNum]));
