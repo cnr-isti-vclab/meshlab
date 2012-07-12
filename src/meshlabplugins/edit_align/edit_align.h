@@ -75,7 +75,6 @@ public:
     vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;}
 		MeshTree meshTree;
 		GLArea * gla;
-
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
 	
@@ -96,6 +95,7 @@ public slots:
 		void alignParamCurrent();
     void setBaseMesh();
     void hideRevealGluedMesh();
+	void toggledColors(int colorstate);
 		
 		void DrawArc( vcg::AlignPair::Result *A );
 signals:

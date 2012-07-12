@@ -41,7 +41,8 @@ $Log: meshedit.cpp,v $
 
 using namespace vcg;
 
-EditAlignPlugin::EditAlignPlugin(){
+EditAlignPlugin::EditAlignPlugin()
+{
 	alignDialog=0;
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);      
@@ -73,11 +74,6 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 		}
 	case ALIGN_IDLE:
 		{
-			if(alignDialog->ui.falseColorCB->isChecked())
-				gla->rm.colorMode=GLW::CMPerMesh;
-			else
-				gla->rm.colorMode=GLW::CMPerVert;
-
 			m.render(GLW::DMBox,GLW::CMNone,GLW::TMNone);
 			if(alignDialog->currentArc!=0)
 				DrawArc(alignDialog->currentArc);
@@ -125,7 +121,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
 		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
-		connect(alignDialog->ui.falseColorCB, SIGNAL(clicked()) , _gla,  SLOT(updateGL() ) );
+		connect(alignDialog->ui.falseColorCB, SIGNAL(stateChanged(int)) , this,  SLOT(toggledColors(int) ));
 		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
 		connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
 		connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), this->gla,SLOT(updateMeshSetVisibilities()));
@@ -142,6 +138,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 	connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	suspendEditToggle();
+	toggledColors(alignDialog->ui.falseColorCB->checkState());
 	return true;
 }
 
@@ -149,6 +146,7 @@ void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 {
 	// some cleaning at the end.
 	qDebug("EndEdit: cleaning everything");
+	toggledColors(Qt::Unchecked);
 	meshTree.clear();
 	assert(alignDialog);
 	delete alignDialog;
@@ -286,13 +284,10 @@ void EditAlignPlugin:: alignParam()
 {
 	RichParameterSet alignParamSet;
 	AlignParameter::buildRichParameterSet(defaultAP, alignParamSet);
-
-	//alignDialog->setWindowFlags(~Qt::WindowCloseButtonHint);
 	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
 	ad.setWindowFlags(Qt::Dialog);
 	ad.setWindowModality(Qt::WindowModal);
     int result=ad.exec();
-	//alignDialog->setWindowFlags(Qt::WindowCloseButtonHint);
 	if(result != QDialog::Accepted) return;
 	// Dialog accepted. get back the values
 	AlignParameter::buildAlignParameters(alignParamSet, defaultAP);
@@ -453,4 +448,13 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 	*/		
 	glPopAttrib(); 
 
+}
+
+void EditAlignPlugin::toggledColors(int colorstate)
+{
+	if(colorstate == Qt::Checked)
+		gla->rm.colorMode=GLW::CMPerMesh;
+	else
+		gla->rm.colorMode=GLW::CMPerVert;
+	gla->update();
 }
