@@ -1020,17 +1020,29 @@ void GLArea::initTexture()
 			glEnable(GL_TEXTURE_2D);
 			GLint MaxTextureSize;
 			glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
-
-			for(unsigned int i =0; i< mp->cm.textures.size();++i){
+			QString unexistingtext = "In mesh file " + mp->fullName() + " : Failure loading textures:\n";
+			bool sometextfailed = false;
+			for(unsigned int i =0; i< mp->cm.textures.size();++i)
+			{
 				QImage img, imgScaled, imgGL;
 				bool res = img.load(mp->cm.textures[i].c_str());
+				sometextfailed = sometextfailed || !res;
 				if(!res)
 				{
 					// Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
 					QString ConvertedName = QString(mp->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
 					res = img.load(ConvertedName);
-					if(!res) this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
-					else this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
+					if(!res)
+					{
+						this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
+						unexistingtext += "\t" + QString(mp->cm.textures[i].c_str()) + "\n";
+					}
+					else 
+						this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
+					mp->glw.TMId.push_back(0);
+					glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
+					glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
+					glTexImage2D( GL_TEXTURE_2D, 0, 3, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
 				}
 				if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
 				{
@@ -1064,9 +1076,12 @@ void GLArea::initTexture()
 
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			}
+			if (sometextfailed)
+				QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
 		}
 		glDisable(GL_TEXTURE_2D);
 	}
+	
 }
 
 void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
