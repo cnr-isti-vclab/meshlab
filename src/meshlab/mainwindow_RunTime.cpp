@@ -1502,6 +1502,22 @@ void MainWindow::toggleSelectVertRendering()
  */
 void MainWindow::saveProject()
 {
+	if (meshDoc() == NULL)
+		return;
+	//if a mesh has been created by a create filter we must before to save it. Otherwise the project will refer to a mesh without file name path.
+	foreach(MeshModel * mp, meshDoc()->meshList)
+	{
+		if ((mp != NULL) && (mp->fullName().isEmpty()))
+		{
+			bool saved = exportMesh(tr(""),mp,false);	
+			if (!saved)
+			{
+				QString msg = "Mesh layer " + mp->label() + " cannot be saved on a file.\nProject \"" + meshDoc()->docLabel() + "\" saving has been aborted.";
+				QMessageBox::warning(this,tr("Project Saving Aborted"),msg);
+				return;
+			}
+		}
+	}
 	QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
 #if defined(Q_OS_MAC)
   saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
@@ -2181,8 +2197,8 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 	if (mod == NULL)
 		return false;
 	mod->meshModified() = false;
-	QString ff = mod->fullName();
-	QFileDialog saveDialog(this,tr("Save Current Layer"), mod->fullName());
+	QString laylabel = "Save \"" + mod->label() + "\" Layer";
+	QFileDialog saveDialog(this,laylabel, mod->fullName());
   saveDialog.setNameFilters(suffixList);
 	saveDialog.setAcceptMode(QFileDialog::AcceptSave);
   QStringList matchingExtensions=suffixList.filter(defaultExt);
