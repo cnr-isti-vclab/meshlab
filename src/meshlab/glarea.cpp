@@ -40,7 +40,6 @@ using namespace vcg;
 GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 : QGLWidget(),interrbutshow(false)
 {
-
 	this->setParent(mvcont);
 
 	this->updateCustomSettingValues(*current);
@@ -529,17 +528,32 @@ void GLArea::displayRealTimeLog(QPainter *painter)
   qFont.setFamily("Helvetica");
   qFont.setPixelSize(12);
   painter->setFont(qFont);
-  float barHeight = qFont.pixelSize()*2;
+  float margin = qFont.pixelSize();
   QFontMetrics metrics = QFontMetrics(font());
   int border = qMax(4, metrics.leading());
-  QRect curRect(border, border, width()/5, barHeight);
-  foreach(QString logText, md()->Log.RealTimeLogText)
+  //QRect curRect(border, border, width()/5, barHeight);
+  qreal roundness = 10.0f;
+  QTextDocument doc;
+  doc.setDefaultFont(qFont);
+  int startingpoint = border;
+  for(QMap<QString,QString>::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
   {
-    painter->fillRect(curRect, ColorConverter::ToQColor(logAreaColor));
-    painter->drawText(curRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, logText);
-    curRect.moveBottom(curRect.bottom()+ barHeight);
-  }
-
+	  doc.clear();
+	  doc.setDocumentMargin(margin);
+	  QColor white = Qt::white;
+	  doc.setHtml("<font color=\"" + white.name() + "\"><p><i><b>" + it.key() + "</b></i></p>" + it.value() + "</font>");
+	  QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
+	  QPainterPath path;
+	  painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
+	  painter->setPen(ColorConverter::ToQColor(logAreaColor));
+	  path.addRoundedRect(outrect,roundness,roundness);
+	  painter->drawPath(path);
+	  painter->save();
+	  painter->translate(border,startingpoint);
+	  doc.drawContents(painter);
+	  painter->restore();
+	   startingpoint = startingpoint + doc.size().height() + margin;
+  }	
   md()->Log.RealTimeLogText.clear();
   painter->restore();
   painter->beginNativePainting();
@@ -1020,7 +1034,7 @@ void GLArea::initTexture()
 			glEnable(GL_TEXTURE_2D);
 			GLint MaxTextureSize;
 			glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
-			QString unexistingtext = "In mesh file " + mp->fullName() + " : Failure loading textures:\n";
+			QString unexistingtext = "In mesh file <i>" + mp->fullName() + "</i> : Failure loading textures:<br>";
 			bool sometextfailed = false;
 			for(unsigned int i =0; i< mp->cm.textures.size();++i)
 			{
@@ -1035,7 +1049,7 @@ void GLArea::initTexture()
 					if(!res)
 					{
 						this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
-						unexistingtext += "\t" + QString(mp->cm.textures[i].c_str()) + "\n";
+						unexistingtext += "<font color=red>" + QString(mp->cm.textures[i].c_str()) + "</font><br>";
 					}
 					else 
 						this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());

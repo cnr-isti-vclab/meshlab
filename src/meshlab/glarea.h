@@ -140,7 +140,6 @@ public:
 	// in which the mouse event are redirected back to the GLArea to drive the camera trackball
 	// The decorate function of the current active editor is still called.
   // EndEdit is called only when you press again the same button or when you change editor.
-	  
 public slots:
 	void updateTexture(); // slot for forcing the texture reload. 
 	void resetTrackBall();

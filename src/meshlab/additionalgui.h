@@ -213,4 +213,5 @@ private:
 	MLSyntaxHighlighter* synhigh;
 	MLAutoCompleter* comp;
 };
+
 #endif 
