@@ -32,11 +32,9 @@ HoleListModel::HoleListModel(MeshModel *m, QObject *parent)
 	state = HoleListModel::Selection;
 	mesh = m;
 	pickedAbutment.SetNull();
-		
-	tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	//tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
 	holesManager.Init(&m->cm);
-	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
-	emit SGN_needUpdateGLA();
 }
 
 
@@ -187,7 +185,8 @@ void HoleListModel::addBridgeFace(CFaceO *pickedFace, int pickedX, int pickedY)
 
 void HoleListModel::fill(FgtHole<CMeshO>::FillerMode mode)
 {
-  tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
+	mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
+  //tri::UpdateTopology<CMeshO>::FaceFace(mesh->cm);
     if(holesManager.Fill(mode))
 	{
 		state = HoleListModel::Filled;
@@ -214,6 +213,7 @@ void HoleListModel::acceptFilling(bool accept)
 	}
 	else
 	{
+		//emit layoutAboutToBeChanged();
 		emit SGN_ExistBridge( holesManager.bridges.size() > 0 );
 		emit SGN_needUpdateGLA();
 		emit layoutChanged();
@@ -432,4 +432,10 @@ bool HoleListModel::setData( const QModelIndex & index, const QVariant & value, 
 	}
 
 	return ret;
+}
+
+void HoleListModel::emitPostConstructionSignals()
+{
+	emit dataChanged( index(0, 0), index(holesManager.HolesCount(), 2) );
+	emit SGN_needUpdateGLA();
 }

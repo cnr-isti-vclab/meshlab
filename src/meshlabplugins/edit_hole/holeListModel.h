@@ -54,8 +54,10 @@ public:
 	inline int rowCount(const QModelIndex &/*parent = QModelIndex()*/) const { return holesManager.HolesCount(); };
 	inline int columnCount(const QModelIndex &/*parent = QModelIndex()*/) const
 	{
-		if(state == HoleListModel::Selection) return 5;
-		else return 7;
+		if(state == HoleListModel::Selection) 
+			return 5;
+		else 
+			return 7;
 	};
 
 	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -101,6 +103,7 @@ private:
 	
 public:
 	HoleSetManager<CMeshO> holesManager;
+	void emitPostConstructionSignals();
 	
 Q_SIGNALS:
 	void SGN_Closing();
@@ -134,6 +137,7 @@ public:
 			return false;
 		else
 			return true;
+		return false;
 	};
 
 };
