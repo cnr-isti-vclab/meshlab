@@ -1,409 +1,296 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>pickpointsDialog</class>
- <widget class="QWidget" name="pickpointsDialog" >
-  <property name="geometry" >
+ <widget class="QWidget" name="pickpointsDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>542</width>
-    <height>654</height>
+    <width>563</width>
+    <height>559</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QFrame" name="frame" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>10</y>
-     <width>531</width>
-     <height>631</height>
-    </rect>
-   </property>
-   <property name="frameShape" >
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow" >
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QTreeWidget" name="pickedPointsTreeWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>501</width>
-      <height>291</height>
-     </rect>
-    </property>
-    <property name="columnCount" >
-     <number>5</number>
-    </property>
-    <column>
-     <property name="text" >
-      <string>1</string>
+  <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-    </column>
-    <column>
-     <property name="text" >
-      <string>2</string>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
-    </column>
-    <column>
-     <property name="text" >
-      <string>3</string>
-     </property>
-    </column>
-    <column>
-     <property name="text" >
-      <string>4</string>
-     </property>
-    </column>
-    <column>
-     <property name="text" >
-      <string>5</string>
-     </property>
-    </column>
-   </widget>
-   <widget class="QGroupBox" name="groupBox" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>291</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Mode: </string>
-    </property>
-    <widget class="QRadioButton" name="pickPointModeRadioButton" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>131</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Pick Point</string>
-     </property>
-     <property name="checked" >
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="movePointRadioButton" >
-     <property name="geometry" >
-      <rect>
-       <x>100</x>
-       <y>20</y>
-       <width>91</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Move Point</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="selectPointRadioButton" >
-     <property name="geometry" >
-      <rect>
-       <x>190</x>
-       <y>20</y>
-       <width>91</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Select Point</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="layoutWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>310</x>
-      <y>10</y>
-      <width>181</width>
-      <height>64</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" >
-     <item row="1" column="0" >
-      <widget class="QPushButton" name="loadPointsButton" >
-       <property name="text" >
-        <string>Load Points From File</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" >
-      <widget class="QPushButton" name="saveButton" >
-       <property name="text" >
-        <string>Save</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_2" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>420</y>
-      <width>431</width>
-      <height>131</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Template Controls</string>
-    </property>
-    <widget class="QCheckBox" name="defaultTemplateCheckBox" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>211</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Save this as your default template</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>111</width>
-       <height>18</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Template Name:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="templateNameLabel" >
-     <property name="geometry" >
-      <rect>
-       <x>110</x>
-       <y>100</y>
-       <width>291</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="palette" >
-      <palette>
-       <active>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>0</red>
-           <green>0</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </active>
-       <inactive>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>0</red>
-           <green>0</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </inactive>
-       <disabled>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>127</red>
-           <green>125</green>
-           <blue>123</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </disabled>
-      </palette>
-     </property>
-     <property name="text" >
-      <string>TextLabel</string>
-     </property>
-    </widget>
-    <widget class="QWidget" name="layoutWidget" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>401</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" >
-      <item>
-       <widget class="QPushButton" name="saveTemplateButton" >
-        <property name="text" >
-         <string>Save</string>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Mode: </string>
         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QRadioButton" name="pickPointModeRadioButton">
+           <property name="text">
+            <string>Pick Point</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="movePointRadioButton">
+           <property name="text">
+            <string>Move Point</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="selectPointRadioButton">
+           <property name="text">
+            <string>Select Point</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="loadTemplateButton" >
-        <property name="text" >
-         <string>Load</string>
+      <item row="0" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="loadPointsButton">
+          <property name="text">
+           <string>Load Points From File</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveButton">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QTreeWidget" name="pickedPointsTreeWidget">
+        <property name="columnCount">
+         <number>5</number>
         </property>
+        <column>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </column>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="clearTemplateButton" >
-        <property name="text" >
-         <string>Clear</string>
+      <item row="2" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="renamePointButton">
+          <property name="text">
+           <string>Rename Point</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removePointButton">
+          <property name="text">
+           <string>Remove Point</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearPointButton">
+          <property name="text">
+           <string>Clear Point</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removeAllPointsButton">
+          <property name="text">
+           <string>Remove All Points</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="undoButton">
+          <property name="text">
+           <string>Undo last move</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Template Controls</string>
         </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0" colspan="2">
+          <widget class="QCheckBox" name="defaultTemplateCheckBox">
+           <property name="text">
+            <string>Save this as your default template</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QPushButton" name="saveTemplateButton">
+             <property name="text">
+              <string>Save</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="loadTemplateButton">
+             <property name="text">
+              <string>Load</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="clearTemplateButton">
+             <property name="text">
+              <string>Clear</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="addPointToTemplateButton">
+             <property name="text">
+              <string>Add Point</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Template Name:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="templateNameLabel">
+           <property name="palette">
+            <palette>
+             <active>
+              <colorrole role="WindowText">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>255</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </active>
+             <inactive>
+              <colorrole role="WindowText">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>0</red>
+                 <green>0</green>
+                 <blue>255</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </inactive>
+             <disabled>
+              <colorrole role="WindowText">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>127</red>
+                 <green>125</green>
+                 <blue>123</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </disabled>
+            </palette>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="addPointToTemplateButton" >
-        <property name="text" >
-         <string>Add Point</string>
+      <item row="4" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Normal Options</string>
         </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_3" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>560</y>
-      <width>431</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Normal Options</string>
-    </property>
-    <widget class="QCheckBox" name="showNormalCheckBox" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>111</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Show Normal?</string>
-     </property>
-     <property name="checked" >
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QWidget" name="layoutWidget" >
-     <property name="geometry" >
-      <rect>
-       <x>170</x>
-       <y>20</y>
-       <width>181</width>
-       <height>26</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4" >
-      <item>
-       <widget class="QLabel" name="label_2" >
-        <property name="text" >
-         <string>Draw as a:  </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="pinRadioButton" >
-        <property name="text" >
-         <string>Pin</string>
-        </property>
-        <property name="checked" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="lineRadioButton" >
-        <property name="text" >
-         <string>Line</string>
-        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QCheckBox" name="showNormalCheckBox">
+           <property name="text">
+            <string>Show Normal?</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Draw as a:  </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="pinRadioButton">
+           <property name="text">
+            <string>Pin</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="lineRadioButton">
+           <property name="text">
+            <string>Line</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QWidget" name="layoutWidget" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>380</y>
-      <width>431</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
-     <item>
-      <widget class="QPushButton" name="renamePointButton" >
-       <property name="text" >
-        <string>Rename Point</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="clearPointButton" >
-       <property name="text" >
-        <string>Clear Point</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removePointButton" >
-       <property name="text" >
-        <string>Remove Point</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removeAllPointsButton" >
-       <property name="text" >
-        <string>Remove All Points</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QPushButton" name="undoButton" >
-    <property name="geometry" >
-     <rect>
-      <x>450</x>
-      <y>380</y>
-      <width>71</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Undo
-last
-move</string>
-    </property>
-   </widget>
-   <zorder>pickedPointsTreeWidget</zorder>
-   <zorder>groupBox</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>groupBox_2</zorder>
-   <zorder>groupBox_3</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>undoButton</zorder>
-   <zorder>renamePointButton</zorder>
-  </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
