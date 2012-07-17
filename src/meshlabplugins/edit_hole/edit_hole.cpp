@@ -34,12 +34,9 @@
 using namespace vcg;
 
 
-EditHolePlugin::EditHolePlugin() {
-	dialogFiller = 0;
-	holesModel = 0;
-	
-	pickedFace = 0;
-	hasPick = false;
+EditHolePlugin::EditHolePlugin() 
+:holesModel(NULL),dialogFiller(NULL),holeSorter(NULL),gla(NULL),mesh(NULL),md(NULL),pickedFace(NULL),hasPick(false)
+{
 }
 
 EditHolePlugin::~EditHolePlugin()
@@ -82,11 +79,11 @@ void EditHolePlugin::mouseMoveEvent(QMouseEvent * /*e*/, MeshModel &/*m*/, GLAre
 
 bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 {
-  this->md = &_md;
-  if (md->mm() == NULL)
-	  return false;
-  md->mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-  if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md->mm()->cm) >0)
+	this->md = &_md;
+	if (md->mm() == NULL)
+		return false;
+	md->mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md->mm()->cm) >0)
 	{
 		QMessageBox::critical(0, tr("Manifoldness Failure"), QString("Hole's managing requires manifoldness."));
 		return false; // can't continue, mesh can't be processed
@@ -99,9 +96,9 @@ bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 		return false;
 
 	// if plugin restart with another mesh, recomputing of hole is forced
-  if(mesh != this->md->mm())
+	if(mesh != this->md->mm())
 	{
-    this->mesh = this->md->mm();
+		this->mesh = this->md->mm();
 		this->gla = gla;
 
 		mesh->clearDataMask(MeshModel::MM_FACEMARK);
@@ -133,17 +130,19 @@ bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 		delete holeSorter;
 		delete holesModel;
 	}
-  holesModel = new HoleListModel(mesh);
+	holesModel = new HoleListModel(mesh);
+	holesModel->emitPostConstructionSignals();
 
-	
+
 	holesModel->holesManager.autoBridgeCB = new EditHoleAutoBridgingCB(dialogFiller->ui.infoLbl, 800);
 	connect(holesModel, SIGNAL(SGN_Closing()),gla,SLOT(endEdit()) );
 	connect(holesModel, SIGNAL(SGN_needUpdateGLA()), this, SLOT(upGlA()) );
 	connect(holesModel, SIGNAL(SGN_ExistBridge(bool)), dialogFiller, SLOT(SLOT_ExistBridge(bool)) );
-	
+
 	holeSorter = new HoleSorterFilter();
-	holeSorter->setSourceModel(holesModel);
-	dialogFiller->ui.holeTree->setModel( holeSorter );
+	//holeSorter->setSourceModel(holesModel);
+	//dialogFiller->ui.holeTree->setModel( holeSorter );
+	dialogFiller->ui.holeTree->setModel(holesModel);
 
 	if(holesModel->holesManager.holes.size()==0)
 	{
@@ -153,10 +152,10 @@ bool EditHolePlugin::StartEdit(MeshDocument &_md, GLArea *gla )
 	}
 	else
 	{
-    Decorate(*mesh, gla);
+		Decorate(*mesh, gla);
 		upGlA();
 	}
-  return true;
+	return true;
 }
 
 void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
