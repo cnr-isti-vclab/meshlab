@@ -19,6 +19,17 @@ static QString DLLExtension() {
   return QString();
 }
 
+static QString DLLFileNamePreamble() {
+#if defined(Q_OS_WIN)
+  return QString("");
+#elif defined(Q_OS_MAC)
+  return QString("lib");
+#else
+  return QString("lib");
+#endif
+  assert(0 && "Unknown Operative System. Please Define the appropriate dynamic library preamble");
+  return QString();
+}
 
 PluginManager::PluginManager()
 :currentDocInterface(NULL),scriptplugcode()
@@ -305,7 +316,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
   if (fin.suffix() == "xml")
   {
 
-    QString dllfile = fin.completeBaseName() + "."+DLLExtension();
+    QString dllfile = DLLFileNamePreamble() + fin.completeBaseName() + "."+DLLExtension();
 
     MeshLabXMLFilterContainer fc;
     //fc.filterInterface = NULL;
