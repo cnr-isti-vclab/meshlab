@@ -350,6 +350,7 @@ signals:
 	void askRasterShot(QString);
 	void askMeshShot(QString);
 	void askViewerShot(QString);
+	void dialogParamChanged();
 
 protected:
 	QWidget *gla_curr;
