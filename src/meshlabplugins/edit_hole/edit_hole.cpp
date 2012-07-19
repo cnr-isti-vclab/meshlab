@@ -211,6 +211,7 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
  }
 
  void EditHolePlugin::EndEdit(MeshModel &/*m*/, GLArea *gla ){
+
 	 if(holesModel == 0)	// means editing is not started
 		 return;
 
@@ -229,6 +230,7 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 		gla = 0;
 		mesh = 0;
 	 }
+	 md->mm()->clearDataMask(MeshModel::MM_FACEFACETOPO);
  }
 
 
