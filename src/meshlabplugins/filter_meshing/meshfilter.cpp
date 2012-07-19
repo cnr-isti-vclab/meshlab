@@ -1352,7 +1352,8 @@ case FP_COMPUTE_PRINC_CURV_DIR:
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
-	  assert(tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm));
+	  m.clearDataMask( MeshModel::MM_FACEFACETOPO);
+	  m.updateDataMask(MeshModel::MM_POLYGONAL);
 
   } break;
 
@@ -1360,11 +1361,6 @@ case FP_COMPUTE_PRINC_CURV_DIR:
   { // in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
 	  m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO);
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
-	  if (!tri::BitQuadCreation<CMeshO>::IsBitTriQuadConventional(m.cm))
-	  {
-		  errorMessage = "The input mesh has not third edge faux for all triangles.";
-		  return false;
-	  }
 	  tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 	  tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
