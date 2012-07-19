@@ -933,8 +933,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
   }
 
   // write manipulator data
-  int ln=0;
-  QString StatusString1 = "MANIPULATOR:";
+  QString StatusString1 = "";
   QString StatusString2 = "";
   QString HelpString1   = "";
   QString HelpString2   = "";
@@ -952,42 +951,24 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
         StatusString1 += "  Translate";
         break;
       case EditManipulatorsPlugin::ManRotate:
-        StatusString1 += "  Rotate";
-        if(aroundOrigin)
-          StatusString1 += "  -  around Mesh Origin";
-        else
-          StatusString1 += "  -  around BBox center";
+        if(aroundOrigin) StatusString1 += "Rotate around Mesh Origin";
+                    else StatusString1 += "Rotate around BBox center";
         break;
       case EditManipulatorsPlugin::ManScale:
-        StatusString1 += "  Scale";
-        if(aroundOrigin)
-          StatusString1 += "  -  around Mesh Origin";
-        else
-          StatusString1 += "  -  around BBox center";
+        if(aroundOrigin) StatusString1 += "Scale around Mesh Origin";
+                    else StatusString1 += "Scale around BBox center";
         break;
       default: ;
     }
-
+    StatusString2="<br>";
     switch(current_manip_mode) 
     {
-      case EditManipulatorsPlugin::ModX:
-        StatusString2 += "X global";
-        break;
-      case EditManipulatorsPlugin::ModY:
-        StatusString2 += "Y global";
-        break;
-      case EditManipulatorsPlugin::ModZ:
-        StatusString2 += "Z global";
-        break;
-      case EditManipulatorsPlugin::ModXX:
-        StatusString2 += "X local";
-        break;
-      case EditManipulatorsPlugin::ModYY:
-        StatusString2 += "Y local";
-        break;
-      case EditManipulatorsPlugin::ModZZ:
-        StatusString2 += "Z local";
-        break;
+      case EditManipulatorsPlugin::ModX: StatusString2 += "X global"; break;
+      case EditManipulatorsPlugin::ModY: StatusString2 += "Y global"; break;
+      case EditManipulatorsPlugin::ModZ: StatusString2 += "Z global"; break;
+      case EditManipulatorsPlugin::ModXX: StatusString2 += "X local"; break;
+      case EditManipulatorsPlugin::ModYY: StatusString2 += "Y local"; break;
+      case EditManipulatorsPlugin::ModZZ: StatusString2 += "Z local"; break;
       default: 
         if((current_manip == EditManipulatorsPlugin::ManMove) || (current_manip == EditManipulatorsPlugin::ManRotate))
           StatusString2 += "viewport";
@@ -1025,68 +1006,45 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
       StatusString2 += QString("  -  Snapping: %1").arg(snapto); 
     }
   }
-  // write status of the manipulator 
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, StatusString1);
-  if(StatusString2.length()>0)
-    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, StatusString2);
 
   if(current_manip == EditManipulatorsPlugin::ManNone)
   {
-    HelpString1 = "press T to translate, R to rotate, S to scale";
+    HelpString1 = "<br><i> press T to translate, R to rotate, S to scale</i>";
   }
   else
   {
-    if(current_manip == EditManipulatorsPlugin::ManMove)
-      HelpString1 = "LEFT CLICK and DRAG to move";
-    else if(current_manip == EditManipulatorsPlugin::ManRotate)
-      HelpString1 = "LEFT CLICK and DRAG to rotate";
-    else if(current_manip == EditManipulatorsPlugin::ManScale)
-      HelpString1 = "LEFT CLICK and DRAG to scale";
+    switch(current_manip)
+    {
+    case EditManipulatorsPlugin::ManMove   : HelpString1 = "<br> LEFT CLICK and DRAG to move"; break;
+    case EditManipulatorsPlugin::ManRotate : HelpString1 = "<br> LEFT CLICK and DRAG to rotate"; break;
+    case EditManipulatorsPlugin::ManScale  : HelpString1 = "<br> LEFT CLICK and DRAG to scale"; break;
+    }
 
     if((current_manip != EditManipulatorsPlugin::ManMove) || (current_manip_mode != EditManipulatorsPlugin::ModNone))
       HelpString1 += "  -  hold SHIFT to snap";
 
+    HelpString2="<br>";
     switch(current_manip_mode) 
     {
-      case EditManipulatorsPlugin::ModX:
-        HelpString2 = "press X to switch to X local";
-        break;
-      case EditManipulatorsPlugin::ModY:
-        HelpString2 = "press Y to switch to Y local";
-        break;
-      case EditManipulatorsPlugin::ModZ:
-        HelpString2 = "press Z to switch to Z local";
-        break;
-      case EditManipulatorsPlugin::ModXX:
-        HelpString2 = "press X to switch to X global";
-        break;
-      case EditManipulatorsPlugin::ModYY:
-        HelpString2 = "press Y to switch to Y global";
-        break;
-      case EditManipulatorsPlugin::ModZZ:
-        HelpString2 = "press Z to switch to Z global";
-        break;
-      default: 
-        HelpString2 = "press X Y Z to select an axis";
-        break;
+      case EditManipulatorsPlugin::ModX:  HelpString2 = "press X to switch to X local"; break;
+      case EditManipulatorsPlugin::ModY:  HelpString2 = "press Y to switch to Y local"; break;
+      case EditManipulatorsPlugin::ModZ:  HelpString2 = "press Z to switch to Z local"; break;
+      case EditManipulatorsPlugin::ModXX: HelpString2 = "press X to switch to X global"; break;
+      case EditManipulatorsPlugin::ModYY: HelpString2 = "press Y to switch to Y global"; break;
+      case EditManipulatorsPlugin::ModZZ: HelpString2 = "press Z to switch to Z global"; break;
+      default:   HelpString2 = "press X Y Z to select an axis";    break;
     }
     
     if((current_manip == EditManipulatorsPlugin::ManRotate) || (current_manip == EditManipulatorsPlugin::ManScale))
     {
-      if(aroundOrigin)
-        HelpString2 += "  -  press SPACE to pivot on BBox center";
-      else
-        HelpString2 += "  -  press SPACE to pivot on Mesh Origin";
+      if(aroundOrigin)  HelpString2 += "  -  press SPACE to pivot on BBox center";
+                  else  HelpString2 += "  -  press SPACE to pivot on Mesh Origin";
     }
 
-    HelpString3 = "press RETURN to apply, BACKSPACE to cancel";
+    HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
   }
-  // write available commands for manipulator 
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString1);
-  if(HelpString2.length()>0)
-    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString2);
-  if(HelpString3.length()>0)
-    glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, HelpString3);
+
+  this->RealTimeLog("Manipulator",qPrintable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
 
   //debug debug
   //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("string - %1 - number - %2 -").arg(inputnumberstring).arg(inputnumber));

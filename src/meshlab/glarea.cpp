@@ -488,7 +488,6 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 {
 	painter->save();
-	qFont.setStyleStrategy(QFont::NoAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
 	painter->setFont(qFont);
@@ -518,20 +517,18 @@ void GLArea::displayRealTimeLog(QPainter *painter)
 {
   painter->endNativePainting();
   painter->save();
-  painter->setRenderHint(QPainter::TextAntialiasing);
   painter->setPen(Qt::white);
   Color4b logAreaColor = glas.logAreaColor;
   glas.logAreaColor[3]=128;
   if(mvc()->currentId!=id) logAreaColor /=2.0;
 
-  qFont.setStyleStrategy(QFont::NoAntialias);
+  qFont.setStyleStrategy(QFont::OpenGLCompatible);
   qFont.setFamily("Helvetica");
-  qFont.setPixelSize(12);
+  qFont.setPixelSize(11);
   painter->setFont(qFont);
   float margin = qFont.pixelSize();
   QFontMetrics metrics = QFontMetrics(font());
   int border = qMax(4, metrics.leading());
-  //QRect curRect(border, border, width()/5, barHeight);
   qreal roundness = 10.0f;
   QTextDocument doc;
   doc.setDefaultFont(qFont);
@@ -539,9 +536,11 @@ void GLArea::displayRealTimeLog(QPainter *painter)
   for(QMap<QString,QString>::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
   {
 	  doc.clear();
-	  doc.setDocumentMargin(margin);
-	  QColor white = Qt::white;
-	  doc.setHtml("<font color=\"" + white.name() + "\"><p><i><b>" + it.key() + "</b></i></p>" + it.value() + "</font>");
+	  doc.setDocumentMargin(margin*0.75);
+	  QColor textColor = Qt::white;
+	  QColor headColor(200,200,200);
+	  doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + it.key() + "</b></i></p></font>"
+				  "<font color=\"" + textColor.name() + "\"             >" + it.value() + "</font>");
 	  QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
 	  QPainterPath path;
 	  painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
@@ -552,7 +551,7 @@ void GLArea::displayRealTimeLog(QPainter *painter)
 	  painter->translate(border,startingpoint);
 	  doc.drawContents(painter);
 	  painter->restore();
-	   startingpoint = startingpoint + doc.size().height() + margin;
+	  startingpoint = startingpoint + doc.size().height() + margin*.75;
   }	
   md()->Log.RealTimeLogText.clear();
   painter->restore();
@@ -563,12 +562,14 @@ void GLArea::displayInfo(QPainter *painter)
 {
 	if (mvc() == NULL)
 		return;
-	//glPushAttrib(GL_ALL_ATTRIB_BITS);
 	painter->endNativePainting();
 	painter->save();
-	painter->setRenderHint(QPainter::TextAntialiasing);
-	painter->setPen(Qt::white);
-	qFont.setStyleStrategy(QFont::NoAntialias);
+	painter->setRenderHint(QPainter::HighQualityAntialiasing);
+	QPen textPen(QColor(255,255,255,200));
+	textPen.setWidthF(0.2f);
+	painter->setPen(textPen);
+
+	qFont.setStyleStrategy(QFont::OpenGLCompatible);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
 	painter->setFont(qFont);
@@ -663,41 +664,17 @@ void GLArea::displayViewerHighlight()
 
 void GLArea::displayHelp(QPainter *painter)
 {
-	if (mvc() == NULL)
-		return;
-	painter->endNativePainting();
-	painter->save();
-	painter->setRenderHint(QPainter::TextAntialiasing);
-	painter->setPen(Qt::white);
-	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(14);
-	painter->setFont(qFont);
-
-	float bar0Width = qFont.pixelSize()* QString("Ctrl-Shift-Wheel:").size();
-	float bar1Width = qFont.pixelSize()* QString("Enter/Exit fullscreen mode").size();
-	int border = 12;
-
-	Color4b logAreaColor = glas.logAreaColor;
-	glas.logAreaColor[3]=128;
-	if(mvc()->currentId!=id) logAreaColor /=2.0;
-
-	static QString tableText;
-	if(tableText.isEmpty())
-	{
-		QFile helpFile(":/images/onscreenHelp.txt");
-		if(helpFile.open(QFile::ReadOnly))
-			tableText=helpFile.readAll();
-		else assert(0);
-	}
-
-	QTextOption TO;
-	TO.setTabStop(150);
-
-	painter->fillRect(QRect(0,     0,      (bar0Width + bar1Width)+border*2, height()), ColorConverter::ToQColor(logAreaColor));
-	painter->drawText(QRect(border,border, (bar0Width + bar1Width),          height()-border), tableText,TO);
-	painter->restore();
-	painter->beginNativePainting();
+  static QString tableText;
+  if(tableText.isEmpty())
+  {
+      QFile helpFile(":/images/onscreenHelp.txt");
+      if(helpFile.open(QFile::ReadOnly))
+          tableText=helpFile.readAll();
+      else assert(0);
+  }
+  this->log->RealTimeLog("Quick Help",tableText);
 }
+
 
 void GLArea::saveSnapshot()
 {

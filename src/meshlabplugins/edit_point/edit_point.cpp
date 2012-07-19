@@ -50,8 +50,11 @@ const QString EditPointPlugin::Info() {
   
 void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
-  this->RealTimeLog("EditPointHop","Hop Thr: %8.3f   (Wheel to change it)",this->maxHop);
-  this->RealTimeLog("EditPointRad"," Radius: %8.3f    (Drag or Alt+Wheel to change it)",this->dist);
+  this->RealTimeLog("Point Selection",
+                    "<table>"
+                    "<tr><td width=50> Hop Thr:</td><td width=100 align=right><b >%8.3f </b></td><td><i> (Wheel to change it)</i> </td></tr>"
+                    "<tr><td>          Radius: </td><td width=70 align=right><b> %8.3f </b></td><td><i> (Drag or Alt+Wheel to change it)</i></td></tr>"
+                    "</table>",this->maxHop,this->dist);
 
     /* When the user first click we have to find the point under the mouse pointer.
        At the same time we need to compute the Dijkstra algorithm over the knn-graph in order

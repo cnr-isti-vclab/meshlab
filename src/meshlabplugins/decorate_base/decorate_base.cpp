@@ -157,7 +157,10 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
     case DP_SHOW_BOX_CORNERS:
       {
         DrawBBoxCorner(m);
-        this->RealTimeLog("BBoxCorners","BB: %7.4f %7.4f %7.4f - %7.4f %7.4f %7.4f",m.cm.bbox.min[0],m.cm.bbox.min[1],m.cm.bbox.min[2],m.cm.bbox.max[0],m.cm.bbox.max[1],m.cm.bbox.max[2]);
+        this->RealTimeLog("Bounding Box","<table>"
+                          "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                          "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                          "</table>",m.cm.bbox.min[0],m.cm.bbox.min[1],m.cm.bbox.min[2],m.cm.bbox.max[0],m.cm.bbox.max[1],m.cm.bbox.max[2]);
       }
       break;
     case DP_SHOW_CAMERA:
@@ -332,8 +335,6 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
 			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
 			glDrawArrays(GL_POINTS,0,vvP->size());
-			this->RealTimeLog("Non Manifold Vert","Non Manif Vert: %i",vvP->size());
-
 		}
 
 		if (tvP->size() > 0)
@@ -342,6 +343,9 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
 			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(tvP->begin()[0].second));
 			glDrawArrays(GL_TRIANGLES,0,tvP->size());
 		}
+		this->RealTimeLog("Non Manifold Vertices",
+						  "<b>%i</b> non manifold vertices<br> "
+						  "<b>%i</b> faces over non manifold vertices",vvP->size(),tvP->size()/3);
 
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_VERTEX_ARRAY);
@@ -381,18 +385,22 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           glDisableClientState (GL_COLOR_ARRAY);
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
-          this->RealTimeLog("Non Manifold Tri","Non Manifold Edges: %i",BVp->size()/2);
-          this->RealTimeLog("Non Manifold Edge","Faces Over Non Manifold Edges: %i",FVp->size()/3);
         }
+        this->RealTimeLog("Non Manifold Edges",
+                          " <b>%i</b> non manifold edges<br>"
+                          " <b>%i</b> faces over non manifold edges",BVp->size()/2,FVp->size()/3);
       }
     }
     case DP_SHOW_BOUNDARY :
     {
+      bool showBorderFlag = rm->getBool(ShowBorderFlag());
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-      CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryVector");
+      CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryVertVector");
+      CMeshO::PerMeshAttributeHandle< vector<Point3f> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryFaceVector");
       if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, bvH))
       {
         vector<Point3f> *BVp = &bvH();
+        vector<Point3f> *BFp = &bfH();
         if (BVp->size() != 0)
         {
           glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
@@ -407,10 +415,17 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
           glEnableClientState (GL_VERTEX_ARRAY);
           glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BVp->begin()[0]));
           glDrawArrays(GL_LINES,0,BVp->size());
+
+          glColor4f(0.0f,1.0f,0.0f,0.5f);
+          if(showBorderFlag)
+          {
+            glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BFp->begin()[0]));
+            glDrawArrays(GL_TRIANGLES,0,BFp->size());
+          }
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
-          this->RealTimeLog("Boundary","Boundary Edges: %i",BVp->size()/2);
         }
+        this->RealTimeLog("Boundary","<b>%i</b> boundary edges",BVp->size()/2);
       }
     } break;
     case DP_SHOW_BOUNDARY_TEX :
@@ -856,20 +871,32 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
   case DP_SHOW_BOUNDARY :
   {
     MeshModel *m=md.mm();
-    CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m->cm,"BoundaryVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,bvH))
-      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m->cm,std::string("BoundaryVector"));
+    CMeshO::PerMeshAttributeHandle< vector<Point3f> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m->cm,"BoundaryVertVector");
+    CMeshO::PerMeshAttributeHandle< vector<Point3f> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m->cm,"BoundaryFaceVector");
+    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m->cm,bvH)){
+      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m->cm,std::string("BoundaryVertVector"));
+      bfH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m->cm,std::string("BoundaryFaceVector"));
+    }
     vector<Point3f> *BVp = &bvH();
+    vector<Point3f> *BFp = &bfH();
     BVp->clear();
     tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m->cm);
     for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
     {
+      bool isB=false;
       for(int i=0;i<3;++i)
         if((*fi).IsB(i))
         {
+          isB=true;
           BVp->push_back((*fi).V0(i)->P());
           BVp->push_back((*fi).V1(i)->P());
         }
+      if(isB)
+      {
+        BFp->push_back((*fi).V(0)->P());
+        BFp->push_back((*fi).V(1)->P());
+        BFp->push_back((*fi).V(2)->P());
+      }
     }
 
   } break;
@@ -957,7 +984,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
   }break;
   case DP_SHOW_NON_MANIF_EDGE :
   {
-    bool showBorderFlag = rm->getBool(ShowBorderFlag());
     MeshModel *m=md.mm();
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"NonManifEdgeVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m->cm,"NonManifFaceVector");
@@ -987,8 +1013,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
           face::Pos<CFaceO> pos(&*fi,i);
           const int faceOnEdgeNum =  min(pos.NumberOfFacesOnEdge(),4);
 
-          if(faceOnEdgeNum == 2) continue;
-          if(faceOnEdgeNum == 1 && showBorderFlag==false) continue;
+          if(faceOnEdgeNum == 2 || faceOnEdgeNum == 1) continue;
 
           bool edgeNotPresent; // true if the edge was not present in the set
           if ( (*fi).V0(i)<(*fi).V1(i)) edgeNotPresent = edgeSet.insert(make_pair((*fi).V0(i),(*fi).V1(i))).second;
@@ -1409,9 +1434,9 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
           parset.addParam(new RichFloat(NormalLength(),0.05,"Normal Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         }
       } break;
-    case DP_SHOW_NON_MANIF_EDGE :{
+    case DP_SHOW_BOUNDARY :{
        assert(!parset.hasParameter(ShowBorderFlag()));
-       parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Edges","If true also the edges and the faces involved in border edges are shown in green"));
+       parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Faces","If true also the faces involved in border edges are shown in green"));
     } break;
     case DP_SHOW_FACE_QUALITY_HISTOGRAM :
     case DP_SHOW_VERT_QUALITY_HISTOGRAM :{
