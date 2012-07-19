@@ -8,4 +8,4 @@ TARGET        = sample_xmlfilter
 
 #INSTALLS += sample_xmlfilter.xml
 
-macx:QMAKE_POST_LINK = "cp "$$TARGET".xml ../../distrib/plugins/lib"$$TARGET".xml"
+macx:QMAKE_POST_LINK = "cp "$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml"
