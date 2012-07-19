@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>329</width>
-    <height>1030</height>
+    <width>354</width>
+    <height>1127</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -65,7 +65,7 @@
          <string>Undo</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/undo-24.png</normaloff>:/images/undo-24.png</iconset>
         </property>
         <property name="toolButtonStyle">
@@ -88,7 +88,7 @@
          <string>Redo</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/redo-24.png</normaloff>:/images/redo-24.png</iconset>
         </property>
         <property name="toolButtonStyle">
@@ -142,7 +142,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/paintbrush-22.png</normaloff>:/images/paintbrush-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -168,7 +168,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/bucket-fill-22.png</normaloff>:/images/bucket-fill-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -191,7 +191,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/blend-22.png</normaloff>:/images/blend-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -217,7 +217,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -243,7 +243,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/clone-22.png</normaloff>:/images/clone-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -269,7 +269,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/color-picker-22.png</normaloff>:/images/color-picker-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -292,7 +292,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/perlin.png</normaloff>:/images/perlin.png</iconset>
         </property>
         <property name="iconSize">
@@ -334,7 +334,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/pickbrush-22.png</normaloff>:/images/pickbrush-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -363,7 +363,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/blur-22.png</normaloff>:/images/blur-22.png</iconset>
         </property>
         <property name="iconSize">
@@ -389,7 +389,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="meshlab.qrc">
+         <iconset resource="edit_paint.qrc">
           <normaloff>:/images/add-24.png</normaloff>:/images/add-24.png</iconset>
         </property>
         <property name="iconSize">
@@ -455,7 +455,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="meshlab.qrc">
+          <iconset resource="edit_paint.qrc">
            <normaloff>:/images/bw.png</normaloff>:/images/bw.png</iconset>
          </property>
          <property name="iconSize">
@@ -481,7 +481,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="meshlab.qrc">
+          <iconset resource="edit_paint.qrc">
            <normaloff>:/images/swap-colors-12.png</normaloff>:/images/swap-colors-12.png</iconset>
          </property>
          <property name="iconSize">
@@ -1425,7 +1425,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="meshlab.qrc"/>
+  <include location="edit_paint.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -1779,7 +1779,7 @@ p, li { white-space: pre-wrap; }
      <y>981</y>
     </hint>
    </hints>
-  </connection>  
+  </connection>
   <connection>
    <sender>mesh_add_button</sender>
    <signal>toggled(bool)</signal>
