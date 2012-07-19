@@ -19,3 +19,5 @@ SOURCES       += filter_mutualinfo.cpp \
 			solver.cpp
 		
 TARGET        = filter_mutualinfo
+
+macx:QMAKE_POST_LINK = "cp "$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml"
