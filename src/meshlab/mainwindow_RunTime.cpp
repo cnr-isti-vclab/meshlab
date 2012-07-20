@@ -1444,7 +1444,8 @@ void MainWindow::applyDecorateMode()
   }
   else{
     QString errorMessage;
-    if (iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
+    if (meshDoc()->mm() &&
+        iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
 				//RichParameterSet * decoratorParams = new RichParameterSet();
 				//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
 				bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
