@@ -1363,6 +1363,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 	case FP_REFINE_HALF_CATMULL:
 		{
+			if (!vcg::tri::BitQuadCreation<CMeshO>::IsTriQuadOnly(m.cm))
+			{
+				errorMessage = "To be applied filter <i>" + filter->text() + "</i> requires a mesh with only triangular and/or quad faces.";
+				return false;
+			}
 			m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO);
 			tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
@@ -1372,7 +1377,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		} break;
 
 	case FP_REFINE_CATMULL :
-		{ // in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
+		{ 
+			if (!vcg::tri::BitQuadCreation<CMeshO>::IsTriQuadOnly(m.cm))
+			{
+				errorMessage = "To be applied filter <i>" + filter->text() + "</i> requires a mesh with only triangular and/or quad faces.";
+				return false;
+			}
+			// in practice it is just a simple double application of the FP_REFINE_HALF_CATMULL.
 			m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO);
 			tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
 			tri::BitQuadCreation<CMeshO>::MakePureByRefine(m.cm);
@@ -1401,6 +1412,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO );
 			int level = par.getEnum("level");
 			vcg::tri::BitQuadCreation<CMeshO>::MakeDominant(m.cm,level);
+			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 			m.updateDataMask(MeshModel::MM_POLYGONAL);
 		}
@@ -1408,6 +1420,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	case FP_MAKE_PURE_TRI:
 		{
 			vcg::tri::BitQuadCreation<CMeshO>::MakeBitTriOnly(m.cm);
+			vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m.cm);
 			m.clearDataMask(MeshModel::MM_POLYGONAL);
 		}
 		break;
