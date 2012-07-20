@@ -993,7 +993,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	}
   else // filter has failed. show the message error.
 	{
-		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(action->text())+iFilter->errorMsg()); // text
+		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
     MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 	}
   // at the end for filters that change the color, or selection set the appropriate rendering mode
