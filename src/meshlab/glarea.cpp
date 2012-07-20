@@ -490,6 +490,7 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 	painter->save();
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
+    qFont.setStyleStrategy(QFont::PreferAntialias);
 	painter->setFont(qFont);
 
 	QString tableText;
@@ -522,7 +523,7 @@ void GLArea::displayRealTimeLog(QPainter *painter)
   glas.logAreaColor[3]=128;
   if(mvc()->currentId!=id) logAreaColor /=2.0;
 
-  qFont.setStyleStrategy(QFont::OpenGLCompatible);
+  qFont.setStyleStrategy(QFont::PreferAntialias);
   qFont.setFamily("Helvetica");
   qFont.setPixelSize(11);
   painter->setFont(qFont);
@@ -569,7 +570,7 @@ void GLArea::displayInfo(QPainter *painter)
 	textPen.setWidthF(0.2f);
 	painter->setPen(textPen);
 
-	qFont.setStyleStrategy(QFont::OpenGLCompatible);
+    qFont.setStyleStrategy(QFont::PreferAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
 	painter->setFont(qFont);
@@ -617,7 +618,7 @@ void GLArea::displayInfo(QPainter *painter)
 			col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
 		painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
 		painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
-		if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
+        if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
 	}
 	painter->restore();
 	painter->beginNativePainting();
