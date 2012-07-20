@@ -447,6 +447,9 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	// ...and take a snapshot
 	if (takeSnapTile) pasteTile();
 
+	// Finally display HELP if requested
+	if (isHelpVisible())
+	  displayHelp(&painter);
 
 	// Draw the log area background
 	// on the bottom of the glArea
@@ -464,14 +467,6 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	if(mvc()->currentId==id)
 		displayViewerHighlight();
 
-	// Finally display HELP if requested
-	if (isHelpVisible())
-	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glDisable(GL_DEPTH_TEST);
-		displayHelp(&painter);
-		glPopAttrib();
-	}
 
 	QString error = checkGLError::makeString("There are gl errors:");
 	if(!error.isEmpty()) {
