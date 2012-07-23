@@ -44,6 +44,8 @@ MeshDocument::~MeshDocument()
 {
   foreach(MeshModel *mmp, meshList)
     delete mmp;
+  foreach(RasterModel* rmp,rasterList)
+	  delete rmp;
 }
 
 //returns the mesh ata given position in the list
@@ -92,17 +94,23 @@ QList<TagBase *> MeshDocument::getMeshTags(int meshId)
 
 void MeshDocument::setCurrentMesh( int i)
 {
-  foreach(MeshModel *mmp, meshList)
-  {
-    if(mmp->id() == i)
-    {
-      currentMesh = mmp;
-      emit currentMeshChanged(i);
-      return;
-    }
-  }
-  assert(0);
-  return;
+	if(i<0)
+	{
+		currentMesh=0;
+		return;
+	}
+
+	foreach(MeshModel *mmp, meshList)
+	{
+		if(mmp->id() == i)
+		{
+			currentMesh = mmp;
+			emit currentMeshChanged(i);
+			return;
+		}
+	}
+	assert(0);
+	return;
 }
 
 //returns the raster at a given position in the list
@@ -208,13 +216,16 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
-  if(!meshList.removeOne(mmToDel)) return false;
-  if((currentMesh == mmToDel) && (meshList.size() != 0))
-        setCurrentMesh(this->meshList.at(0)->id());
+	if(!meshList.removeOne(mmToDel)) 
+		return false;
+	if((currentMesh == mmToDel) && (meshList.size() != 0))
+		setCurrentMesh(this->meshList.at(0)->id());
+	else if (meshList.size() == 0)
+			setCurrentMesh(-1);
 
-  delete mmToDel;
+	delete mmToDel;
 
-  emit meshSetChanged();
+	emit meshSetChanged();
 	return true;
 }
 
