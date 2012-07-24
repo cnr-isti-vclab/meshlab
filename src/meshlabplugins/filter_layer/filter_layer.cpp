@@ -148,7 +148,10 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
   case  FP_RENAME_MESH:          md.mm()->setLabel(par.getString("newName"));  break;
   case  FP_RENAME_RASTER:          md.rm()->setLabel(par.getString("newName"));  break;
   case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("mesh"));           break;
-  case  FP_DELETE_MESH :    if(md.mm()) md.delMesh(md.mm());              break;
+  case  FP_DELETE_MESH :    
+	  if(md.mm()) 
+		  md.delMesh(md.mm());    
+	  break;
   case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm());            break;
 
   case FP_SPLITSELECT :
@@ -157,7 +160,6 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     // that is the back one
     MeshModel *currentMesh  = md.mm();				// source = current
     MeshModel *destMesh= md.addNewMesh("","SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-
     // select all points involved
     tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
     tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
@@ -167,6 +169,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentMesh->cm);
     numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentMesh->cm);
 
+	destMesh->updateDataMask(currentMesh->dataMask());
     if(par.getBool("DeleteOriginal"))	// delete original faces
     {
       CMeshO::VertexIterator vi;
