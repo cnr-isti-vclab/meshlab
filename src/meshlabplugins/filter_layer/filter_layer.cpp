@@ -169,7 +169,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentMesh->cm);
     numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentMesh->cm);
 
-	destMesh->updateDataMask(currentMesh->dataMask());
+	destMesh->updateDataMask(currentMesh);
     if(par.getBool("DeleteOriginal"))	// delete original faces
     {
       CMeshO::VertexIterator vi;
