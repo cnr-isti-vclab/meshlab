@@ -243,6 +243,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"ExtraordinaryVertexVector");
       if(rm->getBool(this->ShowNonRegular()) && vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, vvH))
       {
+        RealTimeLog("Faux Edges","%i non regurlar vertices",vvH().size());
         vector<PointPC> *vvP = &vvH();
         glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
         glDisable(GL_LIGHTING);
@@ -395,7 +396,7 @@ void ExtraMeshDecoratePlugin::decorate(QAction *a, MeshDocument &md, RichParamet
                           " <b>%i</b> non manifold edges<br>"
                           " <b>%i</b> faces over non manifold edges",BVp->size()/2,FVp->size()/3);
       }
-    }
+    } break;
     case DP_SHOW_BOUNDARY :
     {
       bool showBorderFlag = rm->getBool(ShowBorderFlag());
@@ -885,6 +886,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     vector<Point3f> *BVp = &bvH();
     vector<Point3f> *BFp = &bfH();
     BVp->clear();
+    BFp->clear();
     tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m->cm);
     for(CMeshO::FaceIterator fi = m->cm.face.begin(); fi!= m->cm.face.end();++fi) if(!(*fi).IsD())
     {
@@ -1469,8 +1471,8 @@ case DP_SHOW_CAMERA :{
           parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
         } break;
     case DP_SHOW_NON_FAUX_EDGE :{
-              parset.addParam(new RichBool(this->ShowSeparatrix(), true, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
-              parset.addParam(new RichBool(this->ShowNonRegular(), true, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
+              parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
+              parset.addParam(new RichBool(this->ShowNonRegular(), false, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
             } break;
         }
 
