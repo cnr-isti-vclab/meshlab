@@ -290,7 +290,6 @@ public:
 	// but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
 	void Enable(int openingFileMask);
 
-	int dataMask() const;
 	bool hasDataMask(const int maskToBeTested) const;
 	void updateDataMask(MeshModel *m);
 	void updateDataMask(int neededDataMask);
