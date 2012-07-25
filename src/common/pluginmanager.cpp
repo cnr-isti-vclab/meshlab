@@ -341,8 +341,20 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
         }
       }
       else
+      {
+        // we have loaded an xml without the corresponding dll. Let's check that it is a pure javascript plugin
+        bool foundANonJavaScriptFilter=false;
+        foreach(QString filterName, pluginfo->filterNames())
+        {
+          if(pluginfo->filterElement(filterName,MLXMLElNames::filterJSCodeTag).isEmpty())
+            foundANonJavaScriptFilter = true;
+        }
+        if(foundANonJavaScriptFilter)
+        {
+          throw(MeshLabXMLParsingException("We are trying to load a xml file that does not correspond to any dll or javascript code; please delete all the spurious xml files"));
+        }
         par = new QObject();
-
+      }
       QString pname = pluginfo->pluginScriptName();
       if (pname != "")
       {
