@@ -47,5 +47,6 @@
         <file>images/view_raster.png</file>
 		<file>images/ok.png</file>
 		<file>images/stop.png</file>
+		<file>images/search.png</file>
     </qresource>
 </RCC>

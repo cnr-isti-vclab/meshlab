@@ -247,70 +247,72 @@ void MainWindow::setColorMode(QAction *qa)
   if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
 }
 
-void MainWindow::activateSubFiltersMenu( const bool create,const bool act )
+
+//menu create is not enabled only in case of not valid/existing meshdocument
+
+
+void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool validmeshdoc )
 {
-	showFilterScriptAct->setEnabled(act);
-	filterMenuSelect->setEnabled(act);
-	filterMenuClean->setEnabled(act);
-	//menu create is always activated
-	if (create)
-		filterMenuCreate->setEnabled(create);
-	else
-		filterMenuCreate->setEnabled(act);
-	filterMenuRemeshing->setEnabled(act);
-	filterMenuPolygonal->setEnabled(act);
-	filterMenuColorize->setEnabled(act);
-	filterMenuSmoothing->setEnabled(act);
-	filterMenuQuality->setEnabled(act); 
-	filterMenuNormal->setEnabled(act);
-	filterMenuMeshLayer->setEnabled(act);
-	filterMenuRasterLayer->setEnabled(act);
-	filterMenuRangeMap->setEnabled(act);
-	filterMenuPointSet->setEnabled(act);
-	filterMenuSampling->setEnabled(act);
-	filterMenuTexture->setEnabled(act); 
-	filterMenuCamera->setEnabled(act);
+	showFilterScriptAct->setEnabled(validmeshdoc);
+	filterMenuSelect->setEnabled(validmeshdoc);
+	filterMenuClean->setEnabled(validmeshdoc);
+	filterMenuCreate->setEnabled(createmenuenabled || validmeshdoc);
+	filterMenuRemeshing->setEnabled(validmeshdoc);
+	filterMenuPolygonal->setEnabled(validmeshdoc);
+	filterMenuColorize->setEnabled(validmeshdoc);
+	filterMenuSmoothing->setEnabled(validmeshdoc);
+	filterMenuQuality->setEnabled(validmeshdoc); 
+	filterMenuNormal->setEnabled(validmeshdoc);
+	filterMenuMeshLayer->setEnabled(validmeshdoc);
+	filterMenuRasterLayer->setEnabled(validmeshdoc);
+	filterMenuRangeMap->setEnabled(validmeshdoc);
+	filterMenuPointSet->setEnabled(validmeshdoc);
+	filterMenuSampling->setEnabled(validmeshdoc);
+	filterMenuTexture->setEnabled(validmeshdoc); 
+	filterMenuCamera->setEnabled(validmeshdoc);
 }
 
 void MainWindow::updateMenus()
 {
-  bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-  bool activeDocNotEmpty = activeDoc && !meshDoc()->meshList.empty();
+	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
+	bool notEmptyActiveDoc = activeDoc && !meshDoc()->meshList.empty();
 
-  importMeshAct->setEnabled(activeDoc);
+	importMeshAct->setEnabled(activeDoc);
 
-  exportMeshAct->setEnabled(activeDocNotEmpty);
-  exportMeshAsAct->setEnabled(activeDocNotEmpty);
-  reloadMeshAct->setEnabled(activeDocNotEmpty);
-  reloadAllMeshAct->setEnabled(activeDocNotEmpty);
-  importRasterAct->setEnabled(activeDoc);
+	exportMeshAct->setEnabled(notEmptyActiveDoc);
+	exportMeshAsAct->setEnabled(notEmptyActiveDoc);
+	reloadMeshAct->setEnabled(notEmptyActiveDoc);
+	reloadAllMeshAct->setEnabled(notEmptyActiveDoc);
+	importRasterAct->setEnabled(activeDoc);
 
-  saveProjectAsAct->setEnabled(activeDoc);
-  saveProjectAct->setEnabled(activeDoc);
-  closeProjectAct->setEnabled(activeDoc);
+	saveProjectAsAct->setEnabled(activeDoc);
+	saveProjectAct->setEnabled(activeDoc);
+	closeProjectAct->setEnabled(activeDoc);
 
-  saveSnapshotAct->setEnabled(activeDoc);
+	saveSnapshotAct->setEnabled(activeDoc);
 
-  updateRecentFileActions();
-  updateRecentProjActions();
-  filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
+	updateRecentFileActions();
+	updateRecentProjActions();
+	filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
-    activateSubFiltersMenu(!activeDocNotEmpty,activeDocNotEmpty);
-  editMenu->setEnabled(activeDoc && !editMenu->actions().isEmpty());
-  renderMenu->setEnabled(activeDoc);
-  fullScreenAct->setEnabled(activeDoc);
-  trackBallMenu->setEnabled(activeDoc);
-  logMenu->setEnabled(activeDoc);
-  windowsMenu->setEnabled(activeDoc);
-  preferencesMenu->setEnabled(activeDoc);
+		updateSubFiltersMenu(!notEmptyActiveDoc,activeDoc);
+	editMenu->setEnabled(activeDoc && !editMenu->actions().isEmpty());
+	renderMenu->setEnabled(activeDoc);
+	fullScreenAct->setEnabled(activeDoc);
+	trackBallMenu->setEnabled(activeDoc);
+	logMenu->setEnabled(activeDoc);
+	windowsMenu->setEnabled(activeDoc);
+	preferencesMenu->setEnabled(activeDoc);
 
-  renderToolBar->setEnabled(activeDoc);
+	renderToolBar->setEnabled(activeDoc);
 
 	showToolbarRenderAct->setChecked(renderToolBar->isVisible());
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
-  if(activeDoc && GLA()){
-				const RenderMode &rm=GLA()->getCurrentRenderMode();
-				switch (rm.drawMode) {
+	if(activeDoc && GLA())
+	{
+		const RenderMode &rm=GLA()->getCurrentRenderMode();
+		switch (rm.drawMode) 
+		{
 					case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
 					case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
 					case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
@@ -318,78 +320,78 @@ void MainWindow::updateMenus()
 					case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
 					case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
 					case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
-				default: break;
-				}
-				if (meshDoc()->mm() != NULL)
-					colorModePerFaceAct->setEnabled(HasPerFaceColor(meshDoc()->mm()->cm));
-				switch (rm.colorMode)
-				{
-                                        case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
-                                        case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
-					case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
-					case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
 					default: break;
-				}
+		}
+		if (meshDoc()->mm() != NULL)
+			colorModePerFaceAct->setEnabled(HasPerFaceColor(meshDoc()->mm()->cm));
+		switch (rm.colorMode)
+		{
+		case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
+		case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
+		case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
+		case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
+		default: break;
+		}
 
-				lastFilterAct->setEnabled(false);
-				if(GLA()->getLastAppliedFilter() != NULL)
-				{
-					lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
-					lastFilterAct->setEnabled(true);
-				}
-				else
-				{
-					lastFilterAct->setText(QString("Apply filter "));
-				}
+		lastFilterAct->setEnabled(false);
+		if(GLA()->getLastAppliedFilter() != NULL)
+		{
+			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
+			lastFilterAct->setEnabled(true);
+		}
+		else
+		{
+			lastFilterAct->setText(QString("Apply filter "));
+		}
 
 
-				// Management of the editing toolbar
-				// when you enter in a editing mode you can toggle between editing
-				// and camera moving by esc;
-				// you exit from editing mode by pressing again the editing button
-				// When you are in a editing mode all the other editing are disabled.
+		// Management of the editing toolbar
+		// when you enter in a editing mode you can toggle between editing
+		// and camera moving by esc;
+		// you exit from editing mode by pressing again the editing button
+		// When you are in a editing mode all the other editing are disabled.
 
-				foreach (QAction *a,PM.editActionList)
-						 {
-								a->setChecked(false);
-								a->setEnabled( GLA()->getCurrentEditAction() == NULL );
-						 }
+		foreach (QAction *a,PM.editActionList)
+		{
+			a->setChecked(false);
+			a->setEnabled( GLA()->getCurrentEditAction() == NULL );
+		}
 
-				suspendEditModeAct->setChecked(GLA()->suspendedEditor);
-				suspendEditModeAct->setDisabled(GLA()->getCurrentEditAction() == NULL);
+		suspendEditModeAct->setChecked(GLA()->suspendedEditor);
+		suspendEditModeAct->setDisabled(GLA()->getCurrentEditAction() == NULL);
 
-				if(GLA()->getCurrentEditAction())
-						{
-								GLA()->getCurrentEditAction()->setChecked(! GLA()->suspendedEditor);
-								GLA()->getCurrentEditAction()->setEnabled(true);
-						}
+		if(GLA()->getCurrentEditAction())
+		{
+			GLA()->getCurrentEditAction()->setChecked(! GLA()->suspendedEditor);
+			GLA()->getCurrentEditAction()->setEnabled(true);
+		}
 
-				showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
-				showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
-				backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-        renderModeTextureAct->setEnabled(meshDoc()->mm() && !meshDoc()->mm()->cm.textures.empty());
-				renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
-				setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-				setLightAct->setChecked(rm.lighting);
+		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
+		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
+		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
+		renderModeTextureAct->setEnabled(meshDoc()->mm() && !meshDoc()->mm()->cm.textures.empty());
+		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
+		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
+		setLightAct->setChecked(rm.lighting);
 
-				setFancyLightingAct->setChecked(rm.fancyLighting);
-				setDoubleLightingAct->setChecked(rm.doubleSideLighting);
-        setSelectFaceRenderingAct->setChecked(rm.selectedFace);
-        setSelectVertRenderingAct->setChecked(rm.selectedVert);
+		setFancyLightingAct->setChecked(rm.fancyLighting);
+		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
+		setSelectFaceRenderingAct->setChecked(rm.selectedFace);
+		setSelectVertRenderingAct->setChecked(rm.selectedVert);
 
-				// Check only the active decorations
-				foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
-				foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
+		// Check only the active decorations
+		foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
+		foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
 
 	} // if active
 	else
 	{
 		foreach (QAction *a,PM.editActionList)
 		{
-				a->setEnabled(false);
+			a->setEnabled(false);
 		}
 		foreach (QAction *a,PM.decoratorActionList)
-				a->setEnabled(false);
+			a->setEnabled(false);
 
 	}
 
@@ -1808,27 +1810,30 @@ bool MainWindow::appendProject(QString fileName)
 
 GLArea* MainWindow::newProject(const QString& projName)
 {
-	filterMenu->setEnabled(!filterMenu->actions().isEmpty());
-	if (!filterMenu->actions().isEmpty())
-		activateSubFiltersMenu(true,false);
 	MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
-  mdiarea->addSubWindow(mvcont);
-  connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+	mdiarea->addSubWindow(mvcont);
+	  connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+	  filterMenu->setEnabled(!filterMenu->actions().isEmpty());
+	  if (!filterMenu->actions().isEmpty())
+		  updateSubFiltersMenu(true,false);
 	GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
-	mvcont->addView(gla, Qt::Horizontal);
-  if (projName.isEmpty())
+	if (gla != NULL)
 	{
-		static int docCounter = 1;
-		mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));
-		++docCounter;
+		mvcont->addView(gla, Qt::Horizontal);
+		if (projName.isEmpty())
+		{
+			static int docCounter = 1;
+			mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));
+			++docCounter;
+		}
+		else
+			mvcont->meshDoc.setDocLabel(projName);
+		mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
+		//if(mdiarea->isVisible()) 
+		if (gla->mvc() == NULL)
+			return NULL;
+		gla->mvc()->showMaximized();
 	}
-	else
-		mvcont->meshDoc.setDocLabel(projName);
-	mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
-	//if(mdiarea->isVisible()) 
-	if (gla->mvc() == NULL)
-		return NULL;
-  gla->mvc()->showMaximized();
 	return gla;
 }
 
@@ -2502,4 +2507,3 @@ void MainWindow::sendHistory()
 {
 	plugingui->getHistory(meshDoc()->xmlhistory);
 }
-

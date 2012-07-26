@@ -214,4 +214,34 @@ private:
 	MLAutoCompleter* comp;
 };
 
+class MyToolButton : public QToolButton
+{
+public:
+	MyToolButton( QWidget * parent = 0 );
+protected:
+	void paintEvent( QPaintEvent * );
+};
+
+class SearchBar : public QMenu
+{
+	Q_OBJECT
+public:
+	SearchBar(QWidget *parent , QMenuBar* menubar);
+
+private:
+	QLineEdit* searchline;
+	/*QTableWidget results;
+
+	void updateResults();
+	void updateSearchString();
+
+	void keyPressEvent ( QKeyEvent * e );
+
+	QMenuBar* mnbar;
+	QAction* newHintAction(QString text);
+	void findActions(QList<QAction*>& res, QMenu* m, int recursionLevel=0);
+	void findActions(QList<QAction*>& res, QList<QMenu*> m );*/
+};
+
+
 #endif 

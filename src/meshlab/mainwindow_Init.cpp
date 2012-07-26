@@ -87,7 +87,7 @@ MainWindow::MainWindow()
 	qb->setMinimum(0);
 	//qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
-	updateMenus();
+	//updateMenus();
 	newProject();
 	//PM should be initialized before passing it to PluginGeneratorGUI
 	plugingui = new PluginGeneratorGUI(PM,this);
@@ -108,6 +108,9 @@ MainWindow::MainWindow()
 
 void MainWindow::createActions()
 {
+	/*searchAct = new QAction(tr("Search into MeshLab"), this);
+	searchAct->setShortcutContext(Qt::ApplicationShortcut);
+	searchAct->setShortcut(Qt::CTRL+Qt::Key_F);*/
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
 	newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
 	newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -232,7 +235,7 @@ void MainWindow::createActions()
 	setFancyLightingAct   = new QAction(tr("&Fancy Lighting"),this);
 	setFancyLightingAct->setCheckable(true);
 	setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
-	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_F);
+	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_Y);
 	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
 
 	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
@@ -422,6 +425,7 @@ void MainWindow::createActions()
 	showFilterEditAct = new QAction(tr("XML Plugin Editor GUI"),this);
 	showFilterEditAct->setEnabled(true);
 	connect(showFilterEditAct, SIGNAL(triggered()), this, SLOT(showXMLPluginEditorGui()));
+
 }
 
 void MainWindow::createToolBars()
@@ -451,7 +455,8 @@ void MainWindow::createToolBars()
 	editToolBar->addSeparator();
 
 	filterToolBar = addToolBar(tr("Action"));
-
+	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+	filterToolBar->setIconSize(QSize(32,32));
 	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
 	{		
 		foreach(QAction* editAction, iEditFactory->actions())
@@ -462,6 +467,24 @@ void MainWindow::createToolBars()
 			} else qDebug() << "action was null";
 		}
 	}
+	
+	QWidget *spacerWidget = new QWidget();
+	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	//spacerWidget->setVisible(true);
+	searchToolBar = addToolBar(tr("Search"));
+	searchToolBar->addWidget(spacerWidget);
+	searchToolBar->setMovable(false);
+	searchToolBar->setFloatable(false);
+	searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
+	MyToolButton* toolb = new MyToolButton(this);
+	toolb->setPopupMode(QToolButton::InstantPopup);
+	toolb->setIcon(QIcon(":/images/search.png"));
+
+	searchToolBar->addWidget(toolb);
+	SearchBar* ser = new SearchBar(toolb,menuBar());
+	toolb->setMenu(ser);
+
+	//searchToolBar->addAction(searchAct);
 }
 
 
@@ -617,6 +640,8 @@ void MainWindow::fillFilterMenu()
 	filterMenu->addAction(lastFilterAct);
 	filterMenu->addAction(showFilterScriptAct);
 	filterMenu->addSeparator();
+	//filterMenu->addMenu(new SearcherMenu(this,filterMenu));
+	//filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip
 	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
 	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));

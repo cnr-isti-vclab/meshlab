@@ -790,3 +790,135 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 	}
 	return QListView::event(event);
 }
+
+SearchBar::SearchBar(QWidget *parent , QMenuBar* menubar)
+:QMenu(parent),searchline(NULL)
+{
+	searchline = new QLineEdit(this);
+	QWidgetAction* searchact = new QWidgetAction(this);
+	searchact->setDefaultWidget(searchline);
+	addAction(searchact);
+}
+
+////
+//QAction* SearchBar::newHintAction(QString text) {
+//	QAction * res = new QAction(text, parent());
+//	res->setEnabled(false);
+//	QFont tmpFont = res->font();
+//	tmpFont.setItalic(true);
+//	res->setFont(tmpFont);
+//	return res;
+//}
+//
+//void SearchBar::updateSearchString(){
+//	if (searchString.size()==0) {
+//		parentAction->setText( "Search for ...");
+//	} else {
+//		parentAction->setText( tr("Search for <%1>").arg(searchString));
+//	}
+//}
+//
+//void SearchBar::findActions(QList<QAction*>& res, QMenu* m, int lvl){
+//	QList<QAction*> list = m->actions();
+//	for (int i=0; i<list.size(); i++){
+//		QAction *a = list[i];
+//		if (a->menu()!=NULL) {
+//			findActions(res, a->menu(), lvl+1);
+//		} else{
+//			if (!a->isSeparator())
+//				if (a!=parentAction )
+//					if (lvl>=1 ) // only submenus
+//					{
+//						if (a->text().contains(searchString,Qt::CaseInsensitive))
+//							res.push_back(a);
+//					}
+//		}
+//	}
+//}
+//
+//void SearchBar::findActions(QList<QAction*>& res, QList<QMenu*> m ){
+//	for (int i=0; i<m.size(); i++)
+//		findActions(res, m[i], 1);
+//}
+//
+//void SearchBar::updateResultsSubmenu(){
+//	//
+//	const int MAX_SEARCH_RESULTS = 19;
+//
+//	this->clear();
+//	if (searchString.size()==0)  {
+//		this->addAction( justTypeAction );
+//	} else {
+//		QList<QAction*> a;
+//		if (targetMenu) findActions(a, targetMenu);
+//		else findActions(a,targetMenuBar->findChildren<QMenu*>() );
+//
+//		if (a.size()==0) {
+//			this->addAction(notFoundAction);
+//		} else if (a.size()>MAX_SEARCH_RESULTS) {
+//			this->addAction(justTypeAction);
+//		} else {
+//			for (int i=0; i<a.size(); i++) this->addAction(a[i]);
+//		}
+//	}
+//}
+//
+//void SearchBar::keyPressEvent(QKeyEvent *e){
+//	char pressed = e->key();
+//
+//	bool canType;
+//
+//	if (this->actions().size()==0)
+//		canType = true;
+//	else if (this->actions().size()==1)
+//		canType = (this->actions()[0]==justTypeAction);
+//	//canType = (this->actions()[0]!=notFoundAction);
+//	else
+//		canType = true;
+//
+//	bool typeIsValid = ( pressed>='A' && pressed<='Z' ) ||
+//		(pressed==' ' && searchString.size() && !searchString.endsWith(' ')) ||
+//		(pressed>='0' && pressed<='9');
+//
+//	if ( !canType && typeIsValid ) {
+//		QApplication::beep();
+//	}
+//
+//	if ( canType && typeIsValid ) {
+//		searchString.append(pressed);
+//		searchString = searchString.toLower();
+//	} else if (e->key()==Qt::Key_Backspace) {
+//		searchString.chop(1);
+//	} else if (e->key()==Qt::Key_Delete) {
+//		searchString.clear();
+//		//} else if (e->key()==Qt::Key_Left ) {
+//		//	close();
+//	} else if (pressed==' ') {
+//		// nothing
+//	} else {
+//		QMenu::keyPressEvent(e);
+//		return;
+//	}
+//
+//	updateSearchString();
+//	updateResultsSubmenu();
+//	// hide(); show();
+//
+//	// activate at least one action
+//	if (!activeAction() && this->actions().size()) setActiveAction(this->actions()[0]);
+//
+//}
+
+MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
+{
+
+}
+
+void MyToolButton::paintEvent( QPaintEvent * )
+{
+	QStylePainter p( this ); 
+	QStyleOptionToolButton opt; 
+	initStyleOption( & opt ); 
+	opt.features &= (~ QStyleOptionToolButton::HasMenu); 
+	p.drawComplexControl( QStyle::CC_ToolButton, opt );
+}

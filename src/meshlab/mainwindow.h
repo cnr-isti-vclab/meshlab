@@ -149,7 +149,7 @@ private slots:
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
 	void updateMenus();
-	void activateSubFiltersMenu(const bool create,const bool act);
+	void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
 	void updateStdDialog();
 	void updateXMLStdDialog();
 	void setSplit(QAction *qa);
@@ -302,6 +302,7 @@ private:
 	QToolBar *renderToolBar;
 	QToolBar *editToolBar;
 	QToolBar *filterToolBar;
+	QToolBar *searchToolBar;
 
 	///////// Menus ///////////////
 	QMenu *fileMenu;
@@ -350,7 +351,8 @@ private:
 	QMenu *handleMenu;
 	QMenu *splitMenu;
 	QMenu *unSplitMenu;
-
+	////////// Search Action ////////////////
+	QAction* searchAct;
 	//////////// Actions Menu File ///////////////////////
   QAction *newProjectAct;
   QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
