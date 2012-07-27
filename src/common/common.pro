@@ -92,6 +92,7 @@ HEADERS += filterparameter.h \
 	mlexception.h \
 	mlapplication.h \
 	scriptsyntax.h \
+	searcher.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
     meshlabdocumentxml.h 
 SOURCES += filterparameter.cpp \
@@ -104,6 +105,7 @@ SOURCES += filterparameter.cpp \
 	xmlfilterinfo.cpp \
 	mlapplication.cpp \
 	scriptsyntax.cpp \
+	searcher.cpp \
     $$GLEWCODE \
     meshlabdocumentxml.cpp \
     meshlabdocumentbundler.cpp

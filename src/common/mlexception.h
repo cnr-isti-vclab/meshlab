@@ -83,4 +83,12 @@ public:
 	~ExpressionHasNotThisTypeException() throw() {}
 };
 
+class InvalidInvariantException : public MeshLabException
+{
+public:
+	InvalidInvariantException(const QString& invarianterror)
+		:MeshLabException(QString("WARNING! Invalid Invariant: ") + invarianterror){}
+
+	~InvalidInvariantException() throw() {}
+};
 #endif
