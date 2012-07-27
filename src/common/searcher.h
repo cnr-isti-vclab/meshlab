@@ -17,7 +17,7 @@ public:
 	void removeActionReferences(QAction& act);
 	bool getActionsPerWord( const QString& word,QList<QAction*>& res ) const;
 private:
-	QMap<QString,QList<QAction*>> wordacts;
+    QMap<QString,QList<QAction*> > wordacts;
 };
 
 class RankedMatches;
@@ -50,7 +50,7 @@ private:
 	friend int WordActionsMapAccessor::rankedMatchesPerInputString(const QString& input,RankedMatches& rm) const;
 	int computeRankedMatches(const QStringList& inputst,const WordActionsMap& map);
 	QMap<QAction*,int> wordmatchesperaction;
-	QVector<QList<QAction*>> ranking;
+    QVector<QList<QAction*> > ranking;
 };
 
 #endif

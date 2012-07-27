@@ -15,13 +15,13 @@ void WordActionsMap::addWordsPerAction(QAction& act,const QStringList& words)
 
 void WordActionsMap::removeActionReferences(QAction& act )
 {
-	for(QMap<QString,QList<QAction*>>::iterator it  = wordacts.begin();it != wordacts.end();++it)
+    for(QMap<QString,QList<QAction*> >::iterator it  = wordacts.begin();it != wordacts.end();++it)
 		it.value().removeAll(&act);
 }
 
 bool WordActionsMap::getActionsPerWord( const QString& word,QList<QAction*>& res ) const
 {
-	QMap< QString,QList<QAction*> >::iterator it = wordacts.find(word);
+    QMap< QString,QList<QAction*> >::const_iterator it = wordacts.find(word);
 	if (it != wordacts.end())
 	{
 		res = it.value();
