@@ -481,13 +481,10 @@ void MainWindow::createToolBars()
 	MyToolButton* toolb = new MyToolButton(this);
 	toolb->setPopupMode(QToolButton::InstantPopup);
 	toolb->setIcon(QIcon(":/images/search.png"));
-
 	searchToolBar->addWidget(toolb);
-	SearchBar* ser = new SearchBar(wama,10,toolb);
+	SearchMenu* ser = new SearchMenu(wama,10,toolb);
 	toolb->setMenu(ser);
 	connect(ser,SIGNAL(updatedResults()),toolb,SLOT(tbupdate()));
-
-	//searchToolBar->addAction(searchAct);
 }
 
 
@@ -637,27 +634,13 @@ void MainWindow::createMenus()
 	splitMenu = handleMenu->addMenu(tr("&Split"));
 	unSplitMenu = handleMenu->addMenu("&Close");
 
-	wama;
+
+	/////////WordActionsMapAccessor init. Probably should have been done from menu and not from PM. //////////
 	for(QMap<QString,QAction*>::iterator it = PM.actionFilterMap.begin();it != PM.actionFilterMap.end();++it)
 	{
 		QString tx = it.value()->text() + " " + it.value()->toolTip();
 		wama.addWordsPerAction(*it.value(),tx);
-	}
-	try
-	{
-		RankedMatches rm;
-		int ii = wama.rankedMatchesPerInputString("subdivision Butterfly surface",rm);
-		if (ii > 0)
-		{
-			QList<QAction*> myacts;
-			rm.getActionsWithNMatches(ii,myacts);
-		}
-	}
-	catch(InvalidInvariantException& e)
-	{
-		qDebug() << "WARNING!!!!!!!!!!!!!!!!!!!" << e.what() << "\n";
-	}
-		
+	}	
 }
 
 void MainWindow::fillFilterMenu()

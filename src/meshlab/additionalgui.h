@@ -225,11 +225,11 @@ protected:
 	void paintEvent( QPaintEvent * );
 };
 
-class SearchBar : public QMenu
+class SearchMenu : public QMenu
 {
 	Q_OBJECT
 public:
-	SearchBar(const WordActionsMapAccessor& wm,const int max,QWidget* parent);
+	SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent);
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();

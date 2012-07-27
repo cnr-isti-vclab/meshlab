@@ -792,7 +792,7 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 	return QListView::event(event);
 }
 
-SearchBar::SearchBar(const WordActionsMapAccessor& wm,const int max,QWidget* parent)
+SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent)
 :QMenu(parent),searchline(NULL),wama(wm),maxres(max)
 {
 	searchline = new QLineEdit(this);
@@ -802,7 +802,7 @@ SearchBar::SearchBar(const WordActionsMapAccessor& wm,const int max,QWidget* par
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
 }
 
-void SearchBar::updateResults()
+void SearchMenu::updateResults()
 {
 	try
 	{
@@ -826,21 +826,23 @@ void SearchBar::updateResults()
 	}
 }
 
-void SearchBar::edited( const QString& )
+void SearchMenu::edited( const QString& )
 {
 	updateResults();
 }
 
-void SearchBar::clearResults()
+void SearchMenu::clearResults()
 {
 	QList<QAction*> actlst = actions();
 	foreach(QAction* act,actlst)
 	{
+		//QLineEdit MUST NOT be deleted!
 		if (qobject_cast<QWidgetAction*>(act) == 0)
 			removeAction(act);
 	}
 }
 
+//MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
 {
 
