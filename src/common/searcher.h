@@ -18,7 +18,6 @@ public:
 	bool getActionsPerWord( const QString& word,QList<QAction*>& res ) const;
 private:
 	QMap<QString,QList<QAction*>> wordacts;
-	const QList<QAction*> invalidemptylist;
 };
 
 class RankedMatches;
