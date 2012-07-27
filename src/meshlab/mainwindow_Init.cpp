@@ -110,9 +110,8 @@ MainWindow::MainWindow()
 
 void MainWindow::createActions()
 {
-	/*searchAct = new QAction(tr("Search into MeshLab"), this);
-	searchAct->setShortcutContext(Qt::ApplicationShortcut);
-	searchAct->setShortcut(Qt::CTRL+Qt::Key_F);*/
+	searchShortCut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_F), this);
+	searchShortCut->setContext(Qt::ApplicationShortcut);
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
 	newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
 	newProjectAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -478,15 +477,14 @@ void MainWindow::createToolBars()
 	searchToolBar->setMovable(false);
 	searchToolBar->setFloatable(false);
 	searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-	MyToolButton* searchbutton = new MyToolButton(this);
-	searchbutton->setPopupMode(QToolButton::InstantPopup);
-	searchbutton->setIcon(QIcon(":/images/search.png"));
-	searchToolBar->addWidget(searchbutton);
-	SearchMenu* ser = new SearchMenu(wama,10,searchbutton);
-	searchbutton->setMenu(ser);
-	connect(ser,SIGNAL(updatedResults()),searchbutton,SLOT(tbupdate()));
+	searchButton = new MyToolButton(this);
+	searchButton->setPopupMode(QToolButton::InstantPopup);
+	searchButton->setIcon(QIcon(":/images/search.png"));
+	searchToolBar->addWidget(searchButton);
+	SearchMenu* ser = new SearchMenu(wama,10,searchButton);
+	searchButton->setMenu(ser);
+	connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
 }
-
 
 
 void MainWindow::createMenus()

@@ -351,8 +351,9 @@ private:
 	QMenu *handleMenu;
 	QMenu *splitMenu;
 	QMenu *unSplitMenu;
-	////////// Search Action ////////////////
-	QAction* searchAct;
+	////////// Search Shortcut ////////////////
+	QShortcut* searchShortCut;
+	MyToolButton* searchButton;
 	//////////// Actions Menu File ///////////////////////
   QAction *newProjectAct;
   QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
