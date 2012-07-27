@@ -478,13 +478,13 @@ void MainWindow::createToolBars()
 	searchToolBar->setMovable(false);
 	searchToolBar->setFloatable(false);
 	searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-	MyToolButton* toolb = new MyToolButton(this);
-	toolb->setPopupMode(QToolButton::InstantPopup);
-	toolb->setIcon(QIcon(":/images/search.png"));
-	searchToolBar->addWidget(toolb);
-	SearchMenu* ser = new SearchMenu(wama,10,toolb);
-	toolb->setMenu(ser);
-	connect(ser,SIGNAL(updatedResults()),toolb,SLOT(tbupdate()));
+	MyToolButton* searchbutton = new MyToolButton(this);
+	searchbutton->setPopupMode(QToolButton::InstantPopup);
+	searchbutton->setIcon(QIcon(":/images/search.png"));
+	searchToolBar->addWidget(searchbutton);
+	SearchMenu* ser = new SearchMenu(wama,10,searchbutton);
+	searchbutton->setMenu(ser);
+	connect(ser,SIGNAL(updatedResults()),searchbutton,SLOT(tbupdate()));
 }
 
 
