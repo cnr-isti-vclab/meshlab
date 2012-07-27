@@ -99,7 +99,6 @@ public:
   bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 
 private slots:
-
 	//////////// Slot Menu File //////////////////////
   void reload();
   void reloadAllMesh();
@@ -297,6 +296,7 @@ public:
 	
 
 private:
+	WordActionsMapAccessor wama;
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
 	QToolBar *renderToolBar;

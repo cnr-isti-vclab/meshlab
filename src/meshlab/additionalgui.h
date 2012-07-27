@@ -5,6 +5,7 @@
 #include <QString>
 #include <QModelIndex>
 #include "../common/scriptsyntax.h"
+#include "../common/searcher.h"
 
 class CheckBoxListItemDelegate : public QStyledItemDelegate
 {
@@ -214,8 +215,10 @@ private:
 	MLAutoCompleter* comp;
 };
 
+//MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 class MyToolButton : public QToolButton
 {
+	Q_OBJECT
 public:
 	MyToolButton( QWidget * parent = 0 );
 protected:
@@ -226,21 +229,20 @@ class SearchBar : public QMenu
 {
 	Q_OBJECT
 public:
-	SearchBar(QWidget *parent , QMenuBar* menubar);
-
+	SearchBar(const WordActionsMapAccessor& wm,const int max,QWidget* parent);
+	inline void setMaxResultNum(const int max) {maxres = max;};
+	inline int maxResultNum() const {return maxres;};
+	void clearResults();
 private:
+	int maxres;
 	QLineEdit* searchline;
-	/*QTableWidget results;
-
+	QWidgetAction* searchact;
+	const WordActionsMapAccessor& wama;
+private slots:
 	void updateResults();
-	void updateSearchString();
-
-	void keyPressEvent ( QKeyEvent * e );
-
-	QMenuBar* mnbar;
-	QAction* newHintAction(QString text);
-	void findActions(QList<QAction*>& res, QMenu* m, int recursionLevel=0);
-	void findActions(QList<QAction*>& res, QList<QMenu*> m );*/
+	void edited(const QString&);
+signals:
+	void updatedResults();
 };
 
 

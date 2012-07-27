@@ -24,6 +24,7 @@
 
 #include "../common/interfaces.h"
 #include "../common/xmlfilterinfo.h"
+#include "../common/searcher.h"
 
 #include <QtGui>
 #include <QToolBar>
@@ -42,6 +43,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
+:wama()
 {
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
@@ -73,8 +75,8 @@ MainWindow::MainWindow()
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
-	createToolBars();
 	createMenus();
+	createToolBars();
 	stddialog = 0;
 	xmldialog = 0;
 	setAcceptDrops(true);
@@ -481,11 +483,13 @@ void MainWindow::createToolBars()
 	toolb->setIcon(QIcon(":/images/search.png"));
 
 	searchToolBar->addWidget(toolb);
-	SearchBar* ser = new SearchBar(toolb,menuBar());
+	SearchBar* ser = new SearchBar(wama,10,toolb);
 	toolb->setMenu(ser);
+	connect(ser,SIGNAL(updatedResults()),toolb,SLOT(tbupdate()));
 
 	//searchToolBar->addAction(searchAct);
 }
+
 
 
 void MainWindow::createMenus()
@@ -632,6 +636,28 @@ void MainWindow::createMenus()
 	handleMenu = new QMenu(this);
 	splitMenu = handleMenu->addMenu(tr("&Split"));
 	unSplitMenu = handleMenu->addMenu("&Close");
+
+	wama;
+	for(QMap<QString,QAction*>::iterator it = PM.actionFilterMap.begin();it != PM.actionFilterMap.end();++it)
+	{
+		QString tx = it.value()->text() + " " + it.value()->toolTip();
+		wama.addWordsPerAction(*it.value(),tx);
+	}
+	try
+	{
+		RankedMatches rm;
+		int ii = wama.rankedMatchesPerInputString("subdivision Butterfly surface",rm);
+		if (ii > 0)
+		{
+			QList<QAction*> myacts;
+			rm.getActionsWithNMatches(ii,myacts);
+		}
+	}
+	catch(InvalidInvariantException& e)
+	{
+		qDebug() << "WARNING!!!!!!!!!!!!!!!!!!!" << e.what() << "\n";
+	}
+		
 }
 
 void MainWindow::fillFilterMenu()
