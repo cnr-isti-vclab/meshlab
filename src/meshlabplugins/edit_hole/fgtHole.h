@@ -31,6 +31,7 @@
 #include <GL/glew.h>
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
+#include "vcg/complex/algorithms/clean.h"
 #include "vcg/complex/algorithms/hole.h"
 #include <vcg/complex/algorithms/closest.h>
 #include <vcg/space/index/grid_static_ptr.h>
@@ -515,7 +516,7 @@ public:
 		{
 			if (f != *fib)
 			{
-				if(vcg::tri::Clean<MESH>::TestIntersection( *fib, f ))
+				if(vcg::tri::Clean<MESH>::TestFaceFaceIntersection( *fib, f ))
 					return true;
 			}
 		}
