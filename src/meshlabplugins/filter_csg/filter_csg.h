@@ -60,7 +60,7 @@ public:
     virtual bool applyFilter(QAction *, MeshDocument &, RichParameterSet &, vcg::CallBackPos *);
     virtual bool applyFilter(QAction *, MeshModel &, RichParameterSet &, vcg::CallBackPos *) { assert(0); return false; }
 
-    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Layer | MeshFilterInterface::Remeshing; }
+    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::FilterClass( MeshFilterInterface::Layer + MeshFilterInterface::Remeshing ); }
 };
 
 
