@@ -223,6 +223,7 @@ public:
 	MyToolButton( QWidget * parent = 0 );
 protected:
 	void paintEvent( QPaintEvent * );
+	
 };
 
 class SearchMenu : public QMenu
@@ -241,6 +242,7 @@ private:
 private slots:
 	void updateResults();
 	void edited(const QString&);
+	void setLineEditFocus();
 signals:
 	void updatedResults();
 };

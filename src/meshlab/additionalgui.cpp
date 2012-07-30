@@ -800,6 +800,7 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	searchact->setDefaultWidget(searchline);
 	addAction(searchact);
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
+	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
 }
 
 void SearchMenu::updateResults()
@@ -842,10 +843,15 @@ void SearchMenu::clearResults()
 	}
 }
 
+void SearchMenu::setLineEditFocus()
+{
+	searchline->setFocus();
+}
+
+
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
 {
-
 }
 
 void MyToolButton::paintEvent( QPaintEvent * )
