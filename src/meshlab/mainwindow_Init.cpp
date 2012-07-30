@@ -75,8 +75,8 @@ MainWindow::MainWindow()
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
-	createMenus();
 	createToolBars();
+	createMenus();
 	stddialog = 0;
 	xmldialog = 0;
 	setAcceptDrops(true);

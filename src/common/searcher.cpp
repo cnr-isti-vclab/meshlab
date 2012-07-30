@@ -34,7 +34,7 @@ WordActionsMapAccessor::WordActionsMapAccessor()
 :map(),sepexp(),ignexp()
 {
 	sepexp.setPattern("\\b(\\W+)\\b");
-	ignexp.setPattern("\\b(an|the|of|it|as)\\b|\\b[a-z]\\b|'s\\b|\\.|<[^>]*>");
+	ignexp.setPattern("\\b(an|the|of|it|as|in|by|and|or|for)\\b|\\b[a-z]\\b|'s\\b|\\.|<[^>]*>");
 }
 
 void WordActionsMapAccessor::addWordsPerAction(QAction& act,const QString& st )
@@ -59,6 +59,19 @@ void WordActionsMapAccessor::purifiedSplit( const QString& input,QStringList& re
 	tmp.remove(ignexp);
 	res = tmp.split(sepexp,QString::SkipEmptyParts);
 	res.removeDuplicates();
+	QStringList resWithPrefix;
+	foreach(QString str, res)
+	{
+	  QString strPref = str;
+	  resWithPrefix.push_back(strPref);
+	  for(int i=0;i<str.length()-3;++i)
+	  {
+		strPref.chop(1);
+		resWithPrefix.push_back(strPref);
+	  }
+	}
+	resWithPrefix.removeDuplicates();
+	res=resWithPrefix;
 }
 
 RankedMatches::RankedMatches()
