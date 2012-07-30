@@ -295,7 +295,7 @@ void MainWindow::updateMenus()
 	updateRecentProjActions();
 	filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
-		updateSubFiltersMenu(!notEmptyActiveDoc,activeDoc);
+		updateSubFiltersMenu(!notEmptyActiveDoc,notEmptyActiveDoc);
 	editMenu->setEnabled(activeDoc && !editMenu->actions().isEmpty());
 	renderMenu->setEnabled(activeDoc);
 	fullScreenAct->setEnabled(activeDoc);
