@@ -350,7 +350,7 @@ bool GeometryAgingPlugin::faceIntersections(CMeshO &m, face::Pos<CMeshO::FaceTyp
 		std::vector<CFaceO*>::iterator fib;
 		for(fib=inBox.begin(); fib!=inBox.end(); fib++)
 			if(*fib != p.f)
-				if(tri::Clean<CMeshO>::TestIntersection(p.f, *fib))
+				if(tri::Clean<CMeshO>::TestFaceFaceIntersection(p.f, *fib))
 					return true;
 		// move to the next face
 		p.NextE();
