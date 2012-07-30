@@ -811,10 +811,16 @@ void SearchMenu::updateResults()
 		clearResults();
 		RankedMatches rm;
 		int ii = wama.rankedMatchesPerInputString(searchline->text(),rm);
-		while((ii > 0) && (ii < maxres))
+		int inserted = 0;
+		while(ii > 0)
 		{
 			QList<QAction*> myacts;
 			rm.getActionsWithNMatches(ii,myacts);
+			if (inserted + myacts.size() > maxres)
+			{
+				myacts = myacts.mid(0,myacts.size() - (inserted + myacts.size() - maxres));
+				inserted += myacts.size();
+			}		
 			addActions(myacts);
 			addSeparator();
 			--ii;
