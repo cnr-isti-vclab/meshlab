@@ -239,10 +239,13 @@ private:
 	QLineEdit* searchline;
 	QWidgetAction* searchact;
 	const WordActionsMapAccessor& wama;
+
+	void alignToParentGeometry();
 private slots:
 	void updateResults();
 	void edited(const QString&);
 	void setLineEditFocus();
+
 signals:
 	void updatedResults();
 };

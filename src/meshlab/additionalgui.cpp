@@ -801,6 +801,7 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	addAction(searchact);
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
 	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
+	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
 void SearchMenu::updateResults()
@@ -818,8 +819,7 @@ void SearchMenu::updateResults()
 			addSeparator();
 			--ii;
 		}
-		if (actions().size() > 1)
-			emit updatedResults();
+		alignToParentGeometry();
 	}
 	catch(InvalidInvariantException& e)
 	{
@@ -848,6 +848,16 @@ void SearchMenu::setLineEditFocus()
 	searchline->setFocus();
 }
 
+void SearchMenu::alignToParentGeometry()
+{
+	if (parentWidget() != NULL)
+	{
+		QPoint p = parentWidget()->mapToGlobal(QPoint(0,0));
+		int borderx = p.x() + parentWidget()->frameGeometry().width();
+		QSize sz = sizeHint();
+		move(borderx - sz.width(),y());
+	}
+}
 
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
