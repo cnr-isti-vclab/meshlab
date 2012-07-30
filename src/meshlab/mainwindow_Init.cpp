@@ -638,7 +638,13 @@ void MainWindow::createMenus()
 	{
 		QString tx = it.value()->text() + " " + it.value()->toolTip();
 		wama.addWordsPerAction(*it.value(),tx);
-	}	
+	}
+
+	for(QMap<QString,MeshLabXMLFilterContainer>::iterator it = PM.stringXMLFilterMap.begin();it != PM.stringXMLFilterMap.end();++it)
+	{
+		QString tx = it.value().act->text() + " " + it.value().act->toolTip();
+		wama.addWordsPerAction(*it.value().act,tx);
+	}
 }
 
 void MainWindow::fillFilterMenu()
