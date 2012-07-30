@@ -41,6 +41,7 @@ void WordActionsMapAccessor::addWordsPerAction(QAction& act,const QString& st )
 {
 	QStringList wlist;
 	purifiedSplit(st,wlist);
+	addSubStrings(wlist);
 	map.addWordsPerAction(act,wlist);
 }
 
@@ -59,19 +60,23 @@ void WordActionsMapAccessor::purifiedSplit( const QString& input,QStringList& re
 	tmp.remove(ignexp);
 	res = tmp.split(sepexp,QString::SkipEmptyParts);
 	res.removeDuplicates();
+}
+
+void WordActionsMapAccessor::addSubStrings( QStringList& res ) const
+{
 	QStringList resWithPrefix;
 	foreach(QString str, res)
 	{
-	  QString strPref = str;
-	  resWithPrefix.push_back(strPref);
-	  for(int i=0;i<str.length()-3;++i)
-	  {
-		strPref.chop(1);
+		QString strPref = str;
 		resWithPrefix.push_back(strPref);
-	  }
+		for(int i=0;i<str.length()-3;++i)
+		{
+			strPref.chop(1);
+			resWithPrefix.push_back(strPref);
+		}
 	}
 	resWithPrefix.removeDuplicates();
-	res=resWithPrefix;
+	res = resWithPrefix;
 }
 
 RankedMatches::RankedMatches()

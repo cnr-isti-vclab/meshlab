@@ -33,9 +33,10 @@ public:
 	int rankedMatchesPerInputString(const QString& input,RankedMatches& rm) const;
 	inline QRegExp separtor() const {return sepexp;}
 	inline QRegExp ignored() const {return ignexp;}
-	void purifiedSplit(const QString& input,QStringList& res) const;
 
 private:
+	void purifiedSplit(const QString& input,QStringList& res) const;
+	void addSubStrings(QStringList& res) const;
 	WordActionsMap map;
 	QRegExp sepexp;
 	QRegExp ignexp;
