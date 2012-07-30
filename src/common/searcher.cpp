@@ -33,7 +33,8 @@ bool WordActionsMap::getActionsPerWord( const QString& word,QList<QAction*>& res
 WordActionsMapAccessor::WordActionsMapAccessor()
 :map(),sepexp(),ignexp()
 {
-	sepexp.setPattern("\\b(\\W+)\\b");
+	sepexp.setPattern("\\b(W+)\\b|\\s+");
+	sepexp.setMinimal(true);
 	ignexp.setPattern("\\b(an|the|of|it|as|in|by|and|or|for)\\b|\\b[a-z]\\b|'s\\b|\\.|<[^>]*>");
 }
 
