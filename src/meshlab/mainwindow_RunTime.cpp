@@ -255,21 +255,43 @@ void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool v
 {
 	showFilterScriptAct->setEnabled(validmeshdoc);
 	filterMenuSelect->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuSelect,validmeshdoc);
 	filterMenuClean->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuClean,validmeshdoc);
 	filterMenuCreate->setEnabled(createmenuenabled || validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuCreate,createmenuenabled || validmeshdoc);
 	filterMenuRemeshing->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuRemeshing,validmeshdoc);
 	filterMenuPolygonal->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuPolygonal,validmeshdoc);
 	filterMenuColorize->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuColorize,validmeshdoc);
 	filterMenuSmoothing->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuSmoothing,validmeshdoc);
 	filterMenuQuality->setEnabled(validmeshdoc); 
+	updateSubFiltersMenuItem(filterMenuQuality,validmeshdoc);
 	filterMenuNormal->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuNormal,validmeshdoc);
 	filterMenuMeshLayer->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuMeshLayer,validmeshdoc);
 	filterMenuRasterLayer->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuRasterLayer,validmeshdoc);
 	filterMenuRangeMap->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuRangeMap,validmeshdoc);
 	filterMenuPointSet->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuPointSet,validmeshdoc);
 	filterMenuSampling->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuSampling,validmeshdoc);
 	filterMenuTexture->setEnabled(validmeshdoc); 
+	updateSubFiltersMenuItem(filterMenuTexture,validmeshdoc);
 	filterMenuCamera->setEnabled(validmeshdoc);
+	updateSubFiltersMenuItem(filterMenuCamera,validmeshdoc);
+}
+
+void MainWindow::updateSubFiltersMenuItem(QMenu* menu,const bool enabled)
+{
+	foreach(QAction* act,menu->actions())
+		act->setEnabled(enabled);
 }
 
 void MainWindow::updateMenus()

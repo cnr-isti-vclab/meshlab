@@ -149,6 +149,7 @@ private slots:
 	void updateWindowMenu();
 	void updateMenus();
 	void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
+	void updateSubFiltersMenuItem(QMenu* menu,const bool enabled);
 	void updateStdDialog();
 	void updateXMLStdDialog();
 	void setSplit(QAction *qa);
