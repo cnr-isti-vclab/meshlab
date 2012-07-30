@@ -817,10 +817,8 @@ void SearchMenu::updateResults()
 			QList<QAction*> myacts;
 			rm.getActionsWithNMatches(ii,myacts);
 			if (inserted + myacts.size() > maxres)
-			{
 				myacts = myacts.mid(0,myacts.size() - (inserted + myacts.size() - maxres));
-				inserted += myacts.size();
-			}		
+			inserted += myacts.size();
 			addActions(myacts);
 			addSeparator();
 			--ii;
