@@ -9,11 +9,9 @@
 		<FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
 	</FILTER>
 	<FILTER filterName="Compute Geometric Measures" filterFunction="computeGeomMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
-		<FILTER_HELP><![CDATA[Compute a set of geometric measures over a mesh.
-		It computes: bounding box volume and diagonal, surface area, thin shell barycenter, and an Inertia Matrix.
-		Open the layer dialog to see the results.]]></FILTER_HELP>
-		</FILTER>
+		<FILTER_HELP><![CDATA[Compute a set of geometric measures over a mesh.It computes: bounding box volume and diagonal, surface area, thin shell barycenter, and an Inertia Matrix.Open the layer dialog to see the results.]]></FILTER_HELP>
 		<FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+	</FILTER>
 	<FILTER filterName="Per Vertex Quality Stat" filterFunction="computeVertQualityStat" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
 		<FILTER_HELP><![CDATA[Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance.]]></FILTER_HELP>
 		<FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
