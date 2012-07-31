@@ -50,8 +50,6 @@ FilterUnsharp::FilterUnsharp()
               FP_UNSHARP_QUALITY <<
               FP_UNSHARP_VERTEX_COLOR <<
               FP_RECOMPUTE_VERTEX_NORMAL <<
-              FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED <<
-              FP_RECOMPUTE_VERTEX_NORMAL_ANGLE <<
               FP_RECOMPUTE_FACE_NORMAL <<
               FP_RECOMPUTE_QUADFACE_NORMAL <<
               FP_FACE_NORMAL_NORMALIZE <<
@@ -70,69 +68,72 @@ FilterUnsharp::~FilterUnsharp() {
 		delete actionList.at(i);
 }
 
- QString FilterUnsharp::filterName(FilterIDType filter) const
+QString FilterUnsharp::filterName(FilterIDType filter) const
 {
- switch(filter)
+  switch(filter)
   {
-		case FP_LAPLACIAN_SMOOTH :						return QString("Laplacian Smooth");
-		case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
-		case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
-		case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
-		case FP_TAUBIN_SMOOTH :							return QString("Taubin Smooth");
-		case FP_DEPTH_SMOOTH :							return QString("Depth Smooth");
-		case FP_DIRECTIONAL_PRESERVATION :	return QString("Directional Geom. Preserv.");
-		case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
-  	case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals"); 
-  	case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals"); 
-  	case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals"); 
-  	case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth vertex quality"); 
-  	case FP_UNSHARP_NORMAL:						return QString("UnSharp Mask Normals"); 
-  	case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry"); 
-  	case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality"); 
-  	case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color"); 
-	  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals"); 
-	  case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:	return QString("Recompute Weighted Vertex Normals"); 
-	  case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:	return QString("Recompute Angle Weighted Vertex Normals"); 
-	  case FP_RECOMPUTE_FACE_NORMAL:		return QString("Recompute Face Normals"); 
-	  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Recompute Per-Quad Face Normals"); 
-		case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
-		
+  case FP_LAPLACIAN_SMOOTH :					return QString("Laplacian Smooth");
+  case FP_HC_LAPLACIAN_SMOOTH :					return QString("HC Laplacian Smooth");
+  case FP_SD_LAPLACIAN_SMOOTH :					return QString("ScaleDependent Laplacian Smooth");
+  case FP_TWO_STEP_SMOOTH :	    				return QString("TwoStep Smooth");
+  case FP_TAUBIN_SMOOTH :						return QString("Taubin Smooth");
+  case FP_DEPTH_SMOOTH :						return QString("Depth Smooth");
+  case FP_DIRECTIONAL_PRESERVATION :            return QString("Directional Geom. Preserv.");
+  case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
+  case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals");
+  case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals");
+  case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals");
+  case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth Vertex Quality");
+  case FP_UNSHARP_NORMAL:						return QString("UnSharp Mask Normals");
+  case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry");
+  case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality");
+  case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color");
+  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals");
+  case FP_RECOMPUTE_FACE_NORMAL:            return QString("Recompute Face Normals");
+  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Recompute Per-Quad Face Normals");
+  case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
 
-  	default: assert(0);
+
+  default: assert(0);
   }
   return QString("error!");
 }
 
- QString FilterUnsharp::filterInfo(FilterIDType filterId) const
+QString FilterUnsharp::filterInfo(FilterIDType filterId) const
 {
   switch(filterId)
   {
-		case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");  
-    case FP_HC_LAPLACIAN_SMOOTH : 			return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");  
-    case FP_SD_LAPLACIAN_SMOOTH : 			return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");  
-  case FP_TWO_STEP_SMOOTH : 			    return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged toghether and a step where the vertexes are fitted on the new normals. Based on: <br>"
-                                                      "<i>A. Belyaev and Y. Ohtake</i>, <b>A Comparison of Mesh Smoothing Methods</b>, Proc. Israel-Korea Bi-National Conf. Geometric Modeling and Computer Graphics, pp. 83-87, 2003.");
-  case FP_TAUBIN_SMOOTH :							return tr("The &lambda;-&mu; Taubin smoothing, it make two steps of smoothing, forth and back, for each iteration. Based on:<br>"
-                                                              "Gabriel Taubin,<br><b>A signal processing approach to fair surface design</b><br>Siggraph 1995" );
-    case FP_DEPTH_SMOOTH :							return tr("A laplacian smooth that is constrained to move vertices only along the view direction.");  
-		case FP_DIRECTIONAL_PRESERVATION :	return tr("Store and Blend the current geometry with the result of another previous smoothing processing step. It is useful to limit the influence of any smoothing algorithm along the viewing direction. This is import to cope with the biased distribution of the error in many scanning devices. TOF scanner usually have very good <b>x,y</b> accuracy but suffer of great depth errors.");
-		case FP_CREASE_CUT:									return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces"); 
-		case FP_FACE_NORMAL_NORMALIZE:	    return tr("Normalize Face Normal Lenghts"); 
-		case FP_VERTEX_NORMAL_NORMALIZE:	    return tr("Normalize Vertex Normal Lenghts"); 
-		case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Laplacian smooth of the quality values."); 
-		case FP_FACE_NORMAL_SMOOTHING:	    return tr("Smooth Face Normals without touching the position of the vertices."); 
-  	case FP_UNSHARP_NORMAL:							return tr("Unsharp mask filtering of the normals, putting in more evidence normal variations"); 
-  	case FP_UNSHARP_GEOMETRY:						return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations"); 
-  	case FP_UNSHARP_QUALITY:						return tr("Unsharp mask filtering of the quality field"); 
-  	case FP_UNSHARP_VERTEX_COLOR:				return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations"); 
-		case FP_RECOMPUTE_VERTEX_NORMAL:		return tr("Recompute vertex normals as an area weighted average of normals of the incident faces");
-		case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED:		return tr("Recompute vertex normals as a weighted sum of normals of the incident faces. Weights are defined according to the paper <i>Weights for Computing Vertex Normals from Facet Normals</i>, Nelson max, JGT 1999");
-		case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE:		return tr("Recompute vertex normals as an angle weighted sum of normals of the incident faces according to the paper <i>Computing Vertex Normals from Polygonal Facet</i>, G Thurmer, CA Wuthrich, JGT 1998");
-		case FP_RECOMPUTE_FACE_NORMAL:			return tr("Recompute face normals as the normal of the plane of the face");
-		case FP_RECOMPUTE_QUADFACE_NORMAL:			return tr("Recompute face normals as the normal of the average of the normals of the triangles that builds a quad. Useful for showing shaded quad meshes.");
-		case FP_LINEAR_MORPH :							return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
+  case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");
+  case FP_HC_LAPLACIAN_SMOOTH :       return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");
+  case FP_SD_LAPLACIAN_SMOOTH :       return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");
+  case FP_TWO_STEP_SMOOTH :           return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged together and a step where the vertexes are fitted on the new normals. Based on: <br>"
+                                                "<i>A. Belyaev and Y. Ohtake</i>, <b>A Comparison of Mesh Smoothing Methods</b>, Proc. Israel-Korea Bi-National Conf. Geometric Modeling and Computer Graphics, pp. 83-87, 2003.");
+  case FP_TAUBIN_SMOOTH :             return tr("The &lambda;-&mu; Taubin smoothing, it make two steps of smoothing, forth and back, for each iteration. Based on:<br>"
+                                                "Gabriel Taubin,<br><b>A signal processing approach to fair surface design</b><br>Siggraph 1995" );
+  case FP_DEPTH_SMOOTH :              return tr("A laplacian smooth that is constrained to move vertices only along the view direction.");
+  case FP_DIRECTIONAL_PRESERVATION :  return tr("Store and Blend the current geometry with the result of another previous smoothing processing step. It is useful to limit the influence of any smoothing algorithm along the viewing direction. This is import to cope with the biased distribution of the error in many scanning devices. TOF scanner usually have very good <b>x,y</b> accuracy but suffer of great depth errors.");
+  case FP_CREASE_CUT:                 return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces");
+  case FP_FACE_NORMAL_NORMALIZE:      return tr("Normalize Face Normal Lenghts");
+  case FP_VERTEX_NORMAL_NORMALIZE:    return tr("Normalize Vertex Normal Lenghts");
+  case FP_VERTEX_QUALITY_SMOOTHING:	  return tr("Laplacian smooth of the quality values.");
+  case FP_FACE_NORMAL_SMOOTHING:      return tr("Smooth Face Normals without touching the position of the vertices.");
+  case FP_UNSHARP_NORMAL:             return tr("Unsharp mask filtering of the normals, putting in more evidence normal variations");
+  case FP_UNSHARP_GEOMETRY:           return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations");
+  case FP_UNSHARP_QUALITY:            return tr("Unsharp mask filtering of the quality field");
+  case FP_UNSHARP_VERTEX_COLOR:       return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations");
+  case FP_RECOMPUTE_VERTEX_NORMAL:    return tr("Recompute vertex normals according to three different schemes:<br>"
+                                                "1) as a simple average of normals of the incident faces <br>"
+                                                "2) as an area weighted average of normals of the incident faces <br>"
+                                                "3) as an angle weighted sum of normals of the incident faces according to the paper <i>Computing Vertex Normals from Polygonal Facet</i>, G Thurmer, CA Wuthrich, JGT 1998<br>"
+                                                "Probably this is the best all-purpose choice. It could slightly bias the result for degenerate, fat triangles."
+                                                "4) as a weighted sum of normals of the incident faces. Weights are defined according to the paper <i>Weights for Computing Vertex Normals from Facet Normals</i>, Nelson Max, JGT 1999<br>"
+                                                "The weight for each wedge is the cross product of the two edge over the product of the square of the two edge lengths."
+                                                "According to the original paper it is perfect only for spherical surface, but it should perform well also in practice.");
+  case FP_RECOMPUTE_FACE_NORMAL:      return tr("Recompute face normals as the normal of the plane of the face");
+  case FP_RECOMPUTE_QUADFACE_NORMAL:  return tr("Recompute face normals as the normal of the average of the normals of the triangles that builds a quad. Useful for showing shaded quad meshes.");
+  case FP_LINEAR_MORPH :              return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
 
-  	default: assert(0);
+  default: assert(0);
   }
   return QString("error!");
 }
@@ -164,8 +165,6 @@ FilterUnsharp::~FilterUnsharp() {
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
-			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 			case FP_FACE_NORMAL_NORMALIZE:	  
 			case FP_VERTEX_NORMAL_NORMALIZE:	  
 					return MeshFilterInterface::Normal;
@@ -179,8 +178,8 @@ int FilterUnsharp::getPreConditions(QAction *a) const
   {
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_QUALITY:
-          return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
-  		case FP_SD_LAPLACIAN_SMOOTH:
+	return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
+			case FP_SD_LAPLACIAN_SMOOTH:
 			case FP_HC_LAPLACIAN_SMOOTH:
 			case FP_LAPLACIAN_SMOOTH:
 			case FP_TWO_STEP_SMOOTH:
@@ -194,8 +193,6 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
-			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 			case FP_FACE_NORMAL_NORMALIZE:	  
 			case FP_CREASE_CUT:
           return MeshModel::MM_FACENUMBER;
@@ -229,8 +226,6 @@ int FilterUnsharp::postCondition(QAction *a) const
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
-			case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
 			case FP_FACE_NORMAL_NORMALIZE:	  
 			case FP_VERTEX_NORMAL_NORMALIZE:	  
 			case FP_CREASE_CUT:
@@ -256,8 +251,6 @@ int FilterUnsharp::postCondition(QAction *a) const
 
     case FP_RECOMPUTE_FACE_NORMAL :
     case FP_RECOMPUTE_VERTEX_NORMAL :
-    case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED :
-    case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE :
     case FP_FACE_NORMAL_NORMALIZE:
     case FP_VERTEX_NORMAL_NORMALIZE:
     case FP_DIRECTIONAL_PRESERVATION:
@@ -282,6 +275,12 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 {
 	switch(ID(action))
 	{
+	case FP_RECOMPUTE_VERTEX_NORMAL :
+	  parlst.addParam(new RichEnum("weightMode", 0,
+								   QStringList() << "None (avg)" <<  "By Angle" << "By Area" << "As defined by N. Max",
+							  tr("Weighting Mode:"),
+							  tr("")));
+		  break;
 		case FP_CREASE_CUT :
 			parlst.addParam(new RichFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it.")));
 			break;
@@ -522,14 +521,24 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	case FP_RECOMPUTE_QUADFACE_NORMAL : 
 			tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(m.cm);
 			break;
-	case FP_RECOMPUTE_VERTEX_NORMAL : 
-			tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-			break;
-	case FP_RECOMPUTE_VERTEX_NORMAL_WEIGHTED : 
-			tri::UpdateNormals<CMeshO>::PerVertexWeighted(m.cm);
-			break;
-	case FP_RECOMPUTE_VERTEX_NORMAL_ANGLE : 
-			tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m.cm);
+	case FP_RECOMPUTE_VERTEX_NORMAL :
+			  {
+				int weightMode = par.getEnum("weightMode");
+				switch(weightMode)
+				{
+				case 0: tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+						tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+				  break;
+				case 1: tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+				  break;
+				case 2: tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m.cm);
+				  break;
+				case 3: tri::UpdateNormals<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
+				  break;
+				default :
+				  break;
+				}
+			  }
 			break;
 	case FP_FACE_NORMAL_NORMALIZE :
 			tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
