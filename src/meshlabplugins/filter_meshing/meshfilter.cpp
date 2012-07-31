@@ -1238,7 +1238,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0){
-				errorMessage = "Mesh has some not 2 manifold faces, filter require manifoldness";
+				errorMessage = "Mesh has some not 2-manifold edges, filter require edge manifoldness";
 				return false;
 			}
 
