@@ -255,40 +255,40 @@ void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool v
 {
 	showFilterScriptAct->setEnabled(validmeshdoc);
 	filterMenuSelect->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuSelect,validmeshdoc);
+    updateMenuItems(filterMenuSelect,validmeshdoc);
 	filterMenuClean->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuClean,validmeshdoc);
+    updateMenuItems(filterMenuClean,validmeshdoc);
 	filterMenuCreate->setEnabled(createmenuenabled || validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuCreate,createmenuenabled || validmeshdoc);
+    updateMenuItems(filterMenuCreate,createmenuenabled || validmeshdoc);
 	filterMenuRemeshing->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuRemeshing,validmeshdoc);
+    updateMenuItems(filterMenuRemeshing,validmeshdoc);
 	filterMenuPolygonal->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuPolygonal,validmeshdoc);
+    updateMenuItems(filterMenuPolygonal,validmeshdoc);
 	filterMenuColorize->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuColorize,validmeshdoc);
+    updateMenuItems(filterMenuColorize,validmeshdoc);
 	filterMenuSmoothing->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuSmoothing,validmeshdoc);
+    updateMenuItems(filterMenuSmoothing,validmeshdoc);
 	filterMenuQuality->setEnabled(validmeshdoc); 
-	updateSubFiltersMenuItem(filterMenuQuality,validmeshdoc);
+    updateMenuItems(filterMenuQuality,validmeshdoc);
 	filterMenuNormal->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuNormal,validmeshdoc);
+    updateMenuItems(filterMenuNormal,validmeshdoc);
 	filterMenuMeshLayer->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuMeshLayer,validmeshdoc);
+    updateMenuItems(filterMenuMeshLayer,validmeshdoc);
 	filterMenuRasterLayer->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuRasterLayer,validmeshdoc);
+    updateMenuItems(filterMenuRasterLayer,validmeshdoc);
 	filterMenuRangeMap->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuRangeMap,validmeshdoc);
+    updateMenuItems(filterMenuRangeMap,validmeshdoc);
 	filterMenuPointSet->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuPointSet,validmeshdoc);
+    updateMenuItems(filterMenuPointSet,validmeshdoc);
 	filterMenuSampling->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuSampling,validmeshdoc);
+    updateMenuItems(filterMenuSampling,validmeshdoc);
 	filterMenuTexture->setEnabled(validmeshdoc); 
-	updateSubFiltersMenuItem(filterMenuTexture,validmeshdoc);
+    updateMenuItems(filterMenuTexture,validmeshdoc);
 	filterMenuCamera->setEnabled(validmeshdoc);
-	updateSubFiltersMenuItem(filterMenuCamera,validmeshdoc);
+    updateMenuItems(filterMenuCamera,validmeshdoc);
 }
 
-void MainWindow::updateSubFiltersMenuItem(QMenu* menu,const bool enabled)
+void MainWindow::updateMenuItems(QMenu* menu,const bool enabled)
 {
 	foreach(QAction* act,menu->actions())
 		act->setEnabled(enabled);
@@ -315,11 +315,15 @@ void MainWindow::updateMenus()
 
 	updateRecentFileActions();
 	updateRecentProjActions();
-	filterMenu->setEnabled(activeDoc && !filterMenu->actions().isEmpty());
+    filterMenu->setEnabled(!filterMenu->actions().isEmpty());
 	if (!filterMenu->actions().isEmpty())
-		updateSubFiltersMenu(!notEmptyActiveDoc,notEmptyActiveDoc);
-	editMenu->setEnabled(activeDoc && !editMenu->actions().isEmpty());
-	renderMenu->setEnabled(activeDoc);
+        updateSubFiltersMenu(GLA() != NULL,notEmptyActiveDoc);
+    lastFilterAct->setEnabled(false);
+    lastFilterAct->setText(QString("Apply filter"));
+    editMenu->setEnabled(!editMenu->actions().isEmpty());
+    updateMenuItems(editMenu,activeDoc);
+    renderMenu->setEnabled(!editMenu->actions().isEmpty());
+    updateMenuItems(renderMenu,activeDoc);
 	fullScreenAct->setEnabled(activeDoc);
 	trackBallMenu->setEnabled(activeDoc);
 	logMenu->setEnabled(activeDoc);
@@ -355,17 +359,12 @@ void MainWindow::updateMenus()
 		default: break;
 		}
 
-		lastFilterAct->setEnabled(false);
-		if(GLA()->getLastAppliedFilter() != NULL)
+        if(GLA()->getLastAppliedFilter() != NULL)
 		{
+            qDebug() << "update true";
 			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
-			lastFilterAct->setEnabled(true);
+            lastFilterAct->setEnabled(true);
 		}
-		else
-		{
-			lastFilterAct->setText(QString("Apply filter "));
-		}
-
 
 		// Management of the editing toolbar
 		// when you enter in a editing mode you can toggle between editing

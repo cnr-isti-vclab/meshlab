@@ -98,6 +98,8 @@ public:
   bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
   bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 
+ public slots:
+  void updateMenus();
 private slots:
 	//////////// Slot Menu File //////////////////////
   void reload();
@@ -147,9 +149,9 @@ private slots:
 	void showRaster();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
-	void updateMenus();
+    //void updateMenus();
 	void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
-	void updateSubFiltersMenuItem(QMenu* menu,const bool enabled);
+    void updateMenuItems(QMenu* menu,const bool enabled);
 	void updateStdDialog();
 	void updateXMLStdDialog();
 	void setSplit(QAction *qa);
