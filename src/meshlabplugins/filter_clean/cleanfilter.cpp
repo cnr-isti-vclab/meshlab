@@ -73,23 +73,23 @@ CleanFilter::~CleanFilter() {
 		delete actionList.at(i);
 }
 
- QString CleanFilter::filterName(FilterIDType filter) const
+QString CleanFilter::filterName(FilterIDType filter) const
 {
- switch(filter)
+  switch(filter)
   {
- case FP_BALL_PIVOTING :								  return QString("Surface Reconstruction: Ball Pivoting");
-	  case FP_REMOVE_WRT_Q :									return QString("Remove vertices wrt quality");
-	  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove isolated pieces (wrt diameter)");
-	  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove isolated pieces (wrt face num)");
-    case FP_REMOVE_TVERTEX_FLIP :           return QString("Remove T-Vertices by edge flip");
-    case FP_REMOVE_TVERTEX_COLLAPSE :       return QString("Remove T-Vertices by edge collapse");
-  case FP_SNAP_MISMATCHED_BORDER :       return QString("Snap Mismatched Borders");
-    case FP_MERGE_CLOSE_VERTEX :            return QString("Merge Close Vertices");
-    case FP_REMOVE_DUPLICATE_FACE:          return QString("Remove Duplicate Faces");
-  case FP_REMOVE_FOLD_FACE:          return QString("Remove Isolated folded face by edge flip");
-  case FP_REMOVE_NON_MANIF_EDGE:          return QString("Remove Faces from Non Manif Edge");
-  case FP_REMOVE_NON_MANIF_VERT:          return QString("Split Vertexes incident on non manifold faces");
-		default: assert(0);
+  case FP_BALL_PIVOTING :					return QString("Surface Reconstruction: Ball Pivoting");
+  case FP_REMOVE_WRT_Q :            		return QString("Remove Vertices wrt Quality");
+  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove Isolated pieces (wrt Diameter)");
+  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove Isolated pieces (wrt Face Num.)");
+  case FP_REMOVE_TVERTEX_FLIP :             return QString("Remove T-Vertices by Edge Flip");
+  case FP_REMOVE_TVERTEX_COLLAPSE :         return QString("Remove T-Vertices by Edge Collapse");
+  case FP_SNAP_MISMATCHED_BORDER :          return QString("Snap Mismatched Borders");
+  case FP_MERGE_CLOSE_VERTEX :              return QString("Merge Close Vertices");
+  case FP_REMOVE_DUPLICATE_FACE:            return QString("Remove Duplicate Faces");
+  case FP_REMOVE_FOLD_FACE:                 return QString("Remove Isolated Folded Faces by Edge Flip");
+  case FP_REMOVE_NON_MANIF_EDGE:            return QString("Remove Faces from Non Manifold Edges");
+  case FP_REMOVE_NON_MANIF_VERT:            return QString("Split Vertexes Incident on Non Manifold Faces");
+  default: assert(0);
   }
   return QString("error!");
 }
@@ -98,22 +98,26 @@ CleanFilter::~CleanFilter() {
 {
   switch(filterId)
   {
-		case FP_BALL_PIVOTING :	return QString("Reconstruct a surface using the <b>Ball Pivoting Algorithm</b> (Bernardini et al. 1999). <br>"
-																						 "Starting with a seed triangle, the BPA algorithm  pivots a ball around an edge "
-																						 "(i.e. it revolves around the edge while keeping in contact with the edge endpoints) "
-																						 "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."); 
-    case FP_REMOVE_ISOLATED_COMPLEXITY: return QString("Remove isolated connected components composed by a limited number of triangles");
-    case FP_REMOVE_ISOLATED_DIAMETER:   return QString("Remove isolated connected components whose diameter is smaller than the specified constant");
-    case FP_REMOVE_WRT_Q:               return QString("Remove all the vertices with a quality lower smaller than the specified constant");
-    case FP_REMOVE_TVERTEX_COLLAPSE :   return QString("Removes t-vertices from the mesh by collapsing the shortest of the incident edges");
-    case FP_REMOVE_TVERTEX_FLIP :       return QString("Removes t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
-    case FP_SNAP_MISMATCHED_BORDER :    return QString("Try to snap toghether adjacent borders that are slightly mismatched.<br>"
+        case FP_BALL_PIVOTING :	return QString("Given a point cloud with normals it reconstructs a surface using the <b>Ball Pivoting Algorithm</b>."
+                                               "Starting with a seed triangle, the BPA algorithm  pivots a ball of the given radius around the already formed edges"
+                                               "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."
+                                               "This surface reconstruction algoritm uses the existing points without creating new ones. Works better with uniformly sampled point clouds. "
+                                               "If needed first perform a poisson disk subsampling of the point cloud. <br>"
+                                               "Bernardini F., Mittleman J., Rushmeier H., Silva C., Taubin G.<br>"
+                                               "<b>The ball-pivoting algorithm for surface reconstruction.</b><br>"
+                                               "IEEE TVCG 1999");
+    case FP_REMOVE_ISOLATED_COMPLEXITY: return QString("Delete isolated connected components composed by a limited number of triangles");
+    case FP_REMOVE_ISOLATED_DIAMETER:   return QString("Delete isolated connected components whose diameter is smaller than the specified constant");
+    case FP_REMOVE_WRT_Q:               return QString("Delete all the vertices with a quality lower smaller than the specified constant");
+    case FP_REMOVE_TVERTEX_COLLAPSE :   return QString("Delete t-vertices from the mesh by collapsing the shortest of the incident edges");
+    case FP_REMOVE_TVERTEX_FLIP :       return QString("Delete t-vertices by flipping the opposite edge on the degenerate face if the triangulation quality improves");
+    case FP_SNAP_MISMATCHED_BORDER :    return QString("Try to snap together adjacent borders that are slightly mismatched.<br>"
                                                        "This situation can happen on badly triangulated adjacent patches defined by high order surfaces.<br>"
                                                        "For each border vertex the filter snap it onto the closest boundary edge only if it is closest of <i>edge_lenght*threshold</i>. When vertex is snapped the correspoinding face it split and a new vertex is created.");
-    case FP_MERGE_CLOSE_VERTEX :        return QString("Merge togheter all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
-    case FP_REMOVE_DUPLICATE_FACE :     return QString("Remove all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
-    case FP_REMOVE_FOLD_FACE :          return QString("Remove all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
-    case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifol edge it removes the smallest area faces until it becomes 2-manifold.");
+    case FP_MERGE_CLOSE_VERTEX :        return QString("Merge together all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
+    case FP_REMOVE_DUPLICATE_FACE :     return QString("Delete all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
+    case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
+    case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
     case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non manifold vertices until it becomes 2-manifold.");
     default: assert(0);
   }
@@ -153,14 +157,14 @@ CleanFilter::~CleanFilter() {
     case FP_REMOVE_TVERTEX_COLLAPSE: return MeshModel::MM_VERTMARK;
     case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_REMOVE_NON_MANIF_EDGE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-  case FP_REMOVE_NON_MANIF_VERT: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+    case FP_REMOVE_NON_MANIF_VERT: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_SNAP_MISMATCHED_BORDER: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK| MeshModel::MM_FACEMARK;
     case FP_REMOVE_FOLD_FACE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
     case FP_MERGE_CLOSE_VERTEX:
     case FP_REMOVE_DUPLICATE_FACE:
       return MeshModel::MM_NONE;
     default: assert(0);
-  }
+    }
   return 0;
 }
 
@@ -172,7 +176,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
     case FP_BALL_PIVOTING :
 		  parlst.addParam(new RichAbsPerc("BallRadius",(float)maxDiag1,0,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
 		  parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));		  
-			parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
+		  parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
 		  parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
 		  break;
     case FP_REMOVE_ISOLATED_DIAMETER:	 
@@ -182,12 +186,12 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
 		  parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
 		  break;
     case FP_REMOVE_WRT_Q:
-			qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
+          qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
 		  parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
 		  break;
-		case FP_MERGE_CLOSE_VERTEX :
-			parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged toghether. Use very small values, default values is 1/10000 of bounding box diagonal. "));
-		 break;    
+	case FP_MERGE_CLOSE_VERTEX :
+		  parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+		  break;
     case FP_SNAP_MISMATCHED_BORDER:
     parlst.addParam(new RichFloat("EdgeDistRatio",1/100.0f,"Edge Distance Ratio", "Collapse edge when the edge / distance ratio is greater than this value. E.g. for default value 1000 two straight border edges are collapsed if the central vertex dist from the straight line composed by the two edges less than a 1/1000 of the sum of the edges lenght. Larger values enforce that only vertexes very close to the line are removed."));
     parlst.addParam(new RichBool("UnifyVertices",true,"UnifyVertices","if true the snap vertices are weld together."));
@@ -198,6 +202,9 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
                "Threshold", 40, "Ratio", "Detects faces where the base/height ratio is lower than this value"));
        parlst.addParam(new RichBool(
                "Repeat", true, "Iterate until convergence", "Iterates the algorithm until it reaches convergence"));
+       break;
+    case FP_REMOVE_NON_MANIF_VERT :
+       parlst.addParam(new RichFloat("VertDispRatio", 0, "Vertex Displacement Ratio", "When a vertex is split it is moved along the average vector going from its position to the baricyenter of the FF connected faces sharing it"));
        break;
   default: break; // do not add any parameter for the other filters
   }
@@ -311,7 +318,9 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
   break;
   case FP_REMOVE_NON_MANIF_VERT :
   {
-      int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm);
+      float threshold = par.getFloat("VertDispRatio");
+
+      int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
       Log("Successfully split %d non manifold vertices faces", total);
   }
   break;
