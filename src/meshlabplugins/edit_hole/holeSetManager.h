@@ -361,10 +361,7 @@ private:
 		std::vector<HoleInfo> vhi;
 
 		//prendo la lista di info(sugli hole) tutte le facce anche le non selezionate
-		int borderFlagBit = FaceType::NewBitFlag();
-		vcg::tri::UpdateFlags<MESH>::FaceClear(*mesh,borderFlagBit);
-
-		vcgHole::GetInfo(*mesh,borderFlagBit, false, vhi);
+		vcgHole::GetInfo(*mesh, false, vhi);
 		HoleType::ResetHoleId();
 		typename std::vector<HoleInfo>::iterator itH = vhi.begin();
 		for( ; itH != vhi.end(); itH++)
@@ -374,15 +371,12 @@ private:
 			// reset flag and setting of
 			PosType curPos = itH->p;
 			do{
-				curPos.f->ClearUserBit(borderFlagBit);
 				SetHoleBorderAttr(curPos.f);
 				curPos.NextB();
 				assert(curPos.IsBorder());
 			}while( curPos != itH->p );
 		}
-
-		FaceType::DeleteBitFlag(borderFlagBit);
-	};
+	}
 
 	/*  Return border half-edge of the same face which is nearest to point(x, y) of glArea.
 	 */

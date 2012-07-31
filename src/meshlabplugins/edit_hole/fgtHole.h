@@ -266,14 +266,13 @@ public:
 	{
 		assert(!IsFilled());
 		assert(this->p.IsBorder());
-		int patchBit = FaceType::NewBitFlag();
 		switch(mode)
 		{
 		case FgtHole<MESH>::Trivial:
-				vcgHole::template FillHoleEar< TrivialEar >(mesh, *this, patchBit, local_facePointer);
+				vcgHole::template FillHoleEar< TrivialEar >(mesh, *this, local_facePointer);
 			break;
 		case FgtHole<MESH>::MinimumWeight:
-				vcgHole::template FillHoleEar< MinimumWeightEar >(mesh, *this, patchBit, local_facePointer);
+				vcgHole::template FillHoleEar< MinimumWeightEar >(mesh, *this, local_facePointer);
 			break;
 		case FgtHole<MESH>::SelfIntersection:
 				std::vector<FacePointer * > vfp = local_facePointer;
@@ -295,7 +294,7 @@ public:
         for( ; fpi != SelfIntersectionEar::AdjacencyRing().end(); ++fpi)
 					vfp.push_back( &*fpi );
 
-				vcgHole::template FillHoleEar< SelfIntersectionEar >(mesh, *this, patchBit, vfp);
+				vcgHole::template FillHoleEar< SelfIntersectionEar >(mesh, *this, vfp);
 				SelfIntersectionEar::AdjacencyRing().clear();
 			break;
 		}
@@ -310,9 +309,7 @@ public:
 		_state |= FILLED;
 		_state |= ACCEPTED;
 		_state &= (~COMPENET);
-		updatePatchState(patchBit);
-		FaceType::DeleteBitFlag(patchBit);
-	};
+	}
 
 	/* Check if face is a border face of this hole */
 	bool HaveBorderFace(FacePointer bFace) const
