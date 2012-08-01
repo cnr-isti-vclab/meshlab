@@ -808,7 +808,8 @@ void SearchMenu::updateResults()
 {
 	try
 	{
-		clearResults();
+		QList<QAction*> old = actions();
+		QList<QAction*> result;
 		RankedMatches rm;
 		int ii = wama.rankedMatchesPerInputString(searchline->text(),rm);
 		int inserted = 0;
@@ -818,10 +819,39 @@ void SearchMenu::updateResults()
 			rm.getActionsWithNMatches(ii,myacts);
 			if (inserted + myacts.size() > maxres)
 				myacts = myacts.mid(0,myacts.size() - (inserted + myacts.size() - maxres));
+			result.append(myacts);
+			QAction* sep = new QAction(this);
+			sep->setSeparator(true);
+			result.append(sep);
 			inserted += myacts.size();
-			addActions(myacts);
-			addSeparator();
 			--ii;
+		}
+		//list of separators to be deleted and/or menu items (actions) that are no more in the results
+		QList<QAction*> delsepremact;
+		bool maybeallequal = (old.size() - 1) == result.size();
+		//tt start from 1 because the first one is the QWidgetAction containing the QLineEdit
+		for(int tt = 1;tt < old.size();++tt)
+		{
+			QAction* oldact = old[tt];
+			if (maybeallequal && (result.size() > 0))
+				 maybeallequal = (oldact->isSeparator() && result[tt - 1]->isSeparator()) || (oldact == result[tt - 1]);
+			
+			if (oldact->isSeparator() || !result.contains(oldact))
+				delsepremact.push_back(oldact);
+		}
+		if (!maybeallequal)
+		{
+			for(int jj = 0;jj < delsepremact.size();++jj)
+			{
+					if (delsepremact[jj]->isSeparator())
+					{
+						delete delsepremact[jj];
+						delsepremact[jj] = NULL;
+					}
+					else
+						removeAction(delsepremact[jj]);
+			}
+			addActions(result);
 		}
 		alignToParentGeometry();
 	}
@@ -829,6 +859,11 @@ void SearchMenu::updateResults()
 	{
 		qDebug() << "WARNING!!!!!!!!!!!!!!!!!!!" << e.what() << "\n";
 	}
+}
+
+QSize SearchMenu::sizeHint () const
+{
+	return QMenu::sizeHint();
 }
 
 void SearchMenu::edited( const QString& )
@@ -850,6 +885,9 @@ void SearchMenu::clearResults()
 void SearchMenu::setLineEditFocus()
 {
 	searchline->setFocus();
+	QList<QAction*>& acts = actions();
+	if (acts.size() > 1)
+		setActiveAction(acts[1]);
 }
 
 void SearchMenu::alignToParentGeometry()

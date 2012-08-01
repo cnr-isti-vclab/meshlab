@@ -234,6 +234,7 @@ public:
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();
+	QSize sizeHint () const;
 private:
 	int maxres;
 	QLineEdit* searchline;
