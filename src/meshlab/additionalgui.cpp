@@ -885,7 +885,7 @@ void SearchMenu::clearResults()
 void SearchMenu::setLineEditFocus()
 {
 	searchline->setFocus();
-	QList<QAction*>& acts = actions();
+    const QList<QAction*>& acts = actions();
 	if (acts.size() > 1)
 		setActiveAction(acts[1]);
 }
