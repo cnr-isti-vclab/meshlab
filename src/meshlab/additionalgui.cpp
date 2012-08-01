@@ -796,7 +796,7 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 :QMenu(parent),searchline(NULL),wama(wm),maxres(max)
 {
 	searchline = new QLineEdit(this);
-	searchact = new QWidgetAction(this);
+	QWidgetAction* searchact = new QWidgetAction(this);
 	searchact->setDefaultWidget(searchline);
 	addAction(searchact);
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
@@ -804,14 +804,12 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
-void SearchMenu::updateResults()
+void SearchMenu::getResults(const QString& text,QList<QAction*>& result)
 {
 	try
 	{
-		QList<QAction*> old = actions();
-		QList<QAction*> result;
 		RankedMatches rm;
-		int ii = wama.rankedMatchesPerInputString(searchline->text(),rm);
+		int ii = wama.rankedMatchesPerInputString(text,rm);
 		int inserted = 0;
 		while(ii > 0)
 		{
@@ -826,34 +824,6 @@ void SearchMenu::updateResults()
 			inserted += myacts.size();
 			--ii;
 		}
-		//list of separators to be deleted and/or menu items (actions) that are no more in the results
-		QList<QAction*> delsepremact;
-		bool maybeallequal = (old.size() - 1) == result.size();
-		//tt start from 1 because the first one is the QWidgetAction containing the QLineEdit
-		for(int tt = 1;tt < old.size();++tt)
-		{
-			QAction* oldact = old[tt];
-			if (maybeallequal && (result.size() > 0))
-				 maybeallequal = (oldact->isSeparator() && result[tt - 1]->isSeparator()) || (oldact == result[tt - 1]);
-			
-			if (oldact->isSeparator() || !result.contains(oldact))
-				delsepremact.push_back(oldact);
-		}
-		if (!maybeallequal)
-		{
-			for(int jj = 0;jj < delsepremact.size();++jj)
-			{
-					if (delsepremact[jj]->isSeparator())
-					{
-						delete delsepremact[jj];
-						delsepremact[jj] = NULL;
-					}
-					else
-						removeAction(delsepremact[jj]);
-			}
-			addActions(result);
-		}
-		alignToParentGeometry();
 	}
 	catch(InvalidInvariantException& e)
 	{
@@ -861,14 +831,53 @@ void SearchMenu::updateResults()
 	}
 }
 
-QSize SearchMenu::sizeHint () const
+void SearchMenu::updateGUI( const QList<QAction*>& results )
 {
-	return QMenu::sizeHint();
+	QList<QAction*> old = actions();
+	//list of separators to be deleted and/or menu items (actions) that are no more in the results
+	QList<QAction*> delsepremact;
+	bool maybeallequal = (old.size() - 1) == results.size();
+	//tt start from 1 because the first one is the QWidgetAction containing the QLineEdit
+	for(int tt = 1;tt < old.size();++tt)
+	{
+		QAction* oldact = old[tt];
+		if (oldact != NULL)
+		{
+			if (maybeallequal && (results.size() > 0))
+			{
+				QAction* resit = results[tt-1];
+				maybeallequal = (resit != NULL) && ((oldact->isSeparator() && resit->isSeparator()) || (oldact == resit));
+			}
+
+			if (oldact->isSeparator() || !results.contains(oldact))
+				delsepremact.push_back(oldact);
+		}
+	}
+	if (!maybeallequal)
+	{
+		for(int jj = 0;jj < delsepremact.size();++jj)
+		{
+			QAction*  todel = delsepremact[jj];
+			if ((todel != NULL) && (todel->isSeparator()))
+			{
+				delete todel;
+				delsepremact[jj] = NULL;
+			}
+			else
+				removeAction(todel);
+		}
+		addActions(results);
+		if (results.size() > 0 && (results[0] != NULL))
+			setActiveAction(results[0]);
+	}	
+	alignToParentGeometry();
 }
 
-void SearchMenu::edited( const QString& )
+void SearchMenu::edited( const QString& text)
 {
-	updateResults();
+	QList<QAction*> results;
+	getResults(text,results);
+	updateGUI(results);
 }
 
 void SearchMenu::clearResults()
@@ -884,9 +893,10 @@ void SearchMenu::clearResults()
 
 void SearchMenu::setLineEditFocus()
 {
-	searchline->setFocus();
-    const QList<QAction*>& acts = actions();
-	if (acts.size() > 1)
+	setFocus();
+	setFocusProxy(searchline);
+	const QList<QAction*>& acts = actions();
+	if (acts.size() > 1 && acts[1] != NULL)
 		setActiveAction(acts[1]);
 }
 

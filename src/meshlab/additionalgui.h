@@ -234,21 +234,18 @@ public:
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();
-	QSize sizeHint () const;
+
 private:
-	int maxres;
 	QLineEdit* searchline;
-	QWidgetAction* searchact;
+ 	int maxres;
 	const WordActionsMapAccessor& wama;
 
+	void getResults(const QString& text,QList<QAction*>& results);
+	void updateGUI(const QList<QAction*>& results);
 	void alignToParentGeometry();
 private slots:
-	void updateResults();
-	void edited(const QString&);
+	void edited(const QString& text);
 	void setLineEditFocus();
-
-signals:
-	void updatedResults();
 };
 
 
