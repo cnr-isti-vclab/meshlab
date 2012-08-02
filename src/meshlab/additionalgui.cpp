@@ -802,8 +802,6 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
 	connect(searchline,SIGNAL(arrowPressed(const int)),this,SLOT(changeFocus(const int)));
 	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
-	connect(this,SIGNAL(hovered(QAction*)),this,SLOT(highlightIfEnabled(QAction*)));
-	
 	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
