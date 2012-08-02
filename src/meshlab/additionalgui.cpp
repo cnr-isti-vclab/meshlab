@@ -795,12 +795,15 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent)
 :QMenu(parent),searchline(NULL),wama(wm),maxres(max)
 {
-	searchline = new QLineEdit(this);
+	searchline = new MenuLineEdit(this);
 	QWidgetAction* searchact = new QWidgetAction(this);
 	searchact->setDefaultWidget(searchline);
 	addAction(searchact);
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
+	connect(searchline,SIGNAL(arrowPressed(const int)),this,SLOT(changeFocus(const int)));
 	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
+	connect(this,SIGNAL(hovered(QAction*)),this,SLOT(highlightIfEnabled(QAction*)));
+	
 	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
@@ -867,8 +870,8 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 				removeAction(todel);
 		}
 		addActions(results);
-		if (results.size() > 0 && (results[0] != NULL))
-			setActiveAction(results[0]);
+		//if (results.size() > 0 && (results[0] != NULL))
+		//	setActiveAction(results[0]);
 	}	
 	alignToParentGeometry();
 }
@@ -893,11 +896,10 @@ void SearchMenu::clearResults()
 
 void SearchMenu::setLineEditFocus()
 {
-	setFocus();
-	setFocusProxy(searchline);
+	searchline->setFocus();
 	const QList<QAction*>& acts = actions();
-	if (acts.size() > 1 && acts[1] != NULL)
-		setActiveAction(acts[1]);
+	//if (acts.size() > 1 && acts[1] != NULL)
+	//	setActiveAction(acts[1]);
 }
 
 void SearchMenu::alignToParentGeometry()
@@ -908,6 +910,71 @@ void SearchMenu::alignToParentGeometry()
 		int borderx = p.x() + parentWidget()->frameGeometry().width();
 		QSize sz = sizeHint();
 		move(borderx - sz.width(),y());
+	}
+}
+
+void SearchMenu::changeFocus( const int k )
+{
+	setFocus();
+	QAction* act = NULL;
+	int next = nextEnabledAction(k,0,actions(),act);
+	if (next != -1)
+			setActiveAction(act);
+}
+
+int SearchMenu::nextEnabledAction( const int k,const int currentind,const QList<QAction*>& acts,QAction*& nextact) const
+{
+	const int errorind = -1;
+	if ((currentind < 0) || (currentind >= acts.size()))
+		return errorind;
+	QAction* current = acts[currentind];
+	if (acts.size() > 0)
+	{
+		if (current == NULL)
+			return errorind;
+		int ind = currentind;
+		do 
+		{
+			if (k == Qt::Key_Up)
+				ind = (acts.size() + (ind - 1)) % acts.size();
+			else
+				ind = (ind + 1) % acts.size();
+			QAction* curract = acts[ind];
+			if ((curract != NULL) && (curract->isEnabled()) && !curract->isSeparator())
+			{
+				nextact = curract;
+				return ind;
+			}
+		} while (ind != currentind);
+		return errorind;
+	}
+	return errorind;
+}
+
+void SearchMenu::keyPressEvent( QKeyEvent * event )
+{
+	int k = event->key();
+	if ((k != Qt::Key_Up) && (k != Qt::Key_Down))
+		QMenu::keyPressEvent(event);
+	else
+	{
+		const QList<QAction*>& acts = actions();
+		QAction* current = activeAction();
+		if (current != NULL)
+		{
+			int currentind = acts.indexOf(current);
+			if (currentind > -1)
+			{
+				QAction* act = NULL;
+				int next = nextEnabledAction(k,currentind,actions(),act);
+				if (next != -1)
+				{
+					if (next == 0)
+						searchline->setFocus();
+					setActiveAction(act);
+				}
+			}
+		}
 	}
 }
 
@@ -924,3 +991,20 @@ void MyToolButton::paintEvent( QPaintEvent * )
 	opt.features &= (~ QStyleOptionToolButton::HasMenu); 
 	p.drawComplexControl( QStyle::CC_ToolButton, opt );
 }
+
+MenuLineEdit::MenuLineEdit( QWidget* parent )
+:QLineEdit(parent)
+{
+
+}
+
+void MenuLineEdit::keyPressEvent( QKeyEvent * event )
+{
+	int k = event->key();
+	if ((k != Qt::Key_Up) && (k != Qt::Key_Down))
+		QLineEdit::keyPressEvent(event);
+	else
+		emit arrowPressed(k);
+}
+
+

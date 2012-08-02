@@ -226,6 +226,17 @@ protected:
 	
 };
 
+class MenuLineEdit : public QLineEdit
+{
+	Q_OBJECT
+public:
+	MenuLineEdit(QWidget* parent);
+protected:
+	void keyPressEvent(QKeyEvent * event);
+signals:
+	void arrowPressed(const int k);
+};
+
 class SearchMenu : public QMenu
 {
 	Q_OBJECT
@@ -234,18 +245,22 @@ public:
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();
+protected:
+	void keyPressEvent(QKeyEvent * event);
 
 private:
-	QLineEdit* searchline;
+	MenuLineEdit* searchline;
  	int maxres;
 	const WordActionsMapAccessor& wama;
 
 	void getResults(const QString& text,QList<QAction*>& results);
 	void updateGUI(const QList<QAction*>& results);
 	void alignToParentGeometry();
+	int nextEnabledAction( const int k,const int currentind,const QList<QAction*>& acts,QAction*& nextact) const;
 private slots:
 	void edited(const QString& text);
 	void setLineEditFocus();
+	void changeFocus(const int k);
 };
 
 
