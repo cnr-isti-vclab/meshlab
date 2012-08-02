@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Vertex Painting</string>
   </property>
-  <layout class="QGridLayout">
+  <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
     <widget class="QFrame" name="frame_2">
      <property name="sizePolicy">
@@ -112,7 +112,7 @@
       <bool>true</bool>
      </property>
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -424,6 +424,12 @@
    </item>
    <item row="2" column="1">
     <widget class="QWidget" name="widget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>294</width>
+       <height>0</height>
+      </size>
+     </property>
      <layout class="QGridLayout">
       <property name="margin">
        <number>0</number>
@@ -674,34 +680,14 @@
         </widget>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QFrame" name="frame">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QGraphicsView" name="brush_viewer">
-         <property name="geometry">
-          <rect>
-           <x>34</x>
-           <y>4</y>
-           <width>81</width>
-           <height>81</height>
-          </rect>
-         </property>
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-        </widget>
-       </widget>
-      </item>
       <item row="1" column="0" colspan="2">
        <widget class="QFrame" name="clone_source_frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1404,6 +1390,32 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QGraphicsView" name="brush_viewer">
+         <property name="geometry">
+          <rect>
+           <x>34</x>
+           <y>4</y>
+           <width>81</width>
+           <height>81</height>
+          </rect>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
