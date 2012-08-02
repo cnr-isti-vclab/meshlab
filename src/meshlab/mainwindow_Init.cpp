@@ -77,6 +77,7 @@ MainWindow::MainWindow()
 	createActions();
 	createToolBars();
 	createMenus();
+	initSearchEngine();
 	stddialog = 0;
 	xmldialog = 0;
 	setAcceptDrops(true);
@@ -631,20 +632,39 @@ void MainWindow::createMenus()
 	handleMenu = new QMenu(this);
 	splitMenu = handleMenu->addMenu(tr("&Split"));
 	unSplitMenu = handleMenu->addMenu("&Close");
+}
 
-
-	/////////WordActionsMapAccessor init. Probably should have been done from menu and not from PM. //////////
+void MainWindow::initSearchEngine()
+{
 	for(QMap<QString,QAction*>::iterator it = PM.actionFilterMap.begin();it != PM.actionFilterMap.end();++it)
-	{
-		QString tx = it.value()->text() + " " + it.value()->toolTip();
-		wama.addWordsPerAction(*it.value(),tx);
-	}
+		initItemForSearching(it.value());
 
 	for(QMap<QString,MeshLabXMLFilterContainer>::iterator it = PM.stringXMLFilterMap.begin();it != PM.stringXMLFilterMap.end();++it)
+		initItemForSearching(it.value().act);
+
+	initMenuForSearching(editMenu);
+	initMenuForSearching(renderMenu);
+}
+
+void MainWindow::initMenuForSearching(QMenu* menu)
+{
+	if (menu == NULL)
+		return;
+	const QList<QAction*>& acts = menu->actions();
+	foreach(QAction* act,acts)
 	{
-		QString tx = it.value().act->text() + " " + it.value().act->toolTip();
-		wama.addWordsPerAction(*it.value().act,tx);
+		QMenu* submenu = act->menu();
+		if (!act->isSeparator() && (submenu == NULL))
+			initItemForSearching(act);
+		else if (!act->isSeparator())
+				initMenuForSearching(submenu);
 	}
+}
+
+void MainWindow::initItemForSearching(QAction* act)
+{
+	QString tx = act->text() + " " + act->toolTip();
+	wama.addWordsPerAction(*act,tx);
 }
 
 void MainWindow::fillFilterMenu()

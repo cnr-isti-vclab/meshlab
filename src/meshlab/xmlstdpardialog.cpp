@@ -67,6 +67,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	//applyButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
 	defaultButton = new QPushButton("Default", qf);
 	//defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+	applyButton->setFocus();
 	ExpandButtonWidget* exp = new ExpandButtonWidget(qf);
 	connect(exp,SIGNAL(expandView(bool)),this,SLOT(extendedView(bool)));
 	connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
@@ -154,6 +155,8 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 		connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 	}
 	connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
+	raise();
+	activateWindow();
 	return true;
 }
 

@@ -65,7 +65,7 @@ public:
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
 	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.2"); }
+  const QString appVer() const {return tr("1.3.2_64bit"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
@@ -98,8 +98,6 @@ public:
   bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
   bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
 
- public slots:
-  void updateMenus();
 private slots:
 	//////////// Slot Menu File //////////////////////
   void reload();
@@ -149,7 +147,7 @@ private slots:
 	void showRaster();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();
-    //void updateMenus();
+    void updateMenus();
 	void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
     void updateMenuItems(QMenu* menu,const bool enabled);
 	void updateStdDialog();
@@ -194,6 +192,9 @@ private:
 	void initGlobalParameters();
     void createActions();
 	void createMenus();
+	void initSearchEngine();
+	void initItemForSearching(QAction* act);
+	void initMenuForSearching(QMenu* menu);
 	void fillFilterMenu();
 	void fillDecorateMenu();
 	void fillRenderMenu();

@@ -66,6 +66,8 @@ bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, M
 			connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
 		}
         connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
+		raise();
+		activateWindow();
         return true;
   }
 
@@ -155,7 +157,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QPushButton *closeButton = new QPushButton("Close", qf);
 	QPushButton *applyButton = new QPushButton("Apply", qf);
 	QPushButton *defaultButton = new QPushButton("Default", qf);
-
+	applyButton->setFocus();
 #ifdef Q_WS_MAC
 	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
 	helpButton->setMinimumSize(100, 25);
