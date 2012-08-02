@@ -186,7 +186,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
-  #File "${DISTRIB_FOLDER}/plugins\filter_img_patch_param.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_img_patch_param.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_layer.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_measure.xml"
@@ -194,6 +194,8 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_mutualinfo.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_mutualinfo.xml"
+
   
   File "${DISTRIB_FOLDER}/plugins\filter_photosynth.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_plymc.dll"
@@ -204,13 +206,12 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_sdfgpu.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_slice.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
   
   
   File "${DISTRIB_FOLDER}/plugins\filter_texture.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_trioptimize.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_unsharp.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
   File "${DISTRIB_FOLDER}/plugins\filter_zippering.dll"
   
 

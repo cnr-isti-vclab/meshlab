@@ -153,12 +153,15 @@ plugins/libfilter_csg.dylib \
 plugins/libfilter_dirt.dylib \
 plugins/libfilter_fractal.dylib \
 plugins/libfilter_func.dylib \
+plugins/libfilter_img_patch_param.dylib \
 plugins/libfilter_isoparametrization.dylib \
 plugins/libfilter_layer.dylib \
 plugins/libfilter_measure.dylib \
+plugins/filter_measure.xml \
 plugins/libfilter_meshing.dylib \
 plugins/libfilter_mls.dylib \
 plugins/libfilter_mutualinfo.dylib \
+plugins/filter_mutualinfo.xml \
 plugins/libfilter_photosynth.dylib \
 plugins/libfilter_plymc.dylib \
 plugins/libfilter_poisson.dylib \
@@ -194,6 +197,7 @@ plugins/libedit_align.dylib \
 plugins/libedit_arc3D.dylib \
 plugins/libedit_hole.dylib \
 plugins/libedit_measure.dylib \
+plugins/libedit_manipulators.dylib \
 plugins/libedit_paint.dylib \
 plugins/libedit_pickpoints.dylib \
 plugins/libedit_point.dylib \
@@ -209,6 +213,8 @@ plugins/librender_radiance_scaling.dylib \
 plugins/librender_rfx.dylib \
 plugins/librender_splatting.dylib \
 plugins/libsampleedit.dylib \
+plugins/libsamplefilter.dylib \
+plugins/libsamplefilterdyn.dylib \
 "
 
 PLUGINSNAMESXML="\
