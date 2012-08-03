@@ -55,7 +55,9 @@ CleanFilter::CleanFilter()
     << FP_REMOVE_FOLD_FACE
     << FP_REMOVE_NON_MANIF_EDGE
     << FP_REMOVE_NON_MANIF_VERT
-		<< FP_MERGE_CLOSE_VERTEX;
+		<< FP_MERGE_CLOSE_VERTEX
+		<< FP_COMPACT_FACE
+		<< FP_COMPACT_VERT;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -89,6 +91,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
   case FP_REMOVE_FOLD_FACE:                 return QString("Remove Isolated Folded Faces by Edge Flip");
   case FP_REMOVE_NON_MANIF_EDGE:            return QString("Remove Faces from Non Manifold Edges");
   case FP_REMOVE_NON_MANIF_VERT:            return QString("Split Vertexes Incident on Non Manifold Faces");
+  case FP_COMPACT_VERT:						return QString("Compact vertices");
+  case FP_COMPACT_FACE:						return QString("Compact faces");
   default: assert(0);
   }
   return QString("error!");
@@ -119,6 +123,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
     case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non manifold vertices until it becomes 2-manifold.");
+	case FP_COMPACT_VERT:            return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
+	case FP_COMPACT_FACE:            return QString("Compact all the faces that have been deleted and put them to the end of the vector");
     default: assert(0);
   }
   return QString("error!");
@@ -139,6 +145,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_SNAP_MISMATCHED_BORDER:
     case FP_REMOVE_NON_MANIF_EDGE:
     case FP_REMOVE_NON_MANIF_VERT:
+	case FP_COMPACT_VERT:
+	case FP_COMPACT_FACE:
       return MeshFilterInterface::Cleaning;
     case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
     default : assert(0);  
@@ -149,6 +157,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
 {
   switch(ID(action))
   {
+	case FP_COMPACT_FACE:
+	case FP_COMPACT_VERT:
     case FP_REMOVE_WRT_Q:
     case FP_BALL_PIVOTING: MeshModel::MM_VERTMARK;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
@@ -330,7 +340,17 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
       int total = SnapVertexBorder(m.cm, threshold,cb);
       Log("Successfully Splitted %d faces to snap", total);
     } break;
-
+	
+  case FP_COMPACT_FACE :
+	  {
+		  vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+		  break;
+	  }
+  case FP_COMPACT_VERT :
+	  {
+		  vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+		  break;
+	  }
   default : assert(0); // unknown filter;
 	}
 	return true;

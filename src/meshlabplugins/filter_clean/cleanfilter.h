@@ -49,7 +49,9 @@ class CleanFilter : public QObject, public MeshFilterInterface
     FP_REMOVE_DUPLICATE_FACE,
     FP_REMOVE_NON_MANIF_EDGE,
     FP_REMOVE_NON_MANIF_VERT,
-		FP_MERGE_CLOSE_VERTEX
+		FP_MERGE_CLOSE_VERTEX,
+	FP_COMPACT_VERT,
+	FP_COMPACT_FACE
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
