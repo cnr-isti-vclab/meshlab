@@ -361,7 +361,6 @@ void MainWindow::updateMenus()
 
         if(GLA()->getLastAppliedFilter() != NULL)
 		{
-            qDebug() << "update true";
 			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
             lastFilterAct->setEnabled(true);
 		}
