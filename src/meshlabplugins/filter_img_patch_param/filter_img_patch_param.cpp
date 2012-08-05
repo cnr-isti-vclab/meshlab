@@ -190,13 +190,15 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
-	vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-	vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-	if ( vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0 ) 
+	if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) 
 	{
         errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
         return false; // can't continue, mesh can't be processed
       }
+	vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+	vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+	vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
 	glContext->makeCurrent();
     if( glewInit() != GLEW_OK )
         return false;
