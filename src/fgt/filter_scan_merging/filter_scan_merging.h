@@ -34,10 +34,12 @@ class FilterScanMergingPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-  FilterLayerPlugin();
+  enum { FSM_MERGELAYERS };
 
-  virtual QString filterName() const;
-  virtual QString filterInfo() const;
+  FilterScanMergingPlugin();
+
+  virtual QString filterName(FilterIDType filterId) const;
+  virtual QString filterInfo(FilterIDType filterId) const;
   virtual FilterClass getClass(QAction *);
   virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
   virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
