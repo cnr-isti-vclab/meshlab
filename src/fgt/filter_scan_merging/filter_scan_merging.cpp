@@ -26,7 +26,6 @@
 #include <meshlabplugins/edit_point/knnGraph.h>
 #include <vcg/space/fitting3.h>
 #include <vcg/complex/append.h>
-//#include <QTime>
 
 #include "filter_scan_merging.h"
 
@@ -66,13 +65,15 @@ void FilterScanMergingPlugin::initParameterSet(QAction *action, MeshDocument &md
 // Core Function doing the actual mesh processing.
 bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    Plane3<CMeshO::ScalarType> fittingPlane = Plane3<CMeshO::ScalarType>();
+    int nIterations = par.getInt("numOfIterations");
+    int nNeighbors = par.getInt("numOfNeighbors");
 
     MeshModel *destMesh = md.addNewMesh("","MergedMesh");
     md.meshList.front();
 
     CMeshO tempMesh[2];
 
+    /* Compute the low frequencies mesh taking into account the union of the complete set of layers */
     foreach(MeshModel *mmp, md.meshList) {
         tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
         tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
@@ -80,83 +81,27 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
     }
     tri::Allocator<CMeshO>::CompactVertexVector(tempMesh[0]);
 
-    std::vector<CMeshO::CoordType> pointToFit = std::vector<CMeshO::CoordType>();
-    std::vector<CVertexO*>::iterator it;
+    toLowFrequecies(tempMesh, nIterations, nNeighbors);
 
-    int act;
-    int next;
-    for (int i = 0; i < par.getInt("numOfIterations"); i++) {
-        act = i%2;
-        next = (i+1)%2;
+    tri::Append<CMeshO, CMeshO>::Mesh(destMesh->cm, tempMesh[0]);
 
-        tri::KNNGraph<CMeshO>::MakeKNNTree(tempMesh[act], par.getInt("numOfNeighbors"));
-
-        CMeshO::PerVertexAttributeHandle<std::vector<CVertexO*>* > neighbors;
-        neighbors = tri::Allocator<CMeshO>::GetPerVertexAttribute<std::vector<CVertexO*>* >(tempMesh[act], std::string("KNNGraph"));
-
-        CMeshO::VertexIterator vertices = tri::Allocator<CMeshO>::AddVertices(tempMesh[next], tempMesh[act].VertexNumber());
-
-        for (CMeshO::VertexIterator vi = tempMesh[act].vert.begin(); vi != tempMesh[act].vert.end(); vi++) {
-            pointToFit.clear();
-
-            for (it = neighbors[vi]->begin(); it != neighbors[vi]->end(); it++) {
-                pointToFit.push_back((*it)->cP());
-            }
-
-            vcg::PlaneFittingPoints(pointToFit, fittingPlane);
-
-            vertices->P() = fittingPlane.Projection(vi->cP());
-            vertices->N() = vi->cN();
-            vertices++;
-        }
-
-        tri::KNNGraph<CMeshO>::DeleteKNNTree(tempMesh[act]);
-        tempMesh[act].Clear();
-    }
-
-    tri::Append<CMeshO, CMeshO>::Mesh(destMesh->cm, tempMesh[next]);
-
+    /* Compute the high frequencies mesh taking into account one layer at time */
     long vertexCnt = 0;
     md.meshList.front();
     foreach(MeshModel *mmp, md.meshList) {
         if (mmp != destMesh) {
-            tempMesh[act].Clear();
-            tempMesh[next].Clear();
+            tempMesh[0].Clear();
+            tempMesh[1].Clear();
 
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
             tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
 
-            for (int i = 0; i < par.getInt("numOfIterations"); i++) {
-                act = i%2;
-                next = (i+1)%2;
-
-                tri::KNNGraph<CMeshO>::MakeKNNTree(tempMesh[act], par.getInt("numOfNeighbors"));
-
-                CMeshO::PerVertexAttributeHandle<std::vector<CVertexO*>* > neighbors;
-                neighbors = tri::Allocator<CMeshO>::GetPerVertexAttribute<std::vector<CVertexO*>* >(tempMesh[act], std::string("KNNGraph"));
-
-                CMeshO::VertexIterator vertices = tri::Allocator<CMeshO>::AddVertices(tempMesh[next], tempMesh[act].VertexNumber());
-
-                for (CMeshO::VertexIterator vi = tempMesh[act].vert.begin(); vi != tempMesh[act].vert.end(); vi++) {
-                    pointToFit.clear();
-
-                    for (it = neighbors[vi]->begin(); it != neighbors[vi]->end(); it++) {
-                        pointToFit.push_back((*it)->cP());
-                    }
-
-                    vcg::PlaneFittingPoints(pointToFit, fittingPlane);
-
-                    vertices->P() = fittingPlane.Projection(vi->cP());
-                    vertices->N() = vi->cN();
-                    vertices++;
-                }
-
-                tri::KNNGraph<CMeshO>::DeleteKNNTree(tempMesh[act]);
-                tempMesh[act].Clear();
-            }
+            toLowFrequecies(tempMesh, nIterations, nNeighbors);
 
             int localVertexCnt = 0;
-            for (CMeshO::VertexIterator vi = tempMesh[next].vert.begin(); vi != tempMesh[next].vert.end(); vi++) {
+
+            /* Correct the low frequencies mesh with high frequencies features */
+            for (CMeshO::VertexIterator vi = tempMesh[0].vert.begin(); vi != tempMesh[0].vert.end(); vi++) {
                 destMesh->cm.vert[vertexCnt].P() = destMesh->cm.vert[vertexCnt].P() + (vi->cP() - mmp->cm.vert[localVertexCnt].cP());
 
                 vertexCnt++;
@@ -171,7 +116,55 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 
 FilterScanMergingPlugin::FilterClass FilterScanMergingPlugin::getClass(QAction *a)
 {
-    return MeshFilterInterface::Generic;
+    return MeshFilterInterface::Layer;
+}
+
+/**
+  This function computes the low frequencies mesh iterating the projection operator numOfIterations times.
+  m has to be an array of 2 elements, the first contains the mesh to be processed, the second must be empty.
+  For each vertex the projection operator needs numOfNeighbors neighbors to find the fitting plane.
+  Once the function returns the result is in m[0]
+  **/
+void FilterScanMergingPlugin::toLowFrequecies(CMeshO* m, int numOfIterations, int numOfNeighbors) {
+    Plane3<CMeshO::ScalarType> fittingPlane = Plane3<CMeshO::ScalarType>();
+    std::vector<CMeshO::CoordType> pointToFit = std::vector<CMeshO::CoordType>();
+    std::vector<CVertexO*>::iterator it;
+    int act;
+    int next;
+
+    for (int i = 0; i < numOfIterations; i++) {
+        act = i%2;
+        next = (i+1)%2;
+
+        tri::KNNGraph<CMeshO>::MakeKNNTree(m[act], numOfNeighbors);
+
+        CMeshO::PerVertexAttributeHandle<std::vector<CVertexO*>* > neighbors;
+        neighbors = tri::Allocator<CMeshO>::GetPerVertexAttribute<std::vector<CVertexO*>* >(m[act], std::string("KNNGraph"));
+
+        CMeshO::VertexIterator vertices = tri::Allocator<CMeshO>::AddVertices(m[next], m[act].VertexNumber());
+
+        for (CMeshO::VertexIterator vi = m[act].vert.begin(); vi != m[act].vert.end(); vi++) {
+            pointToFit.clear();
+
+            for (it = neighbors[vi]->begin(); it != neighbors[vi]->end(); it++) {
+                pointToFit.push_back((*it)->cP());
+            }
+
+            vcg::PlaneFittingPoints(pointToFit, fittingPlane);
+
+            vertices->P() = fittingPlane.Projection(vi->cP());
+            vertices->N() = vi->cN();
+            vertices++;
+        }
+
+        tri::KNNGraph<CMeshO>::DeleteKNNTree(m[act]);
+        m[act].Clear();
+    }
+    if (act == 1) return;
+    else {
+        tri::Append<CMeshO, CMeshO>::Mesh(m[0], m[1]);
+        return;
+    }
 }
 
 Q_EXPORT_PLUGIN(FilterScanMergingPlugin)
