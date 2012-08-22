@@ -110,7 +110,7 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, Inverse(mmp->cm.Tr), true);
         }
     }
-
+    tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
     return true;
 }
 
