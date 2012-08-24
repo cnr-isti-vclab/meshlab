@@ -50,7 +50,13 @@ QString FilterScanMergingPlugin::filterName(FilterIDType filterId) const
 // Info() return the longer string describing each filtering action
 QString FilterScanMergingPlugin::filterInfo(FilterIDType filterId) const
 {
-   return QString("All the layers are merged into one mesh without loss of the high frequencies details.");
+   return QString("Merge all the selected layers into one new mesh.<br\>"
+                  "The idea is to preserve point positions in non overlapping areas, and to make a fusion of the"
+                  "scans on overlapping regions while keeping all raw points.<br\>"
+                  "See:<br\>"
+                  "<b>High Fidelity Scan Merging</b><br\>"
+                  "<i>J.Digne, J.M.Morel, N.Audfray and C.Lartigue</i><br\>"
+                  "Eurographics Symposium on Geometry Processing 2010, Volume 29 (2010), Number 5");
 }
 
 // This function define the needed parameters for each filter.
@@ -67,6 +73,7 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 {
     int nIterations = par.getInt("numOfIterations");
     int nNeighbors = par.getInt("numOfNeighbors");
+    int nOp = 0;
 
     MeshModel *destMesh = md.addNewMesh("","MergedMesh");
     md.meshList.front();
@@ -74,12 +81,19 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
     CMeshO tempMesh[2];
 
     /* Compute the low frequencies mesh taking into account the union of the complete set of layers */
+    cb(0, "High Fidelity Scan Merging: merging visible layers");
     foreach(MeshModel *mmp, md.meshList) {
-        tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
-        tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
-        tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, Inverse(mmp->cm.Tr), true);
+        if (mmp->visible) {
+            tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
+            tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
+            tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, Inverse(mmp->cm.Tr), true);
+            nOp++;
+        }
     }
     tri::Allocator<CMeshO>::CompactVertexVector(tempMesh[0]);
+    nOp += 2;
+
+    cb(100/nOp, "High Fidelity Scan Merging: computing low frequencies base");
 
     toLowFrequecies(tempMesh, nIterations, nNeighbors);
 
@@ -88,8 +102,11 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
     /* Compute the high frequencies mesh taking into account one layer at time */
     long vertexCnt = 0;
     md.meshList.front();
+    int nMesh = 0;
     foreach(MeshModel *mmp, md.meshList) {
-        if (mmp != destMesh) {
+        if (mmp != destMesh && mmp->visible) {
+            cb((nMesh+2)*100 / nOp, "High Fidelity Scan Merging: computing high frequencies");
+
             tempMesh[0].Clear();
             tempMesh[1].Clear();
 
@@ -108,6 +125,8 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
                 localVertexCnt++;
             }
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, Inverse(mmp->cm.Tr), true);
+
+            nMesh++;
         }
     }
     tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
