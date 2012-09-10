@@ -34,7 +34,6 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
-//:QDialog(p)
 :QFrame(p)
 {
 	gla=curr_gla;
@@ -136,20 +135,18 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 {
 	assert(qf);
 	qf->hide();
-  QLabel *ql;
 
 	QGridLayout *gridLayout = new QGridLayout(qf);
-	qf->setLayout(gridLayout);
 
 	setWindowTitle(curmfi->filterName(curAction));
-	ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
+	QLabel *ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
 	ql->setTextFormat(Qt::RichText);
 	ql->setWordWrap(true);
 	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 
 	stdParFrame = new StdParFrame(this,curgla);
 	stdParFrame->loadFrameContent(curParSet,mdPt);
-  gridLayout->addWidget(stdParFrame,1,0,1,2);
+	gridLayout->addWidget(stdParFrame,1,0,1,2);
 
 	int buttonRow = 2;  // the row where the line of buttons start
 
@@ -200,7 +197,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
     vLayout->setAlignment(Qt::AlignTop);
-	setLayout(vLayout);
+//	setLayout(vLayout);
 
   RichWidgetInterfaceConstructor rwc(this);
 	for(int i = 0; i < curParSet.paramList.count(); i++)
@@ -217,23 +214,6 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
 	this->adjustSize();
 }
 
-void StdParFrame::loadFrameContent( RichParameter* par,MeshDocument */*mdPt*/ /*= 0*/ )
-{
-	if(layout()) delete layout();
-	QGridLayout * vLayout = new QGridLayout(this);
-    vLayout->setAlignment(Qt::AlignTop);
-	setLayout(vLayout);
-
-	QString descr;
-	RichWidgetInterfaceConstructor rwc(this);
-
-		par->accept(rwc);
-		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
-		stdfieldwidgets.push_back(rwc.lastCreated);
-		helpList.push_back(rwc.lastCreated->helpLab);
-	showNormal();
-	adjustSize();
-}
 void StdParFrame::toggleHelp()
 {
 	for(int i = 0; i < helpList.count(); i++)
@@ -1268,16 +1248,13 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		assert(gridLay != 0);
 		row = gridLay->rowCount();
 		//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-		if ((row == 1) && (rpar->val->isBool()))	
+		if (row == 1) 
 		{
-			
-			QLabel* lb = new QLabel("",p);
-			gridLay->addWidget(lb);
-			gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
+			gridLay->addWidget(new QLabel("",p));
+			++row;
 		}
 		///////////////////////////////////////////////////////////////////////
-		else
-			gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 	}
 }
 
@@ -1308,16 +1285,7 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
 
-
-	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
-
-	//int row = gridLay->rowCount() -1 ;
-	//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	if (row == 1)
-		gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
-	///////////////////////////////////////////////////////////////////////
-	else
-		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 }

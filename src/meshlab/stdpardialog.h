@@ -664,7 +664,6 @@ public:
 	StdParFrame(QWidget *p, QWidget *gla=0);
 
 	void loadFrameContent(RichParameterSet &curParSet,MeshDocument *mdPt = 0);
-	void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 
     // The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
     // This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>

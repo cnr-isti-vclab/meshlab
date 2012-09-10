@@ -127,7 +127,8 @@ SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultP
 	RichParameterCopyConstructor cp;
 	curPar->accept(cp);
 	tmppar = cp.lastCreated;
-	frame.loadFrameContent(tmppar);
+	tmpParSet.addParam(tmppar);
+	frame.loadFrameContent(tmpParSet);
 	dialoglayout->addWidget(&frame,0,0,1,5);
 	dialoglayout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(dialoglayout);
@@ -177,11 +178,4 @@ void SettingDialog::load()
 
 SettingDialog::~SettingDialog()
 {
-	delete tmppar;
-	delete savebut;
-	delete resetbut;
-	delete applybut;
-	delete closebut;
-	delete loadbut;
-	//RichParameter Value will be destroyed elsewhere
 }
