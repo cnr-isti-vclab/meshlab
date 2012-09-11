@@ -204,8 +204,13 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 	if (!latest_event.valid || latest_event.processed) return;
 
 	latest_event.processed = true;
-	
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview_matrix);
+	glPushAttrib(GL_TRANSFORM_BIT);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+		glMultMatrix(m.cm.Tr);
+		glGetDoublev(GL_MODELVIEW_MATRIX, modelview_matrix);
+	glPopMatrix();
+	glPopAttrib();
 	glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
 	
 	viewport[0] = viewport[1] = 0;
