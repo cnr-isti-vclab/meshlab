@@ -654,37 +654,41 @@ bool MeshModel::hasDataMask(const int maskToBeTested) const
 
 void MeshModel::updateDataMask(int neededDataMask)
 {
-  if( ( (neededDataMask & MM_FACEFACETOPO)!=0) && !hasDataMask(MM_FACEFACETOPO) )
-  {
-    cm.face.EnableFFAdjacency();
-    tri::UpdateTopology<CMeshO>::FaceFace(cm);
-  }
-  if( ( (neededDataMask & MM_VERTFACETOPO)!=0) && !hasDataMask(MM_VERTFACETOPO) )
-  {
-    cm.vert.EnableVFAdjacency();
-    cm.face.EnableVFAdjacency();
-    tri::UpdateTopology<CMeshO>::VertexFace(cm);
-  }
-  if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
-  if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
-  if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
-  if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
-  if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
-  if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
-  if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
-  if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
-  if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
+	if((neededDataMask & MM_FACEFACETOPO)!=0)
+	{
+		if (!hasDataMask(MM_FACEFACETOPO))
+			cm.face.EnableFFAdjacency();
+		tri::UpdateTopology<CMeshO>::FaceFace(cm);
+	}
+	if((neededDataMask & MM_VERTFACETOPO)!=0) 
+	{
+		if (!hasDataMask(MM_VERTFACETOPO))
+		{
+			cm.vert.EnableVFAdjacency();
+			cm.face.EnableVFAdjacency();
+		}
+		tri::UpdateTopology<CMeshO>::VertexFace(cm);
+	}
+	if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTex();
+	if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+	if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
+	if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
+	if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
+	if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
+	if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
+	if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
+	if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
 
-//  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
-//       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
-//  {
-//    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
-//         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-//    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
-//    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
-//  }
+	//  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
+	//       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
+	//  {
+	//    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
+	//         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+	//    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+	//    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+	//  }
 
-  currentDataMask |= neededDataMask;
+	currentDataMask |= neededDataMask;
  }
 
 void MeshModel::clearDataMask(int unneededDataMask)
