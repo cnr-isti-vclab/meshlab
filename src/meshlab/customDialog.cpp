@@ -105,7 +105,14 @@ void CustomDialog::updateSettings()
 	/*emit tw->horizontalHeader()->sectionAutoResize( 0,QHeaderView::ResizeToContents);
 	emit tw->horizontalHeader()->sectionAutoResize( 1,QHeaderView::ResizeToContents);*/
 }
+
 //Maybe a MeshDocument parameter is needed. See loadFrameContent definition
+
+/*WARNING!*******************************************************/
+//In defPar->defVal the hardwired value is memorized
+//in curPar->defVal the one in the sys reg
+/****************************************************************/
+
 SettingDialog::SettingDialog( RichParameter* currentPar, RichParameter* defaultPar, QWidget* parent /*= 0*/ )
 :QDialog(parent),frame(this),curPar(currentPar),defPar(defaultPar),tmppar(NULL)
 {
@@ -150,7 +157,7 @@ void SettingDialog::save()
 	qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(tmppar->name),qPrintable(docstring));
 	QSettings setting;
 	setting.setValue(tmppar->name,QVariant(docstring));
-	tmppar->pd->defVal->set(*tmppar->val);
+	curPar->pd->defVal->set(*tmppar->val);
 }
 
 void SettingDialog::apply()
@@ -173,7 +180,7 @@ void SettingDialog::reset()
 void SettingDialog::load()
 {
 	assert(frame.stdfieldwidgets.size() == 1);
-	frame.stdfieldwidgets.at(0)->resetValue();
+	frame.stdfieldwidgets.at(0)->setWidgetValue(*(curPar->pd->defVal));
 }
 
 SettingDialog::~SettingDialog()

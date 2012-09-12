@@ -603,9 +603,15 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 		decPlug->initGlobalParameterSet(act,tmpSet);
 		if (tmpSet.paramList.size() != 0)
 		{
+			const RichParameterSet& currSet = mw->currentGlobalPars();
+			
+			/********************************************************************************************************************/
+			//WARNING! The hardwired original value is maintained in the defValue contained inside the tmpSet's parameters
+			//the register system saved value instead is in the defValues of the params inside the current globalParameters set
+			/********************************************************************************************************************/
+
 			for(int jj = 0;jj < tmpSet.paramList.size();++jj)
 			{
-				RichParameterSet currSet = mw->currentGlobalPars();
 				RichParameter* par = currSet.findParameter(tmpSet.paramList[jj]->name);
 				tmpSet.setValue(tmpSet.paramList[jj]->name,*(par->val));
 			}
@@ -622,7 +628,6 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			dialoglayout->addWidget(loadbut,countel,2);
 			dialoglayout->addWidget(frame,0,0,countel,3);
 			this->setLayout(dialoglayout);
-			int si = dialoglayout->rowCount();
 			connect(frame,SIGNAL(parameterChanged()),this,SLOT(apply()));
 			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 			connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
@@ -656,20 +661,16 @@ void DecoratorParamsTreeWidget::save()
 		qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(p->name),qPrintable(docstring));
 		QSettings setting;
 		setting.setValue(p->name,QVariant(docstring));
-		p->pd->defVal->set(*p->val);
+		RichParameterSet& currSet = mainWin->currentGlobalPars();
+		RichParameter* par = currSet.findParameter(tmpSet.paramList[ii]->name);
+		par->pd->defVal->set(*(tmpSet.paramList[ii]->val));
 	}
 }
 
 void DecoratorParamsTreeWidget::reset()
 {
-	//qDebug("resetting the value of param %s to the hardwired default",qPrintable(curPar->name));
-	for(int ii = 0;ii < tmpSet.paramList.size();++ii)
-	{
-		const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name));
-		tmpSet.paramList[ii]->val->set(*(defPar.val));
-		frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
-	}
-	apply();
+	for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
+		frame->stdfieldwidgets[ii]->resetValue();
 }
 
 void DecoratorParamsTreeWidget::apply()
@@ -688,6 +689,11 @@ void DecoratorParamsTreeWidget::apply()
 
 void DecoratorParamsTreeWidget::load()
 {
-	for(int ii = 0;ii < frame->stdfieldwidgets.size();++ii)
-		frame->stdfieldwidgets[ii]->resetValue();
+	for(int ii = 0;ii < tmpSet.paramList.size();++ii)
+	{
+		const RichParameter& defPar = *(mainWin->currentGlobalPars().findParameter(tmpSet.paramList[ii]->name));
+		tmpSet.paramList[ii]->val->set(*(defPar.pd->defVal));
+		frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
+	}
+	apply();
 }
