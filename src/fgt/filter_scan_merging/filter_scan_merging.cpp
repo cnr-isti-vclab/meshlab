@@ -50,13 +50,13 @@ QString FilterScanMergingPlugin::filterName(FilterIDType filterId) const
 // Info() return the longer string describing each filtering action
 QString FilterScanMergingPlugin::filterInfo(FilterIDType filterId) const
 {
-   return QString("Merge all the selected layers into one new mesh.<br\>"
-                  "The idea is to preserve point positions in non overlapping areas, and to make a fusion of the"
-                  "scans on overlapping regions while keeping all raw points.<br\>"
+   return QString("Merge all the selected layers into one new mesh.<br>"
+                  "The idea is to preserve point positions in non overlapping areas, and to make a fusion of the "
+                  "scans on overlapping regions while keeping all raw points.<br>"
                   "See:<br\>"
-                  "<b>High Fidelity Scan Merging</b><br\>"
-                  "<i>J.Digne, J.M.Morel, N.Audfray and C.Lartigue</i><br\>"
-                  "Eurographics Symposium on Geometry Processing 2010, Volume 29 (2010), Number 5");
+                  "<b>High Fidelity Scan Merging</b><br>"
+                  "<i>J. Digne, J. M. Morel, N. Audfray and C. Lartigue</i><br>"
+                  "Eurographics Symposium on Geometry Processing 2010, CGF Vol 29(5), 2010");
 }
 
 // This function define the needed parameters for each filter.
