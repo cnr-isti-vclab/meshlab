@@ -501,7 +501,7 @@ void MainWindow::createToolBars()
 	searchButton->setPopupMode(QToolButton::InstantPopup);
 	searchButton->setIcon(QIcon(":/images/search.png"));
 	searchToolBar->addWidget(searchButton);
-	SearchMenu* ser = new SearchMenu(wama,20,searchButton);
+    SearchMenu* ser = new SearchMenu(wama,15,searchButton);
 	searchButton->setMenu(ser);
 	connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
 }
