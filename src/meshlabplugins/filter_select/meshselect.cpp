@@ -413,7 +413,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
           return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
 
       case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
-      case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::FaceColoring);
+      case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection);
       case FP_SELECT_BY_FACE_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
     case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
     case FP_SELECTBYANGLE :
