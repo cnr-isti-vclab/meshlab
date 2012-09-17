@@ -58,7 +58,7 @@ public:
 	inline QVector<MeshLabFilterInterface*>& meshlabXMLfilterPlugins()  {return meshlabXMLFilterPlug;}
 	void knownIOFormats();
 	static QString getDefaultPluginDirPath();
-	static QString getLocalPluginDirPath();
+    //static QString getLocalPluginDirPath();
 	static QString getBaseDirPath();
 
 	QMap<QString,RichParameterSet> generateFilterParameterMap();

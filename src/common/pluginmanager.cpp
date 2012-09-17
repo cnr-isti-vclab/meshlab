@@ -81,6 +81,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
   scriptplugcode += pluginNameSpace() + " = { };\n";
   foreach (QString fileName, pluginsDir.entryList(QDir::Files))
   {
+      qDebug() << fileName << "\n";
     QString absfilepath = pluginsDir.absoluteFilePath(fileName);
     QFileInfo fin(absfilepath);
     if (fin.suffix() == "xml")
@@ -452,7 +453,7 @@ QString PluginManager::osIndependentPluginName( const QString& plname )
 	return res.remove(0,pref.size());
 }
 
-QString PluginManager::getLocalPluginDirPath()
-{
-	return "puppa";	
-}
+//QString PluginManager::getLocalPluginDirPath()
+//{
+//    return QString();
+//}
