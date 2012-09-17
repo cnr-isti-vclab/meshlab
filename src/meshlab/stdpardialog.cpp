@@ -1447,7 +1447,7 @@ void ColorWidget::updateColorInfo(const ColorValue& newColor)
 
 void ColorWidget::pickColor()
 {
-	pickcol =QColorDialog::getColor(pickcol);
+  pickcol =QColorDialog::getColor(pickcol,this->parentWidget(),"Pick a Color",QColorDialog::DontUseNativeDialog|QColorDialog::ShowAlphaChannel);
 	if(pickcol.isValid()) 
 	{
 		collectWidgetValue();
