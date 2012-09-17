@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "..\..\common\meshmodel.h"
+#include "../../common/meshmodel.h"
 #include "parameters.h"
 
 using namespace std;
