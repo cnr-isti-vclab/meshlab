@@ -4,6 +4,84 @@
 #include "mlexception.h"
 #include <assert.h>
 
+MLXMLInfo::MLXMLInfo( const QString& file ) 
+:filevarname(inputDocName()),fileName(file)
+{
+}
+
+MLXMLInfo::MLXMLInfo()
+:filevarname(inputDocName())
+{
+}
+
+MLXMLInfo::~MLXMLInfo()
+{
+}
+
+QStringList MLXMLInfo::query( const QString& qry)
+{
+	QFile sourceDocument(fileName);
+	QString text;
+	if (sourceDocument.open(QIODevice::ReadOnly))
+	{
+		text = QString(sourceDocument.readAll());
+		sourceDocument.close();
+	}
+	else
+		throw MeshLabException("File " + fileName + " has not been opened.");
+	QBuffer document;
+	document.setData(text.toUtf8());
+	document.open(QIODevice::ReadOnly);
+	xmlq.bindVariable(filevarname, &document);
+	XMLMessageHandler errQuery; 
+	xmlq.setQuery(qry);
+	QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
+	xmlq.setMessageHandler(&errQuery);
+	QStringList result;
+
+	if (!xmlq.isValid())
+	{
+		//errQuery = xmlq.messageHandler();
+		xmlq.setMessageHandler(oldHandler);
+		document.close();
+		throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
+		
+	}
+	xmlq.evaluateTo(&result);
+	QString err = errQuery.statusMessage();
+	xmlq.setMessageHandler(oldHandler);
+	document.close();
+	return result;
+}
+
+QStringList MLXMLInfo::query(const QByteArray& indata, const QString& qry)
+{
+	QByteArray tmp(indata);
+	QBuffer document(&tmp);
+	document.open(QIODevice::ReadOnly);
+	xmlq.bindVariable(filevarname, &document);
+	XMLMessageHandler errQuery; 
+	xmlq.setQuery(qry);
+	QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
+	xmlq.setMessageHandler(&errQuery);
+	QStringList result;
+
+	if (!xmlq.isValid())
+	{
+		//errQuery = xmlq.messageHandler();
+		xmlq.setMessageHandler(oldHandler);
+		document.close();
+		throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
+
+	}
+	xmlq.evaluateTo(&result);
+	xmlq.setMessageHandler(oldHandler);
+	document.close();
+	return result;
+}
+
+
+
 MLXMLPluginInfo* MLXMLPluginInfo::createXMLPluginInfo( const QString& XMLFileName,const QString& XMLSchemaFileName,XMLMessageHandler& errXML)
 {
 	QXmlSchema schema;
@@ -137,29 +215,6 @@ QString MLXMLPluginInfo::filterAttribute( const QString& filterName,const QStrin
   assert(0);
   return QString();
 }
-
-QStringList MLXMLPluginInfo::query( const QString& qry)
-{
-	XMLMessageHandler errQuery; 
-	xmlq.setQuery(qry);
-	QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
-	xmlq.setMessageHandler(&errQuery);
-	QStringList result;
-
-	if (!xmlq.isValid())
-	{
-		//errQuery = xmlq.messageHandler();
-		xmlq.setMessageHandler(oldHandler);
-		throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
-		
-	}
-	xmlq.evaluateTo(&result);
-	/*QString res;
-	xmlq.evaluateTo(&res);*/
-	xmlq.setMessageHandler(oldHandler);
-	return result;
-}
-
 
 MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParametersExtendedInfo( const QString& filterName)
 {
@@ -428,26 +483,13 @@ void MLXMLPluginInfo::destroyXMLPluginInfo( MLXMLPluginInfo* plug )
 	delete plug;
 }
 
-MLXMLPluginInfo::MLXMLPluginInfo( const QString& file ) 
-:filevarname("inputDocument"),fileName(file)
+MLXMLPluginInfo::MLXMLPluginInfo( const QString& file )
+:MLXMLInfo(file)
 {
-	QFile sourceDocument(file);
-	QString text;
-	if (sourceDocument.open(QIODevice::ReadOnly))
-	{
-		text = QString(sourceDocument.readAll());
-		sourceDocument.close();
-	}
-	else
-		throw MeshLabException("File " + file + " has not been opened.");
-	document.setData(text.toUtf8());
-	document.open(QIODevice::ReadOnly);
-	xmlq.bindVariable(filevarname, &document);
 }
 
 MLXMLPluginInfo::~MLXMLPluginInfo()
 {
-	document.close();
 }
 
 QString MLXMLPluginInfo::filterScriptCode( const QString& filterName )

@@ -146,14 +146,31 @@ namespace MLXMLElNames
 	void initMLXMLGUIAttributesTag(const QString& guiType,QStringList& ls);
 }
 
+class MLXMLInfo
+{
+private:
+	static const QString inputDocName() {return QString("inputDocument");} 
+protected:
+	inline static QString doc(const QString& file) {return QString("doc($" + file + ")");}
 
+	QXmlQuery xmlq;
+	QString fileName;
+public:
+	MLXMLInfo(const QString& file);
+	MLXMLInfo();
+	~MLXMLInfo();
+
+	QStringList query(const QString& qry);
+	QStringList query(const QByteArray& indata, const QString& qry);
+	QString filevarname;
+};
 
 
 //Query Exception should be managed by the XMLFilterInfo class (XMLFilterInfo is the class devoted to compose queries)
 //Parsing Exception instead should be managed by the code calling the XMLFilterInfo's functions. 
 //A Parsing Exception is raised every time an unexpected and/or missing tag or attribute in an XML has been encountered. 
 
-class MLXMLPluginInfo
+class MLXMLPluginInfo : public MLXMLInfo
 {
 private:
 	MLXMLPluginInfo(const QString& file);
@@ -166,7 +183,6 @@ private:
 	inline static const QString externalSep() {return QString("^");}
 	inline static const QRegExp extSep() {return QRegExp("\\" + externalSep());}
 	inline static const QRegExp intSep() {return QRegExp("\\s*=\\s*");}
-	inline static QString doc(const QString& file) {return QString("doc($" + file + ")");}
 	inline static QString docMFI(const QString& file) {return doc(file) + "/" + MLXMLElNames::mfiTag;}
 	inline static QString docMFIPlugin(const QString& file) {return docMFI(file) + "/" + MLXMLElNames::pluginTag;}
 	inline static QString docMFIPluginFilter(const QString& file) {return docMFIPlugin(file) + "/" + MLXMLElNames::filterTag;}
@@ -177,10 +193,6 @@ private:
 	inline static QString docMFIPluginFilterNameParamName(const QString& file,const QString& fname,const QString& pname) {return docMFIPluginFilterNameParam(file,fname) + "[@" + MLXMLElNames::paramName + " = \"" + pname + "\"]";}
 	inline static QString attrVal(const QString& attr,const QString& var = QString("")) {return QString("{data(" + var + "@" + attr + ")}");}
 	inline static QString attrNameAttrVal(const QString& attr,const QString& var = QString("")) {return QString(attr + "=" + attrVal(attr,var));}
-	QString filevarname;
-	QString fileName;
-	QXmlQuery xmlq;
-	QBuffer document;
 public:
 
 	typedef QMap<QString,QString> XMLMap;
@@ -212,8 +224,6 @@ public:
 	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName );
 	
 	QString pluginFilePath() const;
-	
-	QStringList query(const QString& qry);
 };
 
 struct MLXMLGUISubTree

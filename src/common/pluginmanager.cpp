@@ -62,9 +62,9 @@ PluginManager::~PluginManager()
 
 void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 {
-  pluginsDir=QDir(getPluginDirPath());
+  pluginsDir=QDir(getDefaultPluginDirPath());
   // without adding the correct library path in the mac the loading of jpg (done via qt plugins) fails
-  qApp->addLibraryPath(getPluginDirPath());
+  qApp->addLibraryPath(getDefaultPluginDirPath());
   qApp->addLibraryPath(getBaseDirPath());
   QStringList pluginfilters;
 
@@ -228,7 +228,7 @@ QString PluginManager::getBaseDirPath()
   return baseDir.absolutePath();
 }
 
-QString PluginManager::getPluginDirPath()
+QString PluginManager::getDefaultPluginDirPath()
 {
   QDir pluginsDir(getBaseDirPath());
   if(!pluginsDir.exists("plugins"))
@@ -442,4 +442,17 @@ void PluginManager::deleteXMLPlugin( const QString& plugscriptname )
 QString PluginManager::pluginNameSpace()
 {
   return "Plugins";
+}
+
+QString PluginManager::osIndependentPluginName( const QString& plname )
+{
+	QFileInfo fi(plname);
+	QString res = fi.baseName();
+	QString pref = DLLFileNamePreamble();
+	return res.remove(0,pref.size());
+}
+
+QString PluginManager::getLocalPluginDirPath()
+{
+	return "puppa";	
 }

@@ -57,7 +57,8 @@ public:
 	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
 	inline QVector<MeshLabFilterInterface*>& meshlabXMLfilterPlugins()  {return meshlabXMLFilterPlug;}
 	void knownIOFormats();
-	static QString getPluginDirPath();
+	static QString getDefaultPluginDirPath();
+	static QString getLocalPluginDirPath();
 	static QString getBaseDirPath();
 
 	QMap<QString,RichParameterSet> generateFilterParameterMap();
@@ -88,6 +89,7 @@ public:
 
 	QStringList pluginsLoaded;
 
+	static QString osIndependentPluginName(const QString& plname);
 	static QString pluginNameSpace();
 	//highlight and autocomplete
 	/*QStringList pluginnamespaces;
