@@ -1139,8 +1139,9 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
 	valueLE = new QLineEdit(p);
   valueLE->setAlignment(Qt::AlignRight);
+
 	valueSlider = new QSlider(Qt::Horizontal,p);
-  valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 	fieldDesc = new QLabel(rp->pd->fieldDesc);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
@@ -1154,8 +1155,8 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
 	
 	QHBoxLayout* lay = new QHBoxLayout(p);
+	valueLE->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
 	lay->addWidget(valueLE,0,Qt::AlignHCenter);
-    //lay->addWidget(valueSlider,0,Qt::AlignJustify);
     lay->addWidget(valueSlider,0,0);
     gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
@@ -1414,8 +1415,7 @@ void StringWidget::setWidgetValue( const Value& nv )
 
 ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 :MeshLabWidget(p,newColor),pickcol()
-{
-	
+{	
 	colorLabel = new QLabel(p);
 	descLabel = new QLabel(rp->pd->fieldDesc,p);
 	colorButton = new QPushButton(p);

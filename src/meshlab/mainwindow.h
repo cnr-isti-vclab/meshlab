@@ -64,8 +64,8 @@ public:
 
   MainWindow();
 	static bool QCallBack(const int pos, const char * str);
-	const QString appName() const {return tr("MeshLab v")+appVer(); }
-  const QString appVer() const {return tr("1.3.2_64bit"); }
+	//const QString appName() const {return tr("MeshLab v")+appVer(); }
+  //const QString appVer() const {return tr("1.3.2"); }
 
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
@@ -300,6 +300,9 @@ public:
 	
 
 private:
+	//the xml filters run in a different thread. The xmlfiltertimer starts on executeFilter and stops on postFilterExecution 
+	//function linked to the thread finished signal.   
+	QTime xmlfiltertimer;
 	WordActionsMapAccessor wama;
 	//////// ToolBars ///////////////
 	QToolBar *mainToolBar;
@@ -464,7 +467,6 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 };
-
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject

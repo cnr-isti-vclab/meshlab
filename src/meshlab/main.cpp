@@ -24,14 +24,16 @@
 #include <common/mlapplication.h>
 #include <QMessageBox>
 #include "mainwindow.h"
+#include <QString>
 
 int main(int argc, char *argv[])
 {	 
   MeshLabApplication app(argc, argv);
   QLocale::setDefault(QLocale::C);
-  QCoreApplication::setOrganizationName("VCG");
-  QCoreApplication::setApplicationName("MeshLab");
-	
+  QCoreApplication::setOrganizationName(MeshLabApplication::organization());
+  QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
+  QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
+		
 		if(argc>1)	
 		{
 			QString helpOpt1="-h";

@@ -43,6 +43,7 @@
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
+#include "../common/mlapplication.h"
 
 
 using namespace std;
@@ -921,8 +922,8 @@ void MainWindow::startFilter()
 
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
-				// if no dialog is created the filter must be executed immediately
-				if(! xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()) )
+				// if no dialog is created the filter must be executed immediatel
+				if(!xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()))
 				{
 					Env env;
 					env.loadMLScriptEnv(*meshDoc(),PM);
@@ -1191,12 +1192,13 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 
 	bool ret = true;
 	qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-	QTime tt; tt.start();
 	//meshDoc()->setBusy(true);
 	//RichParameterSet MergedEnvironment(params);
 	//MergedEnvironment.join(currentGlobalParams);
 
 	////GLA() is only the parent
+	xmlfiltertimer.restart();
+
 	QGLWidget* filterWidget = new QGLWidget(GLA());
 	QGLFormat defForm = QGLFormat::defaultFormat();
 	if (filtercpp)
@@ -1288,7 +1290,7 @@ void MainWindow::postFilterExecution()
 
 	if(obj->_ret)
 	{
-		//meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),tt.elapsed());
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),xmlfiltertimer.elapsed());
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
 		if(GLA())
 		{
@@ -2362,15 +2364,15 @@ void MainWindow::about()
 	QDialog *about_dialog = new QDialog();
 	Ui::aboutDialog temp;
 	temp.setupUi(about_dialog);
-	temp.labelMLName->setText(appName()+"   ("+__DATE__+")");
+	temp.labelMLName->setText(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize))+"   ("+__DATE__+")");
 	//about_dialog->setFixedSize(566,580);
 	about_dialog->show();
 }
 
 void MainWindow::aboutPlugins()
 {
-	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginManager().getPluginDirPath()));
-        PluginDialog dialog(pluginManager().getPluginDirPath(), pluginManager().pluginsLoaded, this);
+	qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginManager().getDefaultPluginDirPath()));
+        PluginDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
 	dialog.exec();
 }
 

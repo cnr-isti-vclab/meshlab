@@ -25,6 +25,7 @@
 #include "../common/interfaces.h"
 #include "../common/xmlfilterinfo.h"
 #include "../common/searcher.h"
+#include "../common/mlapplication.h"
 
 #include <QtGui>
 #include <QToolBar>
@@ -33,6 +34,7 @@
 #include <QFileOpenEvent>
 #include <QFile>
 #include <QtXml>
+#include <QSysInfo>
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "customDialog.h"
@@ -40,11 +42,17 @@
 #include "ui_congratsDialog.h"
 
 
+
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-:wama()
+:wama(),xmlfiltertimer()
 {
+	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called. 
+	//Subsequently restart function will be invoked.
+	xmlfiltertimer.start();
+	//xmlfiltertimer.elapsed();
+
 	//workspace = new QWorkspace(this);
 	mdiarea = new QMdiArea(this);
 	layerDialog = new LayerDialog(this);
@@ -72,6 +80,17 @@ MainWindow::MainWindow()
 	setWindowIcon(icon);
 
 	PM.loadPlugins(defaultGlobalParams);
+	QSettings settings;
+	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
+	//should update those values only after I run MeshLab for the very first time or after I installed a new version
+	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
+	{
+		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(),PluginManager::getDefaultPluginDirPath());
+		settings.setValue(MeshLabApplication::versionRegisterKeyName(),MeshLabApplication::appVer());
+		settings.setValue(MeshLabApplication::worldSizeKeyName(),QSysInfo::WordSize);
+		foreach(QString plfile,PM.pluginsLoaded)
+			settings.setValue(PluginManager::osIndependentPluginName(plfile),MeshLabApplication::appVer());
+	}
 	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
 	loadMeshLabSettings();
 	createActions();
@@ -82,7 +101,7 @@ MainWindow::MainWindow()
 	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
-	setWindowTitle(appName());
+	setWindowTitle(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
 	setStatusBar(new QStatusBar(this));
 	globalStatusBar()=statusBar();
 	qb=new QProgressBar(this);
@@ -997,10 +1016,10 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 #else
 	QString OS="Lin";
 #endif
-	QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(appVer()).arg(OS);
-	idHost=httpReq->setHost("vcg.isti.cnr.it"); // id == 1
+	QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+	idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
 	bool ret=myLocalBuf.open(QBuffer::WriteOnly);
-	if(!ret) QMessageBox::information(this,"Meshlab",QString("Failed opening of internal buffer"));
+	if(!ret) QMessageBox::information(this,MeshLabApplication::appName(),QString("Failed opening of internal buffer"));
 	idGet=httpReq->get(message,&myLocalBuf);     // id == 2
 
 }
@@ -1021,7 +1040,7 @@ void MainWindow::connectionDone(bool /* status */)
 
 void MainWindow::submitBug()
 {
-	QMessageBox mb(QMessageBox::NoIcon,tr("MeshLab"),tr("MeshLab"),QMessageBox::NoButton, this);
+	QMessageBox mb(QMessageBox::NoIcon,MeshLabApplication::appName(),MeshLabApplication::appName(),QMessageBox::NoButton, this);
 	//mb.setWindowTitle(tr("MeshLab"));
 	QPushButton *submitBug = mb.addButton("Submit Bug",QMessageBox::AcceptRole);
 	mb.addButton(QMessageBox::Cancel);

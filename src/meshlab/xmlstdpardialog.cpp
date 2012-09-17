@@ -144,8 +144,12 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 	if(curParMap.isEmpty() && !isPreviewable())
 		return false;
 
+	QTime tt;
+	tt.start();
 	createFrame();
 	loadFrameContent();
+
+	curMeshDoc->Log.Logf(GLLogStream::SYSTEM,"GUI created in %i msec",tt.elapsed());
 	//QString postCond = mfc.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
 	//QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 	//curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
