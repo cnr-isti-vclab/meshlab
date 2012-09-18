@@ -47,8 +47,6 @@ $Log: meshedit.cpp,v $
 
 using namespace std;
 using namespace vcg;
-//FILE *logFP=0; 
-Arc3DReconstruction er;
 
 EditArc3DPlugin::EditArc3DPlugin() {
   arc3DDialog = 0;
@@ -66,11 +64,12 @@ const QString EditArc3DPlugin::Info()
 
 bool EditArc3DPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 {
+	er.modelList.clear();
 	this->md=&_md;
 	gla=_gla;
 	///////
+	delete arc3DDialog;
 	arc3DDialog=new v3dImportDialog(gla->window(),this);
-		
 	QString fileName=arc3DDialog->fileName;
 
  	if (fileName.isEmpty()) return false;
@@ -120,7 +119,9 @@ bool EditArc3DPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 
 	connect(arc3DDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
 	connect(arc3DDialog->ui.plyButton, SIGNAL(clicked()),this,SLOT(ExportPly()) );
+	connect(arc3DDialog->ui.exportbut,SIGNAL(clicked()),this,SLOT(exportShotsToRasters()));
 	connect(this,SIGNAL(resetTrackBall()),gla,SLOT(resetTrackBall()));
+
 
 	return true;
 }
@@ -188,7 +189,7 @@ void EditArc3DPlugin::ExportPly()
 					dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz,scalingFactor);
 				int tt1=clock();
 				gla->log->Logf(GLLogStream::SYSTEM,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
-
+				m->cm.Clear();
 				tri::Append<CMeshO,CMeshO>::Mesh(m->cm,mm); // append mesh mr to ml
 					
 				int tt2=clock();
@@ -240,83 +241,6 @@ void EditArc3DPlugin::ExportPly()
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
 	tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
-   
-//// Importing rasters
-
-	if (arc3DDialog->ui.shotExport->isChecked())
-	{
-		int saveSelected=arc3DDialog->ui.saveShotCombo->currentIndex();
-		for(int i=0; i<er.modelList.size(); ++i)
-		{
-			if (saveSelected==0 || (qtw->isItemSelected(qtw->item(i,0))))
-			{
-				er.modelList[i].cam.Open(er.modelList[i].cameraName.toAscii());
-				mm.Clear();
-				Point3f corr=er.modelList[i].TraCorrection(mm,subSampleVal*2,minCountVal,0);
-				er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
-				RasterModel* rm=md->addNewRaster();
-				rm->addPlane(new Plane(er.modelList[i].textureName,QString("RGB")));
-				rm->setLabel(er.modelList[i].textureName);
-				rm->shot=er.modelList[i].shot;
-				rm->shot.RescalingWorld(scalingFactor, false);
-
-				//// Undistort
-				if (arc3DDialog->ui.shotDistortion->isChecked())
-				{
-					QImage originalImg=rm->currentPlane->image;
-					//originalImg.load(imageName);
-					QFileInfo qfInfo(rm->currentPlane->fullPathFileName);
-					QString suffix = "." + qfInfo.completeSuffix();
-					QString path = qfInfo.absoluteFilePath().remove(suffix);
-					path.append("Undist" + suffix);
-					qDebug(path.toLatin1());
-
-					QImage undistImg(originalImg.width(),originalImg.height(),originalImg.format()); 
-					undistImg.fill(qRgba(0,0,0,255));
-
-					vcg::Camera<float> &cam = rm->shot.Intrinsics;
-					
-					
-					QRgb value;
-					for(int x=0; x<originalImg.width();x++)
-						for(int y=0; y<originalImg.height();y++){
-							value = originalImg.pixel(x,y);
-							///////
-							
-							Point3d m_temp = er.modelList[i].cam.Kinv * Point3d(x,y,1);
-	    
-							double oldx, oldy;
-							er.modelList[i].cam.rd.ComputeOldXY(m_temp[0] / m_temp[2], m_temp[1] / m_temp[2], oldx, oldy);
-							/////////////
-							m_temp=er.modelList[i].cam.K * Point3d(oldx,oldy,1);
-							 vcg::Point2<float> newPoint(m_temp.X(),m_temp.Y());
-
-										if((newPoint.X()- (int)newPoint.X())>0,5)
-														newPoint.X()++;
-												if((newPoint.Y()- (int)newPoint.Y())>0,5)
-														newPoint.Y()++;
-										if(newPoint.X()>=0 && newPoint.X()<undistImg.width() && newPoint.Y()>=0 && newPoint.Y()< undistImg.height())
-								undistImg.setPixel((int)newPoint.X(),(int)newPoint.Y(),qRgba(qRed(value),qGreen(value),qBlue(value), qAlpha(value)));
-						}
-
-
-
-					PullPush(undistImg,qRgba(0,0,0,255));
-					undistImg.save(path);
-					rm->currentPlane->image= undistImg;
-					rm->currentPlane->fullPathFileName=path;
-					QString newLabel = rm->label();
-					newLabel.remove(suffix);
-					newLabel.append("Undist" + suffix);
-					rm->setLabel(newLabel);
-
-				}
-				rm->shot.ApplyRigidTransformation(transf);
-				//// end undistort
-
-			}
-		}
-	}
 
 // Final operations 
 
@@ -350,6 +274,90 @@ void EditArc3DPlugin::mouseReleaseEvent(QMouseEvent * e, MeshModel &/*m*/, GLAre
 void EditArc3DPlugin::toggleButtons()
 {
 
+}
+
+void EditArc3DPlugin::exportShotsToRasters()
+{
+	int subSampleVal = arc3DDialog->ui.subsampleSpinBox->value();
+	float scalingFactor = arc3DDialog->ui.scaleLineEdit->text().toFloat();
+	int minCountVal= arc3DDialog->ui.minCountSpinBox->value();
+	MeshModel* m=md->mm();
+	CMeshO mm;
+	QTableWidget *qtw=arc3DDialog->ui.imageTableWidget;
+	v3dImportDialog::ExportShots saveSelected=v3dImportDialog::ExportShots(arc3DDialog->ui.saveShotCombo->currentIndex());
+	for(int i=0; i<er.modelList.size(); ++i)
+	{
+		if ((saveSelected==v3dImportDialog::EXPORT_ALL) || (qtw->isItemSelected(qtw->item(i,0))))
+		{
+			er.modelList[i].cam.Open(er.modelList[i].cameraName.toAscii());
+			mm.Clear();
+			Point3f corr=er.modelList[i].TraCorrection(mm,subSampleVal*2,minCountVal,0);
+			er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
+			md->setBusy(true);
+			RasterModel* rm=md->addNewRaster();
+			rm->addPlane(new Plane(er.modelList[i].textureName,QString("RGB")));
+			rm->setLabel(er.modelList[i].textureName);
+			rm->shot=er.modelList[i].shot;
+			rm->shot.RescalingWorld(scalingFactor, false);
+
+			//// Undistort
+			if (arc3DDialog->ui.shotDistortion->isChecked())
+			{
+				QImage originalImg=rm->currentPlane->image;
+				//originalImg.load(imageName);
+				QFileInfo qfInfo(rm->currentPlane->fullPathFileName);
+				QString suffix = "." + qfInfo.completeSuffix();
+				QString path = qfInfo.absoluteFilePath().remove(suffix);
+				path.append("Undist" + suffix);
+				qDebug(path.toLatin1());
+
+				QImage undistImg(originalImg.width(),originalImg.height(),originalImg.format()); 
+				undistImg.fill(qRgba(0,0,0,255));
+
+				vcg::Camera<float> &cam = rm->shot.Intrinsics;
+
+
+				QRgb value;
+				for(int x=0; x<originalImg.width();x++)
+					for(int y=0; y<originalImg.height();y++){
+						value = originalImg.pixel(x,y);
+						///////
+
+						Point3d m_temp = er.modelList[i].cam.Kinv * Point3d(x,y,1);
+
+						double oldx, oldy;
+						er.modelList[i].cam.rd.ComputeOldXY(m_temp[0] / m_temp[2], m_temp[1] / m_temp[2], oldx, oldy);
+						/////////////
+						m_temp=er.modelList[i].cam.K * Point3d(oldx,oldy,1);
+						vcg::Point2<float> newPoint(m_temp.X(),m_temp.Y());
+
+						if((newPoint.X()- (int)newPoint.X())>0,5)
+							newPoint.X()++;
+						if((newPoint.Y()- (int)newPoint.Y())>0,5)
+							newPoint.Y()++;
+						if(newPoint.X()>=0 && newPoint.X()<undistImg.width() && newPoint.Y()>=0 && newPoint.Y()< undistImg.height())
+							undistImg.setPixel((int)newPoint.X(),(int)newPoint.Y(),qRgba(qRed(value),qGreen(value),qBlue(value), qAlpha(value)));
+					}
+
+
+
+					PullPush(undistImg,qRgba(0,0,0,255));
+					undistImg.save(path);
+					rm->currentPlane->image= undistImg;
+					rm->currentPlane->fullPathFileName=path;
+					QString newLabel = rm->label();
+					newLabel.remove(suffix);
+					newLabel.append("Undist" + suffix);
+					rm->setLabel(newLabel);
+					md->setBusy(false);
+
+			}
+			Matrix44f transf;
+			transf.SetRotateDeg(180,Point3f(1.0,0.0,0.0));
+			rm->shot.ApplyRigidTransformation(transf);
+			//// end undistort
+		}
+	}
 }
 
 void Arc3DModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 

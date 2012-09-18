@@ -37,42 +37,47 @@ class MeshModel;
 
 class v3dImportDialog : public QDockWidget 
 {
-Q_OBJECT
+	Q_OBJECT
+
+private:
+		
+public:
+	v3dImportDialog(QWidget *parent, EditArc3DPlugin *_edit);
+
+	enum ExportShots {EXPORT_ALL = 0,EXPORT_ONLY_SELECTED = 1};
+
+	static QString exportShotsString(const ExportShots exp);
 
 public:
-  v3dImportDialog(QWidget *parent, EditArc3DPlugin *_edit);
- 
-    	
-
-public:
-  void setArc3DReconstruction(Arc3DReconstruction *_er);
+	void setArc3DReconstruction(Arc3DReconstruction *_er);
 	bool exportToPLY;  /// when true all the selected range maps are exported as separated ply
 	QString fileName;
 	Ui::DockWidget ui;
 	GLArea *gla; 
 
-virtual void closeEvent ( QCloseEvent * event )	;
+	void closeEvent ( QCloseEvent * event )	;
 signals:
 	void closing();
-	
-public slots:
-void on_selectButton_clicked();
-void on_imageTableWidget_itemClicked(QTableWidgetItem * item );
-void on_imageTableWidget_itemSelectionChanged();
-void on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * item );
-void on_plyButton_clicked();
-private:
-EditArc3DPlugin *edit;
-Arc3DReconstruction *er;
-QString erCreated;
 
-QSize imgSize;
+public slots:
+	void on_selectButton_clicked();
+	void on_imageTableWidget_itemClicked(QTableWidgetItem * item );
+	void on_imageTableWidget_itemSelectionChanged();
+	void on_imageTableWidget_itemDoubleClicked(QTableWidgetItem * item );
+	void on_plyButton_clicked();
+
+private:
+	EditArc3DPlugin *edit;
+	Arc3DReconstruction *er;
+	QString erCreated;
+
+	QSize imgSize;
 
 
 private slots:
-  void on_subsampleSpinBox_valueChanged(int);
-  void on_minCountSlider_valueChanged(int);
-  void on_minCountSpinBox_valueChanged(int);
+	void on_subsampleSpinBox_valueChanged(int);
+	void on_minCountSlider_valueChanged(int);
+	void on_minCountSpinBox_valueChanged(int);
 	void dilationSizeChanged(int);
 	void erosionSizeChanged(int);
 };

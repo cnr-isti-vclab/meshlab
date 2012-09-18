@@ -57,6 +57,9 @@ void v3dImportDialog::closeEvent ( QCloseEvent * /*event*/ )
 v3dImportDialog::v3dImportDialog(QWidget *parent,EditArc3DPlugin *_edit )    : QDockWidget(parent)
 {
 	v3dImportDialog::ui.setupUi(this);
+	for(int ii = 0;ii < 2;++ii)
+		ui.saveShotCombo->addItem(exportShotsString(ExportShots(ii)));
+	ui.saveShotCombo->setCurrentIndex(v3dImportDialog::EXPORT_ONLY_SELECTED);
 	this->setFeatures(QDockWidget::AllDockWidgetFeatures);
 	this->setAllowedAreas(Qt::LeftDockWidgetArea);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
@@ -80,6 +83,17 @@ v3dImportDialog::v3dImportDialog(QWidget *parent,EditArc3DPlugin *_edit )    : Q
 	
 }
 
+QString v3dImportDialog::exportShotsString( const ExportShots exp )
+{
+	switch (exp)
+	{
+		case (EXPORT_ALL):
+			return QString("Export all images");
+		case (EXPORT_ONLY_SELECTED):
+			return QString("Export only selected images");
+	}
+	return QString();
+}
 
 /* 
 Main function that populate the dialog, loading all the images and eventually creating the thumbs.

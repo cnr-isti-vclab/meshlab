@@ -41,58 +41,52 @@
 class EditArc3DPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-	
-	
+		Q_INTERFACES(MeshEditInterface)
+
 public:
-    EditArc3DPlugin();
-        virtual ~EditArc3DPlugin() {}
+	EditArc3DPlugin();
+	virtual ~EditArc3DPlugin() {}
 
-    static const QString Info();
+	static const QString Info();
 
-    bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
-    void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
-    void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    bool isSingleMeshEdit() const {return false;}
+	bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
+	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+	void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
+	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
+	bool isSingleMeshEdit() const {return false;}
 
-    QFont qFont;
-  	int mode;			
+	Arc3DReconstruction er;
+	QFont qFont;
+	int mode;			
+	v3dImportDialog *arc3DDialog; //the widget with the list of the meshes. 
 
-    v3dImportDialog *arc3DDialog; //the widget with the list of the meshes. 
-		
-	
 	void toggleButtons();
-
-		
-		
-		MeshDocument *md; 
-		
-    	GLArea * gla;
+	MeshDocument *md; 
+	GLArea * gla;
 
 public:
 
 	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
-														 bool dilation, int dilationNumPasses, int dilationWinsize,
-														 bool erosion, int erosionNumPasses, int erosionWinsize);
+		bool dilation, int dilationNumPasses, int dilationWinsize,
+		bool erosion, int erosionNumPasses, int erosionWinsize);
 	float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
 	bool CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName );
-    void SmartSubSample(int factor, FloatImage &fli, CharImage &chi, FloatImage &subD, FloatImage &subQ, int minCount);
+	void SmartSubSample(int factor, FloatImage &fli, CharImage &chi, FloatImage &subD, FloatImage &subQ, int minCount);
 	void Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minCount, CharImage &featureMask, float depthThr);
 	void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
-	
+
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-  virtual void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
+	void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
 	{ 
-	// add code here to manage the external layer switching
+		// add code here to manage the external layer switching
 	}
 
 public slots:
 	void ExportPly();	
-		
-		
-		
+	void exportShotsToRasters();	
+
+
 signals:
 	void suspendEditToggle();
 	void resetTrackBall();
