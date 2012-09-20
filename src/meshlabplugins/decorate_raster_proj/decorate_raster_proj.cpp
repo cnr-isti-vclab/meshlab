@@ -157,14 +157,6 @@ DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
         
 DecorateRasterProjPlugin::~DecorateRasterProjPlugin()
 {
-    glPushAttrib( GL_ALL_ATTRIB_BITS );
-
-    m_Scene.clear();
-    m_ShadowMapShader.setNull();
-    m_DepthTexture.setNull();
-    m_ColorTexture.setNull();
-
-    glPopAttrib();
 }
 
 
