@@ -521,7 +521,6 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
                 qWarning( (std::string("Impossible to load GLEW library.")+(char*)glewGetErrorString(err)).c_str() );
                 return false;
             }
-            Log( "GLEW library correctly initialized." );
 
             m_Context.acquire();
 
@@ -531,7 +530,6 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
                 qWarning( ("Error while initializing shaders.\n"+logs).c_str() );
                 return false;
             }
-            Log( "Shaders correctly loaded." );
 
             s_AreVBOSupported = glewIsSupported( "GL_ARB_vertex_buffer_object" );
 
