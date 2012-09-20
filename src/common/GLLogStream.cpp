@@ -21,10 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QFont>
-#include <QGLWidget>
-
 #include <stdio.h>
+#include <stdarg.h>
+#include <QStringList>
 
 #include "GLLogStream.h"
 
@@ -45,7 +44,7 @@ void GLLogStream::Logf(int Level, const char * f, ... )
 	Log(Level,buf);
 }
 
-void GLLogStream::RealTimeLogf(QString Id, const char * f, ... )
+void GLLogStream::RealTimeLogf(const QString& Id, const char * f, ... )
 {
 	char buf[4096];
 	va_list marker;
@@ -53,10 +52,11 @@ void GLLogStream::RealTimeLogf(QString Id, const char * f, ... )
 
 	vsprintf(buf,f,marker);
 	va_end( marker );
-	RealTimeLog(Id,buf);
+	QString tmp(buf);
+	RealTimeLog(Id,tmp);
 }
 
-void GLLogStream::RealTimeLog(QString Id, QString text)
+void GLLogStream::RealTimeLog(const QString& Id,const QString& text)
 {
   this->RealTimeLogText[Id]=text;
 }
@@ -89,7 +89,7 @@ void GLLogStream::BackToBookmark()
 void GLLogStream::print(QStringList &out)
 {
   out.clear();
-  QList<pair <int,QString> > ::iterator li;
+  QList<pair <int,QString> > ::const_iterator li;
   for(li=S.begin();li!=S.end();++li)
         out.push_back((*li).second);
 }

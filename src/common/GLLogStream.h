@@ -28,6 +28,7 @@
 #include <list>
 #include <utility>
 #include <QMap>
+#include <QString>
 /**
   This is the logging class.
   One for each document. Responsible of getting an history of the logging message printed out by filters.
@@ -47,11 +48,15 @@ public:
    ~GLLogStream (){};
   void print(QStringList &list);		// Fills a QStringList with the log entries
   void Save(int Level, const char *filename);
-  void Clear() {S.clear();}
+  void Clear() 
+  {
+	  S.clear();
+  }
 	void Logf(int Level, const char * f, ... );
   void Log(int Level, const char * buf )
 	{
-		S.push_back(std::make_pair<int,QString>(Level,buf));
+		QString tmp(buf);
+		S.push_back(std::make_pair<int,QString>(Level,tmp));
     qDebug("LOG: %i %s",Level,buf);
 	}
 
@@ -64,8 +69,8 @@ public:
   QMap<QString,QString> RealTimeLogText;
   
 
-  void RealTimeLogf(QString Id, const char * f, ... );
-  void RealTimeLog(QString Id, QString text);
+  void RealTimeLogf(const QString& Id, const char * f, ... );
+  void RealTimeLog(const QString& Id,const QString& text);
 
 
 private:
