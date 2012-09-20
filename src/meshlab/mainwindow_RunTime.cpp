@@ -1465,6 +1465,7 @@ void MainWindow::applyDecorateMode()
   if(found)
   {
       iDecorateTemp->endDecorate(action,*meshDoc(),GLA()->glas.currentGlobalParamSet,GLA());
+	  iDecorateTemp->setLog(NULL);
       GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
   }
   else{
@@ -1473,6 +1474,7 @@ void MainWindow::applyDecorateMode()
         iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
 				//RichParameterSet * decoratorParams = new RichParameterSet();
 				//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
+				iDecorateTemp->setLog(GLA()->log);
 				bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
 				if(ret) {
 						GLA()->iDecoratorsList.push_back(action);

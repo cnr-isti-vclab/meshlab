@@ -737,6 +737,7 @@ void GLArea::updateDecoration()
 	{
 		MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
 		decorInterface->endDecorate(p, *this->md(),this->glas.currentGlobalParamSet,this);
+		decorInterface->setLog(log);
 		decorInterface->startDecorate(p,*this->md(), this->glas.currentGlobalParamSet,this);
 	}
 }
@@ -780,6 +781,19 @@ bool GLArea::readyToClose()
 		endEdit();
 	if (iRenderer) 
 		iRenderer->Finalize(currentShader, this->md(), this);
+	foreach(QAction* act,iDecoratorsList)
+	{
+		MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>(act->parent());
+		if (mdec != NULL)
+		{
+			mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
+			mdec->setLog(NULL);
+		}
+		else
+			log->Logf(GLLogStream::SYSTEM,"A non decorator action in decorate interface list. Something really bad happened");
+	}
+	iDecoratorsList.clear();
+
 	if(targetTex) glDeleteTextures(1, &targetTex);
 	emit glareaClosed();
 	return true;
