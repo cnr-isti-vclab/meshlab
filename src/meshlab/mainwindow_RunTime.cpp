@@ -1464,7 +1464,8 @@ void MainWindow::applyDecorateMode()
 
   if(found)
   {
-    GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+      iDecorateTemp->endDecorate(action,*meshDoc(),GLA()->glas.currentGlobalParamSet,GLA());
+      GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
   }
   else{
     QString errorMessage;
