@@ -51,7 +51,7 @@ bool U3DIOPlugin::open(const QString & /*formatName*/, const QString &/*fileName
 
 QString U3DIOPlugin::computePluginsPath()
 {
-    QDir pluginsDir(PluginManager::getPluginDirPath());
+    QDir pluginsDir(PluginManager::getDefaultPluginDirPath());
 		#if defined(Q_OS_WIN)
 			pluginsDir.cd("U3D_W32");
 		#elif defined(Q_OS_MAC)
