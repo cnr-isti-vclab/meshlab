@@ -510,6 +510,7 @@ printf("Mesh %s loaded has %i vn %i fn\n", qPrintable(mm->shortName()), mm->cm.v
 	{
 			server.Save(meshDocument.mm(), mask, meshNamesOut.at(0));
       printf("Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshDocument.mm()->fullName()), qPrintable(meshNamesOut.at(0)), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
-	}		
+	}
+	return 0;
 }
 

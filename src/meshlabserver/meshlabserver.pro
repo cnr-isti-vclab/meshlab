@@ -4,6 +4,8 @@ HEADERS        =
 
 SOURCES        = mainserver.cpp
 
+RESOURCES = ../meshlab/meshlab.qrc
+
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
 
