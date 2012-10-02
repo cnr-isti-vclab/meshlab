@@ -85,7 +85,16 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
     QString absfilepath = pluginsDir.absoluteFilePath(fileName);
     QFileInfo fin(absfilepath);
     if (fin.suffix() == "xml")
-      loadXMLPlugin(fileName);
+	{
+		try
+		{
+			loadXMLPlugin(fileName);
+		}
+		catch (MeshLabXMLParsingException& e)
+		{
+			qDebug() << e.what();		
+		}
+	} 
     else
     {
       QPluginLoader loader(absfilepath);
@@ -135,54 +144,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
     }
   }
   knownIOFormats();
-  //QStringList liblist = ScriptAdapterGenerator::javaScriptLibraryFiles();
-  //int ii = 0;
-  //while(ii < liblist.size())
-  //{
-  //	QFile lib(liblist[ii]);
-  //	if (!lib.open(QFile::ReadOnly))
-  //		qDebug("Warning: Library %s has not been loaded.",qPrintable(liblist[ii]));
-  //	QByteArray libcode = lib.readAll();
-  //	QScriptValue res = env.evaluate(QString(libcode));
-  //	if (res.isError())
-  //		qDebug("Warning: Library %s generated JavaScript Error: %s",qPrintable(liblist[ii]),qPrintable(res.toString()));
-  //	++ii;
-  //}
-  ////loadPluginsCode();
-  //QScriptValue applyFun = env.newFunction(PluginInterfaceApplyXML, this);
-  //env.globalObject().setProperty("_applyFilter", applyFun);
-  //QScriptValue res = env.evaluate(scriptplugcode);
-  ////qDebug("Code:\n %s",qPrintable(code));
-  //if (env.hasUncaughtException())
-  //	qDebug() << "JavaScript Interpreter Error: " << res.toString() << "\n";
 }
-
-
-//void PluginManager::loadPluginsCode()
-//{
-//	scriptplugcode = "";
-//	ScriptAdapterGenerator gen;
-//	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
-//	scriptplugcode += pluginNameSpace() + " = { };\n";
-//	//QMap<QString,RichParameterSet> FPM = generateFilterParameterMap();
-//	for(int ii = 0;ii < xmlpluginfo.size();++ii)
-//	{
-//		MLXMLPluginInfo* mi = xmlpluginfo[ii];
-//		QString pname = mi->pluginScriptName();
-//		if (pname != "")
-//		{
-//			scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
-//			QStringList filters = mi->filterNames();
-//			foreach(QString filter,filters)
-//			{
-//				QString filterFunction = mi->filterScriptCode(filter);
-//				if (filterFunction == "")
-//					filterFunction = gen.funCodeGenerator(filter,*mi);
-//				scriptplugcode += pluginNameSpace() + "." + pname + "." + mi->filterAttribute(filter,MLXMLElNames::filterScriptFunctName) + " = " + filterFunction + "\n";
-//			}
-//		}
-//	}
-//}
 
 /*
 This function create a map from filtername to dummy RichParameterSet.
