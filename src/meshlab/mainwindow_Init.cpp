@@ -313,7 +313,7 @@ void MainWindow::createActions()
 	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
-	connect(showLayerDlgAct, SIGNAL(triggered()), this, SLOT(showLayerDlg()));
+	connect(showLayerDlgAct, SIGNAL(triggered(bool)), this, SLOT(showLayerDlg(bool)));
 
 
 	showRasterAct =  new QAction (QIcon(":/images/view_raster.png"),tr("Show Current Raster Mode"), this);

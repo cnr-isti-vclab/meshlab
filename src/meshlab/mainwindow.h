@@ -143,7 +143,7 @@ private slots:
 	void showInfoPane();
 	void showTrackBall();
 	void resetTrackBall();
-	void showLayerDlg();
+	void showLayerDlg(bool visible);
 	void showRaster();
 	///////////Slot Menu Windows /////////////////////
 	void updateWindowMenu();

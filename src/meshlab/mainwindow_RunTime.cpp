@@ -1906,6 +1906,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			rm->setLabel(fileImg);
 			rm->addPlane(new Plane(fileName,QString("")));		
 			meshDoc()->setBusy(false);
+			showLayerDlg(true);
 
 /// Intrinsics extraction from EXIF
 ///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
@@ -2139,7 +2140,7 @@ bool MainWindow::importMesh(QString fileName)
 				pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 			}
 			if (meshDoc()->size() > 1)
-				showLayerDlg();
+				showLayerDlg(true);
 		}
 		else
 			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
@@ -2406,7 +2407,14 @@ void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()-
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::showRaster()    {if(GLA() != 0)	GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));}
-void MainWindow::showLayerDlg() {if(GLA() != 0) 	layerDialog->setVisible( !layerDialog->isVisible() );}
+void MainWindow::showLayerDlg(bool visible) 
+{
+	if(GLA() != 0) 	
+	{
+		layerDialog->setVisible( visible);
+		showLayerDlgAct->setChecked(visible);
+	}
+}
 void MainWindow::showXMLPluginEditorGui(){if(GLA() != 0) 	plugingui->setVisible( !plugingui->isVisible() );}
 
 
