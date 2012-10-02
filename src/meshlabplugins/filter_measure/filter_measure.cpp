@@ -40,26 +40,6 @@
 using namespace std;
 using namespace vcg;
 
-MeasureTopoTag::MeasureTopoTag(MeshDocument &parent, MeshModel *mm, QString name): TagBase(&parent)
-{
-	typeName ="Topological Measures";
-	filterOwner =name;
-	referringMeshes.append(mm->id());
-	
-	edges =-1;
-	boundaryEdges=-1;
-	connectComp=-1;
-	manifoldness =false;
-	genus=-1;
-	holes=-1;
-	edgeManifNum=-1;
-	vertManifNum=-1;
-	edgeManifNum=-1;
-	faceEdgeManif=-1;
-	vertManifNum=-1;
-	faceVertManif=-1;
-};
-
 
 // Core Function doing the actual mesh processing.
 bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
@@ -67,21 +47,15 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 	if (filterName == "Compute Topological Measures")
 		{
 			CMeshO &m=md.mm()->cm;	
-			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
-			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
 			tri::Allocator<CMeshO>::CompactFaceVector(m);
 			tri::Allocator<CMeshO>::CompactVertexVector(m);
-			tri::UpdateTopology<CMeshO>::FaceFace(m);
-			tri::UpdateTopology<CMeshO>::VertexFace(m);
-
-			MeasureTopoTag *tag = new MeasureTopoTag(md, md.mm(), filterName );
+			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
 
 			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
 			int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
 			tri::UpdateSelection<CMeshO>::VertexClear(m);
 			tri::UpdateSelection<CMeshO>::FaceClear(m);
-			tag->edgeManifNum = edgeManifNum;
-			tag->faceEdgeManif = faceEdgeManif;
 
 			int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
 			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
@@ -93,19 +67,12 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
 			Log("Unreferenced Vertices %i",unrefVertNum);
 			Log("Boundary Edges %i",borderNum);
-			tag->edges = edgeNum;
-			tag->boundaryEdges=borderNum;
-			tag->vertManifNum= vertManifNum;
-			tag->faceEdgeManif = faceEdgeManif;
-
 
 			int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
 			Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
-			tag->connectComp=connectedComponentsNum;
 
 			if(edgeManifNum==0 && vertManifNum==0){
 				Log("Mesh has is two-manifold ");
-				tag->manifoldness=true;
 			}
 
 			if(edgeManifNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManifNum,faceEdgeManif);
@@ -117,11 +84,9 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			{
 				holeNum = tri::Clean<CMeshO>::CountHoles(m);
 				Log("Mesh has %i holes",holeNum);
-				tag->holes=holeNum;
 
 				int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
 				Log("Genus is %i",genus);
-				tag->genus=genus;
 			}
 			else
 			{
@@ -129,7 +94,6 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 				Log("Genus is undefined (non 2-manifold mesh)");
 			}
 
-			md.addNewTag(tag);
 			return true;
 		}
 
@@ -309,55 +273,6 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
     return false;
 }
 
-QTreeWidgetItem * FilterMeasurePlugin::tagDump(TagBase * _tag, MeshDocument &/*md*/, MeshModel */*mm*/)
-{
-	MeasureTopoTag *tag = (MeasureTopoTag *) _tag;
-	QTreeWidgetItem *newTag = new QTreeWidgetItem();
-	newTag->setText(2, QString::number(tag->id()));	
-	newTag->setText(3, tag->typeName);
-	QFont font = QFont();
-	font.setItalic(true);
-	newTag->setFont(3,font);
-
-	QTreeWidgetItem *edges = new QTreeWidgetItem();
-	edges->setText(3, QString("Edges"));
-	edges->setText(4, QString::number(tag->edges));
-	newTag->addChild(edges);
-
-	QTreeWidgetItem *bEdges = new QTreeWidgetItem();
-	bEdges->setText(3, QString("Boundary Edges"));
-	bEdges->setText(4, QString::number(tag->boundaryEdges));
-	newTag->addChild(bEdges);
-
-	QTreeWidgetItem *ccomp = new QTreeWidgetItem();
-	ccomp->setText(3, QString("Connected Comp"));
-	ccomp->setText(4, QString::number(tag->connectComp));
-	newTag->addChild(ccomp);
-
-	QTreeWidgetItem *manif = new QTreeWidgetItem();
-	manif->setText(3, QString("Manifold"));
-	if(tag->manifoldness)
-		manif->setText(4, QString("Yes"));
-	else manif->setText(4, QString("No"));
-	newTag->addChild(manif);
-
-	QTreeWidgetItem *genus = new QTreeWidgetItem();
-	genus->setText(3, QString("Genus"));
-	if(tag->vertManifNum==0 && tag->edgeManifNum==0)
-		genus->setText(4, QString::number(tag->genus));
-	else genus->setText(4, QString("-"));
-	newTag->addChild(genus);
-
-	QTreeWidgetItem *holes = new QTreeWidgetItem();
-	holes->setText(3, QString("Holes"));
-	if(tag->vertManifNum==0 && tag->edgeManifNum==0)
-		holes->setText(4, QString::number(tag->holes));
-	else holes->setText(4, QString("-"));
-	newTag->addChild(holes);
-
-
-	return newTag;
-}
 
 Q_EXPORT_PLUGIN(FilterMeasurePlugin)
 

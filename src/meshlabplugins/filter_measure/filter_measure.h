@@ -37,24 +37,6 @@ public:
 
 	FilterMeasurePlugin():MeshLabFilterInterface(){}
 	bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
-	QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel *mm=0);
-};
-
-class MeasureTopoTag: public TagBase
-{
-public:
-	int edges;
-	int boundaryEdges;
-	int connectComp;
-	bool manifoldness;
-	int genus;
-	int holes;
-	int edgeManifNum;
-	int vertManifNum;
-	int faceEdgeManif;
-	int faceVertManif;
-
-	MeasureTopoTag(MeshDocument &parent, MeshModel *mm, QString name);
 };
 
 #endif
