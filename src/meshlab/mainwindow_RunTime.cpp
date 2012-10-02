@@ -1726,6 +1726,7 @@ bool MainWindow::openProject(QString fileName)
       QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
       return false;
 	}
+	
 	//else{
 	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
 	//		{
@@ -2137,6 +2138,8 @@ bool MainWindow::importMesh(QString fileName)
 				postOpenDialog.exec();
 				pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 			}
+			if (meshDoc()->size() > 1)
+				showLayerDlg();
 		}
 		else
 			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
@@ -2524,7 +2527,14 @@ void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& sc
 	if ((xmldialog != NULL) && (xmldialog->isVisible()))
 		this->xmldialog->close();
 	PM.deleteXMLPlugin(scriptname);
-	PM.loadXMLPlugin(xmlpath);
+	try
+	{
+		PM.loadXMLPlugin(xmlpath);
+	}
+	catch (MeshLabXMLParsingException& e)
+	{
+		qDebug() << e.what();
+	}
 	fillFilterMenu();
 }
 
