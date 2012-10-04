@@ -1497,6 +1497,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			MeshModel* base=&m;
 			MeshModel* orig=&m;
 
+			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 			//actual cut of the mesh
 			if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(base->cm)>0 || (tri::Clean<CMeshO>::CountNonManifoldVertexFF(base->cm,false) != 0))
 			{
