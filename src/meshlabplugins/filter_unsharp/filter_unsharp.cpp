@@ -121,11 +121,11 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   case FP_UNSHARP_GEOMETRY:           return tr("Unsharp mask filtering of geometric shape, putting in more evidence ridges and valleys variations");
   case FP_UNSHARP_QUALITY:            return tr("Unsharp mask filtering of the quality field");
   case FP_UNSHARP_VERTEX_COLOR:       return tr("Unsharp mask filtering of the color, putting in more evidence color edge variations");
-  case FP_RECOMPUTE_VERTEX_NORMAL:    return tr("Recompute vertex normals according to three different schemes:<br>"
+  case FP_RECOMPUTE_VERTEX_NORMAL:    return tr("Recompute vertex normals according to four different schemes:<br>"
                                                 "1) as a simple average of normals of the incident faces <br>"
                                                 "2) as an area weighted average of normals of the incident faces <br>"
                                                 "3) as an angle weighted sum of normals of the incident faces according to the paper <i>Computing Vertex Normals from Polygonal Facet</i>, G Thurmer, CA Wuthrich, JGT 1998<br>"
-                                                "Probably this is the best all-purpose choice. It could slightly bias the result for degenerate, fat triangles."
+                                                "Probably this is the best all-purpose choice. It could slightly bias the result for degenerate, fat triangles.<br>"
                                                 "4) as a weighted sum of normals of the incident faces. Weights are defined according to the paper <i>Weights for Computing Vertex Normals from Facet Normals</i>, Nelson Max, JGT 1999<br>"
                                                 "The weight for each wedge is the cross product of the two edge over the product of the square of the two edge lengths."
                                                 "According to the original paper it is perfect only for spherical surface, but it should perform well also in practice.");
@@ -218,18 +218,19 @@ int FilterUnsharp::postCondition(QAction *a) const
 			case FP_DEPTH_SMOOTH:
 			case FP_LINEAR_MORPH :
 			case FP_UNSHARP_NORMAL:				
-			case FP_UNSHARP_GEOMETRY:  return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL;
+			case FP_UNSHARP_GEOMETRY:  return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL  | MeshModel::MM_FACENORMAL;
 			case FP_DIRECTIONAL_PRESERVATION:
-			case FP_FACE_NORMAL_SMOOTHING:	  
 			case FP_VERTEX_QUALITY_SMOOTHING:
 			case FP_UNSHARP_QUALITY:
+			case FP_CREASE_CUT:
+					return MeshModel::MM_UNKNOWN;
+			case FP_FACE_NORMAL_SMOOTHING:
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_FACE_NORMAL_NORMALIZE:	  
-			case FP_VERTEX_NORMAL_NORMALIZE:	  
-			case FP_CREASE_CUT:
-					return MeshModel::MM_UNKNOWN;
+			case FP_FACE_NORMAL_NORMALIZE:
+			case FP_VERTEX_NORMAL_NORMALIZE:
+					return MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL;
 			case FP_UNSHARP_VERTEX_COLOR:	     
 					return MeshModel::MM_VERTCOLOR;
 			
@@ -528,12 +529,16 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 				{
 				case 0: tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
 						tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+						tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				  break;
 				case 1: tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+						tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				  break;
 				case 2: tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m.cm);
+						tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				  break;
 				case 3: tri::UpdateNormals<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
+						tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
 				  break;
 				default :
 				  break;
