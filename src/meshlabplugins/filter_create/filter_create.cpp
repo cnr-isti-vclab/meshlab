@@ -20,7 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
 #include "filter_create.h"
 #include <vcg/complex/algorithms/create/platonic.h>
 
@@ -30,7 +29,7 @@
 
 FilterCreate::FilterCreate()
 {
-	typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE;
+    typeList <<CR_BOX<< CR_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -46,6 +45,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
     case CR_OCTAHEDRON: return QString("Octahedron");
     case CR_TETRAHEDRON: return QString("Tetrahedron");
     case CR_CONE: return QString("Cone");
+  case CR_TORUS: return QString("Torus");
 		default : assert(0);
 	}
 }
@@ -61,8 +61,9 @@ QString FilterCreate::filterName(FilterIDType filterId) const
     case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
     case CR_OCTAHEDRON: return QString("Create an Octahedron");
     case CR_TETRAHEDRON: return QString("Create a Tetrahedron");
-    case CR_CONE: return QString("Create a Cone");
-		default : assert(0);
+  case CR_CONE: return QString("Create a Cone");
+  case CR_TORUS: return QString("Create a Torus");
+        default : assert(0);
 	}
 }
 
@@ -85,13 +86,19 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
     case CR_BOX :
       parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
       break;
-    case CR_CONE:
-      parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
-      parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
-      parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
-      parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
-      break;
-		default : return;
+     case CR_CONE:
+       parlst.addParam(new RichFloat("r0",1,"Radius 1","Radius of the bottom circumference"));
+       parlst.addParam(new RichFloat("r1",2,"Radius 2","Radius of the top circumference"));
+       parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
+       parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
+       break;
+     case CR_TORUS:
+       parlst.addParam(new RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
+       parlst.addParam(new RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
+       parlst.addParam(new RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
+       parlst.addParam(new RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
+       break;
+        default : return;
 	}
 }
 
@@ -114,12 +121,24 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     case CR_OCTAHEDRON:
       vcg::tri::Octahedron<CMeshO>(m->cm);
       break;
-    case CR_SPHERE:
+    case CR_TORUS:
+    {
+      float hRadius=par.getFloat("hRadius");
+      float vRadius=par.getFloat("vRadius");
+      int hSubdiv=par.getInt("hSubdiv");
+      int vSubdiv=par.getInt("vSubdiv");
+      vcg::tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
+      vcg::tri::Clean<CMeshO>::MergeCloseVertex(m->cm,vRadius/100.0f);
+      vcg::tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
+        break;
+    }
+  case CR_SPHERE:
 	{
 		int rec = par.getInt("subdiv");
 		float radius = par.getFloat("radius");
 		m->cm.face.EnableFFAdjacency();
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		assert(vcg::tri::HasPerVertexTexCoord(m->cm) == false);
 		vcg::tri::Sphere<CMeshO>(m->cm,rec);
 
 		for(CMeshO::VertexIterator vi = m->cm.vert.begin();vi!= m->cm.vert.end();++vi)
@@ -145,7 +164,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       break;
    }
  	 vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
-   vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
+   vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
 	return true;
 }
 
@@ -161,6 +180,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     case CR_SPHERE:
     case CR_OCTAHEDRON:
     case CR_CONE:
+    case CR_TORUS:
       return MeshFilterInterface::MeshCreation;
       break;
     default: assert(0);
@@ -179,6 +199,7 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
 		case CR_OCTAHEDRON: return QString("octahedron");
 		case CR_TETRAHEDRON: return QString("tetrahedron");
 		case CR_CONE: return QString("cone");
+		case CR_TORUS: return QString("torus");
 		default : assert(0);
 	}
  }
