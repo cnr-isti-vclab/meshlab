@@ -198,10 +198,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     vcg::tri::UpdateFlags<CMeshO>::FaceClear(destMesh->cm,CMeshO::FaceType::SELECTED);
 
     // init new layer
-    tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
-    for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
-      face::ComputeNormalizedNormal(*fi);
-    tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
+    destMesh->UpdateBoxAndNormals();
     destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
   } break;
 
@@ -218,10 +215,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     Log("Duplicated current model to layer %i", md.meshList.size());
 
     // init new layer
-    tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
-    for(fi=destMesh->cm.face.begin();fi!=destMesh->cm.face.end();++fi)	// face normals
-      face::ComputeNormalizedNormal(*fi);
-    tri::UpdateNormals<CMeshO>::PerVertex(destMesh->cm);				// vertex normals
+    destMesh->UpdateBoxAndNormals();
     destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
   } break;
 
@@ -268,9 +262,8 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
       int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
       Log( "Removed %d duplicated vertices", delvert);
     }
+    destMesh->UpdateBoxAndNormals();
 
-    tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(destMesh->cm);
-    tri::UpdateBounding<CMeshO>::Box(destMesh->cm);
     Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
   } break;
 
@@ -291,8 +284,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
       MeshModel *destMesh= md.addNewMesh("",QString("CC %1").arg(i));
       tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, cm, true);
-      tri::UpdateBounding<CMeshO>::Box(destMesh->cm);						// updates bounding box
-      tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(destMesh->cm);				// vertex normals
+      destMesh->UpdateBoxAndNormals();
       destMesh->cm.Tr = cm.Tr;								// copy transformation
     }
   } break;
