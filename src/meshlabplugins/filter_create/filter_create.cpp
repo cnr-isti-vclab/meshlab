@@ -128,8 +128,6 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       int hSubdiv=par.getInt("hSubdiv");
       int vSubdiv=par.getInt("vSubdiv");
       vcg::tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
-      vcg::tri::Clean<CMeshO>::MergeCloseVertex(m->cm,vRadius/100.0f);
-      vcg::tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
         break;
     }
   case CR_SPHERE:
