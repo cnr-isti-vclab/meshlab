@@ -156,14 +156,14 @@ class MeshLabServer
 			if(degNum) 
 				printf("Warning model contains %i degenerate faces. Removed them.",degNum);
 			mm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-			vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm.cm);
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm.cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm.cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm.cm);
 		} // standard case
 		else {
 			if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				vcg::tri::UpdateNormals<CMeshO>::PerFace(mm.cm);
+				vcg::tri::UpdateNormal<CMeshO>::PerFace(mm.cm);
 			else
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm.cm);
+				vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm.cm);
 		}
 		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
 

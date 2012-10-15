@@ -375,8 +375,8 @@ void MeshModel::UpdateBoxAndNormals()
 {
   tri::UpdateBounding<CMeshO>::Box(cm);
   if(cm.fn>0) {
-    tri::UpdateNormals<CMeshO>::PerFaceNormalized(cm);
-    tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(cm);
+    tri::UpdateNormal<CMeshO>::PerFaceNormalized(cm);
+    tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(cm);
   }
 }
 
@@ -602,7 +602,7 @@ bool MeshModelState::apply(MeshModel *_m)
             if(!(*vi).IsD()) (*vi).N()=(*ci);
 
         //now reset the face normals
-        tri::UpdateNormals<CMeshO>::PerFaceNormalized(m->cm);
+        tri::UpdateNormal<CMeshO>::PerFaceNormalized(m->cm);
     }
 
     if(changeMask & MeshModel::MM_FACEFLAGSELECT)

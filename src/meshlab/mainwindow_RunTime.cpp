@@ -2036,14 +2036,14 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     if(degNum)
       GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
     mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    vcg::tri::UpdateNormals<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
+    vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
+    vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
   } // standard case
   else
   {
-    vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm->cm);
+    vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm->cm);
     if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
-       vcg::tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(mm->cm);
+       vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
   }
   vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
 

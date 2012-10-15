@@ -28,15 +28,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/vertex/component_ocf.h>
-#include <vcg/simplex/edge/base.h>
-#include <vcg/simplex/face/base.h>
-#include <vcg/simplex/face/component_ocf.h>
-
-#include <vcg/complex/used_types.h>
 #include <vcg/complex/complex.h>
-#include <vcg/complex/allocate.h>
 
 #include <vcg/simplex/face/topology.h>
 
