@@ -30,7 +30,7 @@ using namespace vcg::tri;
 
 void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricTexParameter &pp, CallBackPos *cb)
 {
-  tri::UpdateNormals<CMeshO>::PerFace(m);
+  tri::UpdateNormal<CMeshO>::PerFace(m);
 	math::Quadric<double> QZero;
 	QZero.SetZero();
   QuadricTexHelper<CMeshO>::QuadricTemp TD3(m.vert,QZero);
