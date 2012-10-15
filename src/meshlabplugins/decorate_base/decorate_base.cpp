@@ -958,8 +958,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     vector<PointPC> *FVp = &fvH();
     BVp->clear();
     FVp->clear();
-    if(!m->hasDataMask(MeshModel::MM_FACEFACETOPO)) m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    else tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
     tri::SelectionStack<CMeshO> ss(m->cm);
     ss.push();
     tri::UpdateSelection<CMeshO>::VertexClear(m->cm);
@@ -1004,8 +1003,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
     BVp->clear();
     FVp->clear();
 
-    if(!m->hasDataMask(MeshModel::MM_FACEFACETOPO)) m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    else tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
 
     Color4b edgeCol[5]={Color4b::Black, Color4b::Green, Color4b::Black, Color4b::Red,Color4b::Magenta};
     Color4b faceCol[5]={Color4b::Black, Color4b::Green, Color4b::Black, Color4b::Red,Color4b::Magenta};
