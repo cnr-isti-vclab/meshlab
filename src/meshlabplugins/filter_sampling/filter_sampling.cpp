@@ -164,7 +164,7 @@ public:
 		closestPtMesh = _closestMesh;
 		if(m) 
 		{
-			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
       if(m->fn==0) useVertexSampling = true;
               else useVertexSampling = false;
 
@@ -284,7 +284,7 @@ public:
 		m=_m;
 		if(m) 
 		{
-			tri::UpdateNormals<CMeshO>::PerFaceNormalized(*m);
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
 			if(m->fn==0) useVertexSampling = true;
 							else useVertexSampling = false;
 							
@@ -901,7 +901,7 @@ case FP_CLUSTERED_SAMPLING :
             mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
             mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
 			mm1->updateDataMask(MeshModel::MM_FACEMARK);
-			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mm1->cm);
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm1->cm);
 
 			MeshModel *samplePtMesh =0; 
 			MeshModel *closestPtMesh =0; 
@@ -941,8 +941,8 @@ case FP_CLUSTERED_SAMPLING :
 				{
 					tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
 					tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
-					tri::UpdateColor<CMeshO>::VertexQualityRamp(samplePtMesh->cm);
-					tri::UpdateColor<CMeshO>::VertexQualityRamp(closestPtMesh->cm);
+					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(samplePtMesh->cm);
+					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(closestPtMesh->cm);
 				}
 			}
 			break;
@@ -952,7 +952,7 @@ case FP_CLUSTERED_SAMPLING :
 			MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample. 
 			float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
 			srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-			tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 
 		  RedetailSampler rs;
 			rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
@@ -985,7 +985,7 @@ case FP_CLUSTERED_SAMPLING :
 
 			tri::SurfaceSampling<CMeshO,RedetailSampler>::VertexUniform(trgMesh->cm,rs,trgMesh->cm.vn);
 			
-			if(rs.coordFlag) tri::UpdateNormals<CMeshO>::PerFaceNormalized(trgMesh->cm);
+			if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
 			
 		} break;
 		case FP_UNIFORM_MESH_RESAMPLING :
@@ -1023,7 +1023,7 @@ case FP_CLUSTERED_SAMPLING :
 				int total = tri::Clean<CMeshO>::MergeCloseVertex(offsetMesh->cm,mergeThr);
 				Log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
             }
-			tri::UpdateNormals<CMeshO>::PerVertexPerFace(offsetMesh->cm);
+            tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
 		} break;
 		case FP_VORONOI_CLUSTERING :
 		{
@@ -1052,7 +1052,7 @@ case FP_CLUSTERED_SAMPLING :
 			//VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
 	//			tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
-	//			tri::UpdateNormals<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
+	//			tri::UpdateNormal<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
 
 		}
 		break;
@@ -1061,11 +1061,11 @@ case FP_CLUSTERED_SAMPLING :
 			MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples 
 			MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample. 
 			bool backwardFlag = par.getBool("backward");
-			mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);	
 			tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
 			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
-			vector<CMeshO::CoordType> vecP; 
+			mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);
+			vector<CMeshO::CoordType> vecP;
 			// Fills the point vector with the position of the Point cloud
 			for(CMeshO::VertexIterator vi= mmV->cm.vert.begin(); vi!= mmV->cm.vert.end(); ++vi) if(!(*vi).IsD())
 				vecP.push_back((*vi).cP());
@@ -1087,7 +1087,7 @@ case FP_CLUSTERED_SAMPLING :
 			SampleSHT sht;
 	  tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
-			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
+			tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
       tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
       bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
       bool sampleRadiusFlag = par.getBool("SampleRadius");
@@ -1134,7 +1134,7 @@ case FP_CLUSTERED_SAMPLING :
 			tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
 			tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
 
-			tri::UpdateNormals<CMeshO>::PerFaceNormalized(mmM->cm);
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
 			std::vector<Point3f> pvec;
 	
 			tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);

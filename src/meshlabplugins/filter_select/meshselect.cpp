@@ -390,9 +390,9 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   case CP_SELFINTERSECT_SELECT:
     {
       std::vector<CFaceO *> IntersFace;
-      std::vector<CFaceO *>::iterator fpi;
       tri::Clean<CMeshO>::SelfIntersections(m.cm,IntersFace);
       tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
+      std::vector<CFaceO *>::iterator fpi;
       for(fpi=IntersFace.begin();fpi!=IntersFace.end();++fpi)
         (*fpi)->SetS();
     break;
