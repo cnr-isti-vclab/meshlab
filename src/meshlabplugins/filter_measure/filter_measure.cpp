@@ -209,8 +209,8 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
         Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
         Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
 
-        Matrix44f PCA;
-        Point4f pcav;
+        Matrix33f PCA;
+        Point3f pcav;
         I.InertiaTensorEigen(PCA,pcav);
         Log("Principal axes are :");
         Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
