@@ -2,12 +2,8 @@
 #define KNNGRAPH_H
 
 #include <QTime>
-
 #include <Vector>
-
 #include <vcg/complex/complex.h>
-#include <vcg/complex/allocate.h>
-
 #include <vcg/space/index/kdtree/kdtree.h>
 
 namespace vcg {

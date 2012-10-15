@@ -35,7 +35,6 @@
 
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/update/bounding.h>
-#include <vcg/complex/allocate.h>
 
 using namespace vcg;
 

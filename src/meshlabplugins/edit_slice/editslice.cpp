@@ -30,10 +30,6 @@
 #include <wrap/gl/pick.h>
 
 #include <vcg/complex/algorithms/create/platonic.h>
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/vertex/component_ocf.h>
-#include <vcg/space/point3.h>
-#include <vcg/space/box3.h>
 #include <vcg/space/index/grid_closest.h>
 #include <vcg/complex/intersection.h>
 #include <wrap/gl/space.h>
