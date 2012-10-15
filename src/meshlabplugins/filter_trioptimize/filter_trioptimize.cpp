@@ -272,7 +272,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
 		tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 		tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 		vcg::tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 		
     if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0) {
