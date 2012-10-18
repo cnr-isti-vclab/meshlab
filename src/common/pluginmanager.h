@@ -47,7 +47,7 @@ public:
 	void loadPlugins(RichParameterSet& defaultGlobal);
 	QString pluginsCode() const;
 	void loadXMLPlugin(const QString& filename);
-	MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
+	//MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
 	void deleteXMLPlugin(const QString& plugscriptname);
 
 	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}

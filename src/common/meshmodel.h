@@ -298,7 +298,6 @@ public:
 Plane Class
 the base class for a registered image that contains the path, the semantic and the data of the image
 */
-class RasterModel;
 
 class Plane
 {
@@ -484,8 +483,6 @@ private:
 //	QMap<int,RasterModel*> _rendermap;
 //	QReadWriteLock _mutdoc;
 //};
-
-class MeshModelSI;
 
 class MeshDocument : public QObject
 {

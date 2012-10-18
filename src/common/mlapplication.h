@@ -14,7 +14,7 @@ public:
 	static const QString appName(){return tr("MeshLab"); }
 	static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
 	static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw);}
-	static const QString appVer() {return tr("1.3.3"); }
+    static const QString appVer() {return tr("1.3.3BETA"); }
 	static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); } 
 	static const QString organization(){return tr("VCG");}
 	static const QString organizationHost() {return tr("vcg.isti.cnr.it");}

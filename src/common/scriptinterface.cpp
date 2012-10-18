@@ -191,45 +191,45 @@ static bool TestCallback(const int , const char* )
 	return true;
 }
 
-QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine, void * param)
-{
-	QString filterName = context->argument(0).toString();
-	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
-	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
-	if (it == pm->stringFilterMap.end())
-	{
-		return false;
-	}
+//QScriptValue PluginInterfaceInit(QScriptContext *context, QScriptEngine *engine, void * param)
+//{
+//	QString filterName = context->argument(0).toString();
+//	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
+//	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
+//	if (it == pm->stringFilterMap.end())
+//	{
+//		return false;
+//	}
+//
+//	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
+//	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
+//
+//	MeshFilterInterface * mi = it.value();
+//	QAction act(filterName, NULL);
+//	mi->initParameterSet(&act, (md->current()->mm), *rps);
+//
+//	return true;
+//}
 
-	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
-	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
-
-	MeshFilterInterface * mi = it.value();
-	QAction act(filterName, NULL);
-	mi->initParameterSet(&act, (md->current()->mm), *rps);
-
-	return true;
-}
-
-QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine, void * param)
-{
-	QString filterName = context->argument(0).toString();
-	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
-	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
-	if (it == pm->stringFilterMap.end())
-	{
-		return false;
-	}
-
-	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
-	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
-
-	MeshFilterInterface * mi = it.value();
-	QAction act(filterName, NULL);
-	const bool res = mi->applyFilter(&act, *(md->md), *rps, TestCallback);
-
-	return res;
-}
+//QScriptValue PluginInterfaceApply(QScriptContext *context, QScriptEngine *engine, void * param)
+//{
+//	QString filterName = context->argument(0).toString();
+//	PluginManager * pm = reinterpret_cast<PluginManager *>(param);
+//	QMap<QString, MeshFilterInterface*>::iterator it = pm->stringFilterMap.find(filterName);
+//	if (it == pm->stringFilterMap.end())
+//	{
+//		return false;
+//	}
+//
+//	MeshDocumentSI* md = qscriptvalue_cast<MeshDocumentSI*>(engine->globalObject().property(ScriptAdapterGenerator::meshDocVarName()));
+//	RichParameterSet* rps = qscriptvalue_cast<RichParameterSet*>(context->argument(1));
+//
+//	MeshFilterInterface * mi = it.value();
+//	QAction act(filterName, NULL);
+//	const bool res = mi->applyFilter(&act, *(md->md), *rps, TestCallback);
+//
+//	return res;
+//}
 
 QScriptValue PluginInterfaceApplyXML(QScriptContext *context, QScriptEngine *engine, void * param)
 {

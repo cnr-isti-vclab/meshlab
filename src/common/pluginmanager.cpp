@@ -113,7 +113,6 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
             iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
           }
         }
-
         MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
         if (iIO)
           meshIOPlug.push_back(iIO);
@@ -124,7 +123,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
           meshDecoratePlug.push_back(iDecorator);
           foreach(QAction *decoratorAction, iDecorator->actions())
           {
-            editActionList.push_back(decoratorAction);
+            decoratorActionList.push_back(decoratorAction);
             iDecorator->initGlobalParameterSet(decoratorAction,defaultGlobal);
           }
         }
@@ -141,6 +140,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
             editActionList.push_back(editAction);
         }
       }
+	  else
+		  qDebug() << loader.errorString();
     }
   }
   knownIOFormats();
@@ -323,7 +324,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
       {
         QString plugnamespace = pluginNameSpace() + "." + pname;
         //pluginnamespaces << plugnamespace;
-        scriptplugcode += pluginNameSpace() + "." + pname + " = { };\n";
+        scriptplugcode += plugnamespace + " = { };\n";
         QStringList filters = pluginfo->filterNames();
         foreach(QString filter,filters)
         {

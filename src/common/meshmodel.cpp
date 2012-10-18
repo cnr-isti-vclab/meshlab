@@ -1099,7 +1099,6 @@ bool MeshLabRenderState::update( const int id,const MeshLabRenderRaster& rm,cons
 	QMap<int,MeshLabRenderRaster*>::iterator it = _rastermap.find(id);
 	if (it != _rastermap.end())
 	{
-		MeshLabRenderRaster* rrst = *it;
 		remove(it);
 		_rastermap[id] = new MeshLabRenderRaster(rm);
 		unlockRenderState(RASTER);
