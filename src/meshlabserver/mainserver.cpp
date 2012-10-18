@@ -64,7 +64,7 @@ class MeshLabServer
 		PM.loadPlugins(defaultGlobal);
 
 		printf("Total %i filtering actions\n", PM.actionFilterMap.size());
-		printf("Total %i io plugins\n", PM.meshIOPlug.size());
+		printf("Total %i io plugins\n", PM.meshIOPlugins().size());
 	}
 
   void dumpPluginInfoWiki(FILE *fp)
