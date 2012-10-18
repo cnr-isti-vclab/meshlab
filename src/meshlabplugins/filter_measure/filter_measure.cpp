@@ -184,10 +184,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 	if(filterName == "Compute Geometric Measures")
 		{
 			CMeshO &m=md.mm()->cm;
-			tri::Inertia<CMeshO> I;
-			I.Compute(m);
-
-			tri::UpdateBounding<CMeshO>::Box(m); 
+			tri::Inertia<CMeshO> I(m);
 			float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 			float Volume = I.Mass(); 
 			Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
