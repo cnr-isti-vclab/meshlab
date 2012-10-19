@@ -264,8 +264,9 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
 					}
 
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					pm.UpdateBoxAndNormals();
 					Log("Successfully created a mesh of %i vert and %i faces",m.cm.vn,m.cm.fn);
 					
 					int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
@@ -345,9 +346,10 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 					Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 					//m.cm.Clear();	
 
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-					
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					pm.UpdateBoxAndNormals();
+
 					int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
 					qh_freeqhull(!qh_ALL);  
 					qh_memfreeshort (&curlong, &totlong);
@@ -375,9 +377,9 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 				bool result = compute_voronoi(dim,numpoints,m,pm,threshold);
 				
 				if(result){
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					pm.UpdateBoxAndNormals();
 					Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 
 					return true;
@@ -425,9 +427,9 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 				bool result =compute_alpha_shapes(dim,numpoints,m,pm,alpha,alphashape);
 
 				if(result){
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					pm.UpdateBoxAndNormals();
 					Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 					Log("Alpha = %f ",alpha);
 					//m.cm.Clear();	
@@ -495,8 +497,9 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						//Clear all face because,somewhere, they have been selected
 						tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
 					}
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
+					pm.UpdateBoxAndNormals();
 					Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
 				}
 
@@ -523,8 +526,9 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 						tri::UpdateSelection<CMeshO>::FaceClear(pm2.cm);
 					}
 
-					vcg::tri::UpdateBounding<CMeshO>::Box(pm2.cm);
-					vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(pm2.cm);
+					//vcg::tri::UpdateBounding<CMeshO>::Box(pm2.cm);
+					//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm2.cm);
+					pm2.UpdateBoxAndNormals();
 					Log("Successfully created a mesh of %i vert and %i faces",pm2.cm.vn,pm2.cm.fn);
 				}
 
