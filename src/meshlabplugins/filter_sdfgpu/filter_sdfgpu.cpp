@@ -572,11 +572,10 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     }
 
     //Updating mesh metadata
-    tri::UpdateBounding<CMeshO>::Box(m);
     vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
-    vcg::tri::UpdateNormals<CMeshO>::PerVertexAngleWeighted(m);
-
+    vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m);
+	tri::UpdateBounding<CMeshO>::Box(m);
 
     //Enable & Reset the necessary attributes
     switch(onPrimitive)
