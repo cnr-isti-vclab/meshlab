@@ -86,7 +86,7 @@ bool GtsIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
 	if (!normalsUpdated)
-		vcg::tri::UpdateNormals<CMeshO>::PerVertex(m.cm);		// updates normals
+		vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
 
 	if (cb != NULL)
 		(*cb)(99, "Done");
