@@ -227,8 +227,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 				// blend toghether face normals and recompute vertex normal from these normals 
 				// to get smoother offest directions
 				tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm, 3); 
-				tri::UpdateNormals<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-				tri::UpdateNormals<CMeshO>::NormalizeVertex(m.cm);
+				tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+				tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 				
 				for(CMeshO::FaceIterator fi=m.cm.face.begin(); fi!=m.cm.face.end(); fi++) {
 					if((*fi).IsD()) continue;
@@ -263,7 +263,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			}
 			
 			// update normals
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 			
 			smoothPeaks(m.cm, selected, storeDispl);
 			
@@ -299,7 +299,7 @@ void GeometryAgingPlugin::refineMesh(CMeshO &m, QualityEdgePred &ep, bool select
 		}
 		
 		ref = RefineE<CMeshO, MidPoint<CMeshO>, QualityEdgePred>(m, MidPoint<CMeshO>(&m), ep, selection, cb);
-		if(ref) vcg::tri::UpdateNormals<CMeshO>::PerFaceNormalized(m);
+		if(ref) vcg::tri::UpdateNormal<CMeshO>::PerFaceNormalized(m);
 		
 		if(selection) {
 			// erode selection
@@ -388,7 +388,7 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosi
 		}
 	}
 	
-	vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+	vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 	
 	// clear vertexes V bit again
 	tri::UpdateFlags<CMeshO>::VertexClearV(m);

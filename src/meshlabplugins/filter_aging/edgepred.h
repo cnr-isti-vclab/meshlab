@@ -83,7 +83,7 @@ class QualityEdgePred
 		}
 		
 	protected:
-		EdgeLen<CMeshO, CMeshO::ScalarType> lenp;	// edge len predicate object
+		tri::EdgeLen<CMeshO, CMeshO::ScalarType> lenp;	// edge len predicate object
 		float qthVal;			// edge quality threshold value
 		bool selection;		// working on the selection only
 		int selbit;			// face user bit used when working on selections
