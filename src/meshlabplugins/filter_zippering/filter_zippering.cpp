@@ -1518,10 +1518,10 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 	tri::UnMarkAll(a->cm);
 	tri::UnMarkAll(b->cm);
 
-	tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);
-	tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
-	tri::UpdateNormals<CMeshO>::PerFaceNormalized(b->cm);
-	tri::UpdateNormals<CMeshO>::PerVertexNormalized(b->cm);
+	tri::UpdateNormal<CMeshO>::PerFaceNormalized(a->cm);
+	tri::UpdateNormal<CMeshO>::PerVertexNormalized(a->cm);
+	tri::UpdateNormal<CMeshO>::PerFaceNormalized(b->cm);
+	tri::UpdateNormal<CMeshO>::PerVertexNormalized(b->cm);
 	//fixed eps 
 	eps = 0.00001f;
 
@@ -1594,9 +1594,8 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		tri::Append<CMeshO, CMeshO>::Mesh( a->cm, b->cm );
 		tri::UpdateTopology<CMeshO>::FaceFace(a->cm);
 		tri::UpdateFlags<CMeshO>::FaceClear(a->cm);
-		tri::UpdateNormals<CMeshO>::PerFaceNormalized(a->cm);   
-		tri::UpdateNormals<CMeshO>::PerVertexNormalized(a->cm);
-
+		tri::UpdateNormal<CMeshO>::PerFaceNormalized(a->cm);   
+		tri::UpdateNormal<CMeshO>::PerVertexNormalized(a->cm);
 		//create grid on mesh A
 		MeshFaceGrid grid;
 		grid.Set( a->cm.face.begin(), a->cm.face.begin() + fn_limit );  //compute grid on the original part of A
