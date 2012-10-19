@@ -314,7 +314,7 @@ public:
 		heap.clear();
 
 		// comuputing edge flip priority require non normalized vertex normals AND non normalized face normals.
-			vcg::tri::UpdateNormals<TRIMESH_TYPE>::PerVertexPerFace(m);
+			vcg::tri::UpdateNormal<TRIMESH_TYPE>::PerVertexPerFace(m);
 
 		VertexIterator vi;
 		for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)

@@ -360,7 +360,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, 0.0001f, selection,cb);
 			
 		
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
 		if (par.getBool("selection")) {
 			// Clear Writable flags (faces)
@@ -388,7 +388,7 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		int iternum = par.getInt("iterations");
 		float dthreshold = par.getFloat("AngleDeg");
 		tri::Smooth<CMeshO>::VertexCoordPlanarLaplacian(m.cm, iternum, math::ToRad(dthreshold), selection,cb);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 	}
 
 	return true;
