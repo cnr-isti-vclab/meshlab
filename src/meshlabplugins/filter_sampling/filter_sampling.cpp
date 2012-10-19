@@ -105,7 +105,7 @@ class BaseSampler
                         if (ypos < 0) ypos += tex->height();
 
 			val = tex->pixel(xpos,ypos);
-			m->vert.back().C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+			m->vert.back().C()=Color4b(qRed(val),qGreen(val),qBlue(val),255);
 		}
 		
 	}
@@ -942,8 +942,8 @@ case FP_CLUSTERED_SAMPLING :
 					tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
 					tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
 
-					tri::UpdateColor<CMeshO>::VertexQualityRamp(samplePtMesh->cm);
-					tri::UpdateColor<CMeshO>::VertexQualityRamp(closestPtMesh->cm);
+					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(samplePtMesh->cm);
+					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(closestPtMesh->cm);
 				}
 			}
 			break;
@@ -1088,8 +1088,8 @@ case FP_CLUSTERED_SAMPLING :
 			SampleSHT sht;
 	  tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
-			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
-      tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
+			tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
+	  tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
       bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
       bool sampleRadiusFlag = par.getBool("SampleRadius");
       sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());

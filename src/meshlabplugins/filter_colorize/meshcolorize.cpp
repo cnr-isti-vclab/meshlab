@@ -165,7 +165,7 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
        Histogramf H;
        tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
        m.updateDataMask(MeshModel::MM_VERTCOLOR);
-       tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+       tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
      }
      Log("Saturated ");
    }
@@ -195,11 +195,11 @@ break;
       if(usePerc)
       {
         if(ID(filter)==CP_CLAMP_QUALITY) tri::UpdateQuality<CMeshO>::VertexClamp(m.cm,PercLo,PercHi);
-                                    else tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,PercLo,PercHi);
+                                    else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,PercLo,PercHi);
         Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",H.MinV(),H.MaxV(),PercLo,PercHi,par.getDynamicFloat("perc"),100-par.getDynamicFloat("perc"));
       } else {
         if(ID(filter)==CP_CLAMP_QUALITY) tri::UpdateQuality<CMeshO>::VertexClamp(m.cm,RangeMin,RangeMax);
-                                    else tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,RangeMin,RangeMax);
+                                    else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,RangeMin,RangeMax);
         Log("Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);
       }
       break;
@@ -224,7 +224,7 @@ break;
          PercHi = max(math::Abs(PercLo), PercHi);
        }
 
-       tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,PercLo,PercHi);
+       tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm,PercLo,PercHi);
        Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
            H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100-perc);
        break;
@@ -257,7 +257,7 @@ break;
       
       Histogramf H;
       tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-      tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+      tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
       Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
     break;
     }  
@@ -336,7 +336,7 @@ break;
 
        default: assert(0);
      }
-     tri::UpdateColor<CMeshO>::FaceQualityRamp(m.cm,minV,maxV,false);
+     tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm,minV,maxV,false);
      break;
    }
 
@@ -344,13 +344,13 @@ break;
   case CP_RANDOM_CONNECTED_COMPONENT:
    m.updateDataMask(MeshModel::MM_FACEFACETOPO);
    m.updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
-   vcg::tri::UpdateColor<CMeshO>::FaceRandomConnectedComponent(m.cm);
+   vcg::tri::UpdateColor<CMeshO>::PerFaceRandomConnectedComponent(m.cm);
    break;
 
  case CP_RANDOM_FACE:
      m.updateDataMask(MeshModel::MM_FACEFACETOPO);
      m.updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
-    vcg::tri::UpdateColor<CMeshO>::MultiFaceRandom(m.cm);
+    vcg::tri::UpdateColor<CMeshO>::PerFaceRandom(m.cm);
     break;
 
   case CP_VERTEX_SMOOTH:
@@ -368,11 +368,11 @@ break;
 		break;
   case CP_FACE_TO_VERTEX:
      m.updateDataMask(MeshModel::MM_VERTCOLOR);
-     tri::UpdateColor<CMeshO>::VertexFromFace(m.cm);
+     tri::UpdateColor<CMeshO>::PerVertexFromFace(m.cm);
 		break;
 	 case CP_VERTEX_TO_FACE:
      m.updateDataMask(MeshModel::MM_FACECOLOR);
-     tri::UpdateColor<CMeshO>::FaceFromVertex(m.cm);
+     tri::UpdateColor<CMeshO>::PerFaceFromVertex(m.cm);
 		 break;
   case CP_TEXTURE_TO_VERTEX:
 		{
@@ -387,7 +387,7 @@ break;
           // note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
           vcg::Point2f newcoord((*fi).WT(i).P().X()-floor((*fi).WT(i).P().X()),(*fi).WT(i).P().Y()-floor((*fi).WT(i).P().Y()));
           QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
-					(*fi).V(i)->C().SetRGB(qRed(val),qGreen(val),qBlue(val));
+                    (*fi).V(i)->C()=Color4b(qRed(val),qGreen(val),qBlue(val),255);
 				}
 			}
 	    }
