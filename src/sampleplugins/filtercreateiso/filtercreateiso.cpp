@@ -122,7 +122,7 @@ bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		printf("[MARCHING CUBES] Building mesh...");
 		MyMarchingCubes					mc(m.cm, walker);
 		walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10);
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+		vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box		
 	}
 	return true;
