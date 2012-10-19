@@ -194,7 +194,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 	{
         errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
         return false; // can't continue, mesh can't be processed
-      }
+    }
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
