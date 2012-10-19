@@ -371,7 +371,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
       if(pp.overlap==false)
         tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
 
-      tri::UpdateNormals<CMeshO>::PerVertexPerFace(paraModel->cm);
+      tri::UpdateNormal<CMeshO>::PerVertexPerFace(paraModel->cm);
 
       baseModel->clearDataMask(bitToBeCleared);
       Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
@@ -830,7 +830,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // Rasterizing faces
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-            tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+            tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
             if (vertexSampling)
             {
                 TransferColorSampler sampler(srcMesh->cm, img, upperbound,vertexMode); // color sampling
@@ -901,7 +901,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 
             srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-            tri::UpdateNormals<CMeshO>::PerFaceNormalized(srcMesh->cm);
+            tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 
             // Colorizing vertices
             VertexSampler vs(srcMesh->cm, srcImg, upperbound);
