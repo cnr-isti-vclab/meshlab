@@ -968,8 +968,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			}
 			else
 			{
-				tri::Inertia<CMeshO> I;
-				I.Compute(m.cm);
+				tri::Inertia<CMeshO> I(m.cm);
 
 				Matrix33f PCA;
 				Point3f pcav;
