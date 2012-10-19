@@ -371,7 +371,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
       if(pp.overlap==false)
         tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
 
-      tri::UpdateNormal<CMeshO>::PerVertexPerFace(paraModel->cm);
+      paraModel->UpdateBoxAndNormals();
 
       baseModel->clearDataMask(bitToBeCleared);
       Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
