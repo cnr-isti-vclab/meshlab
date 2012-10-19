@@ -941,8 +941,9 @@ case FP_CLUSTERED_SAMPLING :
 				{
 					tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
 					tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
-					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(samplePtMesh->cm);
-					tri::UpdateColor<CMeshO>::PerVertexQualityRamp(closestPtMesh->cm);
+
+					tri::UpdateColor<CMeshO>::VertexQualityRamp(samplePtMesh->cm);
+					tri::UpdateColor<CMeshO>::VertexQualityRamp(closestPtMesh->cm);
 				}
 			}
 			break;
@@ -1087,7 +1088,7 @@ case FP_CLUSTERED_SAMPLING :
 			SampleSHT sht;
 	  tri::VertTmark<CMeshO> markerFunctor;
 			typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
-			tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
+			tri::UpdateColor<CMeshO>::VertexConstant(mmM->cm, Color4b::LightGray);
       tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
       bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
       bool sampleRadiusFlag = par.getBool("SampleRadius");
