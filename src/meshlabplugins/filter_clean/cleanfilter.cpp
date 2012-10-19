@@ -314,7 +314,6 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
   case FP_REMOVE_FOLD_FACE:
     {
       m.updateDataMask(MeshModel::MM_FACECOLOR);
-      tri::UpdateColor<CMeshO>::FaceConstant(m.cm, Color4b::White);
       int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
       m.UpdateBoxAndNormals();
       Log("Successfully flipped %d folded faces", total);
