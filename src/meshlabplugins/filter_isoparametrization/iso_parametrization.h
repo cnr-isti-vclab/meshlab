@@ -2,11 +2,9 @@
 #define TRI_PARAMETRIZATION	
 
 // stuff to define the mesh
- #include <wrap/io_trimesh/export_ply.h>
-#include <wrap/io_trimesh/import_ply.h>
-#include <vcg/space/triangle3.h>
-#include <vcg/simplex/face/component_rt.h>
-#include <vcg/complex/complex.h>
+//#include <vcg/space/triangle3.h>
+//#include <vcg/simplex/face/component_rt.h>
+//#include <vcg/complex/complex.h>
 #include "local_parametrization.h"
 #include "uv_grid.h"
 #include <vcg/complex/algorithms/stat.h>

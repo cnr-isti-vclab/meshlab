@@ -5,7 +5,7 @@
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/bounding.h>
-#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/component_ep.h>
 #include <vector>
 #include <map>
 
@@ -13,12 +13,12 @@ template <class MeshType>
 void UpdateStructures(MeshType *mesh)
 {
 	vcg::tri::UpdateBounding<MeshType>::Box(*mesh);
-	vcg::tri::UpdateNormals<MeshType>::PerFaceNormalized(*mesh);
-	vcg::tri::UpdateNormals<MeshType>::PerVertexNormalized(*mesh);
+	vcg::tri::UpdateNormal<MeshType>::PerFaceNormalized(*mesh);
+	vcg::tri::UpdateNormal<MeshType>::PerVertexNormalized(*mesh);
 	vcg::tri::UpdateTopology<MeshType>::FaceFace(*mesh);
   vcg::tri::UpdateTopology<MeshType>::TestFaceFace(*mesh);
 	vcg::tri::UpdateTopology<MeshType>::VertexFace(*mesh);
-	vcg::tri::UpdateEdges<MeshType>::Set(*mesh);
+	vcg::tri::UpdateComponentEP<MeshType>::Set(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::Clear(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(*mesh);
 	vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFace(*mesh);

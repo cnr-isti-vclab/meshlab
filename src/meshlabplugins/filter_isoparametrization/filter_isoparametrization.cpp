@@ -26,7 +26,7 @@
 #include "defines.h"
 
 #include "../../common/meshmodel.h"
-#include <filter_isoparametrization.h>
+#include "filter_isoparametrization.h"
 #include <iso_transfer.h>
 
 
@@ -393,7 +393,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			mm->updateDataMask(MeshModel::MM_VERTFACETOPO);
 			PrintStats(rem);
-      tri::UpdateNormals<CMeshO>::PerFace(*rem);
+      tri::UpdateNormal<CMeshO>::PerFace(*rem);
 			return true;
 		}
 	case ISOP_DIAMPARAM :
@@ -415,7 +415,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 			DiamondParametrizator DiaPara;
 			DiaPara.Init(&isoPHandle());
 			DiaPara.SetCoordinates<CMeshO>(*rem,border_size);
-      tri::UpdateNormals<CMeshO>::PerFace(*rem);
+      tri::UpdateNormal<CMeshO>::PerFace(*rem);
 			return true;
 		}
 	case ISOP_LOAD : 

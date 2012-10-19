@@ -379,7 +379,7 @@ template <class FaceType>
 		#ifndef _MESHLAB
 		int f0=to_param->fn;
 		#endif
-		bool done=vcg::RefineE<ParamMesh,SplitMidPoint<ParamMesh>,EdgePredicate<ParamMesh> >(*to_param,splMd,eP);
+		bool done=vcg::tri::RefineE<ParamMesh,SplitMidPoint<ParamMesh>,EdgePredicate<ParamMesh> >(*to_param,splMd,eP);
 		#ifndef _MESHLAB
 		printf("FACE ADDED  %d \n",to_param->fn-f0);
 		#endif
@@ -459,7 +459,7 @@ public:
 	//void Draw()
 	//{
 	//	ParamMesh *to_param=isoParam->ParaMesh();
-	//	//vcg::tri::UpdateNormals<ParamMesh>::PerFaceNormalized(*to_param);
+	//	//vcg::tri::UpdateNormal<ParamMesh>::PerFaceNormalized(*to_param);
 	//	glDepthRange(0.01,1.0);
 	//	glEnable(GL_LIGHTING);
 	//	glEnable(GL_LIGHT0);

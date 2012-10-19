@@ -1,18 +1,18 @@
-#include <iso_parametrization.h>
-
-#include<vcg/simplex/edge/base.h>
-#include<vcg/simplex/vertex/base.h>
-#include<vcg/simplex/face/base.h>
-#include <vcg/complex/complex.h>
-#include <vcg/complex/algorithms/update/topology.h>
-#include <vcg/complex/algorithms/update/edges.h>
-#include <vcg/complex/algorithms/update/bounding.h>
-#include <vcg/complex/algorithms/update/flag.h>
-#include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/algorithms/closest.h>
-
 #ifndef _ISO_TRANSFER
 #define _ISO_TRANSFER
+
+#include <iso_parametrization.h>
+
+//#include<vcg/simplex/edge/base.h>
+//#include<vcg/simplex/vertex/base.h>
+//#include<vcg/simplex/face/base.h>
+#include <vcg/complex/complex.h>
+//#include <vcg/complex/algorithms/update/topology.h>
+//#include <vcg/complex/algorithms/update/edges.h>
+//#include <vcg/complex/algorithms/update/bounding.h>
+//#include <vcg/complex/algorithms/update/flag.h>
+//#include <vcg/space/index/grid_static_ptr.h>
+//#include <vcg/complex/algorithms/closest.h>
 
 class IsoTransfer
 {
@@ -89,9 +89,9 @@ class IsoTransfer
 		///put the mesh in the grid
 		typedef typename MeshType::ScalarType ScalarType;
 		vcg::tri::UpdateBounding<ParamMesh>::Box(*IsoParam.ParaMesh());
-		vcg::tri::UpdateNormals<ParamMesh>::PerFaceNormalized(*IsoParam.ParaMesh());
-		vcg::tri::UpdateNormals<ParamMesh>::PerVertexAngleWeighted(*IsoParam.ParaMesh());
-		vcg::tri::UpdateNormals<ParamMesh>::NormalizeVertex(*IsoParam.ParaMesh());
+		vcg::tri::UpdateNormal<ParamMesh>::PerFaceNormalized(*IsoParam.ParaMesh());
+		vcg::tri::UpdateNormal<ParamMesh>::PerVertexAngleWeighted(*IsoParam.ParaMesh());
+		vcg::tri::UpdateNormal<ParamMesh>::NormalizePerVertex(*IsoParam.ParaMesh());
 		
 		TRGrid.Set(IsoParam.ParaMesh()->face.begin(),IsoParam.ParaMesh()->face.end());
 		ScalarType maxDist=IsoParam.ParaMesh()->bbox.Diag();

@@ -146,7 +146,7 @@ public:
 		ScalarType Area_mesh=Area<OutputMesh>(SaveMesh);
 		ScalarType Edge=sqrt((((Area_mesh/(ScalarType)num_tri)*4.0)/(ScalarType)sqrt(3.0)));*/
 		n_merged=vcg::tri::Clean<OutputMesh>::MergeCloseVertex(SaveMesh,(ScalarType)minE*(ScalarType)0.9);
-		vcg::tri::UpdateNormals<OutputMesh>::PerVertexNormalized(SaveMesh);
+		vcg::tri::UpdateNormal<OutputMesh>::PerVertexNormalized(SaveMesh);
 		/*Log("Merged %d vertices\n",merged);*/
 	}
 

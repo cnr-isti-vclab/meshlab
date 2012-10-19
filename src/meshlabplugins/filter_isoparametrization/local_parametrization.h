@@ -2,7 +2,7 @@
 
 #include "defines.h"
 ///fitting
-#include <vcg/space/fitting3.h>
+//#include <vcg/space/fitting3.h>
 #include <vcg/math/matrix33.h>
 #include <vcg/space/triangle2.h>
 #include "texcoord_optimization.h"

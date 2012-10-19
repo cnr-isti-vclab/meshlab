@@ -564,7 +564,7 @@ public:
 		cb=_cb;		
 		accuracy=_accuracy;
 
-		vcg::tri::UpdateNormals<MeshType>::PerFaceNormalized(_domain);
+		vcg::tri::UpdateNormal<MeshType>::PerFaceNormalized(_domain);
 
 		domain=&_domain;
 		h_res_mesh=&_h_res_mesh;

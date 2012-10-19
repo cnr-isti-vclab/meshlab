@@ -21,7 +21,7 @@
 
 // update topology
 #include <vcg/complex/algorithms/update/normal.h>
-#include <vcg/complex/algorithms/update/edges.h>
+//#include <vcg/complex/algorithms/update/edges.h>
 #include <vcg/complex/algorithms/update/flag.h>
 
 
