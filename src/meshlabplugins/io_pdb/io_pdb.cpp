@@ -366,7 +366,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		tr=tr*sc;
 		
 		tri::UpdatePosition<CMeshO>::Matrix(m,tr);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 		tri::UpdateBounding<CMeshO>::Box(m);					// updates bounding box		
 	
 		surfacecreated = true;
@@ -442,8 +442,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 
 		tri::UpdatePosition<CMeshO>::Matrix(m,tr);
 	  tri::Clean<CMeshO>::FlipMesh(m);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 		tri::UpdateBounding<CMeshO>::Box(m);					// updates bounding box		
+	  m.UpdateNormal
 
 
 		//------------------------------------------------
