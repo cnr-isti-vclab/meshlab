@@ -121,7 +121,7 @@ bool ExtraSamplePlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichP
 	
 	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
 	if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(m);
   
