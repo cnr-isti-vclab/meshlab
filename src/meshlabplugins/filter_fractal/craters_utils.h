@@ -146,7 +146,7 @@ public:
        in the "sfv" vector (third parameter). */
     static void FindSamplesFaces(MeshType *target, MeshType *samples, SampleFaceVector &sfv)
     {
-        tri::UpdateNormals<MeshType>::PerFaceNormalized(*target);
+        tri::UpdateNormal<MeshType>::PerFaceNormalized(*target);
 //        tri::UpdateFlags<MeshType>::FaceProjection(*target);
 
         MetroMeshGrid mmg;
@@ -336,7 +336,7 @@ public:
         // updates bounding box and normals
         tri::Allocator<MeshType>::DeletePerVertexAttribute(*(args.target_mesh), std::string("perturbation"));
         vcg::tri::UpdateBounding<MeshType>::Box(*(args.target_mesh));
-        vcg::tri::UpdateNormals<MeshType>::PerVertexNormalizedPerFaceNormalized(*(args.target_mesh));
+        vcg::tri::UpdateNormal<MeshType>::PerVertexNormalizedPerFaceNormalized(*(args.target_mesh));
         return true;
     }
 };

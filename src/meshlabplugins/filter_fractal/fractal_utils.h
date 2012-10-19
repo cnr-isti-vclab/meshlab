@@ -89,7 +89,7 @@ public:
         if(args.saveAsQuality && !tri::HasPerVertexQuality(m)) return false;
 
         // prepares the mesh for the fractal displacement
-        tri::UpdateNormals<MeshType>::PerVertexNormalizedPerFaceNormalized(m);
+        tri::UpdateNormal<MeshType>::PerVertexNormalizedPerFaceNormalized(m);
         if(args.smoothingSteps > 0)
         {
             cb(0, "Smoothing vertex normals..");
@@ -153,7 +153,7 @@ public:
         if(!args.saveAsQuality)
         {
             tri::UpdateBounding<MeshType>::Box(m);
-            tri::UpdateNormals<MeshType>::PerVertexNormalizedPerFaceNormalized(m);
+            tri::UpdateNormal<MeshType>::PerVertexNormalizedPerFaceNormalized(m);
         }
         return true;
     }
