@@ -482,8 +482,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 				if(ID(filter) == FF_GEOM_FUNC) {
 					// update bounding box, normalize normals
-					tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-					tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+					tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+					tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 					tri::UpdateBounding<CMeshO>::Box(m.cm);
 				}
 
@@ -781,8 +781,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				// update bounding box, normals
         Matrix44f rot; rot.SetRotateDeg(180,Point3f(0,1,0));
         tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
-				tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);	
-				tri::UpdateNormals<CMeshO>::NormalizeFace(m.cm);
+				tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);	
+				tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
 				tri::UpdateBounding<CMeshO>::Box(m.cm);
 				
 				return true;
@@ -839,7 +839,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 		tr=tr*sc;
 		
 		tri::UpdatePosition<CMeshO>::Matrix(m.cm,tr);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
 		tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box		
 		return true;
 
@@ -871,11 +871,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 				// Refine current mesh.
 				// Only edge specified with CustomEdge pred are selected
 				//  and the new vertex is choosen with MidPointCustom created above
-				RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
+				vcg::tri::RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
 					(m.cm, mid, edge, false, cb);
-
+				m.UpdateBoxAndNormals();
 				m.clearDataMask( MeshModel::MM_VERTMARK);
-				vcg::tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m.cm);
+				//vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
 
 				return true;
 			}
