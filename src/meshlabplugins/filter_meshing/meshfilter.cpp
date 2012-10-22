@@ -1224,7 +1224,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			switch(par.getEnum("Method")){
 			case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
 			case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false,cb); break;
-			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
+			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
 			case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
 			default:assert(0);break;
 			}
