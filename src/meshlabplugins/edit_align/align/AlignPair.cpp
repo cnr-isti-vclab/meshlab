@@ -55,7 +55,7 @@ bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr,bool hasborderflag)
 {
   Matrix44d Idn; Idn.SetIdentity();
   if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr);
-  tri::UpdateNormals<A2Mesh>::NormalizeVertex(*this);
+  tri::UpdateNormal<A2Mesh>::NormalizeVertex(*this);
   tri::UpdateBounding<A2Mesh>::Box(*this);
   return true;
 }
@@ -68,7 +68,7 @@ bool AlignPair::A2Mesh::Init(const Matrix44d &Tr,bool hasborderflag)
   //int t2=clock();
 	if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr); 
 	//int t3=clock();  
-  tri::UpdateNormals<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this); 
+  tri::UpdateNormal<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this); 
 	//int t4=clock();
 	if(!hasborderflag) 		
     tri::UpdateFlags<A2Mesh>::FaceBorderFromNone(*this);

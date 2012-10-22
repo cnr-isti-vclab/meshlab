@@ -26,16 +26,16 @@
 
 #include <vcg/math/histogram.h>
 #include <vcg/math/matrix44.h>
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/vertex/component.h>
-#include <vcg/simplex/face/base.h>
-#include <vcg/simplex/face/component.h>
-#include <vcg/simplex/face/component_rt.h>
+//#include <vcg/simplex/vertex/base.h>
+//#include <vcg/simplex/vertex/component.h>
+//#include <vcg/simplex/face/base.h>
+//#include <vcg/simplex/face/component.h>
+#include <vcg/simplex/face/component_ep.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include<vcg/complex/complex.h>
 #include<vcg/complex/algorithms/update/normal.h>
 #include<vcg/complex/algorithms/update/bounding.h>
-#include<vcg/complex/algorithms/update/edges.h>
+#include<vcg/complex/algorithms/update/component_ep.h>
 
 
 namespace vcg
@@ -302,7 +302,8 @@ void ConvertMesh(const MESH &M1, A2Mesh &M2)
 			assert((*f2i).V(0)-&M2.vert[0]>=0);
 			assert((*f2i).V(1)-&M2.vert[0] >=0);
 			assert((*f2i).V(2)-&M2.vert[0] >=0);
-			tri::UpdateEdges<A2Mesh>::Set(*f2i);
+			
+			vcg::tri::UpdateEdges<vcg::AlignPair::A2Mesh>::Set(*f2i);
 			++f2i;
 		}	
 	M2.vn=M1.vn;
