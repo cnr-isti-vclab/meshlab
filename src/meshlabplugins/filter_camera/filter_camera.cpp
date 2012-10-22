@@ -497,7 +497,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             (*vi).Q() = q;
            }
         if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::VertexNormalize(cm);
-        if(par.getBool("map")) tri::UpdateColor<CMeshO>::VertexQualityRamp(cm);
+        if(par.getBool("map")) tri::UpdateColor<CMeshO>::PerVertexQualityRamp(cm);
 
       }
     break;
