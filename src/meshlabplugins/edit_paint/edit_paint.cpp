@@ -53,6 +53,7 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	dock->setWidget(paintbox);
 	QPoint p=parent->mapToGlobal(QPoint(0,0));
 	dock->setGeometry(5 + p.x(), p.y() + 5 , paintbox->width(), parent->height() - 10);
+    dock->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Minimum);
 	dock->setFloating(true);
 	dock->setVisible(true);
 
@@ -63,7 +64,7 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	if (!m.hasDataMask(MeshModel::MM_VERTCOLOR))
 	{
 		m.updateDataMask(MeshModel::MM_VERTCOLOR);
-		tri::UpdateColor<CMeshO>::VertexConstant(m.cm,Color4b(150, 150, 150, 255));
+        tri::UpdateColor<CMeshO>::PerVertexConstant(m.cm,Color4b(150, 150, 150, 255));
 	}
   tri::InitFaceIMark(m.cm);
   tri::InitVertexIMark(m.cm);
