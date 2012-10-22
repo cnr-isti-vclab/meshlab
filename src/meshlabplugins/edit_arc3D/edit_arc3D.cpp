@@ -219,7 +219,7 @@ void EditArc3DPlugin::ExportPly()
 	if(closeHole)
 	{
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK);
-		tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);	    
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);	    
 		vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m->cm,maxHoleSize,false);
 	}
 
@@ -230,8 +230,8 @@ void EditArc3DPlugin::ExportPly()
 	
 	m->cm.Tr=transf;
 	tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr);
-	tri::UpdateNormals<CMeshO>::PerVertexMatrix(m->cm,m->cm.Tr);
-	tri::UpdateNormals<CMeshO>::PerFaceMatrix(m->cm,m->cm.Tr);
+	tri::UpdateNormal<CMeshO>::PerVertexMatrix(m->cm,m->cm.Tr);
+	tri::UpdateNormal<CMeshO>::PerFaceMatrix(m->cm,m->cm.Tr);
 	tri::UpdateBounding<CMeshO>::Box(m->cm);
 	m->cm.Tr.SetIdentity();
 	m->cm.shot.ApplyRigidTransformation(transf);
@@ -240,7 +240,7 @@ void EditArc3DPlugin::ExportPly()
 	gla->log->Logf(GLLogStream::SYSTEM,"---------- Total Processing Time%i\n\n\n",t3-t0);
 	
 	vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
-	tri::UpdateNormals<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+	tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 
 // Final operations 
 
@@ -674,7 +674,8 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 	    
     (*vi).P().Import(out);
     QRgb c = TextureImg.pixel(int(in[0]), int(in[1]));
-    (*vi).C().SetRGB(qRed(c),qGreen(c),qBlue(c));
+	vcg::Color4b tmpcol(qRed(c),qGreen(c),qBlue(c),0);
+    (*vi).C().Import(tmpcol);
     if(FeatureMask.Val(int(in[0]/subsampleFactor), int(in[1]/subsampleFactor))<200) (*vi).Q()=0; 
     else (*vi).Q()=1; 
     (*vi).Q()=float(FeatureMask.Val(in[0]/subsampleFactor, in[1]/subsampleFactor))/255.0;
