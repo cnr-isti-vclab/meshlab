@@ -37,7 +37,6 @@ add sampleplugins
 #include <QObject>
 
 #include <common/interfaces.h>
-class QScriptEngine;
 
 class ExtraSampleGPUPlugin : public QObject, public MeshFilterInterface
 {
