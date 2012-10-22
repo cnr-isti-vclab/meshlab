@@ -62,7 +62,7 @@ static std::vector<VertexType*> &FindComponent(_MyMeshType& m, float dim,
 
     typename std::vector<VertexType*>::iterator it;
     if (fitting) {
-        vcg::PlaneFittingPoints(pointToFit, *fittingPlane);
+        vcg::FitPlaneToPointSet(pointToFit, *fittingPlane);
 
         for (VertexIterator vi = m.vert.begin(); vi != m.vert.end(); vi++) {
             if (distFromCenter[vi] < dim && math::Abs(vcg::SignedDistancePlanePoint<typename _MyMeshType::ScalarType>(*fittingPlane, vi->cP())) < distanceFromPlane) resultVect->push_back(&*vi);

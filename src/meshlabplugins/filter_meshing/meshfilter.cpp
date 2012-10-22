@@ -818,7 +818,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				}
 				Log("Using %i vertexes to build a fitting  plane",int(selected_pts.size()));
 				Plane3f plane;
-				PlaneFittingPoints(selected_pts,plane);
+				FitPlaneToPointSet(selected_pts,plane);
 				float errorSum=0;
 				for(size_t i=0;i<selected_pts.size();++i)
 					errorSum+=fabs(SignedDistancePlanePoint(plane,selected_pts[i]));
