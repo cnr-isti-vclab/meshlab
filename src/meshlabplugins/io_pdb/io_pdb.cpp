@@ -445,7 +445,6 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 		tri::UpdateBounding<CMeshO>::Box(m);					// updates bounding box		
 
-
 		//------------------------------------------------
 
 		double ww;
