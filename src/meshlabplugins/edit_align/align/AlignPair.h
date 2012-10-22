@@ -303,9 +303,9 @@ void ConvertMesh(const MESH &M1, A2Mesh &M2)
 			assert((*f2i).V(1)-&M2.vert[0] >=0);
 			assert((*f2i).V(2)-&M2.vert[0] >=0);
 			
-			vcg::tri::UpdateComponentEP<vcg::AlignPair::A2Mesh>::Set(*f2i);
 			++f2i;
 		}	
+	vcg::tri::UpdateComponentEP<vcg::AlignPair::A2Mesh>::Set(M2);
 	M2.vn=M1.vn;
 	M2.fn=M1.fn;
 	M2.bbox.Import(M1.bbox);
