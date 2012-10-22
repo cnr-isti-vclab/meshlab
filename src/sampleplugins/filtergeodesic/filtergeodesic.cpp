@@ -146,7 +146,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				if(unreachedCnt >0 )
 						Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 				
-				tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 				
 			}
 			break;
@@ -175,7 +175,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 						Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 				
 				if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
-			    	else tri::UpdateColor<CMeshO>::VertexQualityRamp(m.cm);
+			    	else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 				}
 
 			break;
