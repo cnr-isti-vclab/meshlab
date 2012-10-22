@@ -282,12 +282,12 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 
 	if(perFace) 
 		{
-			tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
+			tri::UpdateColor<CMeshO>::PerFaceQualityGray(m.cm);
 			CMeshO::FaceIterator fi;
       for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
 					(*fi).Q()=(*fi).Q()/numViews;
 		} else {
-			tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+			tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm,0.0f,0.0f);
 			CMeshO::VertexIterator vi;
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
       {
