@@ -936,8 +936,7 @@ void SdfGpuPlugin::applyObscurancePerVertex(MeshModel &m, float numberOfRays)
     {
         m.cm.vert[i].Q() = result[i*4]/numberOfRays;
     }
-
-    tri::UpdateColor<CMeshO>::VertexQualityGray(m.cm);
+    tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm,0.0f,0.0f);
 
     glReadBuffer(GL_COLOR_ATTACHMENT1_EXT);
     glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
@@ -971,7 +970,7 @@ void SdfGpuPlugin::applyObscurancePerFace(MeshModel &m, float numberOfRays)
         m.cm.face[i].Q() = result[i*4]/numberOfRays;
     }
 
-    tri::UpdateColor<CMeshO>::FaceQualityGray(m.cm);
+    tri::UpdateColor<CMeshO>::PerFaceQualityGray(m.cm);
 
     glReadBuffer(GL_COLOR_ATTACHMENT1_EXT);
     glReadPixels(0, 0, mResTextureDim, mResTextureDim, GL_RGBA, GL_FLOAT, result);
