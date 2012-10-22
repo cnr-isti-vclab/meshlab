@@ -278,7 +278,7 @@ void ColorizeMesh(MeshModel* m){
             else fi->C()=Color4b(255-dirtiness,255-dirtiness,255-dirtiness,0);
         }
     }
-    tri::UpdateColor<CMeshO>::VertexFromFace(m->cm);
+    tri::UpdateColor<CMeshO>::PerVertexFromFace(m->cm);
 }
 
 
