@@ -806,7 +806,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 				}
 			}
 		}
-		vcg::tri::UpdateColor<CMeshO>::VertexSelected(m.cm);
+//		vcg::tri::UpdateColor<CMeshO>::VertexSelected(m.cm);
 
 		if(convex_hullFP){
 			//Add to the new mesh only the faces of the convex hull whose vertices aren't the viewpoint 
