@@ -169,7 +169,7 @@ void FilterScanMergingPlugin::toLowFrequecies(CMeshO* m, int numOfIterations, in
                 pointToFit.push_back((*it)->cP());
             }
 
-            vcg::PlaneFittingPoints(pointToFit, fittingPlane);
+            vcg::FitPlaneToPointSet(pointToFit, fittingPlane);
 
             vertices->P() = fittingPlane.Projection(vi->cP());
             vertices->N() = vi->cN();
