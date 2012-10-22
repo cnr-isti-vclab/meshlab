@@ -372,7 +372,6 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
         tri::Clean<CMeshO>::RemoveDuplicateVertex(paraModel->cm);
 
       paraModel->UpdateBoxAndNormals();
-
       baseModel->clearDataMask(bitToBeCleared);
       Log("Voronoi Atlas: Completed Processing in %i iterations",pp.vas.iterNum);
       Log("Asked %i generated %i regions",pp.sampleNum,pp.vas.regionNum);
