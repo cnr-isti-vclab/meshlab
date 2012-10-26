@@ -106,7 +106,7 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename)
 						QFileInfo fi(filen);
 						QString sem = el.attribute("semantic");
 						QString nm = fi.absoluteFilePath();
-						md.rm()->addPlane(new Plane(fi.absoluteFilePath(),sem));
+						md.rm()->addPlane(new Plane(fi.absoluteFilePath(),Plane::RGBA));
 						el = node.nextSiblingElement("Plane");
 					}	
 					raster=raster.nextSibling();

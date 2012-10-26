@@ -446,7 +446,7 @@ Plane::Plane(const Plane& pl)
 	image = QImage(pl.image);
 }
 
-Plane::Plane(const QString pathName, const QString _semantic)
+Plane::Plane(const QString pathName, const int _semantic)
 {
 	semantic =_semantic;
 	fullPathFileName = pathName;

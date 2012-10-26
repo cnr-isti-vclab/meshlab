@@ -302,9 +302,33 @@ the base class for a registered image that contains the path, the semantic and t
 class Plane
 {
 public:
-	QString semantic;
+
+    enum PlaneSemantic
+    {
+      NONE        = 0x0000,
+      RGBA        = 0x0001,
+      MASK_UB     = 0x0002,
+      MASK_F      = 0x0004,
+      DEPTH_F     = 0x0008,
+      EXTRA00_F        = 0x0100,
+      EXTRA01_F        = 0x0200,
+      EXTRA02_F        = 0x0400,
+      EXTRA03_F        = 0x0800,
+      EXTRA00_RGBA     = 0x1000,
+      EXTRA01_RGBA     = 0x2000,
+      EXTRA02_RGBA     = 0x4000,
+      EXTRA03_RGBA     = 0x8000
+    };
+
+	int semantic;
 	QString fullPathFileName;
 	QImage image;
+	QImage thumb;
+	float *buf;
+
+	bool IsInCore() { return !image.isNull(); }
+	void Load();
+	void Discard(); //discard  the loaded image freeing the mem.
 
 	/// The whole full path name of the mesh
 	const QString fullName() const {return fullPathFileName;}
@@ -312,7 +336,7 @@ public:
 	const QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
 
 	Plane(const Plane& pl);
-	Plane(const QString pathName, const QString _semantic);
+	Plane(const QString pathName, const int _semantic);
 
 }; //end class Plane
 
