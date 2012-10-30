@@ -37,7 +37,8 @@ public:
     inline static QString pointSmoothParam()           {return "MeshLab::Appearance::pointSmooth";}
     float pointSize;
     inline static QString pointSizeParam()           {return "MeshLab::Appearance::pointSize";}
-
+    inline static QString maxTextureMemoryParam()           {return "MeshLab::Appearance::maxTextureMemory";}
+    int maxTextureMemory;
 
     void updateGlobalParameterSet( RichParameterSet& rps );
     static void initGlobalParameterSet( RichParameterSet * defaultGlobalParamSet);

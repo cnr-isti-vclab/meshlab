@@ -254,7 +254,7 @@ protected:
 	void initializeGL();
 	int RoundUpToTheNextHighestPowerOf2(unsigned int v);
 
-	void initTexture();
+    void initTexture(bool reloadAllTexture);
   void displayInfo(QPainter *painter);
   void displayRealTimeLog(QPainter *painter);
 

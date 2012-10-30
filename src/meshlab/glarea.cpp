@@ -332,7 +332,12 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	QTime time;
 	time.start();
 
-	initTexture();
+	if(!this->md()->isBusy())
+	{
+	  initTexture(hasToUpdateTexture);
+	  hasToUpdateTexture=false;
+	}
+
 	glClearColor(1.0,1.0,1.0,0.0);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
@@ -996,31 +1001,58 @@ int GLArea::RoundUpToTheNextHighestPowerOf2(unsigned int v)
   v++;
 return v;
 }
-/** initTexture loads all the required textures (if necessary).
-It is called every time in the glpaint.
+/** \brief Manage the loading/allocation of the textures of the meshes
+
+It is called at every redraw for within the paint event with an active gl context.
+
 It assumes that:
-- there is a shared gl wrapper for all the contexts (same texture id for different glareas)
-- the values stored in the glwrapper for the texture id are an indicator if there is the need of loading a texture (0 means load that texture)
+- there is a single shared gl wrapper for each mesh for all the contexts (eg same texture id for different glareas),
+
+- No attempt of avoiding texture duplication if two models share the same texture file there are two texture id.
+
+- the values stored in the glwrapper for the texture id (glw.TMId()) is an indicator if there is the need of
+  loading a texture (empty vector means load that texture).
 
 */
 
-void GLArea::initTexture()
+void GLArea::initTexture(bool reloadAllTexture)
 {
-	if(hasToUpdateTexture)
+	if(reloadAllTexture) // ALL the texture must to be re-loaded, so we clear all the TMId vectors
 	{
 		foreach (MeshModel *mp,this->md()->meshList)
+		{
+		  if(!mp->glw.TMId.empty())
+		  {
+			glDeleteTextures(1,&(mp->glw.TMId[0]));
 			mp->glw.TMId.clear();
+		  }
+		}
+	}
+	int totalTextureNum=0, toBeUpdatedNum=0;
+	foreach (MeshModel *mp, this->md()->meshList)
+	{
+	  totalTextureNum+=mp->cm.textures.size();
+	  if(!mp->cm.textures.empty() && mp->glw.TMId.empty()) toBeUpdatedNum++;
+	}
 
-		qDebug("Beware: deleting the texutres could lead to problems for shared textures.");
-		hasToUpdateTexture = false;
+	if(toBeUpdatedNum==0) return;
+
+	int singleMaxTextureSizeMpx = glas.maxTextureMemory/totalTextureNum;
+	int singleMaxTextureSize = RoundUpToTheNextHighestPowerOf2(int(sqrt(float(singleMaxTextureSizeMpx))*1024.0))/2;
+
+	glEnable(GL_TEXTURE_2D);
+	GLint MaxTextureSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
+	if(singleMaxTextureSize < MaxTextureSize)
+	{
+	  this->Logf(0,"There are too many textures (%i), reducing max texture size from %i to %i",totalTextureNum,MaxTextureSize,singleMaxTextureSize);
+	  MaxTextureSize = singleMaxTextureSize;
 	}
 
 	foreach (MeshModel *mp, this->md()->meshList)
 	{
-		if(!mp->cm.textures.empty() && mp->glw.TMId.empty()){
-			glEnable(GL_TEXTURE_2D);
-			GLint MaxTextureSize;
-			glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
+		if(!mp->cm.textures.empty() && mp->glw.TMId.empty())
+		{
 			QString unexistingtext = "In mesh file <i>" + mp->fullName() + "</i> : Failure loading textures:<br>";
 			bool sometextfailed = false;
 			for(unsigned int i =0; i< mp->cm.textures.size();++i)
@@ -1064,9 +1096,9 @@ void GLArea::initTexture()
 					imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 					imgGL=convertToGLFormat(imgScaled);
 					mp->glw.TMId.push_back(0);
-					qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->glw.TMId.back() ,imgGL.width(), imgGL.height());
 					glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
 					glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
+					qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->glw.TMId.back() ,imgGL.width(), imgGL.height());
 					glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
 					gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
 				}
@@ -1080,9 +1112,9 @@ void GLArea::initTexture()
 			if (sometextfailed)
 				QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
 		}
-		glDisable(GL_TEXTURE_2D);
 	}
-	
+	glDisable(GL_TEXTURE_2D);
+
 }
 
 void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
