@@ -265,12 +265,16 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 												   "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
 	case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
 	case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
-	case FP_SELECT_FACES_BY_AREA             : return tr("Removes null faces (the one with area equal to zero)");
+	case FP_SELECT_FACES_BY_AREA             : return tr("Remove null faces (the one with area equal to zero)");
 	case FP_SELECT_FACES_BY_EDGE             : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
 	case FP_CLUSTERING                       : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
 	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
-	case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh");
+	case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
+														 "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
+														 "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
+														 "all the faces. If the surface is not orientable (e.g. it is non manifold or non orientable like a moebius "
+														 "strip) the filter will not build a consistent orientation simply because it is not possible. The filter can end up in a consistent orientation that can be exactly the opposite of the expected one; in that case simply invert the whole mesh orientation.");
 	case FP_INVERT_FACES                     : return tr("Invert faces orientation, flipping the normals of the mesh. <br>"
 												   "If requested, it tries to guess the right orientation; "
 												   "mainly it decide to flip all the faces if the minimum/maximum vertexes have not outward point normals for a few directions.<br>"
@@ -1224,7 +1228,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			switch(par.getEnum("Method")){
 			case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
 			case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false,cb); break;
-			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycles(m.cm); break;
+			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
 			case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
 			default:assert(0);break;
 			}
