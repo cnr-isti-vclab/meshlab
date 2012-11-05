@@ -1,4 +1,4 @@
-GLEWDIR = ../external/glew-1.5.1
+include (../general.pri)
 
 HEADERS        = 
 
@@ -12,13 +12,10 @@ RC_FILE = ../meshlab/meshlab.rc
 QT           += xml opengl
 QT += xmlpatterns
 QT += script
-
+#QT -= gui # Only the core module is used.
 DESTDIR = ../distrib
 macx:DESTDIR = ../distrib/meshlab.app/Contents/MacOS/
 macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlabserver"
-# the following line is needed to avoid mismatch between 
-# the awful min/max macros of windows and the limits max
-win32:DEFINES += NOMINMAX
 
 mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
 
@@ -45,7 +42,7 @@ win32-msvc2010:DEFINES += GLEW_STATIC
 
 #DEFINES += GLEW_STATIC
 
-INCLUDEPATH += . .. ../../../vcglib $$GLEWDIR/include
+INCLUDEPATH += . .. $$VCGDIR $$GLEWDIR/include
 CONFIG += stl 
 CONFIG += console
 
