@@ -124,7 +124,6 @@ bool SampleFilterDocPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
                         bool alsounreferenced = par.getBool("AlsoUnreferenced");
 
 			MeshModel *destMesh= md.addNewMesh("Merged Mesh");
-			md.meshList.front();
 			QList<MeshModel *> toBeDeletedList;
 			
 			int cnt=0;

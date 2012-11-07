@@ -228,7 +228,6 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     bool alsoUnreferenced = par.getBool("AlsoUnreferenced");
 
     MeshModel *destMesh= md.addNewMesh("","Merged Mesh");
-    md.meshList.front();
     QList<MeshModel *> toBeDeletedList;
 
     int cnt=0;
