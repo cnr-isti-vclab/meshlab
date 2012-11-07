@@ -62,21 +62,24 @@ QString FilterScanMergingPlugin::filterInfo(FilterIDType filterId) const
 // This function define the needed parameters for each filter.
 void FilterScanMergingPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet &parlst)
 {
-    parlst.addParam(new RichInt("numOfNeighbors", 30, "Number of neighbors",
-                                "The number of neighbors the projection operator uses to compute the projection plane."));
-    parlst.addParam(new RichInt("numOfIterations", 4, "Number of iteration",
-                                "How many times the projection operator has to be applied."));
+  parlst.addParam(new RichInt("numOfNeighbors", 30, "Number of neighbors",
+                              "The number of neighbors the projection operator uses to compute the projection plane."));
+  parlst.addParam(new RichInt("numOfIterations", 4, "Number of iteration",
+                              "How many times the projection operator has to be applied."));
+  parlst.addParam(new RichBool("modifyOriginalMesh",false, "Modify original meshes",
+                               "If true also the original mesh vertexes are displaced according to the computed vector."
+                               "Useful if you want to keep the result as separated entities."));
 }
 
 // Core Function doing the actual mesh processing.
 bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
+    bool modifyOriginalMeshFlag = par.getBool("modifyOriginalMesh");
     int nIterations = par.getInt("numOfIterations");
     int nNeighbors = par.getInt("numOfNeighbors");
     int nOp = 0;
 
     MeshModel *destMesh = md.addNewMesh("","MergedMesh");
-    md.meshList.front();
 
     CMeshO tempMesh[2];
 
@@ -84,6 +87,7 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
     cb(0, "High Fidelity Scan Merging: merging visible layers");
     foreach(MeshModel *mmp, md.meshList) {
         if (mmp->visible) {
+            tri::Allocator<CMeshO>::CompactVertexVector(mmp->cm);
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
             tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, Inverse(mmp->cm.Tr), true);
@@ -95,13 +99,12 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 
     cb(100/nOp, "High Fidelity Scan Merging: computing low frequencies base");
 
-    toLowFrequecies(tempMesh, nIterations, nNeighbors);
+    toLowFreq(tempMesh, nIterations, nNeighbors);
 
     tri::Append<CMeshO, CMeshO>::Mesh(destMesh->cm, tempMesh[0]);
 
     /* Compute the high frequencies mesh taking into account one layer at time */
     long vertexCnt = 0;
-    md.meshList.front();
     int nMesh = 0;
     foreach(MeshModel *mmp, md.meshList) {
         if (mmp != destMesh && mmp->visible) {
@@ -113,14 +116,15 @@ bool FilterScanMergingPlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
             tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr, true);
             tri::Append<CMeshO, CMeshO>::Mesh(tempMesh[0], mmp->cm);
 
-            toLowFrequecies(tempMesh, nIterations, nNeighbors);
+            toLowFreq(tempMesh, nIterations, nNeighbors);
 
             int localVertexCnt = 0;
 
             /* Correct the low frequencies mesh with high frequencies features */
             for (CMeshO::VertexIterator vi = tempMesh[0].vert.begin(); vi != tempMesh[0].vert.end(); vi++) {
-                destMesh->cm.vert[vertexCnt].P() = destMesh->cm.vert[vertexCnt].P() + (vi->cP() - mmp->cm.vert[localVertexCnt].cP());
-
+                destMesh->cm.vert[vertexCnt].P() = destMesh->cm.vert[vertexCnt].P() - (vi->cP() - mmp->cm.vert[localVertexCnt].cP());
+                if(modifyOriginalMeshFlag)
+                  mmp->cm.vert[localVertexCnt].P() =  destMesh->cm.vert[vertexCnt].P();
                 vertexCnt++;
                 localVertexCnt++;
             }
@@ -144,9 +148,9 @@ FilterScanMergingPlugin::FilterClass FilterScanMergingPlugin::getClass(QAction *
   For each vertex the projection operator needs numOfNeighbors neighbors to find the fitting plane.
   Once the function returns the result is in m[0]
   **/
-void FilterScanMergingPlugin::toLowFrequecies(CMeshO* m, int numOfIterations, int numOfNeighbors) {
-    Plane3<CMeshO::ScalarType> fittingPlane = Plane3<CMeshO::ScalarType>();
-    std::vector<CMeshO::CoordType> pointToFit = std::vector<CMeshO::CoordType>();
+void FilterScanMergingPlugin::toLowFreq(CMeshO* m, int numOfIterations, int numOfNeighbors) {
+    Plane3<CMeshO::ScalarType> fittingPlane;
+    std::vector<CMeshO::CoordType> pointToFit;
     std::vector<CVertexO*>::iterator it;
     int act;
     int next;
@@ -155,28 +159,24 @@ void FilterScanMergingPlugin::toLowFrequecies(CMeshO* m, int numOfIterations, in
         act = i%2;
         next = (i+1)%2;
 
-        tri::KNNGraph<CMeshO>::MakeKNNTree(m[act], numOfNeighbors);
-
-        CMeshO::PerVertexAttributeHandle<std::vector<CVertexO*>* > neighbors;
-        neighbors = tri::Allocator<CMeshO>::GetPerVertexAttribute<std::vector<CVertexO*>* >(m[act], std::string("KNNGraph"));
-
+        VertexConstDataWrapper<CMeshO> ww(m[act]);
+        KdTree<float> tree(ww);
+        tree.setMaxNofNeighbors(numOfNeighbors);
         CMeshO::VertexIterator vertices = tri::Allocator<CMeshO>::AddVertices(m[next], m[act].VertexNumber());
 
         for (CMeshO::VertexIterator vi = m[act].vert.begin(); vi != m[act].vert.end(); vi++) {
+            tree.doQueryK( vi->cP() );
+            int neighbours = tree.getNofFoundNeighbors();
             pointToFit.clear();
-
-            for (it = neighbors[vi]->begin(); it != neighbors[vi]->end(); it++) {
-                pointToFit.push_back((*it)->cP());
+            for (int j = 0; j < neighbours; j++) {
+                int neightId = tree.getNeighborId(j);
+                pointToFit.push_back(m[act].vert[neightId].cP() );
             }
-
             vcg::FitPlaneToPointSet(pointToFit, fittingPlane);
-
             vertices->P() = fittingPlane.Projection(vi->cP());
             vertices->N() = vi->cN();
             vertices++;
         }
-
-        tri::KNNGraph<CMeshO>::DeleteKNNTree(m[act]);
         m[act].Clear();
     }
     if (act == 1) return;

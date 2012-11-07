@@ -45,7 +45,7 @@ public:
   virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 private:
-  void toLowFrequecies(CMeshO* m, int numOfIterations, int numOfNeighbors);
+  void toLowFreq(CMeshO* m, int numOfIterations, int numOfNeighbors);
 };
 
 #endif
