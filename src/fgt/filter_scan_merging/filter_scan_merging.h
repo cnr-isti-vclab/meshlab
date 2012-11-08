@@ -27,6 +27,7 @@
 #include <QObject>
 
 #include <common/interfaces.h>
+#include <vector>
 
 class FilterScanMergingPlugin : public QObject, public MeshFilterInterface
 {
@@ -45,7 +46,8 @@ public:
   virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 
 private:
-  void toLowFreq(CMeshO* m, int numOfIterations, int numOfNeighbors);
+  //void toLowFreq(CMeshO* m, int numOfIterations, int numOfNeighbors);
+  void toLowFreq(std::vector<vcg::Point3f>* vert, int numOfIterations, int numOfNeighbors);
 };
 
 #endif
