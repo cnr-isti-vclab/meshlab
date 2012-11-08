@@ -32,7 +32,7 @@
 #include <vcg/complex/algorithms/attribute_seam.h>
 #include <vcg/complex/algorithms/update/curvature.h>
 #include <vcg/complex/algorithms/update/curvature_fitting.h>
-#include <vcg/space/normal_extrapolation.h>
+#include <vcg/complex/algorithms/pointcloud_normal.h>
 #include <vcg/space/fitting3.h>
 #include <wrap/gl/glu_tessellator_cap.h>
 #include "quadric_tex_simp.h"
@@ -478,7 +478,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		break;
 
 	case FP_NORMAL_EXTRAPOLATION:
-		parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to estimate and propagate normals."));
+		parlst.addParam(new RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
+		parlst.addParam(new RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
 		parlst.addParam(new RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
 		parlst.addParam(new RichPoint3f("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
 
@@ -1189,26 +1190,18 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 	case FP_NORMAL_EXTRAPOLATION :
 		{
-			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-			NormalExtrapolation<vector<CVertexO> >::ExtrapolateNormals(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"),-1,NormalExtrapolation<vector<CVertexO> >::IsCorrect,  cb);
-			if (par.getBool("flipFlag")==true)
-			{
-				vcg::Point3f viewp=par.getPoint3f("viewPos");
-				CMeshO::VertexIterator vi;
-				for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-				{
-					if ((*vi).N().dot(viewp-(*vi).P())<0.0f)
-					{
-						(*vi).N()=-(*vi).N();
-					}
-				}
-			}
+	  tri::PointCloudNormal<CMeshO>::Param p;
+	  p.fittingAdjNum = par.getInt("K");
+	  p.smoothingIterNum = par.getInt("smoothIter");
+	  p.viewPoint = par.getPoint3f("viewPos");
+	  p.useViewPoint = par.getBool("flipFlag");
+	  tri::PointCloudNormal<CMeshO>::Compute(m.cm, p,cb);
 		} break;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD :
 		{
 			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-			NormalExtrapolation<vector<CVertexO> >::SmoothNormalsUsingNeighbors(m.cm.vert.begin(), m.cm.vert.end(), par.getInt("K"), par.getBool("useDist"), cb);
+			tri::Smooth<CMeshO>::VertexNormalPointCloud(m.cm,par.getInt("K"),1);
 		} break;
 
 
