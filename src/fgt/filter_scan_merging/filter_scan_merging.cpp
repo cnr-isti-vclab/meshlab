@@ -223,7 +223,8 @@ void FilterScanMergingPlugin::toLowFreq(vector<Point3f>* vert, int numOfIteratio
     }
     if (act == 1) return;
     else {
-        vert[0] = vert[1];
+        for (int i = 0; i < vert[0].size(); i++)
+            vert[0][i] = vert[1][i];
 //        tri::Append<CMeshO, CMeshO>::Mesh(m[0], m[1]);
         return;
     }
