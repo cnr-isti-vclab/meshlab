@@ -1631,14 +1631,14 @@ void MainWindow::saveProject()
 bool MainWindow::openProject(QString fileName)
 {
   if (fileName.isEmpty())
-    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out)");
+    fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out *.nvm);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)");
 
   if (fileName.isEmpty()) return false;
 
   QFileInfo fi(fileName);
   lastUsedDirectory = fi.absoluteDir();
 
-  if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp")  && (fi.suffix().toLower()!="out"))
+  if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp")  && (fi.suffix().toLower()!="out") && (fi.suffix().toLower()!="nvm"))
   {
     QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
     return false;
@@ -1739,6 +1739,51 @@ bool MainWindow::openProject(QString fileName)
 
   }
 
+  //////NVM
+
+  if (QString(fi.suffix()).toLower() == "nvm"){
+
+	QString cameras_filename = fileName;
+	//QString image_list_filename;
+	QString model_filename;
+
+    /*image_list_filename = QFileDialog::getOpenFileName(
+                this  ,  tr("Open image list file"),
+                QFileInfo(fileName).absolutePath(),
+                 tr("Bundler images list file (*.txt)")
+                );
+	if(image_list_filename.isEmpty())
+      return false;*/
+
+
+	//model_filename = QFileDialog::getOpenFileName(
+	//			this, tr("Open 3D model file"),
+	//			QFileInfo(fileName).absolutePath(),
+	//			tr("Bunler 3D model file (*.ply)")
+	//			);
+	//if(model_filename.isEmpty())
+    //  return false;
+
+	GLA()->setColorMode(GLW::CMPerVert);
+	GLA()->setDrawMode(GLW::DMPoints);
+	if(!MeshDocumentFromNvm(*meshDoc(),cameras_filename,model_filename)){
+      QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
+      return false;
+	}
+	
+	//else{
+	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
+	//		{
+	//		  QString fullPath = meshDoc()->meshList[i]->fullName();
+	//		  meshDoc()->setBusy(true);
+	//		  loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
+	//		}
+	//}
+
+
+  }
+
+    //////NVM
 
   meshDoc()->setBusy(false);
   if(this->GLA() == 0)  return false;
