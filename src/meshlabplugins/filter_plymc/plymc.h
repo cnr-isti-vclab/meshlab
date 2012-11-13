@@ -223,42 +223,6 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
         }
     }
 
-	// DEBUG
-	// distance quality
-    for(vi=m.vert.begin(); vi!=m.vert.end();++vi)
-	{
-		float dist = (*vi).P().Norm();
-		float dquality = 1.0;
-
-		if(dist < 500.0)
-			dquality = 1.0;
-		else if(dist > 1600.0)
-			dquality = 0.05;
-		else
-			dquality = 1.05 - ((dist - 500.0) / (1600.0 - 500.0));
-
-		(*vi).Q() = (*vi).Q() * dquality * dquality;
-	}
-
-	// DEBUG
-	// angle quality
-    for(vi=m.vert.begin(); vi!=m.vert.end();++vi)
-	{
-		float aquality = 1.0;
-
-        Point3f viewray;
-        viewray = - (*vi).P();
-        viewray.Normalize();
-
-		aquality = viewray.dot((*vi).N().Normalize());
-		if(aquality <= 0.0)
-			aquality = 0.05;
-		if(aquality >= 1.0)
-			aquality = 1.0;
-
-		(*vi).Q() = (*vi).Q() * aquality;
-	}
-
     tri::UpdatePosition<SMesh>::Matrix(m,Tr,true);
     tri::UpdateBounding<SMesh>::Box(m);
     printf("Init Mesh %s (%ivn,%ifn)\n",filename,m.vn,m.fn);
@@ -271,7 +235,7 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
 // This function add a mesh (or a point cloud to the volume)
 // the point cloud MUST have normalized vertex normals.
 
-bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w, Matrix44f Tr)
+bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w )
 {
     typename SMesh::VertexIterator vi;
     typename SMesh::FaceIterator fi;
@@ -291,11 +255,12 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w, Matrix44f 
     {
             float minq=std::numeric_limits<float>::max(), maxq=-std::numeric_limits<float>::max();
             // Calcolo range qualita geodesica PER FACCIA come media di quelle per vertice
-            for(fi=m.face.begin(); fi!=m.face.end(); ++fi){
+            for(fi=m.face.begin(); fi!=m.face.end();++fi){
                 (*fi).Q()=((*fi).V(0)->Q()+(*fi).V(1)->Q()+(*fi).V(2)->Q())/3.0f;
                 minq=std::min((*fi).Q(),minq);
                 maxq=std::max((*fi).Q(),maxq);
             }
+
 
             // La qualita' e' inizialmente espressa come distanza assoluta dal bordo della mesh
             printf("Q [%4.2f  %4.2f] \n",minq,maxq);
@@ -306,12 +271,9 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w, Matrix44f 
             printf("---- Face Rasterization");
             for(fi=m.face.begin(); fi!=m.face.end();++fi)
                 {
-                    if(closed || (p.PLYFileQualityFlag==false && p.GeodesicQualityFlag==false)) 
-						quality= w * 1.0;		// even if no quality is computed, still use the explicit weight in the aln file
-                    else 
-						quality= w *(*fi).Q();
-
-                    if(quality)		// only nonzero quality faces are added
+                    if(closed || (p.PLYFileQualityFlag==false && p.GeodesicQualityFlag==false)) quality=1.0;
+                    else quality=w*(*fi).Q();
+                    if(quality)
                             res |= B.ScanFace((*fi).V(0)->P(),(*fi).V(1)->P(),(*fi).V(2)->P(),quality,(*fi).N());
                 }
             printf(" : %li\n",clock()-tt0);
@@ -321,11 +283,9 @@ bool AddMeshToVolumeM(SMesh &m, std::string meshname, const double w, Matrix44f 
         printf("Vertex Splatting\n");
         for(vi=m.vert.begin();vi!=m.vert.end();++vi)
                 {
-                    if(p.PLYFileQualityFlag==false) 
-						quality= w * 1.0;
-                    else 
-						quality= w * (*vi).Q();
-                    if(quality)		// only nonzero quality faces are added
+                    if(p.PLYFileQualityFlag==false) quality=1.0;
+                    else quality=w*(*vi).Q();
+                    if(quality)
                         res |= B.SplatVert((*vi).P(),quality,(*vi).N(),(*vi).C());
                 }
     }
@@ -449,7 +409,7 @@ void Process(vcg::CallBackPos *cb=0)
             return;
           }
 		    }
-		    res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i),MP.Tr(i));
+		    res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
 		  }
 		}
 
