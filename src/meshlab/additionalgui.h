@@ -222,8 +222,7 @@ class MyToolButton : public QToolButton
 public:
 	MyToolButton( QWidget * parent = 0 );
 protected:
-	void paintEvent( QPaintEvent * );
-	
+	void paintEvent( QPaintEvent * );	
 };
 
 class MenuLineEdit : public QLineEdit
@@ -261,6 +260,7 @@ private slots:
 	void edited(const QString& text);
 	void setLineEditFocus();
 	void changeFocus(const int k);
+	void selectTextIfNotEmpty();
 };
 
 

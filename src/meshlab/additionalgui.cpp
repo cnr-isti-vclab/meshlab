@@ -802,6 +802,7 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
 	connect(searchline,SIGNAL(arrowPressed(const int)),this,SLOT(changeFocus(const int)));
 	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
+	connect(this,SIGNAL(aboutToShow()),this,SLOT(selectTextIfNotEmpty()));
 	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
@@ -900,6 +901,8 @@ void SearchMenu::setLineEditFocus()
 {
 	searchline->setFocus();
 	const QList<QAction*>& acts = actions();
+	if (!searchline->text().isEmpty())
+		searchline->selectAll();
 	//if (acts.size() > 1 && acts[1] != NULL)
 	//	setActiveAction(acts[1]);
 }
@@ -978,6 +981,12 @@ void SearchMenu::keyPressEvent( QKeyEvent * event )
 			}
 		}
 	}
+}
+
+void SearchMenu::selectTextIfNotEmpty()
+{
+	if (!searchline->text().isEmpty())
+		searchline->selectAll();
 }
 
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
