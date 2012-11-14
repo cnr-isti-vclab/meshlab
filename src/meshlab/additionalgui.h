@@ -240,27 +240,30 @@ class SearchMenu : public QMenu
 {
 	Q_OBJECT
 public:
-	SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent);
+	SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth = -1);
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();
+	QSize sizeHint () const;
 protected:
 	void keyPressEvent(QKeyEvent * event);
-
+	void resizeEvent ( QResizeEvent * event);
 private:
 	MenuLineEdit* searchline;
  	int maxres;
 	const WordActionsMapAccessor& wama;
+	int fixedwidthsize;
 
 	void getResults(const QString& text,QList<QAction*>& results);
 	void updateGUI(const QList<QAction*>& results);
 	void alignToParentGeometry();
+	void selectTextIfNotEmpty();
 	int nextEnabledAction( const int k,const int currentind,const QList<QAction*>& acts,QAction*& nextact) const;
 private slots:
 	void edited(const QString& text);
 	void setLineEditFocus();
+	void onAboutToShowEvent();
 	void changeFocus(const int k);
-	void selectTextIfNotEmpty();
 };
 
 

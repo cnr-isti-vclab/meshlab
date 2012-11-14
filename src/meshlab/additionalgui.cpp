@@ -792,8 +792,8 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 	return QListView::event(event);
 }
 
-SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent)
-:QMenu(parent),searchline(NULL),wama(wm),maxres(max)
+SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth)
+:QMenu(parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
 {
 	searchline = new MenuLineEdit(this);
 	QWidgetAction* searchact = new QWidgetAction(this);
@@ -801,9 +801,9 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	addAction(searchact);
 	connect(searchline,SIGNAL(textEdited( const QString&)),this,SLOT(edited( const QString&)));
 	connect(searchline,SIGNAL(arrowPressed(const int)),this,SLOT(changeFocus(const int)));
-	connect(this,SIGNAL(aboutToShow()),this,SLOT(setLineEditFocus()));
-	connect(this,SIGNAL(aboutToShow()),this,SLOT(selectTextIfNotEmpty()));
-	setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	connect(this,SIGNAL(aboutToShow()),this,SLOT(onAboutToShowEvent()));
+	setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	//setGeometry(1000,10,50,100);
 }
 
 void SearchMenu::getResults(const QString& text,QList<QAction*>& result)
@@ -876,7 +876,6 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 		//if (results.size() > 0 && (results[0] != NULL))
 		//	setActiveAction(results[0]);
 	}	
-	alignToParentGeometry();
 }
 
 void SearchMenu::edited( const QString& text)
@@ -901,8 +900,6 @@ void SearchMenu::setLineEditFocus()
 {
 	searchline->setFocus();
 	const QList<QAction*>& acts = actions();
-	if (!searchline->text().isEmpty())
-		searchline->selectAll();
 	//if (acts.size() > 1 && acts[1] != NULL)
 	//	setActiveAction(acts[1]);
 }
@@ -975,7 +972,10 @@ void SearchMenu::keyPressEvent( QKeyEvent * event )
 				if (next != -1)
 				{
 					if (next == 0)
+					{
 						searchline->setFocus();
+						selectTextIfNotEmpty();
+					}
 					setActiveAction(act);
 				}
 			}
@@ -987,6 +987,33 @@ void SearchMenu::selectTextIfNotEmpty()
 {
 	if (!searchline->text().isEmpty())
 		searchline->selectAll();
+}
+
+QSize SearchMenu::sizeHint() const
+{
+	if (fixedwidthsize == -1)
+		return QMenu::sizeHint();
+	return QSize(fixedwidthsize,QMenu::sizeHint().height());
+}
+
+void SearchMenu::onAboutToShowEvent()
+{
+	setLineEditFocus();
+	selectTextIfNotEmpty();
+	//resizeGUI();
+}
+
+void SearchMenu::resizeEvent( QResizeEvent * event )
+{
+	if (fixedwidthsize != -1)
+	{
+		QPoint linestartpoint = mapToGlobal(searchline->geometry().topLeft());
+		int borderx = (linestartpoint.x() - frameGeometry().x());
+		searchline->setMinimumWidth(fixedwidthsize - borderx * 2);
+		searchline->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
+	}
+	QMenu::resizeEvent(event);
+	alignToParentGeometry();
 }
 
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.

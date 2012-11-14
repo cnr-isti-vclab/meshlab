@@ -96,7 +96,6 @@ MainWindow::MainWindow()
 	createActions();
 	createToolBars();
 	createMenus();
-	initSearchEngine();
 	stddialog = 0;
 	xmldialog = 0;
 	setAcceptDrops(true);
@@ -501,9 +500,6 @@ void MainWindow::createToolBars()
 	searchButton->setPopupMode(QToolButton::InstantPopup);
 	searchButton->setIcon(QIcon(":/images/search.png"));
 	searchToolBar->addWidget(searchButton);
-    SearchMenu* ser = new SearchMenu(wama,15,searchButton);
-	searchButton->setMenu(ser);
-	connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
 }
 
 
@@ -642,7 +638,6 @@ void MainWindow::createMenus()
 	helpMenu->addAction(submitBugAct);
 	helpMenu->addAction(checkUpdatesAct);
 
-	//fillFilterMenu();
 	fillEditMenu();
 	fillRenderMenu();
 	fillDecorateMenu();
@@ -651,6 +646,16 @@ void MainWindow::createMenus()
 	handleMenu = new QMenu(this);
 	splitMenu = handleMenu->addMenu(tr("&Split"));
 	unSplitMenu = handleMenu->addMenu("&Close");
+
+	//SearchMenu
+	if (searchButton != NULL)
+	{
+		initSearchEngine();
+		int longest = longestActionWidthInAllMenus();
+		SearchMenu* ser = new SearchMenu(wama,15,searchButton,longest);
+		searchButton->setMenu(ser);
+		connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
+	}
 }
 
 void MainWindow::initSearchEngine()
@@ -667,6 +672,7 @@ void MainWindow::initSearchEngine()
 
 void MainWindow::initMenuForSearching(QMenu* menu)
 {
+	int actwidth = 0;
 	if (menu == NULL)
 		return;
 	const QList<QAction*>& acts = menu->actions();
@@ -737,26 +743,83 @@ void MainWindow::fillFilterMenu()
 		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if( filterClass & MeshFilterInterface::FaceColoring )   filterMenuColorize->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::VertexColoring ) filterMenuColorize->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Selection )      filterMenuSelect->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Cleaning )       filterMenuClean->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Remeshing )      filterMenuRemeshing->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Smoothing )      filterMenuSmoothing->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Normal )         filterMenuNormal->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Quality )        filterMenuQuality->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Measure  )	    filterMenuQuality->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Layer )          filterMenuMeshLayer->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::RasterLayer )    filterMenuRasterLayer->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::MeshCreation )   filterMenuCreate->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::RangeMap )       filterMenuRangeMap->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::PointSet )       filterMenuPointSet->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Sampling )       filterMenuSampling->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Texture)         filterMenuTexture->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Polygonal)       filterMenuPolygonal->addAction(filterAction);
-		if( filterClass & MeshFilterInterface::Camera)          filterMenuCamera->addAction(filterAction);
+		if( filterClass & MeshFilterInterface::FaceColoring ) 
+		{
+			filterMenuColorize->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::VertexColoring ) 
+		{
+			filterMenuColorize->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Selection )      
+		{
+			filterMenuSelect->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Cleaning )       
+		{
+			filterMenuClean->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Remeshing )      
+		{
+			filterMenuRemeshing->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Smoothing )      
+		{
+			filterMenuSmoothing->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Normal )         
+		{
+			filterMenuNormal->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Quality )        
+		{
+			filterMenuQuality->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Measure  )	    
+		{
+			filterMenuQuality->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Layer )          
+		{
+			filterMenuMeshLayer->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::RasterLayer )    
+		{
+			filterMenuRasterLayer->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::MeshCreation )   
+		{
+			filterMenuCreate->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::RangeMap )       
+		{
+			filterMenuRangeMap->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::PointSet )       
+		{
+			filterMenuPointSet->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Sampling )       
+		{
+			filterMenuSampling->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Texture)         
+		{
+			filterMenuTexture->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Polygonal)       
+		{
+			filterMenuPolygonal->addAction(filterAction);
+		}
+		if( filterClass & MeshFilterInterface::Camera)          
+		{
+			filterMenuCamera->addAction(filterAction);
+		}
 		//  MeshFilterInterface::Generic :
-		if(filterClass == 0)                                    filterMenu->addAction(filterAction);
+		if(filterClass == 0)                                    
+		{
+			filterMenu->addAction(filterAction);
+		}
 		if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
 	}
 
@@ -777,26 +840,83 @@ void MainWindow::fillFilterMenu()
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			foreach(QString nameClass,filterClassesList)
 			{
-				if( nameClass == QString("FaceColoring")) filterMenuColorize->addAction(filterAction);
-				if( nameClass == QString("VertexColoring")) filterMenuColorize->addAction(filterAction);
-				if( nameClass == QString("Selection")) filterMenuSelect->addAction(filterAction);
-				if( nameClass == QString("Cleaning")) filterMenuClean->addAction(filterAction);
-				if( nameClass == QString("Remeshing")) filterMenuRemeshing->addAction(filterAction);
-				if( nameClass == QString("Smoothing")) filterMenuSmoothing->addAction(filterAction);
-				if( nameClass == QString("Normal")) filterMenuNormal->addAction(filterAction);
-				if( nameClass == QString("Quality")) filterMenuQuality->addAction(filterAction);
-				if( nameClass == QString("Measure")) filterMenuQuality->addAction(filterAction);
-				if( nameClass == QString("Layer")) filterMenuMeshLayer->addAction(filterAction);
-				if( nameClass == QString("RasterLayer")) filterMenuRasterLayer->addAction(filterAction);
-				if( nameClass == QString("MeshCreation")) filterMenuCreate->addAction(filterAction);
-				if( nameClass == QString("RangeMap")) filterMenuRangeMap->addAction(filterAction);
-				if( nameClass == QString("PointSet")) filterMenuPointSet->addAction(filterAction);
-				if( nameClass == QString("Sampling")) filterMenuSampling->addAction(filterAction);
-				if( nameClass == QString("Texture")) filterMenuTexture->addAction(filterAction);
-				if( nameClass == QString("Polygonal")) filterMenuPolygonal->addAction(filterAction);
-				if( nameClass == QString("Camera")) filterMenuCamera->addAction(filterAction);
+				if( nameClass == QString("FaceColoring")) 
+				{
+					filterMenuColorize->addAction(filterAction);
+				}
+				if( nameClass == QString("VertexColoring")) 
+				{
+					filterMenuColorize->addAction(filterAction);
+				}
+				if( nameClass == QString("Selection")) 
+				{
+					filterMenuSelect->addAction(filterAction);
+				}
+				if( nameClass == QString("Cleaning")) 
+				{
+					filterMenuClean->addAction(filterAction);
+				}
+				if( nameClass == QString("Remeshing")) 
+				{
+					filterMenuRemeshing->addAction(filterAction);
+				}
+				if( nameClass == QString("Smoothing")) 
+				{
+					filterMenuSmoothing->addAction(filterAction);
+				}
+				if( nameClass == QString("Normal")) 
+				{
+					filterMenuNormal->addAction(filterAction);
+				}
+				if( nameClass == QString("Quality")) 
+				{
+					filterMenuQuality->addAction(filterAction);
+				}
+				if( nameClass == QString("Measure")) 
+				{
+					filterMenuQuality->addAction(filterAction);
+				}
+				if( nameClass == QString("Layer")) 
+				{
+					filterMenuMeshLayer->addAction(filterAction);
+				}
+				if( nameClass == QString("RasterLayer")) 
+				{
+					filterMenuRasterLayer->addAction(filterAction);
+				}
+				if( nameClass == QString("MeshCreation")) 
+				{
+					filterMenuCreate->addAction(filterAction);
+				}
+				if( nameClass == QString("RangeMap")) 
+				{
+					filterMenuRangeMap->addAction(filterAction);
+				}
+				if( nameClass == QString("PointSet")) 
+				{
+					filterMenuPointSet->addAction(filterAction);
+				}
+				if( nameClass == QString("Sampling")) 
+				{
+					filterMenuSampling->addAction(filterAction);
+				}
+				if( nameClass == QString("Texture")) 
+				{
+					filterMenuTexture->addAction(filterAction);
+				}
+				if( nameClass == QString("Polygonal")) 
+				{
+					filterMenuPolygonal->addAction(filterAction);
+				}
+				if( nameClass == QString("Camera")) 
+				{
+					filterMenuCamera->addAction(filterAction);
+				}
 				//  //  MeshFilterInterface::Generic :
-				if(	nameClass == QString("Generic")) filterMenu->addAction(filterAction);
+				if(	nameClass == QString("Generic")) 
+				{
+					filterMenu->addAction(filterAction);
+				}
 				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
 			}
 		}
@@ -1072,3 +1192,33 @@ void MainWindow::wrapSetActiveSubWindow(QWidget* window){
 	}
 }
 
+int MainWindow::longestActionWidthInMenu( QMenu* m,const int longestwidth)
+{
+	int longest = longestwidth;
+
+	const QList<QAction*>& acts = m->actions();
+	foreach(QAction* act,acts)
+	{
+		QMenu* submenu = act->menu();
+		if (!act->isSeparator() && (submenu == NULL))
+			longest = std::max(longest,m->actionGeometry(act).width());
+
+		else if (!act->isSeparator())
+				longest = std::max(longest,longestActionWidthInMenu(submenu,longest));
+	}
+	return longest;
+}
+
+int MainWindow::longestActionWidthInMenu( QMenu* m)
+{
+	return longestActionWidthInMenu(m,0);
+}
+
+int MainWindow::longestActionWidthInAllMenus()
+{
+	int longest = 0;
+	QList<QMenu*> list = menuBar()->findChildren<QMenu*>();
+	foreach(QMenu* m,list)
+		longest = std::max(longest,longestActionWidthInMenu(m));
+	return longest;
+}

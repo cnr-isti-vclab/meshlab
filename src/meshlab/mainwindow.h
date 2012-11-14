@@ -187,6 +187,9 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 	void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
 private:
+	int longestActionWidthInMenu(QMenu* m,const int longestwidth);
+	int longestActionWidthInMenu( QMenu* m);
+	int longestActionWidthInAllMenus();
     void createStdPluginWnd(); // this one is
 	void createXMLStdPluginWnd();
 	void initGlobalParameters();
