@@ -652,8 +652,8 @@ void MainWindow::createMenus()
 	{
 		initSearchEngine();
 		int longest = longestActionWidthInAllMenus();
-		SearchMenu* ser = new SearchMenu(wama,15,searchButton,longest);
-		searchButton->setMenu(ser);
+		searchMenu = new SearchMenu(wama,15,searchButton,longest);
+		searchButton->setMenu(searchMenu);
 		connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
 	}
 }

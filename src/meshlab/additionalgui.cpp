@@ -875,6 +875,7 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 		addActions(results);
 		//if (results.size() > 0 && (results[0] != NULL))
 		//	setActiveAction(results[0]);
+		alignToParentGeometry();
 	}	
 }
 
@@ -993,7 +994,9 @@ QSize SearchMenu::sizeHint() const
 {
 	if (fixedwidthsize == -1)
 		return QMenu::sizeHint();
-	return QSize(fixedwidthsize,QMenu::sizeHint().height());
+	QPoint linestartpoint = mapToGlobal(searchline->geometry().topLeft());
+	int borderx = (linestartpoint.x() - frameGeometry().x());
+	return QSize(fixedwidthsize + borderx * 2,QMenu::sizeHint().height());
 }
 
 void SearchMenu::onAboutToShowEvent()
@@ -1001,21 +1004,24 @@ void SearchMenu::onAboutToShowEvent()
 	setLineEditFocus();
 	selectTextIfNotEmpty();
 	//resizeGUI();
+	alignToParentGeometry();
 }
 
 void SearchMenu::resizeEvent( QResizeEvent * event )
 {
 	if (fixedwidthsize != -1)
 	{
-		QPoint linestartpoint = mapToGlobal(searchline->geometry().topLeft());
-		int borderx = (linestartpoint.x() - frameGeometry().x());
-		searchline->setMinimumWidth(fixedwidthsize - borderx * 2);
+		searchline->setMinimumWidth(fixedwidthsize);
 		searchline->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
 	}
 	QMenu::resizeEvent(event);
 	alignToParentGeometry();
 }
 
+int& SearchMenu::searchLineWidth()
+{
+	return fixedwidthsize;
+}
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
 {

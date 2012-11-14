@@ -241,6 +241,7 @@ class SearchMenu : public QMenu
 	Q_OBJECT
 public:
 	SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth = -1);
+	int& searchLineWidth();
 	inline void setMaxResultNum(const int max) {maxres = max;};
 	inline int maxResultNum() const {return maxres;};
 	void clearResults();

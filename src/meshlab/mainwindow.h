@@ -364,6 +364,7 @@ private:
 	////////// Search Shortcut ////////////////
 	QShortcut* searchShortCut;
 	MyToolButton* searchButton;
+	SearchMenu* searchMenu;
 	//////////// Actions Menu File ///////////////////////
   QAction *newProjectAct;
   QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;

@@ -434,6 +434,7 @@ void MainWindow::updateMenus()
 			layerDialog->updateDecoratorParsView();
 		}
 	}
+	searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
 }
 
 void MainWindow::setSplit(QAction *qa)
