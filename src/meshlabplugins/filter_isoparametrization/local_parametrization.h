@@ -438,7 +438,7 @@ typename FaceType::ScalarType EstimateAreaByParam(const FaceType* f)
 	else
 		alpha=num/max_num;
 
-	ScalarType Rarea=((f->V(1)->RPos-f->V(0)->RPos)^(f->V(2)->RPos-f->V(0)->RPos)).Norm()/2.0;
+	ScalarType Rarea=((f->cV(1)->RPos-f->cV(0)->RPos)^(f->cV(2)->RPos-f->cV(0)->RPos)).Norm()/2.0;
 	estimated=alpha*estimated+(1.0-alpha)*Rarea;
 
 	return(estimated);
@@ -1164,8 +1164,8 @@ void InterpolateUV(const typename MeshType::FaceType* f,
 		   typename MeshType::ScalarType &U,
 		   typename MeshType::ScalarType &V)
 {
-	U=bary.X()*f->V(0)->T().U()+bary.Y()*f->V(1)->T().U()+bary.Z()*f->V(2)->T().U();
-	V=bary.X()*f->V(0)->T().V()+bary.Y()*f->V(1)->T().V()+bary.Z()*f->V(2)->T().V();
+	U=bary.X()*f->cV(0)->T().U()+bary.Y()*f->cV(1)->T().U()+bary.Z()*f->cV(2)->T().U();
+	V=bary.X()*f->cV(0)->T().V()+bary.Y()*f->cV(1)->T().V()+bary.Z()*f->cV(2)->T().V();
 	/*if ((!((U>=-1)&&(U<=1)))||(!((V>=-1)&&(V<=1))))
 	{
 		printf("Bary:%f,%f,%f \n",bary.X(),bary.Y(),bary.Z());
@@ -1190,9 +1190,9 @@ bool GetBaryFaceFromUV(const MeshType &m,
 	for (unsigned int i=0;i<m.face.size();i++)
 	{
                 const typename  MeshType::FaceType *f=&m.face[i];
-		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
-		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
-		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
+        vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->cV(0)->T().U(),f->cV(0)->T().V());
+        vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->cV(1)->T().U(),f->cV(1)->T().V());
+        vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->cV(2)->T().U(),f->cV(2)->T().V());
 
 		vcg::Point2<ScalarType> test=vcg::Point2<ScalarType>(U,V);
 		vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
@@ -1310,9 +1310,9 @@ bool GetCoordFromUV(const MeshType &m,
 	for (unsigned int i=0;i<m.face.size();i++)
 	{
                 const typename MeshType::FaceType *f=&m.face[i];
-		vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->V(0)->T().U(),f->V(0)->T().V());
-		vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->V(1)->T().U(),f->V(1)->T().V());
-		vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->V(2)->T().U(),f->V(2)->T().V());
+        vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f->cV(0)->T().U(),f->cV(0)->T().V());
+        vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f->cV(1)->T().U(),f->cV(1)->T().V());
+        vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f->cV(2)->T().U(),f->cV(2)->T().V());
 
 		vcg::Point2<ScalarType> test=vcg::Point2<ScalarType>(U,V);
 		vcg::Triangle2<ScalarType> t2d=vcg::Triangle2<ScalarType>(tex0,tex1,tex2);
@@ -1333,9 +1333,9 @@ bool GetCoordFromUV(const MeshType &m,
 			ScalarType diff=(1.0-bary.X()-bary.Y()-bary.Z());
 			bary.X()+=diff;
 			if (!rpos)
-				val=f->P(0)*bary.X()+f->P(1)*bary.Y()+f->P(0)*bary.Z();
+				val=f->cP(0)*bary.X()+f->cP(1)*bary.Y()+f->cP(0)*bary.Z();
 			else
-				val=f->V(0)->RPos*bary.X()+f->V(1)->RPos*bary.Y()+f->V(2)->RPos*bary.Z();
+				val=f->cV(0)->RPos*bary.X()+f->cV(1)->RPos*bary.Y()+f->cV(2)->RPos*bary.Z();
 			
 			return true;
 		}
@@ -1380,9 +1380,9 @@ typename MeshType::ScalarType GetSmallestUVHeight(const MeshType &m)
 		///approximation errors
 		for (int j=0;j<3;j++)
 		{
-			vcg::Point2<ScalarType> uv0=f->V(j)->cT().P();
-			vcg::Point2<ScalarType> uv1=f->V1(j)->cT().P();
-			vcg::Point2<ScalarType> uv2=f->V2(j)->cT().P();
+			vcg::Point2<ScalarType> uv0=f->cV(j)->cT().P();
+			vcg::Point2<ScalarType> uv1=f->cV1(j)->cT().P();
+			vcg::Point2<ScalarType> uv2=f->cV2(j)->cT().P();
 			ScalarType area=fabs((uv1-uv0)^(uv2-uv0));
 			ScalarType base=(uv1-uv2).Norm();
 			ScalarType h_test=area/base;

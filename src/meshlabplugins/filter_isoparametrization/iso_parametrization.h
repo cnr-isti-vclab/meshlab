@@ -1102,15 +1102,15 @@ public:
 		float eps=0.00001f;
 #endif
 		///control right domain
-		int I0=f->V(0)->T().N();
-		int I1=f->V(1)->T().N();
-		int I2=f->V(2)->T().N();
+		int I0=f->cV(0)->T().N();
+		int I1=f->cV(1)->T().N();
+		int I2=f->cV(2)->T().N();
 
 		///if they are equal it's is triavially the interpolation of UV coords
 		///and the same face I as the domain
 		if ((I0==I1)&&(I1==I2))
 		{
-			UV=bary3D.X()*f->V(0)->T().P()+bary3D.Y()*f->V(1)->T().P()+bary3D.Z()*f->V(2)->T().P();
+			UV=bary3D.X()*f->cV(0)->T().P()+bary3D.Y()*f->cV(1)->T().P()+bary3D.Z()*f->cV(2)->T().P();
 			Clamp(UV);
 			assert((UV.X()>=0)&&(UV.Y()>=0)&&(UV.X()<=1)&&(UV.Y()<=1)&&(UV.X()+UV.Y()<=1));
 			I=I0;
@@ -1169,9 +1169,9 @@ public:
 			int StarIndex;
 			getStarFromPointer(center,StarIndex);
 			vcg::Point2<ScalarType> UVs0,UVs1,UVs2;
-			vcg::Point2<ScalarType> UV0=f->V(0)->T().P();
-			vcg::Point2<ScalarType> UV1=f->V(1)->T().P();
-			vcg::Point2<ScalarType> UV2=f->V(2)->T().P();
+			vcg::Point2<ScalarType> UV0=f->cV(0)->T().P();
+			vcg::Point2<ScalarType> UV1=f->cV(1)->T().P();
+			vcg::Point2<ScalarType> UV2=f->cV(2)->T().P();
 
 			GE0(I0,UV0,StarIndex,UVs0);
 			GE0(I1,UV1,StarIndex,UVs1);
@@ -1199,9 +1199,9 @@ public:
 			getDiamondFromPointer(v0,v1,EdgeIndex);
 
 			vcg::Point2<ScalarType> UVd0,UVd1,UVd2;
-			vcg::Point2<ScalarType> UV0=f->V(0)->T().P();
-			vcg::Point2<ScalarType> UV1=f->V(1)->T().P();
-			vcg::Point2<ScalarType> UV2=f->V(2)->T().P();
+			vcg::Point2<ScalarType> UV0=f->cV(0)->T().P();
+			vcg::Point2<ScalarType> UV1=f->cV(1)->T().P();
+			vcg::Point2<ScalarType> UV2=f->cV(2)->T().P();
 
 			GE1(I0,UV0,EdgeIndex,UVd0);
 			GE1(I1,UV1,EdgeIndex,UVd1);

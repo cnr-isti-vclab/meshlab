@@ -80,8 +80,8 @@ typename FaceType::ScalarType MinAngleFace(const FaceType &f)
 	ScalarType res=360.0;
 	for (int i=0;i<3;i++)
 	{
-                CoordType v0=f.P((i+1)%3)-f.P(i);
-                CoordType v1=f.P((i+2)%3)-f.P(i);
+	  CoordType v0=f.cP((i+1)%3)-f.cP(i);
+	  CoordType v1=f.cP((i+2)%3)-f.cP(i);
 		v0.Normalize();
 		v1.Normalize();
 		ScalarType angle=acos(v0*v1)* 180.0 / PI;
@@ -102,8 +102,8 @@ typename FaceType::ScalarType MaxAngleFace(const FaceType &f)
 	ScalarType res=0;
 	for (int i=0;i<3;i++)
 	{
-                CoordType v0=f.P((i+1)%3)-f.P(i);
-                CoordType v1=f.P((i+2)%3)-f.P(i);
+				CoordType v0=f.cP((i+1)%3)-f.cP(i);
+				CoordType v1=f.cP((i+2)%3)-f.cP(i);
 		v0.Normalize();
 		v1.Normalize();
 		ScalarType angle=acos(v0*v1)* 180.0 / PI;
@@ -162,8 +162,8 @@ void MaxMinEdge(const MeshType &mesh,typename MeshType::ScalarType &min,
 
 			for (int i=0;i<3;i++)
 			{
-                                typename MeshType::VertexType* v0=(*Fi).V(i);
-                                typename MeshType::VertexType* v1=(*Fi).V((i+1)%3);
+			  typename MeshType::VertexType* v0=(*Fi).cV0(i);
+			  typename MeshType::VertexType* v1=(*Fi).cV1(i);
 				if (v0>v1)
 				{
 					ScalarType dist=(v0->P()-v1->P()).Norm();

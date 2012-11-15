@@ -53,7 +53,7 @@ typename MeshType::ScalarType AspectRatio(const MeshType &mesh)
 	typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
 		if ((!(*Fi).IsD()))
-			res+=vcg::QualityRadii((*Fi).P(0),(*Fi).P(1),(*Fi).P(2));
+			res+=vcg::QualityRadii((*Fi).cP(0),(*Fi).cP(1),(*Fi).cP(2));
 	//return res;
 	return (res/(ScalarType)mesh.fn);
 }
@@ -66,9 +66,9 @@ template <class FaceType>
 typename FaceType::ScalarType AreaUV(const FaceType &f)
 {
 	typedef typename FaceType::ScalarType ScalarType;
-	vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f.V(0)->Bary.X(),f.V(0)->Bary.Y());
-	vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f.V(1)->Bary.X(),f.V(1)->Bary.Y());
-	vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f.V(2)->Bary.X(),f.V(2)->Bary.Y());
+	vcg::Point2<ScalarType> tex0=vcg::Point2<ScalarType>(f.cV(0)->Bary.X(),f.cV(0)->Bary.Y());
+	vcg::Point2<ScalarType> tex1=vcg::Point2<ScalarType>(f.cV(1)->Bary.X(),f.cV(1)->Bary.Y());
+	vcg::Point2<ScalarType> tex2=vcg::Point2<ScalarType>(f.cV(2)->Bary.X(),f.cV(2)->Bary.Y());
 	ScalarType area=((tex1-tex0)^(tex2-tex0));
 	return (area);
 }
