@@ -7,6 +7,7 @@
 #include <QtXml>
 
 #include "meshmodel.h"
+#include<QImageReader>
 #include "meshlabdocumentbundler.h"
 
 #include <wrap/qt/shot_qt.h>
