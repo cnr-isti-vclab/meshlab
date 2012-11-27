@@ -35,7 +35,6 @@
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/create/ball_pivoting.h>
 
-//#include <vcg/space/normal_extrapolation.h>
 using namespace std;
 using namespace vcg;
 
@@ -235,7 +234,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         m.cm.fn=0;
         m.cm.face.resize(0);
       }
-
+      m.updateDataMask(MeshModel::MM_VERTFACETOPO);
       int startingFn=m.cm.fn;
       tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr);
       // the main processing
