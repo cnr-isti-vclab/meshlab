@@ -552,87 +552,89 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	MeshModel & m = *md.mm();
-	switch(ID(filter))
-	{
-	case  FP_LOOP_SS:
-	case  FP_BUTTERFLY_SS:
-	case  FP_MIDPOINT:
-	case  FP_REFINE_LS3_LOOP:
-		{
-			m.updateDataMask( MeshModel::MM_FACEFACETOPO);
-			tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+  MeshModel & m = *md.mm();
+  switch(ID(filter))
+  {
+  case  FP_LOOP_SS:
+  case  FP_BUTTERFLY_SS:
+  case  FP_MIDPOINT:
+  case  FP_REFINE_LS3_LOOP:
+  {
+    tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+    tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+    m.updateDataMask( MeshModel::MM_FACEFACETOPO);
+    tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
-			if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
-			{
-				errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
-			}
+    if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
+    {
+      errorMessage = "Mesh has some not 2 manifoldfaces, subdivision surfaces require manifoldness"; // text
+      return false; // can't continue, mesh can't be processed
+    }
 
-			bool  selected  = par.getBool("Selected");
-			float threshold = par.getAbsPerc("Threshold");
-			int iterations = par.getInt("Iterations");
+    bool  selected  = par.getBool("Selected");
+    float threshold = par.getAbsPerc("Threshold");
+    int iterations = par.getInt("Iterations");
 
-			for(int i=0; i<iterations; ++i) {
-				m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-				switch(ID(filter)) {
-	case FP_LOOP_SS :
-		switch(par.getEnum("LoopWeight")) {
-	case 0:
-		tri::RefineOddEven<CMeshO/*, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO>*/ >
-			(m.cm, tri::OddPointLoop<CMeshO>(m.cm), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
-		break;
-	case 1:
-		tri::RefineOddEven<CMeshO/*,
-								 tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >,
-								 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >*/ >
-								 (m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(m.cm),
-								 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
-		break;
-	case 2:
-		tri::RefineOddEven<CMeshO/*,
-								 tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >,
-								 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >*/ >
-								 (m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(m.cm),
-								 tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
-		break;
-		}
-		break;
-	case FP_BUTTERFLY_SS :
-		Refine<CMeshO,MidPointButterfly<CMeshO> >
-			(m.cm, MidPointButterfly<CMeshO>(m.cm), threshold, selected, cb);
-		break;
-	case FP_MIDPOINT :
-		Refine<CMeshO,MidPoint<CMeshO> >
-			(m.cm, MidPoint<CMeshO>(&m.cm), threshold, selected, cb);
-		break;
-	case FP_REFINE_LS3_LOOP :
-		switch(par.getEnum("LoopWeight")) {
-	case 0:
-		tri::RefineOddEven<CMeshO/*, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >, tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >*/ >
-			(m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >(m.cm), tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >(), threshold, selected, cb);
-		break;
-	case 1:
-		tri::RefineOddEven<CMeshO/*,
-								 tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >,
-								 tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >*/ >
-								 (m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >(m.cm),
-								 tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >(), threshold, selected, cb);
-		break;
-	case 2:
-		tri::RefineOddEven<CMeshO/*,
-								 tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >,
-								 tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >*/ >
-								 (m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >(m.cm),
-								 tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >(), threshold, selected, cb);
-		break;
-		}
-		break;
-				}
-				m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-			}
-			m.UpdateBoxAndNormals();
-		} break;
+    for(int i=0; i<iterations; ++i) {
+      m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+      switch(ID(filter)) {
+      case FP_LOOP_SS :
+        switch(par.getEnum("LoopWeight")) {
+        case 0:
+          tri::RefineOddEven<CMeshO/*, tri::OddPointLoop<CMeshO>, tri::EvenPointLoop<CMeshO>*/ >
+              (m.cm, tri::OddPointLoop<CMeshO>(m.cm), tri::EvenPointLoop<CMeshO>(), threshold, selected, cb);
+          break;
+        case 1:
+          tri::RefineOddEven<CMeshO/*,
+                                     tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >,
+                                     tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >*/ >
+              (m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(m.cm),
+               tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, RegularLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
+          break;
+        case 2:
+          tri::RefineOddEven<CMeshO/*,
+                                     tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >,
+                                     tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >*/ >
+              (m.cm, tri::OddPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(m.cm),
+               tri::EvenPointLoopGeneric<CMeshO, Centroid<CMeshO>, ContinuityLoopWeight<CMeshO::ScalarType> >(), threshold, selected, cb);
+          break;
+        }
+        break;
+      case FP_BUTTERFLY_SS :
+        Refine<CMeshO,MidPointButterfly<CMeshO> >
+            (m.cm, MidPointButterfly<CMeshO>(m.cm), threshold, selected, cb);
+        break;
+      case FP_MIDPOINT :
+        Refine<CMeshO,MidPoint<CMeshO> >
+            (m.cm, MidPoint<CMeshO>(&m.cm), threshold, selected, cb);
+        break;
+      case FP_REFINE_LS3_LOOP :
+        switch(par.getEnum("LoopWeight")) {
+        case 0:
+          tri::RefineOddEven<CMeshO/*, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >, tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >*/ >
+              (m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >(m.cm), tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double> >(), threshold, selected, cb);
+          break;
+        case 1:
+          tri::RefineOddEven<CMeshO/*,
+                                     tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >,
+                                     tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >*/ >
+              (m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >(m.cm),
+               tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, RegularLoopWeight<double> >(), threshold, selected, cb);
+          break;
+        case 2:
+          tri::RefineOddEven<CMeshO/*,
+                                     tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >,
+                                     tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >*/ >
+              (m.cm, tri::OddPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >(m.cm),
+               tri::EvenPointLoopGeneric<CMeshO, LS3Projection<CMeshO, double>, ContinuityLoopWeight<double> >(), threshold, selected, cb);
+          break;
+        }
+        break;
+      }
+      m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+    }
+    m.UpdateBoxAndNormals();
+  } break;
 
 	case FP_SELECT_FACES_BY_EDGE:
 		{
@@ -1216,11 +1218,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 			if(par.getBool("Autoclean")){
 				int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 				Log( "Removed %d unreferenced vertices",delvert);
 			}
 			switch(par.getEnum("Method")){
 			case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
-			case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,false,cb); break;
+			case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,true,cb); break;
 			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
 			case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
 			default:assert(0);break;
