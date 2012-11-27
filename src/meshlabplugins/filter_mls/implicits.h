@@ -26,7 +26,8 @@
 
 #include <vcg/space/point2.h>
 #include <vcg/space/point3.h>
-#include <vcg/math/lin_algebra.h>
+#include <eigenlib/Eigen/Dense>
+#include <eigenlib/Eigen/Eigenvalues>
 
 namespace vcg
 {
@@ -159,17 +160,30 @@ protected:
 	{
 		if (m_kdirAreDirty)
 		{
-			MatrixType copy = m_w;
-			int mrot = 0;
-			VectorType evals;
-			MatrixType evecs;
-			Jacobi(copy, evals, evecs, mrot);
-			VectorType evalsAbs(fabs(evals[0]),fabs(evals[0]),fabs(evals[0]));
-			SortEigenvaluesAndEigenvectors(evals,evecs,true);
-			m_k1 = evals[0];
-			m_k2 = evals[1];
-			m_k1dir = evecs[0];
-			m_k2dir = evecs[1];
+			Eigen::Matrix<Scalar,3,3> copy;
+			m_w.ToEigenMatrix(copy);
+//			MatrixType copy = m_w;
+//			int mrot = 0;
+//			VectorType evals;
+//			MatrixType evecs;
+
+			Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(copy);
+			Eigen::Vector3f eval = eig.eigenvalues();
+			Eigen::Matrix3f evec = eig.eigenvectors();
+			eval = eval.cwiseAbs();
+			int ind0,ind1,ind2;
+			eval.minCoeff(&ind0);
+			ind1=(ind0+1)%3;
+			ind2=(ind0+2)%3;
+			if(eval[ind1]>eval[ind2]) std::swap(ind1,ind2);
+
+//			Jacobi(copy, evals, evecs, mrot);
+//			VectorType evalsAbs(fabs(evals[0]),fabs(evals[0]),fabs(evals[0]));
+//			SortEigenvaluesAndEigenvectors(evals,evecs,true);
+			m_k1 = eval[ind1];
+			m_k2 = eval[ind2];
+			m_k1dir.FromEigenVector(evec.col(ind1));
+			m_k2dir.FromEigenVector(evec.col(ind2));
 			m_kdirAreDirty = false;
 		}
 	}
