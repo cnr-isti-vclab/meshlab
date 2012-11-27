@@ -765,7 +765,7 @@ namespace vcg {
                         set.push_back(ISet2Type(xy));
                         return;
                     }
-                    Point3x v0(i->V(0)->P()), v1(i->V(1)->P()), v2(i->V(2)->P());
+                    Point3x v0(i->cV(0)->P()), v1(i->cV(1)->P()), v2(i->cV(2)->P());
                     v0.Scale(invDelta);
                     v1.Scale(invDelta);
                     v2.Scale(invDelta);

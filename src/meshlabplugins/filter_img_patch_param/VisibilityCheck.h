@@ -68,7 +68,7 @@ public:
     inline bool             isVertVisible( const CMeshO::VertexIterator &v ) const  { return isVertVisible( &*v ); }
 
     inline bool             isFaceVisible( const unsigned int n ) const             { return isFaceVisible( &m_Mesh->face[n] ); }
-    inline bool             isFaceVisible( const CFaceO *f ) const                  { return isVertVisible(f->V(0)) || isVertVisible(f->V(1)) || isVertVisible(f->V(2)); }
+    inline bool             isFaceVisible( const CFaceO *f ) const                  { return isVertVisible(f->cV(0)) || isVertVisible(f->cV(1)) || isVertVisible(f->cV(2)); }
     inline bool             isFaceVisible( const CMeshO::FaceIterator &f ) const    { return isFaceVisible( &*f ); }
 };
 
