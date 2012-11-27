@@ -27,6 +27,7 @@
 #include "balltree.h"
 #include <vcg/space/box3.h>
 #include <vcg/math/matrix33.h>
+#include <eigenlib/Eigen/Dense>
 #include <iostream>
 
 namespace GaelMls {
@@ -128,18 +129,18 @@ class MlsSurface
 
 		inline ConstDataWrapper<VectorType> positions() const
 		{
-			return ConstDataWrapper<VectorType>(&mPoints[0].cP(), mPoints.size(),
-																					size_t(mPoints[1].cP().V()) - size_t(mPoints[0].cP().V()));
+			return ConstDataWrapper<VectorType>(&mPoints[0].P(), mPoints.size(),
+																					size_t(mPoints[1].P().V()) - size_t(mPoints[0].P().V()));
 		}
 		inline ConstDataWrapper<VectorType> normals() const
 		{
-			return ConstDataWrapper<VectorType>(&mPoints[0].cN(), mPoints.size(),
-																					size_t(mPoints[1].cN().V()) - size_t(mPoints[0].cN().V()));
+			return ConstDataWrapper<VectorType>(&mPoints[0].N(), mPoints.size(),
+																					size_t(mPoints[1].N().V()) - size_t(mPoints[0].N().V()));
 		}
 		inline ConstDataWrapper<Scalar> radii() const
 		{
-			return ConstDataWrapper<Scalar>(&mPoints[0].cR(), mPoints.size(),
-																			size_t(&mPoints[1].cR()) - size_t(&mPoints[0].cR()));
+			return ConstDataWrapper<Scalar>(&mPoints[0].R(), mPoints.size(),
+																			size_t(&mPoints[1].R()) - size_t(&mPoints[0].R()));
 		}
 		const vcg::Box3<Scalar>& boundingBox() const { return mAABB; }
 
