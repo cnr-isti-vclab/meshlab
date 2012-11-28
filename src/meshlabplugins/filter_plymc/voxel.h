@@ -163,7 +163,7 @@ public:
 	const Color4b C4b() const 
 		{
 			static Color4b cc;
-			cc.SetRGB(c[0],c[1],c[2]);
+			cc=Color4b(c[0],c[1],c[2],255);
 			return cc;
 		}
 	inline void Blend( Voxelfc const & vx, scalar w)

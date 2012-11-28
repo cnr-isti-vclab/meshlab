@@ -22,20 +22,14 @@
 
 #include <locale>
 #include <iostream>
-//#include <tchar.h>
 
 #include <list>
-#include <limits>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/simplex/vertex/base.h>
-#include <vcg/simplex/face/base.h>
-#include <vcg/complex/used_types.h>
 #include <vcg/complex/complex.h>
 
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/update/quality.h>
-#include <vcg/complex/algorithms/update/edges.h>
 #include <vcg/complex/algorithms/update/topology.h>
 #include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/bounding.h>
@@ -203,7 +197,7 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
 
       if(!(loadmask & tri::io::Mask::IOM_VERTQUALITY))
         tri::UpdateQuality<SMesh>::VertexConstant(m,0);
-      tri::UpdateNormals<SMesh>::PerVertexMatrix(m,Tr);
+      tri::UpdateNormal<SMesh>::PerVertexMatrix(m,Tr);
       //if(!(loadmask & tri::io::Mask::IOM_VERTCOLOR))
       //  saveMask &= ~tri::io::Mask::IOM_VERTCOLOR;
     }
@@ -215,7 +209,7 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
           printf("Removed %i duplicates and %i unref",dup,unref);
       }
 
-      tri::UpdateNormals<SMesh>::PerVertexNormalizedPerFaceNormalized(m);
+      tri::UpdateNormal<SMesh>::PerVertexNormalizedPerFaceNormalized(m);
       if(p.GeodesicQualityFlag) {
           tri::UpdateTopology<SMesh>::VertexFace(m);
           tri::UpdateFlags<SMesh>::FaceBorderFromVF(m);
