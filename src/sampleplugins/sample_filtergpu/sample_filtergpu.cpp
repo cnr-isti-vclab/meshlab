@@ -148,7 +148,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 					if (f.IsD()) continue;
 					for (int v=0; v<3; ++v)
 					{
-						*indices++ = GLuint(f.V(v) - vbase);
+						*indices++ = GLuint(vcg::tri::Index(mesh,f.cV(v)));
 					}
 				}
 				indexBuffer->unmap();

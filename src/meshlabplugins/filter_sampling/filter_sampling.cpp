@@ -78,11 +78,11 @@ class BaseSampler
 	void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType p) 
 	{
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
-		m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
-		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] + f.V(2)->N()*p[2];
+		m->vert.back().P() = f.cP(0)*p[0] + f.cP(1)*p[1] +f.cP(2)*p[2];
+		m->vert.back().N() = f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] + f.cV(2)->N()*p[2];
 
 		if (qualitySampling)	
-      m->vert.back().Q() = f.V(0)->Q()*p[0] + f.V(1)->Q()*p[1] + f.V(2)->Q()*p[2];
+	  m->vert.back().Q() = f.cV(0)->Q()*p[0] + f.cV(1)->Q()*p[1] + f.cV(2)->Q()*p[2];
 	}
         void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const Point2i &tp, float edgeDist)
 	{
@@ -91,9 +91,9 @@ class BaseSampler
 		tri::Allocator<CMeshO>::AddVertices(*m,1);
 
 		if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0); 
-							 else m->vert.back().P() = f.P(0)*p[0] + f.P(1)*p[1] +f.P(2)*p[2];
+							 else m->vert.back().P() = f.cP(0)*p[0] + f.cP(1)*p[1] +f.cP(2)*p[2];
 							 
-		m->vert.back().N() = f.V(0)->N()*p[0] + f.V(1)->N()*p[1] +f.V(2)->N()*p[2];
+		m->vert.back().N() = f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] +f.cV(2)->N()*p[2];
 		if(tex)
 		{
 			QRgb val;
@@ -182,8 +182,8 @@ public:
 
 void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp) 
 {
-	Point3f startPt = f.P(0)*interp[0] + f.P(1)*interp[1] +f.P(2)*interp[2]; // point to be sampled
-	Point3f startN  = f.V(0)->cN()*interp[0] + f.V(1)->cN()*interp[1] +f.V(2)->cN()*interp[2]; // Normal of the interpolated point
+	Point3f startPt = f.cP(0)*interp[0] + f.cP(1)*interp[1] +f.cP(2)*interp[2]; // point to be sampled
+	Point3f startN  = f.cV(0)->cN()*interp[0] + f.cV(1)->cN()*interp[1] +f.cV(2)->cN()*interp[2]; // Normal of the interpolated point
 	AddSample(startPt,startN); // point to be sampled);
 }
 

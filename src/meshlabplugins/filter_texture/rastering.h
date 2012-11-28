@@ -133,7 +133,7 @@ public:
 
         if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - 1 - tp.Y())) < alpha)
         {
-            c.lerp(f.V(0)->cC(), f.V(1)->cC(), f.V(2)->cC(), p);
+            c.lerp(f.cV(0)->cC(), f.cV(1)->cC(), f.cV(2)->cC(), p);
             trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
         }
         if (cb)
@@ -257,9 +257,9 @@ public:
 
         // Get point on face
         CMeshO::CoordType startPt;
-        startPt[0] = bary[0]*f.V(0)->P().X()+bary[1]*f.V(1)->P().X()+bary[2]*f.V(2)->P().X();
-        startPt[1] = bary[0]*f.V(0)->P().Y()+bary[1]*f.V(1)->P().Y()+bary[2]*f.V(2)->P().Y();
-        startPt[2] = bary[0]*f.V(0)->P().Z()+bary[1]*f.V(1)->P().Z()+bary[2]*f.V(2)->P().Z();
+        startPt[0] = bary[0]*f.cV(0)->cP().X()+bary[1]*f.cV(1)->cP().X()+bary[2]*f.cV(2)->cP().X();
+        startPt[1] = bary[0]*f.cV(0)->cP().Y()+bary[1]*f.cV(1)->cP().Y()+bary[2]*f.cV(2)->cP().Y();
+        startPt[2] = bary[0]*f.cV(0)->cP().Z()+bary[1]*f.cV(1)->cP().Z()+bary[2]*f.cV(2)->cP().Z();
 
         // Retrieve closest point on source mesh
 
