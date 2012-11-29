@@ -295,7 +295,7 @@ void EditArc3DPlugin::exportShotsToRasters()
 			er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
 			md->setBusy(true);
 			RasterModel* rm=md->addNewRaster();
-			rm->addPlane(new Plane(er.modelList[i].textureName,QString("RGB")));
+			rm->addPlane(new Plane(er.modelList[i].textureName,Plane::RGBA));
 			rm->setLabel(er.modelList[i].textureName);
 			rm->shot=er.modelList[i].shot;
 			rm->shot.RescalingWorld(scalingFactor, false);

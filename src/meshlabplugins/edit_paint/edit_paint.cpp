@@ -83,8 +83,8 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	setToolType(COLOR_PAINT);
 	
 	glarea = parent;
-	buffer_width = glarea->curSiz.width();
-	buffer_height = glarea->curSiz.height();
+	buffer_width = glarea->width();
+	buffer_height = glarea->height();
 	glarea->setMouseTracking(true);
 
 	connect(this, SIGNAL(setSelectionRendering(bool)),glarea,SLOT(setSelectFaceRendering(bool)) );
@@ -215,12 +215,12 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 	glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
 	
 	viewport[0] = viewport[1] = 0;
-	viewport[2] = gla->curSiz.width(); viewport[3] = gla->curSiz.height();
+	viewport[2] = gla->width(); viewport[3] = gla->height();
 
 	if (zbuffer == NULL)
 	{
-		zbuffer = new GLfloat[gla->curSiz.width()*gla->curSiz.height()];
-		glReadPixels(0,0,gla->curSiz.width(), gla->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, zbuffer);	
+		zbuffer = new GLfloat[gla->width()*gla->height()];
+		glReadPixels(0,0,gla->width(), gla->height(), GL_DEPTH_COMPONENT, GL_FLOAT, zbuffer);	
 	}
 	
 	if (current_options & EPP_DRAW_CURSOR)
@@ -626,12 +626,12 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 
 inline void EditPaintPlugin::capture()
 {
-	color_buffer = new GLubyte[glarea->curSiz.width()*glarea->curSiz.height()*4];
-	clone_zbuffer = new GLfloat[glarea->curSiz.width()*glarea->curSiz.height()];
-	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_RGBA, GL_UNSIGNED_BYTE, color_buffer);
-	glReadPixels(0,0,glarea->curSiz.width(), glarea->curSiz.height(), GL_DEPTH_COMPONENT, GL_FLOAT, clone_zbuffer);
-	buffer_height = glarea->curSiz.height();
-	buffer_width = glarea->curSiz.width();
+	color_buffer = new GLubyte[glarea->width()*glarea->height()*4];
+	clone_zbuffer = new GLfloat[glarea->width()*glarea->height()];
+	glReadPixels(0,0,glarea->width(), glarea->height(), GL_RGBA, GL_UNSIGNED_BYTE, color_buffer);
+	glReadPixels(0,0,glarea->width(), glarea->height(), GL_DEPTH_COMPONENT, GL_FLOAT, clone_zbuffer);
+	buffer_height = glarea->height();
+	buffer_width = glarea->width();
 	
 	source_delta = latest_event.position;
 	
@@ -653,7 +653,7 @@ inline void EditPaintPlugin::capture()
 
 inline bool EditPaintPlugin::accessCloneBuffer(int vertex_x, int vertex_y, vcg::Color4b & color)
 {
-	int y =  buffer_height - source_delta.y() +	(vertex_y + apply_start.y() - glarea->curSiz.height());
+	int y =  buffer_height - source_delta.y() +	(vertex_y + apply_start.y() - glarea->height());
 	int x =  source_delta.x() +	(vertex_x - apply_start.x());
 	
 	int index = y * buffer_width + x;
@@ -805,7 +805,7 @@ inline void EditPaintPlugin::gradient(MeshModel & m,GLArea * gla) {
 	Color4b c1(qc1.red(), qc1.green(), qc1.blue(), qc1.alpha());
 	Color4b c2(qc2.red(), qc2.green(), qc2.blue(), qc2.alpha());
 	
-	QPointF p1(gradient_start.x(),gla->curSiz.height() - gradient_start.y());
+	QPointF p1(gradient_start.x(),gla->height() - gradient_start.y());
 	QPointF p0(latest_event.gl_position);
 	
 	float x2=(p1.x()-p0.x());
@@ -1060,7 +1060,7 @@ void drawLine(GLArea * gla, QPoint & start, QPoint & cur) {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	glOrtho(0,gla->width(),gla->height(),0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -1091,7 +1091,7 @@ void drawSimplePolyLine(GLArea * gla, QPoint & cur, float scale, vector<QPointF>
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	glOrtho(0,gla->width(),gla->height(),0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -1181,11 +1181,11 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 		/** to search with quicksearch the nearset zbuffer value in the line */
 		for (int k = 0; k < STEPS; k++)
 		{
-			double inv_yy = gla->curSiz.height()-pix_y;
+			double inv_yy = gla->height()-pix_y;
 			double zz=999;
 			
-			if ((int)pix_x>=0 && (int)pix_x<gla->curSiz.width() && (int)pix_y>=0 && (int)pix_y<gla->curSiz.height()) 
-				zz=(GLfloat)pixels[(int)(((int)pix_y)*gla->curSiz.width()+(int)pix_x)];
+			if ((int)pix_x>=0 && (int)pix_x<gla->width() && (int)pix_y>=0 && (int)pix_y<gla->height()) 
+				zz=(GLfloat)pixels[(int)(((int)pix_y)*gla->width()+(int)pix_x)];
 			da=da/2.0;
 			db=db/2.0;
 			dc=dc/2.0;
@@ -1216,7 +1216,7 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	glOrtho(0,gla->width(),gla->height(),0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();

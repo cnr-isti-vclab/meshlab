@@ -174,7 +174,7 @@ void EditHolePlugin::Decorate(MeshModel &m, GLArea * gla)
 	{
 		hasPick = false;
 		pickedFace =0;
-		int inverseY = gla->curSiz.height() - cur.y();
+		int inverseY = gla->height() - cur.y();
 		GLPickTri<CMeshO>::PickNearestFace(cur.x(), inverseY, m.cm, pickedFace, 4, 4);
 		
 		if( pickedFace != 0 )

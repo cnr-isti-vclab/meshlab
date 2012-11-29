@@ -128,7 +128,7 @@ private:
 				
 		latest_event.type = t;
 		latest_event.position = p;
-		latest_event.gl_position = QPoint(p.x(), gla->curSiz.height() - p.y());
+		latest_event.gl_position = QPoint(p.x(), gla->height() - p.y());
 		latest_event.modifiers = k;
 		latest_event.button = b;
 		latest_event.pressure = pres;

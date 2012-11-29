@@ -1026,13 +1026,13 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
     HelpString2="<br>";
     switch(current_manip_mode) 
     {
-      case EditManipulatorsPlugin::ModX:  HelpString2 = "press X to switch to X local"; break;
-      case EditManipulatorsPlugin::ModY:  HelpString2 = "press Y to switch to Y local"; break;
-      case EditManipulatorsPlugin::ModZ:  HelpString2 = "press Z to switch to Z local"; break;
-      case EditManipulatorsPlugin::ModXX: HelpString2 = "press X to switch to X global"; break;
-      case EditManipulatorsPlugin::ModYY: HelpString2 = "press Y to switch to Y global"; break;
-      case EditManipulatorsPlugin::ModZZ: HelpString2 = "press Z to switch to Z global"; break;
-      default:   HelpString2 = "press X Y Z to select an axis";    break;
+      case EditManipulatorsPlugin::ModX:  HelpString2 = "<br> press X to switch to X local"; break;
+      case EditManipulatorsPlugin::ModY:  HelpString2 = "<br> press Y to switch to Y local"; break;
+      case EditManipulatorsPlugin::ModZ:  HelpString2 = "<br> press Z to switch to Z local"; break;
+      case EditManipulatorsPlugin::ModXX: HelpString2 = "<br> press X to switch to X global"; break;
+      case EditManipulatorsPlugin::ModYY: HelpString2 = "<br> press Y to switch to Y global"; break;
+      case EditManipulatorsPlugin::ModZZ: HelpString2 = "<br> press Z to switch to Z global"; break;
+      default:   HelpString2 = "<br> press X Y Z to select an axis";    break;
     }
     
     if((current_manip == EditManipulatorsPlugin::ManRotate) || (current_manip == EditManipulatorsPlugin::ManScale))
@@ -1044,7 +1044,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
     HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
   }
 
-  this->RealTimeLog("Manipulator",qPrintable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
+  this->RealTimeLog("Manipulator","",qPrintable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
 
   //debug debug
   //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("string - %1 - number - %2 -").arg(inputnumberstring).arg(inputnumber));

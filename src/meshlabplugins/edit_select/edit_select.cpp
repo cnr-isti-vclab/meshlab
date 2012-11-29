@@ -115,7 +115,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
     glMatrixMode(GL_PROJECTION);
 	  glPushMatrix();
 	  glLoadIdentity();
-	  glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	  glOrtho(0,gla->width(),gla->height(),0,-1,1);
 	  glMatrixMode(GL_MODELVIEW);
 	  glPushMatrix();
 	  glLoadIdentity();
@@ -162,7 +162,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
     vector<CMeshO::FacePointer> NewSelFace;
     vector<CMeshO::VertexPointer> NewSelVert;
     QPoint mid=(start+cur)/2;
-    mid.setY(gla->curSiz.height()-  mid.y());
+    mid.setY(gla->height()-  mid.y());
     QPoint wid=(start-cur);
     if(wid.x()<0)  wid.setX(-wid.x());
     if(wid.y()<0)  wid.setY(-wid.y());
