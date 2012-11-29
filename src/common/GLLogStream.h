@@ -27,7 +27,8 @@
 
 #include <list>
 #include <utility>
-#include <QMap>
+#include <QMultiMap>
+#include <QPair>
 #include <QString>
 /**
   This is the logging class.
@@ -45,7 +46,7 @@ public:
 	};
 	
    GLLogStream ();
-   ~GLLogStream (){};
+   ~GLLogStream (){}
   void print(QStringList &list);		// Fills a QStringList with the log entries
   void Save(int Level, const char *filename);
   void Clear() 
@@ -66,11 +67,14 @@ public:
 
 //private:
   QList<std::pair<int,QString> > S;
-  QMap<QString,QString> RealTimeLogText;
-  
 
-  void RealTimeLogf(const QString& Id, const char * f, ... );
-  void RealTimeLog(const QString& Id,const QString& text);
+  // The list of strings used in realtime display of info over the mesh.
+  // Each box is identified by the title, name of the mesh and text.
+  // the name of the mesh is shown only if two or more box with the same title are shown.
+  QMultiMap<QString,QPair<QString,QString> > RealTimeLogText;
+
+  void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ... );
+  void RealTimeLog(const QString& Id, const QString &meshName,const QString& text);
 
 
 private:

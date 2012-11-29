@@ -44,7 +44,7 @@ void GLLogStream::Logf(int Level, const char * f, ... )
 	Log(Level,buf);
 }
 
-void GLLogStream::RealTimeLogf(const QString& Id, const char * f, ... )
+void GLLogStream::RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ... )
 {
 	char buf[4096];
 	va_list marker;
@@ -53,12 +53,12 @@ void GLLogStream::RealTimeLogf(const QString& Id, const char * f, ... )
 	vsprintf(buf,f,marker);
 	va_end( marker );
 	QString tmp(buf);
-	RealTimeLog(Id,tmp);
+	RealTimeLog(Id,meshName,tmp);
 }
 
-void GLLogStream::RealTimeLog(const QString& Id,const QString& text)
+void GLLogStream::RealTimeLog(const QString& Id, const QString &meshName, const QString& text)
 {
-  this->RealTimeLogText[Id]=text;
+  this->RealTimeLogText.insert(Id,qMakePair(meshName,text) );
 }
 
 

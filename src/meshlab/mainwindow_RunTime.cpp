@@ -400,9 +400,21 @@ void MainWindow::updateMenus()
 		setSelectFaceRenderingAct->setChecked(rm.selectedFace);
 		setSelectVertRenderingAct->setChecked(rm.selectedVert);
 
-		// Check only the active decorations
-		foreach (QAction *a,      PM.decoratorActionList){a->setChecked(false);a->setEnabled(true);}
-		foreach (QAction *a,   GLA()->iDecoratorsList){a->setChecked(true);}
+        // Decorator Menu Checking and unChecking
+        // First uncheck and disable all the decorators
+        foreach (QAction *a, PM.decoratorActionList)
+        {
+          a->setChecked(false);
+          a->setEnabled(true);
+        }
+        // Check the decorator per Document of the current glarea
+        foreach (QAction *a,   GLA()->iPerDocDecoratorlist)
+        { a ->setChecked(true); }
+
+        // Then check the decorator enabled for the current mesh.
+        if(GLA()->mm())
+          foreach (QAction *a,   GLA()->iCurPerMeshDecoratorList())
+          { a ->setChecked(true); }
 
 	} // if active
 	else
@@ -423,7 +435,7 @@ void MainWindow::updateMenus()
 		showRasterAct->setEnabled(meshDoc()->rm() != 0);
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
-		layerDialog->updateLog(*GLA()->log);
+		layerDialog->updateLog(meshDoc()->Log);
 		layerDialog->updateDecoratorParsView();
 	}
 	else
@@ -732,7 +744,7 @@ void MainWindow::runFilterScript()
 
     int req=iFilter->getRequirements(action);
     meshDoc()->mm()->updateDataMask(req);
-    iFilter->setLog(GLA()->log);
+    iFilter->setLog(&meshDoc()->Log);
 		
     RichParameterSet &parameterSet = (*ii).second;
 		
@@ -786,7 +798,7 @@ void MainWindow::runFilterScript()
 			GLA()->resetTrackBall();
 		/* to be changed */
 
-    GLA()->log->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
+	GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
 	}
 }
 
@@ -1448,7 +1460,7 @@ void MainWindow::applyRenderMode()
 		if (!initsupport)
 			msg = "The selected shader is not supported by your graphic hardware!";
 			
-		GLA()->log->Logf(GLLogStream::SYSTEM,qPrintable(msg));
+		GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
 		GLA()->setRenderer(0,0); //default opengl pipeline or vertex and fragment programs not supported
 	} 
 	GLA()->update();
@@ -1457,38 +1469,58 @@ void MainWindow::applyRenderMode()
 
 void MainWindow::applyDecorateMode()
 {
-	QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
-	
-	MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
+  if(GLA()->mm() == 0) return;
+  QAction *action = qobject_cast<QAction *>(sender());		// find the action which has sent the signal
 
-  bool found=GLA()->iDecoratorsList.removeOne(action);
+  MeshDecorateInterface *iDecorateTemp = qobject_cast<MeshDecorateInterface *>(action->parent());
 
-  if(found)
+  if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerDocument)
   {
+    bool found=GLA()->iPerDocDecoratorlist.removeOne(action);
+    if(found)
+    {
       iDecorateTemp->endDecorate(action,*meshDoc(),GLA()->glas.currentGlobalParamSet,GLA());
-	  iDecorateTemp->setLog(NULL);
-      GLA()->log->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+      iDecorateTemp->setLog(NULL);
+      GLA()->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s",qPrintable(action->text()));
+    }
+    else{
+      iDecorateTemp->setLog(&meshDoc()->Log);
+      bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
+      if(ret) {
+        GLA()->iPerDocDecoratorlist.push_back(action);
+        GLA()->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+      }
+      else GLA()->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s",qPrintable(action->text()));
+    }
   }
-  else{
-    QString errorMessage;
-    if (meshDoc()->mm() &&
-        iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
-				//RichParameterSet * decoratorParams = new RichParameterSet();
-				//iDecorateTemp->initGlobalParameterSet(action,decoratorParams);
-				iDecorateTemp->setLog(GLA()->log);
-				bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
-				if(ret) {
-						GLA()->iDecoratorsList.push_back(action);
-						GLA()->log->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
-						}
-						else GLA()->log->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
-			}
-	}
-	layerDialog->updateDecoratorParsView();
-	layerDialog->updateLog(*GLA()->log);
-	layerDialog->update();
-	GLA()->update();
-	
+
+  if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerMesh)
+  {
+    bool found=GLA()->iCurPerMeshDecoratorList().removeOne(action);
+    if(found)
+    {
+      iDecorateTemp->endDecorate(action,*meshDoc(),GLA()->glas.currentGlobalParamSet,GLA());
+      iDecorateTemp->setLog(NULL);
+      GLA()->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+    }
+    else{
+      QString errorMessage;
+      if (iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
+        iDecorateTemp->setLog(&meshDoc()->Log);
+        bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
+        if(ret) {
+          GLA()->iCurPerMeshDecoratorList().push_back(action);
+          GLA()->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+        }
+        else GLA()->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+      }
+    }
+  }
+
+  layerDialog->updateDecoratorParsView();
+  layerDialog->updateLog(meshDoc()->Log);
+  layerDialog->update();
+  GLA()->update();
 }
 
 void MainWindow::setLight()
@@ -2033,7 +2065,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 		return false;
 	}
   meshDoc()->setBusy(true);
-	pCurrentIOPlugin->setLog(GLA()->log);
+    pCurrentIOPlugin->setLog(&meshDoc()->Log);
 	if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,*prePar,QCallBack,this /*gla*/))
 	{
 		QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text+
@@ -2080,7 +2112,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     mm->updateDataMask(MeshModel::MM_POLYGONAL); // just to be sure. Hopefully it should be done in the plugin...
     int degNum = tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
     if(degNum)
-      GLA()->log->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
+      GLA()->Logf(0,"Warning model contains %i degenerate faces. Removed them.",degNum);
     mm->updateDataMask(MeshModel::MM_FACEFACETOPO);
     vcg::tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(mm->cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm->cm);
@@ -2176,7 +2208,7 @@ bool MainWindow::importMesh(QString fileName)
     bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
 		if(open) 
 		{
-			GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
+			GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
 			RichParameterSet par;
 			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 			if(!par.isEmpty())
@@ -2189,9 +2221,9 @@ bool MainWindow::importMesh(QString fileName)
 				showLayerDlg(true);
 		}
 		else
-			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
+			GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
 	}// end foreach file of the input list
-  GLA()->log->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
+  GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 
   this->currentViewContainer()->resetAllTrackBall();
 
@@ -2227,17 +2259,17 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
     bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
 		if(open) 
 		{
-			GLA()->log->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
+			GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
 			RichParameterSet par;
 			pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
 			pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
 			ret = true;
 		}
 		else
-			GLA()->log->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fullPath));
+			GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fullPath));
 	}
 	else
-		GLA()->log->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fullPath),qPrintable(extension));
+		GLA()->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fullPath),qPrintable(extension));
 	return ret;
 }
 
@@ -2329,7 +2361,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 			return false;
 		}
 		//MeshIOInterface* pCurrentIOPlugin = meshIOPlugins[idx-1];
-		pCurrentIOPlugin->setLog(GLA()->log);
+		pCurrentIOPlugin->setLog(&meshDoc()->Log);
 
 		int capability=0,defaultBits=0;
 		pCurrentIOPlugin->GetExportMaskCapability(extension,capability,defaultBits);
@@ -2362,7 +2394,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		QTime tt; tt.start();
 		ret = pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack,this);
 		qb->reset();
-		GLA()->log->Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
+		GLA()->Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
 
 		qApp->restoreOverrideCursor();
 		mod->setFileName(fileName);
@@ -2564,7 +2596,7 @@ void MainWindow::updateProgressBar( const int pos,const QString& text )
 //	}
 //	catch (ParsingException& e)
 //	{
-//		GLA()->log->Logf(GLLogStream::WARNING,e.what());
+//		GLA()->Logf(GLLogStream::WARNING,e.what());
 //	}
 //}
 void MainWindow::updateDocumentScriptBindings()

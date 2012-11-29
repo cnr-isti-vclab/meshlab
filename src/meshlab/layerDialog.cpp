@@ -46,15 +46,6 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	mw=qobject_cast<MainWindow *>(parent);
 	this->layout();
 
-	tagMenu = new QMenu(this);
-	removeTagAct = new QAction(tr("&Remove Tag"),this);
-	tagMenu->addAction(removeTagAct);
-	connect(removeTagAct, SIGNAL(triggered()), this, SLOT(removeTag()));
-
-	updateTagAct = new QAction(tr("&Update Tag"),this);
-	tagMenu->addAction(updateTagAct);
-	//TODO connect(updateTagAct, SIGNAL(triggered()), this, SLOT(?????????????));
-
 	// The following connection is used to associate the click with the change of the current mesh. 
   connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 	
@@ -130,6 +121,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
     case 3 :
       //the user has chosen to switch the layer
       mw->meshDoc()->setCurrentMesh(clickedId);
+      this->updateDecoratorParsView();
       break;
     }
     //make sure the right row is colored or that they right eye is drawn (open or closed)
@@ -186,8 +178,6 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 	if (sigsender == ui->meshTreeWidget)
 	{
 		MeshTreeWidgetItem   *mItem = dynamic_cast<MeshTreeWidgetItem   *>(ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-		QTreeWidgetItem     *qtItem = dynamic_cast<QTreeWidgetItem *>     (ui->meshTreeWidget->itemAt(pos.x(),pos.y()));
-
 		if(mItem)
 		{ 
 			if (mItem->m) mw->meshDoc()->setCurrentMesh(mItem->m->id());
@@ -199,19 +189,6 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 				{
 					mainwindow->meshLayerMenu()->popup(ui->meshTreeWidget->mapToGlobal(pos));
 					return;
-				}
-			}
-		}
-		else 
-		{
-			if(qtItem)
-			{
-				bool ok;
-				int idToRemove = qtItem->text(2).toInt(&ok);
-				if(ok)
-				{
-					removeTagAct->setData(idToRemove);
-					tagMenu->popup(mapToGlobal(pos));
 				}
 			}
 		}
@@ -242,13 +219,6 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 			}
 		}
 	}
-}
-
-void LayerDialog::removeTag()
-{
-  MeshDocument *md=mw->meshDoc();
-	md->removeTag(removeTagAct->data().toInt());
-	updateTable();
 }
 
 void LayerDialog::updateLog(GLLogStream &log)
@@ -323,17 +293,10 @@ void LayerDialog::updateTable()
 
 		//Adding default annotations
 		addDefaultNotes(item, mmd);
-
-		//Adding tags
-		QList<TagBase *> tags = md->getMeshTags(mmd->id());
-		foreach( TagBase *tag, tags)
-			addTreeWidgetItem(item, tag, *md, mmd);
 	}
 		
   for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
 		ui->meshTreeWidget->resizeColumnToContents(i);
-
-	//RasterTreewWidget
 
 	if (md->rasterList.size() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
@@ -473,23 +436,6 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
 
 }
 
-//Add a new item (not a MeshTreeWidgetItem but a tag item) to the treeWidget
-void LayerDialog::addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag, MeshDocument &md, MeshModel *mm)
-{
-	QMap<QString,MeshFilterInterface *>::const_iterator msi;
-	for(msi =  mw->pluginManager().stringFilterMap.begin(); msi != mw->pluginManager().stringFilterMap.end();++msi)
-	{
-		MeshFilterInterface * iFilter= msi.value();
-		if(msi.key() == tag->filterOwner)
-		{
-			QTreeWidgetItem *item = iFilter->tagDump(tag,md,mm);
-			parent->addChild(item);
-			updateColumnNumber(item);
-			item->setExpanded(expandedMap.value(qMakePair(mm->id(),tag->id())));
-		}
-	}
-}
-
 //Add, if necessary, columns to the treeWidget. 
 //It must be called every time a new treeWidget item is added to the tree.
 void LayerDialog::updateColumnNumber(const QTreeWidgetItem * item)
@@ -513,6 +459,8 @@ LayerDialog::~LayerDialog()
 
 void LayerDialog::updateDecoratorParsView() 
 {
+  if(mw->GLA()->md()->mm() ==0 ) return;
+
 	QStringList expIt;
 	int ind=0;
 	while(QTreeWidgetItem *item = ui->decParsTree->topLevelItem(ind))
@@ -527,19 +475,20 @@ void LayerDialog::updateDecoratorParsView()
 		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 		return;
 	}
-	if (mw->GLA()->iDecoratorsList.size() == 0)
+	// build the list of the meaningful decorator to be shown (perDocument + perMesh)
+	QList<QAction*> decList =  mw->GLA()->iPerDocDecoratorlist +mw->GLA()->iCurPerMeshDecoratorList();
+	if (decList.size() == 0)
 	{
 		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 		return;
 	}
-	QList<QAction*>& decList =  mw->GLA()->iDecoratorsList;
 	QList<QTreeWidgetItem*> treeItem;
 	for(int ii = 0; ii < decList.size();++ii)
 	{
 		MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(decList[ii]->parent());
 		if (!decPlug)
 		{
-			mw->GLA()->log->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
+			mw->GLA()->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
 			return;
 		}
 		else
@@ -597,7 +546,7 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 {
 	MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(act->parent());
 	if (!decPlug)
-		mw->GLA()->log->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
+		mw->GLA()->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
 	else
 	{
 		decPlug->initGlobalParameterSet(act,tmpSet);
@@ -684,7 +633,7 @@ void DecoratorParamsTreeWidget::apply()
 	}
 	mainWin->updateCustomSettings();
   if(mainWin->GLA())
-    mainWin->GLA()->updateDecoration();
+    mainWin->GLA()->updateAllPerMeshDecorators();
 }
 
 void DecoratorParamsTreeWidget::load()

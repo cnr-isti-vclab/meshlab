@@ -99,22 +99,19 @@ public:
 
 	vcg::Trackball trackball;
 	vcg::Trackball trackball_light;
-	GLLogStream *log;
 	void Logf(int Level, const char * f, ... );
 
 	GLAreaSetting glas;
-	QSize curSiz;
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-  //QString getFileName() {return QString(mm()->shortName());}
-	RenderMode &  getCurrentRenderMode()		{return rm;}
+  RenderMode &  getCurrentRenderMode()		{return rm;}
 
-	void updateFps(float deltaTime);
-	
+  void updateFps(float deltaTime);
+
   bool isCurrent() { if (mvc() == NULL) return false;return mvc()->currentId == this->id;}
 	
   void showTrackBall(bool b)		{trackBallVisible = b; update();}
@@ -129,7 +126,12 @@ public:
 	void saveSnapshot();
 	void setLightModel();
 	void setView();
-  QList<QAction *> iDecoratorsList;
+
+	// Stores for each mesh what are the per Mesh active decorations
+	QMap<int, QList<QAction *> > iPerMeshDecoratorsListMap;
+
+	QList<QAction *> iPerDocDecoratorlist;
+	QList<QAction *> &iCurPerMeshDecoratorList() { assert(this->md()->mm()) ; return iPerMeshDecoratorsListMap[this->md()->mm()->id()]; }
 
 	void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
 	MeshRenderInterface * getRenderer() { return iRenderer; }
@@ -193,8 +195,9 @@ signals:
 public slots:
 
 	// Called when we change layer, notifies the edit tool if one is open
-    void updateLayer();
-    void updateDecoration();
+	void manageCurrentMeshChange();
+    // Called when we modify the document
+    void updateAllPerMeshDecorators();
 
 public:
 	void focusInEvent ( QFocusEvent * event );

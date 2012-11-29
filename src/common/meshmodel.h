@@ -396,33 +396,6 @@ public:
 };// end class RasterModel
 
 class MeshDocument;
-/**
-The TagBase class define the base class from which each filter has to derive its own tag class.
-
-*/
-class TagBase
-{
-private:
-	int _id;
-
-public:
-	TagBase(MeshDocument *parent);
-	int id() const {return _id;}
-
-	QString typeName;
-	QList<int> referringMeshes;
-	QList<int> referringRasters;
-	QString filterOwner;
-	int property;
-
-	enum TagProperty {
-		TP_NONE               = 0x00000000,
-		TP_UNIQUE             = 0x00000001,
-		TP_UPDATABLE  	       = 0x00000002,
-
-	};
-}; //end class TagBase
-
 class RenderMode
 {
 public:
@@ -516,7 +489,6 @@ public:
 
 	MeshDocument(): QObject(),rendstate(),xmlhistory()
 	{
-		tagIdCounter=0;
 		meshIdCounter=0;
 		rasterIdCounter=0;
 		currentMesh = 0;
@@ -527,7 +499,7 @@ public:
 	//deletes each meshModel
 	~MeshDocument();
 
-	/// returns the mesh with a given unique id
+	/// returns the mesh with the given unique id
 	MeshModel *getMesh(int id);
 	MeshModel *getMesh(QString name);
 	MeshModel *getMeshByFullName(QString pathName);
@@ -536,7 +508,7 @@ public:
 	//set the current mesh to be the one with the given ID
 	void setCurrentMesh( int new_curr_id );
 
-	/// returns the mesh with a given unique id
+	/// returns the raster with the given unique id
 	RasterModel *getRaster(int i);
 
 	//set the current raster to be the one with the given ID
@@ -577,12 +549,8 @@ public:
 	/// The very important member:
 	/// The list of MeshModels.
 	QList<MeshModel *> meshList;
-	//The list of the raster models of the project
+	/// The list of the raster models of the project
 	QList<RasterModel *> rasterList;
-	///The list of the taggings of all the meshes/rasters of the project
-	QList<TagBase *> tagList;
-
-	int newTagId() {return tagIdCounter++;}
 	int newMeshId() {return meshIdCounter++;}
 	int newRasterId() {return rasterIdCounter++;}
 	
@@ -596,7 +564,6 @@ public:
 	
 
 private:
-	int tagIdCounter;
 	int meshIdCounter;
 	int rasterIdCounter;
 
@@ -611,7 +578,7 @@ private:
 	MeshLabRenderState rendstate;
 public:
 
-	inline MeshLabRenderState& renderState() {return rendstate;};
+	inline MeshLabRenderState& renderState() {return rendstate;}
 	void setDocLabel(const QString& docLb) {documentLabel = docLb;}
 	QString docLabel() const {return documentLabel;}
 	QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
@@ -626,7 +593,7 @@ public:
 	{
 		if(busy && _busy==false) 
 		{
-			emit meshModified();
+			emit meshDocumentModified();
 		}
 		busy=_busy;
 	}
@@ -635,9 +602,6 @@ private:
 	bool  busy;
 
 public:
-	///Returns for mesh whose id is 'meshId' the list of the associated  tags
-	QList<TagBase *> getMeshTags(int meshId);
-
 	///add a new mesh with the given name
 	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
 
@@ -649,12 +613,6 @@ public:
 
 	///remove the raster from the list and delete it from memory
 	bool delRaster(RasterModel *rasterToDel);
-
-	///add a new tag in the tagList
-	void addNewTag(TagBase *newTag);
-
-	///remove the tag with the given id
-	void removeTag(int id);
 
 	int vn() /// Sum of all the vertices of all the meshes
 	{
@@ -685,11 +643,12 @@ private:
 	RasterModel* currentRaster;
 
 signals:
-	///when ever the current mesh changed this will send out the index of the newest mesh
+	///whenever the current mesh is changed (e.g. the user click on a different mesh)
+	// this signal will send out with the index of the newest mesh
 	void currentMeshChanged(int index);
 
-	/// whenever a mesh is modified by a filter
-	void meshModified();
+	/// whenever the document (or even a single mesh) is modified by a filter
+	void meshDocumentModified();
 
 	///whenever the meshList is changed
 	void meshSetChanged();
@@ -699,6 +658,7 @@ signals:
 
 	//this signal is emitted when a filter request to update the mesh in the renderingState
 	void documentUpdated();
+
 };// end class MeshDocument
 
 /*

@@ -94,7 +94,7 @@ public:
 	// NEVER EVER use a msgbox to say something to the user.
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
-  void RealTimeLog(QString Id, const char * f, ... ) ;
+  void RealTimeLog(QString Id, const QString &meshName, const char * f, ... ) ;
 };
 
 class MeshCommonInterface : public MeshLabInterface
@@ -341,22 +341,6 @@ public:
   virtual QString filterName(QAction *a) const {return this->filterName(ID(a));}
   virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) {return "";}
 
-
-
-  /**
-  Builds a QTreeWidgetItem that visually describes a given Tag.
-  This is a virtual function, so every filter/edit that generates Tag should implement it.
-
-  In each update, the layerDialog visits the meshlist of the document, and for each mesh asks to the meshDocument the correspondent list of taggings.
-  For each tag it invokes this callback and inserts the generated QtreeWidgetItem) into the treeWidget
-
-  In order to generate different TreeWidgetItem according to the position of the tag,
-  MeshModel* mm and RasterModel* rm pointers are needed.
-  In fact, a tag is displayed below all the meshes/rasters it refers and in the global list of tags,
-  so, it makes sense displaying different info in each position.
-  */
-  virtual QTreeWidgetItem *tagDump(TagBase * /*tag*/, MeshDocument &/*md*/, MeshModel */*mm*/) {assert (0); return 0;}
-
   virtual FilterIDType ID(QAction *a) const
   	{
       foreach( FilterIDType tt, types())
@@ -445,11 +429,15 @@ public:
 /**
   MeshDecorateInterface is the base class of all <b> decorators </b>
   Decorators are 'read-only' visualization aids that helps to show some data about a document.
+  Decorators can make some permesh precomputation but the rendering has to be efficient.
+  Decorators should save the additional data into per-mesh attribute.
+
 
   There are two classes of Decorations
   - PerMesh
   - PerDocument
 
+  PerMesh Decorators are associated to each mesh/view
   Some example of PerDocument Decorations
     - backgrounds
     - trackball icon
@@ -476,7 +464,7 @@ public:
         PerMesh          =0x00001, /*!<  Decoration that are applied on a single mesh */
         PerDocument      =0x00002, /*!<  Decoration that are applied on a single mesh */
         PreRendering     =0x00004, /*!<  Decoration that are applied <i>before</i> the rendering of the document/mesh */
-        PostRendering    =0x00008, /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
+        PostRendering    =0x00008  /*!<  Decoration that are applied <i>after</i> the rendering of the document/mesh */
   };
 
   MeshDecorateInterface(): MeshCommonInterface() {}
@@ -490,17 +478,19 @@ public:
 
 
   virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
-  virtual void decorate(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/) = 0;
+  virtual void decorateMesh(QAction * /*mode*/,  MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
+  virtual void decorateDoc(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
   virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
 
   /** \brief tests if a decoration is applicable to a mesh.
+   * used only for PerMesh Decorators.
   For istance curvature cannot be shown on a mesh without curvature.
   On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
   It is invoked only for decoration of \i PerMesh class;
   */
   virtual bool isDecorationApplicable(QAction */*action*/, const MeshModel& /*m*/, QString&/*MissingItems*/) const {return true;}
 
-  virtual int getDecorationClass(QAction */*action*/) const {return Generic;}
+  virtual int getDecorationClass(QAction */*action*/) const =0;
 
   virtual QList<QAction *> actions() const { return actionList;}
   virtual QList<FilterIDType> types() const { return typeList;}

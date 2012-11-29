@@ -29,6 +29,7 @@
 #include "colorhistogram.h"
 typedef vcg::ColorHistogram<float>  CHist;
 
+typedef std::pair<vcg::Point3f,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
@@ -78,6 +79,7 @@ public:
   {
       typeList <<
                   DP_SHOW_VERT <<
+                  DP_SHOW_EDGE <<
                   DP_SHOW_NON_FAUX_EDGE <<
                   DP_SHOW_BOUNDARY <<
                   DP_SHOW_NON_MANIF_EDGE <<
@@ -118,11 +120,17 @@ public:
   void PlaceTexParam(int TexInd, int TexNum);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
+  void DrawLineVector(std::vector<PointPC> &EV);
+  void DrawTriVector(std::vector<PointPC> &EV);
+  void DrawDotVector(std::vector<PointPC> &EV, float basesize=4.0);
 
-  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter);
+
+
+  void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
+  void decorateMesh(QAction *a, MeshModel &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
-
+  int getDecorationClass(QAction */*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
   
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }

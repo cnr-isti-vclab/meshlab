@@ -43,7 +43,6 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	this->setParent(mvcont);
 
 	this->updateCustomSettingValues(*current);
-	log=mvcont->LogPtr();
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
 	iEdit=0;
@@ -82,8 +81,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	zoom = false;
 	targetTex = 0;
 
-	connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(updateLayer()),Qt::QueuedConnection);
-	connect(this->md(), SIGNAL(meshModified()), this, SLOT(updateDecoration()),Qt::QueuedConnection);
+	connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(manageCurrentMeshChange()()),Qt::QueuedConnection);
+	connect(this->md(), SIGNAL(meshDocumentModified()), this, SLOT(updateAllPerMeshDecorators()),Qt::QueuedConnection);
 	connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
 	connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
@@ -132,15 +131,15 @@ QString GLArea::GetMeshInfoString()
 
 void GLArea::Logf(int Level, const char * f, ... )
 {
-  if(this->log==0) return;
+  if(this->md()==0) return;
 
-	char buf[4096];
-	va_list marker;
-	va_start( marker, f );
+  char buf[4096];
+  va_list marker;
+  va_start( marker, f );
 
-	vsprintf(buf,f,marker);
-	va_end( marker );
-	this->log->Log(Level,buf);
+  vsprintf(buf,f,marker);
+  va_end( marker );
+  this->md()->Log.Log(Level,buf);
 }
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
@@ -225,7 +224,7 @@ void GLArea::pasteTile()
 				bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
 				if (ret) 
         {
-          log->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+          this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
           if(ss.addToRasters)
           {
             mw()->importRaster(outfile);
@@ -243,7 +242,7 @@ void GLArea::pasteTile()
         }
 				else
         {
-          log->Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+          Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
         }
 			}
 			takeSnapTile=false;
@@ -391,24 +390,23 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 					if (!md()->renderState().isEntityInRenderingState(id,MeshLabRenderState::MESH))
 						mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
+				foreach(QAction * p , iPerMeshDecoratorsListMap[mp->id()])
+				{
+				  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+				  decorInterface->decorateMesh(p,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+				}
 			}
 			md()->renderState().render(rm.drawMode,rm.colorMode,rm.textureMode);
-
 		}
 		if(iEdit) {
-		  iEdit->setLog(this->log);
+		  iEdit->setLog(&md()->Log);
 		  iEdit->Decorate(*mm(),this,&painter);
 		}
 
 		// Draw the selection
 		if(rm.selectedFace && (mm() != NULL))  mm()->renderSelectedFace();
 		if(rm.selectedVert && (mm() != NULL))  mm()->renderSelectedVert();
-		foreach(QAction * p , iDecoratorsList)
-		{
-			MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-			decorInterface->setLog(this->log);
-			decorInterface->decorate(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter);
-		}
+
 		glPopAttrib();
 	} ///end if busy
 
@@ -429,6 +427,12 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 			hasToGetPickPos=false;
 		}
 	}
+	foreach(QAction * p , iPerDocDecoratorlist)
+	{
+	  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+	  decorInterface->decorateDoc(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+	}
+
 	glPopMatrix(); // We restore the state to immediately before the trackball
 
 	//If it is a raster viewer draw the image as a texture
@@ -475,7 +479,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
 	QString error = checkGLError::makeString("There are gl errors:");
 	if(!error.isEmpty()) {
-		log->Logf(GLLogStream::WARNING,qPrintable(error));
+		Logf(GLLogStream::WARNING,qPrintable(error));
 	}
 
 	//check if viewers are linked
@@ -534,14 +538,24 @@ void GLArea::displayRealTimeLog(QPainter *painter)
   QTextDocument doc;
   doc.setDefaultFont(qFont);
   int startingpoint = border;
-  for(QMap<QString,QString>::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
+  //mQMultiMap<QString,std::pair<QString,QString> >::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
+  foreach(QString keyIt, md()->Log.RealTimeLogText.uniqueKeys() )
   {
-	  doc.clear();
+    QList< QPair<QString,QString> > valueList = md()->Log.RealTimeLogText.values(keyIt);
+    QPair<QString,QString> itVal;
+    // the map contains pairs of meshname, text
+    // the meshname is used only to disambiguate when there are more than two boxes with the same title
+    foreach(itVal,  valueList)
+    {
+      QString HeadName = keyIt;
+      if(md()->Log.RealTimeLogText.count(keyIt)>1)
+        HeadName += " - "+itVal.first;
+      doc.clear();
 	  doc.setDocumentMargin(margin*0.75);
 	  QColor textColor = Qt::white;
 	  QColor headColor(200,200,200);
-	  doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + it.key() + "</b></i></p></font>"
-				  "<font color=\"" + textColor.name() + "\"             >" + it.value() + "</font>");
+	  doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + HeadName + "</b></i></p></font>"
+				  "<font color=\"" + textColor.name() + "\"             >" + itVal.second + "</font>");
 	  QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
 	  QPainterPath path;
 	  painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
@@ -553,7 +567,10 @@ void GLArea::displayRealTimeLog(QPainter *painter)
 	  doc.drawContents(painter);
 	  painter->restore();
 	  startingpoint = startingpoint + doc.size().height() + margin*.75;
+	}
   }	
+
+  // After the rederaw we clear the RealTimeLog buffer!
   md()->Log.RealTimeLogText.clear();
   painter->restore();
   painter->beginNativePainting();
@@ -673,7 +690,7 @@ void GLArea::displayHelp(QPainter *painter)
           tableText=helpFile.readAll();
       else assert(0);
   }
-  this->log->RealTimeLog("Quick Help",tableText);
+  md()->Log.RealTimeLog("Quick Help","",tableText);
 }
 
 
@@ -717,7 +734,7 @@ void GLArea::saveSnapshot()
 }
 
 // Slot called when the current mesh has changed.
-void GLArea::updateLayer()
+void GLArea::manageCurrentMeshChange()
 {
 	//if we have an edit tool open, notify it that the current layer has changed
 	if(iEdit)
@@ -733,18 +750,27 @@ void GLArea::updateLayer()
 		lastModelEdited = this->md()->mm();
 	}
 	// if the layer has changed update also the decoration.
-	updateDecoration();
+//	updateAllPerMeshDecorators();
 }
 
-void GLArea::updateDecoration()
+/// Execute a end/start pair for all the PerMesh decorator that are active in this glarea.
+/// It is used when the document is changed or when some parameter changes
+/// Note that it is rather inefficient. Such work should be done only once for each decorator.
+void GLArea::updateAllPerMeshDecorators()
 {
-	foreach(QAction *p , iDecoratorsList)
-	{
-		MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-		decorInterface->endDecorate(p, *this->md(),this->glas.currentGlobalParamSet,this);
-		decorInterface->setLog(log);
-		decorInterface->startDecorate(p,*this->md(), this->glas.currentGlobalParamSet,this);
-	}
+  QMap<int, QList<QAction *> >::iterator i;
+  for ( i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
+  {
+    MeshModel * mm = md()->getMesh(i.key());
+    QList<QAction *> &iDecoratorsList = i.value();
+    foreach(QAction *p , iDecoratorsList)
+    {
+      MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+      decorInterface->endDecorate(p, *this->md(),this->glas.currentGlobalParamSet,this);
+      decorInterface->setLog(&md()->Log);
+      decorInterface->startDecorate(p,*this->md(), this->glas.currentGlobalParamSet,this);
+    }
+  }
 }
 
 
@@ -763,7 +789,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 	}
 	else
 	{
-		log->Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+		Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
 		if(mm()!=NULL)
 			mm()->meshModified() = true;
 		else assert(!iEdit->isSingleMeshEdit());
@@ -782,22 +808,19 @@ bool GLArea::readyToClose()
 		if(ret==QMessageBox::No)	// don't close please!
 			return false;
 	}
-	if(getCurrentEditAction()) 
-		endEdit();
+	// Now do the actual closing of the glArea
+	if(getCurrentEditAction()) endEdit();
 	if (iRenderer) 
 		iRenderer->Finalize(currentShader, this->md(), this);
-	foreach(QAction* act,iDecoratorsList)
+
+	// Now manage the closing of the decorator set;
+	foreach(QAction* act, iPerDocDecoratorlist)
 	{
 		MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>(act->parent());
-		if (mdec != NULL)
-		{
-			mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
+		mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
 			mdec->setLog(NULL);
-		}
-		else
-			log->Logf(GLLogStream::SYSTEM,"A non decorator action in decorate interface list. Something really bad happened");
 	}
-	iDecoratorsList.clear();
+	iPerDocDecoratorlist.clear();
 
 	if(targetTex) glDeleteTextures(1, &targetTex);
 	emit glareaClosed();
@@ -1186,10 +1209,8 @@ void GLArea::setLightModel()
 void GLArea::setView()
 {
 	glViewport(0,0, this->width(),this->height());
-	curSiz.setWidth(this->width());
-	curSiz.setHeight(this->height());
 
-	GLfloat fAspect = (GLfloat)curSiz.width()/ curSiz.height();
+	GLfloat fAspect = (GLfloat)width()/height();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -1761,7 +1782,7 @@ void GLArea::viewFromCurrentShot(QString kind)
 	if(kind=="Raster" && this->md()->rm()) localShot = this->md()->rm()->shot;
 	if(!localShot.IsValid())
 	{
-		this->log->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
+		this->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
 		return;
 	}
 

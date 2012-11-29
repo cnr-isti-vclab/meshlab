@@ -33,11 +33,6 @@
 
 using namespace vcg;
 
-TagBase::TagBase(MeshDocument *parent)
-{
- _id=parent->newTagId();
-}
-
 
 //deletes each meshModel
 MeshDocument::~MeshDocument()
@@ -79,18 +74,6 @@ MeshModel *MeshDocument::getMeshByFullName(QString pathName)
 	return 0;
 }
 
-QList<TagBase *> MeshDocument::getMeshTags(int meshId)
-{
-	QList<TagBase *> meshTags;
-	foreach(TagBase *tag, tagList)
-		foreach(int id, tag->referringMeshes)
-		{
-			if(id==meshId)
-				meshTags.append(tag);
-		}
-	
-	return meshTags;
-}
 
 void MeshDocument::setCurrentMesh( int i)
 {
@@ -273,21 +256,6 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 	emit rasterSetChanged();
 
 	return true;
-}
-
-void MeshDocument::addNewTag(TagBase *newTag)
-{
-	tagList.append(newTag);
-}
-
-void MeshDocument::removeTag(int id){
-	for(int i = 0; i<tagList.count(); i++){
-		TagBase *tag = (TagBase *)tagList.at(i);
-		if(tag->id() ==id){
-			tagList.removeAt(i);
-			delete tag;
-		}
-	}
 }
 
 bool MeshDocument::hasBeenModified()

@@ -37,7 +37,6 @@ class GLLogStream;
 class MeshModel;
 class RasterModel;
 class MeshDocument;
-class TagBase;
 class MeshDecorateInterface;
 class StdParFrame;
 
@@ -104,23 +103,17 @@ public slots:
   void showEvent ( QShowEvent * event );
   void showContextMenu(const QPoint& pos);
 	void adaptLayout(QTreeWidgetItem * item);
-	void removeTag();
 
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;
 
-	//Tag Menu
-	QMenu *tagMenu;
-	QAction *removeTagAct;
-	QAction *updateTagAct;
 	QMenu *rasterMenu;
 	QAction* addNewRasterAct;
 	QAction* removeCurrentRasterAct;
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
   void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
-	void addTreeWidgetItem(QTreeWidgetItem *parent, TagBase *tag,  MeshDocument &md, MeshModel *mm);
 	void updateColumnNumber(const QTreeWidgetItem * item);
 
 	void updateExpandedMap(int meshId, int tagId, bool expanded);

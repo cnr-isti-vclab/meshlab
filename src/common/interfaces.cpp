@@ -27,7 +27,7 @@ void MeshLabInterface::Log(int Level, const char * f, ... )
   }
 }
 
-void MeshLabInterface::RealTimeLog(QString Id, const char * f, ... )
+void MeshLabInterface::RealTimeLog(QString Id, const QString &meshName, const char * f, ... )
 {
   if(log)
   {
@@ -36,7 +36,7 @@ void MeshLabInterface::RealTimeLog(QString Id, const char * f, ... )
     va_start( marker, f );
     vsprintf(buf,f,marker);
     va_end( marker );
-    log->RealTimeLog(Id,buf);
+    log->RealTimeLog(Id, meshName,buf);
   }
 }
 
