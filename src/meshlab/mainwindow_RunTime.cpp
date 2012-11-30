@@ -2233,6 +2233,8 @@ bool MainWindow::importMesh(QString fileName)
 
 void MainWindow::openRecentMesh()
 {
+  if(!GLA()) return;
+  if(meshDoc()->isBusy()) return;
 	QAction *action = qobject_cast<QAction *>(sender());
   if (action)	importMesh(action->data().toString());
 }
