@@ -493,7 +493,7 @@ public:
 		rasterIdCounter=0;
 		currentMesh = 0;
 		currentRaster = 0;
-		busy=true;
+		busy=false;
 	}
 
 	//deletes each meshModel
@@ -523,18 +523,9 @@ public:
 	template <class LayerElement>
 	void advanceCurrentElement(QList<LayerElement *>& elemList, LayerElement* curr, int pos)
 	{
-		typename QList<LayerElement *>::iterator mi;
-		for(mi=elemList.begin(); mi!=elemList.end();++mi)
-			if(*mi == curr) break;
-
-		assert(mi!=elemList.end());
-		while(pos>0)
-		{
-			pos--;
-			mi++;
-			if(mi==elemList.end()) mi=elemList.begin();
-		}
-		setCurrent((*mi));
+	  assert(!elemList.empty() && elemList.contains(curr));
+	  int currPos = elemList.indexOf(curr);
+	  setCurrent(elemList.at((currPos+pos)%elemList.size()));
 	}
 
 	MeshModel *mm() {
