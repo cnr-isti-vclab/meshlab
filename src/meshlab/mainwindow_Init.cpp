@@ -124,7 +124,7 @@ MainWindow::MainWindow()
 	//qb->setAutoClose(true);
 	//qb->setMinimumDuration(0);
 	//qb->reset();
-	connect(GLA(), SIGNAL(manageCurrentMeshChange()Table()), layerDialog, SLOT(updateTable()));
+	connect(GLA(), SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
 }
 
 void MainWindow::createActions()

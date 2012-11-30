@@ -81,7 +81,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	zoom = false;
 	targetTex = 0;
 
-	connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(manageCurrentMeshChange()()),Qt::QueuedConnection);
+	connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(manageCurrentMeshChange()),Qt::QueuedConnection);
 	connect(this->md(), SIGNAL(meshDocumentModified()), this, SLOT(updateAllPerMeshDecorators()),Qt::QueuedConnection);
 	connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
 	connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
@@ -749,6 +749,7 @@ void GLArea::manageCurrentMeshChange()
 		//TODO this is not the best design....   iEdit should maybe keep track of the model on its own
 		lastModelEdited = this->md()->mm();
 	}
+	emit this->updateMainWindowMenus();
 	// if the layer has changed update also the decoration.
 //	updateAllPerMeshDecorators();
 }
