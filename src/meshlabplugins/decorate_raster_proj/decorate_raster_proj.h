@@ -109,27 +109,14 @@ private:
     virtual QString         decorationName( FilterIDType filter ) const;
 
 public:
-	inline QList<QAction*>  actions() const                             { return actionList; }
+    inline QList<QAction*>  actions() const                             { return actionList; }
 
-    virtual bool            startDecorate( QAction          *act,
-                                           MeshDocument     &m  ,
-                                           RichParameterSet *par,
-                                           GLArea           *gla );
-
-    virtual void            decorate( QAction           *act,
-                                      MeshDocument      &m  ,
-                                      RichParameterSet  *par,
-                                      GLArea            *gla,
-                                      QPainter          *p  );
-
-    virtual void            endDecorate( QAction          *act,
-                                         MeshDocument     &m  ,
-                                         RichParameterSet *par,
-                                         GLArea           *gla );
-
-    virtual void            initGlobalParameterSet( QAction *act, RichParameterSet &par );
-
-    virtual int             getDecorationClass( QAction *act ) const;
+    bool  startDecorate(QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla );
+    void  decorateMesh( QAction  *   , MeshModel    & , RichParameterSet *   , GLArea *   , QPainter * , GLLogStream &  ) {}
+    void  decorateDoc(  QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla, QPainter *p, GLLogStream &  );
+    void  endDecorate(  QAction  *act, MeshDocument &m, RichParameterSet *par, GLArea *gla );
+    void  initGlobalParameterSet( QAction *act, RichParameterSet &par );
+    int   getDecorationClass( QAction *act ) const;
 };
 
 

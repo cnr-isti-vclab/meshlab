@@ -36,9 +36,8 @@ New small samples
 
 #include <common/interfaces.h>
 #include "cubemap.h"
-//#include "../../meshlab/mainwindow.h"
 
-class SampleMeshDecoratePlugin : public QObject, public MeshDecorateInterface
+class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
   Q_INTERFACES(MeshDecorateInterface)
@@ -65,7 +64,7 @@ inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridC
 
 public:
      
-	SampleMeshDecoratePlugin()
+    DecorateBackgroundPlugin()
 	{
     typeList
     /*<< DP_SHOW_CUBEMAPPED_ENV*/
@@ -86,9 +85,11 @@ public:
   QString cubemapFileName;
 	
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
-  void decorate(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *);
-	void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);	
-		
+  void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &_log);
+  void decorateMesh(QAction *, MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &){}
+  void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
+  int getDecorationClass(QAction */*action*/) const { return MeshDecorateInterface::PerDocument; }
+
 
 private:
   void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, GLArea *gla);

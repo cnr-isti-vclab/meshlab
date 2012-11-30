@@ -34,10 +34,9 @@
 #include <common/pluginmanager.h>
 
 
-
 using namespace vcg;
 
-QString SampleMeshDecoratePlugin::decorationInfo(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 {
   switch(id)
 	{
@@ -47,7 +46,7 @@ QString SampleMeshDecoratePlugin::decorationInfo(FilterIDType id) const
 	assert(0);
 	return QString();
 }
-QString SampleMeshDecoratePlugin::decorationName(FilterIDType id) const
+QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
 {
 	switch(id)
 	{
@@ -58,7 +57,7 @@ QString SampleMeshDecoratePlugin::decorationName(FilterIDType id) const
 	return QString();
 }
 
-void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
   switch(ID(action)){
   case DP_SHOW_CUBEMAPPED_ENV :
@@ -82,7 +81,7 @@ void SampleMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParam
   }
 }		
 		
-bool SampleMeshDecoratePlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
+bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
 {
   switch(ID(action)){
     case DP_SHOW_CUBEMAPPED_ENV :
@@ -97,7 +96,7 @@ bool SampleMeshDecoratePlugin::startDecorate( QAction * action, MeshDocument &/*
 	return true;
 }
 
-void SampleMeshDecoratePlugin::decorate(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea *gla, QPainter * )
+void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea *gla, QPainter *, GLLogStream &)
 {
   static QString lastname("unitialized");
 	switch(ID(a))
@@ -299,7 +298,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     glPopAttrib();
 }
 
-void SampleMeshDecoratePlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, GLArea *gla)
+void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, GLArea *gla)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Point3f minP,maxP, minG,maxG;
@@ -340,6 +339,6 @@ void SampleMeshDecoratePlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
     glPopAttrib();
 }
 
-void  SampleMeshDecoratePlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}
+void  DecorateBackgroundPlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}
 
-Q_EXPORT_PLUGIN(SampleMeshDecoratePlugin)
+Q_EXPORT_PLUGIN(DecorateBackgroundPlugin)

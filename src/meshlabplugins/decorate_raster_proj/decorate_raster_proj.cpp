@@ -184,7 +184,7 @@ int DecorateRasterProjPlugin::getDecorationClass( QAction *act ) const
 {
     switch( ID(act) )
     {
-        case DP_PROJECT_RASTER: return PerDocument|PostRendering;
+        case DP_PROJECT_RASTER: return PerDocument;
         default: assert(0); return Generic;
     }
 }
@@ -606,11 +606,12 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
 }
 
 
-void DecorateRasterProjPlugin::decorate( QAction           *act,
+void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                                          MeshDocument      &m  ,
                                          RichParameterSet  *par,
                                          GLArea            *gla,
-                                         QPainter          * /*p*/)
+                                         QPainter          *,
+                                            GLLogStream &)
 {
     switch( ID(act) )
     {
