@@ -196,10 +196,8 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
 {
  if(layout()) delete layout();
 	QGridLayout * vLayout = new QGridLayout(this);
-    vLayout->setAlignment(Qt::AlignTop);
-//	setLayout(vLayout);
-
-  RichWidgetInterfaceConstructor rwc(this);
+//    vLayout->setAlignment(Qt::AlignTop);
+	RichWidgetInterfaceConstructor rwc(this);
 	for(int i = 0; i < curParSet.paramList.count(); i++)
 	{
 		RichParameter* fpi=curParSet.paramList.at(i);
@@ -209,7 +207,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
 		helpList.push_back(rwc.lastCreated->helpLab);
 	} // end for each parameter
 	
-	this->setMinimumSize(vLayout->sizeHint());
+//	this->setMinimumSize(vLayout->sizeHint());
 	this->showNormal();
 	this->adjustSize();
 }
@@ -1138,7 +1136,7 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 	minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
 	valueLE = new QLineEdit(p);
-  valueLE->setAlignment(Qt::AlignRight);
+	valueLE->setAlignment(Qt::AlignRight);
 
 	valueSlider = new QSlider(Qt::Horizontal,p);
 	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
@@ -1152,13 +1150,13 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 
 	
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+	gridLay->addWidget(fieldDesc,row,0);
 	
 	QHBoxLayout* lay = new QHBoxLayout(p);
 	valueLE->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
 	lay->addWidget(valueLE,0,Qt::AlignHCenter);
     lay->addWidget(valueSlider,0,0);
-    gridLay->addLayout(lay,row,1,Qt::AlignTop);
+    gridLay->addLayout(lay,row,1);
 
 	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
 	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
@@ -1234,7 +1232,8 @@ void MeshLabWidget::resetValue()
 }
 
 MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
-:QWidget(p),rp(rpar)
+//:QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
+:rp(rpar)
 {
 	if (rp!= NULL)
 	{
@@ -1248,13 +1247,6 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		gridLay = qobject_cast<QGridLayout*>(p->layout());
 		assert(gridLay != 0);
 		row = gridLay->rowCount();
-		//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-		if (row == 1) 
-		{
-			gridLay->addWidget(new QLabel("",p));
-			++row;
-		}
-		///////////////////////////////////////////////////////////////////////
 		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 	}
 }
@@ -1286,7 +1278,7 @@ BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
 
-	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+	gridLay->addWidget(cb,row,0,1,2);
 
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 }
@@ -1321,8 +1313,8 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 	//int row = gridLay->rowCount() -1;
 	
 	lab->setToolTip(rp->pd->tooltip);
-	gridLay->addWidget(lab,row,0,Qt::AlignTop);
-	gridLay->addWidget(lned,row,1,Qt::AlignTop);
+	gridLay->addWidget(lab,row,0);
+	gridLay->addWidget(lned,row,1);
 	connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
 	connect(this,SIGNAL(lineEditChanged()),p,SIGNAL(parameterChanged()));
 	lned->setAlignment(Qt::AlignLeft);

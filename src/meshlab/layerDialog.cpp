@@ -571,12 +571,23 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
 			loadbut = new QPushButton("Load",parent);
-			int countel = frame->stdfieldwidgets.size();
-			dialoglayout->addWidget(savebut,countel,0);
-			dialoglayout->addWidget(resetbut,countel,1);
-			dialoglayout->addWidget(loadbut,countel,2);
-			dialoglayout->addWidget(frame,0,0,countel,3);
+			dialoglayout->addWidget(frame,0,0,1,3);
+			dialoglayout->addWidget(savebut,1,0);
+			dialoglayout->addWidget(resetbut,1,1);
+			dialoglayout->addWidget(loadbut,1,2);
 			this->setLayout(dialoglayout);
+			this->layout()->setContentsMargins(0,0,0,0);
+			frame->layout()->setContentsMargins(0,0,0,0);
+			QFont font = frame->font();
+			font.setPointSizeF(3 * font.pointSizeF() / 4.0f);
+			frame->setFont(font);
+			savebut->setFont(font);
+			resetbut->setFont(font);
+			loadbut->setFont(font);
+			savebut ->setMaximumSize( savebut ->maximumSize().width(), savebut ->minimumSizeHint().height()/2);
+			resetbut->setMaximumSize( resetbut->maximumSize().width(), resetbut->minimumSizeHint().height()/2);
+			loadbut ->setMaximumSize( loadbut ->maximumSize().width(), loadbut ->minimumSizeHint().height()/2);
+
 			connect(frame,SIGNAL(parameterChanged()),this,SLOT(apply()));
 			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
 			connect(savebut,SIGNAL(clicked()),this,SLOT(save()));
