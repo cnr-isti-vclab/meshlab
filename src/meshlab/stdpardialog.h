@@ -751,7 +751,7 @@ public:
 
 	void closeEvent ( QCloseEvent * event ); 
 
-	int curmask;
+	uint curmask;
 	MeshModel *curModel;
 	MeshDocument * curMeshDoc;
 	MeshFilterInterface *curmfi;

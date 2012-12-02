@@ -5,7 +5,7 @@
 #include <assert.h>
 
 MLXMLInfo::MLXMLInfo( const QString& file ) 
-:filevarname(inputDocName()),fileName(file)
+:fileName(file),filevarname(inputDocName())
 {
 }
 

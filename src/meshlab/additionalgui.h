@@ -242,8 +242,8 @@ class SearchMenu : public QMenu
 public:
 	SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth = -1);
 	int& searchLineWidth();
-	inline void setMaxResultNum(const int max) {maxres = max;};
-	inline int maxResultNum() const {return maxres;};
+	inline void setMaxResultNum(const int max) {maxres = max;}
+	inline int maxResultNum() const {return maxres;}
 	void clearResults();
 	QSize sizeHint () const;
 protected:
@@ -251,8 +251,8 @@ protected:
 	void resizeEvent ( QResizeEvent * event);
 private:
 	MenuLineEdit* searchline;
- 	int maxres;
 	const WordActionsMapAccessor& wama;
+	int maxres;
 	int fixedwidthsize;
 
 	void getResults(const QString& text,QList<QAction*>& results);

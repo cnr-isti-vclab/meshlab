@@ -21,7 +21,7 @@ bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString imag
   const QString path_im = QFileInfo(image_list_filename).absolutePath()+QString("/");
 
   std::vector<std::string>   image_filenames;
-  vcg::tri::io::ImporterOUT<CMeshO>::Open(md.mm()->cm,shots,image_filenames,qPrintable(filename_out), qPrintable(image_list_filename),qPrintable(path_im));
+  vcg::tri::io::ImporterOUT<CMeshO>::Open(md.mm()->cm,shots,image_filenames,qPrintable(filename_out), qPrintable(image_list_filename));
   md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 
   QString curr_path = QDir::currentPath();

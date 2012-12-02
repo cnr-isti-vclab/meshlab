@@ -195,7 +195,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
  if(layout()) delete layout();
-	QGridLayout * vLayout = new QGridLayout(this);
+ setLayout(new QGridLayout);
 //    vLayout->setAlignment(Qt::AlignTop);
 	RichWidgetInterfaceConstructor rwc(this);
 	for(int i = 0; i < curParSet.paramList.count(); i++)

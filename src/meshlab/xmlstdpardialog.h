@@ -477,7 +477,7 @@ private:
 	MeshModelState meshCacheState;
 	QCheckBox *previewCB;
 	QWidget * curgla;
-	int curmask;
+	uint curmask;
 	MeshLabXMLFilterContainer* curmfc;
 	MainWindowInterface *curmwi;
 	MLXMLPluginInfo::XMLMapList curParMap;
