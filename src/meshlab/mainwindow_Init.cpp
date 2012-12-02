@@ -46,7 +46,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-:wama(),xmlfiltertimer()
+:xmlfiltertimer(),wama()
 {
 	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called. 
 	//Subsequently restart function will be invoked.
@@ -672,7 +672,6 @@ void MainWindow::initSearchEngine()
 
 void MainWindow::initMenuForSearching(QMenu* menu)
 {
-	int actwidth = 0;
 	if (menu == NULL)
 		return;
 	const QList<QAction*>& acts = menu->actions();

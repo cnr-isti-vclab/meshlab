@@ -356,7 +356,6 @@ void MLScriptEditor::lineNumberAreaPaintEvent( QPaintEvent *event,const QColor& 
 	QPainter painter(narea);
 	painter.fillRect(event->rect(),col);
 	QTextBlock block = firstVisibleBlock();
-	int indent = block.blockFormat().indent();
 	int blockNumber = block.blockNumber();
 	int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
 	int bottom = top + (int) blockBoundingRect(block).height();
@@ -900,7 +899,7 @@ void SearchMenu::clearResults()
 void SearchMenu::setLineEditFocus()
 {
 	searchline->setFocus();
-	const QList<QAction*>& acts = actions();
+//	const QList<QAction*>& acts = actions();
 	//if (acts.size() > 1 && acts[1] != NULL)
 	//	setActiveAction(acts[1]);
 }

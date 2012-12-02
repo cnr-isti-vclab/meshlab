@@ -263,7 +263,7 @@ protected:
 
   void displayMatrix(QPainter *painter, QRect areaRect);
 	void displayViewerHighlight();
-  void displayHelp(QPainter *painter);
+  void displayHelp();
 
 	QString GetMeshInfoString();
   void paintEvent(QPaintEvent *event);

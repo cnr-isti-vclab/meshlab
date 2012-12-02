@@ -457,8 +457,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	if (takeSnapTile) pasteTile();
 
 	// Finally display HELP if requested
-	if (isHelpVisible())
-	  displayHelp(&painter);
+	if (isHelpVisible()) displayHelp();
 
 	// Draw the log area background
 	// on the bottom of the glArea
@@ -680,7 +679,7 @@ void GLArea::displayViewerHighlight()
 }
 
 
-void GLArea::displayHelp(QPainter *painter)
+void GLArea::displayHelp()
 {
   static QString tableText;
   if(tableText.isEmpty())
@@ -762,7 +761,6 @@ void GLArea::updateAllPerMeshDecorators()
   QMap<int, QList<QAction *> >::iterator i;
   for ( i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
   {
-    MeshModel * mm = md()->getMesh(i.key());
     QList<QAction *> &iDecoratorsList = i.value();
     foreach(QAction *p , iDecoratorsList)
     {
