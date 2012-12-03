@@ -436,7 +436,7 @@ void MainWindow::updateMenus()
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
 		layerDialog->updateLog(meshDoc()->Log);
-		layerDialog->updateDecoratorParsView();
+//		layerDialog->updateDecoratorParsView();
 	}
 	else
 	{
@@ -1496,18 +1496,19 @@ void MainWindow::applyDecorateMode()
 
   if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerMesh)
   {
+    MeshModel &currentMeshModel = *(meshDoc()->mm());
     bool found=GLA()->iCurPerMeshDecoratorList().removeOne(action);
     if(found)
     {
-      iDecorateTemp->endDecorate(action,*meshDoc(),GLA()->glas.currentGlobalParamSet,GLA());
+      iDecorateTemp->endDecorate(action,currentMeshModel,GLA()->glas.currentGlobalParamSet,GLA());
       iDecorateTemp->setLog(NULL);
       GLA()->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
     }
     else{
       QString errorMessage;
-      if (iDecorateTemp->isDecorationApplicable(action,*(meshDoc()->mm()),errorMessage)) {
+      if (iDecorateTemp->isDecorationApplicable(action,currentMeshModel,errorMessage)) {
         iDecorateTemp->setLog(&meshDoc()->Log);
-        bool ret = iDecorateTemp->startDecorate(action,*meshDoc(), &currentGlobalParams, GLA());
+        bool ret = iDecorateTemp->startDecorate(action,currentMeshModel, &currentGlobalParams, GLA());
         if(ret) {
           GLA()->iCurPerMeshDecoratorList().push_back(action);
           GLA()->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));

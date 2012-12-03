@@ -128,7 +128,7 @@ public:
 
   void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   void decorateMesh(QAction *a, MeshModel &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
-  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+  bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(QAction */*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);

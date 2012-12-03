@@ -477,9 +477,11 @@ public:
   virtual QString decorationInfo(QAction *a) const {return decorationInfo(ID(a));}
 
 
-  virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) =0;
+  virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) {}
+  virtual bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) {}
   virtual void decorateMesh(QAction * /*mode*/,  MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
   virtual void decorateDoc(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
+  virtual void endDecorate(QAction * /*mode*/,   MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
   virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
 
   /** \brief tests if a decoration is applicable to a mesh.

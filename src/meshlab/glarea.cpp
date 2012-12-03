@@ -762,12 +762,13 @@ void GLArea::updateAllPerMeshDecorators()
   for ( i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
   {
     QList<QAction *> &iDecoratorsList = i.value();
+    MeshModel *m = md()->getMesh(i.key());
     foreach(QAction *p , iDecoratorsList)
     {
       MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-      decorInterface->endDecorate(p, *this->md(),this->glas.currentGlobalParamSet,this);
+      decorInterface->endDecorate  (p, *m,this->glas.currentGlobalParamSet,this);
       decorInterface->setLog(&md()->Log);
-      decorInterface->startDecorate(p,*this->md(), this->glas.currentGlobalParamSet,this);
+      decorInterface->startDecorate(p,*m, this->glas.currentGlobalParamSet,this);
     }
   }
 }

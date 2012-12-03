@@ -195,7 +195,8 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
  if(layout()) delete layout();
- setLayout(new QGridLayout);
+ setLayout(new QGridLayout());
+// QGridLayout *vlayout = new QGridLayout(this);
 //    vLayout->setAlignment(Qt::AlignTop);
 	RichWidgetInterfaceConstructor rwc(this);
 	for(int i = 0; i < curParSet.paramList.count(); i++)
@@ -457,19 +458,18 @@ void AbsPercWidget::setWidgetValue( const Value& nv )
 //QHBoxLayout(NULL)
 Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
-
+  qDebug("Creating a Point3fWidget");
 	paramName = rpf->name;
 	//int row = gridLay->rowCount() - 1;
-
-	descLab = new QLabel(rpf->pd->fieldDesc,p);
+	descLab = new QLabel(rpf->pd->fieldDesc);
 	descLab->setToolTip(rpf->pd->fieldDesc);
-	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	gridLay->addWidget(descLab,row,0);
 
-	QHBoxLayout* lay = new QHBoxLayout(p);
-
+    QHBoxLayout* lay = new QHBoxLayout();
+    lay->setSpacing(0);
 	for(int i =0;i<3;++i)
 		{
-			coordSB[i]= new QLineEdit(p);
+			coordSB[i]= new QLineEdit(this);
 			QFont baseFont=coordSB[i]->font();
 			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
 															  else baseFont.setPointSize(baseFont.pointSize()*3/4);
@@ -478,15 +478,16 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			coordSB[i]->setMinimumWidth(0);
 			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
 			//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
-			coordSB[i]->setValidator(new QDoubleValidator(p));
+			coordSB[i]->setValidator(new QDoubleValidator());
 			coordSB[i]->setAlignment(Qt::AlignRight);
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
 			lay->addWidget(coordSB[i]);
+			connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
 		}
 	this->setValue(paramName,rp->val->getPoint3f());
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
-			getPoint3Button = new QPushButton("Get",p);
+			getPoint3Button = new QPushButton("Get");
 			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
 			getPoint3Button->setFlat(true);
@@ -499,7 +500,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			names << "Surf. Pos";
 			names << "Camera Pos";
 			
-			getPoint3Combo = new QComboBox(p);
+			getPoint3Combo = new QComboBox();
 			getPoint3Combo->addItems(names);
 			//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
 			//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
@@ -508,10 +509,10 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
 			connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-      connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+			connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
 			connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
 			connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
-      connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
+			connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
 			connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
 			connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
 		}
@@ -532,10 +533,14 @@ qDebug("Got signal %i",index);
 		} 
 }
 
-Point3fWidget::~Point3fWidget() {}
+Point3fWidget::~Point3fWidget() {
+  qDebug("Deallocating a point3fwidget");
+  this->disconnect();
+}
 
 void Point3fWidget::setValue(QString name,Point3f newVal)
 {
+  qDebug("setValue parametername: %s ",qPrintable(name));
 	if(name==paramName)
 	{
 		for(int i =0;i<3;++i)
@@ -1237,7 +1242,7 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 {
 	if (rp!= NULL)
 	{
-		helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",p);
+		helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",this);
 		helpLab->setTextFormat(Qt::RichText);
 		helpLab->setWordWrap(true);
 		helpLab->setVisible(false);
@@ -1270,14 +1275,12 @@ void MeshLabWidget::setEqualSpaceForEachColumn()
 }
 
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
-BoolWidget::BoolWidget( QWidget* p,RichBool* rb )
+BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
 :MeshLabWidget(p,rb)
 {
-
-	cb = new QCheckBox(rp->pd->fieldDesc,p);
+	cb = new QCheckBox(rp->pd->fieldDesc,this);
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
-
 	gridLay->addWidget(cb,row,0,1,2);
 
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
