@@ -356,6 +356,7 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 
 	for (int r=0; r<md.rasterList.size();r++)
 	{
+		&md.rasterList[r]->isActive();
 		//this->glContext->makeCurrent();
 		align.image=&md.rasterList[r]->currentPlane->image;
 		align.shot=md.rasterList[r]->shot;
