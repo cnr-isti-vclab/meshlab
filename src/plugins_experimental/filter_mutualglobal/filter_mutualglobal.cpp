@@ -356,48 +356,39 @@ bool FilterMutualInfoPlugin::preAlignment(MeshDocument &md, RichParameterSet & p
 
 	for (int r=0; r<md.rasterList.size();r++)
 	{
-		&md.rasterList[r]->isActive();
-		//this->glContext->makeCurrent();
-		align.image=&md.rasterList[r]->currentPlane->image;
-		align.shot=md.rasterList[r]->shot;
-	//this->initGL();
-		align.resize(800);
+		if(md.rasterList[r]->visible)
+		{
+				align.image=&md.rasterList[r]->currentPlane->image;
+				align.shot=md.rasterList[r]->shot;
+				
+				align.resize(800);
 
-	
+				align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
+				align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
 
-  
-	
-    //align.shot=par.getShotf("Shot");
-		
-	align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
-	align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
+				if (solver.fine_alignment)
+				solver.optimize(&align, &mutual, align.shot);
+				else
+				{
+				solver.iterative(&align, &mutual, align.shot);
+				Log(0, "Vado di rough",r);
+				}
+				
+				md.rasterList[r]->shot=align.shot;
+				float ratio=(float)md.rasterList[r]->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
+				md.rasterList[r]->shot.Intrinsics.ViewportPx[0]=md.rasterList[r]->currentPlane->image.width();
+				md.rasterList[r]->shot.Intrinsics.ViewportPx[1]=md.rasterList[r]->currentPlane->image.height();
+				md.rasterList[r]->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+				md.rasterList[r]->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+				md.rasterList[r]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[0]/2.0);
+				md.rasterList[r]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[1]/2.0);
 
-	
-	
-	if (solver.fine_alignment)
-		solver.optimize(&align, &mutual, align.shot);
-	else
-	{
-		solver.iterative(&align, &mutual, align.shot);
-		Log(0, "Vado di rough",r);
-	}
-	//align.renderScene(align.shot, 3);
-	//align.readRender(0);
-		
-	//md.rasterList[r]->shot=align.shot;
-	md.rasterList[r]->shot=align.shot;
-	float ratio=(float)md.rasterList[r]->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
-	md.rasterList[r]->shot.Intrinsics.ViewportPx[0]=md.rasterList[r]->currentPlane->image.width();
-	md.rasterList[r]->shot.Intrinsics.ViewportPx[1]=md.rasterList[r]->currentPlane->image.height();
-	md.rasterList[r]->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-	md.rasterList[r]->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-	md.rasterList[r]->shot.Intrinsics.CenterPx[0]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[0]/2.0);
-	md.rasterList[r]->shot.Intrinsics.CenterPx[1]=(int)((float)md.rasterList[r]->shot.Intrinsics.ViewportPx[1]/2.0);
-
-	Log(0, "Image %d completed",r);
-	//emit md.rasterSetChanged();
-	//this->glContext->doneCurrent();
-	}
+				Log(0, "Image %d completed",r);
+				
+		}
+		else
+			Log(0, "Image %d skipped",r);
+		}
 	}
 	
 	return true;
@@ -470,134 +461,137 @@ std::vector<AlignPair> FilterMutualInfoPlugin::CalcPairs(MeshDocument &md, bool 
 	//this->glContext->makeCurrent();
 	for (int r=0; r<md.rasterList.size(); r++)
 	{
-		AlignPair pair;
-		align.image=&md.rasterList[r]->currentPlane->image;
-		align.shot=md.rasterList[r]->shot;
-		
-		//this->initGL();
-		align.resize(800);
-		
-		//align.shot=par.getShotf("Shot");
-
-		align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
-		align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
-
-		align.mode=AlignSet::COMBINE;
-		align.renderScene(align.shot, 3, true);
-		align.comb=align.rend;
-		QImage covered=align.comb;
-		std::vector<AlignPair> weightList;
-
-		for (int p=0; p<md.rasterList.size(); p++)
+		if(md.rasterList[r]->visible)
 		{
-			if (p!=r)
+			AlignPair pair;
+			align.image=&md.rasterList[r]->currentPlane->image;
+			align.shot=md.rasterList[r]->shot;
+
+			//this->initGL();
+			align.resize(800);
+
+			//align.shot=par.getShotf("Shot");
+
+			align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
+			align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
+
+			align.mode=AlignSet::COMBINE;
+			align.renderScene(align.shot, 3, true);
+			align.comb=align.rend;
+			QImage covered=align.comb;
+			std::vector<AlignPair> weightList;
+
+			for (int p=0; p<md.rasterList.size(); p++)
 			{
-				align.mode=AlignSet::PROJIMG;
-				align.shotPro=md.rasterList[p]->shot;
-				align.imagePro=&md.rasterList[p]->currentPlane->image;
-				align.ProjectedImageChanged(*align.imagePro);
-				float countTot=0.0;
-				float countCol=0.0;
-				float countCov=0.0;
-				align.RenderShadowMap();
-				align.renderScene(align.shot, 2, true);
-				//align.readRender(1);
-				for (int x=0; x<align.wt; x++)
-					for (int y=0; y<align.ht; y++)
-					{
-						QColor color;
-						color.setRgb(align.comb.pixel(x,y));
-						if (color!=qRgb(0,0,0))
+				if (p!=r)
+				{
+					align.mode=AlignSet::PROJIMG;
+					align.shotPro=md.rasterList[p]->shot;
+					align.imagePro=&md.rasterList[p]->currentPlane->image;
+					align.ProjectedImageChanged(*align.imagePro);
+					float countTot=0.0;
+					float countCol=0.0;
+					float countCov=0.0;
+					align.RenderShadowMap();
+					align.renderScene(align.shot, 2, true);
+					//align.readRender(1);
+					for (int x=0; x<align.wt; x++)
+						for (int y=0; y<align.ht; y++)
 						{
-							countTot++;
-							if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
+							QColor color;
+							color.setRgb(align.comb.pixel(x,y));
+							if (color!=qRgb(0,0,0))
 							{
-								countCol++;
+								countTot++;
+								if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
+								{
+									countCol++;
+								}
 							}
 						}
-					}
-					pair.area=countCol/countTot;
-										
-					if (pair.area>0.2)
-					{
+						pair.area=countCol/countTot;
+											
+						if (pair.area>0.2)
+						{
+							pair.mutual=mutual.info(align.wt,align.ht,align.target,align.render);
+							pair.imageId=r;
+							pair.projId=p;
+							pair.weight=pair.area*pair.mutual;
+							weightList.push_back(pair);
+
+						}
+				}
+			}
+
+			Log(0, "Image %d completed",r);
+			if (!globalign)
+			{
+				for (int i=0; i<weightList.size(); i++)
+				{
+					Log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
+					list.push_back(weightList[i]);
+
+				}
+
+				//Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
+				//return list;
+
+			}
+			else
+			{
+
+
+				std::sort(weightList.begin(), weightList.end(), orderingW());
+
+				///////////////////////////////////////7
+				for (int i=0; i<weightList.size(); i++)
+				{
+					int p=weightList[i].projId;
+					align.mode=AlignSet::PROJIMG;
+					align.shotPro=md.rasterList[p]->shot;
+					align.imagePro=&md.rasterList[p]->currentPlane->image;
+					align.ProjectedImageChanged(*align.imagePro);
+					float countTot=0.0;
+					float countCol=0.0;
+					float countCov=0.0;
+					align.RenderShadowMap();
+					align.renderScene(align.shot, 2, true);
+					//align.readRender(1);
+					for (int x=0; x<align.wt; x++)
+						for (int y=0; y<align.ht; y++)
+						{
+							QColor color;
+							color.setRgb(align.comb.pixel(x,y));
+							if (color!=qRgb(0,0,0))
+							{
+								countTot++;
+								if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
+								{
+									if (covered.pixel(x,y)!=qRgb(255,0,0))
+									{
+										countCov++;
+										covered.setPixel(x,y,qRgb(255,0,0));
+									}
+									countCol++;
+								}
+							}
+						}
+						pair.area=countCol/countTot;
+						/*covered.save("covered.jpg");
+						align.rend.save("rend.jpg");
+						align.comb.save("comb.jpg");*/
+						
+						pair.area*=countCov/countTot;
 						pair.mutual=mutual.info(align.wt,align.ht,align.target,align.render);
 						pair.imageId=r;
 						pair.projId=p;
-						pair.weight=pair.area*pair.mutual;
-						weightList.push_back(pair);
-
+						pair.weight=weightList[i].weight;
+						list.push_back(pair);
+						Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
 					}
 			}
-		}
-
-		Log(0, "Image %d completed",r);
-		if (!globalign)
-		{
-			for (int i=0; i<weightList.size(); i++)
-			{
-				Log(0, "Area %3.2f, Mutual %3.2f",weightList[i].area,weightList[i].mutual);
-				list.push_back(weightList[i]);
-
-			}
-
-			//Log(0, "Tot arcs %d, Valid arcs %d",(md.rasterList.size())*(md.rasterList.size()-1),list.size());
-			//return list;
-
-		}
-		else
-		{
-
-
-			std::sort(weightList.begin(), weightList.end(), orderingW());
-
-			///////////////////////////////////////7
-			for (int i=0; i<weightList.size(); i++)
-			{
-				int p=weightList[i].projId;
-				align.mode=AlignSet::PROJIMG;
-				align.shotPro=md.rasterList[p]->shot;
-				align.imagePro=&md.rasterList[p]->currentPlane->image;
-				align.ProjectedImageChanged(*align.imagePro);
-				float countTot=0.0;
-				float countCol=0.0;
-				float countCov=0.0;
-				align.RenderShadowMap();
-				align.renderScene(align.shot, 2, true);
-				//align.readRender(1);
-				for (int x=0; x<align.wt; x++)
-					for (int y=0; y<align.ht; y++)
-					{
-						QColor color;
-						color.setRgb(align.comb.pixel(x,y));
-						if (color!=qRgb(0,0,0))
-						{
-							countTot++;
-							if (align.comb.pixel(x,y)!=align.rend.pixel(x,y))
-							{
-								if (covered.pixel(x,y)!=qRgb(255,0,0))
-								{
-									countCov++;
-									covered.setPixel(x,y,qRgb(255,0,0));
-								}
-								countCol++;
-							}
-						}
-					}
-					pair.area=countCol/countTot;
-					/*covered.save("covered.jpg");
-					align.rend.save("rend.jpg");
-					align.comb.save("comb.jpg");*/
-					
-					pair.area*=countCov/countTot;
-					pair.mutual=mutual.info(align.wt,align.ht,align.target,align.render);
-					pair.imageId=r;
-					pair.projId=p;
-					pair.weight=weightList[i].weight;
-					list.push_back(pair);
-					Log(0, "Area %3.2f, Mutual %3.2f",pair.area,pair.mutual);
-				}
-		}
 			
+		}
 		}
 //////////////////////////////////////////////////////
 
@@ -629,6 +623,36 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 	}
 	int totGr=1;
 	bool done=false;
+	std::vector<int> nod;
+	for (int i=0; i<arcs.size(); i++)
+		{
+			int cand=arcs[i].imageId;
+			bool insert=true;
+			for (int j=0; j<nod.size(); j++)
+			{
+				if(nod[j]==cand)
+				{
+					insert=false;
+					break;
+				}
+			}
+			if(insert)
+				nod.push_back(cand);
+			int cand2=arcs[i].projId;
+			insert=true;
+			for (int j=0; j<nod.size(); j++)
+			{
+				if(nod[j]==cand2)
+				{
+					insert=false;
+					break;
+				}
+			}
+			if(insert)
+				nod.push_back(cand2);
+
+		}
+	int involvedNodes=nod.size();
 	int totNodes=0;
 	Log(0, "Tuttok2");
 	while (!done)
@@ -655,7 +679,7 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 				}
 			}
 		}
-		if (totNodes==numNodes)
+		if (totNodes==involvedNodes)
 			done=true;
 		else totGr++;
 	}
@@ -672,7 +696,10 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 			{
 				Node n;
 				double mut=0.0; double are=0.00001;
-				n.active=false;
+				if(md.rasterList[j]->visible)
+					n.active=false;
+				else 
+					n.active=true;
 				n.id=j;
 				n.avMut=0.0;
 				for (int k=0; k<arcs.size(); k++)
@@ -687,6 +714,15 @@ std::vector<SubGraph> FilterMutualInfoPlugin::CreateGraphs(MeshDocument &md, std
 				std::sort(n.arcs.begin(), n.arcs.end(), ordering());
 				graph.nodes.push_back(n);
 				Log(0, "Node %d of %d: avMut %3.2f, arch %d",j,numNodes, n.avMut, n.arcs.size());
+			}
+			else
+				{
+				Node n;
+				n.active=true;
+				n.id=j;
+				n.avMut=0.0;
+				graph.nodes.push_back(n);
+				Log(0, "Node %d of %d: not used",j,numNodes);
 			}
 		}
 		Gr.push_back(graph);
