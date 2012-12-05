@@ -296,16 +296,18 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glLineWidth(2.f);
         glDepthRange (0.0, 0.999);
-        glEnableClientState (GL_VERTEX_ARRAY);
-        glEnableClientState (GL_COLOR_ARRAY);
-
-        glEnable(GL_POINT_SMOOTH);
-        glPointSize(6.f);
-        glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
-        glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
-        glDrawArrays(GL_LINES,0,vvP->size());
-        glDisableClientState (GL_COLOR_ARRAY);
-        glDisableClientState (GL_VERTEX_ARRAY);
+		if (vvP->size() > 0)
+		{
+			glEnableClientState (GL_VERTEX_ARRAY);
+			glEnableClientState (GL_COLOR_ARRAY);
+			glEnable(GL_POINT_SMOOTH);
+			glPointSize(6.f);
+			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
+			glDrawArrays(GL_LINES,0,vvP->size());
+			glDisableClientState (GL_COLOR_ARRAY);
+			glDisableClientState (GL_VERTEX_ARRAY);
+		}
         glPopAttrib();
       }
     } break;
@@ -414,15 +416,16 @@ void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glLineWidth(1.f);
   glDepthRange (0.0, 0.999);
-  glEnableClientState (GL_VERTEX_ARRAY);
-  glEnableClientState (GL_COLOR_ARRAY);
-
-  glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(EV.begin()[0].first));
-  glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
-  glDrawArrays(GL_LINES,0,EV.size());
-
-  glDisableClientState (GL_COLOR_ARRAY);
-  glDisableClientState (GL_VERTEX_ARRAY);
+  if (EV.size() > 0)
+  {
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glEnableClientState (GL_COLOR_ARRAY);
+	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(EV.begin()[0].first));
+	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
+	glDrawArrays(GL_LINES,0,EV.size());
+	glDisableClientState (GL_COLOR_ARRAY);
+	glDisableClientState (GL_VERTEX_ARRAY);
+  }
   glPopAttrib();
 }
 
@@ -436,15 +439,16 @@ void ExtraMeshDecoratePlugin::DrawTriVector(std::vector<PointPC> &TV)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glLineWidth(1.f);
   glDepthRange (0.0, 0.999);
-  glEnableClientState (GL_VERTEX_ARRAY);
-  glEnableClientState (GL_COLOR_ARRAY);
-
-  glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
-  glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
-  glDrawArrays(GL_TRIANGLES,0,TV.size());
-
-  glDisableClientState (GL_COLOR_ARRAY);
-  glDisableClientState (GL_VERTEX_ARRAY);
+  if (TV.size() > 0)
+  {
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glEnableClientState (GL_COLOR_ARRAY);
+	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
+	glDrawArrays(GL_TRIANGLES,0,TV.size());
+	glDisableClientState (GL_COLOR_ARRAY);
+	glDisableClientState (GL_VERTEX_ARRAY);
+  }
   glPopAttrib();
 }
 
@@ -458,19 +462,21 @@ void ExtraMeshDecoratePlugin::DrawDotVector(std::vector<PointPC> &TV, float base
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glLineWidth(1.f);
   glDepthRange (0.0, 0.999);
-  glEnableClientState (GL_VERTEX_ARRAY);
-  glEnableClientState (GL_COLOR_ARRAY);
-  glPointSize(baseSize+0.5);
-  glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
-  glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
-
-  glDisableClientState (GL_COLOR_ARRAY);
-  glColor(Color4b::DarkGray);
-  glDrawArrays(GL_POINTS,0,TV.size());
-  glPointSize(baseSize-1);
-  glEnableClientState (GL_COLOR_ARRAY);
-  glDrawArrays(GL_POINTS,0,TV.size());
-  glDisableClientState (GL_VERTEX_ARRAY);
+  if (TV.size() > 0)
+  {
+	glEnableClientState (GL_VERTEX_ARRAY);
+	glEnableClientState (GL_COLOR_ARRAY);
+	glPointSize(baseSize+0.5);
+	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
+	glDisableClientState (GL_COLOR_ARRAY);
+	glColor(Color4b::DarkGray);
+	glDrawArrays(GL_POINTS,0,TV.size());
+	glPointSize(baseSize-1);
+	glEnableClientState (GL_COLOR_ARRAY);
+	glDrawArrays(GL_POINTS,0,TV.size());
+	glDisableClientState (GL_VERTEX_ARRAY);
+  }
   glPopAttrib();
 }
 
