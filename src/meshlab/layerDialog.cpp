@@ -459,7 +459,7 @@ LayerDialog::~LayerDialog()
 
 void LayerDialog::updateDecoratorParsView() 
 {
-  if(mw->GLA()->md()->mm() ==0 ) return;
+  if ((mw->GLA() == NULL) || (mw->GLA()->md() == NULL) || (mw->GLA()->md()->mm() == NULL)) return;
 
 	QStringList expIt;
 	int ind=0;
@@ -571,11 +571,11 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
 			loadbut = new QPushButton("Load",parent);
-			int countel = frame->stdfieldwidgets.size();
-			dialoglayout->addWidget(savebut,countel,0);
-			dialoglayout->addWidget(resetbut,countel,1);
-			dialoglayout->addWidget(loadbut,countel,2);
-			dialoglayout->addWidget(frame,0,0,countel,3);
+			//int countel = frame->stdfieldwidgets.size();
+			dialoglayout->addWidget(savebut,1,0);
+			dialoglayout->addWidget(resetbut,1,1);
+			dialoglayout->addWidget(loadbut,1,2);
+			dialoglayout->addWidget(frame,0,0,1,3);
 			this->setLayout(dialoglayout);
 			this->layout()->setContentsMargins(0,0,0,0);
 			frame->layout()->setContentsMargins(0,0,0,0);
