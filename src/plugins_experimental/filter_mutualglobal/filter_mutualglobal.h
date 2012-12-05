@@ -71,6 +71,7 @@ public:
 	bool AlignNode(MeshDocument &md, Node node);
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
+	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
 
 
 

@@ -36,11 +36,14 @@
 #include <wrap/gl/shot.h>
 #include <wrap/gl/camera.h>
 
+#include <vcg/complex/algorithms/point_sampling.h>
+
 // Constructor usually performs only two simple tasks of filling the two lists 
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
 AlignSet align;
+
 
 
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
@@ -98,8 +101,8 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 	QStringList rendList; 
 	switch(ID(action))	 {
 		case FP_IMAGE_GLOBALIGN :  
-			parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
-												"The mesh on which the image must be aligned"));
+			//parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
+				//								"The mesh on which the image must be aligned"));
 			/*parlst.addParam(new RichRaster ("SourceRaster", md.rm(),&md, "Source Raster",
 												"The mesh on which the image must be aligned"));*/
 			
@@ -117,10 +120,14 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 			
 			//parlst.addParam(new RichShotf  ("Shot", vcg::Shotf(),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			
-			parlst.addParam(new RichInt ("Number of refinement steps",
-				1,
-				"Number of minimaziations step on the global graph",
-				"Number of minimaziations step on the global graph"));
+			parlst.addParam(new RichInt ("Max number of refinement steps",
+				5,
+				"Maximum number of minimizations step",
+				"Maximum number of minimizations step on the global graph"));
+			parlst.addParam(new RichFloat ("Threshold for refinement convergence",
+				1.2,
+				"Threshold for refinement convergence (in pixels)",
+				"The threshold (average quadratic variation in the projection on image plane of some samples of the mesh before and after each step of refinement) that stops the refinement"));
 
 			parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
 			parlst.addParam(new RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
@@ -148,6 +155,26 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 // Move Vertex of a random quantity
 bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
+	QTime filterTime;
+	filterTime.start();
+
+	float thresDiff=par.getFloat("Threshold for refinement convergence");
+
+	std::vector<vcg::Point3f> myVec;
+	int leap=(int)((float)md.mm()->cm.vn/1000.0f);
+	CMeshO::VertexIterator vi;
+	for(int i=0;i<=md.mm()->cm.vn;i=i+leap) 
+	{
+		myVec.push_back(md.mm()->cm.vert[i].P());
+	}
+	std::vector<vcg::Shotf> oldShots;
+	for (int r=0; r<md.rasterList.size();r++)
+	{
+		oldShots.push_back(md.rasterList[r]->shot);
+	}
+
+	Log(0,"Sampled has %i vertices",myVec.size());
+	
 	std::vector<SubGraph> Graphs;
 	/// Preliminary singular alignment using classic MI
 	switch(ID(action))	 {
@@ -169,20 +196,23 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 				preAlignment(md, par, cb);
 			}
 
-			this->glContext->doneCurrent();
-
-			this->glContext->makeCurrent();
-
-			this->initGL();
-			if (par.getInt("Number of refinement steps")!=0)
+			if (par.getInt("Max number of refinement steps")!=0)
 			{
 				
 				Graphs=buildGraph(md);
 				Log(0, "BuildGraph completed");
-				for (int i=0; i<par.getInt("Number of refinement steps"); i++)
+				for (int i=0; i<par.getInt("Max number of refinement steps"); i++)
 				{
 					AlignGlobal(md, Graphs);
-					Log(0, "AlignGlobal %d of %d completed",i,par.getInt("Number of refinement steps"));
+					float diff=calcShotsDifference(md,oldShots,myVec);
+					Log(0, "AlignGlobal %d of %d completed, average improvement %f pixels",i+1,par.getInt("Max number of refinement steps"),diff);
+					if (diff<thresDiff)
+						break;
+					oldShots.clear();
+					for (int r=0; r<md.rasterList.size();r++)
+					{
+						oldShots.push_back(md.rasterList[r]->shot);
+					}
 				}
 			}
 			
@@ -193,9 +223,37 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 		default : assert(0); 
 	}
 
+	Log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
+
 		return true;
 
 
+
+}
+
+float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points)
+{
+	std::vector<float> distances;
+	for (int i=0; i<points.size(); i++)
+	{
+		for(int j=0; j<md.rasterList.size(); j++)
+		{
+			vcg::Point2f pp=md.rasterList[j]->shot.Project(points[i]);
+			if(pp[0]>0 && pp[1]>0 && pp[0]<md.rasterList[j]->shot.Intrinsics.ViewportPx[0] && pp[1]<md.rasterList[j]->shot.Intrinsics.ViewportPx[1])
+			{
+				vcg::Point2f ppOld=oldShots[j].Project(points[i]);
+				vcg::Point2f d=pp-ppOld;
+				distances.push_back(vcg::math::Sqrt( d[0]*d[0] + d[1]*d[1] ));
+			}
+		}
+	}
+	float totErr=0.0;
+	for (int i=0; i<distances.size(); i++)
+	{
+		totErr+=(distances[i]*distances[i]);
+	}
+
+	return totErr/(float)distances.size();
 
 }
 
@@ -742,14 +800,14 @@ bool FilterMutualInfoPlugin::AlignGlobal(MeshDocument &md, std::vector<SubGraph>
 		int n=0;
 		while (!allActive(graphs[i]))
 		{
-			Log(0, "Round %d of %d: get the right node",n+1,graphs[i].nodes.size());
+			//Log(0, "Round %d of %d: get the right node",n+1,graphs[i].nodes.size());
 			int curr= getTheRightNode(graphs[i]);
 			graphs[i].nodes[curr].active=true;
-			Log(0, "Round %d of %d: align the node",n+1,graphs[i].nodes.size());
+			//Log(0, "Round %d of %d: align the node",n+1,graphs[i].nodes.size());
 			AlignNode(md, graphs[i].nodes[curr]);
-			Log(0, "Round %d of %d: update the graph",n+1,graphs[i].nodes.size());
+			//Log(0, "Round %d of %d: update the graph",n+1,graphs[i].nodes.size());
 			UpdateGraph(md, graphs[i], curr);
-			Log(0, "Image %d completed",curr);
+			//Log(0, "Image %d completed",curr);
 			n++;
 
 		}
@@ -827,6 +885,24 @@ bool FilterMutualInfoPlugin::AlignNode(MeshDocument &md, Node node)
 		align.arcShots.push_back(&md.rasterList[node.arcs[l].projId]->shot);
 		align.arcMI.push_back(node.arcs[l].mutual);
 
+	}
+
+	if(align.arcImages.size()==0)
+		return true;
+	else if(align.arcImages.size()==1)
+	{
+		align.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
+		align.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		align.arcMI.push_back(node.arcs[0].mutual);
+		align.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
+		align.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		align.arcMI.push_back(node.arcs[0].mutual);
+	}
+	else if(align.arcImages.size()==2)
+	{
+		align.arcImages.push_back(&md.rasterList[node.arcs[0].projId]->currentPlane->image);
+		align.arcShots.push_back(&md.rasterList[node.arcs[0].projId]->shot);
+		align.arcMI.push_back(node.arcs[0].mutual);
 	}
 
 	align.ProjectedMultiImageChanged();

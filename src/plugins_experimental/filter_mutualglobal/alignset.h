@@ -24,6 +24,8 @@ class AlignSet {
   //typedef vcg::Camera<float> Camera;
   //typedef vcg::Shot<float> Shot;
   //typedef vcg::Box3<float> Box;
+	
+
 
  public:
 

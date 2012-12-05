@@ -266,7 +266,7 @@ void AlignSet::initializeGL() {
 
 				if (w > 0.0)
 				{
-					clr /= w;
+					clr = color * clr / w;
 				}
 				else
 				{
@@ -379,12 +379,9 @@ bool AlignSet::ProjectedMultiImageChanged()
 
 /////// Image 2
 
-	if (arcImages.size()>=2)
-	{
-		tmp = QGLWidget::convertToGLFormat(*arcImages[1]);
-		tmp=tmp.scaled(wt,ht);
-	}
-
+	tmp = QGLWidget::convertToGLFormat(*arcImages[1]);
+	tmp=tmp.scaled(wt,ht);
+		
 	//tmp.save("temp2.jpg");
 	
 	glBindTexture(GL_TEXTURE_2D, depthTex2);
@@ -414,12 +411,9 @@ bool AlignSet::ProjectedMultiImageChanged()
 
 /////// Image 3
 
-	if (arcImages.size()>=3)
-	{
-		tmp = QGLWidget::convertToGLFormat(*arcImages[2]);
-		tmp=tmp.scaled(wt,ht);
-	}
-
+	tmp = QGLWidget::convertToGLFormat(*arcImages[2]);
+	tmp=tmp.scaled(wt,ht);
+		
 	//tmp.save("temp3.jpg");
 	
 	glBindTexture(GL_TEXTURE_2D, depthTex3);
