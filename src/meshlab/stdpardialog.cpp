@@ -195,7 +195,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
  if(layout()) delete layout();
- setLayout(new QGridLayout());
+ QGridLayout* glay = new QGridLayout();
 // QGridLayout *vlayout = new QGridLayout(this);
 //    vLayout->setAlignment(Qt::AlignTop);
 	RichWidgetInterfaceConstructor rwc(this);
@@ -206,9 +206,14 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
 		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
 		stdfieldwidgets.push_back(rwc.lastCreated);
 		helpList.push_back(rwc.lastCreated->helpLab);
+		//glay->addItem(rwc.lastCreated->leftItem(),i,0);
+		//glay->addItem(rwc.lastCreated->centralItem(),i,1);
+		//glay->addItem(rwc.lastCreated->rightItem(),i,2);
+		rwc.lastCreated->addWidgetToGridLayout(glay,i);
+
 	} // end for each parameter
-	
-//	this->setMinimumSize(vLayout->sizeHint());
+	setLayout(glay);
+	this->setMinimumSize(glay->sizeHint());
 	this->showNormal();
 	this->adjustSize();
 }
@@ -358,10 +363,10 @@ MeshlabStdDialog::~MeshlabStdDialog()
 	  m_min = absd->min;
 	  m_max = absd->max;
 
- 		fieldDesc = new QLabel(rp->pd->fieldDesc + " (abs and %)",p);
+ 		fieldDesc = new QLabel(rp->pd->fieldDesc + " (abs and %)",this);
 		fieldDesc->setToolTip(rp->pd->tooltip);
-	  absSB = new QDoubleSpinBox(p);
-	  percSB = new QDoubleSpinBox(p);
+	  absSB = new QDoubleSpinBox(this);
+	  percSB = new QDoubleSpinBox(this);
 
 	  absSB->setMinimum(m_min-(m_max-m_min));
 	  absSB->setMaximum(m_max*2);
@@ -384,16 +389,16 @@ MeshlabStdDialog::~MeshlabStdDialog()
 		QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
 		QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
 
-    gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
+  //  gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
-		QGridLayout* lay = new QGridLayout(p);
-		lay->addWidget(absLab,0,0,Qt::AlignHCenter);
-		lay->addWidget(percLab,0,1,Qt::AlignHCenter);
+		vlay = new QGridLayout();
+		vlay->addWidget(absLab,0,0,Qt::AlignHCenter);
+		vlay->addWidget(percLab,0,1,Qt::AlignHCenter);
 
-	  lay->addWidget(absSB,1,0,Qt::AlignTop);
-	  lay->addWidget(percSB,1,1,Qt::AlignTop);
+	  vlay->addWidget(absSB,1,0,Qt::AlignTop);
+	  vlay->addWidget(percSB,1,1,Qt::AlignTop);
 
-		gridLay->addLayout(lay,row,1,Qt::AlignTop);
+		//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
 		connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 		connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
@@ -450,6 +455,15 @@ void AbsPercWidget::setWidgetValue( const Value& nv )
 	setValue(nv.getAbsPerc(),absd->min,absd->max);	
 }
 
+void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(fieldDesc,r,0,Qt::AlignLeft);
+		lay->addLayout(vlay,r,1,Qt::AlignTop);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /******************************************/
 // Point3fWidget Implementation
 /******************************************/
@@ -461,12 +475,12 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
   qDebug("Creating a Point3fWidget");
 	paramName = rpf->name;
 	//int row = gridLay->rowCount() - 1;
-	descLab = new QLabel(rpf->pd->fieldDesc);
+	descLab = new QLabel(rpf->pd->fieldDesc,this);
 	descLab->setToolTip(rpf->pd->fieldDesc);
-	gridLay->addWidget(descLab,row,0);
+	//gridLay->addWidget(descLab,row,0);
 
-    QHBoxLayout* lay = new QHBoxLayout();
-    lay->setSpacing(0);
+    vlay = new QHBoxLayout();
+    vlay->setSpacing(0);
 	for(int i =0;i<3;++i)
 		{
 			coordSB[i]= new QLineEdit(this);
@@ -481,30 +495,30 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			coordSB[i]->setValidator(new QDoubleValidator());
 			coordSB[i]->setAlignment(Qt::AlignRight);
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
-			lay->addWidget(coordSB[i]);
+			vlay->addWidget(coordSB[i]);
 			connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
 		}
 	this->setValue(paramName,rp->val->getPoint3f());
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
-			getPoint3Button = new QPushButton("Get");
+			getPoint3Button = new QPushButton("Get",this);
 			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
 			getPoint3Button->setFlat(true);
 			//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
 			//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
-			lay->addWidget(getPoint3Button);
+			vlay->addWidget(getPoint3Button);
 			QStringList names;
 			names << "View Dir";
 			names << "View Pos";
 			names << "Surf. Pos";
 			names << "Camera Pos";
 			
-			getPoint3Combo = new QComboBox();
+			getPoint3Combo = new QComboBox(this);
 			getPoint3Combo->addItems(names);
 			//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
 			//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
-			lay->addWidget(getPoint3Combo);
+			vlay->addWidget(getPoint3Combo);
 
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
@@ -516,7 +530,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 			connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
 			connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
 		}
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
 
 void Point3fWidget::getPoint()
@@ -576,6 +590,15 @@ void Point3fWidget::setWidgetValue( const Value& nv )
 		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
 
+void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLab,r,0);
+		lay->addLayout(vlay,r,1,Qt::AlignTop);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /******************************************/
 // Matrix44fWidget Implementation
 /******************************************/
@@ -588,12 +611,11 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 	paramName = rpf->name;
 	//int row = gridLay->rowCount() - 1;
 
-	descLab = new QLabel(rpf->pd->fieldDesc,p);
+	descLab = new QLabel(rpf->pd->fieldDesc,this);
 	descLab->setToolTip(rpf->pd->fieldDesc);
-	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
-
-	QVBoxLayout* lay = new QVBoxLayout(p);
-	QGridLayout* lay44 = new QGridLayout(p);
+	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	vlay = new QVBoxLayout();
+	lay44 = new QGridLayout(this);
 
 	
 
@@ -616,15 +638,15 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 		}
 	this->setValue(paramName,rp->val->getMatrix44f());
 
-	lay->addLayout(lay44);
+	vlay->addLayout(lay44);
 
 	QPushButton     * getMatrixButton = new QPushButton("Read from current layer");
-    lay->addWidget(getMatrixButton);
+    vlay->addWidget(getMatrixButton);
 
 	QPushButton     * pasteMatrixButton = new QPushButton("Paste from clipboard");
-	lay->addWidget(pasteMatrixButton);
+	vlay->addWidget(pasteMatrixButton);
 
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(vlay,row,1,Qt::AlignTop);
 
 	connect(gla_curr,SIGNAL(transmitMatrix(QString,vcg::Matrix44f)),this,SLOT(setValue(QString,vcg::Matrix44f)));
 	connect(getMatrixButton,SIGNAL(clicked()),this,SLOT(getMatrix()));
@@ -695,6 +717,15 @@ void Matrix44fWidget::setWidgetValue( const Value& nv )
 		coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii/4][ii%4],'g',3));
 }
 
+void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLab,r,0,Qt::AlignTop);
+		lay->addLayout(vlay,r,1,Qt::AlignTop);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /********************/
 // ShotfWidget Implementation
 
@@ -706,16 +737,16 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
 
   descLab = new QLabel(rpf->pd->fieldDesc,p);
   descLab->setToolTip(rpf->pd->fieldDesc);
-  gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+  //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 
-  QHBoxLayout* lay = new QHBoxLayout(p);
+  hlay = new QHBoxLayout();
 
 
   this->setShotValue(paramName,rp->val->getShotf());
   if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
     {
-      getShotButton = new QPushButton("Get shot",p);
-      lay->addWidget(getShotButton);
+      getShotButton = new QPushButton("Get shot",this);
+      hlay->addWidget(getShotButton);
 
       QStringList names;
       names << "Current Trackball";
@@ -723,9 +754,9 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
       names << "Current Raster";
       names << "From File";
 
-      getShotCombo = new QComboBox(p);
+      getShotCombo = new QComboBox(this);
       getShotCombo->addItems(names);
-      lay->addWidget(getShotCombo);
+      hlay->addWidget(getShotCombo);
       connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
       connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
       connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
@@ -733,7 +764,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
       connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
       connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
     }
-  gridLay->addLayout(lay,row,1,Qt::AlignTop);
+  //gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 }
 
 void ShotfWidget::getShot()
@@ -802,6 +833,15 @@ void ShotfWidget::setWidgetValue( const Value& nv )
   curShot = nv.getShotf();
 }
 
+void ShotfWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addLayout(hlay,r,1);
+		lay->addWidget(descLab,r,0);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /********************/
 // ComboWidget End Implementation
 
@@ -810,14 +850,14 @@ ComboWidget::ComboWidget(QWidget *p, RichParameter* rpar) :MeshLabWidget(p,rpar)
 
 void ComboWidget::Init(QWidget *p,int defaultEnum, QStringList values)
 {
-  enumLabel = new QLabel(p);
+  enumLabel = new QLabel(this);
 	enumLabel->setText(rp->pd->fieldDesc);
-	enumCombo = new QComboBox(p);
+	enumCombo = new QComboBox(this);
   enumCombo->addItems(values);
 	setIndex(defaultEnum);
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
-	gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
+	//gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
+	//gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
 	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
@@ -838,6 +878,15 @@ ComboWidget::~ComboWidget()
 	delete enumLabel;
 }
 
+void ComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(enumLabel,r,0);
+		lay->addWidget(enumCombo,r,1);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /******************************************/
 //EnumWidget Implementation
 /******************************************/
@@ -1140,28 +1189,27 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 {
 	minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
-	valueLE = new QLineEdit(p);
+	valueLE = new QLineEdit(this);
 	valueLE->setAlignment(Qt::AlignRight);
 
-	valueSlider = new QSlider(Qt::Horizontal,p);
+	valueSlider = new QSlider(Qt::Horizontal,this);
 	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-	fieldDesc = new QLabel(rp->pd->fieldDesc);
+	fieldDesc = new QLabel(rp->pd->fieldDesc,this);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
 	valueSlider->setValue(floatToInt(rp->val->getFloat()));
 	const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
 	valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, 5, valueLE));
 	valueLE->setText(QString::number(rp->val->getFloat()));
-
+	valueLE->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
 	
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(fieldDesc,row,0);
+	//lay->addWidget(fieldDesc,row,0);
 	
-	QHBoxLayout* lay = new QHBoxLayout(p);
-	valueLE->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
-	lay->addWidget(valueLE,0,Qt::AlignHCenter);
-    lay->addWidget(valueSlider,0,0);
-    gridLay->addLayout(lay,row,1);
+	hlay = new QHBoxLayout();
+	hlay->addWidget(valueLE,0,Qt::AlignHCenter);
+    hlay->addWidget(valueSlider,0,0);
+    //gridLay->addLayout(hlay,row,1);
 
 	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
 	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
@@ -1222,6 +1270,16 @@ void DynamicFloatWidget::setWidgetValue( const Value& nv )
 {
 	valueLE->setText(QString::number(nv.getFloat()));
 }
+
+void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{	
+	if (lay != NULL)
+	{
+		lay->addWidget(fieldDesc,r,0);
+		lay->addLayout(hlay,r,1);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 /****************************/
 Value& MeshLabWidget::getWidgetValue()
 {
@@ -1237,9 +1295,10 @@ void MeshLabWidget::resetValue()
 }
 
 MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
-//:QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
-:rp(rpar)
+:QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
+//:rp(rpar)
 {
+	//setParent(p);
 	if (rp!= NULL)
 	{
 		helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",this);
@@ -1249,10 +1308,10 @@ MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 		helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		helpLab->setMinimumWidth(250);
 		helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
-		gridLay = qobject_cast<QGridLayout*>(p->layout());
+		/*gridLay = qobject_cast<QGridLayout*>(p->layout());
 		assert(gridLay != 0);
-		row = gridLay->rowCount();
-		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+		row = gridLay->rowCount();*/
+		//gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 	}
 }
 
@@ -1267,11 +1326,17 @@ MeshLabWidget::~MeshLabWidget()
 	delete helpLab;
 }
 
-void MeshLabWidget::setEqualSpaceForEachColumn()
+//void MeshLabWidget::setEqualSpaceForEachColumn()
+//{
+//	int singlewidth = gridLay->geometry().width() / gridLay->columnCount();
+//	for (int ii = 0;ii < gridLay->columnCount();++ii)
+//		gridLay->setColumnMinimumWidth(ii,singlewidth);
+//}
+
+void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 {
-	int singlewidth = gridLay->geometry().width() / gridLay->columnCount();
-	for (int ii = 0;ii < gridLay->columnCount();++ii)
-		gridLay->setColumnMinimumWidth(ii,singlewidth);
+	if (lay != NULL)
+		lay->addWidget(helpLab,r,2,1,1);
 }
 
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
@@ -1281,7 +1346,6 @@ BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
 	cb = new QCheckBox(rp->pd->fieldDesc,this);
 	cb->setToolTip(rp->pd->tooltip);
 	cb->setChecked(rp->val->getBool());
-	gridLay->addWidget(cb,row,0,1,2);
 
 	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 }
@@ -1307,6 +1371,13 @@ void BoolWidget::setWidgetValue( const Value& nv )
 	cb->setChecked(nv.getBool());
 }
 
+void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
+{
+	if (lay !=NULL)
+		lay->addWidget(cb,r,0);
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 //connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 :MeshLabWidget(p,rpar)
@@ -1316,8 +1387,8 @@ LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 	//int row = gridLay->rowCount() -1;
 	
 	lab->setToolTip(rp->pd->tooltip);
-	gridLay->addWidget(lab,row,0);
-	gridLay->addWidget(lned,row,1);
+	//gridLay->addWidget(lab,row,0);
+	//gridLay->addWidget(lned,row,1);
 	connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
 	connect(this,SIGNAL(lineEditChanged()),p,SIGNAL(parameterChanged()));
 	lned->setAlignment(Qt::AlignLeft);
@@ -1337,6 +1408,16 @@ void LineEditWidget::changeChecker()
     if(!this->lastVal.isEmpty())
       emit lineEditChanged();
   }
+}
+
+void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay !=NULL)
+	{
+		lay->addWidget(lab,r,0);
+		lay->addWidget(lned,r,1);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
@@ -1411,22 +1492,22 @@ void StringWidget::setWidgetValue( const Value& nv )
 ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 :MeshLabWidget(p,newColor),pickcol()
 {	
-	colorLabel = new QLabel(p);
-	descLabel = new QLabel(rp->pd->fieldDesc,p);
-	colorButton = new QPushButton(p);
+	colorLabel = new QLabel(this);
+	descLabel = new QLabel(rp->pd->fieldDesc,this);
+	colorButton = new QPushButton(this);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
 	//const QColor cl = rp->pd->defVal->getColor();
 	//resetWidgetValue();
 	initWidgetValue();
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
+	//gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
-	QHBoxLayout* lay = new QHBoxLayout(p);
-	lay->addWidget(colorLabel);
-	lay->addWidget(colorButton);
+	vlay = new QHBoxLayout();
+	vlay->addWidget(colorLabel);
+	vlay->addWidget(colorButton);
 
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	pickcol = rp->val->getColor();
 	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
@@ -1482,6 +1563,16 @@ void ColorWidget::setWidgetValue( const Value& nv )
 	QColor cl = nv.getColor();
 	pickcol = cl;
 	updateColorInfo(cl);
+}
+
+void ColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLabel,r,0,Qt::AlignTop);
+		lay->addLayout(vlay,r,1,Qt::AlignTop);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /*
 void GetFileNameWidget::launchGetFileNameDialog()
@@ -1557,20 +1648,20 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
 :MeshLabWidget(p,rpar),fl()
 {
-	filename = new QLineEdit(p);
+	filename = new QLineEdit(this);
 	filename->setText(tr(""));
-	browse = new QPushButton(p);
-	descLab = new QLabel(rp->pd->fieldDesc,p);
+	browse = new QPushButton(this);
+	descLab = new QLabel(rp->pd->fieldDesc,this);
 	browse->setText("...");
 	//const QColor cl = rp->pd->defVal->getColor();
 	//resetWidgetValue();
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
-	QHBoxLayout* lay = new QHBoxLayout(p);
-	lay->addWidget(filename,2);
-	lay->addWidget(browse);
+	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	hlay = new QHBoxLayout();
+	hlay->addWidget(filename,2);
+	hlay->addWidget(browse);
 
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
 	connect(browse,SIGNAL(clicked()),this,SLOT(selectFile()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
@@ -1606,6 +1697,16 @@ void IOFileWidget::setWidgetValue(const Value& nv)
 void IOFileWidget::updateFileName( const FileValue& file )
 {
 	filename->setText(file.getFileName());
+}
+
+void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLab,r,0,Qt::AlignTop);
+		lay->addLayout(hlay,r,1,Qt::AlignTop);
+	}
+	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
 OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )

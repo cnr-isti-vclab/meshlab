@@ -77,6 +77,7 @@ public slots:
 	void load();
 
 private:
+	float osDependentButtonHeightScaleFactor();
 	MainWindow* mainWin;
 	StdParFrame* frame;
 	RichParameterSet tmpSet;

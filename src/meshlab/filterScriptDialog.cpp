@@ -112,17 +112,32 @@ void FilterScriptDialog::clearScript()
 
 void FilterScriptDialog::saveScript()
 {
-  QString fileName = QFileDialog::getSaveFileName(this,tr("Save Filter Script File"),".", "*.mlx");
+	QString filt;
+	QString mlx("mlx");
+	QString xml("xml");
+	QString mlxast("(*." + mlx + ")");
+	QString xmlast("(*." + xml + ")");
+	QString fileName = QFileDialog::getSaveFileName(this,tr("Save Filter Script File"),".", "MeshLab Scripting File Format " + mlxast + ";;Extensible Markup Language " + xmlast,&filt);
 	if (fileName.isEmpty())	return;
-  QFileInfo fi(fileName);
-  if(fi.suffix().toLower()!="mlx")
-    fileName.append(".mlx");
-  scriptPtr->save(fileName);
+	
+	QFileInfo fi(fileName);
+	QString suf(fi.suffix().toLower());
+	if (filt.contains(mlxast))
+	{
+		if(suf != mlx)
+			fileName.append("." + mlx);
+	}
+	else 
+	{
+		if(suf != xml)
+			fileName.append("." + xml);
+	}	
+	scriptPtr->save(fileName);
 }
 
 void FilterScriptDialog::openScript()
 {
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "*.mlx");
+	QString fileName = QFileDialog::getOpenFileName(this,tr("Open Filter Script File"),".", "MeshLab Scripting File Format (*.mlx);;Extensible Markup Language (*.xml)");
 	if (fileName.isEmpty())	return;
   scriptPtr->open(fileName);
   setScript(scriptPtr);

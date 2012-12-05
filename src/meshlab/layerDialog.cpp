@@ -571,10 +571,11 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			savebut = new QPushButton("Save",parent);
 			resetbut = new QPushButton("Reset",parent);
 			loadbut = new QPushButton("Load",parent);
-			dialoglayout->addWidget(frame,0,0,1,3);
-			dialoglayout->addWidget(savebut,1,0);
-			dialoglayout->addWidget(resetbut,1,1);
-			dialoglayout->addWidget(loadbut,1,2);
+			int countel = frame->stdfieldwidgets.size();
+			dialoglayout->addWidget(savebut,countel,0);
+			dialoglayout->addWidget(resetbut,countel,1);
+			dialoglayout->addWidget(loadbut,countel,2);
+			dialoglayout->addWidget(frame,0,0,countel,3);
 			this->setLayout(dialoglayout);
 			this->layout()->setContentsMargins(0,0,0,0);
 			frame->layout()->setContentsMargins(0,0,0,0);
@@ -584,9 +585,10 @@ DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw
 			savebut->setFont(font);
 			resetbut->setFont(font);
 			loadbut->setFont(font);
-			savebut ->setMaximumSize( savebut ->maximumSize().width(), savebut ->minimumSizeHint().height()/2);
-			resetbut->setMaximumSize( resetbut->maximumSize().width(), resetbut->minimumSizeHint().height()/2);
-			loadbut ->setMaximumSize( loadbut ->maximumSize().width(), loadbut ->minimumSizeHint().height()/2);
+
+			savebut ->setMaximumSize( savebut ->maximumSize().width(), savebut ->minimumSizeHint().height()/osDependentButtonHeightScaleFactor());
+			resetbut->setMaximumSize( resetbut->maximumSize().width(), resetbut->minimumSizeHint().height()/osDependentButtonHeightScaleFactor());
+			loadbut ->setMaximumSize( loadbut ->maximumSize().width(), loadbut ->minimumSizeHint().height()/osDependentButtonHeightScaleFactor());
 
 			connect(frame,SIGNAL(parameterChanged()),this,SLOT(apply()));
 			connect(resetbut,SIGNAL(clicked()),this,SLOT(reset()));
@@ -656,4 +658,15 @@ void DecoratorParamsTreeWidget::load()
 		frame->stdfieldwidgets.at(ii)->setWidgetValue(*(tmpSet.paramList[ii]->val));
 	}
 	apply();
+}
+
+float DecoratorParamsTreeWidget::osDependentButtonHeightScaleFactor()
+{
+#if defined(Q_OS_WIN)
+	return 1.5f;
+#elif defined(Q_OS_MAC)
+	return 2.0f;
+#else
+	return 1.5f;
+#endif
 }
