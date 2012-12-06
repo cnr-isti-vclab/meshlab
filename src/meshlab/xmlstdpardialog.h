@@ -44,8 +44,10 @@ public:
 	void setVisibility(const bool vis);
 	virtual void updateVisibility(const bool vis) = 0;
 
-        virtual ~XMLMeshLabWidget() {}
+    virtual ~XMLMeshLabWidget() {}
 	inline QLabel* helpLabel() {return helpLab;} 
+	
+	virtual void addWidgetToGridLayout(QGridLayout* lay,const int r) = 0;
 
 	bool isImportant;
 	// called when the user press the 'default' button to reset the parameter values to its default.
@@ -59,9 +61,9 @@ signals:
 	//void widgetEvaluateExpression(const Expression& exp,Value** res);
 	//void insertParamInEnv(const QString& paramName,Expression* paramExp);
 
+	//int row;
+	//QGridLayout* gridLay;
 protected:
-	int row;
-	QGridLayout* gridLay;
 	QLabel* helpLab;
 	EnvWrap env;
 	/*const XMLFilterInfo::XMLMap& map;*/
@@ -91,8 +93,9 @@ public:
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
-private:
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 
+private:
 	//WHY WE NEED THIS FUNCTION?
 	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
 	//SO I CANNOT CALL DIRECTLY THE updateVisibility FUNCTION. 
@@ -117,6 +120,8 @@ public:
 	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
+
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 private slots:
 	void tooltipEvaluation();
 private:
@@ -144,6 +149,8 @@ public:
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+
 public slots:
 	void on_absSB_valueChanged(double newv);
 	void on_percSB_valueChanged(double newv);
@@ -168,6 +175,7 @@ private:
 
 	QDoubleSpinBox *absSB;
 	QDoubleSpinBox *percSB;
+	QGridLayout* glay;
 };
 
 class XMLVec3Widget : public XMLMeshLabWidget
@@ -183,7 +191,9 @@ public:
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
 
-	public slots:
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+
+public slots:
 		void  getPoint();
 		void  setPoint( const QString& name,const vcg::Point3f& p );	
 		void  setShot(const QString& name,const vcg::Shotf& val );
@@ -199,6 +209,8 @@ protected:
 	QPushButton *getPoint3Button;
 	QLabel* descLab;
 	QWidget* curr_gla;
+	QHBoxLayout* hlay;
+
 private:
 	//WHY WE NEED THIS FUNCTION?
 	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
@@ -227,6 +239,8 @@ public:
 	//void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
+
 private:
 	//WHY WE NEED THIS FUNCTION?
 	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
@@ -237,11 +251,12 @@ private:
 	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
 	void setVisibility(const bool vis);
 	void  updateColorInfo(const QColor& col);
+	QHBoxLayout* hlay;
 
 signals:
 	void dialogParamChanged();
-	private slots:
-		void pickColor(); 
+private slots:
+	void pickColor(); 
 };
 
 class XMLSliderWidget : public XMLMeshLabWidget
@@ -255,6 +270,7 @@ public:
 	void set(const QString& nwExpStr);
 	void updateVisibility(const bool vis);
 	QString getWidgetExpression();
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 
 public slots:
 	void setValue(int newv);
@@ -275,6 +291,7 @@ private:
 	QLineEdit *valueLE;
 	QSlider   *valueSlider;
 	QLabel* fieldDesc; 
+	QHBoxLayout* hlay;
 	float minVal;
 	float maxVal;
 };
@@ -291,6 +308,7 @@ public:
 	void updateVisibility(const bool vis);
 	virtual QString getWidgetExpression();
 	virtual void set(const QString &) {}
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 
 private:
 	//WHY WE NEED THIS FUNCTION?
@@ -342,6 +360,7 @@ public:
 	QString paramName;
 
 	QString getWidgetExpression();
+	void addWidgetToGridLayout(QGridLayout* lay,const int r);
 
 public slots:
 	void  getShot();
@@ -359,6 +378,8 @@ protected:
 	QComboBox *getShotCombo;
 	QLabel* descLab;
 	QPushButton* getShotButton;
+	QHBoxLayout* hlay;
+
 private:
 	//WHY WE NEED THIS FUNCTION?
 	//IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
@@ -369,36 +390,6 @@ private:
 	//THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
 	void setVisibility(const bool vis);
 };
-
-//class XMLShotfWidget : public MeshLabWidget
-//{
-//	Q_OBJECT
-//
-//public:
-//	ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla);
-//	~ShotfWidget();
-//	QString paramName;
-//	vcg::Shotf getValue();
-//
-//	void collectWidgetValue();
-//	void resetWidgetValue();
-//	void setWidgetValue(const Value& nv);
-//
-//	public slots:
-//		void  getShot();
-//		void  setShotValue(QString name, vcg::Shotf val);
-//signals:
-//		void askRasterShot(QString);
-//		void askMeshShot(QString);
-//		void askViewerShot(QString);
-//
-//protected:
-//	vcg::Shotf curShot;
-//	QLineEdit * shotLE;
-//	QPushButton *getShotButton;
-//	QComboBox *getShotCombo;
-//	QLabel* descLab;
-//};
 
 class XMLStdParFrame : public QFrame
 {
@@ -426,7 +417,7 @@ signals:
 	void parameterChanged();
 
 private:
-	QGridLayout * vLayout;
+	//QGridLayout * vLayout;
 	bool extended;
 
 };

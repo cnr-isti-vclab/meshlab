@@ -117,7 +117,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginManager& pm,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
 {
 	/*if (mfc.filterInterface == NULL)
-		return false;*/
+	return false;*/
 	curMeshDoc = md;
 	if (curMeshDoc == NULL)
 		return false;
@@ -138,7 +138,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 
 	QString fname = mfc.act->text();
 	//mfi->initParameterSet(action, *mdp, curParSet);
-  MLXMLPluginInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
+	MLXMLPluginInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
 	curParMap = mplist;
 	//curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
 	if(curParMap.isEmpty() && !isPreviewable())
@@ -191,10 +191,10 @@ void MeshLabXMLStdDialog::applyClick()
 	//	meshCacheState.apply(curModel);
 	//else
 	//{
-		QString nm = curmfc->act->text();
-		EnvWrap* wrap = new EnvWrap(env);
-		startFilterExecution();
-		curmwi->executeFilter(curmfc,*wrap,false);
+	QString nm = curmfc->act->text();
+	EnvWrap* wrap = new EnvWrap(env);
+	startFilterExecution();
+	curmwi->executeFilter(curmfc,*wrap,false);
 	/*}*/
 	//env.popContext();
 
@@ -262,7 +262,7 @@ void MeshLabXMLStdDialog::applyDynamic()
 	}
 	//two different executions give the identical result if the two contexts (with the filter's parameters inside) are identical
 	previewContext = env.currentContext()->toString();
-	
+
 	meshState.apply(curModel);
 	EnvWrap envir(env);
 	curmwi->executeFilter(this->curmfc, envir, true);
@@ -292,7 +292,7 @@ void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 
 bool MeshLabXMLStdDialog::isPreviewable() const
 {
-	 return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
+	return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
 
 void MeshLabXMLStdDialog::resetExpressions()
@@ -359,21 +359,21 @@ XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
 :QFrame(p),extended(false)
 {
 	curr_gla=gla;
-	vLayout = new QGridLayout(this);
-	vLayout->setAlignment(Qt::AlignTop);
-	setLayout(vLayout);
+	//vLayout = new QGridLayout();
+	//vLayout->setAlignment(Qt::AlignTop);
+	//setLayout(vLayout);
 	//connect(p,SIGNAL(expandView(bool)),this,SLOT(expandView(bool)));
 	//updateFrameContent(parMap,false);
 	//this->setMinimumWidth(vLayout->sizeHint().width());
-	
+
 
 	//this->showNormal();
-	this->adjustSize();
+	//this->adjustSize();
 }
 
 XMLStdParFrame::~XMLStdParFrame()
 {
-	
+
 }
 
 void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir)
@@ -381,6 +381,8 @@ void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,
 	MeshLabXMLStdDialog* dialog = qobject_cast<MeshLabXMLStdDialog*>(parent());
 	if (dialog == NULL)
 		throw MeshLabException("An XMLStdParFrame has not a MeshLabXMLStdDialog's parent");
+	QGridLayout* glay = new QGridLayout();
+	int ii = 0;
 	for(MLXMLPluginInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
 	{
 		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,dialog->curMeshDoc,this);
@@ -388,7 +390,10 @@ void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,
 			return;
 		xmlfieldwidgets.push_back(widg); 
 		helpList.push_back(widg->helpLabel());
+		widg->addWidgetToGridLayout(glay,ii);
+		++ii;
 	}
+	setLayout(glay);
 	//showNormal();
 	updateGeometry();
 	adjustSize();
@@ -428,7 +433,7 @@ XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& en
 	//connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
 	isImportant = env.evalBool(mp[MLXMLElNames::paramIsImportant]);
 	setVisible(isImportant);
-		
+
 	helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
 	helpLab->setTextFormat(Qt::RichText);
 	helpLab->setWordWrap(true);
@@ -436,21 +441,21 @@ XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& en
 	helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	helpLab->setMinimumWidth(250);
 	helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
-	gridLay = qobject_cast<QGridLayout*>(parent->layout());
-	assert(gridLay != 0);
+	//gridLay = qobject_cast<QGridLayout*>(parent->layout());
+	//assert(gridLay != 0);
 
-	row = gridLay->rowCount();
+	//row = gridLay->rowCount();
 	////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	if ((row == 1) && (mp[MLXMLElNames::guiType] == MLXMLElNames::checkBoxTag))	
-	{
+	//if ((row == 1) && (mp[MLXMLElNames::guiType] == MLXMLElNames::checkBoxTag))	
+	//{
 
-		QLabel* lb = new QLabel("",this);
-		gridLay->addWidget(lb);
-		gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
-	}
-	/////////////////////////////////////////////////////////////////////////
-	else
-		gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+	//	QLabel* lb = new QLabel("",this);
+	//	gridLay->addWidget(lb);
+	//	gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
+	//}
+	///////////////////////////////////////////////////////////////////////////
+	//else
+	//	gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
 }
 
 void XMLMeshLabWidget::setVisibility( const bool vis )
@@ -460,6 +465,11 @@ void XMLMeshLabWidget::setVisibility( const bool vis )
 	setVisible(vis);
 }
 
+void XMLMeshLabWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+		lay->addWidget(helpLab,r,2,1,1);
+}
 //void XMLMeshLabWidget::reset()
 //{	
 //	this->set(map[MLXMLElNames::paramDefExpr]);
@@ -472,17 +482,17 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTa
 	cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 	bool defVal = env.evalBool(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 	cb->setChecked(defVal);
-	cb->setVisible(isImportant);
+	//cb->setVisible(isImportant);
 
-	//gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
+	////gridlay->addWidget(this,i,0,1,1,Qt::AlignTop);
 
-	//int row = gridLay->rowCount() -1 ;
-	//WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-	if (row == 1)
-		gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
-	/////////////////////////////////////////////////////////////////////////
-	else
-		gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
+	////int row = gridLay->rowCount() -1 ;
+	////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
+	//if (row == 1)
+	//	gridLay->addWidget(cb,row + 1,0,1,2,Qt::AlignTop);
+	///////////////////////////////////////////////////////////////////////////
+	//else
+	//	gridLay->addWidget(cb,row,0,1,2,Qt::AlignTop);
 
 	setVisibility(isImportant);
 	//cb->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
@@ -491,7 +501,7 @@ XMLCheckBoxWidget::XMLCheckBoxWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTa
 
 XMLCheckBoxWidget::~XMLCheckBoxWidget()
 {
-	
+
 }
 
 void XMLCheckBoxWidget::set( const QString& nwExpStr )
@@ -519,6 +529,13 @@ void XMLCheckBoxWidget::setVisibility( const bool vis )
 	cb->setVisible(vis);
 }
 
+void XMLCheckBoxWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay !=NULL)
+		lay->addWidget(cb,r,0);
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent)
 {
 	QString guiType = widgetTable[MLXMLElNames::guiType];
@@ -530,13 +547,13 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap&
 
 	if (guiType == MLXMLElNames::absPercTag)
 		return new XMLAbsWidget(widgetTable,env,parent);
-	
+
 	if (guiType == MLXMLElNames::vec3WidgetTag)
 		return new XMLVec3Widget(widgetTable,env,parent);
 
 	if (guiType == MLXMLElNames::colorWidgetTag)
 		return new XMLColorWidget(widgetTable,env,parent);
-	
+
 	if (guiType == MLXMLElNames::sliderWidgetTag)
 		return new XMLSliderWidget(widgetTable,env,parent);
 
@@ -560,12 +577,12 @@ XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
 	lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
-	
-	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
-	gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
+
+	//gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+	//gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
 	connect(lineEdit,SIGNAL(editingFinished()),parent,SIGNAL(parameterChanged()));
 	connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
-	
+
 	setVisibility(isImportant);
 }
 
@@ -614,6 +631,16 @@ void XMLEditWidget::setVisibility( const bool vis )
 	this->lineEdit->setVisible(vis);
 }
 
+void XMLEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay !=NULL)
+	{
+		lay->addWidget(fieldDesc,r,0);
+		lay->addWidget(lineEdit,r,1);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
 :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
@@ -646,14 +673,14 @@ XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap&
 	absLab=new QLabel("<i> <small> world unit</small></i>",this);
 	percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>",this);
 
-	gridLay->addWidget(fieldDesc,row,0,Qt::AlignLeft);
-	QGridLayout* lay = new QGridLayout();
-	lay->addWidget(absLab,0,0,Qt::AlignHCenter);
-	lay->addWidget(percLab,0,1,Qt::AlignHCenter);
-	lay->addWidget(absSB,1,0,Qt::AlignTop);
-	lay->addWidget(percSB,1,1,Qt::AlignTop);
-	gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
-	
+	//gridLay->addWidget(fieldDesc,row,0,Qt::AlignLeft);
+	glay = new QGridLayout();
+	glay->addWidget(absLab,0,0,Qt::AlignHCenter);
+	glay->addWidget(percLab,0,1,Qt::AlignHCenter);
+	glay->addWidget(absSB,1,0,Qt::AlignTop);
+	glay->addWidget(percSB,1,1,Qt::AlignTop);
+	//gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
+
 
 	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
@@ -701,6 +728,15 @@ void XMLAbsWidget::setVisibility( const bool vis )
 	this->percSB->setVisible(vis);
 }
 
+void XMLAbsWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(fieldDesc,r,0,Qt::AlignLeft);
+		lay->addLayout(glay,r,1,Qt::AlignTop);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
 
 XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
@@ -712,15 +748,15 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 		paramName = xmlWidgetTag[MLXMLElNames::paramName];
 		//int row = gridLay->rowCount() - 1;
 
-		descLab = new QLabel( xmlWidgetTag[MLXMLElNames::guiLabel],p);
+		descLab = new QLabel( xmlWidgetTag[MLXMLElNames::guiLabel],this);
 		descLab->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
-		gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+		//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 
-		QHBoxLayout* lay = new QHBoxLayout(p);
+		hlay = new QHBoxLayout();
 
 		for(int i =0;i<3;++i)
 		{
-			coordSB[i]= new QLineEdit(p);
+			coordSB[i]= new QLineEdit(this);
 			QFont baseFont=coordSB[i]->font();
 			if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
 			else baseFont.setPointSize(baseFont.pointSize()*3/4);
@@ -729,33 +765,33 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 			coordSB[i]->setMinimumWidth(0);
 			coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
 			//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
-			coordSB[i]->setValidator(new QDoubleValidator(p));
+			coordSB[i]->setValidator(new QDoubleValidator(this));
 			coordSB[i]->setAlignment(Qt::AlignRight);
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
-			lay->addWidget(coordSB[i]);
+			hlay->addWidget(coordSB[i]);
 		}
 		vcg::Point3f def = envir.evalVec3(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 		this->setPoint(paramName,def);
 		if(curr_gla) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 		{
-			getPoint3Button = new QPushButton("Get",p);
+			getPoint3Button = new QPushButton("Get",this);
 			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
 			getPoint3Button->setFlat(true);
 			//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
 			//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
-			lay->addWidget(getPoint3Button);
+			hlay->addWidget(getPoint3Button);
 			QStringList names;
 			names << "View Dir";
 			names << "View Pos";
 			names << "Surf. Pos";
 			names << "Camera Pos";
 
-			getPoint3Combo = new QComboBox(p);
+			getPoint3Combo = new QComboBox(this);
 			getPoint3Combo->addItems(names);
 			//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
 			//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
-			lay->addWidget(getPoint3Combo);
+			hlay->addWidget(getPoint3Combo);
 
 			connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
 			connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
@@ -767,7 +803,7 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 			connect(this,SIGNAL(askSurfacePos(QString)),curr_gla,SLOT(sendSurfacePos(QString)));
 			connect(this,SIGNAL(askCameraPos(QString)),curr_gla,SLOT(sendCameraPos(QString)));
 		}
-		gridLay->addLayout(lay,row,1,Qt::AlignTop);
+		//gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 	}
 	setVisibility(isImportant);
 }
@@ -805,11 +841,11 @@ void XMLVec3Widget::getPoint()
 	qDebug("Got signal %i",index);
 	switch(index)
 	{
-		case 0 : emit askViewDir(paramName);		 break;
-		case 1 : emit askViewPos(paramName);		 break;
-		case 2 : emit askSurfacePos(paramName); break;
-		case 3 : emit askCameraPos(paramName); break;
-		default : assert(0);
+	case 0 : emit askViewDir(paramName);		 break;
+	case 1 : emit askViewPos(paramName);		 break;
+	case 2 : emit askSurfacePos(paramName); break;
+	case 3 : emit askCameraPos(paramName); break;
+	default : assert(0);
 	} 
 }
 
@@ -842,13 +878,23 @@ void XMLVec3Widget::setVisibility( const bool vis )
 	descLab->setVisible(vis);
 }
 
+void XMLVec3Widget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLab,r,0);
+		lay->addLayout(hlay,r,1,Qt::AlignTop);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
-	colorLabel = new QLabel(p);
+	colorLabel = new QLabel(this);
 	QString paramName = xmlWidgetTag[MLXMLElNames::paramName];
-	descLabel = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],p);
-	colorButton = new QPushButton(p);
+	descLabel = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
+	colorButton = new QPushButton(this);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
 	//const QColor cl = rp->pd->defVal->getColor();
@@ -857,13 +903,13 @@ XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
 	pickcol = cl;
 	updateColorInfo(cl);
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
+	//gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
-	QHBoxLayout* lay = new QHBoxLayout(p);
-	lay->addWidget(colorLabel);
-	lay->addWidget(colorButton);
+	hlay = new QHBoxLayout();
+	hlay->addWidget(colorLabel);
+	hlay->addWidget(colorButton);
 
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 	setVisibility(isImportant);
@@ -912,16 +958,26 @@ void XMLColorWidget::setVisibility( const bool vis )
 	colorButton->setVisible(vis);
 }
 
+void XMLColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(descLabel,r,0,Qt::AlignTop);
+		lay->addLayout(hlay,r,1,Qt::AlignTop);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
 	minVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
 	maxVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
-	valueLE = new QLineEdit(p);
+	valueLE = new QLineEdit(this);
 	valueLE->setAlignment(Qt::AlignRight);
-	valueSlider = new QSlider(Qt::Horizontal,p);
+	valueSlider = new QSlider(Qt::Horizontal,this);
 	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel]);
+	fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
 	float fval = env.evalFloat(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -931,13 +987,13 @@ XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,En
 
 
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+	//gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
 
-	QHBoxLayout* lay = new QHBoxLayout(p);
-	lay->addWidget(valueLE,0,Qt::AlignHCenter);
+	hlay = new QHBoxLayout();
+	hlay->addWidget(valueLE,0,Qt::AlignHCenter);
 	//lay->addWidget(valueSlider,0,Qt::AlignJustify);
-	lay->addWidget(valueSlider,0,0);
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	hlay->addWidget(valueSlider,0,0);
+	//gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 
 	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
 	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
@@ -952,8 +1008,8 @@ XMLSliderWidget::~XMLSliderWidget()
 
 void XMLSliderWidget::set( const QString& nwExpStr )
 {
-	 float fval = env.evalFloat(nwExpStr);
-	 valueSlider->setValue(floatToInt(fval));
+	float fval = env.evalFloat(nwExpStr);
+	valueSlider->setValue(floatToInt(fval));
 }
 
 void XMLSliderWidget::updateVisibility( const bool /*vis*/ )
@@ -1002,12 +1058,22 @@ void XMLSliderWidget::setVisibility( const bool vis )
 	fieldDesc->setVisible(vis); 
 }
 
+void XMLSliderWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(fieldDesc,r,0);
+		lay->addLayout(hlay,r,1);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
-	enumLabel = new QLabel(p);
+	enumLabel = new QLabel(this);
 	enumLabel->setText(xmlWidgetTag[MLXMLElNames::guiLabel]);
-	enumCombo = new QComboBox(p);
+	enumCombo = new QComboBox(this);
 	int def;
 	try
 	{
@@ -1019,8 +1085,8 @@ XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
 	}
 	enumCombo->setCurrentIndex(def);
 	//int row = gridLay->rowCount() - 1;
-	gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
-	gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
+	//gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
+	//gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
 	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 	setVisibility(isImportant);
@@ -1047,6 +1113,16 @@ XMLComboWidget::~XMLComboWidget()
 
 }
 
+void XMLComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addWidget(enumLabel,r,0);
+		lay->addWidget(enumCombo,r,1);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
 XMLEnumWidget::XMLEnumWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLComboWidget(xmlWidgetTag,envir,p)
 {
@@ -1065,6 +1141,7 @@ QString XMLEnumWidget::getWidgetExpression()
 {
 	return enumCombo->itemData(enumCombo->currentIndex()).toString();
 }
+
 
 XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
 :XMLEnumWidget(xmlWidgetTag,envir,p)
@@ -1087,12 +1164,12 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 	//int row = gridLay->rowCount() - 1;
 	this->setShotValue(paramName,vcg::Shotf());
 	paramName = xmlWidgetTag[MLXMLElNames::paramName];
-	descLab = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],p);
-	gridLay->addWidget(descLab,row,0,Qt::AlignTop);
-	QHBoxLayout* lay = new QHBoxLayout();
-	getShotButton = new QPushButton("Get shot",p);
-	lay->addWidget(getShotButton);
-	getShotCombo = new QComboBox(p);
+	descLab = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
+	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+	hlay = new QHBoxLayout();
+	getShotButton = new QPushButton("Get shot",this);
+	hlay->addWidget(getShotButton);
+	getShotCombo = new QComboBox(this);
 	int def;
 	try
 	{
@@ -1117,12 +1194,12 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 	}
 	names << "From File";
 	getShotCombo->addItems(names);
-	lay->addWidget(getShotCombo);
+	hlay->addWidget(getShotCombo);
 	connect(getShotCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 	connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
 	connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
-	gridLay->addLayout(lay,row,1,Qt::AlignTop);
+	//gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 	setVisibility(isImportant);
 }
 
@@ -1219,3 +1296,12 @@ void XMLShotWidget::setVisibility( const bool vis )
 	getShotButton->setVisible(vis);
 }
 
+void XMLShotWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+	if (lay != NULL)
+	{
+		lay->addLayout(hlay,r,1);
+		lay->addWidget(descLab,r,0);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
