@@ -34,60 +34,50 @@ using namespace std;
 
 
 QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
- {
+{
   switch(filter)
   {
-    case DP_SHOW_AXIS :									return tr("Draws XYZ axes in world coordinates");
-    case DP_SHOW_BOX_CORNERS:						return tr("Draws object's bounding box corners");
-    case DP_SHOW_VERT:									return tr("Draw the vertices of the mesh as round dots");
-    case DP_SHOW_EDGE:									return tr("Draw the edges of the mesh as round dots");
-    case DP_SHOW_NON_FAUX_EDGE:				return tr("Draws the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
-    case DP_SHOW_BOUNDARY:								return tr("Draws the edge of the mesh that are on the boundary.");
-    case DP_SHOW_BOUNDARY_TEX:					return tr("Draws the edge where there is a texture seam.");
-    case DP_SHOW_NON_MANIF_EDGE:					return tr("Draws the non manifold edges of the current mesh");
-    case DP_SHOW_NON_MANIF_VERT:					return tr("Draws the non manifold vertices of the current mesh");
-    case DP_SHOW_BOX_CORNERS_ABS  :			return tr("Show Box Corners (Abs)");
-    case DP_SHOW_VERT_NORMALS:					return tr("Draws object vertex normals");
-    case DP_SHOW_VERT_PRINC_CURV_DIR :	return tr("Show Vertex Principal Curvature Directions");
-    case DP_SHOW_FACE_NORMALS:					return tr("Draws object face normals");
-    case DP_SHOW_QUOTED_BOX:						return tr("Draws quoted box");
-    case DP_SHOW_VERT_LABEL:						return tr("Draws all the vertex indexes<br> Useful for debugging<br>(do not use it on large meshes)");
-    case DP_SHOW_EDGE_LABEL:						return tr("Draws all the edge indexes<br> Useful for debugging<br>(do not use it on large meshes)");
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per vertex quality");
-    case DP_SHOW_FACE_QUALITY_HISTOGRAM:						return tr("Draws a (colored) Histogram of the per face quality");
-    case DP_SHOW_FACE_LABEL:						return tr("Draws all the face indexes, <br> Useful for debugging <br>(do not use it on large meshes)");
-    case DP_SHOW_CAMERA:								return tr("Draw the position of the camera, if present in the current mesh");
-    case DP_SHOW_TEXPARAM: return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
-	 }
+  case DP_SHOW_AXIS:              return tr("Draws XYZ axes in world coordinates");
+  case DP_SHOW_BOX_CORNERS:       return tr("Draws object's bounding box corners");
+  case DP_SHOW_VERT:              return tr("Draw the vertices of the mesh as round dots");
+  case DP_SHOW_EDGE:              return tr("Draw the edges of the mesh as round dots");
+  case DP_SHOW_NON_FAUX_EDGE:     return tr("Draws the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
+  case DP_SHOW_BOUNDARY:          return tr("Draws the edge of the mesh that are on the boundary.");
+  case DP_SHOW_BOUNDARY_TEX:      return tr("Draw the edge where there is a texture seam.");
+  case DP_SHOW_NON_MANIF_EDGE:    return tr("Draw the non manifold edges of the current mesh");
+  case DP_SHOW_NON_MANIF_VERT:    return tr("Draw the non manifold vertices of the current mesh");
+  case DP_SHOW_NORMALS:           return tr("Draw normals");
+  case DP_SHOW_VERT_PRINC_CURV_DIR: return tr("Show Vertex Principal Curvature Directions");
+  case DP_SHOW_QUOTED_BOX:        return tr("Draws quoted box");
+  case DP_SHOW_LABEL:             return tr("Draws all the vertex/edge/face indexes<br> Useful for debugging<br>(do not use it on large meshes)");
+  case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draws a (colored) Histogram of the per vertex/face quality");
+  case DP_SHOW_CAMERA:            return tr("Draw the position of the camera, if present in the current mesh");
+  case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
+  }
   assert(0);
   return QString();
- }
+}
 
 QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)
     {
-    case DP_SHOW_VERT      :	return QString("Show Vertex Dots");
-    case DP_SHOW_EDGE      :	return QString("Show Edge");
-    case DP_SHOW_NON_FAUX_EDGE :	return QString("Show Non-Faux Edges");
-    case DP_SHOW_BOUNDARY :	return QString("Show Boundary Edges");
-    case DP_SHOW_BOUNDARY_TEX :	return QString("Show Texture Seams");
-    case DP_SHOW_NON_MANIF_EDGE :	return QString("Show Non Manif Edges");
+    case DP_SHOW_VERT: return QString("Show Vertex Dots");
+    case DP_SHOW_EDGE: return QString("Show Edge");
+    case DP_SHOW_NON_FAUX_EDGE:	return QString("Show Non-Faux Edges");
+    case DP_SHOW_BOUNDARY:	return QString("Show Boundary Edges");
+    case DP_SHOW_BOUNDARY_TEX:	return QString("Show Texture Seams");
+    case DP_SHOW_NON_MANIF_EDGE:	return QString("Show Non Manif Edges");
     case DP_SHOW_NON_MANIF_VERT:	return QString("Show Non Manif Vertices");
-    case DP_SHOW_VERT_NORMALS      :	return QString("Show Vertex Normals");
-    case DP_SHOW_VERT_PRINC_CURV_DIR :	return QString("Show Vertex Principal Curvature Directions");
-    case DP_SHOW_FACE_NORMALS      :	return QString("Show Face Normals");
-    case DP_SHOW_BOX_CORNERS  :			return QString("Show Box Corners");
-    case DP_SHOW_BOX_CORNERS_ABS  :		return QString("Show Box Corners (Abs)");
-    case DP_SHOW_AXIS         :			return QString("Show Axis");
+    case DP_SHOW_NORMALS:	return QString("Show Normals");
+    case DP_SHOW_VERT_PRINC_CURV_DIR:	return QString("Show Vertex Principal Curvature Directions");
+    case DP_SHOW_BOX_CORNERS:			return QString("Show Box Corners");
+    case DP_SHOW_AXIS:			return QString("Show Axis");
     case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
-    case DP_SHOW_VERT_LABEL:		return tr("Show Vertex Label");
-    case DP_SHOW_EDGE_LABEL:		return tr("Show Edge Label");
-    case DP_SHOW_FACE_LABEL:			return tr("Show Face Label");
+    case DP_SHOW_LABEL:		return tr("Show Label");
     case DP_SHOW_CAMERA:			return tr("Show Camera");
     case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM:			return tr("Show Vert Quality Histogram");
-    case DP_SHOW_FACE_QUALITY_HISTOGRAM:			return tr("Show Face Quality Histogram");
+    case DP_SHOW_QUALITY_HISTOGRAM:			return tr("Show Quality Histogram");
 
     default: assert(0);
     }
@@ -155,62 +145,57 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 	glMultMatrix(m.cm.Tr);
     switch (ID(a))
     {
-    case DP_SHOW_FACE_NORMALS:
-    case DP_SHOW_VERT_NORMALS:
+    case DP_SHOW_NORMALS:
     case DP_SHOW_VERT_PRINC_CURV_DIR:
+    {
+      glPushAttrib(GL_ENABLE_BIT );
+      float NormalLen=rm->getFloat(NormalLength());
+      float LineLen = m.cm.bbox.Diag()*NormalLen;
+      CMeshO::VertexIterator vi;
+      CMeshO::FaceIterator fi;
+      glDisable(GL_LIGHTING);
+      glDisable(GL_TEXTURE_2D);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      glBegin(GL_LINES);
+      if(rm->getBool(NormalVertFlag())) // vert Normals
+      {
+        glColor4f(.4f,.4f,1.f,.6f);
+        for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
         {
-            glPushAttrib(GL_ENABLE_BIT );
-            float NormalLen=rm->getFloat(NormalLength());
-            float LineLen = m.cm.bbox.Diag()*NormalLen;
-            CMeshO::VertexIterator vi;
-            CMeshO::FaceIterator fi;
-            glDisable(GL_LIGHTING);
-            glDisable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-            glBegin(GL_LINES);
-            if(ID(a) == DP_SHOW_VERT_NORMALS)
-			{
-				glColor4f(.4f,.4f,1.f,.6f);
-                for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-                {
-                    glVertex((*vi).P());
-                    glVertex((*vi).P()+(*vi).N()*LineLen);
-                }
-			}
-            else
-                if( ID(a) == DP_SHOW_VERT_PRINC_CURV_DIR){
-                if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
-                    for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-                    {
-					glColor4f(1.0,0.0,0.0,.8f);
-					glVertex((*vi).P());
-					glColor4f(0.0,1.0,0.0,.1f);
-					glVertex((*vi).P()+(*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25);
-					glColor4f(0.0,1.0,0.0,.8f);
-					glVertex((*vi).P());
-					glColor4f(0.0,1.0,0.0,.1f);
-					glVertex((*vi).P()+(*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25);
-				}
-            }
-            else
-                if(ID(a) == DP_SHOW_FACE_NORMALS)
-                {
-                glColor4f(.1f,.4f,4.f,.6f);
-                for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
-                {
-                    Point3f b=Barycenter(*fi);
-                    glVertex(b);
-                    glVertex(b+(*fi).N()*LineLen);
-                }
-            }
-			
-            glEnd();
-            glPopAttrib();
-        } break;
+          glVertex((*vi).P());
+          glVertex((*vi).P()+(*vi).N()*LineLen);
+        }
+      }
+      if(rm->getBool(NormalFaceFlag())) // face Normals
+      {
+        glColor4f(.1f,.4f,4.f,.6f);
+        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+        {
+          Point3f b=Barycenter(*fi);
+          glVertex(b);
+          glVertex(b+(*fi).N()*LineLen);
+        }
+      }
+      if(rm->getBool(NormalCurvFlag())) // curv Vectors
+        if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
+          for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+          {
+            glColor4f(1.0,0.0,0.0,.8f);
+            glVertex((*vi).P());
+            glColor4f(0.0,1.0,0.0,.1f);
+            glVertex((*vi).P()+(*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25);
+            glColor4f(0.0,1.0,0.0,.8f);
+            glVertex((*vi).P());
+            glColor4f(0.0,1.0,0.0,.1f);
+            glVertex((*vi).P()+(*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25);
+          }
+      glEnd();
+      glPopAttrib();
+    } break;
     case DP_SHOW_BOX_CORNERS:
       {
-        DrawBBoxCorner(m);
+        DrawBBoxCorner(m,rm->getBool(this->BBAbsParam()));
         this->RealTimeLog("Bounding Box",m.shortName(),"<table>"
                           "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
                           "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
@@ -218,9 +203,12 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
       }
       break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
-    case DP_SHOW_VERT_LABEL:	DrawVertLabel(m,painter);break;
-    case DP_SHOW_EDGE_LABEL:	DrawEdgeLabel(m,painter);break;
-    case DP_SHOW_FACE_LABEL:	DrawFaceLabel(m,painter);break;
+    case DP_SHOW_LABEL:
+    {
+      if(rm->getBool(LabelVertFlag())) DrawVertLabel(m,painter);
+      if(rm->getBool(LabelEdgeFlag())) DrawEdgeLabel(m,painter);
+      if(rm->getBool(LabelFaceFlag())) DrawFaceLabel(m,painter);
+    } break;
     case DP_SHOW_VERT:	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
@@ -313,24 +301,19 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     } break;
     case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,painter,rm,qf); break;
 
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
-      {
-        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
-        if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
-          CHist &ch=qH();
-          this->DrawColorHistogram(ch,gla, painter,rm,qf);
-        }
+    case DP_SHOW_QUALITY_HISTOGRAM :
+    {
+      CMeshO::PerMeshAttributeHandle<CHist > qH;
+      if(rm->getEnum(this->HistTypeParam()) == 0)
+        qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
+      else
+        qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
+
+      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
+        CHist &ch=qH();
+        this->DrawColorHistogram(ch,gla, painter,rm,qf);
       }
-      break;
-    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
-      {
-        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
-        if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
-          CHist &ch=qH();
-	        this->DrawColorHistogram(ch,gla, painter,rm,qf);
-	        }
-      }
-      break;
+    } break;
     case DP_SHOW_NON_MANIF_VERT :
     {
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
@@ -402,10 +385,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     } break;
     } // end switch;
 	glPopMatrix();
-
-  if(ID(a) == DP_SHOW_BOX_CORNERS_ABS)	DrawBBoxCorner(m,false);
 }
-
 void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
 {
   glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
@@ -757,7 +737,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 	glVertex3f(ma[0],mi[1],mi[2]); glVertex3f(ma[0]+zz[0],mi[1]+d3[1],mi[2]+zz[2]);
 	glVertex3f(ma[0],mi[1],mi[2]); glVertex3f(ma[0]+zz[0],mi[1]+zz[1],mi[2]+d3[2]);
 
-  glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+d3[0],ma[1]+zz[1],mi[2]+zz[2]);
+	glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+d3[0],ma[1]+zz[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+zz[0],ma[1]-d3[1],mi[2]+zz[2]);
 	glVertex3f(mi[0],ma[1],mi[2]); glVertex3f(mi[0]+zz[0],ma[1]+zz[1],mi[2]+d3[2]);
 
@@ -795,17 +775,12 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_BOUNDARY :
   case DP_SHOW_NON_MANIF_EDGE :
   case DP_SHOW_NON_MANIF_VERT :
-  case DP_SHOW_FACE_NORMALS :
-  case DP_SHOW_VERT_NORMALS :
-  case DP_SHOW_VERT_QUALITY_HISTOGRAM :
-  case DP_SHOW_FACE_QUALITY_HISTOGRAM :
+  case DP_SHOW_NORMALS :
+  case DP_SHOW_QUALITY_HISTOGRAM :
   case DP_SHOW_VERT_PRINC_CURV_DIR :
   case DP_SHOW_BOX_CORNERS :
-  case DP_SHOW_BOX_CORNERS_ABS :
   case DP_SHOW_QUOTED_BOX :
-  case DP_SHOW_VERT_LABEL :
-  case DP_SHOW_EDGE_LABEL :
-  case DP_SHOW_FACE_LABEL :
+  case DP_SHOW_LABEL :
   case DP_SHOW_CAMERA :
   case DP_SHOW_TEXPARAM :
   case DP_SHOW_BOUNDARY_TEX : return ExtraMeshDecoratePlugin::PerMesh;
@@ -817,28 +792,23 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
 
 bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
 {
-  if( ID(action) == DP_SHOW_VERT_LABEL || ID(action) == DP_SHOW_FACE_LABEL)
-        {
-          if(m.cm.vn <1000 && m.cm.fn<2000) return true;
-          else {
-            ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ");
-            return false;
-          }
-        }
-  if(ID(action) == DP_SHOW_FACE_QUALITY_HISTOGRAM ) return m.hasDataMask(MeshModel::MM_FACEQUALITY);
-  if(ID(action) == DP_SHOW_VERT_QUALITY_HISTOGRAM ) return m.hasDataMask(MeshModel::MM_VERTQUALITY);
-
-  if( ID(action) == DP_SHOW_VERT_PRINC_CURV_DIR )
+  if( ID(action) == DP_SHOW_LABEL )
   {
-    if(!m.hasDataMask(MeshModel::MM_VERTCURVDIR)) return false;
-  }
-    if( ID(action) == DP_SHOW_TEXPARAM || ID(action) == DP_SHOW_BOUNDARY_TEX)
-    {
-        if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
+    if(m.cm.vn <1000 && m.cm.fn<2000) return true;
+    else {
+      ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ");
+      return false;
     }
+  }
+  if(ID(action) == DP_SHOW_QUALITY_HISTOGRAM ) return m.hasDataMask(MeshModel::MM_FACEQUALITY) || m.hasDataMask(MeshModel::MM_VERTQUALITY);
 
-    if( ID(action) == DP_SHOW_NON_MANIF_EDGE ) if(m.cm.fn==0) return false;
-    if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0) return false;
+  if( ID(action) == DP_SHOW_TEXPARAM || ID(action) == DP_SHOW_BOUNDARY_TEX)
+  {
+    if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
+  }
+
+  if( ID(action) == DP_SHOW_NON_MANIF_EDGE ) if(m.cm.fn==0) return false;
+  if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0) return false;
 
   return true;
 }
@@ -1073,58 +1043,50 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
     }
 
   } break;
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM :
+    case DP_SHOW_QUALITY_HISTOGRAM :
     {
-      CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
-
+      bool perVertFlag = rm->getEnum(HistTypeParam()) == 0;
+      CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"QualityHist");
       if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,qH))
-        qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m.cm,std::string("VertQualityHist"));
+        qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m.cm,std::string("QualityHist"));
       CHist *H = &qH();
-      std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
-      if(rm->getBool(UseFixedHistParam())) {
-        minmax.first=rm->getFloat(FixedHistMinParam());
-        minmax.second=rm->getFloat(FixedHistMaxParam());
+      std::pair<float,float> minmax;
+      if(perVertFlag) minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
+                 else minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
+      if(rm->getBool(HistFixedParam())) {
+        minmax.first=rm->getFloat(HistFixedMinParam());
+        minmax.second=rm->getFloat(HistFixedMaxParam());
       }
 
       H->SetRange( minmax.first, minmax.second, rm->getInt(HistBinNumParam()));
-      if(rm->getBool(AreaHistParam()))
+      if(perVertFlag)
       {
-        for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+        if(rm->getBool(HistAreaParam()))
         {
-          float area6=DoubleArea(*fi)/6.0f;
-          for(int i=0;i<3;++i)
-            H->Add((*fi).V(i)->Q(),(*fi).V(i)->C(),area6);
-        }
-      } else {
-        for(CMeshO::VertexIterator vi = m.cm.vert.begin(); vi!= m.cm.vert.end();++vi) if(!(*vi).IsD())
-        {
-          H->Add((*vi).Q(),(*vi).C(),1.0f);
+          for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+          {
+            float area6=DoubleArea(*fi)/6.0f;
+            for(int i=0;i<3;++i)
+              H->Add((*fi).V(i)->Q(),(*fi).V(i)->C(),area6);
+          }
+        } else {
+          for(CMeshO::VertexIterator vi = m.cm.vert.begin(); vi!= m.cm.vert.end();++vi) if(!(*vi).IsD())
+          {
+            H->Add((*vi).Q(),(*vi).C(),1.0f);
+          }
         }
       }
-    } break;
-    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
-      {
-        CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
-
-            if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,qH))
-              qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m.cm,std::string("FaceQualityHist"));
-            CHist *H = &qH();
-            std::pair<float,float> minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
-
-            if(rm->getBool(UseFixedHistParam())) {
-              minmax.first=rm->getFloat(FixedHistMinParam());
-              minmax.second=rm->getFloat(FixedHistMaxParam());
-            }
-
-            H->SetRange( minmax.first,minmax.second, rm->getInt(HistBinNumParam()));
-            if(rm->getBool(AreaHistParam())) {
-              for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
-                  H->Add((*fi).Q(),(*fi).C(),DoubleArea(*fi)*0.5f);
-            } else {
-              for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
-                  H->Add((*fi).Q(),(*fi).C(),1.0f);
-          }
-      } break;
+      else{
+        if(rm->getBool(HistAreaParam())) {
+          for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+            H->Add((*fi).Q(),(*fi).C(),DoubleArea(*fi)*0.5f);
+        } else {
+          for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+            H->Add((*fi).Q(),(*fi).C(),1.0f);
+        }
+      }
+  }
+    break;
   case DP_SHOW_CAMERA :
     {
       connect(gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
@@ -1136,17 +1098,17 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
 
 void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
 {
-	glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_LIGHTING);
-	glColor3f(.4f,.4f,.4f);
-				for(size_t i=0;i<m.cm.face.size();++i)
-					if(!m.cm.face[i].IsD())
-							{
-								Point3f bar=Barycenter(m.cm.face[i]);
-                glLabel::render(painter, bar,tr("%1").arg(i));
-							}
-	glPopAttrib();
+  glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+  glDepthFunc(GL_ALWAYS);
+  glDisable(GL_LIGHTING);
+  glColor3f(.4f,.4f,.4f);
+  for(size_t i=0;i<m.cm.face.size();++i)
+    if(!m.cm.face[i].IsD())
+    {
+      Point3f bar=Barycenter(m.cm.face[i]);
+      glLabel::render(painter, bar,tr("%1").arg(i));
+    }
+  glPopAttrib();
 }
 
 void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
@@ -1167,15 +1129,15 @@ void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
 
 void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
 {
-	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_LIGHTING);
-	glColor3f(.4f,.4f,.4f);
-    for(size_t i=0;i<m.cm.vert.size();++i){
-          if(!m.cm.vert[i].IsD())
-                glLabel::render(painter, m.cm.vert[i].P(),tr("%1").arg(i));
-    }
-	glPopAttrib();			
+  glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
+  glDepthFunc(GL_ALWAYS);
+  glDisable(GL_LIGHTING);
+  glColor3f(.4f,.4f,.4f);
+  for(size_t i=0;i<m.cm.vert.size();++i){
+    if(!m.cm.vert[i].IsD())
+      glLabel::render(painter, m.cm.vert[i].P(),tr("%1").arg(i));
+  }
+  glPopAttrib();
 }
 
 void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
@@ -1337,9 +1299,9 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
   float len = ch.MaxV() - ch.MinV();
   float maxWide = ch.MaxCount();
   float histWide=maxWide;
-  if(par->getBool(this->UseFixedHistParam()))
+  if(par->getBool(this->HistFixedParam()))
   {
-    histWide = par->getFloat(this->FixedHistWidthParam());
+    histWide = par->getFloat(this->HistFixedWidthParam());
     if(histWide ==0 ) histWide = maxWide;
   }
   float bn = ch.BinNum();
@@ -1456,58 +1418,65 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
 
 void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
-    switch(ID(action)){
-    case DP_SHOW_TEXPARAM : {
-            assert(!parset.hasParameter(TextureStyleParam()));
-            parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
-            parset.addParam(new RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
-        } break;
-    case DP_SHOW_VERT : {
-            assert(!parset.hasParameter(VertDotSizeParam()));
-            parset.addParam(new RichDynamicFloat(VertDotSizeParam(), 4,2,8,"Dot Size","if true the parametrization is drawn in a textured wireframe style"));
-        } break;
-    case DP_SHOW_VERT_PRINC_CURV_DIR :
-    case DP_SHOW_FACE_NORMALS :
-    case DP_SHOW_VERT_NORMALS :{
-        if(!parset.hasParameter(NormalLength()))
-        {
-          parset.addParam(new RichFloat(NormalLength(),0.05,"Normal Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
-        }
-      } break;
-    case DP_SHOW_BOUNDARY :{
-       assert(!parset.hasParameter(ShowBorderFlag()));
-       parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Faces","If true also the faces involved in border edges are shown in green"));
-    } break;
-    case DP_SHOW_FACE_QUALITY_HISTOGRAM :
-    case DP_SHOW_VERT_QUALITY_HISTOGRAM :{
-        if(!parset.hasParameter(HistBinNumParam()))
-        {
-          parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
-          parset.addParam(new RichBool(AreaHistParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
-                                       "e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
-          parset.addParam(new RichBool(UseFixedHistParam(), false,"Fixed Histogram width","if true the parametrization is drawn in a textured wireframe style"));
-          parset.addParam(new RichFloat(FixedHistMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-          parset.addParam(new RichFloat(FixedHistMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-          parset.addParam(new RichFloat(FixedHistWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
-                                                                              "Useful only if you have to compare multiple histograms.<br>"
-                                                                              "Warning, with wrong values the histogram can become excessively flat or it can overflow"));
-        }
-      } break;
+  switch(ID(action)){
+  case DP_SHOW_BOX_CORNERS :
+  {
+    parset.addParam(new RichBool(this->BBAbsParam(), true,"Abs. Pos","If true the bbox is drawn in the absolute position "
+                                 "(instead of the position transformed by the Transfrmation matrix associated to the current MeshModel"));
+  }    break;
+  case DP_SHOW_TEXPARAM : {
+    assert(!parset.hasParameter(TextureStyleParam()));
+    parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
+    parset.addParam(new RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
+  } break;
+  case DP_SHOW_LABEL :
+  {
+    parset.addParam(new RichBool(LabelVertFlag(),true,"Per Vertex",""));
+    parset.addParam(new RichBool(LabelEdgeFlag(),true,"Per Edge",""));
+    parset.addParam(new RichBool(LabelFaceFlag(),true,"Per Face",""));
+  } break;
+  case DP_SHOW_VERT : {
+    assert(!parset.hasParameter(VertDotSizeParam()));
+    parset.addParam(new RichDynamicFloat(VertDotSizeParam(), 4,2,8,"Dot Size","if true the parametrization is drawn in a textured wireframe style"));
+  } break;
+  case DP_SHOW_NORMALS : {
+      parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+      parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
+      parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
+      parset.addParam(new RichBool(NormalCurvFlag(),true,"Curvature",""));
+  } break;
+  case DP_SHOW_BOUNDARY :{
+    assert(!parset.hasParameter(ShowBorderFlag()));
+    parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Faces","If true also the faces involved in border edges are shown in green"));
+  } break;
+  case DP_SHOW_QUALITY_HISTOGRAM :
+    {
+      parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
+      parset.addParam(new RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
+                                   "e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
+      parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Histogram width","if true the parametrization is drawn in a textured wireframe style"));
+      parset.addParam(new RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+      parset.addParam(new RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+      parset.addParam(new RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
+                                    "Useful only if you have to compare multiple histograms.<br>"
+                                    "Warning, with wrong values the histogram can become excessively flat or it can overflow"));
+  } break;
 
-case DP_SHOW_CAMERA :{
+  case DP_SHOW_CAMERA :{
     QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
     QStringList scale; scale << "No Scale" << "Fixed Factor" << "Adaptive";
-          parset.addParam(new RichEnum(this->CameraScaleParam(), 1, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
-          parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
-          parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
-          parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
-          parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
-        } break;
-    case DP_SHOW_NON_FAUX_EDGE :{
-              parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
-              parset.addParam(new RichBool(this->ShowNonRegular(), false, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
-            } break;
-        }
-
+    parset.addParam(new RichEnum(this->CameraScaleParam(), 1, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
+    parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
+    parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
+    parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
+    parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
+  } break;
+  case DP_SHOW_NON_FAUX_EDGE :{
+    parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
+    parset.addParam(new RichBool(this->ShowNonRegular(), false, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
+  } break;
+  }
 }
+
+
 Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)

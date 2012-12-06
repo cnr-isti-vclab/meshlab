@@ -39,8 +39,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   QString decorationInfo(FilterIDType filter) const;
 
   enum {
-      DP_SHOW_FACE_NORMALS,
-      DP_SHOW_VERT_NORMALS,
+      DP_SHOW_NORMALS,
       DP_SHOW_VERT,
       DP_SHOW_EDGE,
       DP_SHOW_NON_FAUX_EDGE,
@@ -49,14 +48,10 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
       DP_SHOW_NON_MANIF_VERT,
       DP_SHOW_VERT_PRINC_CURV_DIR,
       DP_SHOW_BOX_CORNERS,
-      DP_SHOW_BOX_CORNERS_ABS,
       DP_SHOW_AXIS,
       DP_SHOW_QUOTED_BOX,
-      DP_SHOW_VERT_LABEL,
-      DP_SHOW_EDGE_LABEL,
-      DP_SHOW_VERT_QUALITY_HISTOGRAM,
-      DP_SHOW_FACE_QUALITY_HISTOGRAM,
-      DP_SHOW_FACE_LABEL,
+      DP_SHOW_LABEL,
+      DP_SHOW_QUALITY_HISTOGRAM,
       DP_SHOW_CAMERA,
       DP_SHOW_TEXPARAM,
       DP_SHOW_BOUNDARY_TEX
@@ -84,18 +79,13 @@ public:
                   DP_SHOW_BOUNDARY <<
                   DP_SHOW_NON_MANIF_EDGE <<
                   DP_SHOW_NON_MANIF_VERT <<
-                  DP_SHOW_FACE_NORMALS <<
-                  DP_SHOW_VERT_NORMALS <<
-                  DP_SHOW_VERT_QUALITY_HISTOGRAM <<
-                  DP_SHOW_FACE_QUALITY_HISTOGRAM <<
+                  DP_SHOW_NORMALS <<
+                  DP_SHOW_QUALITY_HISTOGRAM <<
                   DP_SHOW_VERT_PRINC_CURV_DIR <<
                   DP_SHOW_BOX_CORNERS <<
-                  DP_SHOW_BOX_CORNERS_ABS <<
                   DP_SHOW_AXIS <<
                   DP_SHOW_QUOTED_BOX <<
-                  DP_SHOW_VERT_LABEL <<
-                  DP_SHOW_EDGE_LABEL <<
-                  DP_SHOW_FACE_LABEL <<
+                  DP_SHOW_LABEL <<
                   DP_SHOW_CAMERA <<
                   DP_SHOW_TEXPARAM <<
                   DP_SHOW_BOUNDARY_TEX;
@@ -139,7 +129,7 @@ public:
   inline QString ShowCameraDetails() const     { return  "MeshLab::Decoration::CameraShowCameraDetails" ; }
 
   inline QString ShowMeshCameras() const     { return  "MeshLab::Decoration::ShowMeshCameras" ; }
-  inline QString ShowRasterCameras() const     { return  "MeshLab::Decoration::ShowRasterCameras" ; }
+  inline QString ShowRasterCameras() const   { return  "MeshLab::Decoration::ShowRasterCameras" ; }
 
   inline QString ShowNonRegular() const     { return  "MeshLab::Decoration::ShowNonRegular" ; }
   inline QString ShowSeparatrix() const     { return  "MeshLab::Decoration::ShowSeparatrix" ; }
@@ -148,13 +138,25 @@ public:
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString TextureFaceColorParam() const   { return  "MeshLab::Decoration::TextureFaceColor" ; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
+
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
-  inline QString UseFixedHistParam() const   { return  "MeshLab::Decoration::UseFixedHistParam" ; }
-  inline QString FixedHistMinParam() const   { return  "MeshLab::Decoration::FixedHistMinParam" ; }
-  inline QString FixedHistMaxParam() const   { return  "MeshLab::Decoration::FixedHistMaxParam" ; }
-  inline QString FixedHistWidthParam() const { return  "MeshLab::Decoration::FixedHistWidthParam" ; }
-  inline QString AreaHistParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
+  inline QString HistFixedParam() const   { return  "MeshLab::Decoration::UseFixedHistParam" ; }
+  inline QString HistFixedMinParam() const   { return  "MeshLab::Decoration::FixedHistMinParam" ; }
+  inline QString HistFixedMaxParam() const   { return  "MeshLab::Decoration::FixedHistMaxParam" ; }
+  inline QString HistFixedWidthParam() const { return  "MeshLab::Decoration::FixedHistWidthParam" ; }
+  inline QString HistAreaParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
+  inline QString HistTypeParam() const { return  "MeshLab::Decoration::HistType" ; }
+
+  inline QString LabelVertFlag() const { return  "MeshLab::Decoration::LabelVertFlag" ; }
+  inline QString LabelEdgeFlag() const { return  "MeshLab::Decoration::LabelEdgeFlag" ; }
+  inline QString LabelFaceFlag() const { return  "MeshLab::Decoration::LabelFaceFlag" ; }
+
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
+  inline QString NormalVertFlag() const { return  "MeshLab::Decoration::NormalVertFlag" ; }
+  inline QString NormalFaceFlag() const { return  "MeshLab::Decoration::NormalFaceFlag" ; }
+  inline QString NormalCurvFlag() const { return  "MeshLab::Decoration::NormalCurvFlag" ; }
+
+  inline QString BBAbsParam() const { return  "MeshLab::Decoration::BBAbs" ; }
 
 signals:
   void askViewerShot(QString);
