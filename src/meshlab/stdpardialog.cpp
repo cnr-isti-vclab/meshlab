@@ -1187,28 +1187,38 @@ GenericParamDialog::~GenericParamDialog()
 //QGridLayout(NULL)
 DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLabWidget(p,rdf)
 {
-	minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
+    int numbdecimaldigit = 4;
+    minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
 	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
 	valueLE = new QLineEdit(this);
 	valueLE->setAlignment(Qt::AlignRight);
 
 	valueSlider = new QSlider(Qt::Horizontal,this);
-	valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 	fieldDesc = new QLabel(rp->pd->fieldDesc,this);
 	valueSlider->setMinimum(0);
 	valueSlider->setMaximum(100);
 	valueSlider->setValue(floatToInt(rp->val->getFloat()));
 	const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
-	valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, 5, valueLE));
-	valueLE->setText(QString::number(rp->val->getFloat()));
-	valueLE->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
+    QFontMetrics fm(valueLE->font());
+    QSize sz = fm.size(Qt::TextSingleLine,QString::number(0));
+    valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, numbdecimaldigit, valueLE));
+    valueLE->setText(QString::number(rp->val->getFloat()));
+    valueLE->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
 
 	//int row = gridLay->rowCount() - 1;
 	//lay->addWidget(fieldDesc,row,0);
 
 	hlay = new QHBoxLayout();
-	hlay->addWidget(valueLE,0,Qt::AlignHCenter);
-	hlay->addWidget(valueSlider,0,0);
+    hlay->addWidget(valueLE);
+    hlay->addWidget(valueSlider);
+    int numbmaxvaluedigit = (floor(log10(maxVal)) + 1 );
+
+    int maxlenghtplusdot = 8;//numbmaxvaluedigit + numbdecimaldigit + 1;
+    valueLE->setMaxLength(maxlenghtplusdot);
+    valueLE->setMaximumWidth(sz.width() * maxlenghtplusdot);
+
+
 	//gridLay->addLayout(hlay,row,1);
 
 	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
@@ -1275,8 +1285,8 @@ void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {	
 	if (lay != NULL)
 	{
-		lay->addWidget(fieldDesc,r,0);
-		lay->addLayout(hlay,r,1);
+        lay->addWidget(fieldDesc,r,0);
+        lay->addLayout(hlay,r,1);
 	}
 	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }

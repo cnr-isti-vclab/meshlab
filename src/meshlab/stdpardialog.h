@@ -67,10 +67,11 @@ protected:
 
 class BoolWidget : public MeshLabWidget 
 {
+    public:
 	//QLabel* lab;
 	QCheckBox* cb;
 	//QRadioButton* cb;
-public:
+
 	BoolWidget(QWidget* p,RichBool* rb);
 	~BoolWidget();
 
