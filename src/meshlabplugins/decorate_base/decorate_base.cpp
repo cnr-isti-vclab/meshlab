@@ -304,10 +304,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     case DP_SHOW_QUALITY_HISTOGRAM :
     {
       CMeshO::PerMeshAttributeHandle<CHist > qH;
-      if(rm->getEnum(this->HistTypeParam()) == 0)
-        qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"VertQualityHist");
-      else
-        qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"FaceQualityHist");
+      qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"QualityHist");
 
       if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
         CHist &ch=qH();
@@ -1043,12 +1040,15 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
     }
 
   } break;
-    case DP_SHOW_QUALITY_HISTOGRAM :
+  case DP_SHOW_QUALITY_HISTOGRAM :
     {
       bool perVertFlag = rm->getEnum(HistTypeParam()) == 0;
+      if( perVertFlag && !(tri::HasPerVertexQuality(m.cm) && tri::HasPerVertexColor(m.cm)) ) return false;
+      if(!perVertFlag && !(tri::HasPerFaceQuality(m.cm) && tri::HasPerFaceColor(m.cm)) ) return false;
       CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"QualityHist");
       if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,qH))
         qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m.cm,std::string("QualityHist"));
+
       CHist *H = &qH();
       std::pair<float,float> minmax;
       if(perVertFlag) minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
@@ -1451,10 +1451,11 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
   } break;
   case DP_SHOW_QUALITY_HISTOGRAM :
     {
+      parset.addParam(new RichEnum(HistTypeParam(),0,QStringList()<<"Per Vertex"<<"Per Face","Quality Src","Set the source of the quality, it can be either per vertex or per face."));
       parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
       parset.addParam(new RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
                                    "e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
-      parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Histogram width","if true the parametrization is drawn in a textured wireframe style"));
+      parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Width","if true the parametrization is drawn in a textured wireframe style"));
       parset.addParam(new RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
       parset.addParam(new RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
       parset.addParam(new RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
