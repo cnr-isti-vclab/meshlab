@@ -107,7 +107,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	case FP_REMOVE_UNREFERENCED_VERTEX       :
 	case FP_REMOVE_DUPLICATED_VERTEX         :return MeshFilterInterface::Cleaning;
 	case FP_SELECT_FACES_BY_AREA             :
-	case FP_SELECT_FACES_BY_EDGE             : return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Selection);
+	case FP_SELECT_FACES_BY_EDGE             : return FilterClass(Cleaning + Selection);
 
 	case FP_BUTTERFLY_SS                     :
 	case FP_LOOP_SS                          :
@@ -123,14 +123,13 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	case FP_REFINE_HALF_CATMULL    :
 	case FP_QUAD_DOMINANT :
 	case FP_MAKE_PURE_TRI :
-	case FP_QUAD_PAIRING                     :return MeshFilterInterface::FilterClass(MeshFilterInterface::Remeshing+MeshFilterInterface::Polygonal);
+	case FP_QUAD_PAIRING                     :return FilterClass(Remeshing+Polygonal);
 
-	case FP_NORMAL_EXTRAPOLATION             : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
-	case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshFilterInterface::FilterClass( MeshFilterInterface::Normal + MeshFilterInterface::PointSet );
+	case FP_NORMAL_EXTRAPOLATION             : return FilterClass( Normal + PointSet );
+	case FP_NORMAL_SMOOTH_POINTCLOUD         : return FilterClass( Normal + PointSet );
 
 	case FP_INVERT_FACES                     :
 	case FP_REORIENT                         :
-	case FP_COMPUTE_PRINC_CURV_DIR           :
 	case FP_ROTATE                           :
 	case FP_ROTATE_FIT                       :
 	case FP_CENTER                           :
@@ -138,8 +137,10 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	case FP_PRINCIPAL_AXIS                   :
 	case FP_FLIP_AND_SWAP                    : return MeshFilterInterface::Normal;
 
+	case FP_COMPUTE_PRINC_CURV_DIR           : return FilterClass( Normal + VertexColoring );
+
 	case FP_FREEZE_TRANSFORM                 :
-	case FP_RESET_TRANSFORM                  : return FilterClass(MeshFilterInterface::Normal + MeshFilterInterface::Layer);
+	case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
 	case FP_SLICE_WITH_A_PLANE                  : return  MeshFilterInterface::Measure;
 
 	case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Smoothing;
@@ -328,7 +329,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		methods.push_back("Normal Cycles");
 		methods.push_back("Pseudoinverse Quadric Fitting");
 		parlst.addParam(new RichEnum("Method", 3, methods, tr("Method:"), tr("Choose a method")));
+		parlst.addParam(new RichEnum("CurvatureType", 0, QStringList()<<"Mean Curvature"<<"Gaussian Curvature"<<"None", tr("Color Mapping"),
+							QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
 		parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+
 		break;
 
 	case FP_QUADRIC_SIMPLIFICATION:
@@ -1207,28 +1211,43 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		} break;
 
 
-	case FP_COMPUTE_PRINC_CURV_DIR:
-		{
-			m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
-			m.updateDataMask(MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR);
-			if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0 ) {
-				errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
-				return false; // can't continue, mesh can't be processed
-			}
-			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-			if(par.getBool("Autoclean")){
-				int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-				Log( "Removed %d unreferenced vertices",delvert);
-			}
-			switch(par.getEnum("Method")){
-			case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
-			case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,true,cb); break;
-			case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
-			case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
-			default:assert(0);break;
-			}
-		} break;
+  case FP_COMPUTE_PRINC_CURV_DIR:
+  {
+    m.updateDataMask(MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO);
+    m.updateDataMask(MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR);
+    m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+    if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) >0 ) {
+      errorMessage = "Mesh has some not 2-manifold faces, cannot compute principal curvature directions"; // text
+      return false; // can't continue, mesh can't be processed
+    }
+    tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+    if(par.getBool("Autoclean")){
+      int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+      tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+      Log( "Removed %d unreferenced vertices",delvert);
+    }
+    switch(par.getEnum("Method")){
+    case 0:	tri::UpdateCurvature<CMeshO>::PrincipalDirections(m.cm); break;
+    case 1: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsPCA(m.cm,m.cm.bbox.Diag()/20.0,true,cb); break;
+    case 2: tri::UpdateCurvature<CMeshO>::PrincipalDirectionsNormalCycle(m.cm); break;
+    case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
+    default:assert(0);break;
+    }
+    switch(par.getEnum("CurvatureType"))
+    {
+    case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureDir    (m.cm); break;
+    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
+    case 2: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
+    }
+
+    Histogramf H;
+    tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+    if(par.getEnum("CurvatureType")!=2)
+      tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+
+    Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
+
+  } break;
 
 	case FP_CLOSE_HOLES:
 		{

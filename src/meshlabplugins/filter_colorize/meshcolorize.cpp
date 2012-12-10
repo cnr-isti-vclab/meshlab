@@ -231,36 +231,36 @@ break;
    }
 
   case CP_DISCRETE_CURVATURE:
-    {
-      m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);
-      m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-      tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
+ {
+   m.updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);
+   m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+   tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
 
-      if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
-				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
-			}
-			
-			int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-			if(delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
-			tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
-      int curvType = par.getEnum("CurvatureType");
-			
-			switch(curvType){ 
-          case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m.cm);        Log( "Computed Mean Curvature");      break;
-			    case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvature(m.cm);    Log( "Computed Gaussian Curvature"); break;
-          case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log( "Computed RMS Curvature"); break;
-          case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log( "Computed ABS Curvature"); break;
-					default : assert(0);
-      }      
-      
-      Histogramf H;
-      tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-      tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
-      Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
-    break;
-    }  
+   if ( tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0) {
+     errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
+     return false; // can't continue, mesh can't be processed
+   }
+
+   int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+   if(delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices",delvert);
+   tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+   tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m.cm);
+   int curvType = par.getEnum("CurvatureType");
+
+   switch(curvType){
+   case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m.cm);        Log( "Computed Mean Curvature");      break;
+   case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m.cm);    Log( "Computed Gaussian Curvature"); break;
+   case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m.cm);         Log( "Computed RMS Curvature"); break;
+   case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m.cm);    Log( "Computed ABS Curvature"); break;
+   default : assert(0);
+   }
+
+   Histogramf H;
+   tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+   tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+   Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
+   break;
+ }
    case CP_TRIANGLE_QUALITY:
    {
      m.updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
@@ -402,9 +402,10 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
   case   CP_SATURATE_QUALITY:
   case   CP_CLAMP_QUALITY:
     return MeshFilterInterface::Quality;
+  case   CP_DISCRETE_CURVATURE:
+    return FilterClass(Normal + VertexColoring);
 
   case   CP_MAP_VQUALITY_INTO_COLOR:
-  case   CP_DISCRETE_CURVATURE:
   case   CP_COLOR_NON_TOPO_COHERENT:
   case   CP_VERTEX_SMOOTH:
   case   CP_FACE_TO_VERTEX:
