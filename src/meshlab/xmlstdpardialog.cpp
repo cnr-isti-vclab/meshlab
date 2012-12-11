@@ -532,7 +532,7 @@ void XMLCheckBoxWidget::setVisibility( const bool vis )
 void XMLCheckBoxWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
 	if (lay !=NULL)
-		lay->addWidget(cb,r,0);
+        lay->addWidget(cb,r,0,1,2);
 	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
@@ -768,6 +768,7 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 			coordSB[i]->setValidator(new QDoubleValidator(this));
 			coordSB[i]->setAlignment(Qt::AlignRight);
 			//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+            coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
 			hlay->addWidget(coordSB[i]);
 		}
 		vcg::Point3f def = envir.evalVec3(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -778,8 +779,8 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 			getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
 			getPoint3Button->setFlat(true);
-			//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
-			//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
+            getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+
 			hlay->addWidget(getPoint3Button);
 			QStringList names;
 			names << "View Dir";
@@ -883,7 +884,7 @@ void XMLVec3Widget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 	if (lay != NULL)
 	{
 		lay->addWidget(descLab,r,0);
-		lay->addLayout(hlay,r,1,Qt::AlignTop);
+        lay->addLayout(hlay,r,1);
 	}
 	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
@@ -906,7 +907,13 @@ XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
 	//gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
 	hlay = new QHBoxLayout();
-	hlay->addWidget(colorLabel);
+    QFontMetrics met(colorLabel->font());
+    QColor black(Qt::black);
+    QString blackname = "(" + black.name() + ")";
+    QSize sz = met.size(Qt::TextSingleLine,blackname);
+    colorLabel->setMaximumWidth(sz.width());
+    colorLabel->setMinimumWidth(sz.width());
+    hlay->addWidget(colorLabel,0,Qt::AlignRight);
 	hlay->addWidget(colorButton);
 
 	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
@@ -1167,8 +1174,9 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 	descLab = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
 	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 	hlay = new QHBoxLayout();
-	getShotButton = new QPushButton("Get shot",this);
-	hlay->addWidget(getShotButton);
+    getShotButton = new QPushButton("Get Shot",this);
+
+    getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
 	getShotCombo = new QComboBox(this);
 	int def;
 	try
@@ -1193,8 +1201,10 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 		connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
 	}
 	names << "From File";
-	getShotCombo->addItems(names);
-	hlay->addWidget(getShotCombo);
+    getShotCombo->addItems(names);
+    hlay->addWidget(getShotCombo);
+    hlay->addWidget(getShotButton);
+
 	connect(getShotCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
 	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 	connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
@@ -1299,9 +1309,9 @@ void XMLShotWidget::setVisibility( const bool vis )
 void XMLShotWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
 	if (lay != NULL)
-	{
-		lay->addLayout(hlay,r,1);
+    {
 		lay->addWidget(descLab,r,0);
+        lay->addLayout(hlay,r,1);
 	}
 	XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }

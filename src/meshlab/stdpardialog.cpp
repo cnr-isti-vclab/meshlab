@@ -472,7 +472,7 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 //QHBoxLayout(NULL)
 Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
-	qDebug("Creating a Point3fWidget");
+    //qDebug("Creating a Point3fWidget");
 	paramName = rpf->name;
 	//int row = gridLay->rowCount() - 1;
 	descLab = new QLabel(rpf->pd->fieldDesc,this);
@@ -488,13 +488,10 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 		if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
 		else baseFont.setPointSize(baseFont.pointSize()*3/4);
 		coordSB[i]->setFont(baseFont);
-		//coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
-		coordSB[i]->setMinimumWidth(0);
-		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
-		//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
+        coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
 		coordSB[i]->setValidator(new QDoubleValidator());
 		coordSB[i]->setAlignment(Qt::AlignRight);
-		//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+        coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
 		vlay->addWidget(coordSB[i]);
 		connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
 	}
@@ -502,10 +499,11 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 	{
 		getPoint3Button = new QPushButton("Get",this);
-		getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
+        getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
 		getPoint3Button->setFlat(true);
-		//getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
+        getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+        //getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
 		//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
 		vlay->addWidget(getPoint3Button);
 		QStringList names;
@@ -536,7 +534,7 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 void Point3fWidget::getPoint()
 {
 	int index = getPoint3Combo->currentIndex();
-	qDebug("Got signal %i",index);
+    //qDebug("Got signal %i",index);
 	switch(index)
 	{
 	case 0 : emit askViewDir(paramName);		 break;
@@ -548,13 +546,13 @@ void Point3fWidget::getPoint()
 }
 
 Point3fWidget::~Point3fWidget() {
-	qDebug("Deallocating a point3fwidget");
+    //qDebug("Deallocating a point3fwidget");
 	this->disconnect();
 }
 
 void Point3fWidget::setValue(QString name,Point3f newVal)
 {
-	qDebug("setValue parametername: %s ",qPrintable(name));
+    //qDebug("setValue parametername: %s ",qPrintable(name));
 	if(name==paramName)
 	{
 		for(int i =0;i<3;++i)
@@ -595,7 +593,7 @@ void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 	if (lay != NULL)
 	{
 		lay->addWidget(descLab,r,0);
-		lay->addLayout(vlay,r,1,Qt::AlignTop);
+        lay->addLayout(vlay,r,1);
 	}
 	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
@@ -746,6 +744,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
 	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
 	{
 		getShotButton = new QPushButton("Get shot",this);
+        getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
 		hlay->addWidget(getShotButton);
 
 		QStringList names;
@@ -1384,7 +1383,7 @@ void BoolWidget::setWidgetValue( const Value& nv )
 void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 {
 	if (lay !=NULL)
-		lay->addWidget(cb,r,0);
+        lay->addWidget(cb,r,0,1,2);
 	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
@@ -1425,7 +1424,7 @@ void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 	if (lay !=NULL)
 	{
 		lay->addWidget(lab,r,0);
-		lay->addWidget(lned,r,1);
+        lay->addWidget(lned,r,1);
 	}
 	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
@@ -1507,15 +1506,23 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 	colorButton = new QPushButton(this);
 	colorButton->setAutoFillBackground(true);
 	colorButton->setFlat(true);
+    colorButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 	//const QColor cl = rp->pd->defVal->getColor();
 	//resetWidgetValue();
 	initWidgetValue();
 	//int row = gridLay->rowCount() - 1;
 	//gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
-	vlay = new QHBoxLayout();
-	vlay->addWidget(colorLabel);
-	vlay->addWidget(colorButton);
+    vlay = new QHBoxLayout();
+    QFontMetrics met(colorLabel->font());
+    QColor black(Qt::black);
+    QString blackname = "(" + black.name() + ")";
+    QSize sz = met.size(Qt::TextSingleLine,blackname);
+    colorLabel->setMaximumWidth(sz.width());
+    colorLabel->setMinimumWidth(sz.width());
+    vlay->addWidget(colorLabel,0,Qt::AlignRight);
+    vlay->addWidget(colorButton);
+
 
 	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
 	pickcol = rp->val->getColor();
@@ -1579,8 +1586,8 @@ void ColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
 	if (lay != NULL)
 	{
-		lay->addWidget(descLabel,r,0,Qt::AlignTop);
-		lay->addLayout(vlay,r,1,Qt::AlignTop);
+        lay->addWidget(descLabel,r,0);
+        lay->addLayout(vlay,r,1);
 	}
 	MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
