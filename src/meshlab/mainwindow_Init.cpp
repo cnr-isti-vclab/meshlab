@@ -312,6 +312,7 @@ void MainWindow::createActions()
 	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
+    showLayerDlgAct->setShortcut(Qt::CTRL+Qt::Key_L);
 	connect(showLayerDlgAct, SIGNAL(triggered(bool)), this, SLOT(showLayerDlg(bool)));
 
 
@@ -392,7 +393,7 @@ void MainWindow::createActions()
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
 	lastFilterAct->setShortcutContext(Qt::ApplicationShortcut);
-	lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_L);
+    lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_P);
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 
@@ -691,6 +692,11 @@ void MainWindow::initItemForSearching(QAction* act)
 	wama.addWordsPerAction(*act,tx);
 }
 
+QString MainWindow::getDecoratedFileName(const QString& name)
+{
+    return  QString("<br><b><i>(") + name + ")</i></b>";
+}
+
 void MainWindow::fillFilterMenu()
 {
 	filterMenu->clear();
@@ -737,8 +743,8 @@ void MainWindow::fillFilterMenu()
 	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
 	{
 		MeshFilterInterface * iFilter= msi.value();
-		QAction *filterAction = iFilter->AC((msi.key()));
-		filterAction->setToolTip(iFilter->filterInfo(filterAction));
+        QAction *filterAction = iFilter->AC((msi.key()));
+        filterAction->setToolTip(iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString()));
 		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
@@ -832,7 +838,7 @@ void MainWindow::fillFilterMenu()
 		try
 		{
 			QString help = info->filterHelp(filterName);
-			filterAction->setToolTip(help);
+            filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
 
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 			QString filterClasses = info->filterAttribute(filterName,MLXMLElNames::filterClass);

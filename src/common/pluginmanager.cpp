@@ -108,6 +108,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
           meshFilterPlug.push_back(iFilter);
           foreach(QAction *filterAction, iFilter->actions())
           {
+            filterAction->setData(QVariant(fileName));
             actionFilterMap.insert(filterAction->text(),filterAction);
             stringFilterMap.insert(filterAction->text(),iFilter);
             iFilter->initGlobalParameterSet(filterAction,defaultGlobal);
@@ -168,6 +169,11 @@ QMap<QString, RichParameterSet> PluginManager::generateFilterParameterMap()
     FPM[filterName]=rp;
   }
   return FPM;
+}
+
+QString PluginManager::osDependentFileBaseName(const QString &plname)
+{
+    return (DLLFileNamePreamble() + plname + "."+DLLExtension());
 }
 
 QString PluginManager::getBaseDirPath()
@@ -280,7 +286,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
   if (fin.suffix() == "xml")
   {
 
-    QString dllfile = DLLFileNamePreamble() + fin.completeBaseName() + "."+DLLExtension();
+    QString dllfile = osDependentFileBaseName(fin.completeBaseName());
 
     MeshLabXMLFilterContainer fc;
     //fc.filterInterface = NULL;
@@ -330,6 +336,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
         {
           QString completename = plugnamespace;
           fc.act = new QAction(filter,par);
+          fc.act->setData(QVariant(dllfile));
           stringXMLFilterMap.insert(filter,fc);
           QString filterFunction = pluginfo->filterScriptCode(filter);
           if (filterFunction == "")

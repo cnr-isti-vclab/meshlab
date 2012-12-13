@@ -470,6 +470,7 @@ private:
 	QAction *onscreenHelpAct;
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
+    static QString getDecoratedFileName(const QString& name);
 };
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System

@@ -89,9 +89,10 @@ public:
 
 	QStringList pluginsLoaded;
 
+    static QString osDependentFileBaseName(const QString& plname);
 	static QString osIndependentPluginName(const QString& plname);
 	static QString pluginNameSpace();
-	//highlight and autocomplete
+    //highlight and autocomplete
 	/*QStringList pluginnamespaces;
 	QStringList filterscriptnames;*/
 	QList<LibraryElementInfo> libinfolist;
