@@ -415,13 +415,17 @@ AbsPercWidget::~AbsPercWidget()
 
 void AbsPercWidget::on_absSB_valueChanged(double newv)
 {
+	disconnect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
 	percSB->setValue((100*(newv - m_min))/(m_max - m_min));
+	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
 	emit dialogParamChanged();
 }
 
 void AbsPercWidget::on_percSB_valueChanged(double newv)
 {
+	disconnect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 	absSB->setValue((m_max - m_min)*0.01*newv + m_min);
+	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
 	emit dialogParamChanged();
 }
 
