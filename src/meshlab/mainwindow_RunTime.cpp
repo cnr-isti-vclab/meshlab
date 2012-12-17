@@ -1005,58 +1005,67 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
   QGLFormat defForm = QGLFormat::defaultFormat();
   iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
   iFilter->glContext->create(filterWidget->context());
-	ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
- 
-  meshDoc()->setBusy(false);
-
-  qApp->restoreOverrideCursor();
-
-  // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
-
-	if(ret)
-	{
-    meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
-    if (meshDoc()->mm() != NULL)
-		meshDoc()->mm()->meshModified() = true;
-	MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
-    if(GLA())
-    {
-      GLA()->setWindowModified(true);
-      GLA()->setLastAppliedFilter(action);
-    }
-		lastFilterAct->setText(QString("Apply filter ") + action->text());
-		lastFilterAct->setEnabled(true);
-	}
-  else // filter has failed. show the message error.
-	{
-		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
-    MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
-	}
-  // at the end for filters that change the color, or selection set the appropriate rendering mode
-  if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
-    GLA()->setColorMode(vcg::GLW::CMPerFace);
-    meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-  }
-  if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-    GLA()->setColorMode(vcg::GLW::CMPerVert);
-    meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-  }
-  if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+  try
   {
-    GLA()->setColorMode(vcg::GLW::CMPerMesh);
-    meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+      ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+
+      meshDoc()->setBusy(false);
+
+      qApp->restoreOverrideCursor();
+
+      // (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
+
+        if(ret)
+        {
+        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+        if (meshDoc()->mm() != NULL)
+            meshDoc()->mm()->meshModified() = true;
+        MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
+        if(GLA())
+        {
+          GLA()->setWindowModified(true);
+          GLA()->setLastAppliedFilter(action);
+        }
+            lastFilterAct->setText(QString("Apply filter ") + action->text());
+            lastFilterAct->setEnabled(true);
+        }
+      else // filter has failed. show the message error.
+        {
+            QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
+        MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
+        }
+      // at the end for filters that change the color, or selection set the appropriate rendering mode
+      if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+        GLA()->setColorMode(vcg::GLW::CMPerFace);
+        meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+      }
+      if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+        GLA()->setColorMode(vcg::GLW::CMPerVert);
+        meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+      }
+      if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+      {
+        GLA()->setColorMode(vcg::GLW::CMPerMesh);
+        meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+      }
+        if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+      {
+          GLA()->setSelectVertRendering(true);
+          GLA()->setSelectFaceRendering(true);
+      }
+      if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
+          GLA()->resetTrackBall();
+
+        if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+            GLA()->updateTexture();
   }
-	if(iFilter->getClass(action) & MeshFilterInterface::Selection )
+  catch (std::bad_alloc& bdall)
   {
-      GLA()->setSelectVertRendering(true);
-      GLA()->setSelectFaceRendering(true);
+      meshDoc()->setBusy(false);
+      qApp->restoreOverrideCursor();
+      QMessageBox::warning(this, tr("Filter Failure"), QString("Operating system was not able to allocate the requested memory.<br><b>Failure of filter <font color=red>: '%1'</font><br>We warmly suggest you to try a 64-bit version of MeshLab.<br>").arg(action->text())+bdall.what()); // text
+      MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
   }
-  if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
-      GLA()->resetTrackBall();
-
-	if(iFilter->getClass(action) & MeshFilterInterface::Texture )
-	    GLA()->updateTexture();
-
   qb->reset();
 
   updateMenus();
