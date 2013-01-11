@@ -66,9 +66,9 @@ FORMS = ui/layerDialog.ui \
 	
 
 	
-	win32-msvc2005: RCC_DIR = $(ConfigurationName)
-	win32-msvc2008: RCC_DIR = $(ConfigurationName)
-	win32-msvc2010: RCC_DIR = $(ConfigurationName)
+	#win32-msvc2005: RCC_DIR = $(ConfigurationName)
+	#win32-msvc2008: RCC_DIR = $(ConfigurationName)
+	#win32-msvc2010: RCC_DIR = $(ConfigurationName)
 
 
 RESOURCES = meshlab.qrc
@@ -76,7 +76,7 @@ RESOURCES = meshlab.qrc
 
 
 # to add windows icon
-RC_FILE = meshlab.rc
+win32:RC_FILE = meshlab.rc
 
 # ## the xml info list
 # ## the next time the app open a new extension
