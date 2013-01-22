@@ -66,8 +66,8 @@ FORMS = ui/layerDialog.ui \
 	
 
 	
-	#win32-msvc2005: RCC_DIR = $(ConfigurationName)
-	#win32-msvc2008: RCC_DIR = $(ConfigurationName)
+	win32-msvc2005: RCC_DIR = $(ConfigurationName)
+	win32-msvc2008: RCC_DIR = $(ConfigurationName)
 	#win32-msvc2010: RCC_DIR = $(ConfigurationName)
 
 
