@@ -51,19 +51,23 @@ protected:
   std::vector<CMeshO::PerFaceAttributeHandle<float> > f_handlers;
 
 public:
-	enum { FF_VERT_SELECTION, 
-		   FF_FACE_SELECTION, 
-		   FF_GEOM_FUNC, 
-		   FF_FACE_COLOR, 
-		   FF_VERT_COLOR, 
-       FF_VERT_NORMAL,
-       FF_VERT_QUALITY,
-		   FF_FACE_QUALITY, 
-		   FF_DEF_VERT_ATTRIB,
-		   FF_DEF_FACE_ATTRIB,
-		   FF_GRID,
-		   FF_ISOSURFACE,
-		   FF_REFINE } ;
+	enum {
+	  FF_VERT_SELECTION,
+	  FF_FACE_SELECTION,
+	  FF_GEOM_FUNC,
+	  FF_VERT_TEXTURE_FUNC,
+	  FF_WEDGE_TEXTURE_FUNC,
+	  FF_FACE_COLOR,
+	  FF_VERT_COLOR,
+	  FF_VERT_NORMAL,
+	  FF_VERT_QUALITY,
+	  FF_FACE_QUALITY,
+	  FF_DEF_VERT_ATTRIB,
+	  FF_DEF_FACE_ATTRIB,
+	  FF_GRID,
+	  FF_ISOSURFACE,
+	  FF_REFINE
+	} ;
 
 	FilterFunctionPlugin();
 	~FilterFunctionPlugin();
