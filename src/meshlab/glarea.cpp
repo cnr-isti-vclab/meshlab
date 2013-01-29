@@ -289,7 +289,7 @@ void GLArea::drawLight()
 	// Apply the trackball for the light direction
 	glPushMatrix();
 	trackball_light.GetView();
-	trackball_light.Apply(!(isDefaultTrackBall()));
+	trackball_light.Apply();
 
 	static float lightPosF[]={0.0,0.0,1.0,0.0};
 	glLightfv(GL_LIGHT0,GL_POSITION,lightPosF);
@@ -312,6 +312,7 @@ void GLArea::drawLight()
 			glPopAttrib();
 	}
 	glPopMatrix();
+	if(!isDefaultTrackBall()) trackball_light.DrawPostApply();
 
 }
 
@@ -353,7 +354,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
 	// Finally apply the Trackball for the model
 	trackball.GetView();
-	trackball.Apply(false);
+	trackball.Apply();
 	glPushMatrix();
 
 	//glScale(d);
