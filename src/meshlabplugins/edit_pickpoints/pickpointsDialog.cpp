@@ -541,7 +541,7 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 	if(vcg::tri::HasPerMeshAttribute(newMeshModel->cm, PickedPoints::Key))
 	{		
 		CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle = 
-				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(newMeshModel->cm, PickedPoints::Key);
+                vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*>(newMeshModel->cm, PickedPoints::Key);
 			
 		PickedPoints *pickedPoints = ppHandle();
 		
@@ -786,11 +786,7 @@ void PickPointsDialog::savePointsToMetaData()
 {
 	//save the points to the metadata
 	if(NULL != meshModel){
-		CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle =
-			(vcg::tri::HasPerMeshAttribute(meshModel->cm, PickedPoints::Key) ?
-				vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*> (meshModel->cm, PickedPoints::Key) :
-				vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<PickedPoints*> (meshModel->cm, PickedPoints::Key) );
-					
+        CMeshO::PerMeshAttributeHandle<PickedPoints*> ppHandle =vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<PickedPoints*> (meshModel->cm, PickedPoints::Key);
 		ppHandle() = getPickedPoints();
 		
 		//qDebug() << "saved points";

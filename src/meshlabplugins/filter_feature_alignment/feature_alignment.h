@@ -590,7 +590,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 else return PVAttributeHandle(NULL,0);
             }
             //now we can get a handle to the attribute and return it
-            return tri::Allocator<MeshType>::template GetPerVertexAttribute<FeatureType> (m,std::string(FeatureType::getName()));
+            return tri::Allocator<MeshType>::template FindPerVertexAttribute<FeatureType> (m,std::string(FeatureType::getName()));
         }        
 
         /** \brief Extracts \c numRequested features from mesh \c m using the specified \c samplingStrategy.
@@ -825,7 +825,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 pph = tri::Allocator<MeshType>::template AddPerMeshAttribute<PickedPoints*>(m,PickedPoints::Key);
                 pph() = new PickedPoints();
             }
-            else pph = tri::Allocator<MeshType>::template GetPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
+            else pph = tri::Allocator<MeshType>::template FindPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
 
             for(unsigned int i=0; i<vecF.size(); i++){
                 //build up a point name made of an id and feature value...
@@ -849,7 +849,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
             PMAttributeHandle pph;
             //we get a handle to the attribute if it exists
             if(!tri::HasPerMeshAttribute(m, PickedPoints::Key)) return;
-            pph = tri::Allocator<MeshType>::template GetPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
+            pph = tri::Allocator<MeshType>::template FindPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
 
             //delete previous picked points
             (pph()->getPickedPointVector())->clear();
@@ -869,7 +869,7 @@ template<class MESH_TYPE, class FEATURE_TYPE> class FeatureAlignment
                 pph = tri::Allocator<MeshType>::template AddPerMeshAttribute<PickedPoints*>(m,PickedPoints::Key);
                 pph() = new PickedPoints();
             }
-            else pph = tri::Allocator<MeshType>::template GetPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
+            else pph = tri::Allocator<MeshType>::template FindPerMeshAttribute<PickedPoints*>(m, PickedPoints::Key);
 
             (pph()->getPickedPointVector())->clear();  //clear old contents
 

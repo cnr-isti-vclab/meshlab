@@ -280,7 +280,7 @@ void ConvertMesh(const MESH &M1, A2Mesh &M2)
 	M2.face.resize(M1.fn);
 	for(vi=M1.vert.begin(),v2i=M2.vert.begin();vi!=M1.vert.end();++vi)
 		if(!(*vi).IsD()){
-			(*v2i).Flags()=(*vi).Flags();
+            (*v2i).Flags()=(*vi).cFlags();
 			(*v2i).P().Import((*vi).P());
 			(*v2i).N().Import((*vi).cN());
 			(*v2i).N().Normalize();
@@ -293,7 +293,7 @@ void ConvertMesh(const MESH &M1, A2Mesh &M2)
 	typename A2Mesh::FaceIterator f2i;
 
 	for(fi=M1.face.begin(),f2i=M2.face.begin();fi!=M1.face.end();++fi)if(!(*fi).IsD()){
-			(*f2i).Flags()=(*fi).Flags();
+            (*f2i).Flags()=(*fi).cFlags();
 			(*f2i).V(0)=&M2.vert[ (vmap[(*fi).V(0)-&M1.vert[0] ]) ];
 			(*f2i).V(1)=&M2.vert[ (vmap[(*fi).V(1)-&M1.vert[0] ]) ];
 			(*f2i).V(2)=&M2.vert[ (vmap[(*fi).V(2)-&M1.vert[0] ]) ];
@@ -318,7 +318,7 @@ void ConvertVertex(const std::vector<VERTEX> &vert1, std::vector<A2Vertex> &vert
 	vert2.clear();
 	typename std::vector<VERTEX>::const_iterator vi;
 	A2Vertex tv;
-	tv.UberFlags()=0;
+    tv.Flags()=0;
 	 Box3<typename VERTEX::ScalarType> bb;
 	if(Clip){
 		bb.Import(*Clip);

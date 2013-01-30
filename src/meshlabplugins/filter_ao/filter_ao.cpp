@@ -194,14 +194,12 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 	vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
-  CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
-  if(!tri::Allocator<CMeshO>::IsValidHandle<Point3f>(m.cm,BN))
-  {
-        BN = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,"BentNormal");
-        std::vector<std::string> AllVertexAttribName;
-        tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m.cm,AllVertexAttribName);
-        qDebug("Now mesh has %i attrib",AllVertexAttribName.size());
-  }
+    CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+
+    std::vector<std::string> AllVertexAttribName;
+    tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m.cm,AllVertexAttribName);
+    qDebug("Now mesh has %i attrib",AllVertexAttribName.size());
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 

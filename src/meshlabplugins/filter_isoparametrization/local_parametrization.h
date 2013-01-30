@@ -454,7 +454,7 @@ typename MeshType::ScalarType EstimateAreaByParam
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::ScalarType ScalarType;
 
-	//MeshType::PerVertexAttributeHandle<AuxiliaryVertData> handle = vcg::tri::Allocator<MeshType>::GetPerVertexAttribute<AuxiliaryVertData>(mesh,"AuxiliaryVertData");
+    //MeshType::PerVertexAttributeHandle<AuxiliaryVertData> handle = vcg::tri::Allocator<MeshType>::GetPerVertexAttribute<AuxiliaryVertData>(mesh,"AuxiliaryVertData");
 
 	ScalarType estimated[2]={0,0};
 	int num[2]={0,0};

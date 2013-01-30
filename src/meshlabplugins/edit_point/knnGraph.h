@@ -2,7 +2,7 @@
 #define KNNGRAPH_H
 
 #include <QTime>
-#include <Vector>
+#include <vector>
 #include <vcg/complex/complex.h>
 #include <vcg/space/index/kdtree/kdtree.h>
 

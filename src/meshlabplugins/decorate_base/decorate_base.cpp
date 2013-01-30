@@ -305,40 +305,32 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     {
       CMeshO::PerMeshAttributeHandle<CHist > qH;
       qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"QualityHist");
-
-      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, qH)) {
-        CHist &ch=qH();
-        this->DrawColorHistogram(ch,gla, painter,rm,qf);
-      }
+      CHist &ch=qH();
+      this->DrawColorHistogram(ch,gla, painter,rm,qf);
     } break;
     case DP_SHOW_NON_MANIF_VERT :
     {
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifVertVertVector");
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifVertTriVector");
-      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, vvH))
-      {
-        DrawDotVector(vvH());
-        DrawTriVector(tvH());
+      DrawDotVector(vvH());
+      DrawTriVector(tvH());
 
-		this->RealTimeLog("Non Manifold Vertices",m.shortName(),
+      this->RealTimeLog("Non Manifold Vertices",m.shortName(),
 						  "<b>%i</b> non manifold vertices<br> "
 						  "<b>%i</b> faces over non manifold vertices",vvH().size(),tvH().size()/3);
-      }
-    }break;
+    }
+        break;
     case DP_SHOW_NON_MANIF_EDGE :
     {
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifEdgeVector");
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifFaceVector");
-      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, bvH))
-      {
-        DrawLineVector(bvH());
-        DrawTriVector(fvH());
-        this->RealTimeLog("Non Manifold Edges",m.shortName(),
-                          " <b>%i</b> non manifold edges<br>"
-                          " <b>%i</b> faces over non manifold edges",bvH().size()/2,fvH().size()/3);
-      }
+      DrawLineVector(bvH());
+      DrawTriVector(fvH());
+      this->RealTimeLog("Non Manifold Edges",m.shortName(),
+                      " <b>%i</b> non manifold edges<br>"
+                      " <b>%i</b> faces over non manifold edges",bvH().size()/2,fvH().size()/3);
     } break;
     case DP_SHOW_BOUNDARY :
     {
@@ -346,19 +338,14 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryVertVector");
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryFaceVector");
-      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, bvH))
-      {
         DrawLineVector(bvH());
           if(showBorderFlag) DrawTriVector(bfH());
         this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary edges",bvH().size()/2);
-      }
     } break;
     case DP_SHOW_BOUNDARY_TEX :
     {
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
       CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryTexVector");
-      if(vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, btvH))
-      {
         vector<Point3f> *BTVp = &btvH();
         if (BTVp->size() != 0)
         {
@@ -378,7 +365,6 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
         }
-      }
     } break;
     } // end switch;
 	glPopMatrix();
@@ -818,8 +804,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   case DP_SHOW_NON_FAUX_EDGE :
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"ExtraordinaryVertexVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,bvH))
-      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("ExtraordinaryVertexVector"));
     vector<PointPC> *BVp = &bvH();
     BVp->clear();
 
@@ -885,10 +869,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"BoundaryVertVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"BoundaryFaceVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,bvH)){
-      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("BoundaryVertVector"));
-      bfH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("BoundaryFaceVector"));
-    }
     vector<PointPC> *BVp = &bvH();
     vector<PointPC> *BFp = &bfH();
     BVp->clear();
@@ -919,8 +899,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   {
     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
     CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m.cm,"BoundaryTexVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,btvH))
-      btvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<Point3f> >(m.cm,std::string("BoundaryTexVector"));
     vector<Point3f> *BTVp = &btvH();
     BTVp->clear();
     vector<std::pair<CMeshO::FacePointer,int> > SaveTopoVec;
@@ -955,11 +933,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"NonManifVertVertVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"NonManifVertTriVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,bvH))
-    {
-      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("NonManifVertVertVector"));
-      fvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("NonManifVertTriVector"));
-    }
     vector<PointPC> *BVp = &bvH();
     vector<PointPC> *FVp = &fvH();
     BVp->clear();
@@ -998,11 +971,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"NonManifEdgeVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"NonManifFaceVector");
-    if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,bvH))
-    {
-      bvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("NonManifEdgeVector"));
-      fvH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("NonManifFaceVector"));
-    }
     vector<PointPC> *BVp = &bvH();
     vector<PointPC> *FVp = &fvH();
     BVp->clear();
@@ -1046,8 +1014,6 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
       if( perVertFlag && !(tri::HasPerVertexQuality(m.cm) && tri::HasPerVertexColor(m.cm)) ) return false;
       if(!perVertFlag && !(tri::HasPerFaceQuality(m.cm) && tri::HasPerFaceColor(m.cm)) ) return false;
       CMeshO::PerMeshAttributeHandle<CHist > qH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<CHist>(m.cm,"QualityHist");
-      if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,qH))
-        qH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute<CHist>  (m.cm,std::string("QualityHist"));
 
       CHist *H = &qH();
       std::pair<float,float> minmax;

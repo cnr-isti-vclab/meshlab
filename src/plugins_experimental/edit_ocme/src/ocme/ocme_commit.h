@@ -97,24 +97,24 @@ void OCME::Commit(MeshType & m, AttributeMapper attr_map){
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV));
 
 	typename MeshType::template PerFaceAttributeHandle<GIndex> gPosF =  
-		vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
+        vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosF));
 
 	typename MeshType::template PerMeshAttributeHandle<ScaleRange> srE =  
-		vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
+        vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
 
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,srE));
 
 	typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =  
-		vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
+        vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedV));
 
 	typename MeshType::template PerFaceAttributeHandle<unsigned char> lockedF =  
-		vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
+        vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF));
 
 	typename MeshType::template PerMeshAttributeHandle<std::vector<CellKey> > sel_cells_attr =  
-		vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<std::vector<CellKey> > (m,"sel_cells");
+        vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<std::vector<CellKey> > (m,"sel_cells");
 	assert(vcg::tri::Allocator<MeshType>::IsValidHandle(m,sel_cells_attr));
 
 

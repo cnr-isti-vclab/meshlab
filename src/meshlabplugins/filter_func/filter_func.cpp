@@ -756,7 +756,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     CMeshO::PerVertexAttributeHandle<float> h;
     if(tri::HasPerVertexAttribute(m.cm,name))
     {
-      h = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m.cm, name);
+      h = tri::Allocator<CMeshO>::FindPerVertexAttribute<float>(m.cm, name);
       if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
       {
         errorMessage = "attribute already exists with a different type";
@@ -814,7 +814,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     CMeshO::PerFaceAttributeHandle<float> h;
     if(tri::HasPerFaceAttribute(m.cm,name))
     {
-      h = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m.cm, name);
+      h = tri::Allocator<CMeshO>::FindPerFaceAttribute<float>(m.cm, name);
       if(!tri::Allocator<CMeshO>::IsValidHandle<float>(m.cm,h))
       {
         errorMessage = "attribute already exists with a different type";
@@ -1170,39 +1170,35 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
   for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
   {
     CMeshO::PerVertexAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerVertexAttribute<float>(m, AllVertexAttribName[i]);
-    if(tri::Allocator<CMeshO>::IsValidHandle<float>(m,hh))
-    {
-      v_handlers.push_back(hh);
-      v_attrNames.push_back(AllVertexAttribName[i]);
-      v_attrValue.push_back(0);
-      p.DefineVar(v_attrNames.back(), &v_attrValue.back());
-      qDebug("Adding custom per vertex float variable %s",v_attrNames.back().c_str());
-    }
+    v_handlers.push_back(hh);
+    v_attrNames.push_back(AllVertexAttribName[i]);
+    v_attrValue.push_back(0);
+    p.DefineVar(v_attrNames.back(), &v_attrValue.back());
+    qDebug("Adding custom per vertex float variable %s",v_attrNames.back().c_str());
   }
   AllVertexAttribName.clear();
   tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m,AllVertexAttribName);
   for(int i = 0; i < (int) AllVertexAttribName.size(); i++)
   {
     CMeshO::PerVertexAttributeHandle<Point3f> hh3 = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, AllVertexAttribName[i]);
-    if(tri::Allocator<CMeshO>::IsValidHandle<Point3f>(m,hh3))
-    {
-      v3_handlers.push_back(hh3);
 
-      v3_attrValue.push_back(0);
-      v3_attrNames.push_back(AllVertexAttribName[i]+"_x");
-      p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+    v3_handlers.push_back(hh3);
 
-      v3_attrValue.push_back(0);
-      v3_attrNames.push_back(AllVertexAttribName[i]+"_y");
-      p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+    v3_attrValue.push_back(0);
+    v3_attrNames.push_back(AllVertexAttribName[i]+"_x");
+    p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
 
-      v3_attrValue.push_back(0);
-      v3_attrNames.push_back(AllVertexAttribName[i]+"_z");
-      p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
-      qDebug("Adding custom per vertex Point3f variable %s",v3_attrNames.back().c_str());
-    }
-  }
+    v3_attrValue.push_back(0);
+    v3_attrNames.push_back(AllVertexAttribName[i]+"_y");
+    p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+
+    v3_attrValue.push_back(0);
+    v3_attrNames.push_back(AllVertexAttribName[i]+"_z");
+    p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+    qDebug("Adding custom per vertex Point3f variable %s",v3_attrNames.back().c_str());
+   }
 }
+
 
 // Function explicitely define parser variables to perform Per-Face filter action
 void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
@@ -1281,13 +1277,10 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
   for(int i = 0; i < (int) AllFaceAttribName.size(); i++)
   {
     CMeshO::PerFaceAttributeHandle<float> hh = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m, AllFaceAttribName[i]);
-    if(tri::Allocator<CMeshO>::IsValidHandle<float>(m,hh))
-    {
-      f_handlers.push_back(hh);
-      f_attrNames.push_back(AllFaceAttribName[i]);
-      f_attrValue.push_back(0);
-      p.DefineVar(f_attrNames.back(), &f_attrValue.back());
-    }
+    f_handlers.push_back(hh);
+    f_attrNames.push_back(AllFaceAttribName[i]);
+    f_attrValue.push_back(0);
+    p.DefineVar(f_attrNames.back(), &f_attrValue.back());
   }
 
 }

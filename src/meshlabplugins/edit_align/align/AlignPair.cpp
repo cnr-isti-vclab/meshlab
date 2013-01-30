@@ -26,7 +26,7 @@
 
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/update/position.h>
-#include <vcg/complex/algorithms/update/edges.h>
+//#include <vcg/complex/algorithms/update/edges.h>
 #include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/update/bounding.h>
@@ -55,7 +55,7 @@ bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr,bool hasborderflag)
 {
   Matrix44d Idn; Idn.SetIdentity();
   if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr);
-  tri::UpdateNormal<A2Mesh>::NormalizeVertex(*this);
+  tri::UpdateNormal<A2Mesh>::NormalizePerVertex(*this);
   tri::UpdateBounding<A2Mesh>::Box(*this);
   return true;
 }
@@ -76,8 +76,6 @@ bool AlignPair::A2Mesh::Init(const Matrix44d &Tr,bool hasborderflag)
 	//int t5=clock();
 		tri::UpdateBounding<A2Mesh>::Box(*this);
   //int t6=clock();
-		tri::UpdateEdges<A2Mesh>::Set(*this);
-	//int t7=clock();
 
 /*	printf("LoadPly                       %6i\n",t1-t0);
 	printf("RemoveUnrefVert               %6i\n",t2-t1);

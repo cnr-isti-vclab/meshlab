@@ -445,7 +445,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 						errorMessage = "Failed to retrieve the stored vertex position. First Store than recover."; 
 						return false;
 					}
-					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
+                    CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
 					
 					CMeshO::VertexIterator vi;
 					for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi)

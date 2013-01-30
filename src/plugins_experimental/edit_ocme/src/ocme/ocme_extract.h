@@ -174,49 +174,28 @@ m.face.EnableColor();
         typename MeshType::template PerVertexAttributeHandle<GISet> gPosV =
                 vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<GISet> (m,"ocme_gindex");
 
-        if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosV))
-                gPosV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<GISet> (m,"ocme_gindex");
-
         // create an attibute that will store the address in ocme for the vertex
         typename MeshType::template PerVertexAttributeHandle<unsigned int> biV =
                 vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned int> (m,"bi");
-        if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,biV))
-                biV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned int> (m,"bi");
 
 		// create an attibute that will store if the  vertex is locked or not
 		typename MeshType::template PerVertexAttributeHandle<unsigned char> lockedV =
-			vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
-
-		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedV))
-			lockedV = vcg::tri::Allocator<MeshType>::template AddPerVertexAttribute<unsigned char> (m,"ocme_locked");
+            vcg::tri::Allocator<MeshType>::template GetPerVertexAttribute<unsigned char> (m,"ocme_locked");
 
 		// create an attibute that will store the address in ocme for the face
 		typename MeshType::template PerFaceAttributeHandle<GIndex> gPosF =  
-			vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
-
-		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,gPosF) )
-			gPosF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<GIndex> (m,"ocme_gindex");
+            vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<GIndex> (m,"ocme_gindex");
 
 		// create an attibute that will store if the  face is locked or not
 		typename MeshType::template PerFaceAttributeHandle<unsigned char> lockedF =  
-			vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
-
-		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,lockedF) )
-			lockedF = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<unsigned char> (m,"ocme_locked");
+            vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<unsigned char> (m,"ocme_locked");
 
 		// create an attibute that will store the ScaleRange of the mesh
 		typename MeshType::template PerMeshAttributeHandle<ScaleRange> range =  
-			vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
-
-		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,range))
-			range = vcg::tri::Allocator<MeshType>::template AddPerMeshAttribute<ScaleRange> (m,"ocme_range");
-
+            vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute<ScaleRange> (m,"ocme_range");
 
 		typename MeshType::template PerMeshAttributeHandle<std::vector<CellKey> > sel_cells_attr =
-			vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute< std::vector<CellKey   > > (m,"sel_cells");
-		if(!vcg::tri::Allocator<MeshType>::IsValidHandle(m,sel_cells_attr))
-			sel_cells_attr = vcg::tri::Allocator<MeshType>::template AddPerMeshAttribute<std::vector<CellKey> > (m,"sel_cells");
-
+            vcg::tri::Allocator<MeshType>::template GetPerMeshAttribute< std::vector<CellKey   > > (m,"sel_cells");
 
 
 	ScaleRange sr; 

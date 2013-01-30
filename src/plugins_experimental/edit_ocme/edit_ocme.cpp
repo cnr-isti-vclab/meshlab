@@ -548,10 +548,10 @@ void OcmeEditPlugin::drop(){
 
 void OcmeEditPlugin::markEditable(){
 		CMeshO::  PerVertexAttributeHandle<unsigned char>  lockedV =
-				vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
+                vcg::tri::Allocator<CMeshO>::  GetPerVertexAttribute<unsigned char> (mm->cm,"ocme_locked");
 
 		CMeshO::  PerFaceAttributeHandle<unsigned char>  lockedF =
-				vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
+                vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<unsigned char> (mm->cm,"ocme_locked");
 
 		for(CMeshO::VertexIterator vi = mm->cm.vert.begin(); vi != mm->cm.vert.end(); ++vi )
 				if(!(*vi).IsD())
@@ -640,7 +640,7 @@ void OcmeEditPlugin::edit(){
 		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
 
 		CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
-						vcg::tri::Allocator<CMeshO>::  GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
+                        vcg::tri::Allocator<CMeshO>:: GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
 
 		if(!mm->cm.face.IsColorEnabled())
 			  mm->cm.face.EnableColor();

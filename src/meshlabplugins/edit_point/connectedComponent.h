@@ -115,11 +115,7 @@ static void Dijkstra(_MyMeshType& m, VertexType& v, int numOfNeighbours, float m
 
     notReachableVect.clear();
 
-    typename _MyMeshType::template PerVertexAttributeHandle<float> distFromCenter;
-    if (!hasDistParam) {
-        distFromCenter = tri::Allocator<_MyMeshType>::template AddPerVertexAttribute<float>(m, std::string("DistParam"));
-    }
-    else distFromCenter = tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<float>(m, std::string("DistParam"));
+    typename _MyMeshType::template PerVertexAttributeHandle<float> distFromCenter = vcg::tri::Allocator<_MyMeshType>::template GetPerVertexAttribute<float>(m, std::string("DistParam"));
 
     if (!hasKNNGraph) {
         KNNGraph<_MyMeshType>::MakeKNNTree(m, numOfNeighbours);

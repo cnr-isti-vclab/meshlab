@@ -173,12 +173,8 @@ public:
 
             // tte an attibute that will store the address in ocme for the vertex
             attr_r = vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<int*> (*m,"r");
-            if(!vcg::tri::Allocator<MeshType>::IsValidHandle(*m,attr_r))
-                    attr_r = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<int*> (*m,"r");
 
             attr_r_old = vcg::tri::Allocator<MeshType>::template GetPerFaceAttribute<int*> (*m,"r_old");
-            if(!vcg::tri::Allocator<MeshType>::IsValidHandle(*m,attr_r_old))
-                    attr_r_old = vcg::tri::Allocator<MeshType>::template AddPerFaceAttribute<int*> (*m,"r_old");
 
             regions.clear();
 

@@ -202,14 +202,11 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			
 			// if requested, add erosion attribute to vertexes and initialize it
 			if(storeDispl) {
-				CMeshO::PerVertexAttributeHandle<Point3f> vah = 
-						(tri::HasPerVertexAttribute(m.cm, "Erosion") ?
-						 tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion") :
-						 tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f>(m.cm, std::string("Erosion")));
+                CMeshO::PerVertexAttributeHandle<Point3f> vah = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
 				for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
 					vah[vi] = Point3f(0.0, 0.0, 0.0);
 			}
-			CMeshO::PerVertexAttributeHandle<Point3f> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
+            CMeshO::PerVertexAttributeHandle<Point3f> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
 			
 			// vertexes along selection border will not be displaced 
 			if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
@@ -368,7 +365,7 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosi
 	GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
 	gM.Set(m.face.begin(), m.face.end());
 	CMeshO::PerVertexAttributeHandle<Point3f> vah = 
-		vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");
+        vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");
 	
 	for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
 		if((*fi).IsD()) continue;
@@ -402,7 +399,7 @@ void GeometryAgingPlugin::computeMeanCurvature(CMeshO &m)
 	if(delvert) Log( "Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
 	tri::Allocator<CMeshO>::CompactVertexVector(m);
 	tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m);
-	tri::UpdateQuality<CMeshO>::VertexFromMeanCurvature(m);
+    tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m);
 }
 
 
