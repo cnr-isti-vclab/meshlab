@@ -1,0 +1,245 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* A versatile mesh processing toolbox                             o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005                                                \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *   
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+#include <QtGui>
+
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/inertia.h>
+#include <vcg/complex/algorithms/stat.h>
+
+#include <vcg/complex/algorithms/update/selection.h>
+#include<vcg/complex/append.h>
+#include<vcg/simplex/face/pos.h>
+#include<vcg/complex/algorithms/bitquad_support.h>
+#include<vcg/complex/algorithms/bitquad_optimization.h>
+#include "filter_info.h"
+
+using namespace std;
+using namespace vcg;
+
+
+// Core Function doing the actual mesh processing.
+bool FilterInfoVMustPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
+{
+	if (filterName == "Compute Topological Measures")
+	{
+		CMeshO &m=md.mm()->cm;	
+		tri::Allocator<CMeshO>::CompactFaceVector(m);
+		tri::Allocator<CMeshO>::CompactVertexVector(m);
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
+
+		int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+		int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+		tri::UpdateSelection<CMeshO>::VertexClear(m);
+		tri::UpdateSelection<CMeshO>::FaceClear(m);
+
+		int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+		int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+		int edgeNum=0,borderNum=0;
+		tri::Clean<CMeshO>::CountEdges(m, edgeNum, borderNum);
+		int holeNum;
+		Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
+		int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
+		Log("Unreferenced Vertices %i",unrefVertNum);
+		Log("Boundary Edges %i",borderNum);
+
+		int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
+		Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
+
+		if(edgeManifNum==0 && vertManifNum==0){
+			Log("Mesh has is two-manifold ");
+		}
+
+		if(edgeManifNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManifNum,faceEdgeManif);
+		
+		if(vertManifNum!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManifNum,faceVertManif);
+
+		// For Manifold meshes compute some other stuff
+		if(vertManifNum==0 && edgeManifNum==0)
+		{
+			holeNum = tri::Clean<CMeshO>::CountHoles(m);
+			Log("Mesh has %i holes",holeNum);
+
+			int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
+			Log("Genus is %i",genus);
+		}
+		else
+		{
+			Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
+			Log("Genus is undefined (non 2-manifold mesh)");
+		}
+		
+		return true;
+	}
+
+	/************************************************************/
+	if (filterName == "Compute Topological Measures for Quad Meshes")
+		{
+			CMeshO &m=md.mm()->cm;	
+			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
+			md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);				
+
+			if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
+				Log("Error: mesh has a not consistent FF adjacency");
+				return false;
+			}
+			if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
+				Log("Warning: mesh has a not consistent FauxEdge tagging");
+				return false;
+			}
+			if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
+				Log("Warning: IsBitTriQuadOnly");
+				//return false;
+			}
+			//										if (! tri::Clean<CMeshO>::HasConsistentEdges(m)) lastErrorDetected |= NOT_EDGES_CONST;
+			int nsinglets= tri::BitQuadOptimization< tri::BitQuad<CMeshO> >::MarkSinglets(m);
+			if ( nsinglets  )  {
+				Log("Warning: MarkSinglets");
+				//return false;
+			}
+
+			if (! tri::BitQuad<CMeshO>::HasConsistentValencyFlag(m))
+			{
+				Log("Warning: HasConsistentValencyFlag");
+				//return false;
+			}
+
+			int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
+			int nTris = tri::Clean<CMeshO>::CountBitTris(m);
+			int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
+
+      Log("Mesh has %i tri %i quad and %i polig",nTris,nQuads,nPolys);
+
+      //
+      //   i
+      //
+      //
+      //   i+1     i+2
+      tri::UpdateFlags<CMeshO>::FaceClearV(m);
+      Distribution<float> ad; // angle distributio
+      Distribution<float> rd; // ratio distribution
+
+      for(CMeshO::FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
+      {
+
+        // Collect the vertices
+        Point3f qv[4];
+        for(int i=0;i<3;++i)
+        {
+         if(!(*fi).IsF(i) && !(*fi).IsF((i+1)%3))
+         {
+          qv[0]= (*fi).cP0(i);
+          qv[1]= (*fi).cP1(i);
+          qv[2]= (*fi).cP2(i);
+          face::Pos<CFaceO> pp(&*fi,(i+2)%3,fi->V(i));
+          assert(pp.F()->IsF(pp.E()));
+          pp.FlipF();pp.FlipE();pp.FlipV();
+          qv[3]= pp.V()->cP();
+          break;
+         }
+
+         for(int i=0;i<4;++i)
+             ad.Add(fabs(90-math::ToDeg(Angle(qv[(i+0)%4] - qv[(i+1)%4], qv[(i+2)%4] - qv[(i+1)%4]))));
+         float edgeLen[4];
+
+         for(int i=0;i<4;++i)
+             edgeLen[i]=Distance(qv[(i+0)%4],qv[(i+1)%4]);
+         std::sort(edgeLen,edgeLen+4);
+         rd.Add(edgeLen[0]/edgeLen[3]);
+        }
+      }
+
+      Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
+                          ad.Avg(), ad.Min(), ad.Max(),ad.StandardDeviation(),ad.Percentile(0.05),ad.Percentile(0.95));
+
+      Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", rd.Avg(), rd.Min(), rd.Max());
+      return true;
+		}
+		/************************************************************/ 
+	if(filterName == "Compute Geometric Measures")
+		{
+			CMeshO &m=md.mm()->cm;
+			tri::Inertia<CMeshO> I(m);
+			float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
+			float Volume = I.Mass(); 
+			Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
+			Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());			
+			Log("Mesh Volume  is %f", Volume);			
+      Log("Mesh Surface is %f", Area);
+      Point3f bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
+      Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
+
+      if(Volume<=0) Log("Mesh is not 'solid', no information on barycenter and inertia tensor.");
+      else
+      {
+        Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+
+        Matrix33f IT;
+        I.InertiaTensor(IT);
+        Log("Inertia Tensor is :");
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
+
+        Matrix33f PCA;
+        Point3f pcav;
+        I.InertiaTensorEigen(PCA,pcav);
+        Log("Principal axes are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
+        Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+
+        Log("axis momenta are :");
+        Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
+      }
+      return true;
+		}
+		/************************************************************/
+	if((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat") )
+		{
+			CMeshO &m=md.mm()->cm;
+			Distribution<float> DD;
+			if(filterName == "Per Vertex Quality Stat")
+				tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
+			else
+				tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
+
+			Log("   Min %f Max %f",DD.Min(),DD.Max());		
+			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));		
+			Log("   StdDev		%f",DD.StandardDeviation());		
+			Log("   Variance  %f",DD.Variance());
+			return true;
+		}
+
+    return false;
+}
+
+
+Q_EXPORT_PLUGIN(FilterInfoVMustPlugin)
+
+
