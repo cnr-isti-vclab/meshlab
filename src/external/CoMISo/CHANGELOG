@@ -1,0 +1,38 @@
+#============================================================================================
+
+CoMISo 1.0-rc1:
+- Initial release
+
+CoMISo 1.1:
+- Only 2 external dependencies: header libraries GMM++ and Eigen3
+- Efficient re-solve with updated (system and/or constraints) right hand sides 
+
+
+Features:
+ - /NSolver     -- simple non-linear solver c++ interfaces:
+    * Gurobi [1],
+    * IPOPT [2],
+    * TAO/PETSc [3],
+    * CPLEX [4],
+    * an the inhouse Newton Solver and more!
+
+ - /EigenSolver -- interface for large-scale eigenvalue problems ARPACK [5]
+
+ - /Solver      -- several interfaces for common linear system solvers:
+    * sparse Cholesky (Cholmod, LDLT)
+    * SparseQR [6]
+    * TAUCS [7]
+    * UMFPACK  [8]
+    and of course the Constrained and Constrained Mixed Integer Solvers (CoMISo)
+
+
+
+References:
+[1] www.gurobi.com
+[2] https://projects.coin-or.org/Ipopt
+[3] http://www.mcs.anl.gov/research/projects/tao/
+[4] http://www-01.ibm.com/software/integration/optimization/cplex-optimizer/
+[5] http://www.caam.rice.edu/software/ARPACK/
+[6] http://www.cise.ufl.edu/research/sparse/SPQR/
+[7] http://www.tau.ac.il/~stoledo/taucs/
+[8] http://www.cise.ufl.edu/research/sparse/umfpack/
