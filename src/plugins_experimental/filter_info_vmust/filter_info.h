@@ -21,6 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
+
 #ifndef FILTER_INFO_VMUST_H
 #define FILTER_INFO_VMUST_H
 
@@ -28,15 +29,32 @@
 
 #include <common/interfaces.h>
 
-class FilterInfoVMustPlugin : public MeshLabFilterInterface
+class QScriptEngine;
+
+class FilterInfoVMustPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(MeshLabFilterInterface)
+	Q_INTERFACES(MeshFilterInterface)
 
 public:
 
-	FilterInfoVMustPlugin():MeshLabFilterInterface(){}
-	bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
+	enum { FP_EXTRACT_INFO };
+
+	FilterInfoVMustPlugin();
+
+	virtual QString pluginName(void) const { return "FilterInfoVMustPlugin"; }
+
+	QString filterName(FilterIDType filter) const;
+
+	QString filterInfo(FilterIDType filter) const;
+
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	
+	FilterClass getClass(QAction *a);
+	
+	QString filterScriptFunctionName(FilterIDType filterID);
 };
 
 #endif
