@@ -122,20 +122,26 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 	if (ID(filter) == FP_EXTRACT_INFO)
 	{
 		// INFORMATION 
-		int nv=0;                      // number of vertices
-		int ne=0;                      // number of edges
-		int nf=0;                      // number of faces
-		int unreferencedVert=0;        // number of unreferenced vertices
-		int boundaryEdges=0;           // number of boundary edges
-		int connectedComponents=0;     // number of connected components
-		bool isPointCloud = false;     // true: the input model is a point cloud
-		bool isManifold = false;       // true: mesh is two-manifold
-		int nonmanifoldVert=0;         // number of non-manifold vertices
-		int nonmanifoldEdges=0;        // number of non-manifold edges
-		int facesOnNonmanifoldVert=0;  // number of faces incident on the non-manifold vertices
-		int facesOnNonmanifoldEdges=0; // number of faces incident on the non-manifold edges
-		int holes=0;                   // number of holes
-		int genus=0;                   // genus
+		int nv=0;                                      // number of vertices
+		int ne=0;                                      // number of edges
+		int nf=0;                                      // number of faces
+		int unreferencedVert=0;                        // number of unreferenced vertices
+		int boundaryEdges=0;                           // number of boundary edges
+		int connectedComponents=0;                     // number of connected components
+		bool isPointCloud = false;                     // true: the input model is a point cloud
+		bool isManifold = false;                       // true: mesh is two-manifold
+		int nonmanifoldVert=0;                         // number of non-manifold vertices
+		int nonmanifoldEdges=0;                        // number of non-manifold edges
+		int facesOnNonmanifoldVert=0;                  // number of faces incident on the non-manifold vertices
+		int facesOnNonmanifoldEdges=0;                 // number of faces incident on the non-manifold edges
+		int holes=0;                                   // number of holes
+		int genus=0;                                   // genus
+		float bbox_sx=0.0f,bbox_sy=0.0f,bbox_sz=0.0f;  // bounding box size
+		float bbox_diagonal=0.0f;                      // bounding box diagonal
+		float area=0.0f;                               // surface area
+		float volume=0.0f;                             // enclosed volume
+		Point3f barycenter;                            // thin shell barycenter
+		Point3f masscenter;                            // center of mass
 
 		QString str = md.mm()->shortName();
 		QString filename = str + QString(".txt");
@@ -154,21 +160,10 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
 			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
 
-			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-			int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
-			tri::UpdateSelection<CMeshO>::VertexClear(m);
-			tri::UpdateSelection<CMeshO>::FaceClear(m);
-
-			nonmanifoldVert = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
-			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-			facesOnNonmanifoldVert = tri::UpdateSelection<CMeshO>::FaceCount(m);
-
 			nv = m.vn;
 			nf = m.fn;
 
 			tri::Clean<CMeshO>::CountEdges(m, ne, boundaryEdges);
-
-			unreferencedVert = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
 
 			// IMPORTANT! A point cloud is a mesh composed by vertices only. 
 			//            This implies that a mesh composed by few triangles and a lot of
@@ -179,117 +174,164 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			}
 
 			if (!isPointCloud)
+			{
+				// ONLY FOR MESHES (!!)
+
+				int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+				int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+				tri::UpdateSelection<CMeshO>::VertexClear(m);
+				tri::UpdateSelection<CMeshO>::FaceClear(m);
+
+				nonmanifoldVert = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+				facesOnNonmanifoldVert = tri::UpdateSelection<CMeshO>::FaceCount(m);
+
+				unreferencedVert = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
+
 				connectedComponents = tri::Clean<CMeshO>::CountConnectedComponents(m);
 
-			if (nonmanifoldVert == 0 && nonmanifoldEdges == 0)
-			{
-				isManifold = true;
-			}
+				if (nonmanifoldVert == 0 && nonmanifoldEdges == 0)
+				{
+					isManifold = true;
+				}
 
-			// For Manifold meshes compute additional stuffs are computed
-			if (isManifold)
-			{
-				holes = tri::Clean<CMeshO>::CountHoles(m);
-				genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unreferencedVert, ne, m.fn, holes, connectedComponents);
+				// For a two-manifold mesh additional stuffs are computed
+				if (isManifold)
+				{
+					holes = tri::Clean<CMeshO>::CountHoles(m);
+					genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unreferencedVert, ne, m.fn, holes, connectedComponents);
+				}
 			}
-
 
 			/***** COMPUTE GEOMETRIC INFORMATION
 			/***********************************************************************************/
-	/*
-			tri::Inertia<CMeshO> I(m);
-			float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-			float Volume = I.Mass(); 
-			Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
-			Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());			
-			Log("Mesh Volume  is %f", Volume);			
-			Log("Mesh Surface is %f", Area);
-			Point3f bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
-			Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
 
-			if (Volume <= 0)
+			bbox_sx = m.bbox.DimX();
+			bbox_sy = m.bbox.DimY();
+			bbox_sz = m.bbox.DimZ();
+			bbox_diagonal = m.bbox.Diag();
+
+			if (isPointCloud)
 			{
-				Log("Mesh is not 'solid', no information on barycenter and inertia tensor.");
+				// computer center of mass
+				
+				CMeshO::VertexIterator it;
+				CMeshO::VertexType v;
+				v.P()[0] = v.P()[1] = v.P()[2] = 0.0f;
+				for (it = m.vert.begin(); it != m.vert.end(); it++)
+				{
+					v.P() += (*it).P();
+				}
+
+				masscenter = v.P() / static_cast<float>(m.vert.size());
 			}
 			else
 			{
-				Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+				// ONLY FOR MESHES (!!)
 
-				 Matrix33f IT;
-				 I.InertiaTensor(IT);
-				 Log("Inertia Tensor is :");
-				 Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
-				 Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
-				 Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
+				tri::Inertia<CMeshO> I(m);
+				volume = I.Mass();
+				masscenter = I.CenterOfMass();
 
-				 Matrix33f PCA;
-				 Point3f pcav;
-				 I.InertiaTensorEigen(PCA,pcav);
-				 Log("Principal axes are :");
-				 Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
-				 Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
-				 Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+				area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 
-				 Log("axis momenta are :");
-				 Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
+				barycenter = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
+				
+				/*if (volume <= 0.0f)
+				{
+					// Mesh is not 'solid', no information on barycenter and inertia tensor..
+				}
+				else
+				{
+					Matrix33f IT;
+					I.InertiaTensor(IT);
+					Log("Inertia Tensor is :");
+					Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
+					Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
+					Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
+
+					Matrix33f PCA;
+					Point3f pcav;
+					I.InertiaTensorEigen(PCA,pcav);
+					Log("Principal axes are :");
+					Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
+					Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
+					Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+
+					Log("axis moment are :");
+					Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
+				}*/
 			}
-	*/
-			/***** COMPUTE QUALITY STATISTICS
-			/***********************************************************************************/
-	/*
-			Distribution<float> DD;
-
-			tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
-	
-			tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
-
-			Log("   Min %f Max %f",DD.Min(),DD.Max());		
-			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));		
-			Log("   StdDev		%f",DD.StandardDeviation());		
-			Log("   Variance  %f",DD.Variance());
-	*/	
+		
 
 			/***** OUTPUT
 			/***********************************************************************************/
 
 			fout << "Number of Vertices: " << nv << endl;
 			fout << "Number of Edges: " << ne << endl;
-			fout << "Number of Faces: " << nf << endl;
-
-			fout << "Number of unreferenced vertices: " << unreferencedVert << endl;
-
-			fout << "Number of boundary edges: " << boundaryEdges << endl;
+			fout << "Number of Faces: " << nf << endl << endl;
 
 			if (isPointCloud)
 			{
 				fout << "Point Cloud: YES" << endl;
-				fout << "Number of connected components: " << connectedComponents << endl;
+
+				fout << "Number of unreferenced vertices: N/A" << endl;
+				fout << "Number of boundary edges: N/A" << endl;
+				fout << "Number of connected components: " << connectedComponents << endl; // it must be zero for a point cloud
+
+				fout << "Two-manifold: N/A" << endl;
+				fout << "Non-manifold vertices: N/A" << endl;
+				fout << "Non-manifold edges: N/A" << endl;
+				fout << "Faces incident on non-manifold vertices: N/A" << endl; 
+				fout << "Faces incident on non-manifold edges: N/A " << endl;
+				fout << "Holes: N/A" << endl;
+				fout << "Genus: N/A" << endl;
+
+				fout << endl;
+				fout << "Bounding box size: " << bbox_sx << " " << bbox_sy << " " << bbox_sz << endl;
+				fout << "Bounding box diagonal: " << bbox_diagonal << endl;
+				fout << "Volume: N/A" << endl;
+				fout << "Surface area: N/A" << endl;
+				fout << "Mass center: " << masscenter[0] << " " << masscenter[1] << " " << masscenter[2] << endl;
+				fout << "Barycenter: " << barycenter[0] << " " << barycenter[1] << " " << barycenter[2] << endl;
+
 			}
 			else
 			{
 				fout << "Point Cloud: NO" << endl;
-				fout << "Number of connected components: " << connectedComponents << endl;
-			}
 
-			if (isManifold)
-			{
-				fout << "Two-manifold: YES" << endl;
-				fout << "Non-manifold vertices: " << nonmanifoldVert << endl; // it must be zero for two-manifold meshes
-				fout << "Non-manifold edges: " << nonmanifoldEdges << endl;   // it must be zero for two-manifold meshes
-				fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl; // it must be zero for two-manifold meshes
-				fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl; // it must be zero for two-manifold meshes
-				fout << "Holes: " << holes << endl;
-				fout << "Genus: " << genus << endl;
-			}
-			else
-			{
-				fout << "Two-manifold: NO" << endl;
-				fout << "Non-manifold vertices: " << nonmanifoldVert << endl;
-				fout << "Non-manifold edges: " << nonmanifoldEdges << endl;
-				fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl;
-				fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl;
-				fout << "Holes: UNDEFINED (non two-manifold mesh)" << endl;
-				fout << "Genus: UNDEFINED (non two-manifold mesh)" << endl;
+				fout << "Number of unreferenced vertices: " << unreferencedVert << endl;
+				fout << "Number of boundary edges: " << boundaryEdges << endl;
+				fout << "Number of connected components: " << connectedComponents << endl;
+			
+				if (isManifold)
+				{
+					fout << "Two-manifold: YES" << endl;
+					fout << "Non-manifold vertices: " << nonmanifoldVert << endl; // it must be zero for two-manifold meshes
+					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;   // it must be zero for two-manifold meshes
+					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl; // it must be zero for two-manifold meshes
+					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl; // it must be zero for two-manifold meshes
+					fout << "Holes: " << holes << endl;
+					fout << "Genus: " << genus << endl;
+				}
+				else
+				{
+					fout << "Two-manifold: NO" << endl;
+					fout << "Non-manifold vertices: " << nonmanifoldVert << endl;
+					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;
+					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl;
+					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl;
+					fout << "Holes: N/A" << endl;
+					fout << "Genus: N/A" << endl;
+				}
+
+				fout << endl;
+				fout << "Bounding box size: " << bbox_sx << " " << bbox_sy << " " << bbox_sz << endl;
+				fout << "Bounding box diagonal: " << bbox_diagonal << endl;
+				fout << "Volume: " << volume << endl;
+				fout << "Surface area: " << area << endl;
+				fout << "Mass center: " << masscenter[0] << " " << masscenter[1] << " " << masscenter[2] << endl;
+				fout << "Barycenter: " << barycenter[0] << " " << barycenter[1] << " " << barycenter[2] << endl;
 			}
 
 			data.close();
