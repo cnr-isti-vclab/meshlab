@@ -42,6 +42,9 @@ win32-msvc2010:DEFINES += GLEW_STATIC
 
 #DEFINES += GLEW_STATIC
 
+# This removes the need of XSERVER to run meshlabserver
+DEFINES += NO_XSERVER_DEPENDENCY
+
 INCLUDEPATH += . .. $$VCGDIR $$GLEWDIR/include
 CONFIG += stl 
 CONFIG += console
