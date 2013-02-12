@@ -121,7 +121,7 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 {
 	if (ID(filter) == FP_EXTRACT_INFO)
 	{
-		// INFORMATION 
+		// INFORMATION EXTRACTED
 		int nv=0;                                      // number of vertices
 		int ne=0;                                      // number of edges
 		int nf=0;                                      // number of faces
@@ -142,9 +142,14 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 		float volume=0.0f;                             // enclosed volume
 		Point3f barycenter;                            // thin shell barycenter
 		Point3f masscenter;                            // center of mass
+		bool flagVN=false;                             // per-vertex normal
+		bool flagFN=false;                             // per-face normal
+		bool flagVC=false;                             // per-vertex color
+		bool flagFC=false;                             // per-face color
+		bool flagVT=false;                             // per-vertex texture coordinates
 
-		QString str = md.mm()->shortName();
-		QString filename = str + QString(".txt");
+		QString modelname = md.mm()->shortName();
+		QString filename = modelname + QString(".txt");
 
 		QFile data(filename);
 		if (data.open(QFile::WriteOnly | QFile::Truncate)) 
@@ -154,7 +159,8 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			/**** COMPUTE TOPOLOGICAL INFORMATION
 			/***********************************************************************************/
 
-			CMeshO &m=md.mm()->cm;	
+			CMeshO &m=md.mm()->cm;
+
 			tri::Allocator<CMeshO>::CompactFaceVector(m);
 			tri::Allocator<CMeshO>::CompactVertexVector(m);
 			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -223,7 +229,7 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 					v.P() += (*it).P();
 				}
 
-				masscenter = v.P() / static_cast<float>(m.vert.size());
+				masscenter = barycenter = v.P() / static_cast<float>(m.vert.size());
 			}
 			else
 			{
@@ -236,37 +242,51 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 				area = tri::Stat<CMeshO>::ComputeMeshArea(m);
 
 				barycenter = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
-				
-				/*if (volume <= 0.0f)
-				{
-					// Mesh is not 'solid', no information on barycenter and inertia tensor..
-				}
-				else
-				{
-					Matrix33f IT;
-					I.InertiaTensor(IT);
-					Log("Inertia Tensor is :");
-					Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
-					Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
-					Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
-
-					Matrix33f PCA;
-					Point3f pcav;
-					I.InertiaTensorEigen(PCA,pcav);
-					Log("Principal axes are :");
-					Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
-					Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
-					Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
-
-					Log("axis moment are :");
-					Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
-				}*/
 			}
-		
+			
+			/***** CHECK ATTRIBUTES
+			/***********************************************************************************/
+
+			if (tri::HasPerVertexNormal(m))
+				flagVN = true;
+			else
+				flagVN = false;
+
+			if (tri::HasPerFaceNormal(m))
+				flagFN = true;
+			else
+				flagFN = false;
+
+			if (tri::HasPerVertexColor(m)) 
+				flagVC = true;
+			else
+				flagVC = false;
+
+			if (tri::HasPerFaceColor(m))
+				flagFC = true;
+			else
+				flagFC = false;
+
+			if (tri::HasPerVertexTexCoord(m))
+				flagVT = true;
+			else
+				flagVT = false;
+
 
 			/***** OUTPUT
 			/***********************************************************************************/
 
+			fout << "Model name: " << modelname.toStdString().c_str() << "  [ ";
+			
+			if (flagVN) fout << "VN ";
+			if (flagFN) fout << "FN ";
+			if (flagVC) fout << "VC ";
+			if (flagFC) fout << "FC ";
+			if (flagVT) fout << "VT ";
+
+			fout << "]";
+
+			fout << endl << endl;
 			fout << "Number of Vertices: " << nv << endl;
 			fout << "Number of Edges: " << ne << endl;
 			fout << "Number of Faces: " << nf << endl << endl;
