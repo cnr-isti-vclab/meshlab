@@ -331,7 +331,7 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;   // it must be zero for two-manifold meshes
 					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl; // it must be zero for two-manifold meshes
 					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl; // it must be zero for two-manifold meshes
-					fout << "Borders: " << holes << endl;
+					fout << "Borders: " << borders << endl;
 					fout << "Genus: " << genus << endl;
 				}
 				else
