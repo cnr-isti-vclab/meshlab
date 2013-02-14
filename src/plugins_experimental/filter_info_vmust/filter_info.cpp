@@ -130,9 +130,9 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 		int connectedComponents=0;                     // number of connected components
 		bool isPointCloud = false;                     // true: the input model is a point cloud
 		bool isManifold = false;                       // true: mesh is two-manifold
-		int nonmanifoldVert=0;                         // number of non-manifold vertices
+		int nonmanifoldVertices=0;                     // number of non-manifold vertices
 		int nonmanifoldEdges=0;                        // number of non-manifold edges
-		int facesOnNonmanifoldVert=0;                  // number of faces incident on the non-manifold vertices
+		int facesOnNonmanifoldVertices=0;              // number of faces incident on the non-manifold vertices
 		int facesOnNonmanifoldEdges=0;                 // number of faces incident on the non-manifold edges
 		int borders=0;                                 // number of borders
 		int genus=0;                                   // genus
@@ -148,8 +148,12 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 		bool flagFC=false;                             // per-face color
 		bool flagVT=false;                             // per-vertex texture coordinates
 
+		// replace the extension with 'txt'
 		QString modelname = md.mm()->shortName();
-		QString filename = modelname + QString(".txt");
+		QFileInfo finfo(md.mm()->shortName());
+		QString ext = finfo.suffix();
+		QString filename(modelname);
+		filename.replace(QString(ext), QString("txt"));
 
 		QFile data(filename);
 		if (data.open(QFile::WriteOnly | QFile::Truncate)) 
@@ -183,20 +187,20 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 			{
 				// ONLY FOR MESHES (!!)
 
-				int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-				int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+				nonmanifoldEdges = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+				facesOnNonmanifoldEdges = tri::UpdateSelection<CMeshO>::FaceCount(m);
 				tri::UpdateSelection<CMeshO>::VertexClear(m);
 				tri::UpdateSelection<CMeshO>::FaceClear(m);
 
-				nonmanifoldVert = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+				nonmanifoldVertices = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
 				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-				facesOnNonmanifoldVert = tri::UpdateSelection<CMeshO>::FaceCount(m);
+				facesOnNonmanifoldVertices = tri::UpdateSelection<CMeshO>::FaceCount(m);
 
 				unreferencedVert = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
 
 				connectedComponents = tri::Clean<CMeshO>::CountConnectedComponents(m);
 
-				if (nonmanifoldVert == 0 && nonmanifoldEdges == 0)
+				if (nonmanifoldVertices == 0 && nonmanifoldEdges == 0)
 				{
 					isManifold = true;
 				}
@@ -327,9 +331,9 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 				if (isManifold)
 				{
 					fout << "Two-manifold: YES" << endl;
-					fout << "Non-manifold vertices: " << nonmanifoldVert << endl; // it must be zero for two-manifold meshes
+					fout << "Non-manifold vertices: " << nonmanifoldVertices << endl; // it must be zero for two-manifold meshes
 					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;   // it must be zero for two-manifold meshes
-					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl; // it must be zero for two-manifold meshes
+					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVertices << endl; // it must be zero for two-manifold meshes
 					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl; // it must be zero for two-manifold meshes
 					fout << "Borders: " << borders << endl;
 					fout << "Genus: " << genus << endl;
@@ -337,9 +341,9 @@ bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichP
 				else
 				{
 					fout << "Two-manifold: NO" << endl;
-					fout << "Non-manifold vertices: " << nonmanifoldVert << endl;
+					fout << "Non-manifold vertices: " << nonmanifoldVertices << endl;
 					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;
-					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVert << endl;
+					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVertices << endl;
 					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl;
 					fout << "Borders: N/A" << endl;
 					fout << "Genus: N/A" << endl;
