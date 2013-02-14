@@ -1949,6 +1949,7 @@ namespace io {
 					vcg::Color4b colorB;
 					colorB.Import(color);
 					info->color = colorB;
+					info->meshColor = true;
 				}
 				else
 					info->meshColor = false;
