@@ -60,6 +60,7 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		if ( result != vcg::tri::io::ImporterX3D<CMeshO>::E_NOERROR)
 		{
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, info->filenameStack[info->filenameStack.size()-1], vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
+			delete info;
 			return false;
 		}
 		if (info->mask & vcg::tri::io::Mask::IOM_VERTTEXCOORD)
@@ -81,50 +82,51 @@ bool IoX3DPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			QString lineError;
 			lineError.setNum(info->lineNumberError);
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName, fileError, lineError, vcg::tri::io::ImporterX3D<CMeshO>::ErrorMsg(result)));
+			delete info;
 			return false;
 		}
 		if (m.cm.vert.size() == 0)
 		{
 			errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: File without a geometry";
 			QMessageBox::critical(parent, tr("X3D Opening Error"), errorMsgFormat.arg(fileName));
+			delete info;
 			return false;
 		}
 		if(info->mask & vcg::tri::io::Mask::IOM_WEDGNORMAL)
 			normalsUpdated = true;
 		mask = info->mask;
+
+		QString missingTextureFilesMsg = "The following texture files were not found:\n";
+		bool someTextureNotFound = false;
+		for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
+		{
+			FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
+			if (pFile == NULL)
+			{
+				missingTextureFilesMsg.append("\n");
+				missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
+				someTextureNotFound = true;
+			}
+			else
+			{
+				m.cm.textures.push_back(info->textureFile[tx].toStdString());
+				fclose (pFile);
+			}
+		}	
+		
+		
+		if (someTextureNotFound)
+			QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
+			
+		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+		if (!normalsUpdated) 
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
+
+		delete info;
 	}
 	// verify if texture files are present
-	QString missingTextureFilesMsg = "The following texture files were not found:\n";
-	bool someTextureNotFound = false;
-	for(unsigned int tx = 0; tx < info->textureFile.size(); ++tx)
-	{
-		FILE* pFile = fopen (info->textureFile[tx].toStdString().c_str(), "r");
-		if (pFile == NULL)
-		{
-			missingTextureFilesMsg.append("\n");
-			missingTextureFilesMsg.append(info->textureFile[tx].toStdString().c_str());
-			someTextureNotFound = true;
-		}
-		else
-		{
-			m.cm.textures.push_back(info->textureFile[tx].toStdString());
-			fclose (pFile);
-		}
-	}	
-		
-		
-	if (someTextureNotFound)
-	{
-		QMessageBox::warning(parent, tr("Missing texture files"), missingTextureFilesMsg);
-	}
 	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-	if (!normalsUpdated) 
-		vcg::tri::UpdateNormal<CMeshO>::PerVertexPerFace(m.cm);		// updates normals
-
 	if (cb != NULL)	(*cb)(99, "Done");
-	
-	delete(info);
 	return true;
 }
 
