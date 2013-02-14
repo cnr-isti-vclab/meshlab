@@ -160,12 +160,13 @@ class MeshLabServer
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(mm.cm);
 		} // standard case
 		else {
-			if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
-				vcg::tri::UpdateNormal<CMeshO>::PerFace(mm.cm);
-			else
-				vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(mm.cm);
+			if( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) // the mesh already has its per vertex normals (point clouds)
+			{
+			  vcg::tri::UpdateNormal<CMeshO>::PerFace(mm.cm);
+			  vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
+			}
+			else mm.UpdateBoxAndNormals(); // the very standard case
 		}
-		vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);					// updates bounding box
 
 		if(mm.cm.fn==0)
 		{
