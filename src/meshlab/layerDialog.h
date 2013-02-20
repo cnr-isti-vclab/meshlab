@@ -28,6 +28,7 @@ $Log: stdpardialog.cpp,v $
 #ifndef LAYER_DIALOG_H
 #define LAYER_DIALOG_H
 #include <QtGui>
+#include <QTreeWidgetItem>
 #include "../common/filterparameter.h"
 
 class GLArea;
