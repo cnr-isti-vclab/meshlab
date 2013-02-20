@@ -4,6 +4,15 @@
 #include <QtGui>
 #include <QString>
 #include <QModelIndex>
+#include <QListView>
+#include <QCompleter>
+#include <QStyledItemDelegate>
+#include <QPlainTextEdit>
+#include <QToolButton>
+#include <QLineEdit>
+#include <QMenu>
+#include <QProgressBar>
+#include <QShortcut>
 #include "../common/scriptsyntax.h"
 #include "../common/searcher.h"
 

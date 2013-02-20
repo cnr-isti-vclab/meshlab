@@ -34,6 +34,7 @@
 #include <QMdiArea>
 #include <QStringList>
 #include <QColorDialog>
+#include <QMdiSubWindow>
 #include "../common/pluginmanager.h"
 #include "../common/scriptinterface.h"
 #include "glarea.h"
