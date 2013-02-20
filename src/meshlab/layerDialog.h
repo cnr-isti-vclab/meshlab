@@ -29,6 +29,7 @@ $Log: stdpardialog.cpp,v $
 #define LAYER_DIALOG_H
 #include <QtGui>
 #include <QTreeWidgetItem>
+#include <QDockWidget>
 #include "../common/filterparameter.h"
 
 class GLArea;
@@ -40,6 +41,7 @@ class RasterModel;
 class MeshDocument;
 class MeshDecorateInterface;
 class StdParFrame;
+class QGridLayout;
 
 #include <QDialog>
 
