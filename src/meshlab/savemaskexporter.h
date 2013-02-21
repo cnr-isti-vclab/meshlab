@@ -26,8 +26,8 @@
 
 #include <wrap/io_trimesh/io_mask.h>
 
-#include "../common/filterparameter.h"
 #include "stdpardialog.h"
+#include "../common/filterparameter.h"
 #include "glarea.h"
 //
 // Each file format exposes:

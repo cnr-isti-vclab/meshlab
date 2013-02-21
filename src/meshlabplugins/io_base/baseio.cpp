@@ -20,8 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include <Qt>
-#include <QtGui>
 
 #include "baseio.h"
 
@@ -39,6 +37,10 @@
 #include <wrap/io_trimesh/export_dxf.h>
 #include <wrap/io_trimesh/export_vmi.h>
 #include <wrap/io_trimesh/export.h>
+
+#include <Qt>
+#include <QtGui>
+#include <QStaticAssertFailure>
 
 using namespace std;
 using namespace vcg;

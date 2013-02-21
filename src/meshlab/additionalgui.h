@@ -13,6 +13,9 @@
 #include <QMenu>
 #include <QProgressBar>
 #include <QShortcut>
+#include <QTreeWidget>
+#include <QComboBox>
+#include <QPushButton>
 #include "../common/scriptsyntax.h"
 #include "../common/searcher.h"
 

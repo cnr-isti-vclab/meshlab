@@ -28,11 +28,11 @@ $Log: stdpardialog.cpp,v $
 ****************************************************************************/
 
 #include <GL/glew.h>
-#include <QtGui>
 
+#include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
-#include "mainwindow.h"
+
 
 using namespace std;
 

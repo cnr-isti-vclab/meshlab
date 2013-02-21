@@ -25,6 +25,8 @@
 #include "glarea.h"
 #include "mainwindow.h"
 
+#include <QFileDialog>
+
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
 #include <wrap/qt/col_qt_convert.h>
@@ -188,7 +190,7 @@ void GLArea::pasteTile()
 		if (snapBuffer.isNull())
 			snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.numBytes());
+        uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
 		uchar *tilePtr = tileBuffer.bits();
 
 		for (int y=0; y < tileBuffer.height(); y++)

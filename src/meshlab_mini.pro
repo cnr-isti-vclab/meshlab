@@ -11,7 +11,9 @@ CONFIG       += ordered
 SUBDIRS       = common \                          # the common framework, used by all the plugins,
                 meshlab \                         # the GUI framework
                 meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
-                meshlabplugins/filter_meshing \   # a few basic filtering operations, including the well know simplification
+                meshlabplugins/filter_mls \   # a few basic filtering operations, including the well know simplification
+
+
 #
 # Next some other useful, but still easy to be compiled, plugins
 # Uncomment them if you succeed in compiling the above ones.

@@ -23,7 +23,13 @@
 
 #ifndef MESHLAB_INTERFACES_H
 #define MESHLAB_INTERFACES_H
-#include <GL/glew.h>
+//#include <GL/glew.h>
+
+#include "filterparameter.h"
+#include "GLLogStream.h"
+//#include "meshmodel.h"
+#include "scriptinterface.h"
+#include "xmlfilterinfo.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -32,11 +38,6 @@
 #include <QGLFormat>
 #include <QMessageBox>
 #include <QTabletEvent>
-#include "filterparameter.h"
-#include "GLLogStream.h"
-#include "meshmodel.h"
-#include "scriptinterface.h"
-#include "xmlfilterinfo.h"
 
 
 class QWidget;
@@ -51,6 +52,7 @@ class GLArea;
 class GLAreaReg;
 class QScriptEngine;
 
+class MeshModel;
 
 /** The MainWindowInterface class defines just the executeFilter() callback function
     that is invoked by the standard parameter input dialog.

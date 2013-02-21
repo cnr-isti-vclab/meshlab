@@ -1,9 +1,9 @@
 #ifndef XMLGENERATORGUI_H
 #define XMLGENERATORGUI_H
 
-#include "../common/meshmodel.h"
+//#include "../common/meshmodel.h"
 #include "../common/xmlfilterinfo.h"
-#include "../common/pluginmanager.h"
+//#include "../common/pluginmanager.h"
 #include "additionalgui.h"
 #include <QTabWidget>
 #include <QFrame>
@@ -14,6 +14,10 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPlainTextEdit>
+#include <QScriptValue>
+
+class PluginManager;
+class MeshDocument;
 
 namespace Ui 
 {

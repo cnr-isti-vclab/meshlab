@@ -1,6 +1,13 @@
 #include "additionalgui.h"
 #include "../common/mlexception.h"
 
+#include <QStylePainter>
+#include <QHBoxLayout>
+#include <QToolTip>
+#include <QWidgetAction>
+#include <QApplication>
+#include <QScrollBar>
+
 CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
 : QStyledItemDelegate(parent)
 {

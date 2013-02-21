@@ -1,4 +1,4 @@
-include (../../general.pri)
+include (general.pri)
 VCGDIR = ../$$VCGDIR
 # this is the common include for all the plugins
 

@@ -1,12 +1,16 @@
-#include "ui_filtergui.h"
-//#include "ui_paramgui.h"
-#include "ui_filtercreatortab.h"
-//#include "ui_filtereditorframe.h"
-#include "xmlgeneratorgui.h"
 #include "../common/meshmodel.h"
 #include "../common/interfaces.h"
 #include "../common/mlexception.h"
+
+#include "../common/pluginmanager.h"
+
+#include "ui_filtercreatortab.h"
+#include "ui_filtergui.h"
+//#include "ui_paramgui.h"
+//#include "ui_filtereditorframe.h"
+#include "xmlgeneratorgui.h"
 #include <QSplitter>
+#include <QFileDialog>
 
 ParamGeneratorGUI::ParamGeneratorGUI(QWidget* parent /*= NULL*/ )
 :QFrame(parent),parentitem(NULL),currentname()

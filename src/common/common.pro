@@ -72,7 +72,7 @@ QT += xmlpatterns
 QT += script
 
 
-TARGET = 
+TARGET = common
 DEPENDPATH += .
 INCLUDEPATH += . $$EXIF_DIR
 DEFINES += GLEW_STATIC

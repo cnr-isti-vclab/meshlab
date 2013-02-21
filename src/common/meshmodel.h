@@ -45,6 +45,7 @@
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
+
 #include <QList>
 #include <QString>
 #include <QStringList>

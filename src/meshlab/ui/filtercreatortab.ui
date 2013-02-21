@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>FilterCreatorTab</class>
+ <customwidgets>
+  <customwidget>
+   <class>PrimitiveButton</class>
+   <extends>QPushButton</extends>
+   <header>additionalgui.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FilterGeneratorGUI</class>
+   <extends>QFrame</extends>
+   <header>xmlgeneratorgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MLScriptEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>additionalgui.h</header>
+  </customwidget>
+ </customwidgets>
  <widget class="QFrame" name="FilterCreatorTab">
   <property name="geometry">
    <rect>
@@ -111,24 +129,7 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PrimitiveButton</class>
-   <extends>QPushButton</extends>
-   <header>additionalgui.h</header>
-  </customwidget>
-  <customwidget>
-   <class>FilterGeneratorGUI</class>
-   <extends>QFrame</extends>
-   <header>xmlgeneratorgui.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MLScriptEditor</class>
-   <extends>QPlainTextEdit</extends>
-   <header>additionalgui.h</header>
-  </customwidget>
- </customwidgets>
+
  <resources/>
  <connections/>
 </ui>

@@ -1,6 +1,8 @@
 #include "xmlstdpardialog.h"
 #include <climits>
 #include <QtGui>
+#include <QColorDialog>
+#include <QFileDialog>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p )
 :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)

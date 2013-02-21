@@ -21,10 +21,18 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-#include <QStringList>
-#include <common/interfaces.h>
 #include "plugindialog.h"
+#include <common/interfaces.h>
+
+#include <QtGui>
+#include <QLabel>
+#include <QTreeWidget>
+#include <QGroupBox>
+#include <QPushButton>
+#include <QHeaderView>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QStringList>
 
 PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWidget *parent): QDialog(parent)
 {
@@ -80,10 +88,10 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
 void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
 {
     if (fileNames.isEmpty()) {
-        label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::convertSeparators(path)));
+        label->setText(tr("Can't find any plugins in the %1 " "directory.").arg(QDir::toNativeSeparators(path)));
         treeWidget->hide();
     } else {
-        label->setText(tr("Found the following plugins in the %1 " "directory:").arg(QDir::convertSeparators(path)));
+        label->setText(tr("Found the following plugins in the %1 " "directory:").arg(QDir::toNativeSeparators(path)));
         QDir dir(path);
         foreach (QString fileName, fileNames) {
             QPluginLoader loader(dir.absoluteFilePath(fileName));

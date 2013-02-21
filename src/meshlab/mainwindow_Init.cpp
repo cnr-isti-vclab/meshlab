@@ -30,11 +30,15 @@
 #include <QtGui>
 #include <QToolBar>
 #include <QProgressBar>
-#include <QHttp>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QFileOpenEvent>
 #include <QFile>
 #include <QtXml>
 #include <QSysInfo>
+#include <QStatusBar>
+#include <QMenuBar>
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "customDialog.h"
@@ -71,9 +75,8 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
-	httpReq=new QHttp(this);
-	//connect(httpReq, SIGNAL(requestFinished(int,bool)), this, SLOT(connectionFinished(int,bool)));
-	connect(httpReq, SIGNAL(done(bool)), this, SLOT(connectionDone(bool)));
+    httpReq=new QNetworkAccessManager(this);
+    connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
 
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
@@ -1142,21 +1145,21 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	QString OS="Lin";
 #endif
 	QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
-	idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
-	bool ret=myLocalBuf.open(QBuffer::WriteOnly);
-	if(!ret) QMessageBox::information(this,MeshLabApplication::appName(),QString("Failed opening of internal buffer"));
-	idGet=httpReq->get(message,&myLocalBuf);     // id == 2
-
+    //idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
+    httpReq->get(QNetworkRequest(MeshLabApplication::organizationHost() + message));
+    //idGet=httpReq->get(message,&myLocalBuf);     // id == 2
 }
 
-void MainWindow::connectionDone(bool /* status */)
+void MainWindow::connectionDone(QNetworkReply *reply)
 {
-	QString answer=myLocalBuf.data();
+    QString answer = reply->readAll();
 	if(answer.left(3)==QString("NEW"))
 		QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
-	else if (VerboseCheckingFlag) QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
+    else if (VerboseCheckingFlag)
+        QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
 
-	myLocalBuf.close();
+    reply->deleteLater();
+
 	QSettings settings;
 	int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
 	settings.setValue("lastComunicatedValue",loadedMeshCounter);

@@ -22,11 +22,6 @@
 ****************************************************************************/
 
 
-#include <QtGui>
-#include <QToolBar>
-#include <QProgressBar>
-#include <QHttp>
-#include <QDesktopServices>
 
 #include "mainwindow.h"
 #include "plugindialog.h"
@@ -39,6 +34,15 @@
 #include <exception>
 #include "xmlgeneratorgui.h"
 #include "filterthread.h"
+
+
+#include <QtGui>
+#include <QToolBar>
+#include <QToolTip>
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QProgressBar>
+#include <QDesktopServices>
 
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"

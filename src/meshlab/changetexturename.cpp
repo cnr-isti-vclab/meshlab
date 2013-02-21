@@ -23,7 +23,9 @@
 
 #include "ui_renametexture.h"
 #include "changetexturename.h"
+
 #include <QtGui>
+#include <QFileDialog>
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent) : QDialog(parent)
 {

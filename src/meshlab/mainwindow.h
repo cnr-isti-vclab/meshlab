@@ -26,15 +26,9 @@
 
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
-#include <GL/glew.h>
-#include <QtScript>
 
-#include <QDir>
-#include <QMainWindow>
-#include <QMdiArea>
-#include <QStringList>
-#include <QColorDialog>
-#include <QMdiSubWindow>
+#include <GL/glew.h>
+
 #include "../common/pluginmanager.h"
 #include "../common/scriptinterface.h"
 #include "glarea.h"
@@ -42,6 +36,15 @@
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
+
+
+#include <QtScript>
+#include <QDir>
+#include <QMainWindow>
+#include <QMdiArea>
+#include <QStringList>
+#include <QColorDialog>
+#include <QMdiSubWindow>
 
 #define MAXRECENTFILES 4
 
@@ -51,8 +54,8 @@ class QMenu;
 class QScrollArea;
 class QSignalMapper;
 class QProgressDialog;
-class QHttp;
-
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class MainWindow : public QMainWindow, MainWindowInterface
 {
@@ -181,7 +184,7 @@ private slots:
 
 	void dropEvent ( QDropEvent * event );
 	void dragEnterEvent(QDragEnterEvent *);
-	void connectionDone(bool status);
+    void connectionDone(QNetworkReply *reply);
 	void sendHistory();
 
 	///////////Solt Wrapper for QMdiArea //////////////////
@@ -216,7 +219,7 @@ private:
 	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc,EnvWrap &env );
 	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env );
 
-	QHttp *httpReq;
+    QNetworkAccessManager *httpReq;
 	QBuffer myLocalBuf;
 	int idHost;
 	int idGet;

@@ -24,10 +24,7 @@
 #ifndef GLAREA_H
 #define GLAREA_H
 #include <GL/glew.h>
-#include <QTimer>
 
-#include <QTime>
-#include <QtGui>
 #include <vcg/space/plane3.h>
 #include <vcg/space/line3.h>
 #include <vcg/math/matrix44.h>
@@ -36,6 +33,10 @@
 #include <wrap/gui/trackball.h>
 #include <vcg/math/shot.h>
 #include <wrap/gl/shot.h>
+
+#include <QTimer>
+#include <QTime>
+#include <QtGui>
 
 #include "../common/interfaces.h"
 #include "glarea_setting.h"

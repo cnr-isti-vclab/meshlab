@@ -24,13 +24,13 @@
 #ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
-#include<QMap>
-#include<QObject>
-
 #include "interfaces.h"
 #include "xmlfilterinfo.h"
 #include "scriptinterface.h"
 #include "scriptsyntax.h"
+
+#include<QMap>
+#include<QObject>
 
 class QScriptEngine;
 /**

@@ -23,7 +23,15 @@
 
 
 #include "stdpardialog.h"
-#include <QtGui>
+
+#include <QLabel>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QFileDialog>
+#include <QDialogButtonBox>
+#include <QClipboard>
+#include <QColorDialog>
+
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 :QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN)
