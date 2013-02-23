@@ -40,7 +40,6 @@
 
 #include <Qt>
 #include <QtGui>
-#include <QStaticAssertFailure>
 
 using namespace std;
 using namespace vcg;
