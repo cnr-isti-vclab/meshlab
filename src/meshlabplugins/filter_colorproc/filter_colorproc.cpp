@@ -221,6 +221,11 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
         par.addParam(new RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
         break;
     }
+    case CP_SCATTER_PER_MESH:
+    {
+      par.addParam(new RichInt("seed", 0, "Seed","Random seed used to generate scattered colors. Zero means totally random (each time the filter is started it generates a different result)"));
+      break;
+    }
     default: break; // do not add any parameter for the other filters
 	}
 }
@@ -383,15 +388,18 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     }
     case CP_SCATTER_PER_MESH:
     {
-      math::SubtractiveRingRNG myrnd(time(NULL));
+      int seed=par.getInt("seed");
+      if(seed==0) seed= time(NULL);
+      math::SubtractiveRingRNG myrnd(seed);
       int numOfMeshes = md.meshList.size();
       int id = myrnd.generate(numOfMeshes);
+      if(seed!=0) id = seed;
       foreach(MeshModel *mm, md.meshList)
       {
         mm->cm.C()=Color4b::Scatter(numOfMeshes+1,id);
         id=(id+1)%numOfMeshes;
-      }
-      return true;
+     }
+    return true;
     }
     case CP_PERLIN_COLOR:
     {
