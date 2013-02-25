@@ -43,6 +43,7 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_TRIANGLE_QUALITY <<
     CP_VERTEX_SMOOTH <<
 		CP_FACE_SMOOTH <<
+				CP_MESH_TO_FACE <<
 		CP_VERTEX_TO_FACE <<
 		CP_FACE_TO_VERTEX <<
 		CP_TEXTURE_TO_VERTEX <<
@@ -66,6 +67,7 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
   case CP_VERTEX_SMOOTH:             return QString("Smooth: Laplacian Vertex Color");
   case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian Face Color");
   case CP_VERTEX_TO_FACE:            return QString("Transfer Color: Vertex to Face");
+  case CP_MESH_TO_FACE:            return QString("Transfer Color: Mesh to Face");
   case CP_FACE_TO_VERTEX:            return QString("Transfer Color: Face to Vertex");
   case CP_TEXTURE_TO_VERTEX:         return QString("Transfer Color: Texture to Vertex");
   case CP_RANDOM_FACE:               return QString("Random Face Color");
@@ -91,6 +93,7 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
   case CP_VERTEX_SMOOTH:            return QString("Laplacian Smooth Vertex Color");
   case CP_FACE_SMOOTH:              return QString("Laplacian Smooth Face Color");
   case CP_VERTEX_TO_FACE:           return QString("Vertex to Face color transfer");
+  case CP_MESH_TO_FACE:           return QString("Mesh to Face color transfer");
   case CP_FACE_TO_VERTEX:           return QString("Face to Vertex color transfer");
   case CP_TEXTURE_TO_VERTEX:        return QString("Texture to Vertex color transfer");
   case CP_COLOR_NON_TOPO_COHERENT : return QString("Color edges topologically non coherent.");
@@ -135,7 +138,9 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
       par.addParam(new RichBool("updateColor",false,"Update ColorMap","if true the color ramp is computed again"));
 
       break;
-
+  case CP_MESH_TO_FACE:
+    par.addParam(new RichBool("allVisibleMesh",false,"Apply to all Meshes","If true the color mapping is applied to all the meshes."));
+    break;
   case CP_CLAMP_QUALITY:
   case CP_MAP_VQUALITY_INTO_COLOR:
       minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
@@ -154,7 +159,8 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
   }
 }
 
-bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb){
+bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+{
  MeshModel &m=*(md.mm());
  switch(ID(filter)) {
   case CP_SATURATE_QUALITY:{
@@ -370,7 +376,21 @@ break;
      m.updateDataMask(MeshModel::MM_VERTCOLOR);
      tri::UpdateColor<CMeshO>::PerVertexFromFace(m.cm);
 		break;
-	 case CP_VERTEX_TO_FACE:
+ case CP_MESH_TO_FACE:
+ {
+   QList<MeshModel *> meshList;
+   foreach(MeshModel *mmi,md.meshList)
+   {
+    if(mmi->visible)
+    {
+      mmi->updateDataMask(MeshModel::MM_FACECOLOR);
+      tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm,mmi->cm.C());
+    }
+ }
+ }
+  break;
+
+ case CP_VERTEX_TO_FACE:
      m.updateDataMask(MeshModel::MM_FACECOLOR);
      tri::UpdateColor<CMeshO>::PerFaceFromVertex(m.cm);
 		 break;
@@ -419,6 +439,7 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
   case   CP_RANDOM_CONNECTED_COMPONENT:
   case   CP_FACE_SMOOTH:
   case   CP_VERTEX_TO_FACE:
+  case   CP_MESH_TO_FACE:
   case   CP_MAP_FQUALITY_INTO_COLOR:
     return MeshFilterInterface::FaceColoring;
 
@@ -449,6 +470,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const{
   case   CP_VERTEX_TO_FACE:
     return MeshModel::MM_VERTCOLOR;
   case   CP_TEXTURE_TO_VERTEX:
+  case   CP_MESH_TO_FACE:
     return MeshModel::MM_NONE; // TODO: wrong? compare with original
   default: assert(0);
 	  return MeshModel::MM_NONE;
@@ -464,6 +486,7 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
   case CP_COLOR_NON_TOPO_COHERENT:
   case CP_FACE_SMOOTH:
   case CP_VERTEX_TO_FACE:
+  case CP_MESH_TO_FACE:
   case CP_MAP_FQUALITY_INTO_COLOR:
     return MeshModel::MM_FACECOLOR;
   case CP_MAP_VQUALITY_INTO_COLOR:
