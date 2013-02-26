@@ -82,18 +82,9 @@ void MeshDocument::setCurrentMesh( int i)
 		currentMesh=0;
 		return;
 	}
-
-	foreach(MeshModel *mmp, meshList)
-	{
-		if(mmp->id() == i)
-		{
-			currentMesh = mmp;
-			emit currentMeshChanged(i);
-			return;
-		}
-	}
-	assert(0);
-	return;
+	currentMesh = getMesh(i);
+	emit currentMeshChanged(i);
+	assert(currentMesh);
 }
 
 //returns the raster at a given position in the list
