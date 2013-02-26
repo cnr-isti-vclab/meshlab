@@ -103,54 +103,57 @@ void OccupancyGrid::AddVert(vector<Point3f> &vv, Matrix44d &Tr, int id)
 
 void OccupancyGrid::Compute()
 {
-	// Analisi della griglia
-	// Si deve trovare l'insieme degli archi piu'plausibili 
-	// un arco ha "senso" in una cella se entrambe le mesh compaiono in quell'arco
+  // Analisi della griglia
+  // Si deve trovare l'insieme degli archi piu'plausibili
+  // un arco ha "senso" in una cella se entrambe le mesh compaiono in quell'arco
   // Si considera tutti gli archi possibili e si conta in quante celle ha senso un arco
-	VA.clear();
-	VA.resize(mn*mn);
-	
+  VA.clear();
+  VA.resize(mn*mn,0);
+
   vector<int > vv;
   int i,j,k,ii,jj;
-	// scan the grid and update possible arc count
-	for(i=0;i<G.siz[0];++i)
-		for(j=0;j<G.siz[1];++j)
-			for(k=0;k<G.siz[2];++k)
-			{
-				G.Grid(i,j,k).Pack(vv);
-				if(vv.size()>0) 
+  // scan the grid and update possible arc count
+  for(i=0;i<G.siz[0];++i)
+    for(j=0;j<G.siz[1];++j)
+      for(k=0;k<G.siz[2];++k)
+      {
+        G.Grid(i,j,k).Pack(vv);
+        if(vv.size()>0)
         {
           vector<int>::iterator vi;
-					for(vi=vv.begin();vi!=vv.end();++vi)	{// per ogni mesh che passa dalla cella 
-						++VM[*vi].area; // compute mesh area
-						if(vv.size()<OGMeshInfo::MaxStat())
-							++VM[*vi].unique[vv.size()];    
-					}
+          for(vi=vv.begin();vi!=vv.end();++vi)
+          {
+            ++VM[*vi].area; // compute mesh area
+            if(vv.size()<OGMeshInfo::MaxStat())
+              ++VM[*vi].unique[vv.size()];
+          }
 
-					for(ii=0;ii<vv.size()-1;++ii)
-						for(jj=1;jj<vv.size();++jj)
-								++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
-				}
-			}
+          for(ii=0;ii<vv.size()-1;++ii)
+            for(jj=1;jj<vv.size();++jj)
+              ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
+        }
+      }
 
-	// Find the best arcs
- SVA.clear();
-	for(i=0;i<mn-1;++i)
-	 if(VM[i].used)
-			for(j=i+1;j<mn;++j)
-				if(VM[j].used && VA[i+j*mn]>0)
-					SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) )); 
+  // Find the best arcs
+  SVA.clear();
+  for(i=0;i<mn-1;++i)
+    if(VM[i].used)
+      for(j=i+1;j<mn;++j)
+        if(VM[j].used && VA[i+j*mn]>0)
+          SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) ));
   
-	// Compute Mesh Coverage
-	for(i=0;i<SVA.size();++i)
-	{
-			VM[SVA[i].s].coverage += SVA[i].area;
-			VM[SVA[i].t].coverage += SVA[i].area;
-	}
-   
- sort(SVA.begin(),SVA.end());
- reverse(SVA.begin(),SVA.end());
+  // Compute Mesh Coverage
+  for(i=0;i<SVA.size();++i)
+  {
+    VM[SVA[i].s].coverage += SVA[i].area;
+    VM[SVA[i].t].coverage += SVA[i].area;
+  }
+
+  sort(SVA.begin(),SVA.end());
+  reverse(SVA.begin(),SVA.end());
 }
+
+
 void OccupancyGrid::ComputeTotalArea()
 {
 	int ccnt=0;

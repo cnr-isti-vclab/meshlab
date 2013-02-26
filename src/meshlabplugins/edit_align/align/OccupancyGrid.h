@@ -128,85 +128,86 @@ public:
 };
 
 #define _MAX_MCB_SIZE 1024
-// Tiene per ogni voxel quali mesh ci passano.
-// Notare che: 
-//   il massimo numero di mesh e' MAXMESH
+
+// Class to keep for each voxel the id of the mesh passing throuhg it.
 class MeshCounterB
 {
-	std::bitset<_MAX_MCB_SIZE> cnt;
+  std::bitset<_MAX_MCB_SIZE> cnt;
 public:
-	static int MaxVal() {return _MAX_MCB_SIZE;}
-	bool Empty() const {return cnt.none();};
-	void Clear() {cnt.reset();}
-  bool IsSet(int i) const {return cnt[i];}
-	void Set(int i) {cnt[i]=true;}
-	void UnSet(int i) {cnt[i]=false;}
-	int Count() const { return cnt.count();}
-  void Pack(std::vector<int> &v) const
-		{
-			v.clear();
-			for(int i=0;i<_MAX_MCB_SIZE;++i)
-				if(cnt[i]==1) v.push_back(i);
-		}
-		void Dump() const
-		{
-			for(int i=0;i<64;++i) {
-				if((i%32)==0) printf(" " );
-				if(cnt[i]) printf("1"); else printf("0");
-			}
-		}
+  static int MaxVal() {return _MAX_MCB_SIZE;}
+  bool Empty() const {return cnt.none();}
+  void Clear() {cnt.reset();}
+  bool IsSet(int i) const {return cnt.test(i);}
+  void Set(int i) {cnt.set(i);}
+  void UnSet(int i) {cnt.reset(i);}
+  int Count() const { return cnt.count();}
 
-		bool operator < (const MeshCounterB &c) const {		
-		int ii=0;
-		if(cnt==c.cnt) return false;
-		while(ii<_MAX_MCB_SIZE){
-			if(cnt[ii]!=c.cnt[ii]) return cnt[ii]<c.cnt[ii];
-			++ii;
-			}
-		return false;
-		}
-		/*
-		bool operator < (const MeshCounter &c) const {		
-			bitset<MAXMESH> ulb(0xffffffff);
-			unsigned long ul =(ulb & cnt).to_ulong();
-			unsigned long ula=(ulb & c.cnt).to_ulong();
-			//printf("\n<(%8x-%8x)\n",ul,ula);fflush(stdout);
-			if(ul!=ula) return ul<ula;
-			if(cnt==c.cnt) return false;
-			//printf("\nComparing: ");   Dump();
-			//printf("\n           "); c.Dump();
-			int ii=MAXMESH/(sizeof(unsigned long)*8)-1;
-			bitset<MAXMESH> cc = cnt;
-			bitset<MAXMESH> cca = c.cnt;
-			while (ii>0){
-				cc>>=(sizeof(unsigned long)*8);
-				cca>>=(sizeof(unsigned long)*8);
-				unsigned long ul=(cc&ulb).to_ulong();
-				unsigned long ula=(cca&ulb).to_ulong();
-				//printf("\n<(%8x-%8x)\n",ul,ula);fflush(stdout);
-				if(ul!=ula) return ul<ula;
-				--ii;
-			}
-			return false;
-		}
-		*/
+  // Return a vector with all the id of the meshes
+  void Pack(std::vector<int> &v) const
+  {
+    v.clear();
+    for(int i=0;i<_MAX_MCB_SIZE;++i)
+      if(cnt[i]==1) v.push_back(i);
+  }
+
+  void Dump() const
+  {
+    for(int i=0;i<64;++i) {
+      if((i%32)==0) printf(" " );
+      if(cnt[i]) printf("1"); else printf("0");
+    }
+  }
+
+  bool operator < (const MeshCounterB &c) const {
+    int ii=0;
+    if(cnt==c.cnt) return false;
+    while(ii<_MAX_MCB_SIZE){
+      if(cnt[ii]!=c.cnt[ii]) return cnt[ii]<c.cnt[ii];
+      ++ii;
+    }
+    return false;
+  }
+  /*
+        bool operator < (const MeshCounter &c) const {
+            bitset<MAXMESH> ulb(0xffffffff);
+            unsigned long ul =(ulb & cnt).to_ulong();
+            unsigned long ula=(ulb & c.cnt).to_ulong();
+            //printf("\n<(%8x-%8x)\n",ul,ula);fflush(stdout);
+            if(ul!=ula) return ul<ula;
+            if(cnt==c.cnt) return false;
+            //printf("\nComparing: ");   Dump();
+            //printf("\n           "); c.Dump();
+            int ii=MAXMESH/(sizeof(unsigned long)*8)-1;
+            bitset<MAXMESH> cc = cnt;
+            bitset<MAXMESH> cca = c.cnt;
+            while (ii>0){
+                cc>>=(sizeof(unsigned long)*8);
+                cca>>=(sizeof(unsigned long)*8);
+                unsigned long ul=(cc&ulb).to_ulong();
+                unsigned long ula=(cca&ulb).to_ulong();
+                //printf("\n<(%8x-%8x)\n",ul,ula);fflush(stdout);
+                if(ul!=ula) return ul<ula;
+                --ii;
+            }
+            return false;
+        }
+        */
 };
 
 
 /***********************************************************/
-typedef  MeshCounterV MeshCounter;  // per usare i vettori compattati
-//typedef  MeshCounterB MeshCounter;  // per usare i bitset
+//typedef  MeshCounterV MeshCounter;  // per usare i vettori compattati
+typedef  MeshCounterB MeshCounter;  // per usare i bitset
 /***********************************************************/
 
 class OGUseInfo
 {
 public:
-	OGUseInfo() {id=-1; area=0;}
-	OGUseInfo(const int _id, const int _area) :id(_id),area(_area){}
-	int id;
-	int area; 
-	bool operator < (const OGUseInfo &o) const { return area<o.area;}	
-
+  OGUseInfo() {id=-1; area=0;}
+  OGUseInfo(const int _id, const int _area) :id(_id),area(_area){}
+  int id;
+  int area;
+  bool operator < (const OGUseInfo &o) const { return area<o.area;}
 };
 
 class OGMeshInfo
@@ -281,7 +282,6 @@ void AddMesh(MESH &M, const Matrix44d &Tr, int ind)
 }
 
 
-//	void Add(A2Mesh &m, Matrix44d &Tr, int id);
 void ChooseArcs(std::vector<std::pair<int,int> > &AV, std::vector<int> &BNV,std::vector<int> &adjcnt, float normarea= 0.3);
 	void Compute();
 	void ComputeUsefulMesh(FILE *elfp=0);
@@ -292,10 +292,7 @@ void ChooseArcs(std::vector<std::pair<int,int> > &AV, std::vector<int> &BNV,std:
 	void ComputeTotalArea();
 	void DrawCell(int x,int y, int z);
 	GridStaticObj<MeshCounter, float> G;
-//	map<AMesh *,int> M2I;
-//	map<int,AMesh *> I2M;
 	std::vector<int> VA; // virtual arcs
-	//vector<int> MS; // Mesh surface (expressed in voxels)
 	int mn;
   int TotalArea;
 	int MaxCount;   // massimo numero di mesh che passano per una cella;
