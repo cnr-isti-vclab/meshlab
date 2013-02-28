@@ -53,6 +53,7 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
   case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draws a (colored) Histogram of the per vertex/face quality");
   case DP_SHOW_CAMERA:            return tr("Draw the position of the camera, if present in the current mesh");
   case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
+  case DP_SHOW_SELECTED_MESH:     return tr("Enlighten the current Mesh");
   }
   assert(0);
   return QString();
@@ -78,6 +79,7 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_CAMERA:			return tr("Show Camera");
     case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
     case DP_SHOW_QUALITY_HISTOGRAM:			return tr("Show Quality Histogram");
+    case DP_SHOW_SELECTED_MESH:			return tr("Show Current Mesh");
 
     default: assert(0);
     }
@@ -129,6 +131,22 @@ void ExtraMeshDecoratePlugin::decorateDoc(QAction *a, MeshDocument &md, RichPara
     }
   }
     break;
+  case DP_SHOW_SELECTED_MESH:
+  {
+    glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthRange (0.0, 0.9999);
+    glDepthFunc(GL_LEQUAL);
+    glPointSize(3);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 0.1f);
+//    md.mm()->glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
+    md.mm()->render(GLW::DMFlat, GLW::CMNone, GLW::TMNone);
+    glPopAttrib();
+  } break;
+
   case DP_SHOW_AXIS:
   {
     CoordinateFrame(md.bbox().Diag()/2.0).Render(gla,painter);
@@ -768,6 +786,7 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_TEXPARAM :
   case DP_SHOW_BOUNDARY_TEX : return ExtraMeshDecoratePlugin::PerMesh;
   case DP_SHOW_AXIS : return ExtraMeshDecoratePlugin::PerDocument;
+  case DP_SHOW_SELECTED_MESH : return ExtraMeshDecoratePlugin::PerDocument;
   }
   assert (0);
   return 0;
@@ -794,6 +813,18 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
   if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0) return false;
 
   return true;
+}
+
+bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, RichParameterSet *rm, GLArea *gla)
+{
+  switch(ID(action))
+  {
+  case DP_SHOW_AXIS :
+  case DP_SHOW_CAMERA :
+  case DP_SHOW_SELECTED_MESH :
+    return true;
+  }
+  return false;
 }
 
 

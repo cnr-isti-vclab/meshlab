@@ -54,7 +54,8 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
       DP_SHOW_QUALITY_HISTOGRAM,
       DP_SHOW_CAMERA,
       DP_SHOW_TEXPARAM,
-      DP_SHOW_BOUNDARY_TEX
+      DP_SHOW_BOUNDARY_TEX,
+    DP_SHOW_SELECTED_MESH
   };
 
 
@@ -88,6 +89,7 @@ public:
                   DP_SHOW_LABEL <<
                   DP_SHOW_CAMERA <<
                   DP_SHOW_TEXPARAM <<
+                  DP_SHOW_SELECTED_MESH <<
                   DP_SHOW_BOUNDARY_TEX;
 
       FilterIDType tt;
@@ -119,6 +121,7 @@ public:
   void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   void decorateMesh(QAction *a, MeshModel &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+  bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(QAction */*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
