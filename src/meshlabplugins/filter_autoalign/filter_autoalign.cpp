@@ -104,20 +104,22 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 
       MeshModel *firstMesh= par.getMesh("FirstMesh");
       MeshModel *secondMesh= par.getMesh("SecondMesh");
-      fpcs = new vcg::tri::FourPCS<CMeshO>();
-      fpcs->prs.Default();
-      fpcs->prs.f =  par.getFloat("overlapping");
+      vcg::tri::FourPCS<CMeshO> fpcs;
+      fpcs.par.Default();
+      fpcs.par.f =  par.getFloat("overlapping");
       firstMesh->updateDataMask(MeshModel::MM_VERTMARK);
       secondMesh->updateDataMask(MeshModel::MM_VERTMARK);
-      fpcs->Init(firstMesh->cm,secondMesh->cm);
-      bool res = fpcs->Align(0,firstMesh->cm.Tr,cb);
+      fpcs.Init(firstMesh->cm,secondMesh->cm);
+      bool res = fpcs.Align(0,firstMesh->cm.Tr,cb);
       firstMesh->clearDataMask(MeshModel::MM_VERTMARK);
       secondMesh->clearDataMask(MeshModel::MM_VERTMARK);
 
-      // Log function dump textual info in the lower part of the MeshLab screen.
-      Log((res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
-        delete fpcs;
+      if(res) Log("Automatic Rough Alignment Done");
+         else Log("Automatic Rough Alignment Failed");
     } break;
+
+
+
     case FP_BEST_ROTATION :
     {
       MeshModel *firstMesh= par.getMesh("FirstMesh");
