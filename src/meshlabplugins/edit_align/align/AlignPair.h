@@ -26,13 +26,9 @@
 
 #include <vcg/math/histogram.h>
 #include <vcg/math/matrix44.h>
-//#include <vcg/simplex/vertex/base.h>
-//#include <vcg/simplex/vertex/component.h>
-//#include <vcg/simplex/face/base.h>
-//#include <vcg/simplex/face/component.h>
-#include <vcg/simplex/face/component_ep.h>
 #include <vcg/space/index/grid_static_ptr.h>
 #include<vcg/complex/complex.h>
+#include <vcg/simplex/face/component_ep.h>
 #include<vcg/complex/algorithms/update/normal.h>
 #include<vcg/complex/algorithms/update/bounding.h>
 #include<vcg/complex/algorithms/update/component_ep.h>
@@ -52,7 +48,7 @@ class AlignPair
 public: 
 
   enum ErrorCode {SUCCESS, NO_COMMON_BBOX, TOO_FEW_POINTS, 
-		              LSQ_DIVERGE, TOO_MUCH_SHARE, TOO_MUCH_SCALE, FORBIDDEN, INVALID, UNKNOWN_MODE };
+                      LSQ_DIVERGE, TOO_MUCH_SHEAR, TOO_MUCH_SCALE, FORBIDDEN, INVALID, UNKNOWN_MODE };
 
 
 /*********************** Classi Accessorie ****************************/
@@ -65,14 +61,14 @@ class A2UsedTypes: public vcg::UsedTypes < vcg::Use<A2Vertex>::AsVertexType,
                                           vcg::Use<A2Face  >::AsFaceType >{};
 
 class A2Vertex   : public vcg::Vertex<A2UsedTypes,vcg::vertex::Coord3d,vcg::vertex::Normal3d,vcg::vertex::BitFlags> {};
-class A2Face     : public vcg::Face< A2UsedTypes,vcg::face::VertexRef, vcg::face::Normal3d, vcg::face::EdgePlane,vcg::face::Mark,vcg::face::BitFlags> {};
+class A2Face     : public vcg::Face< A2UsedTypes,vcg::face::VertexRef, vcg::face::Normal3d,vcg::face::Mark,vcg::face::BitFlags> {};
 class A2Mesh     : public vcg::tri::TriMesh< std::vector<A2Vertex>, std::vector<A2Face> > 
 { 
 public:
   bool Import(const char *filename) { Matrix44d Tr; Tr.SetIdentity(); return Import(filename,Tr);} 
-	bool Import(const char *filename, Matrix44d &Tr, bool hasborderflag=false);
-  bool InitVert(const Matrix44d &Tr, bool hasborderflag);
-  bool Init(const Matrix44d &Tr, bool hasborderflag);
+  bool Import(const char *filename, Matrix44d &Tr);
+  bool InitVert(const Matrix44d &Tr);
+  bool Init(const Matrix44d &Tr);
 };
 
 typedef A2Mesh::FaceContainer FaceContainer;	  
@@ -113,10 +109,10 @@ public:
 	int FixFaceNum;
 	int TotTime() { return I.back().Time-StartTime; }
 	int IterTime(unsigned int i) const 
-	{
+	{   const int clock_per_ms = std::max(CLOCKS_PER_SEC / 1000,1);
 		assert(i<I.size()); 
-		if(i==0) return  (I[i].Time-StartTime ); 
-		    else return (I[i].Time - I[i-1].Time) ; 
+		if(i==0) return  (I[i].Time-StartTime )/clock_per_ms;
+			else return (I[i].Time - I[i-1].Time)/clock_per_ms ;
 	}
 	int StartTime;
 	void clear();
@@ -130,32 +126,32 @@ public:
 class Param
 {
 public:
-	enum AlignMode      {AMVeryFast, AMFast, AMNormal, AMRobust, AMVeryRobust};
-	enum MatchModeEnum  {MMClassic, MMRigid, MMFast};
+	enum MatchModeEnum  {MMSimilarity, MMRigid};
 	enum SampleModeEnum {SMRandom, SMNormalEqualized};
 
 	Param()
 	{
-			SampleNum    = 1000;	
-			MaxPointNum     = 100000;	
-			MinPointNum  =  30;	
-			
-			MaxIterNum   =   50;	
-			TrgDistAbs  = 0.05f;	// se si inquadra un quadrato 10cm x 10cm significa 0.05 mm 
-			
-			MinDistAbs   = 10;	
-      MaxAngleRad  = math::ToRad(45.0);	
-			MaxShear     = 0.5;
-			MaxScale     = 0.5; // significa che lo scale deve essere compreso tra 1-MaxScale e 1+MaxScale
-      PassHiFilter = 0.75;
-      ReduceFactorPerc = 0.80;
-      MinMinDistPerc = 0.01;
-			EndStepNum   = 5;
-			MatchMode    = MMRigid;
-			SampleMode   = SMNormalEqualized;
-			UGExpansionFactor=10;
-			MinFixVertNum=20000;
-			MinFixVertNumPerc=.25;
+	  SampleNum    = 1000;
+	  MaxPointNum     = 100000;
+	  MinPointNum  =  30;
+
+	  MaxIterNum   =   50;
+	  TrgDistAbs  = 0.05f;	// se si inquadra un quadrato 10cm x 10cm significa 0.05 mm
+
+	  MinDistAbs   = 10;
+	  MaxAngleRad  = math::ToRad(45.0);
+	  MaxShear     = 0.5;
+	  MaxScale     = 0.5; // significa che lo scale deve essere compreso tra 1-MaxScale e 1+MaxScale
+	  PassHiFilter = 0.75;
+	  ReduceFactorPerc = 0.80;
+	  MinMinDistPerc = 0.01;
+	  EndStepNum   = 5;
+	  MatchMode    = MMRigid;
+	  SampleMode   = SMNormalEqualized;
+	  UGExpansionFactor=10;
+	  MinFixVertNum=20000;
+	  MinFixVertNumPerc=.25;
+	  UseVertexOnly = false;
 	}
 	
 	int SampleNum;			// numero di sample da prendere sulla mesh fix, utilizzando 
@@ -255,60 +251,24 @@ public:
 
 /******************* Fine Classi Accessorie ************************/
 
-	static const char *ErrorMsg( ErrorCode code);
-	void Clear(){status=SUCCESS;} 
+  static const char *ErrorMsg( ErrorCode code);
+  void Clear(){status=SUCCESS;}
   AlignPair() {Clear();}
 
-	/******* Data Members *********/ 
-	
+/******* Data Members *********/
+
   std::vector<A2Vertex> *mov;
-	A2Mesh *fix;
+  A2Mesh *fix;
 
-	ErrorCode status;
-	AlignPair::Param ap;
-	
-	/**** End Data Members *********/ 
-	
+  ErrorCode status;
+  AlignPair::Param ap;
+
+/**** End Data Members *********/
+
 template < class MESH >
-void ConvertMesh(const MESH &M1, A2Mesh &M2)
+void ConvertMesh(MESH &M1, A2Mesh &M2)
 {
-	typename MESH::VertContainer::const_iterator vi;
-	typename A2Mesh::VertexIterator v2i;
-
-	std::vector<int> vmap(M1.vert.size(),-1);
-	M2.vert.resize(M1.vn);
-	M2.face.resize(M1.fn);
-	for(vi=M1.vert.begin(),v2i=M2.vert.begin();vi!=M1.vert.end();++vi)
-		if(!(*vi).IsD()){
-            (*v2i).Flags()=(*vi).cFlags();
-			(*v2i).P().Import((*vi).P());
-			(*v2i).N().Import((*vi).cN());
-			(*v2i).N().Normalize();
-
-			vmap[vi-M1.vert.begin()] = v2i - M2.vert.begin();
-			++v2i;
-			}	
-	assert(v2i - M2.vert.begin()==M1.vn);
-	typename MESH::FaceContainer::const_iterator fi;
-	typename A2Mesh::FaceIterator f2i;
-
-	for(fi=M1.face.begin(),f2i=M2.face.begin();fi!=M1.face.end();++fi)if(!(*fi).IsD()){
-            (*f2i).Flags()=(*fi).cFlags();
-			(*f2i).V(0)=&M2.vert[ (vmap[(*fi).V(0)-&M1.vert[0] ]) ];
-			(*f2i).V(1)=&M2.vert[ (vmap[(*fi).V(1)-&M1.vert[0] ]) ];
-			(*f2i).V(2)=&M2.vert[ (vmap[(*fi).V(2)-&M1.vert[0] ]) ];
-			//(*f2i).V(1)=M2.vert.begin()+ (vmap[(*fi).V(1)-M1.vert.begin()]);
-			//(*f2i).V(2)=M2.vert.begin()+ (vmap[(*fi).V(2)-M1.vert.begin()]);
-			assert((*f2i).V(0)-&M2.vert[0]>=0);
-			assert((*f2i).V(1)-&M2.vert[0] >=0);
-			assert((*f2i).V(2)-&M2.vert[0] >=0);
-			
-			++f2i;
-		}	
-	vcg::tri::UpdateComponentEP<vcg::AlignPair::A2Mesh>::Set(M2);
-	M2.vn=M1.vn;
-	M2.fn=M1.fn;
-	M2.bbox.Import(M1.bbox);
+  tri::Append<A2Mesh,MESH>::MeshCopy(M2,M1);
 }
 
 template < class VERTEX >
@@ -318,8 +278,7 @@ void ConvertVertex(const std::vector<VERTEX> &vert1, std::vector<A2Vertex> &vert
 	vert2.clear();
 	typename std::vector<VERTEX>::const_iterator vi;
 	A2Vertex tv;
-    tv.Flags()=0;
-	 Box3<typename VERTEX::ScalarType> bb;
+	Box3<typename VERTEX::ScalarType> bb;
 	if(Clip){
 		bb.Import(*Clip);
 		for(vi=vert1.begin();vi<vert1.end();++vi)

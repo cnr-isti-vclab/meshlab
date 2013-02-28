@@ -29,7 +29,6 @@
 #include <bitset>
 
 
-#include "AlignPair.h"
 #include "OccupancyGrid.h"
 
 #include <vcg/complex/algorithms/clean.h>
@@ -43,15 +42,14 @@ using namespace vcg;
 // Nota che il bbox viene automaticamento inflatato dalla G.SetBBox();
 bool OccupancyGrid::Init(int _mn, Box3d bb, int size)
 {
-	mn=_mn; // the number of meshes (including all the unused ones; eg it is the range of the possible id)
-	if(mn>MeshCounter::MaxVal()) return false;
-	MeshCounter MC;
-	MC.Clear();
-	G.Create(bb,size,MC);
-	VM.clear();
-	VM.resize(mn);
-	OH.SetRange(0,128,128);
-	return true;
+  mn=_mn; // the number of meshes (including all the unused ones; eg it is the range of the possible id)
+  if(mn>MeshCounter::MaxVal()) return false;
+  MeshCounter MC;
+  MC.Clear();
+  G.Create(bb,size,MC);
+  VM.clear();
+  VM.resize(mn);
+  return true;
 }
 
 void OccupancyGrid::Add(const char *MeshName, Matrix44d &Tr, int id)
@@ -85,21 +83,7 @@ void OccupancyGrid::AddMeshes(std::vector<string> &names, std::vector<Matrix44d>
     Add(names[i].c_str(),trv[i],i);
   }
 }
-void OccupancyGrid::AddVert(vector<Point3f> &vv, Matrix44d &Tr, int id)
-{
-	Point3f tmp;
-	Matrix44f Trf;
-	Trf.Import(Tr);
-	vector<Point3f>::iterator vi;
-	for(vi=vv.begin();vi!=vv.end();++vi)
-    G.Grid( Trf*(*vi) ).Set(id);
-	
-	VM[id].coverage=0;
-	VM[id].area=0;
-}
-	
-//void OccupancyGrid::Build(Box3d bb, int size,	list< AMesh *> &M)
-//	mn=ind;
+
 
 void OccupancyGrid::Compute()
 {
@@ -110,40 +94,38 @@ void OccupancyGrid::Compute()
   VA.clear();
   VA.resize(mn*mn,0);
 
-  vector<int > vv;
-  int i,j,k,ii,jj;
   // scan the grid and update possible arc count
-  for(i=0;i<G.siz[0];++i)
-    for(j=0;j<G.siz[1];++j)
-      for(k=0;k<G.siz[2];++k)
+  for(int i=0;i<G.siz[0];++i)
+    for(int j=0;j<G.siz[1];++j)
+      for(int k=0;k<G.siz[2];++k)
       {
+        vector<int > vv;
         G.Grid(i,j,k).Pack(vv);
-        if(vv.size()>0)
+        int meshInCell = vv.size();
+        for( size_t ii=0; ii< vv.size(); ++ii)
         {
-          vector<int>::iterator vi;
-          for(vi=vv.begin();vi!=vv.end();++vi)
-          {
-            ++VM[*vi].area; // compute mesh area
-            if(vv.size()<OGMeshInfo::MaxStat())
-              ++VM[*vi].unique[vv.size()];
-          }
-
-          for(ii=0;ii<vv.size()-1;++ii)
-            for(jj=1;jj<vv.size();++jj)
-              ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
+          int meshId = vv[ii];
+          ++VM[meshId].area; // compute mesh area
+          if(meshInCell>VM[meshId].unicityDistribution.size())
+            VM[meshId].unicityDistribution.resize(meshInCell);
+          ++(VM[meshId].unicityDistribution[meshInCell-1]);
         }
+
+        for(int ii=0;ii<vv.size();++ii)
+          for(int jj=ii+1;jj<vv.size();++jj)
+              ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
       }
 
-  // Find the best arcs
+  // Find all the arcs
   SVA.clear();
-  for(i=0;i<mn-1;++i)
+  for(int i=0;i<mn-1;++i)
     if(VM[i].used)
-      for(j=i+1;j<mn;++j)
+      for(int j=i+1;j<mn;++j)
         if(VM[j].used && VA[i+j*mn]>0)
           SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) ));
   
   // Compute Mesh Coverage
-  for(i=0;i<SVA.size();++i)
+  for(int i=0;i<SVA.size();++i)
   {
     VM[SVA[i].s].coverage += SVA[i].area;
     VM[SVA[i].t].coverage += SVA[i].area;
@@ -244,7 +226,12 @@ void OccupancyGrid::Dump(FILE *fp)
 	for(int i=0;i<VM.size();++i)
 		{
 			if(VM[i].used) 
-					fprintf(fp,"mesh %3i area %6i covg %7i (%5.2f%%) uniq '%3i %3i %3i %3i %3i'\n",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area),VM[i].unique[1],VM[i].unique[2],VM[i].unique[3],VM[i].unique[4],VM[i].unique[5]);
+			{
+					fprintf(fp,"mesh %3i area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
+					for(size_t j=0;j<std::min(size_t(8),VM[i].unicityDistribution.size());++j)
+						fprintf(fp," %3i ", VM[i].unicityDistribution[j]);
+					fprintf(fp,"\n");
+			}
 			else 
 					fprintf(fp,"mesh %3i ---- UNUSED\n",i);
 		}
@@ -273,8 +260,6 @@ void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vec
 			++adjcnt[SVA[i].t];
 			++i;
 	}
-
-
 
   // Second loop to add some more constraints we add also all the arc with area > normarea/3 
 	// and that connects meshes poorly connected (e.g. with zero or one adjacent)

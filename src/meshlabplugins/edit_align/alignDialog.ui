@@ -121,6 +121,22 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="baseMeshButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>When pressed it make the current mesh as base mesh, e.g. the one with a Identity as transformation.</string>
+            </property>
+            <property name="text">
+             <string>Set as Base Mesh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer>
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -128,10 +144,28 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>158</width>
-              <height>13</height>
+              <height>5</height>
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="recalcButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Recalc Current Arc</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="icpButton">
@@ -153,7 +187,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Default ICP Params</string>
+             <string> Param. ICP Default </string>
             </property>
            </widget>
           </item>
@@ -165,13 +199,51 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>Param Current Arc </string>
+             <string>Param. ICP Current Arc </string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="recalcButton">
+           <widget class="QToolButton" name="meshTreeParamButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Param Arc Creation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="badArcButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -179,23 +251,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Recalc Current Arc</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="baseMeshButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>When pressed it make the current mesh as base mesh, e.g. the one with a Identity as transformation.</string>
-            </property>
-            <property name="text">
-             <string>Set as Base Mesh</string>
+             <string>Show Bad Arc</string>
             </property>
            </widget>
           </item>
@@ -228,19 +284,6 @@
              <string>use Point Rendering</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>

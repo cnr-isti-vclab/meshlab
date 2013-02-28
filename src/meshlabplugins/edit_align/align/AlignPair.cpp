@@ -26,7 +26,7 @@
 
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/update/position.h>
-//#include <vcg/complex/algorithms/update/edges.h>
+#include <vcg/complex/algorithms/update/component_ep.h>
 #include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/update/bounding.h>
@@ -36,11 +36,12 @@
 
 #include <vcg/math/random_generator.h>
 #include <vcg/math/gen_normal.h>
-#include <vcg/math/point_matching.h>
+#include <vcg/space/point_matching.h>
+
 using namespace vcg;
 using namespace std;
 
-bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr, bool hasborderflag)
+bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr)
 {
 	int err = tri::io::Importer<A2Mesh>::Open(*this,filename);
   if(err) {
@@ -48,10 +49,10 @@ bool AlignPair::A2Mesh::Import(const char *filename, Matrix44d &Tr, bool hasbord
       exit(-1);
     }
   printf("read mesh `%s'\n", filename);		  
-return Init(Tr,hasborderflag);
+return Init(Tr);
 }
 
-bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr,bool hasborderflag)
+bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr)
 {
   Matrix44d Idn; Idn.SetIdentity();
   if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr);
@@ -60,32 +61,16 @@ bool AlignPair::A2Mesh::InitVert(const Matrix44d &Tr,bool hasborderflag)
   return true;
 }
 
-bool AlignPair::A2Mesh::Init(const Matrix44d &Tr,bool hasborderflag)
+bool AlignPair::A2Mesh::Init(const Matrix44d &Tr)
 {
-	Matrix44d Idn; Idn.SetIdentity();
-	//int t1=clock();
+  Matrix44d Idn; Idn.SetIdentity();
   tri::Clean<A2Mesh>::RemoveUnreferencedVertex(*this);
-  //int t2=clock();
-	if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr); 
-	//int t3=clock();  
-  tri::UpdateNormal<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this); 
-	//int t4=clock();
-	if(!hasborderflag) 		
-    tri::UpdateFlags<A2Mesh>::FaceBorderFromNone(*this);
-    // ComputeBorderFlag();
-	//int t5=clock();
-		tri::UpdateBounding<A2Mesh>::Box(*this);
-  //int t6=clock();
+  if(Tr!=Idn) tri::UpdatePosition<A2Mesh>::Matrix(*this,Tr);
+  tri::UpdateNormal<A2Mesh>::PerVertexNormalizedPerFaceNormalized(*this);
+  tri::UpdateFlags<A2Mesh>::FaceBorderFromNone(*this);
+  tri::UpdateBounding<A2Mesh>::Box(*this);
 
-/*	printf("LoadPly                       %6i\n",t1-t0);
-	printf("RemoveUnrefVert               %6i\n",t2-t1);
-	printf("Apply                         %6i\n",t3-t2);
-	printf("ComputeNormalizedVertexNormal %6i\n",t4-t3);
-	printf("ComputeBorderFlag             %6i\n",t5-t4);
-	printf("ComputeBBox                   %6i\n",t6-t5);
-	printf("ComputeE                      %6i\n",t7-t6);
-*/
-	return true;
+  return true;
 }
 
 
@@ -115,19 +100,19 @@ bool AlignPair::Stat::Stable(int lastiter)
 
 void AlignPair::Stat::Dump(FILE *fp)
 {
-	if(I.size()==0) { 
-		fprintf(fp,"Empty AlignPair::Stat\n");
-		return;
-	}
-	fprintf(fp,"Final Err %8.5f In %i iterations Total Time %ims\n",LastPcl50(),(int)I.size(),TotTime());
-  fprintf(fp,"Mindist  Lo     Med   Hi    Avg  RMS   StdDev   Time Tested Used  Dist Bord Angl \n");
-	for(unsigned int qi=0;qi<I.size();++qi)
-      fprintf(fp,"%5.2f (%6.3f:%5.2f)(%5.3f:%5.2f:%6.3f)%4ims %5i %5i %4i+%4i+%4i\n",
-				I[qi].MinDistAbs,
-        I[qi].pcl50, I[qi].pclhi,
-				I[qi].AVG, I[qi].RMS, I[qi].StdDev ,
-				IterTime(qi),
-			  I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded);
+  if(I.size()==0) {
+    fprintf(fp,"Empty AlignPair::Stat\n");
+    return;
+  }
+  fprintf(fp,"Final Err %8.5f In %i iterations Total Time %ims\n",LastPcl50(),(int)I.size(),TotTime());
+  fprintf(fp,"Mindist   Med   Hi    Avg  RMS   StdDev   Time Tested Used  Dist Bord Angl \n");
+  for(unsigned int qi=0;qi<I.size();++qi)
+    fprintf(fp,"%5.2f (%6.3f:%6.3f) (%6.3f %6.3f %6.3f) %4ims %5i %5i %4i+%4i+%4i\n",
+            I[qi].MinDistAbs,
+            I[qi].pcl50, I[qi].pclhi,
+            I[qi].AVG, I[qi].RMS, I[qi].StdDev ,
+            IterTime(qi),
+            I[qi].SampleTested,I[qi].SampleUsed,I[qi].DistanceDiscarded,I[qi].BorderDiscarded,I[qi].AngleDiscarded);
 }
 
 // Scrive una tabella con tutti i valori
@@ -275,11 +260,18 @@ bool AlignPair::InitFix(AlignPair::A2Mesh *fm,
 
 	//Inserisco la src nella griglia
 	if(PreferredGridSize==0) PreferredGridSize=fm->face.size()*pp.UGExpansionFactor;
-	u.Set(fm->face.begin(), fm->face.end());//, PreferredGridSize);
+	u.Set(fm->face.begin(), fm->face.end(), PreferredGridSize);
 	printf("UG %i %i %i\n",u.siz[0],u.siz[1],u.siz[2]);
 	return true;
 }
 /*
+  The Main ICP alignment Function:
+  It assumes that:
+  we have two meshes:
+  - Fix the mesh that does not move and stays in the spatial indexing structure.
+  - Mov the mesh we 'move' e.g. the one for which we search the transforamtion.
+
+  requires normalize normals for vertexes AND faces
 Allinea due mesh;
 Assume che:
 la uniform grid sia gia' inizializzata con la mesh fix
@@ -322,14 +314,15 @@ bool AlignPair::Align(
 	as.clear();
 	as.StartTime=clock();
 			
-  beyondCntVec.resize(mov->size(),0);
-	/*############inizio ciclo################*/
-	do 
+	beyondCntVec.resize(mov->size(),0);
+
+  /**************** BEGIN ICP LOOP ****************/
+    do
 	{	
 		Stat::IterInfo ii;
 		Box3d movbox;
 		InitMov(movvert,movnorm,movbox,out);
-    H.SetRange(0,StartMinDist,512,2.5);
+		H.SetRange(0,StartMinDist,512,2.5);
 		Pfix.clear();
 		Nfix.clear();
 		Pmov.clear();
@@ -349,8 +342,8 @@ bool AlignPair::Align(
       else
       {
         double error=StartMinDist;
-        Point3d closestNormal(0,0,0),closestPoint,ip;
-        double maxd= std::numeric_limits<double>::max();
+        Point3d closestPoint, closestNormal;
+        double maxd= StartMinDist;
         ii.SampleTested++;
         if(u.Empty()) // using the point cloud grid
         {
@@ -366,16 +359,21 @@ bool AlignPair::Align(
         }
         else // using the standard faces and grid
         {
-          A2Mesh::FacePointer f=vcg::tri::GetClosestFaceEP<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint,closestNormal,ip);
+          A2Mesh::FacePointer f=vcg::tri::GetClosestFaceBase<vcg::AlignPair::A2Mesh, vcg::AlignPair::A2Grid >(*fix, u, movvert[i], maxd, error, closestPoint);
           if(error>=StartMinDist) {
             ii.DistanceDiscarded++; ++beyondCntVec[i]; continue;
           }
           if(movnorm[i].dot(f->N()) < CosAngleThr) {
               ii.AngleDiscarded++; continue;
           }
-          if(	(ip[0]==0 && f->IsB(1)) ||  (ip[1]==0 && f->IsB(2)) || (ip[2]==0 && f->IsB(0))   ){
+          Point3d ip;
+          InterpolationParameters<A2Face,double>(*f,f->N(),closestPoint, ip);
+          const double IP_EPS = 0.00001;
+          // If ip[i] == 0 it means that we are on the edge opposite to i
+          if(	(fabs(ip[0])<=IP_EPS && f->IsB(1)) ||  (fabs(ip[1])<=IP_EPS && f->IsB(2)) || (fabs(ip[2])<=IP_EPS && f->IsB(0))   ){
             ii.BorderDiscarded++;  continue;
           }
+          closestNormal = f->N();
         }
         // The sample was accepted. Store it.
         Pmov.push_back(movvert[i]);
@@ -397,36 +395,25 @@ bool AlignPair::Align(
 			as.I.push_back(ii);
 			return false;
 		}
-		bool res;
-    Matrix44d newout;
+		Matrix44d newout;
 		switch(ap.MatchMode) {
-		case AlignPair::Param::MMClassic : //res = ComputeScalingMatchMatrix(newout,Pfix,OPmov);break;
-										   //res=PointMatching<double>::ComputeMatchMatrix(newout,Pfix,Nfix,OPmov);   break;
-			res = ComputeRotoTranslationScalingMatchMatrix(newout,Pfix,OPmov); break;
-		case AlignPair::Param::MMRigid   : res=PointMatching<double>::ComputeRigidMatchMatrix(newout,Pfix,OPmov);   break;
-  //    case AlignPair::Param::MMFast    : res=PointMatching::ComputeMatchMatrix2(out,Pfix,Nfix,OPmov);  break;
+		case AlignPair::Param::MMSimilarity : ComputeRotoTranslationScalingMatchMatrix(newout,Pfix,OPmov); break;
+		case AlignPair::Param::MMRigid   : ComputeRigidMatchMatrix(Pfix,OPmov,newout);   break;
 			default :
 						status = UNKNOWN_MODE;
 						ii.Time=clock();
 						as.I.push_back(ii);
 						return false;
 		}
-		
-		if(!res)		{ 
-			status = LSQ_DIVERGE;
-			ii.Time=clock();
-			as.I.push_back(ii);
-			return false;
-		}
-			
-    double sum_before=0;
-    double sum_after=0;
-    for(unsigned int iii=0;iii<Pfix.size();++iii)
-    {
-      sum_before+=Distance(Pfix[iii], out*OPmov[iii]);
-      sum_after+=Distance(Pfix[iii], newout*OPmov[iii]);
-    }
-    //printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
+					
+//    double sum_before=0;
+//    double sum_after=0;
+//    for(unsigned int iii=0;iii<Pfix.size();++iii)
+//    {
+//      sum_before+=Distance(Pfix[iii], out*OPmov[iii]);
+//      sum_after+=Distance(Pfix[iii], newout*OPmov[iii]);
+//    }
+//    //printf("Distance %f -> %f\n",sum_before/double(Pfix.size()),sum_after/double(Pfix.size()) ) ;
    
 		// le passate successive utilizzano quindi come trasformazione iniziale questa appena trovata.
 		// Nei prossimi cicli si parte da questa matrice come iniziale.
@@ -453,7 +440,7 @@ bool AlignPair::Align(
 		H.Percentile(.5) > ap.TrgDistAbs && 
 		(nc<ap.EndStepNum+1 || ! as.Stable(ap.EndStepNum) ) 
 		); 
- /*############ fine ciclo################*/
+ /**************** END ICP LOOP ****************/
 	int tt2=clock();  
 	Matrix44d ResCopy=out;
 	Point3d scv,shv,rtv,trv;
@@ -463,10 +450,13 @@ bool AlignPair::Align(
 			return false;
 		}
 	if(shv[0]>ap.MaxShear || shv[1]>ap.MaxShear || shv[2]>ap.MaxShear ) {
-			status = TOO_MUCH_SHARE;
+			status = TOO_MUCH_SHEAR;
 			return false;
 		}
-  printf("Init %i\nLoop %i\n\nSearch %i\n least sqrt %i\n",tt1-tt0,tt2-tt1,ttsearch,ttleast);
+	printf("Grid %i %i %i - fn %i\n",u.siz[0],u.siz[1],u.siz[2],fix->fn);
+  printf("Init %8.3f Loop %8.3f Search %8.3f least sqrt %8.3f\n",
+         float(tt1-tt0)/CLOCKS_PER_SEC, float(tt2-tt1)/CLOCKS_PER_SEC,
+         float(ttsearch)/CLOCKS_PER_SEC,float(ttleast)/CLOCKS_PER_SEC );
 
 	return true;
 }
@@ -475,18 +465,18 @@ bool AlignPair::Align(
 
 
 const char *AlignPair::ErrorMsg( ErrorCode code)
-	{
+{
   switch(code){
-		  case SUCCESS:         return "Success         ";
-			case NO_COMMON_BBOX : return "No Common BBox  "; 
-			case TOO_FEW_POINTS : return "Too few points  "; 
-			case LSQ_DIVERGE		: return "LSQ not converge"; 
-			case TOO_MUCH_SHARE : return "Too much shear  "; 
-			case TOO_MUCH_SCALE : return "Too much scale  "; 
-			case UNKNOWN_MODE   : return "Unknown mode    "; 
-			default :  assert(0); return "Catastrophic Error";
-	}
-	return 0;
+  case SUCCESS:         return "Success         ";
+  case NO_COMMON_BBOX : return "No Common BBox  ";
+  case TOO_FEW_POINTS : return "Too few points  ";
+  case LSQ_DIVERGE    : return "LSQ not converge";
+  case TOO_MUCH_SHEAR : return "Too much shear  ";
+  case TOO_MUCH_SCALE : return "Too much scale  ";
+  case UNKNOWN_MODE   : return "Unknown mode    ";
+  default :  assert(0); return "Catastrophic Error";
+  }
+  return 0;
 }
 /*
 

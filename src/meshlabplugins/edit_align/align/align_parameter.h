@@ -22,20 +22,18 @@
 ****************************************************************************/
 
 #include <common/filterparameter.h>
-#include <meshlabplugins/edit_align/align/AlignPair.h>
-#include <vcg/simplex/face/base.h>
+#include <meshlabplugins/edit_align/meshtree.h>
 
 class AlignParameter {
 
 public:
-	//translates the filter parameters into align parameters
-	static void buildAlignParameters(RichParameterSet &fps, vcg::AlignPair::Param &app);
+	static void RichParameterSetToAlignPairParam(const RichParameterSet &rps, vcg::AlignPair::Param &app);
+	static void AlignPairParamToRichParameterSet(const vcg::AlignPair::Param &app, RichParameterSet &rps);
 
-	//translates the align parameters into filter parameters
-	static void buildRichParameterSet(vcg::AlignPair::Param &app, RichParameterSet &fps);
+	static void RichParameterSetToMeshTreeParam(const RichParameterSet &rps, MeshTree::Param &mtp);
+	static void MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterSet &rps);
 
 private:
 	//no need to have an instance of this class
 	AlignParameter();
-
 };

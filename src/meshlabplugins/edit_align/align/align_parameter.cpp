@@ -28,31 +28,46 @@ using namespace vcg;
 AlignParameter::AlignParameter(){}
 
 // given a RichParameterSet get back the alignment parameter  (dual of the buildParemeterSet)
-void AlignParameter::buildAlignParameters(RichParameterSet &fps , AlignPair::Param &app)
+void AlignParameter::RichParameterSetToAlignPairParam(const RichParameterSet &rps , AlignPair::Param &app)
 {
-	app.SampleNum=fps.getInt("SampleNum");
-  app.MinDistAbs=fps.getFloat("MinDistAbs");
-	app.TrgDistAbs=fps.getFloat("TrgDistAbs");
-	app.MaxIterNum=fps.getInt("MaxIterNum");
-	app.SampleMode= fps.getBool("SampleMode")?AlignPair::Param::SMNormalEqualized  : AlignPair::Param::SMRandom;
-  app.ReduceFactorPerc=fps.getFloat("ReduceFactorPerc");
-  app.PassHiFilter=fps.getFloat("PassHiFilter");
-	app.MatchMode=fps.getBool("MatchMode")? AlignPair::Param::MMRigid : AlignPair::Param::MMClassic;
+  app.SampleNum       =rps.getInt(  "SampleNum");
+  app.MinDistAbs      =rps.getFloat("MinDistAbs");
+  app.TrgDistAbs      =rps.getFloat("TrgDistAbs");
+  app.MaxIterNum      =rps.getInt(  "MaxIterNum");
+  app.SampleMode      =rps.getBool( "SampleMode")?AlignPair::Param::SMNormalEqualized  : AlignPair::Param::SMRandom;
+  app.ReduceFactorPerc=rps.getFloat("ReduceFactorPerc");
+  app.PassHiFilter    =rps.getFloat("PassHiFilter");
+  app.MatchMode       =rps.getBool( "MatchMode")? AlignPair::Param::MMRigid : AlignPair::Param::MMSimilarity;
 }
 
 // given an alignment parameter builds the corresponding RichParameterSet (dual of the retrieveParemeterSet)
-void AlignParameter::buildRichParameterSet(AlignPair::Param &app, RichParameterSet &fps)
+void AlignParameter::AlignPairParamToRichParameterSet(const AlignPair::Param &app, RichParameterSet &rps)
 {
-	fps.clear();
-	fps.addParam(new RichInt("SampleNum",app.SampleNum,"Sample Number","Number of samples that we try to choose at each ICP iteration"));
-	fps.addParam(new RichFloat("MinDistAbs",app.MinDistAbs,"Minimal Starting Distance","For all the chosen sample on one mesh we consider for ICP only the samples nearer than this value."
-							                             "If MSD is too large outliers could be included, if it is too small convergence will be very slow. "
-							                             "A good guess is needed here, suggested values are in the range of 10-100 times of the device scanning error."
-							                             "This value is also dynamically changed by the 'Reduce Distance Factor'"));
-	fps.addParam(new RichFloat("TrgDistAbs",app.TrgDistAbs,"Target Distance","When 50% of the chosen samples are below this distance we consider the two mesh aligned. Usually it should be a value lower than the error of the scanning device. "));
-	fps.addParam(new RichInt("MaxIterNum",app.MaxIterNum,"Max Iteration Num","The maximum number of iteration that the ICP is allowed to perform."));
-	fps.addParam(new RichBool("SampleMode",app.SampleMode == AlignPair::Param::SMNormalEqualized,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way."));
-  fps.addParam(new RichFloat("ReduceFactorPerc",app.ReduceFactorPerc,"MSD Reduce Factor","At each ICP iteration the Minimal Starting Distance is reduced to be 5 times the <Reduce Factor> percentile of the sample distances (e.g. if RF is 0.9 the new Minimal Starting Distance is 5 times the value <X> such that 90% of the sample lies at a distance lower than <X>."));
-  fps.addParam(new RichFloat("PassHiFilter",app.PassHiFilter,"Sample Cut High","At each ICP iteration all the sample that are farther than the <cuth high> percentile are discarded ( In practice we use only the <cut high> best results )."));
-	fps.addParam(new RichBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is cosntrained to perform matching only throug roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear)."));
+  rps.clear();
+  rps.addParam(new RichInt("SampleNum",app.SampleNum,"Sample Number","Number of samples that we try to choose at each ICP iteration"));
+  rps.addParam(new RichFloat("MinDistAbs",app.MinDistAbs,"Minimal Starting Distance","For all the chosen sample on one mesh we consider for ICP only the samples nearer than this value."
+                             "If MSD is too large outliers could be included, if it is too small convergence will be very slow. "
+                             "A good guess is needed here, suggested values are in the range of 10-100 times of the device scanning error."
+                             "This value is also dynamically changed by the 'Reduce Distance Factor'"));
+  rps.addParam(new RichFloat("TrgDistAbs",app.TrgDistAbs,"Target Distance","When 50% of the chosen samples are below this distance we consider the two mesh aligned. Usually it should be a value lower than the error of the scanning device. "));
+  rps.addParam(new RichInt("MaxIterNum",app.MaxIterNum,"Max Iteration Num","The maximum number of iteration that the ICP is allowed to perform."));
+  rps.addParam(new RichBool("SampleMode",app.SampleMode == AlignPair::Param::SMNormalEqualized,"Normal Equalized Sampling","if true (default) the sample points of icp are choosen with a  distribution uniform with respect to the normals of the surface. Otherwise they are distributed in a spatially uniform way."));
+  rps.addParam(new RichFloat("ReduceFactorPerc",app.ReduceFactorPerc,"MSD Reduce Factor","At each ICP iteration the Minimal Starting Distance is reduced to be 5 times the <Reduce Factor> percentile of the sample distances (e.g. if RF is 0.9 the new Minimal Starting Distance is 5 times the value <X> such that 90% of the sample lies at a distance lower than <X>."));
+  rps.addParam(new RichFloat("PassHiFilter",app.PassHiFilter,"Sample Cut High","At each ICP iteration all the sample that are farther than the <cuth high> percentile are discarded ( In practice we use only the <cut high> best results )."));
+  rps.addParam(new RichBool("MatchMode",app.MatchMode == AlignPair::Param::MMRigid,"Rigid matching","If true the ICP is cosntrained to perform matching only throug roto-translations (no scaling allowed). If false a more relaxed transformation matrix is allowed (scaling and shearing can appear)."));
 }
+
+void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterSet &fps , MeshTree::Param &mtp)
+{
+  mtp.arcThreshold=fps.getFloat("arcThreshold");
+  mtp.OGSize = fps.getInt("OGSize");
+}
+
+void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterSet &rps)
+{
+  rps.clear();
+  rps.addParam(new RichInt("OGSize",mtp.OGSize,"Occupancy Grid Size","To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can "));
+  rps.addParam(new RichFloat("arcThreshold",mtp.arcThreshold,"Arc Area Thr.","We run ICP on every pair of mesh with a relative overlap greather than this threshold. The relative overlap is computed as overlapArea / min(area1,area2)"));
+
+}
+

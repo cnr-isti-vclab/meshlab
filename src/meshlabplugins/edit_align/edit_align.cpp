@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -26,32 +26,27 @@ $Log: meshedit.cpp,v $
 ****************************************************************************/
 #include <QtGui>
 
-#include <math.h>
-#include <stdlib.h>
 #include <meshlab/glarea.h>
-#include <vcg/math/point_matching.h>
 #include "edit_align.h"
-#include <wrap/gl/pick.h>
 #include <wrap/qt/trackball.h>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"
 #include "align/align_parameter.h"
 #include <meshlab/stdpardialog.h>
-#include <QMetaObject>
-
+#include <vcg/space/point_matching.h>
 using namespace vcg;
 
 EditAlignPlugin::EditAlignPlugin()
 {
 	alignDialog=0;
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(10);      
+	qFont.setPixelSize(10);
 
 	trackball.center=Point3f(0, 0, 0);
 	trackball.radius= 1;
 }
 
-const QString EditAlignPlugin::Info() 
+const QString EditAlignPlugin::Info()
 {
 	return tr("Allow to align different layers toghether.");
 }
@@ -67,7 +62,7 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 			m.visible=false;
 			glPushMatrix();
 			trackball.GetView();
-			trackball.Apply(true);
+			trackball.Apply();
 			m.render(GLW::DMFlat,GLW::CMPerMesh,gla->rm.textureMode);
 			glPopMatrix();
 			break;
@@ -78,7 +73,7 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 			if(alignDialog->currentArc!=0)
 				DrawArc(alignDialog->currentArc);
 		}
-	case ALIGN_INSPECT_ARC: 		
+	case ALIGN_INSPECT_ARC:
 		{
 			break;
 
@@ -93,7 +88,6 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	this->md=&_md;
 	gla=_gla;
 
-	int id=0;
 	int numOfMeshes = md->meshList.size();
 	meshTree.clear();
 	foreach(MeshModel *mm, md->meshList)
@@ -102,18 +96,18 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 		// if above 50, truly unique color would geenrate too similar colors, so total number of unique color
 		// is capped to 50 and the color reused, id that are close will have different color anyway
 		if(numOfMeshes < 50)
-			mm->cm.C()=Color4b::Scatter(numOfMeshes+1, id, .2f, .7f);
+			mm->cm.C()=Color4b::Scatter(numOfMeshes+1, mm->id(), .2f, .7f);
 		else
-			mm->cm.C()=Color4b::Scatter(51, id%50, .2f, .7f);
-		meshTree.nodeList.push_back(new MeshNode(mm,id));
-		++id;
+			mm->cm.C()=Color4b::Scatter(51, mm->id()%50, .2f, .7f);
+		meshTree.nodeList.push_back(new MeshNode(mm));
 	}
 	gla->rm.colorMode=GLW::CMPerMesh;
 
-	gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));	
+	gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
 	if(alignDialog==0)
 	{
-        alignDialog=new AlignDialog(gla->window(),this);
+		alignDialog=new AlignDialog(gla->window(),this);
+		connect(alignDialog->ui.meshTreeParamButton,SIGNAL(clicked()),this,SLOT(meshTreeParam()));
 		connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
 		connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
 		connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
@@ -126,6 +120,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 		connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
 		connect(alignDialog, SIGNAL(updateMeshSetVisibilities() ), this->gla,SLOT(updateMeshSetVisibilities()));
 		connect(alignDialog->ui.baseMeshButton, SIGNAL(clicked()) , this,  SLOT(setBaseMesh() ) );
+		connect(alignDialog->ui.badArcButton, SIGNAL(clicked()) , this,  SLOT(selectBadArc() ) );
 	}
 
 	//alignDialog->setCurrentNode(meshTree.find(gla->mm()) );
@@ -134,9 +129,10 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	//alignDialog->adjustSize();
 
 	//mainW->addDockWidget(Qt::LeftDockWidgetArea,alignDialog);
-	mode=ALIGN_IDLE;	
+	mode=ALIGN_IDLE;
 	connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
 	connect(alignDialog, SIGNAL(closing()),gla,SLOT(endEdit()) );
+	connect(&_md,SIGNAL(currentMeshChanged(int)),alignDialog,SLOT(currentMeshChanged(int)));
 	suspendEditToggle();
 	toggledColors(alignDialog->ui.falseColorCB->checkState());
 	return true;
@@ -151,7 +147,7 @@ void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 	assert(alignDialog);
 	delete alignDialog;
 	alignDialog=0;
-}    
+}
 
 void EditAlignPlugin::hideRevealGluedMesh()
 {
@@ -160,6 +156,7 @@ void EditAlignPlugin::hideRevealGluedMesh()
 
 	alignDialog->rebuildTree();
 	gla->update();
+	alignDialog->updateMeshVisibilities();
 }
 
 void EditAlignPlugin::setBaseMesh()
@@ -191,14 +188,14 @@ void EditAlignPlugin::glueByPicking()
 	dd->aa->initMesh(currentNode(), &meshTree);
 	dd->aa->isUsingVertexColor = !alignDialog->ui.falseColorCB->isChecked();
 	dd->aa->usePointRendering = alignDialog->ui.pointRenderingCB->isChecked();
-	dd->exec();	
+	dd->exec();
 
 	if(dd->result()==QDialog::Rejected) return;
 
 	// i picked points sono in due sistemi di riferimento.
 
-	std::vector<vcg::Point3f>freePnt = dd->aa->freePickedPointVec; 
-	std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec; 
+	std::vector<vcg::Point3f>freePnt = dd->aa->freePickedPointVec;
+	std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec;
 
 	if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
 		QMessageBox::warning(0,"Align tool", "require the same number of chosen points");
@@ -207,9 +204,9 @@ void EditAlignPlugin::glueByPicking()
 
 	Matrix44f res;
 	if(dd->allowScalingCB->isChecked())
-		PointMatching<float>::ComputeSimilarityMatchMatrix(res,gluedPnt,freePnt);
-	else 
-		PointMatching<float>::ComputeRigidMatchMatrix(res,gluedPnt,freePnt);
+		ComputeSimilarityMatchMatrix(gluedPnt,freePnt,res);
+	else
+		ComputeRigidMatchMatrix(gluedPnt,freePnt,res);
 
 	//md->mm()->cm.Tr=res;
 	currentNode()->tr()=res;
@@ -220,17 +217,17 @@ void EditAlignPlugin::glueByPicking()
 	assert(currentNode()->glued==false);
 
 	currentNode()->glued=true;
-	alignDialog->rebuildTree();	
+	alignDialog->rebuildTree();
 	gla->update();
-} 
+}
 
 
 void EditAlignPlugin::glueManual()
 {
-	assert(currentNode()->glued==false); 
+	assert(currentNode()->glued==false);
 	MeshModel *mm=md->mm();
 	static QString oldLabelButton;
-	Matrix44f tran,mtran; 
+	Matrix44f tran,mtran;
 
 	switch(mode)
 	{
@@ -268,7 +265,7 @@ void EditAlignPlugin:: alignParamCurrent()
 
 	RichParameterSet alignParamSet;
 	QString titleString=QString("Current Arc (%1 -> %2) Alignment Parameters").arg(currentArc()->MovName).arg(currentArc()->FixName);
-	AlignParameter::buildRichParameterSet(currentArc()->ap, alignParamSet);
+	AlignParameter::AlignPairParamToRichParameterSet(currentArc()->ap, alignParamSet);
 
 	GenericParamDialog ad(alignDialog,&alignParamSet,titleString);
 	ad.setWindowFlags(Qt::Dialog);
@@ -277,27 +274,44 @@ void EditAlignPlugin:: alignParamCurrent()
 	if(result != QDialog::Accepted) return;
 
 	// Dialog accepted. get back the values
-	AlignParameter::buildAlignParameters(alignParamSet, currentArc()->ap);
+	AlignParameter::RichParameterSetToAlignPairParam(alignParamSet, currentArc()->ap);
+}
+
+void EditAlignPlugin:: meshTreeParam()
+{
+  RichParameterSet  meshTreeParamSet;
+  AlignParameter::MeshTreeParamToRichParameterSet(defaultMTP, meshTreeParamSet);
+  GenericParamDialog ad(alignDialog,&meshTreeParamSet,"Default Alignment Parameters");
+  ad.setWindowFlags(Qt::Dialog);
+  ad.setWindowModality(Qt::WindowModal);
+  int result=ad.exec();
+  if(result != QDialog::Accepted) return;
+  // Dialog accepted. get back the values
+  AlignParameter::RichParameterSetToMeshTreeParam(meshTreeParamSet, defaultMTP);
+
 }
 
 void EditAlignPlugin:: alignParam()
 {
 	RichParameterSet alignParamSet;
-	AlignParameter::buildRichParameterSet(defaultAP, alignParamSet);
+	AlignParameter::AlignPairParamToRichParameterSet(defaultAP, alignParamSet);
 	GenericParamDialog ad(alignDialog,&alignParamSet,"Default Alignment Parameters");
 	ad.setWindowFlags(Qt::Dialog);
 	ad.setWindowModality(Qt::WindowModal);
-    int result=ad.exec();
+	int result=ad.exec();
 	if(result != QDialog::Accepted) return;
 	// Dialog accepted. get back the values
-	AlignParameter::buildAlignParameters(alignParamSet, defaultAP);
+	AlignParameter::RichParameterSetToAlignPairParam(alignParamSet, defaultAP);
 }
 
 void EditAlignPlugin::glueHere()
-{ 
+{
 	MeshNode *mn=currentNode();
+	if(mn->glued)
+	  meshTree.deleteResult(mn);
+
 	mn->glued = !mn->glued;
-	alignDialog->rebuildTree();	
+	alignDialog->rebuildTree();
 }
 
 void EditAlignPlugin::glueHereAll()
@@ -305,8 +319,25 @@ void EditAlignPlugin::glueHereAll()
 	foreach(MeshNode *mn, meshTree.nodeList)
 		mn->glued=true;
 
-	alignDialog->rebuildTree();	
+	alignDialog->rebuildTree();
 }
+
+void EditAlignPlugin::selectBadArc()
+{
+  float maxErr=0;
+  AlignPair::Result *worseArc=0;
+  for(QList<vcg::AlignPair::Result>::iterator li=meshTree.resultList.begin();li!=meshTree.resultList.end();++li)
+  {
+    if(li->err > maxErr)
+    {
+      maxErr=li->err;
+      worseArc=&*li;
+    }
+  }
+  if(worseArc)
+    alignDialog->setCurrentArc(worseArc);
+}
+
 
 void EditAlignPlugin::process()
 {
@@ -315,8 +346,8 @@ void EditAlignPlugin::process()
 		QMessageBox::warning(0,"Align tool", "Process can work only when more than two meshes have been glued");
 		return;
 	}
-	meshTree.Process(defaultAP);
-	alignDialog->rebuildTree();	
+	meshTree.Process(defaultAP, defaultMTP);
+	alignDialog->rebuildTree();
 	gla->update();
 }
 
@@ -326,8 +357,9 @@ void EditAlignPlugin::recalcCurrentArc()
 
 	meshTree.ProcessArc(currentArc()->FixName,currentArc()->MovName,*currentArc(),currentArc()->ap);
 	meshTree.ProcessGlobal(currentArc()->ap);
-
-	alignDialog->rebuildTree();	
+	AlignPair::Result *recomputedArc = currentArc();
+	alignDialog->rebuildTree();
+	alignDialog->setCurrentArc(recomputedArc);
 	gla->update();
 }
 
@@ -341,7 +373,7 @@ void EditAlignPlugin::mousePressEvent(QMouseEvent *e, MeshModel &, GLArea * )
 	}
 }
 
-void EditAlignPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * ) 
+void EditAlignPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
 	if(mode==ALIGN_MOVE)
 	{
@@ -389,7 +421,7 @@ void EditAlignPlugin::toggleButtons()
 }
 
 void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
-{	
+{
 	unsigned int i;
 	AlignPair::Result &r=*A;
 	MeshNode *fix=meshTree.find(r.FixName);
@@ -409,7 +441,7 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 	glEnd();
 	glPointSize(1.0f);
 	//glColor((*fix).mi.c);
-	if(r.Nfix.size()==r.Pfix.size()) 
+	if(r.Nfix.size()==r.Pfix.size())
 	{
 		glBegin(GL_LINES);
 		for(i=0;i<r.Pfix.size();i++) {
@@ -430,7 +462,7 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 	glEnd();
 	glPointSize(1.0f);
 	//glColor((*mov).mi.c);
-	if(r.Nmov.size()==r.Pmov.size()) 
+	if(r.Nmov.size()==r.Pmov.size())
 	{
 		glBegin(GL_LINES);
 		for(i=0;i<r.Pmov.size();i++) {
@@ -441,12 +473,12 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 	}
 	glPopMatrix();
 	/*
-	// Now Draw the histogram	
+	// Now Draw the histogram
 
 	int HSize = ViewPort[2]-100;
 	r.H.glDraw(Point4i(20,80,HSize,100),dlFont,r.as.I[0].MinDistAbs,1);
-	*/		
-	glPopAttrib(); 
+	*/
+	glPopAttrib();
 
 }
 

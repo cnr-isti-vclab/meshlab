@@ -100,7 +100,7 @@ void AlignPairWidget::paintGL ()
 				tt[i]->center=vcg::Point3f(0, 0, 0);
 				tt[i]->radius= 1;
 				tt[i]->GetView();
-				tt[i]->Apply(false);
+				tt[i]->Apply();
 				vcg::Box3f bb;
 				if(i==0) bb=freeMesh->bbox();
 				else	   bb=gluedTree->gluedBBox();

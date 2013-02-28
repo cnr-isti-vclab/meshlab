@@ -114,7 +114,7 @@ public:
 	Node *ChooseDormantWithMostActiveLink  ();
   void MakeAllDormant();
   void Clear();
-  bool GlobalAlign(const std::vector<std::string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp=0, CallBack * cb=DummyCallBack );
+  bool GlobalAlign(const std::map<int,std::string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp=0, CallBack * cb=DummyCallBack );
 
 	bool CheckGraph();
 

@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -26,8 +26,8 @@
 
 #include <QObject>
 #include <common/interfaces.h>
-#include "align/AlignPair.h" 
-#include "align/OccupancyGrid.h" 
+#include "align/AlignPair.h"
+#include "align/OccupancyGrid.h"
 #include "meshtree.h"
 #include <wrap/gui/trackball.h>
 #include "alignDialog.h"
@@ -36,23 +36,23 @@ class EditAlignPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(MeshEditInterface)
-	
-	enum 
+
+	enum
 	{
 		ALIGN_IDLE = 0x01,
 		ALIGN_INSPECT_ARC = 0x02,
 		ALIGN_MOVE = 0x03
 	};
-		
+
 	void Pick( MeshModel &m, GLArea * gla);
 
 public:
-    EditAlignPlugin();
+	EditAlignPlugin();
 		virtual ~EditAlignPlugin() {
 			mode=ALIGN_IDLE;
 		}
 
-    static const QString Info();
+	static const QString Info();
 
     bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
@@ -61,42 +61,45 @@ public:
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 
-		QFont qFont;
-  	int mode;			
+        QFont qFont;
+    int mode;
 
-    AlignDialog *alignDialog; //the widget with the list of the meshes. 
-		
-		void toggleButtons();
+    AlignDialog *alignDialog; //the widget with the list of the meshes.
 
-		vcg::Trackball trackball;
-		
-		MeshDocument *md; 
+        void toggleButtons();
+
+        vcg::Trackball trackball;
+
+		MeshDocument *md;
 		MeshNode *currentNode() {return meshTree.find(md->mm());}
-    vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;}
+		vcg::AlignPair::Result *currentArc() {return  alignDialog->currentArc;}
 		MeshTree meshTree;
 		GLArea * gla;
 public:
 	vcg::AlignPair::Param defaultAP;  // default alignment parameters
-	
-	// this callback MUST be redefined because we are able to manage internally the layer change.
+	MeshTree::Param defaultMTP;  // default MeshTree parameters
+
+    // this callback MUST be redefined because we are able to manage internally the layer change.
   virtual void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
-	{ 
-	// add code here to manage the external layer switching
-	}
+    {
+    // add code here to manage the external layer switching
+    }
 
 public slots:
 		void process();
 		void recalcCurrentArc();
 		void glueHere();
 		void glueHereAll();
+		void selectBadArc();
 		void glueManual();
 		void glueByPicking();
 		void alignParam();
+		void meshTreeParam();
 		void alignParamCurrent();
-    void setBaseMesh();
-    void hideRevealGluedMesh();
+	void setBaseMesh();
+	void hideRevealGluedMesh();
 	void toggledColors(int colorstate);
-		
+
 		void DrawArc( vcg::AlignPair::Result *A );
 signals:
 	void suspendEditToggle();

@@ -37,4 +37,6 @@ FORMS 	  += alignDialog.ui
 TARGET       = edit_align
 QT           += opengl
 RESOURCES     = edit_align.qrc
+release {DEFINES += NDEBUG}
+macx:QMAKE_CXX=g++
 
