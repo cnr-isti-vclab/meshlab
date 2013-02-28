@@ -128,6 +128,8 @@ public:
 	void setLightModel();
 	void setView();
 
+	int RenderForSelection(int pickX, int pickY);
+
 	// Stores for each mesh what are the per Mesh active decorations
 	QMap<int, QList<QAction *> > iPerMeshDecoratorsListMap;
 
@@ -290,6 +292,7 @@ private:
 	bool	hasToUpdateTexture;			// has to reload textures at the next redraw
 	bool  hasToPick;							// has to pick during the next redraw.
 	bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
+	bool hasToSelect;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
 	QString nameToGetPickPos;         // the name of the parameter that has asked for the point on the surface 
 	bool interrbutshow;
 	vcg::Point2i pointToPick;

@@ -54,6 +54,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	cfps=0;
 	lastTime=0;
 	hasToPick=false;
+	hasToSelect=false;
 	hasToGetPickPos=false;
 	hasToUpdateTexture=false;
 	helpVisible=false;
@@ -317,18 +318,61 @@ void GLArea::drawLight()
 	if(!isDefaultTrackBall()) trackball_light.DrawPostApply();
 
 }
+int GLArea::RenderForSelection(int pickX, int pickY)
+{
+  int sz = int( md()->meshList.size())*5;
+  GLuint *selectBuf =new GLuint[sz];
+  glSelectBuffer(sz, selectBuf);
+  glRenderMode(GL_SELECT);
+  glInitNames();
+
+  /* Because LoadName() won't work with no names on the stack */
+  glPushName(-1);
+  double mp[16];
+
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT,viewport);
+  glPushAttrib(GL_TRANSFORM_BIT);
+  glMatrixMode(GL_PROJECTION);
+  glGetDoublev(GL_PROJECTION_MATRIX ,mp);
+  glPushMatrix();
+  glLoadIdentity();
+  gluPickMatrix(pickX, pickY, 4, 4, viewport);
+  glMultMatrixd(mp);
+
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+
+  foreach(MeshModel * mp, this->md()->meshList)
+  {
+    glLoadName(mp->id());
+    mp->render(rm.drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
+  }
+
+  long hits;
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  hits = glRenderMode(GL_RENDER);
+  glPopAttrib();
+
+  std::vector< std::pair<double,unsigned int> > H;
+  for(long ii=0;ii<hits;ii++){
+    H.push_back( std::pair<double,unsigned int>(selectBuf[ii*4+1]/4294967295.0,selectBuf[ii*4+3]));
+  }
+  std::sort(H.begin(),H.end());
+  delete [] selectBuf;
+  if(hits==0) return -1;
+  return H.front().second;
+}
 
 void GLArea::paintEvent(QPaintEvent */*event*/)
 {
-	int static count = 0;
-	++count;
-	if (mvc() == NULL)
-		return;
+	if (mvc() == NULL) return;
 	QPainter painter(this);
 	painter.beginNativePainting();
-
 	makeCurrent();
-
 
 	if(!isValid() )return;
 	QTime time;
@@ -377,11 +421,23 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	if(!this->md()->isBusy())
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-		if (iRenderer) 
+		if (iRenderer)
 			iRenderer->Render(currentShader, *this->md(), rm, this);
 		else
 		{
+		  if(hasToSelect) // right mouse click you have to select a mesh
+		  {
+			int newId=RenderForSelection(pointToPick[0],pointToPick[1]);
+			if(newId>=0)
+			{
+			  Logf(0,"Selected new Mesh %i",newId);
+			  md()->setCurrentMesh(newId);
+			  update();
+			}
+			hasToSelect=false;
+		  }
+		  //else
+		  {
 			foreach(MeshModel * mp, this->md()->meshList)
 			{
 				//Mesh visibility is read from the viewer visibility map, not from the mesh
@@ -400,6 +456,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 				}
 			}
 			md()->renderState().render(rm.drawMode,rm.colorMode,rm.textureMode);
+		  }
 		}
 		if(iEdit) {
 		  iEdit->setLog(&md()->Log);
@@ -832,81 +889,78 @@ bool GLArea::readyToClose()
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-	if(!isRaster() || isRaster())
-	{
-		e->ignore();
-		if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
-		else{
-			if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-			if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-			if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-		}
-	}
+  e->ignore();
+  if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
+  else{
+    if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+    if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+    if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+  }
 }
 
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
-	if(!isRaster() || isRaster())
-	{
-		e->ignore();
-		if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
-		else{
-			if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-			if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-			if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-		}
-	}
+  e->ignore();
+  if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
+  else{
+    if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+    if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+    if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+  }
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
-	e->accept();	
-	if(!this->hasFocus()) this->setFocus();
+  e->accept();
+  if(!this->hasFocus()) this->setFocus();
 
-	if(!isRaster() || isRaster())
-	{
-		if( (iEdit && !suspendedEditor) )
-			iEdit->mousePressEvent(e,*mm(),this);
-		else {
-			if ((e->modifiers() & Qt::ShiftModifier) && (e->modifiers() & Qt::ControlModifier) &&
-				(e->button()==Qt::LeftButton) )
-				activeDefaultTrackball=false;
-			else activeDefaultTrackball=true;
+  if( (iEdit && !suspendedEditor) )
+    iEdit->mousePressEvent(e,*mm(),this);
+  else
+  {
+    if( e->button()==Qt::RightButton) // Select a new current mesh
+    {
+      hasToSelect=true;
+      this->pointToPick=Point2i(e->x(),height()-e->y());
+    }
+    else
+    {
+      if ((e->modifiers() & Qt::ShiftModifier) &&
+          (e->modifiers() & Qt::ControlModifier) &&
+          (e->button()==Qt::LeftButton) )
+        activeDefaultTrackball=false;
+      else activeDefaultTrackball=true;
 
-			if (isDefaultTrackBall())
-			{
-				if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-				if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-				if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+      if (isDefaultTrackBall())
+      {
+        if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+        if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+        if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 
-				trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-			}
-			else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
-		}
-	}
-	update();
+        trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+      }
+      else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+    }
+  }
+  update();
 }
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-	if(!isRaster() || isRaster())
-	{
-		if( (iEdit && !suspendedEditor) )
-			iEdit->mouseMoveEvent(e,*mm(),this);
-		else {
-			if (isDefaultTrackBall())
-			{
-				trackball.MouseMove(e->x(),height()-e->y());
-				setCursorTrack(trackball.current_mode);
-			}
-			else trackball_light.MouseMove(e->x(),height()-e->y());
-		}
-		update();
-	}
-
+  if( (iEdit && !suspendedEditor) )
+    iEdit->mouseMoveEvent(e,*mm(),this);
+  else {
+    if (isDefaultTrackBall())
+    {
+      trackball.MouseMove(e->x(),height()-e->y());
+      setCursorTrack(trackball.current_mode);
+    }
+    else trackball_light.MouseMove(e->x(),height()-e->y());
+  }
+  update();
 }
 
 // When mouse is released we set the correct mouse cursor
@@ -966,12 +1020,9 @@ void GLArea::wheelEvent(QWheelEvent*e)
 
 void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
-	if(!isRaster() || isRaster())
-	{
-		hasToPick=true;
-		pointToPick=Point2i(e->x(),height()-e->y());
-	}
-	update();
+  hasToPick=true;
+  pointToPick=Point2i(e->x(),height()-e->y());
+  update();
 }
 
 void GLArea::focusInEvent ( QFocusEvent * e )
