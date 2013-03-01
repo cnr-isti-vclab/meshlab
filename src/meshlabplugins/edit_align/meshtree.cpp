@@ -178,7 +178,10 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
     }
   }
 
-  cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment\n")));
+  H.Clear();
+  for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
+   H.Add(li->err);
+  cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f Median %5.3f 90\% %5.3f\n",H.Avg(),H.Percentile(0.5f),H.Percentile(0.9f))));
 
   //if there are no arcs at all complain and return
   if(totalArcNum==0) {
