@@ -69,19 +69,6 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QToolButton" name="manualAlignButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Manual Rough Glue</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QToolButton" name="glueHereButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -103,7 +90,20 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Glue Here all Meshes</string>
+             <string>Glue Here Visible Meshes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="manualAlignButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Manual Rough Glueing</string>
             </property>
            </widget>
           </item>
@@ -187,7 +187,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string> Param. ICP Default </string>
+             <string> Param ICP Default </string>
             </property>
            </widget>
           </item>
@@ -205,7 +205,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Param. ICP Current Arc </string>
+             <string>Param ICP Current Arc </string>
             </property>
            </widget>
           </item>

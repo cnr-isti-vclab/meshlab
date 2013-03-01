@@ -75,7 +75,7 @@ int AlignGlobal::ComputeConnectedComponents()
 					st.pop();
 					++sg.size;
 					assert(cur->sid==cnt);
-					printf("Visiting node %2i %2i\n",cur->id,cur->sid);
+//					printf("Visiting node %2i %2i\n",cur->id,cur->sid);
 
 					list<VirtAlign *>::iterator li;
 					for(li=cur->Adj.begin();li!=cur->Adj.end();++li)

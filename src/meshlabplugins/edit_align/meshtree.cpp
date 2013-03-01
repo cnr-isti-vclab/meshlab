@@ -129,30 +129,50 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
   // Note: the s and t of the OG translate into fix and mov, respectively.
 
   /*************** The long loop of arc computing **************/
+  // First do a bit of stats
+  vcg::Distribution<float> H;
+  for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
+   H.Add(li->err);
 
-  int arcNum=0; // count arc within current thrsh
-  while(arcNum<OG.SVA.size() && OG.SVA[arcNum].norm_area > mtp.arcThreshold)
-    ++arcNum;
+  int totalArcNum=0; // count arc within current threshold
+  int preservedArcNum=0,recalcArcNum=0;
+  float percentileThr=0;
+  if(resultList.size()>0) percentileThr= H.Percentile(1.0f-mtp.recalcThreshold);
 
-  cb(0,qPrintable(buf.sprintf("Using %i possible Arcs on %lu :\n",arcNum,OG.SVA.size())));
+  while(totalArcNum<OG.SVA.size() && OG.SVA[totalArcNum].norm_area > mtp.arcThreshold)
+  {
+    AlignPair::Result *curResult=findResult(OG.SVA[totalArcNum].s,OG.SVA[totalArcNum].t);
+    if(curResult)
+    {
+      if(curResult->err < percentileThr)
+        ++preservedArcNum;
+      else ++recalcArcNum;
+    }
+    ++totalArcNum;
+  }
+
+  cb(0,qPrintable(buf.sprintf("Arc with good overlap %6i (on  %6lu)\n",totalArcNum,OG.SVA.size())));
+  cb(0,qPrintable(buf.sprintf(" %6i preserved %i Recalc \n",preservedArcNum,recalcArcNum))) ;
   for(size_t i=0;i<OG.SVA.size() && OG.SVA[i].norm_area > mtp.arcThreshold; ++i)
   {
     fprintf(stdout,"%4i -> %4i Area:%5i NormArea:%5.3f\n",OG.SVA[i].s,OG.SVA[i].t,OG.SVA[i].area,OG.SVA[i].norm_area);
-    AlignPair::Result *curResult=0;
-    curResult=findResult(OG.SVA[i].s,OG.SVA[i].t);
-    if(curResult==0) {
-      resultList.push_back(AlignPair::Result());
-      curResult= &resultList.back();
+    AlignPair::Result *curResult=findResult(OG.SVA[i].s,OG.SVA[i].t);
+    if(curResult==0 || curResult->err >= percentileThr) // missing arc and arc with great error must be recomputed.
+    {
+      if(curResult==0) {
+        resultList.push_back(AlignPair::Result());
+        curResult= &resultList.back();
+      }
       ProcessArc(OG.SVA[i].s, OG.SVA[i].t, *curResult, ap);
       curResult->area= OG.SVA[i].norm_area;
       if( curResult->IsValid() )
       {
         std::pair<double,double> dd=curResult->ComputeAvgErr();
-        cb(0,qPrintable(buf.sprintf("(%3i/%3i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",int(i+1),arcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
+        cb(0,qPrintable(buf.sprintf("(%3i/%3i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
       }
       else
       {
-        cb(0,qPrintable(buf.sprintf( "(%3i/%3i) %2i -> %2i Failed Alignment of one arc %s\n",int(i+1),arcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
+        cb(0,qPrintable(buf.sprintf( "(%3i/%3i) %2i -> %2i Failed Alignment of one arc %s\n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
         resultList.pop_back();
       }
     }
@@ -161,7 +181,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
   cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment\n")));
 
   //if there are no arcs at all complain and return
-  if(arcNum==0) {
+  if(totalArcNum==0) {
     cb(0,qPrintable(buf.sprintf("\n Failure. There are no overlapping meshes?\n No candidate alignment arcs. Nothing Done.\n")));
     return;
   }
@@ -179,7 +199,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 {
 	QString buf;
 	/************** Preparing Matrices for global alignment *************/
-	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
+//	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
 
 	vcg::Matrix44d Zero44; Zero44.SetZero();
 	std::vector<vcg::Matrix44d> PaddedTrVec(nodeList.size(),Zero44);

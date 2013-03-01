@@ -114,7 +114,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 		connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
 		connect(alignDialog->ui.pointBasedAlignButton,SIGNAL(clicked()),this,SLOT(glueByPicking()));
 		connect(alignDialog->ui.glueHereButton,SIGNAL(clicked()),this,SLOT(glueHere()));
-		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereAll()));
+		connect(alignDialog->ui.glueHereAllButton,SIGNAL(clicked()),this,SLOT(glueHereVisible()));
 		connect(alignDialog->ui.falseColorCB, SIGNAL(stateChanged(int)) , this,  SLOT(toggledColors(int) ));
 		connect(alignDialog->ui.recalcButton, SIGNAL(clicked()) , this,  SLOT(recalcCurrentArc() ) );
 		connect(alignDialog->ui.hideRevealButton,  SIGNAL(clicked()) , this,  SLOT(hideRevealGluedMesh() ) );
@@ -314,10 +314,10 @@ void EditAlignPlugin::glueHere()
 	alignDialog->rebuildTree();
 }
 
-void EditAlignPlugin::glueHereAll()
+void EditAlignPlugin::glueHereVisible()
 {
 	foreach(MeshNode *mn, meshTree.nodeList)
-		mn->glued=true;
+	  if(mn->m->visible) mn->glued=true;
 
 	alignDialog->rebuildTree();
 }
@@ -346,20 +346,24 @@ void EditAlignPlugin::process()
 		QMessageBox::warning(0,"Align tool", "Process can work only when more than two meshes have been glued");
 		return;
 	}
+	alignDialog->setEnabled(false);
 	meshTree.Process(defaultAP, defaultMTP);
 	alignDialog->rebuildTree();
 	gla->update();
+	alignDialog->setEnabled(true);
 }
 
 void EditAlignPlugin::recalcCurrentArc()
 {
 	assert(currentArc());
 
+	alignDialog->setEnabled(false);
 	meshTree.ProcessArc(currentArc()->FixName,currentArc()->MovName,*currentArc(),currentArc()->ap);
 	meshTree.ProcessGlobal(currentArc()->ap);
 	AlignPair::Result *recomputedArc = currentArc();
 	alignDialog->rebuildTree();
 	alignDialog->setCurrentArc(recomputedArc);
+	alignDialog->setEnabled(true);
 	gla->update();
 }
 

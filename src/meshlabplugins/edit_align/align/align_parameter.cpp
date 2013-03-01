@@ -61,6 +61,7 @@ void AlignParameter::RichParameterSetToMeshTreeParam(const RichParameterSet &fps
 {
   mtp.arcThreshold=fps.getFloat("arcThreshold");
   mtp.OGSize = fps.getInt("OGSize");
+  mtp.recalcThreshold = fps.getFloat("recalcThreshold");
 }
 
 void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp, RichParameterSet &rps)
@@ -68,6 +69,7 @@ void AlignParameter::MeshTreeParamToRichParameterSet(const MeshTree::Param &mtp,
   rps.clear();
   rps.addParam(new RichInt("OGSize",mtp.OGSize,"Occupancy Grid Size","To compute the overlap between range maps we discretize them into voxel and count them (both for area and overlap); This parameter affect the resolution of the voxelization process. Using a too fine voxelization can "));
   rps.addParam(new RichFloat("arcThreshold",mtp.arcThreshold,"Arc Area Thr.","We run ICP on every pair of mesh with a relative overlap greather than this threshold. The relative overlap is computed as overlapArea / min(area1,area2)"));
+  rps.addParam(new RichFloat("recalcThreshold",mtp.recalcThreshold,"Recalc Fraction","Every time we start process we discard the <recalc> fraction of all the arcs in order to recompute them and hopefully improve the final result. It corresponds to iteratively recalc the bad arcs."));
 
 }
 

@@ -89,7 +89,7 @@ public slots:
 		void process();
 		void recalcCurrentArc();
 		void glueHere();
-		void glueHereAll();
+		void glueHereVisible();
 		void selectBadArc();
 		void glueManual();
 		void glueByPicking();

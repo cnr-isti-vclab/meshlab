@@ -58,10 +58,12 @@ public:
   public:
     int OGSize;
     float arcThreshold;
+    float recalcThreshold;
     Param()
     {
       OGSize = 50000;
       arcThreshold = 0.4;
+      recalcThreshold = 0.1;
     }
   };
 
