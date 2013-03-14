@@ -21,7 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#include<stack>
+#include <cstdarg>
+#include <stack>
 #include "AlignPair.h"
 #include "AlignGlobal.h"
 #include "../point_matching_scale.h"
