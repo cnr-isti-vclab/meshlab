@@ -24,14 +24,15 @@
 #ifndef __VCG_ALIGNPAIR
 #define __VCG_ALIGNPAIR
 
+#include <ctime>
 #include <vcg/math/histogram.h>
 #include <vcg/math/matrix44.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include<vcg/complex/complex.h>
+#include <vcg/complex/complex.h>
 #include <vcg/simplex/face/component_ep.h>
-#include<vcg/complex/algorithms/update/normal.h>
-#include<vcg/complex/algorithms/update/bounding.h>
-#include<vcg/complex/algorithms/update/component_ep.h>
+#include <vcg/complex/algorithms/update/normal.h>
+#include <vcg/complex/algorithms/update/bounding.h>
+#include <vcg/complex/algorithms/update/component_ep.h>
 
 
 namespace vcg
