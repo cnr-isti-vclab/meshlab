@@ -57,7 +57,7 @@ INCLUDEPATH +=      . \
                     ../utils/ \
                     ./src/ \
                     ./src/ooc_vector \
-                    ../../external/kyotocabinet-1.2.34/include
+                    ../../external/kcwin32/include
 
 #SIMPLE_DB{
 #DEFINES += SIMPLE_DB

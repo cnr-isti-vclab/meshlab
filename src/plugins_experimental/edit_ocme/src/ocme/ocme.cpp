@@ -1,5 +1,5 @@
 #include "ocme_disk_loader.h"
-
+#include "ocme_add.h"
 #include "../utils/memory_debug.h"
 
 // TODO include must be taken out of the way.....
@@ -16,7 +16,7 @@
 //#include "gindex_chunk.h"
 
 #include "ocme_impostor.h"
-#include "import_ocm_ply.h"
+//#include "import_ocm_ply.h"
 #include "../utils/logging.h"
 #include "../utils/std_util.h"
 

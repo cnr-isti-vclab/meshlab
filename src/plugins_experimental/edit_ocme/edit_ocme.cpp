@@ -277,23 +277,24 @@ void OcmeEditPlugin::updateButtonsState(){
 		odw->createOcmPushButton->setEnabled(!ocme_loaded);
 		//odw->markEditablePushButton->setEnabled(!mm->cm.face.empty());
 }
-
-bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
+	
+bool OcmeEditPlugin::StartEdit(MeshDocument & _md, GLArea *_gla )
 {
+	this->gla = _gla;
+	this->md = & _md;
 	STAT::Begin(N_STAT);
 	/* patch to comply to current Mesdlab architecture*/
 		if(this->initialized) { ocme_panel->show();return true;}
 
-	gla = _gla;
 	odw = new Ui::OcmeDockWidget ();
-	ocme_panel  = new QDockWidget(gla);
+	ocme_panel  = new QDockWidget(_gla);
 	odw->setupUi(ocme_panel);
 
 //	OcmeGlobals::FillNAFB<CMeshO>();
 
 	ocme_panel->show();
 	ocme_loaded = false;
-	gla->setCursor(QCursor(QPixmap(":/images/cur_ocme.png"),1,1));
+	_gla->setCursor(QCursor(QPixmap(":/images/cur_ocme.png"),1,1));
 	QObject::connect(odw->loadOcmPushButton,SIGNAL(clicked()),this,SLOT(loadOcm()));
 	QObject::connect(odw->createOcmPushButton,SIGNAL(clicked()),this,SLOT(createOcm()));
 	QObject::connect(odw->closeOcmPushButton,SIGNAL(clicked()),this,SLOT(closeOcm()));
@@ -322,12 +323,12 @@ bool OcmeEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *_gla )
 	QObject::connect(odw->modeComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(renderModeChanged(int)));
 
 	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), gla, SLOT(update()));
+	connect(timer, SIGNAL(timeout()), _gla, SLOT(update()));
 	timer->start(25);
 
 	// store current trackball
-	curr_track.track.sca = gla->trackball.track.sca;
-	curr_track.track.tra = gla->trackball.track.tra;
+	curr_track.track.sca = _gla->trackball.track.sca;
+	curr_track.track.tra = _gla->trackball.track.tra;
 
 	if(!ocme_bbox.IsNull()) setTrackBall();
 
@@ -464,7 +465,9 @@ void OcmeEditPlugin::loadOcm(){
 
 		UpdateBoundingBox();
 		setTrackBall();
-        mm  = gla->meshDoc->addNewMesh("Ocm patch","Ocm Patch");
+		
+        mm  = md->addNewMesh("Ocm patch","Ocm Patch");
+
 //		mm->cm.vert.reserve(2000000);
 //		mm->cm.face.reserve(4000000);
 	//	mm  ->cm.bbox = ocme_bbox;
@@ -489,7 +492,7 @@ void OcmeEditPlugin::resetPlugin(){
 this->ocm_name = QString();
 //OcmeGlobals::NAFB().clear();
 delete this->ocme;
-gla->meshDoc->delMesh(this->mm);
+md->delMesh(this->mm);
 this->mm = 0;
 this->all_keys.clear();
 this->cells_to_edit.clear();
@@ -519,7 +522,7 @@ void OcmeEditPlugin::createOcm(){
 		ocme->Create(ocm_name.toAscii());
 		ocme->InitRender();
 		ocme->splat_renderer.Init(this->gla);
-        mm = gla->meshDoc->addNewMesh("Ocm patch","Ocm patch");
+        mm = md->addNewMesh("Ocm patch","Ocm patch");
 
 		/* paramters to be exposed somehow later  on */
 		ocme->params.side_factor = 20;
@@ -637,7 +640,7 @@ void OcmeEditPlugin::edit(){
 		
 	 
 
-		vcg::tri::UpdateNormals<CMeshO>::PerVertexPerFace ( mm->cm );
+		vcg::tri::UpdateNormal<CMeshO>::PerVertexPerFace ( mm->cm );
 
 		CMeshO::  PerFaceAttributeHandle<GIndex>  gposf =
                         vcg::tri::Allocator<CMeshO>:: GetPerFaceAttribute<GIndex> (mm->cm,"ocme_gindex");
@@ -683,7 +686,7 @@ void OcmeEditPlugin::commit(){
 }
 
 void OcmeEditPlugin::add(){
-	if(gla->meshDoc->mm()  == mm)
+	if(md->mm()  == mm)
 			return;
 
 	// fetch the mesh components selected to be inserted in the ocm database
@@ -701,11 +704,11 @@ void OcmeEditPlugin::add(){
 	}
 
 
-	ocme->AddMesh( gla->meshDoc->mm()->cm,attrMapper );
+	ocme->AddMesh( md->mm()->cm,attrMapper );
 
 	ocme->BuildImpostorsHierarchy(ocme->added_cells);
 
-	gla->meshDoc->delMesh( gla->meshDoc->mm());
+	md->delMesh( md->mm());
 	UpdateBoundingBox();
 	setTrackBall();
 	Log("adding selected layer");
@@ -718,7 +721,8 @@ void OcmeEditPlugin::DrawXORRect(GLArea * gla)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+//	glOrtho(0,gla->curSiz.width(),gla->curSiz.height(),0,-1,1);
+	glOrtho(0,800,600,0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();

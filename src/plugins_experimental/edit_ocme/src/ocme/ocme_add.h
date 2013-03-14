@@ -32,10 +32,10 @@ template <class MeshType>
 ScaleRange OCME::ScaleRangeOfMesh( MeshType & m){
 	typename MeshType::ScalarType minScale,maxScale;
 
-	vcg::Histogramf mHist;
+	vcg::Distribution<float> mHist;
 	ScaleRange sr;
 	if(m.fn * 3>  m.vn){ // use the faces
-		vcg::tri::Stat<MeshType>::ComputeEdgeHistogram(m,mHist);
+		vcg::tri::Stat<MeshType>::ComputeFaceEdgeDistribution(m,mHist);
 		minScale = mHist.Percentile(0.5f);
 		maxScale = mHist.Percentile(0.95f);
 		
@@ -44,9 +44,8 @@ ScaleRange OCME::ScaleRangeOfMesh( MeshType & m){
 	}
 	else{// use the vertices
         mHist.Clear();
-        mHist.SetRange( 0, m.bbox.Diag(), 10000);
-                typename MeshType::VertexIterator vi  = m.vert.begin();
-                typename MeshType::VertexIterator vi1 =  vi; vi++;
+        typename MeshType::VertexIterator vi  = m.vert.begin();
+        typename MeshType::VertexIterator vi1 =  vi; vi++;
 		for( ; vi != m.vert.end(); ++vi,++vi1) 
 			mHist.Add(vcg::Distance((*vi).P(),(*vi1).P()));
 		 

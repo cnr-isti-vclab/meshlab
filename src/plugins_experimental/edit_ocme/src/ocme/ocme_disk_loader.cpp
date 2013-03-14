@@ -20,7 +20,7 @@ int CellDisk::size(CellToken * /*token*/){
 int CellRAM::get(CellToken *token){
 	Cell * c =  ocme->GetCell(token->ck);
 	ocme->ExtractContainedFacesFromASingleCell(token->ck,c->rd->Mesh());
-        vcg::tri::UpdateNormals<vcgMesh>::PerVertexPerFace(c->rd->Mesh());
+        vcg::tri::UpdateNormal<vcgMesh>::PerVertexPerFace(c->rd->Mesh());
 	token->sizeinRAM =    c->SizeInRAM();
 	return token->sizeinRAM;
 }

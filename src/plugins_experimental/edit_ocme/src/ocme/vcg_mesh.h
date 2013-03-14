@@ -1,12 +1,6 @@
 #ifndef __VCG_MESH__
 #define __VCG_MESH__
 
-#include<vcg/simplex/vertex/base.h>//
-#include<vcg/simplex/vertex/component.h>
-#include<vcg/simplex/vertex/component_ocf.h>
-#include<vcg/simplex/face/base.h>//
-#include<vcg/simplex/face/component.h>
-//#include<vcg/simplex/face/topology.h>//
 #include<vcg/complex/complex.h>//
 
 // input output

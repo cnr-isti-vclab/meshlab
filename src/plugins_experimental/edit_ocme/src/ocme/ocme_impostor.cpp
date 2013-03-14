@@ -9,7 +9,7 @@
 #include "../ooc_vector/io/ooc_chains_kcdb.hpp"
 #endif
 
-#include <vcg/space/normal_extrapolation.h>
+#include <vcg/complex/algorithms/pointcloud_normal.h>
 
 extern unsigned int  generic_bool;
 int COff(const int & h);
@@ -19,7 +19,8 @@ void OCME::ComputeImpostors( ){
 		vcgMesh m;
 		this->ClearImpostor((*ci).second->key);
 		this->ExtractVerticesFromASingleCell((*ci).second->key,m);
-		vcg::NormalExtrapolation<vcgMesh::VertContainer>::ExtrapolateNormals(m.vert.begin(),m.vert.end(),10);
+
+		vcg::tri::PointCloudNormal<vcgMesh>::Compute(m,vcg::tri::PointCloudNormal<vcgMesh>::Param(),0);
 		for(vcgMesh::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
 			(*ci).second->impostor->AddSample((*vi).P(),(*vi).cN(),vcg::Color4b::Gray);
 	}

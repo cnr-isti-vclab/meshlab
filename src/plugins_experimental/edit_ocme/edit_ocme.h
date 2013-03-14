@@ -47,7 +47,7 @@ public:
 
     static const QString Info();
 
-	virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	virtual bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 
 	virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
@@ -68,6 +68,7 @@ public:
 	CMeshO::FacePointer curFacePtr;
 	QDockWidget * ocme_panel;
 	Ui::OcmeDockWidget * odw;
+	MeshDocument * md;
 	GLArea * gla;
 	unsigned int pickx,picky;
 	bool pick;
