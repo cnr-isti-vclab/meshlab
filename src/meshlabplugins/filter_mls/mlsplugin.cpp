@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -614,4 +612,4 @@ bool MlsPlugin::applyFilter(QAction* filter, MeshDocument& md, RichParameterSet&
 	return true;
 }
 
-Q_EXPORT_PLUGIN(MlsPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(MlsPlugin)
