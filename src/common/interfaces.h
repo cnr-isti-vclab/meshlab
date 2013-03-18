@@ -637,12 +637,30 @@ protected:
 	bool intteruptreq;
 };
 
-Q_DECLARE_INTERFACE(MeshIOInterface,						"vcg.meshlab.MeshIOInterface/1.0")
-Q_DECLARE_INTERFACE(MeshFilterInterface,				"vcg.meshlab.MeshFilterInterface/1.0")
-Q_DECLARE_INTERFACE(MeshLabFilterInterface,				"vcg.meshlab.MeshLabFilterInterface/1.0")
-Q_DECLARE_INTERFACE(MeshRenderInterface,				"vcg.meshlab.MeshRenderInterface/1.0")
-Q_DECLARE_INTERFACE(MeshDecorateInterface,			"vcg.meshlab.MeshDecorateInterface/1.0")
-Q_DECLARE_INTERFACE(MeshEditInterface,					"vcg.meshlab.MeshEditInterface/1.0")
-Q_DECLARE_INTERFACE(MeshEditInterfaceFactory,			"vcg.meshlab.MeshEditInterfaceFactory/1.0")
+#if (QT_VERSION  >= 0x050000)
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
+#define MESHLAB_PLUGIN_NAME_EXPORTER(x) 
+#else
+#define MESHLAB_PLUGIN_IID_EXPORTER(x) 
+#define MESHLAB_PLUGIN_NAME_EXPORTER(x) Q_EXPORT_PLUGIN(x)
+#endif
+
+
+
+#define MESH_IO_INTERFACE_IID "vcg.meshlab.MeshIOInterface/1.0"
+#define MESH_FILTER_INTERFACE_IID  "vcg.meshlab.MeshFilterInterface/1.0"
+#define MESHLAB_FILTER_INTERFACE_IID  "vcg.meshlab.MeshLabFilterInterface/1.0"
+#define MESH_RENDER_INTERFACE_IID  "vcg.meshlab.MeshRenderInterface/1.0"
+#define MESH_DECORATE_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
+#define MESH_EDIT_INTERFACE_IID  "vcg.meshlab.MeshEditInterface/1.0"
+#define MESH_IO_INTERFACE_FACTORY_IID  "vcg.meshlab.MeshEditInterfaceFactory/1.0"
+
+Q_DECLARE_INTERFACE(MeshIOInterface,						MESH_IO_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshFilterInterface,				MESH_FILTER_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshLabFilterInterface,				MESHLAB_FILTER_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshRenderInterface,				MESH_RENDER_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshDecorateInterface,			MESH_DECORATE_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshEditInterface,					 MESH_EDIT_INTERFACE_IID)
+Q_DECLARE_INTERFACE(MeshEditInterfaceFactory,			MESH_IO_INTERFACE_FACTORY_IID)
 
 #endif
