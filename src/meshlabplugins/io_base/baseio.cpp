@@ -366,4 +366,4 @@ void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, c
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 }
 
-Q_EXPORT_PLUGIN(BaseMeshIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)

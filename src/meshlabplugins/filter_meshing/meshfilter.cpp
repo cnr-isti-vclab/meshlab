@@ -1559,4 +1559,4 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 	}
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshFilterPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshFilterPlugin)
