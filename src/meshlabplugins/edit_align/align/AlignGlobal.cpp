@@ -340,7 +340,7 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
   if(Rigid) ComputeRigidMatchMatrix(FixP,MovP,out);
        else ComputeRotoTranslationScalingMatchMatrix(out,FixP,MovP);
 
-	Matrix44d outIn=out; Invert(outIn);
+	Matrix44d outIn=vcg::Inverse(outIn);
 	//double maxdiff = MatrixNorm(out);
 	double maxdiff = MatrixBoxNorm(out,FixBox);
 

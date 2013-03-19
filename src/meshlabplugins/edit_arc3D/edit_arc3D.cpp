@@ -8,7 +8,7 @@
  *                                                                    \      *
  * All rights reserved.                                                      *
  *                                                                           *
- * This program is free software; you can redistribute it and/or modify      *   
+ * This program is free software; you can redistribute it and/or modify      *
  * it under the terms of the GNU General Public License as published by      *
  * the Free Software Foundation; either version 2 of the License, or         *
  * (at your option) any later version.                                       *
@@ -50,14 +50,14 @@ using namespace vcg;
 
 EditArc3DPlugin::EditArc3DPlugin() {
   arc3DDialog = 0;
-	
+
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(10); 
-	
-	
+	qFont.setPixelSize(10);
+
+
 }
 
-const QString EditArc3DPlugin::Info() 
+const QString EditArc3DPlugin::Info()
 {
 	return tr("This edit can be used to extract 3D models from Arc3D results");
 }
@@ -72,45 +72,45 @@ bool EditArc3DPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 	arc3DDialog=new v3dImportDialog(gla->window(),this);
 	QString fileName=arc3DDialog->fileName;
 
- 	if (fileName.isEmpty()) return false;
-		
+	if (fileName.isEmpty()) return false;
+
 	// this change of dir is needed for subsequent texture/material loading
-	QString FileNameDir = fileName.left(fileName.lastIndexOf("/")); 
+	QString FileNameDir = fileName.left(fileName.lastIndexOf("/"));
 	QDir::setCurrent(FileNameDir);
 
 	QString errorMsgFormat = "Error encountered while loading file %1:\n%2";
 	string stdfilename = QFile::encodeName(fileName).constData ();
- 
+
 	QDomDocument doc;
-	
-	
-  		QFile file(fileName);
-			if (file.open(QIODevice::ReadOnly) && doc.setContent(&file)) 
-        {
+
+
+		QFile file(fileName);
+			if (file.open(QIODevice::ReadOnly) && doc.setContent(&file))
+		{
 					file.close();
 					QDomElement root = doc.documentElement();
-					if (root.nodeName() == tr("reconstruction")) 
-          {
-            QDomNode nhead = root.firstChildElement("head");
-            for(QDomNode n = nhead.firstChildElement("meta"); !n.isNull(); n = n.nextSiblingElement("meta"))
-              {
-               if(!n.hasAttributes()) return false;
-               QDomNamedNodeMap attr= n.attributes();
-               if(attr.contains("name")) er.name = (attr.namedItem("name")).nodeValue() ;
-               if(attr.contains("author")) er.author = (attr.namedItem("author")).nodeValue() ;
-               if(attr.contains("created")) er.created = (attr.namedItem("created")).nodeValue() ;
-              }    
-             for(QDomNode n = root.firstChildElement("model"); !n.isNull(); n = n.nextSiblingElement("model"))
-              {
-                Arc3DModel em;
-                em.Init(n);
+					if (root.nodeName() == tr("reconstruction"))
+		  {
+			QDomNode nhead = root.firstChildElement("head");
+			for(QDomNode n = nhead.firstChildElement("meta"); !n.isNull(); n = n.nextSiblingElement("meta"))
+			  {
+			   if(!n.hasAttributes()) return false;
+			   QDomNamedNodeMap attr= n.attributes();
+			   if(attr.contains("name")) er.name = (attr.namedItem("name")).nodeValue() ;
+			   if(attr.contains("author")) er.author = (attr.namedItem("author")).nodeValue() ;
+			   if(attr.contains("created")) er.created = (attr.namedItem("created")).nodeValue() ;
+			  }
+			 for(QDomNode n = root.firstChildElement("model"); !n.isNull(); n = n.nextSiblingElement("model"))
+			  {
+				Arc3DModel em;
+				em.Init(n);
 				//em.cam.TR
-                er.modelList.push_back(em);
+				er.modelList.push_back(em);
 
               }
           }
         }
-    
+
 
 	arc3DDialog->setArc3DReconstruction( &er);
 
@@ -130,11 +130,11 @@ void EditArc3DPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
 {
 	gla->update();
 	assert(arc3DDialog);
-    delete arc3DDialog;
-    arc3DDialog=0;
+	delete arc3DDialog;
+	arc3DDialog=0;
 
-}  
-/* 
+}
+/*
 This is the main function, which generates the final mesh (and the rasters) based on the selection provided by the user
 */
 
@@ -143,18 +143,18 @@ void EditArc3DPlugin::ExportPly()
 	md->setBusy(true);
 	md->addNewMesh("",er.name,true);
 	MeshModel* m=md->mm();
-	
+
 	// Options collection
-						
+
 	int t0=clock();
-	
+
 	int subSampleVal = arc3DDialog->ui.subsampleSpinBox->value();
 	int minCountVal= arc3DDialog->ui.minCountSpinBox->value();
 	float maxCCDiagVal= arc3DDialog->ui.maxCCDiagSpinBox->value();
 	int smoothSteps=arc3DDialog->ui.smoothSpinBox->value();
 	bool closeHole = arc3DDialog->ui.holeCheckBox->isChecked();
 	int maxHoleSize = arc3DDialog->ui.holeSpinBox->value();
-	
+
 	CMeshO mm;
 	QTableWidget *qtw=arc3DDialog->ui.imageTableWidget;
 	float MinAngleCos=cos(vcg::math::ToRad(arc3DDialog->ui.qualitySpinBox->value()));
@@ -164,7 +164,7 @@ void EditArc3DPlugin::ExportPly()
 	int selectedNum=0,selectedCount=0;
 	int i;
 	 for(i=0;i<qtw->rowCount();++i) if(qtw->isItemSelected(qtw->item(i,0))) ++selectedNum;
-	
+
 	bool dilationFlag = arc3DDialog->ui.dilationCheckBox->isChecked();
 	int dilationN = arc3DDialog->ui.dilationNumPassSpinBox->value();
 	int dilationSz = arc3DDialog->ui.dilationSizeSlider->value() * 2 + 1;
@@ -185,21 +185,21 @@ void EditArc3DPlugin::ExportPly()
 				++selectedCount;
 				mm.Clear();
 				int tt0=clock();
-				(*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps, 
+				(*li).BuildMesh(mm,subSampleVal,minCountVal,MinAngleCos,smoothSteps,
 					dilationFlag, dilationN, dilationSz, erosionFlag, erosionN, erosionSz,scalingFactor);
 				int tt1=clock();
-				gla->log->Logf(GLLogStream::SYSTEM,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
+				this->Log(GLLogStream::SYSTEM,"** Mesh %i : Build in %i\n",selectedCount,tt1-tt0);
 				m->cm.Clear();
 				tri::Append<CMeshO,CMeshO>::Mesh(m->cm,mm); // append mesh mr to ml
-					
+
 				int tt2=clock();
-				gla->log->Logf(GLLogStream::SYSTEM,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
+				this->Log(GLLogStream::SYSTEM,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
 
 			}
 	}
-	 
+
 	int t1=clock();
-	gla->log->Logf(GLLogStream::SYSTEM,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
+	this->Log(GLLogStream::SYSTEM,"Extracted %i meshes in %i\n",selectedCount,t1-t0);
 
 ///// Removing connected components
 
@@ -210,16 +210,16 @@ void EditArc3DPlugin::ExportPly()
 	}
 
 	int t2=clock();
-	gla->log->Logf(GLLogStream::SYSTEM,"Topology and removed CC in %i\n",t2-t1);
+	this->Log(GLLogStream::SYSTEM,"Topology and removed CC in %i\n",t2-t1);
 
 	vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
-	
+
 // Hole filling
 
 	if(closeHole)
 	{
 		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK);
-		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);	    
+		tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 		vcg::tri::Hole<CMeshO>::EarCuttingFill<vcg::tri::MinimumWeightEar< CMeshO> >(m->cm,maxHoleSize,false);
 	}
 
@@ -227,7 +227,7 @@ void EditArc3DPlugin::ExportPly()
 
 	Matrix44f transf;
 	transf.SetRotateDeg(180,Point3f(1.0,0.0,0.0));
-	
+
 	m->cm.Tr=transf;
 	tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr);
 	tri::UpdateNormal<CMeshO>::PerVertexMatrix(m->cm,m->cm.Tr);
@@ -237,35 +237,35 @@ void EditArc3DPlugin::ExportPly()
 	m->cm.shot.ApplyRigidTransformation(transf);
 
 	int t3=clock();
-	gla->log->Logf(GLLogStream::SYSTEM,"---------- Total Processing Time%i\n\n\n",t3-t0);
-	
+	this->Log(GLLogStream::SYSTEM,"---------- Total Processing Time%i\n\n\n",t3-t0);
+
 	vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);					// updates bounding box
 	tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 
-// Final operations 
+// Final operations
 
 	md->mm()->visible=true;
 	md->setBusy(false);
 	gla->rm.colorMode=GLW::CMPerVert;
 	emit this->resetTrackBall();
 	gla->update();
-	
-}    
+
+}
 
 void EditArc3DPlugin::mousePressEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
-	
+
 }
 
-void EditArc3DPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * ) 
+void EditArc3DPlugin::mouseMoveEvent(QMouseEvent *e, MeshModel &, GLArea * )
 {
-	
-	
+
+
 }
 
 void EditArc3DPlugin::mouseReleaseEvent(QMouseEvent * e, MeshModel &/*m*/, GLArea * gla)
 {
-	
+
 }
 
 
@@ -311,7 +311,7 @@ void EditArc3DPlugin::exportShotsToRasters()
 				path.append("Undist" + suffix);
 				qDebug(path.toLatin1());
 
-				QImage undistImg(originalImg.width(),originalImg.height(),originalImg.format()); 
+				QImage undistImg(originalImg.width(),originalImg.height(),originalImg.format());
 				undistImg.fill(qRgba(0,0,0,255));
 
 				vcg::Camera<float> &cam = rm->shot.Intrinsics;
@@ -360,7 +360,7 @@ void EditArc3DPlugin::exportShotsToRasters()
 	}
 }
 
-void Arc3DModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
+void Arc3DModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr,
 														 bool dilation, int dilationNumPasses, int dilationWinsize,
 														 bool erosion, int erosionNumPasses, int erosionWinsize)
 {
@@ -368,7 +368,7 @@ void Arc3DModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float
 	FloatImage depth2;
 	int w = depthImgf.w;
 	int h = depthImgf.h;
-	
+
 	depth=depthImgf;
 
 	if (dilation)
@@ -396,20 +396,20 @@ void Arc3DModel::depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float
     HH.Add(fabs(depthImgf.v[i]-depth.v[i-1]));
 
   int deletedCnt=0;
-  
+
   depthJumpThr = static_cast<float>(HH.Percentile(0.8));
-	for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
-		{
-				if ((depthImgf.Val(x, y) - depth.Val(x, y)) / depthImgf.Val(x, y) > 0.6)
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
         {
-					countImgf.Val(x, y) = 0.0f;
+                if ((depthImgf.Val(x, y) - depth.Val(x, y)) / depthImgf.Val(x, y) > 0.6)
+        {
+                    countImgf.Val(x, y) = 0.0f;
           ++deletedCnt;
         }
-		}
+        }
 
-	countImgf.convertToQImage().save("tmp_filteredcount.jpg","jpg");
-  
+    countImgf.convertToQImage().save("tmp_filteredcount.jpg","jpg");
+
 }
 
 float Arc3DModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
@@ -425,20 +425,20 @@ float Arc3DModel::ComputeDepthJumpThr(FloatImage &depthImgf, float percentile)
 
 
 
-/// Apply the hand drawn mask image 
+/// Apply the hand drawn mask image
 bool Arc3DModel::CombineHandMadeMaskAndCount(CharImage &CountImg, QString maskName )
 {
-	QImage maskImg(maskName);
+    QImage maskImg(maskName);
   qDebug("Trying to read maskname %s",qPrintable(maskName));
-	if(maskImg.isNull()) 
-		return false;
+    if(maskImg.isNull())
+        return false;
 
 	if( (maskImg.width()!= CountImg.w)  || (maskImg.height()!= CountImg.h) )
 	{
 		qDebug("Warning mask and images does not match! %i %i vs %i %i",maskImg.width(),CountImg.w,maskImg.height(),CountImg.h);
 		return false;
 	}
-	
+
 	for(int j=0;j<maskImg.height();++j)
 		for(int i=0;i<maskImg.width();++i)
 			if(qRed(maskImg.pixel(i,j))>128)
@@ -486,7 +486,7 @@ void Arc3DModel::SmartSubSample(int factor, FloatImage &fli, CharImage &chi, Flo
     }
 }
 
-/* 
+/*
 This filter average apply a laplacian smoothing over a depth map averaging the samples with a weighting scheme that follows the Counting masks.
 The result  of the laplacian is applied only on sample with low quality.
 */
@@ -496,7 +496,7 @@ void Arc3DModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minC
   FloatImage Sum;
   int w=depthImg.w,h=depthImg.h;
   Sum.resize(w,h);
-  
+
  for(int y=1;y<h-1;++y)
   for(int x=1;x<w-1;++x)
     {
@@ -525,7 +525,7 @@ void Arc3DModel::Laplacian2(FloatImage &depthImg, FloatImage &countImg, int minC
     }
 }
 
-// It generate a feature mask that mark the featureless area of the original photo. 
+// It generate a feature mask that mark the featureless area of the original photo.
 // Featureless areas are usually affected by noise and have to be smoothed more
 
 void Arc3DModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask)
@@ -573,7 +573,7 @@ void Arc3DModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &Orig
 
 			mask2.Val(x, y) = min(255, avg / ((2 * wsize + 1)* (2 * wsize +1)));
 		}
-  
+
   mask.convertToQImage().save("tmp_testmask.jpg","jpg");
   mask2.convertToQImage().save("tmp_testmaskSmooth.jpg","jpg");
 
@@ -591,7 +591,7 @@ void Arc3DModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &Orig
 
 			mask.Val(x, y) = minimum;
 		}
-  
+
 	grad.convertToQImage().save("tmp_test.jpg","jpg");
 	mask.convertToQImage().save("tmp_testmaskeroded.jpg","jpg");
 }
@@ -599,15 +599,15 @@ void Arc3DModel::GenerateGradientSmoothingMask(int subsampleFactor, QImage &Orig
 /*
 Main processing function;
 
-it takes a depth map, a count map, 
+it takes a depth map, a count map,
 - resample them to a (width/subsample,height/subsample) image
 - leave only the faces that are within a given orientation range
 - that have a count greater than minCount.
 - and smooth them with a count/quality aware laplacian filter
-*/ 
+*/
 
 bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
-													 bool dilation, int dilationPasses, int dilationSize, 
+													 bool dilation, int dilationPasses, int dilationSize,
 													 bool erosion, int erosionPasses, int erosionSize,float scalingFactor)
 {
   FloatImage depthImgf;
@@ -615,18 +615,18 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   int ttt0=clock();
   depthImgf.Open(depthName.toAscii());
   countImgc.Open(countName.toAscii());
-  
+
   QImage TextureImg;
   TextureImg.load(textureName);
   int ttt1=clock();
 
   CombineHandMadeMaskAndCount(countImgc,maskName);  // set count to zero for all masked points
-  
-  FloatImage depthSubf;  // the subsampled depth image 
+
+  FloatImage depthSubf;  // the subsampled depth image
   FloatImage countSubf;  // the subsampled quality image (quality == count)
-  
+
   SmartSubSample(subsampleFactor,depthImgf,countImgc,depthSubf,countSubf,minCount);
-  
+
   CharImage FeatureMask; // the subsampled image with (quality == features)
   GenerateGradientSmoothingMask(subsampleFactor, TextureImg, FeatureMask);
 
@@ -635,7 +635,7 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   int ttt2=clock();
 
   float depthThr = ComputeDepthJumpThr(depthSubf,0.8f);
-  for(int ii=0;ii<smoothSteps;++ii) 
+  for(int ii=0;ii<smoothSteps;++ii)
     Laplacian2(depthSubf,countSubf,minCount,FeatureMask,depthThr);
 
   int ttt3=clock();
@@ -649,13 +649,13 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 	// To be more specific the border of the depth map are identified by erosion
 	// and the relative vertex removed (by setting mincount equal to 0).
   float depthThr2 = ComputeDepthJumpThr(depthSubf,0.95f);
-	depthFilter(depthSubf, countSubf, depthThr2, 
-		dilation, dilationPasses, dilationSize, 
-		erosion, erosionPasses, erosionSize);
+    depthFilter(depthSubf, countSubf, depthThr2,
+        dilation, dilationPasses, dilationSize,
+        erosion, erosionPasses, erosionSize);
 
-	int vn = m.vn;
+    int vn = m.vn;
   for(int i=0;i<vn;++i)
-    if(countSubf.v[i]<minCount) 
+    if(countSubf.v[i]<minCount)
     {
       m.vert[i].SetD();
       m.vn--;
@@ -665,19 +665,19 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 
   CMeshO::VertexIterator vi;
   Matrix33d Rinv= Inverse(cam.R);
- 
+
   for(vi=m.vert.begin();vi!=m.vert.end();++vi)if(!(*vi).IsD())
   {
     Point3f in=(*vi).P();
     Point3d out;
     cam.DepthTo3DPoint(in[0], in[1], in[2], out);
-	    
+
     (*vi).P().Import(out);
     QRgb c = TextureImg.pixel(int(in[0]), int(in[1]));
-	vcg::Color4b tmpcol(qRed(c),qGreen(c),qBlue(c),0);
+    vcg::Color4b tmpcol(qRed(c),qGreen(c),qBlue(c),0);
     (*vi).C().Import(tmpcol);
-    if(FeatureMask.Val(int(in[0]/subsampleFactor), int(in[1]/subsampleFactor))<200) (*vi).Q()=0; 
-    else (*vi).Q()=1; 
+    if(FeatureMask.Val(int(in[0]/subsampleFactor), int(in[1]/subsampleFactor))<200) (*vi).Q()=0;
+    else (*vi).Q()=1;
     (*vi).Q()=float(FeatureMask.Val(in[0]/subsampleFactor, in[1]/subsampleFactor))/255.0;
   }
 
@@ -688,7 +688,7 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
    for(fi=m.face.begin();fi!=m.face.end();++fi)
    {
 
-     if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
+     if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() )
        {
         (*fi).SetD();
         --m.fn;
@@ -714,10 +714,10 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
 	scaleMat.SetScale(scalingFactor,scalingFactor,scalingFactor);
 	vcg::tri::UpdatePosition<CMeshO>::Matrix(m, scaleMat);
 
-    return true;
+	return true;
 }
 
-/* 
+/*
 This is the function which applies a correction to the position of cameras to handle the format of arc3D cameras.
 */
 
@@ -727,36 +727,36 @@ Point3f Arc3DModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, 
   CharImage countImgc;
   depthImgf.Open(depthName.toAscii());
   countImgc.Open(countName.toAscii());
-  
+
   QImage TextureImg;
   TextureImg.load(textureName);
 
   CombineHandMadeMaskAndCount(countImgc,maskName);  // set count to zero for all masked points
-  
-  FloatImage depthSubf;  // the subsampled depth image 
+
+  FloatImage depthSubf;  // the subsampled depth image
   FloatImage countSubf;  // the subsampled quality image (quality == count)
-  
+
   SmartSubSample(subsampleFactor,depthImgf,countImgc,depthSubf,countSubf,minCount);
-  
+
   CharImage FeatureMask; // the subsampled image with (quality == features)
   GenerateGradientSmoothingMask(subsampleFactor, TextureImg, FeatureMask);
 
   depthSubf.convertToQImage().save("tmp_depth.jpg", "jpg");
 
   float depthThr = ComputeDepthJumpThr(depthSubf,0.8f);
-  for(int ii=0;ii<smoothSteps;++ii) 
+  for(int ii=0;ii<smoothSteps;++ii)
     Laplacian2(depthSubf,countSubf,minCount,FeatureMask,depthThr);
 
   vcg::tri::Grid<CMeshO>(m,depthSubf.w,depthSubf.h,depthImgf.w,depthImgf.h,&*depthSubf.v.begin());
 
-  	// The depth is filtered and the minimum count mask is update accordingly.
+	// The depth is filtered and the minimum count mask is update accordingly.
 	// To be more specific the border of the depth map are identified by erosion
 	// and the relative vertex removed (by setting mincount equal to 0).
   float depthThr2 = ComputeDepthJumpThr(depthSubf,0.95f);
-	
-	int vn = m.vn;
+
+    int vn = m.vn;
   for(int i=0;i<vn;++i)
-    if(countSubf.v[i]<minCount) 
+    if(countSubf.v[i]<minCount)
     {
       m.vert[i].SetD();
       m.vn--;
@@ -774,14 +774,14 @@ Point3f Arc3DModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, 
     Point3f in=(*vi).P();
     Point3d out;
     correction+=cam.DepthTo3DPoint(in[0], in[1], in[2], out);
-	numSamp++;
-    
-    }
+    numSamp++;
+
+	}
 	if (numSamp!=0)
 		correction/=(double)numSamp;
 
   return correction;
-  
+
 }
 
 
@@ -866,8 +866,8 @@ bool Arc3DModel::Init(QDomNode &node)
 						myrot[1][0] = -cam[1];	myrot[1][1] = -cam[4];	myrot[1][2] = -cam[7];	myrot[1][3] = 0.0f;
 						myrot[2][0] = -cam[2];	myrot[2][1] = -cam[5];	myrot[2][2] = -cam[8];	myrot[2][3] = 0.0f;
 						myrot[3][0] = 0.0f;			myrot[3][1] = 0.0f;			myrot[3][2] = 0.0f;			myrot[3][3] = 1.0;
-						
-						
+
+
 						shot.Extrinsics.SetRot(myrot);
 
 						// camera position
@@ -885,10 +885,10 @@ bool Arc3DModel::Init(QDomNode &node)
 						//shot.Intrinsics.DistorCenterPx[0]=shot.Intrinsics.CenterPx[0];
 						//shot.Intrinsics.DistorCenterPx[1]=shot.Intrinsics.CenterPx[1];
 
-						
-						fclose(lvcam);			
+
+						fclose(lvcam);
 					}
-            }
+			}
 
   QString tmpName=textureName.left(textureName.length()-4);
   maskName = tmpName.append(".mask.png");

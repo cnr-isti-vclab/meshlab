@@ -191,7 +191,7 @@ void GLArea::pasteTile()
 		if (snapBuffer.isNull())
 			snapBuffer = QImage(tileBuffer.width() * ss.resolution, tileBuffer.height() * ss.resolution, tileBuffer.format());
 
-        uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
+		uchar *snapPtr = snapBuffer.bits() + (tileBuffer.bytesPerLine() * tileCol) + ((totalCols * tileRow) * tileBuffer.byteCount());
 		uchar *tilePtr = tileBuffer.bits();
 
 		for (int y=0; y < tileBuffer.height(); y++)
@@ -225,35 +225,35 @@ void GLArea::pasteTile()
 			if(!ss.tiledSave)
 			{
 				bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
-				if (ret) 
-        {
-          this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-          if(ss.addToRasters)
-          {
-            mw()->importRaster(outfile);
-            
+				if (ret)
+		{
+		  this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+		  if(ss.addToRasters)
+		  {
+			mw()->importRaster(outfile);
+
             RasterModel *rastm = md()->rm();
             rastm->shot = shotFromTrackball().first;
-       			float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
-      			rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
-			      rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
-			      rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-			      rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-			      rastm->shot.Intrinsics.CenterPx[0]=(int)((float)rastm->shot.Intrinsics.ViewportPx[0]/2.0);
-			      rastm->shot.Intrinsics.CenterPx[1]=(int)((float)rastm->shot.Intrinsics.ViewportPx[1]/2.0);
+                float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
+                rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
+                  rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
+                  rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+                  rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+                  rastm->shot.Intrinsics.CenterPx[0]=(int)((float)rastm->shot.Intrinsics.ViewportPx[0]/2.0);
+                  rastm->shot.Intrinsics.CenterPx[1]=(int)((float)rastm->shot.Intrinsics.ViewportPx[1]/2.0);
           }
         }
-				else
+                else
         {
           Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
         }
-			}
-			takeSnapTile=false;
-			snapBuffer=QImage();
-		}
-	}
-	update();
-	glPopAttrib();
+            }
+            takeSnapTile=false;
+            snapBuffer=QImage();
+        }
+    }
+    update();
+    glPopAttrib();
 }
 
 
@@ -471,7 +471,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	} ///end if busy
 
 	glPopMatrix(); // We restore the state to immediately after the trackball (and before the bbox scaling/translating)
-	
+
 	if(trackBallVisible && !takeSnapTile && !(iEdit && !suspendedEditor))
 		trackball.DrawPostApply();
 
@@ -496,7 +496,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	glPopMatrix(); // We restore the state to immediately before the trackball
 
 	//If it is a raster viewer draw the image as a texture
-	if(isRaster()) 
+	if(isRaster())
 		drawTarget();
 
 	// Double click move picked point to center
@@ -530,7 +530,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		updateFps(time.elapsed());
 		glPopAttrib();
 	}
-	
+
 	//Draw highlight if it is the current viewer
 	if(mvc()->currentId==id)
 		displayViewerHighlight();
@@ -553,7 +553,7 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 	painter->save();
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(10);
-    qFont.setStyleStrategy(QFont::PreferAntialias);
+	qFont.setStyleStrategy(QFont::PreferAntialias);
 	painter->setFont(qFont);
 
 	QString tableText;
@@ -610,24 +610,24 @@ void GLArea::displayRealTimeLog(QPainter *painter)
       if(md()->Log.RealTimeLogText.count(keyIt)>1)
         HeadName += " - "+itVal.first;
       doc.clear();
-	  doc.setDocumentMargin(margin*0.75);
-	  QColor textColor = Qt::white;
-	  QColor headColor(200,200,200);
-	  doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + HeadName + "</b></i></p></font>"
-				  "<font color=\"" + textColor.name() + "\"             >" + itVal.second + "</font>");
-	  QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
-	  QPainterPath path;
-	  painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
-	  painter->setPen(ColorConverter::ToQColor(logAreaColor));
-	  path.addRoundedRect(outrect,roundness,roundness);
-	  painter->drawPath(path);
-	  painter->save();
-	  painter->translate(border,startingpoint);
-	  doc.drawContents(painter);
-	  painter->restore();
-	  startingpoint = startingpoint + doc.size().height() + margin*.75;
-	}
-  }	
+      doc.setDocumentMargin(margin*0.75);
+      QColor textColor = Qt::white;
+      QColor headColor(200,200,200);
+      doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + HeadName + "</b></i></p></font>"
+                  "<font color=\"" + textColor.name() + "\"             >" + itVal.second + "</font>");
+      QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
+      QPainterPath path;
+      painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
+      painter->setPen(ColorConverter::ToQColor(logAreaColor));
+      path.addRoundedRect(outrect,roundness,roundness);
+      painter->drawPath(path);
+      painter->save();
+      painter->translate(border,startingpoint);
+      doc.drawContents(painter);
+      painter->restore();
+      startingpoint = startingpoint + doc.size().height() + margin*.75;
+    }
+  }
 
   // After the rederaw we clear the RealTimeLog buffer!
   md()->Log.RealTimeLogText.clear();
@@ -646,7 +646,7 @@ void GLArea::displayInfo(QPainter *painter)
 	textPen.setWidthF(0.2f);
 	painter->setPen(textPen);
 
-    qFont.setStyleStrategy(QFont::PreferAntialias);
+	qFont.setStyleStrategy(QFont::PreferAntialias);
 	qFont.setFamily("Helvetica");
 	qFont.setPixelSize(12);
 	painter->setFont(qFont);
@@ -694,7 +694,7 @@ void GLArea::displayInfo(QPainter *painter)
 			col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
 		painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
 		painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
-        if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
+		if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
 	}
 	painter->restore();
 	painter->beginNativePainting();
@@ -860,7 +860,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 bool GLArea::readyToClose()
 {
 	if (md()->hasBeenModified())
-	{		
+	{
 		QMessageBox::StandardButton ret=QMessageBox::question(
 			this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(md()->docLabel()),
 			QMessageBox::Yes|QMessageBox::No,
@@ -870,7 +870,7 @@ bool GLArea::readyToClose()
 	}
 	// Now do the actual closing of the glArea
 	if(getCurrentEditAction()) endEdit();
-	if (iRenderer) 
+	if (iRenderer)
 		iRenderer->Finalize(currentShader, this->md(), this);
 
 	// Now manage the closing of the decorator set;
@@ -1147,7 +1147,7 @@ void GLArea::initTexture(bool reloadAllTexture)
 						this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
 						unexistingtext += "<font color=red>" + QString(mp->cm.textures[i].c_str()) + "</font><br>";
 					}
-					else 
+					else
 						this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
 					mp->glw.TMId.push_back(0);
 					glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
@@ -1411,8 +1411,7 @@ Point3f GLArea::getViewDir()
 {
 	vcg::Matrix44f rotM;
 	trackball.track.rot.ToMatrix(rotM);
-	vcg::Invert(rotM);
-	return rotM*vcg::Point3f(0,0,1);
+	return vcg::Inverse(rotM)*vcg::Point3f(0,0,1);
 }
 
 void GLArea::updateCustomSettingValues( RichParameterSet& rps )
@@ -1441,7 +1440,7 @@ void GLArea::updateMeshSetVisibilities()
 void GLArea::updateRasterSetVisibilities()
 {
 	//Align rasterVisibilityMap state with rasterList state
-	//Deleting from the map the visibility of the deleted rasters 
+	//Deleting from the map the visibility of the deleted rasters
 	QMapIterator<int, bool> i(rasterVisibilityMap);
 	while (i.hasNext()) {
 		i.next();
@@ -1528,7 +1527,7 @@ void GLArea::loadRaster(int id)
 		}
 }
 
-void GLArea::drawTarget() 
+void GLArea::drawTarget()
 {
 	if(!targetTex) return;
 
@@ -1628,7 +1627,7 @@ void GLArea::initializeShot(Shotf &shot)
 	shot.Extrinsics.SetIdentity();
 }
 
-bool GLArea::viewFromFile() 
+bool GLArea::viewFromFile()
 {
 	QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
 
@@ -1641,7 +1640,7 @@ bool GLArea::viewFromFile()
 	QString project_path = qfInfo.absoluteFilePath();
 
 	QDomDocument doc("XmlDocument");    //It represents the XML document
-	if(!doc.setContent( &qf ))	
+	if(!doc.setContent( &qf ))
 		return false;
 
 	QString type = doc.doctype().name();
@@ -1696,7 +1695,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 	shot.Intrinsics.ViewportPx[1]=h;
 
 	// The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
-	// The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation 
+	// The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation
 	// introduced by the shot.
 	fov = shot.GetFovFromFocal();
 
@@ -1715,7 +1714,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 
 }
 
-/* 
+/*
 ViewState file is an xml file format created by Meshlab with the action "copyToClipboard"
 */
 void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
@@ -1736,7 +1735,7 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 			QDomNamedNodeMap attr = node.attributes();
 			trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
 			nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
-			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();      
+			farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
 			fov = shot.GetFovFromFocal();
 			clipRatioNear = (getCameraDistance()-nearPlane)/2.0f ;
 			clipRatioFar = (farPlane-getCameraDistance())/10.0f ;
@@ -1803,7 +1802,7 @@ void GLArea::viewFromClipboard()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	QString shotString = clipboard->text();
-	QDomDocument doc("StringDoc");  
+	QDomDocument doc("StringDoc");
 	doc.setContent(shotString);
 	loadViewFromViewStateFile(doc);
 }
@@ -1863,7 +1862,7 @@ void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 	//Expressing the translation along Z with a scale factor k
 	//Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
-	////k is the ratio between the distances along z of two correspondent points (before and after the traslation) 
+	////k is the ratio between the distances along z of two correspondent points (before and after the traslation)
 	////from the point of view
 	//float k= abs(p2.Z()/p1.Z());
 
@@ -1936,7 +1935,7 @@ void GLArea::createOrthoView(QString dir)
 }
 
 MultiViewer_Container * GLArea::mvc()
-{ 
+{
 	QObject * curParent = this->parent();
 	while(qobject_cast<MultiViewer_Container *>(curParent) == 0)
 	{
