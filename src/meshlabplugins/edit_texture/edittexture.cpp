@@ -32,7 +32,7 @@
 
 using namespace vcg;
 
-EditTexturePlugin::EditTexturePlugin() 
+EditTexturePlugin::EditTexturePlugin()
 {
 	isDragging = false;
 	widget = 0;
@@ -40,17 +40,17 @@ EditTexturePlugin::EditTexturePlugin()
 	qFont.setPixelSize(14);
 }
 
-EditTexturePlugin::~EditTexturePlugin() 
+EditTexturePlugin::~EditTexturePlugin()
 {
 	// Delete the tool widget
-	if (widget != 0) 
+	if (widget != 0)
 	{
 		delete widget;
 		widget = 0;
 	}
 }
 
-const QString EditTexturePlugin::Info() 
+const QString EditTexturePlugin::Info()
 {
 	return tr("Edit texture coordinates of the selected area");
 }
@@ -59,87 +59,87 @@ void EditTexturePlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLAre
 {
 	isDragging = true;
 
-	if(event->modifiers() == Qt::ControlModifier) selMode = SMAdd;
+    if(event->modifiers() == Qt::ControlModifier) selMode = SMAdd;
     else if(event->modifiers() == Qt::ShiftModifier) selMode = SMSub;
-	else selMode = SMClear;
-	// Change the appearance of the cursor
-	switch(selMode)
-	{
-		case SMAdd:	// CTRL + Mouse
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"),1,1));
-			break;
-		case SMSub: // SHIFT + Mouse
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"),1,1));
-			break;
-		case SMClear: // Mouse
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
-			for (unsigned i = 0; i < FaceSel.size(); i++) FaceSel[i]->ClearS();
-			FaceSel.clear();
-			break;
-	}
+    else selMode = SMClear;
+    // Change the appearance of the cursor
+    switch(selMode)
+    {
+        case SMAdd:	// CTRL + Mouse
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"),1,1));
+            break;
+        case SMSub: // SHIFT + Mouse
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"),1,1));
+            break;
+        case SMClear: // Mouse
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
+            for (unsigned i = 0; i < FaceSel.size(); i++) FaceSel[i]->ClearS();
+            FaceSel.clear();
+            break;
+    }
     if(event->modifiers() == Qt::ControlModifier || event->modifiers() == Qt::ShiftModifier )
-	{
-		CMeshO::FaceIterator fi;
-		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) 
-			if(!(*fi).IsD() && (*fi).IsS()) FaceSel.push_back(&*fi);        
-	}
+    {
+        CMeshO::FaceIterator fi;
+        for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+            if(!(*fi).IsD() && (*fi).IsS()) FaceSel.push_back(&*fi);
+    }
 
-	start = event->pos();
+    start = event->pos();
     cur = start;
-	gla->update();
-	return;
+    gla->update();
+    return;
 }
-  
+
 void EditTexturePlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
     prev = cur;
     cur = event->pos();
-	/*int curT;
-	static int lastRendering;
-	if (isDragging)
-	{
-	    // The user is selecting an area: management of the update 
-		lastRendering = clock();
-		curT = clock();
-	    if(gla->lastRenderingTime() < 50 || (curT - lastRendering) > 1000 )
-		{
-			lastRendering = curT;
-			gla->update();
-	    }
-		else
-		{
-			gla->makeCurrent();
-			glDrawBuffer(GL_FRONT);
-			DrawXORRect(gla);
-			glDrawBuffer(GL_BACK);
-			glFlush();
-	    }
-	}*/
-	if(gla->lastRenderingTime() < 200 )
+    /*int curT;
+    static int lastRendering;
+    if (isDragging)
     {
-		gla->update();
+        // The user is selecting an area: management of the update
+        lastRendering = clock();
+        curT = clock();
+        if(gla->lastRenderingTime() < 50 || (curT - lastRendering) > 1000 )
+        {
+            lastRendering = curT;
+            gla->update();
+        }
+        else
+        {
+            gla->makeCurrent();
+            glDrawBuffer(GL_FRONT);
+            DrawXORRect(gla);
+            glDrawBuffer(GL_BACK);
+            glFlush();
+        }
+    }*/
+    if(gla->lastRenderingTime() < 200 )
+    {
+        gla->update();
     }
     else
-	{
-		gla->makeCurrent();
-		glDrawBuffer(GL_FRONT);
-		DrawXORRect(gla);
-		glDrawBuffer(GL_BACK);
-		glFlush();
+    {
+        gla->makeCurrent();
+        glDrawBuffer(GL_FRONT);
+        DrawXORRect(gla);
+        glDrawBuffer(GL_BACK);
+        glFlush();
     }
 }
-  
+
 void EditTexturePlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
     prev = cur;
     cur = event->pos();
-	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
-	if (isDragging)
-	{
-		widget->SelectFromModel();
-		isDragging = false;
-	}
-	gla->update();
+    gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
+    if (isDragging)
+    {
+        widget->SelectFromModel();
+        isDragging = false;
+    }
+    gla->update();
 }
 
 void EditTexturePlugin::Decorate(MeshModel &m, GLArea *gla)
@@ -153,12 +153,12 @@ void EditTexturePlugin::Decorate(MeshModel &m, GLArea *gla)
 
 		DrawXORRect(gla);
 		mid = (start + cur)/2;
-	    mid.setY(gla->height() - mid.y());
+		mid.setY(gla->height() - mid.y());
 		wid = (start - cur);
-	    if(wid.x()<0) wid.setX(-wid.x());
+		if(wid.x()<0) wid.setX(-wid.x());
 		if(wid.y()<0) wid.setY(-wid.y());
 
-		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) 
+		for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 			if(!(*fi).IsD()) (*fi).ClearS();
 
 		glPushMatrix();
@@ -190,7 +190,7 @@ bool EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	// Set up the model
 	//m.cm.face.EnableFFAdjacency();
   m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-	
+
 	if (m.cm.textures.size() == 0)
 	{
 		QMessageBox::warning(gla->window(), "Texture Parametrization Tool",
@@ -199,13 +199,13 @@ bool EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 		return false;
 	}
 
-	if (vcg::tri::HasPerWedgeTexCoord(m.cm)) 
+	if (vcg::tri::HasPerWedgeTexCoord(m.cm))
 	{
 		vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
 		if(vcg::tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) && !HasCollapsedTextCoords(m)) degenerate = false;
-		else 
+		else
 		{
-			gla->log->Logf(GLLogStream::WARNING,"This mesh has a degenerated texture parametrization!");
+			this->Log(GLLogStream::WARNING,"This mesh has a degenerated texture parametrization!");
 			degenerate = true;
 		}
 	}
@@ -219,23 +219,23 @@ bool EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	for(fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) (*fi).ClearS();
 
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
-	
+
 	connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectionRendering(bool)));
 	setSelectionRendering(true);
 
 	// Create an istance of the interface
-	if (widget == 0) 
-	{ 
+	if (widget == 0)
+	{
 		widget = new TextureEditor(gla->window(), &m, gla, degenerate);
 		dock = new QDockWidget(gla->window());
 		dock->setAllowedAreas(Qt::NoDockWidgetArea);
 		dock->setWidget(widget);
 		QPoint p = gla->window()->mapToGlobal(QPoint(0,0));
 		dock->setGeometry(-5+p.x()+gla->window()->width()-widget->width(),p.y(),widget->width(),widget->height());
-		dock->setFloating(true);		
+		dock->setFloating(true);
 	}
 	dock->setVisible(true);
-	dock->layout()->update();	
+	dock->layout()->update();
 
 	// Initialize the texture using the intere model
 	InitTexture(m);
@@ -248,29 +248,29 @@ void EditTexturePlugin::EndEdit(MeshModel &m , GLArea * )
 {
 	// Delete the widget
 	for (unsigned i = 0; i < m.cm.face.size(); i++) m.cm.face[i].ClearS();
-	if (widget != 0) 
-	{ 
-		delete widget; 
-		delete dock; 
+	if (widget != 0)
+	{
+		delete widget;
+		delete dock;
 		widget = 0;
 		dock = 0;
 	 }
 }
 
 void EditTexturePlugin::DrawXORRect(GLArea *gla)
-{	
-	//	Draw the rectangle of the selection area 
+{
+    //	Draw the rectangle of the selection area
     glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, gla->width(), gla->height(),0,-1,1);
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, gla->width(), gla->height(),0,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_XOR);
     glColor3f(1,1,1);
@@ -283,11 +283,11 @@ void EditTexturePlugin::DrawXORRect(GLArea *gla)
     glEnd();
 
     glDisable(GL_LOGIC_OP);
-  	glPopAttrib();
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+    glPopAttrib();
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void EditTexturePlugin::InitTexture(MeshModel &m)
@@ -311,9 +311,9 @@ bool EditTexturePlugin::HasCollapsedTextCoords(MeshModel &m)
 	if(!HasPerWedgeTexCoord(m.cm)) return true;
 	for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 	{
-		if(!(*fi).IsD()) 
+		if(!(*fi).IsD())
 		{
-			if( (*fi).WT(0).P() == (*fi).WT(1).P() || (*fi).WT(0).P() == (*fi).WT(2).P() || (*fi).WT(1).P() == (*fi).WT(2).P()) 
+			if( (*fi).WT(0).P() == (*fi).WT(1).P() || (*fi).WT(0).P() == (*fi).WT(2).P() || (*fi).WT(1).P() == (*fi).WT(2).P())
 				return true;
 		}
 	}

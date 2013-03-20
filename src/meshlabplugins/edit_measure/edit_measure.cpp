@@ -36,9 +36,9 @@ EditMeasurePlugin::EditMeasurePlugin()
  :rubberband(Color4b(255,170,85,255)),was_ready(false)
 {}
 
-const QString EditMeasurePlugin::Info() 
+const QString EditMeasurePlugin::Info()
 {
-	return tr("Allow to measure distances between points of a model");
+    return tr("Allow to measure distances between points of a model");
 }
 
 void EditMeasurePlugin::mousePressEvent(QMouseEvent *, MeshModel &, GLArea * gla)
@@ -69,12 +69,12 @@ void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla,QPainter* p)
   {
     Point3f a,b;
     rubberband.GetPoints(a,b);
-	  vcg::glLabel::render(p,b,QString("%1").arg(Distance(a,b)));
+      vcg::glLabel::render(p,b,QString("%1").arg(Distance(a,b)));
 
     if(!was_ready)
     {
       suspendEditToggle();
-      gla->log->Logf(GLLogStream::FILTER, "Distance: %f",Distance(a,b));
+      this->Log(GLLogStream::FILTER, "Distance: %f",Distance(a,b));
     }
     was_ready=true;
   }
@@ -83,11 +83,11 @@ void EditMeasurePlugin::Decorate(MeshModel &, GLArea * gla,QPainter* p)
 
 bool EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
 {
-  gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));	
+  gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
   was_ready = false;
   rubberband.Reset();
-	return true;
+    return true;
 }
 
 void EditMeasurePlugin::EndEdit(MeshModel &, GLArea *)

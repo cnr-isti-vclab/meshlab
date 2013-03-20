@@ -575,7 +575,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
     vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m);
-	tri::UpdateBounding<CMeshO>::Box(m);
+    tri::UpdateBounding<CMeshO>::Box(m);
 
     //Enable & Reset the necessary attributes
     switch(onPrimitive)
@@ -705,7 +705,7 @@ void SdfGpuPlugin::calculateSdfHW(FramebufferObject* fboFront, FramebufferObject
 
     vcg::Matrix44f mvprINV(mv_pr_Matrix_f);
     mvprINV.transposeInPlace();
-    vcg::Invert(mvprINV);
+    mvprINV=vcg::Inverse(mvprINV);
     mSDFProgram->setUniformMatrix4fv( "mvprMatrixINV", mvprINV.V(), 1, GL_TRUE );
 
 
@@ -1010,8 +1010,8 @@ bool SdfGpuPlugin::postRender(unsigned int peelingIteration)
             return true;
         }
         else return false;
-	}
-	
+    }
+
     return true;
 }
 
