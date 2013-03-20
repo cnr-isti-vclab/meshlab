@@ -64,10 +64,8 @@ void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
 
 void AlignPairWidget::initializeGL ()
 {
-	/*QRect rr= QApplication::desktop()->screenGeometry ( this );
-	resize(rr.width()*0.8,rr.width()*0.5);
-	int ii = width();
-	int zz = height();*/
+  glewInit();  //needed to init extensions, used by the aligner GL window while rendering
+
   glClearColor(0, 0, 0, 0); 
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
