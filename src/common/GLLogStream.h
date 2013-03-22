@@ -2,14 +2,14 @@
 * VCGLib                                                            o o     *
 * Visual and Computer Graphics Library                            o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2004                      
+* Copyright(C) 2004
 \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -34,7 +34,7 @@
   This is the logging class.
   One for each document. Responsible of getting an history of the logging message printed out by filters.
   */
-class GLLogStream 
+class GLLogStream
 {
 public:
 	enum Levels
@@ -44,22 +44,22 @@ public:
 		FILTER = 2,
 		DEBUG = 3
 	};
-	
+
    GLLogStream ();
    ~GLLogStream (){}
   void print(QStringList &list);		// Fills a QStringList with the log entries
   void Save(int Level, const char *filename);
-  void Clear() 
+  void Clear()
   {
-	  S.clear();
+      S.clear();
   }
-	void Logf(int Level, const char * f, ... );
+    void Logf(int Level, const char * f, ... );
   void Log(int Level, const char * buf )
-	{
-		QString tmp(buf);
-		S.push_back(std::make_pair<int,QString>(Level,tmp));
+    {
+        QString tmp(buf);
+        S.push_back(std::make_pair(Level,tmp));
     qDebug("LOG: %i %s",Level,buf);
-	}
+    }
 
   void SetBookmark();
   void ClearBookmark();
