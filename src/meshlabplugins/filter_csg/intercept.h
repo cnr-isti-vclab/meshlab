@@ -30,7 +30,7 @@ namespace std {
                 return ((x[0]) * 131 + h(x[1])) * 131 + h(x[2]);
             }
         };
-        
+
     }
 }
 
@@ -76,38 +76,38 @@ namespace vcg {
             typedef _dist_type DistType;
             typedef _scalar Scalar;
             typedef vcg::Point3<Scalar> Point3x;
-            
+
         private:
             DistType _dist; /* distance of the intersection from the reference point */
             Point3x _norm; /* normal of the mesh in the intersection point */
             Scalar _sort_norm; /* component of the normal used for sorting (needed to discriminate intercepts having the same distance) */
             Scalar _quality; /* quality of the mesh in the intersection point */
-            
+
         public:
             inline Intercept() { }
-            
+
             inline Intercept(const DistType &dist, const Point3x &norm, const Scalar &sort_norm, const Scalar &quality) :
                     _dist(dist), _norm(norm), _sort_norm(sort_norm), _quality(quality) { }
-            
+
             inline Intercept operator -() const { return Intercept(_dist, -_norm, -_sort_norm, _quality); }
-            
+
             inline bool operator <(const Intercept &other) const { return _dist < other._dist || (_dist == other.dist() && _sort_norm < other._sort_norm); }
-            
+
             inline bool operator <(const DistType &other) const { return _dist < other; }
-            
+
             inline const DistType& dist() const { return _dist; }
-            
+
             inline const Scalar& sort_norm() const { return _sort_norm; }
-            
+
             inline const Scalar& quality() const { return _quality; }
-            
+
             inline const Point3x& norm() const { return _norm; }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const Intercept &x) {
                 return out << "Intercept[" << x._dist << "[" << x._sort_norm << "], (" << p3print(x._norm) << "), " << x._quality << "]";
             }
         };
-        
+
         /** Class InterceptRay
             Class to collect all the intersections between a mesh and a line,
             keeping them sorted to have efficient operations
@@ -118,24 +118,24 @@ namespace vcg {
         {
         public:
             typedef std::vector<InterceptType> ContainerType;
-            
+
         private:
             typedef typename InterceptType::DistType DistType;
-            
+
             inline void cleanup() {
                 std::sort(v.begin(), v.end());
                 v.resize(v.size());
             }
-            
+
             inline bool isValid() const {
                 if (v.empty())
                     return true;
-                
+
                 if (v.size() % 2 != 0) {
                     std::cerr << "Not a solid! (size: " << v.size() << ")" << std::endl;
                     return false;
                 }
-                
+
                 typename ContainerType::const_iterator curr = v.begin();
                 typename ContainerType::const_iterator next = curr+1;
                 while (next != v.end()) {
@@ -146,20 +146,20 @@ namespace vcg {
                     curr = next;
                     next++;
                 }
-                
+
                 return true;
             }
-            
+
         public:
             inline InterceptRay() { }
-            
+
             inline InterceptRay(const ContainerType &set) : v(set) {
                 cleanup();
                 assert (isValid());
             }
-            
+
             inline const ContainerType& container() const { return v; }
-            
+
             inline const InterceptType& GetIntercept(const DistType &s) const {
                 assert (IsIn(s) != IsIn(s+1) || IsIn(s) == 0);
                 typename ContainerType::const_iterator p = std::lower_bound(v.begin(), v.end(), s);
@@ -167,7 +167,7 @@ namespace vcg {
                 assert (s <= p->dist() && p->dist() <= s+1);
                 return *p;
             }
-            
+
             /* Returns -1 if the point at the given distance along the ray is outside,
                0 if it is on the boundary, 1 if it is inside. */
             inline int IsIn(const DistType &s) const {
@@ -179,11 +179,11 @@ namespace vcg {
                 else
                     return ((p - v.begin()) & 1) ? 1 : -1;
             }
-            
+
             inline InterceptRay operator &(const InterceptRay &other) const {
                 typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = other.v.end();
                 ContainerType newv;
-                
+
                 newv.reserve(v.size() + other.v.size());
                 while (i != endi && j != endj) {
                     if (*j < *i) {
@@ -207,11 +207,11 @@ namespace vcg {
                 }
                 return InterceptRay(newv);
             }
-            
+
             inline InterceptRay operator |(const InterceptRay &other) const {
                 typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = other.v.end();
                 ContainerType newv;
-                
+
                 newv.reserve(v.size() + other.v.size());
                 while (i != endi && j != endj) {
                     if (*j < *i) {
@@ -239,11 +239,11 @@ namespace vcg {
                 newv.insert(newv.end(), j, endj);
                 return InterceptRay(newv);
             }
-            
+
             inline InterceptRay operator -(const InterceptRay &other) const {
                 typename ContainerType::const_iterator i = v.begin(), j = other.v.begin(), endi = v.end(), endj = other.v.end();
                 ContainerType newv;
-                
+
                 newv.reserve(v.size() + other.v.size());
                 while (i != endi && j != endj) {
                     while (j != endj && !(*i < *(j+1))) // j < J <= i
@@ -267,7 +267,7 @@ namespace vcg {
                         newv.push_back(-*(j+1));
                         j += 2;
                     }
-                    
+
                     if (j != endj && *j < *(i+1)) // i < j < I <= J
                         newv.push_back(-*j);
                     else  // i < I <= j < J
@@ -277,7 +277,7 @@ namespace vcg {
                 newv.insert(newv.end(), i, endi);
                 return InterceptRay(newv);
             }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptRay &x) {
                 typename ContainerType::const_iterator i, end = x.v.end();
                 out << "InterceptRay[";
@@ -286,11 +286,11 @@ namespace vcg {
                 assert (x.isValid());
                 return out << "]";
             }
-            
+
         private:
             ContainerType v;
         };
-        
+
         /** Class InterceptBeam
             Class to collect all the intersections between a mesh and a family of
             parallel lines, with efficient intersection, union and difference
@@ -302,12 +302,12 @@ namespace vcg {
         {
             typedef typename InterceptType::DistType DistType;
             typedef InterceptRay<InterceptType> IRayType;
-            
+
         public:
             typedef std::vector<std::vector<IRayType > > ContainerType;
-            
+
             inline InterceptBeam(const vcg::Box2i &box, const ContainerType &rays) : bbox(box), ray(rays) { }
-            
+
             inline const IRayType& GetInterceptRay(const vcg::Point2i &p) const {
                 assert (bbox.IsIn(p));
                 vcg::Point2i c = p - bbox.min;
@@ -315,17 +315,17 @@ namespace vcg {
                 assert (size_t(c.X()) < ray.size() && size_t(c.Y()) < ray[c.X()].size());
                 return ray[c.X()][c.Y()];
             }
-            
+
             /* Returns -1 if the point at the given point is outside,
                0 if it is on the boundary, 1 if it is inside. */
             inline int IsIn(const vcg::Point2i &p, const DistType &s) const {
                 return bbox.IsIn(p) ? GetInterceptRay(p).IsIn(s) : -1;
             }
-            
+
             inline InterceptBeam& operator &=(const InterceptBeam &other) {
                 vcg::Box2i newbbox(bbox);
                 newbbox.Intersect(other.bbox);
-                
+
                 for(int i = 0; i <= newbbox.DimX(); ++i) {
                     for(int j = 0; j <= newbbox.DimY(); ++j) {
                         vcg::Point2i p = newbbox.min + vcg::Point2i(i,j);
@@ -337,11 +337,11 @@ namespace vcg {
                 bbox = newbbox;
                 return *this;
             }
-            
+
             inline InterceptBeam& operator |=(const InterceptBeam &other) {
                 vcg::Box2i newbbox(bbox);
                 newbbox.Add(other.bbox);
-                
+
                 ray.resize(newbbox.DimX() + 1);
                 for(int i = newbbox.DimX(); i >= 0; --i) {
                     ray[i].resize(newbbox.DimY() + 1);
@@ -354,11 +354,11 @@ namespace vcg {
                 bbox = newbbox;
                 return *this;
             }
-            
+
             inline InterceptBeam& operator -=(const InterceptBeam &other) {
                 vcg::Box2i damage(bbox);
                 damage.Intersect(other.bbox);
-                
+
                 for(int i = 0; i < damage.DimX(); ++i) {
                     for(int j = 0; j < damage.DimY(); ++j) {
                         vcg::Point2i p = damage.min + vcg::Point2i(i,j);
@@ -368,7 +368,7 @@ namespace vcg {
                 }
                 return *this;
             }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptBeam &x) {
                 out << "InterceptBeam[" << p2print(x.bbox.min) << " - " << p2print(x.bbox.max) << "][" << std::endl;
                 for(int i = x.bbox.min.X(); i <= x.bbox.max.X(); ++i) {
@@ -379,12 +379,12 @@ namespace vcg {
                 }
                 return out << "]";
             }
-            
+
         private:
             vcg::Box2i bbox;
             ContainerType ray;
         };
-        
+
         /** Class InterceptBeam
             Three orthogonal InterceptBeam instances, defining a volume
             @param InterceptType (Template Parameter) Specifies the type of the intercepts of the ray
@@ -395,18 +395,18 @@ namespace vcg {
             typedef typename InterceptType::DistType DistType;
             typedef typename InterceptType::Scalar Scalar;
             typedef vcg::Point3<Scalar> Point3x;
-            
+
             /* To perform intersection/union/difference on different volumes, their
                rays need to match exactly */
             inline bool checkConsistency(const InterceptVolume &other) const {
                 return delta == other.delta;
             }
-            
+
         public:
             typedef typename std::vector<InterceptBeam<InterceptType> > ContainerType;
-            
+
             inline InterceptVolume(const Box3i &b, const Point3x &d, const ContainerType &beams) : delta(d), bbox(b), beam(beams) { assert (beams.size() == 3); };
-            
+
             inline InterceptVolume& operator &=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
@@ -414,7 +414,7 @@ namespace vcg {
                 bbox.Intersect(other.bbox);
                 return *this;
             }
-            
+
             inline InterceptVolume& operator |=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
@@ -422,35 +422,35 @@ namespace vcg {
                 bbox.Add(other.bbox);
                 return *this;
             }
-            
+
             inline InterceptVolume& operator -=(const InterceptVolume &other) {
                 assert (checkConsistency(other));
                 for (int i = 0; i < 3; ++i)
                     beam[i] -= other.beam[i];
                 return *this;
             }
-            
+
             inline const InterceptRay<InterceptType>& GetInterceptRay(int coord, const vcg::Point2i &p) const {
                 assert (0 <= coord && coord < 3);
                 return beam[coord].GetInterceptRay(p);
             }
-            
+
             template <const int coord>
                     inline const InterceptType& GetIntercept(const vcg::Point3i &p1) const {
                 assert (0 <= coord && coord < 3);
                 assert (IsIn(p1) != IsIn(p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2)));
-                
+
                 const int c1 = (coord + 1) % 3;
                 const int c2 = (coord + 2) % 3;
                 return GetInterceptRay(coord, vcg::Point2i(p1.V(c1), p1.V(c2))).GetIntercept(p1.V(coord));
             }
-            
+
             /* Return 1 if the given point is in the volume, -1 if it is outside */
             inline int IsIn(const vcg::Point3i &p) const {
                 int r[3];
                 for (int i = 0; i < 3; ++i)
                     r[i] = beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
-                
+
                 /* If some beams are unable to tell whether a point is inside or outside
                    (i.e. they return 0), try to make them consistent with other beams */
                 if (r[0] == 0)
@@ -459,13 +459,13 @@ namespace vcg {
                     r[1] += r[0] + r[1];
                 if (r[2] == 0)
                     r[2] += r[2] + r[0];
-                
+
                 if (r[0]>0 && r[1]>0 && r[2]>0) /* consistent: inside -> inside */
                     return 1;
                 else if ((r[0]<0 && r[1]<0 && r[2]<0) || /* consistent: outside -> outside */
                          (r[0]==0 && r[1]==0 && r[2] == 0)) /* "consistent": unknown -> outside */
                     return -1;
-                
+
                 /* If the rasterization algorithm generates consistent volumes, this should never happen */
                 std::cerr << "Inconsistency: " << p3print(p) << p3print(delta) << std::endl;
                 for (int i = 0; i < 3; ++i) {
@@ -475,21 +475,21 @@ namespace vcg {
 
                 return 0;
             }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptVolume &x) {
                 out << "InterceptVolume[" << p3print(x.delta) << "][" << std::endl;
                 int coord = 0;
                 for(typename ContainerType::const_iterator iter = x.beam.begin(); iter != x.beam.end(); ++iter) {
                     out << *iter << std::endl;
                     out << "Beam " << coord << std::endl;
-                    
+
                     for (int i=x.bbox.min[coord]; i<=x.bbox.max[coord]; i+=1) {
                         out << i << std::endl;
-                        
+
                         for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]+2; k+=1)
                             out << '+';
                         out << std::endl;
-                        
+
                         for (int j=x.bbox.min[(coord+1)%3]; j<=x.bbox.max[(coord+1)%3]; j+=1) {
                             out << '+';
                             for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]; k+=1) {
@@ -504,7 +504,7 @@ namespace vcg {
                             }
                             out << '+' << std::endl;
                         }
-                        
+
                         for (int k=x.bbox.min[(coord+2)%3]; k<x.bbox.max[(coord+2)%3]+2; k+=1)
                             out << '+';
                         out << std::endl;
@@ -512,16 +512,16 @@ namespace vcg {
                     coord++;
                 }
                 out << "]";
-                
+
                 return out;
             }
-            
+
             const Point3x delta;
             vcg::Box3i bbox;
         private:
             ContainerType beam;
         };
-        
+
         /* Unsorted version of InterceptRay.
            Used to temporarily accumulate the intersections along a line before sorting them */
         template <typename InterceptType>
@@ -529,14 +529,14 @@ namespace vcg {
         {
             typedef std::vector<InterceptType> ContainerType;
             typedef InterceptRay<InterceptType> SortedType;
-            
+
         public:
             inline InterceptSet() { }
-            
+
             inline operator SortedType() const { return SortedType(v); }
-            
+
             inline void AddIntercept(const InterceptType &x) { v.push_back(x); }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptSet &x) {
                 typename ContainerType::const_iterator i, end = x.v.end();
                 out << "InterceptSet[";
@@ -544,30 +544,30 @@ namespace vcg {
                     out << *i << std::endl;
                 return out << "]";
             }
-            
+
         private:
             ContainerType v;
         };
-        
+
         template <typename InterceptType>
                 class InterceptSet1
         {
             typedef std::vector<InterceptSet<InterceptType> > ContainerType;
             typedef std::vector<InterceptRay<InterceptType> > SortedType;
-            
+
         public:
             inline InterceptSet1() { }
-            
+
             inline operator SortedType() const { return SortedType(set.begin(), set.end()); }
-            
+
             inline void resize(size_t size) { set.resize(size); }
-            
+
             inline void AddIntercept(const int i, const InterceptType &x) {
                 assert (i >= 0);
                 assert (size_t(i) < set.size());
                 set[i].AddIntercept(x);
             }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptSet1 &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet1[";
@@ -575,11 +575,11 @@ namespace vcg {
                     out << *i << std::endl;
                 return out << "]InterceptSet1";
             }
-            
+
         private:
             ContainerType set;
         };
-        
+
         /* Unsorted version of InterceptBeam.
            Used to temporarily accumulate the intersections along a family of
            parallel lines before sorting them */
@@ -589,16 +589,16 @@ namespace vcg {
             typedef std::vector<InterceptSet1<InterceptType> > ContainerType;
             typedef std::vector<std::vector<InterceptSet<InterceptType> > > NewContainerType;
             typedef InterceptBeam<InterceptType> SortedType;
-            
+
         public:
             inline InterceptSet2(const vcg::Box2i &box) : bbox(box), set(box.DimX() + 1) {
                 typename ContainerType::iterator i, end = set.end();
                 for (i = set.begin(); i != end; ++i)
                     i->resize(box.DimY() + 1);
             }
-            
+
             inline operator SortedType() const { return SortedType(bbox, typename SortedType::ContainerType(set.begin(), set.end())); }
-            
+
             inline void AddIntercept (const vcg::Point2i &p, const InterceptType &x) {
                 assert (bbox.IsIn(p));
                 vcg::Point2i c = p - bbox.min;
@@ -606,7 +606,7 @@ namespace vcg {
                 assert (size_t(c.X()) < set.size());
                 set[c.X()].AddIntercept(c.Y(), x);
             }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptSet2 &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet2[";
@@ -614,12 +614,12 @@ namespace vcg {
                     out << *i << std::endl;
                 return out << "]InterceptSet2";
             }
-            
+
         private:
             Box2i bbox;
             ContainerType set;
         };
-        
+
         /* Unsorted version of InterceptVolume.
            Used to temporarily accumulate the intersections in a volume before sorting them.
            Rasterization is performed on faces after casting them to an integral type, so that no
@@ -634,7 +634,7 @@ namespace vcg {
             typedef InterceptSet2<InterceptType> ISet2Type;
             typedef InterceptVolume<InterceptType> SortedType;
             typedef std::vector<ISet2Type> ContainerType;
-            
+
             template <const int CoordZ>
                     void RasterFace(const Point3dt &v0, const Point3dt &v1, const Point3dt &v2,
                                     const vcg::Box3i &ibox, const Point3x &norm, const Scalar &quality)
@@ -645,11 +645,11 @@ namespace vcg {
                 const Point3dt d10 = v1 - v0;
                 const Point3dt d21 = v2 - v1;
                 const Point3dt d02 = v0 - v2;
-                
+
                 const DistType det0 = d21[crd2] * d02[crd1] - d21[crd1] * d02[crd2];
                 const DistType det1 = d21[crd0] * d02[crd2] - d21[crd2] * d02[crd0];
                 const DistType det2 = d21[crd1] * d02[crd0] - d21[crd0] * d02[crd1];
-                
+
                 DistType n0xy = (v1[crd1]-ibox.min[crd1])*d21[crd2] - (v1[crd2]-ibox.min[crd2])*d21[crd1];
                 DistType n1xy = (v2[crd1]-ibox.min[crd1])*d02[crd2] - (v2[crd2]-ibox.min[crd2])*d02[crd1];
                 DistType n2xy = (v0[crd1]-ibox.min[crd1])*d10[crd2] - (v0[crd2]-ibox.min[crd2])*d10[crd1];
@@ -668,12 +668,12 @@ namespace vcg {
                                 n0 = d21[crd1];
                             if (n0 == 0)
                                 n0 -= d21[crd2];
-                            
+
                             if (n1 == 0)
                                 n1 = d02[crd1];
                             if (n1 == 0)
                                 n1 -= d02[crd2];
-                            
+
                             if (n2 == 0)
                                 n2 = d10[crd1];
                             if (n2 == 0)
@@ -683,18 +683,18 @@ namespace vcg {
                                 n0 -= d21[crd2];
                             if (n0 == 0)
                                 n0 = d21[crd1];
-                            
+
                             if (n1 == 0)
                                 n1 -= d02[crd2];
                             if (n1 == 0)
                                 n1 = d02[crd1];
-                            
+
                             if (n2 == 0)
                                 n2 -= d10[crd2];
                             if (n2 == 0)
                                 n2 = d10[crd1];
                         }
-                        
+
                         if((n0>0 && n1>0 && n2>0) || (n0<0 && n1<0 && n2<0)) {
                             DistType d = (v0[crd2] - y) * det2 + (v0[crd1] - x) * det1;
                             d /= det0;
@@ -711,7 +711,7 @@ namespace vcg {
                     n2xy -= n2dx;
                 }
             }
-            
+
             void ScanFace(const Point3dt &v0, const Point3dt &v1, const Point3dt &v2,
                           const Point3x &norm, const Scalar &quality) {
                 vcg::Box3<DistType> fbox;
@@ -725,12 +725,12 @@ namespace vcg {
                 }
                 vcg::Box3i ibox(vcg::Point3i(floor(fbox.min.X()), floor(fbox.min.Y()), floor(fbox.min.Z())),
                                 vcg::Point3i(ceil(fbox.max.X()), ceil(fbox.max.Y()), ceil(fbox.max.Z())));
-                
+
                 RasterFace<0>(v0, v1, v2, ibox, norm, quality);
                 RasterFace<1>(v0, v1, v2, ibox, norm, quality);
                 RasterFace<2>(v0, v1, v2, ibox, norm, quality);
             }
-            
+
         public:
             template <class MeshType>
                     inline InterceptSet3(const MeshType &m, const Point3x &d, int subCellPrecision=32, vcg::CallBackPos *cb=vcg::DummyCallBackPos) : delta(d),
@@ -744,16 +744,16 @@ namespace vcg {
                 const Point3x invDelta(Scalar(1) / delta.X(),
                                        Scalar(1) / delta.Y(),
                                        Scalar(1) / delta.Z());
-                
+
                 vcg::Box2i xy, yz, zx;
                 yz.Set(bbox.min.Y(), bbox.min.Z(), bbox.max.Y(), bbox.max.Z());
                 zx.Set(bbox.min.Z(), bbox.min.X(), bbox.max.Z(), bbox.max.X());
                 xy.Set(bbox.min.X(), bbox.min.Y(), bbox.max.X(), bbox.max.Y());
-                
+
                 set.push_back(ISet2Type(yz));
                 set.push_back(ISet2Type(zx));
                 set.push_back(ISet2Type(xy));
-                
+
                 typename MeshType::ConstFaceIterator i, end = m.face.end();
                 const size_t nFaces = m.face.size();
                 size_t f = 0;
@@ -773,7 +773,7 @@ namespace vcg {
                         assert (v0[j] >= bbox.min[j] && v0[j] <= bbox.max[j]);
                         assert (v1[j] >= bbox.min[j] && v1[j] <= bbox.max[j]);
                         assert (v2[j] >= bbox.min[j] && v2[j] <= bbox.max[j]);
-                    }                    
+                    }
                     ScanFace (Point3dt(makeFraction(v0.X()*subCellPrecision, subCellPrecision),
                                        makeFraction(v0.Y()*subCellPrecision, subCellPrecision),
                                        makeFraction(v0.Z()*subCellPrecision, subCellPrecision)),
@@ -787,9 +787,9 @@ namespace vcg {
                               i->cQ());
                 }
             }
-            
+
             inline operator SortedType() const { return SortedType(bbox, delta, typename SortedType::ContainerType(set.begin(), set.end())); }
-            
+
             friend std::ostream& operator<<(std::ostream &out, const InterceptSet3<InterceptType> &x) {
                 typename ContainerType::const_iterator i, end = x.set.end();
                 out << "InterceptSet3[";
@@ -797,13 +797,13 @@ namespace vcg {
                     out << *i << std::endl;
                 return out << "]InterceptSet3";
             }
-            
+
             const Point3x delta;
             const Box3i bbox;
         private:
             ContainerType set;
         };
-        
+
         template <typename MeshType, typename InterceptType>
                 class Walker
         {
@@ -826,11 +826,11 @@ namespace vcg {
             {
                 CellsSet cset; /* cells to be visited */
                 vcg::Point3i p;
-                
+
                 _volume = &volume;
                 _mesh = &mesh;
                 _mesh->Clear();
-                
+
                 /* To improve performance, instead of visiting the whole volume, mark the cells
                    intersecting the surface so that they can be visited.
                    This usually lowers the complexity from n^3 to about n^2 (where n is the
@@ -904,7 +904,7 @@ namespace vcg {
 
                 clear();
             }
-            
+
             inline float V(int i, int j, int k) const { return V(vcg::Point3i(i, j, k)); }
 
             inline float V(const vcg::Point3i &p) const {
@@ -917,8 +917,8 @@ namespace vcg {
                     void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
                 assert (p2 == p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2));
                 assert (_volume->IsIn(p1) != _volume->IsIn(p2));
-                
-                const InterceptType& i = _volume->GetIntercept<coord>(p1);
+
+                const InterceptType& i = _volume->template GetIntercept<coord>(p1);
                 typename VertexTable::const_iterator v = _vertices.find(&i);
                 if (v == _vertices.end()) {
                     p = &*vcg::tri::Allocator<MeshType>::AddVertices(*_mesh, 1);
@@ -932,17 +932,17 @@ namespace vcg {
                 } else /* a vertex is already associated with the intercept. reuse it */
                     p = &_mesh->vert[v->second];
             }
-            
+
             inline void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<0>(p1, p2, p); }
-            
+
             inline void GetYIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<1>(p1, p2, p); }
-            
+
             inline void GetZIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<2>(p1, p2, p); }
-            
+
             bool Exist(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
                 if (V(p1) == V(p2))
                     return false;
-                
+
                 vcg::Point3i d = p2 - p1;
                 if (d.X())
                     GetXIntercept(p1, p2, p);
@@ -950,10 +950,10 @@ namespace vcg {
                     GetYIntercept(p1, p2, p);
                 else if (d.Z())
                     GetZIntercept(p1, p2, p);
-                
+
                 return true;
             }
-            
+
         private:
             VertexTable _vertices; /* maps intercept -> vertex of the reconstructed mesh */
             SamplesTable _samples; /* maps point -> in/out */
