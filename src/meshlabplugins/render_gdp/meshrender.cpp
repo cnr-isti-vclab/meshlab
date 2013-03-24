@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 
@@ -474,4 +472,4 @@ void MeshShaderRenderPlugin::Finalize( QAction*, MeshDocument*, GLArea* )
 	sDialog = 0;
 }
 
-Q_EXPORT_PLUGIN(MeshShaderRenderPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(MeshShaderRenderPlugin)

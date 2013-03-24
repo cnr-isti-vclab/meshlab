@@ -25,8 +25,6 @@
 $Log: samplefilter.cpp,v $
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -1185,4 +1183,4 @@ int FilterDocSampling::postCondition( QAction* a ) const
   return MeshModel::MM_UNKNOWN;
 }
 
-Q_EXPORT_PLUGIN(FilterDocSampling)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterDocSampling)

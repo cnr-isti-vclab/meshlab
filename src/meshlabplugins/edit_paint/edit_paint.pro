@@ -1,7 +1,5 @@
 include (../../shared.pri)
 
-QT += opengl
-
 HEADERS = edit_paint_factory.h \
     cloneview.h \
     colorframe.h \

@@ -25,6 +25,12 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QColor>
+#include <QLineEdit>
+#include <QColorDialog>
+#include <QGLWidget>
+#include <QCheckBox>
+
 #define DECFACTOR 100000.0f
 
 using namespace vcg;

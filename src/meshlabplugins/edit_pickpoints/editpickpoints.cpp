@@ -27,8 +27,6 @@
  * @author Oscar Barney
  */
 
-#include <QtGui>
-
 #include <GL/glew.h>
 
 #include "editpickpoints.h"

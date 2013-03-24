@@ -54,4 +54,4 @@ QString EditSliceFactory::getEditToolDescription(QAction *)
 	return ExtraMeshSlidePlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditSliceFactory)
+ MESHLAB_PLUGIN_NAME_EXPORTER(EditSliceFactory)

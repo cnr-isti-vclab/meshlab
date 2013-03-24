@@ -20,7 +20,6 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include <QtGui>
 
 #include <math.h>
 #include <stdlib.h>
@@ -477,4 +476,4 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
 	}
   return 0;
 }
-Q_EXPORT_PLUGIN(SelectionFilterPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SelectionFilterPlugin)

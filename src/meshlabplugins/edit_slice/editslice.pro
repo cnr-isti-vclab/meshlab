@@ -14,6 +14,5 @@ SOURCES       = edit_slice_factory.cpp \
 		
 TARGET        = editslice
 
-QT           += opengl
 RESOURCES     = meshlab.qrc
 FORMS         = slicedialog.ui svgpro.ui

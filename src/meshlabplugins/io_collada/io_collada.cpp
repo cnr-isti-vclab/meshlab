@@ -88,7 +88,6 @@
 #include <algorithm>
 
 #include <Qt>
-#include <QtGui>
 
 #include "io_collada.h"
 
@@ -243,4 +242,4 @@ void ColladaIOPlugin::GetExportMaskCapability(QString &format, int &capability, 
 	assert(0);
 }
 
-Q_EXPORT_PLUGIN(ColladaIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ColladaIOPlugin)

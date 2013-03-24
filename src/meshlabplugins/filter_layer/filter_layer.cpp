@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -313,4 +311,4 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
   }
 }
 
-Q_EXPORT_PLUGIN(FilterLayerPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterLayerPlugin)

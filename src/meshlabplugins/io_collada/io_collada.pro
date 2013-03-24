@@ -13,5 +13,3 @@ SOURCES       += io_collada.cpp \
 
 TARGET        = io_collada
 
-QT           += xml opengl
-

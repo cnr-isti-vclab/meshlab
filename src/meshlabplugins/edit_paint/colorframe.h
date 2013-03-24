@@ -1,7 +1,8 @@
 #ifndef COLORFRAME_H_
 #define COLORFRAME_H_
 
-#include <QtGui>
+#include <QFrame>
+#include <QColorDialog>
 
 /*
  *A simple widget that displays a color and allows the

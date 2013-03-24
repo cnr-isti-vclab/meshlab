@@ -322,9 +322,9 @@ void Parser::Proto(QDomElement& parent) {
 		node.setAttribute("name", name);
 		proto.insert(name);
 		Expect(22);
-		QDomElement interface = doc->createElement("ProtoInterface");
-		InterfaceDeclarations(interface);
-		node.appendChild(interface);
+		QDomElement interf = doc->createElement("ProtoInterface");
+		InterfaceDeclarations(interf);
+		node.appendChild(interf);
 		Expect(23);
 		Expect(24);
 		QDomElement body = doc->createElement("ProtoBody");

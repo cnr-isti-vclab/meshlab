@@ -214,4 +214,4 @@ void RenderRFX::Finalize(QAction * /*act*/, MeshDocument */*md*/, GLArea */*gla*
 	}
 }
 
-Q_EXPORT_PLUGIN(RenderRFX)
+MESHLAB_PLUGIN_NAME_EXPORTER(RenderRFX)

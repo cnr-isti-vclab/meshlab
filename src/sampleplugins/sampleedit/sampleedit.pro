@@ -9,5 +9,4 @@ SOURCES       = edit_sample_factory.cpp \
 
 TARGET        = sampleedit
 
-QT           += opengl
 RESOURCES     = sampleedit.qrc

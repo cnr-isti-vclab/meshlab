@@ -54,4 +54,4 @@ QString EditPickPointsFactory::getEditToolDescription(QAction *)
 	return EditPickPointsPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditPickPointsFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditPickPointsFactory)

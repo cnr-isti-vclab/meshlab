@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
 #include <common/interfaces.h>
 #include <vcg/math/perlin_noise.h>
 #include <wrap/qt/col_qt_convert.h>
@@ -136,4 +135,4 @@ bool ExtraSampleDynPlugin::applyFilter(QAction *, MeshDocument &md, RichParamete
 	return true;
 }
 
-Q_EXPORT_PLUGIN(ExtraSampleDynPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSampleDynPlugin)

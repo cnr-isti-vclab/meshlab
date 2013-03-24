@@ -25,7 +25,6 @@
  $Log: meshio.cpp,v $
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 
 #include "io_ctm.h"
 
@@ -101,4 +100,4 @@ void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, R
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
                              "It is a number relative to the average edge lenght. (e.g. the default means that the error should be roughly 1/10000 of the average edge lenght)"));
 }
-Q_EXPORT_PLUGIN(IOMPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(IOMPlugin)

@@ -27,7 +27,6 @@ FIRST RELEASE
 
 ****************************************************************************/
 
-#include <QtGui>
 #include <limits>
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"

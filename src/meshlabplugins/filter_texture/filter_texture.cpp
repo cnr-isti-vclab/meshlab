@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include <vcg/math/base.h>
-#include <QtGui>
+
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <eigenlib/Eigen/Sparse>
 #include <eigenlib/unsupported/Eigen/SparseExtra>
@@ -914,4 +914,4 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     return true;
 }
 
-Q_EXPORT_PLUGIN(FilterTexturePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterTexturePlugin)

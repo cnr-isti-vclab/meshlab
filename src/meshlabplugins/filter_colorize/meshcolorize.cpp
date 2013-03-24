@@ -504,5 +504,5 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
 	}
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshColorizePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshColorizePlugin)
   

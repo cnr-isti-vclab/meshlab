@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 #include "filter_dirt.h"
 #include "particle.h"
 #include "dirt_utils.h"
@@ -269,4 +268,4 @@ MeshFilterInterface::FilterClass FilterDirt::getClass(QAction *filter)
     }
 }
 
-Q_EXPORT_PLUGIN(FilterDirt)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterDirt)

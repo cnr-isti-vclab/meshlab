@@ -1364,7 +1364,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
       textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");
     //, QPainter *qDebug(qPrintable(textureName));
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName);
-    checkGLError::qDebug("DrawTexParam");
+    checkGLError::debugInfo("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,painter,qf,90.0f);
 
@@ -1477,4 +1477,4 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
 }
 
 
-Q_EXPORT_PLUGIN(ExtraMeshDecoratePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshDecoratePlugin)

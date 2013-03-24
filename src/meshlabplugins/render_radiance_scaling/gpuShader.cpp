@@ -26,7 +26,6 @@
 #include <sstream>
 #include <stdlib.h>
 
-#include <QtGui>
 #include <QTextStream>
 #include <QString>
 #include <QFile>

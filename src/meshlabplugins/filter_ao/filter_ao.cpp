@@ -182,7 +182,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 	if (errInit)
 		return false;
 
-	checkGLError::qDebug("start");
+	checkGLError::debugInfo("start");
  	int tInitElapsed = 0;
 	QTime tInit, tAll;
 	tInit.start();
@@ -268,7 +268,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 			if(perFace) generateFaceOcclusionSW(m,faceCenterVec);
 			else generateOcclusionSW(m);
 		}
-		checkGLError::qDebug("Debug");
+		checkGLError::debugInfo("Debug");
 	}
 
 	if (useGPU)
@@ -886,4 +886,4 @@ void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, 
 	delete [] cdata;
 }
 
-Q_EXPORT_PLUGIN(AmbientOcclusionPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(AmbientOcclusionPlugin)

@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "holeListModel.h"
+#include <QMessageBox>
 
 using namespace vcg;
 
@@ -373,7 +374,7 @@ QModelIndex HoleListModel::index(int row, int column, const QModelIndex &/*paren
 {
 	if(row >= (int)holesManager.holes.size())
 		return QModelIndex();
-	return createIndex(row,column, 0);
+	return createIndex(row,column/*,0*/);
 }
 
 

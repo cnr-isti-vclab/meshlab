@@ -25,12 +25,13 @@
 #ifndef EditHoleFactoryPLUGIN_H
 #define EditHoleFactoryPLUGIN_H
 
-#include <QObject>
+
 #include <common/interfaces.h>
 
 class EditHoleFactory : public QObject, public MeshEditInterfaceFactory
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_EDIT_INTERFACE_FACTORY_IID)
 	Q_INTERFACES(MeshEditInterfaceFactory)
 
 public:

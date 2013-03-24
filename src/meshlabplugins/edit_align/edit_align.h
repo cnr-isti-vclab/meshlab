@@ -24,7 +24,6 @@
 #ifndef EditAlignPLUGIN_H
 #define EditAlignPLUGIN_H
 
-#include <QObject>
 #include <common/interfaces.h>
 #include "align/AlignPair.h"
 #include "align/OccupancyGrid.h"

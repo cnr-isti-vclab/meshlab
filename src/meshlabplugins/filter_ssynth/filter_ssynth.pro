@@ -19,7 +19,7 @@ linux-g++:LIBS += ../../external/lib/linux-g++/libssynth.a
 macx:LIBS += ../../external/lib/macx64/libssynth.a
 TARGET = filter_ssynth
 TEMPLATE = lib
-QT += opengl
+
 CONFIG += plugin
 OTHER_FILES += x3d.rendertemplate \
     x3d2.rendertemplate \

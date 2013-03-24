@@ -13,4 +13,3 @@ TARGET        = render_gdp
 
 FORMS		= shaderDialog.ui
 
-QT           += opengl xml

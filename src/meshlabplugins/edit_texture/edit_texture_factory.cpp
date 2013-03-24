@@ -54,4 +54,4 @@ QString EditTextureFactory::getEditToolDescription(QAction *)
 	return EditTexturePlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditTextureFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditTextureFactory)

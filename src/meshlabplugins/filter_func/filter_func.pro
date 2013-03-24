@@ -13,6 +13,7 @@ INCLUDEPATH += ../../external/muparser_v132/include
 
 win32-msvc2005:LIBS += ../../external/lib/win32-msvc2005/muparser.lib
 win32-msvc2008:LIBS += ../../external/lib/win32-msvc2008/muparser.lib
+win32-msvc2010:LIBS += ../../external/lib/win32-msvc2010/muparser.lib
 macx:LIBS            += $$MACLIBDIR/libmuparser.a
 linux-g++:LIBS       += ../../external/lib/linux-g++/libmuparser.a
 linux-g++-32:LIBS       += ../../external/lib/linux-g++-32/libmuparser.a

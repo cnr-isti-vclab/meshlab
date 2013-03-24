@@ -54,4 +54,4 @@ QString SampleEditFactory::getEditToolDescription(QAction *)
 	return SampleEditPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(SampleEditFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(SampleEditFactory)

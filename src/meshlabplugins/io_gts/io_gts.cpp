@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 
 #include "io_gts.h"
 
@@ -144,4 +143,4 @@ void GtsIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	return;
 }
 
-Q_EXPORT_PLUGIN(GtsIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(GtsIOPlugin)

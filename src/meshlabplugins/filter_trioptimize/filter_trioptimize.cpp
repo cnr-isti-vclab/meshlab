@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -395,4 +393,4 @@ bool TriOptimizePlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 }
 
 
-Q_EXPORT_PLUGIN(TriOptimizePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(TriOptimizePlugin)

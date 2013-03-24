@@ -29,14 +29,13 @@
 #ifndef SAMPLEIOPLUGIN_H
 #define SAMPLEIOPLUGIN_H
 
-#include <QObject>
-
 #include <meshlab/meshmodel.h>
 #include <meshlab/interfaces.h>
 
 class SampleIOPlugin : public QObject, public MeshIOInterface
 {
   Q_OBJECT
+  MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
   Q_INTERFACES(MeshIOInterface)
 
   

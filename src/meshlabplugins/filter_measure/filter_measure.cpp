@@ -20,9 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -271,7 +268,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 }
 
 
-Q_EXPORT_PLUGIN(FilterMeasurePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePlugin)
 
 //case FP_MEASURE_GAUSSCURV :
 //	{

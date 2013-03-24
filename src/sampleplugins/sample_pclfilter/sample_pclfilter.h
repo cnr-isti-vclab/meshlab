@@ -25,13 +25,12 @@
 #ifndef SAMPLEPCLFILTERPLUGIN_H
 #define SAMPLEPCLFILTERPLUGIN_H
 
-#include <QObject>
-
 #include <common/interfaces.h>
 
 class SamplePCLFilterPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
 public:

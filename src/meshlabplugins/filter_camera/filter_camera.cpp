@@ -541,4 +541,4 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   assert(0);
 }
 
-Q_EXPORT_PLUGIN(FilterCameraPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterCameraPlugin)

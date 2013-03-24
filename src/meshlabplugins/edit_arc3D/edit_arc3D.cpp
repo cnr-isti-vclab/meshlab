@@ -25,7 +25,6 @@
 $Log: meshedit.cpp,v $
 ****************************************************************************/
 #include <Qt>
-#include <QtGui>
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomElement>
 #include <QtXml/QDomNode>
@@ -194,7 +193,6 @@ void EditArc3DPlugin::ExportPly()
 
 				int tt2=clock();
 				this->Log(GLLogStream::SYSTEM,"** Mesh %i : Append in %i\n",selectedCount,tt2-tt1);
-
 			}
 	}
 
@@ -289,7 +287,7 @@ void EditArc3DPlugin::exportShotsToRasters()
 	{
 		if ((saveSelected==v3dImportDialog::EXPORT_ALL) || (qtw->isItemSelected(qtw->item(i,0))))
 		{
-			er.modelList[i].cam.Open(er.modelList[i].cameraName.toAscii());
+			er.modelList[i].cam.Open(er.modelList[i].cameraName.toUtf8().data());
 			mm.Clear();
 			Point3f corr=er.modelList[i].TraCorrection(mm,subSampleVal*2,minCountVal,0);
 			er.modelList[i].shot.Extrinsics.SetTra(er.modelList[i].shot.Extrinsics.Tra()-corr);
@@ -613,8 +611,8 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
   FloatImage depthImgf;
   CharImage countImgc;
   int ttt0=clock();
-  depthImgf.Open(depthName.toAscii());
-  countImgc.Open(countName.toAscii());
+  depthImgf.Open(depthName.toUtf8().data());
+  countImgc.Open(countName.toUtf8().data());
 
   QImage TextureImg;
   TextureImg.load(textureName);
@@ -661,7 +659,7 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
       m.vn--;
     }
 
-  cam.Open(cameraName.toAscii());
+  cam.Open(cameraName.toUtf8().data());
 
   CMeshO::VertexIterator vi;
   Matrix33d Rinv= Inverse(cam.R);
@@ -725,8 +723,8 @@ Point3f Arc3DModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, 
 {
   FloatImage depthImgf;
   CharImage countImgc;
-  depthImgf.Open(depthName.toAscii());
-  countImgc.Open(countName.toAscii());
+  depthImgf.Open(depthName.toUtf8().data());
+  countImgc.Open(countName.toUtf8().data());
 
   QImage TextureImg;
   TextureImg.load(textureName);
@@ -762,7 +760,7 @@ Point3f Arc3DModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, 
       m.vn--;
     }
 
-  cam.Open(cameraName.toAscii());
+  cam.Open(cameraName.toUtf8().data());
 
   CMeshO::VertexIterator vi;
   Matrix33d Rinv= Inverse(cam.R);
@@ -826,7 +824,7 @@ bool Arc3DModel::Init(QDomNode &node)
 
 						FILE* lvcam;
 
-						lvcam = fopen(cameraName.toAscii(),"rb");
+						lvcam = fopen(cameraName.toUtf8().data(),"rb");
 
 						// focus + image centers
 						fscanf(lvcam,"%lf %lf %lf",&(cam[0]),&(cam[1]),&(cam[2]));

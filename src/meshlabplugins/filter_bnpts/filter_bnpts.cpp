@@ -156,4 +156,4 @@ FilterBnptsPlugin::FilterClass FilterBnptsPlugin::getClass(QAction *a)
 }
 }
 
-Q_EXPORT_PLUGIN(FilterBnptsPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterBnptsPlugin)

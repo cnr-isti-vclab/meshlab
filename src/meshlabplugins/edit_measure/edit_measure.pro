@@ -9,6 +9,4 @@ SOURCES   = edit_measure_factory.cpp \
 
 TARGET    = edit_measure
 
-QT       += opengl
-
 RESOURCES = edit_measure.qrc

@@ -403,4 +403,4 @@ void GeometryAgingPlugin::computeMeanCurvature(CMeshO &m)
 }
 
 
-Q_EXPORT_PLUGIN(GeometryAgingPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(GeometryAgingPlugin)

@@ -24,7 +24,6 @@
   History
 $Log: meshedit.cpp,v $
 ****************************************************************************/
-#include <QtGui>
 
 #include <math.h>
 #include <stdlib.h>

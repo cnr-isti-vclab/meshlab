@@ -8,6 +8,4 @@ FORMS         = shaderDialog.ui
 
 RESOURCES     = radianceScalingRenderer.qrc
 
-QT            += opengl
-
 # CONFIG += debug

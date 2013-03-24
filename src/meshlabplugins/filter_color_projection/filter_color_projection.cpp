@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
 #include <QFileDialog>
 
 #include <cmath>
@@ -1044,4 +1043,4 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
 
 
 
-Q_EXPORT_PLUGIN(FilterColorProjectionPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProjectionPlugin)

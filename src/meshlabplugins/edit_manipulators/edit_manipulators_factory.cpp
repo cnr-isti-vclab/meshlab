@@ -54,4 +54,4 @@ QString EditManipulatorsFactory::getEditToolDescription(QAction *)
 	return EditManipulatorsPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditManipulatorsFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditManipulatorsFactory)

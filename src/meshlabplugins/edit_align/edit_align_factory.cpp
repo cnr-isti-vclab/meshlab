@@ -52,4 +52,4 @@ QString EditAlignFactory::getEditToolDescription(QAction *)
 	return EditAlignPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditAlignFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditAlignFactory)

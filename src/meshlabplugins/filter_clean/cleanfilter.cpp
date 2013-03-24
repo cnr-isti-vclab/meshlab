@@ -22,10 +22,9 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
-#include <QtXml/QDomDocument>
-#include <QtXml/QDomElement>
-#include <QtXml/QDomNode>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
 
 #include "cleanfilter.h"
 #include "align_tools.h"
@@ -536,4 +535,4 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 	  return total;
 
 }
-Q_EXPORT_PLUGIN(CleanFilter)
+MESHLAB_PLUGIN_NAME_EXPORTER(CleanFilter)

@@ -243,4 +243,4 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
  }
 
 
-Q_EXPORT_PLUGIN(FilterCreate)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterCreate)

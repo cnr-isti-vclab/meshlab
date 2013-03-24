@@ -36,41 +36,16 @@
 
 #include <QTimer>
 #include <QTime>
-#include <QtGui>
 
 #include "../common/interfaces.h"
 #include "glarea_setting.h"
 #include "multiViewer_Container.h"
+#include "snapshotsetting.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
 
-
-class SnapshotSetting
-{
-public:
-	QString outdir;
-	QString basename;
-	int counter;
-	int resolution;
-  bool transparentBackground;
-  bool snapAllLayers;
-  bool tiledSave; // if true all the tiles are saved as separated files and not joined.
-  bool addToRasters;
-		
-	SnapshotSetting()
-	{
-		outdir=".";
-		basename="snapshot";
-		counter=0;
-		resolution=1;
-    transparentBackground=true;
-    snapAllLayers=false;
-    tiledSave=false;
-    addToRasters=false;
-	};
-};
 
 class MeshModel;
 class MainWindow;

@@ -260,4 +260,4 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 	return true;
 }
 
-Q_EXPORT_PLUGIN(ExtraSampleGPUPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSampleGPUPlugin)

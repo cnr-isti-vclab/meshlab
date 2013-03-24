@@ -110,7 +110,7 @@ public:
 	int FixFaceNum;
 	int TotTime() { return I.back().Time-StartTime; }
 	int IterTime(unsigned int i) const 
-	{   const int clock_per_ms = std::max(CLOCKS_PER_SEC / 1000,1);
+	{   const int clock_per_ms = std::max<int>(CLOCKS_PER_SEC / 1000,1);
 		assert(i<I.size()); 
 		if(i==0) return  (I[i].Time-StartTime )/clock_per_ms;
 			else return (I[i].Time - I[i-1].Time)/clock_per_ms ;

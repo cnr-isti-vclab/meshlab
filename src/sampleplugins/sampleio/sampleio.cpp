@@ -25,7 +25,6 @@
  $Log: meshio.cpp,v $
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 
 #include "sampleio.h"
 
@@ -91,4 +90,4 @@ void SampleIOPlugin::GetExportMaskCapability(QString &format, int &capability, i
 	return;
 }
 
-Q_EXPORT_PLUGIN(SampleIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SampleIOPlugin)

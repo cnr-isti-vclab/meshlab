@@ -41,7 +41,7 @@
 class EditArc3DPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
-		Q_INTERFACES(MeshEditInterface)
+	Q_INTERFACES(MeshEditInterface)
 
 public:
 	EditArc3DPlugin();

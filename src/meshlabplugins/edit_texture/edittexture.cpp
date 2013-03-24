@@ -29,6 +29,7 @@
 #include <wrap/gl/picking.h>
 
 #include <vcg/complex/algorithms/clean.h>
+#include <QDockWidget>
 
 using namespace vcg;
 

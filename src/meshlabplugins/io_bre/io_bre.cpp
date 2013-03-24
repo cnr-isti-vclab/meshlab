@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 #include <QFile>
 
 #include "io_bre.h"
@@ -241,7 +240,7 @@ bool vcg::tri::io::BreHeader::Read(QFile &file)
   bool success = ( 1 == file.read(m_data.data(), 256));
   
   const QString testBR = "BR";
-  QString testStr = QString::fromAscii(m_data.data()+6, 2);
+  QString testStr = QString::fromUtf8(m_data.data()+6, 2);
   success = (QString::compare(testBR, testStr) == 0);
 
   if ( success && Size() > 256 ) 
@@ -750,4 +749,4 @@ bool BGrid<T>::TriangleContainZ( const OpenObjects::TCoord<T>& a, const OpenObje
 
 
 
-Q_EXPORT_PLUGIN(BreMeshIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(BreMeshIOPlugin)

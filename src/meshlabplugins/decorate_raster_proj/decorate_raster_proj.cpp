@@ -696,4 +696,4 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
 
 
 
-Q_EXPORT_PLUGIN(DecorateRasterProjPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(DecorateRasterProjPlugin)

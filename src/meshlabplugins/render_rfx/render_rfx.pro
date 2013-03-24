@@ -1,6 +1,5 @@
 include (../../shared.pri)
 
-QT           += opengl xml
 
 HEADERS       = render_rfx.h             \
 		    rfx_colorbox.h           \

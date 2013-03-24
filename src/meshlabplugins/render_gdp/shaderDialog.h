@@ -27,10 +27,12 @@
 #include <map>
 #include <GL/glew.h>
 #include <common/meshmodel.h>
-#include <QtGui>
-#include <QGLWidget>
+#include <QLabel>
+#include <QDockWidget>
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
+
+class QGLWidget;
 
 class ShaderDialog : public QDockWidget
 {

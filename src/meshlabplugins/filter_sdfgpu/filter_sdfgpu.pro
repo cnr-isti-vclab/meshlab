@@ -20,7 +20,7 @@ SOURCES       += filter_sdfgpu.cpp \
     ../../meshlabplugins/render_radiance_scaling/textureFormat.cpp
 TARGET        = filter_sdfgpu
 TEMPLATE      = lib
-QT           += opengl
+
 CONFIG       += plugin
 
 DEPENDPATH += ./shaders

@@ -25,7 +25,7 @@
 #define __IO_MASK_RENDER_WIDGET_INC__
 
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 
 namespace ui

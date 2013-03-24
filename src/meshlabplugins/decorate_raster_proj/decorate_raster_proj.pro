@@ -1,6 +1,5 @@
 include (../../shared.pri)
 
-QT += opengl
 
 HEADERS += decorate_raster_proj.h \
            $$VCGDIR/wrap/gui/trackball.h \

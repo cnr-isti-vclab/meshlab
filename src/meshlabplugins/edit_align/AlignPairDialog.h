@@ -22,10 +22,12 @@
 ****************************************************************************/
 
 #include <GL/glew.h>
-#include <QObject>
-#include <QtGui>
+#include <QLabel>
+#include <QCheckBox>
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QLayout>
+#include <QDesktopWidget>
 #include <wrap/gui/trackball.h>
 #include <common/interfaces.h>
 #include "AlignPairWidget.h"

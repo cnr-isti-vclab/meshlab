@@ -30,6 +30,7 @@
 #include "meshmodel.h"
 #include "vcg/space/point3.h"
 
+
 class ScriptAdapterGenerator
 {
 private:

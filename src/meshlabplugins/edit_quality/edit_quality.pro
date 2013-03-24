@@ -27,4 +27,3 @@ RESOURCES = qualitymapper.qrc
 
 FORMS		  = qualitymapperdialog.ui
 
-QT           += opengl

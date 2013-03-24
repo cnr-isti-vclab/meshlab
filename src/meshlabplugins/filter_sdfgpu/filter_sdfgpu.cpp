@@ -429,7 +429,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     glGenQueriesARB( 1, &mOcclusionQuery );
 
-    checkGLError::qDebug("GL Init failed");
+    checkGLError::debugInfo("GL Init failed");
 
     return true;
 }
@@ -538,7 +538,7 @@ void SdfGpuPlugin::releaseGL(MeshModel &m)
 
     glDeleteQueriesARB( 1, &mOcclusionQuery );
 
-    checkGLError::qDebug("GL release failed");
+    checkGLError::debugInfo("GL release failed");
 
     this->glContext->doneCurrent();
 }
@@ -1095,8 +1095,8 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
     assert(mFboArray[1]->isValid());
     assert(mFboArray[2]->isValid());
 
-    checkGLError::qDebug("Error during depth peeling");
+    checkGLError::debugInfo("Error during depth peeling");
 }
 
-Q_EXPORT_PLUGIN(SdfGpuPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SdfGpuPlugin)
 

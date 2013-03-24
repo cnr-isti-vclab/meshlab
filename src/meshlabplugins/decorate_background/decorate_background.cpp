@@ -21,13 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <limits>
 #include <stdlib.h>
 #include "decorate_background.h"
-#include <QGLWidget>
 #include <wrap/gl/addons.h>
 
 #include <meshlab/glarea.h>
@@ -341,4 +338,4 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
 
 void  DecorateBackgroundPlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}
 
-Q_EXPORT_PLUGIN(DecorateBackgroundPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(DecorateBackgroundPlugin)

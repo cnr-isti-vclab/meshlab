@@ -27,7 +27,8 @@ $Log: stdpardialog.cpp,v $
 ****************************************************************************/
 #ifndef ALIGN_DIALOG_H
 #define ALIGN_DIALOG_H
-#include <QtGui>
+#include <QMenu>
+#include <QDockWidget>
 #include "meshtree.h"
 class GLArea;
 

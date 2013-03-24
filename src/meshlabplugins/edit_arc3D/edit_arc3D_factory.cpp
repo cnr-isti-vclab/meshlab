@@ -54,4 +54,4 @@ QString EditArc3DFactory::getEditToolDescription(QAction *)
 	return EditArc3DPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditArc3DFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditArc3DFactory)

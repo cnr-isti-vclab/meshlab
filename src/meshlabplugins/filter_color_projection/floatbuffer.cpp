@@ -323,7 +323,7 @@ int floatbuffer::dumppfm(QString filename)
 {
  FILE* miofile;
 
- miofile = fopen(filename.toAscii(), "wb");
+ miofile = fopen(filename.toUtf8().data(), "wb");
 
  int res;
 

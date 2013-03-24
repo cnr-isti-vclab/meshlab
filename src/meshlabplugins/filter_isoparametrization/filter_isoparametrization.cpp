@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 #include "defines.h"
 
 #include "../../common/meshmodel.h"
@@ -529,4 +528,4 @@ int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
 	return MeshModel::MM_UNKNOWN;
 }
 
-Q_EXPORT_PLUGIN(FilterIsoParametrization)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterIsoParametrization)

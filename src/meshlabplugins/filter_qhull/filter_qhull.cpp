@@ -544,4 +544,4 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
   assert(0);
   return false;
 }
-Q_EXPORT_PLUGIN(QhullPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(QhullPlugin)

@@ -25,7 +25,6 @@
  $Log: meshio.cpp,v $
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 
 #include "io_m.h"
 
@@ -93,4 +92,4 @@ void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, R
     par.addParam(new RichBool("HtmlSnippet",true, "HTML Snippet",
                                 "If true save an HTML snippet ready to be included in a web page"));
 }
-Q_EXPORT_PLUGIN(IOMPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(IOMPlugin)

@@ -62,4 +62,4 @@ QString EditSelectFactory::getEditToolDescription(QAction */*a*/)
   return EditSelectPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditSelectFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditSelectFactory)

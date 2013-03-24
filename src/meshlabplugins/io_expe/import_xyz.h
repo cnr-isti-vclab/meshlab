@@ -204,9 +204,9 @@ class ImporterXYZ
         }
         else
         {
-          std::cerr << "error: skip line " << buf.toAscii().data() << "\n";
+          std::cerr << "error: skip line " << buf.toUtf8().data() << "\n";
           for (int i=0; i<line.size(); ++i)
-            std::cerr << line[i].toAscii().data() << " $ ";
+            std::cerr << line[i].toUtf8().data() << " $ ";
           std::cerr << "\n";
         }
       }

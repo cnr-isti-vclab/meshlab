@@ -25,7 +25,6 @@
  $Log: meshio.cpp,v $
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 
 #include "io_tri.h"
 
@@ -333,4 +332,4 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 
  
  
-Q_EXPORT_PLUGIN(TriIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(TriIOPlugin)

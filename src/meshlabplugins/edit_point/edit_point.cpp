@@ -21,8 +21,6 @@
  *                                                                           *
  ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>

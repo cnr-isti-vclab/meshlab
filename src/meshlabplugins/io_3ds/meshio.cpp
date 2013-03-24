@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 
 #include "meshio.h"
 
@@ -165,4 +164,4 @@ void ExtraMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability
 	return;
 }
 
-Q_EXPORT_PLUGIN(ExtraMeshIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshIOPlugin)

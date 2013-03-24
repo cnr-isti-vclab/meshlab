@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include <Qt>
-#include <QtGui>
+#include <QMessageBox>
 #include <QDialog>
 
 #include "v3dImportDialog.h"
@@ -167,7 +167,7 @@ void v3dImportDialog::setArc3DReconstruction(Arc3DReconstruction *_er)
     if(!QFile::exists(ThumbCntName))
       {
         CharImage chi;
-        bool ret=chi.Open(er->modelList[i].countName.toAscii());
+        bool ret=chi.Open(er->modelList[i].countName.toUtf8().data());
         if(!ret) QMessageBox::warning(this,"Error in Thumb creation",QString("Unable to create '%1' from '%2'").arg(ThumbCntName,er->modelList[i].textureName));
 
         CharImage::colorizedScaledToHeight(64,chi).save(ThumbCntName,"jpg");

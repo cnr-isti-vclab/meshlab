@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 #include <QtXml>
 
 
@@ -185,4 +184,4 @@ void IoX3DPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	assert(0);
 }
  
-Q_EXPORT_PLUGIN(IoX3DPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(IoX3DPlugin)

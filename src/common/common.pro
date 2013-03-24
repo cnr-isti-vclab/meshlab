@@ -78,6 +78,7 @@ INCLUDEPATH += . $$EXIF_DIR
 DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
+win32-msvc2010:DEFINES += _CRT_SECURE_NO_WARNINGS
 
 
 # Input
@@ -120,6 +121,7 @@ macx64:LIBS		+= -L../external/lib/macx64 -ljhead
 win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
 win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
 win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
+win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
 win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
 linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
 linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead

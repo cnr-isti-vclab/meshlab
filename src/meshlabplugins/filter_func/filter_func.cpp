@@ -1285,4 +1285,4 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 
 }
 
-Q_EXPORT_PLUGIN(FilterFunctionPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterFunctionPlugin)

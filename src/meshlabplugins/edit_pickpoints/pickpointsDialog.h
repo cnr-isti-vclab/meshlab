@@ -29,7 +29,7 @@
 #ifndef PICKPOINTS_DIALOG_H
 #define PICKPOINTS_DIALOG_H
 
-#include <QtGui>
+#include <QDockWidget>
 
 #include <common/meshmodel.h>
 #include <meshlab/glarea.h>

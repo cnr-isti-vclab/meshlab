@@ -8,7 +8,6 @@ SOURCES       = edit_select_factory.cpp \
 
 TARGET        = edit_select
 
-QT           += opengl
 RESOURCES     = edit_select.qrc
 
 

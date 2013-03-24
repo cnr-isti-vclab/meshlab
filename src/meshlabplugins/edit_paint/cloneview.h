@@ -24,7 +24,9 @@
 #ifndef CLONEVIEW_H_
 #define CLONEVIEW_H_
 
-#include <QtGui>
+#include <QGraphicsView>
+#include <QGraphicsItem>
+#include <QMouseEvent>
 
 class CloneView : public QGraphicsView
 {
@@ -76,7 +78,7 @@ public :
 	{
 		QGraphicsView::setScene(scene);
 		
-		scenegroup = new QGraphicsItemGroup(NULL, scene);
+		scenegroup = new QGraphicsItemGroup(NULL/*, scene*/);
 		crosshair = new QGraphicsItemGroup(scenegroup);
 		crosshair->setZValue(2);
 		QPen pen;

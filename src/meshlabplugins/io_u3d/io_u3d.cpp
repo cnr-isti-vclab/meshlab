@@ -25,7 +25,6 @@
 
 
 #include <Qt>
-#include <QtGui>
 
 #include "io_u3d.h"
 #include <common/pluginmanager.h>
@@ -220,4 +219,4 @@ void U3DIOPlugin::saveParameters(const RichParameterSet &par)
 	delete sw;
 }
 
-Q_EXPORT_PLUGIN(U3DIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(U3DIOPlugin)

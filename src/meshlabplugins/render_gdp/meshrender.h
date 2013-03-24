@@ -34,6 +34,7 @@
 class MeshShaderRenderPlugin : public QObject, public MeshRenderInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_RENDER_INTERFACE_IID)
 	Q_INTERFACES(MeshRenderInterface)
 
 	GLhandleARB v;

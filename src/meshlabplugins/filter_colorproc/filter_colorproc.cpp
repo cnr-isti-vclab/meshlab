@@ -480,4 +480,4 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
 	}
 }
 
-Q_EXPORT_PLUGIN(FilterColorProc)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProc)

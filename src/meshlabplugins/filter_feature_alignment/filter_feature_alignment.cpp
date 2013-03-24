@@ -749,4 +749,4 @@ typename ALIGNER_TYPE::Result FilterFeatureAlignment::RansacDiagramOperation(Mes
     return res;  //all right
 }
 
-Q_EXPORT_PLUGIN(FilterFeatureAlignment)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterFeatureAlignment)

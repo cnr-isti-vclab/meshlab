@@ -26,7 +26,6 @@
 
 ****************************************************************************/
 
-#include <QtGui>
 #include "filter_zippering.h"
 
 #include <vcg/simplex/face/topology.h>
@@ -1695,4 +1694,4 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
     return true;
 }
 
-Q_EXPORT_PLUGIN(FilterZippering)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterZippering)

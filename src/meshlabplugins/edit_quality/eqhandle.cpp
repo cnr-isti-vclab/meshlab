@@ -28,6 +28,8 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include "eqhandle.h"
+#include <QMouseEvent>
+#include <QGraphicsSceneMouseEvent>
 
 EqHandle::EqHandle(CHART_INFO *environment_info, QColor color, QPointF position, 
 				   EQUALIZER_HANDLE_TYPE type, EqHandle** handles, qreal* midHandlePercentilePosition, QDoubleSpinBox* spinbox,

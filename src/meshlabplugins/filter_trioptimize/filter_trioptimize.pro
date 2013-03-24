@@ -1,6 +1,5 @@
 include (../../shared.pri)
 
-QT           += opengl
 
 HEADERS       += filter_trioptimize.h \
 		curvedgeflip.h \

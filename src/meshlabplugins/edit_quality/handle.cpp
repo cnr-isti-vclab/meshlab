@@ -28,7 +28,7 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include "handle.h"
-
+#include <QGraphicsSceneMouseEvent>
 
 Handle::Handle(CHART_INFO *environment_info, QColor color, QPointF position, int zOrder, int size ) : _chartInfo(environment_info)
 {

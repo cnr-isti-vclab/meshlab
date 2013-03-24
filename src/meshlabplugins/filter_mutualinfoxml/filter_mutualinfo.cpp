@@ -207,4 +207,4 @@ bool MutualInfoPlugin::initGL()
 	Log(0, "GL Initialization done");
 	return true;
 }
-Q_EXPORT_PLUGIN(MutualInfoPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(MutualInfoPlugin)

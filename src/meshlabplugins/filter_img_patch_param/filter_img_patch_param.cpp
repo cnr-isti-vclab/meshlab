@@ -981,4 +981,4 @@ int FilterImgPatchParamPlugin::computePatchCount( RasterPatchMap &patches )
 
 
 
-Q_EXPORT_PLUGIN(FilterImgPatchParamPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterImgPatchParamPlugin)

@@ -10,6 +10,4 @@ SOURCES   = edit_manipulators_factory.cpp \
 
 TARGET    = edit_manipulators
 
-QT       += opengl
-
 RESOURCES = edit_manipulators.qrc

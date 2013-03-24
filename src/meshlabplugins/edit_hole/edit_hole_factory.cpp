@@ -54,4 +54,4 @@ QString EditHoleFactory::getEditToolDescription(QAction *)
 	return EditHolePlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditHoleFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditHoleFactory)

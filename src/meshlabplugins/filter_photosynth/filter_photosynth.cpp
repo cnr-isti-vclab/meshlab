@@ -261,4 +261,4 @@ void FilterPhotosynthPlugin::outputToFile(QTextStream &out, Shotf &s, Image &img
   out << "</project>\n\n\n\n";
 }
 
-Q_EXPORT_PLUGIN(FilterPhotosynthPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterPhotosynthPlugin)

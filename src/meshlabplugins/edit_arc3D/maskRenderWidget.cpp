@@ -22,17 +22,17 @@
 ****************************************************************************/
 
 #include "maskRenderWidget.h"
-#include <QtGui/QPen>
-#include <QtGui/QBrush>
-#include <QtGui/QPolygon>
-#include <QtGui/QPixmap>
-#include <QtGui/QImage>
-#include <QtGui/QPainter>
-#include <QtGui/QPalette>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QPen>
+#include <QBrush>
+#include <QPolygon>
+#include <QPixmap>
+#include <QImage>
+#include <QPainter>
+#include <QPalette>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QApplication>
+#include <QMessageBox>
 
 #include <stack>
 #include <cmath>

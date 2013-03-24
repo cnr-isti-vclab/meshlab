@@ -24,7 +24,6 @@
 History
 $Log: meshedit.cpp,v $
 ****************************************************************************/
-#include <QtGui>
 
 #include <meshlab/glarea.h>
 #include "edit_align.h"

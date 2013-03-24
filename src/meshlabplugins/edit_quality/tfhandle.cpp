@@ -28,6 +28,7 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include "tfhandle.h"
+#include <QGraphicsSceneMouseEvent>
 
 //declaration of static member of TFHandle class
 TransferFunction* TFHandle::_tf = 0;

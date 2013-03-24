@@ -46,6 +46,7 @@ macx:QMAKE_LFLAGS += -fopenmp
 win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/levmar.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/levmar.lib
+win32-msvc2010:LIBS	+= ../../external/lib/win32-msvc2010/levmar.lib
 win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 linux-g++:LIBS		+= -L../../external/lib/linux-g++ -llevmar
 linux-g++-32:LIBS		+= -L../../external/lib/linux-g++-32 -llevmar

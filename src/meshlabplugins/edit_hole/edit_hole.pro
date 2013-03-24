@@ -14,11 +14,7 @@ SOURCES       = edit_hole_factory.cpp \
         holeListModel.cpp
 
 TARGET        = edit_hole
-
-QT           += opengl
 RESOURCES     = edit_hole.qrc
 FORMS         = edit_hole.ui
-
-QT           += opengl
 
 

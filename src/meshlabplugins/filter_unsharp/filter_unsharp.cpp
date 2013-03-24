@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 #include <Qt>
-#include <QtGui>
 #include "filter_unsharp.h"
 
 #include <vcg/complex/algorithms/clean.h>
@@ -672,4 +671,4 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 }
 
 
-Q_EXPORT_PLUGIN(FilterUnsharp)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterUnsharp)

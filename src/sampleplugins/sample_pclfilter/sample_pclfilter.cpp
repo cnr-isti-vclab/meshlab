@@ -128,4 +128,4 @@ bool SamplePCLFilterPlugin::applyFilter(QAction * a, MeshDocument & md , RichPar
 	return true;
 }
 
-Q_EXPORT_PLUGIN(SamplePCLFilterPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SamplePCLFilterPlugin)

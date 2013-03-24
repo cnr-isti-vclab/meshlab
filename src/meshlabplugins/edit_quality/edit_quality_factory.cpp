@@ -55,4 +55,4 @@ QString QualityMapperFactory::getEditToolDescription(QAction *)
 	return QualityMapperPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(QualityMapperFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(QualityMapperFactory)

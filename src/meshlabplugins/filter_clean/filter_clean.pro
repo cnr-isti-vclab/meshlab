@@ -6,4 +6,3 @@ SOURCES       += cleanfilter.cpp
 
 TARGET        = filter_clean
 
-QT           += xml

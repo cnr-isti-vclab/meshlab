@@ -195,4 +195,4 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
    return true;
 }
 
-Q_EXPORT_PLUGIN(PlyMCPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(PlyMCPlugin)

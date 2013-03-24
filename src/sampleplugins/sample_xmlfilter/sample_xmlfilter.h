@@ -40,6 +40,7 @@ add sampleplugins
 class SampleXMLFilterPlugin : public MeshLabFilterInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshLabFilterInterface)
 public:
 

@@ -149,4 +149,4 @@ bool SdfPlugin::applyFilter(MeshDocument& md, RichParameterSet& pars, vcg::CallB
   }
   return true;
 }
-Q_EXPORT_PLUGIN(SdfPlugin)
+ MESHLAB_PLUGIN_NAME_EXPORTER(SdfPlugin)

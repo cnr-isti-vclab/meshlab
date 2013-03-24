@@ -54,4 +54,4 @@ QString EditMeasureFactory::getEditToolDescription(QAction *)
 	return EditMeasurePlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditMeasureFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditMeasureFactory)

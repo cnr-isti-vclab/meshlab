@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 #include "radianceScalingRenderer.h"
-#include <QtGui>
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -280,4 +279,4 @@ void RadianceScalingRendererPlugin::cleanFBOs() {
   }
 }
 
-Q_EXPORT_PLUGIN(RadianceScalingRendererPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(RadianceScalingRendererPlugin)

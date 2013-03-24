@@ -13,7 +13,6 @@ SOURCES       = \
 
 TARGET        = edit_point
 
-QT           += opengl
 
 RESOURCES     = edit_point.qrc
 

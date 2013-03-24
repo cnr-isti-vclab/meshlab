@@ -165,4 +165,4 @@ FilterAutoalign::FilterClass FilterAutoalign::getClass(QAction *a)
   }
 }
 
-Q_EXPORT_PLUGIN(FilterAutoalign)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterAutoalign)

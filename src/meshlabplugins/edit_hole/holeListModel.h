@@ -25,7 +25,9 @@
 
 #include <QWidget>
 #include <QHeaderView>
-#include <QtGui>
+#include <QVariant>
+#include <QModelIndex>
+#include <QSortFilterProxyModel>
 #include <common/meshmodel.h>
 #include "fgtHole.h"
 #include "fgtBridge.h"

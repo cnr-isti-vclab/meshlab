@@ -21,9 +21,9 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "glarea.h"
 #include <QDialog>
 #include <QFileDialog>
+#include "snapshotsetting.h"
 
 namespace Ui 
 {

@@ -190,4 +190,4 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
 }
 
 
-Q_EXPORT_PLUGIN(FilterCSG)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterCSG)

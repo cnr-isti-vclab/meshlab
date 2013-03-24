@@ -25,7 +25,7 @@
 #define __IO_MASK_IMAGE_WIDGET_INC__
 
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 
 namespace ui

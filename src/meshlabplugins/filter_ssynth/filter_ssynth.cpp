@@ -1,5 +1,4 @@
 #include <Qt>
-#include <QtGui>
 #include "filter_ssynth.h"
 #include <meshlabplugins/io_x3d/import_x3d.h>
 #include <common/meshmodel.h>
@@ -247,7 +246,7 @@ QList<MeshIOInterface::Format> FilterSSynth::importFormats() const
              grammar->insert(0,tosub);
          }
  }
- Q_EXPORT_PLUGIN(FilterSSynth)
+ MESHLAB_PLUGIN_NAME_EXPORTER(FilterSSynth)
 
 
 

@@ -15,7 +15,6 @@ SOURCES       = edit_texture_factory.cpp \
 
 TARGET        = edit_texture
 
-QT           += opengl
 RESOURCES     = meshlab.qrc
 FORMS         = textureeditor.ui
 

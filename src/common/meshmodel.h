@@ -50,10 +50,8 @@
 #include <QString>
 #include <QStringList>
 #include <QFileInfo>
-#include <QObject>
 #include "GLLogStream.h"
 #include "filterscript.h"
-#include <QSemaphore>
 
 // Forward declarations needed for creating the used types
 class CVertexO;
@@ -428,9 +426,9 @@ public:
 
 }; // end class RenderMode
 
-class MeshLabRenderState : public QObject
+class MeshLabRenderState //: public QObject
 {
-	Q_OBJECT
+	//Q_OBJECT
 public:
 	MeshLabRenderState();
 	~MeshLabRenderState();

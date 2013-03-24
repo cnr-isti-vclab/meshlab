@@ -119,4 +119,4 @@ void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichPa
         }
 }
 
-Q_EXPORT_PLUGIN(DecorateShadowPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(DecorateShadowPlugin)

@@ -72,4 +72,4 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 	return false;
 }
 
-Q_EXPORT_PLUGIN(SampleXMLFilterPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SampleXMLFilterPlugin)

@@ -22,9 +22,17 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <QObject>
+#include <GL/glew.h>
+#include <QFile>
+#include <QImage>
+#include <cassert>
+
+//#include <QObject>
 #include <common/interfaces.h>
-#include <meshlab/glarea.h>
+//#include <meshlab/glarea.h>
+
+
+class GLArea;
 
 #define BLUR_COEF 0.4
 
@@ -92,17 +100,10 @@ protected:
       * and returns false, otherwise returns true;
       * @return true if no errors happened during the setup, false otherwise.
       */
-    bool initGlew(){
+    bool initGlew()
+	{
         GLenum err = glewInit();
-        if (!GLEW_OK == err){
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setWindowTitle("GLEW init failure");
-            msgBox.setText(QString("Init GLEW failed."));
-            msgBox.exec();
-            return false;
-        }
-        return true;
+		return (err == GLEW_OK);
     }
 
     /**
@@ -110,16 +111,9 @@ protected:
       * it shows an allert message an returns false, otherwise returns true;
       * @return true if no errors happened during the setup, false otherwise.
       */
-    bool initSetup(){
-        if(!this->setup()){
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setWindowTitle("FBO Setup failure");
-            msgBox.setText(QString("Failed in creating a Frame Buffer Object."));
-            msgBox.exec();
-            return false;
-        }
-        return true;
+    bool initSetup()
+	{
+        return setup();
     }
 
     /**

@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 
 #include "filter_fractal.h"
 
@@ -306,5 +305,5 @@ int FilterFractal::postCondition(QAction *filter) const
     }
 }
 // ----------------------------------------------------------------------
-Q_EXPORT_PLUGIN(FilterFractal)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterFractal)
 

@@ -38,10 +38,11 @@
 
 class IoX3DPlugin : public QObject, public MeshIOInterface
 {
-  Q_OBJECT
-  Q_INTERFACES(MeshIOInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
+	Q_INTERFACES(MeshIOInterface)
 
-  
+
 public:
 	QList<Format> importFormats() const;
 	QList<Format> exportFormats() const;

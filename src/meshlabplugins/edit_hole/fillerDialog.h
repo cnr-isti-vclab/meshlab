@@ -24,9 +24,9 @@
 #define FILLERDIALOG_H
 
 #include <QWidget>
-#include <QtGui/QDockWidget>
-#include <QtGui/QStandardItemModel>
-#include <QtGui/QSortFilterProxyModel>
+#include <QDockWidget>
+#include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include "ui_edit_hole.h"
 
 class FillerDialog : public QDockWidget

@@ -28,6 +28,9 @@
 
 #include <vcg/math/base.h>
 #include <GL/glew.h>
+#include <QHash>
+#include <QUndoStack>
+#include <QUndoGroup>
 #include "ui_paintbox.h"
 
 /**

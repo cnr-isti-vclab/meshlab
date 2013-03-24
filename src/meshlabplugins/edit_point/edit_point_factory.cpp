@@ -58,4 +58,4 @@ QString PointEditFactory::getEditToolDescription(QAction *)
         return EditPointPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(PointEditFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(PointEditFactory)

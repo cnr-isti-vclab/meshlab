@@ -1,7 +1,5 @@
 include (../../shared.pri)
 
-QT           += opengl
-
 HEADERS       += filter_qhull.h \
 		qhull_tools.h 
 

@@ -19,10 +19,22 @@
 #define p2print(point) ((point).X()) << ", " << ((point).Y())
 #define p3print(point) p2print(point) << ", " << ((point).Z())
 
-namespace std {
-    namespace tr1 {
+namespace std 
+{
+//MSVC++ 11.0 _MSC_VER = 1700 (Visual Studio 2012)
+//MSVC++ 10.0 _MSC_VER = 1600 (Visual Studio 2010)
+//MSVC++ 9.0  _MSC_VER = 1500 (Visual Studio 2008)
+//MSVC++ 8.0  _MSC_VER = 1400 (Visual Studio 2005)
+//MSVC++ 7.1  _MSC_VER = 1310 (Visual Studio 2003)
+//MSVC++ 7.0  _MSC_VER = 1300
+//MSVC++ 6.0  _MSC_VER = 1200
+//MSVC++ 5.0  _MSC_VER = 1100
+#if defined(_MSC_VER) && (_MSC_VER > 1500)
+#else
+	 namespace tr1 {
+#endif
         template <>
-                struct hash<vcg::Point3i> : public std::unary_function<vcg::Point3i, std::size_t>
+        struct hash<vcg::Point3i> : public std::unary_function<vcg::Point3i, std::size_t>
         {
             std::size_t operator()(const vcg::Point3i &x) const
             {
@@ -30,8 +42,10 @@ namespace std {
                 return ((x[0]) * 131 + h(x[1])) * 131 + h(x[2]);
             }
         };
-
-    }
+#if defined(_MSC_VER) && (_MSC_VER > 1500)
+#else
+	 }
+#endif       
 }
 
 /*

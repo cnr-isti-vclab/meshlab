@@ -28,6 +28,8 @@
 #include "textureeditor.h"
 #include "ui_textureeditor.h"
 
+class QDockWidget;
+
 class EditTexturePlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT

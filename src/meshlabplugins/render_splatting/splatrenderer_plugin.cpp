@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -93,4 +91,4 @@ void SplatRendererPlugin::Draw(QAction *a, MeshModel &m, RenderMode &rm, QGLWidg
 #endif
 
 
-Q_EXPORT_PLUGIN(SplatRendererPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(SplatRendererPlugin)

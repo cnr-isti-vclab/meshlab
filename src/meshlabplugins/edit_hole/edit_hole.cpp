@@ -21,7 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
+#include <QMessageBox>
+#include <QMouseEvent>
 #include <QString>
 #include <math.h>
 #include <stdlib.h>

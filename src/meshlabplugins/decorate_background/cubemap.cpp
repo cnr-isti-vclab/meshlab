@@ -78,7 +78,7 @@ void CICubeMap::DrawEnvCube(Matrix44f &tr)
 
 void CICubeMap::DrawEnvCubeOld(Matrix44f &tr)
 {
-	checkGLError::qDebug("DrawEnvCubeOld: start");
+	checkGLError::debugInfo("DrawEnvCubeOld: start");
 	glMatrixMode(GL_MODELVIEW);
 	glPushAttrib(GL_ENABLE_BIT|GL_CURRENT_BIT | GL_TEXTURE_BIT);
 
@@ -112,7 +112,7 @@ void CICubeMap::DrawEnvCubeOld(Matrix44f &tr)
 	glDepthMask(true);
 	glPopMatrix();
 	glPopAttrib();
-	checkGLError::qDebug("DrawEnvCubeOld: end");
+	checkGLError::debugInfo("DrawEnvCubeOld: end");
 
 }
 

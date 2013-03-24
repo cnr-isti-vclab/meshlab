@@ -2211,6 +2211,7 @@ bool MainWindow::importMesh(QString fileName)
 		if(!prePar.isEmpty())
 		{
 			GenericParamDialog preOpenDialog(this, &prePar, tr("Pre-Open Options"));
+			preOpenDialog.setFocus();
 			preOpenDialog.exec();
 		}
 		int mask = 0;

@@ -40,6 +40,7 @@ New small samples
 class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
   Q_INTERFACES(MeshDecorateInterface)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;

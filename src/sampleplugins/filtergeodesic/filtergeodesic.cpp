@@ -33,7 +33,6 @@
  
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 
 #include "filtergeodesic.h"
 
@@ -204,4 +203,4 @@ int FilterGeodesic::postCondition(QAction * filter) const
     default                  : return MeshModel::MM_UNKNOWN;
   }
 }
-Q_EXPORT_PLUGIN(FilterGeodesic)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterGeodesic)

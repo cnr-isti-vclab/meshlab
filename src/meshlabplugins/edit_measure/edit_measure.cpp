@@ -24,7 +24,6 @@
   History
 $Log: editmeasure.cpp,v $
 ****************************************************************************/
-#include <QtGui>
 
 #include <meshlab/glarea.h>
 #include "edit_measure.h"

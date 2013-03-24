@@ -21,9 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <meshlab/glarea.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
 #include <common/pluginmanager.h>
+
 
 ShadowMapping::ShadowMapping(float intensity):DecorateShader()
 {

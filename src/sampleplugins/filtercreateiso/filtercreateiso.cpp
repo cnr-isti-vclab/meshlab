@@ -30,7 +30,6 @@ Added the new sample filter plugin that removes border faces
 
 *****************************************************************************/
 #include <Qt>
-#include <QtGui>
 #include "filtercreateiso.h"
 
 #include <vcg/math/perlin_noise.h>
@@ -140,4 +139,4 @@ void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParamet
 }
 
 
-Q_EXPORT_PLUGIN(FilterCreateIso)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterCreateIso)

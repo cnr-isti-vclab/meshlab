@@ -137,4 +137,4 @@ QString ExtraSamplePlugin::filterScriptFunctionName( FilterIDType filterID )
 	return QString();
 }
 
-Q_EXPORT_PLUGIN(ExtraSamplePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSamplePlugin)

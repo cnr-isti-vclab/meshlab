@@ -11,4 +11,3 @@ SOURCES       += meshfilter.cpp \
 
 TARGET        = filter_meshing
 
-QT += opengl

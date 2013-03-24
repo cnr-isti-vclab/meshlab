@@ -653,7 +653,7 @@ protected:
 #define MESH_RENDER_INTERFACE_IID  "vcg.meshlab.MeshRenderInterface/1.0"
 #define MESH_DECORATE_INTERFACE_IID  "vcg.meshlab.MeshDecorateInterface/1.0"
 #define MESH_EDIT_INTERFACE_IID  "vcg.meshlab.MeshEditInterface/1.0"
-#define MESH_IO_INTERFACE_FACTORY_IID  "vcg.meshlab.MeshEditInterfaceFactory/1.0"
+#define MESH_EDIT_INTERFACE_FACTORY_IID  "vcg.meshlab.MeshEditInterfaceFactory/1.0"
 
 Q_DECLARE_INTERFACE(MeshIOInterface,						MESH_IO_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshFilterInterface,				MESH_FILTER_INTERFACE_IID)
@@ -661,6 +661,6 @@ Q_DECLARE_INTERFACE(MeshLabFilterInterface,				MESHLAB_FILTER_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshRenderInterface,				MESH_RENDER_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshDecorateInterface,			MESH_DECORATE_INTERFACE_IID)
 Q_DECLARE_INTERFACE(MeshEditInterface,					 MESH_EDIT_INTERFACE_IID)
-Q_DECLARE_INTERFACE(MeshEditInterfaceFactory,			MESH_IO_INTERFACE_FACTORY_IID)
+Q_DECLARE_INTERFACE(MeshEditInterfaceFactory,			MESH_EDIT_INTERFACE_FACTORY_IID)
 
 #endif

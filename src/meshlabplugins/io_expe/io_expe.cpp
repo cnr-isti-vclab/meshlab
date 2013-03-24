@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 
 #include "io_expe.h"
 
@@ -167,4 +166,4 @@ void ExpeIOPlugin::GetExportMaskCapability(QString &format, int &capability, int
 	return;
 }
 
-Q_EXPORT_PLUGIN(ExpeIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(ExpeIOPlugin)

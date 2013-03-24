@@ -1,6 +1,5 @@
 include (../../shared.pri)
 
-QT += opengl
 
 HEADERS += decorate_shadow.h \
     shadow_mapping.h \

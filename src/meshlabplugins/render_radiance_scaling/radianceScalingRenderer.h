@@ -26,7 +26,6 @@
 #include <GL/glew.h>
 #include <common/interfaces.h>
 
-#include <QObject>
 #include <QAction>
 #include <QString>
 #include <map>
@@ -38,6 +37,7 @@
 
 class RadianceScalingRendererPlugin : public QObject, public MeshRenderInterface {
     Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_RENDER_INTERFACE_IID)
     Q_INTERFACES(MeshRenderInterface)
 
     bool             _supported;

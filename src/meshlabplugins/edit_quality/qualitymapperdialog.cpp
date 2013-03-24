@@ -25,6 +25,8 @@
 #include <limits>
 #include <QPen>
 #include <QBrush>
+#include <QGraphicsSceneMouseEvent>
+#include <QFileDialog>
 
 using namespace vcg;
 

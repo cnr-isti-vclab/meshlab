@@ -54,4 +54,4 @@ QString EditPaintFactory::getEditToolDescription(QAction *)
 	return EditPaintPlugin::Info();
 }
 
-Q_EXPORT_PLUGIN(EditPaintFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditPaintFactory)

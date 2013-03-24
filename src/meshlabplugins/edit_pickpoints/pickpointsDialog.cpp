@@ -26,8 +26,7 @@
  * @author Oscar Barney
  */
 
-#include <QtGui>
-
+#include <QFileDialog>
 #include <math.h>
 
 #include <common/meshmodel.h>

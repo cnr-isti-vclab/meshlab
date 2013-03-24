@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include <Qt>
-#include <QtGui>
 
 #include "io_pdb.h"
 
@@ -198,7 +197,7 @@ void PDBIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const 
 	*/
 }
 
-Q_EXPORT_PLUGIN(PDBIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(PDBIOPlugin)
 
 
 //---------- PDB READER -----------//

@@ -30,6 +30,7 @@ HEADERS = ../common/interfaces.h \
 	xmlstdpardialog.h \
 	additionalgui.h \
 	xmlgeneratorgui.h \
+	snapshotsetting.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h \

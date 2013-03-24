@@ -26,8 +26,6 @@ Revision 1.0 2008/02/20 Alessandro Maione, Federico Bellucci
 FIRST RELEASE
 
 ****************************************************************************/
-
-#include <QtGui>
 #include <math.h>
 #include <stdlib.h>
 #include "filterqualitymapper.h"
@@ -198,4 +196,4 @@ int QualityMapperFilter::postCondition( QAction* a) const
 		return MeshModel::MM_UNKNOWN;
 	}
 }
-Q_EXPORT_PLUGIN(QualityMapperFilter)
+MESHLAB_PLUGIN_NAME_EXPORTER(QualityMapperFilter)

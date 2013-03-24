@@ -34,8 +34,6 @@ add samplefilter
 
 ****************************************************************************/
 
-#include <QtGui>
-
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -246,4 +244,4 @@ for (i=0; i < nr_faces; i++){
 }
 
 
-Q_EXPORT_PLUGIN(PoissonPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(PoissonPlugin)

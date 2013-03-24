@@ -351,13 +351,13 @@ GLuint RenderHelper::createShaderFromFiles(QString name)
   QString vert = "shaders/" + name + ".vert";
   QString frag = "shaders/" + name + ".frag";
 
-  const char *vs_src = ShaderUtils::importShaders(vert.toAscii().data());
+  const char *vs_src = ShaderUtils::importShaders(vert.toUtf8().data());
   if(!vs_src) {
     cerr << "Could not load shader: " << qPrintable(vert) << endl;
     return 0;
   }
 
-  const char *fs_src = ShaderUtils::importShaders(frag.toAscii().data());
+  const char *fs_src = ShaderUtils::importShaders(frag.toUtf8().data());
   if(!fs_src) {
     cerr << "Could not load shader: " << qPrintable(frag) << endl;
     return 0;

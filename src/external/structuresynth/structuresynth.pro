@@ -117,6 +117,7 @@ macx:DESTDIR       = ../lib/macx
 win32-g++:DESTDIR       = ../lib/win32-gcc
 win32-msvc2005:DESTDIR       = ../lib/win32-msvc2005
 win32-msvc2008:DESTDIR       = ../lib/win32-msvc2008
+win32-msvc2010:DESTDIR       = ../lib/win32-msvc2010
 linux-g++-32:DESTDIR = ../lib/linux-g++-32
 linux-g++-64:DESTDIR = ../lib/linux-g++-64
 linux-g++:DESTDIR = ../lib/linux-g++

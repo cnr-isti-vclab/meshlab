@@ -20,5 +20,3 @@ FORMS        += pickpointsDialog.ui
 
 TARGET        = edit_pickpoints
 
-QT           += opengl 
-QT           += xml

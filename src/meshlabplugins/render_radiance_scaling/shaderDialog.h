@@ -24,9 +24,8 @@
 #define SHADERDIALOG_H
 
 #include <GL/glew.h>
-#include <QtGui>
 #include <QGLWidget>
-#include <QtGui/QDockWidget>
+#include <QDockWidget>
 #include "ui_shaderDialog.h"
 
 class RadianceScalingRendererPlugin;

@@ -20,12 +20,12 @@
  * for more details.                                                         *
  *                                                                           *
  ****************************************************************************/
-#include <QtGui>
 
 #include <meshlab/glarea.h>
 #include "edit_manipulators.h"
 #include <wrap/qt/gl_label.h>
 #include <wrap/gui/trackball.h>
+
 
 using namespace vcg;
 

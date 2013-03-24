@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-
-#include <QtGui>
 #include "renderarea.h"
 #include "textureeditor.h"
 #include <wrap/qt/trackball.h>

@@ -69,7 +69,7 @@ private:
 #include <QSignalMapper>
 #include <QFileDialog>
 #include <QColor>
-#include <QtGui>
+#include <QDockWidget>
 #include "ui_rfx_dialog.h"
 #include "rfx_shader.h"
 #include "rfx_specialuniform.h"

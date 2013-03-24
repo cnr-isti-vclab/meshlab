@@ -31,6 +31,7 @@ FIRST RELEASE
 #define _EQHANDLE_H_
 
 #include "handle.h"
+#include <QDoubleSpinBox>
 
 enum EQUALIZER_HANDLE_TYPE
 {

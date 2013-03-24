@@ -466,4 +466,4 @@ void JSONIOPlugin::GetExportMaskCapability(QString & format, int & capability, i
 	}
 }
 
-Q_EXPORT_PLUGIN(JSONIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(JSONIOPlugin)

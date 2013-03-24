@@ -21,8 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <meshlab/glarea.h>
 #include "ssao.h"
+
 #include <common/pluginmanager.h>
+
 SSAO::SSAO(float radius):DecorateShader()
 {
     this->_radius = radius;

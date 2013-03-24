@@ -23,6 +23,8 @@
 #include "shaderDialog.h"
 #include "radianceScalingRenderer.h"
 
+#include <QFileDialog>
+
 using namespace std;
 
 ShaderDialog::ShaderDialog(RadianceScalingRendererPlugin* wrp,QGLWidget* gla,QWidget *parent)
