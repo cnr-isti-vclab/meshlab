@@ -1627,8 +1627,12 @@ void MainWindow::saveProject()
 
   /*********WARNING!!!!!! CHANGE IT!!! ALSO IN THE OPENPROJECT FUNCTION********/
   meshDoc()->setDocLabel(fileName);
-  mdiarea->activeSubWindow()->setWindowTitle(meshDoc()->docLabel());
-  layerDialog->setWindowTitle(meshDoc()->docLabel());
+  QMdiSubWindow* sub = mdiarea->currentSubWindow();
+  if (sub != NULL)
+  {
+    sub->setWindowTitle(meshDoc()->docLabel());
+    layerDialog->setWindowTitle(meshDoc()->docLabel());
+  }
   /****************************************************************************/
 
 
