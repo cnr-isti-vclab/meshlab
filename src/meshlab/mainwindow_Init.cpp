@@ -133,6 +133,7 @@ MainWindow::MainWindow()
 void MainWindow::createActions()
 {
 	searchShortCut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_F), this);
+	searchShortCut->setAutoRepeat(false);
 	searchShortCut->setContext(Qt::ApplicationShortcut);
 	//////////////Action Menu File ////////////////////////////////////////////////////////////////////////////
 	newProjectAct = new QAction(QIcon(":/images/new_project.png"),tr("New Empty Project..."), this);
