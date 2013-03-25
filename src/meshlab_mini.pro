@@ -14,11 +14,6 @@ SUBDIRS       = common \
 				meshlab \                         # the GUI framework
                meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
 			   meshlabplugins/filter_meshing \
-                meshlabplugins/filter_mls \   # a few basic filtering operations, including the well know simplification
-				meshlabplugins/decorate_background \
-				meshlabplugins/edit_align \
-				meshlabplugins/edit_arc3D \
-				meshlabplugins/edit_hole \
 
 
 #	    meshlabplugins/io_expe \
