@@ -37,23 +37,22 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
 {
   switch(filter)
   {
-  case DP_SHOW_AXIS:              return tr("Draws XYZ axes in world coordinates");
-  case DP_SHOW_BOX_CORNERS:       return tr("Draws object's bounding box corners");
-  case DP_SHOW_VERT:              return tr("Draw the vertices of the mesh as round dots");
-  case DP_SHOW_EDGE:              return tr("Draw the edges of the mesh as round dots");
-  case DP_SHOW_NON_FAUX_EDGE:     return tr("Draws the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
-  case DP_SHOW_BOUNDARY:          return tr("Draws the edge of the mesh that are on the boundary.");
+  case DP_SHOW_AXIS:              return tr("Draw XYZ axes in world coordinates");
+  case DP_SHOW_BOX_CORNERS:       return tr("Draw object's bounding box corners");
+  case DP_SHOW_VERT:              return tr("Draw the vertices of the mesh as small white dots");
+  case DP_SHOW_EDGE:              return tr("Draw the all the edges of the mesh");
+  case DP_SHOW_NON_FAUX_EDGE:     return tr("Draw the edge of the mesh that are tagged as 'real edges' (useful for quadmeshes).");
+  case DP_SHOW_BOUNDARY:          return tr("Draw the edge of the mesh that are on the boundary.");
   case DP_SHOW_BOUNDARY_TEX:      return tr("Draw the edge where there is a texture seam.");
   case DP_SHOW_NON_MANIF_EDGE:    return tr("Draw the non manifold edges of the current mesh");
   case DP_SHOW_NON_MANIF_VERT:    return tr("Draw the non manifold vertices of the current mesh");
-  case DP_SHOW_NORMALS:           return tr("Draw normals");
-  case DP_SHOW_VERT_PRINC_CURV_DIR: return tr("Show Vertex Principal Curvature Directions");
-  case DP_SHOW_QUOTED_BOX:        return tr("Draws quoted box");
-  case DP_SHOW_LABEL:             return tr("Draws all the vertex/edge/face indexes<br> Useful for debugging<br>(do not use it on large meshes)");
-  case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draws a (colored) Histogram of the per vertex/face quality");
+  case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals and per vertex principal curvature directions");
+  case DP_SHOW_QUOTED_BOX:        return tr("Draw quoted box");
+  case DP_SHOW_LABEL:             return tr("Draw on all the vertex/edge/face a label with their index<br> Useful for debugging<br>(WARNING: do not use it on large meshes)");
+  case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
   case DP_SHOW_CAMERA:            return tr("Draw the position of the camera, if present in the current mesh");
   case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
-  case DP_SHOW_SELECTED_MESH:     return tr("Enlighten the current Mesh");
+  case DP_SHOW_SELECTED_MESH:     return tr("Enlighten the current mesh");
   }
   assert(0);
   return QString();
@@ -63,23 +62,22 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)
     {
-    case DP_SHOW_VERT: return QString("Show Vertex Dots");
-    case DP_SHOW_EDGE: return QString("Show Edge");
-    case DP_SHOW_NON_FAUX_EDGE:	return QString("Show Non-Faux Edges");
-    case DP_SHOW_BOUNDARY:	return QString("Show Boundary Edges");
-    case DP_SHOW_BOUNDARY_TEX:	return QString("Show Texture Seams");
-    case DP_SHOW_NON_MANIF_EDGE:	return QString("Show Non Manif Edges");
-    case DP_SHOW_NON_MANIF_VERT:	return QString("Show Non Manif Vertices");
-    case DP_SHOW_NORMALS:	return QString("Show Normals");
-    case DP_SHOW_VERT_PRINC_CURV_DIR:	return QString("Show Vertex Principal Curvature Directions");
-    case DP_SHOW_BOX_CORNERS:			return QString("Show Box Corners");
-    case DP_SHOW_AXIS:			return QString("Show Axis");
-    case DP_SHOW_QUOTED_BOX		:	return QString("Show Quoted Box");
-    case DP_SHOW_LABEL:		return tr("Show Label");
-    case DP_SHOW_CAMERA:			return tr("Show Camera");
-    case DP_SHOW_TEXPARAM:			return tr("Show UV Tex Param");
-    case DP_SHOW_QUALITY_HISTOGRAM:			return tr("Show Quality Histogram");
-    case DP_SHOW_SELECTED_MESH:			return tr("Show Current Mesh");
+    case DP_SHOW_VERT:              return QString("Show Vertex Dots");
+    case DP_SHOW_EDGE:              return QString("Show Edge");
+    case DP_SHOW_NON_FAUX_EDGE:	    return QString("Show Non-Faux Edges");
+    case DP_SHOW_BOUNDARY:          return QString("Show Boundary Edges");
+    case DP_SHOW_BOUNDARY_TEX:      return QString("Show Texture Seams");
+    case DP_SHOW_NON_MANIF_EDGE:    return QString("Show Non Manif Edges");
+    case DP_SHOW_NON_MANIF_VERT:    return QString("Show Non Manif Vertices");
+    case DP_SHOW_NORMALS:           return QString("Show Normal/Curvature");
+    case DP_SHOW_BOX_CORNERS:       return QString("Show Box Corners");
+    case DP_SHOW_AXIS:              return QString("Show Axis");
+    case DP_SHOW_QUOTED_BOX:        return QString("Show Quoted Box");
+    case DP_SHOW_LABEL:             return QString("Show Label");
+    case DP_SHOW_CAMERA:            return QString("Show Camera");
+    case DP_SHOW_TEXPARAM:          return QString("Show UV Tex Param");
+    case DP_SHOW_QUALITY_HISTOGRAM: return QString("Show Quality Histogram");
+    case DP_SHOW_SELECTED_MESH:     return QString("Show Current Mesh");
 
     default: assert(0);
     }
@@ -159,12 +157,11 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 {
   this->setLog(&_log);
   QFont qf;
-	glPushMatrix();
-	glMultMatrix(m.cm.Tr);
+    glPushMatrix();
+    glMultMatrix(m.cm.Tr);
     switch (ID(a))
     {
     case DP_SHOW_NORMALS:
-    case DP_SHOW_VERT_PRINC_CURV_DIR:
     {
       glPushAttrib(GL_ENABLE_BIT );
       float NormalLen=rm->getFloat(NormalLength());
@@ -228,25 +225,25 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
       if(rm->getBool(LabelFaceFlag())) DrawFaceLabel(m,painter);
     } break;
     case DP_SHOW_VERT:	{
-			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
-			glDisable(GL_LIGHTING);
-			glEnable(GL_POINT_SMOOTH);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColor(Color4b::Black);
-			glDepthRange (0.0, 0.9999);
-			glDepthFunc(GL_LEQUAL);
-			float baseSize = rm->getDynamicFloat(this->VertDotSizeParam());
+            glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_LIGHTING);
+            glEnable(GL_POINT_SMOOTH);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glColor(Color4b::Black);
+            glDepthRange (0.0, 0.9999);
+            glDepthFunc(GL_LEQUAL);
+            float baseSize = rm->getDynamicFloat(this->VertDotSizeParam());
 
 			glPointSize(baseSize+0.5);
 			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
 			glColor(Color4b::White);
 			glPointSize(baseSize-1);
-			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();			
+			m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
 			glPopAttrib();
-        } break;
+		} break;
 
-    case DP_SHOW_NON_FAUX_EDGE :	{
+	case DP_SHOW_NON_FAUX_EDGE :	{
 			glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
 			glDisable(GL_LIGHTING);
 			glDepthFunc(GL_LEQUAL);
@@ -254,9 +251,9 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glLineWidth(1.f);
-      Color4b cc=Color4b::DarkGray;
-      cc[3]=128;
-      glColor(cc);
+	  Color4b cc=Color4b::DarkGray;
+	  cc[3]=128;
+	  glColor(cc);
 			glDepthRange (0.0, 0.999);
 			m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
 			glPopAttrib();
@@ -272,7 +269,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthRange (0.0, 0.999);
-		
+
 		if (vvP->size() != 0)
 		{
 			glEnableClientState (GL_VERTEX_ARRAY);
@@ -282,26 +279,26 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 			glPointSize(6.f);
 			glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
 			glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
-	
+
 //        glDrawArrays(GL_POINTS,0,vvP->size());
 			glDrawArrays(GL_TRIANGLES,0,vvP->size());
 			glDisableClientState (GL_COLOR_ARRAY);
 			glDisableClientState (GL_VERTEX_ARRAY);
 		}
-        glPopAttrib();
-      }
-      CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"SeparatrixGraph");
-      if(rm->getBool(this->ShowSeparatrix()) && vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, sgH))
-      {
-        vector<PointPC> *vvP = &sgH();
-        glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_LIGHTING);
-        glDepthFunc(GL_LEQUAL);
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glLineWidth(2.f);
-        glDepthRange (0.0, 0.999);
+		glPopAttrib();
+	  }
+	  CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"SeparatrixGraph");
+	  if(rm->getBool(this->ShowSeparatrix()) && vcg::tri::Allocator<CMeshO>::IsValidHandle (m.cm, sgH))
+	  {
+		vector<PointPC> *vvP = &sgH();
+		glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_LIGHTING);
+		glDepthFunc(GL_LEQUAL);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glLineWidth(2.f);
+		glDepthRange (0.0, 0.999);
 		if (vvP->size() > 0)
 		{
 			glEnableClientState (GL_VERTEX_ARRAY);
@@ -314,10 +311,10 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 			glDisableClientState (GL_COLOR_ARRAY);
 			glDisableClientState (GL_VERTEX_ARRAY);
 		}
-        glPopAttrib();
-      }
-    } break;
-    case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,painter,rm,qf); break;
+		glPopAttrib();
+	  }
+	} break;
+	case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,painter,rm,qf); break;
 
     case DP_SHOW_QUALITY_HISTOGRAM :
     {
@@ -334,57 +331,57 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
       DrawDotVector(vvH());
       DrawTriVector(tvH());
 
-      this->RealTimeLog("Non Manifold Vertices",m.shortName(),
+	  this->RealTimeLog("Non Manifold Vertices",m.shortName(),
 						  "<b>%i</b> non manifold vertices<br> "
 						  "<b>%i</b> faces over non manifold vertices",vvH().size(),tvH().size()/3);
-    }
-        break;
-    case DP_SHOW_NON_MANIF_EDGE :
-    {
-      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-      CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifEdgeVector");
-      CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifFaceVector");
-      DrawLineVector(bvH());
-      DrawTriVector(fvH());
-      this->RealTimeLog("Non Manifold Edges",m.shortName(),
-                      " <b>%i</b> non manifold edges<br>"
-                      " <b>%i</b> faces over non manifold edges",bvH().size()/2,fvH().size()/3);
-    } break;
-    case DP_SHOW_BOUNDARY :
-    {
-      bool showBorderFlag = rm->getBool(ShowBorderFlag());
-      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-      CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryVertVector");
-      CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryFaceVector");
-        DrawLineVector(bvH());
-          if(showBorderFlag) DrawTriVector(bfH());
-        this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary edges",bvH().size()/2);
-    } break;
-    case DP_SHOW_BOUNDARY_TEX :
-    {
-      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-      CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryTexVector");
-        vector<Point3f> *BTVp = &btvH();
-        if (BTVp->size() != 0)
-        {
-          glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
-          glDisable(GL_LIGHTING);
-          glDisable(GL_TEXTURE_2D);
-          glDepthFunc(GL_LEQUAL);
-          glEnable(GL_LINE_SMOOTH);
-          glEnable(GL_BLEND);
-          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-          glLineWidth(1.f);
-          glColor(Color4b::Green);
-          glDepthRange (0.0, 0.999);
-          glEnableClientState (GL_VERTEX_ARRAY);
-          glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BTVp->begin()[0]));
-          glDrawArrays(GL_LINES,0,BTVp->size());
-          glDisableClientState (GL_VERTEX_ARRAY);
-          glPopAttrib();
-        }
-    } break;
-    } // end switch;
+	}
+		break;
+	case DP_SHOW_NON_MANIF_EDGE :
+	{
+	  // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+	  CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifEdgeVector");
+	  CMeshO::PerMeshAttributeHandle< vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"NonManifFaceVector");
+	  DrawLineVector(bvH());
+	  DrawTriVector(fvH());
+	  this->RealTimeLog("Non Manifold Edges",m.shortName(),
+					  " <b>%i</b> non manifold edges<br>"
+					  " <b>%i</b> faces over non manifold edges",bvH().size()/2,fvH().size()/3);
+	} break;
+	case DP_SHOW_BOUNDARY :
+	{
+	  bool showBorderFlag = rm->getBool(ShowBorderFlag());
+	  // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+	  CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryVertVector");
+	  CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryFaceVector");
+		DrawLineVector(bvH());
+		  if(showBorderFlag) DrawTriVector(bfH());
+		this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary edges",bvH().size()/2);
+	} break;
+	case DP_SHOW_BOUNDARY_TEX :
+	{
+	  // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+	  CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryTexVector");
+		vector<Point3f> *BTVp = &btvH();
+		if (BTVp->size() != 0)
+		{
+		  glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+		  glDisable(GL_LIGHTING);
+		  glDisable(GL_TEXTURE_2D);
+		  glDepthFunc(GL_LEQUAL);
+		  glEnable(GL_LINE_SMOOTH);
+		  glEnable(GL_BLEND);
+		  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		  glLineWidth(1.f);
+		  glColor(Color4b::Green);
+		  glDepthRange (0.0, 0.999);
+		  glEnableClientState (GL_VERTEX_ARRAY);
+		  glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BTVp->begin()[0]));
+		  glDrawArrays(GL_LINES,0,BTVp->size());
+		  glDisableClientState (GL_VERTEX_ARRAY);
+		  glPopAttrib();
+		}
+	} break;
+	} // end switch;
 	glPopMatrix();
 }
 void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
@@ -399,13 +396,13 @@ void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
   glDepthRange (0.0, 0.999);
   if (EV.size() > 0)
   {
-	glEnableClientState (GL_VERTEX_ARRAY);
-	glEnableClientState (GL_COLOR_ARRAY);
-	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(EV.begin()[0].first));
-	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
-	glDrawArrays(GL_LINES,0,EV.size());
-	glDisableClientState (GL_COLOR_ARRAY);
-	glDisableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_COLOR_ARRAY);
+    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(EV.begin()[0].first));
+    glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
+    glDrawArrays(GL_LINES,0,EV.size());
+    glDisableClientState (GL_COLOR_ARRAY);
+    glDisableClientState (GL_VERTEX_ARRAY);
   }
   glPopAttrib();
 }
@@ -422,13 +419,13 @@ void ExtraMeshDecoratePlugin::DrawTriVector(std::vector<PointPC> &TV)
   glDepthRange (0.0, 0.999);
   if (TV.size() > 0)
   {
-	glEnableClientState (GL_VERTEX_ARRAY);
-	glEnableClientState (GL_COLOR_ARRAY);
-	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
-	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
-	glDrawArrays(GL_TRIANGLES,0,TV.size());
-	glDisableClientState (GL_COLOR_ARRAY);
-	glDisableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_COLOR_ARRAY);
+    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+    glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
+    glDrawArrays(GL_TRIANGLES,0,TV.size());
+    glDisableClientState (GL_COLOR_ARRAY);
+    glDisableClientState (GL_VERTEX_ARRAY);
   }
   glPopAttrib();
 }
@@ -445,18 +442,18 @@ void ExtraMeshDecoratePlugin::DrawDotVector(std::vector<PointPC> &TV, float base
   glDepthRange (0.0, 0.999);
   if (TV.size() > 0)
   {
-	glEnableClientState (GL_VERTEX_ARRAY);
-	glEnableClientState (GL_COLOR_ARRAY);
-	glPointSize(baseSize+0.5);
-	glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
-	glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
-	glDisableClientState (GL_COLOR_ARRAY);
-	glColor(Color4b::DarkGray);
-	glDrawArrays(GL_POINTS,0,TV.size());
-	glPointSize(baseSize-1);
-	glEnableClientState (GL_COLOR_ARRAY);
-	glDrawArrays(GL_POINTS,0,TV.size());
-	glDisableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_VERTEX_ARRAY);
+    glEnableClientState (GL_COLOR_ARRAY);
+    glPointSize(baseSize+0.5);
+    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+    glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
+    glDisableClientState (GL_COLOR_ARRAY);
+    glColor(Color4b::DarkGray);
+    glDrawArrays(GL_POINTS,0,TV.size());
+    glPointSize(baseSize-1);
+    glEnableClientState (GL_COLOR_ARRAY);
+    glDrawArrays(GL_POINTS,0,TV.size());
+    glDisableClientState (GL_VERTEX_ARRAY);
   }
   glPopAttrib();
 }
@@ -466,10 +463,10 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
 	glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
 
 	// Get gl state values
 	double mm[16],mp[16];
@@ -489,15 +486,15 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 	Point3d p1,p2;
 
 	Point3f c = b.Center();
-		
-	float s = 1.15f;
+
+    float s = 1.15f;
   const float LabelSpacing = 30;
-	chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-	glPushMatrix();
-	glScalef(1,s,s);
-	glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
-	drawQuotedLine(p1,p2,b.min[0],b.max[0],CoordinateFrame::calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
-	glPopMatrix();
+    chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
+    glPushMatrix();
+    glScalef(1,s,s);
+    glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
+    drawQuotedLine(p1,p2,b.min[0],b.max[0],CoordinateFrame::calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
+    glPopMatrix();
 
 	chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
 	glPushMatrix();
@@ -506,7 +503,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 	drawQuotedLine(p1,p2,b.min[1],b.max[1],CoordinateFrame::calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
 	glPopMatrix();
 
-	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate	
+	chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
 	glPushMatrix();
 	glScalef(s,s,1);
 	glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
@@ -658,44 +655,44 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
   float tickDistTen=tickScalarDistance /10.0f;
   float firstTickTen;
   if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
-          else firstTickTen = aVal - fmod(aVal,tickDistTen);          
+          else firstTickTen = aVal - fmod(aVal,tickDistTen);
 
   int neededZeros=0;
-					
+
   Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; // 3D Position of Zero.
-	Point3d v(b-a);
+    Point3d v(b-a);
   //v.Normalize();
   v = v*(1.0/(bVal-aVal));
   glLabel::Mode md(qf,Color4b::White,angle,rightAlign);
   if(tickScalarDistance > 0)   // Draw lines only if the two endpoint are not coincident
-	{
+    {
           neededZeros = ceil(max(0.0,-log10(double(tickScalarDistance))));
-					glPointSize(3);
-					float i;
-					glBegin(GL_POINTS);
+                    glPointSize(3);
+                    float i;
+                    glBegin(GL_POINTS);
           for(i=firstTick;i<bVal;i+=tickScalarDistance)
-						glVertex(Zero+v*i);
-					glEnd();
+                        glVertex(Zero+v*i);
+                    glEnd();
           for(i=firstTick; (i+labelMargin)<bVal;i+=tickScalarDistance)
             glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1 ").arg(i,4+neededZeros,'f',neededZeros),md);
-				 glPointSize(1);
-				 glBegin(GL_POINTS);
+                 glPointSize(1);
+                 glBegin(GL_POINTS);
             for(i=firstTickTen;i<bVal;i+=tickDistTen)
-							glVertex(Zero+v*i);
-				 glEnd();
-	}
+                            glVertex(Zero+v*i);
+                 glEnd();
+    }
 
-	// Draws bigger ticks at 0 and at max size
+    // Draws bigger ticks at 0 and at max size
   glPointSize(6);
-	
+
 	glBegin(GL_POINTS);
-			glVertex(a);	
+			glVertex(a);
 			glVertex(b);
-      if(bVal*aVal<0) glVertex(Zero);
+	  if(bVal*aVal<0) glVertex(Zero);
 	glEnd();
 
 
-	// bold font at beginning and at the end
+    // bold font at beginning and at the end
   md.qFont.setBold(true);
   glLabel::render(painter,Point3f::Construct(a), tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2) ,md);
   glLabel::render(painter,Point3f::Construct(b), tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2) ,md);
@@ -778,7 +775,6 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_NON_MANIF_VERT :
   case DP_SHOW_NORMALS :
   case DP_SHOW_QUALITY_HISTOGRAM :
-  case DP_SHOW_VERT_PRINC_CURV_DIR :
   case DP_SHOW_BOX_CORNERS :
   case DP_SHOW_QUOTED_BOX :
   case DP_SHOW_LABEL :
@@ -829,7 +825,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
 
 
 bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
-{	
+{
   switch(ID(action))
   {
   case DP_SHOW_NON_FAUX_EDGE :
@@ -1187,11 +1183,11 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
 //  float focal = ls.Intrinsics.FocalMm;
 
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
-	glDepthFunc(GL_ALWAYS);
-	glDisable(GL_LIGHTING);
+    glDepthFunc(GL_ALWAYS);
+    glDisable(GL_LIGHTING);
 
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
-  { 
+  {
     // draw scale
     float drawscale = 1.0;
     if(rm->getEnum(CameraScaleParam()) == 1)  // fixed scale
@@ -1204,7 +1200,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
     // arbitrary size to draw axis
     float len;
     //if(m!=NULL)
-	  //  len = m->cm.bbox.Diag()/20.0;
+      //  len = m->cm.bbox.Diag()/20.0;
     //else
       len = ls.Intrinsics.FocalMm * drawscale;
 
@@ -1212,12 +1208,12 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
     glMultMatrix(Inverse(currtr));  //remove current mesh transform
 
     // grey axis, aligned with scene axis
-   	glColor3f(.7f,.7f,.7f);
-	 	glBegin(GL_LINES);
-			glVertex3f(vp[0]-(len/2.0),vp[1],vp[2]); 	glVertex3f(vp[0]+(len/2.0),vp[1],vp[2]); 
-			glVertex3f(vp[0],vp[1]-(len/2.0),vp[2]); 	glVertex3f(vp[0],vp[1]+(len/2.0),vp[2]); 
-			glVertex3f(vp[0],vp[1],vp[2]-(len/2.0)); 	glVertex3f(vp[0],vp[1],vp[2]+(len/2.0)); 
-		glEnd();
+    glColor3f(.7f,.7f,.7f);
+        glBegin(GL_LINES);
+            glVertex3f(vp[0]-(len/2.0),vp[1],vp[2]); 	glVertex3f(vp[0]+(len/2.0),vp[1],vp[2]);
+            glVertex3f(vp[0],vp[1]-(len/2.0),vp[2]); 	glVertex3f(vp[0],vp[1]+(len/2.0),vp[2]);
+            glVertex3f(vp[0],vp[1],vp[2]-(len/2.0)); 	glVertex3f(vp[0],vp[1],vp[2]+(len/2.0));
+        glEnd();
 
 
     if(m!=NULL) //if mesh camera, apply mesh transform
@@ -1292,7 +1288,7 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
-  
+
   float len = ch.MaxV() - ch.MinV();
   float maxWide = ch.MaxCount();
   float histWide=maxWide;

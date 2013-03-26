@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -34,7 +34,7 @@ typedef std::pair<vcg::Point3f,vcg::Color4b> PointPC; // this type is used to ha
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
   Q_INTERFACES(MeshDecorateInterface)
   QString decorationName(FilterIDType filter) const;
   QString decorationInfo(FilterIDType filter) const;
@@ -47,7 +47,6 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
       DP_SHOW_BOUNDARY,
       DP_SHOW_NON_MANIF_EDGE,
       DP_SHOW_NON_MANIF_VERT,
-      DP_SHOW_VERT_PRINC_CURV_DIR,
       DP_SHOW_BOX_CORNERS,
       DP_SHOW_AXIS,
       DP_SHOW_QUOTED_BOX,
@@ -71,7 +70,7 @@ private:
 	void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
   void drawHistogram(QGLWidget *gla, CHist &ch);
 public:
-     
+
   ExtraMeshDecoratePlugin()
   {
       typeList <<
@@ -83,7 +82,6 @@ public:
                   DP_SHOW_NON_MANIF_VERT <<
                   DP_SHOW_NORMALS <<
                   DP_SHOW_QUALITY_HISTOGRAM <<
-                  DP_SHOW_VERT_PRINC_CURV_DIR <<
                   DP_SHOW_BOX_CORNERS <<
                   DP_SHOW_AXIS <<
                   DP_SHOW_QUOTED_BOX <<
@@ -126,7 +124,7 @@ public:
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(QAction */*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  
+
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }
 
