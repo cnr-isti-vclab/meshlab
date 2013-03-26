@@ -52,7 +52,7 @@ QProgressBar *MainWindow::qb;
 MainWindow::MainWindow()
 :xmlfiltertimer(),wama()
 {
-	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called. 
+	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
 	//Subsequently restart function will be invoked.
 	xmlfiltertimer.start();
 	//xmlfiltertimer.elapsed();
@@ -75,8 +75,8 @@ MainWindow::MainWindow()
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateXMLStdDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateDocumentScriptBindings()));
-    httpReq=new QNetworkAccessManager(this);
-    connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
+	httpReq=new QNetworkAccessManager(this);
+	connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
 
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
@@ -191,7 +191,7 @@ void MainWindow::createActions()
 	saveSnapshotAct = new QAction(QIcon(":/images/snapshot.png"),tr("Save snapsho&t"), this);
 	connect(saveSnapshotAct, SIGNAL(triggered()), this, SLOT(saveSnapshot()));
 
-	for (int i = 0; i < MAXRECENTFILES; ++i) 
+	for (int i = 0; i < MAXRECENTFILES; ++i)
 	{
 		recentProjActs[i] = new QAction(this);
 		recentProjActs[i]->setVisible(true);
@@ -316,7 +316,7 @@ void MainWindow::createActions()
 	showLayerDlgAct =  new QAction (QIcon(":/images/layers.png"),tr("Show Layer Dialog"), this);
 	showLayerDlgAct->setCheckable(true);
 	showLayerDlgAct->setChecked(true);
-    showLayerDlgAct->setShortcut(Qt::CTRL+Qt::Key_L);
+	showLayerDlgAct->setShortcut(Qt::CTRL+Qt::Key_L);
 	connect(showLayerDlgAct, SIGNAL(triggered(bool)), this, SLOT(showLayerDlg(bool)));
 
 
@@ -397,7 +397,7 @@ void MainWindow::createActions()
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
 	lastFilterAct = new QAction(tr("Apply filter"),this);
 	lastFilterAct->setShortcutContext(Qt::ApplicationShortcut);
-    lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_P);
+	lastFilterAct->setShortcut(Qt::CTRL+Qt::Key_P);
 	lastFilterAct->setEnabled(false);
 	connect(lastFilterAct, SIGNAL(triggered()), this, SLOT(applyLastFilter()));
 
@@ -430,14 +430,14 @@ void MainWindow::createActions()
 
 	///////////////Action Menu Split/Unsplit from handle////////////////////////////////////////////////////////
 	splitGroupAct = new QActionGroup(this);
-	unsplitGroupAct = new QActionGroup(this);	
+	unsplitGroupAct = new QActionGroup(this);
 
 	splitUpAct = new QAction(tr("&Up"),splitGroupAct);
 	splitDownAct = new QAction(tr("&Down"),splitGroupAct);
 	unsplitUpAct = new QAction(tr("&Up"),unsplitGroupAct);
 	unsplitDownAct = new QAction(tr("&Down"),unsplitGroupAct);
 	splitRightAct = new QAction(tr("&Right"),splitGroupAct);
-	splitLeftAct = new QAction(tr("&Left"),splitGroupAct);		
+	splitLeftAct = new QAction(tr("&Left"),splitGroupAct);
 
 	unsplitRightAct = new QAction(tr("&Right"),unsplitGroupAct);
 	unsplitLeftAct = new QAction(tr("&Left"),unsplitGroupAct);
@@ -483,7 +483,7 @@ void MainWindow::createToolBars()
 	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 	filterToolBar->setIconSize(QSize(32,32));
 	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
-	{		
+	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
 			if(!editAction->icon().isNull())
@@ -492,7 +492,7 @@ void MainWindow::createToolBars()
 			} else qDebug() << "action was null";
 		}
 	}
-	
+
 	QWidget *spacerWidget = new QWidget();
 	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	//spacerWidget->setVisible(true);
@@ -524,9 +524,9 @@ void MainWindow::createMenus()
 	fileMenu->addAction(exportMeshAsAct);
 	fileMenu->addAction(reloadMeshAct);
   fileMenu->addAction(reloadAllMeshAct);
-	fileMenu->addSeparator();
-	fileMenu->addAction(importRasterAct);
-	fileMenu->addSeparator();
+    fileMenu->addSeparator();
+    fileMenu->addAction(importRasterAct);
+    fileMenu->addSeparator();
 
 	fileMenu->addAction(saveSnapshotAct);
 	separatorAct = fileMenu->addSeparator();
@@ -534,7 +534,7 @@ void MainWindow::createMenus()
 	recentFileMenu = fileMenu->addMenu(tr("Recent Files"));
 
 
-	for (int i = 0; i < MAXRECENTFILES; ++i) 
+	for (int i = 0; i < MAXRECENTFILES; ++i)
 	{
 		recentProjMenu->addAction(recentProjActs[i]);
 		recentFileMenu->addAction(recentFileActs[i]);
@@ -632,7 +632,7 @@ void MainWindow::createMenus()
 	//preferencesMenu->addAction(showFilterEditAct);
 	//preferencesMenu->addSeparator();
 	preferencesMenu->addAction(setCustomizeAct);
-	
+
 
 	//////////////////// Menu Help ////////////////////////////////////////////////////////////////
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -698,7 +698,7 @@ void MainWindow::initItemForSearching(QAction* act)
 
 QString MainWindow::getDecoratedFileName(const QString& name)
 {
-    return  QString("<br><b><i>(") + name + ")</i></b>";
+	return  QString("<br><b><i>(") + name + ")</i></b>";
 }
 
 void MainWindow::fillFilterMenu()
@@ -747,85 +747,85 @@ void MainWindow::fillFilterMenu()
 	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
 	{
 		MeshFilterInterface * iFilter= msi.value();
-        QAction *filterAction = iFilter->AC((msi.key()));
-        filterAction->setToolTip(iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString()));
+		QAction *filterAction = iFilter->AC((msi.key()));
+		filterAction->setToolTip(iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString()));
 		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
-		if( filterClass & MeshFilterInterface::FaceColoring ) 
+		if( filterClass & MeshFilterInterface::FaceColoring )
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::VertexColoring ) 
+		if( filterClass & MeshFilterInterface::VertexColoring )
 		{
 			filterMenuColorize->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Selection )      
+		if( filterClass & MeshFilterInterface::Selection )
 		{
 			filterMenuSelect->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Cleaning )       
+		if( filterClass & MeshFilterInterface::Cleaning )
 		{
 			filterMenuClean->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Remeshing )      
+		if( filterClass & MeshFilterInterface::Remeshing )
 		{
 			filterMenuRemeshing->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Smoothing )      
+		if( filterClass & MeshFilterInterface::Smoothing )
 		{
 			filterMenuSmoothing->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Normal )         
+		if( filterClass & MeshFilterInterface::Normal )
 		{
 			filterMenuNormal->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Quality )        
+		if( filterClass & MeshFilterInterface::Quality )
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Measure  )	    
+		if( filterClass & MeshFilterInterface::Measure  )
 		{
 			filterMenuQuality->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Layer )          
+		if( filterClass & MeshFilterInterface::Layer )
 		{
 			filterMenuMeshLayer->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::RasterLayer )    
+		if( filterClass & MeshFilterInterface::RasterLayer )
 		{
 			filterMenuRasterLayer->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::MeshCreation )   
+		if( filterClass & MeshFilterInterface::MeshCreation )
 		{
 			filterMenuCreate->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::RangeMap )       
+		if( filterClass & MeshFilterInterface::RangeMap )
 		{
 			filterMenuRangeMap->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::PointSet )       
+		if( filterClass & MeshFilterInterface::PointSet )
 		{
 			filterMenuPointSet->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Sampling )       
+		if( filterClass & MeshFilterInterface::Sampling )
 		{
 			filterMenuSampling->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Texture)         
+		if( filterClass & MeshFilterInterface::Texture)
 		{
 			filterMenuTexture->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Polygonal)       
+		if( filterClass & MeshFilterInterface::Polygonal)
 		{
 			filterMenuPolygonal->addAction(filterAction);
 		}
-		if( filterClass & MeshFilterInterface::Camera)          
+		if( filterClass & MeshFilterInterface::Camera)
 		{
 			filterMenuCamera->addAction(filterAction);
 		}
 		//  MeshFilterInterface::Generic :
-		if(filterClass == 0)                                    
+		if(filterClass == 0)
 		{
 			filterMenu->addAction(filterAction);
 		}
@@ -842,87 +842,87 @@ void MainWindow::fillFilterMenu()
 		try
 		{
 			QString help = info->filterHelp(filterName);
-            filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
+			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
 
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 			QString filterClasses = info->filterAttribute(filterName,MLXMLElNames::filterClass);
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
 			foreach(QString nameClass,filterClassesList)
 			{
-				if( nameClass == QString("FaceColoring")) 
+				if( nameClass == QString("FaceColoring"))
 				{
 					filterMenuColorize->addAction(filterAction);
 				}
-				if( nameClass == QString("VertexColoring")) 
+				if( nameClass == QString("VertexColoring"))
 				{
 					filterMenuColorize->addAction(filterAction);
 				}
-				if( nameClass == QString("Selection")) 
+				if( nameClass == QString("Selection"))
 				{
 					filterMenuSelect->addAction(filterAction);
 				}
-				if( nameClass == QString("Cleaning")) 
+				if( nameClass == QString("Cleaning"))
 				{
 					filterMenuClean->addAction(filterAction);
 				}
-				if( nameClass == QString("Remeshing")) 
+				if( nameClass == QString("Remeshing"))
 				{
 					filterMenuRemeshing->addAction(filterAction);
 				}
-				if( nameClass == QString("Smoothing")) 
+				if( nameClass == QString("Smoothing"))
 				{
 					filterMenuSmoothing->addAction(filterAction);
 				}
-				if( nameClass == QString("Normal")) 
+				if( nameClass == QString("Normal"))
 				{
 					filterMenuNormal->addAction(filterAction);
 				}
-				if( nameClass == QString("Quality")) 
+				if( nameClass == QString("Quality"))
 				{
 					filterMenuQuality->addAction(filterAction);
 				}
-				if( nameClass == QString("Measure")) 
+				if( nameClass == QString("Measure"))
 				{
 					filterMenuQuality->addAction(filterAction);
 				}
-				if( nameClass == QString("Layer")) 
+				if( nameClass == QString("Layer"))
 				{
 					filterMenuMeshLayer->addAction(filterAction);
 				}
-				if( nameClass == QString("RasterLayer")) 
+				if( nameClass == QString("RasterLayer"))
 				{
 					filterMenuRasterLayer->addAction(filterAction);
 				}
-				if( nameClass == QString("MeshCreation")) 
+				if( nameClass == QString("MeshCreation"))
 				{
 					filterMenuCreate->addAction(filterAction);
 				}
-				if( nameClass == QString("RangeMap")) 
+				if( nameClass == QString("RangeMap"))
 				{
 					filterMenuRangeMap->addAction(filterAction);
 				}
-				if( nameClass == QString("PointSet")) 
+				if( nameClass == QString("PointSet"))
 				{
 					filterMenuPointSet->addAction(filterAction);
 				}
-				if( nameClass == QString("Sampling")) 
+				if( nameClass == QString("Sampling"))
 				{
 					filterMenuSampling->addAction(filterAction);
 				}
-				if( nameClass == QString("Texture")) 
+				if( nameClass == QString("Texture"))
 				{
 					filterMenuTexture->addAction(filterAction);
 				}
-				if( nameClass == QString("Polygonal")) 
+				if( nameClass == QString("Polygonal"))
 				{
 					filterMenuPolygonal->addAction(filterAction);
 				}
-				if( nameClass == QString("Camera")) 
+				if( nameClass == QString("Camera"))
 				{
 					filterMenuCamera->addAction(filterAction);
 				}
 				//  //  MeshFilterInterface::Generic :
-				if(	nameClass == QString("Generic")) 
+				if(	nameClass == QString("Generic"))
 				{
 					filterMenu->addAction(filterAction);
 				}
@@ -947,11 +947,12 @@ void MainWindow::fillDecorateMenu()
 			renderMenu->addAction(decorateAction);
 		}
 	}
+	connect(renderMenu, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 }
 
 void MainWindow::fillRenderMenu()
 {
-	QAction * qaNone = new QAction("None", this); 
+	QAction * qaNone = new QAction("None", this);
 	qaNone->setCheckable(false);
 	shadersMenu->addAction(qaNone);
 	connect(qaNone,SIGNAL(triggered()),this,SLOT(applyRenderMode()));
@@ -964,7 +965,7 @@ void MainWindow::fillRenderMenu()
 void MainWindow::fillEditMenu()
 {
 	foreach(MeshEditInterfaceFactory *iEditFactory, PM.meshEditFactoryPlugins())
-	{		
+	{
 		foreach(QAction* editAction, iEditFactory->actions())
 		{
 			editMenu->addAction(editAction);
@@ -1108,10 +1109,10 @@ void MainWindow::saveRecentProjectList(const QString &projName)
 
 	settings.setValue("recentProjList", files);
 
-	foreach (QWidget *widget, QApplication::topLevelWidgets()) 
+	foreach (QWidget *widget, QApplication::topLevelWidgets())
 	{
 		MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
-		if (mainWin) 
+		if (mainWin)
 			mainWin->updateRecentProjActions();
 	}
 }
@@ -1145,7 +1146,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 #else
 	QString OS="Lin";
 #endif
-	QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
+    QString message=BaseCommand+QString("?code=%1&count=%2&scount=%3&totkv=%4&ver=%5&os=%6").arg(UID).arg(loadedMeshCounter).arg(savedMeshCounter).arg(totalKV).arg(MeshLabApplication::appVer()).arg(OS);
     //idHost=httpReq->setHost(MeshLabApplication::organizationHost()); // id == 1
     httpReq->get(QNetworkRequest(MeshLabApplication::organizationHost() + message));
     //idGet=httpReq->get(message,&myLocalBuf);     // id == 2
@@ -1153,13 +1154,13 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
-    QString answer = reply->readAll();
+	QString answer = reply->readAll();
 	if(answer.left(3)==QString("NEW"))
 		QMessageBox::information(this,"MeshLab Version Checking",answer.remove(0,3));
-    else if (VerboseCheckingFlag)
-        QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
+	else if (VerboseCheckingFlag)
+		QMessageBox::information(this,"MeshLab Version Checking","Your MeshLab version is the most recent one.");
 
-    reply->deleteLater();
+	reply->deleteLater();
 
 	QSettings settings;
 	int loadedMeshCounter=settings.value("loadedMeshCounter",0).toInt();
