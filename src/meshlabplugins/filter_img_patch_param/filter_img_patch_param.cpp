@@ -54,27 +54,27 @@ FilterImgPatchParamPlugin::~FilterImgPatchParamPlugin()
 
 QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
 {
-	switch( id )
+    switch( id )
     {
-		case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
-		case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
+        case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
+        case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
         case FP_RASTER_VERT_COVERAGE:  return QString( "Quality from raster coverage (Vertex)" );
         case FP_RASTER_FACE_COVERAGE:  return QString( "Quality from raster coverage (Face)" );
-		default: assert(0); return QString();
-	}
+        default: assert(0); return QString();
+    }
 }
 
 
 QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
 {
-	switch( id )
+    switch( id )
     {
-		case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
-		case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+        case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+        case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
         case FP_RASTER_VERT_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each vertex of the active mesh is visible." );
         case FP_RASTER_FACE_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each face of the active mesh is visible." );
         default: assert(0); return QString();
-	}
+    }
 }
 
 
@@ -123,9 +123,9 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                                   MeshDocument &/*md*/,
                                                   RichParameterSet &par )
 {
-	switch( ID(act) )
+    switch( ID(act) )
     {
-		case FP_PATCH_PARAM_AND_TEXTURING:
+        case FP_PATCH_PARAM_AND_TEXTURING:
         {
             par.addParam( new RichInt( "textureSize",
                                        1024,
@@ -145,7 +145,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                        "Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
         }
         case FP_PATCH_PARAM_ONLY:
-		{
+        {
             par.addParam( new RichBool( "useDistanceWeight",
                                         false,
                                         "Use distance weight",
@@ -154,10 +154,10 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                         false,
                                         "Use image border weight",
                                         "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
-		    par.addParam( new RichBool( "useAlphaWeight",
-				                        false,
-				                        "Use image alpha weight",
-				                        "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
+            par.addParam( new RichBool( "useAlphaWeight",
+                                        false,
+                                        "Use image alpha weight",
+                                        "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
             par.addParam( new RichBool( "cleanIsolatedTriangles",
                                         true,
                                         "Clean isolated triangles",
@@ -171,7 +171,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                        "Texture gutter",
                                        "Extra boundary to add to each patch before packing in texture space (in pixels)" ) );
             break;
-		}
+        }
         case FP_RASTER_VERT_COVERAGE:
         case FP_RASTER_FACE_COVERAGE:
         {
@@ -181,7 +181,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
                                         "Rescale quality values to the range [0,1]" ) );
             break;
         }
-	}
+    }
 }
 
 
@@ -190,18 +190,18 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
-	if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0) 
+	if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
 	{
-        errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-        return false; // can't continue, mesh can't be processed
-    }
+		errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+		return false; // can't continue, mesh can't be processed
+	}
 	vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
 	vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
 	vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
 	glContext->makeCurrent();
-    if( glewInit() != GLEW_OK )
-        return false;
+	if( glewInit() != GLEW_OK )
+		return false;
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -236,7 +236,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     switch( ID(act) )
     {
         case FP_PATCH_PARAM_ONLY:
-		{
+        {
             RasterPatchMap patches;
             PatchVec nullPatches;
             patchBasedTextureParameterization( patches,
@@ -245,14 +245,14 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                                activeRasters,
                                                par );
 
-            break;
+			break;
 		}
 		case FP_PATCH_PARAM_AND_TEXTURING:
 		{
-            QString texName = par.getString( "textureName" ).simplified();
-            int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
-            if( pathEnd != -1 )
-                texName = texName.right( texName.size()-pathEnd-1 );
+			QString texName = par.getString( "textureName" ).simplified();
+			int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
+			if( pathEnd != -1 )
+				texName = texName.right( texName.size()-pathEnd-1 );
 
             if( (retValue = texName.size()!=0) )
             {
@@ -282,12 +282,12 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                 }
             }
 
-            break;
+			break;
 		}
-        case FP_RASTER_VERT_COVERAGE:
-        {
-            VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-            visibility.setMesh( &mesh );
+		case FP_RASTER_VERT_COVERAGE:
+		{
+			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
+			visibility.setMesh( &mesh );
 
             for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
                 vi->Q() = 0.0f;
@@ -336,7 +336,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
             break;
         }
-	}
+    }
 
 
     foreach( RasterModel *rm, md.rasterList )
@@ -815,7 +815,7 @@ void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
 
     // Performs the packing.
     vcg::Point2f coveredArea;
-    vcg::RectPacker<float>::Pack( patchRect, vcg::Point2f(edgeLen,edgeLen), patchPackingTr, coveredArea );
+    vcg::RectPacker<float>::Pack( patchRect, vcg::Point2i(edgeLen,edgeLen), patchPackingTr, coveredArea );
 
 
     // Applies to the UV coordinates the transformations computed by the packing algorithm, as well as a scaling
@@ -905,7 +905,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 
     // Recovers patches by extracting connected components of faces having the same reference image.
     t.start();
-	float oldArea = computeTotalPatchArea( patches );
+    float oldArea = computeTotalPatchArea( patches );
     int nbPatches = extractPatches( patches, nullPatches, mesh, *faceVis, rasterList );
     Log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
     Log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
@@ -913,7 +913,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
 
     // Extends each patch so as to include faces that belong to the other side of its boundary.
     t.start();
-	oldArea = computeTotalPatchArea( patches );
+    oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
             constructPatchBoundary( *p, *faceVis );
@@ -924,7 +924,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     // Compute the UV coordinates of all patches by projecting them onto their reference images.
     // UV are then defined in image space, ranging from [0,0] to [w,h].
     t.start();
-	oldArea = computeTotalPatchArea( patches );
+    oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         computePatchUV( mesh, rp.key(), rp.value() );
     Log( "PATCHES UV COMPUTATION: %.3f sec.", 0.001f*t.elapsed() );
