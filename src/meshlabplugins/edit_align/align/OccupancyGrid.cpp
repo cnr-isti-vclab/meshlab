@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -37,7 +37,7 @@
 
 using namespace std;
 using namespace vcg;
- 
+
 
 // Nota che il bbox viene automaticamento inflatato dalla G.SetBBox();
 bool OccupancyGrid::Init(int _mn, Box3d bb, int size)
@@ -54,10 +54,10 @@ bool OccupancyGrid::Init(int _mn, Box3d bb, int size)
 
 void OccupancyGrid::Add(const char *MeshName, Matrix44d &Tr, int id)
 {
-	A2Mesh M;
+    A2Mesh M;
   tri::io::Importer<A2Mesh>::Open(M,MeshName);
   tri::Clean<A2Mesh>::RemoveUnreferencedVertex(M);
-	AddMesh(M,Tr,id);
+    AddMesh(M,Tr,id);
 }
 
 void OccupancyGrid::AddMeshes(std::vector<string> &names, std::vector<Matrix44d> &trv, int size )
@@ -65,7 +65,7 @@ void OccupancyGrid::AddMeshes(std::vector<string> &names, std::vector<Matrix44d>
   unsigned int i;
 
   Box3d bb,totalbb;
-  
+
   bb.SetNull();
   totalbb.SetNull();
 
@@ -76,7 +76,7 @@ void OccupancyGrid::AddMeshes(std::vector<string> &names, std::vector<Matrix44d>
     totalbb.Add( trv[i], bb);
   }
   Init(names.size(),totalbb,size);
-  
+
   for(i=0;i<names.size();++i)
   {
     printf("OG::AddMesh:Adding Mesh %i '%s'\n",i,names[i].c_str());
@@ -101,7 +101,7 @@ void OccupancyGrid::Compute()
       {
         vector<int > vv;
         G.Grid(i,j,k).Pack(vv);
-        int meshInCell = vv.size();
+        size_t meshInCell = vv.size();
         for( size_t ii=0; ii< vv.size(); ++ii)
         {
           int meshId = vv[ii];
@@ -111,8 +111,8 @@ void OccupancyGrid::Compute()
           ++(VM[meshId].unicityDistribution[meshInCell-1]);
         }
 
-        for(int ii=0;ii<vv.size();++ii)
-          for(int jj=ii+1;jj<vv.size();++jj)
+        for(size_t ii=0;ii<vv.size();++ii)
+          for(size_t jj=ii+1;jj<vv.size();++jj)
               ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
       }
 
@@ -123,9 +123,9 @@ void OccupancyGrid::Compute()
       for(int j=i+1;j<mn;++j)
         if(VM[j].used && VA[i+j*mn]>0)
           SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) ));
-  
+
   // Compute Mesh Coverage
-  for(int i=0;i<SVA.size();++i)
+  for(size_t i=0;i<SVA.size();++i)
   {
     VM[SVA[i].s].coverage += SVA[i].area;
     VM[SVA[i].t].coverage += SVA[i].area;
@@ -149,24 +149,24 @@ void OccupancyGrid::ComputeTotalArea()
 
 	TotalArea=ccnt;
 }
-/* 
+/*
 	Ordinare le RangeMap in base a quanto sono utili.
 	Una RangeMap e' utile se copre parti non ancora viste
 
 	Per ogni cella della og c'e' un bit che dice quali range map ci passano
 	per ogni range map si conosce l'area (espressa in celle della og)
 	Si considera un voxel visto se ci sono almeno <K> range map che lo coprono.
-	Inizialmente si moltiplica *1,2, ..K l'area di tutte le rm 
+	Inizialmente si moltiplica *1,2, ..K l'area di tutte le rm
 
-	Si parte dalla rm con area maggiore e si diminuisce di uno l'area 
-	di tutte le altre rm che tocca in voxel visti meno di due volte. 
+	Si parte dalla rm con area maggiore e si diminuisce di uno l'area
+	di tutte le altre rm che tocca in voxel visti meno di due volte.
 
 */
 void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
 {
 	vector<int> UpdArea(mn);
 	vector<int> UpdCovg(mn);
-	
+
 	Use.clear();
 	int i,j,m,mcnt=0;
 	for(m=0;m<mn;++m) {
@@ -195,11 +195,11 @@ void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
 
 			if(elfp) fprintf(elfp,"%3i %3i %7i (%7i) %7i %5.2f %7i(%7i)\n",
 				m, best, UpdArea[best],VM[best].area, TotalArea-CumArea, 100.0-100*float(CumArea)/TotalArea, UpdCovg[best],VM[best].coverage);
-					
+
 			Use.push_back(OGUseInfo(best,UpdArea[best]));
 			UpdArea[best]=-1;
 			UpdCovg[best]=-1;
-			
+
 			for(i=0;i<sz;++i)
 			{
 				MeshCounter &mc=G.grid[i];
@@ -222,20 +222,20 @@ void OccupancyGrid::Dump(FILE *fp)
 	fprintf(fp,"grid of ~%i kcells: %d x %d x %d\n",G.size(),G.siz[0],G.siz[1],G.siz[2]);
 	fprintf(fp,"grid voxel size of %f %f %f\n",G.voxel[0],G.voxel[1],G.voxel[2]);
 
-	fprintf(fp,"Computed %i arcs for %i meshes\n",SVA.size(),mn);
-	for(int i=0;i<VM.size();++i)
+	fprintf(fp,"Computed %lu arcs for %i meshes\n",SVA.size(),mn);
+	for(size_t i=0;i<VM.size();++i)
 		{
-			if(VM[i].used) 
+			if(VM[i].used)
 			{
-					fprintf(fp,"mesh %3i area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
+					fprintf(fp,"mesh %3lu area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
 					for(size_t j=0;j<std::min(size_t(8),VM[i].unicityDistribution.size());++j)
 						fprintf(fp," %3i ", VM[i].unicityDistribution[j]);
 					fprintf(fp,"\n");
 			}
-			else 
-					fprintf(fp,"mesh %3i ---- UNUSED\n",i);
+			else
+					fprintf(fp,"mesh %3lu ---- UNUSED\n",i);
 		}
-	fprintf(fp,"Computed %i Arcs :\n",SVA.size());
+	fprintf(fp,"Computed %lu Arcs :\n",SVA.size());
 	for(int i=0;i<SVA.size() && SVA[i].norm_area > .1; ++i)
 		fprintf(fp,"%4i -> %4i Area:%5i NormArea:%5.3f\n",SVA[i].s,SVA[i].t,SVA[i].area,SVA[i].norm_area);
 
@@ -248,7 +248,7 @@ void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vec
 {
 	AV.clear();
 	BNV.clear();
-	int i=0;
+	size_t i=0;
 	adjcnt.clear();
 	adjcnt.resize(mn,0);
 
@@ -261,14 +261,14 @@ void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vec
 			++i;
 	}
 
-  // Second loop to add some more constraints we add also all the arc with area > normarea/3 
-	// and that connects meshes poorly connected (e.g. with zero or one adjacent)
+  // Second loop to add some more constraints we add also all the arc with area > normarea/3
+    // and that connects meshes poorly connected (e.g. with zero or one adjacent)
   normarea/=3.0;
-	while(SVA[i].norm_area>normarea && i<SVA.size())
-	{
-		  if(adjcnt[SVA[i].s]<=1 || adjcnt[SVA[i].t]<=1 )
-			{
-				AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
+    while(SVA[i].norm_area>normarea && i<SVA.size())
+    {
+          if(adjcnt[SVA[i].s]<=1 || adjcnt[SVA[i].t]<=1 )
+            {
+                AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
 
 				++adjcnt[SVA[i].s];
 				++adjcnt[SVA[i].t];
@@ -283,6 +283,6 @@ void OccupancyGrid::RemoveMesh(int id)
 {
 	MeshCounter *GridEnd=G.grid+G.size();
 	MeshCounter *ig;
-	for(ig=G.grid;ig!=GridEnd;++ig) 
-		ig->UnSet(id);	
+	for(ig=G.grid;ig!=GridEnd;++ig)
+		ig->UnSet(id);
 }
