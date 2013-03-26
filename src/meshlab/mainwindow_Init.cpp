@@ -109,7 +109,7 @@ MainWindow::MainWindow()
 	qb=new QProgressBar(this);
 	qb->setMaximum(100);
 	qb->setMinimum(0);
-	//qb->reset();
+	qb->reset();
 	statusBar()->addPermanentWidget(qb,0);
 	//updateMenus();
 	newProject();

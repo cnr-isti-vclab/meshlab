@@ -2590,7 +2590,7 @@ bool MainWindow::QCallBack(const int pos, const char * str)
 	if(pos==lastPos) return true;
 	lastPos=pos;
 
-	static QTime currTime;
+	static QTime currTime = QTime::currentTime();
 	if(currTime.elapsed()< 100) return true;
 	currTime.start();
 	MainWindow::globalStatusBar()->showMessage(str,5000);
