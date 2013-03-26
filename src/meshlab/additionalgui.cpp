@@ -7,6 +7,7 @@
 #include <QWidgetAction>
 #include <QApplication>
 #include <QScrollBar>
+#include <QStyle>
 
 CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
 : QStyledItemDelegate(parent)
@@ -802,6 +803,7 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 :QMenu(parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
 {
 	searchline = new MenuLineEdit(this);
+	//searchline->resize(fixedwidth,searchline->height());
 	QWidgetAction* searchact = new QWidgetAction(this);
 	searchact->setDefaultWidget(searchline);
 	addAction(searchact);
@@ -809,7 +811,6 @@ SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* p
 	connect(searchline,SIGNAL(arrowPressed(const int)),this,SLOT(changeFocus(const int)));
 	connect(this,SIGNAL(aboutToShow()),this,SLOT(onAboutToShowEvent()));
 	setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	//setGeometry(1000,10,50,100);
 }
 
 void SearchMenu::getResults(const QString& text,QList<QAction*>& result)
@@ -1000,8 +1001,7 @@ QSize SearchMenu::sizeHint() const
 {
 	if (fixedwidthsize == -1)
 		return QMenu::sizeHint();
-	QPoint linestartpoint = mapToGlobal(searchline->geometry().topLeft());
-	int borderx = (linestartpoint.x() - frameGeometry().x());
+	int borderx = style()->pixelMetric(QStyle::PM_MenuPanelWidth);
 	return QSize(fixedwidthsize + borderx * 2,QMenu::sizeHint().height());
 }
 
@@ -1035,7 +1035,7 @@ MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
 
 void MyToolButton::paintEvent( QPaintEvent * )
 {
-	QStylePainter p( this ); 
+	QStylePainter p(this); 
 	QStyleOptionToolButton opt; 
 	initStyleOption( & opt ); 
 	opt.features &= (~ QStyleOptionToolButton::HasMenu); 
