@@ -92,7 +92,7 @@ public:
       if((li->MovName==id1 && li->FixName==id2) ||
          (li->MovName==id2 && li->FixName==id1) ) return &*li;
 
-    assert("You are trying to find an unexistent mesh"==0);
+    assert("You are trying to find an unexistent result"==0);
   return 0;
   }
 

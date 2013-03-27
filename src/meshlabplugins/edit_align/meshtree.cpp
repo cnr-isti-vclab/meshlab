@@ -65,7 +65,7 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, 
     ProcessArc(fixId,movId,MovToFix,result,ap);
 }
 /** This is the main alignment function.
-  It takes a pair of mesh and aling the second on the first one according to the parameters stored in <ap>
+  It takes two meshtree nodes and align the second node on the first one according to the parameters stored in <ap>
 
   */
 void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap)
@@ -111,7 +111,10 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
   result.MovName=movId;
   result.as.Dump(stdout);
 }
-
+// The main processing function
+// 1) determine what AlignmentPair must be computed
+// 2) do all the needed mesh-mesh alignment
+// 3) do global alignment.
 void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 {
   QString buf;
@@ -129,16 +132,20 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
   // Note: the s and t of the OG translate into fix and mov, respectively.
 
   /*************** The long loop of arc computing **************/
-  // First do a bit of stats
-  vcg::Distribution<float> H;
-  for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
-   H.Add(li->err);
 
-  int totalArcNum=0; // count arc within current threshold
-  int preservedArcNum=0,recalcArcNum=0;
+  // count existing arcs within current error threshold
   float percentileThr=0;
-  if(resultList.size()>0) percentileThr= H.Percentile(1.0f-mtp.recalcThreshold);
+  if(resultList.size()>0)
+  {
+    vcg::Distribution<float> H;
+    for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
+      H.Add(li->err);
 
+    percentileThr= H.Percentile(1.0f-mtp.recalcThreshold);
+  }
+
+  int totalArcNum=0;
+  int preservedArcNum=0,recalcArcNum=0;
   while(totalArcNum<OG.SVA.size() && OG.SVA[totalArcNum].norm_area > mtp.arcThreshold)
   {
     AlignPair::Result *curResult=findResult(OG.SVA[totalArcNum].s,OG.SVA[totalArcNum].t);
@@ -178,7 +185,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
     }
   }
 
-  H.Clear();
+  vcg::Distribution<float> H; // stat for printing
   for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
    H.Add(li->err);
   cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f Median %5.3f 90\% %5.3f\n",H.Avg(),H.Percentile(0.5f),H.Percentile(0.9f))));

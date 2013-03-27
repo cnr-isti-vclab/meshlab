@@ -295,81 +295,81 @@ Alla fine e' cambiata la matrice M del nodo stesso e tutte le matrici degli alli
 ******************************/
 double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
 {
-	list<VirtAlign *>::iterator li;
+  list<VirtAlign *>::iterator li;
 
-	printf("--- AlignWithActiveAdj --- \nMoving node %i with respect to nodes:",id);
-	for(li=Adj.begin();li!=Adj.end();++li) if((*li)->Adj(this)->Active) printf(" %i,",(*li)->Adj(this)->id);
-	printf("\n");
+  printf("--- AlignWithActiveAdj --- \nMoving node %i with respect to nodes:",id);
+  for(li=Adj.begin();li!=Adj.end();++li) if((*li)->Adj(this)->Active) printf(" %i,",(*li)->Adj(this)->id);
+  printf("\n");
 
   //printf("Base Matrix of Node %i\n",id);print(M);
 
-    // Step 1; Costruiamo le due liste di punti da allineare
+  // Step 1; Costruiamo le due liste di punti da allineare
   vector<Point3d> FixP,MovP, FixN,MovN;
-    Box3d FixBox,MovBox;FixBox.SetNull();MovBox.SetNull();
-    for(li=Adj.begin();li!=Adj.end();++li)
-        if((*li)->Adj(this)->Active) // scorro tutti i nodi adiacenti attivi
-        {
-            //printf("Base Matrix of Node %i adj to %i\n",id,(*li)->Adj(this)->id);
-            //print((*li)->Adj(this)->M);
-            vector<Point3d> &AP=(*li)->AdjP(this);   // Punti sul nodo adiacente corrente;
-            vector<Point3d> &AN=(*li)->AdjN(this);   // Normali sul nodo adiacente corrente;
+  Box3d FixBox,MovBox;FixBox.SetNull();MovBox.SetNull();
+  for(li=Adj.begin();li!=Adj.end();++li)
+    if((*li)->Adj(this)->Active) // scorro tutti i nodi adiacenti attivi
+    {
+      //printf("Base Matrix of Node %i adj to %i\n",id,(*li)->Adj(this)->id);
+      //print((*li)->Adj(this)->M);
+      vector<Point3d> &AP=(*li)->AdjP(this);   // Punti sul nodo adiacente corrente;
+      vector<Point3d> &AN=(*li)->AdjN(this);   // Normali sul nodo adiacente corrente;
 
-			//printf("Transf that bring points of %i onto %i\n",id,(*li)->Adj(this)->id);
-			//print((*li)->A2N(this));
-			//printf("Transf that bring points of %i onto %i\n",(*li)->Adj(this)->id,id);
-			//print((*li)->N2A(this));
-			Point3d pf,nf;
-			Point3d pm;
-			for(int i=0;i<AP.size();++i)
-			{
-				pf=(*li)->Adj(this)->M*AP[i]; // i punti fissi sono quelli sulla sup degli adiacenti messi nella loro pos corrente
-				FixP.push_back(pf);
-				FixBox.Add(pf);
-				nf=(*li)->Adj(this)->M*Point3d(AP[i]+AN[i])-pf;
-				nf.Normalize();
-			FixN.push_back(nf);
+      //printf("Transf that bring points of %i onto %i\n",id,(*li)->Adj(this)->id);
+      //print((*li)->A2N(this));
+      //printf("Transf that bring points of %i onto %i\n",(*li)->Adj(this)->id,id);
+      //print((*li)->N2A(this));
+      Point3d pf,nf;
+      Point3d pm;
+      for(int i=0;i<AP.size();++i)
+      {
+        pf=(*li)->Adj(this)->M*AP[i]; // i punti fissi sono quelli sulla sup degli adiacenti messi nella loro pos corrente
+        FixP.push_back(pf);
+        FixBox.Add(pf);
+        nf=(*li)->Adj(this)->M*Point3d(AP[i]+AN[i])-pf;
+        nf.Normalize();
+        FixN.push_back(nf);
 
-				pm=(*li)->A2N(this)*pf;
-				MovP.push_back(pm); // i punti che si muovono sono quelli sul adj trasformati in modo tale da cascare sul nodo corr.
-				MovBox.Add(pm);
-			}
-		}
-	Matrix44d out;
-	//if(Rigid) ret=ComputeRigidMatchMatrix(out,FixP,MovP);
-	//else ret=ComputeMatchMatrix2(out,FixP,FixN,MovP);
+        pm=(*li)->A2N(this)*pf;
+        MovP.push_back(pm); // i punti che si muovono sono quelli sul adj trasformati in modo tale da cascare sul nodo corr.
+        MovBox.Add(pm);
+      }
+    }
+  Matrix44d out;
+  //if(Rigid) ret=ComputeRigidMatchMatrix(out,FixP,MovP);
+  //else ret=ComputeMatchMatrix2(out,FixP,FixN,MovP);
   if(Rigid) ComputeRigidMatchMatrix(FixP,MovP,out);
-       else ComputeRotoTranslationScalingMatchMatrix(out,FixP,MovP);
+  else ComputeRotoTranslationScalingMatchMatrix(out,FixP,MovP);
 
-	Matrix44d outIn=vcg::Inverse(outIn);
-	//double maxdiff = MatrixNorm(out);
-	double maxdiff = MatrixBoxNorm(out,FixBox);
+  Matrix44d outIn=vcg::Inverse(out);
+  //double maxdiff = MatrixNorm(out);
+  double maxdiff = MatrixBoxNorm(out,FixBox);
 
-//	printf("Computed Transformation:\n"); print(out);printf("--\n");
-//	printf("Collected %i points . Err = %f\n",FixP.size(),maxdiff);
+  //	printf("Computed Transformation:\n"); print(out);printf("--\n");
+  //	printf("Collected %i points . Err = %f\n",FixP.size(),maxdiff);
 
-	// La matrice out calcolata e' quella che applicata ai punti MovP li porta su FixP, quindi i punti della mesh corrente
-	// La nuova posizione di base della mesh diventa quindi
-	// M * out
-	// infatti se considero un punto della mesh originale applicarci la nuova matricie significa fare
-	// p * M * out
+  // La matrice out calcolata e' quella che applicata ai punti MovP li porta su FixP, quindi i punti della mesh corrente
+  // La nuova posizione di base della mesh diventa quindi
+  // M * out
+  // infatti se considero un punto della mesh originale applicarci la nuova matricie significa fare
+  // p * M * out
 
   // M=M*out; //--Orig
-    M=out*M;
+  M=out*M;
 
 
- // come ultimo step occorre applicare la matrice trovata a tutti gli allineamenti in gioco.
-    for(li=Adj.begin();li!=Adj.end();++li)// scorro tutti i nodi adiacenti attivi
-        {
-            //print((*li)->N2A(this));
-            //print((*li)->A2N(this));printf("--\n");
+  // come ultimo step occorre applicare la matrice trovata a tutti gli allineamenti in gioco.
+  for(li=Adj.begin();li!=Adj.end();++li)// scorro tutti i nodi adiacenti attivi
+  {
+    //print((*li)->N2A(this));
+    //print((*li)->A2N(this));printf("--\n");
 
-			(*li)->N2A(this)=(*li)->N2A(this)*outIn;
-			(*li)->A2N(this)=(*li)->A2N(this)*out  ;
-			//print((*li)->N2A(this));
-			//print((*li)->A2N(this));printf("--\n");
-		}
-	//getchar();
-	return maxdiff;
+    (*li)->N2A(this)=(*li)->N2A(this)*outIn;
+    (*li)->A2N(this)=(*li)->A2N(this)*out  ;
+    //print((*li)->N2A(this));
+    //print((*li)->A2N(this));printf("--\n");
+  }
+  //getchar();
+  return maxdiff;
 
 }
 
@@ -431,21 +431,21 @@ Per ogni componente connessa,
 
 bool AlignGlobal::GlobalAlign(const std::map<int,string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp, CallBack* cb )
 {
-    double change;
+  double change;
   int step, localmaxiter;
-    cb("Global Alignment...");
-    LOG(elfp,"----------------\n----------------\nGlobalAlignment (eps %7.3f)\n",epsilon);
+  cb("Global Alignment...");
+  LOG(elfp,"----------------\n----------------\nGlobalAlignment (target eps %7.3f)\n",epsilon);
 
   queue<AlignGlobal::Node *>	Q;
-    MakeAllDormant();
-    AlignGlobal::Node *curr=ChooseDormantWithMostDormantLink();
-    curr->Active=true;
-    int cursid=curr->sid;
-    LOG(elfp,"Root node %i '%s' with %i dormant link\n", curr->id, Names.find(curr->id)->second.c_str(),curr->DormantAdjNum());
+  MakeAllDormant();
+  AlignGlobal::Node *curr=ChooseDormantWithMostDormantLink();
+  curr->Active=true;
+  int cursid=curr->sid;
+  LOG(elfp,"Root node %i '%s' with %i dormant link\n", curr->id, Names.find(curr->id)->second.c_str(),curr->DormantAdjNum());
 
   while(DormantNum()>0)
-    {
-        LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
+  {
+    LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
 
 		curr=ChooseDormantWithMostActiveLink ();
 		if(!curr) {

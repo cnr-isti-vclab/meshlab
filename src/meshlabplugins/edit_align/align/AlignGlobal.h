@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -26,7 +26,7 @@
 #include <list>
 #include <queue>
 #include <wrap/callback.h>
-namespace vcg 
+namespace vcg
 {
 
 class AlignGlobal
@@ -47,9 +47,9 @@ public:
  std::vector<Point3d> MovN; // Normali su Mov
  Matrix44d M2F; //la matrice da applicare ai punti di Mov per ottenere quelli su Fix
  Matrix44d F2M; //la matrice da applicare ai punti di Fix per ottenere quelli su Mov
-/* 
- 
-  Nel caso semplificato che le mesh avessero come trasf di base l'identita' deve valere: 
+/*
+
+  Nel caso semplificato che le mesh avessero come trasf di base l'identita' deve valere:
 
                      N2A(N).Apply(   P(N)) ~= AdjP(N)
                      A2N(N).Apply(AdjP(N)) ~=    P(N)
@@ -68,7 +68,7 @@ Per ottenere i virtualmate relativi ad un nodo n:
  Node *Adj(Node *n);
 
  inline Matrix44d       &N2A(Node *n) {if(n==Fix) return F2M; else return M2F;}
- inline Matrix44d       &A2N(Node *n) {if(n==Fix) return M2F; else return F2M;} 
+ inline Matrix44d       &A2N(Node *n) {if(n==Fix) return M2F; else return F2M;}
 
  inline std::vector<Point3d>    &P(Node *n) {if(n==Fix) return FixP; else return MovP;}
  inline std::vector<Point3d>    &N(Node *n) {if(n==Fix) return FixN; else return MovN;}
@@ -79,28 +79,29 @@ Per ottenere i virtualmate relativi ad un nodo n:
 };
 
 
-class Node 
+class Node
 {
-public:	
-	Node(){id=-1;Active=false;Discarded=false;Queued=false;}
-	
-	int id;  // id della mesh a cui corrisponde il nodo
-	int sid; // Subgraph id;
-	Matrix44d M; // La matrice che mette la mesh nella sua posizione di base;
+public:
+  Node(){id=-1;Active=false;Discarded=false;Queued=false;}
+
+  int id;  // id della mesh a cui corrisponde il nodo
+  int sid; // Subgraph id;
+  Matrix44d M; // La matrice che mette la mesh nella sua posizione di base;
   std::list<VirtAlign *> Adj;
 
-	bool Active;  // true se un nodo e' in Active
-		            // false se e' dormant; 
-	bool Queued;
-	bool Discarded;
-	// Allinea un nodo con tutti i suoi vicini
-	double AlignWithActiveAdj(bool Rigid);
-	double MatrixNorm(Matrix44d &NewM) const;
-	double MatrixBoxNorm(Matrix44d &NewM,Box3d &bb) const;
+  bool Active;  // true se un nodo e' in Active
+  // false se e' dormant;
+  bool Queued;
+  bool Discarded;
+  // Allinea un nodo con tutti i suoi vicini
+  double AlignWithActiveAdj(bool Rigid);
+  double MatrixNorm(Matrix44d &NewM) const;
+  double MatrixBoxNorm(Matrix44d &NewM,Box3d &bb) const;
   int PushBackActiveAdj(std::queue<Node *>	&Q);
-	int DormantAdjNum();
-	int ActiveAdjNum();
+  int DormantAdjNum();
+  int ActiveAdjNum();
 };
+
 // classe ausiliaria per memorizzare le componenti connesse del grafo
 class SubGraphInfo
 {
@@ -116,13 +117,13 @@ public:
   void Clear();
   bool GlobalAlign(const std::map<int,std::string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp=0, CallBack * cb=DummyCallBack );
 
-	bool CheckGraph();
+    bool CheckGraph();
 
 // Data members:
-	
+
   std::list<Node> N;
-	std::list<VirtAlign *> A;
-	std::list<SubGraphInfo> CC; // Descrittori delle componenti connesse, riempito dalla ComputeConnectedComponents
+    std::list<VirtAlign *> A;
+    std::list<SubGraphInfo> CC; // Descrittori delle componenti connesse, riempito dalla ComputeConnectedComponents
 
 
 	int DormantNum();
@@ -135,6 +136,6 @@ public:
 /******************************/
   void BuildGraph(std::vector<AlignPair::Result *> &Res, std::vector<Matrix44d> &Tr, std::vector<int> &Id);
   bool GetMatrixVector(std::vector<Matrix44d> &Tr, std::vector<int> &Id);
-	};
+    };
 } // end namespace
 #endif
