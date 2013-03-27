@@ -1042,6 +1042,12 @@ void MyToolButton::paintEvent( QPaintEvent * )
 	p.drawComplexControl( QStyle::CC_ToolButton, opt );
 }
 
+void MyToolButton::openMenu()
+{
+	if (menu()->isHidden())
+		showMenu();
+}
+
 MenuLineEdit::MenuLineEdit( QWidget* parent )
 :QLineEdit(parent)
 {

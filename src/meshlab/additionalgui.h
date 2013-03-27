@@ -233,6 +233,8 @@ class MyToolButton : public QToolButton
 	Q_OBJECT
 public:
 	MyToolButton( QWidget * parent = 0 );
+public slots:
+	void openMenu();
 protected:
 	void paintEvent( QPaintEvent * );	
 };

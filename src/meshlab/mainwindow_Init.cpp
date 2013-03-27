@@ -659,7 +659,7 @@ void MainWindow::createMenus()
 		int longest = longestActionWidthInAllMenus();
 		searchMenu = new SearchMenu(wama,15,searchButton,longest);
 		searchButton->setMenu(searchMenu);
-		connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(showMenu()));
+		connect(searchShortCut,SIGNAL(activated()),searchButton,SLOT(openMenu()));
 	}
 }
 
