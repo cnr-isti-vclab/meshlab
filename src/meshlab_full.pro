@@ -75,5 +75,5 @@ SUBDIRS       = common \
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \
               sampleplugins/io_m\
-               sampleplugins/filtergeodesic \
-               sampleplugins/filtercreateiso
+               sampleplugins/filter_geodesic \
+               sampleplugins/filter_createiso
