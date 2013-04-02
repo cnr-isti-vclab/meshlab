@@ -34,7 +34,7 @@
 *****************************************************************************/
 #include <Qt>
 
-#include "filtergeodesic.h"
+#include "filter_geodesic.h"
 
 using namespace std;
 using namespace vcg;

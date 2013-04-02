@@ -30,7 +30,7 @@ Added the new sample filter plugin that removes border faces
 
 *****************************************************************************/
 #include <Qt>
-#include "filtercreateiso.h"
+#include "filter_createiso.h"
 
 #include <vcg/math/perlin_noise.h>
 #include <vcg/complex/algorithms/create/marching_cubes.h>
