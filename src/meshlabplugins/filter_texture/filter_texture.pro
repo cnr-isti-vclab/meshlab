@@ -6,6 +6,7 @@ HEADERS       += filter_texture.h \
 		$$VCGDIR/vcg/complex/algorithms/parametrization/voronoi_atlas.h
 SOURCES       += filter_texture.cpp  \
 		$$VCGDIR/wrap/ply/plylib.cpp \
+		$$VCGDIR/wrap/qt/outline2_rasterizer.cpp
 
 TARGET        = filter_texture
 
