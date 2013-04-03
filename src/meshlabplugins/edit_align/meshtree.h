@@ -62,7 +62,7 @@ public:
     Param()
     {
       OGSize = 50000;
-      arcThreshold = 0.4;
+      arcThreshold = 0.3;
       recalcThreshold = 0.1;
     }
   };
