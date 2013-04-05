@@ -2514,7 +2514,11 @@ void MainWindow::showLayerDlg(bool visible)
 		showLayerDlgAct->setChecked(visible);
 	}
 }
-void MainWindow::showXMLPluginEditorGui(){if(GLA() != 0) 	plugingui->setVisible( !plugingui->isVisible() );}
+void MainWindow::showXMLPluginEditorGui()
+{
+	if(GLA() != 0) 	
+		plugingui->setVisible( !plugingui->isVisible() );
+}
 
 
 void MainWindow::setCustomize()
