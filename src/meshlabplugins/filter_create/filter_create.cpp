@@ -30,7 +30,7 @@
 
 FilterCreate::FilterCreate()
 {
-    typeList <<CR_BOX<< CR_SPHERE<< CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
+    typeList <<CR_BOX<< CR_ANNULUS << CR_SPHERE<< CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
 
   foreach(FilterIDType tt , types())
       actionList << new QAction(filterName(tt), this);
@@ -40,6 +40,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
   case CR_BOX : return QString("Box");
+  case CR_ANNULUS : return QString("Annulus");
   case CR_SPHERE: return QString("Sphere");
   case CR_RANDOM_SPHERE: return QString("Random Sphere");
   case CR_ICOSAHEDRON: return QString("Icosahedron");
@@ -58,6 +59,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
   case CR_BOX : return QString("Create a Box");
+  case CR_ANNULUS : return QString("Create an Annulus, e.g. a flat region bounded by two concentric circles");
   case CR_SPHERE: return QString("Create a Sphere");
   case CR_RANDOM_SPHERE: return QString("Create a random Spherical point cloud");
   case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
@@ -85,6 +87,11 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
     parlst.addParam(new RichFloat("radius",1,"Radius","Radius of the sphere"));
     parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
+    break;
+  case CR_ANNULUS :
+    parlst.addParam(new RichFloat("internalRadius",0.5f,"Internal Radius","Internal Radius of the annulus"));
+    parlst.addParam(new RichFloat("externalRadius",1.0f,"External Radius","Externale Radius of the annulus"));
+    parlst.addParam(new RichInt("sides",32,"Sides","Number of the sides of the poligonal approximation of the annulus "));
     break;
   case CR_RANDOM_SPHERE :
     parlst.addParam(new RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
@@ -125,6 +132,10 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       break;
     case CR_OCTAHEDRON:
       vcg::tri::Octahedron<CMeshO>(m->cm);
+      break;
+    case CR_ANNULUS:
+      vcg::tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"),
+                                par.getFloat("externalRadius"),par.getInt("sides"));
       break;
     case CR_TORUS:
     {
@@ -214,6 +225,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     case CR_ICOSAHEDRON:
     case CR_DODECAHEDRON:
     case CR_SPHERE:
+    case CR_ANNULUS:
     case CR_RANDOM_SPHERE:
     case CR_OCTAHEDRON:
     case CR_CONE:
@@ -230,6 +242,7 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
     switch(filterID)
     {
         case CR_BOX : return QString("box");
+        case CR_ANNULUS : return QString("annulus");
         case CR_SPHERE: return QString("sphere");
         case CR_RANDOM_SPHERE: return QString("randomsphere");
         case CR_ICOSAHEDRON: return QString("icosahedron");
