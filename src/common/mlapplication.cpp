@@ -16,8 +16,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 {
 	try
 	{
-		bool not = QApplication::notify(rec,ev);
-		return not;
+		return QApplication::notify(rec,ev);
 	}
 	catch (MeshLabException& e)
 	{    
