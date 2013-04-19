@@ -263,7 +263,7 @@ bool MeshDocument::hasBeenModified()
 
 void MeshDocument::updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask)
 {
-	static QTime currTime;
+	static QTime currTime  = QTime::currentTime();
 	if(currTime.elapsed()< 100) 
 		return;
 	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
