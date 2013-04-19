@@ -159,7 +159,7 @@ public:
 public slots:
 	void getHistory(const QStringList& hist);
 protected:
-	void paintEvent(QPaintEvent *event);
+	void resizeEvent(QResizeEvent *event);
 	void contextMenuEvent ( QContextMenuEvent * event );
 private slots:
 	void menuSelection(QAction*);

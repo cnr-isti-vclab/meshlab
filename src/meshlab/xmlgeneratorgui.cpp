@@ -550,15 +550,6 @@ PluginGeneratorGUI::~PluginGeneratorGUI()
 
 }
 
-void PluginGeneratorGUI::paintEvent( QPaintEvent */*event*/ )
-{
-	if (!init)
-	{
-		setMinimumSize(this->parentWidget()->size().width() * 0.5,0);
-		init = true;
-		//tabs->show();
-	}
-}
 
 void PluginGeneratorGUI::contextMenuEvent( QContextMenuEvent * event )
 {
@@ -978,6 +969,15 @@ void PluginGeneratorGUI::importHistory()
 void PluginGeneratorGUI::getHistory( const QStringList& hist )
 {
 	tab(tabs->currentIndex())->setCode(hist.join("\n"));
+}
+
+void PluginGeneratorGUI::resizeEvent( QResizeEvent *event )
+{
+	if (!init)
+	{
+		setMinimumSize(this->parentWidget()->size().width() * 0.5,0);
+		init = true;
+	}
 }
 
 
