@@ -889,6 +889,56 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
     qDebug("Found %i vertices with valence 3",val3cnt);
     qDebug("Found %i vertices with valence 5",val5cnt);
 
+    if(rm->getBool(this->ShowSeparatrix()))
+    {
+      CMeshO::PerMeshAttributeHandle< vector<PointPC> > sgH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"SeparatrixGraph");
+      if(!vcg::tri::Allocator<CMeshO>::IsValidHandle(m.cm,sgH))
+        sgH=vcg::tri::Allocator<CMeshO>::AddPerMeshAttribute< vector<PointPC> >(m.cm,std::string("SeparatrixGraph"));
+      vector<PointPC> *sgP = &sgH();
+      sgP->clear();
+
+      m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+      SimpleTempData<CMeshO::FaceContainer, Point3i > VisitedEdges(m.cm.face,Point3i(0,0,0));
+      for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+      {
+        for(int i=0;i<3;++i)
+        {
+          if(ValencyCounter[(*fi).V(i)] != 8)
+          {
+            if(VisitedEdges[*fi][i]==0 && !(*fi).IsF(i))
+            {
+
+              CVertexO* startV=(*fi).V(i);
+              face::Pos <CFaceO> sp(&*fi,i,startV);
+              do
+              {
+                VisitedEdges[sp.F()][sp.E()]=1;
+                sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
+                sp.FlipV();
+                sgP->push_back(make_pair(sp.V()->P(),Color4b::Red));
+                sp.FlipE();
+                if(!sp.F()->IsF(sp.E())) sp.FlipF();
+                else
+                {
+                  sp.FlipF();sp.FlipE();sp.FlipF();
+                  assert(!sp.F()->IsF(sp.E()));
+                }
+                sp.FlipE();
+                if(!sp.F()->IsF(sp.E())) sp.FlipF();
+                else
+                {
+                  sp.FlipF();sp.FlipE();sp.FlipF();
+                  assert(!sp.F()->IsF(sp.E()));
+                }
+              }
+              while(ValencyCounter[sp.V()]==8 && VisitedEdges[sp.F()][sp.E()]==0);
+            }
+          }
+        } // end for i in 1..3
+      }  // end foreach face
+    } // end if showSeparatirx
+
+
   } break;
 
 
