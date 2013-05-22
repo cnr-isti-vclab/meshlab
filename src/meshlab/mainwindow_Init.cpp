@@ -477,34 +477,48 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
+    foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+    {
+        foreach(QAction* editAction, iEditFactory->actions())
+        {
+            if(!editAction->icon().isNull())
+            {
+                editToolBar->addAction(editAction);
+            } else qDebug() << "action was null";
+        }
+    }
 	editToolBar->addSeparator();
 
-	filterToolBar = addToolBar(tr("Action"));
-	filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-	filterToolBar->setIconSize(QSize(32,32));
-	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
-	{
-		foreach(QAction* editAction, iEditFactory->actions())
-		{
-			if(!editAction->icon().isNull())
-			{
-				editToolBar->addAction(editAction);
-			} else qDebug() << "action was null";
-		}
-	}
+    //filterToolBar = new FixedToolBar(tr("Filter"),this);
+    filterToolBar = addToolBar(tr("Filter"));
+    filterToolBar->setIconSize(QSize(32,32));
+    filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	QWidget *spacerWidget = new QWidget();
-	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	//spacerWidget->setVisible(true);
-	searchToolBar = addToolBar(tr("Search"));
-	searchToolBar->addWidget(spacerWidget);
-	searchToolBar->setMovable(false);
-	searchToolBar->setFloatable(false);
-	searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-	searchButton = new MyToolButton(this);
-	searchButton->setPopupMode(QToolButton::InstantPopup);
-	searchButton->setIcon(QIcon(":/images/search.png"));
-	searchToolBar->addWidget(searchButton);
+    foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
+    {
+        foreach(QAction* filterAction, iFilter->actions())
+        {
+            if(!filterAction->icon().isNull())
+            {
+                // tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+                filterToolBar->addAction(filterAction);
+            } //else qDebug() << "action was null";
+        }
+    }
+    //filterToolBar->installActionEventFilter();
+
+    QWidget *spacerWidget = new QWidget();
+    spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacerWidget->setVisible(true);
+    searchToolBar = addToolBar(tr("Search"));
+    searchToolBar->addWidget(spacerWidget);
+    searchToolBar->setMovable(false);
+    searchToolBar->setFloatable(false);
+    searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
+    searchButton = new MyToolButton(this);
+    searchButton->setPopupMode(QToolButton::InstantPopup);
+    searchButton->setIcon(QIcon(":/images/search.png"));
+    searchToolBar->addWidget(searchButton);
 }
 
 
@@ -548,7 +562,7 @@ void MainWindow::createMenus()
 	editMenu->addAction(suspendEditModeAct);
 
 	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
-	filterMenu = menuBar()->addMenu(tr("Fi&lters"));
+    filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	fillFilterMenu();
 	//filterMenu = menuBar()->addMenu(tr("Fi&lters"));
 	//filterMenu->addAction(lastFilterAct);
@@ -710,46 +724,64 @@ void MainWindow::fillFilterMenu()
 	//filterMenu->addMenu(new SearcherMenu(this,filterMenu));
 	//filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip
-	filterMenuSelect = filterMenu->addMenu(tr("Selection"));
-	filterMenuClean  = filterMenu->addMenu(tr("Cleaning and Repairing"));
-	filterMenuCreate = filterMenu->addMenu(tr("Create New Mesh Layer"));
-	filterMenuRemeshing = filterMenu->addMenu(tr("Remeshing, Simplification and Reconstruction"));
-	filterMenuPolygonal = filterMenu->addMenu(tr("Polygonal and Quad Mesh"));
-	filterMenuColorize = filterMenu->addMenu(tr("Color Creation and Processing"));
-	filterMenuSmoothing = filterMenu->addMenu(tr("Smoothing, Fairing and Deformation"));
-	filterMenuQuality = filterMenu->addMenu(tr("Quality Measure and Computations"));
-	filterMenuNormal = filterMenu->addMenu(tr("Normals, Curvatures and Orientation"));
-	filterMenuMeshLayer   = filterMenu->addMenu(tr("Mesh Layer"));
-	filterMenuRasterLayer = filterMenu->addMenu(tr("Raster Layer"));
-	filterMenuRangeMap = filterMenu->addMenu(tr("Range Map"));
-	filterMenuPointSet = filterMenu->addMenu(tr("Point Set"));
-	filterMenuSampling = filterMenu->addMenu(tr("Sampling"));
-	filterMenuTexture = filterMenu->addMenu(tr("Texture"));
-	filterMenuCamera = filterMenu->addMenu(tr("Camera"));
 
-	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuMeshLayer,   SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRasterLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+    filterMenuSelect = new MenuWithToolTip(tr("Selection"),this);
+    filterMenu->addMenu(filterMenuSelect);
+    filterMenuClean  = new MenuWithToolTip(tr("Cleaning and Repairing"),this);
+    filterMenu->addMenu(filterMenuClean);
+    filterMenuCreate = new MenuWithToolTip(tr("Create New Mesh Layer"),this);
+    filterMenu->addMenu(filterMenuCreate);
+    filterMenuRemeshing = new MenuWithToolTip(tr("Remeshing, Simplification and Reconstruction"),this);
+    filterMenu->addMenu(filterMenuRemeshing);
+    filterMenuPolygonal = new MenuWithToolTip(tr("Polygonal and Quad Mesh"),this);
+    filterMenu->addMenu(filterMenuPolygonal);
+    filterMenuColorize = new MenuWithToolTip(tr("Color Creation and Processing"),this);
+    filterMenu->addMenu(filterMenuColorize);
+    filterMenuSmoothing = new MenuWithToolTip(tr("Smoothing, Fairing and Deformation"),this);
+    filterMenu->addMenu(filterMenuSmoothing);
+    filterMenuQuality = new MenuWithToolTip(tr("Quality Measure and Computations"),this);
+    filterMenu->addMenu(filterMenuQuality);
+    filterMenuNormal = new MenuWithToolTip(tr("Normals, Curvatures and Orientation"),this);
+    filterMenu->addMenu(filterMenuNormal);
+    filterMenuMeshLayer   = new MenuWithToolTip(tr("Mesh Layer"),this);
+    filterMenu->addMenu(filterMenuMeshLayer);
+    filterMenuRasterLayer = new MenuWithToolTip(tr("Raster Layer"),this);
+    filterMenu->addMenu(filterMenuRasterLayer);
+    filterMenuRangeMap = new MenuWithToolTip(tr("Range Map"),this);
+    filterMenu->addMenu(filterMenuRangeMap);
+    filterMenuPointSet = new MenuWithToolTip(tr("Point Set"),this);
+    filterMenu->addMenu(filterMenuPointSet);
+    filterMenuSampling = new MenuWithToolTip(tr("Sampling"),this);
+    filterMenu->addMenu(filterMenuSampling);
+    filterMenuTexture = new MenuWithToolTip(tr("Texture"),this);
+    filterMenu->addMenu(filterMenuTexture);
+    filterMenuCamera = new MenuWithToolTip(tr("Camera"),this);
+    filterMenu->addMenu(filterMenuCamera);
+
+//	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuMeshLayer,   SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRasterLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
 
 	QMap<QString,MeshFilterInterface *>::iterator msi;
 	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
 	{
 		MeshFilterInterface * iFilter= msi.value();
 		QAction *filterAction = iFilter->AC((msi.key()));
-		filterAction->setToolTip(iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString()));
-		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+        QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+        filterAction->setToolTip(tooltip);
+        connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
 		if( filterClass & MeshFilterInterface::FaceColoring )
@@ -829,7 +861,10 @@ void MainWindow::fillFilterMenu()
 		{
 			filterMenu->addAction(filterAction);
 		}
-		if(!filterAction->icon().isNull())                      filterToolBar->addAction(filterAction);
+        //if(!filterAction->icon().isNull())
+        //    filterToolBar->addAction(filterAction);
+
+
 	}
 
 	QMap<QString,MeshLabXMLFilterContainer>::iterator xmlit;
@@ -842,8 +877,7 @@ void MainWindow::fillFilterMenu()
 		try
 		{
 			QString help = info->filterHelp(filterName);
-			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
-
+            filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 			QString filterClasses = info->filterAttribute(filterName,MLXMLElNames::filterClass);
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
@@ -926,7 +960,8 @@ void MainWindow::fillFilterMenu()
 				{
 					filterMenu->addAction(filterAction);
 				}
-				if(!filterAction->icon().isNull()) filterToolBar->addAction(filterAction);
+                //if(!filterAction->icon().isNull())
+                //    filterToolBar->addAction(filterAction);
 			}
 		}
 		catch(ParsingException e)
@@ -942,7 +977,7 @@ void MainWindow::fillDecorateMenu()
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
-			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+            connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
 			decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
 			renderMenu->addAction(decorateAction);
 		}

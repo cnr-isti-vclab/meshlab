@@ -281,5 +281,15 @@ private slots:
 	void changeFocus(const int k);
 };
 
+class MenuWithToolTip : public QMenu
+{
+    Q_OBJECT
+public:
+    MenuWithToolTip(const QString & title,QWidget* parent = 0);
+    ~MenuWithToolTip();
+
+protected:
+    bool event(QEvent *event);
+};
 
 #endif 

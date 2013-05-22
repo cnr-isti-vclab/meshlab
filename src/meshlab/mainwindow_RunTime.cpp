@@ -450,7 +450,8 @@ void MainWindow::updateMenus()
 			layerDialog->updateDecoratorParsView();
 		}
 	}
-	searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
+    if (searchMenu != NULL)
+        searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
 }
 
 void MainWindow::setSplit(QAction *qa)
@@ -2233,6 +2234,7 @@ bool MainWindow::importMesh(QString fileName)
 			if(!par.isEmpty())
 			{
 				GenericParamDialog postOpenDialog(this, &par, tr("Post-Open Processing"));
+                postOpenDialog.setFocus();
 				postOpenDialog.exec();
 				pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
 			}
