@@ -37,7 +37,7 @@
 
 using namespace vcg;
 
-bool SampleIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, CallBackPos *cb, QWidget *parent)
+bool SampleIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par,CallBackPos *cb, QWidget *parent)
 {
 	int result = vcg::tri::io::ImporterSMF<CMeshO>::Open(m.cm, qPrintable(fileName));
 	if (result != vcg::tri::io::ImporterSMF<CMeshO>::E_NOERROR)
@@ -47,7 +47,7 @@ bool SampleIOPlugin::open(const QString &formatName, const QString &fileName, Me
 	return true;
 }
 
-bool SampleIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent)
+bool SampleIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par,::CallBackPos *cb, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 

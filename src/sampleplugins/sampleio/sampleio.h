@@ -29,14 +29,13 @@
 #ifndef SAMPLEIOPLUGIN_H
 #define SAMPLEIOPLUGIN_H
 
-#include <meshlab/meshmodel.h>
-#include <meshlab/interfaces.h>
+#include <common/interfaces.h>
 
 class SampleIOPlugin : public QObject, public MeshIOInterface
-{
-  Q_OBJECT
-  MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
-  Q_INTERFACES(MeshIOInterface)
+{ 
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_IO_INTERFACE_IID)
+	Q_INTERFACES(MeshIOInterface)
 
   
 public:
@@ -45,8 +44,8 @@ public:
 
 	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
 
-	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb=0, QWidget *parent=0);
-	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, vcg::CallBackPos *cb, QWidget *parent);
+	bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par,vcg::CallBackPos *cb=0, QWidget *parent=0);
+	bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par, vcg::CallBackPos *cb = 0, QWidget *parent = 0);
 };
 
 #endif
