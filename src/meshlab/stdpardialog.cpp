@@ -625,7 +625,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 	descLab->setToolTip(rpf->pd->fieldDesc);
 	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 	vlay = new QVBoxLayout();
-	lay44 = new QGridLayout(this);
+	lay44 = new QGridLayout();
 
 
 
