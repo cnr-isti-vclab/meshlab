@@ -298,7 +298,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 	case FP_QUAD_PAIRING                     : return tr("Convert into a tri-mesh into a quad mesh by pairing triangles.");
 	case FP_QUAD_DOMINANT                    : return tr("Convert into a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
 	case FP_MAKE_PURE_TRI                    : return tr("Convert into a tri-mesh by splitting any polygonal face.");
-	case FP_FAUX_CREASE                      : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.");
+	case FP_FAUX_CREASE                      : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.<br>"
+														 "Angle between face normal is considered signed according to convexity/concavity."
+														 "Convex angles are positive and concave are negative.");
 	case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
 												   "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 												   "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
@@ -478,7 +480,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		break;
 
 	case FP_FAUX_CREASE:
-		parlst.addParam(new RichFloat ("AngleDeg",(int)45,"Angle Threshold (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
+	  parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease."
+									 "If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
+		parlst.addParam(new RichFloat ("AngleDegPos", 45.0f,"Convex Angle Thr. (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
 		break;
 
 	case FP_NORMAL_EXTRAPOLATION:
@@ -844,7 +848,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				float angleRad = Angle(Point3f(0,0,1),plane.Direction());
 				Matrix44f rt; rt.SetRotateRad(-angleRad,rotAxis);
 				m.cm.Tr = rt*tr1;
-		} 
+		}
 		if(par.getBool("Freeze")&& !par.getBool("ToAll")){
 			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
 			tri::UpdateBounding<CMeshO>::Box(m.cm);
@@ -1391,7 +1395,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		} break;
 
 	case FP_REFINE_CATMULL :
-		{ 
+		{
 			if (!vcg::tri::BitQuadCreation<CMeshO>::IsTriQuadOnly(m.cm))
 			{
 				errorMessage = "To be applied filter <i>" + filter->text() + "</i> requires a mesh with only triangular and/or quad faces.";
@@ -1441,8 +1445,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	case FP_FAUX_CREASE :
 		{
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-			float AngleDeg = par.getFloat("AngleDeg");
-			tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
+			float AngleDegNeg = par.getFloat("AngleDegNeg");
+			float AngleDegPos = par.getFloat("AngleDegPos");
+//			tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
+			tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, math::ToRad(AngleDegNeg), math::ToRad(AngleDegPos));
 			m.updateDataMask(MeshModel::MM_POLYGONAL);
 		} break;
 

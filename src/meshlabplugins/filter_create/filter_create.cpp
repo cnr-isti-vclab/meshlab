@@ -159,7 +159,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     vcg::math::MarsenneTwisterRNG rng;
     vcg::tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
     for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
-      vcg::math::GeneratePointOnUnitSphereUniform(rng,vi->P());
+      vi->P()=vcg::math::GeneratePointOnUnitSphereUniform<float>(rng);
     vcg::tri::UpdateBounding<CMeshO>::Box(tt);
 
     const float SphereArea = 4*M_PI;
