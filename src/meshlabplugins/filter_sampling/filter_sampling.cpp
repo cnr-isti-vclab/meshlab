@@ -477,6 +477,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                  "Exact Sample Num",
                                  "If the required total number of samples is not a strict exact requirement we can exploit a different algorithm"
                                  "based on the choice of the number of samples inside each triangle by a random Poisson-distributed number with mean equal to the expected number of samples times the area of the triangle over the surface of the whole mesh."));
+    parlst.addParam(new RichBool("EdgeSampling",  true,
+                                 "Sample CreaseEdge Only",
+                                 "Restrict the sampling process to the crease edges only. Useful to sample in a more accurate way the feature edges of a mechanical mesh."));
     break;
   case FP_STRATIFIED_SAMPLING :
     parlst.addParam(new RichInt ("SampleNum",  std::max(100000,md.mm()->cm.vn),
@@ -519,7 +522,6 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh."));
     break;
   case FP_POISSONDISK_SAMPLING :
-
     parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
     parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
     parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
@@ -688,7 +690,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     switch(par.getEnum("Sampling"))
     {
     case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::VertexUniform(curMM->cm,mps,par.getInt("SampleNum"));	break;
-    case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,false);		break;
+    case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"),true);		break;
     case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
     }
     vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
@@ -728,12 +730,19 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     MeshModel *curMM= md.mm();
     MeshModel *mm= md.addNewMesh("","Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
-
     BaseSampler mps(&(mm->cm));
-    if(par.getBool("Weighted"))
-      tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-    else if(par.getBool("ExactNum")) tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-    else tri::SurfaceSampling<CMeshO,BaseSampler>::MontecarloPoisson(curMM->cm,mps,par.getInt("SampleNum"));
+
+    if(par.getBool("EdgeSampling"))
+    {
+      tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),false);
+    }
+    else
+    {
+      if(par.getBool("Weighted"))
+        tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+      else if(par.getBool("ExactNum")) tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+      else tri::SurfaceSampling<CMeshO,BaseSampler>::MontecarloPoisson(curMM->cm,mps,par.getInt("SampleNum"));
+    }
 
     vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
     Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
