@@ -1,17 +1,17 @@
 include (../../shared.pri)
 
-TARGET = filter_gears
+HEADERS       += \
+    ../../external/maxflow-v2.21.src/adjacency_list/graph.h \
+    ../../external/maxflow-v2.21.src/adjacency_list/block.h \
+    graph_builder.h \
+    filter_decomposer.h
 
-SOURCES += \
-    filter_gears.cpp
+SOURCES       += \
+../../external/maxflow-v2.21.src/adjacency_list/maxflow.cpp \
+../../external/maxflow-v2.21.src/adjacency_list/graph.cpp \
+../../../../vcglib/wrap/ply/plylib.cpp \
+    filter_decomposer.cpp
 
-HEADERS += \
-    filter_gears.h \
-    spur.h
+TARGET        = filter_decomposer
 
-OTHER_FILES += \
-    filter-gears_description.txt
-
-RESOURCES += \
-    filter_gears.qrc
 
