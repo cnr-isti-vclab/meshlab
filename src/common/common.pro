@@ -7,6 +7,7 @@ GLEWCODE = $$GLEWDIR/src/glew.c
 win32-msvc2005:DESTDIR = ../distrib
 win32-msvc2008:DESTDIR = ../distrib
 win32-msvc2010:DESTDIR = ../distrib
+win32-msvc2012:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
 
 
@@ -14,6 +15,7 @@ win32-g++:DLLDESTDIR = ../distrib
 # win32-msvc2005:DESTDIR     = ./release
 # win32-msvc2008:DESTDIR     = ./release
 # win32-msvc2010:DESTDIR     = ./release
+# win32-msvc2012:DESTDIR     = ./release
 # win32-g++:DLLDESTDIR     = ./release
 # }
 
@@ -65,6 +67,7 @@ linux-g++-64:DESTDIR = ../distrib
 win32-msvc2005:CONFIG += staticlib
 win32-msvc2008:CONFIG += staticlib
 win32-msvc2010:CONFIG += staticlib
+win32-msvc2012:CONFIG += staticlib
 
 QT += opengl
 QT += xml
@@ -79,6 +82,7 @@ DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2010:DEFINES += _CRT_SECURE_NO_WARNINGS
+win32-msvc2012:DEFINES += _CRT_SECURE_NO_WARNINGS
 
 
 # Input
@@ -114,6 +118,7 @@ SOURCES += filterparameter.cpp \
 #	win32-msvc2005: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2008: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2010: RCC_DIR = $(ConfigurationName)
+#	win32-msvc2012: RCC_DIR = $(ConfigurationName)
 
 macx:LIBS		+= -L../external/lib/macx -ljhead
 macx32:LIBS		+= -L../external/lib/macx32 -ljhead
@@ -122,6 +127,7 @@ win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
 win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
 win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
 win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
+win32-msvc2012:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
 win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
 linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
 linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead
