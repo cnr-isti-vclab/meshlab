@@ -119,29 +119,17 @@ static const char* ErrorMsg(int error)
 * \param filename The name of the file to open
 * \param oi A structure containing infos about the object to be opened
 */
-static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsInfo &info)
+static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &info)
 {
 	int result = E_NOERROR;
 
 	m.Clear();
-
-	if (file == 0)
-	{
-		file = lib3ds_file_load(filename);
-		if (!file)
-			return E_CANTOPEN;
-		lib3ds_file_eval(file,0);
-	}
-
-	if (info.mask == 0)
-		LoadMask(filename, file, info);
 
 	if (info.numVertices == 0)
 		return E_NO_VERTEX;
 
 	if (info.numTriangles == 0)
 		return E_NO_FACE;
-	
 	
 	// vertices and faces iterators
 	VertexIterator vi;
@@ -153,17 +141,18 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 	int numVertices = 0;
 	int numFaces		= 0;
 
-	p=file->nodes;
+        if (!node)
+        {
   for (p=file->nodes; p!=0; p=p->next)
       if (ReadNode(m, file, p, vi, fi, info, numVertices, numFaces) == E_ABORTED)
+                    return E_ABORTED;
+        }
+        else
 			{
-				lib3ds_file_free(file);
+            if (ReadNode(m, file, node, vi, fi, info, numVertices, numFaces) == E_ABORTED)
 				return E_ABORTED;
 			}
 	
-	// freeing memory
-	lib3ds_file_free(file);
-
 	return result;
 } // end of Open
 
@@ -185,13 +174,16 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 			if (strcmp(node->name,"$$$DUMMY") == 0)
 				return E_NOERROR;
 		
-			if (!node->user.d)
-			{
-				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
+                        Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+                        if( mesh == NULL )
+                          mesh = lib3ds_file_mesh_by_name(file, node->name);
+
 				ASSERT(mesh);
 				if (!mesh)
 				  return E_NOERROR;
       
+                        if (!mesh->user.d)
+			{
 				int numVerticesPlusFaces = info.numVertices + info.numTriangles;				
 				
 				Lib3dsVector *normalL= (Lib3dsVector*) malloc(3*sizeof(Lib3dsVector)*mesh->faces);
@@ -365,15 +357,12 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 	*	\param mask	A mask which will be filled according to type of data found in the object
 	* \param oi A structure which will be filled with infos about the object to be opened
 	*/
-	static bool LoadMask(const char * filename, Lib3dsFile *file, _3dsInfo &info)
+        static bool LoadMask(Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &info)
 	{
-		if (file == 0)
-		{
-			file = lib3ds_file_load(filename);
-			if (!file)
-				return false;
-			lib3ds_file_eval(file,0);
-		}
+                info.mask = 0;
+                info.numVertices	= 0;
+                info.numTriangles	= 0;
+                info.numMeshes = 0;
 		
 		bool bHasPerWedgeTexCoord = true;
 		bool bHasPerFaceNormal		= true;
@@ -381,15 +370,15 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 		bool bHasPerVertexColor		= false;
 		bool bHasPerFaceColor			= true;
 		
-		info.mask = 0;
-		info.numVertices	= 0;
-		info.numTriangles	= 0;
-
+                if (!node)
+                {
 		Lib3dsNode *p;
-		p=file->nodes;
 		for (p=file->nodes; p!=0; p=p->next) {
 			LoadNodeMask(file, p, info);
 		}
+                }
+                else
+                    LoadNodeMask(file, node, info);
 		
 		if (bHasPerWedgeTexCoord)
 			info.mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
@@ -433,13 +422,15 @@ static int Open( OpenMeshType &m, const char * filename, Lib3dsFile *file, _3dsI
 			if (strcmp(node->name,"$$$DUMMY") == 0)
 				return;
 		
-			if (!node->user.d)
-			{
-				Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->name);
+                        Lib3dsMesh * mesh = lib3ds_file_mesh_by_name(file, node->data.object.morph);
+                        if (mesh == NULL)
+                          mesh = lib3ds_file_mesh_by_name(file, node->name);
 				ASSERT(mesh);
 				if (!mesh)
 				  return;
 				
+                        if (!mesh->user.d)
+                        {
 				info.numVertices	+= mesh->points;
 				info.numTriangles	+= mesh->faces;
 				++info.numMeshes;
