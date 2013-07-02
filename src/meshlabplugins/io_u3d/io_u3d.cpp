@@ -165,17 +165,17 @@ void U3DIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 	if(format.toUpper() == tr("U3D"))
 	{
 		capability = defaultBits = vcg::tri::io::ExporterU3D<CMeshO>::GetExportMaskCapability();
-		defaultBits &= vcg::tri::io::Mask::IOM_VERTNORMAL;
-		defaultBits &= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		defaultBits &= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_FACECOLOR);
 		return;
 	}
 	if(format.toUpper() == tr("IDTF"))
 	{
 		capability=defaultBits = vcg::tri::io::ExporterIDTF<CMeshO>::GetExportMaskCapability();
-		defaultBits &= vcg::tri::io::Mask::IOM_VERTNORMAL;
-		defaultBits &= vcg::tri::io::Mask::IOM_VERTCOLOR;
-		defaultBits &= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
+		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTNORMAL);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_VERTCOLOR);
+		defaultBits &= (~vcg::tri::io::Mask::IOM_FACECOLOR);
 		return;
 	}
 
