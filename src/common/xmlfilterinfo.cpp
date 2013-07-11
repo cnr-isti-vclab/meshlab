@@ -578,6 +578,7 @@ QString MLXMLUtilityFunctions::generateXMLFilter( const MLXMLFilterSubTree& filt
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterPreCond) + " "
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterPostCond) + " "
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterArity) + " "
+		+ MLXMLElNames::filterRasterArity + "=\"" + MLXMLElNames::singleRasterArity + "\" " 
 		+ xmlAttrNameValue(filter.filterinfo,MLXMLElNames::filterIsInterruptible) + ">";
 	result += "<" + MLXMLElNames::filterHelpTag + ">" + filter.filterinfo[MLXMLElNames::filterHelpTag] + "</" + MLXMLElNames::filterHelpTag + ">";
 	if (!(filter.filterinfo[MLXMLElNames::filterJSCodeTag].isEmpty()))

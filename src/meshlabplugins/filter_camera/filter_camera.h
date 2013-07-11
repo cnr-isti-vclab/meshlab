@@ -31,27 +31,27 @@
 class FilterCameraPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+		MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+		Q_INTERFACES(MeshFilterInterface)
 
 public:
-      enum { FP_SET_MESH_CAMERA,
-             FP_SET_RASTER_CAMERA,
-             FP_QUALITY_FROM_CAMERA,
-             FP_CAMERA_ROTATE,
-             FP_CAMERA_SCALE,
-			 FP_CAMERA_TRANSLATE,
-			 FP_CAMERA_TRANSFORM,
-             FP_CAMERA_EDIT};
+	enum { FP_SET_MESH_CAMERA,
+		FP_SET_RASTER_CAMERA,
+		FP_QUALITY_FROM_CAMERA,
+		FP_CAMERA_ROTATE,
+		FP_CAMERA_SCALE,
+		FP_CAMERA_TRANSLATE,
+		FP_CAMERA_TRANSFORM,
+		FP_CAMERA_EDIT};
 
-  FilterCameraPlugin();
-	
-  int postCondition(QAction * filter) const;
-  virtual QString filterName(FilterIDType filter) const;
+	FilterCameraPlugin();
+	int getPreConditions(QAction *) const;
+	int postCondition(QAction * filter) const;
+	virtual QString filterName(FilterIDType filter) const;
 	virtual QString filterInfo(FilterIDType filter) const;
-  virtual FilterClass getClass(QAction *);
+	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif

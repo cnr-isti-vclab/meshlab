@@ -34,10 +34,7 @@ add sampleplugins
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <QObject>
-
 #include <common/interfaces.h>
-class QScriptEngine;
 
 class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 {
@@ -58,7 +55,6 @@ public:
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
     FilterClass getClass(QAction *a);
-	QString filterScriptFunctionName(FilterIDType filterID);
 
 };
 

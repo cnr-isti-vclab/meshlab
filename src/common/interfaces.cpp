@@ -69,8 +69,12 @@ bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, Q
   if (preMask & MeshModel::MM_VERTRADIUS && !m.hasDataMask(MeshModel::MM_VERTRADIUS))
       MissingItems.push_back("Vertex Radius");
 
+  if (preMask & MeshModel::MM_CAMERA && !m.hasDataMask(MeshModel::MM_CAMERA))
+	  MissingItems.push_back("Camera");
+
   if (preMask & MeshModel::MM_FACENUMBER && (m.cm.fn==0))
       MissingItems.push_back("Non empty Face Set");
+
 
   return MissingItems.isEmpty();
 }

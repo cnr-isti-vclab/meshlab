@@ -514,8 +514,10 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 	case FP_CAMERA_ROTATE   : 	
 	case FP_CAMERA_TRANSLATE   :               
 	case FP_CAMERA_TRANSFORM:
-	case FP_CAMERA_SCALE                  : return MeshModel::MM_CAMERA;
-    case FP_QUALITY_FROM_CAMERA           : return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
+	case FP_CAMERA_SCALE                  : 
+		return MeshModel::MM_CAMERA;
+    case FP_QUALITY_FROM_CAMERA           : 
+		return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
   }
 }
@@ -540,5 +542,23 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
   }
   assert(0);
 }
+
+ int FilterCameraPlugin::getPreConditions( QAction * a) const
+ {
+	 switch(ID(a))
+	 {
+	 case FP_CAMERA_ROTATE :
+	 case FP_CAMERA_SCALE :
+	 case FP_CAMERA_TRANSLATE :
+	 case FP_CAMERA_EDIT :
+	 case FP_CAMERA_TRANSFORM:
+	 case FP_QUALITY_FROM_CAMERA :
+		 return MeshModel::MM_CAMERA;
+	 case FP_SET_RASTER_CAMERA :
+	 case FP_SET_MESH_CAMERA :
+		return MeshModel::MM_NONE;
+	 }
+	 assert(0);
+ }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterCameraPlugin)

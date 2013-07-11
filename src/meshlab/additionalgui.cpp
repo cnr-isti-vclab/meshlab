@@ -1063,23 +1063,3 @@ void MenuLineEdit::keyPressEvent( QKeyEvent * event )
 		emit arrowPressed(k);
 }
 
-MenuWithToolTip::MenuWithToolTip(const QString & title,QWidget* parent)
-    :QMenu(title,parent)
-{
-}
-
-MenuWithToolTip::~MenuWithToolTip()
-{
-}
-
-bool MenuWithToolTip::event(QEvent *event)
-{
-    const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(event);
-    //qDebug() << event << " " << event->type();
-    if (helpEvent->type() == QEvent::ToolTip)
-        QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
-    else
-        QToolTip::hideText();
-    return QMenu::event(event);
-}
-

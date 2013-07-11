@@ -769,9 +769,9 @@ void PluginGeneratorGUI::saveScriptCode()
 void PluginGeneratorGUI::saveAsXMLPlugin()
 {
 	QFileDialog* saveDiag = new QFileDialog(this,tr("Save XML Plugin File"),finfo.absolutePath(), tr("MeshLab XML Plugin (*.xml)"));
-#if defined(Q_OS_MAC)
+//#if defined(Q_OS_MAC)
 	saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
-#endif
+//#endif
 	QLabel* namelab = new QLabel(tr("JScript Plugin Name"),saveDiag);
 	QLineEdit* jsline= new QLineEdit(plugscriptname,saveDiag);
 	QLabel* authlab = new QLabel(tr("Author Name"),saveDiag);

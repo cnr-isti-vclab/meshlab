@@ -799,6 +799,9 @@ void MainWindow::runFilterScript()
 		GLA()->setSelectFaceRendering(true);
 		GLA()->setSelectVertRendering(true);
 	}
+
+		if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+			 meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
 		if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
 			GLA()->resetTrackBall();
 		/* to be changed */
@@ -1053,6 +1056,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         GLA()->setColorMode(vcg::GLW::CMPerMesh);
         meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
       }
+
+
+	  if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+		  meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
+
         if(iFilter->getClass(action) & MeshFilterInterface::Selection )
       {
           GLA()->setSelectVertRendering(true);
@@ -1278,6 +1286,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 			env.loadMLScriptEnv(*meshDoc(),PM);
 			QScriptValue result = env.evaluate(funcall);
 			scriptCodeExecuted(result,t.elapsed(),"");
+			postFilterExecution();
 
 		}
 		/*if (isinter)
@@ -1299,6 +1308,15 @@ void MainWindow::postFilterExecution()
 {
 	emit filterExecuted();
 	meshDoc()->renderState().clearState();
+	qApp->restoreOverrideCursor();
+	qb->reset();
+
+	updateMenus();
+	GLA()->update(); //now there is the container
+	MultiViewer_Container* mvc = currentViewContainer();
+	if(mvc)
+		mvc->updateAllViewer();
+
 	FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
 	if (obj == NULL)
 		return;
@@ -1311,7 +1329,7 @@ void MainWindow::postFilterExecution()
 	QString fname = mfc->act->text();
 	//meshDoc()->setBusy(false);
 
-	qApp->restoreOverrideCursor();
+
 
 	//// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
@@ -1349,6 +1367,11 @@ void MainWindow::postFilterExecution()
 		GLA()->setColorMode(vcg::GLW::CMPerMesh);
 		meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
 	}
+
+
+	//if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+	//	meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
+
 	if(mask & MeshFilterInterface::Selection )
 	{
 		GLA()->setSelectVertRendering(true);
@@ -1359,14 +1382,6 @@ void MainWindow::postFilterExecution()
 
 	if(mask & MeshFilterInterface::Texture )
 		GLA()->updateTexture();
-
-	qb->reset();
-
-	updateMenus();
-	GLA()->update(); //now there is the container
-	MultiViewer_Container* mvc = currentViewContainer();
-	if(mvc)
-		mvc->updateAllViewer();
 
 	delete obj;
 }

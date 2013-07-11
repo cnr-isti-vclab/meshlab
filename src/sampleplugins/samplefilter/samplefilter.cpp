@@ -128,13 +128,4 @@ bool ExtraSamplePlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichP
 	return true;
 }
 
-QString ExtraSamplePlugin::filterScriptFunctionName( FilterIDType filterID )
-{
-	switch(filterID) {
-		case FP_MOVE_VERTEX :  return QString("randomVerticesDisplacement"); 
-		default : assert(0); 
-	}
-	return QString();
-}
-
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraSamplePlugin)
