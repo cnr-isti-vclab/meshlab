@@ -10,7 +10,6 @@ win32-msvc2010:DESTDIR = ../distrib
 win32-msvc2012:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
 
-
 # CONFIG(release,debug | release) {
 # win32-msvc2005:DESTDIR     = ./release
 # win32-msvc2008:DESTDIR     = ./release
@@ -126,8 +125,8 @@ macx64:LIBS		+= -L../external/lib/macx64 -ljhead
 win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
 win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
 win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
-win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
-win32-msvc2012:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
+win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2010/jhead.lib
+win32-msvc2012:LIBS	+= ../external/lib/win32-msvc2012/jhead.lib
 win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
 linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
 linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead

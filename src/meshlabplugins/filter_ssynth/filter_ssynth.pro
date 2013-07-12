@@ -14,6 +14,7 @@ win32-msvc.net:LIBS += ../../external/lib/win32-msvc.net/ssynth.lib
 win32-msvc2005:LIBS += ../../external/lib/win32-msvc2005/ssynth.lib
 win32-msvc2008:LIBS += ../../external/lib/win32-msvc2008/ssynth.lib
 win32-msvc2010:LIBS += ../../external/lib/win32-msvc2010/ssynth.lib
+win32-msvc2012:LIBS += ../../external/lib/win32-msvc2012/ssynth.lib
 win32-g++:LIBS += ../../external/lib/win32-gcc/libssynth.a
 linux-g++:LIBS += ../../external/lib/linux-g++/libssynth.a
 macx:LIBS += ../../external/lib/macx64/libssynth.a

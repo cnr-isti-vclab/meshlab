@@ -42,11 +42,11 @@ Header: "PG"+ ws +<endianess>+ ws +[sign]+ws + <bit-depth>+" "+<width>+" "+<heig
 
 where:
 
-    * ws (white-spaces) is any combination of characters ' ' and '\t'.
-    * endianess equals "LM" or "ML"(resp. little-endian or big-endian)
-    * sign equals "+" or "-" (resp. unsigned or signed). If omited, values are supposed to be unsigned.
-    * bit-depth that can be any number between 1 and 31. This number must take into account the eventual sign bit.
-    * width and height are the image dimensions (in pixels).
+	* ws (white-spaces) is any combination of characters ' ' and '\t'.
+	* endianess equals "LM" or "ML"(resp. little-endian or big-endian)
+	* sign equals "+" or "-" (resp. unsigned or signed). If omited, values are supposed to be unsigned.
+	* bit-depth that can be any number between 1 and 31. This number must take into account the eventual sign bit.
+	* width and height are the image dimensions (in pixels).
 
 Data: The image binary values appear one after the other (in raster order) immediately after the last header character ('\n')
 and are byte-aligned (they are packed into 1,2 or 4 bytes per sample, depending upon the bit-depth value).
@@ -67,8 +67,8 @@ bool ScalarImage<float>::Open(const char *filename)
   qDebug("image should be of %i x %i %i depth and with range in %f -- %f in mode %c",w,h,depth,ll,lh,mode);
   if(depth!=16) 
   {
-    qDebug("Wrong depth of image 16 bit expected");
-    return false;
+	qDebug("Wrong depth of image 16 bit expected");
+	return false;
   }
 	if (mode != 'l' && mode != 'L')
 	{
@@ -103,7 +103,7 @@ bool ScalarImage<float>::Open(const char *filename)
 
 		for (int i=0; i<imagesize; ++i)
 		{
-      for (size_t j=0; j<sizeof(short); ++j)
+	  for (size_t j=0; j<sizeof(short); ++j)
 			{
 				correct_buffer[sizeof(short)*i +j] = uncompressed_buffer[imagesize*j + i];
 			}
@@ -142,8 +142,8 @@ bool ScalarImage<unsigned char>::Open(const char *filename)
 		qDebug("compressed image of %i x %i %i depth ",w,h,depth);
   if(depth!=8) 
   {
-    qDebug("Wrong depth of image: 8 bit expected");
-    return false;
+	qDebug("Wrong depth of image: 8 bit expected");
+	return false;
   }
   
 	if (mode != 'C')
@@ -159,7 +159,7 @@ bool ScalarImage<unsigned char>::Open(const char *filename)
 		unsigned int mysize = w*h;
 		v.resize(w*h);
 		BZ2_bzBuffToBuffDecompress((char*)&*v.begin(), &mysize, compressed_buffer, compressed_size, 0, 0);
-    if (mysize != (unsigned int)(w*h))
+	if (mysize != (unsigned int)(w*h))
 		{
 			qDebug("This is very wrong. The uncompressed size is not the expected size");
 			return false;
@@ -177,8 +177,8 @@ ScalarImage<unsigned char>::ScalarImage(QImage img)
   resize(img.width(),img.height());
 
    for(int y=0;y<h;++y)
-      for(int x=0;x<w;++x)
-        Val(x,y)=qGray(img.pixel(x,y));
+	  for(int x=0;x<w;++x)
+		Val(x,y)=qGray(img.pixel(x,y));
 
 }
 
@@ -188,8 +188,8 @@ bool ScalarImage<ScalarType>::Subsample(const int factor, ScalarImage<ScalarType
  resize(fli.w/factor,fli.h/factor);
 
   for(int i=0;i<h;++i)
-    for(int j=0;j<w;++j)
-      Val(i,j)=fli.Val(i*factor,j*factor);
+	for(int j=0;j<w;++j)
+	  Val(i,j)=fli.Val(i*factor,j*factor);
   return true;
 };
 

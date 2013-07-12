@@ -1052,7 +1052,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
     md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
 
-    tri::ClusteringSampler<CMeshO> vc(&seedVec);
+    tri::ClusteringSampler<CMeshO> vc(seedVec);
     if(randSeed!=0) tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
     tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
     tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter,90,cb);

@@ -23,6 +23,7 @@ mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
 win32-msvc2005:  LIBS += -L../distrib -lcommon
 win32-msvc2008:  LIBS += -L../distrib -lcommon
 win32-msvc2010:  LIBS += -L../distrib -lcommon
+win32-msvc2012:  LIBS += -L../distrib -lcommon
 win32-g++:  LIBS += -L../distrib -lcommon
 linux-g++:  LIBS += -L../distrib -lcommon
 linux-g++:QMAKE_RPATHDIR += ../distrib
@@ -39,6 +40,7 @@ linux-g++-64:QMAKE_RPATHDIR += ../distrib
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC
 win32-msvc2010:DEFINES += GLEW_STATIC 
+win32-msvc2012:DEFINES += GLEW_STATIC
 
 #DEFINES += GLEW_STATIC
 

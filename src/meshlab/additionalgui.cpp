@@ -44,7 +44,7 @@ CheckBoxList::CheckBoxList( QWidget *widget /*= 0*/ )
 :QComboBox(widget),highli(0),defaultval(),popupopen(false)
 {
 	view()->viewport()->installEventFilter(this);
-        view()->setItemDelegate(new CheckBoxListItemDelegate(this));
+		view()->setItemDelegate(new CheckBoxListItemDelegate(this));
 	connect(this,SIGNAL(highlighted(int)),this,SLOT(currentHighlighted(int)));
 }
 
@@ -859,9 +859,9 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 			}
 
 			if (oldact->isSeparator() || !results.contains(oldact))
-            {
+			{
 				delsepremact.push_back(oldact);
-            }
+			}
 		}
 	}
 	if (!maybeallequal)
@@ -875,9 +875,9 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 				delsepremact[jj] = NULL;
 			}
 			else
-            {
+			{
 				removeAction(todel);
-            }
+			}
 		}
 		addActions(results);
 		//if (results.size() > 0 && (results[0] != NULL))
