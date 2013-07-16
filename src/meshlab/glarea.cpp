@@ -1970,9 +1970,11 @@ void GLArea::showInterruptButton( const bool& show )
 
 void GLArea::completeUpdateRequested()
 {
+	makeCurrent();
 	if ((this->md() != NULL) && (this->md()->rm() != NULL))
 		loadRaster(this->md()->rm()->id());
 	//if (md()->mm() != NULL)
 	//	trackball.center = md()->mm()->cm.bbox.Center();
 	update();
+	doneCurrent();
 }

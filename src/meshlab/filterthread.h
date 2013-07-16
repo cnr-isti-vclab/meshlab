@@ -9,8 +9,7 @@ class FilterThread : public QThread
 	Q_OBJECT
 public:
 	explicit FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env, QObject *parent = 0);
-
-
+	~FilterThread();
 	MeshLabXMLFilterContainer *_mfc;
 	QString _fname;
 	MeshDocument& _md;
@@ -23,10 +22,8 @@ protected:
 
 signals:
 	void ThreadCB(const int pos,const QString& str);
-
-
-	public slots:
-
+private:
+	QGLWidget* _glwid;
 };
 
 #endif // FILTERTHREAD_H

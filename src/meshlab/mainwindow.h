@@ -234,7 +234,6 @@ private:
 	PluginGeneratorGUI* plugingui;
 	QSignalMapper *windowMapper;
 
-
     PluginManager PM;
 
 		/* 
