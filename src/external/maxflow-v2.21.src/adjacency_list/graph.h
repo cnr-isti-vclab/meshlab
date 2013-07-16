@@ -46,9 +46,9 @@ public:
 
 	/* Type of edge weights.
 	   Can be changed to char, int, float, double, ... */
-	typedef short captype;
+	typedef double captype;
 	/* Type of total flow */
-	typedef int flowtype;
+    typedef double flowtype;
 
 	typedef void * node_id;
 

@@ -46,10 +46,10 @@ class WeightFunctor : FunctorType<CutMesh>
 {
 private: float _ambient_weight, _dihedral_weight, _elength_weight, _geodesic_weight, _max1, _max2, _maxq, _geomin, _geomax;
     CutFace::FacePointer _start,_end;
-    typename CutMesh:: template PerFaceAttributeHandle<float> _nfH1, _nfH2;
+    typename CutMesh:: template PerFaceAttributeHandle<float> _gfH1, _gfH2;
     double _totmax;
 public:
-    WeightFunctor(float aow, float dw, float geodesic, float elength, CutFace::FacePointer start, CutFace::FacePointer end,  typename CutMesh:: template PerFaceAttributeHandle<float> nfH1,  typename CutMesh:: template PerFaceAttributeHandle<float> nfH2, float max1, float max2, float geomin, float geomax, float maxq)
+    WeightFunctor(float aow, float dw, float geodesic, float elength, CutFace::FacePointer start, CutFace::FacePointer end,  typename CutMesh:: template PerFaceAttributeHandle<float> gfH1,  typename CutMesh:: template PerFaceAttributeHandle<float> gfH2, float max1, float max2, float geomin, float geomax, float maxq)
     {
         if(max1<0 || max2<0 || maxq<0 || elength<0 || start==NULL ||
                 end==NULL ||aow<0 || dw<0 || geodesic <0 || geomin<0 || geomax<0)
@@ -61,8 +61,8 @@ public:
         _geomin = geomin;
         _geomax = geomax;
         _totmax = std::pow(_geomax*max1, 1.2f) + std::pow(_geomax*max2, 1.2f);
-        _nfH1 = nfH1;
-        _nfH2 = nfH2;
+        _gfH1 = gfH1;
+        _gfH2 = gfH2;
         _start = start;
         _end = end;
         _elength_weight = elength;
@@ -98,17 +98,17 @@ public:
                 + (_dihedral_weight * ((M_PI + vcg::face::DihedralAngleRad<CutFace>(*(pos.f), pos.E()))/2*M_PI)));
     }
 
-    inline double GeodesicDistance(const vcg::face::Pos<CutFace> pos)
+    double GeodesicDistance(const vcg::face::Pos<CutFace> pos)
     {
         //if the current face is too close to either the startFace or the endFace
         //the value _totmax is returned, which makes sure the final weight will be high
         //and the edge won't be considered for a minimumcut.
         //this is useful to avoid trivial cuts.
-        if(_nfH1[pos.f] <= _max1*_geomin || _nfH1[pos.f] >= _max1*_geomax)
+        if(_gfH1[pos.f] <= _max1*_geomin || _gfH1[pos.f] >= _max1*_geomax)
             return _totmax;
-        if(_nfH2[pos.f] <= _max2*_geomin || _nfH2[pos.f] >= _max2*_geomax)
+        if(_gfH2[pos.f] <= _max2*_geomin || _gfH2[pos.f] >= _max2*_geomax)
             return _totmax;
-        return (std::pow(_nfH1[pos.f], 1.2f) + std::pow(_nfH2[pos.f], 1.2f))/_totmax;
+        return (std::pow(_gfH1[pos.f], 1.2f) + std::pow(_gfH2[pos.f], 1.2f))/_totmax;
     }
 };
 
@@ -145,6 +145,7 @@ QString ExtraSamplePlugin::filterInfo(FilterIDType filterId) const
     }
     return QString("Unknown Filter");
 }
+
 
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
@@ -195,11 +196,11 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
     {
         CMeshO &m = md.mm()->cm;
         CutMesh cm;
+        vcg::tri::Append<CutMesh,CMeshO>::MeshCopy(cm,m);
         vcg::tri::RequireFFAdjacency(cm);
         vcg::tri::RequireVFAdjacency(cm);
         vcg::tri::RequirePerFaceQuality(cm);
         vcg::tri::RequirePerFaceNormal(cm);
-        vcg::tri::Append<CutMesh,CMeshO>::MeshCopy(cm,m);
         vcg::tri::Allocator<CutMesh>::CompactFaceVector(cm);
         vcg::tri::Allocator<CutMesh>::CompactVertexVector(cm);
         vcg::tri::UpdateTopology<CutMesh>::FaceFace(cm);
@@ -219,6 +220,8 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
         CutMesh::FacePointer startFace = NULL;
         CutMesh::FacePointer endFace = NULL;
 
+
+
         //getting the closest faces to the passed point parameters
         TriMeshGrid grid;
         grid.Set(cm.face.begin(),cm.face.end());
@@ -236,7 +239,7 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
 
         //getting the geodesic distance from the start/end face and some other data
         //that will be used in the weight computation
-        typename  CutMesh::template PerFaceAttributeHandle <float>  nfH1
+        typename  CutMesh::template PerFaceAttributeHandle <float>  gfH1
                 = vcg::tri::Allocator<CutMesh>::template AddPerFaceAttribute<float>(cm, std::string("GeoDis1"));
         vcg::tri::Geodesic<CutMesh>::Compute(cm, seedVec);
 
@@ -246,11 +249,11 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
         for(CutMesh::FaceIterator fit= cm.face.begin(); fit!=cm.face.end(); fit++){
             if(fit->Q()>=maxq)
                 maxq=fit->Q();
-            nfH1[fit] = (fit->V(0)->Q()+fit->V(1)->Q()+fit->V(2)->Q())/3.0f;
-            if(nfH1[fit]>=max1)
-                max1=nfH1[fit];
+            gfH1[fit] = (fit->V(0)->Q()+fit->V(1)->Q()+fit->V(2)->Q())/3.0f;
+            if(gfH1[fit]>=max1)
+                max1=gfH1[fit];
         }
-        typename  CutMesh::template PerFaceAttributeHandle <float>  nfH2
+        typename  CutMesh::template PerFaceAttributeHandle <float>  gfH2
                 = vcg::tri::Allocator<CutMesh>::template AddPerFaceAttribute<float>(cm, std::string("GeoDis2"));
 
         while(!seedVec.empty())
@@ -261,18 +264,17 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
         vcg::tri::Geodesic<CutMesh>::Compute(cm, seedVec);
         float max2=0.0f;
         for(CutMesh::FaceIterator fit= cm.face.begin(); fit!=cm.face.end(); fit++){
-            nfH2[fit] = (fit->V(0)->Q()+fit->V(1)->Q()+fit->V(2)->Q())/3.0f;
-            if(nfH2[fit]>=max2)
-                max2=nfH2[fit];
+            gfH2[fit] = (fit->V(0)->Q()+fit->V(1)->Q()+fit->V(2)->Q())/3.0f;
+            if(gfH2[fit]>=max2)
+                max2=gfH2[fit];
         }
         //this functor will be used to compute edge weights on the dual graph
-        WeightFunctor wf(ambient, dihedral, geodesic, elength, startFace, endFace, nfH1, nfH2, max1, max2, geomin, geomax, maxq);
+        WeightFunctor wf(ambient, dihedral, geodesic, elength, startFace, endFace, gfH1, gfH2, max1, max2, geomin, geomax, maxq);
         //start actual computation
         vcg::tri::GraphBuilder<CutMesh, WeightFunctor>::Compute(cm, wf, startFace, endFace);
-        vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,nfH1);
-        vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,nfH2);
+        vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH1);
+        vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH2);
         vcg::tri::Append<CMeshO,CutMesh>::MeshCopy(m,cm);
-
         return true;
     }
     }
