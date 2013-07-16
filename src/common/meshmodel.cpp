@@ -279,7 +279,7 @@ void MeshDocument::updateRenderStateMeshes(const QList<int>& mm,const int meshup
 
 void MeshDocument::updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask)
 {
-	static QTime currTime;
+	static QTime currTime = QTime::currentTime();
 	if(currTime.elapsed()< 100) 
 		return;
 	for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
@@ -295,7 +295,7 @@ void MeshDocument::updateRenderStateRasters(const QList<int>& rm,const int raste
 
 void MeshDocument::updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask)
 {
-	static QTime currTime;
+	static QTime currTime = QTime::currentTime();
 	if(currTime.elapsed()< 100) 
 		return;
 	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
