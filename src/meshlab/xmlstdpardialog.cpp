@@ -70,8 +70,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	defaultButton = new QPushButton("Default", qf);
 	//defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
 	applyButton->setFocus();
-	ExpandButtonWidget* exp = new ExpandButtonWidget(qf);
-	connect(exp,SIGNAL(expandView(bool)),this,SLOT(extendedView(bool)));
+	bool onlyimportant = true;
 	connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
 #ifdef Q_WS_MAC
 	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
@@ -97,7 +96,17 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetExpressions()));
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 
-	gridLayout->addWidget(exp,gridLayout->rowCount(),0,1,2,Qt::AlignJustify);
+	foreach(MLXMLPluginInfo::XMLMap mp,mplist)
+	{
+		bool important = (mp[MLXMLElNames::paramIsImportant] == QString("true"));
+		onlyimportant &= important;
+	}
+	if (!onlyimportant)
+	{
+		ExpandButtonWidget* exp = new ExpandButtonWidget(qf);
+		connect(exp,SIGNAL(expandView(bool)),this,SLOT(extendedView(bool)));
+		gridLayout->addWidget(exp,gridLayout->rowCount(),0,1,2,Qt::AlignJustify);
+	}
 	int firstButLine =  gridLayout->rowCount();
 	gridLayout->addWidget(helpButton,   firstButLine,1,Qt::AlignBottom);
 	gridLayout->addWidget(defaultButton,firstButLine,0,Qt::AlignBottom);
