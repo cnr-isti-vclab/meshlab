@@ -881,7 +881,24 @@ bool GLArea::readyToClose()
 			mdec->setLog(NULL);
 	}
 	iPerDocDecoratorlist.clear();
-
+	QSet<QAction *> dectobeclose;
+	for(QMap<int, QList<QAction *> >::iterator it = iPerMeshDecoratorsListMap.begin();it != iPerMeshDecoratorsListMap.end();++it)
+	{
+		foreach(QAction* curract,it.value())
+			dectobeclose.insert(curract);
+	}
+	
+	for(QSet<QAction *>::iterator it = dectobeclose.begin();it != dectobeclose.end();++it)
+	{
+		MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>((*it)->parent());
+		if (mdec != NULL)
+		{
+			mdec->endDecorate(*it,*md(),glas.currentGlobalParamSet,this);
+			mdec->setLog(NULL);
+		}
+	}
+	dectobeclose.clear();
+	iPerMeshDecoratorsListMap.clear();
 	if(targetTex) glDeleteTextures(1, &targetTex);
 	emit glareaClosed();
 	return true;

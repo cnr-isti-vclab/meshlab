@@ -303,7 +303,6 @@ void MainWindow::updateMenus()
 {
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
 	bool notEmptyActiveDoc = activeDoc && !meshDoc()->meshList.empty();
-
 	importMeshAct->setEnabled(activeDoc);
 
 	exportMeshAct->setEnabled(notEmptyActiveDoc);
@@ -444,6 +443,11 @@ void MainWindow::updateMenus()
 	}
 	else
 	{
+		foreach (QAction *a,PM.decoratorActionList)
+		{
+			a->setChecked(false);
+			a->setEnabled(false);
+		}
 		if(layerDialog->isVisible())
 		{
 			layerDialog->updateTable();
@@ -1972,6 +1976,8 @@ GLArea* MainWindow::newProject(const QString& projName)
 		if (gla->mvc() == NULL)
 			return NULL;
 		gla->mvc()->showMaximized();
+		layerDialog->updateTable();
+		layerDialog->updateDecoratorParsView();
 	}
 	return gla;
 }

@@ -64,6 +64,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 
 	connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->rasterTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
+
 	//connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
@@ -72,7 +73,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 void LayerDialog::keyPressEvent ( QKeyEvent * event )
 {
   if(event->key() == Qt::Key_Space )
-    mw->meshDoc()->advanceCurrentRaster(1);
+	mw->meshDoc()->advanceCurrentRaster(1);
 }
 
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
@@ -80,53 +81,53 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
   MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
   if(mItem)
   {
-    int clickedId= mItem->m->id();
-    switch(col)
-    {
-    case 0 :
-      {
-        //the user has clicked on one of the eyes
-        MeshDocument  *md= mw->meshDoc();
+	int clickedId= mItem->m->id();
+	switch(col)
+	{
+	case 0 :
+	  {
+		//the user has clicked on one of the eyes
+		MeshDocument  *md= mw->meshDoc();
 
-        // NICE TRICK.
-        // If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
-        // Very useful for comparing meshes
-        if(QApplication::keyboardModifiers() == Qt::ControlModifier)
-        {
-          foreach(MeshModel *mp, md->meshList)
-            {
-              mw->GLA()->meshSetVisibility(mp, false);
-            }
-        }
+		// NICE TRICK.
+		// If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
+		// Very useful for comparing meshes
+		if(QApplication::keyboardModifiers() == Qt::ControlModifier)
+		{
+		  foreach(MeshModel *mp, md->meshList)
+			{
+			  mw->GLA()->meshSetVisibility(mp, false);
+			}
+		}
 
-        //Toggle visibility of current mesh
-        mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+		//Toggle visibility of current mesh
+		mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
 
-        // EVEN NICER TRICK.
-        // If the user has pressed alt when clicking on the eye icon, all layers will get visible
-        // Very useful after you turned all layer invis using the previous option and want to avoid
-        // clicking on all of them...
-        if(QApplication::keyboardModifiers() == Qt::AltModifier)
-        {
-          foreach(MeshModel *mp, md->meshList)
-            {
-              mw->GLA()->meshSetVisibility(mp, true);
-            }
-        }
-      } break;
-    case 1 :
+		// EVEN NICER TRICK.
+		// If the user has pressed alt when clicking on the eye icon, all layers will get visible
+		// Very useful after you turned all layer invis using the previous option and want to avoid
+		// clicking on all of them...
+		if(QApplication::keyboardModifiers() == Qt::AltModifier)
+		{
+		  foreach(MeshModel *mp, md->meshList)
+			{
+			  mw->GLA()->meshSetVisibility(mp, true);
+			}
+		}
+	  } break;
+	case 1 :
 
-    case 2 :
+	case 2 :
 
-    case 3 :
-      //the user has chosen to switch the layer
-      mw->meshDoc()->setCurrentMesh(clickedId);
-      this->updateDecoratorParsView();
-      break;
-    }
-    //make sure the right row is colored or that they right eye is drawn (open or closed)
-    updateTable();
-    mw->GLA()->update();
+	case 3 :
+	  //the user has chosen to switch the layer
+	  mw->meshDoc()->setCurrentMesh(clickedId);
+	  this->updateDecoratorParsView();
+	  break;
+	}
+	//make sure the right row is colored or that they right eye is drawn (open or closed)
+	updateTable();
+	mw->GLA()->update();
   }
 }
 
@@ -150,16 +151,16 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 				//Update current GLArea visibility 
 				mw->GLA()->updateRasterSetVisibilities( );
 			}
-    case 1 :
-    case 2 :
-    case 3 :
-          if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
-          {
-            mw->meshDoc()->setCurrentRaster(clickedId);
-            if(mw->GLA()->isRaster())
-              mw->GLA()->loadRaster(clickedId);
-          }
-      break;
+	case 1 :
+	case 2 :
+	case 3 :
+		  if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
+		  {
+			mw->meshDoc()->setCurrentRaster(clickedId);
+			if(mw->GLA()->isRaster())
+			  mw->GLA()->loadRaster(clickedId);
+		  }
+	  break;
 
 		}
 		updateTable();
@@ -233,7 +234,7 @@ void LayerDialog::updateLog(GLLogStream &log)
 	QString preFilter  = "<font face=\"courier\" size=2 color=\"black\">" ;
 
 	QString post   = "</font>";
-    QString logText;
+	QString logText;
 	foreach(logElem, logStringList){
 		 logText += logElem.second;
 		if(logElem.first == GLLogStream::SYSTEM)  
@@ -348,8 +349,8 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 	if(mItem){
 		int meshId = mItem->m->id();
 		bool ok;
-    int tagId = mItem->text(2).toInt(&ok);
-    if(ok && tagId >=0 )
+	int tagId = mItem->text(2).toInt(&ok);
+	if(ok && tagId >=0 )
 			//MeshTreeWidgetItems don't have a tag id, so we use -1
 			updateExpandedMap(meshId, -1, item->isExpanded());
 	}
@@ -371,7 +372,7 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
   QTreeWidgetItem *fileItem = new QTreeWidgetItem();
   fileItem->setText(2, QString("File"));
   if(!meshModel->fullName().isEmpty())
-        fileItem->setText(3, meshModel->shortName());
+		fileItem->setText(3, meshModel->shortName());
   parent->addChild(fileItem);
   updateColumnNumber(fileItem);
 
@@ -382,11 +383,11 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
   updateColumnNumber(faceItem);
 
   if(meshModel->cm.en>0){
-    QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
-    edgeItem->setText(2, QString("Edges"));
-    edgeItem->setText(3, QString::number(meshModel->cm.en));
-    parent->addChild(edgeItem);
-    updateColumnNumber(edgeItem);
+	QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
+	edgeItem->setText(2, QString("Edges"));
+	edgeItem->setText(3, QString::number(meshModel->cm.en));
+	parent->addChild(edgeItem);
+	updateColumnNumber(edgeItem);
   }
   QTreeWidgetItem *vertItem = new QTreeWidgetItem();
   vertItem->setText(2, QString("Vertices"));
@@ -398,40 +399,40 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
   vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(meshModel->cm,AttribNameVector);
   for(int i = 0; i < (int) AttribNameVector.size(); i++)
   {
-      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-      vertItem->setText(2, QString("Vert Attr."));
-      vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
-      parent->addChild(vertItem);
-      updateColumnNumber(vertItem);
+	  QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	  vertItem->setText(2, QString("Vert Attr."));
+	  vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+	  parent->addChild(vertItem);
+	  updateColumnNumber(vertItem);
   }
   AttribNameVector.clear();
   vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
   for(int i = 0; i < (int) AttribNameVector.size(); i++)
   {
-      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-      vertItem->setText(2, QString("Vert Attr."));
-      vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
-      parent->addChild(vertItem);
-      updateColumnNumber(vertItem);
+	  QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	  vertItem->setText(2, QString("Vert Attr."));
+	  vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+	  parent->addChild(vertItem);
+	  updateColumnNumber(vertItem);
   }
   vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(meshModel->cm,AttribNameVector);
   for(int i = 0; i < (int) AttribNameVector.size(); i++)
   {
-      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-      vertItem->setText(2, QString("Face Attr."));
-      vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
-      parent->addChild(vertItem);
-      updateColumnNumber(vertItem);
+	  QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	  vertItem->setText(2, QString("Face Attr."));
+	  vertItem->setText(3, "float "+QString(AttribNameVector[i].c_str()));
+	  parent->addChild(vertItem);
+	  updateColumnNumber(vertItem);
   }
   AttribNameVector.clear();
   vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(meshModel->cm,AttribNameVector);
   for(int i = 0; i < (int) AttribNameVector.size(); i++)
   {
-      QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-      vertItem->setText(2, QString("Face Attr."));
-      vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
-      parent->addChild(vertItem);
-      updateColumnNumber(vertItem);
+	  QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+	  vertItem->setText(2, QString("Face Attr."));
+	  vertItem->setText(3, "Point3f "+QString(AttribNameVector[i].c_str()));
+	  parent->addChild(vertItem);
+	  updateColumnNumber(vertItem);
   }
 
 }
@@ -459,7 +460,8 @@ LayerDialog::~LayerDialog()
 
 void LayerDialog::updateDecoratorParsView() 
 {
-  if ((mw->GLA() == NULL) || (mw->GLA()->md() == NULL) || (mw->GLA()->md()->mm() == NULL)) return;
+  if ((mw->GLA() == NULL) || (mw->GLA()->md() == NULL) /*|| (mw->GLA()->md()->mm() == NULL)*/) 
+	  return;
 
 	QStringList expIt;
 	int ind=0;
@@ -476,7 +478,9 @@ void LayerDialog::updateDecoratorParsView()
 		return;
 	}
 	// build the list of the meaningful decorator to be shown (perDocument + perMesh)
-	QList<QAction*> decList =  mw->GLA()->iPerDocDecoratorlist +mw->GLA()->iCurPerMeshDecoratorList();
+	QList<QAction*> decList =  mw->GLA()->iPerDocDecoratorlist;
+	if (mw->GLA()->md()->mm() != NULL)
+		decList += mw->GLA()->iCurPerMeshDecoratorList();
 	if (decList.size() == 0)
 	{
 		ui->decParsTree->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
@@ -517,12 +521,12 @@ void LayerDialog::updateDecoratorParsView()
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 {
   if(meshModel->visible) setIcon(0,QIcon(":/images/layer_eye_open.png"));
-                    else setIcon(0,QIcon(":/images/layer_eye_close.png"));
+					else setIcon(0,QIcon(":/images/layer_eye_close.png"));
   setText(1, QString::number(meshModel->id()));
 
   QString meshName = meshModel->label();
   if (meshModel->meshModified())
-    meshName += " *";
+	meshName += " *";
   setText(2, meshName);
 
   this->m=meshModel;
@@ -531,7 +535,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel)
 RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 {
   if(rasterModel->visible) setIcon(0,QIcon(":/images/ok.png"));
-                      else setIcon(0,QIcon(":/images/stop.png"));
+					  else setIcon(0,QIcon(":/images/stop.png"));
 
   setText(1, QString::number(rasterModel->id()));
 
@@ -646,7 +650,7 @@ void DecoratorParamsTreeWidget::apply()
 	}
 	mainWin->updateCustomSettings();
   if(mainWin->GLA())
-    mainWin->GLA()->updateAllPerMeshDecorators();
+	mainWin->GLA()->updateAllPerMeshDecorators();
 }
 
 void DecoratorParamsTreeWidget::load()
