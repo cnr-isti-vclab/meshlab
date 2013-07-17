@@ -872,6 +872,12 @@ void MainWindow::startFilter()
 			// just to be sure...
 			createStdPluginWnd();
 
+			if (xmldialog != NULL)
+			{
+				xmldialog->close();
+				delete xmldialog;
+				xmldialog = NULL;
+			}
 			// (2) Ask for filter parameters and eventally directly invoke the filter
 			// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 			// if no dialog is created the filter must be executed immediately
@@ -944,7 +950,12 @@ void MainWindow::startFilter()
 				}
 				// just to be sure...
 				createXMLStdPluginWnd();
-
+				if (stddialog != NULL)
+				{
+					stddialog->close();
+					delete stddialog;
+					stddialog = NULL;
+				}
 				// (2) Ask for filter parameters and eventally directly invoke the filter
 				// showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
 				// if no dialog is created the filter must be executed immediatel
