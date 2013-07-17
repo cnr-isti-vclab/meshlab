@@ -1063,3 +1063,19 @@ void MenuLineEdit::keyPressEvent( QKeyEvent * event )
 		emit arrowPressed(k);
 }
 
+
+MenuWithToolTip::MenuWithToolTip( const QString& name,QWidget* par ) 
+	:QMenu(name,par)
+{
+
+}
+
+bool MenuWithToolTip::event(QEvent * e)
+{
+	const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
+	if ((helpEvent->type() == QEvent::ToolTip)  && (activeAction() != 0))
+		QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip()); 
+	else 
+		QToolTip::hideText();
+	return QMenu::event(e);
+}

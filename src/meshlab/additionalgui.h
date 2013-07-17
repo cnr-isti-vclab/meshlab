@@ -18,6 +18,7 @@
 #include <QPushButton>
 #include "../common/scriptsyntax.h"
 #include "../common/searcher.h"
+#include <QToolTip>
 
 class CheckBoxListItemDelegate : public QStyledItemDelegate
 {
@@ -279,6 +280,14 @@ private slots:
 	void setLineEditFocus();
 	void onAboutToShowEvent();
 	void changeFocus(const int k);
+};
+
+class MenuWithToolTip : public QMenu
+{
+	Q_OBJECT
+public:
+	MenuWithToolTip(const QString& name,QWidget* par);
+	bool event(QEvent * e);
 };
 
 #endif 

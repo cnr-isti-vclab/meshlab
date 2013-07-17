@@ -725,56 +725,56 @@ void MainWindow::fillFilterMenu()
 	//filterMenu->addSeparator();
 	// Connects the events of the actions within colorize to the method which shows their tooltip
 
-    filterMenuSelect = new QMenu(tr("Selection"),this);
+   filterMenuSelect = new MenuWithToolTip(tr("Selection"),this);
     filterMenu->addMenu(filterMenuSelect);
-    filterMenuClean  = new QMenu(tr("Cleaning and Repairing"),this);
+    filterMenuClean  = new MenuWithToolTip(tr("Cleaning and Repairing"),this);
     filterMenu->addMenu(filterMenuClean);
-    filterMenuCreate = new QMenu(tr("Create New Mesh Layer"),this);
+    filterMenuCreate = new MenuWithToolTip(tr("Create New Mesh Layer"),this);
     filterMenu->addMenu(filterMenuCreate);
-    filterMenuRemeshing = new QMenu(tr("Remeshing, Simplification and Reconstruction"),this);
+    filterMenuRemeshing = new MenuWithToolTip(tr("Remeshing, Simplification and Reconstruction"),this);
     filterMenu->addMenu(filterMenuRemeshing);
-    filterMenuPolygonal = new QMenu(tr("Polygonal and Quad Mesh"),this);
+    filterMenuPolygonal = new MenuWithToolTip(tr("Polygonal and Quad Mesh"),this);
     filterMenu->addMenu(filterMenuPolygonal);
-    filterMenuColorize = new QMenu(tr("Color Creation and Processing"),this);
+    filterMenuColorize = new MenuWithToolTip(tr("Color Creation and Processing"),this);
     filterMenu->addMenu(filterMenuColorize);
-    filterMenuSmoothing = new QMenu(tr("Smoothing, Fairing and Deformation"),this);
+    filterMenuSmoothing = new MenuWithToolTip(tr("Smoothing, Fairing and Deformation"),this);
     filterMenu->addMenu(filterMenuSmoothing);
-    filterMenuQuality = new QMenu(tr("Quality Measure and Computations"),this);
+    filterMenuQuality = new MenuWithToolTip(tr("Quality Measure and Computations"),this);
     filterMenu->addMenu(filterMenuQuality);
-    filterMenuNormal = new QMenu(tr("Normals, Curvatures and Orientation"),this);
+    filterMenuNormal = new MenuWithToolTip(tr("Normals, Curvatures and Orientation"),this);
     filterMenu->addMenu(filterMenuNormal);
-    filterMenuMeshLayer   = new QMenu(tr("Mesh Layer"),this);
+    filterMenuMeshLayer   = new MenuWithToolTip(tr("Mesh Layer"),this);
     filterMenu->addMenu(filterMenuMeshLayer);
-    filterMenuRasterLayer = new QMenu(tr("Raster Layer"),this);
+    filterMenuRasterLayer = new MenuWithToolTip(tr("Raster Layer"),this);
     filterMenu->addMenu(filterMenuRasterLayer);
-    filterMenuRangeMap = new QMenu(tr("Range Map"),this);
+    filterMenuRangeMap = new MenuWithToolTip(tr("Range Map"),this);
     filterMenu->addMenu(filterMenuRangeMap);
-    filterMenuPointSet = new QMenu(tr("Point Set"),this);
+    filterMenuPointSet = new MenuWithToolTip(tr("Point Set"),this);
     filterMenu->addMenu(filterMenuPointSet);
-    filterMenuSampling = new QMenu(tr("Sampling"),this);
+    filterMenuSampling = new MenuWithToolTip(tr("Sampling"),this);
     filterMenu->addMenu(filterMenuSampling);
-    filterMenuTexture = new QMenu(tr("Texture"),this);
+    filterMenuTexture = new MenuWithToolTip(tr("Texture"),this);
     filterMenu->addMenu(filterMenuTexture);
-    filterMenuCamera = new QMenu(tr("Camera"),this);
+    filterMenuCamera = new MenuWithToolTip(tr("Camera"),this);
     filterMenu->addMenu(filterMenuCamera);
 
-#if !defined(Q_OS_MAC)
-	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuMeshLayer,   SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRasterLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-#endif
+//#if !defined(Q_OS_MAC)
+//	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuMeshLayer,   SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRasterLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
+//#endif
 
 	QMap<QString,MeshFilterInterface *>::iterator msi;
 	for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
@@ -783,6 +783,7 @@ void MainWindow::fillFilterMenu()
 		QAction *filterAction = iFilter->AC((msi.key()));
         QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
         filterAction->setToolTip(tooltip);
+		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
         connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
