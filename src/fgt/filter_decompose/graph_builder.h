@@ -30,8 +30,9 @@ public:
     {
         assert(startFace!=NULL && endFace!=NULL && !startFace->IsD() && !endFace->IsD());
         Graph *g = GraphBuilder<MeshType, FunctorType>::BuildGraph(m, wf, startFace, endFace);
-        g->maxflow();
-        GraphBuilder<MeshType, FunctorType>::ColorFaces(m, *g);
+        double flowVal = g->maxflow();
+        qDebug("Flow %f",flowVal);
+        GraphBuilder<MeshType, FunctorType>::ColorFaces(m, *g, startFace, endFace);
         assert(vcg::tri::HasPerFaceAttribute(m,"NodeID"));
         vcg::tri::Allocator<MeshType>::DeletePerFaceAttribute(m,"NodeID");
         delete g;
@@ -44,7 +45,8 @@ public:
     */
    static Graph * BuildGraph(MeshType &m, FunctorType &wf, FacePointer startFace, FacePointer endFace)
     {
-        vcg::tri::UpdateFlags<MeshType>::Clear(m);
+        vcg::tri::UpdateFlags<MeshType>::FaceClearV(m);
+        tri::Allocator<MeshType>::CompactEveryVector(m);
         Graph *g = new Graph();
         std::vector<FacePointer> faceVec;
 
@@ -71,37 +73,56 @@ public:
         faceVec.push_back(startFace);
         startFace->SetV();
 
-        FacePointer curFace;
-        // continue adding nodes to the graph
-        while(!faceVec.empty()){
-            curFace = faceVec.back();
-            faceVec.pop_back();
-            if(!curFace->IsD()){
-                curFace->SetV();
-                for (int i=0; i<3; i++)
-                {
-                    if(curFace->FFp(i)!=curFace && !curFace->FFp(i)->IsD())
-                    {
-                        if(!curFace->FFp(i)->IsV())
-                            faceVec.push_back(curFace->FFp(i));
-
-                        //if the attribute is still NULL then i haven't considered the face yet
-                        //so i can add a node for it and add it to the vector
-                        if(nfH[curFace->FFp(i)] == NULL)
-                            nfH[curFace->FFp(i)] = g->add_node();
-
-                        // add edges (in the dual graph) between adjacent faces
-                        // an edge is added in both directions with "cap" and "rev_cap"=0 flow capacities
-                        // the reverse edge will be added when curFace->FFp(i) will be popped from the stack
-                        PosType pf(curFace, i);
-                        //using the functor operator () to compute edge capability
-                        double cap = wf(pf);
-                        assert(cap>=0);
-                        g->add_edge(nfH[curFace], nfH[curFace->FFp(i)], cap, 0);
-                    }
-                }
-            }
+        for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
+        {
+          if(nfH[fi] == NULL)
+            nfH[fi] = g->add_node();
         }
+
+        for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
+        {
+          for (int i=0; i<3; i++)
+          {
+            if(!face::IsBorder(*fi,i))
+            {
+              PosType pf(&*fi, i);
+              //using the functor operator () to compute edge capability
+              double cap = wf(pf);
+              assert(cap>=0);
+              g->add_edge(nfH[fi], nfH[fi->FFp(i)], cap, 0);
+            }
+          }
+        }
+
+        // continue adding nodes to the graph
+//        while(!faceVec.empty()){
+//          FacePointer curFace = faceVec.back();
+//          faceVec.pop_back();
+
+//          curFace->SetV();
+//          for (int i=0; i<3; i++)
+//          {
+//            if(!face::IsBorder(*curFace,i))
+//            {
+//              if(!curFace->FFp(i)->IsV())
+//                faceVec.push_back(curFace->FFp(i));
+
+//              //if the attribute is still NULL then i haven't considered the face yet
+//              //so i can add a node for it and add it to the vector
+//              if(nfH[curFace->FFp(i)] == NULL)
+//                nfH[curFace->FFp(i)] = g->add_node();
+
+//              // add edges (in the dual graph) between adjacent faces
+//              // an edge is added in both directions with "cap" and "rev_cap"=0 flow capacities
+//              // the reverse edge will be added when curFace->FFp(i) will be popped from the stack
+//              PosType pf(curFace, i);
+//              //using the functor operator () to compute edge capability
+//              double cap = wf(pf);
+//              assert(cap>=0);
+//              g->add_edge(nfH[curFace], nfH[curFace->FFp(i)], cap, 0);
+//            }
+//          }
+//        }
 
         return g;
     }
@@ -110,7 +131,7 @@ public:
      Red-coloring Source faces and
      Green-coloring Sink faces
     */
-   static void ColorFaces(MeshType &m, Graph &g){
+   static void ColorFaces(MeshType &m, Graph &g, FacePointer startFace, FacePointer endFace){
 
        assert(vcg::tri::HasPerFaceAttribute(m,"NodeID"));
 
@@ -127,8 +148,9 @@ public:
                }
                else if(g.what_segment(nfH[fit]) == Graph::SINK)
                    fit->C()=Color4b::Green;
-
            }
+           if(&*fit == startFace) fit->C()= Color4b::White;
+           if(&*fit == endFace) fit->C()= Color4b::Black;
        }
     }
 };

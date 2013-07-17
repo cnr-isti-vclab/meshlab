@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -36,20 +36,23 @@ struct CutUsedTypes : public vcg::UsedTypes<	vcg::Use<CutVertex>   ::AsVertexTyp
 
 class CutVertex  : public vcg::Vertex<CutUsedTypes, vcg::vertex::Coord3f, vcg::vertex::VFAdj, vcg::vertex::Qualityf, vcg::vertex::Color4b, vcg::vertex::BitFlags  >{};
 class CutFace    : public vcg::Face<CutUsedTypes, vcg::face::VFAdj, vcg::face::VertexRef, vcg::face::FFAdj, vcg::face::FEAdj, vcg::face::Qualityf, vcg::face::Normal3f, vcg::face::Color4b, vcg::face::BitFlags, vcg::face::Mark > {};
-class CutEdge    : public vcg::Edge<CutUsedTypes,  vcg::edge::VertexRef, vcg::edge::BitFlags>{};
+class CutEdge    : public vcg::Edge<CutUsedTypes>{};
 class CutMesh    : public vcg::tri::TriMesh< std::vector<CutVertex>, std::vector<CutFace> , std::vector<CutEdge>  > {};
 typedef vcg::GridStaticPtr<CutFace, CutMesh::ScalarType> TriMeshGrid;
 
 
-
-class WeightFunctor : FunctorType<CutMesh>
+template <class MeshType>
+class WeightFunctor
 {
+  typedef typename MeshType::FaceType FaceType;
+  typedef typename MeshType::FacePointer FacePointer;
+
 private: float _ambient_weight, _dihedral_weight, _elength_weight, _geodesic_weight, _max1, _max2, _maxq, _geomin, _geomax;
-    CutFace::FacePointer _start,_end;
-    typename CutMesh:: template PerFaceAttributeHandle<float> _gfH1, _gfH2;
+    FacePointer _start,_end;
+    typename MeshType:: template PerFaceAttributeHandle<float> _gfH1, _gfH2;
     double _totmax;
 public:
-    WeightFunctor(float aow, float dw, float geodesic, float elength, CutFace::FacePointer start, CutFace::FacePointer end,  typename CutMesh:: template PerFaceAttributeHandle<float> gfH1,  typename CutMesh:: template PerFaceAttributeHandle<float> gfH2, float max1, float max2, float geomin, float geomax, float maxq)
+    WeightFunctor(float aow, float dw, float geodesic, float elength, FacePointer start, FacePointer end,  typename MeshType:: template PerFaceAttributeHandle<float> gfH1,  typename MeshType:: template PerFaceAttributeHandle<float> gfH2, float max1, float max2, float geomin, float geomax, float maxq)
     {
         if(max1<0 || max2<0 || maxq<0 || elength<0 || start==NULL ||
                 end==NULL ||aow<0 || dw<0 || geodesic <0 || geomin<0 || geomax<0)
@@ -69,6 +72,13 @@ public:
         _ambient_weight = aow;
         _dihedral_weight = dw;
         _geodesic_weight = geodesic;
+        qDebug("_max1 %f _max2 %f",_max1,_max2);
+        qDebug("_geomin %f _geomax %f",_geomin,_geomax);
+        qDebug("_totmax %f",_totmax);
+        qDebug("_elength_weight %f",_elength_weight);
+        qDebug("_ambient_weight %f",_ambient_weight);
+        qDebug("_dihedral_weight %f",_dihedral_weight);
+        qDebug("_geodesic_weight %f",_geodesic_weight);
     }
 
     /* Computes the weight W of the edge f1->f2 using the float parameters as coefficients for the expression:
@@ -94,8 +104,8 @@ public:
         //sub-weights are normalized using previously computed max values
         return ((_elength_weight * vcg::Norm(pos.V()->P() - pos.VFlip()->P()))
                 + (_geodesic_weight * GeodesicDistance(pos))
-                + (_ambient_weight * (pos.f->Q()/_maxq))
-                + (_dihedral_weight * ((M_PI + vcg::face::DihedralAngleRad<CutFace>(*(pos.f), pos.E()))/2*M_PI)));
+                + (_ambient_weight * (pos.f->Q() + pos.FFlip()->Q())/(2.0f*_maxq))
+                + (_dihedral_weight * ( (M_PI + vcg::face::DihedralAngleRad<CutFace>(*(pos.f), pos.E())) / (2*M_PI))) );
     }
 
     double GeodesicDistance(const vcg::face::Pos<CutFace> pos)
@@ -104,27 +114,30 @@ public:
         //the value _totmax is returned, which makes sure the final weight will be high
         //and the edge won't be considered for a minimumcut.
         //this is useful to avoid trivial cuts.
-        if(_gfH1[pos.f] <= _max1*_geomin || _gfH1[pos.f] >= _max1*_geomax)
-            return _totmax;
-        if(_gfH2[pos.f] <= _max2*_geomin || _gfH2[pos.f] >= _max2*_geomax)
-            return _totmax;
-        return (std::pow(_gfH1[pos.f], 1.2f) + std::pow(_gfH2[pos.f], 1.2f))/_totmax;
+       float dist = (_gfH1[pos.f] + _gfH1[pos.FFlip()])/2.0f;
+       assert(dist<=_max1);
+        if(dist  <= _gfH1[_end]*_geomin || dist >= _gfH1[_end]*_geomax)
+            return std::numeric_limits<float>::max();
+//        if(_gfH2[pos.f] <= _max2*_geomin || _gfH2[pos.f] >= _max2*_geomax)
+//            return _totmax;
+//        return (std::pow(_gfH1[pos.f], 1.2f) + std::pow(_gfH2[pos.f], 1.2f))/_totmax;
+            return    dist/_max1;
     }
 };
 
 
-// Constructor usually performs only two simple tasks of filling the two lists 
+// Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-ExtraSamplePlugin::ExtraSamplePlugin() 
-{ 
+ExtraSamplePlugin::ExtraSamplePlugin()
+{
     typeList << FP_DECOMPOSER;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
+// ST() must return the very short string describing each filtering action
 // (this string is used also to define the menu entry)
 QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
 {
@@ -135,7 +148,7 @@ QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
     return QString();
 }
 
-// Info() must return the longer string describing each filtering action 
+// Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
 QString ExtraSamplePlugin::filterInfo(FilterIDType filterId) const
 {
@@ -147,8 +160,8 @@ QString ExtraSamplePlugin::filterInfo(FilterIDType filterId) const
 }
 
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
+// The FilterClass describes in which generic class of filters it fits.
+// This choice affect the submenu in which each filter will be placed
 // More than a single class can be choosen.
 ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
 {
@@ -162,14 +175,14 @@ ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
+// For each parameter you need to define,
+// - the name of the parameter,
+// - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 
 //farsi passare due Point3f sulla mesh dai quali risalire alle facce sorgente/pozzo
-void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
     switch(ID(action))	 {
     case FP_DECOMPOSER :
@@ -197,15 +210,9 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
         CMeshO &m = md.mm()->cm;
         CutMesh cm;
         vcg::tri::Append<CutMesh,CMeshO>::MeshCopy(cm,m);
-        vcg::tri::RequireFFAdjacency(cm);
-        vcg::tri::RequireVFAdjacency(cm);
-        vcg::tri::RequirePerFaceQuality(cm);
-        vcg::tri::RequirePerFaceNormal(cm);
-        vcg::tri::Allocator<CutMesh>::CompactFaceVector(cm);
-        vcg::tri::Allocator<CutMesh>::CompactVertexVector(cm);
+        vcg::tri::Allocator<CutMesh>::CompactEveryVector(cm);
         vcg::tri::UpdateTopology<CutMesh>::FaceFace(cm);
         vcg::tri::UpdateTopology<CutMesh>::VertexFace(cm);
-        vcg::tri::UpdateTopology<CutMesh>::AllocateEdge(cm);
         vcg::tri::UpdateNormal<CutMesh>::PerFace(cm);
 
         //Get Parameters
@@ -269,9 +276,9 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
                 max2=gfH2[fit];
         }
         //this functor will be used to compute edge weights on the dual graph
-        WeightFunctor wf(ambient, dihedral, geodesic, elength, startFace, endFace, gfH1, gfH2, max1, max2, geomin, geomax, maxq);
+        WeightFunctor<CutMesh> wf(ambient, dihedral, geodesic, elength, startFace, endFace, gfH1, gfH2, max1, max2, geomin, geomax, maxq);
         //start actual computation
-        vcg::tri::GraphBuilder<CutMesh, WeightFunctor>::Compute(cm, wf, startFace, endFace);
+        vcg::tri::GraphBuilder<CutMesh, WeightFunctor<CutMesh> >::Compute(cm, wf, startFace, endFace);
         vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH1);
         vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH2);
         vcg::tri::Append<CMeshO,CutMesh>::MeshCopy(m,cm);
