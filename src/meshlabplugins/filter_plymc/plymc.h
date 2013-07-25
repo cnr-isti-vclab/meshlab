@@ -35,6 +35,7 @@
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/math/histogram.h>
 #include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/geodesic.h>
 #include <wrap/io_trimesh/import.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/ply/plystuff.h>
@@ -53,12 +54,12 @@
 #include "tri_edge_collapse_mc.h"
 namespace vcg {
     namespace tri {
-      
+
       // Simple prototype for later use...
       template<class MeshType>
       void MCSimplify( MeshType &m, float perc, bool preserveBB=true, vcg::CallBackPos *cb=0);
-              
-              
+
+
 
   template < class SMesh, class MeshProvider>
   class PlyMC
@@ -97,35 +98,35 @@ namespace vcg {
 	public:
 		Parameter()
 		{
-            NCell=10000;
-            WideNum= 3;
-            WideSize=0;
-            VoxSize=0;
-            IPosS=Point3i(0,0,0);  // SubVolume Start
-            IPosE=Point3i(0,0,0);  // SubVolume End
-            IPosB=Point3i(0,0,0);  // SubVolume to restart from in lexicographic order (useful for crashes)
-            IPos=Point3i(0,0,0);
-            IDiv=Point3i(1,1,1);
-            VerboseLevel=0;
-            SliceNum=1;
-            FillThr=12;
-            ExpAngleDeg=30;
-            SmoothNum=1;
-            RefillNum=1;
-            IntraSmoothFlag = false;
-            QualitySmoothAbs = 0.0f; //  0 means un-setted value.
-            QualitySmoothVox = 3.0f; // expressed in voxel
-            OffsetFlag=false;
-            OffsetThr=-3;
-            GeodesicQualityFlag=true;
-            PLYFileQualityFlag=false;
-            SaveVolumeFlag=false;
-            SafeBorder=1;
-            CleaningFlag=false;
-            SimplificationFlag=false;
-            VertSplatFlag=false;
-            MergeColor=false;
-            basename = "plymcout";
+			NCell=10000;
+			WideNum= 3;
+			WideSize=0;
+			VoxSize=0;
+			IPosS=Point3i(0,0,0);  // SubVolume Start
+			IPosE=Point3i(0,0,0);  // SubVolume End
+			IPosB=Point3i(0,0,0);  // SubVolume to restart from in lexicographic order (useful for crashes)
+			IPos=Point3i(0,0,0);
+			IDiv=Point3i(1,1,1);
+			VerboseLevel=0;
+			SliceNum=1;
+			FillThr=12;
+			ExpAngleDeg=30;
+			SmoothNum=1;
+			RefillNum=1;
+			IntraSmoothFlag = false;
+			QualitySmoothAbs = 0.0f; //  0 means un-setted value.
+			QualitySmoothVox = 3.0f; // expressed in voxel
+			OffsetFlag=false;
+			OffsetThr=-3;
+			GeodesicQualityFlag=true;
+			PLYFileQualityFlag=false;
+			SaveVolumeFlag=false;
+			SafeBorder=1;
+			CleaningFlag=false;
+			SimplificationFlag=false;
+			VertSplatFlag=false;
+			MergeColor=false;
+			basename = "plymcout";
 		}
 
 		int NCell;
@@ -143,7 +144,7 @@ namespace vcg {
 		float ExpAngleDeg;
 		int SmoothNum;
 		int RefillNum;
-		bool IntraSmoothFlag; 
+		bool IntraSmoothFlag;
 		float QualitySmoothAbs; //  0 means un-setted value.
 		float QualitySmoothVox; // expressed in voxel
 		bool OffsetFlag;
@@ -157,10 +158,10 @@ namespace vcg {
 		bool VertSplatFlag;
 		bool MergeColor;
 		std::string basename;
-    std::vector<std::string> OutNameVec;
-    std::vector<std::string> OutNameSimpVec;
+	std::vector<std::string> OutNameVec;
+	std::vector<std::string> OutNameSimpVec;
   }; //end Parameter class
-	
+
 /// PLYMC Data
 
     MeshProvider MP;
@@ -213,7 +214,8 @@ bool InitMesh(SMesh &m, const char *filename, Matrix44f Tr)
       if(p.GeodesicQualityFlag) {
           tri::UpdateTopology<SMesh>::VertexFace(m);
           tri::UpdateFlags<SMesh>::FaceBorderFromVF(m);
-          tri::UpdateQuality<SMesh>::VertexGeodesicFromBorder(m);
+          tri::Geodesic<SMesh>::DistanceFromBorder(m);
+//          tri::UpdateQuality<SMesh>::VertexGeodesicFromBorder(m);
         }
     }
 
@@ -361,15 +363,15 @@ void Process(vcg::CallBackPos *cb=0)
 
     for(p.IPos[0]=p.IPosS[0];p.IPos[0]<=p.IPosE[0];++p.IPos[0])
       for(p.IPos[1]=p.IPosS[1];p.IPos[1]<=p.IPosE[1];++p.IPos[1])
-	for(p.IPos[2]=p.IPosS[2];p.IPos[2]<=p.IPosE[2];++p.IPos[2])
-	  if((p.IPos[2]+(p.IPos[1]*p.IDiv[2])+(p.IPos[0]*p.IDiv[2]*p.IDiv[1])) >=
-	     (p.IPosB[2]+(p.IPosB[1]*p.IDiv[2])+(p.IPosB[0]*p.IDiv[2]*p.IDiv[1]))) // skip until IPos >= IPosB
-	      {
-		printf("----------- SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
-		//Volume<Voxelf> B;
-		int t0=clock();
+    for(p.IPos[2]=p.IPosS[2];p.IPos[2]<=p.IPosE[2];++p.IPos[2])
+      if((p.IPos[2]+(p.IPos[1]*p.IDiv[2])+(p.IPos[0]*p.IDiv[2]*p.IDiv[1])) >=
+         (p.IPosB[2]+(p.IPosB[1]*p.IDiv[2])+(p.IPosB[0]*p.IDiv[2]*p.IDiv[1]))) // skip until IPos >= IPosB
+          {
+        printf("----------- SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
+        //Volume<Voxelf> B;
+        int t0=clock();
 
-		Box3f fullbf; fullbf.Import(fullb);
+        Box3f fullbf; fullbf.Import(fullb);
 
 		VV.Init(cells,fullbf,p.IDiv,p.IPos);
 		printf("\n\n --------------- Allocated subcells. %i\n",VV.Allocated());
@@ -383,27 +385,27 @@ void Process(vcg::CallBackPos *cb=0)
 		}
 		/********** Grande loop di scansione di tutte le mesh *********/
 		bool res=false;
-    if(!cb) printf("Step 1: Converting meshes into volume\n");
-    for(int i=0;i<MP.size();++i)
+	if(!cb) printf("Step 1: Converting meshes into volume\n");
+	for(int i=0;i<MP.size();++i)
 		{
 		  Box3f bbb= MP.bb(i);
-      /**********************/
-      if(cb) cb((i+1)/MP.size(),"Step 1: Converting meshes into volume");
-      /**********************/
-      // if bbox of mesh #i is part of the subblock, then process it
+	  /**********************/
+	  if(cb) cb((i+1)/MP.size(),"Step 1: Converting meshes into volume");
+	  /**********************/
+	  // if bbox of mesh #i is part of the subblock, then process it
 		  if(bbb.Collide(VV.SubBoxSafe))
 		  {
-		    SMesh *sm;
-		    if(!MP.Find(i,sm) )
-		    {
-          res = InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
-          if(!res)
-          {
-            printf("Failed Init of mesh %s",MP.MeshName(i).c_str());
-            return;
-          }
-		    }
-		    res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
+			SMesh *sm;
+			if(!MP.Find(i,sm) )
+			{
+		  res = InitMesh(*sm,MP.MeshName(i).c_str(),MP.Tr(i));
+		  if(!res)
+		  {
+			printf("Failed Init of mesh %s",MP.MeshName(i).c_str());
+			return;
+		  }
+			}
+			res |= AddMeshToVolumeM(*sm, MP.MeshName(i),MP.W(i));
 		  }
 		}
 
@@ -411,12 +413,12 @@ void Process(vcg::CallBackPos *cb=0)
 		printf("End Scanning\n");
 		if(p.OffsetFlag)
 		{
-		    VV.Offset(p.OffsetThr);
-		    if (p.VerboseLevel>0)
-		    {
-          VV.SlicedPPM("finaloff","__",p.SliceNum);
-          VV.SlicedPPMQ("finaloff","__",p.SliceNum);
-		    }
+			VV.Offset(p.OffsetThr);
+			if (p.VerboseLevel>0)
+			{
+		  VV.SlicedPPM("finaloff","__",p.SliceNum);
+		  VV.SlicedPPMQ("finaloff","__",p.SliceNum);
+			}
 		}
 		//if(p.VerboseLevel>1) VV.SlicedPPM(filename.c_str(),SFormat("_%02im",i),p.SliceNum	);
 
@@ -443,8 +445,8 @@ void Process(vcg::CallBackPos *cb=0)
 		printf("Extracting surface...\r");
 		if (p.VerboseLevel>0)
 		{
-		    VV.SlicedPPM("final","__",p.SliceNum);
-		    VV.SlicedPPMQ("final","__",p.SliceNum);
+			VV.SlicedPPM("final","__",p.SliceNum);
+			VV.SlicedPPMQ("final","__",p.SliceNum);
 		}
 		//MCMesh me;
 		//
@@ -459,49 +461,49 @@ void Process(vcg::CallBackPos *cb=0)
 		  MarchingCubes	mc(me, walker);
 		  Box3i currentSubBox=VV.SubPartSafe;
 		  Point3i currentSubBoxRes=VV.ssz;
-      /**********************/
-      if(cb) cb(50,"Step 2: Marching Cube...");
-      else printf("Step 2: Marching Cube...\n");
-      /**********************/
-      walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
+	  /**********************/
+	  if(cb) cb(50,"Step 2: Marching Cube...");
+	  else printf("Step 2: Marching Cube...\n");
+	  /**********************/
+	  walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
 
-      typename MCMesh::VertexIterator vi;
+	  typename MCMesh::VertexIterator vi;
 		  Box3f bbb; bbb.Import(VV.SubPart);
 		  for(vi=me.vert.begin();vi!=me.vert.end();++vi)
 		  {
-		      if(!bbb.IsIn((*vi).P()))
+			  if(!bbb.IsIn((*vi).P()))
 			  vcg::tri::Allocator< MCMesh >::DeleteVertex(me,*vi);
-		      VV.DeInterize((*vi).P());
+			  VV.DeInterize((*vi).P());
 		  }
 		  typename MCMesh::FaceIterator fi;
 		  for (fi = me.face.begin(); fi != me.face.end(); ++fi)
 		  {
-		      if((*fi).V(0)->IsD() || (*fi).V(1)->IsD() || (*fi).V(2)->IsD() )
+			  if((*fi).V(0)->IsD() || (*fi).V(1)->IsD() || (*fi).V(2)->IsD() )
 			  vcg::tri::Allocator< MCMesh >::DeleteFace(me,*fi);
-		      else std::swap((*fi).V1(0), (*fi).V2(0));
+			  else std::swap((*fi).V1(0), (*fi).V2(0));
 		  }
 
 		  int t2=clock();  //--------
 		  TotMC+=t2-t1;
 		  if(me.vn >0 || me.fn >0)
 		  {
-        p.OutNameVec.push_back(filename+std::string(".ply"));
-        tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
-        if(p.SimplificationFlag)
-        {
-          /**********************/
-          if(cb) cb(50,"Step 3: Simplify mesh...");
-          else printf("Step 3: Simplify mesh...\n");
-          /**********************/
-          p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
-          me.face.EnableVFAdjacency();
-          MCSimplify<MCMesh>(me, VV.voxel[0]/4.0);
-          tri::Allocator<MCMesh>::CompactFaceVector(me);
-          me.face.EnableFFAdjacency();
-          tri::Clean<MCMesh>::RemoveTVertexByFlip(me,20,true);
-          tri::Clean<MCMesh>::RemoveFaceFoldByFlip(me);
-          tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameSimpVec.back().c_str(),saveMask);
-        }
+		p.OutNameVec.push_back(filename+std::string(".ply"));
+		tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameVec.back().c_str(),saveMask);
+		if(p.SimplificationFlag)
+		{
+		  /**********************/
+		  if(cb) cb(50,"Step 3: Simplify mesh...");
+		  else printf("Step 3: Simplify mesh...\n");
+		  /**********************/
+		  p.OutNameSimpVec.push_back(filename+std::string(".d.ply"));
+		  me.face.EnableVFAdjacency();
+		  MCSimplify<MCMesh>(me, VV.voxel[0]/4.0);
+		  tri::Allocator<MCMesh>::CompactFaceVector(me);
+		  me.face.EnableFFAdjacency();
+		  tri::Clean<MCMesh>::RemoveTVertexByFlip(me,20,true);
+		  tri::Clean<MCMesh>::RemoveFaceFoldByFlip(me);
+		  tri::io::ExporterPLY<MCMesh>::Save(me,p.OutNameSimpVec.back().c_str(),saveMask);
+		}
 		  }
 		  int t3=clock();  //--------
 		  TotSav+=t3-t2;
@@ -513,11 +515,11 @@ void Process(vcg::CallBackPos *cb=0)
 		printf("MC            %8i\n",TotMC);
 		printf("Saving        %8i\n",TotSav);
 		printf("Total         %8i\n",TotAdd+TotMC+TotSav);
-	      }
-	    else
-	      {
+		  }
+		else
+		  {
 		 printf("----------- skipping SubBlock %2i %2i %2i ----------\n",p.IPos[0],p.IPos[1],p.IPos[2]);
-	      }
+		  }
 }
 
 
