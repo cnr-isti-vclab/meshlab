@@ -140,6 +140,8 @@ private slots:
   void toggleSelectFaceRendering();
   void toggleSelectVertRendering();
   void applyDecorateMode();
+
+  void switchOffDecorator(QAction* );
 	///////////Slot Menu View ////////////////////////
 	void fullScreen();
 	void showToolbarFile();
@@ -156,6 +158,8 @@ private slots:
     void updateMenuItems(QMenu* menu,const bool enabled);
 	void updateStdDialog();
 	void updateXMLStdDialog();
+
+	//void updatePerViewApplicationStatus();
 	void setSplit(QAction *qa);
 	void setUnsplit();
 	void linkViewers();
@@ -165,6 +169,7 @@ private slots:
   void viewFromCurrentRasterShot();
   void copyViewToClipBoard();
 	void pasteViewFromClipboard();
+
 
 	///////////Slot PopUp Menu Handles /////////////////////
 	void splitFromHandle(QAction * qa);

@@ -32,7 +32,6 @@ $Log: stdpardialog.cpp,v $
 #include <QDockWidget>
 #include "../common/filterparameter.h"
 
-class GLArea;
 class MainWindow;
 class QTreeWidget;
 class GLLogStream;
@@ -66,6 +65,14 @@ class RasterTreeWidgetItem : public QTreeWidgetItem
 	RasterModel *r;
 };
 
+class DecoratorParamItem : public QTreeWidgetItem
+{
+public:
+	DecoratorParamItem(QAction* );
+
+	QAction* act;
+};
+
 class DecoratorParamsTreeWidget : public QFrame
 {
 	Q_OBJECT
@@ -97,7 +104,7 @@ public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
 	void updateLog(GLLogStream &Log);
-	void updateDecoratorParsView();
+	 void updateDecoratorParsView();
 
 public slots:
   void keyPressEvent ( QKeyEvent * event );
@@ -106,7 +113,7 @@ public slots:
   void meshItemClicked(QTreeWidgetItem * , int );
   void showEvent ( QShowEvent * event );
   void showContextMenu(const QPoint& pos);
-	void adaptLayout(QTreeWidgetItem * item);
+  void adaptLayout(QTreeWidgetItem * item);
 
 private:
     Ui::layerDialog* ui;
@@ -119,8 +126,11 @@ private:
 	QMap< QPair<int ,int> ,  bool> expandedMap;
   void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
 	void updateColumnNumber(const QTreeWidgetItem * item);
+	//QVector<QTreeWidgetItem*> tobedeleted; 
 
 	void updateExpandedMap(int meshId, int tagId, bool expanded);
+signals:
+	void removeDecoratorRequested(QAction* );
 	
 };
 

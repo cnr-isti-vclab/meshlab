@@ -299,6 +299,18 @@ void MainWindow::updateMenuItems(QMenu* menu,const bool enabled)
 		act->setEnabled(enabled);
 }
 
+void MainWindow::switchOffDecorator(QAction* decorator)
+{
+	if (GLA() != NULL)
+	{
+		int res = GLA()->iCurPerMeshDecoratorList().removeAll(decorator);
+		if (res == 0)
+			GLA()->iPerDocDecoratorlist.removeAll(decorator);
+		updateMenus();
+		GLA()->update();
+	}
+}
+
 void MainWindow::updateMenus()
 {
 	bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
@@ -439,7 +451,7 @@ void MainWindow::updateMenus()
 		//if(GLA()->layerDialog->isVisible())
 		layerDialog->updateTable();
 		layerDialog->updateLog(meshDoc()->Log);
-//		layerDialog->updateDecoratorParsView();
+		layerDialog->updateDecoratorParsView();
 	}
 	else
 	{
@@ -1992,6 +2004,7 @@ GLArea* MainWindow::newProject(const QString& projName)
 	}
 	return gla;
 }
+
 
 //WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //Temporary disgusting inequality between open (slot) - importMesh (function)

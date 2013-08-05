@@ -449,10 +449,11 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 					if (!md()->renderState().isEntityInRenderingState(id,MeshLabRenderState::MESH))
 						mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
 				}
-				foreach(QAction * p , iPerMeshDecoratorsListMap[mp->id()])
+				QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
+				for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
 				{
-				  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-				  decorInterface->decorateMesh(p,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+				  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+				  decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
 				}
 			}
 			md()->renderState().render(rm.drawMode,rm.colorMode,rm.textureMode);
@@ -818,12 +819,10 @@ void GLArea::manageCurrentMeshChange()
 /// Note that it is rather inefficient. Such work should be done only once for each decorator.
 void GLArea::updateAllPerMeshDecorators()
 {
-  QMap<int, QList<QAction *> >::iterator i;
-  for ( i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
+  for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
   {
-    QList<QAction *> &iDecoratorsList = i.value();
     MeshModel *m = md()->getMesh(i.key());
-    foreach(QAction *p , iDecoratorsList)
+    foreach(QAction *p , i.value())
     {
       MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
       decorInterface->endDecorate  (p, *m,this->glas.currentGlobalParamSet,this);

@@ -61,10 +61,11 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->rasterTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-
+	ui->decParsTree->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
 	connect(ui->rasterTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
-
+	connect(ui->decParsTree, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
+	//connect(ui->decParsTree,SIGNAL())
 	//connect(ui->menuButton, SIGNAL(clicked()), this, SLOT(showLayerMenu()));
 	//connect(mw,SIGNAL(selectedDecoration(GLArea*,QAction*)),this,SLOT(addParamsToDecorationDialog(GLArea*,QAction*)));
 	//connect(mw,SIGNAL(unSelectedDecoration(GLArea*,QAction*)),this,SLOT(removeParamsFromDecorationDialog(GLArea*,QAction*)));
@@ -195,30 +196,33 @@ void LayerDialog::showContextMenu(const QPoint& pos)
 		}
 	}
 	// switch layer
-	else
+	else if (sigsender == ui->rasterTreeWidget)
 	{
-		if (sigsender == ui->rasterTreeWidget)
-		{
-			RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->rasterTreeWidget->itemAt(pos.x(),pos.y()));
-	
-			if (rItem)
-			{ 
-				if (rItem->r)
-				{
-					mw->meshDoc()->setCurrentRaster(rItem->r->id());
+		RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->rasterTreeWidget->itemAt(pos.x(),pos.y()));
 
-					foreach (QWidget *widget, QApplication::topLevelWidgets()) 
+		if (rItem)
+		{ 
+			if (rItem->r)
+			{
+				mw->meshDoc()->setCurrentRaster(rItem->r->id());
+
+				foreach (QWidget *widget, QApplication::topLevelWidgets()) 
+				{
+					MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
+					if (mainwindow)
 					{
-						MainWindow* mainwindow = dynamic_cast<MainWindow*>(widget);
-						if (mainwindow)
-						{
-							mainwindow->rasterLayerMenu()->popup(ui->rasterTreeWidget->mapToGlobal(pos));
-							return;
-						}
+						mainwindow->rasterLayerMenu()->popup(ui->rasterTreeWidget->mapToGlobal(pos));
+						return;
 					}
 				}
 			}
 		}
+	}
+	else if (sigsender == ui->decParsTree)
+	{
+		DecoratorParamItem*rItem = dynamic_cast<DecoratorParamItem  *>(ui->decParsTree->itemAt(pos.x(),pos.y()));
+		if (rItem != NULL)
+			emit removeDecoratorRequested(rItem->act);
 	}
 }
 
@@ -487,6 +491,7 @@ void LayerDialog::updateDecoratorParsView()
 		return;
 	}
 	QList<QTreeWidgetItem*> treeItem;
+	ui->decParsTree->clear();
 	for(int ii = 0; ii < decList.size();++ii)
 	{
 		MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(decList[ii]->parent());
@@ -497,7 +502,7 @@ void LayerDialog::updateDecoratorParsView()
 		}
 		else
 		{
-			QTreeWidgetItem* item = new QTreeWidgetItem();
+			DecoratorParamItem* item = new DecoratorParamItem(decList[ii]);
 			item->setText(0,decList[ii]->text());
 			QTreeWidgetItem* childItem = new QTreeWidgetItem();
 			item->addChild(childItem);	
@@ -673,4 +678,10 @@ float DecoratorParamsTreeWidget::osDependentButtonHeightScaleFactor()
 #else
 	return 1.5f;
 #endif
+}
+
+DecoratorParamItem::DecoratorParamItem( QAction* action)
+	:QTreeWidgetItem(),act(action)
+{
+
 }

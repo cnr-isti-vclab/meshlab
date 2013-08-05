@@ -128,6 +128,7 @@ MainWindow::MainWindow()
 	//qb->setMinimumDuration(0);
 	//qb->reset();
 	connect(GLA(), SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
+	connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
 }
 
 void MainWindow::createActions()
@@ -643,8 +644,8 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
-	/*preferencesMenu->addAction(showFilterEditAct);
-	preferencesMenu->addSeparator();*/
+	preferencesMenu->addAction(showFilterEditAct);
+	preferencesMenu->addSeparator();
 	preferencesMenu->addAction(setCustomizeAct);
 
 
