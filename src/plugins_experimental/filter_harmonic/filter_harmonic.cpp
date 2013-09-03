@@ -88,11 +88,11 @@ void FilterHarmonicPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 	switch(ID(action))
 	{
 	case FP_SCALAR_HARMONIC_FIELD :
-		// TODO
 		parlst.addParam(new RichPoint3f("point1", m.cm.bbox.min,"Point 1","A vertex on the mesh that represent one harmonic field boundary condition."));
 		parlst.addParam(new RichPoint3f("point2", m.cm.bbox.min,"Point 2","A vertex on the mesh that represent one harmonic field boundary condition."));
 		parlst.addParam(new RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f,"value for the 1st point","Harmonic field value for the vertex."));
 		parlst.addParam(new RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f,"value for the 2nd point","Harmonic field value for the vertex."));
+		parlst.addParam(new RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
 		break;
 	default : assert(0);
 	}
@@ -314,18 +314,27 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		}
 
 		// Colorize bands for the 0-1 interval
-		float steps = 20.0f;
+		if (par.getBool("colorize"))
+		{
+			float steps = 20.0f;
+			for (size_t i = 0; int(i) < n; ++i)
+			{
+				bool on = (int)(x[i]*steps)%2 == 1;
+				if (on)
+				{
+					m.vert[i].C() = vcg::Color4b::ColorRamp(0,2,x[i]);
+				}
+				else
+				{
+					m.vert[i].C() = vcg::Color4b::White;
+				}
+			}
+		}
+
+		// Set field value into vertex quality attribute
 		for (size_t i = 0; int(i) < n; ++i)
 		{
-			bool on = (int)(x[i]*steps)%2 == 1;
-			if (on)
-			{
-				m.vert[i].C() = vcg::Color4b::ColorRamp(0,2,x[i]);
-			}
-			else
-			{
-				m.vert[i].C() = vcg::Color4b::White;
-			}
+			m.vert[i].Q() = x[i];
 		}
 
 		cb(100, "Done.");
