@@ -30,25 +30,31 @@ class QScriptEngine;
 
 class FilterHarmonicPlugin : public QObject, public MeshFilterInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshFilterInterface)
+	Q_OBJECT
+	Q_INTERFACES(MeshFilterInterface)
 
 public:
-    enum {
-        FP_SCALAR_HARMONIC_FIELD
-    };
+	enum {
+		FP_SCALAR_HARMONIC_FIELD
+	};
 
-    FilterHarmonicPlugin();
+	FilterHarmonicPlugin();
 
-    virtual QString pluginName(void) const { return "FilterHarmonicPlugin"; }
-    int getPreConditions(QAction *) const  { return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTFACETOPO; }
-    QString filterName(FilterIDType filter) const;
-    QString filterInfo(FilterIDType filter) const;
-    void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-    int postCondition( QAction* ) const {return MeshModel::MM_VERTCOLOR | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL | MeshModel::MM_FACECOLOR;}
-    FilterClass getClass(QAction *a);
-    QString filterScriptFunctionName(FilterIDType filterID);
+	virtual QString pluginName(void) const { return "FilterHarmonicPlugin"; }
+	int getPreConditions(QAction *) const { return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO; }
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	void initParameterSet(QAction *, MeshModel & /*m*/, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+	int postCondition( QAction* ) const
+	{
+		return MeshModel::MM_VERTCOLOR
+		     | MeshModel::MM_VERTQUALITY
+		     | MeshModel::MM_VERTFLAG
+		     | MeshModel::MM_FACEVERT;
+	}
+	FilterClass getClass(QAction *a);
+	QString filterScriptFunctionName(FilterIDType filterID);
 };
 
 #endif
