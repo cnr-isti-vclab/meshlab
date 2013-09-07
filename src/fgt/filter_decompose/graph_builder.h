@@ -18,7 +18,6 @@ public:
     typedef typename MeshType::FaceType FaceType;
     typedef typename MeshType::FacePointer FacePointer;
     typedef typename MeshType::EdgePointer EdgePointer;
-    typedef typename MeshType::EdgeType EdgeType;
     typedef typename MeshType::VertexIterator VertexIterator;
     typedef typename MeshType::FaceIterator FaceIterator;
     typedef typename MeshType::CoordType Point3f;
@@ -43,7 +42,7 @@ public:
      * the endFace will be connected to the sink
      * wf is used to compute edge weights
     */
-   static Graph * BuildGraph(MeshType &m, FunctorType &wf, FacePointer startFace, FacePointer endFace)
+    static Graph * BuildGraph(MeshType &m, FunctorType &wf, FacePointer startFace, FacePointer endFace)
     {
         vcg::tri::UpdateFlags<MeshType>::FaceClearV(m);
         tri::Allocator<MeshType>::CompactEveryVector(m);
@@ -73,57 +72,30 @@ public:
         faceVec.push_back(startFace);
         startFace->SetV();
 
+        //add a node for each face
         for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
         {
-          if(nfH[fi] == NULL)
-            nfH[fi] = g->add_node();
+            if(nfH[fi] == NULL)
+                nfH[fi] = g->add_node();
         }
 
+        //add edges
         for(FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
         {
-          for (int i=0; i<3; i++)
-          {
-            if(!face::IsBorder(*fi,i))
+            for (int i=0; i<3; i++)
             {
-              PosType pf(&*fi, i);
-              //using the functor operator () to compute edge capability
-              double cap = wf(pf);
-              assert(cap>=0);
-              g->add_edge(nfH[fi], nfH[fi->FFp(i)], cap, 0);
+                if(!face::IsBorder(*fi,i))
+                {
+                    PosType pf(&*fi, i);
+                    //using the functor operator () to compute edge capability
+                    double cap = wf(pf);
+                    assert(cap>=0);
+                    //add edges (in the dual graph) between adjacent faces
+                    //an edge is added in both directions with "cap" and "rev_cap"=0 flow capacities
+                    g->add_edge(nfH[fi], nfH[fi->FFp(i)], cap, 0);
+                }
             }
-          }
         }
-
-        // continue adding nodes to the graph
-//        while(!faceVec.empty()){
-//          FacePointer curFace = faceVec.back();
-//          faceVec.pop_back();
-
-//          curFace->SetV();
-//          for (int i=0; i<3; i++)
-//          {
-//            if(!face::IsBorder(*curFace,i))
-//            {
-//              if(!curFace->FFp(i)->IsV())
-//                faceVec.push_back(curFace->FFp(i));
-
-//              //if the attribute is still NULL then i haven't considered the face yet
-//              //so i can add a node for it and add it to the vector
-//              if(nfH[curFace->FFp(i)] == NULL)
-//                nfH[curFace->FFp(i)] = g->add_node();
-
-//              // add edges (in the dual graph) between adjacent faces
-//              // an edge is added in both directions with "cap" and "rev_cap"=0 flow capacities
-//              // the reverse edge will be added when curFace->FFp(i) will be popped from the stack
-//              PosType pf(curFace, i);
-//              //using the functor operator () to compute edge capability
-//              double cap = wf(pf);
-//              assert(cap>=0);
-//              g->add_edge(nfH[curFace], nfH[curFace->FFp(i)], cap, 0);
-//            }
-//          }
-//        }
-
         return g;
     }
 
@@ -131,27 +103,24 @@ public:
      Red-coloring Source faces and
      Green-coloring Sink faces
     */
-   static void ColorFaces(MeshType &m, Graph &g, FacePointer startFace, FacePointer endFace){
+    static void ColorFaces(MeshType &m, Graph &g, FacePointer startFace, FacePointer endFace){
 
-       assert(vcg::tri::HasPerFaceAttribute(m,"NodeID"));
+        assert(vcg::tri::HasPerFaceAttribute(m,"NodeID"));
 
-       typename MeshType:: template PerFaceAttributeHandle<Graph::node_id> nfH
-               = vcg::tri::Allocator<MeshType>::template FindPerFaceAttribute<Graph::node_id>(m,"NodeID");
+        typename MeshType:: template PerFaceAttributeHandle<Graph::node_id> nfH
+                = vcg::tri::Allocator<MeshType>::template FindPerFaceAttribute<Graph::node_id>(m,"NodeID");
 
-       for(FaceIterator fit=m.face.begin(); fit!=m.face.end(); fit++)
-       {
-           assert(nfH[fit]!=NULL);
-           if(!fit->IsD()){
-               if(g.what_segment(nfH[fit]) == Graph::SOURCE){
-                   fit->C()=Color4b::Red;
-                   //fit->SetS(); ///could be used to get the new mesh after the mincut
-               }
-               else if(g.what_segment(nfH[fit]) == Graph::SINK)
-                   fit->C()=Color4b::Green;
-           }
-           if(&*fit == startFace) fit->C()= Color4b::White;
-           if(&*fit == endFace) fit->C()= Color4b::Black;
-       }
+        for(FaceIterator fit=m.face.begin(); fit!=m.face.end(); fit++)
+        {
+            assert(nfH[fit]!=NULL);
+            if(!fit->IsD()){
+                if(g.what_segment(nfH[fit]) == Graph::SOURCE){
+                    fit->C()=Color4b::Red;
+                }
+                else if(g.what_segment(nfH[fit]) == Graph::SINK)
+                    fit->C()=Color4b::Green;
+            }
+        }
     }
 };
 

@@ -44,37 +44,33 @@ typedef vcg::GridStaticPtr<CutFace, CutMesh::ScalarType> TriMeshGrid;
 template <class MeshType>
 class WeightFunctor
 {
-  typedef typename MeshType::FaceType FaceType;
-  typedef typename MeshType::FacePointer FacePointer;
+    typedef typename MeshType::FaceType FaceType;
+    typedef typename MeshType::FacePointer FacePointer;
 
-private: float _ambient_weight, _dihedral_weight, _elength_weight, _geodesic_weight, _max1, _max2, _maxq, _geomin, _geomax;
+private: float _ambient_weight, _dihedral_weight, _elength_weight, _geodesic_weight, _max, _maxq, _geomin, _geomax;
     FacePointer _start,_end;
-    typename MeshType:: template PerFaceAttributeHandle<float> _gfH1, _gfH2;
+    typename MeshType:: template PerFaceAttributeHandle<float> _gfH1;
     double _totmax;
 public:
-    WeightFunctor(float aow, float dw, float geodesic, float elength, FacePointer start, FacePointer end,  typename MeshType:: template PerFaceAttributeHandle<float> gfH1,  typename MeshType:: template PerFaceAttributeHandle<float> gfH2, float max1, float max2, float geomin, float geomax, float maxq)
+    WeightFunctor(float aow, float dw, float geodesic, float elength, FacePointer start, FacePointer end,  typename MeshType:: template PerFaceAttributeHandle<float> gfH1, float max, float geomin, float geomax, float maxq)
     {
-        if(max1<0 || max2<0 || maxq<0 || elength<0 || start==NULL ||
+        if(max<0 || maxq<0 || elength<0 || start==NULL ||
                 end==NULL ||aow<0 || dw<0 || geodesic <0 || geomin<0 || geomax<0)
             assert(0);
 
-        _max1 = max1;
-        _max2 = max2;
+        _max = max;
         _maxq = maxq;
         _geomin = geomin;
         _geomax = geomax;
-        _totmax = std::pow(_geomax*max1, 1.2f) + std::pow(_geomax*max2, 1.2f);
         _gfH1 = gfH1;
-        _gfH2 = gfH2;
         _start = start;
         _end = end;
         _elength_weight = elength;
         _ambient_weight = aow;
         _dihedral_weight = dw;
         _geodesic_weight = geodesic;
-        qDebug("_max1 %f _max2 %f",_max1,_max2);
+        qDebug("_max1 %f",_max);
         qDebug("_geomin %f _geomax %f",_geomin,_geomax);
-        qDebug("_totmax %f",_totmax);
         qDebug("_elength_weight %f",_elength_weight);
         qDebug("_ambient_weight %f",_ambient_weight);
         qDebug("_dihedral_weight %f",_dihedral_weight);
@@ -82,21 +78,17 @@ public:
     }
 
     /* Computes the weight W of the edge f1->f2 using the float parameters as coefficients for the expression:
+     * W = alpha * (f1->Q()+f2->Q())/2 + beta * f1\/f2 + delta * f1<-->start/end
 
-     * ** WHERE **: f1= pos.f ; f2= pos.FFlip ; W = alpha * f1->Q() + beta * f1\/f2 + delta * f1<-->start/end
-
+     * f1= pos.f ; f2= pos.FFlip ;
      * f1->Q() = ambient occlusion value for the face f1
      ** The final weight of the edge should be lower for faces with higher ambient occlusion value.
-
      * f1\/f2 = dihedral angle between face f1 and f2: concave edges are priviledged.
      ** The final weight of the edge should be higher for convex edges and lower for concave ones.
-
-     * f1<-->start/end = geodesic distance "dist" from the current face to the represantative faces
-                         chosen by the user.
-                         Using the "geomin" and "geomax" coefficients, edges that are at a distance
-                         lower than geomin*dist or higher geomax*dist are given a higher weight
-                         ..this will prevent trivial cuts
-     **
+     * f1<-->start = geodesic distance "dist" from the current face to the start face chosen by the user.
+                     Using the "geomin" and "geomax" coefficients, edges that are at a distance
+                     lower than geomin*dist or higher geomax*dist are given a higher weight
+                     ..this will prevent trivial cuts
      ** weighted also on the length of the edge shared by f1 and f2.
     */
     double operator() (const vcg::face::Pos<CutFace> pos)
@@ -111,17 +103,16 @@ public:
     double GeodesicDistance(const vcg::face::Pos<CutFace> pos)
     {
         //if the current face is too close to either the startFace or the endFace
-        //the value _totmax is returned, which makes sure the final weight will be high
-        //and the edge won't be considered for a minimumcut.
+        //float::max is returned, which makes sure the final weight will be higher
+        //and the edge won't be considered for a minimum cut.
         //this is useful to avoid trivial cuts.
-       float dist = (_gfH1[pos.f] + _gfH1[pos.FFlip()])/2.0f;
-       assert(dist<=_max1);
-        if(dist  <= _gfH1[_end]*_geomin || dist >= _gfH1[_end]*_geomax)
+        float dist = (_gfH1[pos.f] + _gfH1[pos.FFlip()])/2.0f;
+
+        assert(dist<=_max);
+
+        if((dist  <= _gfH1[_end]*_geomin || dist >= _gfH1[_end]*_geomax))
             return std::numeric_limits<float>::max();
-//        if(_gfH2[pos.f] <= _max2*_geomin || _gfH2[pos.f] >= _max2*_geomax)
-//            return _totmax;
-//        return (std::pow(_gfH1[pos.f], 1.2f) + std::pow(_gfH2[pos.f], 1.2f))/_totmax;
-            return    dist/_max1;
+        return    dist/_max;
     }
 };
 
@@ -186,14 +177,14 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParam
 {
     switch(ID(action))	 {
     case FP_DECOMPOSER :
-        parlst.addParam(new RichPoint3f("upperPoint",m.cm.bbox.min,"Start Face","This face will be connected to the SOURCE in the graph over which the mincut algorithm will be applied"));
-        parlst.addParam(new RichPoint3f("lowerPoint",m.cm.bbox.min,"End Face","This face will be connected to the SINK in the graph over which the mincut algorithm will be applied"));
-        parlst.addParam(new RichDynamicFloat("geodesic", 0.2f, 0.0f, 1.0f,"geodesic","Factor to model the geodesic distance impacton the edge weight: The geodesic distance is inteded from a certain face to the Start or End faces."));
-        parlst.addParam(new RichDynamicFloat("geo-factor-min", 0.25f, 0.0f, 1.0f,"geo-factor-min","Factor to model the desidered minimum distance of the cut from the Start and End faces."));
-        parlst.addParam(new RichDynamicFloat("geo-factor-max", 0.75f, 0.0f, 1.0f,"geo-factor-max","Factor to model the desidered maximum distance of the cut from the Start and End faces"));
-        parlst.addParam(new RichDynamicFloat("dihedral", 0.2f, 0.0f, 1.0f,"dihedral","Factor to model the dihedral angle impact on the edge weight: Concave angles between faces will be privileged."));
-        parlst.addParam(new RichDynamicFloat("ambient", 0.2f, 0.0f, 1.0f,"ambient","Factor to model the ambient occlusion impact on the edge weight: Faces with low value of ambient occlusion will be privileged."));
-        parlst.addParam(new RichDynamicFloat("e-length", 0.2f, 0.0f, 1.0f,"e-length","Factor to model the edge length impact on the edge weight: shorter edges will be privileged."));
+        parlst.addParam(new RichPoint3f("upperPoint",m.cm.bbox.min,"Start Surf. Pos","This face will be connected to the SOURCE in the graph over which the mincut algorithm will be applied."));
+        parlst.addParam(new RichPoint3f("lowerPoint",m.cm.bbox.min,"End Surf. Pos","This face will be connected to the SINK in the graph over which the mincut algorithm will be applied."));
+        parlst.addParam(new RichDynamicFloat("geodesic", 0.2f, 0.0f, 1.0f,"Geodesic Weight Factor","Factor to model the geodesic distance impact on the edge weight: The geodesic distance is inteded from a certain face to the Start or End faces."));
+        parlst.addParam(new RichDynamicFloat("geo-factor-min", 0.25f, 0.0f, 1.0f,"Min Dist. Factor","Factor to model the desidered minimum distance of the cut from the Start pos."));
+        parlst.addParam(new RichDynamicFloat("geo-factor-max", 0.75f, 0.0f, 1.0f,"Max Dist. Factor","Factor to model the desidered maximum distance of the cut from the Start pos."));
+        parlst.addParam(new RichDynamicFloat("dihedral", 0.2f, 0.0f, 1.0f,"Dihedral Weight Factor","Factor to model the dihedral angle impact on the edge weight: Concave angles between faces will be privileged."));
+        parlst.addParam(new RichDynamicFloat("ambient", 0.2f, 0.0f, 1.0f,"Ambient Weight Factor","Factor to model the ambient occlusion impact on the edge weight: Faces with low value of ambient occlusion will be privileged."));
+        parlst.addParam(new RichDynamicFloat("e-length", 0.2f, 0.0f, 1.0f,"Edge Length Factor","Factor to model the edge length impact on the edge weight: shorter edges will be privileged."));
         break;
     default : assert(0);
     }
@@ -260,27 +251,13 @@ bool ExtraSamplePlugin::applyFilter(QAction *action, MeshDocument &md, RichParam
             if(gfH1[fit]>=max1)
                 max1=gfH1[fit];
         }
-        typename  CutMesh::template PerFaceAttributeHandle <float>  gfH2
-                = vcg::tri::Allocator<CutMesh>::template AddPerFaceAttribute<float>(cm, std::string("GeoDis2"));
 
-        while(!seedVec.empty())
-            seedVec.pop_back();
 
-        for(int i=0; i<3; i++)
-            seedVec.push_back(endFace->V(i));
-        vcg::tri::Geodesic<CutMesh>::Compute(cm, seedVec);
-        float max2=0.0f;
-        for(CutMesh::FaceIterator fit= cm.face.begin(); fit!=cm.face.end(); fit++){
-            gfH2[fit] = (fit->V(0)->Q()+fit->V(1)->Q()+fit->V(2)->Q())/3.0f;
-            if(gfH2[fit]>=max2)
-                max2=gfH2[fit];
-        }
         //this functor will be used to compute edge weights on the dual graph
-        WeightFunctor<CutMesh> wf(ambient, dihedral, geodesic, elength, startFace, endFace, gfH1, gfH2, max1, max2, geomin, geomax, maxq);
+        WeightFunctor<CutMesh> wf(ambient, dihedral, geodesic, elength, startFace, endFace, gfH1, max1, geomin, geomax, maxq);
         //start actual computation
         vcg::tri::GraphBuilder<CutMesh, WeightFunctor<CutMesh> >::Compute(cm, wf, startFace, endFace);
         vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH1);
-        vcg::tri::Allocator<CutMesh>::DeletePerFaceAttribute(cm,gfH2);
         vcg::tri::Append<CMeshO,CutMesh>::MeshCopy(m,cm);
         return true;
     }
