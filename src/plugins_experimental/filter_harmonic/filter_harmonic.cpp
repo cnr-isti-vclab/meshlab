@@ -101,14 +101,12 @@ void FilterHarmonicPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 enum WeightInfo
 {
 	Success            = 0,
-	EdgeAlreadyVisited,
-	BorderEdge
+	EdgeAlreadyVisited
 };
 
 // Function to compute the cotangent weighting function for an edge
 // return Success             if everything is fine;
 //        EdgeAlreadyVisited  if the weight for the considered edge have been already computed and assigned;
-//        BorderEdge          if the edge is a border on, thus no weight can be computed.
 template <typename FaceType, typename ScalarType = double>
 WeightInfo ComputeWeight(const FaceType &f, int edge, ScalarType & weight)
 {
@@ -118,27 +116,28 @@ WeightInfo ComputeWeight(const FaceType &f, int edge, ScalarType & weight)
 
 	// get the adjacent face
 	const FaceType * fp = f.cFFp(edge);
-	if (fp == NULL ||
-	    fp == &f)
-	{
-		// Mesh not closed, border found
-		return BorderEdge;
-	}
 
-	if (fp->IsV()) return EdgeAlreadyVisited;
+	ScalarType cotA = 0;
+	ScalarType cotB = 0;
 
-	// Get an edge (a pair of vertices)
+	// Get the edge (a pair of vertices)
 	VertexType * v0 = f.cV0(edge);
 	VertexType * v1 = f.cV1(edge);
-	// Get the vertices opposite to the edge
+
+	if (fp != NULL &&
+	    fp != &f)
+	{
+		// not a border edge
+		if (fp->IsV()) return EdgeAlreadyVisited;
+
+		VertexType * vb = fp->cV2(f.cFFi(edge));
+		ScalarType angleB = ComputeAngle(v0, vb, v1);
+		cotB = vcg::math::Cos(angleB) / vcg::math::Sin(angleB);
+	}
+
 	VertexType * va = f.cV2(edge);
-	VertexType * vb = fp->cV2(f.cFFi(edge));
-
 	ScalarType angleA = ComputeAngle(v0, va, v1);
-	ScalarType angleB = ComputeAngle(v0, vb, v1);
-
-	ScalarType cotA = vcg::math::Cos(angleA) / vcg::math::Sin(angleA);
-	ScalarType cotB = vcg::math::Cos(angleB) / vcg::math::Sin(angleB);
+	cotA = vcg::math::Cos(angleA) / vcg::math::Sin(angleA);
 
 	weight = (cotA + cotB) / 2;
 
@@ -191,7 +190,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		SpMat laplaceMat; // the system to be solved
 		laplaceMat.resize(n, n);
 
-		Log("Generating coefficients.`");
 		cb(0, "Generating coefficients...");
 		vcg::tri::UpdateFlags<CMeshO>::FaceClearV(m);
 		// Iterate over the faces
@@ -218,9 +216,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 				{
 				case EdgeAlreadyVisited : continue;
 				case Success            : break;
-				case BorderEdge         :
-					this->errorMessage = "Mesh not closed, cannot compute harmonic field on mesh containing holes or borders";
-					return false;
 				default: assert(0);
 				}
 
@@ -242,7 +237,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		}
 
 		// Fill the system matrix
-		Log("Fill the system matrix");
 		cb(10, "Filling the system matrix...");
 		laplaceMat.reserve(coeffs.size());
 		for (std::map<size_t,CoeffScalar>::const_iterator it = sums.begin(); it != sums.end(); ++it)
@@ -273,7 +267,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		size_t v1_idx = vcg::tri::Index(m, vp1);
 
 		// Add penalty factor alpha
-		Log("Setting up the system matrix");
 		const CoeffScalar alpha = pow(10, 8);
 
 		Eigen::Matrix<CoeffScalar, Eigen::Dynamic, 1> b, x; // Unknown and known terms vectors
@@ -285,7 +278,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		laplaceMat.coeffRef(v1_idx, v1_idx) += alpha;
 
 		// Solve system laplacianMat x = b
-		Log("System matrix decomposition...");
 		cb(20, "System matrix decomposition...");
 		Eigen::SimplicialLDLT<Eigen::SparseMatrix<CoeffScalar> > solver; // TODO eventually use another solver
 		solver.compute(laplaceMat);
@@ -303,7 +295,6 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 			return false;
 		}
 
-		Log("Solving the system...");
 		cb(85, "Solving the system...");
 		x = solver.solve(b);
 		if(solver.info() != Eigen::Success)
