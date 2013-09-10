@@ -865,6 +865,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     BaseSampler mps(&(mm->cm));
 
     tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
+    tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam::Stat pds; pp.pds=&pds;
+
     if(ID(action)==FP_VARIABLEDISK_SAMPLING)
     {
       pp.adaptiveRadiusFlag=true;
@@ -884,8 +886,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
     tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, *presampledMesh, radius,pp);
     //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
-
     vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+    Point3i &g=pp.pds->gridSize;
+    Log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds->gridCellNum, g[0]*g[1]*g[2]);
     Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
   }
     break;
