@@ -529,6 +529,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
     parlst.addParam(new RichBool("RefineFlag", false, "Refine Existing Samples", "If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "));
     parlst.addParam(new RichMesh("RefineMesh", md.mm(),&md, "Samples to be refined", "Used only if the above option is checked. "));
+    parlst.addParam(new RichBool("BestSampleFlag", true, "Best Sample Heuristic", "If true it will use an heuristic for choosing the samples that at a small cost can improve the maximality of the generated sampling. It can slow a bit the process. "));
+    parlst.addParam(new RichInt("BestSamplePool", 10, "Best Sample Pool Size", "Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."));
+
     break;
   case FP_VARIABLEDISK_SAMPLING :
     parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
@@ -876,6 +879,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
         pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
       }
       pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
+      pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
+      pp.bestSamplePoolSize =par.getInt("BestSamplePool");
     }
     tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, *presampledMesh, radius,pp);
     //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
@@ -1055,7 +1060,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     tri::ClusteringSampler<CMeshO> vc(seedVec);
     if(randSeed!=0) tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
     tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
-    tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter,90,cb);
+    tri::EuclideanDistance<CMeshO> edFunc;
+    tri::VoronoiProcessingParameter vpp;
+    tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter, edFunc, vpp, cb);
 
     //VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
 
@@ -1081,7 +1088,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh;
     tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
     Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
-    tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV);
+    tri::EuclideanDistance<CMeshO> edFunc;
+    tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV,edFunc);
 
     for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
     tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
