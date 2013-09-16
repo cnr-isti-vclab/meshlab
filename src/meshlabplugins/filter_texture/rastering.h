@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -306,10 +306,10 @@ public:
             // Convert point to barycentric coords
             vcg::Point3f interp;
             bool ret = vcg::InterpolationParameters(*nearestF, nearestF->N(), closestPt, interp);
-						// if the point is outside the nearest face,
+                        // if the point is outside the nearest face,
             // then let's clamp it inside:
-						if(!ret)
-						{
+                        if(!ret)
+                        {
               assert(fabs((interp[0]+interp[1]+interp[2])-1.0f)<0.00001);
               int nonZeroCnt=3;
               if(interp[0]<0) {interp[0]=0; nonZeroCnt--;}
@@ -325,6 +325,7 @@ public:
             }
 
         if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - 1 - tp.Y())) < alpha)
+        {
             if (fromTexture)
             {
                 int w=srcImg->width(), h=srcImg->height();
@@ -353,8 +354,7 @@ public:
                     nn.Normalize();
                     nn= ((nn+vcg::Point3f(1.0,1.0,1.0))/2.0f)*255.0f;
                     c=vcg::Color4b(nn[0],nn[1],nn[2],255);
-                }
-                    break;
+                } break;
                 case 2 : { // Quality
                     float q = nearestF->V(0)->cQ()*interp[0]+
                             nearestF->V(1)->cQ()*interp[1]+
@@ -363,10 +363,9 @@ public:
                 } break;
                 default: assert(0);
                 }
-
                 trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
             }
-
+        }
             if (cb)
             {
                 if (&f != currFace) {currFace = &f; ++faceCnt;}
