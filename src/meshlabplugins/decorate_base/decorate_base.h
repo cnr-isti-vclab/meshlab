@@ -27,6 +27,8 @@
 #include <common/interfaces.h>
 #include <wrap/gui/coordinateframe.h>
 #include "colorhistogram.h"
+
+class QGLShaderProgram;
 typedef vcg::ColorHistogram<float>  CHist;
 
 typedef std::pair<vcg::Point3f,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
@@ -40,21 +42,22 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
   QString decorationInfo(FilterIDType filter) const;
 
   enum {
-      DP_SHOW_NORMALS,
-      DP_SHOW_VERT,
-      DP_SHOW_EDGE,
-      DP_SHOW_NON_FAUX_EDGE,
-      DP_SHOW_BOUNDARY,
-      DP_SHOW_NON_MANIF_EDGE,
-      DP_SHOW_NON_MANIF_VERT,
-      DP_SHOW_BOX_CORNERS,
-      DP_SHOW_AXIS,
-      DP_SHOW_QUOTED_BOX,
-      DP_SHOW_LABEL,
-      DP_SHOW_QUALITY_HISTOGRAM,
-      DP_SHOW_CAMERA,
-      DP_SHOW_TEXPARAM,
-      DP_SHOW_BOUNDARY_TEX,
+    DP_SHOW_NORMALS,
+    DP_SHOW_VERT,
+    DP_SHOW_EDGE,
+    DP_SHOW_NON_FAUX_EDGE,
+    DP_SHOW_BOUNDARY,
+    DP_SHOW_NON_MANIF_EDGE,
+    DP_SHOW_NON_MANIF_VERT,
+    DP_SHOW_BOX_CORNERS,
+    DP_SHOW_AXIS,
+    DP_SHOW_QUOTED_BOX,
+    DP_SHOW_LABEL,
+    DP_SHOW_QUALITY_HISTOGRAM,
+    DP_SHOW_QUALITY_CONTOUR,
+    DP_SHOW_CAMERA,
+    DP_SHOW_TEXPARAM,
+    DP_SHOW_BOUNDARY_TEX,
     DP_SHOW_SELECTED_MESH
   };
 
@@ -82,6 +85,7 @@ public:
                   DP_SHOW_NON_MANIF_VERT <<
                   DP_SHOW_NORMALS <<
                   DP_SHOW_QUALITY_HISTOGRAM <<
+                  DP_SHOW_QUALITY_CONTOUR <<
                   DP_SHOW_BOX_CORNERS <<
                   DP_SHOW_AXIS <<
                   DP_SHOW_QUOTED_BOX <<
@@ -99,6 +103,8 @@ public:
     foreach(ap,actionList){
         ap->setCheckable(true);
     }
+
+    contourShaderProgram =0;
   }
 
   void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
@@ -149,6 +155,10 @@ public:
   inline QString HistAreaParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
   inline QString HistTypeParam() const { return  "MeshLab::Decoration::HistType" ; }
 
+  inline QString ShowContourFreq() const { return  "MeshLab::Decoration::ShowContourFreq" ; }
+  inline QString ShowContourAlpha() const { return  "MeshLab::Decoration::ShowContourAlpha" ; }
+  inline QString ShowContourWidth() const { return  "MeshLab::Decoration::ShowContourWidth" ; }
+
   inline QString LabelVertFlag() const { return  "MeshLab::Decoration::LabelVertFlag" ; }
   inline QString LabelEdgeFlag() const { return  "MeshLab::Decoration::LabelEdgeFlag" ; }
   inline QString LabelFaceFlag() const { return  "MeshLab::Decoration::LabelFaceFlag" ; }
@@ -168,6 +178,8 @@ public slots:
 
 private:
   vcg::Shotf curShot;
+
+  QGLShaderProgram *contourShaderProgram;
 };
 
 #endif

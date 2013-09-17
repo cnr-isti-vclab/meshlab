@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/decorate">
+        <file>contour.vert</file>
+        <file>contour.frag</file>
+    </qresource>
+</RCC>
