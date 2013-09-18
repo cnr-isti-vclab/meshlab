@@ -692,7 +692,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			float threshold = par.getAbsPerc("Threshold");
 			vcg::tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
 			ClusteringGrid.Init(m.cm.bbox,100000,threshold);
-			ClusteringGrid.AddMesh(m.cm);
+			if(m.cm.FN() ==0)
+			  ClusteringGrid.AddPointSet(m.cm);
+			else
+			  ClusteringGrid.AddMesh(m.cm);
+
 			ClusteringGrid.ExtractMesh(m.cm);
 			m.UpdateBoxAndNormals();
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
