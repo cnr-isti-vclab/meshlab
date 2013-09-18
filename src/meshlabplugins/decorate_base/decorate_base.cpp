@@ -331,24 +331,28 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
       glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
       glDisable(GL_LIGHTING);
       glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glDepthRange (0.0, 0.9999);
       glDepthFunc(GL_LEQUAL);
-      glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
-      QGLShaderProgram *glp=this->contourShaderProgram;
+//      glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
+      QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
+
       CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
       this->RealTimeLog("Quality Contour",m.shortName(),
                           "min Q %f -- max Q %f",mmqH().first,mmqH().second);
 
       float stripe_num = rm->getFloat(this->ShowContourFreq());
-      float strip_width = rm->getFloat(this->ShowContourWidth());
-      float strip_alpha = rm->getFloat(this->ShowContourAlpha());
+      float stripe_width = rm->getFloat(this->ShowContourWidth());
+      float stripe_alpha = rm->getFloat(this->ShowContourAlpha());
+      bool stripe_ramp = rm->getBool(this->ShowContourRamp());
       glp->bind();
       glp->setUniformValue("quality_min",mmqH().first);
       glp->setUniformValue("quality_max",mmqH().second);
       glp->setUniformValue("stripe_num",stripe_num);
-      glp->setUniformValue("stripe_width",strip_width);
-      glp->setUniformValue("strip_alpha",strip_alpha);
+      glp->setUniformValue("stripe_width",stripe_width);
+      glp->setUniformValue("stripe_alpha",stripe_alpha);
+      glp->setUniformValue("stripe_ramp",stripe_ramp);
+
 
       int vert_quality = glp->attributeLocation("vert_quality");
       glBegin(GL_TRIANGLES);
@@ -362,7 +366,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
         glVertex(fi->V(2)->P());
       }
       glEnd();
-      this->contourShaderProgram->release();
+      glp->release();
       glPopAttrib();
 
     } break;
@@ -869,6 +873,21 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &md, 
 }
 
 
+void ExtraMeshDecoratePlugin::endDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
+{
+  switch(ID(action))
+  {
+  case DP_SHOW_QUALITY_CONTOUR :
+    if(this->contourShaderProgramMap[&m]!=0)
+    {
+      delete this->contourShaderProgramMap[&m];
+      this->contourShaderProgramMap[&m]=0;
+    }
+    break;
+  default: break;
+  }
+}
+
 bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
 {
   switch(ID(action))
@@ -1180,16 +1199,18 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
     tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
     CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH;
     mmqH = vcg::tri::Allocator<CMeshO>::FindPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
-    if(this->contourShaderProgram == 0)
+    if(this->contourShaderProgramMap[&m] == 0)
     {
       bool ret=true;
-      this->contourShaderProgram = new QGLShaderProgram(gla);
-      ret &= this->contourShaderProgram->addShaderFromSourceFile(QGLShader::Vertex,":/decorate/contour.vert");
-//      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
-      ret &= this->contourShaderProgram->addShaderFromSourceFile(QGLShader::Fragment,":/decorate/contour.frag");
-//      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
-      ret &= this->contourShaderProgram->link();
-//      qDebug("Linked shader. Log is %s", qPrintable(contourShaderProgram->log()));
+      this->contourShaderProgramMap[&m] = new QGLShaderProgram(gla);
+      QGLShaderProgram *gsp =  this->contourShaderProgramMap[&m];
+
+      ret &= gsp->addShaderFromSourceFile(QGLShader::Vertex,":/decorate/contour.vert");
+      //      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
+      ret &= gsp->addShaderFromSourceFile(QGLShader::Fragment,":/decorate/contour.frag");
+      //      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
+      ret &= gsp->link();
+      //      qDebug("Linked shader. Log is %s", qPrintable(contourShaderProgram->log()));
       if(!ret) return false;
     }
   } break;
@@ -1581,9 +1602,10 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
   } break;
   case DP_SHOW_QUALITY_CONTOUR :
   {
-    parset.addParam(new RichFloat(this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
-    parset.addParam(new RichFloat(this->ShowContourWidth(), 0.5, "Width","Relative width of the contours; in the 0..1 range."));
-    parset.addParam(new RichFloat(this->ShowContourAlpha(), 0.5, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
+    parset.addParam(new RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
+    parset.addParam(new RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
+    parset.addParam(new RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
+    parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
   } break;
   case DP_SHOW_NON_FAUX_EDGE :{
     parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));

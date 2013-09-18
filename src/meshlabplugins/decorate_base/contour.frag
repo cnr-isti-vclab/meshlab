@@ -1,13 +1,18 @@
-uniform vec4 stripe_alpha;
-uniform float stripe_width;   // between 0 constant and 1 binary.
-
+uniform float stripe_alpha;
+uniform float stripe_width;   // between 0 and 1 .
+uniform bool stripe_ramp;
 varying float scaled_quality;
 
 void main(void)
 {
 //  vec4 color = vec4(1.0,1.0,1.0,0.5);
-  vec4 color = vec4(1.0,1.0,1.0,0.5);
-  if(fract(scaled_quality)<stripe_width) gl_FragColor = color;
-                    else discard;
+//  vec4 color = vec4(1.0,1.0,1.0,stripe_alpha);
+  if(fract(scaled_quality) > stripe_width) discard;
 
+  float alpha = 1.0;
+//  vec4 color = vec4(1.0,1.0,1.0,0.5*alpha);
+  if(stripe_ramp) alpha = fract(scaled_quality)/stripe_width;
+
+  vec4 color = vec4(1.0,1.0,1.0,stripe_alpha*alpha);
+  gl_FragColor = color;
 }

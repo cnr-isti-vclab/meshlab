@@ -104,7 +104,6 @@ public:
         ap->setCheckable(true);
     }
 
-    contourShaderProgram =0;
   }
 
   void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
@@ -126,6 +125,7 @@ public:
   void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   void decorateMesh(QAction *a, MeshModel &md, RichParameterSet *, GLArea *gla, QPainter *painter, GLLogStream &_log);
   bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
+  void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
   int getDecorationClass(QAction */*action*/) const;
@@ -158,6 +158,7 @@ public:
   inline QString ShowContourFreq() const { return  "MeshLab::Decoration::ShowContourFreq" ; }
   inline QString ShowContourAlpha() const { return  "MeshLab::Decoration::ShowContourAlpha" ; }
   inline QString ShowContourWidth() const { return  "MeshLab::Decoration::ShowContourWidth" ; }
+  inline QString ShowContourRamp() const { return  "MeshLab::Decoration::ShowContourRamp" ; }
 
   inline QString LabelVertFlag() const { return  "MeshLab::Decoration::LabelVertFlag" ; }
   inline QString LabelEdgeFlag() const { return  "MeshLab::Decoration::LabelEdgeFlag" ; }
@@ -179,7 +180,7 @@ public slots:
 private:
   vcg::Shotf curShot;
 
-  QGLShaderProgram *contourShaderProgram;
+  QMap<MeshModel *, QGLShaderProgram *> contourShaderProgramMap;
 };
 
 #endif
