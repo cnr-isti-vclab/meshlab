@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-
-#include <GL/glew.h>
 #include <algorithm>
 #include <QtGui>
 #include <QtXml/QDomDocument>
@@ -32,7 +30,7 @@
 
 #include "filterscript.h"
 
-using namespace vcg; 
+using namespace vcg;
 
 QDomDocument FilterScript::xmlDoc()
 {
@@ -60,7 +58,6 @@ QDomDocument FilterScript::xmlDoc()
 
 bool FilterScript::save(QString filename)
 {
-
   QDomDocument doc = xmlDoc();
   QFile file(filename);
   file.open(QIODevice::WriteOnly);
@@ -89,13 +86,13 @@ bool FilterScript::open(QString filename)
 	}
 	file.close();
 	QDomElement root = doc.documentElement();
-	if(root.nodeName() != "FilterScript") 
+	if(root.nodeName() != "FilterScript")
 	{
 		qDebug("Failure in parsing script %s\nNo root node with name FilterScript\n",qPrintable(filename));
 		qDebug("Current rootname is %s",qPrintable(root.nodeName()));
 		return false;
 	}
-          
+
 	qDebug("FilterScript");
 	for(QDomElement nf = root.firstChildElement("filter"); !nf.isNull(); nf = nf.nextSiblingElement("filter"))
 		{
@@ -111,6 +108,6 @@ bool FilterScript::open(QString filename)
 					 }
 			 actionList.append(qMakePair(name,par));
 		}
-          
+
   return true;
 }
