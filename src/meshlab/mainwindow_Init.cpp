@@ -127,7 +127,7 @@ MainWindow::MainWindow()
 	//qb->setAutoClose(true);
 	//qb->setMinimumDuration(0);
 	//qb->reset();
-	connect(GLA(), SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
+	connect(this, SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
 	connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
 }
 
@@ -478,16 +478,16 @@ void MainWindow::createToolBars()
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
-    foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
-    {
-        foreach(QAction* editAction, iEditFactory->actions())
-        {
-            if(!editAction->icon().isNull())
-            {
-                editToolBar->addAction(editAction);
-            } else qDebug() << "action was null";
-        }
-    }
+	foreach(MeshEditInterfaceFactory *iEditFactory,PM.meshEditFactoryPlugins())
+	{
+		foreach(QAction* editAction, iEditFactory->actions())
+		{
+			if(!editAction->icon().isNull())
+			{
+				editToolBar->addAction(editAction);
+			} else qDebug() << "action was null";
+		}
+	}
 	editToolBar->addSeparator();
 
     //filterToolBar = new FixedToolBar(tr("Filter"),this);
@@ -562,15 +562,15 @@ void MainWindow::createMenus()
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	editMenu->addAction(suspendEditModeAct);
 
-	//////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
+    //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
     filterMenu = menuBar()->addMenu(tr("Fi&lters"));
-	fillFilterMenu();
-	//filterMenu = menuBar()->addMenu(tr("Fi&lters"));
-	//filterMenu->addAction(lastFilterAct);
-	//filterMenu->addAction(showFilterScriptAct);
-	//filterMenu->addAction(showScriptEditAct);
-	//filterMenu->addAction(showFilterEditAct);
-	//filterMenu->addSeparator();
+    fillFilterMenu();
+    //filterMenu = menuBar()->addMenu(tr("Fi&lters"));
+    //filterMenu->addAction(lastFilterAct);
+    //filterMenu->addAction(showFilterScriptAct);
+    //filterMenu->addAction(showScriptEditAct);
+    //filterMenu->addAction(showFilterEditAct);
+    //filterMenu->addSeparator();
 
 
 	//////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
@@ -782,10 +782,10 @@ void MainWindow::fillFilterMenu()
 	{
 		MeshFilterInterface * iFilter= msi.value();
 		QAction *filterAction = iFilter->AC((msi.key()));
-        QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
-        filterAction->setToolTip(tooltip);
+		QString tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
+		filterAction->setToolTip(tooltip);
 		//connect(filterAction, SIGNAL(hovered()), this, SLOT(showActionMenuTooltip()) );
-        connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
+		connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 
 		int filterClass = iFilter->getClass(filterAction);
 		if( filterClass & MeshFilterInterface::FaceColoring )
@@ -865,8 +865,8 @@ void MainWindow::fillFilterMenu()
 		{
 			filterMenu->addAction(filterAction);
 		}
-        //if(!filterAction->icon().isNull())
-        //    filterToolBar->addAction(filterAction);
+		//if(!filterAction->icon().isNull())
+		//    filterToolBar->addAction(filterAction);
 
 
 	}
@@ -881,7 +881,7 @@ void MainWindow::fillFilterMenu()
 		try
 		{
 			QString help = info->filterHelp(filterName);
-            filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
+			filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
 			connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));
 			QString filterClasses = info->filterAttribute(filterName,MLXMLElNames::filterClass);
 			QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
@@ -964,8 +964,8 @@ void MainWindow::fillFilterMenu()
 				{
 					filterMenu->addAction(filterAction);
 				}
-                //if(!filterAction->icon().isNull())
-                //    filterToolBar->addAction(filterAction);
+				//if(!filterAction->icon().isNull())
+				//    filterToolBar->addAction(filterAction);
 			}
 		}
 		catch(ParsingException e)
@@ -981,7 +981,7 @@ void MainWindow::fillDecorateMenu()
 	{
 		foreach(QAction *decorateAction, iDecorate->actions())
 		{
-            connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
+			connect(decorateAction,SIGNAL(triggered()),this,SLOT(applyDecorateMode()));
 			decorateAction->setToolTip(iDecorate->decorationInfo(decorateAction));
 			renderMenu->addAction(decorateAction);
 		}

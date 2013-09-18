@@ -89,6 +89,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
 	connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
+	connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
+
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
 	*which takes care about the window frame (its parent is the QWorkspace again).
@@ -886,7 +888,7 @@ bool GLArea::readyToClose()
 		foreach(QAction* curract,it.value())
 			dectobeclose.insert(curract);
 	}
-	
+
 	for(QSet<QAction *>::iterator it = dectobeclose.begin();it != dectobeclose.end();++it)
 	{
 		MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>((*it)->parent());
