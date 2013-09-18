@@ -505,9 +505,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 
     parlst.addParam(new RichEnum("Sampling", 1,
                                  QStringList() << "Average" << "Closest to center",
-                                 tr("Representative Strataegy:"),
+                                 tr("Representative Strategy:"),
                                  tr(	"<b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br>"
-                                        "<b>Closes to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones."
+                                        "<b>Closest to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones."
                                         )));
     parlst.addParam(new RichBool ("Selected", false, "Selected",
                                   "If true only for the filter is applied only on the selected subset of the mesh."));
