@@ -142,6 +142,7 @@ public:
 
 	vcg::GlTrimesh<CMeshO> glw;
 	CMeshO cm;
+	//RenderMode rm;
 };
 
 /*
@@ -424,6 +425,50 @@ public:
 		selectedVert=false;
 	}
 
+	inline void setDrawMode(const vcg::GLW::DrawMode dm)
+	{
+		drawMode = dm;
+	}
+
+	inline void setColorMode(const vcg::GLW::ColorMode cm)
+	{
+		colorMode = cm;
+	}
+
+	inline void setTextureMode(const vcg::GLW::TextureMode tm)
+	{
+		textureMode = tm;
+	}
+
+	inline void setLighting(const bool ison)
+	{
+		lighting = ison;
+	}
+
+	inline void setBackFaceCull(const bool ison)
+	{
+		backFaceCull = ison;
+	}
+
+	inline void setDoubleFaceLighting(const bool ison)
+	{
+		doubleSideLighting = ison;
+	}
+
+	inline void setFancyLighting(const bool ison)
+	{
+		fancyLighting = ison;
+	}
+
+	inline void setSelectedFaceRendering(const bool ison)
+	{
+		selectedFace = ison;
+	}
+
+	inline void setSelectedVertRendering(const bool ison)
+	{
+		selectedVert = ison;
+	}
 }; // end class RenderMode
 
 class MeshLabRenderState //: public QObject
@@ -632,6 +677,8 @@ private:
 	//the current raster model 
 	RasterModel* currentRaster;
 
+
+
 signals:
 	///whenever the current mesh is changed (e.g. the user click on a different mesh)
 	// this signal will send out with the index of the newest mesh
@@ -642,6 +689,8 @@ signals:
 
 	///whenever the meshList is changed
 	void meshSetChanged();
+	void meshAdded(int index);
+	void meshRemoved(int index);
 
 	///whenever the rasterList is changed
 	void rasterSetChanged();

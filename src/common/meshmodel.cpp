@@ -182,7 +182,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
   MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
   meshList.push_back(newMesh);
   emit meshSetChanged();
-
+  emit meshAdded(newMesh->id());
   if(setAsCurrent)
     this->setCurrentMesh(newMesh->id());
   return newMesh;
@@ -197,9 +197,11 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 	else if (meshList.size() == 0)
 			setCurrentMesh(-1);
 
+	int index = mmToDel->id();
 	delete mmToDel;
 
 	emit meshSetChanged();
+	emit meshRemoved(index);
 	return true;
 }
 
@@ -711,16 +713,20 @@ bool MeshLabRenderMesh::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode colm,vc
 {
 	if (glw.m != NULL)
 	{
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		glPushMatrix();
 		glMultMatrix(glw.m->Tr);
 		if( (colm == vcg::GLW::CMPerFace)  && (!vcg::tri::HasPerFaceColor(*glw.m)) ) 
 			colm=vcg::GLW::CMNone;
 		if( (tm == vcg::GLW::TMPerWedge )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) ) 
 			tm=vcg::GLW::TMNone;
-		if( (tm == vcg::GLW::TMPerWedgeMulti )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) ) 
+		if( (tm == vcg::GLW::TMPerWedgeMulti )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m))) 
+			tm=vcg::GLW::TMNone;
+		if( (tm == vcg::GLW::TMPerVert )&& (!vcg::tri::HasPerVertexTexCoord(*glw.m))) 
 			tm=vcg::GLW::TMNone;
 		glw.Draw(dm,colm,tm);
 		glPopMatrix();
+		glPopAttrib();
 		return true;
 	}
 	return false;
@@ -1006,7 +1012,9 @@ void MeshLabRenderState::copyBack( const int /*id*/,CMeshO& /*mm*/ ) const
 void MeshLabRenderState::render( const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
 {
 	lockRenderState(MESH,READ);
-	_meshmap[id]->render(dm,cm,tm);
+	QMap<int,MeshLabRenderMesh*>::const_iterator it = _meshmap.find(id);
+	if (it != _meshmap.end())
+		it.value()->render(dm,cm,tm);
 	unlockRenderState(MESH);
 }
 
