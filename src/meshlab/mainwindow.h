@@ -56,6 +56,7 @@ class QSignalMapper;
 class QProgressDialog;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QToolBar;
 
 class MainWindow : public QMainWindow, MainWindowInterface
 {
@@ -90,6 +91,7 @@ public slots:
 
   void delCurrentMesh();
   void delCurrentRaster();
+  void updateRenderMode();
 private slots:
   void endEdit();
   void updateDocumentScriptBindings();
@@ -134,8 +136,14 @@ private slots:
     void setLight();
     void setDoubleLighting();
     void setFancyLighting();
-    void setColorMode(QAction *qa);
-    void applyRenderMode();
+
+    //void setColorMode(QAction *qa);
+    void setColorNoneMode();
+	void setPerMeshColorMode();
+	void setPerVertexColorMode();
+	void setPerFaceColorMode();
+	
+	void applyRenderMode();
     //void applyColorMode();
     void toggleBackFaceCulling();
   void toggleSelectFaceRendering();
@@ -170,8 +178,6 @@ private slots:
   void viewFromCurrentRasterShot();
   void copyViewToClipBoard();
     void pasteViewFromClipboard();
-
-
 	///////////Slot PopUp Menu Handles /////////////////////
 	void splitFromHandle(QAction * qa);
 	void unsplitFromHandle(QAction * qa);
@@ -257,7 +263,11 @@ private:
 
 	QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
+
+	vcg::GLW::TextureMode getBestTextureRenderModePerMesh(const int meshid);
+	void setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm);
 public:
+
 
   MeshDocument *meshDoc() {
     assert(currentViewContainer());
@@ -309,7 +319,7 @@ public:
   }
     QMenu* meshLayerMenu() { return filterMenuMeshLayer; }
     QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
-
+	void connectRenderModeActionList(QList<RenderModeAction*>& actlist);
 
 private:
 	//the xml filters run in a different thread. The xmlfiltertimer starts on executeFilter and stops on postFilterExecution
@@ -396,26 +406,27 @@ private:
   QAction *suspendEditModeAct;
     /////////// Actions Menu Render /////////////////////
     QActionGroup *renderModeGroupAct;
-    QAction *renderBboxAct;
-    QAction *renderModePointsAct;
-    QAction *renderModeWireAct;
-    QAction *renderModeHiddenLinesAct;
-    QAction *renderModeFlatLinesAct;
-    QAction *renderModeFlatAct;
-    QAction *renderModeSmoothAct;
-    QAction *renderModeTextureAct;
-    QAction *setDoubleLightingAct;
-    QAction *setFancyLightingAct;
-  QAction *setLightAct;
-    QAction *backFaceCullAct;
-  QAction *setSelectFaceRenderingAct;
-  QAction *setSelectVertRenderingAct;
+    RenderModeAction *renderBboxAct;
+    RenderModeAction *renderModePointsAct;
+    RenderModeAction *renderModeWireAct;
+    RenderModeAction *renderModeHiddenLinesAct;
+    RenderModeAction *renderModeFlatLinesAct;
+    RenderModeAction *renderModeFlatAct;
+    RenderModeAction *renderModeSmoothAct;
+    RenderModeAction *renderModeTextureWedgeAct;
+	//RenderModeAction *renderModeTextureWedgeAct;
+    RenderModeAction *setDoubleLightingAct;
+    RenderModeAction *setFancyLightingAct;
+	RenderModeAction *setLightAct;
+	RenderModeAction *backFaceCullAct;
+	RenderModeAction *setSelectFaceRenderingAct;
+	RenderModeAction *setSelectVertRenderingAct;
 
 	QActionGroup *colorModeGroupAct;
-	QAction *colorModeNoneAct;
-		QAction *colorModePerMeshAct;
-	QAction *colorModePerVertexAct;
-	QAction *colorModePerFaceAct;
+	RenderModeAction *colorModeNoneAct;
+	RenderModeAction *colorModePerMeshAct;
+	RenderModeAction *colorModePerVertexAct;
+	RenderModeAction *colorModePerFaceAct;
 	///////////Actions Menu View ////////////////////////
 	QAction *fullScreenAct;
 	QAction *showToolbarStandardAct;
@@ -480,7 +491,9 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 	static QString getDecoratedFileName(const QString& name);
+	void updateRenderToolBar( RenderModeAction* act );
 };
+
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject

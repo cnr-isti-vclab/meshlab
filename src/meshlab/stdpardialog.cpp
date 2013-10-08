@@ -31,6 +31,9 @@
 #include <QDialogButtonBox>
 #include <QClipboard>
 #include <QColorDialog>
+#include <QToolBar>
+#include "mainwindow.h"
+
 
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
@@ -184,7 +187,6 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	gridLayout->addWidget(defaultButton,buttonRow+0,0,Qt::AlignBottom);
 	gridLayout->addWidget(closeButton,  buttonRow+1,0,Qt::AlignBottom);
 	gridLayout->addWidget(applyButton,  buttonRow+1,1,Qt::AlignBottom);
-
 
 	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
 	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));

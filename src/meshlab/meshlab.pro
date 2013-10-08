@@ -31,6 +31,7 @@ HEADERS = ../common/interfaces.h \
 	additionalgui.h \
 	xmlgeneratorgui.h \
 	snapshotsetting.h \
+	rendermodeactions.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h \
@@ -51,6 +52,7 @@ SOURCES = main.cpp \
     xmlstdpardialog.cpp \
 	additionalgui.cpp \
 	xmlgeneratorgui.cpp \
+	rendermodeactions.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
     glarea_setting.cpp \

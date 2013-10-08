@@ -41,6 +41,7 @@
 #include "glarea_setting.h"
 #include "multiViewer_Container.h"
 #include "snapshotsetting.h"
+#include "rendermodeactions.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -84,7 +85,7 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-  RenderMode &  getCurrentRenderMode()		{return rm;}
+  RenderMode*  getCurrentRenderMode();
 
   void updateFps(float deltaTime);
 
@@ -100,7 +101,7 @@ public:
 	void setLight(bool state);
 	void setLightMode(bool state,LightingModel lmode);
 	void saveSnapshot();
-	void setLightModel();
+	void setLightModel(RenderMode& rm);
 	void setView();
 
 	int RenderForSelection(int pickX, int pickY);
@@ -130,8 +131,11 @@ public slots:
 
 	//slots for changing the draw rendering and texturing mode
 	void setDrawMode(vcg::GLW::DrawMode mode); 
+	void setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode );
 	void setColorMode(vcg::GLW::ColorMode mode);
+	void setColorMode(RenderMode& rm,vcg::GLW::ColorMode mode);
 	void setTextureMode(vcg::GLW::TextureMode mode);
+	void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);
 	void updateCustomSettingValues(RichParameterSet& rps);
 
 	void endEdit(){	
@@ -201,6 +205,7 @@ public:
 	float getFov() { return fov; }
 	bool showInterruptButton() const;
 	void showInterruptButton(const bool& show);
+
 
 // the following pairs of slot/signal implements a very simple message passing mechanism.
 // a widget that has a pointer to the glarea call the sendViewDir() slot and 
@@ -288,7 +293,8 @@ private:
 	MeshModel *lastModelEdited;
 	
 public:
-	RenderMode rm;
+	QMap<int,RenderMode> rendermodemap;
+	//RenderMode rm;
     // view setting variables
 	float fov;
 	float clipRatioFar;
@@ -312,6 +318,10 @@ public:
 public slots:
 	void updateMeshSetVisibilities();
 	void updateRasterSetVisibilities();
+
+private slots:
+	void addNewEntryInRenderModeMap(int index);
+	void removeEntryFromRenderModeMap(int index);
 
 private:
 	float cfps;

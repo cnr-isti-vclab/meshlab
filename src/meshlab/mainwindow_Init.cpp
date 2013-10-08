@@ -44,6 +44,7 @@
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
+#include "rendermodeactions.h"
 
 
 
@@ -212,72 +213,76 @@ void MainWindow::createActions()
 	connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	//////////////Render Actions for Toolbar and Menu /////////////////////////////////////////////////////////
+	QList<RenderModeAction*> rendlist;
 	renderModeGroupAct = new QActionGroup(this);
 
-	renderBboxAct	  = new QAction(QIcon(":/images/bbox.png"),tr("&Bounding box"), renderModeGroupAct);
+	renderBboxAct	  = new RenderModeBBoxAction(renderModeGroupAct);
 	renderBboxAct->setCheckable(true);
-	connect(renderBboxAct, SIGNAL(triggered()), this, SLOT(renderBbox()));
+	rendlist.push_back(renderBboxAct);
 
-
-	renderModePointsAct	  = new QAction(QIcon(":/images/points.png"),tr("&Points"), renderModeGroupAct);
+	renderModePointsAct	  = new RenderModePointsAction(renderModeGroupAct);
 	renderModePointsAct->setCheckable(true);
-	connect(renderModePointsAct, SIGNAL(triggered()), this, SLOT(renderPoint()));
+	rendlist.push_back(renderModePointsAct);
 
-	renderModeWireAct		  = new QAction(QIcon(":/images/wire.png"),tr("&Wireframe"), renderModeGroupAct);
+	renderModeWireAct		  = new RenderModeWireAction(renderModeGroupAct);
 	renderModeWireAct->setCheckable(true);
-	connect(renderModeWireAct, SIGNAL(triggered()), this, SLOT(renderWire()));
+	rendlist.push_back(renderModeWireAct);
 
-	renderModeHiddenLinesAct  = new QAction(QIcon(":/images/backlines.png"),tr("&Hidden Lines"),renderModeGroupAct);
+	renderModeHiddenLinesAct  = new RenderModeHiddenLinesAction(renderModeGroupAct);
 	renderModeHiddenLinesAct->setCheckable(true);
-	connect(renderModeHiddenLinesAct, SIGNAL(triggered()), this, SLOT(renderHiddenLines()));
+	rendlist.push_back(renderModeHiddenLinesAct);
 
-	renderModeFlatLinesAct = new QAction(QIcon(":/images/flatlines.png"),tr("Flat &Lines"), renderModeGroupAct);
+	renderModeFlatLinesAct = new RenderModeFlatLinesAction(renderModeGroupAct);
 	renderModeFlatLinesAct->setCheckable(true);
-	connect(renderModeFlatLinesAct, SIGNAL(triggered()), this, SLOT(renderFlatLine()));
+	rendlist.push_back(renderModeFlatLinesAct);
 
-	renderModeFlatAct		  = new QAction(QIcon(":/images/flat.png"),tr("&Flat"), renderModeGroupAct);
+	renderModeFlatAct		  = new RenderModeFlatAction(renderModeGroupAct);
 	renderModeFlatAct->setCheckable(true);
-	connect(renderModeFlatAct, SIGNAL(triggered()), this, SLOT(renderFlat()));
+	rendlist.push_back(renderModeFlatAct);
 
-	renderModeSmoothAct	  = new QAction(QIcon(":/images/smooth.png"),tr("&Smooth"), renderModeGroupAct);
+	renderModeSmoothAct	  = new RenderModeSmoothAction(renderModeGroupAct);
 	renderModeSmoothAct->setCheckable(true);
-	connect(renderModeSmoothAct, SIGNAL(triggered()), this, SLOT(renderSmooth()));
+	rendlist.push_back(renderModeSmoothAct);
 
-	renderModeTextureAct  = new QAction(QIcon(":/images/textures.png"),tr("&Texture"),this);
-	renderModeTextureAct->setCheckable(true);
-	connect(renderModeTextureAct, SIGNAL(triggered()), this, SLOT(renderTexture()));
+	renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(this);
+	renderModeTextureWedgeAct->setCheckable(true);
+	rendlist.push_back(renderModeTextureWedgeAct);
 
-	setLightAct	  = new QAction(QIcon(":/images/lighton.png"),tr("&Light on/off"),this);
+	//renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(this);
+	//renderModeTextureWedgeAct->setCheckable(true);
+	//rendlist.push_back(renderModeTextureWedgeAct);
+
+	setLightAct	  = new RenderModeLightOnOffAction(this);
 	setLightAct->setCheckable(true);
-	connect(setLightAct, SIGNAL(triggered()), this, SLOT(setLight()));
+	rendlist.push_back(setLightAct);
 
-	setDoubleLightingAct= new QAction(tr("&Double side lighting"),this);
+	setDoubleLightingAct = new RenderModeDoubleLightingAction(this);
 	setDoubleLightingAct->setCheckable(true);
 	setDoubleLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
-	connect(setDoubleLightingAct, SIGNAL(triggered()), this, SLOT(setDoubleLighting()));
+	rendlist.push_back(setDoubleLightingAct);
 
-	setFancyLightingAct   = new QAction(tr("&Fancy Lighting"),this);
+	setFancyLightingAct   = new RenderModeFancyLightingAction(this);
 	setFancyLightingAct->setCheckable(true);
 	setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
 	setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_Y);
-	connect(setFancyLightingAct, SIGNAL(triggered()), this, SLOT(setFancyLighting()));
+	rendlist.push_back(setFancyLightingAct);
 
-	backFaceCullAct 	  = new QAction(tr("BackFace &Culling"),this);
+	backFaceCullAct 	  = new RenderModeFaceCullAction(this);
 	backFaceCullAct->setCheckable(true);
 	backFaceCullAct->setShortcutContext(Qt::ApplicationShortcut);
 	backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
-	connect(backFaceCullAct, SIGNAL(triggered()), this, SLOT(toggleBackFaceCulling()));
+	rendlist.push_back(backFaceCullAct);
 
-	setSelectFaceRenderingAct 	  = new QAction(QIcon(":/images/selected_face.png"),tr("Selected Face Rendering"),this);
+	setSelectFaceRenderingAct 	  = new RenderModeSelectedFaceRenderingAction(this);
 	setSelectFaceRenderingAct->setCheckable(true);
-	setSelectFaceRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-	connect(setSelectFaceRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectFaceRendering()));
+	rendlist.push_back(setSelectFaceRenderingAct);
 
-	setSelectVertRenderingAct 	  = new QAction(QIcon(":/images/selected_vert.png"),tr("Selected Vertex Rendering"),this);
+	setSelectVertRenderingAct	  = new RenderModeSelectedVertRenderingAction(this);
 	setSelectVertRenderingAct->setCheckable(true);
-	setSelectVertRenderingAct->setShortcutContext(Qt::ApplicationShortcut);
-	connect(setSelectVertRenderingAct, SIGNAL(triggered()), this, SLOT(toggleSelectVertRendering()));
+	rendlist.push_back(setSelectVertRenderingAct);
+
+	connectRenderModeActionList(rendlist);
 
 	//////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
 	fullScreenAct = new QAction (tr("&FullScreen"), this);
@@ -471,10 +476,11 @@ void MainWindow::createToolBars()
 	renderToolBar = addToolBar(tr("Render"));
 	//renderToolBar->setIconSize(QSize(32,32));
 	renderToolBar->addActions(renderModeGroupAct->actions());
-	renderToolBar->addAction(renderModeTextureAct);
+	renderToolBar->addAction(renderModeTextureWedgeAct);
 	renderToolBar->addAction(setLightAct);
 	renderToolBar->addAction(setSelectFaceRenderingAct);
 	renderToolBar->addAction(setSelectVertRenderingAct);
+	connect(renderToolBar,SIGNAL(actionTriggered(QAction*)),this,SLOT(updateMenus()));
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->addAction(suspendEditModeAct);
@@ -579,7 +585,7 @@ void MainWindow::createMenus()
 	renderModeMenu=renderMenu->addMenu(tr("Render &Mode"));
 	renderModeMenu->addAction(backFaceCullAct);
 	renderModeMenu->addActions(renderModeGroupAct->actions());
-	renderModeMenu->addAction(renderModeTextureAct);
+	renderModeMenu->addAction(renderModeTextureWedgeAct);
 	renderModeMenu->addAction(setSelectFaceRenderingAct);
 	renderModeMenu->addAction(setSelectVertRenderingAct);
 
@@ -593,26 +599,30 @@ void MainWindow::createMenus()
 
 	colorModeGroupAct = new QActionGroup(this);	colorModeGroupAct->setExclusive(true);
 
-	colorModeNoneAct = new QAction(QString("&None"),colorModeGroupAct);
+	QList<RenderModeAction*> rendlist;
+	colorModeNoneAct = new RenderModeColorModeNoneAction(colorModeGroupAct);
 	colorModeNoneAct->setCheckable(true);
 	colorModeNoneAct->setChecked(true);
+	rendlist.push_back(colorModeNoneAct);
 
-	colorModePerMeshAct = new QAction(QString("Per &Mesh"),colorModeGroupAct);
+	colorModePerMeshAct = new RenderModeColorModePerMeshAction(colorModeGroupAct);
 	colorModePerMeshAct->setCheckable(true);
+	rendlist.push_back(colorModePerMeshAct);
 
-	colorModePerVertexAct = new QAction(QString("Per &Vertex"),colorModeGroupAct);
+	colorModePerVertexAct = new RenderModeColorModePerVertexAction(colorModeGroupAct);
 	colorModePerVertexAct->setCheckable(true);
+	rendlist.push_back(colorModePerVertexAct);
 
-	colorModePerFaceAct = new QAction(QString("Per &Face"),colorModeGroupAct);
+	colorModePerFaceAct = new RenderModeColorModePerFaceAction(colorModeGroupAct);
 	colorModePerFaceAct->setCheckable(true);
+	rendlist.push_back(colorModePerVertexAct);
 
+	connectRenderModeActionList(rendlist);
 
 	colorModeMenu->addAction(colorModeNoneAct);
 	colorModeMenu->addAction(colorModePerMeshAct);
 	colorModeMenu->addAction(colorModePerVertexAct);
 	colorModeMenu->addAction(colorModePerFaceAct);
-
-	connect(colorModeGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(setColorMode(QAction *)));
 
 	// Shaders SUBmenu
 	shadersMenu = renderMenu->addMenu(tr("&Shaders"));

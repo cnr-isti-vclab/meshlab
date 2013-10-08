@@ -244,12 +244,24 @@ void MainWindow::updateWindowMenu()
 	}
 }
 
-void MainWindow::setColorMode(QAction *qa)
+void MainWindow::setColorNoneMode()
 {
-  if(qa->text() == tr("&None"))					GLA()->setColorMode(GLW::CMNone);
-  if(qa->text() == tr("Per &Mesh"))     GLA()->setColorMode(GLW::CMPerMesh);
-  if(qa->text() == tr("Per &Vertex"))		GLA()->setColorMode(GLW::CMPerVert);
-  if(qa->text() == tr("Per &Face"))			GLA()->setColorMode(GLW::CMPerFace);
+	GLA()->setColorMode(GLW::CMNone);
+}
+
+void MainWindow::setPerMeshColorMode()
+{
+	GLA()->setColorMode(GLW::CMPerMesh);
+}
+
+void MainWindow::setPerVertexColorMode()
+{
+	GLA()->setColorMode(GLW::CMPerVert);
+}
+
+void MainWindow::setPerFaceColorMode()
+{
+	GLA()->setColorMode(GLW::CMPerFace);
 }
 
 
@@ -352,29 +364,6 @@ void MainWindow::updateMenus()
 	showToolbarStandardAct->setChecked(mainToolBar->isVisible());
 	if(activeDoc && GLA())
 	{
-		const RenderMode &rm=GLA()->getCurrentRenderMode();
-		switch (rm.drawMode)
-		{
-					case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
-					case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
-					case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
-					case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
-					case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
-					case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
-					case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
-					default: break;
-		}
-		if (meshDoc()->mm() != NULL)
-			colorModePerFaceAct->setEnabled(HasPerFaceColor(meshDoc()->mm()->cm));
-		switch (rm.colorMode)
-		{
-		case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
-		case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
-		case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
-		case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
-		default: break;
-		}
-
 		if(GLA()->getLastAppliedFilter() != NULL)
 		{
 			lastFilterAct->setText(QString("Apply filter ") + GLA()->getLastAppliedFilter()->text());
@@ -404,23 +393,84 @@ void MainWindow::updateMenus()
 
 		showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
 		showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
-		backFaceCullAct->setChecked(GLA()->getCurrentRenderMode().backFaceCull);
-		renderModeTextureAct->setEnabled(meshDoc()->mm() && !meshDoc()->mm()->cm.textures.empty());
-		renderModeTextureAct->setChecked(GLA()->getCurrentRenderMode().textureMode != GLW::TMNone);
-		setLightAct->setIcon(rm.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-		setLightAct->setChecked(rm.lighting);
+		RenderMode rendtmp;
+		if (meshDoc()->meshList.size() > 0)
+		{
+			QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->meshList[0]->id());
+			if (it == GLA()->rendermodemap.end())
+				throw MeshLabException("Something really bad happened. Mesh id has not been found in rendermodemap.");
+			rendtmp = it.value();
+		}
+		bool checktext = (rendtmp.textureMode != GLW::TMNone);	
+		int ii = 0;
+		while(ii < meshDoc()->meshList.size())
+		{
+			if (meshDoc()->meshList[ii] == NULL)
+				return;
+			QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->meshList[ii]->id());
+			if (it == GLA()->rendermodemap.end())
+				throw MeshLabException("Something really bad happened. Mesh id has not been found in rendermodemap.");
+			RenderMode& rm = it.value();
+			if (rendtmp.drawMode != rm.drawMode)
+				rendtmp.setDrawMode(vcg::GLW::DMNone);
+				
+			if (rendtmp.colorMode != rm.colorMode)
+				rendtmp.setColorMode(vcg::GLW::CMNone);
 
-		setFancyLightingAct->setChecked(rm.fancyLighting);
-		setDoubleLightingAct->setChecked(rm.doubleSideLighting);
-		setSelectFaceRenderingAct->setChecked(rm.selectedFace);
-		setSelectVertRenderingAct->setChecked(rm.selectedVert);
+			checktext &= (rm.textureMode != GLW::TMNone);
 
+			rendtmp.setLighting(rendtmp.lighting && rm.lighting);
+			rendtmp.setFancyLighting(rendtmp.fancyLighting && rm.fancyLighting);
+			rendtmp.setDoubleFaceLighting(rendtmp.doubleSideLighting && rm.doubleSideLighting);
+			rendtmp.setBackFaceCull(rendtmp.backFaceCull || rm.backFaceCull);
+			rendtmp.setSelectedFaceRendering(rendtmp.selectedFace|| rm.selectedFace);
+			rendtmp.setSelectedVertRendering(rendtmp.selectedVert || rm.selectedVert);
+			++ii;
+		}
+
+		foreach(QAction* ac,renderModeGroupAct->actions())
+			ac->setChecked(false);
+
+		switch (rendtmp.drawMode)
+		{
+			case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
+			case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
+			case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
+			case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
+			case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
+			case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
+			case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
+			default: break;
+		}
+
+		foreach(QAction* ac,colorModeGroupAct->actions())
+			ac->setChecked(false);
+
+		switch (rendtmp.colorMode)
+		{
+			case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
+			case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
+			case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
+			case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
+			default: break;
+		}
+
+		backFaceCullAct->setChecked(rendtmp.backFaceCull);
+		setLightAct->setIcon(rendtmp.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
+		setLightAct->setChecked(rendtmp.lighting);
+
+		setFancyLightingAct->setChecked(rendtmp.fancyLighting);
+		setDoubleLightingAct->setChecked(rendtmp.doubleSideLighting);
+		setSelectFaceRenderingAct->setChecked(rendtmp.selectedFace);
+		setSelectVertRenderingAct->setChecked(rendtmp.selectedVert);
+		renderModeTextureWedgeAct->setChecked(checktext);
+			
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
 		foreach (QAction *a, PM.decoratorActionList)
 		{
-		  a->setChecked(false);
-		  a->setEnabled(true);
+			a->setChecked(false);
+			a->setEnabled(true);
 		}
 		// Check the decorator per Document of the current glarea
 		foreach (QAction *a,   GLA()->iPerDocDecoratorlist)
@@ -428,9 +478,8 @@ void MainWindow::updateMenus()
 
 		// Then check the decorator enabled for the current mesh.
 		if(GLA()->mm())
-		  foreach (QAction *a,   GLA()->iCurPerMeshDecoratorList())
-		  { a ->setChecked(true); }
-
+			foreach (QAction *a,   GLA()->iCurPerMeshDecoratorList())
+				a ->setChecked(true);
 	} // if active
 	else
 	{
@@ -1498,9 +1547,10 @@ void MainWindow::applyRenderMode()
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	bool initsupport = false;
-	if (iRenderTemp != NULL)
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if ((iRenderTemp != NULL) && (rm != NULL))
 	{
-		iRenderTemp->Init(action,*(meshDoc()),GLA()->getCurrentRenderMode(),GLA());
+		iRenderTemp->Init(action,*(meshDoc()),*rm,GLA());
 		if (iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
@@ -1583,37 +1633,47 @@ void MainWindow::applyDecorateMode()
 
 void MainWindow::setLight()
 {
-	GLA()->setLight(!GLA()->getCurrentRenderMode().lighting);
-	updateMenus();
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if (rm != NULL)
+	{
+		GLA()->setLight(!rm->lighting);
+		updateMenus();
+	}
 };
 
 void MainWindow::setDoubleLighting()
 {
-	const RenderMode &rm = GLA()->getCurrentRenderMode();
-	GLA()->setLightMode(!rm.doubleSideLighting,LDOUBLE);
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if (rm != NULL)
+		GLA()->setLightMode(!rm->doubleSideLighting,LDOUBLE);
 }
 
 void MainWindow::setFancyLighting()
 {
-	const RenderMode &rm = GLA()->getCurrentRenderMode();
-	GLA()->setLightMode(!rm.fancyLighting,LFANCY);
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if (rm != NULL)
+		GLA()->setLightMode(!rm->fancyLighting,LFANCY);
 }
 
 void MainWindow::toggleBackFaceCulling()
 {
-	RenderMode &rm = GLA()->getCurrentRenderMode();
-	GLA()->setBackFaceCulling(!rm.backFaceCull);
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if (rm != NULL)
+		GLA()->setBackFaceCulling(!rm->backFaceCull);
 }
 
 void MainWindow::toggleSelectFaceRendering()
 {
-  RenderMode &rm = GLA()->getCurrentRenderMode();
-  GLA()->setSelectFaceRendering(!rm.selectedFace);
+  RenderMode* rm = GLA()->getCurrentRenderMode();
+  if (rm != NULL)
+	GLA()->setSelectFaceRendering(!rm->selectedFace);
 }
+
 void MainWindow::toggleSelectVertRendering()
 {
-  RenderMode &rm = GLA()->getCurrentRenderMode();
-  GLA()->setSelectVertRendering(!rm.selectedVert);
+	RenderMode* rm = GLA()->getCurrentRenderMode();
+	if (rm != NULL)
+		GLA()->setSelectVertRendering(!rm->selectedVert);
 }
 
 /*
@@ -2159,12 +2219,12 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
   if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
   if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) GLA()->setColorMode(GLW::CMPerVert);
 
-  renderModeTextureAct->setChecked(false);
-  renderModeTextureAct->setEnabled(false);
+  renderModeTextureWedgeAct->setChecked(false);
+  //renderModeTextureWedgeAct->setEnabled(false);
   if(!meshDoc()->mm()->cm.textures.empty())
   {
-    renderModeTextureAct->setChecked(true);
-    renderModeTextureAct->setEnabled(true);
+    renderModeTextureWedgeAct->setChecked(true);
+    //renderModeTextureWedgeAct->setEnabled(true);
     if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
       GLA()->setTextureMode(GLW::TMPerVert);
     if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
@@ -2706,4 +2766,93 @@ void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& sc
 void MainWindow::sendHistory()
 {
 	plugingui->getHistory(meshDoc()->xmlhistory);
+}
+
+
+void MainWindow::updateRenderToolBar( RenderModeAction* act )
+{
+	//if (GLA() == NULL)
+	//	return;
+	//QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
+	//const RenderMode& tmp = *(rmode.begin()); 
+	//for(QMap<int,RenderMode>::const_iterator it = rmode.begin(); it != rmode.end();++it)
+	//{
+	//	if ()
+	//}
+}
+
+void MainWindow::updateRenderMode( )
+{
+	if ((GLA() == NULL) || (meshDoc() == NULL)) 
+		return;
+	QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
+
+	RenderModeAction* act = qobject_cast<RenderModeAction*>(sender());
+	RenderModeTexturePerVertAction* textact = qobject_cast<RenderModeTexturePerVertAction*>(act);
+
+	//act->data contains the meshid to which the action is referred.
+	//if the meshid is -1 the action is intended to be per-document and not per mesh
+	bool isvalidid = true;
+	int meshid = act->data().toInt(&isvalidid);
+	if (!isvalidid)
+		throw MeshLabException("A RenderModeAction contains a non-integer data id.");
+	
+	if (meshid == -1)
+	{
+		for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
+		{
+			act->updateRenderMode(it.value());
+			//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+			//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one. 
+			//The enum-value depends from the enabled attributes of input mesh.
+			if (textact != NULL)
+				setBestTextureModePerMesh(textact,it.key(),it.value());
+		}
+	}
+	else
+	{
+		QMap<int,RenderMode>::iterator it = rmode.find(meshid);
+		if (it == rmode.end())
+			throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
+		act->updateRenderMode(it.value());
+		updateMenus();
+		//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+		//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one. 
+		//The enum-value depends from the enabled attributes of input mesh.
+		if (textact != NULL)
+			setBestTextureModePerMesh(textact,meshid,it.value());
+	}
+	GLA()->update();
+}
+
+void MainWindow::connectRenderModeActionList(QList<RenderModeAction*>& actlist)
+{
+	for (int ii = 0; ii < actlist.size();++ii)
+		connect(actlist[ii],SIGNAL(triggered()),this,SLOT(updateRenderMode()));
+}
+
+vcg::GLW::TextureMode MainWindow::getBestTextureRenderModePerMesh(const int meshid)
+{
+	MeshModel* mesh = NULL; 
+	if ((meshDoc() == NULL) || ((mesh  = meshDoc()->getMesh(meshid)) == NULL))
+		return vcg::GLW::TMNone;
+
+	if (mesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+		return vcg::GLW::TMPerWedgeMulti;
+
+	if (mesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
+		return vcg::GLW::TMPerVert;
+
+	return vcg::GLW::TMNone;
+}
+
+void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm)
+{
+	if ((textact == NULL) || !textact->isChecked())
+		rm.setTextureMode(vcg::GLW::TMNone);
+	else
+	{
+		vcg::GLW::TextureMode texmode = getBestTextureRenderModePerMesh(meshid);
+		rm.setTextureMode(texmode);
+	}
 }

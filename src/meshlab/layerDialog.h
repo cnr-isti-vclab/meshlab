@@ -41,6 +41,7 @@ class MeshDocument;
 class MeshDecorateInterface;
 class StdParFrame;
 class QGridLayout;
+class QToolBar;
 
 #include <QDialog>
 
@@ -51,10 +52,12 @@ namespace Ui
 
 class MeshTreeWidgetItem : public QTreeWidgetItem
 {
-	public:
-	MeshTreeWidgetItem(MeshModel *);
+public:
+	MeshTreeWidgetItem(MeshModel *,QTreeWidget* tree,QWidget* additional);
+	~MeshTreeWidgetItem();
 
 	MeshModel *m;
+	QWidget* addwid;
 };
 
 class RasterTreeWidgetItem : public QTreeWidgetItem
@@ -124,14 +127,19 @@ private:
 	QAction* removeCurrentRasterAct;
 	//It stores if the treeWidgetItems are expanded or not
 	QMap< QPair<int ,int> ,  bool> expandedMap;
+	//QList<QToolBar*> tobedel;
   void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
 	void updateColumnNumber(const QTreeWidgetItem * item);
 	//QVector<QTreeWidgetItem*> tobedeleted; 
 
 	void updateExpandedMap(int meshId, int tagId, bool expanded);
+
+	//it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar. 
+	//used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
+	QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
+
 signals:
 	void removeDecoratorRequested(QAction* );
-	
 };
 
 

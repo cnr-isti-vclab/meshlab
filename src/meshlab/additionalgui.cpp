@@ -1079,3 +1079,4 @@ bool MenuWithToolTip::event(QEvent * e)
 		QToolTip::hideText();
 	return QMenu::event(e);
 }
+
