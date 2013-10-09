@@ -69,7 +69,20 @@ public:
 
   // Layer Management stuff. 
 
-  MultiViewer_Container *mvc();
+  //MultiViewer_Container *mvc()
+  MultiViewer_Container * mvc()
+  {
+	  QObject * curParent = this->parent();
+	  while(dynamic_cast<MultiViewer_Container *>(curParent) == 0)
+	  {
+		  if (curParent != NULL)
+			  curParent = curParent->parent();
+		  else
+			  return NULL;
+	  }
+	  return dynamic_cast<MultiViewer_Container *>(curParent);
+  }
+
   MainWindow *mw();
   MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
   inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
@@ -85,7 +98,17 @@ public:
 	QAction *getLastAppliedFilter()							{return lastFilterRef;}
 	void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-  RenderMode*  getCurrentRenderMode();
+  //RenderMode*  getCurrentRenderMode();
+  RenderMode* getCurrentRenderMode()
+  {
+	  if ((md() != NULL) && (md()->mm() != NULL))
+	  {
+		  QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
+		  if (it != rendermodemap.end())
+			  return &it.value();
+	  }
+	  return NULL;
+  }
 
   void updateFps(float deltaTime);
 

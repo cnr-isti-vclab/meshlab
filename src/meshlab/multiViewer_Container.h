@@ -26,6 +26,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QSplitter>
+#include <QSplitterHandle>
 
 #include "../common/meshmodel.h"
 
@@ -39,7 +40,7 @@ class Splitter : public QSplitter
 	Q_OBJECT	
 
 public:
-	Splitter ( QWidget * parent = 0 );
+	Splitter ( QWidget * parent);
 	Splitter(Qt::Orientation orientation, QWidget *parent = 0);
 
 	MultiViewer_Container *getRootContainer();
@@ -67,6 +68,7 @@ class MultiViewer_Container : public Splitter
 
 public:
 	MultiViewer_Container(QWidget *parent);
+
     ~MultiViewer_Container();
 	
   void addView(GLArea* viewer,  Qt::Orientation);

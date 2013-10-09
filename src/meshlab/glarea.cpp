@@ -2023,18 +2023,18 @@ void GLArea::createOrthoView(QString dir)
 	loadShot(shotAndScale);
 }
 
-MultiViewer_Container * GLArea::mvc()
-{
-	QObject * curParent = this->parent();
-	while(qobject_cast<MultiViewer_Container *>(curParent) == 0)
-	{
-		if (curParent != NULL)
-			curParent = curParent->parent();
-		else
-			return NULL;
-	}
-	return qobject_cast<MultiViewer_Container *>(curParent);
-}
+//MultiViewer_Container * GLArea::mvc()
+//{
+//	QObject * curParent = this->parent();
+//	while(qobject_cast<MultiViewer_Container *>(curParent) == 0)
+//	{
+//		if (curParent != NULL)
+//			curParent = curParent->parent();
+//		else
+//			return NULL;
+//	}
+//	return qobject_cast<MultiViewer_Container *>(curParent);
+//}
 
 
 MainWindow * GLArea::mw()
@@ -2068,17 +2068,16 @@ void GLArea::completeUpdateRequested()
 	doneCurrent();
 }
 
-RenderMode* GLArea::getCurrentRenderMode()
-{
-	if ((md() != NULL) && (md()->mm() != NULL))
-	{
-		QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-		if (it != rendermodemap.end())
-			return &it.value();
-	}
-	return NULL;
-
-}
+//RenderMode* GLArea::getCurrentRenderMode()
+//{
+//	if ((md() != NULL) && (md()->mm() != NULL))
+//	{
+//		QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
+//		if (it != rendermodemap.end())
+//			return &it.value();
+//	}
+//	return NULL;
+//}
 
 void GLArea::addNewEntryInRenderModeMap( int index )
 {
