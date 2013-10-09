@@ -39,9 +39,9 @@
 
 #include "../common/interfaces.h"
 #include "glarea_setting.h"
-#include "multiViewer_Container.h"
 #include "snapshotsetting.h"
 #include "rendermodeactions.h"
+#include "multiViewer_Container.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -50,6 +50,7 @@ enum LightingModel{LDOUBLE,LFANCY};
 
 class MeshModel;
 class MainWindow;
+
 class GLArea : public QGLWidget
 {
 	Q_OBJECT
@@ -63,6 +64,7 @@ public:
 
 private:
   int id;  //the very important unique id of each subwindow.
+  MultiViewer_Container* parentmultiview;
 
 public:
   int getId() {return id;}
@@ -72,15 +74,7 @@ public:
   //MultiViewer_Container *mvc()
   MultiViewer_Container * mvc()
   {
-	  QObject * curParent = this->parent();
-	  while(dynamic_cast<MultiViewer_Container *>(curParent) == 0)
-	  {
-		  if (curParent != NULL)
-			  curParent = curParent->parent();
-		  else
-			  return NULL;
-	  }
-	  return dynamic_cast<MultiViewer_Container *>(curParent);
+      return parentmultiview;
   }
 
   MainWindow *mw();

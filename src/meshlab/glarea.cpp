@@ -43,7 +43,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 : QGLWidget(),interrbutshow(false)
 {
 	this->setParent(mvcont);
-
+    parentmultiview = mvcont;
 	this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
 	iRenderer=0; //Shader support

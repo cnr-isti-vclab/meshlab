@@ -42,6 +42,7 @@ class Splitter : public QSplitter
 public:
 	Splitter ( QWidget * parent);
 	Splitter(Qt::Orientation orientation, QWidget *parent = 0);
+    ~Splitter() {}
 
 	MultiViewer_Container *getRootContainer();
 
@@ -55,6 +56,7 @@ class SplitterHandle : public QSplitterHandle
 
 public:
 	SplitterHandle(Qt::Orientation orientation, QSplitter *parent);
+    ~SplitterHandle() {}
 
 protected:
 	void mousePressEvent ( QMouseEvent * e ); 
@@ -67,9 +69,8 @@ class MultiViewer_Container : public Splitter
 	typedef vcg::Shot<double> Shot;
 
 public:
-	MultiViewer_Container(QWidget *parent);
-
-    ~MultiViewer_Container();
+    MultiViewer_Container(QWidget *parent);
+    ~MultiViewer_Container() {}
 	
   void addView(GLArea* viewer,  Qt::Orientation);
 	void removeView(int);

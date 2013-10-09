@@ -63,14 +63,10 @@ void SplitterHandle::mousePressEvent ( QMouseEvent * e )
 MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 : Splitter(parent)
 {
-	setChildrenCollapsible(false);
+    setChildrenCollapsible(false);
 
-	currentId=-1;
+    currentId=-1;
 
-}
-
-MultiViewer_Container::~MultiViewer_Container()
-{
 }
 
 int MultiViewer_Container::getNextViewerId(){
