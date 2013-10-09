@@ -79,6 +79,9 @@
 
 #include<QtXml>
 #include <vcg/complex/algorithms/create/platonic.h>
+#include <vcg/complex/algorithms/update/color.h>
+#include <vcg/complex/algorithms/update/position.h>
+#include <vcg/complex/append.h>
 #include <wrap/gl/glu_tesselator.h>
 
 #include "util_x3d.h"
@@ -777,7 +780,7 @@ namespace io {
 					QString coorTag[] = {"Coordinate", "CoordinateDouble"};
 					QDomElement coordinate = findNode(coorTag, 2, geometry);
 					//If geometry node is supported, get info on color, normal and texture coordinate (per vertex, per color, or per wedge)
-					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid"))
+					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid") || (tagName == "Cylinder"))
 					{
 						bool copyTextureFile = true;
 						QStringList colorList, normalList, textureList;
@@ -1859,6 +1862,33 @@ namespace io {
 			return E_NOERROR;
 		}
 		
+
+
+		//Load in the mesh the geometry defined in the node Cylinder
+		static int LoadCylinder(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44f tMatrix,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb)
+		{
+			QStringList radiusList;
+			findAndParseAttribute(radiusList, geometry, "radius", "1");
+			QStringList heightList;
+			findAndParseAttribute(heightList, geometry, "height", "2");
+			float radius = radiusList[0].toFloat();
+			float height = heightList[0].toFloat();
+			OpenMeshType newCylinder;
+			vcg::tri::Cone<OpenMeshType>(newCylinder, radius, radius, height, 100);
+			if (info->meshColor)
+				vcg::tri::UpdateColor<OpenMeshType>::PerVertexConstant(newCylinder, info->color, false);
+			vcg::tri::UpdatePosition<OpenMeshType>::Matrix(newCylinder, tMatrix, false);
+			vcg::tri::Append<OpenMeshType, OpenMeshType>::Mesh(m, newCylinder);			
+			info->numvert++;
+			if (cb !=NULL) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
+			return E_NOERROR;
+		}
+
+
 		
 		//Load texture info from Appearance node.
 		static int LoadAppearance(const QDomElement& root, std::vector<bool>& validTexture, std::vector<TextureInfo>& textureInfo, QDomNodeList& textTransfList, std::map<QString, QDomElement>& defMap, AdditionalInfoX3D* info)
@@ -2451,7 +2481,7 @@ namespace io {
 					QDomElement coordinate = findNode(coordTag, 2, geometry);
 					result = solveDefUse(coordinate, defMap, coordinate, info);
 					if (result != E_NOERROR) return result;
-					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid"))
+					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid") || (geometry.tagName() == "Cylinder"))
 					{
 						//Get coordinate 
 						QStringList coordList;
@@ -2564,7 +2594,9 @@ namespace io {
 						else if (geometry.tagName() == "IndexedFaceSet")
 							return LoadIndexedFaceSet(geometry, m, tMatrix, texture, coordList, colorList, normalList, colorComponent, info, cb);
 						else if (geometry.tagName() == "PointSet")
-							return LoadPointSet(geometry, m, tMatrix, coordList, colorList, colorComponent, info, cb); 
+							return LoadPointSet(geometry, m, tMatrix, coordList, colorList, colorComponent, info, cb);
+						else if (geometry.tagName() == "Cylinder")
+							return LoadCylinder(geometry, m, tMatrix, info, cb);
 					}
 					else if (geometry.tagName() == "Polypoint2D")
 						return LoadPolypoint2D(geometry, m, tMatrix, info, cb);
