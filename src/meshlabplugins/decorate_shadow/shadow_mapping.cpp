@@ -114,11 +114,9 @@ void ShadowMapping::renderingFromLightUnsetup(){
 void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
-	if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
-		return;
+    if (gla == NULL) return;
 
     this->renderingFromLightSetup(md, gla);
-
     glMatrixMode(GL_PROJECTION);
         glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
     glMatrixMode(GL_MODELVIEW);
@@ -135,11 +133,10 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     //binding the FBO
     this->bind();
 
-    RenderMode rm = *gla->getCurrentRenderMode();
     foreach(MeshModel *m, md.meshList)
       if(m->visible)
       {
-      m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
+        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
       }
     glDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -175,7 +172,8 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {
-        m->render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
+      m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
+//        m->render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
       }
     glDisable(GL_BLEND);
     glDepthFunc((GLenum)depthFuncOld);
@@ -191,7 +189,7 @@ bool ShadowMapping::setup()
 
         if (_initOk)
                 return true;
-        
+
         glGenFramebuffersEXT(1, &_fbo);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
@@ -200,7 +198,7 @@ bool ShadowMapping::setup()
         //we don't need a color attachment
         GLenum drawBuffers[] = {GL_NONE};
         glDrawBuffersARB(1, drawBuffers);
-		
+
         glReadBuffer(GL_NONE);
 
         //checks for fbo creation errors

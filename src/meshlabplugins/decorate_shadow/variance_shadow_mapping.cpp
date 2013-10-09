@@ -70,8 +70,7 @@ bool VarianceShadowMapping::init()
 void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
-	if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
-		return;
+    if (gla == NULL) return;
 
     this->renderingFromLightSetup(md, gla);
 
@@ -89,11 +88,10 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     this->bind();
 
     glUseProgram(this->_depthShaderProgram);
-    RenderMode rm = *gla->getCurrentRenderMode();
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {
-        m->render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
       }
 
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -132,7 +130,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {
-        m->render(rm.drawMode, vcg::GLW::CMNone, vcg::GLW::TMNone);
+        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
       }
 
     glDisable(GL_BLEND);
