@@ -617,6 +617,8 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
     {
         case DP_PROJECT_RASTER:
         {
+			if ((gla == NULL) || (gla->getCurrentRenderMode()))
+				return;
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             updateCurrentMesh( m, *par );
@@ -624,7 +626,7 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
 
             glEnable( GL_DEPTH_TEST );
 
-            RenderMode rm = gla->getCurrentRenderMode();
+            RenderMode rm = *gla->getCurrentRenderMode();
             bool notDrawn = false;
             switch( rm.drawMode )
             {

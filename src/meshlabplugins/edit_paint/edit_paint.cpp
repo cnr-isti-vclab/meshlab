@@ -68,8 +68,10 @@ bool EditPaintPlugin::StartEdit(MeshModel& m, GLArea * parent)
 	}
   tri::InitFaceIMark(m.cm);
   tri::InitVertexIMark(m.cm);
-
-	parent->getCurrentRenderMode().colorMode=vcg::GLW::CMPerVert;
+	QMap<int,RenderMode>::iterator it = parent->rendermodemap.find(m.id());
+	if (it == parent->rendermodemap.end())
+		return false;
+	it.value().colorMode=vcg::GLW::CMPerVert;
 
 	QObject::connect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::connect(paintbox, SIGNAL(redo()), this, SLOT(update()));
@@ -290,7 +292,10 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 						if (color_buffer != NULL) delete color_buffer;
 						if (clone_zbuffer != NULL) delete clone_zbuffer;
 						color_buffer = NULL, clone_zbuffer = NULL;
-						glarea->getCurrentRenderMode().lighting = false;
+						QMap<int,RenderMode>::iterator it = glarea->rendermodemap.find(m.id());
+						if (it == glarea->rendermodemap.end())
+							return;
+						it.value().lighting = false;
 						current_options &= ~EPP_DRAW_CURSOR;
 						glarea->update();
 					}
@@ -642,7 +647,9 @@ inline void EditPaintPlugin::capture()
 			image.setPixel(x, glarea->height() - y -1, qRgba((int)color_buffer[index], (int)color_buffer[index + 1], (int)color_buffer[index + 2], (int)color_buffer[index + 3]));
 		}
 	}
-	glarea->getCurrentRenderMode().lighting = true;
+	if (glarea->getCurrentRenderMode() == NULL)
+		return;
+	glarea->getCurrentRenderMode()->lighting = true;
 	current_options |= EPP_DRAW_CURSOR;
 	paintbox->setClonePixmap(image);
 	paintbox->setPixmapDelta(source_delta.x(), source_delta.y());

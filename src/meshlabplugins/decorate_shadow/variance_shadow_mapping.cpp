@@ -70,6 +70,8 @@ bool VarianceShadowMapping::init()
 void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
+	if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
+		return;
 
     this->renderingFromLightSetup(md, gla);
 
@@ -87,7 +89,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     this->bind();
 
     glUseProgram(this->_depthShaderProgram);
-    RenderMode rm = gla->getCurrentRenderMode();
+    RenderMode rm = *gla->getCurrentRenderMode();
     foreach(MeshModel *m, md.meshList)
     if(m->visible)
       {

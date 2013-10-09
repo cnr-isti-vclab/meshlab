@@ -57,12 +57,15 @@ void EditAlignPlugin::Decorate(MeshModel &m, GLArea * gla)
 	case ALIGN_MOVE:
 		{
 			// Draw the editing mesh
-			gla->rm.colorMode=GLW::CMPerMesh;
+			QMap<int,RenderMode>::iterator it = gla->rendermodemap.find(m.id());
+			if (it == gla->rendermodemap.end())
+				return;
+			it.value().colorMode = GLW::CMPerMesh;
 			m.visible=false;
 			glPushMatrix();
 			trackball.GetView();
 			trackball.Apply();
-			m.render(GLW::DMFlat,GLW::CMPerMesh,gla->rm.textureMode);
+			m.render(GLW::DMFlat,GLW::CMPerMesh,it.value().textureMode);
 			glPopMatrix();
 			break;
 		}
@@ -100,7 +103,8 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
 			mm->cm.C()=Color4b::Scatter(51, mm->id()%50, .2f, .7f);
 		meshTree.nodeList.push_back(new MeshNode(mm));
 	}
-	gla->rm.colorMode=GLW::CMPerMesh;
+	for(QMap<int,RenderMode>::iterator it = _gla->rendermodemap.begin();it != _gla->rendermodemap.end();++it)
+		it.value().colorMode=GLW::CMPerMesh;
 
 	gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
 	if(alignDialog==0)
@@ -487,9 +491,12 @@ void EditAlignPlugin::DrawArc(vcg::AlignPair::Result *A )
 
 void EditAlignPlugin::toggledColors(int colorstate)
 {
-	if(colorstate == Qt::Checked)
-		gla->rm.colorMode=GLW::CMPerMesh;
-	else
-		gla->rm.colorMode=GLW::CMPerVert;
+	for(QMap<int,RenderMode>::iterator it = gla->rendermodemap.begin();it != gla->rendermodemap.end();++it)
+	{
+		if(colorstate == Qt::Checked)
+			it.value().colorMode=GLW::CMPerMesh;
+		else
+			it.value().colorMode=GLW::CMPerVert;
+	}
 	gla->update();
 }

@@ -139,6 +139,8 @@ This is the main function, which generates the final mesh (and the rasters) base
 
 void EditArc3DPlugin::ExportPly()
 {
+	if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
+		return;
 	md->setBusy(true);
 	md->addNewMesh("",er.name,true);
 	MeshModel* m=md->mm();
@@ -244,7 +246,7 @@ void EditArc3DPlugin::ExportPly()
 
 	md->mm()->visible=true;
 	md->setBusy(false);
-	gla->rm.colorMode=GLW::CMPerVert;
+	gla->getCurrentRenderMode()->colorMode=GLW::CMPerVert;
 	emit this->resetTrackBall();
 	gla->update();
 

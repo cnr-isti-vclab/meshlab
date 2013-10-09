@@ -113,9 +113,11 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla){
         /***********************************************************/
         //NORMAL MAP and DEPTH MAP generation
         /***********************************************************/
+		if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
+			return;
         this->bind();
         glUseProgram(this->_normalMapShaderProgram);
-        RenderMode rm = gla->getCurrentRenderMode();
+        RenderMode rm = *gla->getCurrentRenderMode();
 
         vcg::Matrix44f mProj, mInverseProj;
         glMatrixMode(GL_PROJECTION);

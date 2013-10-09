@@ -114,6 +114,8 @@ void ShadowMapping::renderingFromLightUnsetup(){
 void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
+	if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
+		return;
 
     this->renderingFromLightSetup(md, gla);
 
@@ -133,7 +135,7 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     //binding the FBO
     this->bind();
 
-    RenderMode rm = gla->getCurrentRenderMode();
+    RenderMode rm = *gla->getCurrentRenderMode();
     foreach(MeshModel *m, md.meshList)
       if(m->visible)
       {
