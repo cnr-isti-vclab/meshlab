@@ -31,6 +31,7 @@
 #include <QDockWidget>
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
+#include <QMap>
 
 class QGLWidget;
 
@@ -39,12 +40,12 @@ class ShaderDialog : public QDockWidget
     Q_OBJECT
 
 public:
-    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent = 0);
+    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QMap<int,RenderMode>&rm, QWidget *parent = 0);
     ~ShaderDialog();
 
 private:
 		QGLWidget* glarea;
-		RenderMode * rendMode;
+		QMap<int,RenderMode>& rendMode;
 		ShaderInfo * shaderInfo;
 		QSignalMapper *colorSignalMapper;
 		QSignalMapper *valueSignalMapper;

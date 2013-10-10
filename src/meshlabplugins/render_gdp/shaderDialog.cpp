@@ -35,8 +35,8 @@
 
 using namespace vcg;
 
-ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QWidget *parent)
-: QDockWidget(parent)
+ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla,QMap<int,RenderMode>& rm, QWidget *parent)
+: QDockWidget(parent),rendMode(rm)
 {
 	ui.setupUi(this);
   this->setWidget(ui.frame);
@@ -46,7 +46,6 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QW
 
 	shaderInfo = sInfo;
 	glarea = gla;
-	rendMode = &rm;
 	colorSignalMapper = new QSignalMapper(this);
 	valueSignalMapper = new QSignalMapper(this);
 
@@ -59,7 +58,8 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, RenderMode &rm, QW
 	QLabel *perVertexColorLabel = new QLabel(this);
 	perVertexColorLabel->setText("Use PerVertex Color");
 	QCheckBox *perVertexColorCBox = new QCheckBox(this);
-	rendMode->colorMode =  GLW::CMNone;
+	for(QMap<int,RenderMode>::iterator it = rendMode.begin();it != rendMode.end();++it)
+		it.value().colorMode =  GLW::CMNone;
 	connect(perVertexColorCBox, SIGNAL(stateChanged(int)), this, SLOT(setColorMode(int)));
 
 	qgrid->addWidget(perVertexColorLabel, 0, 0);
@@ -313,10 +313,14 @@ void ShaderDialog::valuesChanged(const QString &varNameAndIndex) {
 
 
 void ShaderDialog::setColorMode(int state) {
-	if (state == Qt::Checked) {
-		rendMode->colorMode = GLW::CMPerVert;
-	} else {
-		rendMode->colorMode = GLW::CMNone;
+	for(QMap<int,RenderMode>::iterator it = rendMode.begin();it != rendMode.end();++it)
+	{
+		if (state == Qt::Checked) 
+		{
+			it.value().colorMode = GLW::CMPerVert;
+		} else {
+			it.value().colorMode = GLW::CMNone;
+		}
 	}
   glarea->update();
 }

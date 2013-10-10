@@ -64,8 +64,8 @@ public:
   void initActionList();
 
 	bool isSupported() {return supported;}
-	void Init(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
-	void Render(QAction *a, MeshDocument &md, RenderMode &rm, QGLWidget *gla);
+	void Init(QAction *a, MeshDocument &md, QMap<int,RenderMode>&rm, QGLWidget *gla);
+	void Render(QAction *a, MeshDocument &md, QMap<int,RenderMode>&rm, QGLWidget *gla);
 	void Finalize(QAction*, MeshDocument*, GLArea*);
 
 };

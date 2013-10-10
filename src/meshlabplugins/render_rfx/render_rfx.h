@@ -42,8 +42,8 @@ class RenderRFX : public QObject, public MeshRenderInterface
 public:
 	RenderRFX();
 	~RenderRFX();
-	void Init(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
-	void Render(QAction*, MeshDocument&, RenderMode&, QGLWidget*);
+	void Init(QAction*, MeshDocument&, QMap<int,RenderMode>&, QGLWidget*);
+	void Render(QAction*, MeshDocument&, QMap<int,RenderMode>&, QGLWidget*);
 	void Finalize(QAction*, MeshDocument*, GLArea*);
 	bool isSupported()         { return shadersSupported; }
 	bool AlternativeRender(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);

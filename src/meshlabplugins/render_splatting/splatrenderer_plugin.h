@@ -53,8 +53,8 @@ public:
 	void initActionList();
 
 	bool isSupported() {return splat_renderer.isSupported();}
-	void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
-	void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
+	void Init(QAction *a, MeshDocument &m, QMap<int,RenderMode>& rm, QGLWidget *gla);
+	void Render(QAction *a, MeshDocument &m, QMap<int,RenderMode>& rm, QGLWidget *gla);
 	void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/) ;
 
 };

@@ -52,7 +52,7 @@ RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
 
 }
 
-void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &, QGLWidget *gla) {
+void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, QMap<int,RenderMode>&, QGLWidget *gla) {
   if(_sDialog) {
     _sDialog->close();
     delete _sDialog;
@@ -75,7 +75,7 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &
   }
   
   _supported = true;
-  _sDialog = new ShaderDialog(this,gla);
+  _sDialog = new ShaderDialog(this,gla,gla);
   _sDialog->move(10,100);
   _sDialog->show();
 
@@ -92,7 +92,7 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, RenderMode &
   GL_TEST_ERR
 }
 
-void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, RenderMode &rm, QGLWidget *) {
+void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, QMap<int,RenderMode>&rm, QGLWidget *) {
   checkViewport();
 
   // first pass: buffers 
@@ -102,7 +102,9 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, RenderMo
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
   _buffPass->enable();
   foreach(MeshModel *mp,md.meshList) {
-    if(mp->visible) mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
+	  QMap<int,RenderMode>::iterator it = rm.find(mp->id());
+	  if((mp->visible) && (it != rm.end())) 
+		  mp->render(it.value().drawMode,it.value().colorMode,it.value().textureMode);
   }
   _buffPass->disable();
   

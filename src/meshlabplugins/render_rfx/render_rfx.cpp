@@ -99,7 +99,7 @@ void RenderRFX::initActionList()
 	}
 }
 
-void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWidget *parent)
+void RenderRFX::Init(QAction *action, MeshDocument &md, QMap<int,RenderMode>&/*rmode*/, QGLWidget *parent)
 {
 
 	if (!actionList.contains(action))
@@ -166,11 +166,12 @@ void RenderRFX::Init(QAction *action, MeshDocument &md, RenderMode &rmode, QGLWi
 	glGetError();
 }
 
-void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWidget *parent)
+void RenderRFX::Render(QAction *action, MeshDocument &md, QMap<int,RenderMode>&rm, QGLWidget *parent)
 {
 
   if(!activeShader) return;
-	rm.textureMode = vcg::GLW::TMPerWedge;
+  for(QMap<int,RenderMode>::iterator it = rm.begin(); it != rm.end();++it)
+	it.value().textureMode = vcg::GLW::TMPerWedge;
 	
 	
 	for(shaderPass=0;shaderPass<totPass;shaderPass++)
@@ -188,8 +189,9 @@ void RenderRFX::Render(QAction *action, MeshDocument &md,  RenderMode &rm, QGLWi
 
 				}
 				else{
-					if(mp->visible) 
-						mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
+					QMap<int,RenderMode>::const_iterator it = rm.find(mp->id());
+					if ((mp->visible) && (it != rm.end())) 
+						mp->render(it.value().drawMode,it.value().colorMode,it.value().textureMode);
 				}
 				
 			}

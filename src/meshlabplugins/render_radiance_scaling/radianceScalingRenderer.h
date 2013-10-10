@@ -55,9 +55,9 @@ class RadianceScalingRendererPlugin : public QObject, public MeshRenderInterface
     void initActionList();
     
     virtual bool isSupported() {return _supported;}
-    virtual void Init(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);
+    virtual void Init(QAction *a, MeshDocument &m, QMap<int,RenderMode>&rm, QGLWidget *gla);
     virtual void Finalize(QAction *a, MeshDocument *m, GLArea * gla);
-    virtual void Render(QAction *a, MeshDocument &m, RenderMode &rm, QGLWidget *gla);  
+    virtual void Render(QAction *a, MeshDocument &m, QMap<int,RenderMode>&rm, QGLWidget *gla);  
 
     inline void setEnable(bool enabled);
     inline void setLit(bool lit);
