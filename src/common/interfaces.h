@@ -422,8 +422,8 @@ public:
 	MeshRenderInterface() :MeshCommonInterface() {}
     virtual ~MeshRenderInterface() {}
 		
-  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, RenderMode &/*rm*/, QGLWidget * /*parent*/){}
-	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, RenderMode &/*rm*/, QGLWidget * /*parent*/) = 0;
+  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/){}
+	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/) = 0;
   virtual void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/){}
 	virtual bool isSupported() = 0;
 	virtual QList<QAction *> actions() = 0;
