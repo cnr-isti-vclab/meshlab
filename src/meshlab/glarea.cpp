@@ -431,8 +431,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	if(!this->md()->isBusy())
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		if (iRenderer && md()->meshList.size() > 0)
-			iRenderer->Render(currentShader, *this->md(), rendermodemap[0], this);
+		if (iRenderer)
+			iRenderer->Render(currentShader, *this->md(), rendermodemap, this);
 		else
 		{
 		  if(hasToSelect) // right mouse click you have to select a mesh

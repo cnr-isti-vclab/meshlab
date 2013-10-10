@@ -1547,10 +1547,9 @@ void MainWindow::applyRenderMode()
 	// Make the call to the plugin core
 	MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
 	bool initsupport = false;
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if ((iRenderTemp != NULL) && (rm != NULL))
+	if (iRenderTemp != NULL)
 	{
-		iRenderTemp->Init(action,*(meshDoc()),*rm,GLA());
+		iRenderTemp->Init(action,*(meshDoc()),GLA()->rendermodemap,GLA());
 		if (iRenderTemp->isSupported())
 		{
 			GLA()->setRenderer(iRenderTemp,action);
