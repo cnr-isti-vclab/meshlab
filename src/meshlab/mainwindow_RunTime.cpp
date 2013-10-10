@@ -401,7 +401,7 @@ void MainWindow::updateMenus()
 				throw MeshLabException("Something really bad happened. Mesh id has not been found in rendermodemap.");
 			rendtmp = it.value();
 		}
-		bool checktext = (rendtmp.textureMode != GLW::TMNone);	
+		bool checktext = (rendtmp.textureMode != GLW::TMNone);
 		int ii = 0;
 		while(ii < meshDoc()->meshList.size())
 		{
@@ -413,7 +413,7 @@ void MainWindow::updateMenus()
 			RenderMode& rm = it.value();
 			if (rendtmp.drawMode != rm.drawMode)
 				rendtmp.setDrawMode(vcg::GLW::DMNone);
-				
+
 			if (rendtmp.colorMode != rm.colorMode)
 				rendtmp.setColorMode(vcg::GLW::CMNone);
 
@@ -464,7 +464,7 @@ void MainWindow::updateMenus()
 		setSelectFaceRenderingAct->setChecked(rendtmp.selectedFace);
 		setSelectVertRenderingAct->setChecked(rendtmp.selectedVert);
 		renderModeTextureWedgeAct->setChecked(checktext);
-			
+
 		// Decorator Menu Checking and unChecking
 		// First uncheck and disable all the decorators
 		foreach (QAction *a, PM.decoratorActionList)
@@ -1116,6 +1116,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 	  else // filter has failed. show the message error.
 		{
 			QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 		}
 	  // at the end for filters that change the color, or selection set the appropriate rendering mode
@@ -1424,7 +1425,9 @@ void MainWindow::postFilterExecution()
 	}
 	else // filter has failed. show the message error.
 	{
-		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(fname)/*+iFilter->errorMsg()*/); // text
+	  MeshLabFilterInterface         *iFilter = obj->_mfc->filterInterface;
+		QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(fname)+iFilter->errorMsg()); // text
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
 		MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
 	}
 	// at the end for filters that change the color, or selection set the appropriate rendering mode
@@ -1665,7 +1668,7 @@ void MainWindow::toggleSelectFaceRendering()
 {
   RenderMode* rm = GLA()->getCurrentRenderMode();
   if (rm != NULL)
-	GLA()->setSelectFaceRendering(!rm->selectedFace);
+    GLA()->setSelectFaceRendering(!rm->selectedFace);
 }
 
 void MainWindow::toggleSelectVertRendering()
@@ -2773,7 +2776,7 @@ void MainWindow::updateRenderToolBar( RenderModeAction* act )
 	//if (GLA() == NULL)
 	//	return;
 	//QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
-	//const RenderMode& tmp = *(rmode.begin()); 
+	//const RenderMode& tmp = *(rmode.begin());
 	//for(QMap<int,RenderMode>::const_iterator it = rmode.begin(); it != rmode.end();++it)
 	//{
 	//	if ()
@@ -2782,7 +2785,7 @@ void MainWindow::updateRenderToolBar( RenderModeAction* act )
 
 void MainWindow::updateRenderMode( )
 {
-	if ((GLA() == NULL) || (meshDoc() == NULL)) 
+	if ((GLA() == NULL) || (meshDoc() == NULL))
 		return;
 	QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
 
@@ -2795,14 +2798,14 @@ void MainWindow::updateRenderMode( )
 	int meshid = act->data().toInt(&isvalidid);
 	if (!isvalidid)
 		throw MeshLabException("A RenderModeAction contains a non-integer data id.");
-	
+
 	if (meshid == -1)
 	{
 		for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
 		{
 			act->updateRenderMode(it.value());
 			//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-			//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one. 
+			//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
 			//The enum-value depends from the enabled attributes of input mesh.
 			if (textact != NULL)
 				setBestTextureModePerMesh(textact,it.key(),it.value());
@@ -2816,7 +2819,7 @@ void MainWindow::updateRenderMode( )
 		act->updateRenderMode(it.value());
 		updateMenus();
 		//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-		//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one. 
+		//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
 		//The enum-value depends from the enabled attributes of input mesh.
 		if (textact != NULL)
 			setBestTextureModePerMesh(textact,meshid,it.value());
@@ -2832,7 +2835,7 @@ void MainWindow::connectRenderModeActionList(QList<RenderModeAction*>& actlist)
 
 vcg::GLW::TextureMode MainWindow::getBestTextureRenderModePerMesh(const int meshid)
 {
-	MeshModel* mesh = NULL; 
+	MeshModel* mesh = NULL;
 	if ((meshDoc() == NULL) || ((mesh  = meshDoc()->getMesh(meshid)) == NULL))
 		return vcg::GLW::TMNone;
 
