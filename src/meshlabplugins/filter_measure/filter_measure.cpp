@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -43,11 +43,11 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 {
 	if (filterName == "Compute Topological Measures")
 		{
-			CMeshO &m=md.mm()->cm;	
+			CMeshO &m=md.mm()->cm;
 			tri::Allocator<CMeshO>::CompactFaceVector(m);
 			tri::Allocator<CMeshO>::CompactVertexVector(m);
 			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
+			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
 
 			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
 			int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
@@ -97,40 +97,35 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 	/************************************************************/
 	if (filterName == "Compute Topological Measures for Quad Meshes")
 		{
-			CMeshO &m=md.mm()->cm;	
-			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);				
-			md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);				
+			CMeshO &m=md.mm()->cm;
+			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
 
 			if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
-				Log("Error: mesh has a not consistent FF adjacency");
+				this->errorMessage = "Error: mesh has a not consistent FF adjacency";
 				return false;
 			}
 			if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
-				Log("Warning: mesh has a not consistent FauxEdge tagging");
-				return false;
-			}
-			if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-				Log("Warning: IsBitTriQuadOnly");
-				//return false;
-			}
-			//										if (! tri::Clean<CMeshO>::HasConsistentEdges(m)) lastErrorDetected |= NOT_EDGES_CONST;
-			int nsinglets= tri::BitQuadOptimization< tri::BitQuad<CMeshO> >::MarkSinglets(m);
-			if ( nsinglets  )  {
-				Log("Warning: MarkSinglets");
-				//return false;
-			}
 
-			if (! tri::BitQuad<CMeshO>::HasConsistentValencyFlag(m))
-			{
-				Log("Warning: HasConsistentValencyFlag");
-				//return false;
+				this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
+				return false;
 			}
 
 			int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
 			int nTris = tri::Clean<CMeshO>::CountBitTris(m);
 			int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
+			int nLargePolys = tri::Clean<CMeshO>::CountBitLargePolygons(m);
+			if(nLargePolys>0) nQuads=0;
 
-      Log("Mesh has %i tri %i quad and %i polig",nTris,nQuads,nPolys);
+			Log("Mesh has %8i triangles \n",nTris);
+			Log("         %8i quads \n",nQuads);
+			Log("         %8i polygons \n",nPolys);
+			Log("         %8i large polygons (with internal faux vertexes)",nLargePolys);
+
+	  if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
+		  this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
+		  return false;
+	  }
 
       //
       //   i
@@ -138,55 +133,54 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
       //
       //   i+1     i+2
       tri::UpdateFlags<CMeshO>::FaceClearV(m);
-      Distribution<float> ad; // angle distributio
-      Distribution<float> rd; // ratio distribution
-
+      Distribution<float> AngleD; // angle distribution
+      Distribution<float> RatioD; // ratio distribution
+      tri::UpdateFlags<CMeshO>::FaceClearV(m);
       for(CMeshO::FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
-      {
-
-        // Collect the vertices
-        Point3f qv[4];
-        for(int i=0;i<3;++i)
+        if(!fi->IsV())
         {
-         if(!(*fi).IsF(i) && !(*fi).IsF((i+1)%3))
-         {
-          qv[0]= (*fi).cP0(i);
-          qv[1]= (*fi).cP1(i);
-          qv[2]= (*fi).cP2(i);
-          face::Pos<CFaceO> pp(&*fi,(i+2)%3,fi->V(i));
-          assert(pp.F()->IsF(pp.E()));
-          pp.FlipF();pp.FlipE();pp.FlipV();
-          qv[3]= pp.V()->cP();
-          break;
-         }
+          fi->SetV();
+          // Collect the vertices
+          Point3f qv[4];
+          bool quadFound=false;
+          for(int i=0;i<3;++i)
+          {
+            if((*fi).IsF(i) && !(*fi).IsF((i+1)%3) && !(*fi).IsF((i+2)%3) )
+            {
+              qv[0] = fi->V0(i)->P(),
+                  qv[1] = fi->FFp(i)->V2( fi->FFi(i) )->P(),
+                  qv[2] = fi->V1(i)->P(),
+                  qv[3] = fi->V2(i)->P();
+              quadFound=true;
+            }
+          }
+          assert(quadFound);
+          for(int i=0;i<4;++i)
+            AngleD.Add(fabs(90-math::ToDeg(Angle(qv[(i+0)%4] - qv[(i+1)%4], qv[(i+2)%4] - qv[(i+1)%4]))));
+          float edgeLen[4];
 
-         for(int i=0;i<4;++i)
-             ad.Add(fabs(90-math::ToDeg(Angle(qv[(i+0)%4] - qv[(i+1)%4], qv[(i+2)%4] - qv[(i+1)%4]))));
-         float edgeLen[4];
-
-         for(int i=0;i<4;++i)
-             edgeLen[i]=Distance(qv[(i+0)%4],qv[(i+1)%4]);
-         std::sort(edgeLen,edgeLen+4);
-         rd.Add(edgeLen[0]/edgeLen[3]);
+          for(int i=0;i<4;++i)
+            edgeLen[i]=Distance(qv[(i+0)%4],qv[(i+1)%4]);
+          std::sort(edgeLen,edgeLen+4);
+          RatioD.Add(edgeLen[0]/edgeLen[3]);
         }
-      }
 
       Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-                          ad.Avg(), ad.Min(), ad.Max(),ad.StandardDeviation(),ad.Percentile(0.05),ad.Percentile(0.95));
+                          AngleD.Avg(), AngleD.Min(), AngleD.Max(),AngleD.StandardDeviation(),AngleD.Percentile(0.05),AngleD.Percentile(0.95));
 
-      Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", rd.Avg(), rd.Min(), rd.Max());
+      Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
       return true;
-		}
-		/************************************************************/ 
-	if(filterName == "Compute Geometric Measures")
-		{
-			CMeshO &m=md.mm()->cm;
-			tri::Inertia<CMeshO> I(m);
-			float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-			float Volume = I.Mass(); 
-			Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());			
-			Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());			
-			Log("Mesh Volume  is %f", Volume);			
+        }
+        /************************************************************/
+    if(filterName == "Compute Geometric Measures")
+        {
+            CMeshO &m=md.mm()->cm;
+            tri::Inertia<CMeshO> I(m);
+            float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
+            float Volume = I.Mass();
+            Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
+            Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
+            Log("Mesh Volume  is %f", Volume);
       Log("Mesh Surface is %f", Area);
       Point3f bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
       Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
@@ -215,20 +209,20 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
         Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
       }
       return true;
-		}
-		/************************************************************/
-	if((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat") )
-		{
-			CMeshO &m=md.mm()->cm;
-			Distribution<float> DD;
-			if(filterName == "Per Vertex Quality Stat")
-				tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
-			else
-				tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
+        }
+        /************************************************************/
+    if((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat") )
+        {
+            CMeshO &m=md.mm()->cm;
+            Distribution<float> DD;
+            if(filterName == "Per Vertex Quality Stat")
+                tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
+            else
+                tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
 
-			Log("   Min %f Max %f",DD.Min(),DD.Max());		
-			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));		
-			Log("   StdDev		%f",DD.StandardDeviation());		
+			Log("   Min %f Max %f",DD.Min(),DD.Max());
+			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));
+			Log("   StdDev		%f",DD.StandardDeviation());
 			Log("   Variance  %f",DD.Variance());
 			return true;
 		}
@@ -263,8 +257,8 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			  Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
 			Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
 			return true;
-        }
-    return false;
+		}
+	return false;
 }
 
 
