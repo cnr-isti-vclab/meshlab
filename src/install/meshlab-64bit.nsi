@@ -5,18 +5,18 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "1.3.2"
+!define PRODUCT_VERSION "1.3.3"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "D:\qt-everywhere-opensource-src-4.7.2"
+!define QT_BASE "C:\Qt\qt-everywhere-opensource-src-5.1.0\qtbase"
 !define DISTRIB_FOLDER "../distrib"
-!define MICROSOFT_VS2008_REDIST_KEYDIR "Software\Microsoft\Windows\CurrentVersion\Uninstall\"
-!define MICROSOFT_VS2008_X64 "{8220EEFE-38CD-377E-8595-13398D740ACE}"
-!define MICROSOFT_VS2008_IA64 "{5827ECE1-AEB0-328E-B813-6FC68622C1F9}"
+!define MICROSOFT_VS2010_REDIST_KEYDIR "Software\Microsoft\Windows\CurrentVersion\Uninstall\"
+!define MICROSOFT_VS2010_X64 "{1D8E6291-B0D5-35EC-8441-6616F567A0F7}"
+!define MICROSOFT_VS2010_IA64 "{88C73C1C-2DE5-3B01-AFB8-B46EF4AB41CD}"
 
 
 
@@ -55,7 +55,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v132BETA_64bit_${NOW}.exe"
+OutFile "MeshLabDevel_v133_64bit_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 InstallDir "${MAINDIR}\VCG\MeshLab"
 ShowInstDetails show
@@ -96,17 +96,17 @@ Section -Prerequisites
 	;MessageBox MB_OK "Letto : $0" 
 	;Quit
 	
-	!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2008_REDIST_KEYDIR} ${MICROSOFT_VS2008_X64}
+	!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_X64}
 	Pop $R0
 	${If} $R0 == "1" 
 		Goto endPrerequisites
 	${Else}
-		!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2008_REDIST_KEYDIR} ${MICROSOFT_VS2008_IA64}
+		!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_IA64}
 		Pop $R0
 		${If} $R0 == "1" 
 			Goto endPrerequisites
 		${Else} 
-			MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2008 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
+			MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2010 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
 			Quit
 		${Endif}
 	${Endif}
@@ -218,8 +218,8 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\samplefilter.dll"
   File "${DISTRIB_FOLDER}/plugins\samplefilterdyn.dll"
 
-  File "${DISTRIB_FOLDER}/plugins\filtergeodesic.dll"
-  File "${DISTRIB_FOLDER}/plugins\filtercreateiso.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_geodesic.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_createiso.dll"
  
 
   ; edit plugins (14)
@@ -290,18 +290,19 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\samples\images"
   File "${DISTRIB_FOLDER}/sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
-  File ${QT_BASE}\plugins\imageformats\qjpeg4.dll
-  File ${QT_BASE}\plugins\imageformats\qgif4.dll
-  File ${QT_BASE}\plugins\imageformats\qtiff4.dll
+  File ${QT_BASE}\plugins\imageformats\qjpeg.dll
+  File ${QT_BASE}\plugins\imageformats\qgif.dll
+  File ${QT_BASE}\plugins\imageformats\qtiff.dll
   SetOutPath "$INSTDIR"
   ;File "${DISTRIB_FOLDER}\common.lib"
-  File "${QT_BASE}\bin\QtCore4.dll"
-  File "${QT_BASE}\bin\QtGui4.dll"
-  File "${QT_BASE}\bin\QtOpenGL4.dll"
-  File "${QT_BASE}\bin\QtXml4.dll"
-  File "${QT_BASE}\bin\QtNetwork4.dll"
-  File "${QT_BASE}\bin\QtScript4.dll"
-  File "${QT_BASE}\bin\QtXmlPatterns4.dll"
+  File "${QT_BASE}\bin\Qt5Core.dll"
+  File "${QT_BASE}\bin\Qt5Gui.dll"
+  File "${QT_BASE}\bin\Qt5OpenGL.dll"
+  File "${QT_BASE}\bin\Qt5Xml.dll"
+  File "${QT_BASE}\bin\Qt5Network.dll"
+  File "${QT_BASE}\bin\Qt5Script.dll"
+  File "${QT_BASE}\bin\Qt5XmlPatterns.dll"
+  File "${QT_BASE}\bin\Qt5Widgets.dll"
   ;File "C:\MinGW\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"

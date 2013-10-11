@@ -654,8 +654,8 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
 	preferencesMenu=menuBar()->addMenu(tr("&Tools"));
-	preferencesMenu->addAction(showFilterEditAct);
-	preferencesMenu->addSeparator();
+	//preferencesMenu->addAction(showFilterEditAct);
+	//preferencesMenu->addSeparator();
 	preferencesMenu->addAction(setCustomizeAct);
 
 
@@ -1139,7 +1139,7 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 			temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
 			congratsDialog->exec();
 			if(congratsDialog->result()==QDialog::Accepted)
-				QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it?cc=g.ranzuglia@isti.cnr.it&subject=[MeshLab] Reporting Info on MeshLab Usage"));
+				QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
 		}
 	}
 }
