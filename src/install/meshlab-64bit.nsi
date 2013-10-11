@@ -5,7 +5,7 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "1.3.3"
+!define PRODUCT_VERSION "1.3.3BETA"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -13,6 +13,7 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define QT_BASE "C:\Qt\qt-everywhere-opensource-src-5.1.0\qtbase"
+!define ICU_DLLS "C:\Users\ranzuglia\Desktop\icu\bin64"
 !define DISTRIB_FOLDER "../distrib"
 !define MICROSOFT_VS2010_REDIST_KEYDIR "Software\Microsoft\Windows\CurrentVersion\Uninstall\"
 !define MICROSOFT_VS2010_X64 "{1D8E6291-B0D5-35EC-8441-6616F567A0F7}"
@@ -55,7 +56,7 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v133_64bit_${NOW}.exe"
+OutFile "MeshLabDevel_v133BETA_64bit_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 InstallDir "${MAINDIR}\VCG\MeshLab"
 ShowInstDetails show
@@ -129,6 +130,7 @@ Section "MainSection" SEC01
   Delete "$INSTDIR\ming*.dll"
   Delete "$INSTDIR\plugins\*.dll"
   Delete "$INSTDIR\imageformats\*.dll"
+  Delete "$INSTDIR\platforms\*.dll"
   
   SetOutPath "$INSTDIR\shaders"
   File "${DISTRIB_FOLDER}\shaders\*.frag"
@@ -293,6 +295,10 @@ Section "MainSection" SEC01
   File ${QT_BASE}\plugins\imageformats\qjpeg.dll
   File ${QT_BASE}\plugins\imageformats\qgif.dll
   File ${QT_BASE}\plugins\imageformats\qtiff.dll
+   SetOutPath "$INSTDIR\platforms"
+  File "${QT_BASE}\plugins\platforms\qminimal.dll"
+  File "${QT_BASE}\plugins\platforms\qwindows.dll"
+  
   SetOutPath "$INSTDIR"
   ;File "${DISTRIB_FOLDER}\common.lib"
   File "${QT_BASE}\bin\Qt5Core.dll"
@@ -303,6 +309,11 @@ Section "MainSection" SEC01
   File "${QT_BASE}\bin\Qt5Script.dll"
   File "${QT_BASE}\bin\Qt5XmlPatterns.dll"
   File "${QT_BASE}\bin\Qt5Widgets.dll"
+  File "${ICU_DLLS}\icuin51.dll"
+  File "${ICU_DLLS}\icudt51.dll"
+  File "${ICU_DLLS}\icuuc51.dll"
+  
+  
   ;File "C:\MinGW\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\libgcc_s_dw2-1.dll"
