@@ -58,9 +58,9 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_CAMERA,
     DP_SHOW_TEXPARAM,
     DP_SHOW_BOUNDARY_TEX,
-    DP_SHOW_SELECTED_MESH,
+    DP_SHOW_SELECTED_MESH/*,
     DP_SHOW_SELECTED_FACE,
-    DP_SHOW_SELECTED_VERT
+    DP_SHOW_SELECTED_VERT*/
   };
 
 
@@ -95,18 +95,18 @@ public:
                 DP_SHOW_CAMERA <<
                 DP_SHOW_TEXPARAM <<
                 DP_SHOW_SELECTED_MESH <<
-                DP_SHOW_SELECTED_FACE <<
-                DP_SHOW_SELECTED_VERT <<
+                /*DP_SHOW_SELECTED_FACE <<
+                DP_SHOW_SELECTED_VERT <<*/
                 DP_SHOW_BOUNDARY_TEX;
 
     FilterIDType tt;
     foreach(tt , types())
     {
       actionList << new QAction(decorationName(tt), this);
-      if(tt==DP_SHOW_SELECTED_VERT)
+      /*if(tt==DP_SHOW_SELECTED_VERT)
         actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
       if(tt==DP_SHOW_SELECTED_FACE)
-        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));
+        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));*/
     }
 
   QAction *ap;
