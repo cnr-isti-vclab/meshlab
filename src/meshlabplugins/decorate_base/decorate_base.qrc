@@ -3,4 +3,8 @@
         <file>contour.vert</file>
         <file>contour.frag</file>
     </qresource>
+    <qresource prefix="/images">
+        <file>selected_face.png</file>
+        <file>selected_vert.png</file>
+    </qresource>
 </RCC>

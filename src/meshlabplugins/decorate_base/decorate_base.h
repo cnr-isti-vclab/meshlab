@@ -58,7 +58,9 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_CAMERA,
     DP_SHOW_TEXPARAM,
     DP_SHOW_BOUNDARY_TEX,
-    DP_SHOW_SELECTED_MESH
+    DP_SHOW_SELECTED_MESH,
+    DP_SHOW_SELECTED_FACE,
+    DP_SHOW_SELECTED_VERT
   };
 
 
@@ -76,35 +78,43 @@ public:
 
   ExtraMeshDecoratePlugin()
   {
-      typeList <<
-                  DP_SHOW_VERT <<
-                  DP_SHOW_EDGE <<
-                  DP_SHOW_NON_FAUX_EDGE <<
-                  DP_SHOW_BOUNDARY <<
-                  DP_SHOW_NON_MANIF_EDGE <<
-                  DP_SHOW_NON_MANIF_VERT <<
-                  DP_SHOW_NORMALS <<
-                  DP_SHOW_QUALITY_HISTOGRAM <<
-                  DP_SHOW_QUALITY_CONTOUR <<
-                  DP_SHOW_BOX_CORNERS <<
-                  DP_SHOW_AXIS <<
-                  DP_SHOW_QUOTED_BOX <<
-                  DP_SHOW_LABEL <<
-                  DP_SHOW_CAMERA <<
-                  DP_SHOW_TEXPARAM <<
-                  DP_SHOW_SELECTED_MESH <<
-                  DP_SHOW_BOUNDARY_TEX;
+    typeList <<
+                DP_SHOW_VERT <<
+                DP_SHOW_EDGE <<
+                DP_SHOW_NON_FAUX_EDGE <<
+                DP_SHOW_BOUNDARY <<
+                DP_SHOW_NON_MANIF_EDGE <<
+                DP_SHOW_NON_MANIF_VERT <<
+                DP_SHOW_NORMALS <<
+                DP_SHOW_QUALITY_HISTOGRAM <<
+                DP_SHOW_QUALITY_CONTOUR <<
+                DP_SHOW_BOX_CORNERS <<
+                DP_SHOW_AXIS <<
+                DP_SHOW_QUOTED_BOX <<
+                DP_SHOW_LABEL <<
+                DP_SHOW_CAMERA <<
+                DP_SHOW_TEXPARAM <<
+                DP_SHOW_SELECTED_MESH <<
+                DP_SHOW_SELECTED_FACE <<
+                DP_SHOW_SELECTED_VERT <<
+                DP_SHOW_BOUNDARY_TEX;
 
-      FilterIDType tt;
-      foreach(tt , types()){
-          actionList << new QAction(decorationName(tt), this);
-      }
-      QAction *ap;
-    foreach(ap,actionList){
-        ap->setCheckable(true);
+    FilterIDType tt;
+    foreach(tt , types())
+    {
+      actionList << new QAction(decorationName(tt), this);
+      if(tt==DP_SHOW_SELECTED_VERT)
+        actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
+      if(tt==DP_SHOW_SELECTED_FACE)
+        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));
     }
 
+  QAction *ap;
+  foreach(ap,actionList){
+    ap->setCheckable(true);
   }
+
+}
 
   void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
   void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);

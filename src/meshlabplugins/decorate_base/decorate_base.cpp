@@ -55,6 +55,8 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
   case DP_SHOW_CAMERA:            return tr("Draw the position of the camera, if present in the current mesh");
   case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
   case DP_SHOW_SELECTED_MESH:     return tr("Enlighten the current mesh");
+  case DP_SHOW_SELECTED_FACE:     return tr("Show the selected faces of the current mesh");
+  case DP_SHOW_SELECTED_VERT:     return tr("Show the selected vertices of the current mesh");
   }
   assert(0);
   return QString();
@@ -81,6 +83,8 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_QUALITY_HISTOGRAM: return QString("Show Quality Histogram");
     case DP_SHOW_QUALITY_CONTOUR:   return QString("Show Quality Contour");
     case DP_SHOW_SELECTED_MESH:     return QString("Show Current Mesh");
+    case DP_SHOW_SELECTED_FACE:     return QString("Show Selected Faces");
+    case DP_SHOW_SELECTED_VERT:     return QString("Show Selected Vertices");
 
     default: assert(0);
     }
@@ -428,6 +432,12 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 		  glPopAttrib();
 		}
 	} break;
+	case DP_SHOW_SELECTED_FACE :
+	  m.renderSelectedFace();
+	 break;
+	case DP_SHOW_SELECTED_VERT :
+	  m.renderSelectedVert();
+	 break;
 	} // end switch;
 	glPopMatrix();
 }
@@ -828,6 +838,8 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_LABEL :
   case DP_SHOW_CAMERA :
   case DP_SHOW_TEXPARAM :
+  case DP_SHOW_SELECTED_FACE :
+  case DP_SHOW_SELECTED_VERT :
   case DP_SHOW_BOUNDARY_TEX : return ExtraMeshDecoratePlugin::PerMesh;
   case DP_SHOW_AXIS : return ExtraMeshDecoratePlugin::PerDocument;
   case DP_SHOW_SELECTED_MESH : return ExtraMeshDecoratePlugin::PerDocument;
