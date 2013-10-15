@@ -52,8 +52,8 @@ void SaveMaskExporterDialog::InitDialog()
   QVBoxLayout *vbox = new QVBoxLayout(this);
 	vbox->addWidget(stdParFrame);
 	ui->saveParBox->setLayout(vbox);
-
- this->setWindowTitle("Choose Saving Options for: '"+m->label()+"'");
+	QFileInfo fi(m->fullName());
+ this->setWindowTitle("Choose Saving Options for: '"+ fi.baseName() +"'");
 	// Show the additional parameters only for formats that have some.
     if(parSet->isEmpty()) ui->saveParBox->hide();
 								else ui->saveParBox->show();

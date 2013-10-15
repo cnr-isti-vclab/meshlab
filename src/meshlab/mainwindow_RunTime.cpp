@@ -2448,21 +2448,22 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         return false;
     mod->meshModified() = false;
     QString laylabel = "Save \"" + mod->label() + "\" Layer";
-    QFileDialog saveDialog(this,laylabel, mod->fullName());
-  saveDialog.setNameFilters(suffixList);
-    saveDialog.setAcceptMode(QFileDialog::AcceptSave);
+    QFileDialog* saveDialog = new QFileDialog(this,laylabel, mod->fullName());
+  saveDialog->setNameFilters(suffixList);
+    saveDialog->setAcceptMode(QFileDialog::AcceptSave);
+	connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
   QStringList matchingExtensions=suffixList.filter(defaultExt);
     if(!matchingExtensions.isEmpty())
-        saveDialog.selectNameFilter(matchingExtensions.last());
+        saveDialog->selectNameFilter(matchingExtensions.last());
 
 	if (fileName.isEmpty()){
-		int dialogRet = saveDialog.exec();
+		int dialogRet = saveDialog->exec();
 		if(dialogRet==QDialog::Rejected	) return false;
-		fileName=saveDialog.selectedFiles ().first();
+		fileName=saveDialog->selectedFiles ().first();
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty())
 		{
-			QString ext = saveDialog.selectedNameFilter();
+			QString ext = saveDialog->selectedNameFilter();
 			ext.chop(1); ext = ext.right(4);
 			fileName = fileName + ext;
 			qDebug("File without extension adding it by hand '%s'", qPrintable(fileName));
@@ -2542,6 +2543,22 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 
 	}
 	return ret;
+}
+
+void MainWindow::changeFileExtension(const QString& st)
+{
+	QFileDialog* fd = qobject_cast<QFileDialog*>(sender());
+	if (fd == NULL)
+		return;
+	QRegExp extlist("\\*.\\w+");
+	int start = st.indexOf(extlist);
+	QString ext = extlist.cap().remove("*");
+	QStringList stlst = fd->selectedFiles();
+	if (!stlst.isEmpty())
+	{
+		QFileInfo fi(stlst[0]);
+		fd->selectFile(fi.baseName() + ext);
+	}
 }
 
 bool MainWindow::save(const bool saveAllPossibleAttributes)

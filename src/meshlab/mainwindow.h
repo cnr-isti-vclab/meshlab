@@ -114,6 +114,7 @@ private slots:
     bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
     bool save(const bool saveAllPossibleAttributes = false);
     bool saveSnapshot();
+	void changeFileExtension(const QString&);
     ///////////Slot Menu Edit ////////////////////////
     void applyEditMode();
     void suspendEditMode();
