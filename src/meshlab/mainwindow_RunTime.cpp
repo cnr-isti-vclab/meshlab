@@ -1877,12 +1877,12 @@ bool MainWindow::openProject(QString fileName)
 	//if(model_filename.isEmpty())
 	//  return false;
 
-	GLA()->setColorMode(GLW::CMPerVert);
-	GLA()->setDrawMode(GLW::DMPoints);
 	if(!MeshDocumentFromBundler(*meshDoc(),cameras_filename,image_list_filename,model_filename)){
 	  QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
 	  return false;
 	}
+	setPerVertexColorMode();
+	renderPoint();
 
 	//else{
 	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
@@ -1921,12 +1921,13 @@ bool MainWindow::openProject(QString fileName)
 	//if(model_filename.isEmpty())
 	//  return false;
 
-	GLA()->setColorMode(GLW::CMPerVert);
-	GLA()->setDrawMode(GLW::DMPoints);
+	
 	if(!MeshDocumentFromNvm(*meshDoc(),cameras_filename,model_filename)){
 	  QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
 	  return false;
 	}
+	setPerVertexColorMode();
+	renderPoint();
 
 	//else{
 	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
