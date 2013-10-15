@@ -463,9 +463,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
 	case FP_SCALE:
 		{
-			parlst.addParam(new RichDynamicFloat("axisX",1,0.1,10,"X Axis","Scaling"));
-			parlst.addParam(new RichDynamicFloat("axisY",1,0.1,10,"Y Axis","Scaling"));
-			parlst.addParam(new RichDynamicFloat("axisZ",1,0.1,10,"Z Axis","Scaling"));
+			parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
+			parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
+			parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
 			parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
 			QStringList scaleCenter;
 			scaleCenter.push_back("origin");
@@ -1100,7 +1100,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					Point3f tranVec;
 					Matrix44f trTran,trTranInv;
 
-					float xScale= par.getDynamicFloat("axisX");
+					float xScale= par.getFloat("axisX");
 					trScale.SetScale(xScale,xScale,xScale);
 
 					if(par.getBool("unitFlag"))
@@ -1142,9 +1142,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				Point3f tranVec;
 				Matrix44f trTran,trTranInv;
 
-				float xScale= par.getDynamicFloat("axisX");
-				float yScale= par.getDynamicFloat("axisY");
-				float zScale= par.getDynamicFloat("axisZ");
+				float xScale= par.getFloat("axisX");
+				float yScale= par.getFloat("axisY");
+				float zScale= par.getFloat("axisZ");
 				if(par.getBool("uniformFlag"))
 					trScale.SetScale(xScale,xScale,xScale);
 				else
