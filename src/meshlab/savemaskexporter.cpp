@@ -205,7 +205,10 @@ void SaveMaskExporterDialog::SlotCancelButton()
 void SaveMaskExporterDialog::SlotRenameTexture()
 {
 	int row = ui->listTextureName->currentRow();
-	std::string newtexture = vcg::tri::io::TextureRename::GetNewTextureName(m->cm.textures[row].c_str());
+	ChangeTextureNameDialog dialog(this,m->cm.textures[row].c_str());
+	dialog.exec();
+	std::string newtexture = dialog.GetTextureName();
+	dialog.close();
 	if(newtexture.size()>0)
 	{
 		QStringList lists = QString(newtexture.c_str()).split('/');

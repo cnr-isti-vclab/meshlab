@@ -29,7 +29,6 @@
 
 ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent) : QDialog(parent)
 {
-	ui = new Ui::RenameTextureDialog();
 	InitDialog();
 }
 
@@ -41,6 +40,7 @@ ChangeTextureNameDialog::ChangeTextureNameDialog(QWidget *parent,std::string old
 
 void ChangeTextureNameDialog::InitDialog()
 {
+	ui = new Ui::RenameTextureDialog();
 	ChangeTextureNameDialog::ui->setupUi(this);
 	connect(ui->okButton, SIGNAL(clicked()), this, SLOT(SlotOkButton()));
 	connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(SlotCancelButton()));

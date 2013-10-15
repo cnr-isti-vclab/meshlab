@@ -52,24 +52,4 @@ private:
 	std::string texture;
 };//end class
 
-namespace vcg {
-namespace tri {
-namespace io {
-	
-	class TextureRename
-	{
-	public:	
-		inline static std::string GetNewTextureName(std::string oldtexturename)
-		{
-			ChangeTextureNameDialog dialog(new QWidget(),oldtexturename);
-			dialog.exec();
-			std::string name = dialog.GetTextureName();
-			dialog.close();
-			return name;
-		}
-	};
-} // end Namespace tri
-} // end Namespace io
-} // end Namespace vcg
-
 #endif
