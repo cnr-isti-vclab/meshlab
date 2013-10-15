@@ -836,12 +836,12 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_BOX_CORNERS :
   case DP_SHOW_QUOTED_BOX :
   case DP_SHOW_LABEL :
-  case DP_SHOW_CAMERA :
   case DP_SHOW_TEXPARAM :
   /*case DP_SHOW_SELECTED_FACE :
   case DP_SHOW_SELECTED_VERT :*/
   case DP_SHOW_BOUNDARY_TEX : return ExtraMeshDecoratePlugin::PerMesh;
   case DP_SHOW_AXIS : return ExtraMeshDecoratePlugin::PerDocument;
+  case DP_SHOW_CAMERA : return ExtraMeshDecoratePlugin::PerDocument;
   case DP_SHOW_SELECTED_MESH : return ExtraMeshDecoratePlugin::PerDocument;
   }
   assert (0);

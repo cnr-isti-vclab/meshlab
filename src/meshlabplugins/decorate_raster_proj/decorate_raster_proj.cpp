@@ -617,7 +617,7 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
     {
         case DP_PROJECT_RASTER:
         {
-			if ((gla == NULL) || (gla->getCurrentRenderMode()))
+			if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
 				return;
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 

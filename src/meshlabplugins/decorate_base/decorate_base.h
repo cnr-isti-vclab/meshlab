@@ -80,7 +80,7 @@ public:
   {
     typeList <<
                 DP_SHOW_VERT <<
-                DP_SHOW_EDGE <<
+                //DP_SHOW_EDGE <<
                 DP_SHOW_NON_FAUX_EDGE <<
                 DP_SHOW_BOUNDARY <<
                 DP_SHOW_NON_MANIF_EDGE <<
