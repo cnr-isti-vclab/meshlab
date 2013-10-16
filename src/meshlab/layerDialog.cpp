@@ -372,11 +372,8 @@ void LayerDialog::updateTable()
 		wid += ui->meshTreeWidget->columnWidth(i);
 	}
 	ui->meshTreeWidget->setMinimumWidth(wid);
-	/*for(int ii = 0; ii < md->meshList.size();++ii)
-	{
-		if ()
-	}*/
-	ui->meshTreeWidget->setCurrentItem(selitem);
+	if (selitem != NULL)
+		ui->meshTreeWidget->setCurrentItem(selitem);
 	if (md->rasterList.size() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
