@@ -9,7 +9,7 @@ SOURCES += filter_ssynth.cpp \
     ../../meshlabplugins/io_x3d/vrml/Parser.cpp \
     ../../meshlabplugins/io_x3d/vrml/Scanner.cpp \
     mytrenderer.cpp
-INCLUDEPATH += ../../external/structuresynth/ssynth
+INCLUDEPATH += ../../external/structuresynth-1.5/ssynth
 win32-msvc.net:LIBS += ../../external/lib/win32-msvc.net/ssynth.lib
 win32-msvc2005:LIBS += ../../external/lib/win32-msvc2005/ssynth.lib
 win32-msvc2008:LIBS += ../../external/lib/win32-msvc2008/ssynth.lib
