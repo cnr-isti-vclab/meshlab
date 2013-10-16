@@ -196,6 +196,18 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 				parlst.addParam(new RichDynamicFloat("PercentBV", 0.2f, 0.0f, 1.0f,  tr("Variation from Blue or Value"), tr("A float between 0 and 1 that represents the percent variation from this color that will be selected.  For example if the R was 200 and you put 0.1 then any color with R 200+-25.5 will be selected.") ));
 			}
 			break;
+			case FP_SELECT_ALL:
+			{
+				 parlst.addParam(new RichBool("allFaces", true, "Select all Faces", "If true the filter will select all the faces."));
+				 parlst.addParam(new RichBool("allVerts", true, "Select all Vertices", "If true the filter will select all the vertices."));
+			}
+			break;
+			case FP_SELECT_NONE:
+			{
+				 parlst.addParam(new RichBool("allFaces", true, "De-select all Faces", "If true the filter will de-select all the faces."));
+				 parlst.addParam(new RichBool("allVerts", true, "De-select all Vertices", "If true the filter will de-select all the vertices."));
+			}
+			break;
 			case FP_SELECT_INVERT:
 			{
 				 parlst.addParam(new RichBool("InvFaces", true, "Invert Faces", "If true the filter will invert the selected faces."));
@@ -274,11 +286,15 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   }
   break;
   case FP_SELECT_ALL    :
-      tri::UpdateSelection<CMeshO>::VertexAll(m.cm);
-      tri::UpdateSelection<CMeshO>::FaceAll(m.cm);     break;
+	  if (par.getBool("allVerts"))
+		tri::UpdateSelection<CMeshO>::VertexAll(m.cm);
+	  if (par.getBool("allFaces"))
+	      tri::UpdateSelection<CMeshO>::FaceAll(m.cm);     break;
   case FP_SELECT_NONE   :
-      tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
-      tri::UpdateSelection<CMeshO>::FaceClear(m.cm);   break;
+	  if (par.getBool("allVerts"))
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+	  if (par.getBool("allFaces"))
+		tri::UpdateSelection<CMeshO>::FaceClear(m.cm);   break;
   case FP_SELECT_INVERT :
 	  if (par.getBool("InvVerts"))
 		tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);
