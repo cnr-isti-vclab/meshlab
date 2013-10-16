@@ -40,7 +40,9 @@ FilterLayerPlugin::FilterLayerPlugin()
   typeList <<
               FP_FLATTEN <<
               FP_DELETE_MESH <<
+			  FP_DELETE_NON_VISIBLE_MESH <<
               FP_DELETE_RASTER <<
+			  FP_DELETE_NON_SELECTED_RASTER <<
               FP_SPLITSELECT <<
               FP_SPLITCONNECTED <<
               FP_RENAME_MESH <<
@@ -60,7 +62,9 @@ FilterLayerPlugin::FilterLayerPlugin()
    case FP_SPLITCONNECTED :  return QString("Split in Connected Components");
    case FP_DUPLICATE :  return QString("Duplicate Current layer");
    case FP_DELETE_MESH :  return QString("Delete Current Mesh");
+   case FP_DELETE_NON_VISIBLE_MESH :  return QString("Delete all non visible Mesh Layers");
    case FP_DELETE_RASTER :  return QString("Delete Current Raster");
+   case FP_DELETE_NON_SELECTED_RASTER :  return QString("Delete all Non Selected Rasters");
    case FP_FLATTEN :  return QString("Flatten Visible Layers");
    case FP_RENAME_MESH :  return QString("Rename Current Mesh");
    case FP_RENAME_RASTER :  return QString("Rename Current Raster");
@@ -75,7 +79,9 @@ FilterLayerPlugin::FilterLayerPlugin()
    switch(filterId) {
    case FP_SPLITSELECT :  return QString("Selected faces are moved (or duplicated) in a new layer");
    case FP_DELETE_MESH :  return QString("The current mesh layer is deleted");
+   case FP_DELETE_NON_VISIBLE_MESH :  return QString("All the non visible mesh layers are deleted");
    case FP_DELETE_RASTER :  return QString("The current raster layer is deleted");
+   case FP_DELETE_NON_SELECTED_RASTER :  return QString("All non selected raster layers are deleted");
    case FP_SPLITCONNECTED:  return QString("Split current Layer into many layers, one for each connected components");
    case FP_DUPLICATE :  return QString("Create a new layer containing the same model as the current one");
    case FP_FLATTEN :  return QString("Flatten all or only the visible layers into a single new mesh. <br> Transformations are preserved. Existing layers can be optionally deleted");
@@ -150,7 +156,25 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 	  if(md.mm()) 
 		  md.delMesh(md.mm());    
 	  break;
+  case  FP_DELETE_NON_VISIBLE_MESH :    
+	  foreach(MeshModel *mmp, md.meshList)
+	  { 
+	    if(!mmp->visible)
+	    {
+			md.delMesh(mmp);
+	    }
+	  }
+	  break;
   case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm());            break;
+  case  FP_DELETE_NON_SELECTED_RASTER :    
+	  foreach(RasterModel *rmp, md.rasterList)
+	  { 
+	    if(!rmp->visible)
+	    {
+			md.delRaster(rmp);
+	    }
+	  }
+	  break;
 
   case FP_SPLITSELECT :
   {
@@ -301,9 +325,11 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     case FP_SELECTCURRENT :
     case FP_SPLITCONNECTED :
     case FP_DELETE_MESH :
+	case FP_DELETE_NON_VISIBLE_MESH :
       return MeshFilterInterface::Layer;
 	case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
+	case FP_DELETE_NON_SELECTED_RASTER :
       return MeshFilterInterface::RasterLayer;
 
     default :  assert(0);
