@@ -69,7 +69,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
 
 			if(edgeManifNum==0 && vertManifNum==0){
-				Log("Mesh has is two-manifold ");
+				Log("Mesh is two-manifold ");
 			}
 
 			if(edgeManifNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManifNum,faceEdgeManif);
