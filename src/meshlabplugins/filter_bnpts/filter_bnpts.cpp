@@ -40,7 +40,7 @@ FilterBnptsPlugin::FilterBnptsPlugin()
 QString FilterBnptsPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
-		case FP_BNPTSGEN	:	return QString("generate a BNPTS file for out-of-core poisson");
+		case FP_BNPTSGEN	:	return QString("Generate a BNPTS file for out-of-core poisson");
 		default : assert(0);
 	}
 }
@@ -49,7 +49,7 @@ QString FilterBnptsPlugin::filterName(FilterIDType filterId) const
  QString FilterBnptsPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
-		case FP_BNPTSGEN	:	return QString("generate a BNPTS file using data from all layers. This file contains points+normals and it is used with the external tool for out-of-core poisson merging");
+		case FP_BNPTSGEN	:	return QString("Generate a BNPTS file using data from all layers. This file contains points+normals and it is used with the external tool for out-of-core poisson merging");
     default : assert(0);
 	}
 }
