@@ -1147,7 +1147,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 		  GLA()->resetTrackBall();
 
 		if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+		{
 			GLA()->updateTexture();
+		}
   }
   catch (std::bad_alloc& bdall)
   {
@@ -1461,8 +1463,9 @@ void MainWindow::postFilterExecution()
 		GLA()->resetTrackBall();
 
 	if(mask & MeshFilterInterface::Texture )
+	{
 		GLA()->updateTexture();
-
+	}
 	delete obj;
 }
 

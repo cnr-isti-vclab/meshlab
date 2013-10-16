@@ -1228,10 +1228,10 @@ void GLArea::initTexture(bool reloadAllTexture)
 					}
 					else
 						this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
-					mp->glw.TMId.push_back(0);
+					/*mp->glw.TMId.push_back(0);
 					glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
 					glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
-					glTexImage2D( GL_TEXTURE_2D, 0, 3, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+					glTexImage2D( GL_TEXTURE_2D, 0, 3, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );*/
 				}
 				if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
 				{
@@ -1239,6 +1239,8 @@ void GLArea::initTexture(bool reloadAllTexture)
 					int newTexId = bindTexture(QString(mp->cm.textures[i].c_str()));
 					mp->glw.TMId.push_back(newTexId);
 				}
+				if (!res)
+					res = img.load(":/images/dummy.png");
 				if(res)
 				{
 					// image has to be scaled to a 2^n size. We choose the first 2^N >= picture size.
@@ -1267,6 +1269,7 @@ void GLArea::initTexture(bool reloadAllTexture)
 			}
 			if (sometextfailed)
 				QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+
 		}
 	}
 	glDisable(GL_TEXTURE_2D);
