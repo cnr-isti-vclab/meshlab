@@ -279,6 +279,7 @@ void LayerDialog::updateTable()
 	//ui->meshTreeWidget->setColumnWidth(2,40);
 	ui->meshTreeWidget->header()->hide();
 	int maxwidth = 0;
+	MeshTreeWidgetItem *selitem = NULL;
 	foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
@@ -291,7 +292,6 @@ void LayerDialog::updateTable()
 			mmd->visible=true;
 		}
 
-		//tobedel.push_back(new Tollbar());
 		QToolBar* rendertb = new QToolBar();
 		QList<RenderModeAction*> rendlist;
 		QActionGroup* renderModeGroupAct = new QActionGroup(rendertb);
@@ -347,7 +347,10 @@ void LayerDialog::updateTable()
 			if (textact != NULL)
 				ract->setChecked(ract->isChecked() || mmd->hasDataMask(MeshModel::MM_VERTTEXCOORD));
 		}
+		
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
+		if(mmd == md->mm())
+			selitem = item;
 		if(mmd== mw->GLA()->mm()) {
 			item->setBackground(1,QBrush(Qt::yellow));
 			item->setForeground(1,QBrush(Qt::blue));
@@ -369,7 +372,11 @@ void LayerDialog::updateTable()
 		wid += ui->meshTreeWidget->columnWidth(i);
 	}
 	ui->meshTreeWidget->setMinimumWidth(wid);
-
+	/*for(int ii = 0; ii < md->meshList.size();++ii)
+	{
+		if ()
+	}*/
+	ui->meshTreeWidget->setCurrentItem(selitem);
 	if (md->rasterList.size() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
@@ -592,7 +599,7 @@ void LayerDialog::updateDecoratorParsView()
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel,QTreeWidget* tree,QWidget* additional)
-	:QTreeWidgetItem(tree),addwid(additional)
+	:QTreeWidgetItem(tree)
 {
 	if(meshModel->visible) 
 		setIcon(0,QIcon(":/images/layer_eye_open.png"));
@@ -604,12 +611,9 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel *meshModel,QTreeWidget* tree,QW
 	if (meshModel->meshModified())
 		meshName += " *";
 	setText(2, meshName);
-
 	if (additional != NULL)
-	{
-		tree->setItemWidget(this,3,additional);	
-	}
-	this->m=meshModel;
+		tree->setItemWidget(this,3,additional);
+	m = meshModel;
 }
 
 MeshTreeWidgetItem::~MeshTreeWidgetItem()

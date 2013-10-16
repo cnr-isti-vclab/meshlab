@@ -1148,6 +1148,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 		if(iFilter->getClass(action) & MeshFilterInterface::Texture )
 		{
+			//WARNING!!!!! HERE IT SHOULD BE A CHECK IF THE FILTER IS FOR MESH OR FOR DOCUMENT (IN THIS CASE I SHOULD ACTIVATE ALL THE TEXTURE MODE FOR EVERYONE...)
+			//NOW WE HAVE JUST TEXTURE FILTERS WORKING ON SINGLE MESH
+			QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
+			if (it != GLA()->rendermodemap.end())
+				it.value().setTextureMode(GLW::TMPerWedgeMulti);
 			GLA()->updateTexture();
 		}
   }
@@ -1464,6 +1469,11 @@ void MainWindow::postFilterExecution()
 
 	if(mask & MeshFilterInterface::Texture )
 	{
+		//WARNING!!!!! HERE IT SHOULD BE A CHECK IF THE FILTER IS FOR MESH OR FOR DOCUMENT (IN THIS CASE I SHOULD ACTIVATE ALL THE TEXTURE MODE FOR EVERYONE...)
+		//NOW WE HAVE JUST TEXTURE FILTERS WORKING ON SINGLE MESH
+		QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
+		if (it != GLA()->rendermodemap.end())
+			it.value().setTextureMode(GLW::TMPerWedgeMulti);
 		GLA()->updateTexture();
 	}
 	delete obj;

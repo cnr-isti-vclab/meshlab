@@ -56,8 +56,7 @@ public:
 	MeshTreeWidgetItem(MeshModel *,QTreeWidget* tree,QWidget* additional);
 	~MeshTreeWidgetItem();
 
-	MeshModel *m;
-	QWidget* addwid;
+	MeshModel* m;
 };
 
 class RasterTreeWidgetItem : public QTreeWidgetItem
