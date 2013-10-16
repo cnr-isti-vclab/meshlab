@@ -410,6 +410,12 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
 		break;
+	case FP_RESET_TRANSFORM:
+		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
+		break;
+	case FP_FREEZE_TRANSFORM:
+		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
+		break;
 	case FP_INVERT_FACES:
 		parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected the normals will always be flipped otherwise the filter tries to set them outside"));
 		break;
@@ -728,10 +734,26 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 	case FP_FREEZE_TRANSFORM:
 		{
-			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-			tri::UpdateBounding<CMeshO>::Box(m.cm);
-			m.cm.Tr.SetIdentity();
-		} break;
+			bool all=par.getBool("allLayers");
+			if(all)
+			{
+				foreach(MeshModel *mmp, md.meshList)
+				{
+					if(mmp->visible)
+					{
+						tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr,true);
+						tri::UpdateBounding<CMeshO>::Box(mmp->cm);
+						mmp->cm.Tr.SetIdentity();
+					}
+				} 
+			}
+			else
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
+				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.Tr.SetIdentity();
+			} 
+		}break;
 
 
 	case FP_QUADRIC_SIMPLIFICATION:
@@ -807,8 +829,22 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 	case FP_RESET_TRANSFORM :
 		{
-			m.cm.Tr.SetIdentity();
-		} break;
+			bool all=par.getBool("allLayers");
+			if(all)
+			{
+				foreach(MeshModel *mmp, md.meshList)
+				{
+					if(mmp->visible)
+					{
+						mmp->cm.Tr.SetIdentity();
+					}
+				} 
+			}
+			else
+			{
+				m.cm.Tr.SetIdentity();
+			} 
+		}break;
 
 	case FP_ROTATE_FIT:
 		{
