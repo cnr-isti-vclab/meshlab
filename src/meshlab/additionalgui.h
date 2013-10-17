@@ -251,7 +251,16 @@ signals:
 	void arrowPressed(const int k);
 };
 
-class SearchMenu : public QMenu
+
+class MenuWithToolTip : public QMenu
+{
+	Q_OBJECT
+public:
+	MenuWithToolTip(const QString& name,QWidget* par);
+	bool event(QEvent * e);
+};
+
+class SearchMenu : public MenuWithToolTip
 {
 	Q_OBJECT
 public:
@@ -275,19 +284,11 @@ private:
 	void alignToParentGeometry();
 	void selectTextIfNotEmpty();
 	int nextEnabledAction( const int k,const int currentind,const QList<QAction*>& acts,QAction*& nextact) const;
-private slots:
-	void edited(const QString& text);
-	void setLineEditFocus();
-	void onAboutToShowEvent();
-	void changeFocus(const int k);
-};
-
-class MenuWithToolTip : public QMenu
-{
-	Q_OBJECT
-public:
-	MenuWithToolTip(const QString& name,QWidget* par);
-	bool event(QEvent * e);
+	private slots:
+		void edited(const QString& text);
+		void setLineEditFocus();
+		void onAboutToShowEvent();
+		void changeFocus(const int k);
 };
 
 #endif 

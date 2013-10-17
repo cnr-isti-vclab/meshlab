@@ -2265,7 +2265,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
        vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
   }
   vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-
+	QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(mm->id());
   if(mm->cm.fn==0 && mm->cm.en==0){
     GLA()->setDrawMode(vcg::GLW::DMPoints);
     if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))

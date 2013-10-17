@@ -525,6 +525,7 @@ void MainWindow::createToolBars()
     searchButton = new MyToolButton(this);
     searchButton->setPopupMode(QToolButton::InstantPopup);
     searchButton->setIcon(QIcon(":/images/search.png"));
+
     searchToolBar->addWidget(searchButton);
 }
 

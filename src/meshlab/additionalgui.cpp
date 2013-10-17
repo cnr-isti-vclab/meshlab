@@ -800,7 +800,7 @@ bool MLAutoCompleterPopUp::event( QEvent *event )
 }
 
 SearchMenu::SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth)
-:QMenu(parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
+:MenuWithToolTip(QString(),parent),searchline(NULL),wama(wm),maxres(max),fixedwidthsize(fixedwidth)
 {
 	searchline = new MenuLineEdit(this);
 	//searchline->resize(fixedwidth,searchline->height());
@@ -1075,8 +1075,8 @@ bool MenuWithToolTip::event(QEvent * e)
 	const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
 	if ((helpEvent->type() == QEvent::ToolTip)  && (activeAction() != 0))
 		QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip()); 
-	else 
-		QToolTip::hideText();
+	/*else 
+		QToolTip::hideText();*/
 	return QMenu::event(e);
 }
 
