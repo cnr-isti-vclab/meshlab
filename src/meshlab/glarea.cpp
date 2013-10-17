@@ -1113,7 +1113,7 @@ void GLArea::setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode )
 	update();
 }
 
-
+//
 void GLArea::setColorMode(vcg::GLW::ColorMode mode)
 {
 	for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)

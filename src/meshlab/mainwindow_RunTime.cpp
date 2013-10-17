@@ -244,25 +244,25 @@ void MainWindow::updateWindowMenu()
 	}
 }
 
-void MainWindow::setColorNoneMode()
-{
-	GLA()->setColorMode(GLW::CMNone);
-}
-
-void MainWindow::setPerMeshColorMode()
-{
-	GLA()->setColorMode(GLW::CMPerMesh);
-}
-
-void MainWindow::setPerVertexColorMode()
-{
-	GLA()->setColorMode(GLW::CMPerVert);
-}
-
-void MainWindow::setPerFaceColorMode()
-{
-	GLA()->setColorMode(GLW::CMPerFace);
-}
+//void MainWindow::setColorNoneMode()
+//{
+//	GLA()->setColorMode(GLW::CMNone);
+//}
+//
+//void MainWindow::setPerMeshColorMode()
+//{
+//	GLA()->setColorMode(GLW::CMPerMesh);
+//}
+//
+//void MainWindow::setPerVertexColorMode()
+//{
+//	GLA()->setColorMode(GLW::CMPerVert);
+//}
+//
+//void MainWindow::setPerFaceColorMode()
+//{
+//	GLA()->setColorMode(GLW::CMPerFace);
+//}
 
 
 //menu create is not enabled only in case of not valid/existing meshdocument
@@ -846,7 +846,8 @@ void MainWindow::runFilterScript()
 		//WARNING!!!!!!!!!!!!
 		/* to be changed */
 	iFilter->applyFilter( action, *meshDoc(), (*ii).second, QCallBack );
-		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
+		if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) 
+		{
 			GLA()->setColorMode(vcg::GLW::CMPerFace);
 	  meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
 		}
@@ -1646,50 +1647,50 @@ void MainWindow::applyDecorateMode()
   GLA()->update();
 }
 
-void MainWindow::setLight()
-{
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if (rm != NULL)
-	{
-		GLA()->setLight(!rm->lighting);
-		updateMenus();
-	}
-};
-
-void MainWindow::setDoubleLighting()
-{
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if (rm != NULL)
-		GLA()->setLightMode(!rm->doubleSideLighting,LDOUBLE);
-}
-
-void MainWindow::setFancyLighting()
-{
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if (rm != NULL)
-		GLA()->setLightMode(!rm->fancyLighting,LFANCY);
-}
-
-void MainWindow::toggleBackFaceCulling()
-{
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if (rm != NULL)
-		GLA()->setBackFaceCulling(!rm->backFaceCull);
-}
-
-void MainWindow::toggleSelectFaceRendering()
-{
-  RenderMode* rm = GLA()->getCurrentRenderMode();
-  if (rm != NULL)
-    GLA()->setSelectFaceRendering(!rm->selectedFace);
-}
-
-void MainWindow::toggleSelectVertRendering()
-{
-	RenderMode* rm = GLA()->getCurrentRenderMode();
-	if (rm != NULL)
-		GLA()->setSelectVertRendering(!rm->selectedVert);
-}
+//void MainWindow::setLight()
+//{
+//	RenderMode* rm = GLA()->getCurrentRenderMode();
+//	if (rm != NULL)
+//	{
+//		GLA()->setLight(!rm->lighting);
+//		updateMenus();
+//	}
+//};
+//
+//void MainWindow::setDoubleLighting()
+//{
+//	RenderMode* rm = GLA()->getCurrentRenderMode();
+//	if (rm != NULL)
+//		GLA()->setLightMode(!rm->doubleSideLighting,LDOUBLE);
+//}
+//
+//void MainWindow::setFancyLighting()
+//{
+//	RenderMode* rm = GLA()->getCurrentRenderMode();
+//	if (rm != NULL)
+//		GLA()->setLightMode(!rm->fancyLighting,LFANCY);
+//}
+//
+//void MainWindow::toggleBackFaceCulling()
+//{
+//	RenderMode* rm = GLA()->getCurrentRenderMode();
+//	if (rm != NULL)
+//		GLA()->setBackFaceCulling(!rm->backFaceCull);
+//}
+//
+//void MainWindow::toggleSelectFaceRendering()
+//{
+//  RenderMode* rm = GLA()->getCurrentRenderMode();
+//  if (rm != NULL)
+//    GLA()->setSelectFaceRendering(!rm->selectedFace);
+//}
+//
+//void MainWindow::toggleSelectVertRendering()
+//{
+//	RenderMode* rm = GLA()->getCurrentRenderMode();
+//	if (rm != NULL)
+//		GLA()->setSelectVertRendering(!rm->selectedVert);
+//}
 
 /*
  Save project. It saves the info of all the layers and the layer themselves. So
@@ -1894,9 +1895,9 @@ bool MainWindow::openProject(QString fileName)
 	  QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
 	  return false;
 	}
-	setPerVertexColorMode();
-	renderPoint();
-
+	
+	GLA()->setColorMode(GLW::CMPerVert);
+	GLA()->setDrawMode(GLW::DMPoints);
 	//else{
 	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
 	//		{
@@ -1939,8 +1940,8 @@ bool MainWindow::openProject(QString fileName)
 	  QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
 	  return false;
 	}
-	setPerVertexColorMode();
-	renderPoint();
+	GLA()->setColorMode(GLW::CMPerVert);
+	GLA()->setDrawMode(GLW::DMPoints);
 
 	//else{
 	//	for (int i=0; i<meshDoc()->meshList.size(); i++)
@@ -2180,6 +2181,13 @@ bool MainWindow::importRaster(const QString& fileImg)
 
 bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar)
 {
+	if ((GLA() == NULL) || (mm == NULL))
+		return false;
+	
+	QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(mm->id());
+	if (it == GLA()->rendermodemap.end())
+		return false;
+	RenderMode& rm = it.value();
 	QFileInfo fi(fileName);
 	QString extension = fi.suffix();
 	if(!fi.exists())
@@ -2232,8 +2240,10 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
   saveRecentFileList(fileName);
 
-  if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) GLA()->setColorMode(GLW::CMPerFace);
-  if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) GLA()->setColorMode(GLW::CMPerVert);
+  if( mask & vcg::tri::io::Mask::IOM_FACECOLOR) 
+	  GLA()->setColorMode(GLW::CMPerFace);
+  if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR) 
+	  GLA()->setColorMode(GLW::CMPerVert);
 
   renderModeTextureWedgeAct->setChecked(false);
   //renderModeTextureWedgeAct->setEnabled(false);
@@ -2242,9 +2252,9 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     renderModeTextureWedgeAct->setChecked(true);
     //renderModeTextureWedgeAct->setEnabled(true);
     if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
-      GLA()->setTextureMode(GLW::TMPerVert);
+      GLA()->setTextureMode(rm,GLW::TMPerVert);
     if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
-      GLA()->setTextureMode(GLW::TMPerWedgeMulti);
+      GLA()->setTextureMode(rm,GLW::TMPerWedgeMulti);
   }
 
   // In case of polygonal meshes the normal should be updated accordingly
@@ -2265,16 +2275,15 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
        vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
   }
   vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-	QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(mm->id());
   if(mm->cm.fn==0 && mm->cm.en==0){
-    GLA()->setDrawMode(vcg::GLW::DMPoints);
+    GLA()->setDrawMode(rm,vcg::GLW::DMPoints);
     if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
       GLA()->setLight(false);
     else
       mm->updateDataMask(MeshModel::MM_VERTNORMAL);
   }
   if(mm->cm.fn==0 && mm->cm.en>0){
-    GLA()->setDrawMode(vcg::GLW::DMWire);
+    GLA()->setDrawMode(rm,vcg::GLW::DMWire);
     if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
       GLA()->setLight(false);
     else
@@ -2675,21 +2684,21 @@ void MainWindow::setCustomize()
 	dialog.exec();
 }
 
-void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
-void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
-void MainWindow::renderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
-void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
-void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
-void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
-void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
-void MainWindow::renderTexture()
-{
-    QAction *a = qobject_cast<QAction* >(sender());
-  if( tri::HasPerVertexTexCoord(meshDoc()->mm()->cm))
-    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerVert);
-  if( tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm))
-    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
-}
+//void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
+//void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
+//void MainWindow::renderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
+//void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
+//void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
+//void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
+//void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
+//void MainWindow::renderTexture()
+//{
+//    QAction *a = qobject_cast<QAction* >(sender());
+//  if( tri::HasPerVertexTexCoord(meshDoc()->mm()->cm))
+//    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerVert);
+//  if( tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm))
+//    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
+//}
 
 
 void MainWindow::fullScreen(){

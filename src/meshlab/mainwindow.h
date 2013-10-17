@@ -126,9 +126,9 @@ private slots:
     void showXMLPluginEditorGui();
   void showTooltip(QAction*);
   /////////// Slot Menu Render /////////////////////
-    void renderBbox();
-    void renderPoint();
-    void renderWire();
+   //void renderBbox();
+    //void renderPoint();
+/*    void renderWire();
     void renderFlat();
     void renderFlatLine();
     void renderHiddenLines();
@@ -136,20 +136,20 @@ private slots:
     void renderTexture();
     void setLight();
     void setDoubleLighting();
-    void setFancyLighting();
+    void setFancyLighting();*/
 
     //void setColorMode(QAction *qa);
-    void setColorNoneMode();
-	void setPerMeshColorMode();
-	void setPerVertexColorMode();
-	void setPerFaceColorMode();
+ //   void setColorNoneMode();
+	//void setPerMeshColorMode();
+	//void setPerVertexColorMode();
+	//void setPerFaceColorMode();
 	
 	void applyRenderMode();
     //void applyColorMode();
-    void toggleBackFaceCulling();
-  void toggleSelectFaceRendering();
-  void toggleSelectVertRendering();
-  void applyDecorateMode();
+	/* void toggleBackFaceCulling();
+	void toggleSelectFaceRendering();
+	void toggleSelectVertRendering();*/
+	void applyDecorateMode();
 
   void switchOffDecorator(QAction* );
     ///////////Slot Menu View ////////////////////////

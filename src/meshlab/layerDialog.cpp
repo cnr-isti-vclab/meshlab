@@ -119,6 +119,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 						mw->GLA()->meshSetVisibility(mp, true);
 					}
 				}
+				mw->meshDoc()->setCurrentMesh(clickedId);
 			} break;
 		case 1 :
 
