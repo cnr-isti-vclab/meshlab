@@ -369,7 +369,7 @@ bool QualityMapperDialog::initEqualizerHistogram()
 	connect(ui.maxSpinBox, SIGNAL(editingFinished()), this, SLOT(on_previewButton_clicked()));
 
 	// Connecting brightessSpinBox to brightnessSlider
-	connect(ui.brightessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_brightessSpinBox_valueChanged()));
+	connect(ui.brightessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_brightessSpinBox_valueChanged(double)));
 
 	ui.equalizerGraphicsView->setScene(&_equalizerHistogramScene);
 
@@ -866,7 +866,7 @@ void QualityMapperDialog::on_loadPresetButton_clicked()
 
 //callback to manage the user selection of a TF from combo box
 //builds a new TF joined to newValue. It searches first among the default ones, then among the external file ones
-void QualityMapperDialog::on_presetComboBox_textChanged(const QString &newValue)
+void QualityMapperDialog::on_presetComboBox_currentTextChanged(const QString &newValue)
 {
 	//searching newValue among default TFs
 	for (int i=0; i<NUMBER_OF_DEFAULT_TF; i++)
