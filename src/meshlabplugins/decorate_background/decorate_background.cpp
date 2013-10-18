@@ -36,12 +36,12 @@ using namespace vcg;
 QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 {
   switch(id)
-	{
-	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
+    {
+    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
   case DP_SHOW_GRID :      return tr("Draws a gridded background that can be used as a reference.");
-	}
-	assert(0);
-	return QString();
+    }
+    assert(0);
+    return QString();
 }
 QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
 {
@@ -49,9 +49,9 @@ QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
 	{
 	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Cube mapped background");
   case DP_SHOW_GRID :      return tr("Background Grid");
-	}
-	assert(0);
-	return QString();
+    }
+    assert(0);
+    return QString();
 }
 
 void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
@@ -68,16 +68,15 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
       parset.addParam(new RichFloat(BoxRatioParam(),2.0,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
       parset.addParam(new RichFloat(GridMajorParam(),10,"Major Spacing",""));
       parset.addParam(new RichFloat(GridMinorParam(),1,"Minor Spacing",""));
-      parset.addParam(new RichBool(GridSnapParam(),false,"Grid Snapping",""));
-      parset.addParam(new RichBool(GridBackParam(),false,"Front grid culling",""));
+      parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
       parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
       parset.addParam(new RichColor(GridColorBackParam(),QColor(Color4b::Gray),"Back Grid Color",""));
       parset.addParam(new RichColor(GridColorFrontParam(),QColor(Color4b::Gray),"Front grid Color",""));
 
     break;
   }
-}		
-		
+}
+
 bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
 {
   switch(ID(action)){
@@ -90,16 +89,16 @@ bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*
     connect(this,SIGNAL(askViewerShot(QString)),gla,SLOT(sendViewerShot(QString)));
   break;
   }
-	return true;
+    return true;
 }
 
 void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea *gla, QPainter *, GLLogStream &)
 {
   static QString lastname("unitialized");
-	switch(ID(a))
-	{
-	  case DP_SHOW_CUBEMAPPED_ENV :
-		{
+    switch(ID(a))
+    {
+      case DP_SHOW_CUBEMAPPED_ENV :
+        {
       if(!cm.IsValid() || (lastname != cubemapFileName ) )
       {
         qDebug( "Current CubeMapPath Dir: %s ",qPrintable(cubemapFileName));
@@ -110,15 +109,15 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
         //QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + cubemapFileName );
         cm.radius=10;
       }
-			if(!cm.IsValid()) return;
+            if(!cm.IsValid()) return;
 
-      Matrix44f tr;
-			glGetv(GL_MODELVIEW_MATRIX,tr);			
+	  Matrix44f tr;
+			glGetv(GL_MODELVIEW_MATRIX,tr);
 			// Remove the translation from the current matrix by simply padding the last column of the matrix
-      tr.SetColumn(3,Point4f(0,0,0,1.0));
+	  tr.SetColumn(3,Point4f(0,0,0,1.0));
 			//Remove the scaling from the the current matrix by adding an inverse scaling matrix
 			float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
-			Matrix44f Scale; 
+			Matrix44f Scale;
 			Scale.SetDiagonal(scale);
 			tr=tr*Scale;
 
@@ -131,7 +130,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 			glMatrixMode(GL_MODELVIEW);
-    } break;
+	} break;
   case DP_SHOW_GRID :
     {
       emit this->askViewerShot("me");
@@ -139,23 +138,23 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
       float scaleBB = parset->getFloat(BoxRatioParam());
       float majorTick = parset->getFloat(GridMajorParam());
       float minorTick = parset->getFloat(GridMinorParam());
-      bool gridSnap = parset->getBool(GridSnapParam());
       bool backFlag = parset->getBool(GridBackParam());
       bool shadowFlag = parset->getBool(ShowShadowParam());
       Color4b backColor = parset->getColor4b(GridColorBackParam());
       Color4b frontColor = parset->getColor4b(GridColorFrontParam());
       bb.Offset((bb.max-bb.min)*(scaleBB-1.0));
-      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,gridSnap,backFlag,shadowFlag,backColor,frontColor,gla);
+      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,backFlag,shadowFlag,backColor,frontColor,gla);
     } break;
   }
 }
 
+
+// Note minG/maxG is wider than minP/maxP.
 void DrawGridPlane(int axis,
                    int side, // 0 is min 1 is max
                    Point3f minP, Point3f maxP,
                    Point3f minG, Point3f maxG, // the box with vertex positions snapped to the grid (enlarging it).
                    float majorTick, float minorTick,
-                   bool snappedBorder,
                    Color4b lineColor)
 {
   int xAxis = (1+axis)%3;
@@ -165,65 +164,49 @@ void DrawGridPlane(int axis,
   Color4b majorColor=lineColor;
   Color4b minorColor=lineColor;
   minorColor[3]=127;
-
+  assert(minG[0] <= minP[0] && maxG[0]>=maxP[0]);
+  assert(minG[1] <= minP[1] && maxG[1]>=maxP[1]);
+  assert(minG[2] <= minP[2] && maxG[2]>=maxP[2]);
   // We draw orizontal ande vertical lines onto the XY plane snapped with the major ticks
   Point3f p1,p2;
-  if(snappedBorder)
-      p1[zAxis]=p2[zAxis] = side ? maxG[zAxis] : minG[zAxis] ;
-  else
-      p1[zAxis]=p2[zAxis] = side ? maxP[zAxis] : minP[zAxis] ;
+  p1[zAxis]=p2[zAxis] = side ? maxG[zAxis] : minG[zAxis] ;
 
   float aMin,aMax;
   // first draw the vertical lines (e.g we iterate on the X with fixed Y extents)
   glBegin(GL_LINES);
-  if(snappedBorder) {
-      p1[yAxis]=minG[yAxis];
-      p2[yAxis]=maxG[yAxis];
-      aMin =minG[xAxis];
-      aMax =maxG[xAxis];
-  } else {
-      p1[yAxis]=minP[yAxis];
-      p2[yAxis]=maxP[yAxis];
-      aMin =minG[xAxis]+majorTick;
-      aMax =maxP[xAxis];
-  }
+  p1[yAxis]=minG[yAxis];
+  p2[yAxis]=maxG[yAxis];
+  aMin =minG[xAxis];
+  aMax =maxG[xAxis];
+
   for(float alpha=aMin;alpha<=aMax;alpha+=majorTick)
   {
-      p1[xAxis]=p2[xAxis]=alpha;
-      glColor(majorColor);
+    p1[xAxis]=p2[xAxis]=alpha;
+    glColor(majorColor);
+    glVertex(p1); glVertex(p2);
+    glColor(minorColor);
+    for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax; alpha2+=minorTick) {
+      p1[xAxis]=p2[xAxis]=alpha2;
       glVertex(p1); glVertex(p2);
-      glColor(minorColor);
-      for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax; alpha2+=minorTick) {
-          p1[xAxis]=p2[xAxis]=alpha2;
-          glVertex(p1); glVertex(p2);
-      }
+    }
   }
 
-    // then the horizontal lines  (e.g we iterate on the Y with fixed X extents)
-  if(snappedBorder) {
-      p1[xAxis]=minG[xAxis];
-      p2[xAxis]=maxG[xAxis];
-      aMin = minG[yAxis];
-      aMax = maxG[yAxis];
-  } else {
-      p1[xAxis]=minP[xAxis];
-      p2[xAxis]=maxP[xAxis];
-      aMin = minG[yAxis]+majorTick;
-      aMax = maxP[yAxis];
-  }
+  p1[xAxis]=minG[xAxis];
+  p2[xAxis]=maxG[xAxis];
+  aMin = minG[yAxis];
+  aMax = maxG[yAxis];
 
   for(float alpha=aMin;alpha<=aMax;alpha+=majorTick)
-    {
-      p1[yAxis]=p2[yAxis]=alpha;
-      glColor(majorColor);
+  {
+    p1[yAxis]=p2[yAxis]=alpha;
+    glColor(majorColor);
+    glVertex(p1); glVertex(p2);
+    glColor(minorColor);
+    for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax ;alpha2+=minorTick) {
+      p1[yAxis]=p2[yAxis]=alpha2;
       glVertex(p1); glVertex(p2);
-      glColor(minorColor);
-      for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax ;alpha2+=minorTick) {
-          p1[yAxis]=p2[yAxis]=alpha2;
-          glVertex(p1); glVertex(p2);
-      }
     }
-
+  }
   glEnd();
   glColor(majorColor);
 
@@ -295,7 +278,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, GLArea *gla)
+void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, GLArea *gla)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Point3f minP,maxP, minG,maxG;
@@ -328,7 +311,7 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
             bool front = FrontFacing(viewPos,ii,jj,minP,maxP);
             if( front || !backCullFlag)
             {
-                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,snapFlag,front?frontColor:backColor);
+                DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,front?frontColor:backColor);
                 if(shadowFlag) DrawFlatMesh(m, ii,jj,minG,maxG);
             }
         }

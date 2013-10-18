@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -40,7 +40,7 @@ New small samples
 class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
   Q_INTERFACES(MeshDecorateInterface)
   QString decorationName(FilterIDType id) const;
   QString decorationInfo(FilterIDType id) const;
@@ -48,13 +48,12 @@ class DecorateBackgroundPlugin : public QObject, public MeshDecorateInterface
   enum {
     DP_SHOW_CUBEMAPPED_ENV,
     DP_SHOW_GRID
-		};
+        };
 
 private:
 vcg::CICubeMap cm;
 
 inline QString CubeMapPathParam() const { return  "MeshLab::Decoration::CubeMapPath" ; }
-inline QString GridSnapParam() const { return  "MeshLab::Decoration::GridSnap" ; }
 inline QString GridBackParam() const { return  "MeshLab::Decoration::GridBack" ; }
 inline QString GridMajorParam() const { return  "MeshLab::Decoration::GridMajor" ; }
 inline QString GridMinorParam() const { return  "MeshLab::Decoration::GridMinor" ; }
@@ -64,12 +63,12 @@ inline QString GridColorBackParam() const { return  "MeshLab::Decoration::GridCo
 inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridColorFront" ; }
 
 public:
-     
-    DecorateBackgroundPlugin()
+
+	DecorateBackgroundPlugin()
 	{
-    typeList
-    /*<< DP_SHOW_CUBEMAPPED_ENV*/
-    << DP_SHOW_GRID;
+	typeList
+	/*<< DP_SHOW_CUBEMAPPED_ENV*/
+	<< DP_SHOW_GRID;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -81,10 +80,10 @@ public:
     }
   }
 
-	QList<QAction *> actions () const {return actionList;}
+    QList<QAction *> actions () const {return actionList;}
 
   QString cubemapFileName;
-	
+
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*parent*/ par, GLArea * /*parent*/);
   void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &_log);
   void decorateMesh(QAction *, MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &){}
@@ -93,7 +92,7 @@ public:
 
 
 private:
-  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool snapFlag, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, GLArea *gla);
+  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, GLArea *gla);
   vcg::Shotf curShot;
 
 signals:
