@@ -148,13 +148,39 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 		{
 		case 0 :
 			{
+				//the user has clicked on the "V" or "X"
+				MeshDocument  *md= mw->meshDoc();
+
+				// NICE TRICK.
+				// If the user has pressed ctrl when clicking on the icon, only that layer will remain visible
+				//
+				if(QApplication::keyboardModifiers() == Qt::ControlModifier)
+				{
+					foreach(RasterModel *rp, md->rasterList)
+					{
+						rp->visible = false;
+					}
+				}
+
 				if(rItem->r->visible){
 					rItem->r->visible = false;
 				}
 				else{
 					rItem->r->visible = true;
 				}
-				//Update current GLArea visibility 
+
+				// EVEN NICER TRICK.
+				// If the user has pressed alt when clicking on the icon, all layers will get visible
+				// Very useful after you turned all layer invis using the previous option and want to avoid
+				// clicking on all of them...
+				if(QApplication::keyboardModifiers() == Qt::AltModifier)
+				{
+					foreach(RasterModel *rp, md->rasterList)
+					{
+						rp->visible = true;
+					}
+				}
+				
 				mw->GLA()->updateRasterSetVisibilities( );
 			}
 		case 1 :
