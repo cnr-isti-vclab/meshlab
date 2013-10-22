@@ -98,7 +98,7 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
         case FP_PATCH_PARAM_ONLY:
         case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
         case FP_RASTER_VERT_COVERAGE:
-        case FP_RASTER_FACE_COVERAGE:  return Quality;
+        case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
         default:  assert(0); return MeshFilterInterface::Generic;
     }
 }
@@ -190,15 +190,8 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
-	if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-	{
-		errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-		return false; // can't continue, mesh can't be processed
-	}
-	vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-	vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-	vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
-	vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+	
+	
 	glContext->makeCurrent();
 	if( glewInit() != GLEW_OK )
 		return false;
@@ -230,13 +223,27 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     }
 
     if( activeRasters.empty() )
-      return false;
+	{
+		glContext->doneCurrent();
+		errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
+		return false;
+	}
 
 
     switch( ID(act) )
     {
         case FP_PATCH_PARAM_ONLY:
         {
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
+			{
+				glContext->doneCurrent();
+				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
             RasterPatchMap patches;
             PatchVec nullPatches;
             patchBasedTextureParameterization( patches,
@@ -249,6 +256,16 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 		}
 		case FP_PATCH_PARAM_AND_TEXTURING:
 		{
+			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
+			{
+				glContext->doneCurrent();
+				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
 			QString texName = par.getString( "textureName" ).simplified();
 			int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
 			if( pathEnd != -1 )
@@ -289,7 +306,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
 			visibility.setMesh( &mesh );
 
-            for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
+			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
                 vi->Q() = 0.0f;
 
             foreach( RasterModel *rm, activeRasters )
