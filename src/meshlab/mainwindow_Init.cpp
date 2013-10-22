@@ -198,6 +198,7 @@ void MainWindow::createActions()
 		recentProjActs[i] = new QAction(this);
 		recentProjActs[i]->setVisible(true);
 		recentProjActs[i]->setEnabled(true);
+		recentProjActs[i]->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_1+i));
 
 		recentFileActs[i] = new QAction(this);
 		recentFileActs[i]->setVisible(true);
@@ -329,6 +330,7 @@ void MainWindow::createActions()
 	showRasterAct =  new QAction (QIcon(":/images/view_raster.png"),tr("Show Current Raster Mode"), this);
 	showRasterAct->setCheckable(true);
 	showRasterAct->setChecked(true);
+	showRasterAct->setShortcut(Qt::SHIFT + Qt::Key_R);
 	connect(showRasterAct, SIGNAL(triggered()), this, SLOT(showRaster()));
 
 
@@ -387,6 +389,7 @@ void MainWindow::createActions()
 
 	viewFromMeshAct = new QAction (tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction (tr("View from Raster Camera"), this);
+	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
 	viewFromFileAct = new QAction (tr("View from file"), this);
 	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
