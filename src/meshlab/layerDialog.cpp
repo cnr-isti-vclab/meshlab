@@ -119,6 +119,16 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 						mw->GLA()->meshSetVisibility(mp, true);
 					}
 				}
+
+				if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
+				{
+					foreach(MeshModel *mp, md->meshList)
+					{
+						mw->GLA()->meshSetVisibility(mp, !mp->visible);
+					}
+					mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+				}
+
 				mw->meshDoc()->setCurrentMesh(clickedId);
 			} break;
 		case 1 :
@@ -179,6 +189,15 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 					{
 						rp->visible = true;
 					}
+				}
+
+				if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
+				{
+					foreach(RasterModel *rp, md->rasterList)
+					{
+						rp->visible = !rp->visible;
+					}
+					rItem->r->visible = !rItem->r->visible;
 				}
 				
 				mw->GLA()->updateRasterSetVisibilities( );
