@@ -1975,7 +1975,8 @@ namespace io {
 				findAndParseAttribute(list, materialNode, "diffuseColor", "");
 				if (list.size() >= 3)
 				{
-					vcg::Color4f color(list.at(0).toFloat(), list.at( 1).toFloat(), list.at(2).toFloat(), 1); 
+					float transparency = 1.0 - materialNode.attribute("transparency", "0.0").toFloat();
+					vcg::Color4f color(list.at(0).toFloat(), list.at( 1).toFloat(), list.at(2).toFloat(), transparency); 
 					vcg::Color4b colorB;
 					colorB.Import(color);
 					info->color = colorB;
