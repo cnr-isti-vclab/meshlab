@@ -43,7 +43,7 @@ void EditSelectPlugin::keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *
 
 void EditSelectPlugin::keyPressEvent    (QKeyEvent */*event*/, MeshModel &/*m*/, GLArea *gla)
 {
-	Qt::KeyboardModifiers mod = QGuiApplication::queryKeyboardModifiers();
+	Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
 	if(mod ==  Qt::AltModifier)  
 		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"),1,1));	
 	if(mod == (Qt::AltModifier+Qt::ControlModifier)) 	
