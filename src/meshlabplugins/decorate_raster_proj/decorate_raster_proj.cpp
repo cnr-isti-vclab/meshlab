@@ -44,15 +44,15 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow( glw::Context &context )
         glPushMatrix();
         glMultMatrix(m_Mesh->cm.Tr);
         glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-		glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_VERTEX_ARRAY );
 
-        context.bindVertexBuffer( m_VBOVertices );
+		context.bindVertexBuffer( m_VBOVertices );
 		glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
 
-        context.bindIndexBuffer( m_VBOIndices );
+		context.bindIndexBuffer( m_VBOIndices );
 		glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
 
-        context.unbindIndexBuffer();
+		context.unbindIndexBuffer();
 		context.unbindVertexBuffer();
 
         glPopClientAttrib();
@@ -76,17 +76,17 @@ void DecorateRasterProjPlugin::MeshDrawer::draw( glw::Context &context )
         glPushMatrix();
         glMultMatrix(m_Mesh->cm.Tr);
         glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-		glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_NORMAL_ARRAY );
 
-        context.bindVertexBuffer( m_VBOVertices );
+		context.bindVertexBuffer( m_VBOVertices );
 		glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
-        glNormalPointer(    GL_FLOAT, 2*sizeof(vcg::Point3f), (GLvoid*)sizeof(vcg::Point3f) );
+		glNormalPointer(    GL_FLOAT, 2*sizeof(vcg::Point3f), (GLvoid*)sizeof(vcg::Point3f) );
 
-        context.bindIndexBuffer( m_VBOIndices );
+		context.bindIndexBuffer( m_VBOIndices );
 		glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
 
-        context.unbindIndexBuffer();
+		context.unbindIndexBuffer();
 		context.unbindVertexBuffer();
 
         glPopClientAttrib();
@@ -140,7 +140,7 @@ void DecorateRasterProjPlugin::MeshDrawer::update( glw::Context &context, bool u
 
 bool DecorateRasterProjPlugin::s_AreVBOSupported;
 
-    
+
 DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
     m_CurrentRaster(NULL),
     m_CurrentMesh(NULL)
@@ -154,7 +154,7 @@ DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
         ap->setCheckable(true);
 }
 
-        
+
 DecorateRasterProjPlugin::~DecorateRasterProjPlugin()
 {
 }
@@ -166,7 +166,7 @@ QString DecorateRasterProjPlugin::decorationInfo( FilterIDType id ) const
     {
         case DP_PROJECT_RASTER: return tr("Project the current raster onto the 3D mesh");
         default: assert(0); return QString();
-    }  
+    }
 }
 
 
@@ -217,11 +217,19 @@ void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParamet
                                         false,
                                         "Project on all meshes",
                                         "Project the current raster on all meshes instead of only on the current one" ) );
+            par.addParam( new RichBool( "MeshLab::Decoration::ShowAlpha",
+                                        false,
+                                        "Show Alpha Mask",
+                                        "Show in purple the alpha value" ) );
+            par.addParam( new RichBool( "MeshLab::Decoration::EnableAlpha",
+                                        false,
+                                        "Enable Alpha",
+                                        "If the current raster has an alpha channel use it during the rendering. It is multiplied with the 'global' transparency set in the above parameter." ) );
             break;
         }
         default: assert(0);
     }
-}		
+}
 
 
 void DecorateRasterProjPlugin::updateCurrentMesh( MeshDocument &m,
@@ -325,9 +333,8 @@ void DecorateRasterProjPlugin::updateColorTexture()
     const int w = m_CurrentRaster->currentPlane->image.width();
     const int h = m_CurrentRaster->currentPlane->image.height();
 
-
     // Recover image data and convert pixels to the adequate format for transfer onto the GPU.
-    GLubyte *texData = new GLubyte [ 3*w*h ];
+    GLubyte *texData = new GLubyte [ 4*w*h ];
     for( int y=h-1, n=0; y>=0; --y )
         for( int x=0; x<w; ++x )
         {
@@ -335,12 +342,12 @@ void DecorateRasterProjPlugin::updateColorTexture()
             texData[n++] = (GLubyte) qRed  ( pixel );
             texData[n++] = (GLubyte) qGreen( pixel );
             texData[n++] = (GLubyte) qBlue ( pixel );
+            texData[n++] = (GLubyte) qAlpha ( pixel );
         }
-
 
     // Create and initialize the OpenGL texture object.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-    m_ColorTexture = glw::createTexture2D( m_Context, GL_RGB, w, h, GL_RGB, GL_UNSIGNED_BYTE, texData );
+    m_ColorTexture = glw::createTexture2D( m_Context, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, texData );
     delete [] texData;
 
     glw::BoundTexture2DHandle t = m_Context.bindTexture2D( m_ColorTexture, 0 );
@@ -447,7 +454,7 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
             v_Normal = (u_ModelXf*vec4(gl_Normal,1.0)).xyz;
             v_RasterView = u_Viewpoint - (u_ModelXf*gl_Vertex).xyz;
             v_Light = u_LightToObj[2].xyz;
-    
+
             float d = length( gl_ModelViewMatrix * gl_Vertex );
             float distAtten = 1.0 / (gl_Point.distanceConstantAttenuation      +
                                      gl_Point.distanceLinearAttenuation*d      +
@@ -466,6 +473,8 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
         uniform sampler2DShadow u_ColorMap;
         uniform sampler2DShadow u_DepthMap;
         uniform bool            u_IsLightActivated;
+        uniform bool            u_UseOriginalAlpha;
+        uniform bool            u_ShowAlpha;
         uniform float           u_AlphaValue;
 
         void main()
@@ -477,7 +486,7 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
             if( clipCoord.x<0.0 || clipCoord.x>1.0 ||
                 clipCoord.y<0.0 || clipCoord.y>1.0 )
                 discard;
-        
+
             float visibility = shadow2DProj( u_DepthMap, v_ProjVert ).r;
             if( visibility <= 0.001 )
                 discard;
@@ -491,15 +500,20 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
                 vec3 L = normalize( v_Light );
                 vec3 N = normalize( v_Normal );
                 float Kd = max( dot(L,N), 0.0 );
-        
-                color = Ka + gl_FrontMaterial.emission + Kd*gl_FrontLightProduct[0].diffuse*color;
-            }
 
-            gl_FragColor = vec4( color.xyz, u_AlphaValue );
+                color.xyz = (Ka + gl_FrontMaterial.emission + Kd*gl_FrontLightProduct[0].diffuse*color).xyz;
+            }
+            float finalAlpha=0.0;
+
+            if(u_UseOriginalAlpha) finalAlpha = color.a*u_AlphaValue;
+            else finalAlpha = u_AlphaValue;
+            if(u_ShowAlpha) color.xyz = vec3(1.0-color.a, 0 ,color.a);
+
+            gl_FragColor = vec4( color.xyz, finalAlpha );
         }
     );
 
-	m_ShadowMapShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
+    m_ShadowMapShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
     return m_ShadowMapShader->isLinked();
 }
 
@@ -580,7 +594,7 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
         glEnable( GL_POINT_SMOOTH );
     else
         glDisable( GL_POINT_SMOOTH );
-    
+
     glPointSize( par->getFloat("MeshLab::Appearance::pointSize") );
 
     if( glPointParameterfv )
@@ -617,8 +631,8 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
     {
         case DP_PROJECT_RASTER:
         {
-			if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
-				return;
+            if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
+                return;
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             updateCurrentMesh( m, *par );
@@ -674,6 +688,8 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                 shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
                 shader->setUniform( "u_IsLightActivated", rm.lighting && par->getBool("MeshLab::Decoration::ProjRasterLighting") );
                 shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
+                shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
+                shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
 
                 for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
                 {
