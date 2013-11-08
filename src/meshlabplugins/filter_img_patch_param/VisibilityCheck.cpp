@@ -81,7 +81,7 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
     {
         m_ColorRB     = glw::createRenderbuffer( m_Context, GL_RGBA, vp.X(), vp.Y() );
         m_DepthRB     = glw::createRenderbuffer( m_Context, GL_DEPTH_COMPONENT, vp.X(), vp.Y() );
-		m_FrameBuffer = glw::createFramebuffer ( m_Context, glw::renderbufferTarget(m_DepthRB), glw::renderbufferTarget(m_ColorRB) );
+        m_FrameBuffer = glw::createFramebuffer ( m_Context, glw::renderbufferTarget(m_DepthRB), glw::renderbufferTarget(m_ColorRB) );
     }
 
     m_Context.bindReadDrawFramebuffer( m_FrameBuffer );
@@ -336,13 +336,13 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     if( s_AreVBOSupported )
     {
         glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-		glEnableClientState( GL_VERTEX_ARRAY );
+        glEnableClientState( GL_VERTEX_ARRAY );
 
-        m_Context.bindVertexBuffer( m_ShadowVBOVertices );
+		m_Context.bindVertexBuffer( m_ShadowVBOVertices );
 		glVertexPointer( 3, GL_FLOAT, 0, 0 );
 		m_Context.unbindVertexBuffer();
 
-        m_Context.bindIndexBuffer( m_ShadowVBOIndices );
+		m_Context.bindIndexBuffer( m_ShadowVBOIndices );
 		glDrawElements( GL_TRIANGLES, 3*m_Mesh->fn, GL_UNSIGNED_INT, 0 );
 		m_Context.unbindIndexBuffer();
 
@@ -389,7 +389,7 @@ bool VisibilityCheck_ShadowMap::initShaders()
         uniform sampler2DShadow u_SadowMap;
         uniform mat4            u_ShadowProj;
         uniform vec3            u_Viewpoint;
-		uniform vec3            u_ZAxis;
+        uniform vec3            u_ZAxis;
         uniform vec2            u_PixelSize;
 
         const float             V_UNDEFINED = 0.0;
@@ -420,7 +420,7 @@ bool VisibilityCheck_ShadowMap::initShaders()
     );
 
 
-	m_VisDetectionShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
+    m_VisDetectionShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
     return m_VisDetectionShader->isLinked();
 }
 
@@ -503,16 +503,16 @@ void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
         // Create the framebuffer into which the result of the visibility computation will be stored.
         m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RED, m_VertexMap->width(), m_VertexMap->height() );
         m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
-		glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
-		if(!hfb->isComplete());
-		{
-			m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RGBA8, m_VertexMap->width(), m_VertexMap->height() );
-			m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
-			glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
+        glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
+        if(!hfb->isComplete())
+        {
+            m_ColorBuffer = glw::createRenderbuffer( m_Context, GL_RGBA8, m_VertexMap->width(), m_VertexMap->height() );
+            m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
+            glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
 
 		}
 		m_Context.unbindReadDrawFramebuffer();
-    }
+	}
 }
 
 
@@ -546,7 +546,7 @@ void VisibilityCheck_ShadowMap::checkVisibility()
     boundShader->setUniform( "u_SadowMap" , 2 );
     boundShader->setUniform4x4( "u_ShadowProj", m_ShadowProj.V(), false );
     boundShader->setUniform3( "u_Viewpoint", m_Raster->shot.GetViewPoint().V() );
-	boundShader->setUniform3( "u_ZAxis", m_Raster->shot.Axis(2).V() );
+    boundShader->setUniform3( "u_ZAxis", m_Raster->shot.Axis(2).V() );
     boundShader->setUniform( "u_PixelSize", 1.0f/m_VertexMap->width(), 1.0f/m_VertexMap->height() );
 
 

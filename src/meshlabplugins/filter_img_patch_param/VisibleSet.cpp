@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -67,7 +67,7 @@ VisibleSet::VisibleSet( glw::Context &ctx,
     {
         visibility.setRaster( rm );
         visibility.checkVisibility();
-        
+
         for( int f=0; f<mesh.fn; ++f )
             if( visibility.isFaceVisible(f) )
             {
@@ -106,31 +106,23 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
 
     if( (m_WeightMask & W_IMG_ALPHA) && weight>0.0f )
     {
-        vcg::Point2f ppoint0 = rm->shot.Project( f.V(0)->P() );
-        vcg::Point2f ppoint1 = rm->shot.Project( f.V(0)->P() );
-        vcg::Point2f ppoint2 = rm->shot.Project( f.V(0)->P() );
+        float alpha[3];
+        for(int i=0;i<3;++i)
+        {
+          vcg::Point2f ppoint = rm->shot.Project( f.V(i)->P() );
+          if(ppoint[0] < 0 ||
+             ppoint[1] < 0 ||
+             ppoint[0] >= rm->currentPlane->image.width() ||
+             ppoint[1] >= rm->currentPlane->image.height())
+            alpha[i] = 0;
+          else
+            alpha[i] = qAlpha(rm->currentPlane->image.pixel(ppoint[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint[1]));
+        }
 
-        float aweight = 1.0;
-        float wt;
-        QRgb pcolor;
-        
-        // vertex 0
-        pcolor = rm->currentPlane->image.pixel(ppoint0[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint0[1]);
-        wt = (qAlpha(pcolor) / 255.0);
-        if(aweight > wt)
-          aweight = wt;
-        // vertex 0
-        pcolor = rm->currentPlane->image.pixel(ppoint1[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint1[1]);
-        wt = (qAlpha(pcolor) / 255.0);
-        if(aweight > wt)
-          aweight = wt;
-        // vertex 0
-        pcolor = rm->currentPlane->image.pixel(ppoint2[0],rm->shot.Intrinsics.ViewportPx[1] - ppoint2[1]);
-        wt = (qAlpha(pcolor) / 255.0);
-        if(aweight > wt)
-          aweight = wt;
+        int minAlpha = vcg::math::Min(alpha[0],alpha[1],alpha[2]);
+        float aweight = float(minAlpha)/255.0f;
 
-        // if alpha weight is zero, that image part should not be used at all, 
+        // if alpha weight is zero, that image part should not be used at all,
         // so, we set the weight below zero in order to force the visibility check to fail
         // just setting weight to zero would result passing visibility check with a 0 weight,
         // making the piece usable if nothing else is available

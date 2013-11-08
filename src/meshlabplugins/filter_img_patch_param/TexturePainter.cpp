@@ -52,29 +52,38 @@ bool TexturePainter::init( int texSize )
 
     const std::string initFragSrc = GLW_STRINGIFY
     (
-        uniform sampler2D   u_Tex;
+          uniform sampler2D   u_Tex;
         uniform int         u_Radius;
         uniform vec2        u_PixelSize;
 
-        vec3 fetch( int texUnit, int x, int y )
+        vec4 fetch( int texUnit, int x, int y )
         {
-            return texture2D( u_Tex, gl_TexCoord[texUnit].xy + u_PixelSize * vec2(x,y) ).xyz;
+          if(texUnit==0) return texture2D( u_Tex, gl_TexCoord[0].xy + u_PixelSize * vec2(x,y) );
+          return texture2D( u_Tex, gl_TexCoord[1].xy + u_PixelSize * vec2(x,y) );
+//            return texture2D( u_Tex, gl_TexCoord[texUnit].xy + u_PixelSize * vec2(x,y) ).xyz;
         }
 
         void main()
         {
-            vec3 finalColor = vec3(0.0);
-
+            vec3 finalColor0 = vec3(0.0);
+            vec3 finalColor1 = vec3(0.0);
+            float cnt0 = 0.0;
+            float cnt1 = 0.0;
             for( int y=-u_Radius; y<=u_Radius; ++y )
                 for( int x=-u_Radius; x<=u_Radius; ++x )
                 {
-                    vec3 c1 = fetch( 0, x, y );
-                    vec3 c2 = fetch( 1, x, y );
-                    finalColor += 0.5*( c2 - c1 );
-                }
+                    vec4 c0 = fetch( 0, x, y );
+                    finalColor0+=c0.a*c0.xyz;
+                    cnt0+=c0.a;
 
-            int diameter = 2*u_Radius + 1;
-            finalColor /= diameter * diameter;
+                    vec4 c1 = fetch( 1, x, y );
+                    finalColor1+=c1.a*c1.xyz;
+                    cnt1+=c1.a;
+                }
+            vec3 finalColor = 0.5*(finalColor1/cnt1 - finalColor0/cnt0);
+            if(cnt0<=0.1 || cnt1<=0.1) finalColor = vec3(0);
+            //int diameter = 2*u_Radius + 1;
+//            finalColor /= float(cnt);
 
             gl_FragColor = vec4( finalColor, 1.0 );
         }
@@ -95,7 +104,7 @@ bool TexturePainter::init( int texSize )
 
         void main()
         {
-            vec2 pos = 2.0 * ivec2( gl_FragCoord.xy );
+            vec2 pos = vec2(ivec2( gl_FragCoord.xy )*2);
 
             vec4 avg = vec4( 0.0 );
             for( int y=0; y<2; ++y )
@@ -144,10 +153,10 @@ bool TexturePainter::init( int texSize )
         }
     );
 
-    m_PushPullShader_Init    = glw::createProgram( m_Context, "", initVertSrc      , initFragSrc    );
-    m_PushPullShader_Push    = glw::createProgram( m_Context, "", correctionVertSrc, pushFragSrc    );
-    m_PushPullShader_Pull    = glw::createProgram( m_Context, "", correctionVertSrc, pullFragSrc    );
-    m_PushPullShader_Combine = glw::createProgram( m_Context, "", correctionVertSrc, combineFragSrc );
+    m_PushPullShader_Init    = glw::createProgram( m_Context, "", initVertSrc      , initFragSrc    ); qDebug("1");
+    m_PushPullShader_Push    = glw::createProgram( m_Context, "", correctionVertSrc, pushFragSrc    );qDebug("2");
+    m_PushPullShader_Pull    = glw::createProgram( m_Context, "", correctionVertSrc, pullFragSrc    );qDebug("3");
+    m_PushPullShader_Combine = glw::createProgram( m_Context, "", correctionVertSrc, combineFragSrc );qDebug("4");
 
     if( !m_PushPullShader_Init   ->isLinked() ||
         !m_PushPullShader_Push   ->isLinked() ||
@@ -323,6 +332,8 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindReadDrawFramebuffer();
 
+    QImage ttt = getTexture();
+    ttt.save("dump.png");
 
     glPopMatrix();
     glMatrixMode( GL_PROJECTION );
@@ -485,13 +496,14 @@ QImage TexturePainter::getTexture()
     GLubyte *texData = new GLubyte [ 3*m_TexImg->width()*m_TexImg->height() ];
     glReadPixels( 0, 0, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE, texData );
 
-	m_Context.unbindReadDrawFramebuffer();
+    m_Context.unbindReadDrawFramebuffer();
 
-	QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
+    QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
     for( int y=(int)m_TexImg->height()-1, n=0; y>=0; --y )
-        for( int x= 0; x<(int)m_TexImg->width(); ++x, n+=3 )
+        for( int x= 0; x<(int)m_TexImg->width(); ++x, n+=3 ){
             tex.setPixel( x, y, qRgb(texData[n+0],texData[n+1],texData[n+2]) );
-
+//            if((x%100)==0 && (y%100)==0) qDebug("img %i %i",x,y);
+}
     delete [] texData;
     return tex;
 }

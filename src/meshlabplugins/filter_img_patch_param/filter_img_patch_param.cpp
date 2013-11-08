@@ -142,7 +142,7 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
             par.addParam( new RichInt( "colorCorrectionFilterSize",
                                        1,
                                        "Color correction filter",
-                                       "Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
+                                       "It is the radius (in pixel) of the kernel that is used to compute the difference between corresponding texels in different rasters. Default is 1 that generate a 3x3 kernel. Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
         }
         case FP_PATCH_PARAM_ONLY:
         {
@@ -194,7 +194,10 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 	
 	glContext->makeCurrent();
 	if( glewInit() != GLEW_OK )
-		return false;
+	{
+		 this->errorMessage="Failed GLEW intialization";
+		 return false;
+	   }
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -203,7 +206,10 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     m_Context->acquire();
 
     if( !VisibilityCheck::GetInstance(*m_Context) )
-        return false;
+    {
+         this->errorMessage="VisibilityCheck failed";
+         return false;
+       }
     VisibilityCheck::ReleaseInstance();
 
 
@@ -222,13 +228,14 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
           activeRasters.push_back( rm );
     }
 
-    if( activeRasters.empty() )
+    if( activeRasters.empty() )    {
+      this->errorMessage="No active Raster";
 	{
 		glContext->doneCurrent();
 		errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
 		return false;
 	}
-
+    }
 
     switch( ID(act) )
     {
@@ -970,6 +977,9 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
         for( std::vector<CFaceO*>::iterator f=p->faces.begin(); f!=p->faces.end(); ++f )
             for( int i=0; i<3; ++i )
                 (*f)->WT(i).P() = vcg::Point2f(0.0f,0.0f);
+
+    for(CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end();++fi)
+      for(int i=0;i<3;++i) fi->WT(i).N()=0;
 }
 
 
