@@ -1095,7 +1095,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV,edFunc);
 
     for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
-    tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm, vecV,backwardFlag);
+    tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm,backwardFlag);
   } break;
 
   case FP_DISK_COLORING :
