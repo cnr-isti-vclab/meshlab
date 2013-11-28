@@ -31,9 +31,9 @@
 using namespace vcg;
 using namespace std;
 
-FilterUnsharp::FilterUnsharp() 
+FilterUnsharp::FilterUnsharp()
 {
-  typeList <<  
+  typeList <<
               FP_CREASE_CUT <<
               FP_LAPLACIAN_SMOOTH<<
               FP_HC_LAPLACIAN_SMOOTH<<
@@ -55,15 +55,15 @@ FilterUnsharp::FilterUnsharp()
               FP_VERTEX_NORMAL_NORMALIZE <<
               FP_LINEAR_MORPH	;
   ;
- 
+
   FilterIDType tt;
   foreach(tt , types())
-	    actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(filterName(tt), this);
 
 }
 
 FilterUnsharp::~FilterUnsharp() {
-	for (int i = 0; i < actionList.count() ; i++ ) 
+	for (int i = 0; i < actionList.count() ; i++ )
 		delete actionList.at(i);
 }
 
@@ -87,9 +87,9 @@ QString FilterUnsharp::filterName(FilterIDType filter) const
   case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry");
   case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality");
   case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color");
-  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Recompute Vertex Normals");
-  case FP_RECOMPUTE_FACE_NORMAL:            return QString("Recompute Face Normals");
-  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Recompute Per-Quad Face Normals");
+  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Compute Vertex Normals");
+  case FP_RECOMPUTE_FACE_NORMAL:            return QString("Compute Face Normals");
+  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Compute Per-Quad Face Normals");
   case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
 
 
@@ -141,31 +141,31 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
 {
   switch(ID(a))
   {
-			case FP_CREASE_CUT :
-			return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Normal | MeshFilterInterface::Remeshing);				
-  		case FP_SD_LAPLACIAN_SMOOTH:
-			case FP_HC_LAPLACIAN_SMOOTH:
-			case FP_LAPLACIAN_SMOOTH:
-			case FP_TWO_STEP_SMOOTH:
-			case FP_TAUBIN_SMOOTH:
-			case FP_DEPTH_SMOOTH:
-			case FP_DIRECTIONAL_PRESERVATION:
-			case FP_FACE_NORMAL_SMOOTHING:	  
-			case FP_VERTEX_QUALITY_SMOOTHING:
-			case FP_UNSHARP_NORMAL:				
-			case FP_UNSHARP_GEOMETRY:	    
-			case FP_UNSHARP_QUALITY:
-			case FP_LINEAR_MORPH :
-					return 	MeshFilterInterface::Smoothing;
+            case FP_CREASE_CUT :
+            return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Normal | MeshFilterInterface::Remeshing);
+        case FP_SD_LAPLACIAN_SMOOTH:
+            case FP_HC_LAPLACIAN_SMOOTH:
+            case FP_LAPLACIAN_SMOOTH:
+            case FP_TWO_STEP_SMOOTH:
+            case FP_TAUBIN_SMOOTH:
+            case FP_DEPTH_SMOOTH:
+            case FP_DIRECTIONAL_PRESERVATION:
+            case FP_FACE_NORMAL_SMOOTHING:
+            case FP_VERTEX_QUALITY_SMOOTHING:
+            case FP_UNSHARP_NORMAL:
+            case FP_UNSHARP_GEOMETRY:
+            case FP_UNSHARP_QUALITY:
+            case FP_LINEAR_MORPH :
+                    return 	MeshFilterInterface::Smoothing;
 
-			case FP_UNSHARP_VERTEX_COLOR:	     
+			case FP_UNSHARP_VERTEX_COLOR:
 					return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Smoothing | MeshFilterInterface::VertexColoring);
-				
+
 			case FP_RECOMPUTE_FACE_NORMAL :
 			case FP_RECOMPUTE_QUADFACE_NORMAL :
 			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_FACE_NORMAL_NORMALIZE:	  
-			case FP_VERTEX_NORMAL_NORMALIZE:	  
+			case FP_FACE_NORMAL_NORMALIZE:
+			case FP_VERTEX_NORMAL_NORMALIZE:
 					return MeshFilterInterface::Normal;
 
     default : return MeshFilterInterface::Generic;
@@ -175,31 +175,31 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 {
   switch(ID(a))
   {
-			case FP_VERTEX_QUALITY_SMOOTHING:
-			case FP_UNSHARP_QUALITY:
-	return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
-			case FP_SD_LAPLACIAN_SMOOTH:
-			case FP_HC_LAPLACIAN_SMOOTH:
-			case FP_LAPLACIAN_SMOOTH:
-			case FP_TWO_STEP_SMOOTH:
-			case FP_TAUBIN_SMOOTH:
-			case FP_DEPTH_SMOOTH:
-			case FP_LINEAR_MORPH :
-			case FP_UNSHARP_NORMAL:				
-			case FP_UNSHARP_GEOMETRY:  
-			case FP_DIRECTIONAL_PRESERVATION:
-			case FP_FACE_NORMAL_SMOOTHING:	  
-			case FP_RECOMPUTE_FACE_NORMAL :
-			case FP_RECOMPUTE_QUADFACE_NORMAL :
-			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_FACE_NORMAL_NORMALIZE:	  
-			case FP_CREASE_CUT:
+            case FP_VERTEX_QUALITY_SMOOTHING:
+            case FP_UNSHARP_QUALITY:
+    return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
+            case FP_SD_LAPLACIAN_SMOOTH:
+            case FP_HC_LAPLACIAN_SMOOTH:
+            case FP_LAPLACIAN_SMOOTH:
+            case FP_TWO_STEP_SMOOTH:
+            case FP_TAUBIN_SMOOTH:
+            case FP_DEPTH_SMOOTH:
+            case FP_LINEAR_MORPH :
+            case FP_UNSHARP_NORMAL:
+            case FP_UNSHARP_GEOMETRY:
+            case FP_DIRECTIONAL_PRESERVATION:
+            case FP_FACE_NORMAL_SMOOTHING:
+            case FP_RECOMPUTE_FACE_NORMAL :
+            case FP_RECOMPUTE_QUADFACE_NORMAL :
+            case FP_RECOMPUTE_VERTEX_NORMAL :
+            case FP_FACE_NORMAL_NORMALIZE:
+            case FP_CREASE_CUT:
           return MeshModel::MM_FACENUMBER;
-			case FP_UNSHARP_VERTEX_COLOR:	     
+            case FP_UNSHARP_VERTEX_COLOR:
           return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTCOLOR;
 
-      case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshModel::MM_NONE;
-					
+	  case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshModel::MM_NONE;
+
     default : assert(0); return MeshModel::MM_NONE;
   }
 }
@@ -209,30 +209,30 @@ int FilterUnsharp::postCondition(QAction *a) const
 {
   switch(ID(a))
   {
-  		case FP_SD_LAPLACIAN_SMOOTH:
-			case FP_HC_LAPLACIAN_SMOOTH:
-			case FP_LAPLACIAN_SMOOTH:
-			case FP_TWO_STEP_SMOOTH:
-			case FP_TAUBIN_SMOOTH:
-			case FP_DEPTH_SMOOTH:
-			case FP_LINEAR_MORPH :
-			case FP_UNSHARP_NORMAL:				
-			case FP_UNSHARP_GEOMETRY:  return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL  | MeshModel::MM_FACENORMAL;
-			case FP_DIRECTIONAL_PRESERVATION:
-			case FP_VERTEX_QUALITY_SMOOTHING:
-			case FP_UNSHARP_QUALITY:
-			case FP_CREASE_CUT:
-					return MeshModel::MM_UNKNOWN;
-			case FP_FACE_NORMAL_SMOOTHING:
-			case FP_RECOMPUTE_FACE_NORMAL :
-			case FP_RECOMPUTE_QUADFACE_NORMAL :
-			case FP_RECOMPUTE_VERTEX_NORMAL :
-			case FP_FACE_NORMAL_NORMALIZE:
-			case FP_VERTEX_NORMAL_NORMALIZE:
-					return MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL;
-			case FP_UNSHARP_VERTEX_COLOR:	     
-					return MeshModel::MM_VERTCOLOR;
-			
+        case FP_SD_LAPLACIAN_SMOOTH:
+            case FP_HC_LAPLACIAN_SMOOTH:
+            case FP_LAPLACIAN_SMOOTH:
+            case FP_TWO_STEP_SMOOTH:
+            case FP_TAUBIN_SMOOTH:
+            case FP_DEPTH_SMOOTH:
+            case FP_LINEAR_MORPH :
+            case FP_UNSHARP_NORMAL:
+            case FP_UNSHARP_GEOMETRY:  return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL  | MeshModel::MM_FACENORMAL;
+            case FP_DIRECTIONAL_PRESERVATION:
+            case FP_VERTEX_QUALITY_SMOOTHING:
+            case FP_UNSHARP_QUALITY:
+            case FP_CREASE_CUT:
+                    return MeshModel::MM_UNKNOWN;
+            case FP_FACE_NORMAL_SMOOTHING:
+            case FP_RECOMPUTE_FACE_NORMAL :
+            case FP_RECOMPUTE_QUADFACE_NORMAL :
+            case FP_RECOMPUTE_VERTEX_NORMAL :
+            case FP_FACE_NORMAL_NORMALIZE:
+            case FP_VERTEX_NORMAL_NORMALIZE:
+                    return MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL;
+            case FP_UNSHARP_VERTEX_COLOR:
+                    return MeshModel::MM_VERTCOLOR;
+
 
     default : assert(0); return MeshModel::MM_UNKNOWN;
   }
@@ -284,7 +284,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 		case FP_CREASE_CUT :
 			parlst.addParam(new RichFloat("angleDeg", 90.f, tr("Crease Angle (degree)"), tr("If the angle between the normals of two adjacent faces is <b>larger</b> that this threshold the edge is considered a creased and the mesh is cut along it.")));
 			break;
-		case FP_UNSHARP_NORMAL: 
+		case FP_UNSHARP_NORMAL:
 			parlst.addParam(new RichBool("recalc", false, tr("Recompute Normals"), tr("Recompute normals from scratch before the unsharp masking")));
 			parlst.addParam(new RichFloat("weight", 0.3f, tr("Unsharp Weight"), tr("the unsharp weight <i>w<sub><big>u</big></sub></i> in the unsharp mask equation: <br> <i>w<sub><big>o</big></sub>orig + w<sub><big>u</big></sub> (orig - lowpass)<i><br>")));
 			parlst.addParam(new RichFloat("weightOrig", 1.f, tr("Original Weight"), tr("How much the original signal is used, e.g. the weight <i>w<sub><big>o</big></sub></i> in the above unsharp mask equation.<br> Usually you should not need to change the default 1.0 value.")));
@@ -324,11 +324,11 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
 		case FP_DIRECTIONAL_PRESERVATION:
-			parlst.addParam(new RichEnum("step", 0, 
-									QStringList() << "Store Vertex Position" << "Blend Vertex Position", 
-									tr("Step:"), 
+			parlst.addParam(new RichEnum("step", 0,
+									QStringList() << "Store Vertex Position" << "Blend Vertex Position",
+									tr("Step:"),
 									tr("The purpose of this filter is to <b>constrain</b> any smoothing algorithm to moving vertices only along a give line of sight.<br> First you should store current vertex position, than after applying  one of the many smoothing algorithms you should re start this filter and blend the original positions with the smoothed results.<br>"
-									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>."))); 
+									   "Given a view point  <i>vp</i> , the smoothed vertex position <i>vs</i> and the original position  <i>v</i>, The new vertex position is computed as the projection of  <i>vs</i> on the line  connecting  <i>v</i>  and <i>vp</i>.")));
 			parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
 			parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 			break;
@@ -343,14 +343,14 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
 			parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
 			float maxVal = md.mm()->cm.bbox.Diag()/10;
 		  parlst.addParam(new RichAbsPerc("delta",maxVal*0.01,0,maxVal,"delta", ""));
-      parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
+	  parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
 		}
 		break;
 		case FP_LINEAR_MORPH :
 		{
 			parlst.addParam(new RichMesh ("TargetMesh", md.mm(), &md,"Target Mesh", "The mesh that is the morph target."));
-			
-			parlst.addParam(new RichDynamicFloat("PercentMorph", 0.0, -150, 250,  
+
+			parlst.addParam(new RichDynamicFloat("PercentMorph", 0.0, -150, 250,
 			"% Morph", "The percent you want to morph toward (or away from) the target. <br>"
 			"0 means current mesh <br>"
 			"100 means targe mesh <br>"
@@ -364,8 +364,8 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 {
     MeshModel &m=*(md.mm());
     switch(ID(filter))
-	{
-		case FP_CREASE_CUT :{
+    {
+        case FP_CREASE_CUT :{
         if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm,false) > 0 || tri::Clean<CMeshO>::CountNonManifoldVertexFF(m.cm,false) > 0)
         {
           errorMessage = "Mesh has some not 2 manifold faces, this filter require manifoldness";
@@ -377,51 +377,51 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 				m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 	}
 			break;
-		
+
   case FP_FACE_NORMAL_SMOOTHING :
       tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
                  tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
-			 break;
+             break;
   case FP_VERTEX_QUALITY_SMOOTHING :
       tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
                  tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm);
-			 break;
-			 
+             break;
+
 	case FP_LAPLACIAN_SMOOTH :
 	  {
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 	  int stepSmoothNum = par.getInt("stepSmoothNum");
-      bool Selected=par.getBool("Selected");
-      if(Selected && m.cm.svn==0)
-          m.cm.svn=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			
+	  bool Selected=par.getBool("Selected");
+	  if(Selected && m.cm.svn==0)
+		  m.cm.svn=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+
 	  bool boundarySmooth = par.getBool("Boundary");
 	  bool cotangentWeight = par.getBool("cotangentWeight");
 	  if(!boundarySmooth) tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
-					
-	  tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
+
+      tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
       Log( "Smoothed %d vertices", Selected>0 ? m.cm.svn : m.cm.vn);
       m.UpdateBoxAndNormals();
-	  }
-		break;
-	case FP_DEPTH_SMOOTH :
-	  {
-			int stepSmoothNum = par.getInt("stepSmoothNum");
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			//float delta = par.getAbsPerc("delta");
-			Point3f viewPoint(0,0,0);
-			float alpha = 1;
-			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
-			Log( "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
-			m.UpdateBoxAndNormals();
-	  }
-		break;
-	case FP_DIRECTIONAL_PRESERVATION:
-	  {
-			const std::string AttribName("SavedVertPosition");
-			int stepNum = par.getEnum("step");
-			Point3f viewpoint(0,0,0);
-			float alpha = 1;
+      }
+        break;
+    case FP_DEPTH_SMOOTH :
+      {
+            int stepSmoothNum = par.getInt("stepSmoothNum");
+            size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+            //float delta = par.getAbsPerc("delta");
+            Point3f viewPoint(0,0,0);
+            float alpha = 1;
+            tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
+            Log( "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            m.UpdateBoxAndNormals();
+      }
+        break;
+    case FP_DIRECTIONAL_PRESERVATION:
+      {
+            const std::string AttribName("SavedVertPosition");
+            int stepNum = par.getEnum("step");
+            Point3f viewpoint(0,0,0);
+            float alpha = 1;
 
 			switch (stepNum) {
 				case 0: // ***** Storing Vertex Data *****
@@ -431,21 +431,21 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 					}
 					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,AttribName);
 					CMeshO::VertexIterator vi;
-					
+
 					for(vi =m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
 						h[vi] = vi->cP();
-					
-					Log( "Stored Position %d vertices", m.cm.vn);	 
-					break;  
+
+					Log( "Stored Position %d vertices", m.cm.vn);
+					break;
 				}
 				case 1: // ***** Recovering and Projection Vertex Data *****
 				{
 					if(!tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
-						errorMessage = "Failed to retrieve the stored vertex position. First Store than recover."; 
+						errorMessage = "Failed to retrieve the stored vertex position. First Store than recover.";
 						return false;
 					}
-                    CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
-					
+					CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
+
 					CMeshO::VertexIterator vi;
 					for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
 					{
@@ -465,11 +465,11 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			int stepSmoothNum = par.getInt("stepSmoothNum");
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			// Small hack 
+			// Small hack
 			tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 			float delta = par.getAbsPerc("delta");
 			tri::Smooth<CMeshO>::VertexCoordScaleDependentLaplacian_Fujiwara(m.cm,stepSmoothNum,delta);
-			Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
+			Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
 			m.UpdateBoxAndNormals();
 	  }
 		break;
@@ -477,23 +477,23 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	  {
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
-      m.UpdateBoxAndNormals();
-      }
+	  tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
+	  m.UpdateBoxAndNormals();
+	  }
 		break;
   case FP_TWO_STEP_SMOOTH:
-	  {
-			tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);			
-			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-			int stepSmoothNum = par.getInt("stepSmoothNum");
-			// sigma==0 all is smoothed
-			// sigma==1 nothing is smoothed
-			float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
-			if(sigma<0) sigma=0;
-			
-      int stepNormalNum = par.getInt("stepNormalNum");
+      {
+            tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+            tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+            int stepSmoothNum = par.getInt("stepSmoothNum");
+            // sigma==0 all is smoothed
+            // sigma==1 nothing is smoothed
+            float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
+            if(sigma<0) sigma=0;
+
+	  int stepNormalNum = par.getInt("stepNormalNum");
 			int stepFitNum = par.getInt("stepFitNum");
-      bool selectedFlag = par.getBool("Selected");
+	  bool selectedFlag = par.getBool("Selected");
 			for(int i=0;i<stepSmoothNum;++i)
 			{
 				tri::UpdateNormal<CMeshO>::PerFaceNormalized(m.cm);
@@ -509,164 +509,164 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 			float lambda=par.getFloat("lambda");
 			float mu=par.getFloat("mu");
 
-			size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+            size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
       tri::Smooth<CMeshO>::VertexCoordTaubin(m.cm,stepSmoothNum,lambda,mu,cnt>0,cb);
-			Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);	   
-			m.UpdateBoxAndNormals();
-	  }
-			break;
-	case FP_RECOMPUTE_FACE_NORMAL : 
-			tri::UpdateNormal<CMeshO>::PerFace(m.cm);
-			break;
-	case FP_RECOMPUTE_QUADFACE_NORMAL : 
-			tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(m.cm);
-			break;
-	case FP_RECOMPUTE_VERTEX_NORMAL :
-			  {
-				int weightMode = par.getEnum("weightMode");
-				switch(weightMode)
-				{
-				case 0: tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
-						tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-						tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-				  break;
-				case 1: tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
-						tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-				  break;
-				case 2: tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m.cm);
-						tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-				  break;
-				case 3: tri::UpdateNormal<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
-						tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-				  break;
-				default :
-				  break;
-				}
-			  }
-			break;
-	case FP_FACE_NORMAL_NORMALIZE :
-			tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
-			 break;
-	case FP_VERTEX_NORMAL_NORMALIZE :
-			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
-			 break;
-	
-	case FP_UNSHARP_NORMAL:			
-			{	
+            Log( "Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+            m.UpdateBoxAndNormals();
+      }
+            break;
+    case FP_RECOMPUTE_FACE_NORMAL :
+            tri::UpdateNormal<CMeshO>::PerFace(m.cm);
+            break;
+    case FP_RECOMPUTE_QUADFACE_NORMAL :
+            tri::UpdateNormal<CMeshO>::PerBitQuadFaceNormalized(m.cm);
+            break;
+    case FP_RECOMPUTE_VERTEX_NORMAL :
+              {
+                int weightMode = par.getEnum("weightMode");
+                switch(weightMode)
+                {
+                case 0: tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
+                        tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+                        tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+                  break;
+                case 1: tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+                        tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+                  break;
+                case 2: tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(m.cm);
+                        tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+                  break;
+                case 3: tri::UpdateNormal<CMeshO>::PerVertexNelsonMaxWeighted(m.cm);
+                        tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+                  break;
+                default :
+                  break;
+                }
+              }
+            break;
+    case FP_FACE_NORMAL_NORMALIZE :
+            tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
+             break;
+    case FP_VERTEX_NORMAL_NORMALIZE :
+            tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+             break;
+
+	case FP_UNSHARP_NORMAL:
+			{
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
-				
+
 				tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
 				vector<Point3f> normalOrig(m.cm.fn);
 				for(int i=0;i<m.cm.fn;++i)
 					normalOrig[i]=m.cm.face[i].cN();
-				
+
 				for(int i=0;i<smoothIter;++i)
 						tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm);
-				
-				for(int i=0;i<m.cm.fn;++i)
+
+                for(int i=0;i<m.cm.fn;++i)
           m.cm.face[i].N() = normalOrig[i]*alphaorig + (normalOrig[i] - m.cm.face[i].N())*alpha;
-				
+
 			}	break;
-	case FP_UNSHARP_GEOMETRY:			
+	case FP_UNSHARP_GEOMETRY:
 			{
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
-				
+
 				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 				vector<Point3f> geomOrig(m.cm.vn);
 				for(int i=0;i<m.cm.vn;++i)
 					geomOrig[i]=m.cm.vert[i].P();
-				
+
 				tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,smoothIter);
-				
+
 				for(int i=0;i<m.cm.vn;++i)
-					m.cm.vert[i].P()=geomOrig[i]*alphaorig + (geomOrig[i] - m.cm.vert[i].P())*alpha;				
-					
+					m.cm.vert[i].P()=geomOrig[i]*alphaorig + (geomOrig[i] - m.cm.vert[i].P())*alpha;
+
 				m.UpdateBoxAndNormals();
 
 			}	break;
-	case FP_UNSHARP_VERTEX_COLOR:			
-			{	
+	case FP_UNSHARP_VERTEX_COLOR:
+			{
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
-				
+
 				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 				vector<Color4f> colorOrig(m.cm.vn);
 				for(int i=0;i<m.cm.vn;++i)
 					colorOrig[i].Import(m.cm.vert[i].C());
-				
+
 				tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,smoothIter);
 				for(int i=0;i<m.cm.vn;++i)
-					{ 
+					{
 						Color4f colorDelta = colorOrig[i] - Color4f::Construct(m.cm.vert[i].C());
-						Color4f newCol = 	colorOrig[i]*alphaorig + colorDelta*alpha;	 // Unsharp formula 
+						Color4f newCol = 	colorOrig[i]*alphaorig + colorDelta*alpha;	 // Unsharp formula
 						Clamp(newCol); // Clamp everything in the 0..1 range
 						m.cm.vert[i].C().Import(newCol);
-						
+
 						}
 			}	break;
-	case FP_UNSHARP_QUALITY:			
-	{	
+	case FP_UNSHARP_QUALITY:
+	{
 	  tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
 				float alpha=par.getFloat("weight");
 				float alphaorig=par.getFloat("weightOrig");
 				int smoothIter = par.getInt("iterations");
-				
+
 				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
 				vector<float> qualityOrig(m.cm.vn);
 				for(int i=0;i<m.cm.vn;++i)
 					qualityOrig[i] = m.cm.vert[i].Q();
-				
+
 				tri::Smooth<CMeshO>::VertexQualityLaplacian(m.cm, smoothIter);
 				for(int i=0;i<m.cm.vn;++i)
-				{ 
-					float qualityDelta = qualityOrig[i] - m.cm.vert[i].Q();		
-					m.cm.vert[i].Q() = 	qualityOrig[i]*alphaorig + qualityDelta*alpha;	 // Unsharp formula 
+				{
+					float qualityDelta = qualityOrig[i] - m.cm.vert[i].Q();
+					m.cm.vert[i].Q() = 	qualityOrig[i]*alphaorig + qualityDelta*alpha;	 // Unsharp formula
 				}
 	}	break;
-	
+
 	case FP_LINEAR_MORPH:
 	{
 		CMeshO &targetMesh = par.getMesh("TargetMesh")->cm;
 		CMeshO &sourceMesh = m.cm;
-				
+
 		//if the numbers of vertices dont match up
 		if(sourceMesh.vn != targetMesh.vn)
 		{
 			errorMessage = "Number of vertices is not the same so you cant morph between these two meshes.";
 			return false;
 		}
-		
-		vcg::tri::Allocator<CMeshO>::CompactVertexVector(sourceMesh); 
-		vcg::tri::Allocator<CMeshO>::CompactFaceVector(sourceMesh); 
-		vcg::tri::Allocator<CMeshO>::CompactVertexVector(targetMesh); 
+
+		vcg::tri::Allocator<CMeshO>::CompactVertexVector(sourceMesh);
+		vcg::tri::Allocator<CMeshO>::CompactFaceVector(sourceMesh);
+		vcg::tri::Allocator<CMeshO>::CompactVertexVector(targetMesh);
 		vcg::tri::Allocator<CMeshO>::CompactFaceVector(targetMesh);
 
 		float percentage = par.getDynamicFloat("PercentMorph")/100.f;
-		
+
 		int i;
 		for(i=0;i<targetMesh.vn;++i)
 		{
-			CMeshO::CoordType &srcP =sourceMesh.vert[i].P();  
-			CMeshO::CoordType &trgP =targetMesh.vert[i].P();  
+			CMeshO::CoordType &srcP =sourceMesh.vert[i].P();
+			CMeshO::CoordType &trgP =targetMesh.vert[i].P();
 			srcP = srcP + (trgP-srcP)*percentage;
 		}
-	
+
 		m.UpdateBoxAndNormals();
 	} break;
 	default : assert(0);
 	}
 
-	
-				
+
+
 	return true;
 }
 
