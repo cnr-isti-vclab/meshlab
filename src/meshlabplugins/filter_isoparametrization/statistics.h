@@ -1,7 +1,7 @@
-#include <iso_parametrization.h>
-
 #ifndef _ISO_STATISTICS
 #define _ISO_STATISTICS
+
+#include <iso_parametrization.h>
 
 template <class ScalarType>
 ScalarType geomAverage(const ScalarType &val0,

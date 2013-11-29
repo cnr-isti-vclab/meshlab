@@ -31,7 +31,6 @@
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/update/quality.h>
 #include <vcg/complex/algorithms/update/topology.h>
-#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/math/histogram.h>
 #include <vcg/complex/algorithms/clean.h>
@@ -48,7 +47,7 @@
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 
-#include <vcg/simplex/edge/base.h>
+//#include <vcg/simplex/edge/base.h>
 #include <stdarg.h>
 #include "volume.h"
 #include "tri_edge_collapse_mc.h"

@@ -20,12 +20,13 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#include "filter_isoparametrization.h"
 
-#include <Qt>
+#include <QStringList>
+#include <QFileInfo>
 #include "defines.h"
 
 #include "../../common/meshmodel.h"
-#include "filter_isoparametrization.h"
 #include <iso_transfer.h>
 
 

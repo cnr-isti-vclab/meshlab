@@ -34,19 +34,14 @@
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
 #include<vector>
-#include<vcg/simplex/vertex/base.h>
 #include<vcg/space/index/base.h>
-#include<vcg/simplex/face/base.h>
 #include<vcg/complex/complex.h>
 #include <vcg/space/point3.h>
 #include <vcg/space/intersection2.h>
-#include <vcg/complex/allocate.h>
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/closest.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/algorithms/geodesic.h>
-#include <vcg/complex/algorithms/clean.h>
-#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/complex/algorithms/create/resampler.h>

@@ -21,7 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
 #include "filter_dirt.h"
 #include "particle.h"
 #include "dirt_utils.h"
@@ -37,15 +36,11 @@
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/smooth.h>
-#include <vcg/complex/algorithms/update/flag.h>
-#include <vcg/complex/algorithms/update/selection.h> 
 #include <vcg/complex/algorithms/update/color.h>
-#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle3.h>
-#include <vcg/complex/allocate.h>
 #include <vector>
 
 using namespace std;

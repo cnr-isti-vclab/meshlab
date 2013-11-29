@@ -7,7 +7,7 @@
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse_quadric.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_flip.h>
-#include <vcg/complex/append.h>
+#include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/edge_collapse.h>
 #include <vcg/space/color4.h>
 #include <vcg/math/quadric.h>

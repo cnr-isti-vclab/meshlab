@@ -1,8 +1,9 @@
-#include <algorithm>
-#include <vcg/container/simple_temporary_data.h>
-
 #ifndef _OPT_PATCHES
 #define _OPT_PATCHES
+
+#include <algorithm>
+#include <vcg/complex/complex.h>
+
 
 template <class MeshType>
 class PatchesOptimizer

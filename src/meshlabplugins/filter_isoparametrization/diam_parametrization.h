@@ -1,12 +1,12 @@
-#include <algorithm>
-#include <time.h>
-#include <vcg/complex/algorithms/refine.h>
-#include <vcg/simplex/face/pos.h>
-#include <vcg/space/color4.h>
-#include <vcg/space/intersection2.h>
-
 #ifndef _DIAMONDPARA
 #define _DIAMONDPARA
+
+#include <algorithm>
+#include <ctime>
+#include <vcg/complex/algorithms/refine.h>
+#include <vcg/complex/complex.h>
+#include <vcg/space/color4.h>
+#include <vcg/space/intersection2.h>
 
 class DiamondParametrizator
 {

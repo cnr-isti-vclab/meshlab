@@ -9,8 +9,6 @@
 #include <stack>
 
 #include <vcg/complex/complex.h>
-#include <vcg/complex/allocate.h>
-#include <vcg/complex/algorithms/update/flag.h>
 
 #include <vcg/space/fitting3.h>
 

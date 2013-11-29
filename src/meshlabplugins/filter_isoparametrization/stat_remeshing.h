@@ -1,13 +1,12 @@
+#ifndef STAT_REMESHING
+#define STAT_REMESHING
+
 #include <vcg/complex/algorithms/update/topology.h>
-#include <vcg/complex/algorithms/update/flag.h>
 #include <vcg/space/triangle3.h>
 #include <wrap/io_trimesh/import_ply.h>
 #include <wrap/io_trimesh/export_ply.h>
 #include <vcg/simplex/face/pos.h>
 #include <vcg/math/histogram.h>
-
-#ifndef STAT_REMESHING
-#define STAT_REMESHING
 
 #define PI 3.14159265
 

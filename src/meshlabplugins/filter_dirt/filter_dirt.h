@@ -30,8 +30,6 @@
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
 #include<vector>
-#include<vcg/simplex/vertex/base.h>
-#include<vcg/simplex/face/base.h>
 #include<vcg/complex/complex.h>
 //#include "muParser.h"
 

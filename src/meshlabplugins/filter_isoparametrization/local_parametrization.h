@@ -1,3 +1,6 @@
+#ifndef LOCAL_PARAMETRIZATION
+#define LOCAL_PARAMETRIZATION
+
 
 
 #include "defines.h"
@@ -7,9 +10,6 @@
 #include <vcg/space/triangle2.h>
 #include "texcoord_optimization.h"
 #include "mesh_operators.h"
-
-#ifndef LOCAL_PARAMETRIZATION
-#define LOCAL_PARAMETRIZATION
 
 //#include <vcg/complex/algorithms/point_sampling.h>
 

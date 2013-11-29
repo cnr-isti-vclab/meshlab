@@ -3,7 +3,7 @@
 #include <vcg/simplex/face/pos.h>
 #include <vcg/complex/algorithms/update/normal.h>
 #include <vcg/complex/algorithms/update/topology.h>
-#include <vcg/complex/algorithms/update/flag.h>
+#include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/update/bounding.h>
 #include <vcg/complex/algorithms/update/component_ep.h>
 #include <vector>
