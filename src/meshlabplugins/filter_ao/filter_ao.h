@@ -32,6 +32,7 @@ class AOGLWidget;
 class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
 // Attributes
