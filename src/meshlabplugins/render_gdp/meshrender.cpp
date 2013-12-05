@@ -344,7 +344,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 					}
 
 
-					sDialog = new ShaderDialog(&shaders[a->text()], gla, rm);
+					sDialog = new ShaderDialog(&shaders[a->text()], gla, rm,gla);
 					sDialog->move(10,100);
 					sDialog->show();
 
