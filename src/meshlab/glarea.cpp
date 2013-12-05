@@ -1597,6 +1597,11 @@ void GLArea::loadRaster(int id)
 		if(rm->id()==id)
 		{
 			this->md()->setCurrentRaster(id);
+			if (rm->currentPlane->image.isNull())
+			{
+				Logf(0,"Image file %s has not been correctly loaded, a fake image is going to be shown.",rm->currentPlane->fullPathFileName.toUtf8().constData());
+				rm->currentPlane->image.load(":/images/dummy.png");
+			}
 			setTarget(rm->currentPlane->image);
 			//load his shot or a default shot
 
@@ -1670,7 +1675,8 @@ void GLArea::drawTarget()
 
 
 void GLArea::setTarget(QImage &image) {
-
+	if (image.isNull())
+		return;
 	if (targetTex) {
 		glDeleteTextures(1, &targetTex);
 		targetTex = 0;
