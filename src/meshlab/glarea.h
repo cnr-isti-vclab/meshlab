@@ -337,8 +337,8 @@ public slots:
 	void updateRasterSetVisibilities();
 
 private slots:
-	void addNewEntryInRenderModeMap(int index);
-	void removeEntryFromRenderModeMap(int index);
+	void meshAdded(int index);
+	void meshRemoved(int index);
 
 private:
 	float cfps;

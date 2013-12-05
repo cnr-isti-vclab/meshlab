@@ -2379,7 +2379,10 @@ bool MainWindow::importMesh(QString fileName)
 				showLayerDlg(true);
 		}
 		else
+		{
+			meshDoc()->delMesh(mm);
 			GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
+		}
 	}// end foreach file of the input list
   GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 
@@ -2444,6 +2447,7 @@ void MainWindow::reloadAllMesh()
   loadMeshWithStandardParams(fileName,mmm);
   }
   qb->reset();
+  update();
 }
 
 void MainWindow::reload()
@@ -2454,6 +2458,7 @@ void MainWindow::reload()
 	QString fileName = meshDoc()->mm()->fullName();
 	loadMeshWithStandardParams(fileName,meshDoc()->mm());
 	qb->reset();
+	update();
 }
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)

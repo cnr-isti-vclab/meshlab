@@ -90,8 +90,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
 	connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
 	connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
-	connect(md(),SIGNAL(meshAdded(int)),this,SLOT(addNewEntryInRenderModeMap(int)));
-	connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(removeEntryFromRenderModeMap(int)));
+	connect(md(),SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
+	connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
 	foreach(MeshModel* mesh,md()->meshList)
 			rendermodemap[mesh->id()] = RenderMode();
@@ -1214,7 +1214,8 @@ void GLArea::initTexture(bool reloadAllTexture)
 			for(unsigned int i =0; i< mp->cm.textures.size();++i)
 			{
 				QImage img, imgScaled, imgGL;
-				bool res = img.load(mp->cm.textures[i].c_str());
+				QFileInfo fi(mp->cm.textures[i].c_str());
+				bool res = img.load(fi.absoluteFilePath());
 				sometextfailed = sometextfailed || !res;
 				if(!res)
 				{
@@ -2082,12 +2083,14 @@ void GLArea::completeUpdateRequested()
 //	return NULL;
 //}
 
-void GLArea::addNewEntryInRenderModeMap( int index )
+void GLArea::meshAdded( int index )
 {
 	rendermodemap[index] = RenderMode();
+	emit updateLayerTable();
 }
 
-void GLArea::removeEntryFromRenderModeMap( int index )
+void GLArea::meshRemoved( int index )
 {
-		rendermodemap.remove(index);
+	rendermodemap.remove(index);
+	emit updateLayerTable();
 }
