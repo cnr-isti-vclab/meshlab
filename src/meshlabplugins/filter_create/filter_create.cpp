@@ -196,7 +196,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 	case CR_BOX:
 	{
 	  float sz=par.getFloat("size");
-	  vcg::Box3f b(vcg::Point3f(1,1,1)*(sz/2),vcg::Point3f(1,1,1)*(-sz/2));
+	  vcg::Box3f b(vcg::Point3f(1,1,1)*(-sz/2),vcg::Point3f(1,1,1)*(sz/2));
 	  vcg::tri::Box<CMeshO>(m->cm,b);
 			m->updateDataMask(MeshModel::MM_POLYGONAL);
 
