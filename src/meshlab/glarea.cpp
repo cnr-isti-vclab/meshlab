@@ -540,6 +540,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		hasToPick=false;
 		if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
 		{
+      // write picked point in the log
+      Logf(0,"Recentering on point [%f %f %f]",pp[0],pp[1],pp[2]);
 			trackball.Translate(-pp);
 			trackball.Scale(1.25f);
 			QCursor::setPos(mapToGlobal(QPoint(width()/2+2,height()/2+2)));
