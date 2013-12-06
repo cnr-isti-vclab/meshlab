@@ -100,7 +100,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, QMap<int
   glDrawBuffers(3,FramebufferObject::buffers(0));
   glClearColor(0.0,0.0,0.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glColor(Color4b::LightGray);
+  vcg::glColor(vcg::Color4b::LightGray);
   _buffPass->enable();
   foreach(MeshModel *mp,md.meshList) {
       QMap<int,RenderMode>::iterator it = rm.find(mp->id());
