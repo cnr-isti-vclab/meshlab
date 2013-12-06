@@ -39,7 +39,7 @@ class QScriptEngine;
 class PluginManager
 {
 private:
-	MeshDocumentSI* currentDocInterface;
+	//MeshDocumentSI* currentDocInterface;
 public:
 	PluginManager();
 	~PluginManager();
