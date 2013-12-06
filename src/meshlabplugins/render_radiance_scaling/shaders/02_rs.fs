@@ -71,14 +71,14 @@ vec3 hsvToRgb(in float h,in float s,in float v) {
   float p = v*(1.0-s);
   float q = v*(1.0-f*s);
   float t = v*(1.0-(1.0-f)*s);
-  
+
   if(hi==0) color = vec3(v,t,p);
   else if(hi==1) color = vec3(q,v,p);
   else if(hi==2) color = vec3(p,v,t);
   else if(hi==3) color = vec3(p,q,v);
   else if(hi==4) color = vec3(t,p,v);
   else color = vec3(v,p,q);
-  
+
   return color;
 }
 
@@ -89,15 +89,15 @@ float tanh(in float c, in float en) {
   float x = ((c*cmax*1.0)/tanhmax);
   float e = exp(-2.0*x);
   float t = clamp((1.0-e)/(1.0+e),-1.0,1.0);
-  
+
   return t;
 }
 
-// **** WARPING FUNCTION **** 
+// **** WARPING FUNCTION ****
 float warp(in float impfunc,in float beta) {
   const float alpha = 0.1;
   float expbeta = exp(-beta);
-  return (alpha*expbeta+impfunc*(1.0-alpha-alpha*expbeta)) / (alpha+impfunc*(expbeta-alpha-alpha*expbeta)); 
+  return (alpha*expbeta+impfunc*(1.0-alpha-alpha*expbeta)) / (alpha+impfunc*(expbeta-alpha-alpha*expbeta));
 }
 
 // **** WEIGHT FUNCTIONS ****
@@ -110,14 +110,14 @@ float silhouetteWeight(in float s) {
 }
 
 float weight() {
-  return (silhouetteWeight(abs(A.z-X.z)) + 
-	  silhouetteWeight(abs(B.z-X.z)) + 
-	  silhouetteWeight(abs(C.z-X.z)) +
-	  silhouetteWeight(abs(D.z-X.z)) +
-	  silhouetteWeight(abs(E.z-X.z)) +
-	  silhouetteWeight(abs(F.z-X.z)) +
-	  silhouetteWeight(abs(G.z-X.z)) +
-	  silhouetteWeight(abs(H.z-X.z)))/8.0;
+  return (silhouetteWeight(abs(A.z-X.z)) +
+    silhouetteWeight(abs(B.z-X.z)) +
+    silhouetteWeight(abs(C.z-X.z)) +
+    silhouetteWeight(abs(D.z-X.z)) +
+    silhouetteWeight(abs(E.z-X.z)) +
+    silhouetteWeight(abs(F.z-X.z)) +
+    silhouetteWeight(abs(G.z-X.z)) +
+    silhouetteWeight(abs(H.z-X.z)))/8.0;
 }
 
 // **** CURVATURE FUNCTIONS ****
@@ -126,7 +126,7 @@ vec3 hessian() {
   float xy = E.y-D.y;
   float yx = B.x-G.x;
   float yy = B.y-G.y;
-  
+
   return vec3(xx,yy,(xy+yx)/2.0);
 }
 
@@ -162,30 +162,30 @@ vec4 coloredDescriptor(in float c, in float s) {
 
   if(s<1.0)
     rgb = vec3(0.2);
-  
+
   return vec4(rgb,1.0);
 }
 
 vec4 greyDescriptor(in float c, in float s) {
-  return vec4((c*0.5+0.5)-(1.0-s));
+  return vec4( vec3( (c*0.5+0.5)-(1.0-s) ), 1.0);
 }
 
 // **** LIT SPHERE FUNCTIONS ****
 vec4 oneLitSphere(in vec3 n,in float c) {
   vec4 color = texture2D(convexLS,(n.xy*0.5)+vec2(0.5));
-  
+
   return enabled ? color*warp(length(color),c) : color;
 }
 
 vec4 twoLitSphere(in vec3 n,in float w,in vec3 h,in float c) {
   const float eps = 0.2;
-  
+
   vec2 coord = (n.xy*0.5)+vec2(0.5);
   vec4 cconv = texture2D(convexLS,coord);
   vec4 cconc = texture2D(concavLS,coord);
   vec4 color = mix(cconc,cconv,smoothstep(0.5-eps,0.5+eps,curvature(w,h,transition)*0.5+0.5));
 
-  return enabled ? color*warp(length(color),c) : color;
+  return vec4( (enabled ? color*warp(length(color),c) : color).xyz,1.0);
 }
 
 // **** LIGHTING COMPUTATION ****
@@ -212,28 +212,28 @@ void main(void) {
   //Initialize the depth of the fragment with the just saved depth
   gl_FragDepth = texture2D(norm,gl_TexCoord[0].st).w;
 
-  if(display==0) 
+  if(display==0)
   {
     // lambertian lighting
     float cosineTerm = max(dot(n,l),0.0);
     float warpedTerm = enabled ? cosineTerm*warp(cosineTerm,c) : cosineTerm;
-    gl_FragColor = m*warpedTerm;
-  } 
-  else if(display==1) 
+    gl_FragColor = vec4(m.rgb*warpedTerm,1.0);
+  }
+  else if(display==1)
   {
-    // using lit spheres 
+    // using lit spheres
     if(twoLS) {
       gl_FragColor = twoLitSphere(n,w,h,c);
     } else {
       gl_FragColor = oneLitSphere(n,c);
     }
-  } 
+  }
   else if(display==2)
   {
     // colored descriptor
     gl_FragColor = coloredDescriptor(c,w);
-  } 
-  else if(display==3) 
+  }
+  else if(display==3)
   {
     // grey descriptor
     gl_FragColor = greyDescriptor(c,w);
