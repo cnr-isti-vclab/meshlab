@@ -519,7 +519,7 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
 
 
 bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
-                                              MeshDocument     & /*m*/,
+                                              MeshDocument     & m,
                                               RichParameterSet * /*par*/,
                                               GLArea           * /*gla*/ )
 {
@@ -527,6 +527,11 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
     {
         case DP_PROJECT_RASTER:
         {
+			if (m.rm() == NULL)
+			{
+				qWarning("No valid raster has been loaded.");
+				return false;
+			}
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             GLenum err = glewInit();
