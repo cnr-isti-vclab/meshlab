@@ -29,6 +29,7 @@
 
 using namespace std;
 GLLogStream::GLLogStream()
+	:QObject()
 {
   ClearBookmark();
 }
@@ -92,5 +93,18 @@ void GLLogStream::print(QStringList &out)
   QList<pair <int,QString> > ::const_iterator li;
   for(li=S.begin();li!=S.end();++li)
         out.push_back((*li).second);
+}
+
+void GLLogStream::Clear()
+{
+	S.clear();
+}
+
+void GLLogStream::Log( int Level, const char * buf )
+{
+	QString tmp(buf);
+	S.push_back(std::make_pair(Level,tmp));
+	qDebug("LOG: %i %s",Level,buf);
+	emit logUpdated();
 }
 

@@ -317,6 +317,15 @@ void MeshDocument::updateRenderState(const QList<int>& mm,const int meshupdatema
 	currTime.start();
 }
 
+MeshDocument::MeshDocument() : QObject(),rendstate(),xmlhistory(),Log()
+{
+	meshIdCounter=0;
+	rasterIdCounter=0;
+	currentMesh = 0;
+	currentRaster = 0;
+	busy=false;
+}
+
 void MeshModel::Clear()
 {
   meshModified() = false;

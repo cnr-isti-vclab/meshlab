@@ -30,12 +30,14 @@
 #include <QMultiMap>
 #include <QPair>
 #include <QString>
+#include <QObject>
 /**
   This is the logging class.
   One for each document. Responsible of getting an history of the logging message printed out by filters.
   */
-class GLLogStream
+class GLLogStream : public QObject
 {
+	Q_OBJECT
 public:
 	enum Levels
 	{
@@ -45,21 +47,13 @@ public:
 		DEBUG = 3
 	};
 
-   GLLogStream ();
+	GLLogStream ();
    ~GLLogStream (){}
   void print(QStringList &list);		// Fills a QStringList with the log entries
   void Save(int Level, const char *filename);
-  void Clear()
-  {
-      S.clear();
-  }
+  void Clear();
     void Logf(int Level, const char * f, ... );
-  void Log(int Level, const char * buf )
-    {
-        QString tmp(buf);
-        S.push_back(std::make_pair(Level,tmp));
-    qDebug("LOG: %i %s",Level,buf);
-    }
+  void Log(int Level, const char * buf );
 
   void SetBookmark();
   void ClearBookmark();
@@ -76,6 +70,8 @@ public:
   void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ... );
   void RealTimeLog(const QString& Id, const QString &meshName,const QString& text);
 
+signals:
+  void logUpdated();
 
 private:
   int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing

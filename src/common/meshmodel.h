@@ -398,6 +398,9 @@ public:
 class MeshDocument;
 class RenderMode
 {
+private:
+	QList<QAction*> declist;
+
 public:
 	vcg::GLW::DrawMode	drawMode;
 	vcg::GLW::ColorMode	colorMode;
@@ -412,6 +415,7 @@ public:
 
 
 	RenderMode()
+		:declist()
 	{
 		drawMode	= vcg::GLW::DMFlat;
 		colorMode = vcg::GLW::CMNone;
@@ -469,6 +473,12 @@ public:
 	{
 		selectedVert = ison;
 	}
+
+	inline QList<QAction*>& decoratorList()
+	{
+		return declist;
+	}
+
 }; // end class RenderMode
 
 class MeshLabRenderState //: public QObject
@@ -531,14 +541,7 @@ class MeshDocument : public QObject
 
 public:
 
-	MeshDocument(): QObject(),rendstate(),xmlhistory()
-	{
-		meshIdCounter=0;
-		rasterIdCounter=0;
-		currentMesh = 0;
-		currentRaster = 0;
-		busy=false;
-	}
+	MeshDocument();
 
 	//deletes each meshModel
 	~MeshDocument();
