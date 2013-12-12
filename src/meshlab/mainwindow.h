@@ -68,6 +68,7 @@ public:
 	void executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool  isPreview);
 
   MainWindow();
+  void init();
     static bool QCallBack(const int pos, const char * str);
     //const QString appName() const {return tr("MeshLab v")+appVer(); }
   //const QString appVer() const {return tr("1.3.2"); }
@@ -204,6 +205,7 @@ private slots:
 	void wrapSetActiveSubWindow(QWidget* window);
 	void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
 private:
+
 	int longestActionWidthInMenu(QMenu* m,const int longestwidth);
 	int longestActionWidthInMenu( QMenu* m);
 	int longestActionWidthInAllMenus();

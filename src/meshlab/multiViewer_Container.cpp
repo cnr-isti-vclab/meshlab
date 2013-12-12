@@ -294,6 +294,18 @@ void MultiViewer_Container::updateTrackballInViewers()
 
 void MultiViewer_Container::closeEvent( QCloseEvent *event )
 {
+	if (meshDoc.hasBeenModified())
+	{
+		QMessageBox::StandardButton ret=QMessageBox::question(
+			this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(meshDoc.docLabel()),
+			QMessageBox::Yes|QMessageBox::No,
+			QMessageBox::No);
+		if(ret==QMessageBox::No)	// don't close please!
+		{	
+			event->ignore();
+			return;
+		}
+	}
 	bool close = true;
 	int ii = 0;
 	while(close && (ii < viewerList.size()))
@@ -301,6 +313,7 @@ void MultiViewer_Container::closeEvent( QCloseEvent *event )
 		close = viewerList.at(ii)->readyToClose();
 		++ii;
 	}
+
 	if (close)
 		event->accept();
 	else

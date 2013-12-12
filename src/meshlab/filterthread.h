@@ -8,21 +8,22 @@ class FilterThread : public QThread
 {
 	Q_OBJECT
 public:
-	explicit FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env, QObject *parent = 0);
+	FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env);
 	~FilterThread();
 	MeshLabXMLFilterContainer *_mfc;
 	QString _fname;
 	MeshDocument& _md;
 	EnvWrap & _env;
 	bool _ret;
-	static bool QCallBackLocal(const int pos, const char * str);
+	static bool localCallBack(const int pos, const char * str);
 
 protected:
 	void run();
 
 signals:
-	void ThreadCB(const int pos,const QString& str);
+	void threadCB(const int pos,const QString& str);
 private:
+	static FilterThread* _cur;
 	QGLWidget* _glwid;
 };
 

@@ -40,10 +40,10 @@ using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
-: QGLWidget(),interrbutshow(false)
+	: QGLWidget(),interrbutshow(false)
 {
 	this->setParent(mvcont);
-    parentmultiview = mvcont;
+	parentmultiview = mvcont;
 	this->updateCustomSettingValues(*current);
 	animMode=AnimNone;
 	iRenderer=0; //Shader support
@@ -94,7 +94,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
 	connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
 	foreach(MeshModel* mesh,md()->meshList)
-			rendermodemap[mesh->id()] = RenderMode();
+		rendermodemap[mesh->id()] = RenderMode();
 
 	/*getting the meshlab MainWindow from parent, which is QWorkspace.
 	*note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
@@ -142,15 +142,15 @@ QString GLArea::GetMeshInfoString()
 
 void GLArea::Logf(int Level, const char * f, ... )
 {
-  if(this->md()==0) return;
+	if(this->md()==0) return;
 
-  char buf[4096];
-  va_list marker;
-  va_start( marker, f );
+	char buf[4096];
+	va_list marker;
+	va_start( marker, f );
 
-  vsprintf(buf,f,marker);
-  va_end( marker );
-  this->md()->Log.Log(Level,buf);
+	vsprintf(buf,f,marker);
+	va_end( marker );
+	this->md()->Log.Log(Level,buf);
 }
 
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
@@ -234,34 +234,34 @@ void GLArea::pasteTile()
 			{
 				bool ret = (snapBuffer.mirrored(false,true)).save(outfile,"PNG");
 				if (ret)
-		{
-		  this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
-		  if(ss.addToRasters)
-		  {
-			mw()->importRaster(outfile);
+				{
+					this->Logf(GLLogStream::SYSTEM, "Snapshot saved to %s",outfile.toLocal8Bit().constData());
+					if(ss.addToRasters)
+					{
+						mw()->importRaster(outfile);
 
-            RasterModel *rastm = md()->rm();
-            rastm->shot = shotFromTrackball().first;
-                float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
-                rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
-                  rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
-                  rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-                  rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-                  rastm->shot.Intrinsics.CenterPx[0]=(int)((float)rastm->shot.Intrinsics.ViewportPx[0]/2.0);
-                  rastm->shot.Intrinsics.CenterPx[1]=(int)((float)rastm->shot.Intrinsics.ViewportPx[1]/2.0);
-          }
-        }
-                else
-        {
-          Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
-        }
-            }
-            takeSnapTile=false;
-            snapBuffer=QImage();
-        }
-    }
-    update();
-    glPopAttrib();
+						RasterModel *rastm = md()->rm();
+						rastm->shot = shotFromTrackball().first;
+						float ratio=(float)rastm->currentPlane->image.height()/(float)rastm->shot.Intrinsics.ViewportPx[1];
+						rastm->shot.Intrinsics.ViewportPx[0]=rastm->currentPlane->image.width();
+						rastm->shot.Intrinsics.ViewportPx[1]=rastm->currentPlane->image.height();
+						rastm->shot.Intrinsics.PixelSizeMm[1]/=ratio;
+						rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
+						rastm->shot.Intrinsics.CenterPx[0]=(int)((float)rastm->shot.Intrinsics.ViewportPx[0]/2.0);
+						rastm->shot.Intrinsics.CenterPx[1]=(int)((float)rastm->shot.Intrinsics.ViewportPx[1]/2.0);
+					}
+				}
+				else
+				{
+					Logf(GLLogStream::WARNING,"Error saving %s",outfile.toLocal8Bit().constData());
+				}
+			}
+			takeSnapTile=false;
+			snapBuffer=QImage();
+		}
+	}
+	update();
+	glPopAttrib();
 }
 
 
@@ -328,53 +328,53 @@ void GLArea::drawLight()
 }
 int GLArea::RenderForSelection(int pickX, int pickY)
 {
-  int sz = int( md()->meshList.size())*5;
-  GLuint *selectBuf =new GLuint[sz];
-  glSelectBuffer(sz, selectBuf);
-  glRenderMode(GL_SELECT);
-  glInitNames();
+	int sz = int( md()->meshList.size())*5;
+	GLuint *selectBuf =new GLuint[sz];
+	glSelectBuffer(sz, selectBuf);
+	glRenderMode(GL_SELECT);
+	glInitNames();
 
-  /* Because LoadName() won't work with no names on the stack */
-  glPushName(-1);
-  double mp[16];
+	/* Because LoadName() won't work with no names on the stack */
+	glPushName(-1);
+	double mp[16];
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  glPushAttrib(GL_TRANSFORM_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glGetDoublev(GL_PROJECTION_MATRIX ,mp);
-  glPushMatrix();
-  glLoadIdentity();
-  gluPickMatrix(pickX, pickY, 4, 4, viewport);
-  glMultMatrixd(mp);
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT,viewport);
+	glPushAttrib(GL_TRANSFORM_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glGetDoublev(GL_PROJECTION_MATRIX ,mp);
+	glPushMatrix();
+	glLoadIdentity();
+	gluPickMatrix(pickX, pickY, 4, 4, viewport);
+	glMultMatrixd(mp);
 
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 
-  foreach(MeshModel * mp, this->md()->meshList)
-  {
-    glLoadName(mp->id());
-	QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
-	if (it != rendermodemap.end())
-		mp->render(it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
-  }
+	foreach(MeshModel * mp, this->md()->meshList)
+	{
+		glLoadName(mp->id());
+		QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
+		if (it != rendermodemap.end())
+			mp->render(it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
+	}
 
-  long hits;
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  hits = glRenderMode(GL_RENDER);
-  glPopAttrib();
+	long hits;
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	hits = glRenderMode(GL_RENDER);
+	glPopAttrib();
 
-  std::vector< std::pair<double,unsigned int> > H;
-  for(long ii=0;ii<hits;ii++){
-    H.push_back( std::pair<double,unsigned int>(selectBuf[ii*4+1]/4294967295.0,selectBuf[ii*4+3]));
-  }
-  std::sort(H.begin(),H.end());
-  delete [] selectBuf;
-  if(hits==0) return -1;
-  return H.front().second;
+	std::vector< std::pair<double,unsigned int> > H;
+	for(long ii=0;ii<hits;ii++){
+		H.push_back( std::pair<double,unsigned int>(selectBuf[ii*4+1]/4294967295.0,selectBuf[ii*4+3]));
+	}
+	std::sort(H.begin(),H.end());
+	delete [] selectBuf;
+	if(hits==0) return -1;
+	return H.front().second;
 }
 
 void GLArea::paintEvent(QPaintEvent */*event*/)
@@ -390,8 +390,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
 	if(!this->md()->isBusy())
 	{
-	  initTexture(hasToUpdateTexture);
-	  hasToUpdateTexture=false;
+		initTexture(hasToUpdateTexture);
+		hasToUpdateTexture=false;
 	}
 
 	glClearColor(1.0,1.0,1.0,0.0);
@@ -405,7 +405,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 
 	drawLight();
 
-	
+
 	glPushMatrix();
 
 	// Finally apply the Trackball for the model
@@ -420,8 +420,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	// Set proper colorMode
 	/*if(rm.colorMode != GLW::CMNone)
 	{
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
 	}
 	else glColor(Color4b::LightGray);*/
 
@@ -432,22 +432,35 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	{
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		if (iRenderer)
+		{
 			iRenderer->Render(currentShader, *this->md(), rendermodemap, this);
+			foreach(MeshModel * mp, this->md()->meshList)
+			{
+				if (mp->visible)
+				{
+					QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
+					for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
+					{
+						MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+						decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+					}
+				}
+			}
+		}
 		else
 		{
-		  if(hasToSelect) // right mouse click you have to select a mesh
-		  {
-			int newId=RenderForSelection(pointToPick[0],pointToPick[1]);
-			if(newId>=0)
+			if(hasToSelect) // right mouse click you have to select a mesh
 			{
-			  Logf(0,"Selected new Mesh %i",newId);
-			  md()->setCurrentMesh(newId);
-			  update();
+				int newId=RenderForSelection(pointToPick[0],pointToPick[1]);
+				if(newId>=0)
+				{
+					Logf(0,"Selected new Mesh %i",newId);
+					md()->setCurrentMesh(newId);
+					update();
+				}
+				hasToSelect=false;
 			}
-			hasToSelect=false;
-		  }
-		  //else
-		  {
+			//else
 			foreach(MeshModel * mp, this->md()->meshList)
 			{
 				QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
@@ -473,21 +486,22 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 					{
 						if (!md()->renderState().isEntityInRenderingState(id,MeshLabRenderState::MESH))
 							mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
+						else
+							md()->renderState().render(mp->id(),rm.drawMode,rm.colorMode,rm.textureMode);
+						QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
+						for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
+						{
+							MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+							decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+						}
 					}
-					QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
-					for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
-					{
-					  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-					  decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
-					}
-					md()->renderState().render(mp->id(),rm.drawMode,rm.colorMode,rm.textureMode);
 				}
 			}
-		  }
+
 		}
 		if(iEdit) {
-		  iEdit->setLog(&md()->Log);
-		  iEdit->Decorate(*mm(),this,&painter);
+			iEdit->setLog(&md()->Log);
+			iEdit->Decorate(*mm(),this,&painter);
 		}
 
 		// Draw the selection
@@ -522,8 +536,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 	}
 	foreach(QAction * p , iPerDocDecoratorlist)
 	{
-	  MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-	  decorInterface->decorateDoc(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+		MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+		decorInterface->decorateDoc(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter,md()->Log);
 	}
 
 	glPopMatrix(); // We restore the state to immediately before the trackball
@@ -540,10 +554,13 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
 		hasToPick=false;
 		if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
 		{
-      // write picked point in the log
-      Logf(0,"Recentering on point [%f %f %f]",pp[0],pp[1],pp[2]);
+			// write picked point in the log
+			Logf(0,"Recentering on point [%f %f %f] [%d,%d]",pp[0],pp[1],pp[2],pointToPick[0],pointToPick[1]);
+
+			trackball.MouseUp(pointToPick[0],pointToPick[1], vcg::Trackball::BUTTON_NONE );
 			trackball.Translate(-pp);
 			trackball.Scale(1.25f);
+
 			QCursor::setPos(mapToGlobal(QPoint(width()/2+2,height()/2+2)));
 		}
 	}
@@ -614,60 +631,60 @@ void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
 }
 void GLArea::displayRealTimeLog(QPainter *painter)
 {
-  painter->endNativePainting();
-  painter->save();
-  painter->setPen(Qt::white);
-  Color4b logAreaColor = glas.logAreaColor;
-  glas.logAreaColor[3]=128;
-  if(mvc()->currentId!=id) logAreaColor /=2.0;
+	painter->endNativePainting();
+	painter->save();
+	painter->setPen(Qt::white);
+	Color4b logAreaColor = glas.logAreaColor;
+	glas.logAreaColor[3]=128;
+	if(mvc()->currentId!=id) logAreaColor /=2.0;
 
-  qFont.setStyleStrategy(QFont::PreferAntialias);
-  qFont.setFamily("Helvetica");
-  qFont.setPixelSize(11);
-  painter->setFont(qFont);
-  float margin = qFont.pixelSize();
-  QFontMetrics metrics = QFontMetrics(font());
-  int border = qMax(4, metrics.leading());
-  qreal roundness = 10.0f;
-  QTextDocument doc;
-  doc.setDefaultFont(qFont);
-  int startingpoint = border;
-  //mQMultiMap<QString,std::pair<QString,QString> >::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
-  foreach(QString keyIt, md()->Log.RealTimeLogText.uniqueKeys() )
-  {
-    QList< QPair<QString,QString> > valueList = md()->Log.RealTimeLogText.values(keyIt);
-    QPair<QString,QString> itVal;
-    // the map contains pairs of meshname, text
-    // the meshname is used only to disambiguate when there are more than two boxes with the same title
-    foreach(itVal,  valueList)
-    {
-      QString HeadName = keyIt;
-      if(md()->Log.RealTimeLogText.count(keyIt)>1)
-        HeadName += " - "+itVal.first;
-      doc.clear();
-      doc.setDocumentMargin(margin*0.75);
-      QColor textColor = Qt::white;
-      QColor headColor(200,200,200);
-      doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + HeadName + "</b></i></p></font>"
-                  "<font color=\"" + textColor.name() + "\"             >" + itVal.second + "</font>");
-      QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
-      QPainterPath path;
-      painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
-      painter->setPen(ColorConverter::ToQColor(logAreaColor));
-      path.addRoundedRect(outrect,roundness,roundness);
-      painter->drawPath(path);
-      painter->save();
-      painter->translate(border,startingpoint);
-      doc.drawContents(painter);
-      painter->restore();
-      startingpoint = startingpoint + doc.size().height() + margin*.75;
-    }
-  }
+	qFont.setStyleStrategy(QFont::PreferAntialias);
+	qFont.setFamily("Helvetica");
+	qFont.setPixelSize(11);
+	painter->setFont(qFont);
+	float margin = qFont.pixelSize();
+	QFontMetrics metrics = QFontMetrics(font());
+	int border = qMax(4, metrics.leading());
+	qreal roundness = 10.0f;
+	QTextDocument doc;
+	doc.setDefaultFont(qFont);
+	int startingpoint = border;
+	//mQMultiMap<QString,std::pair<QString,QString> >::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
+	foreach(QString keyIt, md()->Log.RealTimeLogText.uniqueKeys() )
+	{
+		QList< QPair<QString,QString> > valueList = md()->Log.RealTimeLogText.values(keyIt);
+		QPair<QString,QString> itVal;
+		// the map contains pairs of meshname, text
+		// the meshname is used only to disambiguate when there are more than two boxes with the same title
+		foreach(itVal,  valueList)
+		{
+			QString HeadName = keyIt;
+			if(md()->Log.RealTimeLogText.count(keyIt)>1)
+				HeadName += " - "+itVal.first;
+			doc.clear();
+			doc.setDocumentMargin(margin*0.75);
+			QColor textColor = Qt::white;
+			QColor headColor(200,200,200);
+			doc.setHtml("<font color=\"" + headColor.name() + "\" size=\"+1\" ><p><i><b>" + HeadName + "</b></i></p></font>"
+				"<font color=\"" + textColor.name() + "\"             >" + itVal.second + "</font>");
+			QRect outrect(border,startingpoint,doc.size().width(),doc.size().height());
+			QPainterPath path;
+			painter->setBrush(QBrush(ColorConverter::ToQColor(logAreaColor),Qt::SolidPattern));
+			painter->setPen(ColorConverter::ToQColor(logAreaColor));
+			path.addRoundedRect(outrect,roundness,roundness);
+			painter->drawPath(path);
+			painter->save();
+			painter->translate(border,startingpoint);
+			doc.drawContents(painter);
+			painter->restore();
+			startingpoint = startingpoint + doc.size().height() + margin*.75;
+		}
+	}
 
-  // After the rederaw we clear the RealTimeLog buffer!
-  md()->Log.RealTimeLogText.clear();
-  painter->restore();
-  painter->beginNativePainting();
+	// After the rederaw we clear the RealTimeLog buffer!
+	md()->Log.RealTimeLogText.clear();
+	painter->restore();
+	painter->beginNativePainting();
 }
 
 void GLArea::displayInfo(QPainter *painter)
@@ -779,15 +796,15 @@ void GLArea::displayViewerHighlight()
 
 void GLArea::displayHelp()
 {
-  static QString tableText;
-  if(tableText.isEmpty())
-  {
-      QFile helpFile(":/images/onscreenHelp.txt");
-      if(helpFile.open(QFile::ReadOnly))
-          tableText=helpFile.readAll();
-      else assert(0);
-  }
-  md()->Log.RealTimeLog("Quick Help","",tableText);
+	static QString tableText;
+	if(tableText.isEmpty())
+	{
+		QFile helpFile(":/images/onscreenHelp.txt");
+		if(helpFile.open(QFile::ReadOnly))
+			tableText=helpFile.readAll();
+		else assert(0);
+	}
+	md()->Log.RealTimeLog("Quick Help","",tableText);
 }
 
 
@@ -848,7 +865,7 @@ void GLArea::manageCurrentMeshChange()
 	}
 	emit this->updateMainWindowMenus();
 	// if the layer has changed update also the decoration.
-//	updateAllPerMeshDecorators();
+	//	updateAllPerMeshDecorators();
 }
 
 /// Execute a end/start pair for all the PerMesh decorator that are active in this glarea.
@@ -856,17 +873,17 @@ void GLArea::manageCurrentMeshChange()
 /// Note that it is rather inefficient. Such work should be done only once for each decorator.
 void GLArea::updateAllPerMeshDecorators()
 {
-  for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
-  {
-    MeshModel *m = md()->getMesh(i.key());
-    foreach(QAction *p , i.value())
-    {
-      MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
-      decorInterface->endDecorate  (p, *m,this->glas.currentGlobalParamSet,this);
-      decorInterface->setLog(&md()->Log);
-      decorInterface->startDecorate(p,*m, this->glas.currentGlobalParamSet,this);
-    }
-  }
+	for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
+	{
+		MeshModel *m = md()->getMesh(i.key());
+		foreach(QAction *p , i.value())
+		{
+			MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+			decorInterface->endDecorate  (p, *m,this->glas.currentGlobalParamSet,this);
+			decorInterface->setLog(&md()->Log);
+			decorInterface->startDecorate(p,*m, this->glas.currentGlobalParamSet,this);
+		}
+	}
 }
 
 
@@ -895,15 +912,6 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 
 bool GLArea::readyToClose()
 {
-	if (md()->hasBeenModified())
-	{
-		QMessageBox::StandardButton ret=QMessageBox::question(
-			this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(md()->docLabel()),
-			QMessageBox::Yes|QMessageBox::No,
-			QMessageBox::No);
-		if(ret==QMessageBox::No)	// don't close please!
-			return false;
-	}
 	// Now do the actual closing of the glArea
 	if(getCurrentEditAction()) endEdit();
 	if (iRenderer)
@@ -914,7 +922,7 @@ bool GLArea::readyToClose()
 	{
 		MeshDecorateInterface* mdec = qobject_cast<MeshDecorateInterface*>(act->parent());
 		mdec->endDecorate(act,*md(),glas.currentGlobalParamSet,this);
-			mdec->setLog(NULL);
+		mdec->setLog(NULL);
 	}
 	iPerDocDecoratorlist.clear();
 	QSet<QAction *> dectobeclose;
@@ -942,78 +950,78 @@ bool GLArea::readyToClose()
 
 void GLArea::keyReleaseEvent ( QKeyEvent * e )
 {
-  e->ignore();
-  if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
-  else{
-    if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-    if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-    if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-  }
+	e->ignore();
+	if(iEdit && !suspendedEditor)  iEdit->keyReleaseEvent(e,*mm(),this);
+	else{
+		if(e->key()==Qt::Key_Control) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+		if(e->key()==Qt::Key_Shift) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+		if(e->key()==Qt::Key_Alt) trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+	}
 }
 
 void GLArea::keyPressEvent ( QKeyEvent * e )
 {
-  e->ignore();
-  if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
-  else{
-    if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-    if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-    if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-  }
+	e->ignore();
+	if(iEdit && !suspendedEditor)  iEdit->keyPressEvent(e,*mm(),this);
+	else{
+		if(e->key()==Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+		if(e->key()==Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+		if(e->key()==Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+	}
 }
 
 void GLArea::mousePressEvent(QMouseEvent*e)
 {
-  e->accept();
-  if(!this->hasFocus()) this->setFocus();
+	e->accept();
+	if(!this->hasFocus()) this->setFocus();
 
-  if( (iEdit && !suspendedEditor) )
-    iEdit->mousePressEvent(e,*mm(),this);
-  else
-  {
-    if( e->button()==Qt::RightButton) // Select a new current mesh
-    {
-      hasToSelect=true;
-      this->pointToPick=Point2i(e->x(),height()-e->y());
-    }
-    else
-    {
-      if ((e->modifiers() & Qt::ShiftModifier) &&
-          (e->modifiers() & Qt::ControlModifier) &&
-          (e->button()==Qt::LeftButton) )
-        activeDefaultTrackball=false;
-      else activeDefaultTrackball=true;
+	if( (iEdit && !suspendedEditor) )
+		iEdit->mousePressEvent(e,*mm(),this);
+	else
+	{
+		if( e->button()==Qt::RightButton) // Select a new current mesh
+		{
+			hasToSelect=true;
+			this->pointToPick=Point2i(e->x(),height()-e->y());
+		}
+		else
+		{
+			if ((e->modifiers() & Qt::ShiftModifier) &&
+				(e->modifiers() & Qt::ControlModifier) &&
+				(e->button()==Qt::LeftButton) )
+				activeDefaultTrackball=false;
+			else activeDefaultTrackball=true;
 
-      if (isDefaultTrackBall())
-      {
-        if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-        if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-        if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-        else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+			if (isDefaultTrackBall())
+			{
+				if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
+				if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
+				if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+				else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
 
-        trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
-      }
-      else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
-    }
-  }
-  update();
+				trackball.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), e->modifiers() ) );
+			}
+			else trackball_light.MouseDown(e->x(),height()-e->y(), QT2VCG(e->button(), Qt::NoModifier ) );
+		}
+	}
+	update();
 }
 
 void GLArea::mouseMoveEvent(QMouseEvent*e)
 {
-  if( (iEdit && !suspendedEditor) )
-    iEdit->mouseMoveEvent(e,*mm(),this);
-  else {
-    if (isDefaultTrackBall())
-    {
-      trackball.MouseMove(e->x(),height()-e->y());
-      setCursorTrack(trackball.current_mode);
-    }
-    else trackball_light.MouseMove(e->x(),height()-e->y());
-  }
-  update();
+	if( (iEdit && !suspendedEditor) )
+		iEdit->mouseMoveEvent(e,*mm(),this);
+	else {
+		if (isDefaultTrackBall())
+		{
+			trackball.MouseMove(e->x(),height()-e->y());
+			setCursorTrack(trackball.current_mode);
+		}
+		else trackball_light.MouseMove(e->x(),height()-e->y());
+	}
+	update();
 }
 
 // When mouse is released we set the correct mouse cursor
@@ -1073,9 +1081,9 @@ void GLArea::wheelEvent(QWheelEvent*e)
 
 void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
-  hasToPick=true;
-  pointToPick=Point2i(e->x(),height()-e->y());
-  update();
+	hasToPick=true;
+	pointToPick=Point2i(e->x(),height()-e->y());
+	update();
 }
 
 void GLArea::focusInEvent ( QFocusEvent * e )
@@ -1150,14 +1158,14 @@ void GLArea::updateTexture()
 // compute the next highest power of 2 of 32-bit v
 int GLArea::RoundUpToTheNextHighestPowerOf2(unsigned int v)
 {
-  v--;
-  v |= v >> 1;
-  v |= v >> 2;
-  v |= v >> 4;
-  v |= v >> 8;
-  v |= v >> 16;
-  v++;
-return v;
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
 }
 /** \brief Manage the loading/allocation of the textures of the meshes
 
@@ -1169,7 +1177,7 @@ It assumes that:
 - No attempt of avoiding texture duplication if two models share the same texture file there are two texture id.
 
 - the values stored in the glwrapper for the texture id (glw.TMId()) is an indicator if there is the need of
-  loading a texture (empty vector means load that texture).
+loading a texture (empty vector means load that texture).
 
 */
 
@@ -1179,18 +1187,18 @@ void GLArea::initTexture(bool reloadAllTexture)
 	{
 		foreach (MeshModel *mp,this->md()->meshList)
 		{
-		  if(!mp->glw.TMId.empty())
-		  {
-			glDeleteTextures(1,&(mp->glw.TMId[0]));
-			mp->glw.TMId.clear();
-		  }
+			if(!mp->glw.TMId.empty())
+			{
+				glDeleteTextures(1,&(mp->glw.TMId[0]));
+				mp->glw.TMId.clear();
+			}
 		}
 	}
 	int totalTextureNum=0, toBeUpdatedNum=0;
 	foreach (MeshModel *mp, this->md()->meshList)
 	{
-	  totalTextureNum+=mp->cm.textures.size();
-	  if(!mp->cm.textures.empty() && mp->glw.TMId.empty()) toBeUpdatedNum++;
+		totalTextureNum+=mp->cm.textures.size();
+		if(!mp->cm.textures.empty() && mp->glw.TMId.empty()) toBeUpdatedNum++;
 	}
 
 	if(toBeUpdatedNum==0) return;
@@ -1203,8 +1211,8 @@ void GLArea::initTexture(bool reloadAllTexture)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
 	if(singleMaxTextureSize < MaxTextureSize)
 	{
-	  this->Logf(0,"There are too many textures (%i), reducing max texture size from %i to %i",totalTextureNum,MaxTextureSize,singleMaxTextureSize);
-	  MaxTextureSize = singleMaxTextureSize;
+		this->Logf(0,"There are too many textures (%i), reducing max texture size from %i to %i",totalTextureNum,MaxTextureSize,singleMaxTextureSize);
+		MaxTextureSize = singleMaxTextureSize;
 	}
 
 	foreach (MeshModel *mp, this->md()->meshList)
@@ -1844,16 +1852,16 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 		}
 		/*else if (QString::compare(node.nodeName(),"Render")==0)
 		{
-			QDomNamedNodeMap attr = node.attributes();
-			rm.drawMode = (vcg::GLW::DrawMode) (attr.namedItem("DrawMode").nodeValue().section(' ',0,0).toInt());
-			rm.colorMode = (vcg::GLW::ColorMode) (attr.namedItem("ColorMode").nodeValue().section(' ',0,0).toInt());
-			rm.textureMode = (vcg::GLW::TextureMode) (attr.namedItem("TextureMode").nodeValue().section(' ',0,0).toInt());
-			rm.lighting = (attr.namedItem("Lighting").nodeValue().section(' ',0,0).toInt() != 0);
-			rm.backFaceCull = (attr.namedItem("BackFaceCull").nodeValue().section(' ',0,0).toInt() != 0);
-			rm.doubleSideLighting = (attr.namedItem("DoubleSideLighting").nodeValue().section(' ',0,0).toInt() != 0);
-			rm.fancyLighting = (attr.namedItem("FancyLighting").nodeValue().section(' ',0,0).toInt() != 0);
-			rm.selectedFace = (attr.namedItem("SelectedFace").nodeValue().section(' ',0,0).toInt() != 0);
-			rm.selectedVert = (attr.namedItem("SelectedVert").nodeValue().section(' ',0,0).toInt() != 0);
+		QDomNamedNodeMap attr = node.attributes();
+		rm.drawMode = (vcg::GLW::DrawMode) (attr.namedItem("DrawMode").nodeValue().section(' ',0,0).toInt());
+		rm.colorMode = (vcg::GLW::ColorMode) (attr.namedItem("ColorMode").nodeValue().section(' ',0,0).toInt());
+		rm.textureMode = (vcg::GLW::TextureMode) (attr.namedItem("TextureMode").nodeValue().section(' ',0,0).toInt());
+		rm.lighting = (attr.namedItem("Lighting").nodeValue().section(' ',0,0).toInt() != 0);
+		rm.backFaceCull = (attr.namedItem("BackFaceCull").nodeValue().section(' ',0,0).toInt() != 0);
+		rm.doubleSideLighting = (attr.namedItem("DoubleSideLighting").nodeValue().section(' ',0,0).toInt() != 0);
+		rm.fancyLighting = (attr.namedItem("FancyLighting").nodeValue().section(' ',0,0).toInt() != 0);
+		rm.selectedFace = (attr.namedItem("SelectedFace").nodeValue().section(' ',0,0).toInt() != 0);
+		rm.selectedVert = (attr.namedItem("SelectedVert").nodeValue().section(' ',0,0).toInt() != 0);
 		}*/
 		node = node.nextSibling();
 	}

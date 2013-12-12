@@ -1183,7 +1183,11 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env
 
 	if ((ar == MLXMLElNames::singleMeshArity)&& (meshDoc()->mm() != NULL))
 	{
+
+		QTime tt;
+		tt.start();
 		meshDoc()->renderState().add(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
+		GLA()->Logf(0,"Elapsed time %d\n",tt.elapsed());
 		return;
 	}
 
@@ -1356,7 +1360,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
 		{
 			//I'm using PM.stringXMLFilterMap[fname] instead of mfc passed like parameter because i'm sure that the first one is still alive after the function will exit.
 			//wid = new QGLWidget();
-			FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env,this);
+			FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env);
 			connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
 			connect(ft,SIGNAL(ThreadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
 			connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
@@ -1421,7 +1425,7 @@ void MainWindow::postFilterExecution()
 
 	if(obj->_ret)
 	{
-		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(fname),xmlfiltertimer.elapsed());
+		meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec\n",qPrintable(fname),xmlfiltertimer.elapsed());
 		MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
 		if(GLA())
 		{
@@ -1567,22 +1571,24 @@ void MainWindow::applyRenderMode()
 	if (iRenderTemp != NULL)
 	{
 		iRenderTemp->Init(action,*(meshDoc()),GLA()->rendermodemap,GLA());
-		if (iRenderTemp->isSupported())
-		{
+		initsupport = iRenderTemp->isSupported();
+		if (initsupport)
 			GLA()->setRenderer(iRenderTemp,action);
-			initsupport = true;
-		}
 		else
+		{
+			if (!initsupport)
+			{
+				QString msg = "The selected shader is not supported by your graphic hardware!";
+				GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
+			}
 			iRenderTemp->Finalize(action,meshDoc(),GLA());
+		}
 	}
 
 	/*I clicked None in renderMenu */
 	if ((action->parent() == this) || (!initsupport))
 	{
 		QString msg("No Shader.");
-		if (!initsupport)
-			msg = "The selected shader is not supported by your graphic hardware!";
-
 		GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
 		GLA()->setRenderer(0,0); //default opengl pipeline or vertex and fragment programs not supported
 	}

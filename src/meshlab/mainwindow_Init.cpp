@@ -82,7 +82,57 @@ MainWindow::MainWindow()
 	QIcon icon;
 	icon.addPixmap(QPixmap(":images/eye48.png"));
 	setWindowIcon(icon);
+	PM.loadPlugins(defaultGlobalParams);
+	QSettings settings;
+	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
+	//should update those values only after I run MeshLab for the very first time or after I installed a new version
+	if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
+	{
+		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(),PluginManager::getDefaultPluginDirPath());
+		settings.setValue(MeshLabApplication::versionRegisterKeyName(),MeshLabApplication::appVer());
+		settings.setValue(MeshLabApplication::worldSizeKeyName(),QSysInfo::WordSize);
+		foreach(QString plfile,PM.pluginsLoaded)
+			settings.setValue(PluginManager::osIndependentPluginName(plfile),MeshLabApplication::appVer());
+	}
+	// Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
+	loadMeshLabSettings();
+	createActions();
+	createToolBars();
+	createMenus();
+	stddialog = 0;
+	xmldialog = 0;
+	setAcceptDrops(true);
+	mdiarea->setAcceptDrops(true);
+	setWindowTitle(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
+	setStatusBar(new QStatusBar(this));
+	globalStatusBar()=statusBar();
+	qb=new QProgressBar(this);
+	qb->setMaximum(100);
+	qb->setMinimum(0);
+	qb->reset();
+	statusBar()->addPermanentWidget(qb,0);
+	//updateMenus();
+	newProject();
+	//PM should be initialized before passing it to PluginGeneratorGUI
+	plugingui = new PluginGeneratorGUI(PM,this);
+	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
+	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
+	connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
+	connect(plugingui,SIGNAL(historyRequest()),this,SLOT(sendHistory()));
+	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
+	//wid->showMaximized();
+	//ar->update();
 
+	//qb->setAutoClose(true);
+	//qb->setMinimumDuration(0);
+	//qb->reset();
+	connect(this, SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
+	connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
+}
+
+void MainWindow::init()
+{
 	PM.loadPlugins(defaultGlobalParams);
 	QSettings settings;
 	QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
