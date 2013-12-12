@@ -1286,13 +1286,16 @@ void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
 }
 
 
-void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel *, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
+void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
 {
   if(!ls.IsValid())
   {
-    if(cameraSourceId == 1 ) glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Mesh Has an invalid Camera");
-    else if(cameraSourceId == 2 ) glLabel::render2D(painter,glLabel::TOP_LEFT,"Current Raster Has an invalid Camera");
-    else glLabel::render2D(painter,glLabel::TOP_LEFT,"Current TrackBall Has an invalid Camera");
+    if(cameraSourceId == 1 ) 
+		this->RealTimeLog("Show Camera",m->shortName(),"Current Mesh Has an invalid Camera");
+    else if(cameraSourceId == 2 ) 
+		this->RealTimeLog("Show Camera",m->shortName(),"Current Raster Has an invalid Camera");
+    else 
+		this->RealTimeLog("Show Camera",m->shortName(),"Current TrackBall Has an invalid Camera");
     return;
   }
 
