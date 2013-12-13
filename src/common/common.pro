@@ -1,7 +1,6 @@
 include (../general.pri)
 EXIF_DIR = ../external/jhead-2.95
 
-
 GLEWCODE = $$GLEWDIR/src/glew.c
 
 win32-msvc2005:DESTDIR = ../distrib
@@ -91,25 +90,25 @@ HEADERS += filterparameter.h \
     interfaces.h \
     meshmodel.h \
     pluginmanager.h \
-	scriptinterface.h \
-	xmlfilterinfo.h \
-	mlexception.h \
-	mlapplication.h \
-	scriptsyntax.h \
-	searcher.h \
-	$$VCGDIR/wrap/gl/trimesh.h \
-    meshlabdocumentxml.h 
+  scriptinterface.h \
+  xmlfilterinfo.h \
+  mlexception.h \
+  mlapplication.h \
+  scriptsyntax.h \
+  searcher.h \
+  $$VCGDIR/wrap/gl/trimesh.h \
+    meshlabdocumentxml.h
 SOURCES += filterparameter.cpp \
     interfaces.cpp \
     filterscript.cpp \
     GLLogStream.cpp \
     meshmodel.cpp \
     pluginmanager.cpp \
-	scriptinterface.cpp \
-	xmlfilterinfo.cpp \
-	mlapplication.cpp \
-	scriptsyntax.cpp \
-	searcher.cpp \
+  scriptinterface.cpp \
+  xmlfilterinfo.cpp \
+  mlapplication.cpp \
+  scriptsyntax.cpp \
+  searcher.cpp \
     $$GLEWCODE \
     meshlabdocumentxml.cpp \
     meshlabdocumentbundler.cpp
@@ -119,17 +118,17 @@ SOURCES += filterparameter.cpp \
 #	win32-msvc2010: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2012: RCC_DIR = $(ConfigurationName)
 
-macx:LIBS		+= -L../external/lib/macx -ljhead
-macx32:LIBS		+= -L../external/lib/macx32 -ljhead
-macx64:LIBS		+= -L../external/lib/macx64 -ljhead
-win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
-win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
-win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
-win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2010/jhead.lib
-win32-msvc2012:LIBS	+= ../external/lib/win32-msvc2012/jhead.lib
-win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
-linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
-linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead
-linux-g++-64:LIBS		+= -L../external/lib/linux-g++-64 -ljhead
-	
+#macx:LIBS		+= -L../external/lib/macx -ljhead
+#macx32:LIBS		+= -L../external/lib/macx32 -ljhead
+#macx64:LIBS		+= -L../external/lib/macx64 -ljhead
+#win32-msvc.net:LIBS	+= ../external/lib/win32-msvc.net/jhead.lib
+#win32-msvc2005:LIBS	+= ../external/lib/win32-msvc2005/jhead.lib
+#win32-msvc2008:LIBS	+= ../external/lib/win32-msvc2008/jhead.lib
+#win32-msvc2010:LIBS	+= ../external/lib/win32-msvc2010/jhead.lib
+#win32-msvc2012:LIBS	+= ../external/lib/win32-msvc2012/jhead.lib
+#win32-g++:LIBS		+= -L../external/lib/win32-gcc -ljhead
+#linux-g++:LIBS		+= -L../external/lib/linux-g++ -ljhead
+#linux-g++-32:LIBS		+= -L../external/lib/linux-g++-32 -ljhead
+#linux-g++-64:LIBS		+= -L../external/lib/linux-g++-64 -ljhead
+
 #RESOURCES = common.qrc
