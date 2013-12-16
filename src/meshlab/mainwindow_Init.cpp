@@ -90,7 +90,7 @@ MainWindow::MainWindow()
 	{
 		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(),PluginManager::getDefaultPluginDirPath());
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(),MeshLabApplication::appVer());
-		settings.setValue(MeshLabApplication::worldSizeKeyName(),QSysInfo::WordSize);
+		settings.setValue(MeshLabApplication::wordSizeKeyName(),QSysInfo::WordSize);
 		foreach(QString plfile,PM.pluginsLoaded)
 			settings.setValue(PluginManager::osIndependentPluginName(plfile),MeshLabApplication::appVer());
 	}
@@ -141,7 +141,7 @@ void MainWindow::init()
 	{
 		settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(),PluginManager::getDefaultPluginDirPath());
 		settings.setValue(MeshLabApplication::versionRegisterKeyName(),MeshLabApplication::appVer());
-		settings.setValue(MeshLabApplication::worldSizeKeyName(),QSysInfo::WordSize);
+		settings.setValue(MeshLabApplication::wordSizeKeyName(),QSysInfo::WordSize);
 		foreach(QString plfile,PM.pluginsLoaded)
 			settings.setValue(PluginManager::osIndependentPluginName(plfile),MeshLabApplication::appVer());
 	}
