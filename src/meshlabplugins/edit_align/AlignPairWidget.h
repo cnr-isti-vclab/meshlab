@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -35,53 +35,54 @@ class MeshNode;
 
 class AlignPairWidget: public QGLWidget
 {
-	Q_OBJECT 
+    Q_OBJECT
 public:
-	AlignPairWidget (QWidget * parent = 0);
-	public slots:
-		/// widget-based user interaction slots
+    AlignPairWidget (QWidget * parent = 0);
+    public slots:
+        /// widget-based user interaction slots
 signals:
-		/// signal for setting the statusbar message
-		void setStatusBar(QString message);
+        /// signal for setting the statusbar message
+        void setStatusBar(QString message);
 protected:
-	/// opengl initialization and drawing calls
-	void initializeGL ();
-	void paintGL ();
-	/// keyboard and mouse event callbacks
-	void keyReleaseEvent(QKeyEvent * e);
-	void keyPressEvent(QKeyEvent * e);
-	void mousePressEvent(QMouseEvent*e);
-	void mouseMoveEvent(QMouseEvent*e);
-	void mouseReleaseEvent(QMouseEvent*e);
-	void wheelEvent(QWheelEvent*e); 
-	void mouseDoubleClickEvent(QMouseEvent * e);
-	void drawPickedPoints(std::vector<vcg::Point3f> &, vcg::Color4b color);
+    /// opengl initialization and drawing calls
+    void initializeGL ();
+    void paintEvent(QPaintEvent *);
+//    void paintGL ();
+    /// keyboard and mouse event callbacks
+    void keyReleaseEvent(QKeyEvent * e);
+    void keyPressEvent(QKeyEvent * e);
+    void mousePressEvent(QMouseEvent*e);
+    void mouseMoveEvent(QMouseEvent*e);
+    void mouseReleaseEvent(QMouseEvent*e);
+    void wheelEvent(QWheelEvent*e);
+    void mouseDoubleClickEvent(QMouseEvent * e);
+    void drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &, vcg::Color4b color);
 
 private:
-	/// the active mesh instance
-	MeshNode* freeMesh;
-	MeshTree* gluedTree;
+    /// the active mesh instance
+    MeshNode* freeMesh;
+    MeshTree* gluedTree;
 
-	/// the active manipulator
-	vcg::Trackball trackLeft,trackRight;
-	vcg::Trackball* tt[2];
-	vcg::Trackball* currentTrack;
-public:	
-	std::vector<vcg::Point3f> freePickedPointVec;
-	std::vector<vcg::Point3f> gluedPickedPointVec;
-
-	/// mesh data structure initializer
-	bool hasToPick;
-	bool hasToDelete;
-	vcg::Point2i pointToPick;
-
-	// use mesh vertex colors
-	bool isUsingVertexColor;
-
-	// force point rendering
-	bool usePointRendering;
+    /// the active manipulator
+    vcg::Trackball trackLeft,trackRight;
+    vcg::Trackball* tt[2];
+    vcg::Trackball* currentTrack;
 public:
-	void initMesh(MeshNode *left, MeshTree *right);
+    std::vector<vcg::Point3f> freePickedPointVec;
+    std::vector<vcg::Point3f> gluedPickedPointVec;
+
+    /// mesh data structure initializer
+    bool hasToPick;
+    bool hasToDelete;
+    vcg::Point2i pointToPick;
+
+    // use mesh vertex colors
+    bool isUsingVertexColor;
+
+    // force point rendering
+    bool usePointRendering;
+public:
+    void initMesh(MeshNode *left, MeshTree *right);
 };
 
 #endif
