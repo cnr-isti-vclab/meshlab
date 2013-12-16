@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -27,8 +27,8 @@
 
 class EditSelectPlugin : public QObject, public MeshEditInterface
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
+    Q_OBJECT
+    Q_INTERFACES(MeshEditInterface)
 
 
 public:
@@ -45,24 +45,24 @@ public:
     virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
     virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
     virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-		virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *);
-		virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *);
+        virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *);
+        virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *);
 
-    QPoint start;
-    QPoint cur;
-    QPoint prev;
+    vcg::Point2f start;
+    vcg::Point2f cur;
+    vcg::Point2f prev;
     bool isDragging;
     int selectionMode;
     std::vector<CMeshO::FacePointer> LastSelFace;
     std::vector<CMeshO::VertexPointer> LastSelVert;
 
 signals:
-	void setSelectionRendering(bool);
+    void setSelectionRendering(bool);
 
 private:
   typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
   ComposingSelMode composingSelMode;
-	bool selectFrontFlag;
+    bool selectFrontFlag;
   void DrawXORRect(GLArea * gla, bool doubleDraw);
 };
 
