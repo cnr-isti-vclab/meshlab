@@ -540,6 +540,19 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         decorInterface->decorateDoc(p,*this->md(),this->glas.currentGlobalParamSet, this,&painter,md()->Log);
     }
 
+    // we want to write scene-space the point picked with double-click in the log
+    // we have to do it now, before leaving this transformation space
+    // we hook to the same mechanism double-click will be managed later on to move trackball
+    if(hasToPick && !hasToGetPickPos)
+    {
+        Point3f pp;
+        if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
+        {
+            // write picked point in the log
+            Logf(0,"Recentering on point [%f %f %f] [%d,%d]",pp[0],pp[1],pp[2],pointToPick[0],pointToPick[1]);
+        }
+    }
+
     glPopMatrix(); // We restore the state to immediately before the trackball
 
     //If it is a raster viewer draw the image as a texture
@@ -554,9 +567,6 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         hasToPick=false;
         if(Pick<Point3f>(pointToPick[0],pointToPick[1],pp))
         {
-            // write picked point in the log
-            Logf(0,"Recentering on point [%f %f %f] [%d,%d]",pp[0],pp[1],pp[2],pointToPick[0],pointToPick[1]);
-
             trackball.MouseUp(pointToPick[0],pointToPick[1], vcg::Trackball::BUTTON_NONE );
             trackball.Translate(-pp);
             trackball.Scale(1.25f);
