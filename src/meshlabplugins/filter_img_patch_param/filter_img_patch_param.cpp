@@ -40,8 +40,8 @@ FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
              << FP_RASTER_VERT_COVERAGE
              << FP_RASTER_FACE_COVERAGE;
 
-	foreach( FilterIDType tt , types() )
-		actionList << new QAction(filterName(tt), this);
+    foreach( FilterIDType tt , types() )
+        actionList << new QAction(filterName(tt), this);
 }
 
 
@@ -190,16 +190,16 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                              RichParameterSet &par,
                                              vcg::CallBackPos * /*cb*/ )
 {
-	
-	
-	glContext->makeCurrent();
-	if( glewInit() != GLEW_OK )
-	{
-		 this->errorMessage="Failed GLEW intialization";
-		 return false;
-	   }
 
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glContext->makeCurrent();
+    if( glewInit() != GLEW_OK )
+    {
+         this->errorMessage="Failed GLEW intialization";
+         return false;
+       }
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     delete m_Context;
     m_Context = new glw::Context();
@@ -230,27 +230,27 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
     if( activeRasters.empty() )    {
       this->errorMessage="No active Raster";
-	{
-		glContext->doneCurrent();
-		errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
-		return false;
-	}
+    {
+        glContext->doneCurrent();
+        errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
+        return false;
+    }
     }
 
     switch( ID(act) )
     {
         case FP_PATCH_PARAM_ONLY:
         {
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
-				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
-			}
-			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
-			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+            if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
+            {
+                glContext->doneCurrent();
+                errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+                return false; // can't continue, mesh can't be processed
+            }
+            vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
+            vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
+            vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+            vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
             RasterPatchMap patches;
             PatchVec nullPatches;
             patchBasedTextureParameterization( patches,
@@ -259,24 +259,23 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                                                activeRasters,
                                                par );
 
-			break;
-		}
-		case FP_PATCH_PARAM_AND_TEXTURING:
-		{
-			if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
-			{
-				glContext->doneCurrent();
-				errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
-				return false; // can't continue, mesh can't be processed
-			}
-			vcg::tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-			vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-			vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
-			vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
-			QString texName = par.getString( "textureName" ).simplified();
-			int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
-			if( pathEnd != -1 )
-				texName = texName.right( texName.size()-pathEnd-1 );
+            break;
+        }
+        case FP_PATCH_PARAM_AND_TEXTURING:
+        {
+            if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
+            {
+                glContext->doneCurrent();
+                errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness"; // text
+                return false; // can't continue, mesh can't be processed
+            }
+            vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
+            vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
+            vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+            QString texName = par.getString( "textureName" ).simplified();
+            int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
+            if( pathEnd != -1 )
+                texName = texName.right( texName.size()-pathEnd-1 );
 
             if( (retValue = texName.size()!=0) )
             {
@@ -306,14 +305,14 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                 }
             }
 
-			break;
-		}
-		case FP_RASTER_VERT_COVERAGE:
-		{
-			VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-			visibility.setMesh( &mesh );
+            break;
+        }
+        case FP_RASTER_VERT_COVERAGE:
+        {
+            VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
+            visibility.setMesh( &mesh );
 
-			for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
+            for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
                 vi->Q() = 0.0f;
 
             foreach( RasterModel *rm, activeRasters )
@@ -396,7 +395,7 @@ void FilterImgPatchParamPlugin::getNeighbors( CVertexO *v,
 }
 
 
-void FilterImgPatchParamPlugin::getNeighbors( CFaceO *f,
+void FilterImgPatchParamPlugin::getFaceNeighbors( CFaceO *f,
                                               NeighbSet &neighb ) const
 {
     getNeighbors( f->V(0), neighb );
@@ -412,11 +411,10 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
     std::set<CFaceO*> toOptim;
 
 
+    vcg::tri::UpdateFlags<CMeshO>::FaceClearV(mesh);
+
     // Collects the faces belonging to boundaries (namely faces for which at least one adjacent
     // face has a different reference image), so as to initialize the optimization step.
-    for( CMeshO::FaceIterator f=mesh.face.begin(); f!=mesh.face.end(); ++f )
-        f->ClearV();
-
     for( CMeshO::FaceIterator f=mesh.face.begin(); f!=mesh.face.end(); ++f )
     {
         // Checks each of the three edges of the current face. If the opposite face has a different
@@ -425,7 +423,7 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
         for( int i=0; i<3; ++i )
         {
             const CFaceO *f2 = p.FFlip();
-            if( f2 && !f2->IsV() )
+            if( !f2->IsV() )
                 if( faceVis[f2].ref() != faceVis[f].ref() )
                 {
                     NeighbSet neighb;
@@ -452,7 +450,7 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
 
         // Counts how many times appears each reference image in the 1-ring neighborhood of this face.
         NeighbSet neighb;
-        getNeighbors( f, neighb );
+        getFaceNeighbors( f, neighb );
 
         QMap<RasterModel*,int> neighbRefCount;
 
@@ -660,13 +658,13 @@ void FilterImgPatchParamPlugin::constructPatchBoundary( Patch &p,
         for( int i=0; i<3; ++i )
         {
             const CFaceO *f2 = pos.FFlip();
-            if( f2 && faceVis[f2].ref() && faceVis[f2].ref()!=fRef )
+            if(faceVis[f2].ref() && faceVis[f2].ref()!=fRef )
             {
                 NeighbSet neighb;
                 getNeighbors( pos.V(), neighb );
                 getNeighbors( pos.VFlip(), neighb );
                 for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
-                    if( !(*n)->IsV() && faceVis[*n].ref()!=fRef )
+                    if( !(*n)->IsV() && faceVis[*n].ref()!=fRef && faceVis[*n].contains(fRef))
                     {
                         p.boundary.push_back( *n );
                         (*n)->SetV();
@@ -906,14 +904,14 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
         weightMask |= VisibleSet::W_IMG_BORDER;
     if( par.getBool("useAlphaWeight") )
         weightMask |= VisibleSet::W_IMG_ALPHA;
-    VisibleSet *faceVis = new VisibleSet( *m_Context, mesh, rasterList, weightMask );
+    VisibleSet faceVis( *m_Context, mesh, rasterList, weightMask );
     Log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
 
 
     // Boundary optimization: the goal is to produce more regular boundaries between surface regions
     // associated to different reference images.
     t.start();
-    boundaryOptimization( mesh, *faceVis, true );
+    boundaryOptimization( mesh, faceVis, true );
     Log( "BOUNDARY OPTIMIZATION: %.3f sec.", 0.001f*t.elapsed() );
 
 
@@ -921,7 +919,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     if( par.getBool("cleanIsolatedTriangles") )
     {
         t.start();
-        int triCleaned = cleanIsolatedTriangles( mesh, *faceVis );
+        int triCleaned = cleanIsolatedTriangles( mesh, faceVis );
         Log( "CLEANING ISOLATED TRIANGLES: %.3f sec.", 0.001f*t.elapsed() );
         Log( "  * %i triangles cleaned.", triCleaned );
     }
@@ -930,7 +928,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     // Recovers patches by extracting connected components of faces having the same reference image.
     t.start();
     float oldArea = computeTotalPatchArea( patches );
-    int nbPatches = extractPatches( patches, nullPatches, mesh, *faceVis, rasterList );
+    int nbPatches = extractPatches( patches, nullPatches, mesh, faceVis, rasterList );
     Log( "PATCH EXTRACTION: %.3f sec.", 0.001f*t.elapsed() );
     Log( "  * %i patches extracted, %i null patches.", nbPatches, nullPatches.size() );
 
@@ -940,8 +938,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     oldArea = computeTotalPatchArea( patches );
     for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
         for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
-            constructPatchBoundary( *p, *faceVis );
-    delete faceVis;
+            constructPatchBoundary( *p, faceVis );
     Log( "PATCH EXTENSION: %.3f sec.", 0.001f*t.elapsed() );
 
 

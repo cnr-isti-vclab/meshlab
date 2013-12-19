@@ -320,20 +320,25 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
     glBegin( GL_POINTS );
         for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
             for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p )
+            {
+              //qDebug("PushPullInit Boundary size %i",p->boundary.size());
                 for( unsigned int n=0; n<p->boundary.size(); ++n )
+                {
                     for( int i=0; i<3; ++i )
                     {
                         glTexCoord2fv( p->boundary[n]->WT(i).P().V() );
                         glVertex2fv( p->boundaryUV[n].v[i].P().V() );
                     }
+                }
+            }
     glEnd();
 
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindReadDrawFramebuffer();
 
-    QImage ttt = getTexture();
-    ttt.save("dump.png");
+//    QImage ttt = getTexture();
+//    ttt.save("dump.png");
 
     glPopMatrix();
     glMatrixMode( GL_PROJECTION );
@@ -360,9 +365,14 @@ void TexturePainter::push( glw::Texture2DHandle &higherLevel,
         glVertex2i( -1,  1 );
     glEnd();
 
+
     m_Context.unbindProgram();
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindReadDrawFramebuffer();
+
+//    QImage ttt = getTexture(fbuffer,lowerLevel);
+//    ttt.save(QString("push%1.png").arg(lowerLevel->width()));
+
 }
 
 
@@ -396,6 +406,9 @@ void TexturePainter::pull( glw::Texture2DHandle &lowerLevel,
     m_Context.unbindTexture2D( 0 );
     m_Context.unbindTexture2D( 1 );
     m_Context.unbindReadDrawFramebuffer();
+
+//    QImage ttt = getTexture(fbuffer,tmp);
+//    ttt.save(QString("pull%1.png").arg(lowerLevel->width()));
 
     higherLevel = tmp;
 }
@@ -485,23 +498,29 @@ void TexturePainter::rectifyColor( RasterPatchMap &patches, int filterSize )
 
 QImage TexturePainter::getTexture()
 {
+  return getTexture(this->m_TexFB, this->m_TexImg);
+}
+
+QImage TexturePainter::getTexture(glw::FramebufferHandle &fbh, glw::Texture2DHandle &txh )
+{
     if( !isInitialized() )
         return QImage();
 
 
     // Recovers the content of the off-screen painting buffer and returns it as a QImage object.
-    m_Context.bindReadDrawFramebuffer( m_TexFB );
+//    m_Context.bindReadDrawFramebuffer( m_TexFB );
+    m_Context.bindReadDrawFramebuffer( fbh );
     glReadBuffer( GL_COLOR_ATTACHMENT0 );
 
-    GLubyte *texData = new GLubyte [ 3*m_TexImg->width()*m_TexImg->height() ];
-    glReadPixels( 0, 0, m_TexImg->width(), m_TexImg->height(), GL_RGB, GL_UNSIGNED_BYTE, texData );
+    GLubyte *texData = new GLubyte [ 4*txh->width()*txh->height() ];
+    glReadPixels( 0, 0, txh->width(), txh->height(), GL_RGBA, GL_UNSIGNED_BYTE, texData );
 
     m_Context.unbindReadDrawFramebuffer();
 
-    QImage tex( m_TexImg->width(), m_TexImg->height(), QImage::Format_ARGB32 );
-    for( int y=(int)m_TexImg->height()-1, n=0; y>=0; --y )
-        for( int x= 0; x<(int)m_TexImg->width(); ++x, n+=3 ){
-            tex.setPixel( x, y, qRgb(texData[n+0],texData[n+1],texData[n+2]) );
+    QImage tex( txh->width(), txh->height(), QImage::Format_ARGB32 );
+    for( int y=(int)txh->height()-1, n=0; y>=0; --y )
+        for( int x= 0; x<(int)txh->width(); ++x, n+=4 ){
+            tex.setPixel( x, y, qRgba(texData[n+0],texData[n+1],texData[n+2],texData[n+3]));
 //            if((x%100)==0 && (y%100)==0) qDebug("img %i %i",x,y);
 }
     delete [] texData;

@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -43,7 +43,7 @@ public:
     };
 
 
-    class Face
+    class FaceVisInfo
     {
     private:
         float                       m_RefWeight;
@@ -51,7 +51,7 @@ public:
         std::vector<RasterModel*>   m_Visible;
 
     public:
-        inline  Face() : m_RefWeight(-std::numeric_limits<float>::max()), m_Ref(NULL) {}
+        inline  FaceVisInfo() : m_RefWeight(-std::numeric_limits<float>::max()), m_Ref(NULL) {}
 
         inline void         add( float weight, RasterModel *rm )
         {
@@ -70,7 +70,7 @@ public:
 
 private:
     const CMeshO        &m_Mesh;
-    std::vector<Face>   m_FaceVis;
+    std::vector<FaceVisInfo>   m_FaceVis;
     int                 m_WeightMask;
     float               m_DepthMax;
     float               m_DepthRangeInv;
@@ -85,14 +85,14 @@ public:
 
     float               getWeight( const RasterModel *rm, CFaceO &f );
 
-    inline const Face&  operator[]( const int f ) const                     { return m_FaceVis[f]; }
-    inline Face&        operator[]( const int f )                           { return m_FaceVis[f]; }
-    inline const Face&  operator[]( const CFaceO& f ) const                 { return m_FaceVis[id(f)]; }
-    inline Face&        operator[]( const CFaceO& f )                       { return m_FaceVis[id(f)]; }
-    inline const Face&  operator[]( const CFaceO* f ) const                 { return m_FaceVis[id(*f)]; }
-    inline Face&        operator[]( const CFaceO* f )                       { return m_FaceVis[id(*f)]; }
-    inline const Face&  operator[]( const CMeshO::FaceIterator& f ) const   { return m_FaceVis[id(*f)]; }
-    inline Face&        operator[]( const CMeshO::FaceIterator& f )         { return m_FaceVis[id(*f)]; }
+    inline const FaceVisInfo&  operator[]( const int f ) const                     { return m_FaceVis[f]; }
+    inline       FaceVisInfo&  operator[]( const int f )                           { return m_FaceVis[f]; }
+    inline const FaceVisInfo&  operator[]( const CFaceO& f ) const                 { return m_FaceVis[id(f)]; }
+    inline       FaceVisInfo&  operator[]( const CFaceO& f )                       { return m_FaceVis[id(f)]; }
+    inline const FaceVisInfo&  operator[]( const CFaceO* f ) const                 { return m_FaceVis[id(*f)]; }
+    inline       FaceVisInfo&  operator[]( const CFaceO* f )                       { return m_FaceVis[id(*f)]; }
+    inline const FaceVisInfo&  operator[]( const CMeshO::FaceIterator& f ) const   { return m_FaceVis[id(*f)]; }
+    inline       FaceVisInfo&  operator[]( const CMeshO::FaceIterator& f )         { return m_FaceVis[id(*f)]; }
 };
 
 

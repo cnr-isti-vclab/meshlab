@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -38,10 +38,10 @@ class VisibleSet;
 class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES( MeshFilterInterface )
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES( MeshFilterInterface )
 
-	enum
+    enum
     {
         FP_PATCH_PARAM_ONLY             ,
         FP_PATCH_PARAM_AND_TEXTURING    ,
@@ -50,12 +50,12 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
     };
 
     typedef std::set<CFaceO*> NeighbSet;
-	glw::Context        *m_Context;
+    glw::Context        *m_Context;
 
 
     void                getNeighbors( CVertexO *v,
                                       NeighbSet &neighb ) const;
-    void                getNeighbors( CFaceO *f,
+    void                getFaceNeighbors( CFaceO *f,
                                       NeighbSet &neighb ) const;
 
     void                boundaryOptimization( CMeshO &mesh,
@@ -94,13 +94,13 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
     int                 computePatchCount( RasterPatchMap &patches );
 
 public:
-	FilterImgPatchParamPlugin();
-	~FilterImgPatchParamPlugin();
+    FilterImgPatchParamPlugin();
+    ~FilterImgPatchParamPlugin();
 
-	virtual QString     filterName( FilterIDType id ) const;
-	virtual QString     filterInfo( FilterIDType id ) const;
+    virtual QString     filterName( FilterIDType id ) const;
+    virtual QString     filterInfo( FilterIDType id ) const;
 
-	virtual FilterClass getClass( QAction *act );
+    virtual FilterClass getClass( QAction *act );
 
     virtual void        initParameterSet( QAction *act,
                                           MeshDocument &md,
