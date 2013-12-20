@@ -176,8 +176,8 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
 	case FP_QUAD_PAIRING                     :
 	case FP_FAUX_CREASE                      :
 	case FP_VATTR_SEAM                       :
-	case FP_SLICE_WITH_A_PLANE                       :
-	case FP_REFINE_LS3_LOOP									 : return MeshModel::MM_FACENUMBER;
+    case FP_SLICE_WITH_A_PLANE               :
+    case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
 	case FP_CLUSTERING                       :
@@ -225,13 +225,13 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
 	case FP_CLOSE_HOLES                      : return tr("Close Holes");
 	case FP_CYLINDER_UNWRAP                  : return tr("Geometric Cylindrical Unwrapping");
 	case FP_REFINE_HALF_CATMULL              : return tr("Tri to Quad by 4-8 Subdivision");
-	case FP_QUAD_DOMINANT              : return tr("Turn into Quad-Dominant mesh");
-	case FP_MAKE_PURE_TRI				: return tr("Turn into a Pure-Triangular mesh");
+    case FP_QUAD_DOMINANT                    : return tr("Turn into Quad-Dominant mesh");
+    case FP_MAKE_PURE_TRI                    : return tr("Turn into a Pure-Triangular mesh");
 	case FP_QUAD_PAIRING                     : return tr("Tri to Quad by smart triangle pairing");
 	case FP_FAUX_CREASE                      : return tr("Crease Marking with NonFaux Edges");
 	case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
-	case FP_REFINE_LS3_LOOP									 : return tr("Subdivision Surfaces: LS3 Loop");
-	case FP_SLICE_WITH_A_PLANE									 : return tr("Compute Planar Section");
+    case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
+    case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
 
 	default                                  : assert(0);
 	}
@@ -264,13 +264,13 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 												   "<b>4-8 Subdivision</b>"
 												   "<br> <i>Luiz Velho, Denis Zorin </i>"
 												   "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
-	case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh if it is referenced by a face and removes it");
-	case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh if there are two vertices with same coordinates and removes it");
+    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
+    case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged");
 	case FP_SELECT_FACES_BY_AREA             : return tr("Remove null faces (the one with area equal to zero)");
 	case FP_SELECT_FACES_BY_EDGE             : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
 	case FP_CLUSTERING                       : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
-	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
-	case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy, better than clustering but slower");
+    case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
 	case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
 														 "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
 														 "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
@@ -417,8 +417,9 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
 		break;
 	case FP_INVERT_FACES:
-		parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected the normals will always be flipped otherwise the filter tries to set them outside"));
-		break;
+        parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
+        parlst.addParam(new RichBool ("onlySelected",false,"Flip only selected faces","If selected, only selected faces will be affected"));
+        break;
 	case FP_ROTATE_FIT:
 		{
 			parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
@@ -711,8 +712,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 	case FP_INVERT_FACES:
 		{
 			bool flipped=par.getBool("forceFlip");
-			if(flipped) tri::Clean<CMeshO>::FlipMesh(m.cm);
-			else flipped =  tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
+            bool onlySelected=par.getBool("onlySelected");
+
+            if(flipped)
+                tri::Clean<CMeshO>::FlipMesh(m.cm,onlySelected);
+            else
+                flipped =  tri::Clean<CMeshO>::FlipNormalOutside(m.cm);
 
 			if(flipped && m.hasDataMask(MeshModel::MM_POLYGONAL))
 			{
@@ -1500,32 +1505,32 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			unsigned int nmask = 0;
 			switch (par.getEnum("NormalMode"))
 			{
-			case 0  : break;
-			case 1  : if (m.hasDataMask(MeshModel::MM_VERTNORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_VERTEX; break;
-			case 2  : if (m.hasDataMask(MeshModel::MM_WEDGNORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_WEDGE;  break;
-			case 3  : if (m.hasDataMask(MeshModel::MM_FACENORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_FACE;   break;
-			default : break;
+                case 0  : break;
+                case 1  : if (m.hasDataMask(MeshModel::MM_VERTNORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_VERTEX; break;
+                case 2  : if (m.hasDataMask(MeshModel::MM_WEDGNORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_WEDGE;  break;
+                case 3  : if (m.hasDataMask(MeshModel::MM_FACENORMAL)) nmask |= vcg::tri::AttributeSeam::NORMAL_PER_FACE;   break;
+                default : break;
 			}
 			if (nmask != 0) m.updateDataMask(MeshModel::MM_VERTNORMAL);
 
 			unsigned int cmask = 0;
 			switch (par.getEnum("ColorMode"))
 			{
-			case 0  : break;
-			case 1  : if (m.hasDataMask(MeshModel::MM_VERTCOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_VERTEX; break;
-			case 2  : if (m.hasDataMask(MeshModel::MM_WEDGCOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_WEDGE;  break;
-			case 3  : if (m.hasDataMask(MeshModel::MM_FACECOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_FACE;   break;
-			default : break;
+                case 0  : break;
+                case 1  : if (m.hasDataMask(MeshModel::MM_VERTCOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_VERTEX; break;
+                case 2  : if (m.hasDataMask(MeshModel::MM_WEDGCOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_WEDGE;  break;
+                case 3  : if (m.hasDataMask(MeshModel::MM_FACECOLOR)) cmask |= vcg::tri::AttributeSeam::COLOR_PER_FACE;   break;
+                default : break;
 			}
 			if (cmask != 0) m.updateDataMask(MeshModel::MM_VERTCOLOR);
 
 			unsigned int tmask = 0;
 			switch (par.getEnum("TexcoordMode"))
 			{
-			case 0  : break;
-			case 1  : if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)) tmask |= vcg::tri::AttributeSeam::TEXCOORD_PER_VERTEX; break;
-			case 2  : if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) tmask |= vcg::tri::AttributeSeam::TEXCOORD_PER_WEDGE;  break;
-			default : break;
+                case 0  : break;
+                case 1  : if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)) tmask |= vcg::tri::AttributeSeam::TEXCOORD_PER_VERTEX; break;
+                case 2  : if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) tmask |= vcg::tri::AttributeSeam::TEXCOORD_PER_WEDGE;  break;
+                default : break;
 			}
 			if (tmask != 0) m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 
@@ -1567,9 +1572,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 			switch(RefPlane(par.getEnum("relativeTo")))
 			{
-			case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);      break;
-			case REF_MIN:     planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);    break;
-			case REF_ORIG:    planeCenter = planeAxis*planeOffset;  break;
+                case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);      break;
+                case REF_MIN:     planeCenter = bbox.min+planeAxis*planeOffset*(bbox.Diag()/2.0);    break;
+                case REF_ORIG:    planeCenter = planeAxis*planeOffset;  break;
 			}
 
 			//planeCenter+=planeAxis*planeDist ;
