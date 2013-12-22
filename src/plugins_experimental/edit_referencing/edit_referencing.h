@@ -27,6 +27,10 @@
 #include <QObject>
 #include <common/interfaces.h>
 
+// function to calculate rototranslaton and rototranslaton+scale matrices from series of points
+#include <vcg/space/point_matching.h>
+
+
 class EditReferencingPlugin : public QObject, public MeshEditInterface
 {
 	Q_OBJECT
@@ -49,9 +53,9 @@ public:
     void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea *gla, QPainter *p);
 
     QPoint cur;
-	QFont qFont;
+    QFont qFont;
     bool haveToPick;
-	CMeshO::FacePointer curFacePtr;
+    CMeshO::FacePointer curFacePtr;
 
 };
 

@@ -54,4 +54,4 @@ QString EditReferencingFactory::getEditToolDescription(QAction *)
     return EditReferencingPlugin::Info();
 }
 
-MESHLAB_PLUGIN_NAME_EXPORTER(SampleEditFactory)
+MESHLAB_PLUGIN_NAME_EXPORTER(EditReferencingFactory)

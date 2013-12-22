@@ -46,6 +46,68 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     gla->update();
     cur=event->pos();
     haveToPick=true;
+
+    // DEBUG DEBUG
+
+    vector<vcg::Point3d> FixP;
+    vector<vcg::Point3d> MovP;
+    Matrix44d Mtrasf;
+    vcg::Point3d newp;
+
+    FixP.clear();
+    newp = Point3d(-25.19000, 89.52376, 0.0);
+    FixP.push_back(newp);
+    newp = Point3d(35.97340, 21.47749, 1.0);
+    FixP.push_back(newp);
+    newp = Point3d(0.00000, 0.00000, 5.0);
+    FixP.push_back(newp);
+    newp = Point3d(-58.22760, 68.19291, 2.0);
+    FixP.push_back(newp);
+    newp = Point3d(-24.87419, 29.90908, 1.0);
+    FixP.push_back(newp);
+    newp = Point3d(8.98064, 46.20274, 2.0);
+    FixP.push_back(newp);
+    newp = Point3d(-34.08825, 59.46381, -3.0);
+    FixP.push_back(newp);
+    newp = Point3d(14.83746, 28.60058, -1.0);
+    FixP.push_back(newp);
+
+    newp = Point3d(38.97, -45.4012, 0.0);
+    MovP.push_back(newp);
+    newp = Point3d(-52.9811, -39.7094, 1.0);
+    MovP.push_back(newp);
+    newp = Point3d(-42.0136, 0.259092, 5.0);
+    MovP.push_back(newp);
+    newp = Point3d(47.047, -7.04106, 2.0);
+    MovP.push_back(newp);
+    newp = Point3d(-3.1936, -3.69573, 1.0);
+    MovP.push_back(newp);
+    newp = Point3d(-16.494, -38.3969, 2.0);
+    MovP.push_back(newp);
+    newp = Point3d(23.9654, -17.6361, -3.0);
+    MovP.push_back(newp);
+    newp = Point3d(-32.6295, -29.9274, -1.0);
+    MovP.push_back(newp);
+
+    ComputeRigidMatchMatrix(FixP, MovP, Mtrasf);
+
+    this->Log(GLLogStream::FILTER, "MATRIX:");
+    this->Log(GLLogStream::FILTER, "%f, %f, %f, %f",Mtrasf[0][0],Mtrasf[0][1],Mtrasf[0][2],Mtrasf[0][3]);
+    this->Log(GLLogStream::FILTER, "%f, %f, %f, %f",Mtrasf[1][0],Mtrasf[1][1],Mtrasf[1][2],Mtrasf[1][3]);
+    this->Log(GLLogStream::FILTER, "%f, %f, %f, %f",Mtrasf[2][0],Mtrasf[2][1],Mtrasf[2][2],Mtrasf[2][3]);
+    this->Log(GLLogStream::FILTER, "%f, %f, %f, %f",Mtrasf[3][0],Mtrasf[3][1],Mtrasf[3][2],Mtrasf[3][3]);
+
+    this->Log(GLLogStream::FILTER, "  ");
+    this->Log(GLLogStream::FILTER, "errors:");
+
+    float TrError=0;
+    for(int Pind=0; Pind<MovP.size(); Pind++)
+    {
+      TrError = (FixP[Pind] - (Mtrasf * MovP[Pind])).Norm();
+      this->Log(GLLogStream::FILTER, "%d: %f",Pind,TrError);
+    }
+
+    //this->Log(GLLogStream::FILTER, "Distance: %f",Distance(a,b));
 }
   
 void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
