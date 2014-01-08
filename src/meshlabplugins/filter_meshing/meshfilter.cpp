@@ -304,7 +304,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 	case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
 												   "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
 												   "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
-	case FP_SLICE_WITH_A_PLANE                       : return tr("Compute the polyline representing a planar section of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
+	case FP_SLICE_WITH_A_PLANE                       : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
 
 	default                                  : assert(0);
 	}
