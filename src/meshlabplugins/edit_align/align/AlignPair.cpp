@@ -445,7 +445,7 @@ bool AlignPair::Align(
 	Matrix44d ResCopy=out;
 	Point3d scv,shv,rtv,trv;
 	Decompose(ResCopy,scv,shv,rtv,trv);
-  if(math::Abs(1-scv[0])>ap.MaxScale || math::Abs(1-scv[1])>ap.MaxScale || math::Abs(1-scv[2])>ap.MaxScale ) {
+  if((ap.MatchMode==vcg::AlignPair::Param::MMRigid) && (math::Abs(1-scv[0])>ap.MaxScale || math::Abs(1-scv[1])>ap.MaxScale || math::Abs(1-scv[2])>ap.MaxScale) ) {
 			status = TOO_MUCH_SCALE;
 			return false;
 		}

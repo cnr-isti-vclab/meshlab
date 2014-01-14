@@ -238,7 +238,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 	AG.BuildGraph(ResVecPtr, GluedTrVec, GluedIdVec);
 
 	float StartGlobErr = 0.001f;
-	while(!AG.GlobalAlign(names, 	StartGlobErr, 100, true, stdout)){
+	while(!AG.GlobalAlign(names, 	StartGlobErr, 100, ap.MatchMode==vcg::AlignPair::Param::MMRigid, stdout)){
 		StartGlobErr*=2;
 		AG.BuildGraph(ResVecPtr,GluedTrVec, GluedIdVec);
 	}
