@@ -51,7 +51,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-:xmlfiltertimer(),wama()
+:xmlfiltertimer(),wama(),mwsettings()
 {
 	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
 	//Subsequently restart function will be invoked.
@@ -117,6 +117,7 @@ MainWindow::MainWindow()
 	plugingui = new PluginGeneratorGUI(PM,this);
 	plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::LeftDockWidgetArea,plugingui);
+	updateCustomSettings();
 	connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
 	connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
 	connect(plugingui,SIGNAL(historyRequest()),this,SLOT(sendHistory()));
@@ -278,10 +279,6 @@ void MainWindow::createActions()
 	renderModeWireAct		  = new RenderModeWireAction(renderModeGroupAct);
 	renderModeWireAct->setCheckable(true);
 	rendlist.push_back(renderModeWireAct);
-
-	renderModeHiddenLinesAct  = new RenderModeHiddenLinesAction(renderModeGroupAct);
-	renderModeHiddenLinesAct->setCheckable(true);
-	rendlist.push_back(renderModeHiddenLinesAct);
 
 	renderModeFlatLinesAct = new RenderModeFlatLinesAction(renderModeGroupAct);
 	renderModeFlatLinesAct->setCheckable(true);
@@ -1083,6 +1080,7 @@ void MainWindow::loadMeshLabSettings()
 	// I have already loaded the plugins so the default parameters for the settings
 	// of the plugins are already in the <defaultGlobalParams> .
 	// we just miss the globals default of meshlab itself
+	MainWindowSetting::initGlobalParameterSet(&defaultGlobalParams);
 	GLArea::initGlobalParameterSet(& defaultGlobalParams);
 
 	QSettings settings;
@@ -1334,4 +1332,14 @@ int MainWindow::longestActionWidthInAllMenus()
 	foreach(QMenu* m,list)
 		longest = std::max(longest,longestActionWidthInMenu(m));
 	return longest;
+}
+
+void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
+{
+	glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
+}
+
+void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
+{
+	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
 }

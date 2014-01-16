@@ -58,6 +58,17 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QToolBar;
 
+class MainWindowSetting
+{
+public:
+
+	static void initGlobalParameterSet(RichParameterSet* gblset);
+	void updateGlobalParameterSet( RichParameterSet& rps );
+
+	bool permeshtoolbar;
+	static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
+};
+
 class MainWindow : public QMainWindow, MainWindowInterface
 {
 	Q_OBJECT
@@ -72,7 +83,7 @@ public:
     static bool QCallBack(const int pos, const char * str);
     //const QString appName() const {return tr("MeshLab v")+appVer(); }
   //const QString appVer() const {return tr("1.3.2"); }
-
+	MainWindowSetting mwsettings;
 signals:
 	void dispatchCustomSettings(RichParameterSet& rps);
 	void filterExecuted();
@@ -412,7 +423,7 @@ private:
     RenderModeAction *renderBboxAct;
     RenderModeAction *renderModePointsAct;
     RenderModeAction *renderModeWireAct;
-    RenderModeAction *renderModeHiddenLinesAct;
+    //RenderModeAction *renderModeHiddenLinesAct;
     RenderModeAction *renderModeFlatLinesAct;
     RenderModeAction *renderModeFlatAct;
     RenderModeAction *renderModeSmoothAct;
@@ -494,6 +505,7 @@ private:
 	QAction *checkUpdatesAct;
 	////////////////////////////////////////////////////
 	static QString getDecoratedFileName(const QString& name);
+	
 	void updateRenderToolBar( RenderModeAction* act );
 };
 

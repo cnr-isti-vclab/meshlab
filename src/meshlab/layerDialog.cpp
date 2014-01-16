@@ -337,63 +337,61 @@ void LayerDialog::updateTable()
 			mw->GLA()->meshVisibilityMap[mmd->id()]=true;
 			mmd->visible=true;
 		}
-
-		QToolBar* rendertb = new QToolBar();
-		QList<RenderModeAction*> rendlist;
-		QActionGroup* renderModeGroupAct = new QActionGroup(rendertb);
-
-		RenderModeAction* renderBboxAct	  = new RenderModeBBoxAction(mmd->id(),renderModeGroupAct);
-		renderBboxAct->setCheckable(true);
-		rendlist.push_back(renderBboxAct);
-
-		RenderModeAction*renderModePointsAct	  = new RenderModePointsAction(mmd->id(),renderModeGroupAct);
-		renderModePointsAct->setCheckable(true);
-		rendlist.push_back(renderModePointsAct);
-
-		RenderModeAction* renderModeWireAct		  = new RenderModeWireAction(mmd->id(),renderModeGroupAct);
-		renderModeWireAct->setCheckable(true);
-		rendlist.push_back(renderModeWireAct);
-
-		RenderModeAction* renderModeHiddenLinesAct  = new RenderModeHiddenLinesAction(mmd->id(),renderModeGroupAct);
-		renderModeHiddenLinesAct->setCheckable(true);
-		rendlist.push_back(renderModeHiddenLinesAct);
-
-		RenderModeAction* renderModeFlatLinesAct = new RenderModeFlatLinesAction(mmd->id(),renderModeGroupAct);
-		renderModeFlatLinesAct->setCheckable(true);
-		rendlist.push_back(renderModeFlatLinesAct);
-
-		RenderModeAction* renderModeFlatAct		  = new RenderModeFlatAction(mmd->id(),renderModeGroupAct);
-		renderModeFlatAct->setCheckable(true);
-		rendlist.push_back(renderModeFlatAct);
-
-		RenderModeAction*renderModeSmoothAct	  = new RenderModeSmoothAction(mmd->id(),renderModeGroupAct);
-		renderModeSmoothAct->setCheckable(true);
-		rendlist.push_back(renderModeSmoothAct);
-
-		RenderModeAction* renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(mmd->id(),rendertb);
-		renderModeTextureWedgeAct->setCheckable(true);
-		rendlist.push_back(renderModeTextureWedgeAct);
-
-		mw->connectRenderModeActionList(rendlist);
-		rendertb->addActions(renderModeGroupAct->actions());
-		rendertb->addAction(renderModeTextureWedgeAct);
-
-		QMap<int,RenderMode>::iterator it = mw->GLA()->rendermodemap.find(mmd->id());
-		if (it == mw->GLA()->rendermodemap.end())
-			throw MeshLabException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
-
-		rendertb->setIconSize(QSize(16,16));
-		foreach(QAction* act,rendertb->actions())
+		QToolBar* rendertb = NULL;
+		if (mw->mwsettings.permeshtoolbar)
 		{
-			RenderModeAction* ract = qobject_cast<RenderModeAction*>(act);
-			if (act == NULL)
-				throw MeshLabException("A non-RenderModeAction-derived action has been found inside an intended render mode selector QToolBar.");
-			ract->setChecked(ract->isRenderModeEnabled(it.value()));
-			RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(ract);
-			if (textact != NULL)
-				ract->setChecked(ract->isChecked() || mmd->hasDataMask(MeshModel::MM_VERTTEXCOORD));
+			rendertb = new QToolBar();
+			QList<RenderModeAction*> rendlist;
+			QActionGroup* renderModeGroupAct = new QActionGroup(rendertb);
+
+			RenderModeAction* renderBboxAct	  = new RenderModeBBoxAction(mmd->id(),renderModeGroupAct);
+			renderBboxAct->setCheckable(true);
+			rendlist.push_back(renderBboxAct);
+
+			RenderModeAction*renderModePointsAct	  = new RenderModePointsAction(mmd->id(),renderModeGroupAct);
+			renderModePointsAct->setCheckable(true);
+			rendlist.push_back(renderModePointsAct);
+
+			RenderModeAction* renderModeWireAct		  = new RenderModeWireAction(mmd->id(),renderModeGroupAct);
+			renderModeWireAct->setCheckable(true);
+			rendlist.push_back(renderModeWireAct);
+
+			RenderModeAction* renderModeFlatLinesAct = new RenderModeFlatLinesAction(mmd->id(),renderModeGroupAct);
+			renderModeFlatLinesAct->setCheckable(true);
+			rendlist.push_back(renderModeFlatLinesAct);
+
+			RenderModeAction* renderModeFlatAct		  = new RenderModeFlatAction(mmd->id(),renderModeGroupAct);
+			renderModeFlatAct->setCheckable(true);
+			rendlist.push_back(renderModeFlatAct);
+
+			RenderModeAction*renderModeSmoothAct	  = new RenderModeSmoothAction(mmd->id(),renderModeGroupAct);
+			renderModeSmoothAct->setCheckable(true);
+			rendlist.push_back(renderModeSmoothAct);
+
+			RenderModeAction* renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(mmd->id(),rendertb);
+			renderModeTextureWedgeAct->setCheckable(true);
+			rendlist.push_back(renderModeTextureWedgeAct);
+
+			mw->connectRenderModeActionList(rendlist);
+			rendertb->addActions(renderModeGroupAct->actions());
+			rendertb->addAction(renderModeTextureWedgeAct);
+
+			QMap<int,RenderMode>::iterator it = mw->GLA()->rendermodemap.find(mmd->id());
+			if (it == mw->GLA()->rendermodemap.end())
+				throw MeshLabException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
+
+			rendertb->setIconSize(QSize(16,16));
+			foreach(QAction* act,rendertb->actions())
+			{
+				RenderModeAction* ract = qobject_cast<RenderModeAction*>(act);
+				if (act == NULL)
+					throw MeshLabException("A non-RenderModeAction-derived action has been found inside an intended render mode selector QToolBar.");
+				ract->setChecked(ract->isRenderModeEnabled(it.value()));
+				RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(ract);
+				if (textact != NULL)
+					ract->setChecked(ract->isChecked() || mmd->hasDataMask(MeshModel::MM_VERTTEXCOORD));
+			}
 		}
-		
 		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
 		if(mmd == md->mm())
 			selitem = item;

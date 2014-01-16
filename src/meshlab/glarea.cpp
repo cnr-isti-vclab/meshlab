@@ -1530,6 +1530,7 @@ Point3f GLArea::getViewDir()
 void GLArea::updateCustomSettingValues( RichParameterSet& rps )
 {
     glas.updateGlobalParameterSet(rps);
+
     this->update();
 }
 

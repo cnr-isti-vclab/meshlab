@@ -163,6 +163,7 @@ void MainWindow::updateXMLStdDialog()
 
 void MainWindow::updateCustomSettings()
 {
+	mwsettings.updateGlobalParameterSet(currentGlobalParams);
 	emit dispatchCustomSettings(currentGlobalParams);
 }
 
@@ -439,7 +440,6 @@ void MainWindow::updateMenus()
 		case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
 		case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
 		case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
-		case GLW::DMHidden:			renderModeHiddenLinesAct->setChecked(true);			break;
 		default: break;
 		}
 
@@ -1720,17 +1720,17 @@ void MainWindow::saveProject()
 		}
 	}
 	QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
-#if defined(Q_OS_MAC)
-	saveDiag->setOption(QFileDialog::DontUseNativeDialog,true);
-#endif
+	saveDiag->setOption(QFileDialog::DontUseNativeDialog);
 	QCheckBox* saveAllFile = new QCheckBox(QString("Save All Files"),saveDiag);
 	saveAllFile->setCheckState(Qt::Unchecked);
 	QCheckBox* onlyVisibleLayers = new QCheckBox(QString("Only Visible Layers"),saveDiag);
 	onlyVisibleLayers->setCheckState(Qt::Unchecked);
-	QGridLayout* layout = (QGridLayout*) saveDiag->layout();
-	layout->addWidget(saveAllFile,4,2);
-	layout->addWidget(onlyVisibleLayers,4,1);
-
+	QGridLayout* layout = qobject_cast<QGridLayout*>(saveDiag->layout());
+	if (layout != NULL)
+	{
+		layout->addWidget(saveAllFile,4,2);
+		layout->addWidget(onlyVisibleLayers,4,1);
+	}
 	saveDiag->setAcceptMode(QFileDialog::AcceptSave);
 	saveDiag->exec();
 	QStringList files = saveDiag->selectedFiles();
@@ -2496,17 +2496,23 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		return false;
 	mod->meshModified() = false;
 	QString laylabel = "Save \"" + mod->label() + "\" Layer";
-	QFileDialog* saveDialog = new QFileDialog(this,laylabel, mod->fullName());
+	QString ss = fi.absoluteFilePath();
+	QFileDialog* saveDialog = new QFileDialog(this,laylabel, fi.absolutePath());
+	saveDialog->setOption(QFileDialog::DontUseNativeDialog);
 	saveDialog->setNameFilters(suffixList);
 	saveDialog->setAcceptMode(QFileDialog::AcceptSave);
-	connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
+	saveDialog->setFileMode(QFileDialog::AnyFile);
+	saveDialog->selectFile(fileName);
 	QStringList matchingExtensions=suffixList.filter(defaultExt);
 	if(!matchingExtensions.isEmpty())
 		saveDialog->selectNameFilter(matchingExtensions.last());
+	connect(saveDialog,SIGNAL(filterSelected(const QString&)),this,SLOT(changeFileExtension(const QString&)));
 
 	if (fileName.isEmpty()){
+		saveDialog->selectFile(meshDoc()->mm()->fullName());
 		int dialogRet = saveDialog->exec();
-		if(dialogRet==QDialog::Rejected	) return false;
+		if(dialogRet==QDialog::Rejected	) 
+			return false;
 		fileName=saveDialog->selectedFiles ().first();
 		QFileInfo fni(fileName);
 		if(fni.suffix().isEmpty())
@@ -2518,6 +2524,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 		}
 	}
 
+	
 	bool ret = false;
 
 	QStringList fs = fileName.split(".");
