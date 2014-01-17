@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>edit_referencingDialog</class>
+ <widget class="QWidget" name="edit_referencingDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>526</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="spacing">
+    <number>6</number>
+   </property>
+   <property name="leftMargin">
+    <number>9</number>
+   </property>
+   <property name="topMargin">
+    <number>9</number>
+   </property>
+   <property name="rightMargin">
+    <number>9</number>
+   </property>
+   <property name="bottomMargin">
+    <number>9</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="frame">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="absRef">
+         <attribute name="title">
+          <string>Absolute Reference</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QTableWidget" name="tableWidget">
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>65</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Active</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (picked)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (picked)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Z (picked)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (ref)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (ref)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Z (ref)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>error</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="addLine">
+              <property name="text">
+               <string>Add Point</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="delLine">
+              <property name="text">
+               <string>Delete Point</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="pickCurrent">
+              <property name="text">
+               <string>Pick Current</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="exportToFile">
+              <property name="text">
+               <string>Export to File</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="loadFromFile">
+              <property name="text">
+               <string>Load From File</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="buttonPickRef">
+              <property name="text">
+               <string>DEBUG</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="cbAllowScaling">
+              <property name="text">
+               <string>Allow Scaling</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="cbApplyToAll">
+              <property name="text">
+               <string>Apply to all Layers</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="cbApplyOnTop">
+              <property name="text">
+               <string>Apply on top of current transformation</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="buttonCalculate">
+              <property name="text">
+               <string>Calculate Rototranslation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonApply">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Apply</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="distRef">
+         <attribute name="title">
+          <string>Distance Reference</string>
+         </attribute>
+         <widget class="QLabel" name="label">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>70</y>
+            <width>201</width>
+            <height>111</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>used to scale scene given distances between picked points: useful for scaling to correct size data coming from SFM, PHOTOGRAMMETRY and DENSE STEREO                    NOT YET IMPLEMENTED</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
