@@ -24,16 +24,32 @@
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
-#include "edit_referencing.h"
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
+#include "edit_referencing.h"
+#include "edit_referencingDialog.h"
+
+#define MAX_REFPOINTS 128
 
 using namespace std;
 using namespace vcg;
 
 EditReferencingPlugin::EditReferencingPlugin() {
 	qFont.setFamily("Helvetica");
-	qFont.setPixelSize(12);    
+    qFont.setPixelSize(12);
+
+    referencingDialog = NULL;
+
+    //setup
+    usePoint.reserve(MAX_REFPOINTS);
+    pointID.reserve(MAX_REFPOINTS);
+    pickedPoints.reserve(MAX_REFPOINTS);
+    refPoints.reserve(MAX_REFPOINTS);
+    pointError.reserve(MAX_REFPOINTS);
+
+    transfMatrix.SetIdentity();
+
+    lastname = 0;
 }
 
 const QString EditReferencingPlugin::Info()
@@ -45,10 +61,10 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
 {
     gla->update();
     cur=event->pos();
-    haveToPick=true;
+    //haveToPick=true;
 
     // DEBUG DEBUG
-
+/*
     vector<vcg::Point3d> FixP;
     vector<vcg::Point3d> MovP;
     Matrix44d Mtrasf;
@@ -106,23 +122,108 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
       TrError = (FixP[Pind] - (Mtrasf * MovP[Pind])).Norm();
       this->Log(GLLogStream::FILTER, "%d: %f",Pind,TrError);
     }
+*/
 
-    //this->Log(GLLogStream::FILTER, "Distance: %f",Distance(a,b));
+
 }
   
 void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
-    if(haveToPick)
+    //status
+    int pindex;
+
+    pindex = referencingDialog->ui->tableWidget->currentRow();
+    if(pindex == -1)
+        status_line1.sprintf("Active Point: ----");
+    else
+        status_line1.sprintf("Active Point: %s",pointID[pindex].toStdString().c_str());
+
+    this->RealTimeLog("Edit Referencing", m.shortName(),
+                      "%s<br>"
+                      "%s<br>"
+                      "%s<br>"
+                      "%s",
+                      status_line1.toStdString().c_str(),
+                      status_line2.toStdString().c_str(),
+                      status_line3.toStdString().c_str(),
+                      status_error.toStdString().c_str());
+
+    // draw picked & reference points
+    if(true)
     {
-        glPushMatrix();
-        glMultMatrix(m.cm.Tr);
-        vector<CMeshO::FacePointer> NewSel;
-        GLPickTri<CMeshO>::PickFace(cur.x(), gla->height() - cur.y(), m.cm, NewSel);
-        if(NewSel.size()>0)
-            curFacePtr=NewSel.front();
-        haveToPick=false;
-        glPopMatrix();
-	}   
+        int pindex;
+        vcg::Point3d currpoint;
+        QString buf;
+
+        glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+        glLineWidth(2.0f);
+
+        glDisable(GL_LIGHTING);
+
+        for(pindex=0; pindex<usePoint.size(); pindex++)
+        {
+            if(usePoint[pindex])    //if active
+                glColor3ub(233, 233, 155);
+            else
+                glColor3ub(115, 115, 75);
+
+            currpoint = pickedPoints[pindex];
+            glBegin(GL_LINES);
+                glVertex3f(currpoint[0]-10.0, currpoint[1],      currpoint[2]);
+                glVertex3f(currpoint[0]+10.0, currpoint[1],      currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1]-10.0, currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1]+10.0, currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]-10.0);
+                glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]+10.0);
+            glEnd();
+
+            buf = pointID[pindex] + " (picked)";
+            vcg::glLabel::render(p,currpoint,buf);
+
+            if(usePoint[pindex])    //if active
+                glColor3ub(155, 233, 233);
+            else
+                glColor3ub(75, 115, 115);
+
+            currpoint = refPoints[pindex];
+            glBegin(GL_LINES);
+                glVertex3f(currpoint[0]-10.0, currpoint[1],      currpoint[2]);
+                glVertex3f(currpoint[0]+10.0, currpoint[1],      currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1]-10.0, currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1]+10.0, currpoint[2]);
+                glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]-10.0);
+                glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]+10.0);
+            glEnd();
+
+            buf = pointID[pindex] + " (ref)";
+            vcg::glLabel::render(p,currpoint,buf);
+
+            if(validMatrix)
+            {
+                if(usePoint[pindex])    //if active
+                {
+                    glColor3ub(128, 255, 128);
+
+                    currpoint = transfMatrix * pickedPoints[pindex];
+                    glBegin(GL_LINES);
+                        glVertex3f(currpoint[0]-10.0, currpoint[1],      currpoint[2]);
+                        glVertex3f(currpoint[0]+10.0, currpoint[1],      currpoint[2]);
+                        glVertex3f(currpoint[0],      currpoint[1]-10.0, currpoint[2]);
+                        glVertex3f(currpoint[0],      currpoint[1]+10.0, currpoint[2]);
+                        glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]-10.0);
+                        glVertex3f(currpoint[0],      currpoint[1],      currpoint[2]+10.0);
+                    glEnd();
+
+                    buf = pointID[pindex] + " (trasf)";
+                    vcg::glLabel::render(p,currpoint,buf);
+                }
+            }
+        }
+
+        glEnable(GL_LIGHTING);
+        glPopAttrib();
+    }
+
  if(curFacePtr)
  {
     glPushMatrix();
@@ -176,9 +277,262 @@ void EditReferencingPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLAre
     }
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
+bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
 {
+    qDebug("EDIT_REFERENCING: StartEdit: setup all");
     curFacePtr=0;
-    gla->setCursor(QCursor(QPixmap(":/images/cur_referencing.png"),1,1));
+
+    glArea=gla;
+
+    if(referencingDialog == NULL)
+    {
+        referencingDialog = new edit_referencingDialog(gla->window(), this);
+
+        //connecting buttons
+        connect(referencingDialog->ui->addLine,SIGNAL(clicked()),this,SLOT(addNewPoint()));
+        connect(referencingDialog->ui->delLine,SIGNAL(clicked()),this,SLOT(deleteCurrentPoint()));
+        connect(referencingDialog->ui->pickCurrent,SIGNAL(clicked()),this,SLOT(pickCurrentPoint()));
+        connect(referencingDialog->ui->buttonPickRef,SIGNAL(clicked()),this,SLOT(pickCurrentRefPoint()));
+        connect(referencingDialog->ui->buttonCalculate,SIGNAL(clicked()),this,SLOT(calculateMatrix()));
+        connect(referencingDialog->ui->buttonApply,SIGNAL(clicked()),this,SLOT(applyMatrix()));
+        //connecting other actions
+    }
+    referencingDialog->show();
+
+    // signals for asking clicked point
+    connect(gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(receivedSurfacePoint(QString,vcg::Point3f)));
+    connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
+
+    status_line1 = "";
+    status_line2 = "";
+    status_line3 = "";
+    status_error = "";
+
+    glArea->update();
+
     return true;
+}
+
+void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea *gla)
+{
+    qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
+    assert(referencingDialog);
+    delete(referencingDialog);
+    referencingDialog = NULL;
+
+    usePoint.clear();
+    pointID.clear();
+    pickedPoints.clear();
+    refPoints.clear();
+    pointError.clear();
+}
+
+void EditReferencingPlugin::addNewPoint()
+{
+    // i do not want to have too many refs
+    if(usePoint.size() > MAX_REFPOINTS)
+    {
+        status_error = "Too many points";
+        return;
+    }
+
+    QString newname = "P" + QString::number(lastname++);
+
+    // I should check the name is really new... hehe :)
+
+    usePoint.push_back(new bool(true));
+    pointID.push_back(newname);
+    pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
+    refPoints.push_back(Point3d(0.0, 0.0, 0.0));
+    pointError.push_back(0.0);
+
+    // update dialog
+    referencingDialog->updateTable();
+    glArea->update();
+}
+
+void EditReferencingPlugin::deleteCurrentPoint()
+{
+    int pindex = referencingDialog->ui->tableWidget->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    usePoint.erase(usePoint.begin() + pindex);
+    pointID.erase(pointID.begin() + pindex);
+    pickedPoints.erase(pickedPoints.begin() + pindex);
+    refPoints.erase(refPoints.begin() + pindex);
+    pointError.erase(pointError.begin() + pindex);
+
+    // update dialog
+    referencingDialog->updateTable();
+    glArea->update();
+}
+
+void EditReferencingPlugin::pickCurrentPoint()
+{
+    int pindex = referencingDialog->ui->tableWidget->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    emit askSurfacePos("current");
+    status_line2 = "Double-click on model to pick point";
+    glArea->update();
+}
+
+void EditReferencingPlugin::pickCurrentRefPoint()
+{
+    int pindex = referencingDialog->ui->tableWidget->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    emit askSurfacePos("currentREF");
+    status_line2 = "Double-click on model to pick point";
+    glArea->update();
+}
+
+
+void EditReferencingPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoint)
+{
+    int pindex = referencingDialog->ui->tableWidget->currentRow();
+
+    if(name=="current")
+        pickedPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+    else
+        refPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+
+    status_line2 = "";
+
+    // update dialog
+    referencingDialog->updateTable();
+    glArea->update();
+}
+
+void EditReferencingPlugin::calculateMatrix()
+{
+    vector<vcg::Point3d> FixP;
+    vector<vcg::Point3d> MovP;
+    vector<int> IndexP;
+
+    int pindex = 0;
+    float TrError=0;
+
+    // constructing a vector of only ACTIVE points, plus indices and names, just for convenience
+    // matrix calculation function uses all points in the vector, while in the filter we keep
+    // a larger lint, in order to turn on and off points when we need, which is more flexible
+
+    FixP.clear();
+    FixP.reserve(MAX_REFPOINTS);
+    MovP.clear();
+    MovP.reserve(MAX_REFPOINTS);
+    IndexP.clear();
+    IndexP.reserve(MAX_REFPOINTS);
+
+    referencingDialog->ui->buttonApply->setEnabled(false);
+    validMatrix=false;
+    isMatrixRigid=true;
+    status_line3 = "NO MATRIX";
+
+    //filling
+    for(pindex=0; pindex<usePoint.size(); pindex++)
+    {
+        if(usePoint[pindex] == true)
+        {
+            MovP.push_back(pickedPoints[pindex]);
+            FixP.push_back(refPoints[pindex]);
+            IndexP.push_back(pindex);
+        }
+
+        // while iterating, set all errors to zero
+        pointError[pindex]=0.0;
+    }
+
+    // if less than 4 points, error
+    if(MovP.size() < 4)
+    {
+        // tell the user the problem
+        status_error = "There has to be at least 4 points";
+
+        // cleaning up
+        FixP.clear();
+        MovP.clear();
+        IndexP.clear();
+
+        return;
+    }
+
+    if(referencingDialog->ui->cbAllowScaling->checkState() == Qt::Checked)
+    {
+        this->Log(GLLogStream::FILTER, "calculating NON RIGID transformation using %d reference points:", FixP.size());
+        ComputeSimilarityMatchMatrix(FixP, MovP, transfMatrix);
+        validMatrix=true;
+        isMatrixRigid=false;
+    }
+    else
+    {
+        this->Log(GLLogStream::FILTER, "calculating RIGID transformation using %d reference points:", FixP.size());
+        ComputeRigidMatchMatrix(FixP, MovP, transfMatrix);
+        validMatrix=true;
+        isMatrixRigid=true;
+    }
+
+    referencingDialog->ui->buttonApply->setEnabled(true);
+
+    status_line3.sprintf("RIGID MATRIX:<br>"
+                         "%.2f %.2f %.2f %.3f<br>"
+                         "%.2f %.2f %.2f %.3f<br>"
+                         "%.2f %.2f %.2f %.3f<br>"
+                         "%.2f %.2f %.2f %.3f<br>",
+                         transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3],
+                         transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3],
+                         transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3],
+                         transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
+
+    if(isMatrixRigid)
+        this->Log(GLLogStream::FILTER, "RIGID MATRIX:");
+    else
+        this->Log(GLLogStream::FILTER, "NON-RIGID MATRIX:");
+    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[0][0],transfMatrix[0][1],transfMatrix[0][2],transfMatrix[0][3]);
+    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[1][0],transfMatrix[1][1],transfMatrix[1][2],transfMatrix[1][3]);
+    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[2][0],transfMatrix[2][1],transfMatrix[2][2],transfMatrix[2][3]);
+    this->Log(GLLogStream::FILTER, "%f %f %f %f",transfMatrix[3][0],transfMatrix[3][1],transfMatrix[3][2],transfMatrix[3][3]);
+
+    this->Log(GLLogStream::FILTER, "  ");
+    this->Log(GLLogStream::FILTER, "Residual Errors:");
+
+    for(pindex=0; pindex<MovP.size(); pindex++)
+    {
+      TrError = (FixP[IndexP[pindex]] - (transfMatrix * MovP[IndexP[pindex]])).Norm();
+      pointError[IndexP[pindex]] = TrError;
+      this->Log(GLLogStream::FILTER, "%s: %f",pointID[IndexP[pindex]].toStdString().c_str(),TrError);
+    }
+
+    // update dialog
+    referencingDialog->updateTable();
+    glArea->update();
+
+    // cleaning up
+    FixP.clear();
+    MovP.clear();
+    IndexP.clear();
+}
+
+void EditReferencingPlugin::applyMatrix()
+{
+    glArea->mm()->cm.Tr.FromMatrix(transfMatrix);
+    glArea->update();
 }

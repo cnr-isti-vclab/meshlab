@@ -26,6 +26,7 @@
 
 #include <QObject>
 #include <common/interfaces.h>
+#include "edit_referencingDialog.h"
 
 // function to calculate rototranslaton and rototranslaton+scale matrices from series of points
 #include <vcg/space/point_matching.h>
@@ -43,7 +44,8 @@ public:
     static const QString Info();
 
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
+    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+
     void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
     void Decorate (MeshModel &/*m*/, GLArea * ){};
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
@@ -57,6 +59,49 @@ public:
     bool haveToPick;
     CMeshO::FacePointer curFacePtr;
 
+    // the dialog
+    edit_referencingDialog *referencingDialog;
+
+    // used to draw over the rendering
+    GLArea *glArea;
+
+    //the place where the mouse was clicked
+    QPoint currentMousePosition;
+
+    //referencing data
+    std::vector<bool>            usePoint;
+    std::vector<QString>         pointID;
+    std::vector<vcg::Point3d>    pickedPoints;
+    std::vector<vcg::Point3d>    refPoints;
+    std::vector<double>          pointError;
+
+    vcg::Matrix44d transfMatrix;
+
+    int lastname;
+
+    bool validMatrix;
+    bool isMatrixRigid;
+
+    // status text or log
+    QString status_line1;
+    QString status_line2;
+    QString status_line3;
+    QString status_error;
+
+public slots:
+    void addNewPoint();
+    void deleteCurrentPoint();
+
+    void pickCurrentPoint();
+    void pickCurrentRefPoint();
+    void receivedSurfacePoint(QString name,vcg::Point3f pPoint);
+
+    void calculateMatrix();
+
+    void applyMatrix();
+
+signals:
+    void askSurfacePos(QString);
 };
 
 #endif
