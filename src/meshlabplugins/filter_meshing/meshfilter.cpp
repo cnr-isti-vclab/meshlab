@@ -502,8 +502,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD:
 		parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to smooth normals."));
-		parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
-		break;
+        parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
+        break;
 
 	case FP_VATTR_SEAM:
 		{
@@ -545,14 +545,15 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		break;
 	case FP_SLICE_WITH_A_PLANE:
 		{
-			QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis";
+            QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
 			parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
 			//	  parlst.addParam(new RichSaveFile ("filename","output.svg",QString("svg"),QString("Output File"),QString("Name of the svg files and of the folder containing them, it is automatically created in the Sample folder of the Meshlab tree")));
 			//	  parlst.addParam(new RichFloat("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
 			parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
 			parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
 			// BBox min=0, BBox center=1, Origin=2
-			parlst.addParam(new RichEnum   ("relativeTo",0,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
+            parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
+            parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
 		}
 		break;
 	case FP_QUAD_DOMINANT:
@@ -1549,8 +1550,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		{
 			Point3f planeAxis(0,0,0);
 			int ind = par.getEnum("planeAxis");
-			if(ind>=0 && ind<3)   planeAxis[ind] = 1.0f;
-			else planeAxis=par.getPoint3f("customAxis");
+            if(ind>=0 && ind<3)
+                planeAxis[ind] = 1.0f;
+            else
+                planeAxis=par.getPoint3f("customAxis");
 
 			planeAxis.Normalize();
 
@@ -1580,14 +1583,29 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			//planeCenter+=planeAxis*planeDist ;
 			slicingPlane.Init(planeCenter,planeAxis);
 
+            // making up new layer name
+            QString sectionName = QFileInfo(base->shortName()).baseName() + "_sect";
+            switch(ind)
+            {
+                case 0:  sectionName.append("_X_");  break;
+                case 1:  sectionName.append("_Y_");  break;
+                case 2:  sectionName.append("_Z_");  break;
+                case 3:  sectionName.append("_custom_");  break;
+            }
+            sectionName.append(QString::number(planeOffset));
+
 			//this is used to generate svg slices
-			MeshModel* cap= md.addNewMesh("","Section PolyLine");
+            MeshModel* cap= md.addNewMesh("",sectionName);
 			vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(orig->cm, slicingPlane, cap->cm );
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
-			MeshModel* cap2= md.addNewMesh("","Section Mesh");
-			tri::CapEdgeMesh(cap->cm, cap2->cm);
-			cap2->UpdateBoxAndNormals();
+            if(par.getBool("createSectionSurface"))
+            {
+                sectionName.append("_mesh");
+                MeshModel* cap2= md.addNewMesh("",sectionName);
+                tri::CapEdgeMesh(cap->cm, cap2->cm);
+                cap2->UpdateBoxAndNormals();
+            }
 		} break;
 	}
 	return true;
