@@ -2424,7 +2424,7 @@ void MainWindow::openRecentProj()
 
 bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
 {
-	if ((meshDoc() == nullptr) || (mm == nullptr))
+	if ((meshDoc() == NULL) || (mm == NULL))
 		return false;
 	bool ret = false;
 	mm->Clear();
@@ -2470,7 +2470,7 @@ void MainWindow::reloadAllMesh()
 
 void MainWindow::reload()
 {
-	if ((meshDoc() == nullptr) || (meshDoc()->mm() == nullptr))
+	if ((meshDoc() == NULL) || (meshDoc()->mm() == NULL))
 		return;
 	// Discards changes and reloads current file
 	// save current file name
