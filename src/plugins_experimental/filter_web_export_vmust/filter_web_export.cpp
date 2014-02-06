@@ -59,7 +59,7 @@ QString FilterWebExportVMustPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) 
 	{
-		case FP_WEB_EXPORT :  return QString("Extract Information"); 
+		case FP_WEB_EXPORT :  return QString("Web Export"); 
 	
 		default : assert(0); 
 	}
@@ -73,7 +73,7 @@ QString FilterWebExportVMustPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) 
 	{
-		case FP_WEB_EXPORT : return QString("This filter prepares a Web version of the input 3D model according to some pre-defined templates. It is based on the CIF API of the V-MUST CIF PIPELINE."); 
+		case FP_WEB_EXPORT : return QString("This filter prepares a Web version of the input 3D model according to a chosen pre-defined template. It is based on the CIF API of the V-MUST CIF PIPELINE."); 
 		default : assert(0); 
 	}
 
@@ -87,7 +87,7 @@ FilterWebExportVMustPlugin::FilterClass FilterWebExportVMustPlugin::getClass(QAc
 {
   switch(ID(a))
 	{
-		case FP_WEB_EXPORT :  return MeshFilterInterface::Generic; 
+		case FP_WEB_EXPORT :  return MeshFilterInterface::Layer; 
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -100,7 +100,7 @@ FilterWebExportVMustPlugin::FilterClass FilterWebExportVMustPlugin::getClass(QAc
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterWebExportVMustPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void FilterWebExportVMustPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst) 
 {
 	int meshCount = md.meshList.size();
 
@@ -110,11 +110,11 @@ void FilterWebExportVMustPlugin::initParameterSet(QAction *action,MeshModel &m, 
 	parlst.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh to export."));
 
 	QStringList templateList;
-	templateList << "f1 (Gaussian)" << "f2 (Multiquadric)" << "f3";
-	parlst.addParam(new RichEnum("rbf", 1, templateList, "Web Template:", "Web template to use."));
-
-	//parlst.addParam(new RichDynamicFloat("min_radius", 0.1, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
-	//parlst.addParam(new RichBool("save_as_quality", false, "Save as vertex quality", "Saves the perturbation as vertex quality."));
+	templateList << "Basic Viewer" << "Standard Viewer" << "Fullsize Viewer" << "Radiance Scaling" <<
+		"Walkthrough" << "POP Geometry" << "Nexus conversion";
+	parlst.addParam(new RichEnum("template", 1, templateList, "Web Template:", "Web template to use."));
+	parlst.addParam(new RichString("notification_email", "youremail@domain.com", "Notification email:", 
+		"A link to download the exported model will be send at this email address."));
 
 	return;
 }
