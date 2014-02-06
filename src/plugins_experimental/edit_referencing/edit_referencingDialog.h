@@ -35,6 +35,8 @@ private slots:
 
     void on_tableWidget_cellDoubleClicked(int row, int column);
 
+    void on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
+
 private:
     EditReferencingPlugin *referencingPlugin;
 };

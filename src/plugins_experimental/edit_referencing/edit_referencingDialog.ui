@@ -235,17 +235,10 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="1" column="1">
              <widget class="QCheckBox" name="cbApplyToAll">
               <property name="text">
-               <string>Apply to all Layers</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="cbApplyOnTop">
-              <property name="text">
-               <string>Apply on top of current transformation</string>
+               <string>Apply to all VISIBLE layers</string>
               </property>
              </widget>
             </item>
@@ -269,7 +262,7 @@
             <item>
              <widget class="QPushButton" name="buttonApply">
               <property name="enabled">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="text">
                <string>Apply</string>

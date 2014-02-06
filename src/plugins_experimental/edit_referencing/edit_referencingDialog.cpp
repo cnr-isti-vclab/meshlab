@@ -211,3 +211,9 @@ void edit_referencingDialog::on_tableWidget_cellDoubleClicked(int row, int colum
     this->referencingPlugin->glArea->update();
     return;
 }
+
+void edit_referencingDialog::on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    this->referencingPlugin->glArea->update();
+    return;
+}

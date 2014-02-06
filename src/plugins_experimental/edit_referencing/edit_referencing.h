@@ -88,6 +88,9 @@ public:
     QString status_line3;
     QString status_error;
 
+    // string to hold referencing result (for exporting documentation)
+    QString referencingResults;
+
 public slots:
     void addNewPoint();
     void deleteCurrentPoint();
@@ -95,6 +98,9 @@ public slots:
     void pickCurrentPoint();
     void pickCurrentRefPoint();
     void receivedSurfacePoint(QString name,vcg::Point3f pPoint);
+
+    void loadFromFile();
+    void saveToFile();
 
     void calculateMatrix();
 
