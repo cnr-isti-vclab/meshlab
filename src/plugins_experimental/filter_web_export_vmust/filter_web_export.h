@@ -42,7 +42,7 @@ public:
 
 	FilterWebExportVMustPlugin();
 
-	virtual QString pluginName(void) const { return "FilterInfoVMustPlugin"; }
+	virtual QString pluginName(void) const { return "FilterWebExportVMustPlugin"; }
 
 	QString filterName(FilterIDType filter) const;
 

@@ -47,7 +47,7 @@ using namespace vcg;
 
 FilterWebExportVMustPlugin::FilterWebExportVMustPlugin() 
 { 
-	typeList << FP_EXTRACT_INFO;
+	typeList << FP_WEB_EXPORT;
   
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -59,7 +59,7 @@ QString FilterWebExportVMustPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) 
 	{
-		case FP_EXTRACT_INFO :  return QString("Extract Information"); 
+		case FP_WEB_EXPORT :  return QString("Extract Information"); 
 	
 		default : assert(0); 
 	}
@@ -83,11 +83,11 @@ QString FilterWebExportVMustPlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be choosen.
-FilterInfoVMustPlugin::FilterClass FilterInfoVMustPlugin::getClass(QAction *a)
+FilterWebExportVMustPlugin::FilterClass FilterWebExportVMustPlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
-		case FP_EXTRACT_INFO :  return MeshFilterInterface::Measure; 
+		case FP_WEB_EXPORT :  return MeshFilterInterface::Generic; 
 		default : assert(0); 
 	}
 	return MeshFilterInterface::Generic;
@@ -100,276 +100,50 @@ FilterInfoVMustPlugin::FilterClass FilterInfoVMustPlugin::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterInfoVMustPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void FilterWebExportVMustPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
 {
-	// Nothing to set..
+	int meshCount = md.meshList.size();
+
+	// tries to detect the target mesh
+	MeshModel* target = md.mm();
+  
+	parlst.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh to export."));
+
+	QStringList templateList;
+	templateList << "f1 (Gaussian)" << "f2 (Multiquadric)" << "f3";
+	parlst.addParam(new RichEnum("rbf", 1, templateList, "Web Template:", "Web template to use."));
+
+	//parlst.addParam(new RichDynamicFloat("min_radius", 0.1, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
+	//parlst.addParam(new RichBool("save_as_quality", false, "Save as vertex quality", "Saves the perturbation as vertex quality."));
+
+	return;
 }
 
-QString FilterInfoVMustPlugin::filterScriptFunctionName( FilterIDType filterID )
+QString FilterWebExportVMustPlugin::filterScriptFunctionName( FilterIDType filterID )
 {
 	switch(filterID) 
 	{
-		case FP_EXTRACT_INFO :  return QString("Extract Information"); 
+		case FP_WEB_EXPORT :  return QString("Web Export"); 
 
 		default : assert(0); 
 	}
 	return QString();
 }
 
-// Core Function doing the actual mesh processing.
-bool FilterInfoVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb)
+// Core 
+bool FilterWebExportVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb)
 {
-	if (ID(filter) == FP_EXTRACT_INFO)
+	if (ID(filter) == FP_WEB_EXPORT)
 	{
-		// INFORMATION EXTRACTED
-		int nv=0;                                      // number of vertices
-		int ne=0;                                      // number of edges
-		int nf=0;                                      // number of faces
-		int unreferencedVert=0;                        // number of unreferenced vertices
-		int boundaryEdges=0;                           // number of boundary edges
-		int connectedComponents=0;                     // number of connected components
-		bool isPointCloud = false;                     // true: the input model is a point cloud
-		bool isManifold = false;                       // true: mesh is two-manifold
-		int nonmanifoldVertices=0;                     // number of non-manifold vertices
-		int nonmanifoldEdges=0;                        // number of non-manifold edges
-		int facesOnNonmanifoldVertices=0;              // number of faces incident on the non-manifold vertices
-		int facesOnNonmanifoldEdges=0;                 // number of faces incident on the non-manifold edges
-		int borders=0;                                 // number of borders
-		int genus=0;                                   // genus
-		float bbox_sx=0.0f,bbox_sy=0.0f,bbox_sz=0.0f;  // bounding box size
-		float bbox_diagonal=0.0f;                      // bounding box diagonal
-		float area=0.0f;                               // surface area
-		float volume=0.0f;                             // enclosed volume
-		Point3f barycenter;                            // thin shell barycenter
-		Point3f masscenter;                            // center of mass
-		bool flagVN=false;                             // per-vertex normal
-		bool flagFN=false;                             // per-face normal
-		bool flagVC=false;                             // per-vertex color
-		bool flagFC=false;                             // per-face color
-		bool flagVT=false;                             // per-vertex texture coordinates
+		CMeshO &m=md.mm()->cm;
 
-		// replace the extension with 'txt'
-		QString modelname = md.mm()->shortName();
-		QFileInfo finfo(md.mm()->shortName());
-		QString ext = finfo.suffix();
-		QString filename(modelname);
-		filename.replace(QString(ext), QString("txt"));
-
-		QFile data(filename);
-		if (data.open(QFile::WriteOnly | QFile::Truncate)) 
-		{
-			QTextStream fout(&data);
-
-			/**** COMPUTE TOPOLOGICAL INFORMATION
-			/***********************************************************************************/
-
-			CMeshO &m=md.mm()->cm;
-
-			tri::Allocator<CMeshO>::CompactFaceVector(m);
-			tri::Allocator<CMeshO>::CompactVertexVector(m);
-			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);				
-
-			nv = m.vn;
-			nf = m.fn;
-
-			tri::Clean<CMeshO>::CountEdges(m, ne, boundaryEdges);
-
-			// IMPORTANT! A point cloud is a mesh composed by vertices only. 
-			//            This implies that a mesh composed by few triangles and a lot of
-			//            vertices is considered as a mesh with many unreferenced vertices.
-			if (ne == 0 && nf == 0)
-			{
-				isPointCloud = true;
-			}
-
-			if (!isPointCloud)
-			{
-				// ONLY FOR MESHES (!!)
-
-				nonmanifoldEdges = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-				facesOnNonmanifoldEdges = tri::UpdateSelection<CMeshO>::FaceCount(m);
-				tri::UpdateSelection<CMeshO>::VertexClear(m);
-				tri::UpdateSelection<CMeshO>::FaceClear(m);
-
-				nonmanifoldVertices = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
-				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-				facesOnNonmanifoldVertices = tri::UpdateSelection<CMeshO>::FaceCount(m);
-
-				unreferencedVert = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
-
-				connectedComponents = tri::Clean<CMeshO>::CountConnectedComponents(m);
-
-				if (nonmanifoldVertices == 0 && nonmanifoldEdges == 0)
-				{
-					isManifold = true;
-				}
-
-				// For a two-manifold mesh additional stuffs are computed
-				if (isManifold)
-				{
-					borders = tri::Clean<CMeshO>::CountHoles(m);
-					genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unreferencedVert, ne, m.fn, borders, connectedComponents);
-				}
-			}
-
-			/***** COMPUTE GEOMETRIC INFORMATION
-			/***********************************************************************************/
-
-			bbox_sx = m.bbox.DimX();
-			bbox_sy = m.bbox.DimY();
-			bbox_sz = m.bbox.DimZ();
-			bbox_diagonal = m.bbox.Diag();
-
-			if (isPointCloud)
-			{
-				// computer center of mass
-				
-				CMeshO::VertexIterator it;
-				CMeshO::VertexType v;
-				v.P()[0] = v.P()[1] = v.P()[2] = 0.0f;
-				for (it = m.vert.begin(); it != m.vert.end(); it++)
-				{
-					v.P() += (*it).P();
-				}
-
-				masscenter = barycenter = v.P() / static_cast<float>(m.vert.size());
-			}
-			else
-			{
-				// ONLY FOR MESHES (!!)
-
-				tri::Inertia<CMeshO> I(m);
-				volume = I.Mass();
-				masscenter = I.CenterOfMass();
-
-				area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-
-				barycenter = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
-			}
-			
-			/***** CHECK ATTRIBUTES
-			/***********************************************************************************/
-
-			if (tri::HasPerVertexNormal(m))
-				flagVN = true;
-			else
-				flagVN = false;
-
-			if (tri::HasPerFaceNormal(m))
-				flagFN = true;
-			else
-				flagFN = false;
-
-			if (tri::HasPerVertexColor(m)) 
-				flagVC = true;
-			else
-				flagVC = false;
-
-			if (tri::HasPerFaceColor(m))
-				flagFC = true;
-			else
-				flagFC = false;
-
-			if (tri::HasPerVertexTexCoord(m))
-				flagVT = true;
-			else
-				flagVT = false;
-
-
-			/***** OUTPUT
-			/***********************************************************************************/
-
-			fout << "Model name: " << modelname.toStdString().c_str() << "  [ ";
-			
-			if (flagVN) fout << "VN ";
-			if (flagFN) fout << "FN ";
-			if (flagVC) fout << "VC ";
-			if (flagFC) fout << "FC ";
-			if (flagVT) fout << "VT ";
-
-			fout << "]";
-
-			fout << endl << endl;
-			fout << "Number of Vertices: " << nv << endl;
-			fout << "Number of Edges: " << ne << endl;
-			fout << "Number of Faces: " << nf << endl << endl;
-
-			if (isPointCloud)
-			{
-				fout << "Point Cloud: YES" << endl;
-
-				fout << "Number of unreferenced vertices: N/A" << endl;
-				fout << "Number of boundary edges: N/A" << endl;
-				fout << "Number of connected components: " << connectedComponents << endl; // it must be zero for a point cloud
-
-				fout << "Two-manifold: N/A" << endl;
-				fout << "Non-manifold vertices: N/A" << endl;
-				fout << "Non-manifold edges: N/A" << endl;
-				fout << "Faces incident on non-manifold vertices: N/A" << endl; 
-				fout << "Faces incident on non-manifold edges: N/A " << endl;
-				fout << "Borders: N/A" << endl;
-				fout << "Genus: N/A" << endl;
-
-				fout << endl;
-				fout << "Bounding box size: " << bbox_sx << " " << bbox_sy << " " << bbox_sz << endl;
-				fout << "Bounding box diagonal: " << bbox_diagonal << endl;
-				fout << "Volume: N/A" << endl;
-				fout << "Surface area: N/A" << endl;
-				fout << "Mass center: " << masscenter[0] << " " << masscenter[1] << " " << masscenter[2] << endl;
-				fout << "Barycenter: " << barycenter[0] << " " << barycenter[1] << " " << barycenter[2] << endl;
-
-			}
-			else
-			{
-				fout << "Point Cloud: NO" << endl;
-
-				fout << "Number of unreferenced vertices: " << unreferencedVert << endl;
-				fout << "Number of boundary edges: " << boundaryEdges << endl;
-				fout << "Number of connected components: " << connectedComponents << endl;
-			
-				if (isManifold)
-				{
-					fout << "Two-manifold: YES" << endl;
-					fout << "Non-manifold vertices: " << nonmanifoldVertices << endl; // it must be zero for two-manifold meshes
-					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;   // it must be zero for two-manifold meshes
-					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVertices << endl; // it must be zero for two-manifold meshes
-					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl; // it must be zero for two-manifold meshes
-					fout << "Borders: " << borders << endl;
-					fout << "Genus: " << genus << endl;
-				}
-				else
-				{
-					fout << "Two-manifold: NO" << endl;
-					fout << "Non-manifold vertices: " << nonmanifoldVertices << endl;
-					fout << "Non-manifold edges: " << nonmanifoldEdges << endl;
-					fout << "Faces incident on non-manifold vertices: " << facesOnNonmanifoldVertices << endl;
-					fout << "Faces incident on non-manifold edges: " << facesOnNonmanifoldEdges << endl;
-					fout << "Borders: N/A" << endl;
-					fout << "Genus: N/A" << endl;
-				}
-
-				fout << endl;
-				fout << "Bounding box size: " << bbox_sx << " " << bbox_sy << " " << bbox_sz << endl;
-				fout << "Bounding box diagonal: " << bbox_diagonal << endl;
-				fout << "Volume: " << volume << endl;
-				fout << "Surface area: " << area << endl;
-				fout << "Mass center: " << masscenter[0] << " " << masscenter[1] << " " << masscenter[2] << endl;
-				fout << "Barycenter: " << barycenter[0] << " " << barycenter[1] << " " << barycenter[2] << endl;
-			}
-
-			data.close();
-
-			return true;
-		}
-		else
-			return false;
+		// ...TODO...
 	}
 
 	return true;
 }
 
 
-Q_EXPORT_PLUGIN(FilterInfoVMustPlugin)
+Q_EXPORT_PLUGIN(FilterWebExportVMustPlugin)
 
 
