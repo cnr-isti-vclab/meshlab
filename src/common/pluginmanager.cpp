@@ -85,16 +85,16 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
     QString absfilepath = pluginsDir.absoluteFilePath(fileName);
     QFileInfo fin(absfilepath);
     if (fin.suffix() == "xml")
-	{
-		try
-		{
-			loadXMLPlugin(fileName);
-		}
-		catch (MeshLabXMLParsingException& e)
-		{
-			qDebug() << e.what();		
-		}
-	} 
+    {
+        try
+        {
+            loadXMLPlugin(fileName);
+        }
+        catch (MeshLabXMLParsingException& e)
+        {
+            qDebug() << e.what();
+        }
+    }
     else
     {
       QPluginLoader loader(absfilepath);
@@ -141,8 +141,8 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
             editActionList.push_back(editAction);
         }
       }
-	  else
-		  qDebug() << loader.errorString();
+      else
+          qDebug() << loader.errorString();
     }
   }
   knownIOFormats();
@@ -296,7 +296,7 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
     {
       xmlpluginfo << pluginfo;
       fc.xmlInfo = xmlpluginfo[xmlpluginfo.size() - 1];
-      QStringList fn = fc.xmlInfo->filterNames();
+//      QStringList fn = fc.xmlInfo->filterNames();
       QObject* par = NULL;
       if (pluginsDir.exists(dllfile))
       {
@@ -417,10 +417,10 @@ QString PluginManager::pluginNameSpace()
 
 QString PluginManager::osIndependentPluginName( const QString& plname )
 {
-	QFileInfo fi(plname);
-	QString res = fi.baseName();
-	QString pref = DLLFileNamePreamble();
-	return res.remove(0,pref.size());
+    QFileInfo fi(plname);
+    QString res = fi.baseName();
+    QString pref = DLLFileNamePreamble();
+    return res.remove(0,pref.size());
 }
 
 //QString PluginManager::getLocalPluginDirPath()
