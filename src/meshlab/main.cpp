@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -26,59 +26,64 @@
 #include <QString>
 
 int main(int argc, char *argv[])
-{	 
+{
 
   MeshLabApplication app(argc, argv);
   QLocale::setDefault(QLocale::C);
   QCoreApplication::setOrganizationName(MeshLabApplication::organization());
+#if QT_VERSION >= 0x050100
+ // Enable support for highres images (added in Qt 5.1, but off by default)
+  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+
   QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
   QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
-		
-		if(argc>1)	
-		{
-			QString helpOpt1="-h";
-			QString helpOpt2="--help";
-			if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
-			{
-				printf("\n\n"
-							 "    MeshLab: an open source mesh processing system\n"
-							 "          Paolo Cignoni (and many many others) \n"
-							 "              Visual Computing Lab\n"
-							 "                  ISTI - CNR \n\n"
-							 "usage:\n\n"
-							 "    meshlab [meshfile] \n\n"
-							 "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
-							 );
-			exit(-1);
-			}
-		}
-	
+
+        if(argc>1)
+        {
+            QString helpOpt1="-h";
+            QString helpOpt2="--help";
+            if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
+            {
+                printf("\n\n"
+                             "    MeshLab: an open source mesh processing system\n"
+                             "          Paolo Cignoni (and many many others) \n"
+                             "              Visual Computing Lab\n"
+                             "                  ISTI - CNR \n\n"
+                             "usage:\n\n"
+                             "    meshlab [meshfile] \n\n"
+                             "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
+                             );
+            exit(-1);
+            }
+        }
+
   MainWindow window;
   window.show();
   window.showMaximized();
 
   // This event filter is installed to intercept the open events sent directly by the Operative System.
   FileOpenEater *filterObj=new FileOpenEater(&window);
-	app.installEventFilter(filterObj);
-	app.processEvents();
+    app.installEventFilter(filterObj);
+    app.processEvents();
 
-	if(argc>1)	
-	{
-		QString helpOpt1="-h";
-		QString helpOpt2="--help";
-		if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
-		printf(
-			"usage:\n"
-			"meshlab <meshfile>\n"
-			"Look at http://meshlab.sourceforge.net/wiki\n"
-			"for a longer documentation\n"
-		);
+    if(argc>1)
+    {
+        QString helpOpt1="-h";
+        QString helpOpt2="--help";
+        if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
+        printf(
+            "usage:\n"
+            "meshlab <meshfile>\n"
+            "Look at http://meshlab.sourceforge.net/wiki\n"
+            "for a longer documentation\n"
+        );
 
     if(QString(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString(argv[1]).endsWith("aln",Qt::CaseInsensitive))
       window.openProject(argv[1]);
     else
       window.importMesh(argv[1]);
-	}
-	//else 	if(filterObj->noEvent) window.open();
-	return app.exec();
+    }
+    //else 	if(filterObj->noEvent) window.open();
+    return app.exec();
 }
