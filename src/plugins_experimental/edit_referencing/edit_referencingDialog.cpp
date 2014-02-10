@@ -29,10 +29,11 @@ void edit_referencingDialog::closeEvent(QCloseEvent *event)
 
 void edit_referencingDialog::updateTable()
 {
+    this->referencingPlugin->status_error = "";
     this->ui->tableWidget->clear();
     this->ui->tableWidget->setRowCount(this->referencingPlugin->usePoint.size());
 
-    this->ui->tableWidget->setHorizontalHeaderLabels(QString("Active; ID ;X (picked);Y (picked);Z (picked);X (ref);Y (ref);Z (ref);Error").split(";"));
+    this->ui->tableWidget->setHorizontalHeaderLabels(QString("Active; ID ;X (mov);Y (mov);Z (mov);X (ref);Y (ref);Z (ref);Error").split(";"));
 
     this->ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -89,6 +90,7 @@ void edit_referencingDialog::updateTable()
 
 void edit_referencingDialog::on_tableWidget_itemChanged(QTableWidgetItem *item)
 {
+    this->referencingPlugin->status_error = "";
     // an item in the table has changed
     int rowInd = this->ui->tableWidget->currentRow();
     int colInd = this->ui->tableWidget->currentColumn();
@@ -191,6 +193,7 @@ void edit_referencingDialog::on_tableWidget_itemChanged(QTableWidgetItem *item)
 
 void edit_referencingDialog::on_tableWidget_cellDoubleClicked(int row, int column)
 {
+    this->referencingPlugin->status_error = "";
     // only significative for forst column, to toggle between active<->inactive
     if(column == 0)
     {
@@ -214,6 +217,7 @@ void edit_referencingDialog::on_tableWidget_cellDoubleClicked(int row, int colum
 
 void edit_referencingDialog::on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
+    this->referencingPlugin->status_error = "";
     this->referencingPlugin->glArea->update();
     return;
 }

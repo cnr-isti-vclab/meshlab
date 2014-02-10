@@ -65,20 +65,6 @@
             <property name="bottomMargin">
              <number>5</number>
             </property>
-            <item>
-             <widget class="QPushButton" name="pushButton_2">
-              <property name="text">
-               <string>PushButton</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>PushButton</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </item>
           <item>
@@ -112,17 +98,17 @@
               </column>
               <column>
                <property name="text">
-                <string>X (picked)</string>
+                <string>X (mov)</string>
                </property>
               </column>
               <column>
                <property name="text">
-                <string>Y (picked)</string>
+                <string>Y (mov)</string>
                </property>
               </column>
               <column>
                <property name="text">
-                <string>Z (picked)</string>
+                <string>Z (mov)</string>
                </property>
               </column>
               <column>
@@ -163,14 +149,14 @@
             <item>
              <widget class="QPushButton" name="addLine">
               <property name="text">
-               <string>Add Point</string>
+               <string>Add New Point</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="delLine">
               <property name="text">
-               <string>Delete Point</string>
+               <string>Delete Current Point</string>
               </property>
              </widget>
             </item>
@@ -191,30 +177,36 @@
              <number>5</number>
             </property>
             <item row="0" column="0">
-             <widget class="QPushButton" name="pickCurrent">
-              <property name="text">
-               <string>Pick Current</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="exportToFile">
-              <property name="text">
-               <string>Export to File</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
              <widget class="QPushButton" name="loadFromFile">
               <property name="text">
-               <string>Load From File</string>
+               <string>Load Reference Points From File</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
+             <widget class="QPushButton" name="exportToFile">
+              <property name="text">
+               <string>Export all Referencing Data to file...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pickCurrent">
+              <property name="text">
+               <string>Pick current point on MOVING</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
              <widget class="QPushButton" name="buttonPickRef">
               <property name="text">
-               <string>DEBUG</string>
+               <string>Pick current point on REFERENCE</string>
               </property>
              </widget>
             </item>
@@ -231,7 +223,7 @@
             <item row="0" column="0">
              <widget class="QCheckBox" name="cbAllowScaling">
               <property name="text">
-               <string>Allow Scaling</string>
+               <string>Allow UNIFORM Scaling</string>
               </property>
              </widget>
             </item>

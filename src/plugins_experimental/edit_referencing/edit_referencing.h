@@ -52,21 +52,14 @@ public:
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 		
-    void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea *gla, QPainter *p);
-
     QPoint cur;
     QFont qFont;
-    bool haveToPick;
-    CMeshO::FacePointer curFacePtr;
 
     // the dialog
     edit_referencingDialog *referencingDialog;
 
     // used to draw over the rendering
     GLArea *glArea;
-
-    //the place where the mouse was clicked
-    QPoint currentMousePosition;
 
     //referencing data
     std::vector<bool>            usePoint;
