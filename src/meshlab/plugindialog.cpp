@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -24,7 +24,6 @@
 #include "plugindialog.h"
 #include <common/interfaces.h>
 
-#include <QtGui>
 #include <QLabel>
 #include <QTreeWidget>
 #include <QGroupBox>
@@ -46,35 +45,35 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
     treeWidget->setHeaderLabels(headerLabels);
     treeWidget->header()->hide();
 
-		groupBox=new QGroupBox(tr("Info Plugin"));
-		
+        groupBox=new QGroupBox(tr("Info Plugin"));
+
     okButton = new QPushButton(tr("OK"));
     okButton->setDefault(true);
-		
-		spacerItem = new QSpacerItem(363, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-		
-		labelInfo=new QLabel(groupBox);
-		labelInfo->setWordWrap(true);
-		//tedit->hide();
+
+        spacerItem = new QSpacerItem(363, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        labelInfo=new QLabel(groupBox);
+        labelInfo->setWordWrap(true);
+        //tedit->hide();
 
     connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
-		connect(treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(displayInfo(QTreeWidgetItem*,int)));
+        connect(treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),this,SLOT(displayInfo(QTreeWidgetItem*,int)));
 
     QGridLayout *mainLayout = new QGridLayout;
-		QHBoxLayout *gboxLayout = new QHBoxLayout(groupBox);
-		gboxLayout->addWidget(labelInfo);
+        QHBoxLayout *gboxLayout = new QHBoxLayout(groupBox);
+        gboxLayout->addWidget(labelInfo);
     //mainLayout->setColumnStretch(0, 1);
     //mainLayout->setColumnStretch(2, 1);
     mainLayout->addWidget(label, 0, 0, 1, 2);
     mainLayout->addWidget(treeWidget, 1, 0, 4, 2);
     mainLayout->addWidget(groupBox,5,0,1,2);
-		mainLayout->addItem(spacerItem, 6, 0, 1, 1);
-		mainLayout->addWidget(okButton,6,1,1,1);
+        mainLayout->addItem(spacerItem, 6, 0, 1, 1);
+        mainLayout->addWidget(okButton,6,1,1,1);
 
 
-		//mainLayout->addWidget(okButton, 3, 1,Qt::AlignHCenter);
-		//mainLayout->addLayout(buttonLayout,3,1);			
-		setLayout(mainLayout);
+        //mainLayout->addWidget(okButton, 3, 1,Qt::AlignHCenter);
+        //mainLayout->addLayout(buttonLayout,3,1);
+        setLayout(mainLayout);
 
     interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirOpenIcon),QIcon::Normal, QIcon::On);
     interfaceIcon.addPixmap(style()->standardPixmap(QStyle::SP_DirClosedIcon),QIcon::Normal, QIcon::Off);
@@ -82,7 +81,7 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
 
     setWindowTitle(tr("Plugin Information"));
     populateTreeWidget(path, fileNames);
-		pathDirectory=path;
+        pathDirectory=path;
 }
 
 void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
@@ -99,7 +98,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 
             QTreeWidgetItem *pluginItem = new QTreeWidgetItem(treeWidget);
             pluginItem->setText(0, fileName);
-						pluginItem->setIcon(0, interfaceIcon);
+                        pluginItem->setIcon(0, interfaceIcon);
             treeWidget->setItemExpanded(pluginItem, false);
 
             QFont boldFont = pluginItem->font(0);
@@ -108,70 +107,70 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
 
             if (plugin) {
                 MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
-								if (iMeshIO){
-									QStringList Templist;
-									foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
-										QString formats;
-										foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
-										Templist.push_back(formats);
-									}
-									foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
-										QString formats;
-										foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
-										Templist.push_back(formats);
-									}
+                                if (iMeshIO){
+                                    QStringList Templist;
+                                    foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+                                        QString formats;
+                                        foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+                                        Templist.push_back(formats);
+                                    }
+                                    foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+                                        QString formats;
+                                        foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+                                        Templist.push_back(formats);
+                                    }
                   addItems(pluginItem,Templist);
-								}
+                                }
                 MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
-								if (iDecorate){
-									QStringList Templist;
-									foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
-									addItems(pluginItem,Templist);
-								}								 
-								MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-								if (iFilter){
-									QStringList Templist;
-									foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
-									addItems(pluginItem,Templist);
-								}
-								MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-								if (iXMLFilter)
-								{
-									QFileInfo f(dir.absoluteFilePath(fileName));
-									QString tmp = f.baseName() + ".xml";
-									QString xmlFile = dir.absoluteFilePath(tmp);
-									XMLMessageHandler xmlErr;
-									MeshLabXMLFilterContainer fc;
-									fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-									if (fc.xmlInfo != NULL)
-									{
-										QStringList fn = fc.xmlInfo->filterNames();
-										addItems(pluginItem,fn);	
-									}
-									MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
-								}
-								MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-								if (iRender){
-									QStringList Templist;
-									foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
-    									addItems(pluginItem,Templist);
-								}
-								MeshEditInterfaceFactory *iEdit = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-								if (iEdit){
-									QStringList Templist;
-									foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
-									addItems(pluginItem,Templist);
-								}
+                                if (iDecorate){
+                                    QStringList Templist;
+                                    foreach(QAction *a,iDecorate->actions()){Templist.push_back(a->text());}
+                                    addItems(pluginItem,Templist);
+                                }
+                                MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+                                if (iFilter){
+                                    QStringList Templist;
+                                    foreach(QAction *a,iFilter->actions()){Templist.push_back(a->text());}
+                                    addItems(pluginItem,Templist);
+                                }
+                                MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+                                if (iXMLFilter)
+                                {
+                                    QFileInfo f(dir.absoluteFilePath(fileName));
+                                    QString tmp = f.baseName() + ".xml";
+                                    QString xmlFile = dir.absoluteFilePath(tmp);
+                                    XMLMessageHandler xmlErr;
+                                    MeshLabXMLFilterContainer fc;
+                                    fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
+                                    if (fc.xmlInfo != NULL)
+                                    {
+                                        QStringList fn = fc.xmlInfo->filterNames();
+                                        addItems(pluginItem,fn);
+                                    }
+                                    MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
+                                }
+                                MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+                                if (iRender){
+                                    QStringList Templist;
+                                    foreach(QAction *a,iRender->actions()){Templist.push_back(a->text());}
+                                        addItems(pluginItem,Templist);
+                                }
+                                MeshEditInterfaceFactory *iEdit = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+                                if (iEdit){
+                                    QStringList Templist;
+                                    foreach(QAction *a,iEdit->actions()){Templist.push_back(a->text());}
+                                    addItems(pluginItem,Templist);
+                                }
            }
-				}
-   	}
+                }
+    }
 }
 
 
 void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &features){
 
-	foreach (QString feature, features) {
-		QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
+    foreach (QString feature, features) {
+        QTreeWidgetItem *featureItem = new QTreeWidgetItem(pluginItem);
     featureItem->setText(0, feature);
     featureItem->setIcon(0, featureIcon);
   }
@@ -180,70 +179,70 @@ void PluginDialog::addItems(QTreeWidgetItem *pluginItem,const QStringList &featu
 
 void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
 {
-	QString parent;
-	QString actionName;
+    QString parent;
+    QString actionName;
   if(item==NULL) return;
-	if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
-	else parent=item->text(0);
-	QString fileName=pathDirectory+"/"+parent;
-	QDir dir(pathDirectory);
-	QPluginLoader loader(fileName);
+    if (item->parent()!=NULL)	{parent=item->parent()->text(0);actionName=item->text(0);}
+    else parent=item->text(0);
+    QString fileName=pathDirectory+"/"+parent;
+    QDir dir(pathDirectory);
+    QPluginLoader loader(fileName);
     qDebug("Trying to load the plugin '%s'",qPrintable(fileName));
-	QObject *plugin = loader.instance();
-	if (plugin) {
-		MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
-		if (iMeshIO){
-			foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
-				QString formats;
-				foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
-			}
-			foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
-				QString formats;
-				foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
-				if (actionName==formats) labelInfo->setText(f.description);
-			}
-		}
-		MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
-		if (iDecorate)
-		{
-			foreach(QAction *a,iDecorate->actions())
-				if (actionName==a->text()) 
-					labelInfo->setText(iDecorate->decorationInfo(a));
-		}
-		MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
-		if (iFilter)
-		{
-			foreach(QAction *a,iFilter->actions())
-							if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
-		}
-		MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
-		if (iXMLFilter)
-		{
-			QFileInfo f(dir.absoluteFilePath(parent));
-			QString tmp = f.baseName() + ".xml";
-			QString xmlFile = dir.absoluteFilePath(tmp);
-			XMLMessageHandler xmlErr;
-			MeshLabXMLFilterContainer fc;
-			fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
-			if (fc.xmlInfo != NULL)
-			{
-				QStringList ls = fc.xmlInfo->filterNames();
-				foreach(QString fn,ls)
-					labelInfo->setText(fc.xmlInfo->filterHelp(fn));	
-			}
-			MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
-		}
-		MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
-		if (iRender){
-		}
-		MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
-		if (iEditFactory)
-		{
-			foreach(QAction *a, iEditFactory->actions())
-			{
-				if(iEditFactory) labelInfo->setText(iEditFactory->getEditToolDescription(a));
-			}
-		}
-	}
-}	
+    QObject *plugin = loader.instance();
+    if (plugin) {
+        MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);
+        if (iMeshIO){
+            foreach(const MeshIOInterface::Format f,iMeshIO->importFormats()){
+                QString formats;
+                foreach(const QString s,f.extensions) formats+="Importer_"+s+" ";
+                if (actionName==formats) labelInfo->setText(f.description);
+            }
+            foreach(const MeshIOInterface::Format f,iMeshIO->exportFormats()){
+                QString formats;
+                foreach(const QString s,f.extensions) formats+="Exporter_"+s+" ";
+                if (actionName==formats) labelInfo->setText(f.description);
+            }
+        }
+        MeshDecorateInterface *iDecorate = qobject_cast<MeshDecorateInterface *>(plugin);
+        if (iDecorate)
+        {
+            foreach(QAction *a,iDecorate->actions())
+                if (actionName==a->text())
+                    labelInfo->setText(iDecorate->decorationInfo(a));
+        }
+        MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(plugin);
+        if (iFilter)
+        {
+            foreach(QAction *a,iFilter->actions())
+                            if (actionName==a->text()) labelInfo->setText(iFilter->filterInfo(iFilter->ID(a)));
+        }
+        MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
+        if (iXMLFilter)
+        {
+            QFileInfo f(dir.absoluteFilePath(parent));
+            QString tmp = f.baseName() + ".xml";
+            QString xmlFile = dir.absoluteFilePath(tmp);
+            XMLMessageHandler xmlErr;
+            MeshLabXMLFilterContainer fc;
+            fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
+            if (fc.xmlInfo != NULL)
+            {
+                QStringList ls = fc.xmlInfo->filterNames();
+                foreach(QString fn,ls)
+                    labelInfo->setText(fc.xmlInfo->filterHelp(fn));
+            }
+            MLXMLPluginInfo::destroyXMLPluginInfo(fc.xmlInfo);
+        }
+        MeshRenderInterface *iRender = qobject_cast<MeshRenderInterface *>(plugin);
+        if (iRender){
+        }
+        MeshEditInterfaceFactory *iEditFactory = qobject_cast<MeshEditInterfaceFactory *>(plugin);
+        if (iEditFactory)
+        {
+            foreach(QAction *a, iEditFactory->actions())
+            {
+                if(iEditFactory) labelInfo->setText(iEditFactory->getEditToolDescription(a));
+            }
+        }
+    }
+}

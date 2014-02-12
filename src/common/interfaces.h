@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -38,6 +38,7 @@
 #include <QGLFormat>
 #include <QMessageBox>
 #include <QTabletEvent>
+#include <QDebug>
 
 
 class QWidget;
@@ -84,16 +85,16 @@ public:
     \todo To be renamed as ActionIDType
     */
 
-	MeshLabInterface() :log(0) {}
-	virtual ~MeshLabInterface() {}
+    MeshLabInterface() :log(0) {}
+    virtual ~MeshLabInterface() {}
 private:
-	GLLogStream *log;	
+    GLLogStream *log;
 public:
-	
-	/// Standard stuff that usually should not be redefined. 
-	void setLog(GLLogStream *log) { this->log = log ;}
-	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files. 
-	// NEVER EVER use a msgbox to say something to the user.
+
+    /// Standard stuff that usually should not be redefined.
+    void setLog(GLLogStream *log) { this->log = log ;}
+    // This fucntion must be used to communicate useful information collected in the parsing/saving of the files.
+    // NEVER EVER use a msgbox to say something to the user.
   void Log(const char * f, ... );
   void Log(int Level, const char * f, ... ) ;
   void RealTimeLog(QString Id, const QString &meshName, const char * f, ... ) ;
@@ -102,9 +103,9 @@ public:
 class MeshCommonInterface : public MeshLabInterface
 {
 public:
-	typedef int FilterIDType;
-	MeshCommonInterface() {}
-	virtual ~MeshCommonInterface() {}
+    typedef int FilterIDType;
+    MeshCommonInterface() {}
+    virtual ~MeshCommonInterface() {}
 
   virtual QString pluginName(void) const { return ""; }
 
@@ -133,52 +134,52 @@ public:
    At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
    If a filter wants to save some permanent stuff should set the permanent default values.
 */
-	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
+    virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
   */
 class MeshIOInterface : public MeshCommonInterface
 {
 public:
-	class Format
-	{
-	public:
-		Format(QString description,QString ex): description(description){extensions << ex;}
-		QString description;
-		QStringList extensions;
-	};
+    class Format
+    {
+    public:
+        Format(QString description,QString ex): description(description){extensions << ex;}
+        QString description;
+        QStringList extensions;
+    };
 
-	MeshIOInterface(): MeshCommonInterface() {  }
+    MeshIOInterface(): MeshCommonInterface() {  }
   virtual ~MeshIOInterface() {}
-	
-	virtual QList<Format> importFormats() const = 0;
-	virtual QList<Format> exportFormats() const = 0;
+
+    virtual QList<Format> importFormats() const = 0;
+    virtual QList<Format> exportFormats() const = 0;
 
   // This function is called to initialize the list of additional parameters that a OPENING filter could require
-	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
-	// The instanced parameters are then passed to the open at the loading time.
-	// Typical example of use to decide what subportion of a mesh you have to load.
-	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
-	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterSet & /*par*/) {}
-	
-	// This function is called to initialize the list of additional parameters that a OPENING filter could require 
-	// it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
-	// typical example: unifying vertices in stl models. 
-	// If you do not need any additional processing do nothing.
-	virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
+    // it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
+    // The instanced parameters are then passed to the open at the loading time.
+    // Typical example of use to decide what subportion of a mesh you have to load.
+    // If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
+    virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterSet & /*par*/) {}
 
-  // This is the corresponding function that is called after the mesh is loaded with the initialized parameters 
-	virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterSet &/*par*/){}
+    // This function is called to initialize the list of additional parameters that a OPENING filter could require
+    // it is called by the framework AFTER the mesh is already loaded to perform more or less standard processing on the mesh.
+    // typical example: unifying vertices in stl models.
+    // If you do not need any additional processing do nothing.
+    virtual void initOpenParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 
-	// This function is called to initialize the list of additional parameters that a SAVING filter could require 
-	// it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
-	// typical example: ascii or binary format for ply or stl 
-	// If you do not need any additional parameter simply do nothing.
-	virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 	{}
+  // This is the corresponding function that is called after the mesh is loaded with the initialized parameters
+    virtual void applyOpenParameter(const QString &/*format*/, MeshModel &/*m*/, const RichParameterSet &/*par*/){}
+
+    // This function is called to initialize the list of additional parameters that a SAVING filter could require
+    // it is called by the framework after the mesh is loaded to perform more or less standard processing on the mesh.
+    // typical example: ascii or binary format for ply or stl
+    // If you do not need any additional parameter simply do nothing.
+    virtual void initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 	{}
 
 
-	virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
-    
+    virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const = 0;
+
   /// callback used to actually load a mesh from a file
   virtual bool open(
       const QString &format,					/// the extension of the format e.g. "PLY"
@@ -191,22 +192,22 @@ public:
 
   virtual bool save(
       const QString &format, // the extension of the format e.g. "PLY"
-			const QString &fileName,
-      MeshModel &m, 
+            const QString &fileName,
+      MeshModel &m,
       const int mask,       // a bit mask indicating what kind of the data present in the mesh should be saved (e.g. you could not want to save normals in ply files)
       const RichParameterSet & par,
-			vcg::CallBackPos *cb=0,
-      QWidget *parent= 0)=0 ; 
+            vcg::CallBackPos *cb=0,
+      QWidget *parent= 0)=0 ;
 
-	/// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
-	/// io plugins should avoid using QMessageBox for reporting errors. 
-	/// Failure should put some meaningful information inside the errorMessage string.
-	virtual QString &errorMsg() {return this->errorMessage;}
-	void clearErrorString() {errorMessage.clear();}
-	
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	// NEVER EVER use a msgbox to say something to the user.
-	QString errorMessage;
+    /// This function is invoked by the framework when the import/export plugin fails to give some info to the user about the failure
+    /// io plugins should avoid using QMessageBox for reporting errors.
+    /// Failure should put some meaningful information inside the errorMessage string.
+    virtual QString &errorMsg() {return this->errorMessage;}
+    void clearErrorString() {errorMessage.clear();}
+
+    // this string is used to pass back to the framework error messages in case of failure of a filter apply.
+    // NEVER EVER use a msgbox to say something to the user.
+    QString errorMessage;
 
 };
 
@@ -221,8 +222,8 @@ public:
   /** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
    Each filter can belong to one or more filtering class, or-ed togheter.
   */
-	enum FilterClass 
-	{ 
+    enum FilterClass
+    {
         Generic          =0x00000, /*!< Should be avoided if possible. */  //
         Selection        =0x00001, /*!<  select or de-select something, basic operation on selections (like deleting)*/
         Cleaning         =0x00002, /*!<  Filters that can be used to clean meshes (duplicated vertices etc)*/
@@ -243,13 +244,13 @@ public:
         Polygonal        =0x08000,  /*!<  Filters that works on polygonal and quad meshes.*/
         Camera           =0x10000  /*!<  Filters that works on shot of mesh and raster.*/
     };
-	
-	
-	
-	MeshFilterInterface() : MeshCommonInterface() 
-	{
-	}
-	virtual ~MeshFilterInterface() {}
+
+
+
+    MeshFilterInterface() : MeshCommonInterface()
+    {
+    }
+    virtual ~MeshFilterInterface() {}
 
 
   /** The very short string (a few words) describing each filtering action
@@ -258,7 +259,7 @@ public:
   virtual QString filterName(FilterIDType ) const =0;
 
   /** The long, formatted string describing each filtering action.
-	// This string is printed in the top of the parameter window 
+    // This string is printed in the top of the parameter window
   // so it should be at least one or two paragraphs long. The more the better.
   // you can use simple html formatting tags (like "<br>" "<b>" and "<i>") to improve readability.
   // This string is used in the 'About plugin' dialog and by meshlabserver to create the filter list wiki page and the doxygen documentation of the filters.
@@ -271,39 +272,39 @@ public:
   <br>
   e.g. italic for authors, bold for title (quoted) and plain for bib ref.
   */
-	virtual QString filterInfo(FilterIDType filter) const =0;
-	
+    virtual QString filterInfo(FilterIDType filter) const =0;
+
   /** The FilterClass describes in which generic class of filters it fits.
-	// This choice affect the submenu in which each filter will be placed 
-	// For example filters that perform an action only on the selection will be placed in the Selection Class
+    // This choice affect the submenu in which each filter will be placed
+    // For example filters that perform an action only on the selection will be placed in the Selection Class
   */
-	virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
-	
+    virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
+
   /**
    The filters can have some additional requirements on the mesh capabiliteis.
-	// For example if a filters requires Face-Face Adjacency you shoud re-implement 
-	// this function making it returns MeshModel::MM_FACEFACETOPO. 
-	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
+    // For example if a filters requires Face-Face Adjacency you shoud re-implement
+    // this function making it returns MeshModel::MM_FACEFACETOPO.
+    // The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
   //
   // Furthermore, requirements are checked just before the invocation of a filter. If your filter
   // outputs a never used before mesh property (e.g. face colors), it will be allocated by a call
   // to MeshModel::updateDataMask(...)
   */
   virtual int getRequirements(QAction *){return MeshModel::MM_NONE;}
-	
+
   /** The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
-	// For example algorithms that compute per face quality have as precondition the existence of faces 
-	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
-	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
-	// and Face as precondition.
+    // For example algorithms that compute per face quality have as precondition the existence of faces
+    // (but quality per face is not a precondition, because quality per face is created by these algorithms)
+    // on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
+    // and Face as precondition.
   // These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
   // They are also used to grayout menus un-appliable entries.
   */
   virtual int getPreConditions(QAction *) const {return MeshModel::MM_NONE;}
 
   /** Function used by the framework to get info about the mesh properties changed by the filter.
-	// It is widely used by the meshlab's preview system.
-	//TO BE REPLACED WITH = 0
+    // It is widely used by the meshlab's preview system.
+    //TO BE REPLACED WITH = 0
   */
   virtual int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;}
 
@@ -327,36 +328,36 @@ public:
   */
   bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
 
-	// This function is called to initialized the list of parameters. 
+    // This function is called to initialized the list of parameters.
   // it is always called. If a filter does not need parameter it leave it empty and the framework
   // will not create a dialog (unless for previewing)
-	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
-	virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par) 
-	{initParameterSet(filter,*(md.mm()),par);}
-		
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*par*/) {}
+    virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par)
+    {initParameterSet(filter,*(md.mm()),par);}
+
   /** \brief is invoked by the framework when the applyFilter fails to give some info to the user about the fiter failure
     * Filters \b must never use QMessageBox for reporting errors.
     * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
     */
-	const QString &errorMsg() {return this->errorMessage;}
+    const QString &errorMsg() {return this->errorMessage;}
   virtual QString filterInfo(QAction *a) const {return this->filterInfo(ID(a));}
   virtual QString filterName(QAction *a) const {return this->filterName(ID(a));}
   virtual QString filterScriptFunctionName(FilterIDType /*filterID*/) {return "";}
 
   virtual FilterIDType ID(QAction *a) const
-  	{
+    {
       foreach( FilterIDType tt, types())
         if( a->text() == this->filterName(tt) ) return tt;
-			
-			
-			qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
-			assert(0);
+
+
+            qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
+            assert(0);
       return -1;
     }
-		
+
     virtual QAction *AC(FilterIDType filterID)
-  	{
-			QString idName=this->filterName(filterID);
+    {
+            QString idName=this->filterName(filterID);
       return AC(idName);
     }
 
@@ -369,64 +370,64 @@ public:
       assert(0);
       return 0;
     }
-	 
+
     virtual QList<QAction *> actions() const { return actionList;}
-	  virtual QList<FilterIDType> types() const { return typeList;}
+      virtual QList<FilterIDType> types() const { return typeList;}
 
-	  /** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
-	      BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
-	  int previewOnCreatedAttributes(QAction* act,const MeshModel& mm);
-	QString generatedScriptCode;
+      /** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
+          BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
+      int previewOnCreatedAttributes(QAction* act,const MeshModel& mm);
+    QString generatedScriptCode;
 
-	/** If you need to init your QGLContext in order to use GPU redefine this function. */
-	virtual bool initGLContext() {return true;}
+    /** If you need to init your QGLContext in order to use GPU redefine this function. */
+    virtual bool initGLContext() {return true;}
 
-	QGLContext* glContext;
+    QGLContext* glContext;
 protected:
-    // Each plugins exposes a set of filtering possibilities. 
-		// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id. 
-		// 
-		
-    // The list of actions exported by the plugin. Each actions strictly corresponds to 
-		QList <QAction *> actionList;
-    
-		QList <FilterIDType> typeList;
-    
-		// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-		QString errorMessage;
+    // Each plugins exposes a set of filtering possibilities.
+        // Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id.
+        //
+
+    // The list of actions exported by the plugin. Each actions strictly corresponds to
+        QList <QAction *> actionList;
+
+        QList <FilterIDType> typeList;
+
+        // this string is used to pass back to the framework error messages in case of failure of a filter apply.
+        QString errorMessage;
 };
 
 
 /**
-Used to customized the rendering process. 
-Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel. 
+Used to customized the rendering process.
+Rendering plugins are now responsible of the rendering of the whole MeshDocument and not only of a single MeshModel.
 
-The Render function is called in with the ModelView and Projection Matrices already set up, screen cleared and background drawn. 
-After the Render call the MeshLab frawework draw on the opengl context other decorations and the trackball, so it there is the 
+The Render function is called in with the ModelView and Projection Matrices already set up, screen cleared and background drawn.
+After the Render call the MeshLab frawework draw on the opengl context other decorations and the trackball, so it there is the
 requirement for a rendering plugin is that it should leave the z-buffer in a coherent state.
 
 The typical rendering loop of a Render plugin is something like, :
 
 <your own opengl setup>
 
-		foreach(MeshModel * mp, meshDoc.meshList)
-				{
-					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-				}
+        foreach(MeshModel * mp, meshDoc.meshList)
+                {
+                    if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+                }
 
 */
 
 class MeshRenderInterface : public MeshCommonInterface
 {
 public:
-	MeshRenderInterface() :MeshCommonInterface() {}
+    MeshRenderInterface() :MeshCommonInterface() {}
     virtual ~MeshRenderInterface() {}
-		
+
   virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/){}
-	virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/) = 0;
+    virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/) = 0;
   virtual void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/){}
-	virtual bool isSupported() = 0;
-	virtual QList<QAction *> actions() = 0;
+    virtual bool isSupported() = 0;
+    virtual QList<QAction *> actions() = 0;
 };
 /**
   MeshDecorateInterface is the base class of all <b> decorators </b>
@@ -501,14 +502,14 @@ public:
 protected:
   QList <QAction *> actionList;
   QList <FilterIDType> typeList;
-	virtual FilterIDType ID(QAction *a) const
-	{
-		foreach( FilterIDType tt, types())
+    virtual FilterIDType ID(QAction *a) const
+    {
+        foreach( FilterIDType tt, types())
       if( a->text() == this->decorationName(tt) ) return tt;
-		qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
-		assert(0);
-		return -1;
-	}
+        qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
+        assert(0);
+        return -1;
+    }
 };
 
 
@@ -521,49 +522,49 @@ Editing tools are exclusive (only one at a time) and can grab the mouse events a
 class MeshEditInterface : public MeshCommonInterface
 {
 public:
-	MeshEditInterface() : MeshCommonInterface() {}
-	virtual ~MeshEditInterface() {}
-	
-	//should return a sentence describing what the editing tool does
-	static const QString Info();
+    MeshEditInterface() : MeshCommonInterface() {}
+    virtual ~MeshEditInterface() {}
+
+    //should return a sentence describing what the editing tool does
+    static const QString Info();
 
   // Called when the user press the first time the button
     virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;}
-	virtual bool StartEdit(MeshDocument &md, GLArea *parent)
-	{
-		//assert(NULL != md.mm());
-		if ( md.mm() != NULL)
-			return (StartEdit(*(md.mm()), parent));	
-		else return false;
-	}
-	// Called when the user press the second time the button 
-	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){}
-    
+    virtual bool StartEdit(MeshDocument &md, GLArea *parent)
+    {
+        //assert(NULL != md.mm());
+        if ( md.mm() != NULL)
+            return (StartEdit(*(md.mm()), parent));
+        else return false;
+    }
+    // Called when the user press the second time the button
+    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){}
 
-	// There are two classes of editing tools, the one that works on a single layer at a time
-	// and the ones that works on all layers and have to manage in a correct way the action of changing the current layer.
-	// For the edit tools that works ona single layer changing the layer means the restart of the edit tool.
-	virtual bool isSingleMeshEdit() const { return true; }
 
-	// Called when the user changes the selected layer
-	//by default it calls end edit with the layer that was selected and start with the new layer that is
-	//selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
-	//they are not expecting.
-	// If your editing plugins is not singleMesh you MUST reimplement this to correctly handle the change of layer.
-	virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
-	{
-		assert(this->isSingleMeshEdit());
-		EndEdit(oldMeshModel, parent);
-		StartEdit(md, parent);
-	}
-		
+    // There are two classes of editing tools, the one that works on a single layer at a time
+    // and the ones that works on all layers and have to manage in a correct way the action of changing the current layer.
+    // For the edit tools that works ona single layer changing the layer means the restart of the edit tool.
+    virtual bool isSingleMeshEdit() const { return true; }
+
+    // Called when the user changes the selected layer
+    //by default it calls end edit with the layer that was selected and start with the new layer that is
+    //selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
+    //they are not expecting.
+    // If your editing plugins is not singleMesh you MUST reimplement this to correctly handle the change of layer.
+    virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
+    {
+        assert(this->isSingleMeshEdit());
+        EndEdit(oldMeshModel, parent);
+        StartEdit(md, parent);
+    }
+
   virtual void Decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { Decorate(m,parent); }
   virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/){}
 
-	virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
-	  virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
+    virtual void mousePressEvent  (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+    virtual void mouseMoveEvent   (QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * )=0;
+      virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
   virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *){}
   virtual void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * ){}
   virtual void tabletEvent(QTabletEvent * e, MeshModel &/*m*/, GLArea *){e->ignore();}
@@ -579,16 +580,16 @@ public:
 class MeshEditInterfaceFactory
 {
 public:
-	virtual ~MeshEditInterfaceFactory() {}
-	
-	//gets a list of actions available from this plugin
-	virtual QList<QAction *> actions() const = 0;
-	
-	//get the edit tool for the given action
-	virtual MeshEditInterface* getMeshEditInterface(QAction *) = 0;
-	
-	//get the description for the given action
-	virtual QString getEditToolDescription(QAction *)=0;
+    virtual ~MeshEditInterfaceFactory() {}
+
+    //gets a list of actions available from this plugin
+    virtual QList<QAction *> actions() const = 0;
+
+    //get the edit tool for the given action
+    virtual MeshEditInterface* getMeshEditInterface(QAction *) = 0;
+
+    //get the description for the given action
+    virtual QString getEditToolDescription(QAction *)=0;
 
 };
 
@@ -601,47 +602,47 @@ typedef bool SignalCallBack();
 
 class MeshLabFilterInterface : public QObject, public MeshLabInterface
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	MeshLabFilterInterface();
-	virtual ~MeshLabFilterInterface() {}
+    MeshLabFilterInterface();
+    virtual ~MeshLabFilterInterface() {}
 
-	QGLContext* glContext;
+    QGLContext* glContext;
 
-	static void initConvertingMap(QMap<QString,MeshModel::MeshElement>& convertingMap);
-	static void initConvertingCategoryMap(QMap<QString,MeshFilterInterface::FilterClass>& convertingMap);
-	static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
-	static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
-	static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
-	virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) =0;
-	const QString &errorMsg() {return this->errorMessage;}
+    static void initConvertingMap(QMap<QString,MeshModel::MeshElement>& convertingMap);
+    static void initConvertingCategoryMap(QMap<QString,MeshFilterInterface::FilterClass>& convertingMap);
+    static bool arePreCondsValid(const int filterPreConds,const MeshModel& m, QStringList &MissingItems);
+    static int convertStringListToMeshElementEnum(const QStringList& stringListEnum);
+    static int convertStringListToCategoryEnum(const QStringList& stringListEnum);
+    virtual bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) =0;
+    const QString &errorMsg() {return this->errorMessage;}
 public slots:
-	inline void setInterrupt(const bool& inter) {intteruptreq = inter;};
+    inline void setInterrupt(const bool& inter) {intteruptreq = inter;};
 
 protected:
-	////This function has two different aims: 
-	////1) should be invoked by filters in order to request a redraw of a subset of meshes and/or rasters inside the MeshDocument. 
-	////2) like a synchronization point where the filter can safely stop is execution.
-	////if filter has not a pending interrupt request a render state update request will be sent to the framework.
-	////return value: true if the request has been sent, false otherwise (filter has an interrupt request).
+    ////This function has two different aims:
+    ////1) should be invoked by filters in order to request a redraw of a subset of meshes and/or rasters inside the MeshDocument.
+    ////2) like a synchronization point where the filter can safely stop is execution.
+    ////if filter has not a pending interrupt request a render state update request will be sent to the framework.
+    ////return value: true if the request has been sent, false otherwise (filter has an interrupt request).
 
-	//bool sendUpdateRequest(const MeshDocument& md,);
+    //bool sendUpdateRequest(const MeshDocument& md,);
 
-	//QList<int> meshestobeupdated;
-	//int meshmaskattributestobeupdated;
-	//QList<int> rasterstobeupdated;
-	//int rastermaskattributestobeupdated;
+    //QList<int> meshestobeupdated;
+    //int meshmaskattributestobeupdated;
+    //QList<int> rasterstobeupdated;
+    //int rastermaskattributestobeupdated;
 
-	// this string is used to pass back to the framework error messages in case of failure of a filter apply.
-	QString errorMessage;
-	bool intteruptreq;
+    // this string is used to pass back to the framework error messages in case of failure of a filter apply.
+    QString errorMessage;
+    bool intteruptreq;
 };
 
 #if (QT_VERSION  >= 0x050000)
 #define MESHLAB_PLUGIN_IID_EXPORTER(x) Q_PLUGIN_METADATA(IID x)
-#define MESHLAB_PLUGIN_NAME_EXPORTER(x) 
+#define MESHLAB_PLUGIN_NAME_EXPORTER(x)
 #else
-#define MESHLAB_PLUGIN_IID_EXPORTER(x) 
+#define MESHLAB_PLUGIN_IID_EXPORTER(x)
 #define MESHLAB_PLUGIN_NAME_EXPORTER(x) Q_EXPORT_PLUGIN(x)
 #endif
 

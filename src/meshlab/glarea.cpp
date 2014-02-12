@@ -26,6 +26,7 @@
 #include "mainwindow.h"
 
 #include <QFileDialog>
+#include <QClipboard>
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
@@ -383,8 +384,8 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
     QPainter painter(this);
     painter.beginNativePainting();
     makeCurrent();
+    if(!isValid() ) return;
 
-    if(!isValid() )return;
     QTime time;
     time.start();
 
@@ -598,7 +599,7 @@ void GLArea::paintEvent(QPaintEvent */*event*/)
         displayViewerHighlight();
 
 
-    QString error = checkGLError::makeString("There are gl errors:");
+    QString error = checkGLError::makeString("There are gl errors: ");
     if(!error.isEmpty()) {
         Logf(GLLogStream::WARNING,qPrintable(error));
     }
