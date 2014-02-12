@@ -40,7 +40,7 @@ MeshDocument::~MeshDocument()
   foreach(MeshModel *mmp, meshList)
     delete mmp;
   foreach(RasterModel* rmp,rasterList)
-	  delete rmp;
+      delete rmp;
 }
 
 //returns the mesh ata given position in the list
@@ -56,35 +56,35 @@ MeshModel *MeshDocument::getMesh(int i)
 
 MeshModel *MeshDocument::getMesh(QString name)
 {
-	foreach(MeshModel *mmp, meshList)
-			{
+    foreach(MeshModel *mmp, meshList)
+            {
                 if(mmp->shortName() == name) return mmp;
-			}
-	//assert(0);
-	return 0;
+            }
+    //assert(0);
+    return 0;
 }
 
 MeshModel *MeshDocument::getMeshByFullName(QString pathName)
 {
-	foreach(MeshModel *mmp, meshList)
-	{
-		if(mmp->fullName() == pathName) return mmp;
-	}
-	//assert(0);
-	return 0;
+    foreach(MeshModel *mmp, meshList)
+    {
+        if(mmp->fullName() == pathName) return mmp;
+    }
+    //assert(0);
+    return 0;
 }
 
 
 void MeshDocument::setCurrentMesh( int i)
 {
-	if(i<0)
-	{
-		currentMesh=0;
-		return;
-	}
-	currentMesh = getMesh(i);
-	emit currentMeshChanged(i);
-	assert(currentMesh);
+    if(i<0)
+    {
+        currentMesh=0;
+        return;
+    }
+    currentMesh = getMesh(i);
+    emit currentMeshChanged(i);
+    assert(currentMesh);
 }
 
 //returns the raster at a given position in the list
@@ -103,8 +103,8 @@ void MeshDocument::setCurrentRaster( int i)
 {
   if(i<0)
   {
-	  currentRaster=0;
-	  return;
+      currentRaster=0;
+      return;
   }
 
   foreach(RasterModel *rmp, rasterList)
@@ -133,10 +133,10 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
       QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
       QString suffix = fi.suffix();
       bool ok;
- 
-      // if name ends with a number between parenthesis (XXX), 
-      // it was himself a duplicated name, and we need to 
-      // just increase the number between parenthesis 
+
+      // if name ends with a number between parenthesis (XXX),
+      // it was himself a duplicated name, and we need to
+      // just increase the number between parenthesis
       int numDisamb;
       int startDisamb;
       int endDisamb;
@@ -147,7 +147,7 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
         numDisamb = (baseName.mid((startDisamb+1),(endDisamb-startDisamb-1))).toInt(&ok);
       else
         numDisamb = 0;
-      
+
       if(startDisamb!=-1)
         newName = baseName.left(startDisamb)+ "(" + QString::number(numDisamb+1) + ")";
       else
@@ -170,13 +170,13 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
  */
 
 MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
-{	
+{
   QString newlabel = NameDisambiguator(this->meshList,label);
 
   if(!fullPath.isEmpty())
   {
-	  QFileInfo fi(fullPath);
-	  fullPath = fi.absoluteFilePath(); 
+      QFileInfo fi(fullPath);
+      fullPath = fi.absoluteFilePath();
   }
 
   MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
@@ -190,19 +190,19 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
-	if(!meshList.removeOne(mmToDel)) 
-		return false;
-	if((currentMesh == mmToDel) && (meshList.size() != 0))
-		setCurrentMesh(this->meshList.at(0)->id());
-	else if (meshList.size() == 0)
-			setCurrentMesh(-1);
+    if(!meshList.removeOne(mmToDel))
+        return false;
+    if((currentMesh == mmToDel) && (meshList.size() != 0))
+        setCurrentMesh(this->meshList.at(0)->id());
+    else if (meshList.size() == 0)
+            setCurrentMesh(-1);
 
-	int index = mmToDel->id();
-	delete mmToDel;
+    int index = mmToDel->id();
+    delete mmToDel;
 
-	emit meshSetChanged();
-	emit meshRemoved(index);
-	return true;
+    emit meshSetChanged();
+    emit meshRemoved(index);
+    return true;
 }
 
 RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
@@ -212,118 +212,118 @@ RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
   QString newName = NameDisambiguator(this->rasterList, newLabel);
 
   RasterModel *newRaster=new RasterModel(this, newLabel);
-	rasterList.push_back(newRaster);
+    rasterList.push_back(newRaster);
 
-	//Add new plane
+    //Add new plane
   //Plane *plane = new Plane(newRaster, fullPathFilename, QString());
   //newRaster->addPlane(plane);
 
-	this->setCurrentRaster(newRaster->id());
+    this->setCurrentRaster(newRaster->id());
 
   emit rasterSetChanged();
-	return newRaster;
+    return newRaster;
 }
 
 bool MeshDocument::delRaster(RasterModel *rasterToDel)
 {
-	QMutableListIterator<RasterModel *> i(rasterList);
+    QMutableListIterator<RasterModel *> i(rasterList);
 
-	while (i.hasNext())
-	{
-		RasterModel *r = i.next();
+    while (i.hasNext())
+    {
+        RasterModel *r = i.next();
 
-		if (r==rasterToDel)
-		{
-			i.remove();
-			delete rasterToDel;
-		}
-	}
+        if (r==rasterToDel)
+        {
+            i.remove();
+            delete rasterToDel;
+        }
+    }
 
-	if(currentRaster == rasterToDel)
-	{
-		if (rasterList.size() > 0)
-			setCurrentRaster(rasterList.at(0)->id());
-		else
-			setCurrentRaster(-1);
-	}
-	emit rasterSetChanged();
+    if(currentRaster == rasterToDel)
+    {
+        if (rasterList.size() > 0)
+            setCurrentRaster(rasterList.at(0)->id());
+        else
+            setCurrentRaster(-1);
+    }
+    emit rasterSetChanged();
 
-	return true;
+    return true;
 }
 
 bool MeshDocument::hasBeenModified()
 {
-	int ii = 0;
-	while(ii < meshList.size())
-	{
-		if (meshList[ii]->meshModified())
-			return true;
-		++ii;
-	}
-	return false;
+    int ii = 0;
+    while(ii < meshList.size())
+    {
+        if (meshList[ii]->meshModified())
+            return true;
+        ++ii;
+    }
+    return false;
 }
 
 void MeshDocument::updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask)
 {
-	static QTime currTime  = QTime::currentTime();
-	if(currTime.elapsed()< 100) 
-		return;
-	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
-	{
-		MeshModel* mesh = getMesh(*mit);
-		if (mesh != NULL)
-			renderState().update(mesh->id(),mesh->cm,meshupdatemask);
-	}
-	if ((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE))
-		emit documentUpdated();
-	currTime.start();
+    static QTime currTime  = QTime::currentTime();
+    if(currTime.elapsed()< 100)
+        return;
+    for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
+    {
+        MeshModel* mesh = getMesh(*mit);
+        if (mesh != NULL)
+            renderState().update(mesh->id(),mesh->cm,meshupdatemask);
+    }
+    if ((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE))
+        emit documentUpdated();
+    currTime.start();
 }
 
 void MeshDocument::updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask)
 {
-	static QTime currTime = QTime::currentTime();
-	if(currTime.elapsed()< 100) 
-		return;
-	for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
-	{
-		RasterModel* raster = getRaster(*rit);
-		if (raster != NULL)
-			renderState().update(raster->id(),*raster,rasterupdatemask);
-	}
-	if ((rm.size() > 0) && (rasterupdatemask != RasterModel::RM_NONE))
-		emit documentUpdated();
-	currTime.start();
+    static QTime currTime = QTime::currentTime();
+    if(currTime.elapsed()< 100)
+        return;
+    for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
+    {
+        RasterModel* raster = getRaster(*rit);
+        if (raster != NULL)
+            renderState().update(raster->id(),*raster,rasterupdatemask);
+    }
+    if ((rm.size() > 0) && (rasterupdatemask != RasterModel::RM_NONE))
+        emit documentUpdated();
+    currTime.start();
 }
 
 void MeshDocument::updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask)
 {
-	static QTime currTime = QTime::currentTime();
-	if(currTime.elapsed()< 100) 
-		return;
-	for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
-	{
-		MeshModel* mesh = getMesh(*mit);
-		if (mesh != NULL)
-			renderState().update(mesh->id(),mesh->cm,meshupdatemask);
-	}
+    static QTime currTime = QTime::currentTime();
+    if(currTime.elapsed()< 100)
+        return;
+    for (QList<int>::const_iterator mit = mm.begin();mit != mm.end();++mit)
+    {
+        MeshModel* mesh = getMesh(*mit);
+        if (mesh != NULL)
+            renderState().update(mesh->id(),mesh->cm,meshupdatemask);
+    }
     for (QList<int>::const_iterator rit = rm.begin();rit != rm.end();++rit)
-	{
-		RasterModel* raster = getRaster(*rit);
-		if (raster != NULL)
-			renderState().update(raster->id(),*raster,rasterupdatemask);
-	}
-	if (((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE)) || (rm.size() > 0 && (rasterupdatemask != RasterModel::RM_NONE)))
-		emit documentUpdated();
-	currTime.start();
+    {
+        RasterModel* raster = getRaster(*rit);
+        if (raster != NULL)
+            renderState().update(raster->id(),*raster,rasterupdatemask);
+    }
+    if (((mm.size() > 0) && (meshupdatemask != MeshModel::MM_NONE)) || (rm.size() > 0 && (rasterupdatemask != RasterModel::RM_NONE)))
+        emit documentUpdated();
+    currTime.start();
 }
 
-MeshDocument::MeshDocument() : QObject(),rendstate(),xmlhistory(),Log()
+MeshDocument::MeshDocument() : QObject(),rendstate(),Log(),xmlhistory()
 {
-	meshIdCounter=0;
-	rasterIdCounter=0;
-	currentMesh = 0;
-	currentRaster = 0;
-	busy=false;
+    meshIdCounter=0;
+    rasterIdCounter=0;
+    currentMesh = 0;
+    currentRaster = 0;
+    busy=false;
 }
 
 void MeshModel::Clear()
@@ -379,62 +379,62 @@ QString MeshModel::documentPathName() const
 
 int MeshModel::io2mm(int single_iobit)
 {
-	switch(single_iobit) 
-	{
-		case tri::io::Mask::IOM_NONE					: return  MM_NONE;
-		case tri::io::Mask::IOM_VERTCOORD		: return  MM_VERTCOORD;
-		case tri::io::Mask::IOM_VERTCOLOR		: return  MM_VERTCOLOR;
-		case tri::io::Mask::IOM_VERTFLAGS		: return  MM_VERTFLAG;
-		case tri::io::Mask::IOM_VERTQUALITY	: return  MM_VERTQUALITY;
-		case tri::io::Mask::IOM_VERTNORMAL		: return  MM_VERTNORMAL;
-		case tri::io::Mask::IOM_VERTTEXCOORD : return  MM_VERTTEXCOORD;
-		case tri::io::Mask::IOM_VERTRADIUS		: return  MM_VERTRADIUS;
-		
-		case tri::io::Mask::IOM_FACEINDEX   		: return  MM_FACEVERT  ;
-		case tri::io::Mask::IOM_FACEFLAGS   		: return  MM_FACEFLAG  ;
-		case tri::io::Mask::IOM_FACECOLOR   		: return  MM_FACECOLOR  ;
-		case tri::io::Mask::IOM_FACEQUALITY 		: return  MM_FACEQUALITY;
-		case tri::io::Mask::IOM_FACENORMAL  		: return  MM_FACENORMAL ;
-		
-		case tri::io::Mask::IOM_WEDGTEXCOORD 		: return  MM_WEDGTEXCOORD;
-		case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
-		case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
+    switch(single_iobit)
+    {
+        case tri::io::Mask::IOM_NONE					: return  MM_NONE;
+        case tri::io::Mask::IOM_VERTCOORD		: return  MM_VERTCOORD;
+        case tri::io::Mask::IOM_VERTCOLOR		: return  MM_VERTCOLOR;
+        case tri::io::Mask::IOM_VERTFLAGS		: return  MM_VERTFLAG;
+        case tri::io::Mask::IOM_VERTQUALITY	: return  MM_VERTQUALITY;
+        case tri::io::Mask::IOM_VERTNORMAL		: return  MM_VERTNORMAL;
+        case tri::io::Mask::IOM_VERTTEXCOORD : return  MM_VERTTEXCOORD;
+        case tri::io::Mask::IOM_VERTRADIUS		: return  MM_VERTRADIUS;
 
-		case tri::io::Mask::IOM_BITPOLYGONAL   	: return  MM_POLYGONAL  ;
+        case tri::io::Mask::IOM_FACEINDEX   		: return  MM_FACEVERT  ;
+        case tri::io::Mask::IOM_FACEFLAGS   		: return  MM_FACEFLAG  ;
+        case tri::io::Mask::IOM_FACECOLOR   		: return  MM_FACECOLOR  ;
+        case tri::io::Mask::IOM_FACEQUALITY 		: return  MM_FACEQUALITY;
+        case tri::io::Mask::IOM_FACENORMAL  		: return  MM_FACENORMAL ;
 
-		default:
-			assert(0);
-			return MM_NONE;  // FIXME: Returning this is not the best solution (!)
-			break;
-	} ;
+        case tri::io::Mask::IOM_WEDGTEXCOORD 		: return  MM_WEDGTEXCOORD;
+        case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
+        case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
+
+        case tri::io::Mask::IOM_BITPOLYGONAL   	: return  MM_POLYGONAL  ;
+
+        default:
+            assert(0);
+            return MM_NONE;  // FIXME: Returning this is not the best solution (!)
+            break;
+    } ;
 }
 
 Plane::Plane(const Plane& pl)
 {
-	semantic = pl.semantic;
-	fullPathFileName = pl.fullPathFileName;
-	image = QImage(pl.image);
+    semantic = pl.semantic;
+    fullPathFileName = pl.fullPathFileName;
+    image = QImage(pl.image);
 }
 
 Plane::Plane(const QString pathName, const int _semantic)
 {
-	semantic =_semantic;
-	fullPathFileName = pathName;
+    semantic =_semantic;
+    fullPathFileName = pathName;
 
-	image = QImage(pathName);
+    image = QImage(pathName);
 }
 
 RasterModel::RasterModel(MeshDocument *parent, QString _rasterName)
-: MeshLabRenderRaster() 
+: MeshLabRenderRaster()
 {
-  _id=parent->newRasterId(); 
+  _id=parent->newRasterId();
   par = parent;
   this->_label= _rasterName;
   visible=true;
 }
 
 RasterModel::RasterModel()
-: MeshLabRenderRaster() 
+: MeshLabRenderRaster()
 {
 
 }
@@ -448,25 +448,25 @@ MeshLabRenderRaster::MeshLabRenderRaster()
 MeshLabRenderRaster::MeshLabRenderRaster( const MeshLabRenderRaster& rm )
 :shot(rm.shot),planeList()
 {
-	for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)	
-	{
-		planeList.push_back(new Plane(**it));
-		if (rm.currentPlane == *it)
-			currentPlane = planeList[planeList.size() - 1];
-	}
+    for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)
+    {
+        planeList.push_back(new Plane(**it));
+        if (rm.currentPlane == *it)
+            currentPlane = planeList[planeList.size() - 1];
+    }
 }
 
 void MeshLabRenderRaster::addPlane(Plane *plane)
 {
-	planeList.append(plane);
-	currentPlane = plane;
+    planeList.append(plane);
+    currentPlane = plane;
 }
 
 MeshLabRenderRaster::~MeshLabRenderRaster()
 {
-	currentPlane = NULL;
-	for(int ii = 0;ii < planeList.size();++ii)
-		delete planeList[ii];
+    currentPlane = NULL;
+    for(int ii = 0;ii < planeList.size();++ii)
+        delete planeList[ii];
 }
 
 void MeshModelState::create(int _mask, MeshModel* _m)
@@ -518,14 +518,14 @@ void MeshModelState::create(int _mask, MeshModel* _m)
          if(!(*fi).IsD()) (*ci) = (*fi).IsS();
     }
 
-	if(changeMask & MeshModel::MM_VERTFLAGSELECT)
-	{
-		vertSelection.resize(m->cm.vert.size());
-		std::vector<bool>::iterator ci;
-		CMeshO::VertexIterator vi;
-		for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-			if(!(*vi).IsD()) (*ci) = (*vi).IsS();
-	}
+    if(changeMask & MeshModel::MM_VERTFLAGSELECT)
+    {
+        vertSelection.resize(m->cm.vert.size());
+        std::vector<bool>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*ci) = (*vi).IsS();
+    }
 
   if(changeMask & MeshModel::MM_TRANSFMATRIX)
       Tr = m->cm.Tr;
@@ -535,8 +535,8 @@ void MeshModelState::create(int _mask, MeshModel* _m)
 
 bool MeshModelState::apply(MeshModel *_m)
 {
-  if(_m != m) 
-	  return false;
+  if(_m != m)
+      return false;
     if(changeMask & MeshModel::MM_VERTCOLOR)
     {
         if(vertColor.size() != m->cm.vert.size()) return false;
@@ -589,19 +589,19 @@ bool MeshModelState::apply(MeshModel *_m)
         }
     }
 
-	if(changeMask & MeshModel::MM_VERTFLAGSELECT)
-	{
-		if(vertSelection.size() != m->cm.vert.size()) return false;
-		std::vector<bool>::iterator ci;
-		CMeshO::VertexIterator vi;
-		for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-		{
-			if((*ci))
-				(*vi).SetS();
-			else
-				(*vi).ClearS();
-		}
-	}
+    if(changeMask & MeshModel::MM_VERTFLAGSELECT)
+    {
+        if(vertSelection.size() != m->cm.vert.size()) return false;
+        std::vector<bool>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertSelection.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+        {
+            if((*ci))
+                (*vi).SetS();
+            else
+                (*vi).ClearS();
+        }
+    }
 
     if(changeMask & MeshModel::MM_TRANSFMATRIX)
         m->cm.Tr=Tr;
@@ -624,41 +624,41 @@ bool MeshModel::hasDataMask(const int maskToBeTested) const
 
 void MeshModel::updateDataMask(int neededDataMask)
 {
-	if((neededDataMask & MM_FACEFACETOPO)!=0)
-	{
-		if (!hasDataMask(MM_FACEFACETOPO))
-			cm.face.EnableFFAdjacency();
-		tri::UpdateTopology<CMeshO>::FaceFace(cm);
-	}
-	if((neededDataMask & MM_VERTFACETOPO)!=0) 
-	{
-		if (!hasDataMask(MM_VERTFACETOPO))
-		{
-			cm.vert.EnableVFAdjacency();
-			cm.face.EnableVFAdjacency();
-		}
-		tri::UpdateTopology<CMeshO>::VertexFace(cm);
-	}
+    if((neededDataMask & MM_FACEFACETOPO)!=0)
+    {
+        if (!hasDataMask(MM_FACEFACETOPO))
+            cm.face.EnableFFAdjacency();
+        tri::UpdateTopology<CMeshO>::FaceFace(cm);
+    }
+    if((neededDataMask & MM_VERTFACETOPO)!=0)
+    {
+        if (!hasDataMask(MM_VERTFACETOPO))
+        {
+            cm.vert.EnableVFAdjacency();
+            cm.face.EnableVFAdjacency();
+        }
+        tri::UpdateTopology<CMeshO>::VertexFace(cm);
+    }
     if( ( (neededDataMask & MM_WEDGTEXCOORD)!=0)	&& !hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.EnableWedgeTexCoord();
-	if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
-	if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
-	if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
-	if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
-	if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
-	if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
-	if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
-	if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
+    if( ( (neededDataMask & MM_FACECOLOR)!=0)			&& !hasDataMask(MM_FACECOLOR))			cm.face.EnableColor();
+    if( ( (neededDataMask & MM_FACEQUALITY)!=0)		&& !hasDataMask(MM_FACEQUALITY))		cm.face.EnableQuality();
+    if( ( (neededDataMask & MM_FACEMARK)!=0)			&& !hasDataMask(MM_FACEMARK))				cm.face.EnableMark();
+    if( ( (neededDataMask & MM_VERTMARK)!=0)			&& !hasDataMask(MM_VERTMARK))				cm.vert.EnableMark();
+    if( ( (neededDataMask & MM_VERTCURV)!=0)			&& !hasDataMask(MM_VERTCURV))				cm.vert.EnableCurvature();
+    if( ( (neededDataMask & MM_VERTCURVDIR)!=0)		&& !hasDataMask(MM_VERTCURVDIR))		cm.vert.EnableCurvatureDir();
+    if( ( (neededDataMask & MM_VERTRADIUS)!=0)		&& !hasDataMask(MM_VERTRADIUS))			cm.vert.EnableRadius();
+    if( ( (neededDataMask & MM_VERTTEXCOORD)!=0)  && !hasDataMask(MM_VERTTEXCOORD))		cm.vert.EnableTexCoord();
 
-	//  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
-	//       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
-	//  {
-	//    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
-	//         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
-	//    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
-	//    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
-	//  }
+    //  if(  ( (neededDataMask & MM_FACEFLAGBORDER) && !hasDataMask(MM_FACEFLAGBORDER) ) ||
+    //       ( (neededDataMask & MM_VERTFLAGBORDER) && !hasDataMask(MM_VERTFLAGBORDER) )    )
+    //  {
+    //    if( (currentDataMask & MM_FACEFACETOPO) || (neededDataMask & MM_FACEFACETOPO))
+    //         tri::UpdateFlags<CMeshO>::FaceBorderFromFF(cm);
+    //    else tri::UpdateFlags<CMeshO>::FaceBorderFromNone(cm);
+    //    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(cm);
+    //  }
 
-	currentDataMask |= neededDataMask;
+    currentDataMask |= neededDataMask;
  }
 
 void MeshModel::clearDataMask(int unneededDataMask)
@@ -682,14 +682,14 @@ void MeshModel::clearDataMask(int unneededDataMask)
 
 void MeshModel::Enable(int openingFileMask)
 {
-  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD ) 
-	  updateDataMask(MM_VERTTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD ) 
-	  updateDataMask(MM_WEDGTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    ) 
-	  updateDataMask(MM_VERTCOLOR);
-  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    ) 
-	  updateDataMask(MM_FACECOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD )
+      updateDataMask(MM_VERTTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD )
+      updateDataMask(MM_WEDGTEXCOORD);
+  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    )
+      updateDataMask(MM_VERTCOLOR);
+  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    )
+      updateDataMask(MM_FACECOLOR);
   if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
   if( openingFileMask & tri::io::Mask::IOM_CAMERA       ) updateDataMask(MM_CAMERA);
   if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
@@ -699,7 +699,7 @@ void MeshModel::Enable(int openingFileMask)
 
 bool& MeshModel::meshModified()
 {
-	return this->modified;
+    return this->modified;
 }
 
 MeshLabRenderMesh::MeshLabRenderMesh()
@@ -710,115 +710,115 @@ MeshLabRenderMesh::MeshLabRenderMesh()
 MeshLabRenderMesh::MeshLabRenderMesh(CMeshO& mesh )
 :glw(),cm()
 {
-	vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(cm,mesh);
-	//cm.Tr = mesh.Tr;
-	cm.Tr.SetIdentity();
-	cm.sfn = mesh.sfn;
-	cm.svn = mesh.svn;
-	glw.m = &cm; 
+    vcg::tri::Append<CMeshO,CMeshO>::MeshCopy(cm,mesh);
+    //cm.Tr = mesh.Tr;
+    cm.Tr.SetIdentity();
+    cm.sfn = mesh.sfn;
+    cm.svn = mesh.svn;
+    glw.m = &cm;
 }
 
 bool MeshLabRenderMesh::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode colm,vcg::GLW::TextureMode tm )
 {
-	if (glw.m != NULL)
-	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		glPushMatrix();
-		glMultMatrix(glw.m->Tr);
-		if( (colm == vcg::GLW::CMPerFace)  && (!vcg::tri::HasPerFaceColor(*glw.m)) ) 
-			colm=vcg::GLW::CMNone;
-		if( (tm == vcg::GLW::TMPerWedge )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) ) 
-			tm=vcg::GLW::TMNone;
-		if( (tm == vcg::GLW::TMPerWedgeMulti )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m))) 
-			tm=vcg::GLW::TMNone;
-		if( (tm == vcg::GLW::TMPerVert )&& (!vcg::tri::HasPerVertexTexCoord(*glw.m))) 
-			tm=vcg::GLW::TMNone;
-		glw.Draw(dm,colm,tm);
-		glPopMatrix();
-		glPopAttrib();
-		return true;
-	}
-	return false;
+    if (glw.m != NULL)
+    {
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glPushMatrix();
+        glMultMatrix(glw.m->Tr);
+        if( (colm == vcg::GLW::CMPerFace)  && (!vcg::tri::HasPerFaceColor(*glw.m)) )
+            colm=vcg::GLW::CMNone;
+        if( (tm == vcg::GLW::TMPerWedge )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)) )
+            tm=vcg::GLW::TMNone;
+        if( (tm == vcg::GLW::TMPerWedgeMulti )&& (!vcg::tri::HasPerWedgeTexCoord(*glw.m)))
+            tm=vcg::GLW::TMNone;
+        if( (tm == vcg::GLW::TMPerVert )&& (!vcg::tri::HasPerVertexTexCoord(*glw.m)))
+            tm=vcg::GLW::TMNone;
+        glw.Draw(dm,colm,tm);
+        glPopMatrix();
+        glPopAttrib();
+        return true;
+    }
+    return false;
 }
 
 bool MeshLabRenderMesh::renderSelectedFace()
 {
-	if (glw.m != NULL)
-	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-		glColor4f(1.0f,0.0,0.0,.3f);
-		glPolygonOffset(-1.0, -1);
-		CMeshO::FaceIterator fi;
-		glPushMatrix();
-		glMultMatrix(glw.m->Tr);
-		glBegin(GL_TRIANGLES);
-		glw.m->sfn=0;
-		for(fi=glw.m->face.begin();fi!=glw.m->face.end();++fi)
-		{
-			if(!(*fi).IsD() && (*fi).IsS())
-			{
-				glVertex((*fi).cP(0));
-				glVertex((*fi).cP(1));
-				glVertex((*fi).cP(2));
-				++glw.m->sfn;
-			}
-		}
-		glEnd();
-		glPopMatrix();
-		glPopAttrib();
-		return true;
-	}
-	return false;
+    if (glw.m != NULL)
+    {
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glDepthMask(GL_FALSE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+        glColor4f(1.0f,0.0,0.0,.3f);
+        glPolygonOffset(-1.0, -1);
+        CMeshO::FaceIterator fi;
+        glPushMatrix();
+        glMultMatrix(glw.m->Tr);
+        glBegin(GL_TRIANGLES);
+        glw.m->sfn=0;
+        for(fi=glw.m->face.begin();fi!=glw.m->face.end();++fi)
+        {
+            if(!(*fi).IsD() && (*fi).IsS())
+            {
+                glVertex((*fi).cP(0));
+                glVertex((*fi).cP(1));
+                glVertex((*fi).cP(2));
+                ++glw.m->sfn;
+            }
+        }
+        glEnd();
+        glPopMatrix();
+        glPopAttrib();
+        return true;
+    }
+    return false;
 }
 
 bool MeshLabRenderMesh::renderSelectedVert()
 {
-	if (glw.m != NULL)
-	{
-		glPushAttrib(GL_ALL_ATTRIB_BITS);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-		glColor4f(1.0f,0.0,0.0,.3f);
-		glDepthRange(0.00,0.999);
-		glPointSize(3.0);
-		glPushMatrix();
-		glMultMatrix(glw.m->Tr);
-		glBegin(GL_POINTS);
-		glw.m->svn=0;
-		CMeshO::VertexIterator vi;
-		for(vi=glw.m->vert.begin();vi!=glw.m->vert.end();++vi)
-		{
-			if(!(*vi).IsD() && (*vi).IsS())
-			{
-				glVertex((*vi).cP());
-				++glw.m->svn;
-			}
-		}
-		glEnd();
-		glPopMatrix();
-		glPopAttrib();
-		return true;
-	}
-	return false;
+    if (glw.m != NULL)
+    {
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glDepthMask(GL_FALSE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+        glColor4f(1.0f,0.0,0.0,.3f);
+        glDepthRange(0.00,0.999);
+        glPointSize(3.0);
+        glPushMatrix();
+        glMultMatrix(glw.m->Tr);
+        glBegin(GL_POINTS);
+        glw.m->svn=0;
+        CMeshO::VertexIterator vi;
+        for(vi=glw.m->vert.begin();vi!=glw.m->vert.end();++vi)
+        {
+            if(!(*vi).IsD() && (*vi).IsS())
+            {
+                glVertex((*vi).cP());
+                ++glw.m->svn;
+            }
+        }
+        glEnd();
+        glPopMatrix();
+        glPopAttrib();
+        return true;
+    }
+    return false;
 }
 
 MeshLabRenderMesh::~MeshLabRenderMesh()
 {
-	glw.m = NULL;
-	cm.Clear();
-	CMeshO::VertContainer tempVert;
-	CMeshO::FaceContainer tempFace;
-	cm.vert.swap(tempVert);
-	cm.face.swap(tempFace);
+    glw.m = NULL;
+    cm.Clear();
+    CMeshO::VertContainer tempVert;
+    CMeshO::FaceContainer tempFace;
+    cm.vert.swap(tempVert);
+    cm.face.swap(tempFace);
 }
 
 MeshLabRenderState::MeshLabRenderState()
@@ -829,185 +829,185 @@ MeshLabRenderState::MeshLabRenderState()
 
 MeshLabRenderState::~MeshLabRenderState()
 {
-	clearState();
+    clearState();
 }
 
 bool MeshLabRenderState::update(const int id,CMeshO& mm,const int updateattributesmask)
 {
-	if (updateattributesmask == MeshModel::MM_NONE)
-		return false;
-	lockRenderState(MESH,WRITE);
-	QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.find(id);
-	if (it != _meshmap.end())
-	{
-		MeshLabRenderMesh* rm = *it;
+    if (updateattributesmask == MeshModel::MM_NONE)
+        return false;
+    lockRenderState(MESH,WRITE);
+    QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.find(id);
+    if (it != _meshmap.end())
+    {
+        MeshLabRenderMesh* rm = *it;
 
-		if (!(updateattributesmask & MeshModel::MM_VERTCOLOR) &
-			!(updateattributesmask & MeshModel::MM_VERTCOORD) &
-			!(updateattributesmask & MeshModel::MM_VERTQUALITY) &
-			!(updateattributesmask & MeshModel::MM_VERTNORMAL) &
-			!(updateattributesmask & MeshModel::MM_FACEFLAGSELECT) &
-			!(updateattributesmask & MeshModel::MM_VERTFLAGSELECT) &
-			!(updateattributesmask & MeshModel::MM_TRANSFMATRIX) &
-			!(updateattributesmask & MeshModel::MM_CAMERA))
-		{
-			remove(it);
-			_meshmap[id] = new MeshLabRenderMesh(mm);
-			unlockRenderState(MESH);
-			return true;
-		}
+        if (!(updateattributesmask & MeshModel::MM_VERTCOLOR) &
+            !(updateattributesmask & MeshModel::MM_VERTCOORD) &
+            !(updateattributesmask & MeshModel::MM_VERTQUALITY) &
+            !(updateattributesmask & MeshModel::MM_VERTNORMAL) &
+            !(updateattributesmask & MeshModel::MM_FACEFLAGSELECT) &
+            !(updateattributesmask & MeshModel::MM_VERTFLAGSELECT) &
+            !(updateattributesmask & MeshModel::MM_TRANSFMATRIX) &
+            !(updateattributesmask & MeshModel::MM_CAMERA))
+        {
+            remove(it);
+            _meshmap[id] = new MeshLabRenderMesh(mm);
+            unlockRenderState(MESH);
+            return true;
+        }
 
-		if (updateattributesmask & MeshModel::MM_VERTCOLOR)
-		{		
-			if(mm.vert.size() != (rm->cm.vert.size())) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			else
-			{
-				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-					if(!(*mmvi).IsD()) 
-						(*rmvi).C()=(*mmvi).cC();
-			}
-		}
+        if (updateattributesmask & MeshModel::MM_VERTCOLOR)
+        {
+            if(mm.vert.size() != (rm->cm.vert.size()))
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            else
+            {
+                CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+                for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+                    if(!(*mmvi).IsD())
+                        (*rmvi).C()=(*mmvi).cC();
+            }
+        }
 
-		if (updateattributesmask & MeshModel::MM_VERTCOORD)
-		{
-			if(mm.vert.size() != (rm->cm.vert.size())) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			else
-			{
-				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-					if(!(*mmvi).IsD()) 
-						(*rmvi).P()=(*mmvi).cP();
-			}
-		}
+        if (updateattributesmask & MeshModel::MM_VERTCOORD)
+        {
+            if(mm.vert.size() != (rm->cm.vert.size()))
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            else
+            {
+                CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+                for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+                    if(!(*mmvi).IsD())
+                        (*rmvi).P()=(*mmvi).cP();
+            }
+        }
 
-		if (updateattributesmask & MeshModel::MM_VERTQUALITY)
-		{
-			if(mm.vert.size() != (rm->cm.vert.size())) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			else
-			{
-				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-					if(!(*mmvi).IsD()) 
-						(*rmvi).Q()=(*mmvi).cQ();
-			}
-		}
+        if (updateattributesmask & MeshModel::MM_VERTQUALITY)
+        {
+            if(mm.vert.size() != (rm->cm.vert.size()))
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            else
+            {
+                CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+                for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+                    if(!(*mmvi).IsD())
+                        (*rmvi).Q()=(*mmvi).cQ();
+            }
+        }
 
-		if	(updateattributesmask & MeshModel::MM_VERTNORMAL)
-		{
-			if(mm.vert.size() != (rm->cm.vert.size())) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			else
-			{
-				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-					if(!(*mmvi).IsD()) 
-						(*rmvi).N()=(*mmvi).cN();
-			}
-		}
-		
-		if(updateattributesmask & MeshModel::MM_FACEFLAGSELECT)
-		{
-			if(mm.face.size() != rm->cm.face.size()) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			CMeshO::FaceIterator rmfi = rm->cm.face.begin();
-			for(CMeshO::ConstFaceIterator mmfi = mm.face.begin(); mmfi != mm.face.end(); ++mmfi, ++rmfi)
-			{
-				if ((!(*mmfi).IsD()) && ((*mmfi).IsS()))
-					(*rmfi).SetS();
-				else
-					if (!(*mmfi).IsS())
-						(*rmfi).ClearS();
-			}
-		}
+        if	(updateattributesmask & MeshModel::MM_VERTNORMAL)
+        {
+            if(mm.vert.size() != (rm->cm.vert.size()))
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            else
+            {
+                CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+                for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+                    if(!(*mmvi).IsD())
+                        (*rmvi).N()=(*mmvi).cN();
+            }
+        }
 
-		if(updateattributesmask & MeshModel::MM_VERTFLAGSELECT)
-		{
-			if(mm.vert.size() != (rm->cm.vert.size())) 
-			{
-				unlockRenderState(MESH);
-				return false;
-			}
-			else
-			{
-				CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-				for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-				{
-					if ((!(*mmvi).IsD()) && ((*mmvi).IsS()))
-						(*rmvi).SetS();
-					else
-						if (!(*mmvi).IsS())
-							(*rmvi).ClearS();
-				}
-			}
-		}
+        if(updateattributesmask & MeshModel::MM_FACEFLAGSELECT)
+        {
+            if(mm.face.size() != rm->cm.face.size())
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            CMeshO::FaceIterator rmfi = rm->cm.face.begin();
+            for(CMeshO::ConstFaceIterator mmfi = mm.face.begin(); mmfi != mm.face.end(); ++mmfi, ++rmfi)
+            {
+                if ((!(*mmfi).IsD()) && ((*mmfi).IsS()))
+                    (*rmfi).SetS();
+                else
+                    if (!(*mmfi).IsS())
+                        (*rmfi).ClearS();
+            }
+        }
 
-		if(updateattributesmask & MeshModel::MM_TRANSFMATRIX)
-			rm->cm.Tr = mm.Tr;
-		if(updateattributesmask & MeshModel::MM_CAMERA)
-			rm->cm.shot = mm.shot;
-		unlockRenderState(MESH);
-		return true;
-	}
-	unlockRenderState(MESH);
-	return false;
+        if(updateattributesmask & MeshModel::MM_VERTFLAGSELECT)
+        {
+            if(mm.vert.size() != (rm->cm.vert.size()))
+            {
+                unlockRenderState(MESH);
+                return false;
+            }
+            else
+            {
+                CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
+                for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
+                {
+                    if ((!(*mmvi).IsD()) && ((*mmvi).IsS()))
+                        (*rmvi).SetS();
+                    else
+                        if (!(*mmvi).IsS())
+                            (*rmvi).ClearS();
+                }
+            }
+        }
+
+        if(updateattributesmask & MeshModel::MM_TRANSFMATRIX)
+            rm->cm.Tr = mm.Tr;
+        if(updateattributesmask & MeshModel::MM_CAMERA)
+            rm->cm.shot = mm.shot;
+        unlockRenderState(MESH);
+        return true;
+    }
+    unlockRenderState(MESH);
+    return false;
 }
 
 void MeshLabRenderState::add(const int id,CMeshO& mm )
 {
-	lockRenderState(MESH,WRITE);
-	if (!_meshmap.contains(id))
-	{
-		_meshmap[id] = new MeshLabRenderMesh(mm);
-	}
-	unlockRenderState(MESH);
+    lockRenderState(MESH,WRITE);
+    if (!_meshmap.contains(id))
+    {
+        _meshmap[id] = new MeshLabRenderMesh(mm);
+    }
+    unlockRenderState(MESH);
 }
 
 QMap<int,MeshLabRenderMesh*>::iterator MeshLabRenderState::remove(QMap<int,MeshLabRenderMesh*>::iterator it )
-{	
-	lockRenderState(MESH,WRITE);
-	if (it != _meshmap.end())
-	{
-		MeshLabRenderMesh* tmp = it.value();
-		delete tmp;
-		QMap<int,MeshLabRenderMesh*>::iterator tmpit = _meshmap.erase(it);
-		unlockRenderState(MESH);
-		return tmpit;
-	}
-	unlockRenderState(MESH);
-	return _meshmap.end();
+{
+    lockRenderState(MESH,WRITE);
+    if (it != _meshmap.end())
+    {
+        MeshLabRenderMesh* tmp = it.value();
+        delete tmp;
+        QMap<int,MeshLabRenderMesh*>::iterator tmpit = _meshmap.erase(it);
+        unlockRenderState(MESH);
+        return tmpit;
+    }
+    unlockRenderState(MESH);
+    return _meshmap.end();
 }
 
 void MeshLabRenderState::clearState()
 {
-	lockRenderState(MESH,WRITE);
-	QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();
-	while(it != _meshmap.end())
-		it = remove(it);
-	unlockRenderState(MESH);
-	lockRenderState(RASTER,WRITE);
-	QMap<int,MeshLabRenderRaster*>::iterator itr = _rastermap.begin();
-	while(itr != _rastermap.end())
-		itr = remove(itr);
-	unlockRenderState(RASTER);
+    lockRenderState(MESH,WRITE);
+    QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();
+    while(it != _meshmap.end())
+        it = remove(it);
+    unlockRenderState(MESH);
+    lockRenderState(RASTER,WRITE);
+    QMap<int,MeshLabRenderRaster*>::iterator itr = _rastermap.begin();
+    while(itr != _rastermap.end())
+        itr = remove(itr);
+    unlockRenderState(RASTER);
 }
 
 void MeshLabRenderState::copyBack( const int /*id*/,CMeshO& /*mm*/ ) const
@@ -1020,132 +1020,132 @@ void MeshLabRenderState::copyBack( const int /*id*/,CMeshO& /*mm*/ ) const
 
 void MeshLabRenderState::render( const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
 {
-	lockRenderState(MESH,READ);
-	QMap<int,MeshLabRenderMesh*>::const_iterator it = _meshmap.find(id);
-	if (it != _meshmap.end())
-		it.value()->render(dm,cm,tm);
-	unlockRenderState(MESH);
+    lockRenderState(MESH,READ);
+    QMap<int,MeshLabRenderMesh*>::const_iterator it = _meshmap.find(id);
+    if (it != _meshmap.end())
+        it.value()->render(dm,cm,tm);
+    unlockRenderState(MESH);
 }
 
 void MeshLabRenderState::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  )
 {
-	lockRenderState(MESH,READ);
-	for(QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();it != _meshmap.end();++it)
-		(*it)->render(dm,cm,tm);
-	unlockRenderState(MESH);
+    lockRenderState(MESH,READ);
+    for(QMap<int,MeshLabRenderMesh*>::iterator it = _meshmap.begin();it != _meshmap.end();++it)
+        (*it)->render(dm,cm,tm);
+    unlockRenderState(MESH);
 }
 
 bool MeshLabRenderState::isEntityInRenderingState( const int id,const MESHLAB_RENDER_ENTITY ent)
 {
-	bool found = false;
-	switch(ent)
-	{
-		case (MESH):
-		{
-			lockRenderState(MESH,READ);
-			found = _meshmap.contains(id);
-			unlockRenderState(MESH);
-		}
+    bool found = false;
+    switch(ent)
+    {
+        case (MESH):
+        {
+            lockRenderState(MESH,READ);
+            found = _meshmap.contains(id);
+            unlockRenderState(MESH);
+        }
 
-		case (RASTER):
-		{
-			lockRenderState(RASTER,READ);
-			found = _meshmap.contains(id);
-			unlockRenderState(RASTER);
-		}	
-	}
-	return found;
+        case (RASTER):
+        {
+            lockRenderState(RASTER,READ);
+            found = _meshmap.contains(id);
+            unlockRenderState(RASTER);
+        }
+    }
+    return found;
 }
 
 void MeshLabRenderState::add( const int id,const MeshLabRenderRaster& rm )
 {
-	lockRenderState(RASTER,WRITE);
-	if (!_rastermap.contains(id))
-	{
-		_rastermap[id] = new MeshLabRenderRaster(rm);
-	}
-	unlockRenderState(RASTER);
+    lockRenderState(RASTER,WRITE);
+    if (!_rastermap.contains(id))
+    {
+        _rastermap[id] = new MeshLabRenderRaster(rm);
+    }
+    unlockRenderState(RASTER);
 }
 
 bool MeshLabRenderState::update( const int id,const MeshLabRenderRaster& rm,const int updateattributesmask)
 {
-	if (updateattributesmask & RasterModel::RM_NONE)
-		return false;
-	lockRenderState(RASTER,WRITE);
-	QMap<int,MeshLabRenderRaster*>::iterator it = _rastermap.find(id);
-	if (it != _rastermap.end())
-	{
-		remove(it);
-		_rastermap[id] = new MeshLabRenderRaster(rm);
-		unlockRenderState(RASTER);
-		return true;
-	}
-	unlockRenderState(RASTER);
-	return false;
+    if (updateattributesmask & RasterModel::RM_NONE)
+        return false;
+    lockRenderState(RASTER,WRITE);
+    QMap<int,MeshLabRenderRaster*>::iterator it = _rastermap.find(id);
+    if (it != _rastermap.end())
+    {
+        remove(it);
+        _rastermap[id] = new MeshLabRenderRaster(rm);
+        unlockRenderState(RASTER);
+        return true;
+    }
+    unlockRenderState(RASTER);
+    return false;
 }
 
 QMap<int,MeshLabRenderRaster*>::iterator MeshLabRenderState::remove( QMap<int,MeshLabRenderRaster*>::iterator it )
 {
-	lockRenderState(RASTER,WRITE);
-	if (it != _rastermap.end())
-	{
-		MeshLabRenderRaster* tmp = it.value();
-		delete tmp;
-		QMap<int,MeshLabRenderRaster*>::iterator tmpit = _rastermap.erase(it);
-		unlockRenderState(RASTER);
-		return tmpit;
-	}
-	unlockRenderState(RASTER);
-	return _rastermap.end();
+    lockRenderState(RASTER,WRITE);
+    if (it != _rastermap.end())
+    {
+        MeshLabRenderRaster* tmp = it.value();
+        delete tmp;
+        QMap<int,MeshLabRenderRaster*>::iterator tmpit = _rastermap.erase(it);
+        unlockRenderState(RASTER);
+        return tmpit;
+    }
+    unlockRenderState(RASTER);
+    return _rastermap.end();
 }
 
 void MeshLabRenderState::lockRenderState( const MESHLAB_RENDER_ENTITY ent,const MESHLAB_RENDER_STATE_ACTION act )
 {
-	switch(ent)
-	{
-		case (MESH):
-		{
-			lockReadOrWrite(_meshmut,act);
-			break;
-		}
-		case (RASTER):
-		{
-			lockReadOrWrite(_rastermut,act);
-			break;
-		}
-	}
+    switch(ent)
+    {
+        case (MESH):
+        {
+            lockReadOrWrite(_meshmut,act);
+            break;
+        }
+        case (RASTER):
+        {
+            lockReadOrWrite(_rastermut,act);
+            break;
+        }
+    }
 }
 
 void MeshLabRenderState::unlockRenderState( const MESHLAB_RENDER_ENTITY ent )
 {
-	switch(ent)
-	{
-		case (MESH):
-		{
-			_meshmut.unlock();
-			break;
-		}
-		case (RASTER):
-		{
-			_rastermut.unlock();
-			break;
-		}
-	}
+    switch(ent)
+    {
+        case (MESH):
+        {
+            _meshmut.unlock();
+            break;
+        }
+        case (RASTER):
+        {
+            _rastermut.unlock();
+            break;
+        }
+    }
 }
 
 void MeshLabRenderState::lockReadOrWrite( QReadWriteLock& mutex,const MESHLAB_RENDER_STATE_ACTION act )
 {
-	switch(act)
-	{
-		case (READ):
-		{
-			mutex.lockForRead();
-			break;
-		}
-		case (WRITE):
-		{
-			mutex.lockForWrite();
-			break;
-		}
-	}
+    switch(act)
+    {
+        case (READ):
+        {
+            mutex.lockForRead();
+            break;
+        }
+        case (WRITE):
+        {
+            mutex.lockForWrite();
+            break;
+        }
+    }
 }
