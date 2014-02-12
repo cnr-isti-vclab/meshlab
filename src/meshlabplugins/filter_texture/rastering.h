@@ -24,7 +24,6 @@
 #ifndef _RASTERING_H
 #define _RASTERING_H
 
-#include <QtGui>
 #include <common/interfaces.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/space/triangle2.h>

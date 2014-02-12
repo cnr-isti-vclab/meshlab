@@ -25,7 +25,6 @@
 
 
 #include "edit_align.h"
-#include <QtGui>
 #include <QGLWidget>
 #include "AlignPairWidget.h"
 #include "AlignPairDialog.h"

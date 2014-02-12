@@ -27,7 +27,7 @@ $Log: stdpardialog.cpp,v $
 ****************************************************************************/
 #ifndef LAYER_DIALOG_H
 #define LAYER_DIALOG_H
-#include <QtGui>
+
 #include <QTreeWidgetItem>
 #include <QDockWidget>
 #include "../common/filterparameter.h"
@@ -45,68 +45,68 @@ class QToolBar;
 
 #include <QDialog>
 
-namespace Ui 
+namespace Ui
 {
-	class layerDialog;
-} 
+    class layerDialog;
+}
 
 class MeshTreeWidgetItem : public QTreeWidgetItem
 {
 public:
-	MeshTreeWidgetItem(MeshModel *,QTreeWidget* tree,QWidget* additional);
-	~MeshTreeWidgetItem();
+    MeshTreeWidgetItem(MeshModel *,QTreeWidget* tree,QWidget* additional);
+    ~MeshTreeWidgetItem();
 
-	MeshModel* m;
+    MeshModel* m;
 };
 
 class RasterTreeWidgetItem : public QTreeWidgetItem
 {
-	public:
-	RasterTreeWidgetItem(RasterModel *);
+    public:
+    RasterTreeWidgetItem(RasterModel *);
 
-	RasterModel *r;
+    RasterModel *r;
 };
 
 class DecoratorParamItem : public QTreeWidgetItem
 {
 public:
-	DecoratorParamItem(QAction* );
+    DecoratorParamItem(QAction* );
 
-	QAction* act;
+    QAction* act;
 };
 
 class DecoratorParamsTreeWidget : public QFrame
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
-	~DecoratorParamsTreeWidget();
+    DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
+    ~DecoratorParamsTreeWidget();
 
 public slots:
-	void save();
-	void reset();
-	void apply();
-	void load();
+    void save();
+    void reset();
+    void apply();
+    void load();
 
 private:
-	float osDependentButtonHeightScaleFactor();
-	MainWindow* mainWin;
-	StdParFrame* frame;
-	RichParameterSet tmpSet;
-	QPushButton* savebut;
-	QPushButton* resetbut;
-	QPushButton* loadbut;
-	QGridLayout* dialoglayout;
+    float osDependentButtonHeightScaleFactor();
+    MainWindow* mainWin;
+    StdParFrame* frame;
+    RichParameterSet tmpSet;
+    QPushButton* savebut;
+    QPushButton* resetbut;
+    QPushButton* loadbut;
+    QGridLayout* dialoglayout;
 };
 
 class LayerDialog : public QDockWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-	void updateLog(GLLogStream &Log);
-	 void updateDecoratorParsView();
+    void updateLog(GLLogStream &Log);
+     void updateDecoratorParsView();
 
 public slots:
   void keyPressEvent ( QKeyEvent * event );
@@ -121,24 +121,24 @@ private:
     Ui::layerDialog* ui;
     MainWindow *mw;
 
-	QMenu *rasterMenu;
-	QAction* addNewRasterAct;
-	QAction* removeCurrentRasterAct;
-	//It stores if the treeWidgetItems are expanded or not
-	QMap< QPair<int ,int> ,  bool> expandedMap;
-	//QList<QToolBar*> tobedel;
+    QMenu *rasterMenu;
+    QAction* addNewRasterAct;
+    QAction* removeCurrentRasterAct;
+    //It stores if the treeWidgetItems are expanded or not
+    QMap< QPair<int ,int> ,  bool> expandedMap;
+    //QList<QToolBar*> tobedel;
   void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
-	void updateColumnNumber(const QTreeWidgetItem * item);
-	//QVector<QTreeWidgetItem*> tobedeleted; 
+    void updateColumnNumber(const QTreeWidgetItem * item);
+    //QVector<QTreeWidgetItem*> tobedeleted;
 
-	void updateExpandedMap(int meshId, int tagId, bool expanded);
+    void updateExpandedMap(int meshId, int tagId, bool expanded);
 
-	//it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar. 
-	//used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
-	QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
+    //it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar.
+    //used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
+    QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
 
 signals:
-	void removeDecoratorRequested(QAction* );
+    void removeDecoratorRequested(QAction* );
 };
 
 
