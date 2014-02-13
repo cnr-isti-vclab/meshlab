@@ -46,14 +46,14 @@ void DecorateRasterProjPlugin::MeshDrawer::drawShadow( glw::Context &context )
         glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
         glEnableClientState( GL_VERTEX_ARRAY );
 
-		context.bindVertexBuffer( m_VBOVertices );
-		glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
+        context.bindVertexBuffer( m_VBOVertices );
+        glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
 
-		context.bindIndexBuffer( m_VBOIndices );
-		glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
+        context.bindIndexBuffer( m_VBOIndices );
+        glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
 
-		context.unbindIndexBuffer();
-		context.unbindVertexBuffer();
+        context.unbindIndexBuffer();
+        context.unbindVertexBuffer();
 
         glPopClientAttrib();
         glPopMatrix();
@@ -79,15 +79,15 @@ void DecorateRasterProjPlugin::MeshDrawer::draw( glw::Context &context )
         glEnableClientState( GL_VERTEX_ARRAY );
         glEnableClientState( GL_NORMAL_ARRAY );
 
-		context.bindVertexBuffer( m_VBOVertices );
-		glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
-		glNormalPointer(    GL_FLOAT, 2*sizeof(vcg::Point3f), (GLvoid*)sizeof(vcg::Point3f) );
+        context.bindVertexBuffer( m_VBOVertices );
+        glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
+        glNormalPointer(    GL_FLOAT, 2*sizeof(vcg::Point3f), (GLvoid*)sizeof(vcg::Point3f) );
 
-		context.bindIndexBuffer( m_VBOIndices );
-		glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
+        context.bindIndexBuffer( m_VBOIndices );
+        glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
 
-		context.unbindIndexBuffer();
-		context.unbindVertexBuffer();
+        context.unbindIndexBuffer();
+        context.unbindVertexBuffer();
 
         glPopClientAttrib();
         glPopMatrix();
@@ -142,8 +142,8 @@ bool DecorateRasterProjPlugin::s_AreVBOSupported;
 
 
 DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
-    m_CurrentRaster(NULL),
-    m_CurrentMesh(NULL)
+  m_CurrentMesh(NULL),
+  m_CurrentRaster(NULL)
 {
     typeList << DP_PROJECT_RASTER;
 
@@ -433,7 +433,7 @@ void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m )
 }
 
 
-bool DecorateRasterProjPlugin::initShaders( std::string &logs )
+bool DecorateRasterProjPlugin::initShaders(std::string &logs)
 {
     const std::string vertSrc = GLW_STRINGIFY
     (
@@ -514,6 +514,7 @@ bool DecorateRasterProjPlugin::initShaders( std::string &logs )
     );
 
     m_ShadowMapShader = glw::createProgram( m_Context, "", vertSrc, fragSrc );
+    logs = m_ShadowMapShader->fullLog();
     return m_ShadowMapShader->isLinked();
 }
 
@@ -527,17 +528,17 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
     {
         case DP_PROJECT_RASTER:
         {
-			if (m.rm() == NULL)
-			{
-				qWarning("No valid raster has been loaded.");
-				return false;
-			}
+            if (m.rm() == NULL)
+            {
+                qWarning("No valid raster has been loaded.");
+                return false;
+            }
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             GLenum err = glewInit();
             if( err != GLEW_OK )
             {
-                qWarning( (std::string("Impossible to load GLEW library.")+(char*)glewGetErrorString(err)).c_str() );
+                qWarning("Impossible to load GLEW library. %s",(const char *)glewGetErrorString(err));
                 return false;
             }
 
@@ -546,7 +547,7 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
             std::string logs;
             if( !initShaders(logs) )
             {
-                qWarning( ("Error while initializing shaders.\n"+logs).c_str() );
+                qWarning( "Error while initializing shaders. :%s\n",logs.c_str());
                 return false;
             }
 

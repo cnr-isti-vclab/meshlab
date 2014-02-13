@@ -45,9 +45,9 @@ QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 }
 QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
 {
-	switch(id)
-	{
-	case DP_SHOW_CUBEMAPPED_ENV :      return tr("Cube mapped background");
+    switch(id)
+    {
+    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Cube mapped background");
   case DP_SHOW_GRID :      return tr("Background Grid");
     }
     assert(0);
@@ -111,26 +111,26 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
       }
             if(!cm.IsValid()) return;
 
-	  Matrix44f tr;
-			glGetv(GL_MODELVIEW_MATRIX,tr);
-			// Remove the translation from the current matrix by simply padding the last column of the matrix
-	  tr.SetColumn(3,Point4f(0,0,0,1.0));
-			//Remove the scaling from the the current matrix by adding an inverse scaling matrix
-			float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
-			Matrix44f Scale;
-			Scale.SetDiagonal(scale);
-			tr=tr*Scale;
+      Matrix44f tr;
+            glGetv(GL_MODELVIEW_MATRIX,tr);
+            // Remove the translation from the current matrix by simply padding the last column of the matrix
+      tr.SetColumn(3,Point4f(0,0,0,1.0));
+            //Remove the scaling from the the current matrix by adding an inverse scaling matrix
+            float scale = 1.0/pow(tr.Determinant(),1.0f/3.0f);
+            Matrix44f Scale;
+            Scale.SetDiagonal(scale);
+            tr=tr*Scale;
 
-			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-				cm.DrawEnvCube(tr);
-			glPopMatrix();
-			glMatrixMode(GL_PROJECTION);
-			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
-	} break;
+            glMatrixMode(GL_PROJECTION);
+            glPushMatrix();
+            glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
+                cm.DrawEnvCube(tr);
+            glPopMatrix();
+            glMatrixMode(GL_PROJECTION);
+            glPopMatrix();
+            glMatrixMode(GL_MODELVIEW);
+    } break;
   case DP_SHOW_GRID :
     {
       emit this->askViewerShot("me");
@@ -143,7 +143,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
       Color4b backColor = parset->getColor4b(GridColorBackParam());
       Color4b frontColor = parset->getColor4b(GridColorFrontParam());
       bb.Offset((bb.max-bb.min)*(scaleBB-1.0));
-      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,backFlag,shadowFlag,backColor,frontColor,gla);
+      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,backFlag,shadowFlag,backColor,frontColor);
     } break;
   }
 }
@@ -278,7 +278,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor, GLArea *gla)
+void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Point3f minP,maxP, minG,maxG;
@@ -319,6 +319,6 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
     glPopAttrib();
 }
 
-void  DecorateBackgroundPlugin::setValue(QString name, vcg::Shotf val) {curShot=val;}
+void  DecorateBackgroundPlugin::setValue(QString /*name*/, vcg::Shotf val) {curShot=val;}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(DecorateBackgroundPlugin)

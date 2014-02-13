@@ -64,11 +64,11 @@ inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridC
 
 public:
 
-	DecorateBackgroundPlugin()
-	{
-	typeList
-	/*<< DP_SHOW_CUBEMAPPED_ENV*/
-	<< DP_SHOW_GRID;
+    DecorateBackgroundPlugin()
+    {
+    typeList
+    /*<< DP_SHOW_CUBEMAPPED_ENV*/
+    << DP_SHOW_GRID;
 
     FilterIDType tt;
     foreach(tt , types()){
@@ -92,14 +92,14 @@ public:
 
 
 private:
-  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor, GLArea *gla);
+  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
   vcg::Shotf curShot;
 
 signals:
   void askViewerShot(QString);
 
 public slots:
-  void  setValue(QString name, vcg::Shotf val);
+  void  setValue(QString, vcg::Shotf val);
 
 };
 

@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -36,7 +36,7 @@
 class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
 {
     Q_OBJECT
-		MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
+        MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
     Q_INTERFACES( MeshDecorateInterface )
 
 
@@ -103,7 +103,7 @@ private:
     void                    updateColorTexture();
     void                    updateDepthTexture();
 
-    bool                    initShaders( std::string &logs );
+    bool                    initShaders(std::string &logs);
 
 
     virtual QString         decorationInfo( FilterIDType filter ) const;
