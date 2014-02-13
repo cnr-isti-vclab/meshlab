@@ -39,224 +39,224 @@ using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 :QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN)
 {
-	qf = NULL;
-	stdParFrame=NULL;
-	clearValues();
+    qf = NULL;
+    stdParFrame=NULL;
+    clearValues();
 }
 
 StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
 :QFrame(p)
 {
-	gla=curr_gla;
+    gla=curr_gla;
 }
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
 bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi, QWidget *gla)
 {
-	validcache = false;
-	curAction=action;
-	curmfi=mfi;
-	curmwi=mwi;
-	curParSet.clear();
-	prevParSet.clear();
-	curModel = mm;
-	curMeshDoc = mdp;
-	curgla=gla;
+    validcache = false;
+    curAction=action;
+    curmfi=mfi;
+    curmwi=mwi;
+    curParSet.clear();
+    prevParSet.clear();
+    curModel = mm;
+    curMeshDoc = mdp;
+    curgla=gla;
 
-	mfi->initParameterSet(action, *mdp, curParSet);
-	curmask = mfi->postCondition(action);
-	if(curParSet.isEmpty() && !isPreviewable()) return false;
+    mfi->initParameterSet(action, *mdp, curParSet);
+    curmask = mfi->postCondition(action);
+    if(curParSet.isEmpty() && !isPreviewable()) return false;
 
-	createFrame();
-	loadFrameContent(mdp);
-	if(isPreviewable())
-	{
-		meshState.create(curmask, curModel);
-		connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
-	}
-	connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
-	raise();
-	activateWindow();
-	return true;
+    createFrame();
+    loadFrameContent(mdp);
+    if(isPreviewable())
+    {
+        meshState.create(curmask, curModel);
+        connect(stdParFrame,SIGNAL(parameterChanged()), this, SLOT(applyDynamic()));
+    }
+    connect(curMeshDoc, SIGNAL(currentMeshChanged(int)),this, SLOT(changeCurrentMesh(int)));
+    raise();
+    activateWindow();
+    return true;
 }
 
 void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 {
-	if(isPreviewable())
-	{
-		meshState.apply(curModel);
-		curModel=curMeshDoc->getMesh(meshInd);
-		meshState.create(curmask, curModel);
-		applyDynamic();
-	}
+    if(isPreviewable())
+    {
+        meshState.apply(curModel);
+        curModel=curMeshDoc->getMesh(meshInd);
+        meshState.create(curmask, curModel);
+        applyDynamic();
+    }
 }
 
 bool MeshlabStdDialog::isPreviewable()
 {
-	return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
+    return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
 }
 
 
 void MeshlabStdDialog::clearValues()
 {
-	curAction = NULL;
-	curModel = NULL;
-	curmfi = NULL;
-	curmwi = NULL;
+    curAction = NULL;
+    curModel = NULL;
+    curmfi = NULL;
+    curmwi = NULL;
 }
 
 void MeshlabStdDialog::createFrame()
 {
-	if(qf) delete qf;
+    if(qf) delete qf;
 
-	QFrame *newqf= new QFrame(this);
-	setWidget(newqf);
-	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-	qf = newqf;
+    QFrame *newqf= new QFrame(this);
+    setWidget(newqf);
+    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    qf = newqf;
 }
 
 // update the values of the widgets with the values in the paramlist;
 void MeshlabStdDialog::resetValues()
 {
-	curParSet.clear();
-	curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
+    curParSet.clear();
+    curmfi->initParameterSet(curAction, *curMeshDoc, curParSet);
 
-	assert(qf);
-	assert(qf->isVisible());
-	// assert(curParSet.paramList.count() == stdfieldwidgets.count());
-	stdParFrame->resetValues(curParSet);
+    assert(qf);
+    assert(qf->isVisible());
+    // assert(curParSet.paramList.count() == stdfieldwidgets.count());
+    stdParFrame->resetValues(curParSet);
 }
 
 void StdParFrame::resetValues(RichParameterSet &curParSet)
 {
-	QList<RichParameter*> &parList =curParSet.paramList;
-	assert(stdfieldwidgets.size() == parList.size());
-	for(int i = 0; i < parList.count(); i++)
-	{
-		RichParameter* fpi= parList.at(i);
-		if (fpi != NULL)	
-			stdfieldwidgets[i]->resetValue();
-	}
+    QList<RichParameter*> &parList =curParSet.paramList;
+    assert(stdfieldwidgets.size() == parList.size());
+    for(int i = 0; i < parList.count(); i++)
+    {
+        RichParameter* fpi= parList.at(i);
+        if (fpi != NULL)
+            stdfieldwidgets[i]->resetValue();
+    }
 }
 
 /* creates widgets for the standard parameters */
 
 void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 {
-	assert(qf);
-	qf->hide();
+    assert(qf);
+    qf->hide();
 
-	QGridLayout *gridLayout = new QGridLayout(qf);
+    QGridLayout *gridLayout = new QGridLayout(qf);
 
-	setWindowTitle(curmfi->filterName(curAction));
-	QLabel *ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
-	ql->setTextFormat(Qt::RichText);
-	ql->setWordWrap(true);
-	gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
+    setWindowTitle(curmfi->filterName(curAction));
+    QLabel *ql = new QLabel("<i>"+curmfi->filterInfo(curAction)+"</i>",qf);
+    ql->setTextFormat(Qt::RichText);
+    ql->setWordWrap(true);
+    gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 
-	stdParFrame = new StdParFrame(this,curgla);
-	stdParFrame->loadFrameContent(curParSet,mdPt);
-	gridLayout->addWidget(stdParFrame,1,0,1,2);
+    stdParFrame = new StdParFrame(this,curgla);
+    stdParFrame->loadFrameContent(curParSet,mdPt);
+    gridLayout->addWidget(stdParFrame,1,0,1,2);
 
-	int buttonRow = 2;  // the row where the line of buttons start
+    int buttonRow = 2;  // the row where the line of buttons start
 
-	QPushButton *helpButton = new QPushButton("Help", qf);
-	QPushButton *closeButton = new QPushButton("Close", qf);
-	QPushButton *applyButton = new QPushButton("Apply", qf);
-	QPushButton *defaultButton = new QPushButton("Default", qf);
-	applyButton->setFocus();
+    QPushButton *helpButton = new QPushButton("Help", qf);
+    QPushButton *closeButton = new QPushButton("Close", qf);
+    QPushButton *applyButton = new QPushButton("Apply", qf);
+    QPushButton *defaultButton = new QPushButton("Default", qf);
+    applyButton->setFocus();
 #ifdef Q_WS_MAC
-	// Hack needed on mac for correct sizes of button in the bottom of the dialog.
-	helpButton->setMinimumSize(100, 25);
-	closeButton->setMinimumSize(100,25);
-	applyButton->setMinimumSize(100,25);
-	defaultButton->setMinimumSize(100, 25);
-#endif 	
+    // Hack needed on mac for correct sizes of button in the bottom of the dialog.
+    helpButton->setMinimumSize(100, 25);
+    closeButton->setMinimumSize(100,25);
+    applyButton->setMinimumSize(100,25);
+    defaultButton->setMinimumSize(100, 25);
+#endif
 
-	if(isPreviewable())
-	{
-		previewCB = new QCheckBox("Preview", qf);
-		previewCB->setCheckState(Qt::Unchecked);
-		gridLayout->addWidget(previewCB,    buttonRow+0,0,Qt::AlignBottom);
-		connect(previewCB,SIGNAL(toggled(bool)),this,SLOT( togglePreview() ));
-		buttonRow++;
-	}
+    if(isPreviewable())
+    {
+        previewCB = new QCheckBox("Preview", qf);
+        previewCB->setCheckState(Qt::Unchecked);
+        gridLayout->addWidget(previewCB,    buttonRow+0,0,Qt::AlignBottom);
+        connect(previewCB,SIGNAL(toggled(bool)),this,SLOT( togglePreview() ));
+        buttonRow++;
+    }
 
-	gridLayout->addWidget(helpButton,   buttonRow+0,1,Qt::AlignBottom);
-	gridLayout->addWidget(defaultButton,buttonRow+0,0,Qt::AlignBottom);
-	gridLayout->addWidget(closeButton,  buttonRow+1,0,Qt::AlignBottom);
-	gridLayout->addWidget(applyButton,  buttonRow+1,1,Qt::AlignBottom);
+    gridLayout->addWidget(helpButton,   buttonRow+0,1,Qt::AlignBottom);
+    gridLayout->addWidget(defaultButton,buttonRow+0,0,Qt::AlignBottom);
+    gridLayout->addWidget(closeButton,  buttonRow+1,0,Qt::AlignBottom);
+    gridLayout->addWidget(applyButton,  buttonRow+1,1,Qt::AlignBottom);
 
-	connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
-	connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
-	connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
-	connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
+    connect(helpButton,SIGNAL(clicked()),this,SLOT(toggleHelp()));
+    connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
+    connect(closeButton,SIGNAL(clicked()),this,SLOT(closeClick()));
+    connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetValues()));
 
-	qf->showNormal();
-	qf->adjustSize();
+    qf->showNormal();
+    qf->adjustSize();
 
-	//set the minimum size so it will shrink down to the right size	after the help is toggled
-	this->setMinimumSize(qf->sizeHint());
-	this->showNormal();
-	this->adjustSize();
+    //set the minimum size so it will shrink down to the right size	after the help is toggled
+    this->setMinimumSize(qf->sizeHint());
+    this->showNormal();
+    this->adjustSize();
 }
 
 void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*_mdPt*/ )
 {
-	if(layout()) delete layout();
-	QGridLayout* glay = new QGridLayout();
-	// QGridLayout *vlayout = new QGridLayout(this);
-	//    vLayout->setAlignment(Qt::AlignTop);
-	RichWidgetInterfaceConstructor rwc(this);
-	for(int i = 0; i < curParSet.paramList.count(); i++)
-	{
-		RichParameter* fpi=curParSet.paramList.at(i);
-		fpi->accept(rwc);
-		//vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
-		stdfieldwidgets.push_back(rwc.lastCreated);
-		helpList.push_back(rwc.lastCreated->helpLab);
-		//glay->addItem(rwc.lastCreated->leftItem(),i,0);
-		//glay->addItem(rwc.lastCreated->centralItem(),i,1);
-		//glay->addItem(rwc.lastCreated->rightItem(),i,2);
-		rwc.lastCreated->addWidgetToGridLayout(glay,i);
+    if(layout()) delete layout();
+    QGridLayout* glay = new QGridLayout();
+    // QGridLayout *vlayout = new QGridLayout(this);
+    //    vLayout->setAlignment(Qt::AlignTop);
+    RichWidgetInterfaceConstructor rwc(this);
+    for(int i = 0; i < curParSet.paramList.count(); i++)
+    {
+        RichParameter* fpi=curParSet.paramList.at(i);
+        fpi->accept(rwc);
+        //vLayout->addWidget(rwc.lastCreated,i,0,1,1,Qt::AlignTop);
+        stdfieldwidgets.push_back(rwc.lastCreated);
+        helpList.push_back(rwc.lastCreated->helpLab);
+        //glay->addItem(rwc.lastCreated->leftItem(),i,0);
+        //glay->addItem(rwc.lastCreated->centralItem(),i,1);
+        //glay->addItem(rwc.lastCreated->rightItem(),i,2);
+        rwc.lastCreated->addWidgetToGridLayout(glay,i);
 
-	} // end for each parameter
-	setLayout(glay);
-	this->setMinimumSize(glay->sizeHint());
-	this->showNormal();
-	this->adjustSize();
+    } // end for each parameter
+    setLayout(glay);
+    this->setMinimumSize(glay->sizeHint());
+    this->showNormal();
+    this->adjustSize();
 }
 
 void StdParFrame::toggleHelp()
 {
-	for(int i = 0; i < helpList.count(); i++)
-		helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
-	updateGeometry();
-	adjustSize();
+    for(int i = 0; i < helpList.count(); i++)
+        helpList.at(i)->setVisible(!helpList.at(i)->isVisible()) ;
+    updateGeometry();
+    adjustSize();
 }
 
 void MeshlabStdDialog::toggleHelp()
 {
-	stdParFrame->toggleHelp();
-	qf->updateGeometry();	
-	qf->adjustSize();
-	this->updateGeometry();
-	this->adjustSize();
+    stdParFrame->toggleHelp();
+    qf->updateGeometry();
+    qf->adjustSize();
+    this->updateGeometry();
+    this->adjustSize();
 }
 
 //void StdParFrame::readValues(ParameterDeclarationSet &curParSet)
 void StdParFrame::readValues(RichParameterSet &curParSet)
 {
-	QList<RichParameter*> &parList =curParSet.paramList;
-	assert(parList.size() == stdfieldwidgets.size());
-	QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin(); 
-	for(int i = 0; i < parList.count(); i++)
-	{
-		QString sname = parList.at(i)->name;
-		curParSet.setValue(sname,(*it)->getWidgetValue());
-		++it;
-	}
+    QList<RichParameter*> &parList =curParSet.paramList;
+    assert(parList.size() == stdfieldwidgets.size());
+    QVector<MeshLabWidget*>::iterator it = stdfieldwidgets.begin();
+    for(int i = 0; i < parList.count(); i++)
+    {
+        QString sname = parList.at(i)->name;
+        curParSet.setValue(sname,(*it)->getWidgetValue());
+        ++it;
+    }
 }
 
 StdParFrame::~StdParFrame()
@@ -271,92 +271,92 @@ StdParFrame::~StdParFrame()
 
 void MeshlabStdDialog::applyClick()
 {
-	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
+    QAction *q = curAction;
+    stdParFrame->readValues(curParSet);
 
-	// Note that curModel CAN BE NULL (for creation filters on empty docs...)
-	if(curmask && curModel)
-		meshState.apply(curModel);
+    // Note that curModel CAN BE NULL (for creation filters on empty docs...)
+    if(curmask && curModel)
+        meshState.apply(curModel);
 
-	//PreView Caching: if the apply parameters are the same to those used in the preview mode
-	//we don't need to reapply the filter to the mesh
-	bool isEqual = (curParSet == prevParSet);
-	if (curModel && (isEqual) && (validcache))
-		meshCacheState.apply(curModel);
-	else
-		curmwi->executeFilter(q, curParSet, false);
+    //PreView Caching: if the apply parameters are the same to those used in the preview mode
+    //we don't need to reapply the filter to the mesh
+    bool isEqual = (curParSet == prevParSet);
+    if (curModel && (isEqual) && (validcache))
+        meshCacheState.apply(curModel);
+    else
+        curmwi->executeFilter(q, curParSet, false);
 
-	if(curmask && curModel)
-		meshState.create(curmask, curModel);
-	if(this->curgla) 
-		this->curgla->update();
+    if(curmask && curModel)
+        meshState.create(curmask, curModel);
+    if(this->curgla)
+        this->curgla->update();
 
 }
 
 void MeshlabStdDialog::applyDynamic()
 {
-	if(!previewCB->isChecked()) 
-		return;
-	QAction *q = curAction;
-	stdParFrame->readValues(curParSet);
-	//for cache mechanism
-	//needed to allocate the required memory space in prevParSet
-	//it called the operator=(RichParameterSet) function defined in RichParameterSet
-	prevParSet = curParSet;
-	stdParFrame->readValues(prevParSet);
-	// Restore the
-	meshState.apply(curModel);
-	curmwi->executeFilter(q, curParSet, true);
-	meshCacheState.create(curmask,curModel);
-	validcache = true;
+    if(!previewCB->isChecked())
+        return;
+    QAction *q = curAction;
+    stdParFrame->readValues(curParSet);
+    //for cache mechanism
+    //needed to allocate the required memory space in prevParSet
+    //it called the operator=(RichParameterSet) function defined in RichParameterSet
+    prevParSet = curParSet;
+    stdParFrame->readValues(prevParSet);
+    // Restore the
+    meshState.apply(curModel);
+    curmwi->executeFilter(q, curParSet, true);
+    meshCacheState.create(curmask,curModel);
+    validcache = true;
 
 
-	if(this->curgla) 
-		this->curgla->update();
+    if(this->curgla)
+        this->curgla->update();
 }
 
 void MeshlabStdDialog::togglePreview()
 {
-	if(previewCB->isChecked()) 
-	{
-		stdParFrame->readValues(curParSet);
-		if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
-			meshCacheState.apply(curModel);
-		else
-			applyDynamic();
-	}
-	else
-		meshState.apply(curModel);
+    if(previewCB->isChecked())
+    {
+        stdParFrame->readValues(curParSet);
+        if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
+            meshCacheState.apply(curModel);
+        else
+            applyDynamic();
+    }
+    else
+        meshState.apply(curModel);
 
-	curgla->update();
+    curgla->update();
 }
 
 /* click event for the close button of the standard plugin window */
 
 void MeshlabStdDialog::closeClick()
 {
-	//int mask = 0;//curParSet.getDynamicFloatMask();
-	if(curmask != MeshModel::MM_UNKNOWN)
-		meshState.apply(curModel);
-	curmask = MeshModel::MM_UNKNOWN;
-	// Perform the update only if there is Valid GLarea. 
-	if(this->curgla) 
-		this->curgla->update();
-	close();
+    //int mask = 0;//curParSet.getDynamicFloatMask();
+    if(curmask != MeshModel::MM_UNKNOWN)
+        meshState.apply(curModel);
+    curmask = MeshModel::MM_UNKNOWN;
+    // Perform the update only if there is Valid GLarea.
+    if(this->curgla)
+        this->curgla->update();
+    close();
 }
 
 
 // click event for the standard red crossed close button in the upper right widget's corner
 void MeshlabStdDialog::closeEvent(QCloseEvent * /*event*/)
 {
-	closeClick();
+    closeClick();
 }
 
 MeshlabStdDialog::~MeshlabStdDialog()
 {
-	delete stdParFrame;
-	if(isPreviewable())
-		delete previewCB;
+    delete stdParFrame;
+    if(isPreviewable())
+        delete previewCB;
 }
 
 
@@ -369,74 +369,74 @@ MeshlabStdDialog::~MeshlabStdDialog()
 AbsPercWidget::AbsPercWidget(QWidget *p, RichAbsPerc* rabs):MeshLabWidget(p,rabs)
 
 {
-	AbsPercDecoration* absd = reinterpret_cast<AbsPercDecoration*>(rp->pd);
-	m_min = absd->min;
-	m_max = absd->max;
+    AbsPercDecoration* absd = reinterpret_cast<AbsPercDecoration*>(rp->pd);
+    m_min = absd->min;
+    m_max = absd->max;
 
-	fieldDesc = new QLabel(rp->pd->fieldDesc + " (abs and %)",this);
-	fieldDesc->setToolTip(rp->pd->tooltip);
-	absSB = new QDoubleSpinBox(this);
-	percSB = new QDoubleSpinBox(this);
+    fieldDesc = new QLabel(rp->pd->fieldDesc + " (abs and %)",this);
+    fieldDesc->setToolTip(rp->pd->tooltip);
+    absSB = new QDoubleSpinBox(this);
+    percSB = new QDoubleSpinBox(this);
 
-	absSB->setMinimum(m_min-(m_max-m_min));
-	absSB->setMaximum(m_max*2);
-	absSB->setAlignment(Qt::AlignRight);
+    absSB->setMinimum(m_min-(m_max-m_min));
+    absSB->setMaximum(m_max*2);
+    absSB->setAlignment(Qt::AlignRight);
 
-	int decimals= 7-ceil(log10(fabs(m_max-m_min)) ) ;
-	//qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
-	//qDebug("log range is %f ",log10(fabs(m_max-m_min)));
-	absSB->setDecimals(decimals);
-	absSB->setSingleStep((m_max-m_min)/100.0);
-	float initVal = rp->val->getAbsPerc();
-	absSB->setValue(initVal);
+    int decimals= 7-ceil(log10(fabs(m_max-m_min)) ) ;
+    //qDebug("range is (%f %f) %f ",m_max,m_min,fabs(m_max-m_min));
+    //qDebug("log range is %f ",log10(fabs(m_max-m_min)));
+    absSB->setDecimals(decimals);
+    absSB->setSingleStep((m_max-m_min)/100.0);
+    float initVal = rp->val->getAbsPerc();
+    absSB->setValue(initVal);
 
-	percSB->setMinimum(-200);
-	percSB->setMaximum(200);
-	percSB->setAlignment(Qt::AlignRight);
-	percSB->setSingleStep(0.5);
-	percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
-	percSB->setDecimals(3);
-	QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
-	QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
+    percSB->setMinimum(-200);
+    percSB->setMaximum(200);
+    percSB->setAlignment(Qt::AlignRight);
+    percSB->setSingleStep(0.5);
+    percSB->setValue((100*(initVal - m_min))/(m_max - m_min));
+    percSB->setDecimals(3);
+    QLabel *absLab=new QLabel("<i> <small> world unit</small></i>");
+    QLabel *percLab=new QLabel("<i> <small> perc on"+QString("(%1 .. %2)").arg(m_min).arg(m_max)+"</small></i>");
 
-	//  gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
+    //  gridLay->addWidget(fieldDesc,row,0,Qt::AlignHCenter);
 
-	vlay = new QGridLayout();
-	vlay->addWidget(absLab,0,0,Qt::AlignHCenter);
-	vlay->addWidget(percLab,0,1,Qt::AlignHCenter);
+    vlay = new QGridLayout();
+    vlay->addWidget(absLab,0,0,Qt::AlignHCenter);
+    vlay->addWidget(percLab,0,1,Qt::AlignHCenter);
 
-	vlay->addWidget(absSB,1,0,Qt::AlignTop);
-	vlay->addWidget(percSB,1,1,Qt::AlignTop);
+    vlay->addWidget(absSB,1,0,Qt::AlignTop);
+    vlay->addWidget(percSB,1,1,Qt::AlignTop);
 
-	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
+    //gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
-	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+    connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+    connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+    connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
 
 AbsPercWidget::~AbsPercWidget()
 {
-	delete absSB;
-	delete percSB;
-	delete fieldDesc;
+    delete absSB;
+    delete percSB;
+    delete fieldDesc;
 }
 
 
 void AbsPercWidget::on_absSB_valueChanged(double newv)
 {
-	disconnect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-	percSB->setValue((100*(newv - m_min))/(m_max - m_min));
-	connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
-	emit dialogParamChanged();
+    disconnect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+    percSB->setValue((100*(newv - m_min))/(m_max - m_min));
+    connect(percSB,SIGNAL(valueChanged(double)),this,SLOT(on_percSB_valueChanged(double)));
+    emit dialogParamChanged();
 }
 
 void AbsPercWidget::on_percSB_valueChanged(double newv)
 {
-	disconnect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-	absSB->setValue((m_max - m_min)*0.01*newv + m_min);
-	connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
-	emit dialogParamChanged();
+    disconnect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+    absSB->setValue((m_max - m_min)*0.01*newv + m_min);
+    connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
+    emit dialogParamChanged();
 }
 
 //float AbsPercWidget::getValue()
@@ -446,37 +446,37 @@ void AbsPercWidget::on_percSB_valueChanged(double newv)
 
 void AbsPercWidget::setValue(float val, float minV, float maxV)
 {
-	assert(absSB);
-	absSB->setValue (val);
-	m_min=minV;
-	m_max=maxV;
+    assert(absSB);
+    absSB->setValue (val);
+    m_min=minV;
+    m_max=maxV;
 }
 
 void AbsPercWidget::collectWidgetValue()
 {
-	rp->val->set(AbsPercValue(float(absSB->value())));
+    rp->val->set(AbsPercValue(float(absSB->value())));
 }
 
 void AbsPercWidget::resetWidgetValue()
 {
-	const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
-	setValue(rp->pd->defVal->getAbsPerc(),absd->min,absd->max);	
+    const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
+    setValue(rp->pd->defVal->getAbsPerc(),absd->min,absd->max);
 }
 
 void AbsPercWidget::setWidgetValue( const Value& nv )
 {
-	const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
-	setValue(nv.getAbsPerc(),absd->min,absd->max);	
+    const AbsPercDecoration* absd = reinterpret_cast<const AbsPercDecoration*>(&(rp->pd));
+    setValue(nv.getAbsPerc(),absd->min,absd->max);
 }
 
 void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addWidget(fieldDesc,r,0,Qt::AlignLeft);
-		lay->addLayout(vlay,r,1,Qt::AlignTop);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    if (lay != NULL)
+    {
+        lay->addWidget(fieldDesc,r,0,Qt::AlignLeft);
+        lay->addLayout(vlay,r,1,Qt::AlignTop);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /******************************************/
 // Point3fWidget Implementation
@@ -487,129 +487,129 @@ void AbsPercWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
     //qDebug("Creating a Point3fWidget");
-	paramName = rpf->name;
-	//int row = gridLay->rowCount() - 1;
-	descLab = new QLabel(rpf->pd->fieldDesc,this);
-	descLab->setToolTip(rpf->pd->fieldDesc);
-	//gridLay->addWidget(descLab,row,0);
+    paramName = rpf->name;
+    //int row = gridLay->rowCount() - 1;
+    descLab = new QLabel(rpf->pd->fieldDesc,this);
+    descLab->setToolTip(rpf->pd->fieldDesc);
+    //gridLay->addWidget(descLab,row,0);
 
-	vlay = new QHBoxLayout();
-	vlay->setSpacing(0);
-	for(int i =0;i<3;++i)
-	{
-		coordSB[i]= new QLineEdit(this);
-		QFont baseFont=coordSB[i]->font();
-		if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
-		else baseFont.setPointSize(baseFont.pointSize()*3/4);
-		coordSB[i]->setFont(baseFont);
+    vlay = new QHBoxLayout();
+    vlay->setSpacing(0);
+    for(int i =0;i<3;++i)
+    {
+        coordSB[i]= new QLineEdit(this);
+        QFont baseFont=coordSB[i]->font();
+        if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+        else baseFont.setPointSize(baseFont.pointSize()*3/4);
+        coordSB[i]->setFont(baseFont);
         coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
-		coordSB[i]->setValidator(new QDoubleValidator());
-		coordSB[i]->setAlignment(Qt::AlignRight);
+        coordSB[i]->setValidator(new QDoubleValidator());
+        coordSB[i]->setAlignment(Qt::AlignRight);
         coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
-		vlay->addWidget(coordSB[i]);
-		connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
-	}
-	this->setValue(paramName,rp->val->getPoint3f());
-	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
-	{
-		getPoint3Button = new QPushButton("Get",this);
+        vlay->addWidget(coordSB[i]);
+        connect(coordSB[i],SIGNAL(textChanged(QString)),p,SIGNAL(parameterChanged()));
+    }
+    this->setValue(paramName,rp->val->getPoint3f());
+    if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+    {
+        getPoint3Button = new QPushButton("Get",this);
         getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
-		getPoint3Button->setFlat(true);
+        getPoint3Button->setFlat(true);
         getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
         //getPoint3Button->setMinimumWidth(getPoint3Button->sizeHint().width());
-		//this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
-		vlay->addWidget(getPoint3Button);
-		QStringList names;
-		names << "View Dir";
-		names << "View Pos";
-		names << "Surf. Pos";
-		names << "Camera Pos";
+        //this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
+        vlay->addWidget(getPoint3Button);
+        QStringList names;
+        names << "View Dir";
+        names << "View Pos";
+        names << "Surf. Pos";
+        names << "Camera Pos";
 
-		getPoint3Combo = new QComboBox(this);
-		getPoint3Combo->addItems(names);
-		//getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
-		//this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
-		vlay->addWidget(getPoint3Combo);
+        getPoint3Combo = new QComboBox(this);
+        getPoint3Combo->addItems(names);
+        //getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
+        //this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
+        vlay->addWidget(getPoint3Combo);
 
-		connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
-		connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
-		connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-		connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
-		connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
-		connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
-		connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
-		connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
-		connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
-	}
-	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
+        connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
+        connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
+        connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+        connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+        connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+        connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
+        connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
+        connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
+        connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
+    }
+    //gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
 
 void Point3fWidget::getPoint()
 {
-	int index = getPoint3Combo->currentIndex();
+    int index = getPoint3Combo->currentIndex();
     //qDebug("Got signal %i",index);
-	switch(index)
-	{
-	case 0 : emit askViewDir(paramName);		 break;
-	case 1 : emit askViewPos(paramName);		 break;
-	case 2 : emit askSurfacePos(paramName); break;
-	case 3 : emit askCameraPos(paramName); break;
-	default : assert(0);
-	} 
+    switch(index)
+    {
+    case 0 : emit askViewDir(paramName);		 break;
+    case 1 : emit askViewPos(paramName);		 break;
+    case 2 : emit askSurfacePos(paramName); break;
+    case 3 : emit askCameraPos(paramName); break;
+    default : assert(0);
+    }
 }
 
 Point3fWidget::~Point3fWidget() {
     //qDebug("Deallocating a point3fwidget");
-	this->disconnect();
+    this->disconnect();
 }
 
 void Point3fWidget::setValue(QString name,Point3f newVal)
 {
     //qDebug("setValue parametername: %s ",qPrintable(name));
-	if(name==paramName)
-	{
-		for(int i =0;i<3;++i)
-			coordSB[i]->setText(QString::number(newVal[i],'g',4));
-	}
+    if(name==paramName)
+    {
+        for(int i =0;i<3;++i)
+            coordSB[i]->setText(QString::number(newVal[i],'g',4));
+    }
 }
 
 void Point3fWidget::setShotValue(QString name,Shotf newValShot)
 {
-	Point3f p = newValShot.GetViewPoint();
-	setValue(name,p);
+    Point3f p = newValShot.GetViewPoint();
+    setValue(name,p);
 }
 
 vcg::Point3f Point3fWidget::getValue()
 {
-	return Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat());
+    return Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat());
 }
 
 void Point3fWidget::collectWidgetValue()
 {
-	rp->val->set(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
+    rp->val->set(Point3fValue(vcg::Point3f(coordSB[0]->text().toFloat(),coordSB[1]->text().toFloat(),coordSB[2]->text().toFloat())));
 }
 
 void Point3fWidget::resetWidgetValue()
 {
-	for(unsigned int ii = 0; ii < 3;++ii)
-		coordSB[ii]->setText(QString::number(rp->pd->defVal->getPoint3f()[ii],'g',3));
+    for(unsigned int ii = 0; ii < 3;++ii)
+        coordSB[ii]->setText(QString::number(rp->pd->defVal->getPoint3f()[ii],'g',3));
 }
 
 void Point3fWidget::setWidgetValue( const Value& nv )
 {
-	for(unsigned int ii = 0; ii < 3;++ii)
-		coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
+    for(unsigned int ii = 0; ii < 3;++ii)
+        coordSB[ii]->setText(QString::number(nv.getPoint3f()[ii],'g',3));
 }
 
 void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addWidget(descLab,r,0);
+    if (lay != NULL)
+    {
+        lay->addWidget(descLab,r,0);
         lay->addLayout(vlay,r,1);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /******************************************/
 // Matrix44fWidget Implementation
@@ -620,50 +620,50 @@ void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
 
-	paramName = rpf->name;
-	//int row = gridLay->rowCount() - 1;
+    paramName = rpf->name;
+    //int row = gridLay->rowCount() - 1;
 
-	descLab = new QLabel(rpf->pd->fieldDesc,this);
-	descLab->setToolTip(rpf->pd->fieldDesc);
-	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
-	vlay = new QVBoxLayout();
-	lay44 = new QGridLayout();
+    descLab = new QLabel(rpf->pd->fieldDesc,this);
+    descLab->setToolTip(rpf->pd->fieldDesc);
+    //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+    vlay = new QVBoxLayout();
+    lay44 = new QGridLayout();
 
 
 
-	for(int i =0;i<16;++i)
-	{
-		coordSB[i]= new QLineEdit(p);
-		QFont baseFont=coordSB[i]->font();
-		if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
-		else baseFont.setPointSize(baseFont.pointSize()*3/4);
-		coordSB[i]->setFont(baseFont);
-		//coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
-		coordSB[i]->setMinimumWidth(0);
-		coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
-		//coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
-		coordSB[i]->setValidator(new QDoubleValidator(p));
-		coordSB[i]->setAlignment(Qt::AlignRight);
-		//this->addWidget(coordSB[i],1,Qt::AlignHCenter);
-		lay44->addWidget(coordSB[i],i/4,i%4);
+    for(int i =0;i<16;++i)
+    {
+        coordSB[i]= new QLineEdit(p);
+        QFont baseFont=coordSB[i]->font();
+        if(baseFont.pixelSize() != -1) baseFont.setPixelSize(baseFont.pixelSize()*3/4);
+        else baseFont.setPointSize(baseFont.pointSize()*3/4);
+        coordSB[i]->setFont(baseFont);
+        //coordSB[i]->setMinimumWidth(coordSB[i]->sizeHint().width()/4);
+        coordSB[i]->setMinimumWidth(0);
+        coordSB[i]->setMaximumWidth(coordSB[i]->sizeHint().width()/2);
+        //coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
+        coordSB[i]->setValidator(new QDoubleValidator(p));
+        coordSB[i]->setAlignment(Qt::AlignRight);
+        //this->addWidget(coordSB[i],1,Qt::AlignHCenter);
+        lay44->addWidget(coordSB[i],i/4,i%4);
 
-	}
-	this->setValue(paramName,rp->val->getMatrix44f());
+    }
+    this->setValue(paramName,rp->val->getMatrix44f());
 
-	vlay->addLayout(lay44);
+    vlay->addLayout(lay44);
 
-	QPushButton     * getMatrixButton = new QPushButton("Read from current layer");
-	vlay->addWidget(getMatrixButton);
+    QPushButton     * getMatrixButton = new QPushButton("Read from current layer");
+    vlay->addWidget(getMatrixButton);
 
-	QPushButton     * pasteMatrixButton = new QPushButton("Paste from clipboard");
-	vlay->addWidget(pasteMatrixButton);
+    QPushButton     * pasteMatrixButton = new QPushButton("Paste from clipboard");
+    vlay->addWidget(pasteMatrixButton);
 
-	//gridLay->addLayout(vlay,row,1,Qt::AlignTop);
+    //gridLay->addLayout(vlay,row,1,Qt::AlignTop);
 
-	connect(gla_curr,SIGNAL(transmitMatrix(QString,vcg::Matrix44f)),this,SLOT(setValue(QString,vcg::Matrix44f)));
-	connect(getMatrixButton,SIGNAL(clicked()),this,SLOT(getMatrix()));
-	connect(pasteMatrixButton,SIGNAL(clicked()),this,SLOT(pasteMatrix()));
-	connect(this,SIGNAL(askMeshMatrix(QString)),  gla_curr,SLOT(sendMeshMatrix(QString)));
+    connect(gla_curr,SIGNAL(transmitMatrix(QString,vcg::Matrix44f)),this,SLOT(setValue(QString,vcg::Matrix44f)));
+    connect(getMatrixButton,SIGNAL(clicked()),this,SLOT(getMatrix()));
+    connect(pasteMatrixButton,SIGNAL(clicked()),this,SLOT(pasteMatrix()));
+    connect(this,SIGNAL(askMeshMatrix(QString)),  gla_curr,SLOT(sendMeshMatrix(QString)));
 
 }
 
@@ -672,71 +672,71 @@ Matrix44fWidget::~Matrix44fWidget() {}
 
 void Matrix44fWidget::setValue(QString name,Matrix44f newVal)
 {
-	if(name==paramName)
-	{
-		for(int i =0;i<16;++i)
-			coordSB[i]->setText(QString::number(newVal[i/4][i%4],'g',4));
-	}
+    if(name==paramName)
+    {
+        for(int i =0;i<16;++i)
+            coordSB[i]->setText(QString::number(newVal[i/4][i%4],'g',4));
+    }
 }
 
 
 vcg::Matrix44f Matrix44fWidget::getValue()
 {
-	float val[16];
-	for(unsigned int i  = 0; i < 16; ++i)
-		val[i] = coordSB[i]->text().toFloat();
-	return Matrix44f(val); 
+    float val[16];
+    for(unsigned int i  = 0; i < 16; ++i)
+        val[i] = coordSB[i]->text().toFloat();
+    return Matrix44f(val);
 }
 
 void Matrix44fWidget::getMatrix(){
 
-	emit askMeshMatrix(QString("TransformMatrix"));
+    emit askMeshMatrix(QString("TransformMatrix"));
 }
 
 void Matrix44fWidget::pasteMatrix(){
-	QClipboard *clipboard = QApplication::clipboard();
-	QString shotString = clipboard->text();
-	QStringList list1 = shotString.split(" ");
-	if(list1.size() != 16) return;
-	int id = 0;
-	for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
-		bool ok = true;
-		(*i).toFloat(&ok);
-		if(!ok) return;
-	}
-	id = 0;
-	for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id) 
-		coordSB[id]->setText(*i) ;
+    QClipboard *clipboard = QApplication::clipboard();
+    QString shotString = clipboard->text();
+    QStringList list1 = shotString.split(" ");
+    if(list1.size() != 16) return;
+    int id = 0;
+    for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
+        bool ok = true;
+        (*i).toFloat(&ok);
+        if(!ok) return;
+    }
+    id = 0;
+    for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id)
+        coordSB[id]->setText(*i) ;
 }
 
 void Matrix44fWidget::collectWidgetValue()
 {
-	vcg::Matrix44f  m;
-	for(unsigned int i  = 0; i < 16; ++i) m[i/4][i%4] = coordSB[i]->text().toFloat();
-	rp->val->set(Matrix44fValue(m));
+    vcg::Matrix44f  m;
+    for(unsigned int i  = 0; i < 16; ++i) m[i/4][i%4] = coordSB[i]->text().toFloat();
+    rp->val->set(Matrix44fValue(m));
 }
 
 void Matrix44fWidget::resetWidgetValue()
 {
-	vcg::Matrix44f  m; m.SetIdentity();
-	for(unsigned int ii = 0; ii < 16;++ii)
-		coordSB[ii]->setText(QString::number(rp->pd->defVal->getMatrix44f()[ii/4][ii%4],'g',3));
+    vcg::Matrix44f  m; m.SetIdentity();
+    for(unsigned int ii = 0; ii < 16;++ii)
+        coordSB[ii]->setText(QString::number(rp->pd->defVal->getMatrix44f()[ii/4][ii%4],'g',3));
 }
 
 void Matrix44fWidget::setWidgetValue( const Value& nv )
 {
-	for(unsigned int ii = 0; ii < 16;++ii)
-		coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii/4][ii%4],'g',3));
+    for(unsigned int ii = 0; ii < 16;++ii)
+        coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii/4][ii%4],'g',3));
 }
 
 void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addWidget(descLab,r,0,Qt::AlignTop);
-		lay->addLayout(vlay,r,1,Qt::AlignTop);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    if (lay != NULL)
+    {
+        lay->addWidget(descLab,r,0,Qt::AlignTop);
+        lay->addLayout(vlay,r,1,Qt::AlignTop);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /********************/
 // ShotfWidget Implementation
@@ -744,116 +744,116 @@ void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
 
-	paramName = rpf->name;
-	//int row = gridLay->rowCount() - 1;
+    paramName = rpf->name;
+    //int row = gridLay->rowCount() - 1;
 
-	descLab = new QLabel(rpf->pd->fieldDesc,p);
-	descLab->setToolTip(rpf->pd->fieldDesc);
-	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+    descLab = new QLabel(rpf->pd->fieldDesc,p);
+    descLab->setToolTip(rpf->pd->fieldDesc);
+    //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
 
-	hlay = new QHBoxLayout();
+    hlay = new QHBoxLayout();
 
 
-	this->setShotValue(paramName,rp->val->getShotf());
-	if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
-	{
-		getShotButton = new QPushButton("Get shot",this);
+    this->setShotValue(paramName,rp->val->getShotf());
+    if(gla_curr) // if we have a connection to the current glarea we can setup the additional button for getting the current view direction.
+    {
+        getShotButton = new QPushButton("Get shot",this);
         getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
-		hlay->addWidget(getShotButton);
+        hlay->addWidget(getShotButton);
 
-		QStringList names;
-		names << "Current Trackball";
-		names << "Current Mesh";
-		names << "Current Raster";
-		names << "From File";
+        QStringList names;
+        names << "Current Trackball";
+        names << "Current Mesh";
+        names << "Current Raster";
+        names << "From File";
 
-		getShotCombo = new QComboBox(this);
-		getShotCombo->addItems(names);
-		hlay->addWidget(getShotCombo);
-		connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
-		connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
-		connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
-		connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
-		connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
-		connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
-	}
-	//gridLay->addLayout(hlay,row,1,Qt::AlignTop);
+        getShotCombo = new QComboBox(this);
+        getShotCombo->addItems(names);
+        hlay->addWidget(getShotCombo);
+        connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
+        connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
+        connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+        connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
+        connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
+        connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
+    }
+    //gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 }
 
 void ShotfWidget::getShot()
 {
-	int index = getShotCombo->currentIndex();
-	switch(index)  {
-	case 0 : emit askViewerShot(paramName); break;
-	case 1 : emit askMeshShot(paramName); break;
-	case 2 : emit askRasterShot(paramName); break;
-	case 3:
-		{
-			QString filename = QFileDialog::getOpenFileName(this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
-			QFile qf(filename);
-			QFileInfo qfInfo(filename);
+    int index = getShotCombo->currentIndex();
+    switch(index)  {
+    case 0 : emit askViewerShot(paramName); break;
+    case 1 : emit askMeshShot(paramName); break;
+    case 2 : emit askRasterShot(paramName); break;
+    case 3:
+        {
+            QString filename = QFileDialog::getOpenFileName(this, tr("Load xml camera"), "./", tr("Xml Files (*.xml)"));
+            QFile qf(filename);
+            QFileInfo qfInfo(filename);
 
-			if( !qf.open(QIODevice::ReadOnly ) )
-				return ;
+            if( !qf.open(QIODevice::ReadOnly ) )
+                return ;
 
-			QDomDocument doc("XmlDocument");    //It represents the XML document
-			if(!doc.setContent( &qf ))     return;
-			qf.close();
+            QDomDocument doc("XmlDocument");    //It represents the XML document
+            if(!doc.setContent( &qf ))     return;
+            qf.close();
 
-			QString type = doc.doctype().name();
+            QString type = doc.doctype().name();
 
-			//TextAlign file project
-			//if(type == "RegProjectML")   loadShotFromTextAlignFile(doc);
-			//View State file
-			//else if(type == "ViewState") loadViewFromViewStateFile(doc);
+            //TextAlign file project
+            //if(type == "RegProjectML")   loadShotFromTextAlignFile(doc);
+            //View State file
+            //else if(type == "ViewState") loadViewFromViewStateFile(doc);
 
-			//qDebug("End file reading");
+            //qDebug("End file reading");
 
 
-			// return true;
-		}
-	default : assert(0);
-	}
+            // return true;
+        }
+    default : assert(0);
+    }
 }
 
 ShotfWidget::~ShotfWidget() {}
 
 void ShotfWidget::setShotValue(QString name,Shotf newVal)
 {
-	if(name==paramName)
-	{
-		curShot=newVal;
-	}
+    if(name==paramName)
+    {
+        curShot=newVal;
+    }
 }
 
 vcg::Shotf ShotfWidget::getValue()
 {
-	return curShot;
+    return curShot;
 }
 
 void ShotfWidget::collectWidgetValue()
 {
-	rp->val->set(ShotfValue(curShot));
+    rp->val->set(ShotfValue(curShot));
 }
 
 void ShotfWidget::resetWidgetValue()
 {
-	curShot = rp->pd->defVal->getShotf();
+    curShot = rp->pd->defVal->getShotf();
 }
 
 void ShotfWidget::setWidgetValue( const Value& nv )
 {
-	curShot = nv.getShotf();
+    curShot = nv.getShotf();
 }
 
 void ShotfWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addLayout(hlay,r,1);
-		lay->addWidget(descLab,r,0);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    if (lay != NULL)
+    {
+        lay->addLayout(hlay,r,1);
+        lay->addWidget(descLab,r,0);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /********************/
 // ComboWidget End Implementation
@@ -863,42 +863,42 @@ ComboWidget::ComboWidget(QWidget *p, RichParameter* rpar) :MeshLabWidget(p,rpar)
 
 void ComboWidget::Init(QWidget *p,int defaultEnum, QStringList values)
 {
-	enumLabel = new QLabel(this);
-	enumLabel->setText(rp->pd->fieldDesc);
-	enumCombo = new QComboBox(this);
-	enumCombo->addItems(values);
-	setIndex(defaultEnum);
-	//int row = gridLay->rowCount() - 1;
-	//gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
-	//gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
-	connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
-	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+    enumLabel = new QLabel(this);
+    enumLabel->setText(rp->pd->fieldDesc);
+    enumCombo = new QComboBox(this);
+    enumCombo->addItems(values);
+    setIndex(defaultEnum);
+    //int row = gridLay->rowCount() - 1;
+    //gridLay->addWidget(enumLabel,row,0,Qt::AlignTop);
+    //gridLay->addWidget(enumCombo,row,1,Qt::AlignTop);
+    connect(enumCombo,SIGNAL(activated(int)),this,SIGNAL(dialogParamChanged()));
+    connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
 
 void ComboWidget::setIndex(int newEnum)
 {
-	enumCombo->setCurrentIndex(newEnum);
+    enumCombo->setCurrentIndex(newEnum);
 }
 
 int ComboWidget::getIndex()
 {
-	return enumCombo->currentIndex();
+    return enumCombo->currentIndex();
 }
 
 ComboWidget::~ComboWidget()
 {
-	delete enumCombo;
-	delete enumLabel;
+    delete enumCombo;
+    delete enumLabel;
 }
 
 void ComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addWidget(enumLabel,r,0);
-		lay->addWidget(enumCombo,r,1);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    if (lay != NULL)
+    {
+        lay->addWidget(enumLabel,r,0);
+        lay->addWidget(enumCombo,r,1);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /******************************************/
 //EnumWidget Implementation
@@ -907,31 +907,31 @@ void ComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 EnumWidget::EnumWidget(QWidget *p, RichEnum* rpar)
 :ComboWidget(p,rpar)
 {
-	//you MUST call it!!!!
-	Init(p,rpar->val->getEnum(),reinterpret_cast<EnumDecoration*>(rpar->pd)->enumvalues);
-	//assert(enumCombo != NULL);
+    //you MUST call it!!!!
+    Init(p,rpar->val->getEnum(),reinterpret_cast<EnumDecoration*>(rpar->pd)->enumvalues);
+    //assert(enumCombo != NULL);
 }
 
 int EnumWidget::getSize()
 {
-	return enumCombo->count();
+    return enumCombo->count();
 }
 
 
 void EnumWidget::collectWidgetValue()
 {
-	rp->val->set(EnumValue(enumCombo->currentIndex()));
+    rp->val->set(EnumValue(enumCombo->currentIndex()));
 }
 
 void EnumWidget::resetWidgetValue()
 {
-	//lned->setText(QString::number(rp->val->getFloat(),'g',3));
-	enumCombo->setCurrentIndex(rp->pd->defVal->getEnum());
+    //lned->setText(QString::number(rp->val->getFloat(),'g',3));
+    enumCombo->setCurrentIndex(rp->pd->defVal->getEnum());
 }
 
 void EnumWidget::setWidgetValue( const Value& nv )
 {
-	enumCombo->setCurrentIndex(nv.getEnum());
+    enumCombo->setCurrentIndex(nv.getEnum());
 }
 
 /******************************************/
@@ -940,66 +940,66 @@ void EnumWidget::setWidgetValue( const Value& nv )
 
 
 MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
-:ComboWidget(p,rpar) 
+:ComboWidget(p,rpar)
 {
-	md=reinterpret_cast<MeshDecoration*>(rp->pd)->meshdoc;
+    md=reinterpret_cast<MeshDecoration*>(rp->pd)->meshdoc;
 
-	QStringList meshNames;
+    QStringList meshNames;
 
-	//make the default mesh Index be 0
-	defaultMeshIndex = -1;
+    //make the default mesh Index be 0
+    defaultMeshIndex = -1;
 
-	for(int i=0;i<md->meshList.size();++i)
-	{
-		QString shortName = md->meshList.at(i)->label();
-		meshNames.push_back(shortName);
-		if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
-	}
+    for(int i=0;i<md->meshList.size();++i)
+    {
+        QString shortName = md->meshList.at(i)->label();
+        meshNames.push_back(shortName);
+        if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
+    }
 
-	//add a blank choice because there is no default available
-	if(defaultMeshIndex == -1)
-	{
-		meshNames.push_back("");
-		defaultMeshIndex = meshNames.size()-1;  //have the blank choice be shown
-	}
-	Init(p,defaultMeshIndex,meshNames);
+    //add a blank choice because there is no default available
+    if(defaultMeshIndex == -1)
+    {
+        meshNames.push_back("");
+        defaultMeshIndex = meshNames.size()-1;  //have the blank choice be shown
+    }
+    Init(p,defaultMeshIndex,meshNames);
 }
 
 MeshModel * MeshWidget::getMesh()
 {
-	//test to make sure index is in bounds
-	int index = enumCombo->currentIndex();
-	if(index < md->meshList.size() && index > -1)
-		return md->meshList.at(enumCombo->currentIndex());
-	else return NULL;
+    //test to make sure index is in bounds
+    int index = enumCombo->currentIndex();
+    if(index < md->meshList.size() && index > -1)
+        return md->meshList.at(enumCombo->currentIndex());
+    else return NULL;
 }
 
 void MeshWidget::setMesh(MeshModel * newMesh)
 {
-	for(int i=0; i < md->meshList.size(); ++i)
-	{
-		if(md->meshList.at(i) == newMesh) 
-			setIndex(i);
-	}
+    for(int i=0; i < md->meshList.size(); ++i)
+    {
+        if(md->meshList.at(i) == newMesh)
+            setIndex(i);
+    }
 }
 
 void MeshWidget::collectWidgetValue()
 {
-	MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(rp->pd);
-	dec->meshindex = enumCombo->currentIndex();
-	rp->val->set(MeshValue(md->meshList.at(dec->meshindex)));
+    MeshDecoration* dec = reinterpret_cast<MeshDecoration*>(rp->pd);
+    dec->meshindex = enumCombo->currentIndex();
+    rp->val->set(MeshValue(md->meshList.at(dec->meshindex)));
 }
 
 void MeshWidget::resetWidgetValue()
 {
-	enumCombo->setCurrentIndex(defaultMeshIndex);
+    enumCombo->setCurrentIndex(defaultMeshIndex);
 }
 
 void MeshWidget::setWidgetValue( const Value& /*nv*/ )
 {
-	//WARNING!!!!! I HAVE TO THINK CAREFULLY ABOUT THIS FUNCTION!!!
-	assert(0);
-	//enumCombo->setCurrentIndex(md->meshList(nv.getMesh());
+    //WARNING!!!!! I HAVE TO THINK CAREFULLY ABOUT THIS FUNCTION!!!
+    assert(0);
+    //enumCombo->setCurrentIndex(md->meshList(nv.getMesh());
 }
 
 /******************************************
@@ -1126,70 +1126,70 @@ fileNameLabel->setText(QFileInfo(_fileName).fileName());
 void GetFileNameWidget::setFileName(QString newName){
 _fileName = newName;
 }
-*/ 
+*/
 
 GenericParamDialog::GenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
 : QDialog(p) {
-	stdParFrame=NULL;
-	curParSet=_curParSet;
-	meshDocument = _meshDocument;
-	createFrame();
-	if(!title.isEmpty())
-		setWindowTitle(title);
+    stdParFrame=NULL;
+    curParSet=_curParSet;
+    meshDocument = _meshDocument;
+    createFrame();
+    if(!title.isEmpty())
+        setWindowTitle(title);
 }
 
 
 // update the values of the widgets with the values in the paramlist;
 void GenericParamDialog::resetValues()
 {
-	stdParFrame->resetValues(*curParSet);
+    stdParFrame->resetValues(*curParSet);
 }
 
 void GenericParamDialog::toggleHelp()
 {
-	stdParFrame->toggleHelp();
-	this->updateGeometry();
-	this->adjustSize();
+    stdParFrame->toggleHelp();
+    this->updateGeometry();
+    this->adjustSize();
 }
 
 
 void GenericParamDialog::createFrame()
 {
-	QVBoxLayout *vboxLayout = new QVBoxLayout(this);
-	setLayout(vboxLayout);
+    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+    setLayout(vboxLayout);
 
-	stdParFrame = new StdParFrame(this);
-	stdParFrame->loadFrameContent(*curParSet, meshDocument);
-	layout()->addWidget(stdParFrame);
+    stdParFrame = new StdParFrame(this);
+    stdParFrame->loadFrameContent(*curParSet, meshDocument);
+    layout()->addWidget(stdParFrame);
 
-	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
-	//add the reset button so we can get its signals
-	QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
-	layout()->addWidget(buttonBox);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+    //add the reset button so we can get its signals
+    QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
+    layout()->addWidget(buttonBox);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-	connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
-	connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
 
-	setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 
-	//set the minimum size so it will shrink down to the right size	after the help is toggled
-	this->setMinimumSize(stdParFrame->sizeHint());
-	this->showNormal();
-	this->adjustSize();
+    //set the minimum size so it will shrink down to the right size	after the help is toggled
+    this->setMinimumSize(stdParFrame->sizeHint());
+    this->showNormal();
+    this->adjustSize();
 }
 
 
 void GenericParamDialog::getAccept()
 {
-	stdParFrame->readValues(*curParSet);
-	accept();
+    stdParFrame->readValues(*curParSet);
+    accept();
 }
 
 GenericParamDialog::~GenericParamDialog()
 {
-	delete stdParFrame;
+    delete stdParFrame;
 }
 
 /******************************************/
@@ -1202,41 +1202,39 @@ DynamicFloatWidget::DynamicFloatWidget(QWidget *p, RichDynamicFloat* rdf):MeshLa
 {
     int numbdecimaldigit = 4;
     minVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->min;
-	maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
-	valueLE = new QLineEdit(this);
-	valueLE->setAlignment(Qt::AlignRight);
+    maxVal = reinterpret_cast<DynamicFloatDecoration*>(rdf->pd)->max;
+    valueLE = new QLineEdit(this);
+    valueLE->setAlignment(Qt::AlignRight);
 
-	valueSlider = new QSlider(Qt::Horizontal,this);
+    valueSlider = new QSlider(Qt::Horizontal,this);
     valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-	fieldDesc = new QLabel(rp->pd->fieldDesc,this);
-	valueSlider->setMinimum(0);
-	valueSlider->setMaximum(100);
-	valueSlider->setValue(floatToInt(rp->val->getFloat()));
-	const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
+    fieldDesc = new QLabel(rp->pd->fieldDesc,this);
+    valueSlider->setMinimum(0);
+    valueSlider->setMaximum(100);
+    valueSlider->setValue(floatToInt(rp->val->getFloat()));
+    const DynamicFloatDecoration* dfd = reinterpret_cast<const DynamicFloatDecoration*>(&(rp->pd));
     QFontMetrics fm(valueLE->font());
     QSize sz = fm.size(Qt::TextSingleLine,QString::number(0));
     valueLE->setValidator(new QDoubleValidator (dfd->min,dfd->max, numbdecimaldigit, valueLE));
     valueLE->setText(QString::number(rp->val->getFloat()));
     valueLE->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
 
-	//int row = gridLay->rowCount() - 1;
-	//lay->addWidget(fieldDesc,row,0);
+    //int row = gridLay->rowCount() - 1;
+    //lay->addWidget(fieldDesc,row,0);
 
-	hlay = new QHBoxLayout();
+    hlay = new QHBoxLayout();
     hlay->addWidget(valueLE);
     hlay->addWidget(valueSlider);
-    int numbmaxvaluedigit = (floor(log10(maxVal)) + 1 );
-
     int maxlenghtplusdot = 8;//numbmaxvaluedigit + numbdecimaldigit + 1;
     valueLE->setMaxLength(maxlenghtplusdot);
     valueLE->setMaximumWidth(sz.width() * maxlenghtplusdot);
 
 
-	//gridLay->addLayout(hlay,row,1);
+    //gridLay->addLayout(hlay,row,1);
 
-	connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
-	connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
-	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+    connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
+    connect(valueSlider,SIGNAL(valueChanged(int)),this,SLOT(setValue(int)));
+    connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 
 }
 
@@ -1246,107 +1244,107 @@ DynamicFloatWidget::~DynamicFloatWidget()
 
 float DynamicFloatWidget::getValue()
 {
-	return float(valueLE->text().toDouble());
+    return float(valueLE->text().toDouble());
 }
 
 void DynamicFloatWidget::setValue(float  newVal)
 {
-	if( QString::number(intToFloat(newVal)) != valueLE->text())
-		valueLE->setText(QString::number(intToFloat(newVal)));
+    if( QString::number(intToFloat(newVal)) != valueLE->text())
+        valueLE->setText(QString::number(intToFloat(newVal)));
 }
 
 void DynamicFloatWidget::setValue(int  newVal)
 {
-	if(floatToInt(float(valueLE->text().toDouble())) != newVal)
-	{
-		valueLE->setText(QString::number(intToFloat(newVal)));
-	}
+    if(floatToInt(float(valueLE->text().toDouble())) != newVal)
+    {
+        valueLE->setText(QString::number(intToFloat(newVal)));
+    }
 }
 
 void DynamicFloatWidget::setValue()
 {
-	float newValLE=float(valueLE->text().toDouble());
-	valueSlider->setValue(floatToInt(newValLE));
-	emit dialogParamChanged();
+    float newValLE=float(valueLE->text().toDouble());
+    valueSlider->setValue(floatToInt(newValLE));
+    emit dialogParamChanged();
 }
 
 float DynamicFloatWidget::intToFloat(int val)
 {
-	return minVal+float(val)/100.0f*(maxVal-minVal);
+    return minVal+float(val)/100.0f*(maxVal-minVal);
 }
 int DynamicFloatWidget::floatToInt(float val)
 {
-	return int (100.0f*(val-minVal)/(maxVal-minVal));
+    return int (100.0f*(val-minVal)/(maxVal-minVal));
 }
 
 void DynamicFloatWidget::collectWidgetValue()
 {
-	rp->val->set(DynamicFloatValue(valueLE->text().toFloat()));
+    rp->val->set(DynamicFloatValue(valueLE->text().toFloat()));
 }
 
 void DynamicFloatWidget::resetWidgetValue()
 {
-	valueLE->setText(QString::number(rp->pd->defVal->getFloat()));
+    valueLE->setText(QString::number(rp->pd->defVal->getFloat()));
 }
 
 void DynamicFloatWidget::setWidgetValue( const Value& nv )
 {
-	valueLE->setText(QString::number(nv.getFloat()));
+    valueLE->setText(QString::number(nv.getFloat()));
 }
 
 void DynamicFloatWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
-{	
-	if (lay != NULL)
-	{
+{
+    if (lay != NULL)
+    {
         lay->addWidget(fieldDesc,r,0);
         lay->addLayout(hlay,r,1);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /****************************/
 Value& MeshLabWidget::getWidgetValue()
 {
-	collectWidgetValue();
-	return *(rp->val);
+    collectWidgetValue();
+    return *(rp->val);
 }
 
 
 void MeshLabWidget::resetValue()
 {
-	rp->val->set(*rp->pd->defVal);
-	resetWidgetValue();
+    rp->val->set(*rp->pd->defVal);
+    resetWidgetValue();
 }
 
 MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
 :QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
 //:rp(rpar)
 {
-	//setParent(p);
-	if (rp!= NULL)
-	{
-		helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",this);
-		helpLab->setTextFormat(Qt::RichText);
-		helpLab->setWordWrap(true);
-		helpLab->setVisible(false);
-		helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-		helpLab->setMinimumWidth(250);
-		helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
-		/*gridLay = qobject_cast<QGridLayout*>(p->layout());
-		assert(gridLay != 0);
-		row = gridLay->rowCount();*/
-		//gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
-	}
+    //setParent(p);
+    if (rp!= NULL)
+    {
+        helpLab = new QLabel("<small>"+rpar->pd->tooltip +"</small>",this);
+        helpLab->setTextFormat(Qt::RichText);
+        helpLab->setWordWrap(true);
+        helpLab->setVisible(false);
+        helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+        helpLab->setMinimumWidth(250);
+        helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
+        /*gridLay = qobject_cast<QGridLayout*>(p->layout());
+        assert(gridLay != 0);
+        row = gridLay->rowCount();*/
+        //gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+    }
 }
 
 void MeshLabWidget::InitRichParameter(RichParameter* rpar)
 {
-	rp = rpar;
+    rp = rpar;
 }
 
 MeshLabWidget::~MeshLabWidget()
 {
-	//delete rp;
-	delete helpLab;
+    //delete rp;
+    delete helpLab;
 }
 
 //void MeshLabWidget::setEqualSpaceForEachColumn()
@@ -1358,152 +1356,152 @@ MeshLabWidget::~MeshLabWidget()
 
 void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 {
-	if (lay != NULL)
-		lay->addWidget(helpLab,r,2,1,1);
+    if (lay != NULL)
+        lay->addWidget(helpLab,r,2,1,1);
 }
 
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
 BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
 :MeshLabWidget(p,rb)
 {
-	cb = new QCheckBox(rp->pd->fieldDesc,this);
-	cb->setToolTip(rp->pd->tooltip);
-	cb->setChecked(rp->val->getBool());
+    cb = new QCheckBox(rp->pd->fieldDesc,this);
+    cb->setToolTip(rp->pd->tooltip);
+    cb->setChecked(rp->val->getBool());
 
-	connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
+    connect(cb,SIGNAL(stateChanged(int)),p,SIGNAL(parameterChanged()));
 }
 
 void BoolWidget::collectWidgetValue()
 {
-	rp->val->set(BoolValue(cb->isChecked()));
+    rp->val->set(BoolValue(cb->isChecked()));
 }
 
 void BoolWidget::resetWidgetValue()
 {
-	cb->setChecked(rp->pd->defVal->getBool());
+    cb->setChecked(rp->pd->defVal->getBool());
 }
 
 BoolWidget::~BoolWidget()
 {
-	//delete lab;
-	delete cb;
+    //delete lab;
+    delete cb;
 }
 
 void BoolWidget::setWidgetValue( const Value& nv )
 {
-	cb->setChecked(nv.getBool());
+    cb->setChecked(nv.getBool());
 }
 
 void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 {
-	if (lay !=NULL)
+    if (lay !=NULL)
         lay->addWidget(cb,r,0,1,2);
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
 //connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
 :MeshLabWidget(p,rpar)
 {
-	lab = new QLabel(rp->pd->fieldDesc,this);
-	lned = new QLineEdit(this);
-	//int row = gridLay->rowCount() -1;
+    lab = new QLabel(rp->pd->fieldDesc,this);
+    lned = new QLineEdit(this);
+    //int row = gridLay->rowCount() -1;
 
-	lab->setToolTip(rp->pd->tooltip);
-	//gridLay->addWidget(lab,row,0);
-	//gridLay->addWidget(lned,row,1);
-	connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
-	connect(this,SIGNAL(lineEditChanged()),p,SIGNAL(parameterChanged()));
-	lned->setAlignment(Qt::AlignLeft);
+    lab->setToolTip(rp->pd->tooltip);
+    //gridLay->addWidget(lab,row,0);
+    //gridLay->addWidget(lned,row,1);
+    connect(lned,SIGNAL(editingFinished()),this,SLOT(changeChecker()));
+    connect(this,SIGNAL(lineEditChanged()),p,SIGNAL(parameterChanged()));
+    lned->setAlignment(Qt::AlignLeft);
 }
 
 LineEditWidget::~LineEditWidget()
 {
-	delete lned;
-	delete lab;
+    delete lned;
+    delete lab;
 }
 
 void LineEditWidget::changeChecker()
 {
-	if(lned->text() != this->lastVal)
-	{
-		this->lastVal = lned->text();
-		if(!this->lastVal.isEmpty())
-			emit lineEditChanged();
-	}
+    if(lned->text() != this->lastVal)
+    {
+        this->lastVal = lned->text();
+        if(!this->lastVal.isEmpty())
+            emit lineEditChanged();
+    }
 }
 
 void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay !=NULL)
-	{
-		lay->addWidget(lab,r,0);
+    if (lay !=NULL)
+    {
+        lay->addWidget(lab,r,0);
         lay->addWidget(lned,r,1);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(QString::number(rp->val->getInt()));
+    lned->setText(QString::number(rp->val->getInt()));
 }
 
 void IntWidget::collectWidgetValue()
 {
-	rp->val->set(IntValue(lned->text().toInt()));
+    rp->val->set(IntValue(lned->text().toInt()));
 }
 
 void IntWidget::resetWidgetValue()
 {
-	lned->setText(QString::number(rp->pd->defVal->getInt()));
+    lned->setText(QString::number(rp->pd->defVal->getInt()));
 }
 
 void IntWidget::setWidgetValue( const Value& nv )
 {
-	lned->setText(QString::number(nv.getInt()));
+    lned->setText(QString::number(nv.getInt()));
 }
 //
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(QString::number(rp->val->getFloat(),'g',3));
+    lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
 
 void FloatWidget::collectWidgetValue()
 {
-	rp->val->set(FloatValue(lned->text().toFloat()));
+    rp->val->set(FloatValue(lned->text().toFloat()));
 }
 
 void FloatWidget::resetWidgetValue()
 {
-	lned->setText(QString::number(rp->pd->defVal->getFloat(),'g',3));
+    lned->setText(QString::number(rp->pd->defVal->getFloat(),'g',3));
 }
 
 void FloatWidget::setWidgetValue( const Value& nv )
 {
-	lned->setText(QString::number(nv.getFloat(),'g',3));
+    lned->setText(QString::number(nv.getFloat(),'g',3));
 }
 
 StringWidget::StringWidget( QWidget* p,RichString* rpar )
 :LineEditWidget(p,rpar)
 {
-	lned->setText(rp->val->getString());
+    lned->setText(rp->val->getString());
 }
 
 void StringWidget::collectWidgetValue()
 {
-	rp->val->set(StringValue(lned->text()));
+    rp->val->set(StringValue(lned->text()));
 }
 
 void StringWidget::resetWidgetValue()
 {
-	lned->setText(rp->pd->defVal->getString());
+    lned->setText(rp->pd->defVal->getString());
 }
 
 void StringWidget::setWidgetValue( const Value& nv )
 {
-	lned->setText(nv.getString());
+    lned->setText(nv.getString());
 }
 
 
@@ -1514,18 +1512,18 @@ void StringWidget::setWidgetValue( const Value& nv )
 
 ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
 :MeshLabWidget(p,newColor),pickcol()
-{	
-	colorLabel = new QLabel(this);
-	descLabel = new QLabel(rp->pd->fieldDesc,this);
-	colorButton = new QPushButton(this);
-	colorButton->setAutoFillBackground(true);
-	colorButton->setFlat(true);
+{
+    colorLabel = new QLabel(this);
+    descLabel = new QLabel(rp->pd->fieldDesc,this);
+    colorButton = new QPushButton(this);
+    colorButton->setAutoFillBackground(true);
+    colorButton->setFlat(true);
     colorButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-	//const QColor cl = rp->pd->defVal->getColor();
-	//resetWidgetValue();
-	initWidgetValue();
-	//int row = gridLay->rowCount() - 1;
-	//gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
+    //const QColor cl = rp->pd->defVal->getColor();
+    //resetWidgetValue();
+    initWidgetValue();
+    //int row = gridLay->rowCount() - 1;
+    //gridLay->addWidget(descLabel,row,0,Qt::AlignTop);
 
     vlay = new QHBoxLayout();
     QFontMetrics met(colorLabel->font());
@@ -1538,72 +1536,72 @@ ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
     vlay->addWidget(colorButton);
 
 
-	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
-	pickcol = rp->val->getColor();
-	connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
-	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+    //gridLay->addLayout(lay,row,1,Qt::AlignTop);
+    pickcol = rp->val->getColor();
+    connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
+    connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
 
 void ColorWidget::updateColorInfo(const ColorValue& newColor)
 {
-	QColor col = newColor.getColor();
-	colorLabel->setText("("+col.name()+")");
-	QPalette palette(col);
-	colorButton->setPalette(palette);
+    QColor col = newColor.getColor();
+    colorLabel->setText("("+col.name()+")");
+    QPalette palette(col);
+    colorButton->setPalette(palette);
 }
 
 void ColorWidget::pickColor()
 {
-	pickcol =QColorDialog::getColor(pickcol,this->parentWidget(),"Pick a Color",QColorDialog::DontUseNativeDialog|QColorDialog::ShowAlphaChannel);
-	if(pickcol.isValid()) 
-	{
-		collectWidgetValue();
-		updateColorInfo(ColorValue(pickcol));
-	}
-	emit dialogParamChanged();
+    pickcol =QColorDialog::getColor(pickcol,this->parentWidget(),"Pick a Color",QColorDialog::DontUseNativeDialog|QColorDialog::ShowAlphaChannel);
+    if(pickcol.isValid())
+    {
+        collectWidgetValue();
+        updateColorInfo(ColorValue(pickcol));
+    }
+    emit dialogParamChanged();
 }
 
 void ColorWidget::initWidgetValue()
 {
-	QColor cl = rp->val->getColor();
-	pickcol = cl;
-	updateColorInfo(cl);
+    QColor cl = rp->val->getColor();
+    pickcol = cl;
+    updateColorInfo(cl);
 }
 
 void ColorWidget::resetWidgetValue()
 {
-	QColor cl = rp->pd->defVal->getColor();
-	pickcol = cl;
-	updateColorInfo(cl);
+    QColor cl = rp->pd->defVal->getColor();
+    pickcol = cl;
+    updateColorInfo(cl);
 }
 
 void ColorWidget::collectWidgetValue()
 {
-	rp->val->set(ColorValue(pickcol));
+    rp->val->set(ColorValue(pickcol));
 }
 
 ColorWidget::~ColorWidget()
 {
-	delete colorButton;
-	delete colorLabel;
-	delete descLabel;
+    delete colorButton;
+    delete colorLabel;
+    delete descLabel;
 }
 
 void ColorWidget::setWidgetValue( const Value& nv )
 {
-	QColor cl = nv.getColor();
-	pickcol = cl;
-	updateColorInfo(cl);
+    QColor cl = nv.getColor();
+    pickcol = cl;
+    updateColorInfo(cl);
 }
 
 void ColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
+    if (lay != NULL)
+    {
         lay->addWidget(descLabel,r,0);
         lay->addLayout(vlay,r,1);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 /*
 void GetFileNameWidget::launchGetFileNameDialog()
@@ -1613,131 +1611,131 @@ void GetFileNameWidget::launchGetFileNameDialog()
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichBool& pd )
 {
-	if (pd.val->getBool())
-		lastCreated = new QTableWidgetItem("true"/*,lst*/);
-	else
-		lastCreated = new QTableWidgetItem("false"/*,lst*/);
+    if (pd.val->getBool())
+        lastCreated = new QTableWidgetItem("true"/*,lst*/);
+    else
+        lastCreated = new QTableWidgetItem("false"/*,lst*/);
 
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichInt& pd )
 {
-	lastCreated = new QTableWidgetItem(QString::number(pd.val->getInt())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.val->getInt())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichFloat& pd )
 {
-	lastCreated = new QTableWidgetItem(QString::number(pd.val->getFloat())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.val->getFloat())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichString& pd )
 {
-	lastCreated = new QTableWidgetItem(pd.val->getString()/*,lst*/);
+    lastCreated = new QTableWidgetItem(pd.val->getString()/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichPoint3f& pd )
 {
-	vcg::Point3f pp = pd.val->getPoint3f(); 
-	QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")"; 
-	lastCreated = new QTableWidgetItem(pst/*,lst*/);
+    vcg::Point3f pp = pd.val->getPoint3f();
+    QString pst = "P3(" + QString::number(pp.X()) + "," + QString::number(pp.Y()) + "," + QString::number(pp.Z()) + ")";
+    lastCreated = new QTableWidgetItem(pst/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichShotf& /*pd*/ )
 {
-	assert(0); ///
-	lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);
+    assert(0); ///
+    lastCreated = new QTableWidgetItem(QString("TODO")/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit(RichOpenFile& pd)
 {
-	lastCreated = new QTableWidgetItem(pd.val->getFileName()/*,lst*/);
+    lastCreated = new QTableWidgetItem(pd.val->getFileName()/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichColor& pd )
 {
-	QPixmap pix(10,10);
-	pix.fill(pd.val->getColor());
-	QIcon ic(pix);
-	lastCreated = new QTableWidgetItem(ic,""/*,lst*/);
+    QPixmap pix(10,10);
+    pix.fill(pd.val->getColor());
+    QIcon ic(pix);
+    lastCreated = new QTableWidgetItem(ic,""/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichAbsPerc& pd )
 {
-	lastCreated = new QTableWidgetItem(QString::number(pd.val->getAbsPerc())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.val->getAbsPerc())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichEnum& pd )
 {
-	lastCreated = new QTableWidgetItem(QString::number(pd.val->getEnum())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.val->getEnum())/*,lst*/);
 }
 
 void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 {
-	lastCreated = new QTableWidgetItem(QString::number(pd.val->getDynamicFloat())/*,lst*/);
+    lastCreated = new QTableWidgetItem(QString::number(pd.val->getDynamicFloat())/*,lst*/);
 }
 
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
 :MeshLabWidget(p,rpar),fl()
 {
-	filename = new QLineEdit(this);
-	filename->setText(tr(""));
-	browse = new QPushButton(this);
-	descLab = new QLabel(rp->pd->fieldDesc,this);
-	browse->setText("...");
-	//const QColor cl = rp->pd->defVal->getColor();
-	//resetWidgetValue();
-	//int row = gridLay->rowCount() - 1;
-	//gridLay->addWidget(descLab,row,0,Qt::AlignTop);
-	hlay = new QHBoxLayout();
-	hlay->addWidget(filename,2);
-	hlay->addWidget(browse);
+    filename = new QLineEdit(this);
+    filename->setText(tr(""));
+    browse = new QPushButton(this);
+    descLab = new QLabel(rp->pd->fieldDesc,this);
+    browse->setText("...");
+    //const QColor cl = rp->pd->defVal->getColor();
+    //resetWidgetValue();
+    //int row = gridLay->rowCount() - 1;
+    //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
+    hlay = new QHBoxLayout();
+    hlay->addWidget(filename,2);
+    hlay->addWidget(browse);
 
-	//gridLay->addLayout(lay,row,1,Qt::AlignTop);
+    //gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
-	connect(browse,SIGNAL(clicked()),this,SLOT(selectFile()));
-	connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
+    connect(browse,SIGNAL(clicked()),this,SLOT(selectFile()));
+    connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
 }
 
 IOFileWidget::~IOFileWidget()
 {
-	delete filename;
-	delete browse;
-	delete descLab;
+    delete filename;
+    delete browse;
+    delete descLab;
 }
 
 void IOFileWidget::collectWidgetValue()
 {
-	rp->val->set(FileValue(fl));
+    rp->val->set(FileValue(fl));
 }
 
 void IOFileWidget::resetWidgetValue()
 {
-	QString fle = rp->pd->defVal->getFileName();
-	fl = fle;
-	updateFileName(fle);
+    QString fle = rp->pd->defVal->getFileName();
+    fl = fle;
+    updateFileName(fle);
 }
 
 
 void IOFileWidget::setWidgetValue(const Value& nv)
 {
-	QString fle = nv.getFileName();
-	fl = fle;
-	updateFileName(QString());
+    QString fle = nv.getFileName();
+    fl = fle;
+    updateFileName(QString());
 }
 
 void IOFileWidget::updateFileName( const FileValue& file )
 {
-	filename->setText(file.getFileName());
+    filename->setText(file.getFileName());
 }
 
 void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	if (lay != NULL)
-	{
-		lay->addWidget(descLab,r,0,Qt::AlignTop);
-		lay->addLayout(hlay,r,1,Qt::AlignTop);
-	}
-	MeshLabWidget::addWidgetToGridLayout(lay,r);
+    if (lay != NULL)
+    {
+        lay->addWidget(descLab,r,0,Qt::AlignTop);
+        lay->addLayout(hlay,r,1,Qt::AlignTop);
+    }
+    MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
 OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
@@ -1747,12 +1745,12 @@ OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
 
 void OpenFileWidget::selectFile()
 {
-	OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
-	QString ext;
-	fl = QFileDialog::getOpenFileName(this,tr("Open"),dec->defVal->getFileName(),dec->exts.join(" "));
-	collectWidgetValue();
-	updateFileName(fl);
-	emit dialogParamChanged();
+    OpenFileDecoration* dec = reinterpret_cast<OpenFileDecoration*>(rp->pd);
+    QString ext;
+    fl = QFileDialog::getOpenFileName(this,tr("Open"),dec->defVal->getFileName(),dec->exts.join(" "));
+    collectWidgetValue();
+    updateFileName(fl);
+    emit dialogParamChanged();
 }
 
 
@@ -1764,7 +1762,7 @@ OpenFileWidget::~OpenFileWidget()
 SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
 :IOFileWidget(p,rpar)
 {
-	filename->setText(rpar->val->getFileName());
+    filename->setText(rpar->val->getFileName());
 }
 
 SaveFileWidget::~SaveFileWidget()
@@ -1773,10 +1771,10 @@ SaveFileWidget::~SaveFileWidget()
 
 void SaveFileWidget::selectFile()
 {
-	SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
-	QString ext;
-	fl = QFileDialog::getSaveFileName(this,tr("Save"),dec->defVal->getFileName(),dec->ext);
-	collectWidgetValue();
-	updateFileName(fl);
-	emit dialogParamChanged();
+    SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(rp->pd);
+    QString ext;
+    fl = QFileDialog::getSaveFileName(this,tr("Save"),dec->defVal->getFileName(),dec->ext);
+    collectWidgetValue();
+    updateFileName(fl);
+    emit dialogParamChanged();
 }

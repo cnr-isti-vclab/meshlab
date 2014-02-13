@@ -22,12 +22,9 @@
 ****************************************************************************/
 
 #include <time.h>
-#include <assert.h>
 #include <list>
 #include <utility>
-#include <vector>
 #include <bitset>
-
 
 #include "OccupancyGrid.h"
 
@@ -138,128 +135,128 @@ void OccupancyGrid::Compute()
 
 void OccupancyGrid::ComputeTotalArea()
 {
-	int ccnt=0;
-	MaxCount=0;
-	int sz=G.size();
-	for(int i=0;i<sz;++i)
-		if(!G.grid[i].Empty()) {
-			ccnt++;
-			if(G.grid[i].Count()>MaxCount) MaxCount=G.grid[i].Count();
-		}
+    int ccnt=0;
+    MaxCount=0;
+    int sz=G.size();
+    for(int i=0;i<sz;++i)
+        if(!G.grid[i].Empty()) {
+            ccnt++;
+            if(G.grid[i].Count()>MaxCount) MaxCount=G.grid[i].Count();
+        }
 
-	TotalArea=ccnt;
+    TotalArea=ccnt;
 }
 /*
-	Ordinare le RangeMap in base a quanto sono utili.
-	Una RangeMap e' utile se copre parti non ancora viste
+    Ordinare le RangeMap in base a quanto sono utili.
+    Una RangeMap e' utile se copre parti non ancora viste
 
-	Per ogni cella della og c'e' un bit che dice quali range map ci passano
-	per ogni range map si conosce l'area (espressa in celle della og)
-	Si considera un voxel visto se ci sono almeno <K> range map che lo coprono.
-	Inizialmente si moltiplica *1,2, ..K l'area di tutte le rm
+    Per ogni cella della og c'e' un bit che dice quali range map ci passano
+    per ogni range map si conosce l'area (espressa in celle della og)
+    Si considera un voxel visto se ci sono almeno <K> range map che lo coprono.
+    Inizialmente si moltiplica *1,2, ..K l'area di tutte le rm
 
-	Si parte dalla rm con area maggiore e si diminuisce di uno l'area
-	di tutte le altre rm che tocca in voxel visti meno di due volte.
+    Si parte dalla rm con area maggiore e si diminuisce di uno l'area
+    di tutte le altre rm che tocca in voxel visti meno di due volte.
 
 */
 void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
 {
-	vector<int> UpdArea(mn);
-	vector<int> UpdCovg(mn);
+    vector<int> UpdArea(mn);
+    vector<int> UpdCovg(mn);
 
-	Use.clear();
-	int i,j,m,mcnt=0;
-	for(m=0;m<mn;++m) {
-			if(VM[m].used && VM[m].area>0) {
-				mcnt++;
-				UpdCovg[m]=VM[m].coverage;
-				UpdArea[m]=VM[m].area;
-			}
-		}
+    Use.clear();
+    int i,j,m,mcnt=0;
+    for(m=0;m<mn;++m) {
+            if(VM[m].used && VM[m].area>0) {
+                mcnt++;
+                UpdCovg[m]=VM[m].coverage;
+                UpdArea[m]=VM[m].area;
+            }
+        }
 
-	int sz=G.size();
-	if(elfp) {
-		fprintf(elfp,"\n\nComputing Usefulness of Meshes of %i(on %i) meshes\n Og with %i / %i fill ratio %i max mesh per cell\n\n",mcnt,mn,TotalArea,sz,MaxCount);
-		fprintf(elfp,"\n");
+    int sz=G.size();
+    if(elfp) {
+        fprintf(elfp,"\n\nComputing Usefulness of Meshes of %i(on %i) meshes\n Og with %i / %i fill ratio %i max mesh per cell\n\n",mcnt,mn,TotalArea,sz,MaxCount);
+        fprintf(elfp,"\n");
 
-	}
-	int CumArea=0;
-	for(m=0;m<mn-1;++m)
-		{
+    }
+    int CumArea=0;
+    for(m=0;m<mn-1;++m)
+        {
 
-			int best = max_element(UpdArea.begin(),UpdArea.end())-UpdArea.begin();
-			//int best = max_element(UpdCovg.begin(),UpdCovg.end())-UpdCovg.begin();
-			CumArea+=UpdArea[best];
-			if(UpdCovg[best]<0) break;
-			if(VM[best].area==0) continue; // se era una mesh fuori del working group si salta tutto.
+            int best = max_element(UpdArea.begin(),UpdArea.end())-UpdArea.begin();
+            //int best = max_element(UpdCovg.begin(),UpdCovg.end())-UpdCovg.begin();
+            CumArea+=UpdArea[best];
+            if(UpdCovg[best]<0) break;
+            if(VM[best].area==0) continue; // se era una mesh fuori del working group si salta tutto.
 
-			if(elfp) fprintf(elfp,"%3i %3i %7i (%7i) %7i %5.2f %7i(%7i)\n",
-				m, best, UpdArea[best],VM[best].area, TotalArea-CumArea, 100.0-100*float(CumArea)/TotalArea, UpdCovg[best],VM[best].coverage);
+            if(elfp) fprintf(elfp,"%3i %3i %7i (%7i) %7i %5.2f %7i(%7i)\n",
+                m, best, UpdArea[best],VM[best].area, TotalArea-CumArea, 100.0-100*float(CumArea)/TotalArea, UpdCovg[best],VM[best].coverage);
 
-			Use.push_back(OGUseInfo(best,UpdArea[best]));
-			UpdArea[best]=-1;
-			UpdCovg[best]=-1;
+            Use.push_back(OGUseInfo(best,UpdArea[best]));
+            UpdArea[best]=-1;
+            UpdCovg[best]=-1;
 
-			for(i=0;i<sz;++i)
-			{
-				MeshCounter &mc=G.grid[i];
-				if(mc.IsSet(best))	{
-				  mc.UnSet(best);
-					for(j=0;j<mn;++j)
-					  if(mc.IsSet(j)) {
-							--UpdArea[j];
-							UpdCovg[j]-=mc.Count();
-					  }
-					mc.Clear();
-			  }
-			}
-		}
+            for(i=0;i<sz;++i)
+            {
+                MeshCounter &mc=G.grid[i];
+                if(mc.IsSet(best))	{
+                  mc.UnSet(best);
+                    for(j=0;j<mn;++j)
+                      if(mc.IsSet(j)) {
+                            --UpdArea[j];
+                            UpdCovg[j]-=mc.Count();
+                      }
+                    mc.Clear();
+              }
+            }
+        }
 }
 
 void OccupancyGrid::Dump(FILE *fp)
 {
-	fprintf(fp,"Occupancy Grid\n");
-	fprintf(fp,"grid of ~%i kcells: %d x %d x %d\n",G.size(),G.siz[0],G.siz[1],G.siz[2]);
-	fprintf(fp,"grid voxel size of %f %f %f\n",G.voxel[0],G.voxel[1],G.voxel[2]);
+    fprintf(fp,"Occupancy Grid\n");
+    fprintf(fp,"grid of ~%i kcells: %d x %d x %d\n",G.size(),G.siz[0],G.siz[1],G.siz[2]);
+    fprintf(fp,"grid voxel size of %f %f %f\n",G.voxel[0],G.voxel[1],G.voxel[2]);
 
-	fprintf(fp,"Computed %lu arcs for %i meshes\n",SVA.size(),mn);
-	for(size_t i=0;i<VM.size();++i)
-		{
-			if(VM[i].used)
-			{
-					fprintf(fp,"mesh %3lu area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
-					for(size_t j=0;j<std::min(size_t(8),VM[i].unicityDistribution.size());++j)
-						fprintf(fp," %3i ", VM[i].unicityDistribution[j]);
-					fprintf(fp,"\n");
-			}
-			else
-					fprintf(fp,"mesh %3lu ---- UNUSED\n",i);
-		}
-	fprintf(fp,"Computed %lu Arcs :\n",SVA.size());
-	for(int i=0;i<SVA.size() && SVA[i].norm_area > .1; ++i)
-		fprintf(fp,"%4i -> %4i Area:%5i NormArea:%5.3f\n",SVA[i].s,SVA[i].t,SVA[i].area,SVA[i].norm_area);
+    fprintf(fp,"Computed %lu arcs for %i meshes\n",SVA.size(),mn);
+    for(size_t i=0;i<VM.size();++i)
+        {
+            if(VM[i].used)
+            {
+                    fprintf(fp,"mesh %3lu area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
+                    for(size_t j=0;j<std::min(size_t(8),VM[i].unicityDistribution.size());++j)
+                        fprintf(fp," %3i ", VM[i].unicityDistribution[j]);
+                    fprintf(fp,"\n");
+            }
+            else
+                    fprintf(fp,"mesh %3lu ---- UNUSED\n",i);
+        }
+    fprintf(fp,"Computed %lu Arcs :\n",SVA.size());
+    for(size_t i=0;i<SVA.size() && SVA[i].norm_area > .1; ++i)
+        fprintf(fp,"%4i -> %4i Area:%5i NormArea:%5.3f\n",SVA[i].s,SVA[i].t,SVA[i].area,SVA[i].norm_area);
 
-	fprintf(fp,"End OG Dump\n");
+    fprintf(fp,"End OG Dump\n");
 }
 
 // sceglie gli archi da fare che abbiano una sovrapposizione di almeno <normarea>
 // e restituisce la lista di nodi isolati;
 void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vector<int> &adjcnt, float normarea)
 {
-	AV.clear();
-	BNV.clear();
-	size_t i=0;
-	adjcnt.clear();
-	adjcnt.resize(mn,0);
+    AV.clear();
+    BNV.clear();
+    size_t i=0;
+    adjcnt.clear();
+    adjcnt.resize(mn,0);
 
-	while(SVA[i].norm_area>normarea && i<SVA.size())
-	{
-			AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
+    while(SVA[i].norm_area>normarea && i<SVA.size())
+    {
+            AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
 
-			++adjcnt[SVA[i].s];
-			++adjcnt[SVA[i].t];
-			++i;
-	}
+            ++adjcnt[SVA[i].s];
+            ++adjcnt[SVA[i].t];
+            ++i;
+    }
 
   // Second loop to add some more constraints we add also all the arc with area > normarea/3
     // and that connects meshes poorly connected (e.g. with zero or one adjacent)
@@ -270,19 +267,19 @@ void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vec
             {
                 AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
 
-				++adjcnt[SVA[i].s];
-				++adjcnt[SVA[i].t];
-			}
-			++i;
-	}
+                ++adjcnt[SVA[i].s];
+                ++adjcnt[SVA[i].t];
+            }
+            ++i;
+    }
 
-	for(i=0;i<mn;++i) if(VM[i].used && adjcnt[i]==0) BNV.push_back(i);
+    for(i=0;i<mn;++i) if(VM[i].used && adjcnt[i]==0) BNV.push_back(i);
 }
 
 void OccupancyGrid::RemoveMesh(int id)
 {
-	MeshCounter *GridEnd=G.grid+G.size();
-	MeshCounter *ig;
-	for(ig=G.grid;ig!=GridEnd;++ig)
-		ig->UnSet(id);
+    MeshCounter *GridEnd=G.grid+G.size();
+    MeshCounter *ig;
+    for(ig=G.grid;ig!=GridEnd;++ig)
+        ig->UnSet(id);
 }

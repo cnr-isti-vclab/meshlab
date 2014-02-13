@@ -228,7 +228,7 @@ QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString&
 }
 
 
-QString MLXMLPluginInfo::filterAttribute( const QString& filterName,const QString& attribute)
+QString MLXMLPluginInfo::filterAttribute( const QString& filterName, const QString& attribute)
 {
   QDomDocument qDom;
   QFile qFile(this->fileName);

@@ -666,13 +666,10 @@ void MainWindow::splitFromHandle(QAction *qa )
     int newCurrent = mvc->getViewerByPicking(point);
     mvc->updateCurrent(newCurrent);
 
-    QAction *act;
-    if(qa->text() == tr("&Right")||qa->text() == tr("&Left"))
-        act= new QAction(tr("&Horizontally"), this);
-    else if(qa->text() == tr("&Up")||qa->text() == tr("&Down"))
-        act= new QAction(tr("&Vertically"), this);
-
-    setSplit(act);
+    if(qa->text() == tr("&Right") || qa->text() == tr("&Left"))
+      setSplit(new QAction(tr("&Horizontally"), this));
+    else
+      setSplit( new QAction(tr("&Vertically"), this));
 }
 
 void MainWindow::unsplitFromHandle(QAction * qa)
@@ -1331,7 +1328,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
     }*/
     try
     {
-        /*bool isinter = */(mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
+//        /*bool isinter = */(mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
         /*if (isinter)
         {
         showInterruptButton(true);
@@ -2610,6 +2607,7 @@ void MainWindow::changeFileExtension(const QString& st)
         return;
     QRegExp extlist("\\*.\\w+");
     int start = st.indexOf(extlist);
+    (void)start;
     QString ext = extlist.cap().remove("*");
     QStringList stlst = fd->selectedFiles();
     if (!stlst.isEmpty())
@@ -2846,7 +2844,7 @@ void MainWindow::sendHistory()
 }
 
 
-void MainWindow::updateRenderToolBar( RenderModeAction* act )
+void MainWindow::updateRenderToolBar( RenderModeAction* /*act*/ )
 {
     //if (GLA() == NULL)
     //	return;
