@@ -1376,7 +1376,7 @@ void GLArea::setLightModel(RenderMode& rm)
 
 void GLArea::setView()
 {
-    glViewport(0,0, this->width()*this->devicePixelRatio(),this->height()*this->devicePixelRatio());
+    glViewport(0,0, (GLsizei) QTLogicalToDevice(this,width()),(GLsizei) QTLogicalToDevice(this,height()));
 
     GLfloat fAspect = (GLfloat)width()/height();
     glMatrixMode(GL_PROJECTION);
