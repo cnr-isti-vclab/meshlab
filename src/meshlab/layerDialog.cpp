@@ -470,7 +470,7 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 		int meshId = mItem->m->id();
 		bool ok;
 		int tagId = mItem->text(2).toInt(&ok);
-		if(ok && tagId >=0 )
+		if(!ok || tagId < 0 )
 			//MeshTreeWidgetItems don't have a tag id, so we use -1
 			updateExpandedMap(meshId, -1, item->isExpanded());
 	}
@@ -480,7 +480,7 @@ void LayerDialog::adaptLayout(QTreeWidgetItem * item)
 			int meshId = parent->m->id();
 			bool ok;
 			int tagId = item->text(2).toInt(&ok);
-			if(ok)
+			if(!ok)
 				updateExpandedMap(meshId, tagId, item->isExpanded());
 		}
 	}

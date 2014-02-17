@@ -2349,6 +2349,8 @@ bool MainWindow::importMesh(QString fileName)
 
     QTime allFileTime;
     allFileTime.start();
+    bool layervisi = layerDialog->isVisible();
+    showLayerDlg(false);
     foreach(fileName,fileNameList)
     {
         QFileInfo fi(fileName);
@@ -2389,8 +2391,6 @@ bool MainWindow::importMesh(QString fileName)
                 postOpenDialog.exec();
                 pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
             }
-            if (meshDoc()->size() > 1)
-                showLayerDlg(true);
         }
         else
         {
@@ -2398,6 +2398,7 @@ bool MainWindow::importMesh(QString fileName)
             GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
         }
     }// end foreach file of the input list
+    showLayerDlg(meshDoc()->size() > 1 || layervisi);
     GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 
     this->currentViewContainer()->resetAllTrackBall();

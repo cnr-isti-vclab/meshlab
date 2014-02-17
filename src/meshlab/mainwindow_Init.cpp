@@ -511,14 +511,10 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
-  this->setStyleSheet("QToolBar {\
-                      spacing: 0px; \
-}\
-QToolButton { /* all types of tool button */\
-     border: 0px solid #8f8f91;\
-     border-radius: 0px;\
- }");
-mainToolBar = addToolBar(tr("Standard"));
+#if defined(Q_OS_MAC) 
+    this->setStyleSheet("QToolBar {spacing: 0px; } QToolButton {border: 0px solid #8f8f91;border-radius: 0px;}");
+#endif
+    mainToolBar = addToolBar(tr("Standard"));
 //	mainToolBar->setIconSize(QSize(32,32));
     mainToolBar->addAction(this->newProjectAct);
     mainToolBar->addAction(this->openProjectAct);
