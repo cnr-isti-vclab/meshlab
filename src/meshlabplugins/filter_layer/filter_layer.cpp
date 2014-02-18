@@ -183,8 +183,11 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     MeshModel *currentMesh  = md.mm();				// source = current
     MeshModel *destMesh= md.addNewMesh("","SelectedSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
     // select all points involved
-    tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
-    tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
+    if (currentMesh->cm.fn > 0)
+    {
+        tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
+        tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
+    }
 
     tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
 
