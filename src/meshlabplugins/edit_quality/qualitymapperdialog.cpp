@@ -426,7 +426,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 		this->ComputePerVertexQualityHistogram(mesh.cm, histogramRange, _equalizer_histogram, NUMBER_OF_HISTOGRAM_BINS);
 		if (histogramRange.minV == histogramRange.maxV)
 		{
-			QMessageBox::warning(this, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
+			QMessageBox::warning(this, tr("Quality Mapper"), tr("The model vertex quality is a constant"), QMessageBox::Ok); 
 			return false;
 		}
 		//building histogram chart informations
