@@ -26,9 +26,9 @@
 
 #include <cassert>
 #include <QString>
-#include <vcg/complex/algorithms/stat.h>
 #include <common/meshmodel.h>
 #include "rfx_uniform.h"
+#include <vcg/complex/algorithms/stat.h>
 
 class RfxSpecialUniform : public RfxUniform
 {
@@ -38,20 +38,20 @@ public:
           MSHLB_BBOX_MIN,MSHLB_BBOX_MAX,MSHLB_QUALITY_MIN,MSHLB_QUALITY_MAX,
           TOTAL_SPECIAL_TYPES,
           NONE
-	};
+    };
 
-	RfxSpecialUniform(const QString&, const QString&, MeshDocument*);
-	virtual ~RfxSpecialUniform();
-     
-	void initialize();
+    RfxSpecialUniform(const QString&, const QString&, MeshDocument*);
+    virtual ~RfxSpecialUniform();
 
-	/*
-		Verifies if the uniform is a special one or not.
-		If the name of the uniform is one of the uniform special name it returns the special type of the uniform.
-		Otherwise returns "NONE".
-		@param name the name of the uniform
-		@return the special uniform type.
-	*/
+    void initialize();
+
+    /*
+        Verifies if the uniform is a special one or not.
+        If the name of the uniform is one of the uniform special name it returns the special type of the uniform.
+        Otherwise returns "NONE".
+        @param name the name of the uniform
+        @return the special uniform type.
+    */
     static RfxSpecialUniform::SpecialUniformType getSpecialType(const QString&);
 
 private:
@@ -60,7 +60,7 @@ private:
      /* The type of this special uniform */
      SpecialUniformType _specialType;
 
-     
+
 
      static const char *SpecialUniformTypeString[];
 };
