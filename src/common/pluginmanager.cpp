@@ -81,7 +81,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
   scriptplugcode += pluginNameSpace() + " = { };\n";
   foreach (QString fileName, pluginsDir.entryList(QDir::Files))
   {
-      qDebug() << fileName << "\n";
+//      qDebug() << fileName;
     QString absfilepath = pluginsDir.absoluteFilePath(fileName);
     QFileInfo fin(absfilepath);
     if (fin.suffix() == "xml")
