@@ -511,8 +511,8 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
-#if defined(Q_OS_MAC) 
-    this->setStyleSheet("QToolBar {spacing: 0px; } QToolButton {border: 0px solid #8f8f91;border-radius: 0px;}");
+#if defined(Q_OS_MAC)
+  this->setStyleSheet("QToolBar {spacing: 0px; } QToolButton {border-radius: 0px;} QToolButton:checked {background: darkgray}");
 #endif
     mainToolBar = addToolBar(tr("Standard"));
 //	mainToolBar->setIconSize(QSize(32,32));
