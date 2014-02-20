@@ -101,8 +101,8 @@ void MainWindow::createStdPluginWnd()
         delete stddialog;
     }
     stddialog = new MeshlabStdDialog(this);
-    stddialog->setAllowedAreas (    Qt::RightDockWidgetArea);
-    addDockWidget(Qt::RightDockWidgetArea,stddialog);
+    stddialog->setAllowedAreas (   Qt::NoDockWidgetArea);
+//    addDockWidget(Qt::RightDockWidgetArea,stddialog);
     //stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
     stddialog->setFloating(true);
     stddialog->hide();
