@@ -94,7 +94,7 @@ private slots:
   void saveProject();
 
 public slots:
-  bool importMesh(QString fileName=QString());
+  bool importMeshWithLayerManagement(QString fileName=QString());  
   bool importRaster(const QString& fileImg = QString());
   bool openProject(QString fileName=QString());
   bool appendProject(QString fileName=QString());
@@ -105,6 +105,7 @@ public slots:
   void delCurrentRaster();
   void updateRenderMode();
 private slots:
+  bool importMesh(QString fileName=QString());  
   void endEdit();
   void updateDocumentScriptBindings();
   void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
@@ -532,7 +533,7 @@ protected:
     if (event->type() == QEvent::FileOpen) {
       noEvent=false;
       QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
-      mainWindow->importMesh(fileEvent->file());
+      mainWindow->importMeshWithLayerManagement(fileEvent->file());
       qDebug("event fileopen %s",qPrintable(fileEvent->file()));
       return true;
     } else {

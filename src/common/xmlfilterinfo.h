@@ -5,7 +5,7 @@
 #include<QtXmlPatterns/QAbstractMessageHandler>
 #include <QtXmlPatterns/QXmlSchema>
 #include <QtXmlPatterns/QXmlSchemaValidator>
-#include <QtXmlPatterns/QXmlQuery>
+//#include <QtXmlPatterns/QXmlQuery>
 #include <QUrl>
 #include<QAction>
 #include<QBuffer>
@@ -153,15 +153,15 @@ private:
 protected:
 	inline static QString doc(const QString& file) {return QString("doc($" + file + ")");}
 
-	QXmlQuery xmlq;
+	//QXmlQuery xmlq;
 	QString fileName;
 public:
 	MLXMLInfo(const QString& file);
 	MLXMLInfo();
 	~MLXMLInfo();
 
-	QStringList query(const QString& qry);
-	QStringList query(const QByteArray& indata, const QString& qry);
+	//QStringList query(const QString& qry);
+	//QStringList query(const QByteArray& indata, const QString& qry);
 	QString filevarname;
 };
 
@@ -208,7 +208,7 @@ public:
 	QString pluginAttribute(const QString& attribute );
 	
 	QStringList filterNames();
-	QString	filterHelp(const QString& filterName);
+    QString	filterHelp(const QString& filterName);
 	QString filterScriptCode(const QString& filterName);
 	QString filterElement(const QString& filterName,const QString& filterElement);
 	
@@ -218,7 +218,7 @@ public:
 	QString filterAttribute(const QString& filterName,const QString& attribute);
 
 	QString filterParameterHelp(const QString& filterName,const QString& paramName);
-	XMLMap filterParameterGui(const QString& filter,const QString& parameter);
+	//XMLMap filterParameterGui(const QString& filter,const QString& parameter);
 	XMLMap filterParameterExtendedInfo(const QString& filter,const QString& parameter);
 	QString filterParameterAttribute(const QString& filterName,const QString& paramName,const QString& attribute);
 	QString filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName );

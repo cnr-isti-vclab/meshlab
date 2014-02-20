@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     if(QString(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString(argv[1]).endsWith("aln",Qt::CaseInsensitive))
       window.openProject(argv[1]);
     else
-      window.importMesh(argv[1]);
+      window.importMeshWithLayerManagement(argv[1]);
     }
     //else 	if(filterObj->noEvent) window.open();
     return app.exec();

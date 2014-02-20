@@ -101,8 +101,9 @@ void MainWindow::createStdPluginWnd()
         delete stddialog;
     }
     stddialog = new MeshlabStdDialog(this);
-    stddialog->setAllowedAreas (   Qt::NoDockWidgetArea);
-//    addDockWidget(Qt::RightDockWidgetArea,stddialog);
+    stddialog->setAllowedAreas (    Qt::NoDockWidgetArea);
+    //addDockWidget(Qt::RightDockWidgetArea,stddialog);
+
     //stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
     stddialog->setFloating(true);
     stddialog->hide();
@@ -119,8 +120,8 @@ void MainWindow::createXMLStdPluginWnd()
     }
     xmldialog = new MeshLabXMLStdDialog(this);
     //connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-    xmldialog->setAllowedAreas (    Qt::RightDockWidgetArea);
-    addDockWidget(Qt::RightDockWidgetArea,xmldialog);
+    xmldialog->setAllowedAreas (  Qt::NoDockWidgetArea);
+    //addDockWidget(Qt::RightDockWidgetArea,xmldialog);
     //stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
     xmldialog->setFloating(true);
     xmldialog->hide();
@@ -748,6 +749,12 @@ void MainWindow::dropEvent ( QDropEvent * event )
     if (data->hasUrls())
     {
         QList< QUrl > url_list = data->urls();
+        bool layervis = false;
+        if (layerDialog != NULL)
+        {
+            layervis = layerDialog->isVisible();
+            showLayerDlg(false);
+        }
         for (int i=0, size=url_list.size(); i<size; i++)
         {
             QString path = url_list.at(i).toLocalFile();
@@ -759,8 +766,11 @@ void MainWindow::dropEvent ( QDropEvent * event )
             if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive))
                 openProject(path);
             else
+            {
                 importMesh(path);
+            }
         }
+        showLayerDlg(layervis || meshDoc()->meshList.size() > 1);
     }
 }
 
@@ -1805,6 +1815,8 @@ void MainWindow::saveProject()
 
 bool MainWindow::openProject(QString fileName)
 {
+    bool visiblelayer = layerDialog->isVisible();
+    showLayerDlg(false);
     if (fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out *.nvm);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)");
 
@@ -1971,6 +1983,7 @@ bool MainWindow::openProject(QString fileName)
     this->currentViewContainer()->resetAllTrackBall();
     qb->reset();
     saveRecentProjectList(fileName);
+    showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 1));
     return true;
 }
 
@@ -2316,6 +2329,20 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     return true;
 }
 
+bool MainWindow::importMeshWithLayerManagement(QString fileName)
+{
+    bool layervisible = false;
+    if (layerDialog != NULL)
+    {
+        layervisible = layerDialog->isVisible();
+        showLayerDlg(false);
+    }
+    bool res = importMesh(fileName);
+    if (layerDialog != NULL)
+        showLayerDlg(layervisible || meshDoc()->meshList.size() > 1);
+    return res;
+}
+
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
 bool MainWindow::importMesh(QString fileName)
 {
@@ -2349,8 +2376,6 @@ bool MainWindow::importMesh(QString fileName)
 
     QTime allFileTime;
     allFileTime.start();
-    bool layervisi = layerDialog->isVisible();
-    showLayerDlg(false);
     foreach(fileName,fileNameList)
     {
         QFileInfo fi(fileName);
@@ -2398,7 +2423,6 @@ bool MainWindow::importMesh(QString fileName)
             GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
         }
     }// end foreach file of the input list
-    showLayerDlg(meshDoc()->size() > 1 || layervisi);
     GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 
     this->currentViewContainer()->resetAllTrackBall();
@@ -2412,7 +2436,7 @@ void MainWindow::openRecentMesh()
     if(!GLA()) return;
     if(meshDoc()->isBusy()) return;
     QAction *action = qobject_cast<QAction *>(sender());
-    if (action)	importMesh(action->data().toString());
+    if (action)	importMeshWithLayerManagement(action->data().toString());
 }
 
 void MainWindow::openRecentProj()
@@ -2698,7 +2722,7 @@ void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
 void MainWindow::showRaster()    {if(GLA() != 0)	GLA()->showRaster((QApplication::keyboardModifiers () & Qt::ShiftModifier));}
 void MainWindow::showLayerDlg(bool visible)
 {
-    if(GLA() != 0)
+    if ((GLA() != 0) && (layerDialog != NULL))
     {
         layerDialog->setVisible( visible);
         showLayerDlgAct->setChecked(visible);
@@ -2837,6 +2861,7 @@ void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& sc
         qDebug() << e.what();
     }
     fillFilterMenu();
+    initSearchEngine();
 }
 
 void MainWindow::sendHistory()

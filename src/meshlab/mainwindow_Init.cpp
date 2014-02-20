@@ -218,7 +218,7 @@ void MainWindow::createActions()
     importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
     importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
     importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
-    connect(importMeshAct, SIGNAL(triggered()), this, SLOT(importMesh()));
+    connect(importMeshAct, SIGNAL(triggered()), this, SLOT(importMeshWithLayerManagement()));
 
     exportMeshAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh..."), this);
     exportMeshAct->setShortcutContext(Qt::ApplicationShortcut);

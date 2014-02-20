@@ -19,67 +19,67 @@ MLXMLInfo::~MLXMLInfo()
 {
 }
 
-QStringList MLXMLInfo::query( const QString& qry)
-{
-    QFile sourceDocument(fileName);
-    QString text;
-    if (sourceDocument.open(QIODevice::ReadOnly))
-    {
-        text = QString(sourceDocument.readAll());
-        sourceDocument.close();
-    }
-    else
-        throw MeshLabException("File " + fileName + " has not been opened.");
-    QBuffer document;
-    document.setData(text.toUtf8());
-    document.open(QIODevice::ReadOnly);
-    xmlq.bindVariable(filevarname, &document);
-    XMLMessageHandler errQuery;
-    xmlq.setQuery(qry);
-    QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
-    xmlq.setMessageHandler(&errQuery);
-    QStringList result;
-
-    if (!xmlq.isValid())
-    {
-        //errQuery = xmlq.messageHandler();
-        xmlq.setMessageHandler(oldHandler);
-        document.close();
-        throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
-
-    }
-    xmlq.evaluateTo(&result);
-    QString err = errQuery.statusMessage();
-    xmlq.setMessageHandler(oldHandler);
-    document.close();
-    return result;
-}
-
-QStringList MLXMLInfo::query(const QByteArray& indata, const QString& qry)
-{
-    QByteArray tmp(indata);
-    QBuffer document(&tmp);
-    document.open(QIODevice::ReadOnly);
-    xmlq.bindVariable(filevarname, &document);
-    XMLMessageHandler errQuery;
-    xmlq.setQuery(qry);
-    QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
-    xmlq.setMessageHandler(&errQuery);
-    QStringList result;
-
-    if (!xmlq.isValid())
-    {
-        //errQuery = xmlq.messageHandler();
-        xmlq.setMessageHandler(oldHandler);
-        document.close();
-        throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
-
-    }
-    xmlq.evaluateTo(&result);
-    xmlq.setMessageHandler(oldHandler);
-    document.close();
-    return result;
-}
+//QStringList MLXMLInfo::query( const QString& qry)
+//{
+//    QFile sourceDocument(fileName);
+//    QString text;
+//    if (sourceDocument.open(QIODevice::ReadOnly))
+//    {
+//        text = QString(sourceDocument.readAll());
+//        sourceDocument.close();
+//    }
+//    else
+//        throw MeshLabException("File " + fileName + " has not been opened.");
+//    QBuffer document;
+//    document.setData(text.toUtf8());
+//    document.open(QIODevice::ReadOnly);
+//    xmlq.bindVariable(filevarname, &document);
+//    XMLMessageHandler errQuery;
+//    xmlq.setQuery(qry);
+//    QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
+//    xmlq.setMessageHandler(&errQuery);
+//    QStringList result;
+//
+//    if (!xmlq.isValid())
+//    {
+//        //errQuery = xmlq.messageHandler();
+//        xmlq.setMessageHandler(oldHandler);
+//        document.close();
+//        throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
+//
+//    }
+//    xmlq.evaluateTo(&result);
+//    QString err = errQuery.statusMessage();
+//    xmlq.setMessageHandler(oldHandler);
+//    document.close();
+//    return result;
+//}
+//
+//QStringList MLXMLInfo::query(const QByteArray& indata, const QString& qry)
+//{
+//    QByteArray tmp(indata);
+//    QBuffer document(&tmp);
+//    document.open(QIODevice::ReadOnly);
+//    xmlq.bindVariable(filevarname, &document);
+//    XMLMessageHandler errQuery;
+//    xmlq.setQuery(qry);
+//    QAbstractMessageHandler * oldHandler = xmlq.messageHandler();
+//    xmlq.setMessageHandler(&errQuery);
+//    QStringList result;
+//
+//    if (!xmlq.isValid())
+//    {
+//        //errQuery = xmlq.messageHandler();
+//        xmlq.setMessageHandler(oldHandler);
+//        document.close();
+//        throw QueryException(QString("line: ") + QString::number(errQuery.line()) + " column: " + QString::number(errQuery.column()) + " - " + errQuery.statusMessage());
+//
+//    }
+//    xmlq.evaluateTo(&result);
+//    xmlq.setMessageHandler(oldHandler);
+//    document.close();
+//    return result;
+//}
 
 
 
@@ -192,7 +192,7 @@ QString MLXMLPluginInfo::filterHelp( const QString& filterName)
 
 
     //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
-    QString namesQuery = docMFIPluginFilterName(filevarname,filterName) + "/" + MLXMLElNames::filterHelpTag + "/string()";
+  /*  QString namesQuery = docMFIPluginFilterName(filevarname,filterName) + "/" + MLXMLElNames::filterHelpTag + "/string()";
     try
     {
         QStringList res = query(namesQuery);
@@ -204,27 +204,43 @@ QString MLXMLPluginInfo::filterHelp( const QString& filterName)
     {
     qDebug("Caught a QueryException %s",q.what());
     }
-  assert(0);
+  assert(0);*/
   return QString();
 }
 
 QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString& filterElement)
 {
-    //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/FILTER_HELP/string()";
-    QString namesQuery = docMFIPluginFilterName(filevarname,filterName) + "/" + filterElement + "/string()";
+    QDomDocument qDom;
+    QFile qFile(this->fileName);
+    qDom.setContent(&qFile);
+    QDomNodeList nodelist = qDom.elementsByTagName(MLXMLElNames::filterTag);
+    for(int i=0;i<nodelist.size();++i)
+    {
+        if(nodelist.at(i).toElement().attribute(MLXMLElNames::filterName)==filterName)
+        {
+            QDomNode jsNode = nodelist.at(i).firstChildElement(filterElement);
+            if(jsNode.isNull())
+                throw ParsingException("There is not" + filterElement + " tag for filter " + filterName);
+            QString result = jsNode.firstChild().toCDATASection().data();
+            return result;
+        }
+    }
+    
+    throw ParsingException("There is not " + filterName);
+    
+    /*QString namesQuery = docMFIPluginFilterName(filevarname,filterName) + "/" + filterElement + "/string()";
     try
     {
-        QStringList res = query(namesQuery);
-        if (res.size() != 1)
-            throw ParsingException("There is not " + filterElement + " tag for filter " + filterName);
-        return res[0].trimmed();
+    QStringList res = query(namesQuery);
+    if (res.size() != 1)
+    throw ParsingException("There is not " + filterElement + " tag for filter " + filterName);
+    return res[0].trimmed();
     }
     catch(QueryException q)
     {
-        qDebug("Caught a QueryException %s",q.what());
+    qDebug("Caught a QueryException %s",q.what());
     }
-    assert(0);
-    return QString();
+    assert(0);*/
 }
 
 
@@ -310,9 +326,43 @@ MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParametersExtendedInfo( const
 
 MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParameters( const QString& filterName)
 {
-  QString namesQuery = docMFIPluginFilterNameParam(filevarname,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + externalSep() + attrNameAttrVal(MLXMLElNames::paramName) + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr) + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant) + "</p>/string()";
-  QStringList res = query(namesQuery);
-  return mapListFromStringList(res);
+  //QString namesQuery = docMFIPluginFilterNameParam(filevarname,filterName) + "/<p>" + attrNameAttrVal(MLXMLElNames::paramType) + externalSep() + attrNameAttrVal(MLXMLElNames::paramName) + externalSep() + attrNameAttrVal(MLXMLElNames::paramDefExpr) + externalSep() + attrNameAttrVal(MLXMLElNames::paramIsImportant) + "</p>/string()";
+  //QStringList res = query(namesQuery);
+    /*return mapListFromStringList(res);*/
+
+
+  QFile file(this->fileName);
+  QDomDocument doc;
+  doc.setContent(&file);
+
+  QDomNodeList filterlist = doc.elementsByTagName(MLXMLElNames::filterTag);
+  if (filterlist.size() == 0)
+      throw ParsingException("No filters have been defined inside file " + fileName);
+  int ii = 0;
+  bool found = false;
+  while ((ii < filterlist.size()) && !found)
+  {
+      if (filterlist.at(ii).toElement().attribute(MLXMLElNames::filterName) == filterName)
+          found = true;
+      else
+          ++ii;
+  }
+  if (!found)
+      throw ParsingException("Filter: " +filterName + " has not been defined");
+
+  XMLMapList mplist;
+  QDomNodeList paramlist = filterlist.at(ii).toElement().elementsByTagName(MLXMLElNames::paramTag);
+  for(int ii = 0;ii < paramlist.size();++ii) 
+  {
+      MLXMLPluginInfo::XMLMap map;
+      QDomElement paramnode =  paramlist.at(ii).toElement();
+      map[MLXMLElNames::paramType] = paramnode.attribute(MLXMLElNames::paramType);
+      map[MLXMLElNames::paramName] = paramnode.attribute(MLXMLElNames::paramName);
+      map[MLXMLElNames::paramDefExpr] = paramnode.attribute(MLXMLElNames::paramDefExpr);
+      map[MLXMLElNames::paramIsImportant] = paramnode.attribute(MLXMLElNames::paramIsImportant);
+      mplist.push_back(map);
+  }
+  return mplist;
 }
 
 MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::mapListFromStringList( const QStringList& list )
@@ -340,58 +390,58 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::mapFromString(const QString& st,const Q
     return attrValue;
 }
 
-MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filterName,const QString& parameterName)
-{
+//MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterGui( const QString& filterName,const QString& parameterName)
+//{
+//
+//
+//
+//
+//    QString var("$gui");
+//    //QString totQuery("for " + var + " in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + parameterName + "\"]/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
+//    QString totQuery("for " + var + " in " + docMFIPluginFilterNameParamName(filevarname,filterName,parameterName) + "/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
+//    try
+//    {
+//        QStringList res = query(totQuery);
+//        MLXMLPluginInfo::XMLMapList tmp = mapListFromStringList(res);
+//        //MUST BE FOR EACH PARAMETER ONLY ONE GUI DECLARATION
+//        if (tmp.size() != 1)
+//            throw ParsingException("In filter " + filterName + " more than a single GUI declaration has been found for parameter " + parameterName);
+//        else if (res[0] == MLXMLPluginInfo::guiErrorMsg())
+//                //GUI NOT DEFINED
+//                throw ParsingException("In filter " + filterName + " no valid GUI declaration has been found for parameter " + parameterName);
+//             else return tmp[0];
+//    }
+//    catch(QueryException e)
+//    {
+//    qDebug("Caught a QueryException %s",e.what());
+//    }
+//  assert(0);
+//  return MLXMLPluginInfo::XMLMap();
+//}
 
-
-
-
-    QString var("$gui");
-    //QString totQuery("for " + var + " in doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + parameterName + "\"]/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
-    QString totQuery("for " + var + " in " + docMFIPluginFilterNameParamName(filevarname,filterName,parameterName) + "/(* except PARAM_HELP) return " + guiTypeSwitchQueryText(var));
-    try
-    {
-        QStringList res = query(totQuery);
-        MLXMLPluginInfo::XMLMapList tmp = mapListFromStringList(res);
-        //MUST BE FOR EACH PARAMETER ONLY ONE GUI DECLARATION
-        if (tmp.size() != 1)
-            throw ParsingException("In filter " + filterName + " more than a single GUI declaration has been found for parameter " + parameterName);
-        else if (res[0] == MLXMLPluginInfo::guiErrorMsg())
-                //GUI NOT DEFINED
-                throw ParsingException("In filter " + filterName + " no valid GUI declaration has been found for parameter " + parameterName);
-             else return tmp[0];
-    }
-    catch(QueryException e)
-    {
-    qDebug("Caught a QueryException %s",e.what());
-    }
-  assert(0);
-  return MLXMLPluginInfo::XMLMap();
-}
-
-QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QString& paramName )
-{
-    //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
-    QString namesQuery = docMFIPluginFilterNameParamName(filterName,filevarname,paramName) + "/" + MLXMLElNames::paramHelpTag + "/string()";
-    try
-    {
-        QStringList res = query(namesQuery);
-        if (res.size() == 0)
-            throw ParsingException("Help section has not been defined for Parameter: " + paramName + " in filter: " + filterName);
-        return res[0];
-    }
-    catch (QueryException e)
-    {
-    qDebug("Caught a QueryException %s",e.what());
-    }
-  assert(0);
-  return QString();
-}
+//QString MLXMLPluginInfo::filterParameterHelp( const QString& filterName,const QString& paramName )
+//{
+//    //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
+//    QString namesQuery = docMFIPluginFilterNameParamName(filterName,filevarname,paramName) + "/" + MLXMLElNames::paramHelpTag + "/string()";
+//    try
+//    {
+//        QStringList res = query(namesQuery);
+//        if (res.size() == 0)
+//            throw ParsingException("Help section has not been defined for Parameter: " + paramName + " in filter: " + filterName);
+//        return res[0];
+//    }
+//    catch (QueryException e)
+//    {
+//    qDebug("Caught a QueryException %s",e.what());
+//    }
+//  assert(0);
+//  return QString();
+//}
 
 QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const QString& paramName,const QString& elemName )
 {
     //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/PARAM_HELP/string()";
-    QString namesQuery = docMFIPluginFilterNameParamName(filevarname,filterName,paramName) + "/" + elemName + "/string()";
+    /*QString namesQuery = docMFIPluginFilterNameParamName(filevarname,filterName,paramName) + "/" + elemName + "/string()";
     try
     {
         QStringList res = query(namesQuery);
@@ -404,7 +454,47 @@ QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const
         qDebug("Caught a QueryException %s",e.what());
     }
     assert(0);
-    return QString();
+    return QString();*/
+
+    QFile file(this->fileName);
+    QDomDocument doc;
+    doc.setContent(&file);
+
+    QDomNodeList filterlist = doc.elementsByTagName(MLXMLElNames::filterTag);
+    if (filterlist.size() == 0)
+        throw ParsingException("No filters have been defined inside file " + fileName);
+    int ii = 0;
+    bool found = false;
+    while ((ii < filterlist.size()) && !found)
+    {
+        if (filterlist.at(ii).toElement().attribute(MLXMLElNames::filterName) == filterName)
+            found = true;
+        else
+            ++ii;
+    }
+    if (!found)
+        throw ParsingException("Filter: " +filterName + " has not been defined");
+
+    QDomNodeList paramlist = filterlist.at(ii).toElement().elementsByTagName(MLXMLElNames::paramTag);
+    bool paramfound = false;
+    int jj = 0;
+    while ((jj < paramlist.size()) && !paramfound)
+    {
+        if (paramlist.at(jj).toElement().attribute(MLXMLElNames::paramName) == paramName)
+            paramfound = true;
+        else
+            ++jj;
+    }
+    if (!paramfound)
+        throw ParsingException("Parameter: " + paramName + " has not been defined in filter: " + filterName);
+    
+    QDomElement param = paramlist.at(jj).toElement();
+    QDomNodeList lst = param.elementsByTagName(elemName);
+    if (lst.size() == 0)
+         throw ParsingException("Element: " + elemName + " has not defined in Parameter: " + paramName + " in filter: " + filterName);
+    if (lst.size() > 1)
+        throw ParsingException("More than one instance of Element: " + elemName + " has not defined in Parameter: " + paramName + " in filter: " + filterName);
+    return lst.at(0).firstChild().toCDATASection().data();
 }
 
 MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QString& filterName,const QString& paramName )
@@ -541,25 +631,60 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QStr
 QString MLXMLPluginInfo::filterParameterAttribute( const QString& filterName,const QString& paramName,const QString& attribute )
 {
     //QString namesQuery = "doc(\"" + this->fileName + "\")/MESHLAB_FILTER_INTERFACE/PLUGIN/FILTER[@name = \"" + filterName + "\"]/PARAM[@name = \"" + paramName + "\"]/@" + attribute + "/string()";
-    QString namesQuery = docMFIPluginFilterNameParamName(filevarname,filterName,paramName) + "/@" + attribute + "/string()";
-    try
+  //  QString namesQuery = docMFIPluginFilterNameParamName(filevarname,filterName,paramName) + "/@" + attribute + "/string()";
+  //  try
+  //  {
+  //      QStringList res = query(namesQuery);
+  //      if (res.size() != 1)
+  //          throw ParsingException("Attribute " + attribute + " has not been specified for parameter " + paramName + " in filter " + filterName);
+  //      return res[0];
+  //  }
+  //  catch (QueryException e)
+  //  {
+  //  qDebug("Caught a QueryException %s",e.what());
+  //  }
+  //assert(0);
+  //return QString();
+    QFile file(this->fileName);
+    QDomDocument doc;
+    doc.setContent(&file);
+
+    QDomNodeList filterlist = doc.elementsByTagName(MLXMLElNames::filterTag);
+    if (filterlist.size() == 0)
+        throw ParsingException("No filters have been defined inside file " + fileName);
+    int ii = 0;
+    bool found = false;
+    while ((ii < filterlist.size()) && !found)
     {
-        QStringList res = query(namesQuery);
-        if (res.size() != 1)
-            throw ParsingException("Attribute " + attribute + " has not been specified for parameter " + paramName + " in filter " + filterName);
-        return res[0];
+        if (filterlist.at(ii).toElement().attribute(MLXMLElNames::filterName) == filterName)
+            found = true;
+        else
+            ++ii;
     }
-    catch (QueryException e)
+    if (!found)
+        throw ParsingException("Filter: " +filterName + " has not been defined");
+
+    QDomNodeList paramlist = filterlist.at(ii).toElement().elementsByTagName(MLXMLElNames::paramTag);
+    bool paramfound = false;
+    int jj = 0;
+    while ((jj < paramlist.size()) && !paramfound)
     {
-    qDebug("Caught a QueryException %s",e.what());
+        if (paramlist.at(jj).toElement().attribute(MLXMLElNames::paramName) == paramName)
+            paramfound = true;
+        else
+            ++jj;
     }
-  assert(0);
-  return QString();
+    if (!paramfound)
+        throw ParsingException("Parameter: " + paramName + " has not been defined in filter: " + filterName);
+
+    QDomElement param = paramlist.at(jj).toElement();
+    return param.attribute(attribute);
+
 }
 
 QString MLXMLPluginInfo::interfaceAttribute( const QString& attribute )
 {
-    QString namesQuery = docMFI(filevarname) + "/<p>" +attrVal(attribute)+"</p>/string()";
+    /*QString namesQuery = docMFI(filevarname) + "/<p>" +attrVal(attribute)+"</p>/string()";
     try
     {
         QStringList res = query(namesQuery);
@@ -573,27 +698,42 @@ QString MLXMLPluginInfo::interfaceAttribute( const QString& attribute )
     }
 
     assert(0);
-    return QString();
+    return QString();*/
+
+    QDomDocument qDom;
+    QFile qFile(this->fileName);
+    qDom.setContent(&qFile);
+    QDomNodeList nodelist = qDom.elementsByTagName(MLXMLElNames::mfiTag);
+    if(nodelist.size()!=1)
+        throw ParsingException("Attribute " + attribute + " has not been specified for plugin.");
+    return nodelist.at(0).toElement().attribute(attribute);
 }
 
 
 QString MLXMLPluginInfo::pluginAttribute(const QString& attribute )
 {
-    QString namesQuery = docMFIPlugin(filevarname) + "/<p>" +attrVal(attribute)+"</p>/string()";
+    /*QString namesQuery = docMFIPlugin(filevarname) + "/<p>" +attrVal(attribute)+"</p>/string()";
     try
     {
-        QStringList res = query(namesQuery);
-        if (res.size() != 1)
-            throw ParsingException("Attribute " + attribute + " has not been specified for plugin.");
-        return res[0];
+    QStringList res = query(namesQuery);
+    if (res.size() != 1)
+    throw ParsingException("Attribute " + attribute + " has not been specified for plugin.");
+    return res[0];
     }
     catch(QueryException e)
     {
-        qDebug("Caught a QueryException %s",e.what());
+    qDebug("Caught a QueryException %s",e.what());
     }
 
     assert(0);
-    return QString();
+    return QString();*/
+    QDomDocument qDom;
+    QFile qFile(this->fileName);
+    qDom.setContent(&qFile);
+    QDomNodeList nodelist = qDom.elementsByTagName(MLXMLElNames::pluginTag);
+    if(nodelist.size()!=1)
+        throw ParsingException(MLXMLElNames::pluginTag + " has not been specified for plugin.");
+    return nodelist.at(0).toElement().attribute(attribute);
 }
 
 
