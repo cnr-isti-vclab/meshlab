@@ -71,7 +71,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
     applyButton->setFocus();
     bool onlyimportant = true;
     connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     // Hack needed on mac for correct sizes of button in the bottom of the dialog.
     helpButton->setMinimumSize(100, 25);
     closeButton->setMinimumSize(100,25);
