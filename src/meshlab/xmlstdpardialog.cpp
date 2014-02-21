@@ -302,7 +302,7 @@ void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 
 bool MeshLabXMLStdDialog::isPreviewable() const
 {
-    return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER));
+    return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER) && !(curmask & MeshModel::MM_FACENORMAL) && !(curmask & MeshModel::MM_FACECOLOR));
 }
 
 void MeshLabXMLStdDialog::resetExpressions()
