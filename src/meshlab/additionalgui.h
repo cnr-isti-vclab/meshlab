@@ -269,8 +269,6 @@ class SearchMenu : public MenuWithToolTip
 public:
     SearchMenu(const WordActionsMapAccessor& wm,const int max,QWidget* parent,const int fixedwidth = -1);
     int& searchLineWidth();
-    inline void setMaxResultNum(const int max) {maxres = max;}
-    inline int maxResultNum() const {return maxres;}
     void clearResults();
     QSize sizeHint () const;
 protected:

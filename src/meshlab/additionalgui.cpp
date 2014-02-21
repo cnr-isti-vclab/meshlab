@@ -9,6 +9,7 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QDebug>
+ #include <QMetaEnum>
 
 CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
 : QStyledItemDelegate(parent)
@@ -867,7 +868,10 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
     }
     if (!maybeallequal)
     {
-        for(int jj = 0;jj < delsepremact.size();++jj)
+#ifdef Q_OS_MAC
+      this->hide();
+#endif
+      for(int jj = 0;jj < delsepremact.size();++jj)
         {
             QAction*  todel = delsepremact[jj];
             if ((todel != NULL) && (todel->isSeparator()))
@@ -881,6 +885,9 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
             }
         }
         addActions(results);
+#ifdef Q_OS_MAC
+        this->show();
+#endif
         //if (results.size() > 0 && (results[0] != NULL))
         //	setActiveAction(results[0]);
         alignToParentGeometry();
@@ -889,9 +896,9 @@ void SearchMenu::updateGUI( const QList<QAction*>& results )
 
 void SearchMenu::edited( const QString& text)
 {
-    QList<QAction*> results;
-    getResults(text,results);
-    updateGUI(results);
+  QList<QAction*> results;
+  getResults(text,results);
+  updateGUI(results);
 }
 
 void SearchMenu::clearResults()
@@ -1073,11 +1080,13 @@ MenuWithToolTip::MenuWithToolTip( const QString& name,QWidget* par )
 
 bool MenuWithToolTip::event(QEvent * e)
 {
-    const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
-    if ((helpEvent->type() == QEvent::ToolTip)  && (activeAction() != 0))
-        QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
-    /*else
+//  QString pippo = QEvent::staticMetaObject.enumerator(QEvent::staticMetaObject.indexOfEnumerator("Type")).valueToKey(e->type());
+
+  const QHelpEvent *helpEvent = static_cast <QHelpEvent *>(e);
+  if ((helpEvent->type() == QEvent::ToolTip)  && (activeAction() != 0))
+    QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
+  /*else
         QToolTip::hideText();*/
-    return QMenu::event(e);
+  return QMenu::event(e);
 }
 
