@@ -21,6 +21,7 @@ SOURCES       = edit_align_factory.cpp \
                 meshtree.cpp \
                 alignDialog.cpp \
                 AlignPairWidget.cpp \
+                AlignPairDialog.cpp \
                 align/AlignPair.cpp \
                 align/AlignGlobal.cpp \
                 align/OccupancyGrid.cpp \
@@ -29,7 +30,8 @@ SOURCES       = edit_align_factory.cpp \
                 $$VCGDIR/wrap/ply/plylib.cpp\
                 $$VCGDIR/wrap/gui/trackball.cpp\
                 $$VCGDIR/wrap/gui/trackmode.cpp \
-                $$GLEWCODE
+                $$GLEWCODE 
+    
                 
 INCLUDEPATH += ../../external
 

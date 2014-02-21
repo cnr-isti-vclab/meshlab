@@ -35,6 +35,9 @@
 #include <wrap/gl/space.h>
 #include <wrap/qt/gl_label.h>
 
+
+
+
 AlignPairWidget::AlignPairWidget (QWidget * parent) :QGLWidget (parent)
 {
   currentTrack=0;
@@ -162,7 +165,6 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
       glPopMatrix();
       tt[i]->DrawPostApply();
     }
-    doneCurrent();
     painter.endNativePainting();
 }
 

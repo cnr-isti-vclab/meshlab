@@ -20,19 +20,37 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef __VCG_ALIGNPAIRDIALOG
-#define __VCG_ALIGNPAIRDIALOG
 
+#include "edit_align.h"
+#include <QGLWidget>
+#include "AlignPairDialog.h"
+#include <QLabel>
+#include <QDialogButtonBox>
+#include <QDesktopWidget>
 
-#include <common/interfaces.h>
-#include "AlignPairWidget.h"
-
-class AlignPairDialog: public QDialog
+AlignPairDialog::AlignPairDialog (QWidget * parent) : QDialog(parent)
 {
-    Q_OBJECT
-public:
-    AlignPairWidget *aa;
-    QCheckBox * allowScalingCB;
-    AlignPairDialog (QWidget * parent = 0);
-};
-#endif
+    QVBoxLayout *layout = new QVBoxLayout(this);
+
+    aa=new AlignPairWidget(this);
+    aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+    allowScalingCB = new QCheckBox("Allow Scaling");
+    allowScalingCB->setChecked(false);
+
+    QLabel *helpLabel = new QLabel("Choose at least 4 matching pair of points on the two meshes. <br>Double Click over each mesh to add new points. Choose points in consistent order");
+    helpLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    layout->addWidget(helpLabel);
+    layout->addWidget(aa);
+    layout->addWidget(allowScalingCB);
+    layout->addWidget(buttonBox);
+
+    setLayout(layout);
+    adjustSize();
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    QRect rr= QApplication::desktop()->screenGeometry ( this );
+    setMinimumSize(rr.width()*0.8,rr.width()*0.5);
+}
+
+
