@@ -135,7 +135,7 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		switch(ID(action))
 		{
     case FP_SELECT_BORDER:
-      parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
+      //parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
     case FP_SELECTBYANGLE :
       {
