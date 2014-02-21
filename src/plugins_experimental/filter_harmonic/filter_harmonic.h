@@ -31,6 +31,7 @@ class QScriptEngine;
 class FilterHarmonicPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
@@ -41,7 +42,8 @@ public:
 	FilterHarmonicPlugin();
 
 	virtual QString pluginName(void) const { return "FilterHarmonicPlugin"; }
-	int getPreConditions(QAction *) const { return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO; }
+	int getPreConditions(QAction *) const { return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENUMBER; }
+	int getRequirements(QAction *) { return MeshModel::MM_FACEFACETOPO; }
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *, MeshModel & /*m*/, RichParameterSet & /*parent*/);

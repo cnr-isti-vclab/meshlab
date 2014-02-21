@@ -23,9 +23,7 @@
 #include "filter_harmonic.h"
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/simplex/face/topology.h>
-#include <eigenlib/Eigen/Sparse>
-
-#include <map>
+#include <vcg/complex/algorithms/harmonic.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -98,60 +96,6 @@ void FilterHarmonicPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 	}
 }
 
-enum WeightInfo
-{
-	Success            = 0,
-	EdgeAlreadyVisited
-};
-
-// Function to compute the cotangent weighting function for an edge
-// return Success             if everything is fine;
-//        EdgeAlreadyVisited  if the weight for the considered edge have been already computed and assigned;
-template <typename FaceType, typename ScalarType = double>
-WeightInfo ComputeWeight(const FaceType &f, int edge, ScalarType & weight)
-{
-	typedef typename FaceType::VertexType VertexType;
-
-	assert(edge >= 0 && edge < 3);
-
-	// get the adjacent face
-	const FaceType * fp = f.cFFp(edge);
-
-	ScalarType cotA = 0;
-	ScalarType cotB = 0;
-
-	// Get the edge (a pair of vertices)
-	VertexType * v0 = f.cV0(edge);
-	VertexType * v1 = f.cV1(edge);
-
-	if (fp != NULL &&
-	    fp != &f)
-	{
-		// not a border edge
-		if (fp->IsV()) return EdgeAlreadyVisited;
-
-		VertexType * vb = fp->cV2(f.cFFi(edge));
-		ScalarType angleB = ComputeAngle(v0, vb, v1);
-		cotB = vcg::math::Cos(angleB) / vcg::math::Sin(angleB);
-	}
-
-	VertexType * va = f.cV2(edge);
-	ScalarType angleA = ComputeAngle(v0, va, v1);
-	cotA = vcg::math::Cos(angleA) / vcg::math::Sin(angleA);
-
-	weight = (cotA + cotB) / 2;
-
-	return Success;
-}
-
-template <typename VertexType, typename ScalarType = double>
-ScalarType ComputeAngle(const VertexType * a, const VertexType * b, const VertexType * c)
-{
-	assert(a != NULL && b != NULL && c != NULL);
-	ScalarType angle = vcg::Angle(a->P() - b->P(), c->P() - b->P());
-	return angle;
-}
-
 // The Real Core Function doing the actual mesh processing.
 bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
@@ -161,89 +105,25 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 	{
 		typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType> VertexGrid;
 
-		typedef double                           CoeffScalar; // TODO, when moving the code to a class make it a template (CoeffScalar = double)
+		typedef double                           FieldScalar;
+		// double is fine
 
 		typedef CMeshO::ScalarType               ScalarType;
 		typedef CMeshO::CoordType                CoordType;
 		typedef CMeshO::VertexType               VertexType;
 		typedef CMeshO::FaceType                 FaceType;
 
-		typedef Eigen::Triplet<CoeffScalar>      T;
-		typedef Eigen::SparseMatrix<CoeffScalar> SpMat; //sparse matrix type of double
-
+		cb(1, "Computing harmonic field...");
 
 		CMeshO & m = md.mm()->cm;
 
 		vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
 		vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
 
-		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK);
+		md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEFLAG);
 		vcg::tri::UpdateBounding<CMeshO>::Box(m);
-		vcg::tri::UpdateTopology<CMeshO>::FaceFace(m);
 
 		int n  = m.VN();
-		int fn = m.FN();
-
-		std::vector<T>             coeffs; // coefficients of the system
-		std::map<size_t,CoeffScalar> sums; // row sum of the coefficient
-
-		SpMat laplaceMat; // the system to be solved
-		laplaceMat.resize(n, n);
-
-		cb(0, "Generating coefficients...");
-		vcg::tri::UpdateFlags<CMeshO>::FaceClearV(m);
-		// Iterate over the faces
-		for (size_t i = 0; i < m.face.size(); ++i)
-		{
-			CMeshO::FaceType & f = m.face[i];
-
-			if (f.IsD())
-			{
-				assert(int(i) == fn);
-				break; // TODO FIX the indexing of vertices
-			}
-
-			assert(!f.IsV());
-			f.SetV();
-
-			// Generate coefficients for each edge
-			for (int idx = 0; idx < 3; ++idx)
-			{
-				CoeffScalar weight;
-				WeightInfo res = ComputeWeight<FaceType, CoeffScalar>(f, idx, weight);
-
-				switch (res)
-				{
-				case EdgeAlreadyVisited : continue;
-				case Success            : break;
-				default: assert(0);
-				}
-
-//				if (weight < 0) weight = 0; // TODO check if negative weight may be an issue
-
-				// Add the weight to the coefficients vector for both the vertices of the considered edge
-				size_t v0_idx = vcg::tri::Index(m, f.V0(idx));
-				size_t v1_idx = vcg::tri::Index(m, f.V1(idx));
-
-				coeffs.push_back(T(v0_idx, v1_idx, -weight));
-				coeffs.push_back(T(v1_idx, v0_idx, -weight));
-
-				// Add the weight to the row sum
-				sums[v0_idx] += weight;
-				sums[v1_idx] += weight;
-			}
-
-			f.SetV();
-		}
-
-		// Fill the system matrix
-		cb(10, "Filling the system matrix...");
-		laplaceMat.reserve(coeffs.size());
-		for (std::map<size_t,CoeffScalar>::const_iterator it = sums.begin(); it != sums.end(); ++it)
-		{
-			coeffs.push_back(T(it->first, it->first, it->second));
-		}
-		laplaceMat.setFromTriplets(coeffs.begin(), coeffs.end());
 
 		// Get the two vertices with value set
 		VertexGrid vg;
@@ -263,69 +143,37 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 			return false;
 		}
 
-		size_t v0_idx = vcg::tri::Index(m, vp0);
-		size_t v1_idx = vcg::tri::Index(m, vp1);
+		vcg::tri::Harmonic<CMeshO, FieldScalar>::ConstraintVec constraints;
+		constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp0, FieldScalar(par.getFloat("value1"))));
+		constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp1, FieldScalar(par.getFloat("value2"))));
 
-		// Add penalty factor alpha
-		const CoeffScalar alpha = pow(10, 8);
+		CMeshO::PerVertexAttributeHandle<FieldScalar> handle = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<FieldScalar>(m, "harmonic");
 
-		Eigen::Matrix<CoeffScalar, Eigen::Dynamic, 1> b, x; // Unknown and known terms vectors
-		b.setZero(n);
-		b(v0_idx) = alpha * par.getFloat("value1");
-		b(v1_idx) = alpha * par.getFloat("value2");
+		bool ok = vcg::tri::Harmonic<CMeshO, FieldScalar>::ComputeScalarField(m, constraints, handle);
 
-		laplaceMat.coeffRef(v0_idx, v0_idx) += alpha;
-		laplaceMat.coeffRef(v1_idx, v1_idx) += alpha;
-
-		// Solve system laplacianMat x = b
-		cb(20, "System matrix decomposition...");
-		Eigen::SimplicialLDLT<Eigen::SparseMatrix<CoeffScalar> > solver; // TODO eventually use another solver
-		solver.compute(laplaceMat);
-		if(solver.info() != Eigen::Success)
+		if (!ok)
 		{
-			// decomposition failed
-			this->errorMessage = "System matrix decomposition failed: ";
-			if (solver.info() == Eigen::NumericalIssue)
-				this->errorMessage += "numerical issue.";
-			else if (solver.info() == Eigen::NoConvergence)
-				this->errorMessage += "no convergence.";
-			else if (solver.info() == Eigen::InvalidInput)
-				this->errorMessage += "invalid input.";
-
-			return false;
-		}
-
-		cb(85, "Solving the system...");
-		x = solver.solve(b);
-		if(solver.info() != Eigen::Success)
-		{
-			// solving failed
-			this->errorMessage = "System solving failed.";
+			this->errorMessage += "An error occurred.";
 			return false;
 		}
 
 		// Colorize bands for the 0-1 interval
 		if (par.getBool("colorize"))
 		{
+			md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
 			float steps = 20.0f;
 			for (size_t i = 0; int(i) < n; ++i)
 			{
-				bool on = (int)(x[i]*steps)%2 == 1;
+				bool on = (int)(handle[i]*steps)%2 == 1;
 				if (on)
 				{
-					m.vert[i].C() = vcg::Color4b::ColorRamp(0,2,x[i]);
+					m.vert[i].C() = vcg::Color4b::ColorRamp(0,2,handle[i]);
 				}
 				else
 				{
 					m.vert[i].C() = vcg::Color4b::White;
 				}
 			}
-		}
-
-		// Set field value into vertex quality attribute
-		for (size_t i = 0; int(i) < n; ++i)
-		{
-			m.vert[i].Q() = x[i];
 		}
 
 		cb(100, "Done.");
@@ -347,4 +195,4 @@ QString FilterHarmonicPlugin::filterScriptFunctionName( FilterIDType filterID )
 	return QString();
 }
 
-Q_EXPORT_PLUGIN(FilterHarmonicPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterHarmonicPlugin)
