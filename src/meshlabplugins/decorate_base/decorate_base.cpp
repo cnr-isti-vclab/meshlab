@@ -1300,21 +1300,41 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotf &ls, int camera
   }
 
   int ln=0;
-  if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Perspective");
-  if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, "Camera Type: Orthographic");
+  const char *typeBuf;
+  if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) typeBuf="Persp";
+  if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       typeBuf="Ortho";
 
   Point3f vp = ls.GetViewPoint();
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("ViewPoint %1 %2 %3").arg(vp[0]).arg(vp[1]).arg(vp[2]));
   Point3f ax0 = ls.Axis(0);
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 0 - %1 %2 %3").arg(ax0[0]).arg(ax0[1]).arg(ax0[2]));
   Point3f ax1 = ls.Axis(1);
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 1 - %1 %2 %3").arg(ax1[0]).arg(ax1[1]).arg(ax1[2]));
   Point3f ax2 = ls.Axis(2);
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
   float fov = ls.GetFovFromFocal();
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
   float focal = ls.Intrinsics.FocalMm;
-  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("ViewPoint %1 %2 %3").arg(vp[0]).arg(vp[1]).arg(vp[2]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 0 - %1 %2 %3").arg(ax0[0]).arg(ax0[1]).arg(ax0[2]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 1 - %1 %2 %3").arg(ax1[0]).arg(ax1[1]).arg(ax1[2]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
+//  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
+
+
+  this->RealTimeLog("Camera Info", m->shortName(),
+                    "<table>"
+                    "<tr><td>Viewpoint: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                    "<tr><td>axis 0:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                    "<tr><td>axis 1:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                    "<tr><td>axis 2:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+                    "</table><br>"
+                    "<table>"
+                    "<tr><td>FOV (%s): %7.4f     </td><td> Viewport (%i  x %i)</td></tr>"
+                    "<tr><td>Focal Length %7.4f  </td><td> PxSize (%.4f x %.4f)</td></tr>"
+                    "</table>",
+                    vp[0],vp[1],vp[2],
+      ax0[0],ax0[1],ax0[2],
+      ax1[0],ax1[1],ax1[2],
+      ax2[0],ax2[1],ax2[2],
+      typeBuf, fov,  ls.Intrinsics.ViewportPx[0], ls.Intrinsics.ViewportPx[1],
+      focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
 void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
