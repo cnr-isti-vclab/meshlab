@@ -68,8 +68,8 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
     //lastEditRef = NULL;
     setAttribute(Qt::WA_DeleteOnClose,true);
     fov = 60;
-    clipRatioFar = 1;
-    clipRatioNear = 1;
+    clipRatioFar = 5;
+    clipRatioNear = 0.2;
     nearPlane = .2f;
     farPlane = 5.f;
 
@@ -1390,8 +1390,8 @@ void GLArea::setView()
 
     if(fov==5) cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
 
-    nearPlane = cameraDist - 2.f*clipRatioNear;
-    farPlane =  cameraDist + 10.f*clipRatioFar;
+    nearPlane = cameraDist*clipRatioNear;
+    farPlane =  cameraDist*clipRatioFar;
     if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
     if (!takeSnapTile)
@@ -1858,8 +1858,8 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
             nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
             farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
             fov = shot.GetFovFromFocal();
-            clipRatioNear = (getCameraDistance()-nearPlane)/2.0f ;
-            clipRatioFar = (farPlane-getCameraDistance())/10.0f ;
+            clipRatioNear = nearPlane/getCameraDistance();
+            clipRatioFar = farPlane/getCameraDistance();
 
         }
         /*else if (QString::compare(node.nodeName(),"Render")==0)
