@@ -157,8 +157,8 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
   {
   case FF_FACE_SELECTION :
   case FF_VERT_SELECTION	: return MeshFilterInterface::Selection;
-  case FF_FACE_QUALITY		: return MeshFilterInterface::Quality;
-  case FF_VERT_QUALITY		: return MeshFilterInterface::Quality;
+  case FF_FACE_QUALITY		: return FilterClass( Quality + FaceColoring );
+  case FF_VERT_QUALITY		: return FilterClass( Quality + VertexColoring );
   case FF_VERT_TEXTURE_FUNC		: return MeshFilterInterface::Texture;
   case FF_VERT_COLOR			:	return MeshFilterInterface::VertexColoring;
   case FF_VERT_NORMAL			:	return MeshFilterInterface::Normal;
@@ -560,8 +560,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::VertexNormalize(m.cm);
 
     // map quality into per-vertex color
-    if(par.getBool("map")) tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
-
+    if(par.getBool("map")) 
+    {
+        tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
+        m.updateDataMask(MeshModel::MM_VERTCOLOR);
+    }
     // if succeded log stream contains number of vertices and time elapsed
     Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
@@ -738,7 +741,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::FaceNormalize(m.cm);
 
     // map quality into per-vertex color
-    if(par.getBool("map")) tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm);
+    if(par.getBool("map")) 
+    {
+        tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm);
+        m.updateDataMask(MeshModel::MM_FACECOLOR);
+    }
 
     // if succeded log stream contains number of faces processed and time elapsed
     Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
