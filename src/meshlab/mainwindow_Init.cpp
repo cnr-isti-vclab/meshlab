@@ -183,6 +183,7 @@ void MainWindow::init()
     connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
 }
 
+
 void MainWindow::createActions()
 {
     searchShortCut = new QShortcut(QKeySequence(Qt::CTRL+Qt::Key_F), this);
@@ -669,7 +670,7 @@ void MainWindow::createMenus()
 
     colorModePerFaceAct = new RenderModeColorModePerFaceAction(colorModeGroupAct);
     colorModePerFaceAct->setCheckable(true);
-    rendlist.push_back(colorModePerVertexAct);
+    rendlist.push_back(colorModePerFaceAct);
 
     connectRenderModeActionList(rendlist);
 
