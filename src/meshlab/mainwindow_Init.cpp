@@ -1138,7 +1138,7 @@ void MainWindow::loadMeshLabSettings()
         }
     }
 
-    emit dispatchCustomSettings(currentGlobalParams);
+    //emit dispatchCustomSettings(currentGlobalParams);
 }
 
 void MainWindow::addToMenu(QList<QAction *> actionList, QMenu *menu, const char *slot)
