@@ -23,6 +23,7 @@
 #ifndef __VCG_ALIGNPAIRDIALOG
 #define __VCG_ALIGNPAIRDIALOG
 
+class QCheckBox;
 
 #include <common/interfaces.h>
 #include "AlignPairWidget.h"
