@@ -115,20 +115,21 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gl
   //qFont.setPixelSize(12);
   //p->setFont(qFont);
   QString buf = QString("f%1\n (%3 %4 %5)").arg(QString::number(tri::Index(m.cm,fp))).arg(QString::number(tri::Index(m.cm,fp->V(0)))).arg(QString::number(tri::Index(m.cm,fp->V(1)))).arg(QString::number(tri::Index(m.cm,fp->V(2))));
-  //if( m.hasDataMask(MeshModel::MM_FACECOLOR) )
-  //    buf +=QString(" - C(%1)").arg(QString::number(fp->));
+  if( m.hasDataMask(MeshModel::MM_FACECOLOR) )
+      buf +=QString(" - C(%1 %2 %3)").arg(QString::number(fp->C().X())).arg(QString::number(fp->C().Y())).arg(QString::number(fp->C().Z()));
   Point3f c=Barycenter(*fp);
   vcg::glLabel::render(p,c,buf);
   for(int i=0;i<3;++i)
     {
-       buf =QString("\nv%1:%2 (%3 %4 %5)").arg(i).arg(QString::number(fp->V(i) - &m.cm.vert[0])).arg(QString::number(fp->P(i)[0])).arg(QString::number(fp->P(i)[1])).arg(QString::number(fp->P(i)[2]));
-      if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
+		QString buf;
+       buf =QString("v%1:%2 (%3 %4 %5)").arg(QString::number(i)).arg(QString::number(fp->V(i) - &m.cm.vert[0])).arg(QString::number(fp->P(i)[0])).arg(QString::number(fp->P(i)[1])).arg(QString::number(fp->P(i)[2]));
+		if( m.hasDataMask(MeshModel::MM_VERTQUALITY) )
         buf +=QString(" - Q(%1)").arg(QString::number(fp->V(i)->Q()));
-      if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
+     if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
           buf +=QString("- uv(%1 %2) id:%3").arg(QString::number(fp->WT(i).U())).arg(QString::number(fp->WT(i).V())).arg(QString::number(fp->WT(i).N()));
       if( m.hasDataMask(MeshModel::MM_VERTTEXCOORD) )
           buf +=QString("- uv(%1 %2) id:%3").arg(QString::number(fp->V(i)->T().U())).arg(QString::number(fp->V(i)->T().V())).arg(QString::number(fp->V(i)->T().N()));
-    vcg::glLabel::render(p,fp->V(i)->P(),buf);
+	vcg::glLabel::render(p,fp->V(i)->P(),buf);
     }
 
   //p->drawText(QRect(0,0,gla->width(),gla->height()), Qt::AlignLeft | Qt::TextWordWrap, buf);
