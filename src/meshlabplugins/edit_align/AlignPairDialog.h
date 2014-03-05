@@ -28,6 +28,8 @@ class QCheckBox;
 #include <common/interfaces.h>
 #include "AlignPairWidget.h"
 
+#include <QCheckBox>
+
 class AlignPairDialog: public QDialog
 {
     Q_OBJECT
