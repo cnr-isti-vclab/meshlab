@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
         }
 
   MainWindow window;
-  window.show();
   window.showMaximized();
 
   // This event filter is installed to intercept the open events sent directly by the Operative System.
