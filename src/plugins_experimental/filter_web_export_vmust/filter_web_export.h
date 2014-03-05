@@ -56,6 +56,12 @@ public:
 	FilterClass getClass(QAction *a);
 	
 	QString filterScriptFunctionName(FilterIDType filterID);
+
+private:
+
+	QStringList templateList;
+	QStringList templateNames;
+
 };
 
 #endif

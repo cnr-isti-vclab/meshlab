@@ -22,6 +22,10 @@
 ****************************************************************************/
 
 #include <QtScript>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QMessageBox>
 
 #include <math.h>
 #include <stdlib.h>
@@ -109,12 +113,15 @@ void FilterWebExportVMustPlugin::initParameterSet(QAction *action, MeshDocument 
   
 	parlst.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh to export."));
 
-	QStringList templateList;
 	templateList << "Basic Viewer" << "Standard Viewer" << "Fullsize Viewer" << "Radiance Scaling" <<
-		"Walkthrough" << "POP Geometry" << "Nexus conversion";
+		"Walk Through" << "POP Geometry" << "Nexus conversion";
 	parlst.addParam(new RichEnum("template", 1, templateList, "Web Template:", "Web template to use."));
 	parlst.addParam(new RichString("notification_email", "youremail@domain.com", "Notification email:", 
 		"A link to download the exported model will be send at this email address."));
+
+	// names to be used with the CIF API
+	templateNames << "basic" << "standard" << "fullsize" << "radianceScaling" << "walkthrough" 
+		<< "pop" << "nexus";
 
 	return;
 }
@@ -137,12 +144,46 @@ bool FilterWebExportVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, 
 	{
 		CMeshO &m=md.mm()->cm;
 
-		// ...TODO...
+		QNetworkAccessManager NAManager;
+		QUrl url ("http://pipeline.v-must.net");
+
+		QNetworkRequest request(url);
+		
+		QNetworkReply *reply = NAManager.get(request);
+		QTimer timer;
+		timer.setSingleShot(true);
+		timer.start(5000);
+
+		QEventLoop eventLoop;
+		connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+		connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+		eventLoop.exec();   // block the http request 
+
+		if (timer.isActive())
+		{
+			// processing the reply and proceed 
+		}
+		else
+		{
+			//QMessageBox::warning(this, tr("V-Must CIF API"), tr("Server is time out. The model will not be exported. Please, re-try later."));
+		}
+
+
+/*
+		QHttpRequestHeader header("GET", QUrl::toPercentEncoding("/api/v1/buckets"));
+		header.setValue("Accept", "application/json");
+		header.setValue("Accept-Encoding", "gzip, deflate, compress");
+		header.setValue("Content-Type", "application/octet-stream");
+		header.setValue("Host", "pipelineserver.ltd");
+		header.setValue("X-Filename", "test.ply");
+		http.request(header);
+		*/
+
+
 	}
 
 	return true;
 }
-
 
 Q_EXPORT_PLUGIN(FilterWebExportVMustPlugin)
 
