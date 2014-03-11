@@ -113,9 +113,9 @@ void FilterWebExportVMustPlugin::initParameterSet(QAction *action, MeshDocument 
   
 	parlst.addParam(new RichMesh("target_mesh", target, &md, "Target mesh:", "The mesh to export."));
 
-	templateList << "Basic Viewer" << "Standard Viewer" << "Fullsize Viewer" << "Radiance Scaling" <<
+	templateNamesHR << "Basic Viewer" << "Standard Viewer" << "Fullsize Viewer" << "Radiance Scaling" <<
 		"Walk Through" << "POP Geometry" << "Nexus conversion";
-	parlst.addParam(new RichEnum("template", 1, templateList, "Web Template:", "Web template to use."));
+	parlst.addParam(new RichEnum("template", 1, templateNamesHR, "Web Template:", "Web template to use."));
 	parlst.addParam(new RichString("notification_email", "youremail@domain.com", "Notification email:", 
 		"A link to download the exported model will be send at this email address."));
 
@@ -145,39 +145,50 @@ bool FilterWebExportVMustPlugin::applyFilter(QAction *filter, MeshDocument &md, 
 		CMeshO &m=md.mm()->cm;
 
 		QNetworkAccessManager NAManager;
-		QUrl url ("http://pipeline.v-must.net");
 
-		QNetworkRequest request(url);
-		
-		QNetworkReply *reply = NAManager.get(request);
+		// STEP 1: check if the server works (by requesting the list of application templates)
+		// (note that this list is not used)
+		QUrl urlTest ("http://pipeline.v-must.net/api/v1/bundles");
+
+		QNetworkRequest request1(urlTest);
+
+		QNetworkReply *reply1 = NAManager.get(request1);
 		QTimer timer;
 		timer.setSingleShot(true);
 		timer.start(5000);
 
 		QEventLoop eventLoop;
-		connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+		connect(reply1, SIGNAL(finished()), &eventLoop, SLOT(quit()));
 		connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
-		eventLoop.exec();   // block the http request 
+		eventLoop.exec();   // block the http request for 5 seconds
+
+		delete reply1;
 
 		if (timer.isActive())
 		{
-			// processing the reply and proceed 
+			timer.stop();
+
+			// STEP 2: preparing the bucket for the processing
+
+			QUrl urlBucket("http://pipeline.v-must.net/api/v1/buckets");
+			QNetworkRequest request2(urlBucket);
+			request2.setRawHeader("Accept", "application/json");
+			request2.setRawHeader("Accept-Encoding", "gzip, deflate, compress");
+			request2.setRawHeader("Content-Type", "application/octet-stream");
+			request2.setRawHeader("Host", "pipelineserver.ltd");
+			request2.setRawHeader("X-Filename", "test.ply");
+
+			QNetworkReply *reply2 = NAManager.get(request2);
+			connect(reply2, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+			eventLoop.exec();   // block the http request
+
+			// STEP 3: launch the processing according to the selected template
 		}
 		else
 		{
-			//QMessageBox::warning(this, tr("V-Must CIF API"), tr("Server is time out. The model will not be exported. Please, re-try later."));
+			QMessageBox::warning(0, tr("V-Must CIF API"), tr("Server is time out. Please, re-try later."));
 		}
 
-
-/*
-		QHttpRequestHeader header("GET", QUrl::toPercentEncoding("/api/v1/buckets"));
-		header.setValue("Accept", "application/json");
-		header.setValue("Accept-Encoding", "gzip, deflate, compress");
-		header.setValue("Content-Type", "application/octet-stream");
-		header.setValue("Host", "pipelineserver.ltd");
-		header.setValue("X-Filename", "test.ply");
-		http.request(header);
-		*/
 
 
 	}

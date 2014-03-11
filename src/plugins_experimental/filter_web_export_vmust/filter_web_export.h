@@ -59,8 +59,8 @@ public:
 
 private:
 
-	QStringList templateList;
-	QStringList templateNames;
+	QStringList templateNames;     // name of the application templates
+	QStringList templateNamesHR;   // human-readable version of the name of the application templates
 
 };
 
