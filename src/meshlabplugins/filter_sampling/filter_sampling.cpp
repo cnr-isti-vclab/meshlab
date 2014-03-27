@@ -39,7 +39,7 @@ $Log: samplefilter.cpp,v $
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/algorithms/geodesic.h>
 #include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/complex/algorithms/voronoi_clustering.h>
+#include <vcg/complex/algorithms/voronoi_processing.h>
 
 using namespace vcg;
 using namespace std;
