@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -33,36 +33,36 @@ using namespace mu;
 using namespace vcg;
 
 // Constructor
-FilterFunctionPlugin::FilterFunctionPlugin() 
-{ 
-	typeList 
-		<< FF_VERT_SELECTION
-		<< FF_FACE_SELECTION
-		<< FF_GEOM_FUNC
-		<< FF_WEDGE_TEXTURE_FUNC
-		<< FF_VERT_TEXTURE_FUNC
-		<< FF_FACE_COLOR
-		<< FF_VERT_COLOR
-		<< FF_VERT_QUALITY
+FilterFunctionPlugin::FilterFunctionPlugin()
+{
+    typeList
+        << FF_VERT_SELECTION
+        << FF_FACE_SELECTION
+        << FF_GEOM_FUNC
+        << FF_WEDGE_TEXTURE_FUNC
+        << FF_VERT_TEXTURE_FUNC
+        << FF_FACE_COLOR
+        << FF_VERT_COLOR
+        << FF_VERT_QUALITY
     << FF_VERT_NORMAL
-		<< FF_FACE_QUALITY
-		<< FF_DEF_VERT_ATTRIB
-		<< FF_DEF_FACE_ATTRIB
-		<< FF_GRID
-		<< FF_ISOSURFACE
-		<< FF_REFINE;
-  
-	foreach(FilterIDType tt , types())
-		actionList << new QAction(filterName(tt), this);
+        << FF_FACE_QUALITY
+        << FF_DEF_VERT_ATTRIB
+        << FF_DEF_FACE_ATTRIB
+        << FF_GRID
+        << FF_ISOSURFACE
+        << FF_REFINE;
+
+    foreach(FilterIDType tt , types())
+        actionList << new QAction(filterName(tt), this);
 }
 
 FilterFunctionPlugin::~FilterFunctionPlugin()
 {
-	for (int i = 0; i < actionList.count() ; i++ )
-		delete actionList.at(i);
+    for (int i = 0; i < actionList.count() ; i++ )
+        delete actionList.at(i);
 }
 
-// short string describing each filtering action 
+// short string describing each filtering action
 QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
@@ -87,35 +87,35 @@ QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
 }
 const QString PerVertexAttributeString("It's possibile to use the following per-vertex variables in the expression:<br>"
                                        "x, y, z, nx, ny, nz (normal), r, g, b (color), q (quality), rad, vi (index), vtu, vtv (tex coord ) <br>"
-																			 "and all custom <i>vertex attributes</i> already defined by user.<br>");
+                                                                             "and all custom <i>vertex attributes</i> already defined by user.<br>");
 
 const QString PerFaceAttributeString("It's possibile to use per-face variables like attributes associated to the three vertex of every face.<br>"
-																		"<b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>"
-																		"and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,"
+                                                                        "<b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>"
+                                                                        "and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0</b> for <b>color</b>,"
                                     "<b>q0,q1,q2</b> for <b>quality</b> wtu0, wtv0, wtu1, wtv1,wtu2, wtv2 (per wedge tex coord ).<br>");
 
-// long string describing each filtering action 
+// long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
 {
-	switch(filterId) {
-		case FF_VERT_SELECTION : return tr("Boolean function using muparser lib to perform vertex selection over current mesh.<br>"
-										   "It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
-										   "<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")
-											 +PerVertexAttributeString; 
+    switch(filterId) {
+        case FF_VERT_SELECTION : return tr("Boolean function using muparser lib to perform vertex selection over current mesh.<br>"
+                                           "It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
+                                           "<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")
+                                             +PerVertexAttributeString;
 
-		case FF_FACE_SELECTION : return tr("Boolean function using muparser lib to perform faces selection over current mesh.<br>"
-																			 "It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
-																			 "<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")+PerFaceAttributeString;   
+        case FF_FACE_SELECTION : return tr("Boolean function using muparser lib to perform faces selection over current mesh.<br>"
+                                                                             "It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
+                                                                             "<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")+PerFaceAttributeString;
 
-		case FF_GEOM_FUNC :  return tr("Geometric function using muparser lib to generate new Coord<br>"
-									   "You can change x,y,z for every vertex according to the function specified.<br>")
-											+PerVertexAttributeString;
+        case FF_GEOM_FUNC :  return tr("Geometric function using muparser lib to generate new Coord<br>"
+                                       "You can change x,y,z for every vertex according to the function specified.<br>")
+                                            +PerVertexAttributeString;
 
-		case FF_FACE_COLOR : return tr("Color function using muparser lib to generate new RGB color for every face<br>"
-									   "Insert three function each one for red, green and blue channel respectively.<br>")+PerFaceAttributeString;   
-		case FF_VERT_COLOR : return tr("Color function using muparser lib to generate new RGB color for every vertex<br>"
-									   "Insert three function each one for red, green and blue channel respectively.<br>")
-											+PerVertexAttributeString;
+        case FF_FACE_COLOR : return tr("Color function using muparser lib to generate new RGB color for every face<br>"
+                                       "Insert three function each one for red, green and blue channel respectively.<br>")+PerFaceAttributeString;
+        case FF_VERT_COLOR : return tr("Color function using muparser lib to generate new RGB color for every vertex<br>"
+                                       "Insert three function each one for red, green and blue channel respectively.<br>")
+                                            +PerVertexAttributeString;
 
     case FF_VERT_QUALITY : return tr("Quality function using muparser to generate new Quality for every vertex<br>")
                 +PerVertexAttributeString;
@@ -124,31 +124,31 @@ QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
   case FF_VERT_NORMAL : return tr("Normal function using muparser to generate new Normal for every vertex<br>")
               +PerVertexAttributeString;
 
-		case FF_FACE_QUALITY : return tr("Quality function using muparser to generate new Quality for every face<br>"
-										 "Insert three function each one for quality of the three vertex of a face<br>")+PerFaceAttributeString;   
-	case FF_WEDGE_TEXTURE_FUNC : return tr("Texture function using muparser to generate new per wedge tex coords for every face<br>"
-									 "Insert six functions each u v for each one of the three vertex of a face<br>")+PerFaceAttributeString;
-		case FF_DEF_VERT_ATTRIB : return tr("Add a new Per-Vertex scalar attribute to current mesh and fill it with the defined function.<br>"
-								       "The name specified below can be used in other filter function")+PerVertexAttributeString;
+        case FF_FACE_QUALITY : return tr("Quality function using muparser to generate new Quality for every face<br>"
+                                         "Insert three function each one for quality of the three vertex of a face<br>")+PerFaceAttributeString;
+    case FF_WEDGE_TEXTURE_FUNC : return tr("Texture function using muparser to generate new per wedge tex coords for every face<br>"
+                                     "Insert six functions each u v for each one of the three vertex of a face<br>")+PerFaceAttributeString;
+        case FF_DEF_VERT_ATTRIB : return tr("Add a new Per-Vertex scalar attribute to current mesh and fill it with the defined function.<br>"
+                                       "The name specified below can be used in other filter function")+PerVertexAttributeString;
 
-		case FF_DEF_FACE_ATTRIB : return tr("Add a new Per-Face attribute to current mesh.<br>"
-									   "You can specify custom name and a function to generate attribute's value<br>"
+        case FF_DEF_FACE_ATTRIB : return tr("Add a new Per-Face attribute to current mesh.<br>"
+                                       "You can specify custom name and a function to generate attribute's value<br>"
                      "It's possible to use per-face variables in the expression:<br>")+PerFaceAttributeString+
                      tr("<font color=\"#FF0000\">The attribute name specified below can be used in other filter function</font>");
 
-		case FF_GRID : return tr("Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user with absolute length/height.<br>"
-						         "It's possible to center Grid on origin.");
+        case FF_GRID : return tr("Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user with absolute length/height.<br>"
+                                 "It's possible to center Grid on origin.");
 
-		case FF_ISOSURFACE : return tr("Generate a new mesh that corresponds to the 0 valued isosurface defined by the scalar field generated by the given expression");
+        case FF_ISOSURFACE : return tr("Generate a new mesh that corresponds to the 0 valued isosurface defined by the scalar field generated by the given expression");
 
-		case FF_REFINE : return tr("Refine current mesh with user defined parameters.<br>"
-							       "Specify a Boolean Function needed to select which edges will be cut for refinement purpose.<br>"
-								   "Each edge is identified with first and second vertex.<br>"
+        case FF_REFINE : return tr("Refine current mesh with user defined parameters.<br>"
+                                   "Specify a Boolean Function needed to select which edges will be cut for refinement purpose.<br>"
+                                   "Each edge is identified with first and second vertex.<br>"
                    "Arguments accepted are first and second vertex attributes:<br>")+PerVertexAttributeString;
 
-		default : assert(0); 
-	}
-	return QString("filter not found!");
+        default : assert(0);
+    }
+    return QString("filter not found!");
 }
 
 FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
@@ -236,12 +236,12 @@ int FilterFunctionPlugin::getRequirements(QAction *action)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
+// For each parmeter you need to define,
+// - the name of the parameter,
+// - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
   Q_UNUSED(m);
   switch(ID(action))	 {
@@ -560,7 +560,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::VertexNormalize(m.cm);
 
     // map quality into per-vertex color
-    if(par.getBool("map")) 
+    if(par.getBool("map"))
     {
         tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
         m.updateDataMask(MeshModel::MM_VERTCOLOR);
@@ -741,7 +741,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     if(par.getBool("normalize")) tri::UpdateQuality<CMeshO>::FaceNormalize(m.cm);
 
     // map quality into per-vertex color
-    if(par.getBool("map")) 
+    if(par.getBool("map"))
     {
         tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm);
         m.updateDataMask(MeshModel::MM_FACECOLOR);
@@ -775,7 +775,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
     std::vector<std::string> AllVertexAttribName;
     tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm,AllVertexAttribName);
-    qDebug("Now mesh has %i vertex float attribute",AllVertexAttribName.size());
+    qDebug("Now mesh has %lu vertex float attribute",AllVertexAttribName.size());
     Parser p;
     setPerVertexVariables(p,m.cm);
     p.SetExpr(expr);
@@ -1059,73 +1059,73 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
 // set per-face attributes associated to parser variables
 void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 {
-	// set attributes for First vertex
-	// coords, normal coords, quality
-	x0 = (*fi).V(0)->P()[0];
-	y0 = (*fi).V(0)->P()[1];
-	z0 = (*fi).V(0)->P()[2];
+    // set attributes for First vertex
+    // coords, normal coords, quality
+    x0 = (*fi).V(0)->P()[0];
+    y0 = (*fi).V(0)->P()[1];
+    z0 = (*fi).V(0)->P()[2];
 
-	nx0 = (*fi).V(0)->N()[0];
-	ny0 = (*fi).V(0)->N()[1];
-	nz0 = (*fi).V(0)->N()[2];
+    nx0 = (*fi).V(0)->N()[0];
+    ny0 = (*fi).V(0)->N()[1];
+    nz0 = (*fi).V(0)->N()[2];
 
-	r0 = (*fi).V(0)->C()[0];
-	g0 = (*fi).V(0)->C()[1];
-	b0 = (*fi).V(0)->C()[2];
+    r0 = (*fi).V(0)->C()[0];
+    g0 = (*fi).V(0)->C()[1];
+    b0 = (*fi).V(0)->C()[2];
 
-	q0 = (*fi).V(0)->Q();
-	q1 = (*fi).V(1)->Q();
-	q2 = (*fi).V(2)->Q();
+    q0 = (*fi).V(0)->Q();
+    q1 = (*fi).V(1)->Q();
+    q2 = (*fi).V(2)->Q();
 
-	// set attributes for Second vertex
-	// coords, normal coords, quality
-	x1 = (*fi).V(1)->P()[0];
-	y1 = (*fi).V(1)->P()[1];
-	z1 = (*fi).V(1)->P()[2];
+    // set attributes for Second vertex
+    // coords, normal coords, quality
+    x1 = (*fi).V(1)->P()[0];
+    y1 = (*fi).V(1)->P()[1];
+    z1 = (*fi).V(1)->P()[2];
 
-	nx1 = (*fi).V(1)->N()[0];
-	ny1 = (*fi).V(1)->N()[1];
-	nz1 = (*fi).V(1)->N()[2];
+    nx1 = (*fi).V(1)->N()[0];
+    ny1 = (*fi).V(1)->N()[1];
+    nz1 = (*fi).V(1)->N()[2];
 
-	r1 = (*fi).V(1)->C()[0];
-	g1 = (*fi).V(1)->C()[1];
-	b1 = (*fi).V(1)->C()[2];
+    r1 = (*fi).V(1)->C()[0];
+    g1 = (*fi).V(1)->C()[1];
+    b1 = (*fi).V(1)->C()[2];
 
-	// set attributes for Third vertex
-	// coords, normal coords, quality
-	x2 = (*fi).V(2)->P()[0];
-	y2 = (*fi).V(2)->P()[1];
-	z2 = (*fi).V(2)->P()[2];
+    // set attributes for Third vertex
+    // coords, normal coords, quality
+    x2 = (*fi).V(2)->P()[0];
+    y2 = (*fi).V(2)->P()[1];
+    z2 = (*fi).V(2)->P()[2];
 
-	nx2 = (*fi).V(2)->N()[0];
-	ny2 = (*fi).V(2)->N()[1];
-	nz2 = (*fi).V(2)->N()[2];
+    nx2 = (*fi).V(2)->N()[0];
+    ny2 = (*fi).V(2)->N()[1];
+    nz2 = (*fi).V(2)->N()[2];
 
-	r2 = (*fi).V(2)->C()[0];
-	g2 = (*fi).V(2)->C()[1];
-	b2 = (*fi).V(2)->C()[2];
-	
+    r2 = (*fi).V(2)->C()[0];
+    g2 = (*fi).V(2)->C()[1];
+    b2 = (*fi).V(2)->C()[2];
+
   if(HasPerFaceQuality(m))
          fq=(*fi).Q();
     else fq=0;
 
-	// set face color attributes
-	if(HasPerFaceColor(m)){
-		r = (*fi).C()[0];
-		g = (*fi).C()[1];
-		b = (*fi).C()[2];
-	} else {
-		r=g=b=255;
-	}
-	
-	// zero based index of face
-	f = fi - m.face.begin();
+    // set face color attributes
+    if(HasPerFaceColor(m)){
+        r = (*fi).C()[0];
+        g = (*fi).C()[1];
+        b = (*fi).C()[2];
+    } else {
+        r=g=b=255;
+    }
 
-	// zero based index of its vertices
-	v0i = ((*fi).V(0) - &m.vert[0]);
-	v1i = ((*fi).V(1) - &m.vert[0]);
-	v2i = ((*fi).V(2) - &m.vert[0]);
-	
+    // zero based index of face
+    f = fi - m.face.begin();
+
+    // zero based index of its vertices
+    v0i = ((*fi).V(0) - &m.vert[0]);
+    v1i = ((*fi).V(1) - &m.vert[0]);
+    v2i = ((*fi).V(2) - &m.vert[0]);
+
   if(tri::HasPerWedgeTexCoord(m))
   {
     wtu0=(*fi).WT(0).U();
@@ -1138,34 +1138,34 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
   else { wtu0=wtv0=wtu1=wtv1=wtu2=wtv2=0; }
 
 
-	// if user-defined attributes exist (vector is not empty) 
-	//  set variables to explicit value obtained through attribute's handler
-	for(int i = 0; i < (int) f_attrValue.size(); i++)
+    // if user-defined attributes exist (vector is not empty)
+    //  set variables to explicit value obtained through attribute's handler
+    for(int i = 0; i < (int) f_attrValue.size(); i++)
     f_attrValue[i] = f_handlers[i][fi];
 }
 
 // Function explicitely define parser variables to perform per-vertex filter action
 // x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
-// and q for quality 
+// and q for quality
 void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 {
-	p.DefineVar("x", &x);
-	p.DefineVar("y", &y);
-	p.DefineVar("z", &z);
-	p.DefineVar("nx", &nx);
-	p.DefineVar("ny", &ny);
-	p.DefineVar("nz", &nz);
-	p.DefineVar("r", &r);
-	p.DefineVar("g", &g);
-	p.DefineVar("b", &b);
-	p.DefineVar("q", &q);
-	p.DefineVar("vi",&v);
-	p.DefineVar("rad",&rad);
+    p.DefineVar("x", &x);
+    p.DefineVar("y", &y);
+    p.DefineVar("z", &z);
+    p.DefineVar("nx", &nx);
+    p.DefineVar("ny", &ny);
+    p.DefineVar("nz", &nz);
+    p.DefineVar("r", &r);
+    p.DefineVar("g", &g);
+    p.DefineVar("b", &b);
+    p.DefineVar("q", &q);
+    p.DefineVar("vi",&v);
+    p.DefineVar("rad",&rad);
   p.DefineVar("vtu",&vtu);
   p.DefineVar("vtv",&vtv);
 
-	// define var for user-defined attributes (if any exists)
-	// if vector is empty, code won't be executed
+    // define var for user-defined attributes (if any exists)
+    // if vector is empty, code won't be executed
   v_handlers.clear();
   v_attrNames.clear();
   v_attrValue.clear();
@@ -1210,62 +1210,62 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 // Function explicitely define parser variables to perform Per-Face filter action
 void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 {
-	// coord of the three vertices within a face
-	p.DefineVar("x0", &x0);
-	p.DefineVar("y0", &y0);
-	p.DefineVar("z0", &z0);
-	p.DefineVar("x1", &x1);
-	p.DefineVar("y1", &y1);
-	p.DefineVar("z1", &z1);
-	p.DefineVar("x2", &x2);
-	p.DefineVar("y2", &y2);
-	p.DefineVar("z2", &z2);
+    // coord of the three vertices within a face
+    p.DefineVar("x0", &x0);
+    p.DefineVar("y0", &y0);
+    p.DefineVar("z0", &z0);
+    p.DefineVar("x1", &x1);
+    p.DefineVar("y1", &y1);
+    p.DefineVar("z1", &z1);
+    p.DefineVar("x2", &x2);
+    p.DefineVar("y2", &y2);
+    p.DefineVar("z2", &z2);
 
-	// attributes of the vertices
-	// normals:
-	p.DefineVar("nx0", &nx0);
-	p.DefineVar("ny0", &ny0);
-	p.DefineVar("nz0", &nz0);
-		
-	p.DefineVar("nx1", &nx1);
-	p.DefineVar("ny1", &ny1);
-	p.DefineVar("nz1", &nz1);
+    // attributes of the vertices
+    // normals:
+    p.DefineVar("nx0", &nx0);
+    p.DefineVar("ny0", &ny0);
+    p.DefineVar("nz0", &nz0);
 
-	p.DefineVar("nx2", &nx2);
-	p.DefineVar("ny2", &ny2);
-	p.DefineVar("nz2", &nz2);
+    p.DefineVar("nx1", &nx1);
+    p.DefineVar("ny1", &ny1);
+    p.DefineVar("nz1", &nz1);
 
-	// colors:
-	p.DefineVar("r0", &r0);
-	p.DefineVar("g0", &g0);
-	p.DefineVar("b0", &b0);
+    p.DefineVar("nx2", &nx2);
+    p.DefineVar("ny2", &ny2);
+    p.DefineVar("nz2", &nz2);
 
-	p.DefineVar("r1", &r1);
-	p.DefineVar("g1", &g1);
-	p.DefineVar("b1", &b1);
-	
-	p.DefineVar("r2", &r2);
-	p.DefineVar("g2", &g2);
-	p.DefineVar("b2", &b2);
+    // colors:
+    p.DefineVar("r0", &r0);
+    p.DefineVar("g0", &g0);
+    p.DefineVar("b0", &b0);
 
-	// quality
-	p.DefineVar("q0", &q0);
-	p.DefineVar("q1", &q1);
-	p.DefineVar("q2", &q2);
+    p.DefineVar("r1", &r1);
+    p.DefineVar("g1", &g1);
+    p.DefineVar("b1", &b1);
 
-	// face color
-	p.DefineVar("r", &r);
-	p.DefineVar("g", &g);
-	p.DefineVar("b", &b);
+    p.DefineVar("r2", &r2);
+    p.DefineVar("g2", &g2);
+    p.DefineVar("b2", &b2);
+
+    // quality
+    p.DefineVar("q0", &q0);
+    p.DefineVar("q1", &q1);
+    p.DefineVar("q2", &q2);
+
+    // face color
+    p.DefineVar("r", &r);
+    p.DefineVar("g", &g);
+    p.DefineVar("b", &b);
 
   // face quality
   p.DefineVar("q", &fq);
 
-	// index
-	p.DefineVar("fi",&f);
-	p.DefineVar("vi0",&v0i);
-	p.DefineVar("vi1",&v1i);
-	p.DefineVar("vi2",&v2i);
+    // index
+    p.DefineVar("fi",&f);
+    p.DefineVar("vi0",&v0i);
+    p.DefineVar("vi1",&v1i);
+    p.DefineVar("vi2",&v2i);
 
   p.DefineVar("wtu0",&wtu0);
   p.DefineVar("wtv0",&wtv0);
@@ -1274,8 +1274,8 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
   p.DefineVar("wtu2",&wtu2);
   p.DefineVar("wtv2",&wtv2);
 
-	// define var for user-defined attributes (if any exists)
-	// if vector is empty, code won't be executed
+    // define var for user-defined attributes (if any exists)
+    // if vector is empty, code won't be executed
   std::vector<std::string> AllFaceAttribName;
   tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m,AllFaceAttribName);
   f_handlers.clear();
