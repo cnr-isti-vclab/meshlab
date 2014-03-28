@@ -576,4 +576,4 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
 
  
  
-MESHLAB_PLUGIN_NAME_EXPORTER(TriIOPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(TxtIOPlugin)
