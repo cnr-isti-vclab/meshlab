@@ -434,6 +434,12 @@
        <layout class="QHBoxLayout" name="_10">
         <item>
          <widget class="QPushButton" name="selectButton">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>25</height>
+           </size>
+          </property>
           <property name="text">
            <string>Select</string>
           </property>
@@ -524,6 +530,18 @@
         </item>
         <item>
          <widget class="QPushButton" name="exportbut">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>25</height>
+           </size>
+          </property>
           <property name="text">
            <string>Export Shots to Raster</string>
           </property>
@@ -576,6 +594,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>25</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Process all selected range maps and save them as separated ply</string>
           </property>
@@ -595,6 +619,18 @@
         </item>
         <item>
          <widget class="QPushButton" name="cancelButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>25</height>
+           </size>
+          </property>
           <property name="text">
            <string>Close</string>
           </property>
