@@ -76,11 +76,8 @@ v3dImportDialog::v3dImportDialog(QWidget *parent,EditArc3DPlugin *_edit )    : Q
 		connect(ui.cancelButton, SIGNAL(pressed()), this, SIGNAL(closing()));
 				
     er=0;
-		exportToPLY=false;
-
-	fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select v3D File"), ".", "*.v3d");
-
-	
+	exportToPLY=false;
+	fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select v3D File"), tr("."), tr("Arc 3D Document (*.v3d)"));
 }
 
 QString v3dImportDialog::exportShotsString( const ExportShots exp )
