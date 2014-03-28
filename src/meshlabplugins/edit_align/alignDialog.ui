@@ -82,6 +82,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
             <property name="text">
              <string>Glue Here Mesh</string>
             </property>
@@ -100,6 +105,11 @@
               <width>100</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
             </property>
             <property name="text">
              <string>Glue Here Visible Meshes</string>
@@ -120,6 +130,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
             <property name="text">
              <string>Manual Rough Glueing</string>
             </property>
@@ -139,6 +154,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
             <property name="text">
              <string>Point Based Glueing</string>
             </property>
@@ -157,6 +177,11 @@
               <width>100</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
             </property>
             <property name="toolTip">
              <string>When pressed it make the current mesh as base mesh, e.g. the one with a Identity as transformation.</string>
@@ -195,7 +220,8 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>8</pointsize>
+              <family>Arial</family>
+              <pointsize>13</pointsize>
              </font>
             </property>
             <property name="text">
@@ -210,6 +236,11 @@
               <width>100</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
             </property>
             <property name="text">
              <string>Process</string>
@@ -234,6 +265,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
             <property name="text">
              <string> Param ICP Default </string>
             </property>
@@ -255,7 +291,8 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>8</pointsize>
+              <family>Arial</family>
+              <pointsize>13</pointsize>
              </font>
             </property>
             <property name="text">
@@ -279,7 +316,8 @@
             </property>
             <property name="font">
              <font>
-              <pointsize>8</pointsize>
+              <family>Arial</family>
+              <pointsize>13</pointsize>
               <weight>50</weight>
               <bold>false</bold>
              </font>
@@ -316,6 +354,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
+            </property>
             <property name="text">
              <string>Show Bad Arc</string>
             </property>
@@ -334,6 +377,11 @@
               <width>100</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Arial</family>
+             </font>
             </property>
             <property name="text">
              <string>Hide/Reveal Unglued Mesh</string>
