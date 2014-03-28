@@ -69,12 +69,18 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QToolButton" name="glueHereButton">
+           <widget class="QPushButton" name="glueHereButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Glue Here Mesh</string>
@@ -82,12 +88,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="glueHereAllButton">
+           <widget class="QPushButton" name="glueHereAllButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Glue Here Visible Meshes</string>
@@ -95,12 +107,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="manualAlignButton">
+           <widget class="QPushButton" name="manualAlignButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Manual Rough Glueing</string>
@@ -108,12 +126,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="pointBasedAlignButton">
+           <widget class="QPushButton" name="pointBasedAlignButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Point Based Glueing</string>
@@ -121,12 +145,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="baseMeshButton">
+           <widget class="QPushButton" name="baseMeshButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="toolTip">
              <string>When pressed it make the current mesh as base mesh, e.g. the one with a Identity as transformation.</string>
@@ -157,6 +187,12 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>11</pointsize>
@@ -169,6 +205,12 @@
           </item>
           <item>
            <widget class="QPushButton" name="icpButton">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
+            </property>
             <property name="text">
              <string>Process</string>
             </property>
@@ -179,12 +221,18 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QToolButton" name="icpParamButton">
+           <widget class="QPushButton" name="icpParamButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string> Param ICP Default </string>
@@ -192,12 +240,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="icpParamCurrentButton">
+           <widget class="QPushButton" name="icpParamCurrentButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="font">
              <font>
@@ -210,12 +264,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="meshTreeParamButton">
+           <widget class="QPushButton" name="meshTreeParamButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="font">
              <font>
@@ -243,12 +303,18 @@
            </spacer>
           </item>
           <item>
-           <widget class="QToolButton" name="badArcButton">
+           <widget class="QPushButton" name="badArcButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Show Bad Arc</string>
@@ -256,12 +322,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="hideRevealButton">
+           <widget class="QPushButton" name="hideRevealButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>25</height>
+             </size>
             </property>
             <property name="text">
              <string>Hide/Reveal Unglued Mesh</string>

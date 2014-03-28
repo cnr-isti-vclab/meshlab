@@ -30,7 +30,7 @@
 
 AlignPairDialog::AlignPairDialog (QWidget * parent) : QDialog(parent)
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QVBoxLayout *layout = new QVBoxLayout();
 
     aa=new AlignPairWidget(this);
     aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
