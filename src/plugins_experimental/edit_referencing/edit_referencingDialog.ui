@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>526</height>
+    <width>643</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,12 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QTabWidget" name="tabWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -148,6 +154,12 @@
             </property>
             <item>
              <widget class="QPushButton" name="addLine">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Add New Point</string>
               </property>
@@ -155,6 +167,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="delLine">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Delete Current Point</string>
               </property>
@@ -178,6 +196,12 @@
             </property>
             <item row="0" column="0">
              <widget class="QPushButton" name="loadFromFile">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Load Reference Points From File</string>
               </property>
@@ -191,6 +215,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QPushButton" name="exportToFile">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Export all Referencing Data to file...</string>
               </property>
@@ -198,6 +228,12 @@
             </item>
             <item row="1" column="0">
              <widget class="QPushButton" name="pickCurrent">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Pick current point on MOVING</string>
               </property>
@@ -205,6 +241,12 @@
             </item>
             <item row="1" column="1">
              <widget class="QPushButton" name="buttonPickRef">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Pick current point on REFERENCE</string>
               </property>
@@ -227,7 +269,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="1" column="0">
              <widget class="QCheckBox" name="cbApplyToAll">
               <property name="text">
                <string>Apply to all VISIBLE layers</string>
@@ -246,6 +288,12 @@
             </property>
             <item>
              <widget class="QPushButton" name="buttonCalculate">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
               <property name="text">
                <string>Calculate Rototranslation</string>
               </property>
@@ -255,6 +303,12 @@
              <widget class="QPushButton" name="buttonApply">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
               </property>
               <property name="text">
                <string>Apply</string>
