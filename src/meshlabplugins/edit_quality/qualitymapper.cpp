@@ -47,11 +47,20 @@ const QString QualityMapperPlugin::Info()
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 {
+    
 	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
 	{
 			QMessageBox::warning(gla, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
 			return false;
 	}
+    QMap<int,RenderMode>::iterator it = gla->rendermodemap.find(m.id());  
+    m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+    if (it != gla->rendermodemap.end())
+    {
+        it.value().setColorMode(GLW::CMPerVert);
+        gla->update();
+    }
+    
 	if(_qualityMapperDialog==0)
 		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
 
@@ -73,7 +82,7 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 	return true;
 }
 
-void QualityMapperPlugin::EndEdit(MeshModel &, GLArea * )
+void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea * )
 {
 	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )
