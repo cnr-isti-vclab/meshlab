@@ -93,7 +93,6 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
 	View3
 	In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
 	*/
-
   //CASE 0: only when the first viewer is opened, just add it and return;
   if (viewerCounter()==0)
   {

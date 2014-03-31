@@ -169,7 +169,7 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
  If it is a newly created one the fullpath is an empty string and the user has to provide a label.
  */
 
-MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
+MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
 {
   QString newlabel = NameDisambiguator(this->meshList,label);
 
@@ -182,7 +182,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
   MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
   meshList.push_back(newMesh);
   emit meshSetChanged();
-  emit meshAdded(newMesh->id());
+  emit meshAdded(newMesh->id(),rm);
   if(setAsCurrent)
     this->setCurrentMesh(newMesh->id());
   return newMesh;
@@ -602,6 +602,7 @@ bool MeshModelState::apply(MeshModel *_m)
                 (*vi).ClearS();
         }
     }
+
 
     if(changeMask & MeshModel::MM_TRANSFMATRIX)
         m->cm.Tr=Tr;

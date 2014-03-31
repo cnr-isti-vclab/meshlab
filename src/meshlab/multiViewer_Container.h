@@ -34,6 +34,7 @@
 class GLArea;
 class RichParameterSet;
 class MultiViewer_Container;
+class MainWindow;
 
 class Splitter : public QSplitter
 {

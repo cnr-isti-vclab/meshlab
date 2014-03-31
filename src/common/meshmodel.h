@@ -641,7 +641,7 @@ private:
 
 public:
 	///add a new mesh with the given name
-	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
+	MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true,const RenderMode& rm = RenderMode());
 
 	///remove the mesh from the list and delete it from memory
 	bool delMesh(MeshModel *mmToDel);
@@ -692,7 +692,7 @@ signals:
 
 	///whenever the meshList is changed
 	void meshSetChanged();
-	void meshAdded(int index);
+	void meshAdded(int index,RenderMode rm);
 	void meshRemoved(int index);
 
 	///whenever the rasterList is changed

@@ -43,6 +43,8 @@
 #include "rendermodeactions.h"
 #include "multiViewer_Container.h"
 
+class MultiViewer_Container;
+
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
@@ -337,7 +339,7 @@ public slots:
 	void updateRasterSetVisibilities();
 
 private slots:
-	void meshAdded(int index);
+	void meshAdded(int index,RenderMode rm);
 	void meshRemoved(int index);
 
 private:

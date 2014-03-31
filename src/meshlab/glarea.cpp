@@ -91,7 +91,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
     connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
     connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
     connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
-    connect(md(),SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
+    connect(md(),SIGNAL(meshAdded(int,RenderMode)),this,SLOT(meshAdded(int,RenderMode)));
     connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
     foreach(MeshModel* mesh,md()->meshList)
@@ -2111,9 +2111,9 @@ void GLArea::completeUpdateRequested()
 //	return NULL;
 //}
 
-void GLArea::meshAdded( int index )
+void GLArea::meshAdded( int index,RenderMode rm )
 {
-    rendermodemap[index] = RenderMode();
+    rendermodemap[index] = rm;
     emit updateLayerTable();
 }
 

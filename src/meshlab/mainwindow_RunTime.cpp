@@ -763,7 +763,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
                 this->newProject();
             }
 
-            if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive))
+            if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive) || path.endsWith("out",Qt::CaseInsensitive) || path.endsWith("nvm",Qt::CaseInsensitive) )
                 openProject(path);
             else
             {
@@ -2087,25 +2087,21 @@ GLArea* MainWindow::newProject(const QString& projName)
     if (!filterMenu->actions().isEmpty())
         updateSubFiltersMenu(true,false);
     GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
-    if (gla != NULL)
+    mvcont->addView(gla, Qt::Horizontal);
+    if (projName.isEmpty())
     {
-        mvcont->addView(gla, Qt::Horizontal);
-        if (projName.isEmpty())
-        {
-            static int docCounter = 1;
-            mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));
-            ++docCounter;
-        }
-        else
-            mvcont->meshDoc.setDocLabel(projName);
-        mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
-        //if(mdiarea->isVisible())
-        if (gla->mvc() == NULL)
-            return NULL;
-        gla->mvc()->showMaximized();
-        layerDialog->updateTable();
-        layerDialog->updateDecoratorParsView();
+        static int docCounter = 1;
+        mvcont->meshDoc.setDocLabel(QString("Project_") + QString::number(docCounter));
+        ++docCounter;
     }
+    else
+        mvcont->meshDoc.setDocLabel(projName);
+    mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
+    //if(mdiarea->isVisible())
+        
+    layerDialog->updateTable();
+    layerDialog->updateDecoratorParsView();
+    mvcont->showMaximized();
     return gla;
 }
 
