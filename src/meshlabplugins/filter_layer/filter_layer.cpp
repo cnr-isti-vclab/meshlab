@@ -182,7 +182,13 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     case FP_SPLITSELECTEDVERTICES :
         {
             MeshModel* currentmesh = md.mm();
-            MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset");
+            RenderMode rm;
+            rm.drawMode = GLW::DMPoints;
+            if (currentmesh->hasDataMask(MeshModel::MM_VERTCOLOR))
+                rm.colorMode = GLW::CMPerVert;
+            
+            MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset",true,rm);
+            destmesh->updateDataMask(currentmesh);
             numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentmesh->cm);
             tri::Append<CMeshO,CMeshO>::Mesh(destmesh->cm, currentmesh->cm, true);
             destmesh->updateDataMask(currentmesh);
@@ -222,7 +228,21 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             // creating the new layer
             // that is the back one
             MeshModel *currentMesh  = md.mm();				// source = current
-            MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+            RenderMode rm;
+            if (currentMesh->hasDataMask(MeshModel::MM_VERTCOLOR))
+                rm.colorMode = GLW::CMPerVert;
+            else if (currentMesh->hasDataMask(MeshModel::MM_FACECOLOR))
+                    rm.colorMode = GLW::CMPerFace;
+            else if (currentMesh->hasDataMask(MeshModel::MM_COLOR))
+                    rm.colorMode = GLW::CMPerMesh;
+
+            if (currentMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+                rm.textureMode = GLW::TMPerWedge;
+            else if (currentMesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
+                    rm.textureMode = GLW::TMPerVert;
+            //vcg::GLW::TextureMode tex = rm.textureMode;
+            MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
+            destMesh->updateDataMask(currentMesh);
             // select all points involved
             //if (currentMesh->cm.fn > 0)
             //{
@@ -235,7 +255,6 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentMesh->cm);
             numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentMesh->cm);
 
-            destMesh->updateDataMask(currentMesh);
             if(par.getBool("DeleteOriginal"))	// delete original faces
             {
                 CMeshO::VertexIterator vi;
