@@ -152,10 +152,26 @@ bool PoissonPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 	if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)){
 		m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
 	}
-	
-	int cnt=0;
-	CMeshO::VertexIterator vi;
-	for(vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi)
+
+    //Useless control on the normals. It can just avoid crashes derived from an importer setting up to [0.0f,0.0f,0.0f] the normal vectors of a mesh without per-vertex normal attribute.
+    int zeronrm = 0;
+    for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi)
+    {
+        if(!(*vi).IsD())
+        {
+            if ((*vi).N() == vcg::Point3f(0.0f,0.0f,0.0f))
+                ++zeronrm;
+        }
+    }
+
+    if (zeronrm == m.cm.vn)
+    {
+        Log(GLLogStream::SYSTEM,"All the normal vectors are set to [0.0,0.0,0.0]. Poisson reconstruction filter requires a set of valid per-vertex normal. Filter will be aborted.");
+        return false;
+    }
+
+    int cnt=0;
+	for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); ++vi)
 	if(!(*vi).IsD()){
 			(*vi).N().Normalize();
 			for(int ii=0;ii<3;++ii){
