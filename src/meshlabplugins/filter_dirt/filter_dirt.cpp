@@ -168,8 +168,9 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         if(cb) (*cb)(50,"Generating Particles...");
 
         GenerateParticles(currMM,dust_points,/*dust_particles,*/n_p,0.6);
-
-        MeshModel* dmm=md.addNewMesh("","dust_mesh");
+		RenderMode rm;
+		rm.drawMode = GLW::DMPoints;
+        MeshModel* dmm=md.addNewMesh("","dust_mesh",true,rm);
         dmm->cm.Clear();
         tri::Allocator<CMeshO>::AddVertices(dmm->cm,dust_points.size());
         CMeshO::VertexIterator vi;

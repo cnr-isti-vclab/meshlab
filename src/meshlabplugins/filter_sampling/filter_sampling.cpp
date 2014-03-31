@@ -685,7 +685,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_ELEMENT_SUBSAMPLING :
   {
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
 
     BaseSampler mps(&(mm->cm));
@@ -704,7 +706,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   {
     MeshModel *curMM= md.mm();
     if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    rm.colorMode = GLW::CMPerVert;
+    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     bool RecoverColor = par.getBool("RecoverColor");
     BaseSampler mps(&(mm->cm));
     mps.texSamplingWidth=par.getInt("TextureW");
@@ -731,7 +736,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
 
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Montecarlo Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Montecarlo Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
     BaseSampler mps(&(mm->cm));
 
@@ -759,7 +766,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
 
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Subdiv Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Subdiv Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
     int samplingMethod = par.getEnum("Sampling");
     BaseSampler mps(&(mm->cm));
@@ -788,7 +797,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_CLUSTERED_SAMPLING :
   {
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Cluster Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Cluster Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     int samplingMethod = par.getEnum("Sampling");
     float threshold = par.getAbsPerc("Threshold");
     bool selected = par.getBool("Selected");
@@ -836,7 +847,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
 
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Poisson-disk Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Poisson-disk Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
 
     float radius = par.getAbsPerc("Radius");
@@ -1147,7 +1160,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     float offset=par.getAbsPerc("Offset");
 
     MeshModel *mmM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Recur Samples"); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    RenderMode rm;
+    rm.drawMode = GLW::DMPoints;
+    MeshModel *mm= md.addNewMesh("","Recur Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
     tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
