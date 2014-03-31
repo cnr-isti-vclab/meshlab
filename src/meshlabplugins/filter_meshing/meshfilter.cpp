@@ -1595,7 +1595,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             sectionName.append(QString::number(planeOffset));
 
 			//this is used to generate svg slices
-            MeshModel* cap= md.addNewMesh("",sectionName);
+            RenderMode rm;
+            rm.drawMode = GLW::DMWire;
+            MeshModel* cap= md.addNewMesh("",sectionName,true,rm);
 			vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(orig->cm, slicingPlane, cap->cm );
 			tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
