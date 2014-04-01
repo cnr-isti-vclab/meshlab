@@ -237,12 +237,13 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                     rm.colorMode = GLW::CMPerMesh;
 
             if (currentMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-                rm.textureMode = GLW::TMPerWedge;
+                rm.textureMode = GLW::TMPerWedgeMulti;
             else if (currentMesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
                     rm.textureMode = GLW::TMPerVert;
             //vcg::GLW::TextureMode tex = rm.textureMode;
             MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
             destMesh->updateDataMask(currentMesh);
+
             // select all points involved
             //if (currentMesh->cm.fn > 0)
             //{
