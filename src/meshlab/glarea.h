@@ -221,6 +221,7 @@ public:
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
     void drawLight();
+	float getFov() { return fov; }
     bool showInterruptButton() const;
     void showInterruptButton(const bool& show);
 
