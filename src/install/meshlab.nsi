@@ -2,15 +2,15 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "MeshLab"
-!define PRODUCT_VERSION "1.3.2"
+!define PRODUCT_VERSION "1.3.3"
 !define PRODUCT_PUBLISHER "Paolo Cignoni, Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\QtSDK\Desktop\Qt\4.7.4\mingw"
-!define MINGW_BASE "C:\QtSDK\mingw"
+!define QT_BASE "C:\Qt\Qt5.2.1_32bit\5.2.1\mingw48_32"
+!define MINGW_BASE "C:\MinGW"
 !define DISTRIB_FOLDER "../distrib"
 
 ; MUI 1.67 compatible ------
@@ -47,8 +47,8 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v132BETA_${NOW}.exe"
-InstallDir "$PROGRAMFILES\VCG\MeshLab"
+OutFile "MeshLab_v133.exe"
+InstallDir "$PROGRAMFILES32\VCG\MeshLab"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -104,6 +104,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\io_gts.dll"
   File "${DISTRIB_FOLDER}/plugins\io_pdb.dll"
   File "${DISTRIB_FOLDER}/plugins\io_m.dll"
+  File "${DISTRIB_FOLDER}/plugins\io_txt.dll"
 
   ; filter plugins (23)
   File "${DISTRIB_FOLDER}/plugins\filter_ao.dll"
@@ -156,8 +157,8 @@ Section "MainSection" SEC01
   ;File "${DISTRIB_FOLDER}/plugins\samplefilterdoc.dll"
   File "${DISTRIB_FOLDER}/plugins\samplefilterdyn.dll"
 
-  File "${DISTRIB_FOLDER}/plugins\filtergeodesic.dll"
-  File "${DISTRIB_FOLDER}/plugins\filtercreateiso.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_geodesic.dll"
+  File "${DISTRIB_FOLDER}/plugins\filter_createiso.dll"
   ;File "${DISTRIB_FOLDER}/plugins\filterborder.dll"
  
 
@@ -173,9 +174,10 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\sampleedit.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_pickpoints.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_quality.dll"
+  File "${DISTRIB_FOLDER}/plugins\edit_referencing.dll"
   
   File "${DISTRIB_FOLDER}/plugins\edit_select.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_texture.dll"
+  ;File "${DISTRIB_FOLDER}/plugins\edit_texture.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_hole.dll"
   File "${DISTRIB_FOLDER}/plugins\edit_manipulators.dll"
   ;File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
@@ -229,22 +231,30 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\samples\images"
   File "${DISTRIB_FOLDER}/sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
-  File ${QT_BASE}\plugins\imageformats\qjpeg4.dll
-  File ${QT_BASE}\plugins\imageformats\qgif4.dll
-  File ${QT_BASE}\plugins\imageformats\qtiff4.dll
+  File ${QT_BASE}\plugins\imageformats\qjpeg.dll
+  File ${QT_BASE}\plugins\imageformats\qgif.dll
+  File ${QT_BASE}\plugins\imageformats\qtiff.dll
+  SetOutPath "$INSTDIR\plugins\platforms"
+  File "${QT_BASE}\plugins\platforms\qminimal.dll"
+  File "${QT_BASE}\plugins\platforms\qwindows.dll"
+  
   SetOutPath "$INSTDIR"
   File "${DISTRIB_FOLDER}\common.dll"
-  File "${QT_BASE}\bin\QtCore4.dll"
-  File "${QT_BASE}\bin\QtGui4.dll"
-  File "${QT_BASE}\bin\QtOpenGL4.dll"
-  File "${QT_BASE}\bin\QtXml4.dll"
-  File "${QT_BASE}\bin\QtNetwork4.dll"
-  File "${QT_BASE}\bin\QtScript4.dll"
-  File "${QT_BASE}\bin\QtXmlPatterns4.dll"
-  ;File "C:\MinGW\bin\mingwm10.dll"
-  File "${MINGW_BASE}\bin\mingwm10.dll"
-  File "${MINGW_BASE}\bin\libgcc_s_dw2-1.dll"
-  File "${MINGW_BASE}\bin\libgomp-1.dll"
+  File "${QT_BASE}\bin\Qt5Core.dll"
+  File "${QT_BASE}\bin\Qt5Gui.dll"
+  File "${QT_BASE}\bin\Qt5OpenGL.dll"
+  File "${QT_BASE}\bin\Qt5Xml.dll"
+  File "${QT_BASE}\bin\Qt5Network.dll"
+  File "${QT_BASE}\bin\Qt5Script.dll"
+  File "${QT_BASE}\bin\Qt5XmlPatterns.dll"
+  File "${QT_BASE}\bin\Qt5Widgets.dll"
+  File "${QT_BASE}\bin\icuin51.dll"
+  File "${QT_BASE}\bin\icudt51.dll"
+  File "${QT_BASE}\bin\icuuc51.dll"
+  File "${QT_BASE}\bin\libgcc_s_dw2-1.dll"
+  File "${QT_BASE}\bin\libstdc++-6.dll"
+  File "${QT_BASE}\bin\libwinpthread-1.dll"
+  File ".\qt.conf"
   
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
