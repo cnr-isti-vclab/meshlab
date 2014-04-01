@@ -1,15 +1,15 @@
 <font size="+1">
 <table>
-<tr><td width="100">Drag:		</td><td width="100">Rotate</td></tr>
-<tr><td width="100">Ctrl-Drag:		</td><td width="100">Pan</td></tr>
-<tr><td width="100">Shift-Drag:		</td><td width="100">Zoom</td></tr>
-<tr><td width="100">Alt-Drag:		</td><td width="100">Z-Panning</td></tr>
-<tr><td width="100">Ctrl-Shift-Drag:	</td><td width="100">Rotate light</td></tr>
-<tr><td width="100">Wheel:		</td><td width="100">Zoom	</td></tr>
-<tr><td width="100">Shift-Wheel:	</td><td width="100">Change perspective</td></tr>
-<tr><td width="100">Ctrl-Wheel:		</td><td width="100">Move near clipping plane</td></tr>
-<tr><td width="100">Ctrl-Shift-Wheel:	</td><td width="100">Move far clipping plane</td></tr>
-<tr><td width="100">Double Click:	</td><td width="100">Center on mouse</td></tr>
-<tr><td width="100">Alt+enter:		</td><td width="100">Enter/Exit fullscreen mode</td></tr>
+<tr><td width="100">Drag:	           </td><td width="100">Rotate</td></tr>
+<tr><td width="100">Ctrl-Drag:       </td><td width="100">Pan</td></tr>
+<tr><td width="100">Shift-Drag:      </td><td width="100">Zoom</td></tr>
+<tr><td width="100">Wheel:           </td><td width="100">Zoom	</td></tr>
+<tr><td width="100">Alt-Drag:        </td><td width="100">Z-Panning</td></tr>
+<tr><td width="100">Ctrl-Shift-Drag: </td><td width="100">Change light direction</td></tr>
+<tr><td width="100">Shift-Wheel:     </td><td width="100">Change perspective (up to a orthographic camera)</td></tr>
+<tr><td width="100">Ctrl-Wheel:      </td><td width="100">Move near clipping plane (in image space, 0 is viewer position, 1 is trackball center)</td></tr>
+<tr><td width="100">Double Click:    </td><td width="100">Center on mouse</td></tr>
+<tr><td width="100">Alt+enter:       </td><td width="100">Enter/Exit fullscreen mode</td></tr>
+<tr><td width="100">Ctrl-Shift H:    </td><td width="100">Reset Trackball</td></tr>
 </table>
 </font>

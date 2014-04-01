@@ -480,6 +480,8 @@ void MainWindow::createActions()
     connect(submitBugAct, SIGNAL(triggered()), this, SLOT(submitBug()));
 
     onscreenHelpAct = new QAction(tr("On screen quick help"), this);
+    onscreenHelpAct->setShortcut(Qt::Key_F1);
+    onscreenHelpAct->setShortcutContext(Qt::ApplicationShortcut);
     connect(onscreenHelpAct, SIGNAL(triggered()), this, SLOT(helpOnscreen()));
 
     checkUpdatesAct = new QAction(tr("Check for updates"), this);
@@ -630,7 +632,7 @@ void MainWindow::createMenus()
     //filterMenu->addAction(lastFilterAct);
     //filterMenu->addAction(showFilterScriptAct);
     //filterMenu->addAction(showScriptEditAct);
-    //filterMenu->addAction(showFilterEditAct);
+    filterMenu->addAction(showFilterEditAct);
     //filterMenu->addSeparator();
 
 
