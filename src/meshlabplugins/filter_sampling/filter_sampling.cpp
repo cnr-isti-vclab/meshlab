@@ -377,9 +377,9 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
   case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Subsampling");
   case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling");
   case FP_STRATIFIED_SAMPLING :  return QString("Stratified Triangle Sampling");
-  case FP_CLUSTERED_SAMPLING :  return QString("Clustered vertex Subsampling");
+  case FP_CLUSTERED_SAMPLING :  return QString("Clustered Vertex Subsampling");
   case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
-  case FP_VARIABLEDISK_SAMPLING : return QString("Variable density Disk Sampling");
+  case FP_VARIABLEDISK_SAMPLING : return QString("Variable Density Disk Sampling");
   case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance");
   case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling");
   case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer");
@@ -839,6 +839,12 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_POISSONDISK_SAMPLING :
   case FP_VARIABLEDISK_SAMPLING :
   {
+    if(ID(action)==FP_VARIABLEDISK_SAMPLING && !md.mm()->hasDataMask(MeshModel::MM_VERTQUALITY))
+       {
+         errorMessage = "This filter requires per vertex quality for biasing the distribution.";
+         return false; // cannot continue
+       }
+
     bool subsampleFlag = par.getBool("Subsample");
     if (md.mm()->cm.fn==0 && subsampleFlag==false)
     {
