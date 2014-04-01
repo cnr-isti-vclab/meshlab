@@ -1382,7 +1382,8 @@ void GLArea::setView()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     Matrix44f mtTr; mtTr.SetTranslate( trackball.center);
-    Matrix44f mt = mtTr * trackball.Matrix() *(-mtTr);
+    Matrix44f mtSc; mtSc.SetScale(4.0f,4.0f,4.0f);
+    Matrix44f mt = mtSc * mtTr * trackball.Matrix() *(-mtTr);
 //    Matrix44f mt =  trackball.Matrix();
 
     Box3f bb;
