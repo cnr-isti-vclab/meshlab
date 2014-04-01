@@ -234,7 +234,7 @@ void RenderModeTexturePerWedgeAction::updateRenderMode( RenderMode& rm )
 
 bool RenderModeTexturePerWedgeAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-	return (rm.textureMode == vcg::GLW::TMPerWedgeMulti);
+	return ((rm.textureMode == vcg::GLW::TMPerWedgeMulti) || (rm.textureMode == vcg::GLW::TMPerWedge));
 }
 
 
