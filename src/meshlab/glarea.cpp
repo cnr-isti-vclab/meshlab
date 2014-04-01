@@ -67,9 +67,9 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
     lastFilterRef = NULL;
     //lastEditRef = NULL;
     setAttribute(Qt::WA_DeleteOnClose,true);
-    fov = 60;
+    fov = fovDefault();
     clipRatioFar = 5;
-    clipRatioNear = 0.2;
+    clipRatioNear = clipRatioNearDefault();
     nearPlane = .2f;
     farPlane = 5.f;
 
@@ -754,10 +754,10 @@ void GLArea::displayInfo(QPainter *painter)
 
         if(fov>5) col0Text += QString("FOV: %1\n").arg(fov);
         else col0Text += QString("FOV: Ortho\n");
-        if ((cfps>0) && (cfps<999))
+        if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
-        if ((clipRatioNear!=1) || (clipRatioFar!=1))
-            col0Text += QString("Clipping: N:%1 F:%2\n").arg(clipRatioNear,7,'f',1).arg(clipRatioFar,7,'f',1);
+        if (clipRatioNear!=clipRatioNearDefault())
+            col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
         painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
         if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
@@ -1071,8 +1071,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
         float notch = e->delta()/ float(WHEEL_STEP);
         switch(e->modifiers())
         {
-        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.2f, notch),0.01f,50000.0f); break;
-        case Qt::ControlModifier                       : clipRatioNear = math::Clamp(clipRatioNear*powf(1.2f, notch),0.01f,500.0f); break;
+//        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.1f, notch),0.01f,50000.0f); break;
+        case Qt::ControlModifier                       : clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); break;
         case Qt::ShiftModifier                         : fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
         case Qt::AltModifier                           : glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
             foreach(MeshModel * mp, this->md()->meshList)
@@ -1381,25 +1381,30 @@ void GLArea::setView()
     GLfloat fAspect = (GLfloat)width()/height();
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+    Matrix44f mtTr; mtTr.SetTranslate( trackball.center);
+    Matrix44f mt = mtTr * trackball.Matrix() *(-mtTr);
+//    Matrix44f mt =  trackball.Matrix();
 
-    // This parameter is the one that controls:
-    // HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
-    float viewRatio = 1.75f;
+    Box3f bb;
+    bb.Add(mt,this->md()->bbox());
+    float cameraDist = this->getCameraDistance();
 
-    float cameraDist = viewRatio / tanf(math::ToRad(fov*.5f));  // the distance between the center of the trackball and the viewer.
-
-    if(fov==5) cameraDist = 1000; // small hack for orthographic projection where camera distance is rather meaningless...
+    if(fov==5) cameraDist = 3.0f; // small hack for orthographic projection where camera distance is rather meaningless...
 
     nearPlane = cameraDist*clipRatioNear;
-    farPlane =  cameraDist*clipRatioFar;
+    farPlane = cameraDist + max(viewRatio(),-bb.min[2]);
     if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
+
+    //qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
+    //qDebug("camera dist %f far  %f",cameraDist, farPlane);
+    //qDebug("Bb %f %f %f - %f %f %f", bb.min[0], bb.min[1], bb.min[2], bb.max[0], bb.max[1], bb.max[2]);
 
     if (!takeSnapTile)
     {
-        if(fov==5)	glOrtho( -viewRatio*fAspect, viewRatio*fAspect, -viewRatio, viewRatio, cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
+        if(fov==5)	glOrtho( -viewRatio()*fAspect, viewRatio()*fAspect, -viewRatio(), viewRatio(),  nearPlane, farPlane);
         else		gluPerspective(fov, fAspect, nearPlane, farPlane);
     }
-    else	setTiledView(fov, viewRatio, fAspect, nearPlane, farPlane, cameraDist);
+    else	setTiledView(fov, viewRatio(), fAspect, nearPlane, farPlane, cameraDist);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -1459,6 +1464,8 @@ void GLArea::resetTrackBall()
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
     trackball.track.tra =  -this->md()->bbox().Center();
+    clipRatioNear = clipRatioNearDefault();
+    fov=fovDefault();
     update();
 }
 
@@ -1721,11 +1728,7 @@ void GLArea::setTarget(QImage &image) {
 
 float GLArea::getCameraDistance()
 {
-    // This parameter is the one that controls:
-    // HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
-    float viewRatio = 1.75f;
-    float cameraDist = viewRatio / tanf(vcg::math::ToRad(fov*.5f));
-
+    float cameraDist = viewRatio() / tanf(vcg::math::ToRad(fov*.5f));
     return cameraDist;
 }
 
@@ -1742,8 +1745,7 @@ void GLArea::initializeShot(Shotf &shot)
     shot.Intrinsics.ViewportPx[1]=height();
 
     double viewportYMm = shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
-    float defaultFov=60.0;
-    shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(defaultFov/2))); //27.846098mm
+    shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(this->fovDefault()/2.0f))); //27.846098mm
 
     shot.Extrinsics.SetIdentity();
 }
