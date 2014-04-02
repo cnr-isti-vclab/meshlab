@@ -41,6 +41,9 @@
                     <li>
                         <a href="#helpTab" data-toggle="tab">Help</a>
                     </li>
+                    <li>
+                        <a href="#licenseTab" data-toggle="tab">License</a>
+                    </li>
                 </ul>
                 <div id="my-tab-content" class="tab-content">
                     <!-*****************************************************************  HOME TAB *********************->
@@ -74,22 +77,19 @@
                                     <a href="#3dp_color" data-toggle="tab">3D Printing: <br> <small>Color Processing</small> </a>
                                 </li>
                                 <li>
+                                    <a href="#3dp_clean" data-toggle="tab">3D Printing: <br> <small>Cleaning Meshes</small> </a>
+                                </li>
+                                <li>
                                     <a href="#geom_measure" data-toggle="tab">Research: <br> <small>Measuring Meshes</small> </a>
                                 </li>
                                 <li>
-                                    <a href="#geom_clean" data-toggle="tab">Research: <br> <small>Cleaning Meshes</small> </a>
+                                    <a href="#prod_insp" data-toggle="tab">Industry:<br> <small> Mesh Inspection</small></a>
                                 </li>
                                 <li>
-                                    <a href="#ch_" data-toggle="tab">Cultural Heritage: <br> <small>Cleaning Meshes</small> </a>
+                                    <a href="#prod_simpl" data-toggle="tab">Industry:<br> <small> Mesh Simplification</small></a>
                                 </li>
                                 <li>
-                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Inspection</small></a>
-                                </li>
-                                <li>
-                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Simplification</small></a>
-                                </li>
-                                <li>
-                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Conversion</small></a>
+                                    <a href="#prod_conv" data-toggle="tab">Industry:<br> <small> Mesh Conversion</small></a>
                                 </li>
                             </ul>
                         </div>
@@ -107,15 +107,19 @@
                                     <img class="pull-right img-rounded shadowed" src="img/3D_scanning_and_printing.ico.jpg" width="140">text text Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui
                                 </div>
                                 <!----------------------------------------------------------------------->
-                                <div class="tab-pane" id="vTab3">
+                                <div class="tab-pane" id="3dp_clean">
+                                    <img class="pull-right img-rounded shadowed" src="img/3D_scanning_and_printing.ico.jpg" width="140">text text Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="geom_measure">
                                     Tab 1 content
                                 </div>
                                 <!----------------------------------------------------------------------->
-                                <div class="tab-pane" id="vTab4">
+                                <div class="tab-pane" id="geom_clean">
                                     Tab 1 content
                                 </div>
                                 <!----------------------------------------------------------------------->
-                                <div class="tab-pane" id="vTab5">
+                                <div class="tab-pane" id="prod_simpl">
                                     Tab 1 content
                                 </div>
                                 <!----------------------------------------------------------------------->
@@ -153,10 +157,51 @@
                             <h2>References</h2>
 
                             <h2>History</h2>
-
+    
+                    </div>
+                    <!-*****************************************************************  ABOUT TAB *********************->
+                    <div class="tab-pane" id="licenseTab">
                             <h2>License</h2>
-
-                            <h3>Disclaimer</h2>
+<p>MeshLab uses some third party open source libraries for its working. 
+Here is the complete lists of the projects that we gratefully thanks for their kind liberality.
+MeshLab is licensed under the GNU General Public License (<a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html" class="external text" title="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html" rel="nofollow">GPL</a>).
+</p>
+<ul><li> VCG Library, developed at the <a href="http://vcg.isti.cnr.it/" class="external text" title="http://vcg.isti.cnr.it/" rel="nofollow">Visual Computing Group</a> - <a href="http://www.isti.cnr.it" class="external text" title="http://www.isti.cnr.it" rel="nofollow">ISTI - CNR</a>. Responsible for all the mesh processing and rendering tasks. (GPL)
+</li><li> <a href="http://trolltech.com/products/qt" class="external text" title="http://trolltech.com/products/qt" rel="nofollow">QT, TrollTech</a> the standard framework for high performance,  cross-platform application development.  
+</li><li> <a href="http://glew.sourceforge.net" class="external text" title="http://glew.sourceforge.net" rel="nofollow">GLEW</a>: The OpenGL Extension Wrangler Library (BSD)
+</li><li> <a href="http://lib3ds.sourceforge.net/" class="external text" title="http://lib3ds.sourceforge.net/" rel="nofollow">lib3ds</a> a software library for managing 3D-Studio Release 3 and 4 ".3DS" files. (LGPL)
+</li><li> <a href="http://www.bzip.org/" class="external text" title="http://www.bzip.org/" rel="nofollow">bzip2</a> a freely available, patent free, high-quality data compressor. (BSD)
+</li><li> <a href="http://u3d.sourceforge.net/" class="external text" title="http://u3d.sourceforge.net/" rel="nofollow">Universal 3D Sample Software</a> Set of libraries to write, read, extend, render and interact with U3D-formatted data, as defined by standard ECMA-363. This library is not directly linked but the U3D plugin invokes the idtfcoverted executable, whose sources are provided with the examples of the library. A binary of the idtfconverter is directly provided with the MeshLab distribution.
+</li><li> Poisson Surface reconstrution, heavily based on the <a href="http://www.cs.jhu.edu/~misha/Code/PoissonRecon/" class="external text" title="http://www.cs.jhu.edu/~misha/Code/PoissonRecon/" rel="nofollow">code</a> kindly provided by Michael Kazhdan and Matthew Bolitho (<a href="http://www.cs.jhu.edu/~misha/Code/PoissonRecon/license.txt" class="external text" title="http://www.cs.jhu.edu/~misha/Code/PoissonRecon/license.txt" rel="nofollow">custom license</a> thanks Misha and Matthew!)
+</li><li> <a href="http://www.ctan.org/tex-archive/help/Catalogue/entries/movie15.html" class="external text" title="http://www.ctan.org/tex-archive/help/Catalogue/entries/movie15.html" rel="nofollow">movie15 Latex package</a> a LaTeX style to embed movies, sounds and 3D objects into PDF documents; the needed glue to generating pdf with embedded U3D objects.
+</li><li> Some of the icons of the editing tools came from the <a href="http://tango.freedesktop.org" class="external text" title="http://tango.freedesktop.org" rel="nofollow">Tango Icon Library</a> projects.
+</li></ul>
+<a name="Privacy_Disclaimer" id="Privacy_Disclaimer"></a><h2>Privacy Disclaimer</span></h2>
+<p>MeshLab will automatically check for the availability of updated versions and will notify the need of upgrading the software to the users. For this reason, from time to time, MeshLab will issue a http network connection.
+If you prefer that MeshLab does not communicate in any way with its
+developers, simply use a plain firewall and prevent any MeshLab access to
+the network. This will not limit in  any way the normal behavior of MeshLab (apart from getting notified of new MeshLab releases)
+Moreover, when using MeshLab, it locally collects some aggregated statistical data about only the
+specific usage of MeshLab: the overall number and averaged size of the opened/saved meshes; nothing more.
+Periodically this information is sent back to the developers. This data will be used
+for statistical analysis and for the assessment of the MeshLab usage. 
+</p><p>We would like to remark that the kind of information collected by MeshLab
+is probably by far less sensitive than the information that is silently
+collected by most web sites when you surf them: IP address, visited pages,
+frequency of return. We would also like to stress that we really need this
+information in order to assess how diffusely MeshLab is used and what is its impact on the 3D community.
+</p>
+<a name="Acknowledgments" id="Acknowledgments"></a><h2>Acknowledgments </span></h2>
+<p>Some of the MeshLab developers got financial support for their work. 
+For the Italian CNR employees (and for the other involved partners) we acknowledge the financial support of the following projects: 
+</p>
+<ul><li> <i><b>3D-CoForm</b></i> (EU IST): "The research leading to these results has received funding from the European Community's Seventh Framework Programme (FP7/2007-2013) under
+</li></ul>
+<p>grant agreement n° 231809"
+</p>
+<ul><li> EPOCH (EU Network of Excellence, IST-2002-507382)
+</li><li> MIUR "BLU-ARCHEOSYS", 2006-2009
+</li></ul>
 
                         </p>
                     </div>
