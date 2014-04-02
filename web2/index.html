@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>MeshLab</title>
+    <link rel="shortcut icon" href="img/favicon.ico" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/bootstrap.vertical-tabs.css" />
+    <link rel="stylesheet" href="css/font-awesome.css" />
+    <link rel="stylesheet" href="css/social-buttons.css" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <style>
+        img.shadowed{
+        box-shadow: 3px 3px 8px #888888;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="masthead">
+            <h3 class="text-muted">MeshLab</h3>
+            <!-------->
+            <div id="content">
+                <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+                    <li class="active">
+                        <a href="#homeTab" data-toggle="tab">Home</a>
+                    </li>
+                    <li>
+                        <a href="#downloadTab" data-toggle="tab">Download</a>
+                    </li>
+                    <li>
+                        <a href="#aboutTab" data-toggle="tab">About</a>
+                    </li>
+                    <li>
+                        <a href="#featureTab" data-toggle="tab">Feature</a>
+                    </li>
+                    <li>
+                        <a href="#helpTab" data-toggle="tab">Help</a>
+                    </li>
+                </ul>
+                <div id="my-tab-content" class="tab-content">
+                    <!-*****************************************************************  HOME TAB *********************->
+                    <div class="tab-pane active" id="homeTab">
+                        <h1>MeshLab
+                            <small>the mesh processing system</small>
+                        </h1>
+                        <div class="jumbotron">
+                            <h1>Marketing stuff!</h1>
+                            <p class="lead">Latest News here</p>
+                            <p>
+                                <a class="btn btn-lg btn-success" href="#" role="button">Download</a>
+                            </p>
+                        </div>
+                    </div>
+                    <!-*****************************************************************  FEATURES TAB *********************->
+                    <div class="tab-pane" id="featureTab">
+                        <h1>Features
+                            <small>MeshLab is a pivotal tool in a variety of contexts</small>
+                        </h1>
+                        <hr/>
+                        <div class="col-xs-3" background-color="gray">
+                            <ul id="tabws" class="nav nav-tabs tabs-left" data-tabs="tabs">
+                                <li class="active">
+                                    <a href="#scan_align" data-toggle="tab">3D Scanning: <br> <small>Aligning and Merging</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#ch_color" data-toggle="tab">Cultural Heritage: <br>  <small>Color Processing</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#3dp_color" data-toggle="tab">3D Printing: <br> <small>Color Processing</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#geom_measure" data-toggle="tab">Research: <br> <small>Measuring Meshes</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#geom_clean" data-toggle="tab">Research: <br> <small>Cleaning Meshes</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#ch_" data-toggle="tab">Cultural Heritage: <br> <small>Cleaning Meshes</small> </a>
+                                </li>
+                                <li>
+                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Inspection</small></a>
+                                </li>
+                                <li>
+                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Simplification</small></a>
+                                </li>
+                                <li>
+                                    <a href="#vTab4" data-toggle="tab">Industry:<br> <small> Mesh Conversion</small></a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-xs-9">
+                            <div class="tab-content">
+                                <div class="tab-pane" id="scan_align">
+                                    In the pipeline of processing 3D scanned data the aligment step, (also known as referencing), is a fundamental one. Most acquisition devices generate sequences of range maps, each one of them is usually defined in its own reference system. MeshLab provides various tools for briging these maps in a common reference system. 
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="ch_color">
+                                    Even if a precise, detailed geometry is essential for the study and documentation of a CH artifact, lots of information also comes from the color and appearance data. Since a complete reconstruction of the optical properties of an artifact is still hard to achieve, what is normally done is to rely on color data coming from photographic dataset. MeshLab offers state of the art tools for the generation and processing of color information on a high resolution 3D model. This paper shows the basic operations available and present actual projects were this tools have been successfully used. The first step in the color management, is to align photos to the 3D model, this operation is possible in MeshLab in a short time by using a very simple interface. The photos aligned in this way may be spatially-explored directly in the 3D space, instead of browsing a folder on the disk, looking at the photos like see-through transparencies suspended in space or projected onto the surface. An interesting possibility is to use also unconventional photos, like photos with annotations, historical photos or even near-visible lighting photos (ultraviolet, multispectral, infrared, thermography….) The spatial exploration of the georeferenced photographic set is a powerful tool but, in many applications, it is needed to have the color information mapped onto the geometry. To this aim, MeshLab offers different color mapping tools to better cope with the different needs of the various datasets. By using the color data from the calibrated images, it is possible to generate detailed, artifact free per-vertex color encoding, fill an existing texture parametrization or generate an entirely new texture mapping, driven by the photographic coverage. The reconstruction of a faithful representation of the actual color of an artifact is often just a first step towards the understanding of the original aspect of the object. Almost always, the current state of an archeological find is degraded: to propose possible reconstruction of the original color of the object is a normal activity for archeologists or art historian. This task, however, is generally carried out on photos or drawings of the artifact, while it would be possible to do it directly on the 3D surface. The Surface Painting tools provided by MeshLab may be used to color the 3D surface using painting-like interface. By using this editing tool, it was possible to produce such proposed color reconstructions, directly on the 3D geometry. MeshLab is the most complete open source software for the creation and manipulation od high resolution 3D models of real-world objects, and the availability of such color management tools is an important instrument for the archeological and CH communityTab 1 content
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="3dp_color">
+                                    <img class="pull-right img-rounded shadowed" src="img/3D_scanning_and_printing.ico.jpg" width="140">text text Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="vTab3">
+                                    Tab 1 content
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="vTab4">
+                                    Tab 1 content
+                                </div>
+                                <!----------------------------------------------------------------------->
+                                <div class="tab-pane" id="vTab5">
+                                    Tab 1 content
+                                </div>
+                                <!----------------------------------------------------------------------->
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <!-*****************************************************************  DOWNLOAD TAB *********************->
+                    <div class="tab-pane" id="downloadTab">
+                        <h1>Download</h1>
+                        <a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/">Latest version V 1.3.2</a><br>
+                        
+                        <a class="btn btn-primary btn-sm " href="http://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLab_v132_64bit.exe/download" role="button">Windows 64bit&raquo;</a> <br>
+                        <a class="btn btn-primary btn-sm " href="http://sourceforge.net/p/meshlab/discussion/499532" role="button">Windows 64bit&raquo;</a>  <br>
+                        <a class="btn btn-primary btn-sm " href="http://sourceforge.net/p/meshlab/discussion/499532" role="button">Mac OsX &raquo;</a>
+                        <a class="btn btn-primary btn-sm " href="http://sourceforge.net/p/meshlab/discussion/499532" role="button">Linux &raquo;</a>
+                               
+                        
+                        
+                    </div>
+                    <!-*****************************************************************  ABOUT TAB *********************->
+                    <div class="tab-pane" id="aboutTab">
+                        <h1>About</h1>
+                        <p>MeshLab is an open source interactive mesh processing system. It is a multiplatform software distributed under GPL.
+
+                            <p>Project Leader:
+                                <b>Paolo Cignoni</b>
+                            </p>
+                            <p>Core Developer and Manager:
+                                <b>Guido Ranzuglia</b>
+                            </p>
+                            <p>Copyright: Visual Computing Lab, CNR-ISTI, Pisa, Italy</p>
+
+                            <h2>References</h2>
+
+                            <h2>History</h2>
+
+                            <h2>License</h2>
+
+                            <h3>Disclaimer</h2>
+
+                        </p>
+                    </div>
+                    <!-*****************************************************************  HELP TAB *********************->
+                    <div class="tab-pane" id="helpTab">
+                        <h1>Help
+                            <small>and support</small>
+                        </h1>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h2>Video Tutorial</h2>
+                                The
+                                <a href="">Mister P. MeshLab Tutorials</a>youTube page contains more than 40 videos describing the many functionalities of MeshLab. Videos are organized into playlists about the most common topics.
+
+                                <h3>Basics</h3>
+                                This playlist shows the basic concepts for the 3D model handling in MeshLab
+                                <h3>Cleaning</h3>
+                                This playlist describes way to "clean" your mesh by removing unwanted geometry or attributes.
+                                <h3>Arc3D and MeshLab</h3>
+                                This shows the integration of Arc3D web-service in MeshLab. This is useful for anybody working with data from dense stereo matching, anyway.
+                                <h3>Point Clouds</h3>
+                                This playlist contains tutorials dealing with the processing of point clouds.
+                                <h3>Raster Layer</h3>
+                                This playlist covers the main uses and utilities to take advantage of raster layers
+                                <h3>3D Scanning pipeline</h3>
+                                This playlist describes the main steps of the scanning pipeline performed with MeshLab
+
+                            </div>
+                            <div class="col-lg-3">
+                                <h2>Support</h2>
+                                    <p>There are a few active communities for discussing, exchanging experiences and looking for help, a facebook page and the forums hosted on sourceforge.</p>
+
+                                    <p><a href="https://www.facebook.com/MeshLab"><button class="btn btn-facebook"><i class="fa fa-facebook"></i> | Connect with Facebook</button></a></p>
+                                    <p><a class="btn btn-primary" href="http://sourceforge.net/p/meshlab/discussion/499532" role="button">User Forum &raquo;</a>
+                                    <p>MeshLab users can discuss here their experiences and suggestions</p>
+                                    <a class="btn btn-primary" href="http://sourceforge.net/p/meshlab/discussion/499533/" role="button">Help Forum &raquo;</a>
+                                    <p>To discuss high level problems, searches for help in using MeshLab should be posted here.</p>
+                                </p>
+                            </div>
+                            <div class="col-lg-3">
+                                <h2>Bug Report</h2>
+                                <p>If you encounter a bug, and you are able to consistently replicate it, please submit a bug report here. Please closely follows the
+                                    <a href="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">guidelines for reporting bugs effectively</a>
+                                </p>
+                                <p>
+                                    <a class="btn btn-primary" href="http://sourceforge.net/p/meshlab/bugs" role="button">Submit Bug &raquo;</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $('#tabs').tab();
+            });
+        </script>
+    </div>
+    <!-- container -->
+    <hr>
+
+    <footer>
+        <p>&copy; Company 2014</p>
+    </footer>
+
+
+</body>
+
+</html>
