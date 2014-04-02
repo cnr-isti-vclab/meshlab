@@ -14,6 +14,7 @@
 	.shown { DISPLAY: inline }
 	</style>
 
+ <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>	
 <script type="text/Javascript">
 function toggle (postid) {
    whichpost = document.getElementById(postid);
@@ -31,6 +32,9 @@ function hideNow (postid) {
    document.getElementById(postid).className="hidden";
 }
 	</script>
+	<style>
+	  .answer { display:none; }
+	</style>
 </head>
 <body>
 <div id="leftcontent">
@@ -59,10 +63,59 @@ Other projects that have previously supported MeshLab are listed <a href="http:/
 <p class="body"><a 
 href="http://sourceforge.net/project/showfiles.php?group_id=149444"></a></p>
 <p class="body">
-	<big><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/">
-		Download Latest Version (03 August 2012)<b><i> V1.3.2 </i></b></a>
+	<big><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.3/">
+		Download Latest Version (02 April 2014)<b><i> V1.3.3 </i></b></a>
 	</big>
-<a href="http://meshlab.sourceforge.net/wiki/index.php/Release_Notes_1.3.2">(changes)</a></p><br/>
+<a href="http://meshlab.sourceforge.net/wiki/index.php/Release_Notes_1.3.3">(changes)</a></p><br/>
+
+	<div class="span-23 container" id='faq_tab'>
+		<p class="body">
+		<big><font color="red"><b>Known Installation Problems</b></font> <i>(click on the items to expand/collapse them)</i></big>
+		<ul>
+			<li>
+				<a class="question" href="">Windows 7/8 prevents to install MeshLab 1.3.3 on my computer</a>
+				<div class="answer">
+					<p>Click on <i>More Info</i></p>	
+					<p><img style="WIDTH: 500px; HEIGHT: 250px" src="images/screenshots/win8_block_edt.jpg" alt=""></img></p>
+					<p>Click on <i>Run Anyway</i></p>
+					<p><img style="WIDTH: 500px; HEIGHT: 250px" src="images/screenshots/win8_goon_edt.jpg" alt=""></img></p>
+				</div>	
+			<li>
+				<a class="question" href="">MacOSX 10.9 prevents to run MeshLab 1.3.3 on my computer</a>
+				<div class="answer">
+					<p>The first time you run MeshLab 1.3.3 on MacOSX 10.9:
+					<ul>
+						<li>browse with <i>Finder</i> to the directory where you installed MeshLab 1.3.3</li>
+						<li>click <i>ctrl+left mouse button</i> on the MeshLab 1.3.3 icon</li>
+						<li>on the popup menu click on <i>Open</i></li>
+					</ul>
+					</p>
+					<p><img style="WIDTH: 500px; HEIGHT: 250px" src="images/screenshots/runmac.jpg" alt=""></img></p>
+				</div>
+			</li>
+			<li>
+				<a class="question" href=""><i>Selection Tool</i> is really slow on my new Windows laptop</a>
+				<div class="answer">
+					<p>If your laptop is reasonably new and equipped with a nVidia graphics card it's possible that it's using the integrated graphics card instead of the nVidia one.</p>
+				
+					<p>Click with the mouse right button on your laptop Desktop and select the <i>NVIDIA Control Panel</i> on the popup menu.</p>
+					<p><img style="WIDTH: 500px; HEIGHT: 250px" src="images/screenshots/desk.jpg" alt=""></img></p>
+					<p>On the <i>NVIDIA Control Panel</i>:
+					<ul>
+						<li>on the left-side bar select <i>3D Settings/Manage 3D Settings</i></li>
+						<li>on the right-side area select <i>Program Settings</i> tab</li>
+						<li>click on <i>Add</i> button and browse to the directory where you installed MeshLab 1.3.3</li>
+						<li>on <i>Select preferred graphics processor for this program</i> combo-box select <i>High performance NVIDIA processor</i></li>
+						<li>click on the <i>Apply</i> button</li>
+						<li>run MeshLab 1.3.3</li>
+					</ul>
+					</p>
+					<p><img style="WIDTH: 500px; HEIGHT: 250px" src="images/screenshots/nvidia_panel.jpg" alt=""></img></p>
+				</div>
+			</li>
+		</ul>
+	</p>
+	</div><br/>
 <p class="body">Remember that, whenever you use MeshLab in a 
 official/commercial project or in any kind of research, you should: </p>
 <ul>
@@ -365,6 +418,37 @@ var phpmyvisitesSite = 1;
 var phpmyvisitesURL = "http://meshlab.sourceforge.net/phpmv2/phpmyvisites.php";
 //-->
 				</script>
+				 <script type="text/javascript">
+	$("ul.tabs li.label").hide(); 
+	$("#tab-set > div").hide(); 
+	$("#tab-set > div").eq(0).show(); 
+    $("ul.tabs a").click( 
+  	function() { 
+  		$("ul.tabs a.selected").removeClass('selected'); 
+  		$("#tab-set > div").hide();
+  		$(""+$(this).attr("href")).fadeIn('slow'); 
+  		$(this).addClass('selected'); 
+  		return false; 
+  	}
+  );
+  $("#toggle-label").click( function() {
+  	$(".tabs li.label").toggle(); 
+  	return false; 
+  }); 
+  $(".question").click( function() {
+    $(this).next().toggle();
+	return false;
+  });
+  $(".contact_ref").click( 
+  	function() { 
+		$("ul.tabs a.selected").removeClass('selected'); 
+		$("#tab-set > div").hide();
+  		$(""+$(this).attr("href")).fadeIn('slow'); 
+  		$(this).addClass('selected'); 
+  		return false; 
+  	}
+  );
+</script>
 
 			
 <script language="javascript" 
@@ -392,12 +476,12 @@ src="http://sourceforge.net/sflogo.php?group_id=149444&amp;type=2" /></a><br/>
 <Small>
 <p class="menu"><a href="http://meshlab.sourceforge.net/wiki/index.php/Compiling" >- Compiling</a></p>
 </Small>
-<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/">Download V1.3.2</a></p>
+<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.3/">Download V1.3.3</a></p>
 <Small>
-<p class="menu"><a href="http://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLab_v132.exe/download" >- Windows</a></p>
-<p class="menu"><a href="http://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLab_v132_64bit.exe/download" >- Windows (x64)</a></p>
-<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLabSrc_AllInc_v132.tgz/download">- Linux (src) </a> </p>
-<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLabMac_v132.dmg/download" >- MacOSX (intel only)</a></p> 
+<p class="menu"><a href="http://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLab_v133.exe/download" >- Windows</a></p>
+<p class="menu"><a href="http://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLab_v133_64bit.exe/download" >- Windows (x64)</a></p>
+<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLabSrc_AllInc_v133.tgz/download">- Linux (src) </a> </p>
+<p class="menu"><a href="https://sourceforge.net/projects/meshlab/files/meshlab/MeshLab%20v1.3.2/MeshLabMac_v133.dmg/download" >- MacOSX (intel only)</a></p> 
 </Small>
 <!--<p class="menu"><a href="http://meshlab.sourceforge.net/wiki/index.php/Projects">Developer's Corner</a></p>-->
 <p class="menu">MeshLab for Mobiles</p>
