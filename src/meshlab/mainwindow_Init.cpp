@@ -632,7 +632,7 @@ void MainWindow::createMenus()
     //filterMenu->addAction(lastFilterAct);
     //filterMenu->addAction(showFilterScriptAct);
     //filterMenu->addAction(showScriptEditAct);
-    filterMenu->addAction(showFilterEditAct);
+    //filterMenu->addAction(showFilterEditAct);
     //filterMenu->addSeparator();
 
 
