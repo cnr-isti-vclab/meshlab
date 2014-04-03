@@ -10,24 +10,22 @@
     <link rel="stylesheet" href="css/social-buttons.css" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
     <script type="text/javascript" src="js/bootstrap.js"></script>
+
     <style>
         img.shadowed{
         box-shadow: 3px 3px 8px #888888;
         }
     </style>
-
 </head>
 
 <body>
-
     <div class="container">
         <div class="masthead">
-            <h3 class="text-muted">MeshLab</h3>
             <!-------->
             <div id="content">
                 <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
                     <li class="active">
-                        <a href="#homeTab" data-toggle="tab">Home</a>
+                        <a href="#homeTab" data-toggle="tab"><b>MeshLab</b></a>
                     </li>
                     <li>
                         <a href="#downloadTab" data-toggle="tab">Download</a>
@@ -48,14 +46,14 @@
                 <div id="my-tab-content" class="tab-content">
                     <!-*****************************************************************  HOME TAB *********************->
                     <div class="tab-pane active" id="homeTab">
-                        <h1>MeshLab
-                            <small>the mesh processing system</small>
-                        </h1>
-                        <div class="jumbotron">
-                            <h1>Marketing stuff!</h1>
-                            <p class="lead">Latest News here</p>
+                        
+                        <div class="jumbotron" height="300">
+                            <img class="pull-right img-rounded shadowed" src="img/meshlab_logo.png" width="200">
+                            <h1>MeshLab</h1>
+                            <p class="lead">The most used mesh processing system.</p>
+                            Multiplatform, for all your processing need (3D scanning, Cleaning, Converting, Inspecting)<Br>
                             <p>
-                                <a class="btn btn-lg btn-success" href="#" role="button">Download</a>
+                                <a class="btn btn-lg btn-success" href="#downloadTab" data-toggle="tab" role="button">Download 1.3.3</a> 
                             </p>
                         </div>
                     </div>
@@ -158,17 +156,30 @@
                         </p>
                         <p>Copyright: Visual Computing Lab, CNR-ISTI, Pisa, Italy</p>
 
+                        <h3>History</h3>
+                        MeshLab is developed by <a href ="http://vcg.isti.cnr.it">Visual Computing Laboratory</a> of the 
+                        <a href ="http://www.isti.cnr.it">ISTI - CNR</a> research center; initially MeshLab was created as 
+                        a course assignment at the University of Pisa in late 2005.  From the first official,numerous versions 
+                        and updates had been released, in a continuous process of growth of the functionalities offered. 
+                        The evolution of the system followed closely the development of research in geometric processing 
+                        and the stakeholder needs that had been identified by the european projects that have, in part,
+                        supported the development.
+                        
+                        
                         <h2>References</h2>
                         MeshLab is widely used in the scientific community. Google Scholar reports more than
                         <a href="http://scholar.google.com/scholar?hl=en&q=meshlab">1500</a> references in scientific papers.
                         <br>If you use MeshLab, please, remember to cite it appropriately:
-                        <br><i>Generic Citation:</i><small><br>
+                        <ul>
+                            <li>
+                                <i>Generic Citation:</i><small><br>
                         <a data-toggle="collapse" data-parent="#accordion" href="#coll_Generic">
                             <b>"MeshLab: an Open-Source Mesh Processing Tool"</b> 
                             <i>P. Cignoni, M. Callieri, M. Corsini, M. Dellepiane, F. Ganovelli, G. Ranzuglia</i><br> 
                             Sixth Eurographics Italian Chapter Conference, ISBN 978-3-905673-68-5, page 129-136 - 2008
                         </a> </small>
                         <div id="coll_Generic" class="panel-collapse collapse"><div class="panel-body">
+                            
 <pre><small>@inproceedings{cignoni2008meshlab,
   title={Meshlab: an open-source mesh processing tool},
   author={Cignoni, P. and Callieri, M. and Corsini, M. and Dellepiane, M. and Ganovelli, F. and Ranzuglia, G.},
@@ -182,8 +193,34 @@
 </pre>
                             </div>
                         </div>
-                        
-                        <br>When using MeshLab for texture/color management in 3D scanning:<small><br>
+                        </li>
+                                                        
+                        </li><li>
+                        <i>When using MeshLab for processing architectural 3D scanned data:</i><small><br>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#coll_scan">                        
+                            <b>Processing a Complex Architectural Sampling with MeshLab: the case of Piazza Della Signoria</b><br>
+                            <i>M. Callieri, P. Cignoni, M. Dellepiane, G. Ranzuglia, R. Scopigno</i><br>
+                            Proc. of 3D-ARCH 2011 - 4th Int. Workshop on 3D Virtual Reconstruction and Visualization of Complex Architectures 
+                            (Trento, 2-5 March 2011),
+                        </a> </small>
+                        <div id="coll_scan" class="panel-collapse collapse"><div class="panel-body">
+<pre><small>@InProceedings\{CCDRS11,
+  author       = "Callieri, Marco and Cignoni, Paolo and Dellepiane, Matteo and Ranzuglia, Guido and Scopigno, Roberto",
+  title        = "Processing a Complex Architectural Sampling with MeshLab: the case of Piazza Della Signoria",
+  booktitle    = "Proc. of 3D-ARCH 2011 - 4th Int. Workshop on 3D Virtual Reconstruction and Visualization of Complex Architectures (Trento, 2-5 March 2011)",
+  volume       = "vol. XXXVIII-5/W16",
+  pages        = "art. 29",
+  year         = "2011",
+  editor       = "Fabio Remondino, Sabry El-Hakim ",
+  publisher    = "International Society of Photogrammetry and Remote Sensing",
+  url          = "http://vcg.isti.cnr.it/Publications/2011/CCDRS11"
+}</small>
+</pre>
+                            </div>
+                        </div>
+                            </li>
+
+                            <li><i>When using MeshLab for texture/color management in 3D scanning:</i><small><br>
                         <a data-toggle="collapse" data-parent="#accordion" href="#coll_texture">
                             <b>"MeshLab as a complete tool for the integration of photos and color with high resolution 3D geometry data ",</b> <br>
                             <i>G. Ranzuglia, M. Callieri, M. Dellepiane, P. Cignoni, R. Scopigno</i><br> 
@@ -202,36 +239,14 @@
 </pre>
                             </div>
                         </div>
+                                
+                        
+                        </ul>
+                    </div><!- end tab ->
 
-                        <br>When using MeshLab for3D scanning:<small><br>
-                        <a data-toggle="collapse" data-parent="#accordion" href="#coll_scan">
-                        
-                        <b>Processing a Complex Architectural Sampling with MeshLab: the case of Piazza Della Signoria</b><br>
-<i>M. Callieri, P. Cignoni, M. Dellepiane, G. Ranzuglia, R. Scopigno</i><br>
-Proc. of 3D-ARCH 2011 - 4th Int. Workshop on 3D Virtual Reconstruction and Visualization of Complex Architectures (Trento, 2-5 March 2011), Volume vol. XXXVIII-5/W16, page art. 29 - 2011
-                        </a> </small>
-                        <div id="coll_scan" class="panel-collapse collapse"><div class="panel-body">
-<pre><small>@InProceedings\{CCDRS11,
-  author       = "Callieri, Marco and Cignoni, Paolo and Dellepiane, Matteo and Ranzuglia, Guido and Scopigno, Roberto",
-  title        = "Processing a Complex Architectural Sampling with MeshLab: the case of Piazza Della Signoria",
-  booktitle    = "Proc. of 3D-ARCH 2011 - 4th Int. Workshop on 3D Virtual Reconstruction and Visualization of Complex Architectures (Trento, 2-5 March 2011)",
-  volume       = "vol. XXXVIII-5/W16",
-  pages        = "art. 29",
-  year         = "2011",
-  editor       = "Fabio Remondino, Sabry El-Hakim ",
-  publisher    = "International Society of Photogrammetry and Remote Sensing",
-  url          = "http://vcg.isti.cnr.it/Publications/2011/CCDRS11"
-}</small>
-</pre>
-                            </div>
-                        </div>
-                        
-                        
-                            <h2>History</h2>
-                        MeshLab is developed by <a href ="http://vcg.isti.cnr.it">Visual Computing Laboratory</a> of the <a href ="http://www.isti.cnr.it">ISTI - CNR</a> research center; initially MeshLab was created as a course assignment at the University of Pisa in late 2005.  From the first official,numerous versions and updates had been released, in a continuous process of growth of the functionalities offered. The evolution of the system followed closely the development of research in geometric processing and the stakeholder needs that had been identified by the european projects that have, in part, supported the development.
-    
-                    </div>
+                    <!-****************************************************************************************************->
                     <!-*****************************************************************  LICENSE TAB *********************->
+                    <!-****************************************************************************************************->
                     <div class="tab-pane" id="licenseTab">
                             <h2>License</h2>
 <p>MeshLab uses some third party open source libraries for its working. 
@@ -276,7 +291,11 @@ For the Italian CNR employees (and for the other involved partners) we acknowled
 
                         </p>
                     </div>
-                    <!-*****************************************************************  HELP TAB *********************->
+                     
+        <!-****************************************************************************************************->
+        <!-*****************************************************************  HELP TAB  ***********************->                            
+        <!-****************************************************************************************************->
+
                     <div class="tab-pane" id="helpTab">
                         <h1>Help
                             <small>and support</small>
@@ -314,7 +333,8 @@ For the Italian CNR employees (and for the other involved partners) we acknowled
                             </div>
                             <div class="col-lg-3">
                                 <h2>Bug Report</h2>
-                                <p>If you encounter a bug, and you are able to consistently replicate it, please submit a bug report here. Please closely follows the
+                                <p>If you encounter a bug, and you are able to consistently replicate it, please submit a bug report here.
+                                    Please closely follows the
                                     <a href="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">guidelines for reporting bugs effectively</a>
                                 </p>
                                 <p>
@@ -328,20 +348,32 @@ For the Italian CNR employees (and for the other involved partners) we acknowled
         </div>
 
 
-        <script type="text/javascript">
-            jQuery(document).ready(function ($) {
+<!--<script type="text/javascript">
+    jQuery(document).ready(function ($) {
                 $('#tabs').tab();
             });
-        </script>
-    </div>
-    <!-- container -->
-    <hr>
+</script>-->
+</div>
+<!-- container -->
+<hr>
 
-    <footer>
-        <p>&copy; Company 2014</p>
-    </footer>
+<script type='text/javascript'>
+    $(document).ready(function() {
+        
+// Javascript to enable link to tab
+var url = document.location.toString();
+if (url.match('#')) {
+    $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+} 
 
+// Change hash for page-reload
+$('.nav-tabs a').on('shown.bs.tab',function (e) {
+    window.location.hash = e.target.hash;
+})
 
+        
+        });
+</script>
 </body>
 
 </html>
