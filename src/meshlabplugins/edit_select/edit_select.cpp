@@ -201,7 +201,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
       else
       {
         if(selectFrontFlag)	GLPickTri<CMeshO>::PickFaceVisible(mid[0], mid[1], m.cm, NewSelFace, wid[0], wid[1]);
-        else                GLPickTri<CMeshO>::PickFace(mid[0], mid[1], m.cm, NewSelFace, wid[0], wid[1]);
+        else                GLPickTri<CMeshO>::PickFaceSW(mid[0], mid[1], m.cm, NewSelFace, wid[0], wid[1]);
 
         //    qDebug("Pickface: rect %i %i - %i %i",mid.x(),mid.y(),wid.x(),wid.y());
         //    qDebug("Pickface: Got  %i on %i",int(NewSelFace.size()),int(m.cm.face.size()));
