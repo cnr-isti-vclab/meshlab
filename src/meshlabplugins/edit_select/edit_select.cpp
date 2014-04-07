@@ -167,7 +167,6 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
       vector<CMeshO::FacePointer>::iterator fpi;
       // Starting Sel
       vector<CMeshO::FacePointer> NewSelFace;
-      vector<CMeshO::VertexPointer> NewSelVert;
       Point2f mid=(start+cur)/2;
       Point2f wid=vcg::Abs(start-cur);
 
@@ -175,9 +174,10 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
       glMultMatrix(m.cm.Tr);
       if(selectionMode == SELECT_VERT_MODE)
       {
+        vector<CMeshO::VertexPointer> NewSelVert;
         vector<CMeshO::VertexPointer>::iterator vpi;
 
-        GLPickTri<CMeshO>::PickVert(mid[0], mid[1], m.cm, NewSelVert, wid[0], wid[1]);
+        GLPickTri<CMeshO>::PickVertSW(mid[0], mid[1], m.cm, NewSelVert, wid[0], wid[1]);
         glPopMatrix();
         tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 
