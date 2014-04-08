@@ -1,0 +1,10 @@
+MeshLab Release Note
+
+** Every Time you commit something significant add a few lines here. 
+** Be Descriptive please. 
+
+
+2014 04 08 Corrected Selection Bug. 
+Old and low-end graphics cards (like the integrated intel ones) do not support OpenGL selection modes. Re-implemented all the selection using a internal pipeline that is actually faster.
+
+
