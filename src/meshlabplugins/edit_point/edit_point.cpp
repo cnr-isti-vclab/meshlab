@@ -8,7 +8,7 @@
  *                                                                    \      *
  * All rights reserved.                                                      *
  *                                                                           *
- * This program is free software; you can redistribute it and/or modify      *   
+ * This program is free software; you can redistribute it and/or modify      *
  * it under the terms of the GNU General Public License as published by      *
  * the Free Software Foundation; either version 2 of the License, or         *
  * (at your option) any later version.                                       *
@@ -45,7 +45,7 @@ EditPointPlugin::EditPointPlugin(int _editType) : editType(_editType) {}
 const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
-  
+
 void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
   this->RealTimeLog("Point Selection",m.shortName(),
@@ -61,13 +61,12 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
     {
         glPushMatrix();
         glMultMatrix(m.cm.Tr);
-        vector<CMeshO::VertexPointer> NewSel;
-        GLPickTri<CMeshO>::PickVert(cur.x(), gla->height() - cur.y(), m.cm, NewSel);
-        if(NewSel.size() > 0) {
-            startingVertex = NewSel.front();
-
+        CMeshO::VertexPointer newStartingVertex=0;
+        GLPickTri<CMeshO>::PickClosestVert(cur.x(), gla->height() - cur.y(), m.cm, newStartingVertex);
+        if(newStartingVertex)
+        {
+            startingVertex = newStartingVertex;
             tri::ComponentFinder<CMeshO>::Dijkstra(m.cm, *startingVertex, K, this->maxHop, this->NotReachableVector);
-
             ComponentVector.push_back(startingVertex);
         }
 

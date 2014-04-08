@@ -563,7 +563,7 @@ inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& 
 
     //TODO e se i vertici sono stati cancellati? (IsD())
 
-    if (vcg::GLPickTri<CMeshO>::PickNearestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2))
+    if (vcg::GLPickTri<CMeshO>::PickClosestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2))
     {
 
         QPointF point[3];

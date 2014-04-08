@@ -416,7 +416,7 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
             {
                 case COLOR_FILL:
                     CFaceO * face;
-                    if(GLPickTri<CMeshO>::PickNearestFace(latest_event.gl_position.x(), latest_event.gl_position.y(), m.cm, face, 2, 2))
+                    if(GLPickTri<CMeshO>::PickClosestFace(latest_event.gl_position.x(), latest_event.gl_position.y(), m.cm, face, 2, 2))
                     {
                         fill(m, face);
                         glarea->update();
