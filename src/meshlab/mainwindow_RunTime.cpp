@@ -1368,7 +1368,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, boo
             //wid = new QGLWidget();
             FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env);
             connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
-            connect(ft,SIGNAL(ThreadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
+            connect(ft,SIGNAL(threadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
             connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
             /*iFilter->glContext->moveToThread(ft);*/
             ft->start();
