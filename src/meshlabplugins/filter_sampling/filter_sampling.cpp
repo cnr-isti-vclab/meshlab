@@ -1068,28 +1068,15 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     int sampleNum = par.getInt("SampleNum");
     int relaxIter = par.getInt("RelaxIter");
     int randSeed = par.getInt("RandSeed");
-    // Following two lines commented by Alessandro Giannini
-    // Parameters "SaveSample" and "QualityFlag" not defined in initParameterSet for FP_VORONOI_CLUSTERING
-    //bool saveSampleFlag=par.getBool("SaveSample");
-    //bool qualityFlag = par.getBool("QualityFlag");
     CMeshO *cm = &md.mm()->cm;
-    //			MeshModel *clusteredMesh =md.addNewMesh("Offset mesh");
     vector<CMeshO::VertexType *> seedVec;
     md.mm()->updateDataMask(MeshModel::MM_VERTMARK);
     md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
     md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
 
-    tri::ClusteringSampler<CMeshO> vc(seedVec);
-    if(randSeed!=0) tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
-    tri::SurfaceSampling<CMeshO, tri::ClusteringSampler<CMeshO> >::VertexUniform(*cm,vc,sampleNum);
     tri::EuclideanDistance<CMeshO> edFunc;
     tri::VoronoiProcessingParameter vpp;
     tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter, edFunc, vpp, cb);
-
-    //VoronoiProcessing<CMeshO>::VoronoiClustering(*cm,clusteredMesh->cm,seedVec);
-
-    //			tri::UpdateBounding<CMeshO>::Box(clusteredMesh->cm);
-    //			tri::UpdateNormal<CMeshO>::PerVertexPerFace(clusteredMesh->cm);
 
   }
     break;
