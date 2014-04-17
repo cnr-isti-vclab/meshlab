@@ -413,9 +413,15 @@ public:
     bool selectedFace;
     bool selectedVert;
 
+    RenderMode(vcg::GLW::DrawMode dm) // :declist()
+    {
+      Init();
+      drawMode=dm;
+    }
 
-    RenderMode()
-        :declist()
+    RenderMode() {  Init(); }
+
+    void Init()
     {
         drawMode	= vcg::GLW::DMFlat;
         colorMode = vcg::GLW::CMNone;
