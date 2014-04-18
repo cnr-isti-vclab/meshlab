@@ -286,6 +286,7 @@ public:
     void updateDataMask(MeshModel *m);
     void updateDataMask(int neededDataMask);
     void clearDataMask(int unneededDataMask);
+    int dataMask() const;
 
 
     bool& meshModified();

@@ -711,6 +711,11 @@ bool& MeshModel::meshModified()
     return this->modified;
 }
 
+int MeshModel::dataMask() const
+{
+    return currentDataMask;
+}
+
 MeshLabRenderMesh::MeshLabRenderMesh()
 :glw(),cm()
 {
