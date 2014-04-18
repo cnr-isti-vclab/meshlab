@@ -7,4 +7,5 @@ MeshLab Release Note
 2014 04 08 Corrected Selection Bug. 
 Old and low-end graphics cards (like the integrated intel ones) do not support OpenGL selection modes. Re-implemented all the selection using a internal pipeline that is actually faster.
 
-
+2014 04 18 New MeshLabServer version has been committed
+MeshLabServer is now able to properly manage the MeshLab Project files. MeshLabServer has been completely rewritten in order (hopefully) to enhance the robustness and usability of the tool 
