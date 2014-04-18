@@ -947,22 +947,27 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
     QStringList meshNames;
 
     //make the default mesh Index be 0
-    defaultMeshIndex = -1;
+    //defaultMeshIndex = -1;
 
+    int currentmeshindex = -1;
     for(int i=0;i<md->meshList.size();++i)
     {
         QString shortName = md->meshList.at(i)->label();
         meshNames.push_back(shortName);
-        if(md->meshList.at(i) == rp->pd->defVal->getMesh()) defaultMeshIndex = i;
+      /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh()) 
+            defaultMeshIndex = i;*/
+        if(md->meshList.at(i) == rp->val->getMesh())
+            currentmeshindex = i;
+
     }
 
     //add a blank choice because there is no default available
-    if(defaultMeshIndex == -1)
-    {
-        meshNames.push_back("");
-        defaultMeshIndex = meshNames.size()-1;  //have the blank choice be shown
-    }
-    Init(p,defaultMeshIndex,meshNames);
+    //if(defaultMeshIndex == -1)
+    //{
+    //    meshNames.push_back("");
+    //    defaultMeshIndex = meshNames.size()-1;  //have the blank choice be shown
+    //}
+    Init(p,currentmeshindex,meshNames);
 }
 
 MeshModel * MeshWidget::getMesh()
@@ -992,14 +997,26 @@ void MeshWidget::collectWidgetValue()
 
 void MeshWidget::resetWidgetValue()
 {
-    enumCombo->setCurrentIndex(defaultMeshIndex);
+    int meshindex = -1;
+    for(int i=0;i<md->meshList.size();++i)
+    {
+        if(md->meshList.at(i) == rp->pd->defVal->getMesh()) 
+            meshindex = i;
+    }
+    enumCombo->setCurrentIndex(meshindex);
 }
 
-void MeshWidget::setWidgetValue( const Value& /*nv*/ )
+void MeshWidget::setWidgetValue( const Value& nv )
 {
     //WARNING!!!!! I HAVE TO THINK CAREFULLY ABOUT THIS FUNCTION!!!
-    assert(0);
-    //enumCombo->setCurrentIndex(md->meshList(nv.getMesh());
+    //assert(0);
+    int meshindex = -1;
+    for(int i=0;i<md->meshList.size();++i)
+    {
+        if(md->meshList.at(i) == nv.getMesh()) 
+            meshindex = i;
+    }
+    enumCombo->setCurrentIndex(meshindex);
 }
 
 /******************************************
