@@ -439,7 +439,7 @@ class MeshWidget : public ComboWidget
 {
 private:
 	MeshDocument *md;
-	int defaultMeshIndex;
+	//int defaultMeshIndex;
 public:
 	MeshWidget(QWidget *p, RichMesh* defaultMesh);
 	~MeshWidget(){};
