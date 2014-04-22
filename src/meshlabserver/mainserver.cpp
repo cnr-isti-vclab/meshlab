@@ -576,7 +576,7 @@ int main(int argc, char *argv[])
                     fprintf(logfp,"output mesh  %s\n", qPrintable(outfl.filename));
                     i++;
                 }
-                if (((i + 1) < argc) && (QString(argv[i+1]) == QString("-" + commandline::mask)))
+                if (((i + 1) < argc) && (QString(argv[i+1]) == (QString("-") + commandline::mask)))
                 {
                     i = i + 2;
                     do
@@ -623,9 +623,11 @@ int main(int argc, char *argv[])
                         default :  i++; fprintf(logfp,"WARNING: unknowns attribute '%s'",argv[i]);break;
                         }
                     }while (((i) < argc) && (argv[i][0] != '-'));     
-                    outfl.mask = mask;
-                    outmeshlist << outfl;
                 }
+                else
+                    ++i;
+                outfl.mask = mask;
+                outmeshlist << outfl;
                 break;
             }
         case 's' :
@@ -660,6 +662,12 @@ int main(int argc, char *argv[])
                 }
                 i+=2;
                 break;
+            }
+        default:
+            {
+                printf("Something bad happened parsing the document. String %s\n",qPrintable(argv[i])); 
+                system("pause");
+                exit(-1);
             }
         }
     }
