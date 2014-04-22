@@ -247,7 +247,7 @@ public:
 
 
 
-    MeshFilterInterface() : MeshCommonInterface()
+    MeshFilterInterface() : MeshCommonInterface(),glContext(NULL)
     {
     }
     virtual ~MeshFilterInterface() {}
