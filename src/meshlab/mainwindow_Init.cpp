@@ -711,8 +711,8 @@ void MainWindow::createMenus()
 
     //////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
     preferencesMenu=menuBar()->addMenu(tr("&Tools"));
-    //preferencesMenu->addAction(showFilterEditAct);
-    //preferencesMenu->addSeparator();
+    preferencesMenu->addAction(showFilterEditAct);
+    preferencesMenu->addSeparator();
     preferencesMenu->addAction(setCustomizeAct);
 
 

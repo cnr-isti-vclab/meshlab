@@ -631,11 +631,13 @@ public:
 	RichMesh(const QString nm,int meshindex,MeshDocument* doc,const QString desc=QString(),const QString tltip=QString());
 
 	//WARNING: IT SHOULD BE USED ONLY BY MESHLABSERVER!!!!!!!
-	RichMesh(const QString nm,int meshindex,const QString desc=QString(),const QString tltip=QString());
+	RichMesh(const QString nm,int meshind,const QString desc=QString(),const QString tltip=QString());
 	
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);
 	~RichMesh();
+
+    int meshindex;
 };
 
 class RichFloatList : public RichParameter

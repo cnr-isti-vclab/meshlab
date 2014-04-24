@@ -333,7 +333,7 @@ public:
                 //if this is a mesh paramter and the index is valid
                 if(parameter->val->isMesh())
                 {
-                    MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+                    RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
                     if(	md->meshindex < meshDocument.size() &&
                         md->meshindex >= 0  )
                     {

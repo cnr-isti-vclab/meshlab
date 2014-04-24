@@ -812,6 +812,8 @@ void MainWindow::showFilterScript()
 
 void MainWindow::runFilterScript()
 {
+    if (meshDoc() == NULL)
+        return;
     FilterScript::iterator ii;
     for(ii= meshDoc()->filterHistory.actionList.begin();ii!= meshDoc()->filterHistory.actionList.end();++ii)
     {
@@ -819,7 +821,8 @@ void MainWindow::runFilterScript()
         MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
 
         int req=iFilter->getRequirements(action);
-        meshDoc()->mm()->updateDataMask(req);
+        if (meshDoc()->mm() != NULL)
+            meshDoc()->mm()->updateDataMask(req);
         iFilter->setLog(&meshDoc()->Log);
 
         RichParameterSet &parameterSet = (*ii).second;
@@ -832,11 +835,11 @@ void MainWindow::runFilterScript()
             //if this is a mesh paramter and the index is valid
             if(parameter->val->isMesh())
             {
-                MeshDecoration* md = reinterpret_cast<MeshDecoration*>(parameter->pd);
+                RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
                 if(	md->meshindex < meshDoc()->size() &&
                     md->meshindex >= 0  )
                 {
-                    RichMesh* rmesh = new RichMesh(parameter->name,meshDoc()->getMesh(md->meshindex),meshDoc());
+                    RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
                     parameterSet.paramList.replace(i,rmesh);
                 } else
                 {
@@ -852,32 +855,38 @@ void MainWindow::runFilterScript()
         //WARNING!!!!!!!!!!!!
         /* to be changed */
         iFilter->applyFilter( action, *meshDoc(), (*ii).second, QCallBack );
-        if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring )
+        if (meshDoc()->mm() != NULL)
         {
-            GLA()->setColorMode(vcg::GLW::CMPerFace);
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+            if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring )
+            {
+                GLA()->setColorMode(vcg::GLW::CMPerFace);
+                meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
+            }
+            if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
+                GLA()->setColorMode(vcg::GLW::CMPerVert);
+                meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+            }
+            if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
+            {
+                GLA()->setColorMode(vcg::GLW::CMPerMesh);
+                meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
+            }
+            if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+                meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
         }
-        if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-            GLA()->setColorMode(vcg::GLW::CMPerVert);
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-        }
-        if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-        {
-            GLA()->setColorMode(vcg::GLW::CMPerMesh);
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
-        }
+
         if(iFilter->getClass(action) & MeshFilterInterface::Selection )
         {
             GLA()->setSelectFaceRendering(true);
             GLA()->setSelectVertRendering(true);
         }
 
-        if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
         if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
             GLA()->resetTrackBall();
         /* to be changed */
 
+        qb->reset();
+        GLA()->update();
         GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii).first));
     }
 }
