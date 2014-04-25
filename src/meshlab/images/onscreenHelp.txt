@@ -1,15 +1,28 @@
 <font size="+1">
+<H2 >
+<table> <tr><td width='400' align='center'>3D Window</td></tr>
+</H2>
 <table>
-<tr><td width="100">Drag:	           </td><td width="100">Rotate</td></tr>
-<tr><td width="100">Ctrl-Drag:       </td><td width="100">Pan</td></tr>
-<tr><td width="100">Shift-Drag:      </td><td width="100">Zoom</td></tr>
-<tr><td width="100">Wheel:           </td><td width="100">Zoom	</td></tr>
-<tr><td width="100">Alt-Drag:        </td><td width="100">Z-Panning</td></tr>
-<tr><td width="100">Ctrl-Shift-Drag: </td><td width="100">Change light direction</td></tr>
-<tr><td width="100">Shift-Wheel:     </td><td width="100">Change perspective (up to a orthographic camera)</td></tr>
-<tr><td width="100">Ctrl-Wheel:      </td><td width="100">Move near clipping plane (in image space, 0 is viewer position, 1 is trackball center)</td></tr>
-<tr><td width="100">Double Click:    </td><td width="100">Center on mouse</td></tr>
-<tr><td width="100">Alt+enter:       </td><td width="100">Enter/Exit fullscreen mode</td></tr>
-<tr><td width="100">Ctrl-Shift H:    </td><td width="100">Reset Trackball</td></tr>
+<tr><td width="200" align='right'>Drag:	           </td><td width="200">Rotate</td></tr>
+<tr><td width="200" align='right'>Ctrl-Drag:       </td><td width="200">Pan</td></tr>
+<tr><td width="200" align='right'>Shift-Drag:      </td><td width="200">Zoom</td></tr>
+<tr><td width="200" align='right'>Wheel:           </td><td width="200">Zoom	</td></tr>
+<tr><td width="200" align='right'>Alt-Drag:        </td><td width="200">Z-Panning</td></tr>
+<tr><td width="200" align='right'>Ctrl-Shift-Drag: </td><td width="200">Change light direction</td></tr>
+<tr><td width="200" align='right'>Shift-Wheel:     </td><td width="200" align='justify'>Change perspective (up to a orthographic camera)</td></tr>
+<tr><td width="200" align='right'>Ctrl-Wheel:      </td><td width="200">Move near clipping plane <br>(in image space: 0 is viewer position, 1 is trackball center)</td></tr>
+<tr><td width="200" align='right'>Double Click:    </td><td width="200">Center on mouse</td></tr>
+<tr><td width="200" align='right'>Alt+enter:       </td><td width="200">Enter/Exit fullscreen mode</td></tr>
+<tr><td width="200" align='right'>Ctrl-Shift H:    </td><td width="200">Reset Trackball</td></tr>
+</table>
+<br>
+<H2 >
+<table> <tr><td width='400' align='center'>Layer Window</td></tr>
+</H2>
+<table>
+<tr><td width="200" align='right'>Click on eye icon: </td><td width="100">Toggle visibility status of the layer</td></tr>
+<tr><td width="200" align='right'>Ctrl-Click on eye icon: </td><td width="100">Make Invisibile all other layers</td></tr>
+<tr><td width="200" align='right'>Alt-Click on eye icon: </td><td width="100">Make Visibile all other layers</td></tr>
+<tr><td width="200" align='right'>Shift-Click on eye icon: </td><td width="100">Invert visibility status of all the layers</td></tr>
 </table>
 </font>

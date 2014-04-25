@@ -9,3 +9,6 @@ Old and low-end graphics cards (like the integrated intel ones) do not support O
 
 2014 04 18 New MeshLabServer version has been committed
 MeshLabServer is now able to properly manage the MeshLab Project files. MeshLabServer has been completely rewritten in order (hopefully) to enhance the robustness and usability of the tool 
+
+2014 04 25 Improved on screen Help. 
+Now it reports the trick for quick visibility toggling in the Layer window.
