@@ -202,7 +202,9 @@ void MeshLabXMLStdDialog::applyClick()
     //else
     //{
     QString nm = curmfc->act->text();
+     //WARNING!!! THIS IS HORRIBLE! DON'T TOUCH THE envir object after the executeFilter will be invoked. The function will dispose the object!!!
     EnvWrap* wrap = new EnvWrap(env);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     startFilterExecution();
     curmwi->executeFilter(curmfc,*wrap,false);
     /*}*/
@@ -274,7 +276,9 @@ void MeshLabXMLStdDialog::applyDynamic()
     previewContext = env.currentContext()->toString();
 
     meshState.apply(curModel);
+    //WARNING!!! THIS IS HORRIBLE! DON'T TOUCH THE envir object after the executeFilter will be invoked. The function will dispose the object!!!
     EnvWrap* envir = new EnvWrap(env);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     startFilterExecution();
     curmwi->executeFilter(this->curmfc, *envir, true);
     //env.pushContext();

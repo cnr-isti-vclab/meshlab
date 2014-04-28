@@ -31,7 +31,9 @@ void FilterThread::run()
 	_mfc->filterInterface->glContext->create(_glwid->context());
 	_cur = this;
 	_ret = _mfc->filterInterface->applyFilter(_fname, _md, *_env, &localCallBack);
+    //THIS IS HORRIBLE!!! We destroy here the environment created in the applyClick() and in the applyDynamic() functions (file xmlstdpardialog.cpp)
     delete _env;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	_cur = NULL;
 }
 
