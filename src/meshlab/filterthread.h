@@ -13,7 +13,7 @@ public:
 	MeshLabXMLFilterContainer *_mfc;
 	QString _fname;
 	MeshDocument& _md;
-	EnvWrap & _env;
+	EnvWrap* _env;
 	bool _ret;
 	static bool localCallBack(const int pos, const char * str);
 

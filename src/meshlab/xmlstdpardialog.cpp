@@ -261,7 +261,7 @@ void MeshLabXMLStdDialog::applyDynamic()
     if(!previewCB->isChecked())
         return;
     //QAction *q = curAction;
-    env.pushContext();
+    //env.pushContext();
     assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
     for(int ii = 0;ii < curParMap.size();++ii)
     {
@@ -274,9 +274,10 @@ void MeshLabXMLStdDialog::applyDynamic()
     previewContext = env.currentContext()->toString();
 
     meshState.apply(curModel);
-    EnvWrap envir(env);
-    curmwi->executeFilter(this->curmfc, envir, true);
-    env.pushContext();
+    EnvWrap* envir = new EnvWrap(env);
+    startFilterExecution();
+    curmwi->executeFilter(this->curmfc, *envir, true);
+    //env.pushContext();
     meshCacheState.create(curmask,curModel);
     validcache = true;
 

@@ -9,7 +9,7 @@
 FilterThread* FilterThread::_cur = NULL;
 
 FilterThread::FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env) 
-:QThread(), _mfc(mfc), _fname(fname),_md(md),_env(env),_glwid(NULL)
+:QThread(), _mfc(mfc), _fname(fname),_md(md),_env(&env),_glwid(NULL)
 {
 	_glwid = new QGLWidget();
 }
@@ -30,7 +30,8 @@ void FilterThread::run()
 	_mfc->filterInterface->glContext = new QGLContext(defForm,_glwid->context()->device());
 	_mfc->filterInterface->glContext->create(_glwid->context());
 	_cur = this;
-	_ret = _mfc->filterInterface->applyFilter(_fname, _md, _env, &localCallBack);
+	_ret = _mfc->filterInterface->applyFilter(_fname, _md, *_env, &localCallBack);
+    delete _env;
 	_cur = NULL;
 }
 
