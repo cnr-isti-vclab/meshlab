@@ -726,8 +726,10 @@ private:
     MeshModel *m; // the mesh which the changes refers to.
     std::vector<float> vertQuality;
     std::vector<vcg::Color4b> vertColor;
+    std::vector<vcg::Color4b> faceColor;
     std::vector<vcg::Point3f> vertCoord;
     std::vector<vcg::Point3f> vertNormal;
+    std::vector<vcg::Point3f> faceNormal;
     std::vector<bool> faceSelection;
     std::vector<bool> vertSelection;
     vcg::Matrix44f Tr;

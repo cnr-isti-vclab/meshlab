@@ -94,7 +94,14 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-    return ((curmask != MeshModel::MM_UNKNOWN) && (curmask != MeshModel::MM_NONE) && !(curmask & MeshModel::MM_VERTNUMBER) && !(curmask & MeshModel::MM_FACENUMBER) && !(curmask & MeshModel::MM_FACENORMAL) && !(curmask & MeshModel::MM_FACECOLOR) );
+  if( (curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE) )
+    return false;
+
+  if( (curmask & MeshModel::MM_VERTNUMBER ) ||
+      (curmask & MeshModel::MM_FACENUMBER ) )
+    return false;
+
+  return true;
 }
 
 
@@ -954,7 +961,7 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
     {
         QString shortName = md->meshList.at(i)->label();
         meshNames.push_back(shortName);
-      /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh()) 
+      /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh())
             defaultMeshIndex = i;*/
         if(md->meshList.at(i) == rp->val->getMesh())
         {
@@ -1025,7 +1032,7 @@ void MeshWidget::setWidgetValue( const Value& nv )
     int meshindex = -1;
     for(int i=0;i<md->meshList.size();++i)
     {
-        if(md->meshList.at(i) == nv.getMesh()) 
+        if(md->meshList.at(i) == nv.getMesh())
         {
             meshindex = i;
             //RichMesh* rm = reinterpret_cast<RichMesh*>(rp);

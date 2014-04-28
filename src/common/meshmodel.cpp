@@ -517,6 +517,25 @@ void MeshModelState::create(int _mask, MeshModel* _m)
              if(!(*vi).IsD()) (*ci)=(*vi).N();
     }
 
+    if(changeMask & MeshModel::MM_FACENORMAL)
+    {
+        faceNormal.resize(m->cm.face.size());
+        std::vector<Point3f>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci = faceNormal.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+         if(!(*fi).IsD()) (*ci) = (*fi).N();
+    }
+
+    if(changeMask & MeshModel::MM_FACECOLOR)
+    {
+       m->updateDataMask(MeshModel::MM_FACECOLOR);
+        faceColor.resize(m->cm.face.size());
+        std::vector<Color4b>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci = faceColor.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+         if(!(*fi).IsD()) (*ci) = (*fi).C();
+    }
+
     if(changeMask & MeshModel::MM_FACEFLAGSELECT)
     {
         faceSelection.resize(m->cm.face.size());
@@ -545,14 +564,22 @@ bool MeshModelState::apply(MeshModel *_m)
 {
   if(_m != m)
       return false;
-    if(changeMask & MeshModel::MM_VERTCOLOR)
-    {
-        if(vertColor.size() != m->cm.vert.size()) return false;
-        std::vector<Color4b>::iterator ci;
-        CMeshO::VertexIterator vi;
-        for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-            if(!(*vi).IsD()) (*vi).C()=(*ci);
-    }
+  if(changeMask & MeshModel::MM_VERTCOLOR)
+  {
+      if(vertColor.size() != m->cm.vert.size()) return false;
+      std::vector<Color4b>::iterator ci;
+      CMeshO::VertexIterator vi;
+      for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+          if(!(*vi).IsD()) (*vi).C()=(*ci);
+  }
+  if(changeMask & MeshModel::MM_FACECOLOR)
+  {
+      if(faceColor.size() != m->cm.face.size()) return false;
+      std::vector<Color4b>::iterator ci;
+      CMeshO::FaceIterator fi;
+      for(fi = m->cm.face.begin(), ci = faceColor.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+          if(!(*fi).IsD()) (*fi).C()=(*ci);
+  }
     if(changeMask & MeshModel::MM_VERTQUALITY)
     {
         if(vertQuality.size() != m->cm.vert.size()) return false;
@@ -578,9 +605,15 @@ bool MeshModelState::apply(MeshModel *_m)
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).N()=(*ci);
+    }
 
-        //now reset the face normals
-        tri::UpdateNormal<CMeshO>::PerFaceNormalized(m->cm);
+    if(changeMask & MeshModel::MM_FACENORMAL)
+    {
+        if(faceNormal.size() != m->cm.face.size()) return false;
+        std::vector<Point3f>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci=faceNormal.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+            if(!(*fi).IsD()) (*fi).N()=(*ci);
     }
 
     if(changeMask & MeshModel::MM_FACEFLAGSELECT)
