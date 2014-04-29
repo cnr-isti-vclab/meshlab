@@ -248,10 +248,7 @@ class RedetailSampler
 
 public:
 
-  RedetailSampler():markerFunctor(0)
-  {
-    m=0;
-  };
+  RedetailSampler():m(0) {}
 
   CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
   CallBackPos *cb;
@@ -280,21 +277,19 @@ public:
     selectionFlag=false;
     storeDistanceAsQualityFlag=false;
     m=_m;
-    if(m)
-    {
-      tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
-      if(m->fn==0) useVertexSampling = true;
-      else useVertexSampling = false;
+    tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
+    if(m->fn==0) useVertexSampling = true;
+    else useVertexSampling = false;
 
-      if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
-      else  unifGridFace.Set(m->face.begin(),m->face.end());
-      markerFunctor.SetMesh(m);
-    }
+    if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
+    else  unifGridFace.Set(m->face.begin(),m->face.end());
+    markerFunctor.SetMesh(m);
     // sampleNum and sampleCnt are used only for the progress callback.
     cb=_cb;
     sampleNum = targetSz;
-    sampleCnt=0;
+    sampleCnt = 0;
   }
+
   // this function is called for each vertex of the target mesh.
   // and retrieve the closest point on the source mesh.
   void AddVert(CMeshO::VertexType &p)
@@ -1158,21 +1153,14 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     MeshModel *mm= md.addNewMesh("","Recur Samples",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
-    tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
-    tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
+    tri::Allocator<CMeshO>::CompactEveryVector(mmM->cm);
 
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
     std::vector<Point3f> pvec;
 
     tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
     qDebug("Generated %i points",int(pvec.size()));
-
-    for(uint i=0;i<pvec.size();++i)
-    {
-      tri::Allocator<CMeshO>::AddVertices(mm->cm,1);
-      mm->cm.vert.back().P() = pvec[i];
-    }
-
+    tri::Build(mm->cm,pvec);
   }
     break;
   default : assert(0);
