@@ -15,3 +15,6 @@ Now it reports the trick for quick visibility toggling in the Layer window.
 
 2014 04 28 Corrected Missing Preview Bug
 The preview check box disappeared from many filters that were changing just the geometry of the mesh (like all the smoothing filters) without any serious reason.
+
+2014 04 30 Improved selection-by-quality filters
+Now they consistently works also for point clouds. 
