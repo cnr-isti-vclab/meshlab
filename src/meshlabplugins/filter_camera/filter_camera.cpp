@@ -29,6 +29,7 @@
 using namespace std;
 using namespace vcg;
 
+
 // Constructor
 FilterCameraPlugin::FilterCameraPlugin()
 {
@@ -40,7 +41,8 @@ FilterCameraPlugin::FilterCameraPlugin()
   FP_CAMERA_SCALE<<
   FP_CAMERA_TRANSLATE<<
   FP_CAMERA_TRANSFORM <<
-  FP_CAMERA_EDIT;
+  FP_CAMERA_EDIT <<
+  FP_ORIENT_NORMALS_WITH_CAMERAS;
 
   foreach(FilterIDType tt , types())
 	  actionList << new QAction(filterName(tt), this);
@@ -50,14 +52,15 @@ FilterCameraPlugin::FilterCameraPlugin()
 QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_SET_MESH_CAMERA :      return QString("Set Mesh Camera");
-    case FP_SET_RASTER_CAMERA :    return QString("Set Raster Camera");
-    case FP_QUALITY_FROM_CAMERA :  return QString("Vertex Quality from Camera");
-	case FP_CAMERA_ROTATE :         return QString("Transform: Rotate Camera or set of cameras");
-	case FP_CAMERA_SCALE :         return QString("Transform: Scale Camera or set of cameras");
-	case FP_CAMERA_TRANSLATE :         return QString("Transform: Translate Camera or set of cameras");
- 	case FP_CAMERA_TRANSFORM :        return QString("Transform the camera extrinsics, or all the cameras of the project.");
-    case FP_CAMERA_EDIT :         return QString("Edit Raster Camera");
+    case FP_SET_MESH_CAMERA :           return QString("Set Mesh Camera");
+    case FP_SET_RASTER_CAMERA :         return QString("Set Raster Camera");
+    case FP_QUALITY_FROM_CAMERA :       return QString("Vertex Quality from Camera");
+    case FP_CAMERA_ROTATE :             return QString("Transform: Rotate Camera or set of cameras");
+    case FP_CAMERA_SCALE :              return QString("Transform: Scale Camera or set of cameras");
+    case FP_CAMERA_TRANSLATE :          return QString("Transform: Translate Camera or set of cameras");
+    case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project.");
+    case FP_CAMERA_EDIT :               return QString("Edit Raster Camera");
+    case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras");
     default : assert(0);
   }
 }
@@ -74,6 +77,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 	case FP_CAMERA_TRANSLATE :        return QString("Translate the camera, or all the cameras of the project.");
 	case FP_CAMERA_TRANSFORM :        return QString("Transform the camera extrinsics, or all the cameras of the project.");
     case FP_CAMERA_EDIT :        return QString("Allow to edit the current raster camera allowing to tweak intrinsics.");
+    case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras. For this  filter to work the mesh needs to have the attribute 'correspondences' which is only created when loading Bundler files (.out projects)");
     default : assert(0);
   }
 }
@@ -501,6 +505,27 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
 
       }
     break;
+
+    case FP_ORIENT_NORMALS_WITH_CAMERAS:
+    {
+		struct Correspondence{unsigned int id_img;float padding[3];};
+		typedef  vector<Correspondence> CorrVec;
+
+        CMeshO::PerVertexAttributeHandle<CorrVec> ch =
+                vcg::tri::Allocator<CMeshO>::FindPerVertexAttribute<CorrVec>(cm,"correspondences");
+        if(!vcg::tri::Allocator<CMeshO>::IsValidHandle<CorrVec>(cm,ch)){
+			 this->errorMessage="Vertices have no associated camera.\n This filter works only for point clouds loaded within a Bundler project (.out)";
+            return false;
+		}
+        for(CMeshO::VertexIterator vi= cm.vert.begin(); vi != cm.vert.end();++vi){
+            unsigned int camera_id = ch[*vi][0].id_img;
+            vcg::Point3f n=md.rasterList[camera_id]->shot.GetViewPoint()-(*vi).P() ;
+            if( n*(*vi).cN()<0)
+                (*vi). N()=-(*vi).cN();
+        }
+    }
+        break;
+
   }
 
 	return true;
@@ -536,9 +561,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
       return MeshFilterInterface::Camera;
   case FP_SET_RASTER_CAMERA :
 	  return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
-
-
-
+  case FP_ORIENT_NORMALS_WITH_CAMERAS:
+      return MeshFilterInterface::Camera;
   }
   assert(0);
 }
@@ -556,6 +580,8 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 	 case FP_SET_RASTER_CAMERA :
 	 case FP_SET_MESH_CAMERA :
 		return MeshModel::MM_NONE;
+     case FP_ORIENT_NORMALS_WITH_CAMERAS:
+        return MeshModel::MM_VERTNORMAL;
 	 }
 	 assert(0);
  }

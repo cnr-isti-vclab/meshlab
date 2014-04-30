@@ -42,7 +42,8 @@ public:
 		FP_CAMERA_SCALE,
 		FP_CAMERA_TRANSLATE,
 		FP_CAMERA_TRANSFORM,
-		FP_CAMERA_EDIT};
+        FP_CAMERA_EDIT,
+        FP_ORIENT_NORMALS_WITH_CAMERAS};
 
 	FilterCameraPlugin();
 	int getPreConditions(QAction *) const;
