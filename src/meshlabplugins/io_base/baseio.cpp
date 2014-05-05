@@ -40,6 +40,28 @@
 
 using namespace std;
 using namespace vcg;
+
+class MyPolyEdge;
+class MyPolyFace;
+class MyPolyVertex;
+struct PolyUsedTypes : public UsedTypes<Use<MyPolyVertex>   ::AsVertexType,
+                                        Use<MyPolyEdge>     ::AsEdgeType,
+                                        Use<MyPolyFace>     ::AsFaceType> {};
+
+class MyPolyVertex  : public Vertex<PolyUsedTypes,  vertex::Coord3f, vertex::Normal3f, vertex::Qualityf, vertex::Color4b, vertex::BitFlags  >{};
+class MyPolyEdge    : public Edge< PolyUsedTypes, edge::VertexRef, edge::BitFlags>{};
+class MyPolyFace:public vcg::Face<
+     PolyUsedTypes,
+    face::PolyInfo, // this is necessary  if you use component in vcg/simplex/face/component_polygon.h
+    face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
+    face::Color4b,
+    face::BitFlags, // bit flags
+    face::Normal3f // normal
+> {};
+
+class MyPolyMesh    : public tri::TriMesh< vector<MyPolyVertex>, vector<MyPolyEdge>, vector<MyPolyFace>   > {};
+
+
 // initialize importing parameters
 void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
 {
@@ -259,18 +281,39 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
         return true;
     }
     if( formatName.toUpper() == tr("OFF"))
-  {
-        if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
-            m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-    int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
-    if(result!=0)
+    {
+      if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
+        m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+      int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+      if(result!=0)
       {
-            errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
-          return false;
+        errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+        return false;
       }
-    return true;
-  }
-    if( formatName.toUpper() == tr("DXF") || formatName.toUpper() == tr("OBJ") )
+      return true;
+    }
+
+    if( formatName.toUpper() == tr("OBJ"))
+    {
+      int result;
+      if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
+      {
+        m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+        MyPolyMesh pm;
+        tri::PolygonSupport<CMeshO,MyPolyMesh>::ImportFromTriMesh(pm,m.cm);
+        result = tri::io::ExporterOBJ<MyPolyMesh>::Save(pm,filename.c_str(),mask,cb);
+      }
+      else
+      result = tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+      if(result!=0)
+      {
+        errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+        return false;
+      }
+      return true;
+    }
+
+    if( formatName.toUpper() == tr("DXF") )
   {
         int result = tri::io::Exporter<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
     if(result!=0)
@@ -308,12 +351,12 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 QList<MeshIOInterface::Format> BaseMeshIOPlugin::exportFormats() const
 {
     QList<Format> formatList;
-    formatList << Format("Stanford Polygon File Format"	, tr("PLY"));
-    formatList << Format("STL File Format"				      , tr("STL"));
-    formatList << Format("Alias Wavefront Object"				, tr("OBJ"));
-    formatList << Format("Object File Format"						, tr("OFF"));
-    formatList << Format("VRML File Format"							, tr("WRL"));
-    formatList << Format("DXF File Format"							, tr("DXF"));
+    formatList << Format("Stanford Polygon File Format", tr("PLY"));
+    formatList << Format("STL File Format",              tr("STL"));
+    formatList << Format("Alias Wavefront Object",       tr("OBJ"));
+    formatList << Format("Object File Format",           tr("OFF"));
+    formatList << Format("VRML File Format",             tr("WRL"));
+    formatList << Format("DXF File Format",              tr("DXF"));
     return formatList;
 }
 
@@ -334,7 +377,9 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
         capability = tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();
         defaultBits=capability;
     }
-    if(format.toUpper() == tr("OBJ")){capability=defaultBits= tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability();}
+    if(format.toUpper() == tr("OBJ")){
+      capability=defaultBits= tri::io::ExporterOBJ<CMeshO>::GetExportMaskCapability() | tri::io::Mask::IOM_BITPOLYGONAL;
+    }
     if(format.toUpper() == tr("OFF")){capability=defaultBits= tri::io::ExporterOFF<CMeshO>::GetExportMaskCapability();}
     if(format.toUpper() == tr("WRL")){capability=defaultBits= tri::io::ExporterWRL<CMeshO>::GetExportMaskCapability();}
 

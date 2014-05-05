@@ -18,3 +18,9 @@ The preview check box disappeared from many filters that were changing just the 
 
 2014 04 30 Improved selection-by-quality filters
 Now they consistently works also for point clouds. 
+
+2014 04 30 Improved Computation of normals for point clouds
+In the case of working with point clouds generated with the well known Bundler, we added the options to reorient the vertex normals to comply with the cameras in Bundler datasets that have a camera attribute 
+
+2014 05 06 Obj File Export. 
+Added support of polygonal meshes in OBJ  output. Now meshes with faux edges set are correctly exported as polygonal meshes (and not tris)
