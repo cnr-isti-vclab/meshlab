@@ -24,3 +24,8 @@ In the case of working with point clouds generated with the well known Bundler, 
 
 2014 05 06 Obj File Export. 
 Added support of polygonal meshes in OBJ  output. Now meshes with faux edges set are correctly exported as polygonal meshes (and not tris)
+
+2014 05 07 OFF File Import
+Corrected bug in the faux edge setting when loading polygonal meshes. 
+
+
