@@ -65,14 +65,14 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
 
 private:
-	float niceRound2(float value,float base);
-	float niceRound(float value);
+    float niceRound2(float value,float base);
+    float niceRound(float value);
 
   void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
 
-	void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
-	void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
-	void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
+    void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
+    void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
+    void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
   void drawHistogram(QGLWidget *gla, CHist &ch);
 public:
 
@@ -164,6 +164,9 @@ public:
   inline QString HistFixedWidthParam() const { return  "MeshLab::Decoration::FixedHistWidthParam" ; }
   inline QString HistAreaParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
   inline QString HistTypeParam() const { return  "MeshLab::Decoration::HistType" ; }
+
+  inline QString ShowFauxEdgeWidth() const { return  "MeshLab::Decoration::FauxEdgeWidth" ; }
+
 
   inline QString ShowContourFreq() const { return  "MeshLab::Decoration::ShowContourFreq" ; }
   inline QString ShowContourAlpha() const { return  "MeshLab::Decoration::ShowContourAlpha" ; }

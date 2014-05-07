@@ -251,13 +251,14 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
         } break;
 
     case DP_SHOW_NON_FAUX_EDGE :	{
+            float lineWidth = rm->getFloat(ShowFauxEdgeWidth());
             glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
             glDisable(GL_LIGHTING);
             glDepthFunc(GL_LEQUAL);
             glEnable(GL_LINE_SMOOTH);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glLineWidth(1.f);
+            glLineWidth(lineWidth);
       Color4b cc=Color4b::DarkGray;
       cc[3]=128;
       glColor(cc);
@@ -1643,6 +1644,7 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
     parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
   } break;
   case DP_SHOW_NON_FAUX_EDGE :{
+    parset.addParam(new RichFloat(ShowFauxEdgeWidth(),1.5,"Line Width",""));
     parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
     parset.addParam(new RichBool(this->ShowNonRegular(), false, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
   } break;

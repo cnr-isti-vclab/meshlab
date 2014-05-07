@@ -28,4 +28,6 @@ Added support of polygonal meshes in OBJ  output. Now meshes with faux edges set
 2014 05 07 OFF File Import
 Corrected bug in the faux edge setting when loading polygonal meshes. 
 
+2014 05 07 Faux Edge Decorator
+Added line width control to the Non Faux Edge decorator.
 
