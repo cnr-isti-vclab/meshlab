@@ -366,6 +366,7 @@ public:
             }
             else
             {
+
                 MeshLabXMLFilterContainer cont = PM.stringXMLFilterMap[ fname];
                 MLXMLPluginInfo* info = cont.xmlInfo;
                 MeshLabFilterInterface* cppfilt = cont.filterInterface;
@@ -406,7 +407,7 @@ public:
                         //WARNING!!!!!!!!!!!!
                         /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
                         meshDocument.setBusy(true);
-                        cppfilt->applyFilter( fname, meshDocument, envwrap, filterCallBack );
+                        ret = cppfilt->applyFilter( fname, meshDocument, envwrap, filterCallBack );
                         meshDocument.setBusy(false);
                         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     }
@@ -777,7 +778,6 @@ int main(int argc, char *argv[])
 
     if((logfp != NULL) && (logfp != stdout))
         fclose(logfp);
-    system("pause");
     return 0;
 }
 
