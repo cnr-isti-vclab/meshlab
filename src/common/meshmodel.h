@@ -54,7 +54,7 @@
 #include <QImage>
 #include <QAction>
 #include "GLLogStream.h"
-
+#include "filterscript.h"
 
 // Forward declarations needed for creating the used types
 class CVertexO;
@@ -545,7 +545,7 @@ private:
 //	QMap<int,RasterModel*> _rendermap;
 //	QReadWriteLock _mutdoc;
 //};
-class FilterScript;
+//class FilterScript;
 
 class MeshDocument : public QObject
 {
