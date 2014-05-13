@@ -50,8 +50,11 @@
 #include <QString>
 #include <QStringList>
 #include <QFileInfo>
+#include <QReadWriteLock>
+#include <QImage>
+#include <QAction>
 #include "GLLogStream.h"
-#include "filterscript.h"
+
 
 // Forward declarations needed for creating the used types
 class CVertexO;
@@ -150,6 +153,8 @@ MeshModel Class
 The base class for representing a single mesh.
 It contains a single vcg mesh object with some additional information for keeping track of its origin and of what info it has.
 */
+
+class MeshDocument;
 
 class MeshModel : public MeshLabRenderMesh
 {
@@ -396,7 +401,6 @@ public:
     };
 };// end class RasterModel
 
-class MeshDocument;
 class RenderMode
 {
 private:
@@ -541,6 +545,7 @@ private:
 //	QMap<int,RasterModel*> _rendermap;
 //	QReadWriteLock _mutdoc;
 //};
+class FilterScript;
 
 class MeshDocument : public QObject
 {
@@ -629,7 +634,7 @@ public:
     QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
     void setFileName(const QString& newFileName) {fullPathFilename = newFileName;}
     GLLogStream Log;
-    FilterScript filterHistory;
+    FilterScript* filterHistory;
     QStringList xmlhistory;
 
     int size() const {return meshList.size();}

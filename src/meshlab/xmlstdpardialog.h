@@ -355,7 +355,7 @@ public:
 	XMLShotWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
 	~XMLShotWidget(){};
 	void updateVisibility(const bool vis);
-	void set(const QString &) {}
+	void set(const QString & expr);
 
 	QString paramName;
 
@@ -477,7 +477,6 @@ private:
 	QString previewContext;
 	bool validcache;
 	bool showHelp;
-
 	//we have to change the button caption when the filter has been launched for execution
 	QPushButton *applyButton;
 	QPushButton *helpButton;
@@ -486,6 +485,33 @@ private:
 
 signals:
 	void filterInterrupt(const bool isinterruptrequested);
+    void filterParametersEvaluated(const QString& fnmame,const QMap<QString,QString>& parvalue);
 };
+
+//// This class provide a modal dialog box for asking a generic parameter set
+//// It can be used by anyone needing for some values in a structred form and having some integrated help
+//class MeshLabXMLGenericParamDialog: public QDialog
+//{
+//    Q_OBJECT 
+//public:
+//    MeshLabXMLGenericParamDialog(MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
+//    ~MeshLabXMLGenericParamDialog();
+//
+//    XMLStdParFrame* stdParFrame;
+//    Env env;
+//
+//    void createFrame();
+//
+//public slots:	
+//    void getAccept();
+//    void toggleHelp();
+//
+//        //reset the values on the gui back to the ones originally given to the dialog
+//    void resetValues();
+//
+//private:
+//    MeshDocument *meshDocument;
+//
+//};
 
 #endif

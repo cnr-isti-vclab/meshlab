@@ -8,8 +8,8 @@
 
 FilterThread* FilterThread::_cur = NULL;
 
-FilterThread::FilterThread(QString fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,EnvWrap& env) 
-:QThread(), _mfc(mfc), _fname(fname),_md(md),_env(&env),_glwid(NULL)
+FilterThread::FilterThread(const QString& fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,Env& env) 
+:QThread(), _mfc(mfc), _fname(fname),_md(md),_envwrap(env),_glwid(NULL)
 {
 	_glwid = new QGLWidget();
 }
@@ -30,10 +30,7 @@ void FilterThread::run()
 	_mfc->filterInterface->glContext = new QGLContext(defForm,_glwid->context()->device());
 	_mfc->filterInterface->glContext->create(_glwid->context());
 	_cur = this;
-	_ret = _mfc->filterInterface->applyFilter(_fname, _md, *_env, &localCallBack);
-    //THIS IS HORRIBLE!!! We destroy here the environment created in the applyClick() and in the applyDynamic() functions (file xmlstdpardialog.cpp)
-    delete _env;
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	_ret = _mfc->filterInterface->applyFilter(_fname, _md, _envwrap, &localCallBack);
 	_cur = NULL;
 }
 

@@ -29,7 +29,7 @@
 #include <wrap/gl/math.h>
 #include "scriptinterface.h"
 #include <vcg/complex/append.h>
-
+#include "../common/filterscript.h"
 
 using namespace vcg;
 
@@ -41,6 +41,7 @@ MeshDocument::~MeshDocument()
     delete mmp;
   foreach(RasterModel* rmp,rasterList)
       delete rmp;
+  delete filterHistory;
 }
 
 //returns the mesh ata given position in the list
@@ -332,6 +333,7 @@ MeshDocument::MeshDocument() : QObject(),rendstate(),Log(),xmlhistory()
     currentMesh = 0;
     currentRaster = 0;
     busy=false;
+    filterHistory = new FilterScript();
 }
 
 void MeshModel::Clear()

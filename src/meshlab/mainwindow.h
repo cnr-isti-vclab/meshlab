@@ -76,7 +76,7 @@ class MainWindow : public QMainWindow, MainWindowInterface
 public:
 	// callback function to execute a filter
 	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
-	void executeFilter(MeshLabXMLFilterContainer* mfc, EnvWrap& env, bool  isPreview);
+	void executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool  isPreview);
 
   MainWindow();
   void init();
@@ -243,8 +243,8 @@ private:
     void saveRecentProjectList(const QString &projName);
     void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
-	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc,EnvWrap &env );
-	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, EnvWrap &env );
+	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc,Env &env );
+	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, Env &env );
 
 	QNetworkAccessManager *httpReq;
 	QBuffer myLocalBuf;
@@ -262,6 +262,8 @@ private:
 	QSignalMapper *windowMapper;
 
 	PluginManager PM;
+
+    //QMap<QThread*,Env*> envtobedeleted;
 
 		/*
 		Note this part should be detached from MainWindow just like the loading plugin part.

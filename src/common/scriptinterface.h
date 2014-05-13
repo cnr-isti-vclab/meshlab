@@ -24,10 +24,10 @@
 #ifndef SCRIPTINTERFACE_H
 #define SCRIPTINTERFACE_H
 
+#include "meshmodel.h"
 #include <QtScript>
 #include "filterparameter.h"
 #include "xmlfilterinfo.h"
-#include "meshmodel.h"
 #include "vcg/space/point3.h"
 
 

@@ -49,11 +49,10 @@ FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 void FilterScriptDialog::setScript(FilterScript *scr)
 {
 	scriptPtr=scr;
-  FilterScript::iterator li;
   ui->scriptListWidget->clear();
   
-  for(li=scr->actionList.begin();li!=scr->actionList.end() ;++li)
-     ui->scriptListWidget->addItem((*li).first);
+  for( FilterScript::iterator li=scr->filtparlist.begin();li!=scr->filtparlist.end() ;++li)
+     ui->scriptListWidget->addItem((*li)->filterName());
 }
 
 void FilterScriptDialog::applyScript()
@@ -64,49 +63,13 @@ void FilterScriptDialog::applyScript()
 	if(NULL == mainWindow){
 		qDebug() << "problem casting parent of filterscriptdialog to main window";
 	}
-	
-	//deal with the special case parameter of 
-	for(int action = 0; action < scriptPtr->actionList.size(); action++)
-	{
-	
-		RichParameterSet &parameterSet = scriptPtr->actionList[action].second;
-	
-		for(int i = 0; i < parameterSet.paramList.size(); i++)
-		{	
-			//get a modifieable reference
-        //	RichParameter* parameter = parameterSet.paramList[i];
-		
-			//if this is a mesh paramter and the pointer not valid
-		//	if(parameter.fieldType == FilterParameter::PARMESH &&
-    //			!mainWindow->meshDoc().meshList.contains((MeshModel*)parameter.pointerVal) )
-		//	{
-		//		//if the meshmodel pointer is not in the document but not null there must be a problem
-		//		if(NULL != parameter.pointerVal )
-		//		{
-		//			qDebug() << "meshdoc gave us null";
-		//			QMessageBox::critical(this, tr("Script Failure"), QString("Failed because you set a script parameter to be a mesh which does not exist anymore."));
-		//			return;
-    //		} else if(parameter.fieldVal.toInt() >= mainWindow->meshDoc().meshList.size() || parameter.fieldVal.toInt() < 0)
-		//		{
-		//			qDebug() << "integer is out of bounds:" << parameter.fieldVal.toInt();
-		//			QMessageBox::critical(this, tr("Script Failure"), QString("One of the filters in the script needs more meshes than you have loaded."));
-		//			return;
-		//		} else {
-		//			qDebug() << "meshdoc has non null value";
-    //			parameter.pointerVal = mainWindow->meshDoc().getMesh(parameter.fieldVal.toInt());
-		//		}
-		//	} 
-		//	
-		}
-	}
-	
 	accept();
 }
 
 void FilterScriptDialog::clearScript()
 {
   assert(scriptPtr);
-  scriptPtr->actionList.clear();
+  scriptPtr->filtparlist.clear();
   ui->scriptListWidget->clear();
 }
 
@@ -149,10 +112,16 @@ void FilterScriptDialog::moveSelectedFilterUp()
 	//however, i found it to be over complicated and not too helpful for reording
 	
 	int currentRow = ui->scriptListWidget->currentRow();
+    if ((currentRow == -1) || (currentRow == 0))
+        return;
 
 	//move item up in list
-	QPair<QString, RichParameterSet> pair = scriptPtr->actionList.takeAt(currentRow);
-	scriptPtr->actionList.insert(currentRow-1, pair);
+	FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    QString filtername = ui->scriptListWidget->currentItem()->text();
+	if (pair->filterName() == filtername)
+        scriptPtr->filtparlist.insert(currentRow-1, pair);
+    else
+        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 	
 	//move item up on ui
 	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
@@ -164,26 +133,39 @@ void FilterScriptDialog::moveSelectedFilterUp()
 
 void FilterScriptDialog::moveSelectedFilterDown()
 {
-	int currentRow = ui->scriptListWidget->currentRow();
+    int currentRow = ui->scriptListWidget->currentRow();
+    if ((currentRow == -1) || (currentRow == scriptPtr->filtparlist.size() - 1))
+        return;
 
-	//move item down in list
-	QPair<QString, RichParameterSet> pair = scriptPtr->actionList.takeAt(currentRow);
-	scriptPtr->actionList.insert(currentRow+1, pair);
-	
-	//move item down on ui
-	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
-	ui->scriptListWidget->insertItem(currentRow+1, item);
-	
-	//set selected 
-	ui->scriptListWidget->setCurrentItem(item);
+    //move item up in list
+    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    QString filtername = ui->scriptListWidget->currentItem()->text();
+    if (pair->filterName() == filtername)
+        scriptPtr->filtparlist.insert(currentRow+1, pair);
+    else
+        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+
+    //move item up on ui
+    QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
+    ui->scriptListWidget->insertItem(currentRow+1, item);
+
+    //set selected 
+    ui->scriptListWidget->setCurrentItem(item);
 }
 
 void FilterScriptDialog::removeSelectedFilter()
 {
 	int currentRow = ui->scriptListWidget->currentRow();
-	
-	//remove from list and ui
-	scriptPtr->actionList.removeAt(currentRow);
+    if(currentRow == -1)
+        return;
+
+    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    QString filtername = ui->scriptListWidget->currentItem()->text();
+    if (pair->filterName() == filtername)
+        scriptPtr->filtparlist.removeAt(currentRow);
+    else
+        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+  
 	ui->scriptListWidget->takeItem(currentRow);
 }
 
@@ -196,55 +178,77 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	if(currentRow == -1)
 		return;
 	
-	QString actionName = scriptPtr->actionList.at(currentRow).first;
-	RichParameterSet oldParameterSet = scriptPtr->actionList.at(currentRow).second;
-	
-	//get the main window
-	MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
-	
-	if(NULL == mainWindow){
-		qDebug() << "problem casting parent of filterscriptdialog to main window";
-		return;
-	}
-
-	//get a pointer to this action and filter from the main window so we can get the 
-	//description of the parameters from the filter
-	QAction *action = mainWindow->pluginManager().actionFilterMap[actionName];
-	MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
-	
-	if(NULL == iFilter){
-		qDebug() << "null filter";
-		return;
-	}
-
-	//fill the paramter set with all the names and descriptions which are lost in the 
-	//filter script
-	RichParameterSet newParameterSet;
-  iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
-
-	if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
-	{
-		//now set values to be the old values
-		RichParameterCopyConstructor cc;
-		for(int i = 0; i < newParameterSet.paramList.size(); i++)
-		{
-			oldParameterSet.paramList[i]->accept(cc);
-			newParameterSet.paramList[i]->val = cc.lastCreated->val;
-		}	
-	} else
-		qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
-
-	//launch the dialog
-  GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->meshDoc());
-	int result = parameterDialog.exec();
-	if(result == QDialog::Accepted){
-		//keep the changes	
-		scriptPtr->actionList[currentRow].second = newParameterSet;
-	}
-	
+	QString filtername = ui->scriptListWidget->currentItem()->text();
+    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.at(currentRow);
+    if (pair->filterName() == filtername)
+        if (!pair->isXMLFilter())
+            editOldParameters(currentRow);
+        else 
+            editXMLParameters(currentRow);
+    else
+        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 }
 
 FilterScriptDialog::~FilterScriptDialog()
 {
 	delete ui;
+}
+
+void FilterScriptDialog::editOldParameters( const int row )
+{
+    if(row == -1)
+        return;
+    QString actionName = ui->scriptListWidget->currentItem()->text();
+
+    int sz = scriptPtr->filtparlist.size();
+    OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
+     RichParameterSet oldParameterSet = old->pair.second;
+    //get the main window
+    MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
+
+    if(NULL == mainWindow){
+        qDebug() << "problem casting parent of filterscriptdialog to main window";
+        return;
+    }
+
+    //get a pointer to this action and filter from the main window so we can get the 
+    //description of the parameters from the filter
+    QAction *action = mainWindow->pluginManager().actionFilterMap[actionName];
+    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+
+    if(NULL == iFilter){
+        qDebug() << "null filter";
+        return;
+    }
+
+    //fill the paramter set with all the names and descriptions which are lost in the 
+    //filter script
+    RichParameterSet newParameterSet;
+    iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);
+
+    if(newParameterSet.paramList.size() == oldParameterSet.paramList.size())
+    {
+        //now set values to be the old values
+        RichParameterCopyConstructor cc;
+        for(int i = 0; i < newParameterSet.paramList.size(); i++)
+        {
+            oldParameterSet.paramList[i]->accept(cc);
+            newParameterSet.paramList[i]->val = cc.lastCreated->val;
+        }	
+    } else
+        qDebug() << "the size of the given list is not the same as the filter suggests it should be.  your filter script may be out of date, or there is a bug in the filter script class";
+
+    //launch the dialog
+    GenericParamDialog parameterDialog(this, &newParameterSet, "Edit Parameters", mainWindow->meshDoc());
+    int result = parameterDialog.exec();
+    if(result == QDialog::Accepted)
+    {
+        //keep the changes	
+        old->pair.second = newParameterSet;
+    }
+}
+
+void FilterScriptDialog::editXMLParameters( const int row )
+{
+
 }

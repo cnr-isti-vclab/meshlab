@@ -65,6 +65,9 @@ private:
 	Ui::scriptDialog* ui;
   FilterScript *scriptPtr;
 
+  void editOldParameters(const int row);
+  void editXMLParameters(const int row);
+
 };
 
 #endif

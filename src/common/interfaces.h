@@ -63,7 +63,7 @@ class MainWindowInterface
 {
 public:
   virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){}
-  virtual void executeFilter(MeshLabXMLFilterContainer*, EnvWrap& , bool /* isPreview */){}
+  virtual void executeFilter(MeshLabXMLFilterContainer*, Env& , bool /* isPreview */){}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.

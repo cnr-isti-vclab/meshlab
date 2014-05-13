@@ -6,6 +6,7 @@
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p )
 :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)
 {
+
     curmask = 0;
     qf = NULL;
     stdParFrame=NULL;
@@ -177,19 +178,23 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 void MeshLabXMLStdDialog::applyClick()
 {
     //env.pushContext();
-    if ((isfilterexecuting) && (curmfc->xmlInfo->filterAttribute(curmfc->act->text(),MLXMLElNames::filterIsInterruptible) == "true"))
+    QString fname = curmfc->act->text();
+    if ((isfilterexecuting) && (curmfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true"))
     {
         emit filterInterrupt(true);
         return;
     }
 
+    QMap<QString,QString> parvalue;
     assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
     for(int ii = 0;ii < curParMap.size();++ii)
     {
         XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
         QString exp = wid->getWidgetExpression();
+        parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
         env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
     }
+    emit filterParametersEvaluated(fname,parvalue);
     ////int mask = 0;//curParSet.getDynamicFloatMask();
     if(curmask)
         meshState.apply(curModel);
@@ -201,12 +206,8 @@ void MeshLabXMLStdDialog::applyClick()
     //	meshCacheState.apply(curModel);
     //else
     //{
-    QString nm = curmfc->act->text();
-     //WARNING!!! THIS IS HORRIBLE! DON'T TOUCH THE envir object after the executeFilter will be invoked. The function will dispose the object!!!
-    EnvWrap* wrap = new EnvWrap(env);
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     startFilterExecution();
-    curmwi->executeFilter(curmfc,*wrap,false);
+    curmwi->executeFilter(curmfc,env,false);
     /*}*/
     //env.popContext();
 
@@ -276,11 +277,8 @@ void MeshLabXMLStdDialog::applyDynamic()
     previewContext = env.currentContext()->toString();
 
     meshState.apply(curModel);
-    //WARNING!!! THIS IS HORRIBLE! DON'T TOUCH THE envir object after the executeFilter will be invoked. The function will dispose the object!!!
-    EnvWrap* envir = new EnvWrap(env);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     startFilterExecution();
-    curmwi->executeFilter(this->curmfc, *envir, true);
+    curmwi->executeFilter(this->curmfc, env, true);
     //env.pushContext();
     meshCacheState.create(curmask,curModel);
     validcache = true;
@@ -1272,6 +1270,116 @@ QString XMLShotWidget::getWidgetExpression()
     return ms;
 }
 
+//expr == new CameraShot(rotmat[0],....,rotmat[15],travec[0],..,travec[2],foc,pxs[0],pxs[1],centpxs[0],centpxs[1],viewpxs[0],viewpxs[1],distcent[0],distcent[1],k[0],...,k[3])
+void XMLShotWidget::set( const QString & expr )
+{
+    QRegExp openexp(QString("(new\\s+") + MLXMLElNames::shotType + "\(|)");
+    QString tmp(expr);
+    tmp.remove(openexp);
+    QStringList numbs = tmp.split(",",QString::SkipEmptyParts);
+    if (numbs.size() != 32)
+    {
+        QString err = "Something bad happened in XMLShotWidget::set function: expected expression should match the following format : new " + MLXMLElNames::shotType + "(rotmat[0],....,rotmat[15],travec[0],..,travec[2],foc,pxs[0],pxs[1],centpxs[0],centpxs[1],viewpxs[0],viewpxs[1],distcent[0],distcent[1],k[0],...,k[3])";
+        throw MeshLabException(err);
+    }
+    int offset = 0;
+    vcg::Matrix44f rot;
+    for(int ii = 0;ii < 16;++ii)
+    {
+        bool ok = false;
+        rot[ii / 4][ii % 4] = numbs[ii].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Extrinsics.SetRot(rot);
+    vcg::Point3f tra;
+    for(int ii = 0; ii < 3;++ii)
+    {
+        bool ok = false;
+        tra[ii] = numbs[ii + offset].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Extrinsics.SetTra(tra);
+    bool ok = false;
+    float foc = numbs[offset].toFloat(&ok);
+    if (!ok)
+    {
+        QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+        throw MeshLabException(err);
+    }
+    ++offset;
+    vcg::Point2f tmp2vcf;
+    for(int ii = 0; ii < 2;++ii)
+    {
+        bool ok = false;
+        tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Intrinsics.PixelSizeMm = tmp2vcf;
+    for(int ii = 0; ii < 2;++ii)
+    {
+        bool ok = false;
+        tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Intrinsics.CenterPx = tmp2vcf;
+    vcg::Point2i tmp2vci;
+    for(int ii = 0; ii < 2;++ii)
+    {
+        bool ok = false;
+        tmp2vci[ii] = numbs[ii + offset].toInt(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Intrinsics.ViewportPx = tmp2vci;
+    for(int ii = 0; ii < 2;++ii)
+    {
+        bool ok = false;
+        tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+    curShot.Intrinsics.DistorCenterPx = tmp2vcf;
+    for(int ii = 0; ii < 4;++ii)
+    {
+        bool ok = false;
+        curShot.Intrinsics.k[ii] = numbs[ii + offset].toFloat(&ok);
+        if (!ok)
+        {
+            QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
+            throw MeshLabException(err);
+        }
+        ++offset;
+    }
+}
+
 void XMLShotWidget::getShot()
 {
     int index = getShotCombo->currentIndex();
@@ -1337,3 +1445,68 @@ void XMLShotWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
     }
     XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
+
+
+
+//MeshLabXMLGenericParamDialog::MeshLabXMLGenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
+//    : QDialog(p) {
+//        stdParFrame=NULL;
+//        curParSet=_curParSet;
+//        meshDocument = _meshDocument;
+//        createFrame();
+//        if(!title.isEmpty())
+//            setWindowTitle(title);
+//}
+//
+//MeshLabXMLGenericParamDialog::~MeshLabXMLGenericParamDialog()
+//{
+//    delete stdParFrame;
+//}
+//
+//// update the values of the widgets with the values in the paramlist;
+//void MeshLabXMLGenericParamDialog::resetValues()
+//{
+//    stdParFrame->resetValues(*curParSet);
+//}
+//
+//void XMLGenericParamDialog::toggleHelp()
+//{
+//    stdParFrame->toggleHelp();
+//    this->updateGeometry();
+//    this->adjustSize();
+//}
+//
+//
+//void MeshLabXMLGenericParamDialog::createFrame()
+//{
+//    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+//    setLayout(vboxLayout);
+//
+//    stdParFrame = new StdParFrame(this);
+//    stdParFrame->loadFrameContent(*curParSet, meshDocument);
+//    layout()->addWidget(stdParFrame);
+//
+//    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
+//    //add the reset button so we can get its signals
+//    QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
+//    layout()->addWidget(buttonBox);
+//
+//    connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
+//    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+//    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+//    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
+//
+//    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+//
+//    //set the minimum size so it will shrink down to the right size	after the help is toggled
+//    this->setMinimumSize(stdParFrame->sizeHint());
+//    this->showNormal();
+//    this->adjustSize();
+//}
+
+
+//void MeshLabXMLGenericParamDialog::getAccept()
+//{
+//    stdParFrame->readValues(*curParSet);
+//    accept();
+//}
