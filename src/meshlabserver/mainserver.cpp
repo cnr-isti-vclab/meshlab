@@ -139,6 +139,7 @@ public:
         if (pCurrentIOPlugin == 0)
         {
             fprintf(fp,"Error encountered while opening file: ");
+            QDir::setCurrent(curDir.absolutePath());
             return false;
         }
         int mask = 0;
@@ -149,6 +150,7 @@ public:
         if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
         {
             fprintf(fp,"MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(QDir::currentPath()));
+            QDir::setCurrent(curDir.absolutePath());
             return false;
         }
 
@@ -188,6 +190,7 @@ public:
     {
         QFileInfo fi(fileName);
         // this change of dir is needed for subsequent textures/materials loading
+        QDir curDir = QDir::current();
         QDir::setCurrent(fi.absolutePath());
 
         QString extension = fi.suffix();
@@ -199,6 +202,7 @@ public:
             fprintf(fp,"Error encountered while opening file: ");
             //QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
             //QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+            QDir::setCurrent(curDir.absolutePath());
             return false;
         }
 
@@ -209,15 +213,16 @@ public:
         if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
         {
             fprintf(fp,"Failed saving\n");
+            QDir::setCurrent(curDir.absolutePath());
             return false;
         }
-
+        QDir::setCurrent(curDir.absolutePath());
         return true;
     }
 
     bool openProject(MeshDocument& md,const QString& filename)
     {
-
+      QDir curDir = QDir::current();
         QFileInfo fi(filename);
         bool opened = MeshDocumentFromXML(md,fi.absoluteFilePath());
         if (!opened)
@@ -238,6 +243,7 @@ public:
                 {
                     md.delMesh(md.meshList[i]);
                     md.setBusy(false);
+                    QDir::setCurrent(curDir.absolutePath());
                     return false;
                 }
                 else
@@ -246,6 +252,7 @@ public:
                 md.setBusy(false);
             }
         }
+        QDir::setCurrent(curDir.absolutePath());
         return true;
     }
 
@@ -253,6 +260,8 @@ public:
     {
         QFileInfo outprojinfo(filename);
         QString outdir = outprojinfo.absolutePath();
+
+        QDir curDir = QDir::current();
         QDir::setCurrent(outprojinfo.absolutePath());
         foreach(MeshModel* m,md.meshList)
         {
@@ -270,6 +279,8 @@ public:
                 exportMesh(m,m->dataMask(),outfilename);
             }
         }
+
+        QDir::setCurrent(curDir.absolutePath());
         return MeshDocumentToXMLFile(md,filename,false);
     }
 
