@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
                                 }
                                 break;
                             } 
-                        case 'f' :
+                        case commandline::face :
                             {
                                 switch (argv[i][1])
                                 {
@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
                                 }
                                 break;
                             }	
-                        case 'w' :
+                        case commandline::wedge :
                             {
                                 switch (argv[i][1])
                                 {
@@ -690,7 +690,7 @@ int main(int argc, char *argv[])
                 outmeshlist << outfl;
                 break;
             }
-        case 's' :
+        case commandline::script :
             {
                 QFileInfo fi(argv[i+1]);
                 QString scriptName = fi.absoluteFilePath();
@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
                 i += 2;
                 break;
             }
-        case 'l' :
+        case commandline::log :
             {
                 //freopen redirect both std::cout and printf. Now I'm quite sure i will get everything the plugins will print in the standard output (i hope no one used std::cerr...)
                 logfp = fopen(argv[i+1],"a");
@@ -709,7 +709,7 @@ int main(int argc, char *argv[])
                 i += 2;
                 break;
             }
-        case 'd' :
+        case commandline::dump :
             {
                 dumpfp = fopen(argv[i+1],"w");
                 if (dumpfp == NULL)
