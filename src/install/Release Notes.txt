@@ -32,8 +32,13 @@ Added support of polygonal meshes in OBJ  output. Now meshes with faux edges set
 Corrected bug in the faux edge setting when loading polygonal meshes. 
 
 2014 05 07 Faux Edge Decorator
-Added line width control to the Non Faux Edge decorator.
+Added control of width of the drawn line.	
 
 2014 05 13 MeshLab core
 Added support for xml filters in the old fashioned scripting system
 
+2014 05 15 Create Sphere Cap
+Added another basic shape (tessellated spherical cap).
+
+2014 05 15 Invert Face Filter
+Corrected bug in filter inverting faces that messed the faux bit flag.
