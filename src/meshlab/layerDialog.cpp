@@ -495,11 +495,11 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
     parent->addChild(fileItem);
     updateColumnNumber(fileItem);
 
-    QTreeWidgetItem *faceItem = new QTreeWidgetItem();
-    faceItem->setText(2, QString("Faces"));
-    faceItem->setText(3, QString::number(meshModel->cm.fn));
-    parent->addChild(faceItem);
-    updateColumnNumber(faceItem);
+    QTreeWidgetItem *vertItem = new QTreeWidgetItem();
+    vertItem->setText(2, QString("Vertices"));
+    vertItem->setText(3, QString::number(meshModel->cm.vn));
+    parent->addChild(vertItem);
+    updateColumnNumber(vertItem);
 
     if(meshModel->cm.en>0){
         QTreeWidgetItem *edgeItem = new QTreeWidgetItem();
@@ -508,11 +508,12 @@ void LayerDialog::addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel
         parent->addChild(edgeItem);
         updateColumnNumber(edgeItem);
     }
-    QTreeWidgetItem *vertItem = new QTreeWidgetItem();
-    vertItem->setText(2, QString("Vertices"));
-    vertItem->setText(3, QString::number(meshModel->cm.vn));
-    parent->addChild(vertItem);
-    updateColumnNumber(vertItem);
+
+    QTreeWidgetItem *faceItem = new QTreeWidgetItem();
+    faceItem->setText(2, QString("Faces"));
+    faceItem->setText(3, QString::number(meshModel->cm.fn));
+    parent->addChild(faceItem);
+    updateColumnNumber(faceItem);
 
     std::vector<std::string> AttribNameVector;
     vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(meshModel->cm,AttribNameVector);
