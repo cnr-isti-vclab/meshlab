@@ -27,22 +27,35 @@
 
 class FilterCreate : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+  Q_OBJECT
+  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+  Q_INTERFACES(MeshFilterInterface)
 
-public:
-	enum { CR_BOX, CR_ANNULUS, CR_SPHERE, CR_RANDOM_SPHERE, CR_ICOSAHEDRON,CR_DODECAHEDRON, CR_TETRAHEDRON, CR_OCTAHEDRON, CR_CONE, CR_TORUS } ;
+  public:
+    enum {
+    CR_BOX,
+        CR_ANNULUS,
+        CR_SPHERE,
+        CR_SPHERE_CAP,
+        CR_RANDOM_SPHERE,
+        CR_ICOSAHEDRON,
+        CR_DODECAHEDRON,
+        CR_TETRAHEDRON,
+        CR_OCTAHEDRON,
+        CR_CONE,
+        CR_TORUS,
 
-	FilterCreate();
+  } ;
 
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *);
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	QString filterScriptFunctionName(FilterIDType filterID);
-	QString pluginName(void) const { return "FilterCreate"; }
+  FilterCreate();
+
+  QString filterName(FilterIDType filter) const;
+  QString filterInfo(FilterIDType filter) const;
+  FilterClass getClass(QAction *);
+  void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+  bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  QString filterScriptFunctionName(FilterIDType filterID);
+  QString pluginName(void) const { return "FilterCreate"; }
 };
 
 #endif

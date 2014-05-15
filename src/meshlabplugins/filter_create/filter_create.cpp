@@ -23,6 +23,9 @@
 #include "filter_create.h"
 #include <vcg/complex/algorithms/create/platonic.h>
 #include <vcg/complex/algorithms/point_sampling.h>
+#include <vcg/complex/algorithms/smooth.h>
+using namespace vcg;
+using namespace tri;
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -30,7 +33,9 @@
 
 FilterCreate::FilterCreate()
 {
-    typeList <<CR_BOX<< CR_ANNULUS << CR_SPHERE<< CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON<< CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
+    typeList << CR_BOX<< CR_ANNULUS << CR_SPHERE<< CR_SPHERE_CAP
+             << CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON
+             << CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
 
   foreach(FilterIDType tt , types())
       actionList << new QAction(filterName(tt), this);
@@ -42,6 +47,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
   case CR_BOX : return QString("Box");
   case CR_ANNULUS : return QString("Annulus");
   case CR_SPHERE: return QString("Sphere");
+  case CR_SPHERE_CAP: return QString("Sphere Cap");
   case CR_RANDOM_SPHERE: return QString("Random Sphere");
   case CR_ICOSAHEDRON: return QString("Icosahedron");
   case CR_DODECAHEDRON: return QString("Dodecahedron");
@@ -61,7 +67,8 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
   case CR_BOX : return QString("Create a Box");
   case CR_ANNULUS : return QString("Create an Annulus, e.g. a flat region bounded by two concentric circles");
   case CR_SPHERE: return QString("Create a Sphere");
-  case CR_RANDOM_SPHERE: return QString("Create a random Spherical point cloud");
+  case CR_SPHERE_CAP: return QString("Create a Sphere Cap subtended by a cone of given angle");
+  case CR_RANDOM_SPHERE: return QString("Create a random spherical point cloud");
   case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
   case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
   case CR_OCTAHEDRON: return QString("Create an Octahedron");
@@ -79,12 +86,18 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet & parlst)
+void FilterCreate::initParameterSet(QAction *action, MeshModel & m, RichParameterSet & parlst)
 {
   switch(ID(action))	 {
 
   case CR_SPHERE :
     parlst.addParam(new RichFloat("radius",1,"Radius","Radius of the sphere"));
+    parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
+                                "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
+    break;
+
+  case CR_SPHERE_CAP :
+    parlst.addParam(new RichFloat("angle",60,"Angle","Angle of the cone subtending the cap. It must be < 180"));
     parlst.addParam(new RichInt("subdiv",3,"Subdiv. Level","Number of the recursive subdivision of the surface. Default is 3 (a sphere approximation composed by 1280 faces).<br>"
                                 "Admitted values are in the range 0 (an icosahedron) to 8 (a 1.3 MegaTris approximation of a sphere)"));
     break;
@@ -116,25 +129,25 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 }
 
 // The Real Core Function doing the actual mesh processing.
-bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
+bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
 {
     MeshModel* m=md.addNewMesh("",this->filterName(ID(filter)));
   switch(ID(filter))	 {
     case CR_TETRAHEDRON :
-      vcg::tri::Tetrahedron<CMeshO>(m->cm);
+      tri::Tetrahedron<CMeshO>(m->cm);
       break;
     case CR_ICOSAHEDRON:
-      vcg::tri::Icosahedron<CMeshO>(m->cm);
+      tri::Icosahedron<CMeshO>(m->cm);
       break;
     case CR_DODECAHEDRON:
-      vcg::tri::Dodecahedron<CMeshO>(m->cm);
+      tri::Dodecahedron<CMeshO>(m->cm);
       m->updateDataMask(MeshModel::MM_POLYGONAL);
       break;
     case CR_OCTAHEDRON:
-      vcg::tri::Octahedron<CMeshO>(m->cm);
+      tri::Octahedron<CMeshO>(m->cm);
       break;
     case CR_ANNULUS:
-      vcg::tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"),
+      tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"),
                                 par.getFloat("externalRadius"),par.getInt("sides"));
       break;
     case CR_TORUS:
@@ -143,7 +156,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       float vRadius=par.getFloat("vRadius");
       int hSubdiv=par.getInt("hSubdiv");
       int vSubdiv=par.getInt("vSubdiv");
-      vcg::tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
+      tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
         break;
     }
   case CR_RANDOM_SPHERE:
@@ -156,27 +169,36 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     if(pointNum >= 10000) oversamplingFactor = 50;
     if(pointNum >= 100000) oversamplingFactor = 20;
 
-    vcg::math::MarsenneTwisterRNG rng;
-    vcg::tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
+    math::MarsenneTwisterRNG rng;
+    tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
     for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
-      vi->P()=vcg::math::GeneratePointOnUnitSphereUniform<float>(rng);
-    vcg::tri::UpdateBounding<CMeshO>::Box(tt);
+      vi->P()=math::GeneratePointOnUnitSphereUniform<float>(rng);
+    tri::UpdateBounding<CMeshO>::Box(tt);
 
     const float SphereArea = 4*M_PI;
     float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
 
-    std::vector<vcg::Point3f> poissonSamples;
-    vcg::tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
-    vcg::tri::SurfaceSampling<CMeshO, vcg::tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
+    std::vector<Point3f> poissonSamples;
+    tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
+    tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
 
-    vcg::tri::SurfaceSampling<CMeshO,vcg::tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
+    tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
     m->cm.Clear();
-    vcg::tri::Allocator<CMeshO>::AddVertices(m->cm,poissonSamples.size());
+    tri::Allocator<CMeshO>::AddVertices(m->cm,poissonSamples.size());
     for(size_t i=0;i<poissonSamples.size();++i)
     {
       m->cm.vert[i].P()=poissonSamples[i];
       m->cm.vert[i].N()=m->cm.vert[i].P();
     }
+  } break;
+
+  case CR_SPHERE_CAP:
+  {
+    int rec = par.getInt("subdiv");
+    const float angleDeg = par.getFloat("angle");
+    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+    tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
+    tri::SphericalCap(m->cm,math::ToRad(angleDeg),rec);
   } break;
 
   case CR_SPHERE:
@@ -185,20 +207,17 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
         float radius = par.getFloat("radius");
         m->cm.face.EnableFFAdjacency();
         m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-        assert(vcg::tri::HasPerVertexTexCoord(m->cm) == false);
-        vcg::tri::Sphere<CMeshO>(m->cm,rec);
-
-		for(CMeshO::VertexIterator vi = m->cm.vert.begin();vi!= m->cm.vert.end();++vi)
-		  vi->P()=vi->P()*radius;
-
-		break;
-	}
-	case CR_BOX:
-	{
-	  float sz=par.getFloat("size");
-	  vcg::Box3f b(vcg::Point3f(1,1,1)*(-sz/2),vcg::Point3f(1,1,1)*(sz/2));
-	  vcg::tri::Box<CMeshO>(m->cm,b);
-			m->updateDataMask(MeshModel::MM_POLYGONAL);
+        assert(tri::HasPerVertexTexCoord(m->cm) == false);
+        tri::Sphere<CMeshO>(m->cm,rec);
+        tri::UpdatePosition<CMeshO>::Scale(m->cm,radius);
+        break;
+    }
+    case CR_BOX:
+    {
+      float sz=par.getFloat("size");
+      Box3f b(Point3f(1,1,1)*(-sz/2),Point3f(1,1,1)*(sz/2));
+      tri::Box<CMeshO>(m->cm,b);
+            m->updateDataMask(MeshModel::MM_POLYGONAL);
 
       break;
     }
@@ -207,11 +226,11 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       float r1=par.getFloat("r1");
       float h=par.getFloat("h");
       int subdiv=par.getInt("subdiv");
-      vcg::tri::Cone<CMeshO>(m->cm,r0,r1,h,subdiv);
+      tri::Cone<CMeshO>(m->cm,r0,r1,h,subdiv);
       break;
    }
-     vcg::tri::UpdateBounding<CMeshO>::Box(m->cm);
-   vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
+     tri::UpdateBounding<CMeshO>::Box(m->cm);
+   tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
     return true;
 }
 
@@ -219,12 +238,12 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 {
   switch(ID(a))
   {
-
     case CR_BOX:
     case CR_TETRAHEDRON:
     case CR_ICOSAHEDRON:
     case CR_DODECAHEDRON:
     case CR_SPHERE:
+    case CR_SPHERE_CAP:
     case CR_ANNULUS:
     case CR_RANDOM_SPHERE:
     case CR_OCTAHEDRON:
@@ -244,6 +263,7 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
         case CR_BOX : return QString("box");
         case CR_ANNULUS : return QString("annulus");
         case CR_SPHERE: return QString("sphere");
+        case CR_SPHERE_CAP: return QString("spherecap");
         case CR_RANDOM_SPHERE: return QString("randomsphere");
         case CR_ICOSAHEDRON: return QString("icosahedron");
         case CR_DODECAHEDRON: return QString("dodecahedron");
