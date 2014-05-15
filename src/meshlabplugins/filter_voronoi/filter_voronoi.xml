@@ -1,0 +1,157 @@
+<MESHLAB_FILTER_INTERFACE mfiVersion="2.0" >
+ <PLUGIN pluginName="VoronoiTechniques" pluginAuthor="Paolo Cignoni" pluginEmail="paolo.cignoni@isti.cnr.it">
+  <FILTER filterFunction="voronoiSampling"    filterName="Voronoi Sampling"       filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
+   <FILTER_HELP><![CDATA[Compute a sampling over a mesh and perform a Lloyd relaxation. It can]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="iterNum" parIsImportant="true" parType="Int" parDefault="10">
+    <PARAM_HELP><![CDATA[ number of iterations ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Iteration"/>
+   </PARAM>
+   <PARAM parName="sampleNum" parIsImportant="true" parType="Int" parDefault="10">
+    <PARAM_HELP><![CDATA[ Number of samples ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Sample Num."/>
+   </PARAM>
+   <PARAM parName="radiusVariance" parIsImportant="true" parType="Real" parDefault="1">
+    <PARAM_HELP><![CDATA[The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality. ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Radius Variance"/>
+   </PARAM>
+   <PARAM parName="colorStrategy" parIsImportant="false" parType="Enum {None: 0 | Seed_Distance : 1 | Border_Distance : 2 | Region_Area : 3}" parDefault="1">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <ENUM_GUI guiLabel="Color Strategy"/>
+   </PARAM>
+   <PARAM parName="distanceType" parIsImportant="true" parType="Enum { Euclidean : 0 | QualityWeighted : 1 | Anisotropic : 2}" parDefault="0">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <ENUM_GUI guiLabel="distanceType"/>
+   </PARAM>
+   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Preprocessing"/>
+   </PARAM>
+   <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 }" parDefault="1">
+    <PARAM_HELP><![CDATA[
+    At each relaxation step we search for each voronoi region the new position of the seed.
+    According to the classical LLoyd relaxation strategy it should have been placed onto the
+    barycenter of the region. Over a surface we have two different strategies:
+    <ul>
+    <li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>
+    <li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>
+    </ul>
+    ]]></PARAM_HELP>
+    <ENUM_GUI guiLabel="Relax Type"/>
+   </PARAM>
+  </FILTER>
+  <FILTER filterFunction="volumeSampling"     filterName="Volumetric Sampling"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
+   <FILTER_HELP><![CDATA[Compute a volumetric sampling over a watertight mesh. ]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 500.0">
+    <PARAM_HELP><![CDATA[ Surface Sampling is used only as an optimization ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Surface Sampling Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="200000">
+    <PARAM_HELP><![CDATA[ Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram.]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Volume Sample Num."/>
+   </PARAM>
+   <PARAM parName="poissonFiltering" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Poisson Filtering"/>
+   </PARAM>
+   <PARAM parName="poissonRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+    <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Poisson Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+  </FILTER>
+  <FILTER filterFunction="voronoiScaffolding" filterName="Voronoi Scaffolding"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
+   <FILTER_HELP><![CDATA[Compute a volumetric sampling over a watertight mesh]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+    <PARAM_HELP><![CDATA[ Surface Sampling is used only as an optimization ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Surface Sampling Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="100000">
+    <PARAM_HELP><![CDATA[ Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram.]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Volume Sample Num."/>
+   </PARAM>
+   <PARAM parName="voronoiSeed" parIsImportant="true" parType="Int" parDefault="20">
+    <PARAM_HELP><![CDATA[ Number of seeds of the voronoi cells ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Voronoi Seed Num."/>
+   </PARAM>
+   <PARAM parName="voxelRes" parIsImportant="true" parType="Int" parDefault="50">
+    <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Volume Side Resolution."/>
+   </PARAM>
+   <PARAM parName="isoThr" parIsImportant="true" parType="Real" parDefault="1">
+    <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Width of the entity (in voxel)"/>
+   </PARAM>
+   <PARAM parName="smoothStep" parIsImportant="true" parType="Int" parDefault="3">
+    <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Smooth Step"/>
+   </PARAM>
+   <PARAM parName="relaxStep" parIsImportant="true" parType="Int" parDefault="5">
+    <PARAM_HELP><![CDATA[ Number of Lloyd relaxation step to get a better distribution of the voronoi seeds ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Lloyd Relax Step"/>
+   </PARAM>
+   <PARAM parName="surfFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Add original surface"/>
+   </PARAM>
+     <PARAM parName="elemType" parIsImportant="true" parType="Enum { Seed : 0 | Edge : 1 | Face :2}" parDefault="1">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <ENUM_GUI guiLabel="Voronoi Element"/>
+   </PARAM>
+  </FILTER>
+  <FILTER filterFunction="buildShell"         filterName="Create Solid Wireframe" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Meshing"  filterPost="" filterArity="SingleMesh" filterIsInterruptible="false">
+   <FILTER_HELP><![CDATA[]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="edgeCylFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ If True all the edges are converted into cylinders ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Edge -> Cyl."/>
+   </PARAM>
+   <PARAM parName="edgeCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+    <PARAM_HELP><![CDATA[ The radius of the cylinder replacing each edge ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Edge Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="vertCylFlag" parIsImportant="true" parType="Boolean" parDefault="false">
+    <PARAM_HELP><![CDATA[ If True all the vertexes are converted into cylinders ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Vertex -> Cyl."/>
+   </PARAM>
+   <PARAM parName="vertCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+    <PARAM_HELP><![CDATA[ The radius of the cylinder replacing each vertex ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Vertex Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="vertSphFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ If True all the vertexes are converted into sphere ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Vertex -> Sph."/>
+   </PARAM>
+   <PARAM parName="vertSphRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+    <PARAM_HELP><![CDATA[ The radius of the sphere replacing each vertex ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Vertex Sphere Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="faceExtFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ If True all the faces are converted into prism ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Face -> Prism"/>
+   </PARAM>
+   <PARAM parName="faceExtHeight" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0">
+    <PARAM_HELP><![CDATA[ The radius of the sphere replacing each vertex ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Face Prism Height." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
+   <PARAM parName="edgeFauxFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[ If true only the Non-Faux edges will be considered for conversion]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Ignore Faux Edge."/>
+   </PARAM>
+  </FILTER>
+  <FILTER filterFunction="crossFieldCreation" filterName="Cross Field Creation"   filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Normal" filterPost="MM_VERTCURVDIR" filterArity="SingleMesh" filterIsInterruptible="false">
+   <FILTER_HELP><![CDATA[]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="crossType" parIsImportant="true" parType="Enum { Linear_Y : 0 | Radial : 1 | Curvature :2}" parDefault="0">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <ENUM_GUI guiLabel="crossType"/>
+   </PARAM>
+  </FILTER>
+  <FILTER filterFunction="crossFieldColoring" filterName="Cross Field Coloring"   filterPre="MM_VERTCURVDIR" filterRasterArity="SingleRaster" filterClass="Generic" filterPost="MM_VERTCOLOR" filterArity="SingleMesh" filterIsInterruptible="false">
+   <FILTER_HELP><![CDATA[]]></FILTER_HELP>
+   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+  </FILTER>
+ </PLUGIN>
+</MESHLAB_FILTER_INTERFACE>
+
