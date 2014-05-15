@@ -90,8 +90,8 @@ void ColorHistogram<ScalarType>::Add(ScalarType v,Color4b c,float increment/*=1.
     CV[pos]+=Color4f(c[0],c[1],c[2],255.0)*increment;
     this->H[pos]+=increment;
     this->cnt+=increment;
-    this->avg+=v*increment;
-    this->rms += (v*v)*increment;
+    this->sum+=v*increment;
+    this->rms+= (v*v)*increment;
   }
 }
 
