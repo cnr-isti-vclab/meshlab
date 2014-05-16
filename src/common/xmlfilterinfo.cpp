@@ -225,9 +225,9 @@ QString MLXMLPluginInfo::filterElement( const QString& filterName,const QString&
             return result;
         }
     }
-    
+
     throw ParsingException("There is not " + filterName);
-    
+
     /*QString namesQuery = docMFIPluginFilterName(filevarname,filterName) + "/" + filterElement + "/string()";
     try
     {
@@ -352,7 +352,7 @@ MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParameters( const QString& fi
 
   XMLMapList mplist;
   QDomNodeList paramlist = filterlist.at(ii).toElement().elementsByTagName(MLXMLElNames::paramTag);
-  for(int ii = 0;ii < paramlist.size();++ii) 
+  for(int ii = 0;ii < paramlist.size();++ii)
   {
       MLXMLPluginInfo::XMLMap map;
       QDomElement paramnode =  paramlist.at(ii).toElement();
@@ -487,7 +487,7 @@ QString MLXMLPluginInfo::filterParameterElement( const QString& filterName,const
     }
     if (!paramfound)
         throw ParsingException("Parameter: " + paramName + " has not been defined in filter: " + filterName);
-    
+
     QDomElement param = paramlist.at(jj).toElement();
     QDomNodeList lst = param.elementsByTagName(elemName);
     if (lst.size() == 0)
@@ -547,7 +547,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QStr
     MLXMLElNames::initMLXMLGUITypeList(guitypelist);
     int zz = 0;
     bool guitypefound = false;
-    while ((jj < guitypelist.size()) && !guitypefound)
+    while ((zz < guitypelist.size()) && !guitypefound)
     {
         QDomNodeList guinodelist = paramnode.elementsByTagName(guitypelist[zz]);
         if (guinodelist.size() == 1)
