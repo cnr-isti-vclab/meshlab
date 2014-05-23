@@ -295,6 +295,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
 
     if( formatName.toUpper() == tr("OBJ"))
     {
+      tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
       int result;
       if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
       {
