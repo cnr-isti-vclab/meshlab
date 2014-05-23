@@ -57,3 +57,7 @@ Easy to use filter for uniformly simplifying point clouds.
 2014 05 23 Quality for face
 Added two new measures for measuring the planarity of polygonal faces. 
 
+2014 05 23 Compute Measures
+Improved quality of the results formatting and report more useful info (edge Length sum)
+Improved support of polygonal meshes 
+
