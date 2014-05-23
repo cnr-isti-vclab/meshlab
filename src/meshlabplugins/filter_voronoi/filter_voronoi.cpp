@@ -27,6 +27,7 @@
 #include<vcg/complex/algorithms/update/quality.h>
 #include<vcg/complex/algorithms/smooth.h>
 #include<vcg/complex/algorithms/voronoi_volume_sampling.h>
+#include<vcg/complex/algorithms/polygon_support.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
