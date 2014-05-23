@@ -8,10 +8,10 @@
 
 FilterThread* FilterThread::_cur = NULL;
 
-FilterThread::FilterThread(const QString& fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,Env& env) 
-:QThread(), _mfc(mfc), _fname(fname),_md(md),_envwrap(env),_glwid(NULL)
+FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md) 
+:QThread(),_glwid(NULL),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md)
 {
-	_glwid = new QGLWidget();
+    _glwid = new QGLWidget();
 }
 
 bool FilterThread::localCallBack(const int pos, const char * str)
@@ -26,15 +26,40 @@ bool FilterThread::localCallBack(const int pos, const char * str)
 
 void FilterThread::run()
 {
-	QGLFormat defForm = QGLFormat::defaultFormat();
-	_mfc->filterInterface->glContext = new QGLContext(defForm,_glwid->context()->device());
-	_mfc->filterInterface->glContext->create(_glwid->context());
-	_cur = this;
-	_ret = _mfc->filterInterface->applyFilter(_fname, _md, _envwrap, &localCallBack);
-	_cur = NULL;
+    try
+    {
+        Env env;
+        QScriptValue val = env.loadMLScriptEnv(_md,_pm);
+        if (val.isError())
+            throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + val.toString() + "\n");
+
+        QMap<QString,MeshLabXMLFilterContainer>::iterator it =_pm.stringXMLFilterMap.find(_fname);
+        if ((it == _pm.stringXMLFilterMap.end()) || (it->xmlInfo == NULL))
+            throw MeshLabException("Filter " + _fname + " has not been found.\n");
+        if (it->filterInterface != NULL)
+        {
+            
+            it->filterInterface->glContext = new QGLContext(QGLFormat::defaultFormat(),_glwid->context()->device());
+            it->filterInterface->glContext->create(_glwid->context());
+            for (QMap<QString,QString>::const_iterator itp = _parexpval.cbegin();itp != _parexpval.cend();++itp)
+                env.insertExpressionBinding(itp.key(),itp.value());
+            EnvWrap envwrap(env);
+            _cur = this;
+            _success = it->filterInterface->applyFilter(_fname, _md, envwrap, &localCallBack);
+            _cur = NULL;
+       
+            delete it->filterInterface->glContext;
+        }
+        else
+            throw MeshLabException("There is not yet support for not-C++ filters.");
+    }
+    catch (MeshLabException& e)
+    {
+    	_md.Log.Log(GLLogStream::SYSTEM,e.what());
+    }
 }
 
 FilterThread::~FilterThread()
 {
-	delete _glwid;
+     delete _glwid;
 }

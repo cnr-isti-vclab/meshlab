@@ -396,7 +396,7 @@ class XMLStdParFrame : public QFrame
 	Q_OBJECT
 public:
 	XMLStdParFrame(QWidget *p,QWidget *gla=0);
-	void loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir);
+	void loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir,MeshDocument* md);
 	void extendedView(bool ext,bool help);
 	//void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
 
@@ -405,7 +405,7 @@ public:
 	//void readValues(RichParameterSet &curParSet);
 	void resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist);
 
-	void toggleHelp(bool help);	
+	void toggleHelp(const bool help);	
 
 	QVector<XMLMeshLabWidget*> xmlfieldwidgets;
 	QVector<QLabel *> helpList;
@@ -488,30 +488,35 @@ signals:
     void filterParametersEvaluated(const QString& fnmame,const QMap<QString,QString>& parvalue);
 };
 
-//// This class provide a modal dialog box for asking a generic parameter set
-//// It can be used by anyone needing for some values in a structred form and having some integrated help
-//class MeshLabXMLGenericParamDialog: public QDialog
-//{
-//    Q_OBJECT 
-//public:
-//    MeshLabXMLGenericParamDialog(MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget *gla=0);
-//    ~MeshLabXMLGenericParamDialog();
-//
-//    XMLStdParFrame* stdParFrame;
-//    Env env;
-//
-//    void createFrame();
-//
-//public slots:	
-//    void getAccept();
-//    void toggleHelp();
-//
-//        //reset the values on the gui back to the ones originally given to the dialog
-//    void resetValues();
-//
-//private:
-//    MeshDocument *meshDocument;
-//
-//};
+// This class provide a modal dialog box for asking a generic parameter set
+// It can be used by anyone needing for some values in a structred form and having some integrated help
+class OldScriptingSystemXMLParamDialog: public QDialog
+{
+    Q_OBJECT 
+public:
+    OldScriptingSystemXMLParamDialog(QMap<QString,QString>& currparamvalues,MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget* p, QWidget *gla=0);
+    ~OldScriptingSystemXMLParamDialog();
+
+
+    void createFrame();
+
+public slots:	
+    void getAccept();
+    void toggleHelp(const bool help);
+
+        //reset the values on the gui back to the ones originally given to the dialog
+    void resetValues();
+//signals:
+//    void newParamValues(const QString fname, const QMap<QString,QString> pvals);
+private:
+    Env _env;
+    QMap<QString,QString>& _paramvalues;
+    XMLStdParFrame* _stdparframe;
+    MeshLabXMLFilterContainer& _mfc;
+    PluginManager& _pm;
+    MeshDocument *_meshdocument;
+    MainWindowInterface* _mwi;
+    QWidget _gla;
+};
 
 #endif

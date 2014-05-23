@@ -6,25 +6,31 @@
 
 class FilterThread : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	FilterThread(const QString& fname,MeshLabXMLFilterContainer *mfc, MeshDocument& md,Env& env);
-	~FilterThread();
-	MeshLabXMLFilterContainer *_mfc;
-	QString _fname;
-	MeshDocument& _md;
-	EnvWrap _envwrap;
-	bool _ret;
-	static bool localCallBack(const int pos, const char * str);
+    //Ideally PluginManager parameter should be const
+    FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md);
+    ~FilterThread();
+    inline bool succeed() const {return _success;}
+    inline QString filterName() const {return _fname;}
+    static bool localCallBack(const int pos, const char * str);
 
 protected:
-	void run();
+    void run();
 
 signals:
-	void threadCB(const int pos,const QString& str);
+    void threadCB(const int pos,const QString& str);
 private:
-	static FilterThread* _cur;
-	QGLWidget* _glwid;
+    static FilterThread* _cur;
+    QString _fname;
+    QMap<QString,QString> _parexpval;
+    //ideally this should be const
+    PluginManager& _pm;
+    MeshDocument& _md;
+    QGLWidget* _glwid;
+    bool _success;
+    
+
 };
 
 #endif // FILTERTHREAD_H

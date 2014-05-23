@@ -64,6 +64,7 @@ class FilterScript : public QObject
 {
     Q_OBJECT
 public:
+    FilterScript();
     ~FilterScript();
     bool open(QString filename);
     bool save(QString filename);
@@ -74,8 +75,6 @@ public:
     
 public slots:
     void addExecutedXMLFilter(const QString& name,const QMap<QString,QString>& parvalue);
-
-
 };
 
 #endif

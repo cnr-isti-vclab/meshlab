@@ -341,6 +341,8 @@ void PluginManager::loadXMLPlugin( const QString& fileName )
           QString filterFunction = pluginfo->filterScriptCode(filter);
           if (filterFunction == "")
             filterFunction = gen.funCodeGenerator(filter,*pluginfo);
+          else
+              filterFunction = "{" + filterFunction + "};";
           QString jname = pluginfo->filterAttribute(filter,MLXMLElNames::filterScriptFunctName);
           completename += "." + jname;
           //filterscriptnames << completename;

@@ -2,9 +2,10 @@
 #include <climits>
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QDialogButtonBox>
 
-MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p )
-:QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)
+MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
+    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),showHelp(false),env()
 {
 
     curmask = 0;
@@ -35,7 +36,7 @@ void MeshLabXMLStdDialog::createFrame()
     qf = newqf;
 }
 
-void MeshLabXMLStdDialog::loadFrameContent( )
+void MeshLabXMLStdDialog::loadFrameContent()
 {
     assert(qf);
     qf->hide();
@@ -56,7 +57,7 @@ void MeshLabXMLStdDialog::loadFrameContent( )
 
     MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
     EnvWrap wrap(env);
-    stdParFrame->loadFrameContent(mplist,wrap);
+    stdParFrame->loadFrameContent(mplist,wrap,curMeshDoc);
     gridLayout->addWidget(stdParFrame,1,0,1,2);
 
     //int buttonRow = 2;  // the row where the line of buttons start
@@ -132,7 +133,6 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
     curMeshDoc = md;
     if (curMeshDoc == NULL)
         return false;
-    env.loadMLScriptEnv(*curMeshDoc,pm);
     if (mfc.xmlInfo == NULL)
         return false;
     if (mfc.act == NULL)
@@ -155,6 +155,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
     if(curParMap.isEmpty() && !isPreviewable())
         return false;
 
+    env.loadMLScriptEnv(*md,pm);
     QTime tt;
     tt.start();
     createFrame();
@@ -192,7 +193,6 @@ void MeshLabXMLStdDialog::applyClick()
         XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
         QString exp = wid->getWidgetExpression();
         parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
-        env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
     }
     emit filterParametersEvaluated(fname,parvalue);
     ////int mask = 0;//curParSet.getDynamicFloatMask();
@@ -207,7 +207,7 @@ void MeshLabXMLStdDialog::applyClick()
     //else
     //{
     startFilterExecution();
-    curmwi->executeFilter(curmfc,env,false);
+    curmwi->executeFilter(curmfc,parvalue,false);
     /*}*/
     //env.popContext();
 
@@ -266,19 +266,20 @@ void MeshLabXMLStdDialog::applyDynamic()
     //QAction *q = curAction;
     //env.pushContext();
     assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
+    QMap<QString,QString> parval;
     for(int ii = 0;ii < curParMap.size();++ii)
     {
         XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
         QString exp = wid->getWidgetExpression();
-        env.insertExpressionBinding(curParMap[ii][MLXMLElNames::paramName],exp);
+        parval[curParMap[ii][MLXMLElNames::paramName]] = exp;
         //delete exp;
     }
     //two different executions give the identical result if the two contexts (with the filter's parameters inside) are identical
-    previewContext = env.currentContext()->toString();
+    //previewContext = env.currentContext()->toString();
 
     meshState.apply(curModel);
     startFilterExecution();
-    curmwi->executeFilter(this->curmfc, env, true);
+    curmwi->executeFilter(this->curmfc, parval, true);
     //env.pushContext();
     meshCacheState.create(curmask,curModel);
     validcache = true;
@@ -305,21 +306,20 @@ void MeshLabXMLStdDialog::changeCurrentMesh( int meshInd )
 
 bool MeshLabXMLStdDialog::isPreviewable() const
 {
-  if( (curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE) )
-    return false;
+    if( (curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE) )
+        return false;
 
-  if( (curmask & MeshModel::MM_VERTNUMBER ) ||
-      (curmask & MeshModel::MM_FACENUMBER ) )
-    return false;
+    if( (curmask & MeshModel::MM_VERTNUMBER ) ||
+        (curmask & MeshModel::MM_FACENUMBER ) )
+        return false;
 
-  return true;
+    return true;
 }
 
 void MeshLabXMLStdDialog::resetExpressions()
 {
     QString fname(curmfc->act->text());
     MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
-    EnvWrap envir(env);
     stdParFrame->resetExpressions(mplist);
 }
 
@@ -376,7 +376,7 @@ QString MeshLabXMLStdDialog::applyButtonLabel( const bool applystate )
 }
 
 XMLStdParFrame::XMLStdParFrame( QWidget *p,QWidget *gla/*=0*/ )
-:QFrame(p),extended(false)
+    :QFrame(p),extended(false)
 {
     curr_gla=gla;
     //vLayout = new QGridLayout();
@@ -396,16 +396,13 @@ XMLStdParFrame::~XMLStdParFrame()
 
 }
 
-void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir)
+void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir,MeshDocument* md)
 {
-    MeshLabXMLStdDialog* dialog = qobject_cast<MeshLabXMLStdDialog*>(parent());
-    if (dialog == NULL)
-        throw MeshLabException("An XMLStdParFrame has not a MeshLabXMLStdDialog's parent");
     QGridLayout* glay = new QGridLayout();
     int ii = 0;
     for(MLXMLPluginInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
     {
-        XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,dialog->curMeshDoc,this);
+        XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,md,this);
         if (widg == NULL)
             return;
         xmlfieldwidgets.push_back(widg);
@@ -444,7 +441,7 @@ void XMLStdParFrame::resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist)
 }
 
 XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
-:QWidget(parent),env(envir)
+    :QWidget(parent),env(envir)
 {
     //WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //It's not nice at all doing the connection for an external object! The connect should be called in XMLStdParFrame::loadFrameContent but in this way
@@ -496,7 +493,7 @@ void XMLMeshLabWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 //}
 
 XMLCheckBoxWidget::XMLCheckBoxWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
-:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
     cb = new QCheckBox(xmlWidgetTag[MLXMLElNames::guiLabel],this);
     cb->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
@@ -589,7 +586,7 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap&
 }
 
 XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
-:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
     lineEdit = new QLineEdit(this);
@@ -662,7 +659,7 @@ void XMLEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
-:XMLMeshLabWidget(xmlWidgetTag,envir,parent)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
     m_min = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
     m_max = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
@@ -759,7 +756,7 @@ void XMLAbsWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p)
-:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
     XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
     if (par != NULL)
@@ -910,7 +907,7 @@ void XMLVec3Widget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
     colorLabel = new QLabel(this);
     QString paramName = xmlWidgetTag[MLXMLElNames::paramName];
@@ -996,7 +993,7 @@ void XMLColorWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
     minVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMinExpr]);
     maxVal = env.evalFloat(xmlWidgetTag[MLXMLElNames::guiMaxExpr]);
@@ -1096,7 +1093,7 @@ void XMLSliderWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
     enumLabel = new QLabel(this);
     enumLabel->setText(xmlWidgetTag[MLXMLElNames::guiLabel]);
@@ -1151,7 +1148,7 @@ void XMLComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 XMLEnumWidget::XMLEnumWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLComboWidget(xmlWidgetTag,envir,p)
+    :XMLComboWidget(xmlWidgetTag,envir,p)
 {
     QString typ = xmlWidgetTag[MLXMLElNames::paramType];
     QMap<int,QString> mp;
@@ -1171,7 +1168,7 @@ QString XMLEnumWidget::getWidgetExpression()
 
 
 XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLEnumWidget(xmlWidgetTag,envir,p)
+    :XMLEnumWidget(xmlWidgetTag,envir,p)
 {
     foreach(MeshModel* mm,mdoc->meshList)
         enumCombo->addItem(mm->shortName(),mm->id());
@@ -1182,7 +1179,7 @@ XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& 
 
 
 XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
-:XMLMeshLabWidget(xmlWidgetTag,envir,p)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,p)
 {
     XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
     if (par == NULL)
@@ -1273,7 +1270,8 @@ QString XMLShotWidget::getWidgetExpression()
 //expr == new CameraShot(rotmat[0],....,rotmat[15],travec[0],..,travec[2],foc,pxs[0],pxs[1],centpxs[0],centpxs[1],viewpxs[0],viewpxs[1],distcent[0],distcent[1],k[0],...,k[3])
 void XMLShotWidget::set( const QString & expr )
 {
-    QRegExp openexp(QString("(new\\s+") + MLXMLElNames::shotType + "\(|)");
+    QString regexpstr = "(new\\s+" + MLXMLElNames::shotType + "\\(|\\)|\\[|\\])";
+    QRegExp openexp(regexpstr);
     QString tmp(expr);
     tmp.remove(openexp);
     QStringList numbs = tmp.split(",",QString::SkipEmptyParts);
@@ -1284,7 +1282,8 @@ void XMLShotWidget::set( const QString & expr )
     }
     int offset = 0;
     vcg::Matrix44f rot;
-    for(int ii = 0;ii < 16;++ii)
+    int ii = 0;
+    for(ii = 0;ii < 16;++ii)
     {
         bool ok = false;
         rot[ii / 4][ii % 4] = numbs[ii].toFloat(&ok);
@@ -1293,11 +1292,11 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Extrinsics.SetRot(rot);
     vcg::Point3f tra;
-    for(int ii = 0; ii < 3;++ii)
+    for(ii = 0; ii < 3;++ii)
     {
         bool ok = false;
         tra[ii] = numbs[ii + offset].toFloat(&ok);
@@ -1306,11 +1305,11 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Extrinsics.SetTra(tra);
     bool ok = false;
-    float foc = numbs[offset].toFloat(&ok);
+    curShot.Intrinsics.FocalMm = numbs[offset].toFloat(&ok);
     if (!ok)
     {
         QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
@@ -1318,7 +1317,7 @@ void XMLShotWidget::set( const QString & expr )
     }
     ++offset;
     vcg::Point2f tmp2vcf;
-    for(int ii = 0; ii < 2;++ii)
+    for(ii = 0; ii < 2;++ii)
     {
         bool ok = false;
         tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
@@ -1327,10 +1326,10 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Intrinsics.PixelSizeMm = tmp2vcf;
-    for(int ii = 0; ii < 2;++ii)
+    for(ii = 0; ii < 2;++ii)
     {
         bool ok = false;
         tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
@@ -1339,11 +1338,11 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Intrinsics.CenterPx = tmp2vcf;
     vcg::Point2i tmp2vci;
-    for(int ii = 0; ii < 2;++ii)
+    for(ii = 0; ii < 2;++ii)
     {
         bool ok = false;
         tmp2vci[ii] = numbs[ii + offset].toInt(&ok);
@@ -1352,10 +1351,10 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Intrinsics.ViewportPx = tmp2vci;
-    for(int ii = 0; ii < 2;++ii)
+    for(ii = 0; ii < 2;++ii)
     {
         bool ok = false;
         tmp2vcf[ii] = numbs[ii + offset].toFloat(&ok);
@@ -1364,10 +1363,10 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
     curShot.Intrinsics.DistorCenterPx = tmp2vcf;
-    for(int ii = 0; ii < 4;++ii)
+    for(ii = 0; ii < 4;++ii)
     {
         bool ok = false;
         curShot.Intrinsics.k[ii] = numbs[ii + offset].toFloat(&ok);
@@ -1376,8 +1375,8 @@ void XMLShotWidget::set( const QString & expr )
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
             throw MeshLabException(err);
         }
-        ++offset;
     }
+    offset += ii;
 }
 
 void XMLShotWidget::getShot()
@@ -1448,65 +1447,104 @@ void XMLShotWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 
 
 
-//MeshLabXMLGenericParamDialog::MeshLabXMLGenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
-//    : QDialog(p) {
-//        stdParFrame=NULL;
-//        curParSet=_curParSet;
-//        meshDocument = _meshDocument;
-//        createFrame();
-//        if(!title.isEmpty())
-//            setWindowTitle(title);
-//}
-//
-//MeshLabXMLGenericParamDialog::~MeshLabXMLGenericParamDialog()
-//{
-//    delete stdParFrame;
-//}
-//
-//// update the values of the widgets with the values in the paramlist;
-//void MeshLabXMLGenericParamDialog::resetValues()
-//{
-//    stdParFrame->resetValues(*curParSet);
-//}
-//
-//void XMLGenericParamDialog::toggleHelp()
-//{
-//    stdParFrame->toggleHelp();
-//    this->updateGeometry();
-//    this->adjustSize();
-//}
-//
-//
-//void MeshLabXMLGenericParamDialog::createFrame()
-//{
-//    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
-//    setLayout(vboxLayout);
-//
-//    stdParFrame = new StdParFrame(this);
-//    stdParFrame->loadFrameContent(*curParSet, meshDocument);
-//    layout()->addWidget(stdParFrame);
-//
-//    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
-//    //add the reset button so we can get its signals
-//    QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
-//    layout()->addWidget(buttonBox);
-//
-//    connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
-//    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-//    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
-//    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
-//
-//    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-//
-//    //set the minimum size so it will shrink down to the right size	after the help is toggled
-//    this->setMinimumSize(stdParFrame->sizeHint());
-//    this->showNormal();
-//    this->adjustSize();
-//}
+OldScriptingSystemXMLParamDialog::OldScriptingSystemXMLParamDialog(QMap<QString,QString>& currparamvalues,MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget* p, QWidget *gla)
+    : QDialog(p),_env(),_paramvalues(currparamvalues),_stdparframe(NULL),_mfc(mfc),_pm(pm),_meshdocument(md),_mwi(mwi),_gla(gla)
+{
+    createFrame();
+    if (mfc.act != NULL)
+        setWindowTitle(mfc.act->text());
+}
+
+OldScriptingSystemXMLParamDialog::~OldScriptingSystemXMLParamDialog()
+{
+    delete _stdparframe;
+}
+
+// update the values of the widgets with the values in the paramlist;
+void OldScriptingSystemXMLParamDialog::resetValues()
+{
+    if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
+    {
+        QString fname(_mfc.act->text());
+        MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
+        _stdparframe->resetExpressions(mplist);
+    }
+}
+
+void  OldScriptingSystemXMLParamDialog::toggleHelp(const bool help)
+{
+    _stdparframe->toggleHelp(help);
+    this->updateGeometry();
+    this->adjustSize();
+}
 
 
-//void MeshLabXMLGenericParamDialog::getAccept()
-//{
-//    stdParFrame->readValues(*curParSet);
-//    accept();
-//}
+void OldScriptingSystemXMLParamDialog::createFrame()
+{
+    if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
+    {
+        QString fname(_mfc.act->text());
+        MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
+        if (mplist.size() != _paramvalues.size())
+            MeshLabException("OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. The mplist and _paramvalues MUST have the same number of items.");
+
+        QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+        setLayout(vboxLayout);
+        _env.loadMLScriptEnv(*_meshdocument,_pm);
+        EnvWrap envwrap(_env);
+        _stdparframe = new XMLStdParFrame(this);
+        _stdparframe->loadFrameContent(mplist, envwrap,_meshdocument);
+        for(int ii = 0;ii < mplist.size();++ii)
+        {
+            QMap<QString,QString>::iterator it = _paramvalues.find(mplist[ii][MLXMLElNames::paramName]);
+            if (it == _paramvalues.end())
+            {
+                QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
+                throw MeshLabException(err);
+            }
+            _stdparframe->xmlfieldwidgets[ii]->set(it.value());
+        }
+        layout()->addWidget(_stdparframe);
+
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel );
+        //add the reset button so we can get its signals
+        QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
+        layout()->addWidget(buttonBox);
+
+        connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
+        connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+        connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+        connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
+
+        setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+
+        //set the minimum size so it will shrink down to the right size	after the help is toggled
+        this->setMinimumSize(_stdparframe->sizeHint());
+        this->showNormal();
+        this->adjustSize();
+    }
+}
+
+
+void OldScriptingSystemXMLParamDialog::getAccept()
+{
+    if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
+    {
+        QString fname(_mfc.act->text());
+        MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
+        if (_stdparframe->xmlfieldwidgets.size() != _paramvalues.size())
+            MeshLabException("OldScriptingSystemXMLParamDialog::getAccept() : Something really bad happened. The _stdparframe->xmlfieldwidgets and _paramvalues MUST have the same number of items.");
+        for(int ii = 0;ii < mplist.size();++ii)
+        {
+            QMap<QString,QString>::iterator it = _paramvalues.find(mplist[ii][MLXMLElNames::paramName]);
+            if (it == _paramvalues.end())
+            {
+                QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
+                throw MeshLabException(err);
+            }
+            it.value() = _stdparframe->xmlfieldwidgets[ii]->getWidgetExpression();
+        }
+        accept();
+    }
+    reject();
+}

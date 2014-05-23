@@ -207,9 +207,12 @@ class Env :public QScriptEngine
 	Q_OBJECT
 
 	QString out;
+    QList<QObject*> _tobedeleted;
 public:
 	Env();
-	Q_INVOKABLE void insertExpressionBinding(const QString& nm,const QString& exp);
+	~Env();
+    Q_INVOKABLE void insertExpressionBinding(const QString& nm,const QString& exp);
+    
 	QString output();
 	void appendOutput(const QString& output);
 	QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm);

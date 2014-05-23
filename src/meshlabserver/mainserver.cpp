@@ -365,7 +365,6 @@ public:
                     }
                 }
                 QGLWidget wid;
-                delete iFilter->glContext;
                 iFilter->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
                 bool res = iFilter->glContext->create();
                 if (!iFilter->glContext->isValid())
@@ -376,6 +375,7 @@ public:
                 meshDocument.setBusy(true);
                 ret = iFilter->applyFilter( action, meshDocument, pairold->pair.second, filterCallBack);
                 meshDocument.setBusy(false);
+                delete iFilter->glContext;
             }
             else
             {
@@ -416,6 +416,14 @@ public:
                                 }
                             }
                         }
+                        QGLWidget wid;
+                        cppfilt->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
+                        bool res = cppfilt->glContext->create();
+                        if (!cppfilt->glContext->isValid())
+                        {
+                            fprintf(fp,"A valid GLContext is required by the filter to work.\n");
+                            return false;
+                        }
 
                         //WARNING!!!!!!!!!!!!
                         /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
@@ -423,6 +431,7 @@ public:
                         ret = cppfilt->applyFilter( fname, meshDocument, envwrap, filterCallBack );
                         meshDocument.setBusy(false);
                         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        delete cppfilt->glContext;
                     }
                     else
                         throw MeshLabException("WARNING! The MeshLab Script System is able to manage just the C++ XML filters.");

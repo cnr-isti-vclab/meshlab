@@ -200,16 +200,13 @@ void FilterScriptDialog::editOldParameters( const int row )
         return;
     QString actionName = ui->scriptListWidget->currentItem()->text();
 
-    int sz = scriptPtr->filtparlist.size();
     OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
      RichParameterSet oldParameterSet = old->pair.second;
     //get the main window
     MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
-    if(NULL == mainWindow){
-        qDebug() << "problem casting parent of filterscriptdialog to main window";
-        return;
-    }
+    if(NULL == mainWindow)
+        throw MeshLabException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
 
     //get a pointer to this action and filter from the main window so we can get the 
     //description of the parameters from the filter
@@ -250,5 +247,23 @@ void FilterScriptDialog::editOldParameters( const int row )
 
 void FilterScriptDialog::editXMLParameters( const int row )
 {
+    if(row == -1)
+        return;
+    MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
+    if(NULL == mainWindow)
+        throw MeshLabException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
+    
+    QString fname = ui->scriptListWidget->currentItem()->text();
+    XMLFilterNameParameterValuesPair* xmlparval = reinterpret_cast<XMLFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
+
+    QMap<QString,MeshLabXMLFilterContainer>::iterator it = mainWindow->PM.stringXMLFilterMap.find(fname);
+    if (it == mainWindow->PM.stringXMLFilterMap.end())
+    {
+        QString err = "FilterScriptDialog::editXMLParameters : filter " + fname + " has not been found.";
+        throw MeshLabException(err);
+    }
+
+    OldScriptingSystemXMLParamDialog xmldialog(xmlparval->pair.second,it.value(),mainWindow->PM,mainWindow->meshDoc(),mainWindow,this,mainWindow->GLA());
+    xmldialog.exec();
 }

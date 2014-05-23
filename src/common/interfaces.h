@@ -62,8 +62,11 @@ class MeshModel;
 class MainWindowInterface
 {
 public:
-  virtual void executeFilter(QAction *, RichParameterSet &, bool /* isPreview */){}
-  virtual void executeFilter(MeshLabXMLFilterContainer*, Env& , bool /* isPreview */){}
+  virtual void executeFilter(QAction *, RichParameterSet &, bool  isPreview = false ){}
+  //parexpval is a string map containing the parameter expression values set in the filter's dialog. 
+  //These parameter expression values will be evaluated when the filter will start.
+  virtual void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& parexpval , bool  isPreview = false){}
+  //virtual void executeFilter(MeshLabXMLFilterContainer*,Env& envcode , bool  isPreview = false) {}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.

@@ -43,6 +43,7 @@
 #include <QProgressBar>
 #include <QDesktopServices>
 
+
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
@@ -267,10 +268,30 @@ void MainWindow::updateWindowMenu()
 //	GLA()->setColorMode(GLW::CMPerFace);
 //}
 
+void MainWindow::enableDocumentSensibleActionsContainer(const bool allowed)
+{
+    QAction* fileact = fileMenu->menuAction();
+    if (fileact != NULL)
+        fileact->setEnabled(allowed);
+    if (mainToolBar != NULL)
+        mainToolBar->setEnabled(allowed);
+    if (searchToolBar != NULL)
+        searchToolBar->setEnabled(allowed);
+    QAction* filtact = filterMenu->menuAction();
+    if (filtact != NULL)
+        filtact->setEnabled(allowed);
+    if (filterToolBar != NULL)
+        filterToolBar->setEnabled(allowed);
+    QAction* editact = editMenu->menuAction();
+    if (editact != NULL)
+        editact->setEnabled(allowed);
+    if (editToolBar)
+        editToolBar->setEnabled(allowed);
+}
+
+
 
 //menu create is not enabled only in case of not valid/existing meshdocument
-
-
 void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool validmeshdoc )
 {
     showFilterScriptAct->setEnabled(validmeshdoc);
@@ -306,6 +327,7 @@ void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool v
     updateMenuItems(filterMenuTexture,validmeshdoc);
     filterMenuCamera->setEnabled(validmeshdoc);
     updateMenuItems(filterMenuCamera,validmeshdoc);
+    
 }
 
 void MainWindow::updateMenuItems(QMenu* menu,const bool enabled)
@@ -859,17 +881,22 @@ void MainWindow::runFilterScript()
                 }
             }
             //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
-
+            QGLWidget wid;
+            iFilter->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
+            bool created = iFilter->glContext->create(wid.context());
+            if ((!created) || (!iFilter->glContext->isValid()))
+                throw MeshLabException("A valid GLContext is required by the filter to work.\n");
             meshDoc()->setBusy(true);
             //WARNING!!!!!!!!!!!!
             /* to be changed */
             iFilter->applyFilter( action, *meshDoc(), old->pair.second, QCallBack );
             meshDoc()->setBusy(false);
+            delete iFilter->glContext;
             classes = int(iFilter->getClass(action));
         }
         else
         {
-            MeshLabXMLFilterContainer cont = PM.stringXMLFilterMap[ filtnm];
+            MeshLabXMLFilterContainer& cont = PM.stringXMLFilterMap[ filtnm];
             MLXMLPluginInfo* info = cont.xmlInfo;
             MeshLabFilterInterface* cppfilt = cont.filterInterface;
             try
@@ -878,8 +905,8 @@ void MainWindow::runFilterScript()
                 {
                     cppfilt->setLog(&meshDoc()->Log);
 
-                    Env env;
-                    env.loadMLScriptEnv(*meshDoc(),PM);
+                    Env env ;
+                    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
                     XMLFilterNameParameterValuesPair* xmlfilt = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
                     QMap<QString,QString>& parmap = xmlfilt->pair.second;
                     for(QMap<QString,QString>::const_iterator it = parmap.constBegin();it != parmap.constEnd();++it)
@@ -905,14 +932,24 @@ void MainWindow::runFilterScript()
                             }
                         }
                     }
-
+                    disconnect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
+                    QGLWidget wid;
+                    cppfilt->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
+                    bool created = cppfilt->glContext->create(wid.context());
+                    if ((!created) || (!cppfilt->glContext->isValid()))
+                        throw MeshLabException("A valid GLContext is required by the filter to work.\n");
+                    
+                    
                     //WARNING!!!!!!!!!!!!
                     /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
                     meshDoc()->setBusy(true);
                     cppfilt->applyFilter( filtnm, *meshDoc(), envwrap, QCallBack );
                     meshDoc()->setBusy(false);
                     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+                    delete cppfilt->glContext;
+                    GLA()->completeUpdateRequested();
+                    connect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
+                   /* executeFilter(&cont,*env);*/
                     QStringList filterClassesList = cont.xmlInfo->filterAttribute(filtnm,MLXMLElNames::filterClass).split(QRegExp("\\W+"), QString::SkipEmptyParts);
                     classes = MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
                 }
@@ -1113,21 +1150,12 @@ void MainWindow::startFilter()
                     bool jscode = (filt.xmlInfo->filterScriptCode(filt.act->text()) != "");
                     bool filtercpp = (ifilter != NULL) && (!jscode);
 
-                    /*WARNING!!!!!!!! IT MUST BE CHANGED AS SOON AS POSSIBLE!!!!!!!
-                    THIS THING DOESN'T CRASH JUST CAUSE, IN CASE OF A CPP FILTER (WITH EXTERNAL THREAD...) THERE ARE NOT PARAMETERS TO EVALUATE INSIDE THE ENVIRONMENT.
-                    THE ENVIRONMENT MUST BE A SPURIOS PARAMETER, JUST TO MAKE THE FUNCTION HAPPY. ENV PARAMETER MUST NOT BE ACCESSED!!!!!!!NEVER!!!!!!!
-                    IN THE CASE OF THE JAVASCRIPT FILTERS INSTEAD THERE IS NOT A DIFFERENT THREAD. SO IT'S SAFE TO WORK WITH THE ENVIRONMENT*/ 
-                    Env env;
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    
-                    env.loadMLScriptEnv(*meshDoc(),PM);
-
                     /*Mock Parameters (there are no ones in the filter indeed) for the filter history.The filters with parameters are inserted by the applyClick of the XMLStdParDialog. 
                     That is the only place where I can easily evaluate the parameter values without writing a long, boring and horrible if on the filter type for the correct evaluation of the expressions contained inside the XMLWidgets*/
                     QMap<QString,QString> mock;
                     meshDoc()->filterHistory->addExecutedXMLFilter(fname,mock);
 
-                    executeFilter(&filt, env, false);            
+                    executeFilter(&filt, mock, false);            
                     meshDoc()->Log.Logf(GLLogStream::SYSTEM,"OUT OF SCOPE\n");
                 }
                 //delete env;
@@ -1280,7 +1308,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
-void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env& env )
+void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
 {
    /* if (env.isNull())
         throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
@@ -1302,6 +1330,9 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env
 
     if (ar == MLXMLElNames::fixedArity)
     {
+        Env env;
+        QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
+        bool err = val.isError();
         EnvWrap envwrap(env);
         //I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
         MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
@@ -1311,7 +1342,6 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env
             {
                 try
                 {
-
                     MeshModel* tmp = envwrap.evalMesh(params[ii][MLXMLElNames::paramName]);
                     if (tmp != NULL)
                         meshDoc()->renderState().add(tmp->id(),tmp->cm);
@@ -1335,7 +1365,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc, Env
     }
 }
 
-void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, Env &/*env*/ )
+void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc)
 {
     if (meshDoc() == NULL)
         return;
@@ -1384,7 +1414,7 @@ void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, E
     }
 }
 
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool ispreview)
+void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString,QString>& parexpval , bool  ispreview)
 {
     if (mfc == NULL)
         return;
@@ -1397,9 +1427,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool is
     QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
     int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
     if (postCondMask != MeshModel::MM_NONE)
-        initDocumentMeshRenderState(mfc,env);
+        initDocumentMeshRenderState(mfc);
 
-    initDocumentRasterRenderState(mfc,env);
+    initDocumentRasterRenderState(mfc);
 
     if(!ispreview)
         meshDoc()->Log.ClearBookmark();
@@ -1448,13 +1478,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool is
     }*/
     try
     {
-        //        /*bool isinter = */(mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
-        /*if (isinter)
-        {
-        showInterruptButton(true);
-        if (filtercpp)
-        connect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)),Qt::DirectConnection);
-        }*/
         MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
         QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
         if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity && !jscode)
@@ -1465,8 +1488,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool is
         }
         for(int ii = 0;ii < ml.size();++ii)
         {
-            EnvWrap envwrap(env);
-            funcall = funcall + envwrap.evalString(ml[ii][MLXMLElNames::paramName]);
+            funcall = funcall + parexpval[ml[ii][MLXMLElNames::paramName]];
             if (ii != ml.size() - 1)
                 funcall = funcall + ",";
         }
@@ -1475,22 +1497,14 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool is
             meshDoc()->xmlhistory << funcall;
         if (filtercpp)
         {
-            //I'm using PM.stringXMLFilterMap[fname] instead of mfc passed like parameter because i'm sure that the first one is still alive after the function will exit.
-            //wid = new QGLWidget()
-            FilterThread* ft = new FilterThread(fname,&PM.stringXMLFilterMap[fname],*(meshDoc()),env);
-           /* QMap<QThread*,Env*>::const_iterator it = envtobedeleted.find(ft);
-            if (it != envtobedeleted.end())
-            {
-                QString err;
-                err.sprintf("FilterThread with address: %08p already  exists. Filter %s will be aborted",ft,qPrintable(fname));
-                throw MeshLabException(err);
-            }*/
+            enableDocumentSensibleActionsContainer(false);
+            FilterThread* ft = new FilterThread(fname,parexpval,PM,*(meshDoc()));
+
             connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
             connect(ft,SIGNAL(threadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
             connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
-            /*iFilter->glContext->moveToThread(ft);*/
+
             ft->start();
-            //ret = iFilter->applyFilter(fname, *(meshDoc()), env, QCallBack);
         }
         else
         {
@@ -1503,12 +1517,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool is
             postFilterExecution();
 
         }
-        /*if (isinter)
-        {
-        showInterruptButton(false);
-        if (filtercpp)
-        disconnect(iFilter,SIGNAL(filterUpdateRequest(const bool&,bool*)),this,SLOT(filterUpdateRequest(const bool&,bool*)));
-        }*/
     }
     catch(MeshLabException& e)
     {
@@ -1524,7 +1532,9 @@ void MainWindow::postFilterExecution()
     meshDoc()->renderState().clearState();
     qApp->restoreOverrideCursor();
     qb->reset();
-
+    //foreach(QAction* act,filterMenu->actions())
+    //    act->setEnabled(true);
+    enableDocumentSensibleActionsContainer(true);
     updateMenus();
     GLA()->update(); //now there is the container
     MultiViewer_Container* mvc = currentViewContainer();
@@ -1534,11 +1544,11 @@ void MainWindow::postFilterExecution()
     FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
     if (obj == NULL)
         return;
-    MeshLabXMLFilterContainer* mfc = obj->_mfc;
-    if (mfc == NULL)
+    QMap<QString,MeshLabXMLFilterContainer>::const_iterator mfc = PM.stringXMLFilterMap.find(obj->filterName());
+    if (mfc != PM.stringXMLFilterMap.cend())
         return;
-
-    mfc->filterInterface->setInterrupt(false);
+    if (mfc->filterInterface != NULL)
+        mfc->filterInterface->setInterrupt(false);
 
     QString fname = mfc->act->text();
     //meshDoc()->setBusy(false);
@@ -1547,7 +1557,7 @@ void MainWindow::postFilterExecution()
 
     //// (5) Apply post filter actions (e.g. recompute non updated stuff if needed)
 
-    if(obj->_ret)
+    if(obj->succeed())
     {
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec\n",qPrintable(fname),xmlfiltertimer.elapsed());
         MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
@@ -1561,7 +1571,7 @@ void MainWindow::postFilterExecution()
     }
     else // filter has failed. show the message error.
     {
-        MeshLabFilterInterface         *iFilter = obj->_mfc->filterInterface;
+        MeshLabFilterInterface         *iFilter = mfc->filterInterface;
         QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(fname)+iFilter->errorMsg()); // text
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);

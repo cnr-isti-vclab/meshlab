@@ -307,7 +307,7 @@ QScriptValue myprint (QScriptContext* sc, QScriptEngine* se)
 }
 
 MeshDocumentSI::MeshDocumentSI( MeshDocument* doc )
-:QObject(doc),md(doc)
+:QObject(),md(doc)
 {
 }
 
@@ -849,6 +849,13 @@ Env::Env()
 	globalObject().setProperty(MLXMLElNames::shotType + "DefCtor", shot_defctor);
 }
 
+Env::~Env()
+{
+    for(int ii = 0;ii < _tobedeleted.size();++ii)
+        delete _tobedeleted[ii];
+    _tobedeleted.clear();
+}
+
 void Env::insertExpressionBinding( const QString& nm,const QString& exp )
 {
 	QString decl("var " + nm + " = " + exp + ";");
@@ -871,6 +878,7 @@ QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm )
 {
 	QString code;
 	MeshDocumentSI* mi = new MeshDocumentSI(&md);
+    _tobedeleted << mi;
 	QScriptValue val = newQObject(mi);
 	globalObject().setProperty(ScriptAdapterGenerator::meshDocVarName(),val); 
 	JavaScriptLanguage lang;
@@ -883,6 +891,7 @@ QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm )
 	QScriptValue res = evaluate(code);
 	return res;
 }
+
 
 ShotSI::ShotSI( const vcg::Shotf& st )
 :shot()

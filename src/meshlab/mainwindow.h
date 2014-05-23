@@ -69,14 +69,17 @@ public:
 	static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 };
 
-class MainWindow : public QMainWindow, MainWindowInterface
+class MainWindow : public QMainWindow, public MainWindowInterface
 {
 	Q_OBJECT
 
 public:
 	// callback function to execute a filter
-	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview);
-	void executeFilter(MeshLabXMLFilterContainer* mfc, Env& env, bool  isPreview);
+	void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview = false);
+    //parexpval is a string map containing the parameter expression values set in the filter's dialog. 
+    //These parameter expression values will be evaluated when the filter will start.
+    void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& parexpval , bool  isPreview = false);
+
 
   MainWindow();
   void init();
@@ -181,6 +184,7 @@ private slots:
     void updateMenuItems(QMenu* menu,const bool enabled);
     void updateStdDialog();
     void updateXMLStdDialog();
+    void enableDocumentSensibleActionsContainer(const bool enable);
 
 	//void updatePerViewApplicationStatus();
 	void setSplit(QAction *qa);
@@ -243,8 +247,8 @@ private:
     void saveRecentProjectList(const QString &projName);
     void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
-	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc,Env &env );
-	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc, Env &env );
+	void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
+	void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
 
 	QNetworkAccessManager *httpReq;
 	QBuffer myLocalBuf;
@@ -261,7 +265,6 @@ private:
 	PluginGeneratorGUI* plugingui;
 	QSignalMapper *windowMapper;
 
-	PluginManager PM;
 
     //QMap<QThread*,Env*> envtobedeleted;
 
@@ -284,7 +287,7 @@ private:
 	vcg::GLW::TextureMode getBestTextureRenderModePerMesh(const int meshid);
 	void setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm);
 public:
-
+    PluginManager PM;
 
   MeshDocument *meshDoc() {
     assert(currentViewContainer());

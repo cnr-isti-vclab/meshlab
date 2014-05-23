@@ -31,6 +31,12 @@
 
 using namespace vcg;
 
+
+FilterScript::FilterScript() :QObject()
+{
+
+}
+
 FilterScript::~FilterScript()
 {
     for(FilterScript::iterator it = filtparlist.begin();it != filtparlist.end();++it)
@@ -160,5 +166,6 @@ void FilterScript::addExecutedXMLFilter( const QString& name,const QMap<QString,
     tmp->pair = qMakePair(name,parvalue);
     filtparlist.append(tmp);
 }
+
 
 
