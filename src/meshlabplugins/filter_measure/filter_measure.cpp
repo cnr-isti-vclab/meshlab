@@ -41,91 +41,91 @@ using namespace vcg;
 // Core Function doing the actual mesh processing.
 bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
 {
-	if (filterName == "Compute Topological Measures")
-		{
-			CMeshO &m=md.mm()->cm;
-			tri::Allocator<CMeshO>::CompactFaceVector(m);
-			tri::Allocator<CMeshO>::CompactVertexVector(m);
-			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
+    if (filterName == "Compute Topological Measures")
+        {
+            CMeshO &m=md.mm()->cm;
+            tri::Allocator<CMeshO>::CompactFaceVector(m);
+            tri::Allocator<CMeshO>::CompactVertexVector(m);
+            md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+            md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
 
-			int edgeManifNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-			int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
-			tri::UpdateSelection<CMeshO>::VertexClear(m);
-			tri::UpdateSelection<CMeshO>::FaceClear(m);
+            int edgeNonManifFFNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
+            int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+            tri::UpdateSelection<CMeshO>::VertexClear(m);
+            tri::UpdateSelection<CMeshO>::FaceClear(m);
 
-			int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
-			tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-			int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
-			int edgeNum=0,borderNum=0;
-			tri::Clean<CMeshO>::CountEdges(m, edgeNum, borderNum);
-			int holeNum;
-			Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
-			int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
-			Log("Unreferenced Vertices %i",unrefVertNum);
-			Log("Boundary Edges %i",borderNum);
+            int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
+            tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+            int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+            int edgeNum=0,edgeBorderNum=0,edgeNonManifNum=0;
+            tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum,edgeNonManifNum);
+            assert(edgeNonManifFFNum == edgeNonManifNum );
+            int holeNum;
+            Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
+            int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
+            Log("Unreferenced Vertices %i",unrefVertNum);
+            Log("Boundary Edges %i",edgeBorderNum);
 
-			int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
-			Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
+            int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
+            Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
 
-			if(edgeManifNum==0 && vertManifNum==0){
-				Log("Mesh is two-manifold ");
-			}
+            if(edgeNonManifFFNum==0 && vertManifNum==0){
+                Log("Mesh is two-manifold ");
+            }
 
-			if(edgeManifNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeManifNum,faceEdgeManif);
+            if(edgeNonManifFFNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeNonManifFFNum,faceEdgeManif);
+            if(vertManifNum!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManifNum,faceVertManif);
 
-			if(vertManifNum!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManifNum,faceVertManif);
+            // For Manifold meshes compute some other stuff
+            if(vertManifNum==0 && edgeNonManifFFNum==0)
+            {
+                holeNum = tri::Clean<CMeshO>::CountHoles(m);
+                Log("Mesh has %i holes",holeNum);
 
-			// For Manifold meshes compute some other stuff
-			if(vertManifNum==0 && edgeManifNum==0)
-			{
-				holeNum = tri::Clean<CMeshO>::CountHoles(m);
-				Log("Mesh has %i holes",holeNum);
+                int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
+                Log("Genus is %i",genus);
+            }
+            else
+            {
+                Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
+                Log("Genus is undefined (non 2-manifold mesh)");
+            }
 
-				int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
-				Log("Genus is %i",genus);
-			}
-			else
-			{
-				Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
-				Log("Genus is undefined (non 2-manifold mesh)");
-			}
+            return true;
+        }
 
-			return true;
-		}
+    /************************************************************/
+    if (filterName == "Compute Topological Measures for Quad Meshes")
+        {
+            CMeshO &m=md.mm()->cm;
+            md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+            md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
 
-	/************************************************************/
-	if (filterName == "Compute Topological Measures for Quad Meshes")
-		{
-			CMeshO &m=md.mm()->cm;
-			md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-			md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
+            if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
+                this->errorMessage = "Error: mesh has a not consistent FF adjacency";
+                return false;
+            }
+            if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
 
-			if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
-				this->errorMessage = "Error: mesh has a not consistent FF adjacency";
-				return false;
-			}
-			if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
+                this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
+                return false;
+            }
 
-				this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
-				return false;
-			}
+            int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
+            int nTris = tri::Clean<CMeshO>::CountBitTris(m);
+            int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
+            int nLargePolys = tri::Clean<CMeshO>::CountBitLargePolygons(m);
+            if(nLargePolys>0) nQuads=0;
 
-			int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
-			int nTris = tri::Clean<CMeshO>::CountBitTris(m);
-			int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
-			int nLargePolys = tri::Clean<CMeshO>::CountBitLargePolygons(m);
-			if(nLargePolys>0) nQuads=0;
+            Log("Mesh has %8i triangles \n",nTris);
+            Log("         %8i quads \n",nQuads);
+            Log("         %8i polygons \n",nPolys);
+            Log("         %8i large polygons (with internal faux vertexes)",nLargePolys);
 
-			Log("Mesh has %8i triangles \n",nTris);
-			Log("         %8i quads \n",nQuads);
-			Log("         %8i polygons \n",nPolys);
-			Log("         %8i large polygons (with internal faux vertexes)",nLargePolys);
-
-	  if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-		  this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
-		  return false;
-	  }
+      if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
+          this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
+          return false;
+      }
 
       //
       //   i
@@ -173,20 +173,32 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
         }
         /************************************************************/
     if(filterName == "Compute Geometric Measures")
-        {
-            CMeshO &m=md.mm()->cm;
-            tri::Inertia<CMeshO> I(m);
-            float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-            float Volume = I.Mass();
-            Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
-            Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
-            Log("Mesh Volume  is %f", Volume);
+    {
+      CMeshO &m=md.mm()->cm;
+      tri::Inertia<CMeshO> I(m);
+      float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
+      float Volume = I.Mass();
+
+      int edgeNum=0,edgeBorderNum=0,edgeNonManifNum=0;
+      tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum,edgeNonManifNum);
+      bool watertight = (edgeBorderNum==0) && (edgeNonManifNum==0);
+      if(!watertight)
+         Log("Mesh is not 'watertight', no information on volume, barycenter and inertia tensor.");
+
+      Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
+      Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
+      if(watertight) Log("Mesh Volume  is %f", Volume);
       Log("Mesh Surface is %f", Area);
+      Distribution<float> eDist;
+      tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m,eDist,false);
+      Log("Mesh Total Len of %i Edges is %f Avg Len %f",int(eDist.Cnt()), eDist.Sum(),eDist.Avg());
+      tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m,eDist,true);
+      Log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))",int(eDist.Cnt()), eDist.Sum(),eDist.Avg());
+
       Point3f bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
       Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
 
-      if(Volume<=0) Log("Mesh is not 'solid', no information on barycenter and inertia tensor.");
-      else
+      if(watertight)
       {
         Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
 
@@ -220,45 +232,45 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
             else
                 tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
 
-			Log("   Min %f Max %f",DD.Min(),DD.Max());
-			Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));
-			Log("   StdDev		%f",DD.StandardDeviation());
-			Log("   Variance  %f",DD.Variance());
-			return true;
-		}
+            Log("   Min %f Max %f",DD.Min(),DD.Max());
+            Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));
+            Log("   StdDev		%f",DD.StandardDeviation());
+            Log("   Variance  %f",DD.Variance());
+            return true;
+        }
 
-	if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
-		{
-			CMeshO &m=md.mm()->cm;
-			float RangeMin = env.evalFloat("HistMin");
-			float RangeMax = env.evalFloat("HistMax");
-			int binNum     = env.evalInt("binNum");
+    if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
+        {
+            CMeshO &m=md.mm()->cm;
+            float RangeMin = env.evalFloat("HistMin");
+            float RangeMax = env.evalFloat("HistMax");
+            int binNum     = env.evalInt("binNum");
 
-			Histogramf H;
-			H.SetRange(RangeMin,RangeMax,binNum);
-			if(filterName == "Per Vertex Quality Histogram")
-			{
-				for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-					if(!(*vi).IsD())
-					{
-						assert(!math::IsNAN((*vi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
-						H.Add((*vi).Q());
-					}
-			}else{
-				for(CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
-					if(!(*fi).IsD())
-					{
-						assert(!math::IsNAN((*fi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
-						H.Add((*fi).Q());
-					}
-			}
-			Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
-			for(int i=1;i<=binNum;++i)
-			  Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
-			Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
-			return true;
-		}
-	return false;
+            Histogramf H;
+            H.SetRange(RangeMin,RangeMax,binNum);
+            if(filterName == "Per Vertex Quality Histogram")
+            {
+                for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+                    if(!(*vi).IsD())
+                    {
+                        assert(!math::IsNAN((*vi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
+                        H.Add((*vi).Q());
+                    }
+            }else{
+                for(CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
+                    if(!(*fi).IsD())
+                    {
+                        assert(!math::IsNAN((*fi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
+                        H.Add((*fi).Q());
+                    }
+            }
+            Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
+            for(int i=1;i<=binNum;++i)
+              Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
+            Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
+            return true;
+        }
+    return false;
 }
 
 
