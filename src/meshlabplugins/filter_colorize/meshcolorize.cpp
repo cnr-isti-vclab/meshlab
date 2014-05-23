@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -27,6 +27,7 @@
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/update/curvature.h>
 #include <vcg/complex/algorithms/parametrization/distortion.h>
+#include <vcg/space/fitting3.h>
 
 
 
@@ -34,7 +35,7 @@ using namespace std;
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
-    typeList << 
+    typeList <<
     CP_CLAMP_QUALITY <<
     CP_SATURATE_QUALITY <<
     CP_MAP_VQUALITY_INTO_COLOR <<
@@ -42,17 +43,17 @@ ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
     CP_DISCRETE_CURVATURE <<
     CP_TRIANGLE_QUALITY <<
     CP_VERTEX_SMOOTH <<
-		CP_FACE_SMOOTH <<
-				CP_MESH_TO_FACE <<
-		CP_VERTEX_TO_FACE <<
-		CP_FACE_TO_VERTEX <<
-		CP_TEXTURE_TO_VERTEX <<
+        CP_FACE_SMOOTH <<
+                CP_MESH_TO_FACE <<
+        CP_VERTEX_TO_FACE <<
+        CP_FACE_TO_VERTEX <<
+        CP_TEXTURE_TO_VERTEX <<
     CP_RANDOM_FACE <<
     CP_RANDOM_CONNECTED_COMPONENT;
-    
+
   FilterIDType tt;
   foreach(tt , types())
-	    actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(filterName(tt), this);
 }
 
 QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
@@ -112,22 +113,25 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
   switch(ID(a)){
   case CP_FACE_SMOOTH:
   case CP_VERTEX_SMOOTH:
-    par.addParam(new RichInt("iteration",1,QString("Iteration"),QString("the number ofiteration of the smoothing algorithm")));
+    par.addParam(new RichInt("iteration",1,QString("Iteration"),QString("the number of iteration of the smoothing algorithm")));
     break;
   case CP_TRIANGLE_QUALITY:
             metrics.push_back("area/max side");
-			metrics.push_back("inradius/circumradius");
-			metrics.push_back("mean ratio");
-			metrics.push_back("Area");
-			metrics.push_back("Texture Angle Distortion");
-			metrics.push_back("Texture Area Distortion");
-			par.addParam(new RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
-			break;
+            metrics.push_back("inradius/circumradius");
+            metrics.push_back("mean ratio");
+            metrics.push_back("Area");
+            metrics.push_back("Texture Angle Distortion");
+            metrics.push_back("Texture Area Distortion");
+            metrics.push_back("Planarity (abs plane dist)");
+            metrics.push_back("Planarity (relative)");
+
+            par.addParam(new RichEnum("Metric", 0, metrics, tr("Metric:"), tr("Choose a metric to compute triangle quality.")));
+            break;
   case CP_DISCRETE_CURVATURE:
-			curvNameList.push_back("Mean Curvature");
-			curvNameList.push_back("Gaussian Curvature");
-			curvNameList.push_back("RMS Curvature");
-			curvNameList.push_back("ABS Curvature");
+            curvNameList.push_back("Mean Curvature");
+            curvNameList.push_back("Gaussian Curvature");
+            curvNameList.push_back("RMS Curvature");
+            curvNameList.push_back("ABS Curvature");
       par.addParam(new RichEnum("CurvatureType", 0, curvNameList, tr("Type:"),
                                 QString("Choose the curvatures. Mean and Gaussian curvature are computed according the technique described in the Desbrun et al. paper.<br>"
                                         "Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation"
@@ -144,10 +148,10 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
   case CP_CLAMP_QUALITY:
   case CP_MAP_VQUALITY_INTO_COLOR:
       minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
-			par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)"));
-			par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)"));
-			par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
-			par.addParam(new RichBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)"));
+            par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)"));
+            par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)"));
+            par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+            par.addParam(new RichBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)"));
       break;
   case CP_MAP_FQUALITY_INTO_COLOR:
       minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
@@ -180,23 +184,23 @@ break;
      m.updateDataMask(MeshModel::MM_VERTCOLOR);
   case CP_CLAMP_QUALITY:
       {
-      float RangeMin = par.getFloat("minVal");	
-      float RangeMax = par.getFloat("maxVal");		
-			bool usePerc = par.getDynamicFloat("perc")>0;
-			
-			Histogramf H;
-			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+      float RangeMin = par.getFloat("minVal");
+      float RangeMax = par.getFloat("maxVal");
+            bool usePerc = par.getDynamicFloat("perc")>0;
 
-			float PercLo = H.Percentile(par.getDynamicFloat("perc")/100.f);
-			float PercHi = H.Percentile(1.0-par.getDynamicFloat("perc")/100.f);
-			
-			if(par.getBool("zeroSym"))
-				{
-					RangeMin = min(RangeMin, -math::Abs(RangeMax));
-					RangeMax = max(math::Abs(RangeMin), RangeMax);
-					PercLo = min(PercLo, -math::Abs(PercHi));
-					PercHi = max(math::Abs(PercLo), PercHi);
-				}
+            Histogramf H;
+            tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
+
+            float PercLo = H.Percentile(par.getDynamicFloat("perc")/100.f);
+            float PercHi = H.Percentile(1.0-par.getDynamicFloat("perc")/100.f);
+
+            if(par.getBool("zeroSym"))
+                {
+                    RangeMin = min(RangeMin, -math::Abs(RangeMax));
+                    RangeMax = max(math::Abs(RangeMin), RangeMax);
+                    PercLo = min(PercLo, -math::Abs(PercHi));
+                    PercHi = max(math::Abs(PercLo), PercHi);
+                }
 
       if(usePerc)
       {
@@ -283,6 +287,11 @@ break;
          return false;
        }
      }
+     if((metric ==6 || metric ==7) && !m.hasDataMask(MeshModel::MM_POLYGONAL))
+     {
+         this->errorMessage = "This metric is meaningless for triangle only meshes (all faces are planar by definition)";
+         return false;
+     }
      switch(metric){
 
        case 0: { //area / max edge
@@ -339,6 +348,44 @@ break;
          minV = distrib.Percentile(0.05);
          maxV = distrib.Percentile(0.95);
        } break;
+     case 6:
+     case 7: { // polygonal planarity
+         tri::UpdateFlags<CMeshO>::FaceClearV(m.cm);
+         std::vector<CMeshO::VertexPointer> vertVec;
+         std::vector<CMeshO::FacePointer> faceVec;
+         for(size_t i=0;i<m.cm.face.size();++i)
+           if(!m.cm.face[i].IsV())
+           {
+             tri::PolygonSupport<CMeshO,CMeshO>::ExtractPolygon(&(m.cm.face[i]),vertVec,faceVec);
+             assert(faceVec.size()==vertVec.size()-2);
+
+             std::vector<CMeshO::CoordType> pointVec;
+             for(size_t j=0;j<vertVec.size();++j)
+               pointVec.push_back(vertVec[j]->P());
+
+             Plane3f pl;
+             vcg::FitPlaneToPointSet(pointVec,pl);
+             float maxDist = 0, sumDist=0, halfPerim=0;
+             for(size_t j=0;j<vertVec.size();++j)
+             {
+               float d=fabs(SignedDistancePlanePoint(pl,pointVec[j]));
+               sumDist+=d;
+               maxDist=max(maxDist,d);
+               halfPerim += Distance(pointVec[j],pointVec[(j+1)%vertVec.size()]);
+             }
+
+             float avgDist = sumDist/float(vertVec.size());
+             for(size_t j=0;j<faceVec.size();++j)
+               if(metric==6)
+                 faceVec[j]->Q()=maxDist;
+             else
+                 faceVec[j]->Q()=avgDist/halfPerim;
+
+           }
+         tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
+         minV = distrib.Percentile(0.05);
+         maxV = distrib.Percentile(0.95);
+       } break;
 
        default: assert(0);
      }
@@ -360,22 +407,22 @@ break;
     break;
 
   case CP_VERTEX_SMOOTH:
-		{
-		int iteration = par.getInt("iteration");
-		tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,iteration,false,cb);
-		}
-		break;
+        {
+        int iteration = par.getInt("iteration");
+        tri::Smooth<CMeshO>::VertexColorLaplacian(m.cm,iteration,false,cb);
+        }
+        break;
   case CP_FACE_SMOOTH:
-		{
+        {
     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-		int iteration = par.getInt("iteration");
-		tri::Smooth<CMeshO>::FaceColorLaplacian(m.cm,iteration,false,cb);
-		}
-		break;
+        int iteration = par.getInt("iteration");
+        tri::Smooth<CMeshO>::FaceColorLaplacian(m.cm,iteration,false,cb);
+        }
+        break;
   case CP_FACE_TO_VERTEX:
      m.updateDataMask(MeshModel::MM_VERTCOLOR);
      tri::UpdateColor<CMeshO>::PerVertexFromFace(m.cm);
-		break;
+        break;
  case CP_MESH_TO_FACE:
  {
    QList<MeshModel *> meshList;
@@ -393,28 +440,28 @@ break;
  case CP_VERTEX_TO_FACE:
      m.updateDataMask(MeshModel::MM_FACECOLOR);
      tri::UpdateColor<CMeshO>::PerFaceFromVertex(m.cm);
-		 break;
+         break;
   case CP_TEXTURE_TO_VERTEX:
-		{
+        {
       m.updateDataMask(MeshModel::MM_VERTCOLOR);
       if(!HasPerWedgeTexCoord(m.cm)) break;
-			CMeshO::FaceIterator fi; 
-			QImage tex(m.cm.textures[0].c_str());
-			for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD()) 
-			{
-				for (int i=0; i<3; i++)
-				{
+            CMeshO::FaceIterator fi;
+            QImage tex(m.cm.textures[0].c_str());
+            for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+            {
+                for (int i=0; i<3; i++)
+                {
           // note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
           vcg::Point2f newcoord((*fi).WT(i).P().X()-floor((*fi).WT(i).P().X()),(*fi).WT(i).P().Y()-floor((*fi).WT(i).P().Y()));
           QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
                     (*fi).V(i)->C()=Color4b(qRed(val),qGreen(val),qBlue(val),255);
-				}
-			}
-	    }
-		
-		break;
+                }
+            }
+        }
+
+        break;
  }
-	return true;
+    return true;
 }
 
 MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
@@ -445,7 +492,7 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
 
   default:
     assert(0);
-	return MeshFilterInterface::Generic;
+    return MeshFilterInterface::Generic;
   }
 }
 
@@ -473,7 +520,7 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const{
   case   CP_MESH_TO_FACE:
     return MeshModel::MM_NONE; // TODO: wrong? compare with original
   default: assert(0);
-	  return MeshModel::MM_NONE;
+      return MeshModel::MM_NONE;
   }
 }
 
@@ -501,8 +548,8 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
     return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
   default: assert(0);
      return MeshModel::MM_NONE;
-	}
+    }
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshColorizePlugin)
-  
+
