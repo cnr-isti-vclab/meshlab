@@ -985,8 +985,8 @@ namespace vcg {
         else if (!vcg::tri::Clean<MeshType>::IsSizeConsistent(mesh))
             errorMessage = "non size-consistent mesh";
         else {
-            int boundaryEdgeNum, internalEdgeNum;
-            vcg::tri::Clean<MeshType>::CountEdges(mesh, internalEdgeNum, boundaryEdgeNum);
+            int boundaryEdgeNum, internalEdgeNum,nonManifold;
+            vcg::tri::Clean<MeshType>::CountEdgeNum(mesh, internalEdgeNum, boundaryEdgeNum,nonManifold);
             if (boundaryEdgeNum > 0)
                 errorMessage = "non watertight mesh";
             else

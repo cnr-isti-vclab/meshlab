@@ -733,8 +733,8 @@ public:
     int cc=vcg::tri::Clean<MeshType>::CountConnectedComponents(mesh);
     if(cc>1) return MultiComponent;
 
-    int boundaryEdgeNum, internalEdgeNum;
-    vcg::tri::Clean<MeshType>::CountEdges(mesh,internalEdgeNum,boundaryEdgeNum);
+    int boundaryEdgeNum, internalEdgeNum,nonManif;
+    vcg::tri::Clean<MeshType>::CountEdgeNum(mesh,internalEdgeNum,boundaryEdgeNum,nonManif);
     if(boundaryEdgeNum>0) return NonWatertigh;
 
 		return Done;
