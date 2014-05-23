@@ -11,21 +11,21 @@
 *                                                                           *
 ****************************************************************************/
 
-
 #include "filter_autoalign.h"
 #include <vcg/complex/algorithms/autoalign_4pcs.h>
 #include "../../meshlabplugins/edit_align/align/Guess.h"
 
 using namespace vcg;
 using namespace std;
+
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
 FilterAutoalign::FilterAutoalign()
 {
-  typeList << FP_AUTOALIGN
-           //<< FP_BEST_ROTATION
+  typeList << FP_ALIGN_4PCS
+           << FP_BEST_ROTATION
            ;
 
   foreach(FilterIDType tt , types())
@@ -37,8 +37,8 @@ FilterAutoalign::FilterAutoalign()
 QString FilterAutoalign::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_AUTOALIGN :  return QString("Automatic pair Alignement");
-    case FP_BEST_ROTATION :  return QString("Automatic Alignement (Brute)");
+    case FP_ALIGN_4PCS    :  return QString("Automatic Rough Alignement (4PCS)");
+    case FP_BEST_ROTATION :  return QString("Automatic Rough Alignement (Brute Force)");
     default : assert(0);
   }
 }
@@ -48,7 +48,7 @@ QString FilterAutoalign::filterName(FilterIDType filterId) const
 QString FilterAutoalign::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-    case FP_AUTOALIGN     :  return QString("Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  ");
+    case FP_ALIGN_4PCS     :  return QString("Automatic Rough Alignment of two meshes. Based on the paper <b> 4-Points Congruent Sets for Robust Pairwise Surface Registration</b>, by Aiger,Mitra, Cohen-Or. Siggraph 2008  ");
     case FP_BEST_ROTATION :  return QString("Automatic Rough Alignment of two meshes. Brute Force Approach");
     default : assert(0);
   }
@@ -65,29 +65,35 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, R
 {
    MeshModel *target;
    switch(ID(action))	 {
-    case FP_AUTOALIGN :
+    case FP_ALIGN_4PCS :
         target= md.mm();
         foreach (target, md.meshList)
             if (target != md.mm())  break;
 
-        parlst.addParam(new RichMesh ("FirstMesh", md.mm(),&md, "First Mesh",
+        parlst.addParam(new RichMesh ("fixMesh", md.mm(),&md, "Fixed Mesh",
                         "The mesh were the coplanar bases are sampled (it will contain the trasformation)"));
-        parlst.addParam(new RichMesh ("SecondMesh", target,&md, "Second Mesh",
+        parlst.addParam(new RichMesh ("movMesh", target,&md, "Moving Mesh",
                         "The mesh were similar coplanar based are searched."));
-        parlst.addParam(new RichFloat("overlapping",0.5f,"Estimated fraction of the\n first mesh overlapped by the second"));
-        parlst.addParam(new RichFloat("tolerance [0.0,1.0]",0.3f,"Error tolerance"));
+        parlst.addParam(new RichFloat("overlap",0.5f,"Overlap %","Estimated fraction of the\n first mesh overlapped by the second"));
+        parlst.addParam(new RichInt("sampleNum",1000,"Sample Num"));
+        parlst.addParam(new RichFloat("tolerance",0.3f,"Error tolerance",""));
+        parlst.addParam(new RichBool("showSample",true,"show subsamples",""));
+        parlst.addParam(new RichInt("randSeed",0,"Random Seed","0 means the random generator it is intializised with internal clock to guarantee different result every time"));
      break;
+
        case FP_BEST_ROTATION :
        target= md.mm();
        foreach (target, md.meshList)
        if (target != md.mm())  break;
 
-       parlst.addParam(new RichMesh ("FirstMesh", md.mm(),&md, "First Mesh",
+       parlst.addParam(new RichMesh ("fixMesh", md.mm(),&md, "Fix Mesh",
                        "The mesh that will be moved"));
-       parlst.addParam(new RichMesh ("SecondMesh", target,&md, "Second Mesh",
+       parlst.addParam(new RichMesh ("movMesh", target,&md, "Mov Mesh",
                        "The mesh that will be kept fixed."));
-       parlst.addParam(new RichInt("GridSize",10,"Grid Size", "The size of the uniform grid that is used for searching the best translation for a given rotation"));
-       parlst.addParam(new RichInt("Rotation Num",64,"RotationNumber", "sss"));
+       parlst.addParam(new RichInt("searchRange",6,"Search Range", "The size of the uniform grid that is used for searching the best translation for a given rotation"));
+       parlst.addParam(new RichInt("sampleSize",5000,"Sample Size", "The size of the uniform grid that is used for searching the best translation for a given rotation"));
+       parlst.addParam(new RichInt("gridSize",100000,"Grid Size", "The size of the uniform grid that is used for searching the best translation for a given rotation"));
+       parlst.addParam(new RichInt("RotationNumber",64,"Rotation Number", "sss"));
        break;
 
    default: break; // do not add any parameter for the other filters
@@ -97,56 +103,91 @@ void FilterAutoalign::initParameterSet(QAction *action,MeshDocument & md/*m*/, R
 // The Real Core Function doing the actual mesh processing.
 bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-  vcg::tri::FourPCS<CMeshO> *fpcs ;
   switch(ID(filter)) {
-    case FP_AUTOALIGN :
+    case FP_ALIGN_4PCS :
     {
+      MeshModel *fixMesh= par.getMesh("fixMesh");
+      MeshModel *movMesh= par.getMesh("movMesh");
+      MeshModel *sampleMesh= 0;
+      bool showSample = par.getBool("showSample");
+      if(showSample) sampleMesh = md.addOrGetMesh("sample","sample",false, RenderMode(vcg::GLW::DMPoints));
+      tri::UpdateNormal<CMeshO>::NormalizePerVertex(fixMesh->cm);
+      tri::UpdateNormal<CMeshO>::NormalizePerVertex(movMesh->cm);
+      tri::Clean<CMeshO>::RemoveUnreferencedVertex(fixMesh->cm);
+      tri::Clean<CMeshO>::RemoveUnreferencedVertex(movMesh->cm);
+      tri::Allocator<CMeshO>::CompactEveryVector(fixMesh->cm);
+      tri::Allocator<CMeshO>::CompactEveryVector(movMesh->cm);
+      fixMesh->updateDataMask(MeshModel::MM_VERTMARK);
+      movMesh->updateDataMask(MeshModel::MM_VERTMARK);
 
-      MeshModel *firstMesh= par.getMesh("FirstMesh");
-      MeshModel *secondMesh= par.getMesh("SecondMesh");
       vcg::tri::FourPCS<CMeshO> fpcs;
       fpcs.par.Default();
-      fpcs.par.f =  par.getFloat("overlapping");
-      firstMesh->updateDataMask(MeshModel::MM_VERTMARK);
-      secondMesh->updateDataMask(MeshModel::MM_VERTMARK);
-      fpcs.Init(firstMesh->cm,secondMesh->cm);
-      bool res = fpcs.Align(0,firstMesh->cm.Tr,cb);
-      firstMesh->clearDataMask(MeshModel::MM_VERTMARK);
-      secondMesh->clearDataMask(MeshModel::MM_VERTMARK);
+      fpcs.par.overlap    =  par.getFloat("overlap");
+      fpcs.par.sampleNumP =  par.getInt("sampleNum");
+      fpcs.par.deltaPerc  =  par.getFloat("tolerance");
+      fpcs.par.seed       = par.getInt("randSeed");
+      fpcs.Init(movMesh->cm,fixMesh->cm);
+      Matrix44f Tr;
+      bool res = fpcs.Align(Tr,cb);
 
-      if(res) Log("Automatic Rough Alignment Done");
-         else Log("Automatic Rough Alignment Failed");
+      if(res)
+      {
+        Log("4PCS Completed, radius %f",fpcs.par.samplingRadius);
+        Log("Tested %i candidate, best score was %i\n",fpcs.U.size(),fpcs.U[fpcs.iwinner].score);
+
+        Log("Estimated overlap is now %f \n",fpcs.par.overlap);
+        Log("Init %5.0f Coplanar Search %5.0f",fpcs.stat.init(),fpcs.stat.select());
+        Log("findCongruent %5.0f testAlignment %5.0f",fpcs.stat.findCongruent(),fpcs.stat.testAlignment());
+        movMesh->cm.Tr = Tr;
+        if(showSample)
+        {
+          sampleMesh->cm.Clear();
+          for(int i=0;i<fpcs.subsetQ.size();++i)
+            tri::Allocator<CMeshO>::AddVertex(sampleMesh->cm, fpcs.subsetQ[i]->P(), fpcs.subsetQ[i]->N());
+          tri::UpdateBounding<CMeshO>::Box(sampleMesh->cm);
+        }
+      }
+      else Log("4PCS Failed");
     } break;
 
 
 
     case FP_BEST_ROTATION :
     {
-      MeshModel *firstMesh= par.getMesh("FirstMesh");
-      MeshModel *secondMesh= par.getMesh("SecondMesh");
+      MeshModel *fixMesh= par.getMesh("fixMesh");
+      MeshModel *movMesh= par.getMesh("movMesh");
+      int searchRange = par.getInt("searchRange");
+      int rotNum = par.getInt("RotationNumber");
+      int gridSize = par.getInt("gridSize");
+      int sampleSize = par.getInt("sampleSize");
+      MeshModel *sample=md.addOrGetMesh("sample", "sample",false);
+      MeshModel *occ=md.addOrGetMesh("occ", "occ",false);
+
       tri::Guess GG;
-      GG.pp.MatrixNum = 100;
-      GG.GenRotMatrix();
-      GG.Init<CMeshO>(firstMesh->cm, secondMesh->cm);
-      static int counterMV=0;
-      static int step=0;
-      //for(int i=0;i<GG.MV.size();++i)
-      int i=counterMV;
-      step = (step +1)%4;
-//			if(step==0) counterMV++;
+      std::vector<tri::Guess::Result> ResultVec;
+      GG.pp.MatrixNum = rotNum;
+      GG.pp.GridSize =gridSize;
+      GG.pp.SampleNum = sampleSize;
+      GG.Init<CMeshO>(fixMesh->cm, movMesh->cm);
 
-      qDebug("Counter %i step %i",counterMV,step);
-        {
-            Point3f baseTran =  GG.InitBaseTranslation(GG.MV[i]);
-            Point3f bestTran;
+      for(int i=0;i<GG.RotMVec.size();++i)
+      {
+        Point3f baseTran =  GG.ComputeBaseTranslation(GG.RotMVec[i]);
+        Point3f bestTran;
+        int res = GG.SearchBestTranslation(GG.u[0],GG.RotMVec[i],searchRange,baseTran,bestTran);
+        ResultVec.push_back(tri::Guess::Result(GG.BuildResult(GG.RotMVec[i],baseTran,bestTran), res, i, bestTran));
+      }
+      sort(ResultVec.begin(),ResultVec.end());
+      movMesh->cm.Tr = ResultVec.back().m;
 
-            int res = GG.SearchBestTranslation(GG.u[0],GG.MV[i],4,1,baseTran,bestTran);
-            if(step==0) firstMesh->cm.Tr.SetIdentity();
-            if(step==1) firstMesh->cm.Tr = GG.MV[i];
-            if(step==2) firstMesh->cm.Tr = GG.BuildTransformation(GG.MV[i],baseTran);
-            if(step==3) firstMesh->cm.Tr = GG.BuildTransformation(GG.MV[i],bestTran);
-        }
-      //Log(0,(res)?" Automatic Rough Alignment Done":"Automatic Rough Alignment Failed");
+      tri::Build(sample->cm,GG.movVertBase);
+      sample->cm.Tr = ResultVec.back().m;
+
+      qDebug("Result %i",ResultVec.back().score);
+      GG.GenerateOccupancyMesh(occ->cm,0,ResultVec.back().m);
+      occ->UpdateBoxAndNormals();
+
+      Log("Automatic Rough Alignment Tested %i rotations, best err was %i",GG.RotMVec.size(), ResultVec.back().score);
     } break;
     default: assert (0);
   }
@@ -157,7 +198,7 @@ FilterAutoalign::FilterClass FilterAutoalign::getClass(QAction *a)
 {
   switch(ID(a))
   {
-    case FP_AUTOALIGN :
+    case FP_ALIGN_4PCS :
     case FP_BEST_ROTATION :
       return FilterClass(MeshFilterInterface::Layer+MeshFilterInterface::RangeMap);
     default :

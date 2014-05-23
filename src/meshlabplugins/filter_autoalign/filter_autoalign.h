@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -24,29 +24,27 @@
 #ifndef SAMPLEFILTERSPLUGIN_H
 #define SAMPLEFILTERSPLUGIN_H
 
-#include <QObject>
-
 #include <common/interfaces.h>
 
 class FilterAutoalign : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+  Q_OBJECT
+  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+  Q_INTERFACES(MeshFilterInterface)
 
-public:
-	enum { 
-		FP_AUTOALIGN, 
-		FP_BEST_ROTATION 
-  } ;
+  public:
+    enum {
+    FP_ALIGN_4PCS,
+    FP_BEST_ROTATION
+  };
 
-	FilterAutoalign();
-	
+  FilterAutoalign();
+
   virtual QString filterName(FilterIDType filter) const;
   virtual QString filterInfo(FilterIDType filter) const;
   virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-	virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+  virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif
