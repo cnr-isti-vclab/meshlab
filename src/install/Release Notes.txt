@@ -51,3 +51,9 @@ Added option for obtaining an exact number of samples (very useful when you want
 
 2014 05 23 Added Point Cloud Simplification Filter
 Easy to use filter for uniformly simplifying point clouds. 
+
+2014 05 23  Improved normal computation for polygonal face. 
+
+2014 05 23 Quality for face
+Added two new measures for measuring the planarity of polygonal faces. 
+
