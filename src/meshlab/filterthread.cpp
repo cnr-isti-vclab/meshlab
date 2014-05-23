@@ -8,7 +8,7 @@
 
 FilterThread* FilterThread::_cur = NULL;
 
-FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md) 
+FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md)
 :QThread(),_glwid(NULL),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md)
 {
     _glwid = new QGLWidget();
@@ -16,12 +16,12 @@ FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& par
 
 bool FilterThread::localCallBack(const int pos, const char * str)
 {
-	QString st(str);
-	static QTime currTime;
-	if(currTime.elapsed()< 100) return true;
-	emit _cur->threadCB(pos,st);
-	currTime.start();
-	return true;
+    QString st(str);
+    static QTime currTime;
+    if(currTime.elapsed()< 100) return true;
+    emit _cur->threadCB(pos,st);
+    currTime.start();
+    return true;
 }
 
 void FilterThread::run()
@@ -38,16 +38,16 @@ void FilterThread::run()
             throw MeshLabException("Filter " + _fname + " has not been found.\n");
         if (it->filterInterface != NULL)
         {
-            
+
             it->filterInterface->glContext = new QGLContext(QGLFormat::defaultFormat(),_glwid->context()->device());
             it->filterInterface->glContext->create(_glwid->context());
-            for (QMap<QString,QString>::const_iterator itp = _parexpval.cbegin();itp != _parexpval.cend();++itp)
+            for (QMap<QString,QString>::const_iterator itp = _parexpval.constBegin();itp != _parexpval.constEnd();++itp)
                 env.insertExpressionBinding(itp.key(),itp.value());
             EnvWrap envwrap(env);
             _cur = this;
             _success = it->filterInterface->applyFilter(_fname, _md, envwrap, &localCallBack);
             _cur = NULL;
-       
+
             delete it->filterInterface->glContext;
         }
         else
@@ -55,7 +55,7 @@ void FilterThread::run()
     }
     catch (MeshLabException& e)
     {
-    	_md.Log.Log(GLLogStream::SYSTEM,e.what());
+        _md.Log.Log(GLLogStream::SYSTEM,e.what());
     }
 }
 
