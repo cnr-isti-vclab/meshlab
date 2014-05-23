@@ -42,3 +42,12 @@ Added another basic shape (tessellated spherical cap).
 
 2014 05 15 Invert Face Filter
 Corrected bug in filter inverting faces that messed the faux bit flag.
+
+2014 05 23 Sampling Filter
+Improved Montecarlo, added weighted montecarlo 
+Improved Poisson weighting scheme (now it is coherent with the montecarlo one) 
+Combined the variable disk and standard poisson disk sampling
+Added option for obtaining an exact number of samples (very useful when you want to get a very low number of samples)
+
+2014 05 23 Added Point Cloud Simplification Filter
+Easy to use filter for uniformly simplifying point clouds. 
