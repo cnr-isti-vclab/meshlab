@@ -1448,7 +1448,7 @@ void XMLShotWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 
 
 OldScriptingSystemXMLParamDialog::OldScriptingSystemXMLParamDialog(QMap<QString,QString>& currparamvalues,MeshLabXMLFilterContainer& mfc, PluginManager& pm, MeshDocument * md, MainWindowInterface *mwi, QWidget* p, QWidget *gla)
-    : QDialog(p),_env(),_paramvalues(currparamvalues),_stdparframe(NULL),_mfc(mfc),_pm(pm),_meshdocument(md),_mwi(mwi),_gla(gla)
+    : QDialog(p),_env(),_paramvalues(currparamvalues),_stdparframe(NULL),_mfc(mfc),_pm(pm),_meshdocument(md),_mwi(mwi),_gla(gla),_showhelp(false)
 {
     createFrame();
     if (mfc.act != NULL)
@@ -1469,13 +1469,6 @@ void OldScriptingSystemXMLParamDialog::resetValues()
         MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
         _stdparframe->resetExpressions(mplist);
     }
-}
-
-void  OldScriptingSystemXMLParamDialog::toggleHelp(const bool help)
-{
-    _stdparframe->toggleHelp(help);
-    this->updateGeometry();
-    this->adjustSize();
 }
 
 
@@ -1503,6 +1496,9 @@ void OldScriptingSystemXMLParamDialog::createFrame()
                 throw MeshLabException(err);
             }
             _stdparframe->xmlfieldwidgets[ii]->set(it.value());
+            //in this dialog we will not make distinction between important/not-important parameters
+            _stdparframe->xmlfieldwidgets[ii]->setVisibility(true);
+
         }
         layout()->addWidget(_stdparframe);
 
@@ -1547,4 +1543,12 @@ void OldScriptingSystemXMLParamDialog::getAccept()
         accept();
     }
     reject();
+}
+
+void OldScriptingSystemXMLParamDialog::toggleHelp()
+{
+    _showhelp = !_showhelp;
+    _stdparframe->toggleHelp(_showhelp);
+    updateGeometry();
+    adjustSize();
 }

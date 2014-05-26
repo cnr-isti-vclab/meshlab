@@ -502,8 +502,7 @@ public:
 
 public slots:	
     void getAccept();
-    void toggleHelp(const bool help);
-
+    void toggleHelp();
         //reset the values on the gui back to the ones originally given to the dialog
     void resetValues();
 //signals:
@@ -517,6 +516,7 @@ private:
     MeshDocument *_meshdocument;
     MainWindowInterface* _mwi;
     QWidget _gla;
+    bool _showhelp;
 };
 
 #endif
