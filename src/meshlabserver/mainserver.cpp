@@ -299,7 +299,11 @@ public:
             printf("No script specified\n");
             return false;
         }
-        scriptPtr.open(scriptfile);
+        if (!scriptPtr.open(scriptfile))
+        {
+            printf("File %s was not found.\n",qPrintable(scriptfile));
+            return false;
+        }
         fprintf(fp,"Starting Script of %i actions",scriptPtr.filtparlist.size());
         GLLogStream log;
         for(FilterScript::iterator ii = scriptPtr.filtparlist.begin();ii!= scriptPtr.filtparlist.end();++ii)
