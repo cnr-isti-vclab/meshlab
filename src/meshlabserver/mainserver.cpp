@@ -209,8 +209,10 @@ public:
         // optional saving parameters (like ascii/binary encoding)
         RichParameterSet savePar;
         pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
-
-        if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask, savePar))
+        int formatmask = 0;
+        int defbits = 0;
+        pCurrentIOPlugin->GetExportMaskCapability(extension,formatmask,defbits);
+        if (!pCurrentIOPlugin->save(extension, fileName, *mm ,mask & formatmask, savePar))
         {
             fprintf(fp,"Failed saving\n");
             QDir::setCurrent(curDir.absolutePath());
