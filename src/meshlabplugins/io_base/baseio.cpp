@@ -56,7 +56,8 @@ class MyPolyFace:public vcg::Face<
     face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
     face::Color4b,
     face::BitFlags, // bit flags
-    face::Normal3f // normal
+    face::Normal3f, // normal
+    face::WedgeTexCoord2f
 > {};
 
 class MyPolyMesh    : public tri::TriMesh< vector<MyPolyVertex>, vector<MyPolyEdge>, vector<MyPolyFace>   > {};
@@ -297,7 +298,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
     {
       tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
       int result;
-      if(mask && tri::io::Mask::IOM_BITPOLYGONAL)
+      if(mask & tri::io::Mask::IOM_BITPOLYGONAL)
       {
         m.updateDataMask(MeshModel::MM_FACEFACETOPO);
         MyPolyMesh pm;
