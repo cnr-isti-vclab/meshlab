@@ -1545,7 +1545,7 @@ void MainWindow::postFilterExecution()
     if (obj == NULL)
         return;
     QMap<QString,MeshLabXMLFilterContainer>::const_iterator mfc = PM.stringXMLFilterMap.find(obj->filterName());
-    if (mfc != PM.stringXMLFilterMap.cend())
+    if (mfc == PM.stringXMLFilterMap.constEnd())
         return;
     if (mfc->filterInterface != NULL)
         mfc->filterInterface->setInterrupt(false);
