@@ -35,21 +35,21 @@ using namespace std;
 using namespace vcg;
 
 ExtraMeshColorizePlugin::ExtraMeshColorizePlugin() {
-    typeList <<
-    CP_CLAMP_QUALITY <<
-    CP_SATURATE_QUALITY <<
-    CP_MAP_VQUALITY_INTO_COLOR <<
-    CP_MAP_FQUALITY_INTO_COLOR <<
-    CP_DISCRETE_CURVATURE <<
-    CP_TRIANGLE_QUALITY <<
-    CP_VERTEX_SMOOTH <<
-        CP_FACE_SMOOTH <<
-                CP_MESH_TO_FACE <<
-        CP_VERTEX_TO_FACE <<
-        CP_FACE_TO_VERTEX <<
-        CP_TEXTURE_TO_VERTEX <<
-    CP_RANDOM_FACE <<
-    CP_RANDOM_CONNECTED_COMPONENT;
+  typeList <<
+              CP_CLAMP_QUALITY <<
+              CP_SATURATE_QUALITY <<
+              CP_MAP_VQUALITY_INTO_COLOR <<
+              CP_MAP_FQUALITY_INTO_COLOR <<
+              CP_DISCRETE_CURVATURE <<
+              CP_TRIANGLE_QUALITY <<
+              CP_VERTEX_SMOOTH <<
+              CP_FACE_SMOOTH <<
+              CP_MESH_TO_FACE <<
+              CP_VERTEX_TO_FACE <<
+              CP_FACE_TO_VERTEX <<
+              CP_TEXTURE_TO_VERTEX <<
+              CP_RANDOM_FACE <<
+              CP_RANDOM_CONNECTED_COMPONENT;
 
   FilterIDType tt;
   foreach(tt , types())
@@ -219,6 +219,7 @@ break;
        float RangeMin = par.getFloat("minVal");
        float RangeMax = par.getFloat("maxVal");
        float perc = par.getDynamicFloat("perc");
+       bool usePerc = perc>0;
 
        Histogramf H;
        tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m.cm,H);
@@ -234,9 +235,14 @@ break;
          PercHi = max(math::Abs(PercLo), PercHi);
        }
 
-       tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm,PercLo,PercHi);
-       Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
-           H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100-perc);
+       if(usePerc){
+         tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm,PercLo,PercHi);
+         Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
+             H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100-perc);
+       } else {
+         tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m.cm,RangeMin,RangeMax);
+         Log("Quality Range: %f %f; Used (%f %f)",H.MinV(),H.MaxV(),RangeMin,RangeMax);
+       }
        break;
    }
 

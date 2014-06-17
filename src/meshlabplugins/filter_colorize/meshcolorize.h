@@ -8,7 +8,7 @@
  *                                                                    \      *
  * All rights reserved.                                                      *
  *                                                                           *
- * This program is free software; you can redistribute it and/or modify      *   
+ * This program is free software; you can redistribute it and/or modify      *
  * it under the terms of the GNU General Public License as published by      *
  * the Free Software Foundation; either version 2 of the License, or         *
  * (at your option) any later version.                                       *
@@ -30,7 +30,7 @@
 class ExtraMeshColorizePlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
     Q_INTERFACES(MeshFilterInterface)
 
 public:
@@ -45,7 +45,7 @@ public:
       CP_VERTEX_SMOOTH,
       CP_FACE_SMOOTH,
       CP_FACE_TO_VERTEX,
-			CP_TEXTURE_TO_VERTEX,
+      CP_TEXTURE_TO_VERTEX,
       CP_VERTEX_TO_FACE,
       CP_MESH_TO_FACE,
       CP_COLOR_NON_TOPO_COHERENT,
@@ -53,18 +53,18 @@ public:
       CP_RANDOM_CONNECTED_COMPONENT
     };
 
-    
+
 
     ExtraMeshColorizePlugin();
     ~ExtraMeshColorizePlugin(){}
-  
+
  QString filterName(FilterIDType filter) const;
  QString filterInfo(FilterIDType filterId) const;
-	int getPreConditions(QAction *) const;
-	int postCondition( QAction* ) const;
-	FilterClass getClass(QAction *);
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    int getPreConditions(QAction *) const;
+    int postCondition( QAction* ) const;
+    FilterClass getClass(QAction *);
+    void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 };
 
 #endif
