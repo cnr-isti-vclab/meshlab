@@ -34,64 +34,6 @@
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 using namespace vcg;
 using namespace std;
-namespace vcg {
-namespace tri {
-
-template <class MeshType>
-void BuildExtrudedFaceShell(MeshType &mIn, MeshType &mOut, float height=0, float inset=0, bool smoothFlag=true  )
-{
-  typedef typename MeshType::VertexPointer VertexPointer;
-  typedef typename MeshType::CoordType CoordType;
-  if(height==0) height = mIn.bbox.Diag()/100.0f;
-  if(inset==0) inset = mIn.bbox.Diag()/100.0f;
-  tri::UpdateFlags<MeshType>::FaceClearV(mIn);
-  for(size_t i=0;i<mIn.face.size();++i) if(!mIn.face[i].IsV())
-  {
-    _SphMesh faceM;
-    CoordType bary = Barycenter(mIn.face[i]);
-    CoordType nf = mIn.face[i].N().Normalize();
-    nf = nf*height/2.0f;
-    std::vector<VertexPointer> vertVec;
-    tri::PolygonSupport<MeshType,MeshType>::ExtractPolygon(&(mIn.face[i]),vertVec);
-    size_t vn = vertVec.size();
-    // Add vertices (alternated top and bottom)
-    tri::Allocator<_SphMesh>::AddVertex(faceM, bary-nf);
-    tri::Allocator<_SphMesh>::AddVertex(faceM, bary+nf);
-    for(size_t j=0;j<vn;++j){
-      tri::Allocator<_SphMesh>::AddVertex(faceM, vertVec[j]->P()-nf);
-      tri::Allocator<_SphMesh>::AddVertex(faceM, vertVec[j]->P()+nf);
-    }
-
-    // Build top and bottom faces
-    for(size_t j=0;j<vn;++j)
-      tri::Allocator<_SphMesh>::AddFace(faceM, 0, 2+(j+0)*2, 2+((j+1)%vn)*2 );
-    for(size_t j=0;j<vn;++j)
-      tri::Allocator<_SphMesh>::AddFace(faceM, 1, 3+(j+0)*2, 3+((j+1)%vn)*2 );
-
-    // Build side strip
-    for(size_t j=0;j<vn;++j){
-      size_t j0=j;
-      size_t j1=(j+1)%vn;
-      tri::Allocator<_SphMesh>::AddFace(faceM, 2+ j0*2 + 0 , 2+ j0*2+1, 2+j1*2+0);
-      tri::Allocator<_SphMesh>::AddFace(faceM, 2+ j0*2 + 1 , 2+ j1*2+1, 2+j1*2+0);
-    }
-
-    for(size_t j=0;j<2*vn;++j)
-      faceM.face[j].SetS();
-
-    tri::UpdateTopology<_SphMesh>::FaceFace(faceM);
-    tri::UpdateFlags<_SphMesh>::FaceBorderFromFF(faceM);
-    tri::Refine(faceM, MidPoint<_SphMesh>(&faceM),0,true);
-    tri::Refine(faceM, MidPoint<_SphMesh>(&faceM),0,true);
-
-    tri::Append<MeshType,_SphMesh>::Mesh(mOut,faceM);
-
-  } // end main loop for each face;
-}
-
-
-};
-};
 
 FilterVoronoiPlugin::FilterVoronoiPlugin()
 {
@@ -306,6 +248,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     float vertCylRadius = env.evalFloat("vertCylRadius");
     float vertSphRadius = env.evalFloat("vertSphRadius");
     float faceExtHeight = env.evalFloat("faceExtHeight");
+    float faceExtInset =  env.evalFloat("faceExtInset");
     bool edgeCylFlag = env.evalBool("edgeCylFlag");
     bool vertCylFlag = env.evalBool("vertCylFlag");
     bool vertSphFlag = env.evalBool("vertSphFlag");
@@ -320,7 +263,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     if(edgeCylFlag) tri::BuildCylinderEdgeShell(m->cm,sm->cm,edgeCylRadius);
     if(vertCylFlag) tri::BuildCylinderVertexShell(m->cm,sm->cm,vertCylRadius,edgeCylRadius);
     if(vertSphFlag) tri::BuildSphereVertexShell(m->cm,sm->cm,vertSphRadius);
-    if(faceExtFlag) tri::BuildExtrudedFaceShell(m->cm,sm->cm,faceExtHeight);
+    if(faceExtFlag) tri::BuildPrismFaceShell(m->cm,sm->cm,faceExtHeight,faceExtInset);
 
     sm->UpdateBoxAndNormals();
      return true;

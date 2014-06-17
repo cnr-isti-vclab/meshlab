@@ -40,7 +40,7 @@
     <ENUM_GUI guiLabel="Relax Type"/>
    </PARAM>
   </FILTER>
-  <FILTER filterFunction="volumeSampling"     filterName="Volumetric Sampling"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
+  <FILTER filterFunction="volumeSampling"     filterName="Volumetric Sampling"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="Variable" filterIsInterruptible="true">
    <FILTER_HELP><![CDATA[Compute a volumetric sampling over a watertight mesh. ]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
    <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 500.0">
@@ -100,7 +100,7 @@
     <ENUM_GUI guiLabel="Voronoi Element"/>
    </PARAM>
   </FILTER>
-  <FILTER filterFunction="buildShell"         filterName="Create Solid Wireframe" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Meshing"  filterPost="" filterArity="SingleMesh" filterIsInterruptible="false">
+  <FILTER filterFunction="buildShell"         filterName="Create Solid Wireframe" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Remeshing"  filterPost="" filterArity="Variable" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
    <PARAM parName="edgeCylFlag" parIsImportant="true" parType="Boolean" parDefault="true">
@@ -132,12 +132,16 @@
     <CHECKBOX_GUI guiLabel="Face -> Prism"/>
    </PARAM>
    <PARAM parName="faceExtHeight" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0">
-    <PARAM_HELP><![CDATA[ The radius of the sphere replacing each vertex ]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[ The Height of the prism that is substitued with each face ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Face Prism Height." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
+   <PARAM parName="faceExtInset" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0">
+    <PARAM_HELP><![CDATA[ The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism ]]></PARAM_HELP>
+    <ABSPERC_GUI guiLabel="Face Prism Inset." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
+   </PARAM>
    <PARAM parName="edgeFauxFlag" parIsImportant="true" parType="Boolean" parDefault="true">
-    <PARAM_HELP><![CDATA[ If true only the Non-Faux edges will be considered for conversion]]></PARAM_HELP>
-    <CHECKBOX_GUI guiLabel="Ignore Faux Edge."/>
+    <PARAM_HELP><![CDATA[ If true only the Non-Faux edges will be considered for conversion ]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Ignore faux edges"/>
    </PARAM>
   </FILTER>
   <FILTER filterFunction="crossFieldCreation" filterName="Cross Field Creation"   filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Normal" filterPost="MM_VERTCURVDIR" filterArity="SingleMesh" filterIsInterruptible="false">
