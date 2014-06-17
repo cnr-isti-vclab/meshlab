@@ -24,6 +24,8 @@
 #include <vcg/complex/algorithms/create/platonic.h>
 #include <vcg/complex/algorithms/point_sampling.h>
 #include <vcg/complex/algorithms/smooth.h>
+#include <vcg/math/gen_normal.h>
+
 using namespace vcg;
 using namespace tri;
 
@@ -48,7 +50,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
   case CR_ANNULUS : return QString("Annulus");
   case CR_SPHERE: return QString("Sphere");
   case CR_SPHERE_CAP: return QString("Sphere Cap");
-  case CR_RANDOM_SPHERE: return QString("Random Sphere");
+  case CR_RANDOM_SPHERE: return QString("Points on a Sphere");
   case CR_ICOSAHEDRON: return QString("Icosahedron");
   case CR_DODECAHEDRON: return QString("Dodecahedron");
   case CR_OCTAHEDRON: return QString("Octahedron");
@@ -68,7 +70,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
   case CR_ANNULUS : return QString("Create an Annulus, e.g. a flat region bounded by two concentric circles");
   case CR_SPHERE: return QString("Create a Sphere");
   case CR_SPHERE_CAP: return QString("Create a Sphere Cap subtended by a cone of given angle");
-  case CR_RANDOM_SPHERE: return QString("Create a random spherical point cloud");
+  case CR_RANDOM_SPHERE: return QString("Create a spherical point cloud, it can be random or regularly distributed.");
   case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
   case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
   case CR_OCTAHEDRON: return QString("Create an Octahedron");
@@ -108,6 +110,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & m, RichParamete
     break;
   case CR_RANDOM_SPHERE :
     parlst.addParam(new RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
+    parlst.addParam(new RichBool("randomFlag",true,"Random","If true the points are randomly generated using a Poisson Disk distribution. Otherwise the Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used."));
     break;
   case CR_BOX :
     parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
@@ -160,35 +163,44 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
         break;
     }
   case CR_RANDOM_SPHERE:
-    {
+  {
     CMeshO tt;
 
     int pointNum = par.getInt("pointNum");
-    int oversamplingFactor =100;
-    if(pointNum <= 100) oversamplingFactor = 1000;
-    if(pointNum >= 10000) oversamplingFactor = 50;
-    if(pointNum >= 100000) oversamplingFactor = 20;
+    bool randomFlag=par.getBool("randomFlag");
 
-    math::MarsenneTwisterRNG rng;
-    tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
-    for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
-      vi->P()=math::GeneratePointOnUnitSphereUniform<float>(rng);
-    tri::UpdateBounding<CMeshO>::Box(tt);
-
-    const float SphereArea = 4*M_PI;
-    float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
-
-    std::vector<Point3f> poissonSamples;
-    tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
-    tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
-
-    tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
-    m->cm.Clear();
-    tri::Allocator<CMeshO>::AddVertices(m->cm,poissonSamples.size());
-    for(size_t i=0;i<poissonSamples.size();++i)
+    if(randomFlag)
     {
-      m->cm.vert[i].P()=poissonSamples[i];
-      m->cm.vert[i].N()=m->cm.vert[i].P();
+      int oversamplingFactor =100;
+      if(pointNum <= 100) oversamplingFactor = 1000;
+      if(pointNum >= 10000) oversamplingFactor = 50;
+      if(pointNum >= 100000) oversamplingFactor = 20;
+
+      math::MarsenneTwisterRNG rng;
+      tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
+      for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
+        vi->P()=math::GeneratePointOnUnitSphereUniform<float>(rng);
+      tri::UpdateBounding<CMeshO>::Box(tt);
+
+      const float SphereArea = 4*M_PI;
+      float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
+
+      std::vector<Point3f> poissonSamples;
+      tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
+      tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
+
+      tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
+      m->cm.Clear();
+      for(size_t i=0;i<poissonSamples.size();++i)
+        tri::Allocator<CMeshO>::AddVertex(m->cm,poissonSamples[i],poissonSamples[i]);
+    }
+    else
+    {
+      std::vector<Point3f> regularSamples;
+      GenNormal<float>::Regular(pointNum,regularSamples);
+      m->cm.Clear();
+      for(size_t i=0;i<regularSamples.size();++i)
+        tri::Allocator<CMeshO>::AddVertex(m->cm,regularSamples[i],regularSamples[i]);
     }
   } break;
 
