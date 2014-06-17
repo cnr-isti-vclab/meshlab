@@ -41,17 +41,17 @@
 using namespace std;
 using namespace vcg;
 
-class MyPolyEdge;
-class MyPolyFace;
-class MyPolyVertex;
-struct PolyUsedTypes : public UsedTypes<Use<MyPolyVertex>   ::AsVertexType,
-                                        Use<MyPolyEdge>     ::AsEdgeType,
-                                        Use<MyPolyFace>     ::AsFaceType> {};
+class PEdge;
+class PFace;
+class PVertex;
+struct PUsedTypes : public UsedTypes<Use<PVertex>   ::AsVertexType,
+                                        Use<PEdge>     ::AsEdgeType,
+                                        Use<PFace>     ::AsFaceType> {};
 
-class MyPolyVertex  : public Vertex<PolyUsedTypes,  vertex::Coord3f, vertex::Normal3f, vertex::Qualityf, vertex::Color4b, vertex::BitFlags  >{};
-class MyPolyEdge    : public Edge< PolyUsedTypes, edge::VertexRef, edge::BitFlags>{};
-class MyPolyFace:public vcg::Face<
-     PolyUsedTypes,
+class PVertex  : public Vertex<PUsedTypes,  vertex::Coord3f, vertex::Normal3f, vertex::Qualityf, vertex::Color4b, vertex::BitFlags  >{};
+class PEdge    : public Edge< PUsedTypes, edge::VertexRef, edge::BitFlags>{};
+class PFace:public vcg::Face<
+     PUsedTypes,
     face::PolyInfo, // this is necessary  if you use component in vcg/simplex/face/component_polygon.h
     face::PFVAdj,   // Pointer to the vertices (just like FVAdj )
     face::Color4b,
@@ -60,7 +60,7 @@ class MyPolyFace:public vcg::Face<
     face::WedgeTexCoord2f
 > {};
 
-class MyPolyMesh    : public tri::TriMesh< vector<MyPolyVertex>, vector<MyPolyEdge>, vector<MyPolyFace>   > {};
+class PMesh    : public tri::TriMesh< vector<PVertex>, vector<PEdge>, vector<PFace>   > {};
 
 
 // initialize importing parameters
@@ -301,9 +301,9 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
       if(mask & tri::io::Mask::IOM_BITPOLYGONAL)
       {
         m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-        MyPolyMesh pm;
-        tri::PolygonSupport<CMeshO,MyPolyMesh>::ImportFromTriMesh(pm,m.cm);
-        result = tri::io::ExporterOBJ<MyPolyMesh>::Save(pm,filename.c_str(),mask,cb);
+        PMesh pm;
+        tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(pm,m.cm);
+        result = tri::io::ExporterOBJ<PMesh>::Save(pm,filename.c_str(),mask,cb);
       }
       else
       result = tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
