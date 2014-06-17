@@ -61,3 +61,18 @@ Added two new measures for measuring the planarity of polygonal faces.
 Improved quality of the results formatting and report more useful info (edge Length sum)
 Improved support of polygonal meshes 
 
+2014 06 17 Decorators and Interface
+Added possibility of choosing the color of the text, useful when showing info, histograms and such on white backgrounds. 
+Exposed color of NonFaux Edges
+
+2014 06 17 Colorize by face color
+Corrected small bug in the percentile filtering
+
+2014 06 17 Filter Change: Create->Random Sphere now is  Create->Point on a Sphere
+It allows the creation of points randomly generated using a Poisson Disk distribution or using the Dave Rusin's disco ball algorithm for the regular placement of points on a sphere.
+
+2014 06 17 New Filter: Build a Polyline with NonFaux Edges
+Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh
+
+
+
