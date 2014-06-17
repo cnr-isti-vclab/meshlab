@@ -77,6 +77,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_MAKE_PURE_TRI
         << FP_QUAD_PAIRING
         << FP_FAUX_CREASE
+        << FP_FAUX_EXTRACT
         << FP_VATTR_SEAM
         << FP_REFINE_LS3_LOOP
         << FP_SLICE_WITH_A_PLANE
@@ -117,6 +118,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_CLUSTERING                       :
     case FP_CLOSE_HOLES                      :
     case FP_FAUX_CREASE                      :
+    case FP_FAUX_EXTRACT                      :
     case FP_VATTR_SEAM                       :
     case FP_REFINE_LS3_LOOP									 : return MeshFilterInterface::Remeshing;
     case FP_REFINE_CATMULL                   :
@@ -175,6 +177,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_QUAD_DOMINANT					 :
     case FP_QUAD_PAIRING                     :
     case FP_FAUX_CREASE                      :
+    case FP_FAUX_EXTRACT                      :
     case FP_VATTR_SEAM                       :
     case FP_SLICE_WITH_A_PLANE               :
     case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
@@ -229,6 +232,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_MAKE_PURE_TRI                    : return tr("Turn into a Pure-Triangular mesh");
     case FP_QUAD_PAIRING                     : return tr("Tri to Quad by smart triangle pairing");
     case FP_FAUX_CREASE                      : return tr("Crease Marking with NonFaux Edges");
+    case FP_FAUX_EXTRACT                     : return tr("Build a Polyline with NonFaux Edges");
     case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
     case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
     case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
@@ -305,6 +309,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                    "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
                                                    "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
     case FP_SLICE_WITH_A_PLANE                       : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
+    case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
 
     default                                  : assert(0);
     }
@@ -1483,6 +1488,23 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             m.updateDataMask(MeshModel::MM_POLYGONAL);
         } break;
 
+  case FP_FAUX_EXTRACT :
+  {
+    MeshModel *em= md.addNewMesh("","EdgeMesh",true,RenderMode(GLW::DMWire));
+    tri::RequireCompactness(m.cm);
+    for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+      tri::Allocator<CMeshO>::AddVertex(em->cm, vi->cP());
+
+    std::vector< typename tri::UpdateTopology<CMeshO>::PEdge > edgeVec;
+    tri::UpdateTopology<CMeshO>::FillUniqueEdgeVector(m.cm,edgeVec,false);
+
+    for(size_t i=0;i<edgeVec.size();++i)
+    {
+      int v0i = tri::Index(m.cm,edgeVec[i].v[0]);
+      int v1i = tri::Index(m.cm,edgeVec[i].v[1]);
+      tri::Allocator<CMeshO>::AddEdge(em->cm, &em->cm.vert[v0i],&em->cm.vert[v1i]);
+    }
+  } break;
     case FP_VATTR_SEAM :
         {
             unsigned int vmask = 0;
@@ -1580,9 +1602,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             sectionName.append(QString::number(planeOffset));
 
             //this is used to generate svg slices
-            RenderMode rm;
-            rm.drawMode = GLW::DMWire;
-            MeshModel* cap= md.addNewMesh("",sectionName,true,rm);
+            MeshModel* cap= md.addNewMesh("",sectionName,true,RenderMode(GLW::DMWire));
             vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(orig->cm, slicingPlane, cap->cm );
             tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
