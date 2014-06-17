@@ -29,7 +29,7 @@
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
 #include <QGLShader>
-
+#include <meshlab/glarea_setting.h>
 using namespace vcg;
 using namespace std;
 
@@ -164,6 +164,9 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 {
   this->setLog(&_log);
   QFont qf;
+
+     textColor = rm->getColor4b( GLAreaSetting::textColorParam());
+
     glPushMatrix();
     glMultMatrix(m.cm.Tr);
     switch (ID(a))
@@ -255,13 +258,14 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
             glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
             glDisable(GL_LIGHTING);
             glDepthFunc(GL_LEQUAL);
+            glDepthMask(GL_FALSE);
             glEnable(GL_LINE_SMOOTH);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glLineWidth(lineWidth);
-      Color4b cc=Color4b::DarkGray;
-      cc[3]=128;
-      glColor(cc);
+      Color4b lineColor=rm->getColor4b(this->ShowFauxEdgeColor());
+      lineColor[3]=128;
+      glColor(lineColor);
             glDepthRange (0.0, 0.999);
             m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
             glPopAttrib();
@@ -721,7 +725,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
     Point3d v(b-a);
   //v.Normalize();
   v = v*(1.0/(bVal-aVal));
-  glLabel::Mode md(qf,Color4b::White,angle,rightAlign);
+  glLabel::Mode md(qf,textColor,angle,rightAlign);
   if(tickScalarDistance > 0)   // Draw lines only if the two endpoint are not coincident
     {
           neededZeros = ceil(max(0.0,-log10(double(tickScalarDistance))));
@@ -732,7 +736,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
                         glVertex(Zero+v*i);
                     glEnd();
           for(i=firstTick; (i+labelMargin)<bVal;i+=tickScalarDistance)
-            glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1 ").arg(i,4+neededZeros,'f',neededZeros),md);
+            glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1   ").arg(i,4+neededZeros,'f',neededZeros),md);
                  glPointSize(1);
                  glBegin(GL_POINTS);
             for(i=firstTickTen;i<bVal;i+=tickDistTen)
@@ -752,8 +756,8 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 
     // bold font at beginning and at the end
   md.qFont.setBold(true);
-  glLabel::render(painter,Point3f::Construct(a), tr("%1").arg(aVal,6+neededZeros,'f',neededZeros+2) ,md);
-  glLabel::render(painter,Point3f::Construct(b), tr("%1").arg(bVal,6+neededZeros,'f',neededZeros+2) ,md);
+  glLabel::render(painter,Point3f::Construct(a), tr("%1   ").arg(aVal,4+neededZeros,'f',neededZeros) ,md);
+  glLabel::render(painter,Point3f::Construct(b), tr("%1   ").arg(bVal,4+neededZeros,'f',neededZeros) ,md);
 
   glPopAttrib();
 }
@@ -1247,7 +1251,7 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
     if(!m.cm.face[i].IsD())
     {
       Point3f bar=Barycenter(m.cm.face[i]);
-      glLabel::render(painter, bar,tr("%1").arg(i));
+      glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
     }
   glPopAttrib();
 }
@@ -1262,7 +1266,7 @@ void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
     if(!m.cm.edge[i].IsD())
     {
       Point3f bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
-      glLabel::render(painter, bar,tr("%1").arg(i));
+      glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
     }
   glPopAttrib();
 }
@@ -1276,7 +1280,7 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
   glColor3f(.4f,.4f,.4f);
   for(size_t i=0;i<m.cm.vert.size();++i){
     if(!m.cm.vert[i].IsD())
-      glLabel::render(painter, m.cm.vert[i].P(),tr("%1").arg(i));
+      glLabel::render(painter, m.cm.vert[i].P(),tr("%1").arg(i),glLabel::Mode(textColor));
   }
   glPopAttrib();
 }
@@ -1470,7 +1474,7 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
   }
   float bn = ch.BinNum();
 
-  float border = 0.1;
+  float border = 0.15;
   float histH = 1.0f - 2.f*border;
   float histW = 0.3f;
 
@@ -1492,9 +1496,9 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
 
   glEnd();
 
-  glColor(Color4b::White);
+  glColor(textColor);
   drawQuotedLine(Point3d(border*4/5.0,border,0),Point3d(border*4/5.0,1.0-border,0),ch.MinV(),ch.MaxV(),len/20.0,painter,qf,0,true);
-  glLabel::render(painter,Point3f(border,1-border*0.5,0),QString("MinV %1 MaxV %2 MaxC %3").arg(ch.MinElem()).arg(ch.MaxElem()).arg(maxWide));
+  glLabel::render(painter,Point3f(border,1-border*0.5,0),QString("MinV %1 MaxV %2 MaxC %3").arg(ch.MinElem()).arg(ch.MaxElem()).arg(maxWide),glLabel::Mode(textColor));
   // Closing 2D
   glPopAttrib();
   glPopMatrix(); // restore modelview
@@ -1530,7 +1534,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
     if(!m.glw.TMId.empty())
       textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");
     //, QPainter *qDebug(qPrintable(textureName));
-    glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName);
+    glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
     checkGLError::debugInfo("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,painter,qf,90.0f);
@@ -1582,7 +1586,8 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
 
 void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
-  switch(ID(action)){
+
+     switch(ID(action)){
   case DP_SHOW_BOX_CORNERS :
   {
     parset.addParam(new RichBool(this->BBAbsParam(), true,"Abs. Pos","If true the bbox is drawn in the absolute position "
@@ -1645,6 +1650,7 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
   } break;
   case DP_SHOW_NON_FAUX_EDGE :{
     parset.addParam(new RichFloat(ShowFauxEdgeWidth(),1.5,"Line Width",""));
+    parset.addParam(new RichColor(ShowFauxEdgeColor(),Color4b::DarkGray,"Line Color",""));
     parset.addParam(new RichBool(this->ShowSeparatrix(), false, "Show Quad mesh Separatrices","if true the lines connecting extraordinary vertices of a quad mesh are shown"));
     parset.addParam(new RichBool(this->ShowNonRegular(), false, "Show Non Regular Vertices","if true, vertices with valence not equal to four are shown with red/blue fans"));
   } break;

@@ -6,6 +6,7 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalPara
     defaultGlobalParamSet->addParam(new RichColor(backgroundBotColorParam(),QColor(128,128,255),"MeshLab Bottom BackGround Color","MeshLab GLarea's BackGround Color(bottom corner)"));
     defaultGlobalParamSet->addParam(new RichColor(backgroundTopColorParam(),QColor(  0, 0,   0),"MeshLab Top BackGround Color","MeshLab GLarea's BackGround Color(top corner)"));
     defaultGlobalParamSet->addParam(new RichColor(logAreaColorParam(),   QColor(128,16,16),"MeshLab GLarea's Log Area Color","MeshLab GLarea's BackGround Color(bottom corner)"));
+    defaultGlobalParamSet->addParam(new RichColor(textColorParam(),vcg::Color4b::White,"Text Color","Color of the text used in all the Graphics Window (it should be well different from the background color...)"));
 
 
     defaultGlobalParamSet->addParam(new RichColor(baseLightAmbientColorParam()	,QColor( 32, 32, 32),"MeshLab Base Light Ambient Color","MeshLab GLarea's BackGround Color(bottom corner)"));

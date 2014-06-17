@@ -22,9 +22,11 @@ public:
     vcg::Color4b backgroundBotColor;
     vcg::Color4b backgroundTopColor;
     vcg::Color4b logAreaColor;
+    vcg::Color4b textColor;
     inline static QString backgroundBotColorParam()		{return "MeshLab::Appearance::backgroundBotColor";}
     inline static QString backgroundTopColorParam()		{return "MeshLab::Appearance::backgroundTopColor";}
     inline static QString logAreaColorParam()           {return "MeshLab::Appearance::logAreaColor";}
+    inline static QString textColorParam()           {return "MeshLab::Appearance::textColor";}
 
     int textureMagFilter;
     int textureMinFilter;

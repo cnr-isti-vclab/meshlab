@@ -74,6 +74,8 @@ private:
     void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
     void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
   void drawHistogram(QGLWidget *gla, CHist &ch);
+
+  vcg::Color4b textColor;
 public:
 
   ExtraMeshDecoratePlugin()
@@ -165,7 +167,10 @@ public:
   inline QString HistAreaParam() const { return  "MeshLab::Decoration::AreaHistParam" ; }
   inline QString HistTypeParam() const { return  "MeshLab::Decoration::HistType" ; }
 
+  inline QString TextColorParam() const { return  "MeshLab::Decoration::TextColor" ; }
+
   inline QString ShowFauxEdgeWidth() const { return  "MeshLab::Decoration::FauxEdgeWidth" ; }
+  inline QString ShowFauxEdgeColor() const { return  "MeshLab::Decoration::FauxEdgeColor" ; }
 
 
   inline QString ShowContourFreq() const { return  "MeshLab::Decoration::ShowContourFreq" ; }
