@@ -338,7 +338,7 @@ break;
        } break;
 
        case 5: { //TEXTURE Area Distortion
-         float areaScaleVal, edgeScaleVal;
+         CMeshO::ScalarType areaScaleVal, edgeScaleVal;
          if(m.hasDataMask(MeshModel::MM_WEDGTEXCOORD))
          {
            Distortion<CMeshO,true>::MeshScalingFactor(m.cm, areaScaleVal,edgeScaleVal);
@@ -369,7 +369,7 @@ break;
              for(size_t j=0;j<vertVec.size();++j)
                pointVec.push_back(vertVec[j]->P());
 
-             Plane3f pl;
+             Plane3m pl;
              vcg::FitPlaneToPointSet(pointVec,pl);
              float maxDist = 0, sumDist=0, halfPerim=0;
              for(size_t j=0;j<vertVec.size();++j)
