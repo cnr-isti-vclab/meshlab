@@ -409,7 +409,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
             int stepSmoothNum = par.getInt("stepSmoothNum");
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
             //float delta = par.getAbsPerc("delta");
-            Point3f viewPoint(0,0,0);
+            Point3m viewPoint(0,0,0);
             float alpha = 1;
             tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
             Log( "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
@@ -420,7 +420,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
       {
             const std::string AttribName("SavedVertPosition");
             int stepNum = par.getEnum("step");
-            Point3f viewpoint(0,0,0);
+            Point3m viewpoint(0,0,0);
             float alpha = 1;
 
             switch (stepNum) {
@@ -429,7 +429,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
                     if(tri::HasPerVertexAttribute(m.cm,AttribName)) 	{
                         vcg::tri::Allocator<CMeshO>::DeletePerVertexAttribute(m.cm,AttribName);
                     }
-                    CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3f> (m.cm,AttribName);
+                    CMeshO::PerVertexAttributeHandle<Point3m> h = tri::Allocator<CMeshO>::AddPerVertexAttribute<Point3m> (m.cm,AttribName);
                     CMeshO::VertexIterator vi;
 
                     for(vi =m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
@@ -444,12 +444,12 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
                         errorMessage = "Failed to retrieve the stored vertex position. First Store than recover.";
                         return false;
                     }
-                    CMeshO::PerVertexAttributeHandle<Point3f> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f> (m.cm,AttribName);
+                    CMeshO::PerVertexAttributeHandle<Point3m> h = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m> (m.cm,AttribName);
 
                     CMeshO::VertexIterator vi;
                     for(vi= m.cm.vert.begin();vi!= m.cm.vert.end();++vi)
                     {
-                        Point3f d = h[vi] - viewpoint; d.Normalize();
+                        Point3m d = h[vi] - viewpoint; d.Normalize();
                         float s = d * ( (*vi).cP() - h[vi] );
                         (*vi).P() = h[vi] + d * (s*alpha);
                     }
@@ -560,7 +560,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-                vector<Point3f> normalOrig(m.cm.fn);
+                vector<Point3m> normalOrig(m.cm.fn);
                 for(int i=0;i<m.cm.fn;++i)
                     normalOrig[i]=m.cm.face[i].cN();
 
@@ -580,7 +580,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
                 int smoothIter = par.getInt("iterations");
 
                 tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-                vector<Point3f> geomOrig(m.cm.vn);
+                vector<Point3m> geomOrig(m.cm.vn);
                 for(int i=0;i<m.cm.vn;++i)
                     geomOrig[i]=m.cm.vert[i].P();
 
