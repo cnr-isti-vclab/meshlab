@@ -463,7 +463,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
     case FP_CENTER:
         {
-            Box3f &bb=m.cm.bbox;
+            Box3m &bb=m.cm.bbox;
             parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Absolute translation amount along the X axis"));
             parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Absolute translation amount along the Y axis"));
             parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Absolute translation amount along the Z axis"));
@@ -852,8 +852,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                     return false;
                 }
             }
-            Box3f selBox; //il bbox delle facce selezionate
-            std::vector< Point3f > selected_pts; //devo copiare i punti per il piano di fitting
+            Box3m selBox; //il bbox delle facce selezionate
+            std::vector< Point3m > selected_pts; //devo copiare i punti per il piano di fitting
 
             if(m.cm.svn==0 || m.cm.sfn!=0 )
             {
@@ -863,12 +863,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
             for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
                 if(!(*vi).IsD() && (*vi).IsS() ){
-                    Point3f p = (*vi).P();
+                    Point3m p = (*vi).P();
                     selBox.Add(p);
                     selected_pts.push_back(p);
                 }
                 Log("Using %i vertexes to build a fitting  plane",int(selected_pts.size()));
-                Plane3f plane;
+                Plane3m plane;
                 FitPlaneToPointSet(selected_pts,plane);
                 float errorSum=0;
                 for(size_t i=0;i<selected_pts.size();++i)
@@ -878,11 +878,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                 Log("New Z axis is %f %f %f",plane.Direction()[0],plane.Direction()[1],plane.Direction()[2]);
 
-                Matrix44f tr1; tr1.SetTranslate(-selBox.Center());
-                Point3f rotAxis=Point3f(0,0,1) ^ plane.Direction();
+                Matrix44m tr1; tr1.SetTranslate(-selBox.Center());
+                Point3m rotAxis=Point3m(0,0,1) ^ plane.Direction();
                 rotAxis.Normalize();
-                float angleRad = Angle(Point3f(0,0,1),plane.Direction());
-                Matrix44f rt; rt.SetRotateRad(-angleRad,rotAxis);
+                float angleRad = Angle(Point3m(0,0,1),plane.Direction());
+                Matrix44m rt; rt.SetRotateRad(-angleRad,rotAxis);
                 m.cm.Tr = rt*tr1;
         }
         if(par.getBool("Freeze")&& !par.getBool("ToAll")){
@@ -891,7 +891,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             m.cm.Tr.SetIdentity();
         }
         else if(par.getBool("ToAll")){
-            Matrix44f transf=m.cm.Tr;
+            Matrix44m transf=m.cm.Tr;
             for (int i=0; i<md.meshList.size(); i++)
             {
                 md.meshList[i]->cm.Tr=transf;
@@ -919,22 +919,22 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                 }
             }
-            Matrix44f trRot; trRot.SetIdentity();
-            Point3f axis, tranVec;
-            Matrix44f trTran,trTranInv;
+            Matrix44m trRot; trRot.SetIdentity();
+            Point3m axis, tranVec;
+            Matrix44m trTran,trTranInv;
 
             switch(par.getEnum("rotAxis"))
             {
-            case 0: axis=Point3f(1,0,0); break;
-            case 1: axis=Point3f(0,1,0);break;
-            case 2: axis=Point3f(0,0,1);break;
-            case 3: axis=par.getPoint3f("customAxis");break;
+            case 0: axis=Point3m(1,0,0); break;
+            case 1: axis=Point3m(0,1,0);break;
+            case 2: axis=Point3m(0,0,1);break;
+            case 3: axis=par.getPoint3m("customAxis");break;
             }
             switch(par.getEnum("rotCenter"))
             {
-            case 0: tranVec=Point3f(0,0,0); break;
+            case 0: tranVec=Point3m(0,0,0); break;
             case 1: tranVec=m.cm.bbox.Center(); break;
-            case 2: tranVec=par.getPoint3f("customCenter");break;
+            case 2: tranVec=par.getPoint3m("customCenter");break;
             }
 
             float angleDeg= par.getDynamicFloat("angle");
@@ -953,7 +953,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 m.cm.Tr.SetIdentity();
             }
             else if(par.getBool("ToAll")){
-                Matrix44f transf=m.cm.Tr;
+                Matrix44m transf=m.cm.Tr;
                 for (int i=0; i<md.meshList.size(); i++)
                 {
                     md.meshList[i]->cm.Tr=transf;
@@ -979,9 +979,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             }
             if(par.getBool("pointsFlag"))
             {
-                Matrix33f cov;
-                Point3f bp(0,0,0);
-                vector<Point3f> PtVec;
+                Matrix33m cov;
+                Point3m bp(0,0,0);
+                vector<Point3m> PtVec;
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end();++vi)
                     if(!(*vi).IsD()) {
                         PtVec.push_back((*vi).cP());
@@ -1010,7 +1010,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                     qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
 
-                    Matrix44f trTran; trTran.SetIdentity();
+                    Matrix44m trTran; trTran.SetIdentity();
                     for(int i=0;i<3;++i)
                         for(int j=0;j<3;++j)
                             trTran[i][j] = eigenvecMatrix[i][j];
@@ -1021,8 +1021,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             {
                 tri::Inertia<CMeshO> I(m.cm);
 
-                Matrix33f PCA;
-                Point3f pcav;
+                Matrix33m PCA;
+                Point3m pcav;
                 I.InertiaTensorEigen(PCA,pcav);
                 for(int i=0;i<4;i++)
                     qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
@@ -1030,7 +1030,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                 for(int i=0;i<4;i++)
                     qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
-                Matrix44f trTran; trTran.SetIdentity();
+                Matrix44m trTran; trTran.SetIdentity();
                 for(int i=0;i<3;++i)
                     for(int j=0;j<3;++j)
                         trTran[i][j] = PCA[i][j];
@@ -1045,7 +1045,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             }
             else if (par.getBool("ToAll"))
             {
-                Matrix44f transf=m.cm.Tr;
+                Matrix44m transf=m.cm.Tr;
                 for (int i=0; i<md.meshList.size(); i++)
                 {
                     md.meshList[i]->cm.Tr=transf;
@@ -1077,7 +1077,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                 }
             }
-            Matrix44f trTran; trTran.SetIdentity();
+            Matrix44m trTran; trTran.SetIdentity();
 
             float xScale= par.getDynamicFloat("axisX");
             float yScale= par.getDynamicFloat("axisY");
@@ -1095,7 +1095,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             }
             else if (par.getBool("ToAll"))
             {
-                Matrix44f transf=trTran;
+                Matrix44m transf=trTran;
                 for (int i=0; i<md.meshList.size(); i++)
                 {
                     md.meshList[i]->cm.Tr=transf;
@@ -1128,9 +1128,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 }
                 else
                 {
-                    Matrix44f trScale; trScale.SetIdentity();
-                    Point3f tranVec;
-                    Matrix44f trTran,trTranInv;
+                    Matrix44m trScale; trScale.SetIdentity();
+                    Point3m tranVec;
+                    Matrix44m trTran,trTranInv;
 
                     float xScale= par.getFloat("axisX");
                     trScale.SetScale(xScale,xScale,xScale);
@@ -1142,9 +1142,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                     }
                     switch(par.getEnum("scaleCenter"))
                     {
-                    case 0: tranVec=Point3f(0,0,0); break;
+                    case 0: tranVec=Point3m(0,0,0); break;
                     case 1: tranVec=m.cm.bbox.Center(); break;
-                    case 2: tranVec=par.getPoint3f("customCenter");break;
+                    case 2: tranVec=par.getPoint3m("customCenter");break;
                     }
 
                     trTran.SetTranslate(tranVec);
@@ -1170,9 +1170,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             }
             else
             {
-                Matrix44f trScale; trScale.SetIdentity();
-                Point3f tranVec;
-                Matrix44f trTran,trTranInv;
+                Matrix44m trScale; trScale.SetIdentity();
+                Point3m tranVec;
+                Matrix44m trTran,trTranInv;
 
                 float xScale= par.getFloat("axisX");
                 float yScale= par.getFloat("axisY");
@@ -1188,9 +1188,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 }
                 switch(par.getEnum("scaleCenter"))
                 {
-                case 0: tranVec=Point3f(0,0,0); break;
+                case 0: tranVec=Point3m(0,0,0); break;
                 case 1: tranVec=m.cm.bbox.Center(); break;
-                case 2: tranVec=par.getPoint3f("customCenter");break;
+                case 2: tranVec=par.getPoint3m("customCenter");break;
                 }
 
                 trTran.SetTranslate(tranVec);
@@ -1208,20 +1208,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
     case FP_FLIP_AND_SWAP:
         {
-            Matrix44f tr; tr.SetIdentity();
-            if(par.getBool("flipX")) { Matrix44f flipM; flipM.SetIdentity(); flipM[0][0]=-1.0f; tr *= flipM; }
-            if(par.getBool("flipY")) { Matrix44f flipM; flipM.SetIdentity(); flipM[1][1]=-1.0f; tr *= flipM; }
-            if(par.getBool("flipZ")) { Matrix44f flipM; flipM.SetIdentity(); flipM[2][2]=-1.0f; tr *= flipM; }
+            Matrix44m tr; tr.SetIdentity();
+            if(par.getBool("flipX")) { Matrix44m flipM; flipM.SetIdentity(); flipM[0][0]=-1.0f; tr *= flipM; }
+            if(par.getBool("flipY")) { Matrix44m flipM; flipM.SetIdentity(); flipM[1][1]=-1.0f; tr *= flipM; }
+            if(par.getBool("flipZ")) { Matrix44m flipM; flipM.SetIdentity(); flipM[2][2]=-1.0f; tr *= flipM; }
 
-            if(par.getBool("swapXY")) { Matrix44f swapM; swapM.SetIdentity();
+            if(par.getBool("swapXY")) { Matrix44m swapM; swapM.SetIdentity();
             swapM[0][0]=0.0f; swapM[0][1]=1.0f;
             swapM[1][0]=1.0f; swapM[1][1]=0.0f;
             tr *= swapM; }
-            if(par.getBool("swapXZ")) { Matrix44f swapM; swapM.SetIdentity();
+            if(par.getBool("swapXZ")) { Matrix44m swapM; swapM.SetIdentity();
             swapM[0][0]=0.0f; swapM[0][2]=1.0f;
             swapM[2][0]=1.0f; swapM[2][2]=0.0f;
             tr *= swapM; }
-            if(par.getBool("swapYZ")) { Matrix44f swapM; swapM.SetIdentity();
+            if(par.getBool("swapYZ")) { Matrix44m swapM; swapM.SetIdentity();
             swapM[1][1]=0.0f; swapM[1][2]=1.0f;
             swapM[2][1]=1.0f; swapM[2][2]=0.0f;
             tr *= swapM; }
@@ -1239,7 +1239,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
       tri::PointCloudNormal<CMeshO>::Param p;
       p.fittingAdjNum = par.getInt("K");
       p.smoothingIterNum = par.getInt("smoothIter");
-      p.viewPoint = par.getPoint3f("viewPos");
+      p.viewPoint = par.getPoint3m("viewPos");
       p.useViewPoint = par.getBool("flipFlag");
       tri::PointCloudNormal<CMeshO>::Compute(m.cm, p,cb);
         } break;
@@ -1344,8 +1344,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
                 if(!(*vi).IsD())
                 {
-                    Point3f p = (*vi).P();
-                    float ro,theta,phi;
+                    Point3m p = (*vi).P();
+                    CMeshO::ScalarType ro,theta,phi;
                     p.Y()=0;
                     p.ToPolarRad(ro,theta,phi);
                     float thetaDeg = math::ToDeg(theta);
@@ -1555,20 +1555,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
         } break;
     case FP_SLICE_WITH_A_PLANE:
         {
-            Point3f planeAxis(0,0,0);
+            Point3m planeAxis(0,0,0);
             int ind = par.getEnum("planeAxis");
             if(ind>=0 && ind<3)
                 planeAxis[ind] = 1.0f;
             else
-                planeAxis=par.getPoint3f("customAxis");
+                planeAxis=par.getPoint3m("customAxis");
 
             planeAxis.Normalize();
 
             float planeOffset = par.getFloat("planeOffset");
-            Point3f planeCenter;
-            Plane3f slicingPlane;
+            Point3m planeCenter;
+            Plane3m slicingPlane;
 
-            Box3f bbox=m.cm.bbox;
+            Box3m bbox=m.cm.bbox;
             MeshModel* base=&m;
             MeshModel* orig=&m;
 
@@ -1603,7 +1603,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
             //this is used to generate svg slices
             MeshModel* cap= md.addNewMesh("",sectionName,true,RenderMode(GLW::DMWire));
-            vcg::IntersectionPlaneMesh<CMeshO, CMeshO, float>(orig->cm, slicingPlane, cap->cm );
+            vcg::IntersectionPlaneMesh<CMeshO, CMeshO, CMeshO::ScalarType>(orig->cm, slicingPlane, cap->cm );
             tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
             if(par.getBool("createSectionSurface"))
