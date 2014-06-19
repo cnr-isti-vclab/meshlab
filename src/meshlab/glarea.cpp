@@ -760,7 +760,7 @@ void GLArea::displayInfo(QPainter *painter)
             col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
         painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
-        if(mm()->cm.Tr != Matrix44f::Identity() ) displayMatrix(painter, Column_2);
+        if(mm()->cm.Tr != Matrix44m::Identity() ) displayMatrix(painter, Column_2);
     }
     painter->restore();
     painter->beginNativePainting();
@@ -1386,14 +1386,14 @@ void GLArea::setView()
     Matrix44f mt = mtSc * mtTr * trackball.Matrix() *(-mtTr);
 //    Matrix44f mt =  trackball.Matrix();
 
-    Box3f bb;
-    bb.Add(mt,this->md()->bbox());
+    Box3m bb;
+    bb.Add(Matrix44m::Construct(mt),this->md()->bbox());
     float cameraDist = this->getCameraDistance();
 
     if(fov==5) cameraDist = 3.0f; // small hack for orthographic projection where camera distance is rather meaningless...
 
     nearPlane = cameraDist*clipRatioNear;
-    farPlane = cameraDist + max(viewRatio(),-bb.min[2]);
+    farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
     if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
     //qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
@@ -1464,7 +1464,7 @@ void GLArea::resetTrackBall()
     trackball.Reset();
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
-    trackball.track.tra =  -this->md()->bbox().Center();
+    trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
     fov=fovDefault();
     update();
@@ -1500,24 +1500,24 @@ void GLArea::sendViewDir(QString name)
 
 void GLArea::sendMeshShot(QString name)
 {
-    Shotf curShot=this->md()->mm()->cm.shot;
+    Shotm curShot=this->md()->mm()->cm.shot;
     emit transmitShot(name, curShot);
 }
 
 void GLArea::sendMeshMatrix(QString name)
 {
-    Matrix44f mat=this->md()->mm()->cm.Tr;
+    Matrix44m mat=this->md()->mm()->cm.Tr;
     emit transmitMatrix(name, mat);
 }
 
 void GLArea::sendViewerShot(QString name)
 {
-    Shotf curShot=shotFromTrackball().first;
+    Shotm curShot=shotFromTrackball().first;
     emit transmitShot(name, curShot);
 }
 void GLArea::sendRasterShot(QString name)
 {
-    Shotf curShot = vcg::Shotf();
+    Shotm curShot;
     if (this->md()->rm() != NULL)
         curShot = this->md()->rm()->shot;
     emit transmitShot(name, curShot);
@@ -1648,7 +1648,7 @@ void GLArea::loadRaster(int id)
                 Point3f p2 = (Point3f(0,0,cameraDist));
 
                 trackball.track.sca =fabs(p2.Z()/p1.Z());
-                loadShot(QPair<Shotf, float> (rm->shot,trackball.track.sca));
+                loadShot(QPair<Shotm, float> (rm->shot,trackball.track.sca));
             }
             else
                 createOrthoView("Front");
@@ -1733,7 +1733,7 @@ float GLArea::getCameraDistance()
     return cameraDist;
 }
 
-void GLArea::initializeShot(Shotf &shot)
+void GLArea::initializeShot(Shotm &shot)
 {
     shot.Intrinsics.PixelSizeMm[0]=0.036916077;
     shot.Intrinsics.PixelSizeMm[1]=0.036916077;
@@ -1784,7 +1784,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 {
     QDomElement root = doc.documentElement();
     QDomNode node;
-    Shotf shot;
+    Shotm shot;
 
     node = root.firstChild();
 
@@ -1834,7 +1834,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
 
     trackball.track.sca =fabs(p2.Z()/p1.Z());
 
-    loadShot(QPair<Shotf, float> (shot,trackball.track.sca));
+    loadShot(QPair<Shotm, float> (shot,trackball.track.sca));
 
 }
 
@@ -1843,16 +1843,16 @@ ViewState file is an xml file format created by Meshlab with the action "copyToC
 */
 void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
 {
-    Shotf shot;
+    Shotm shot;
     QDomElement root = doc.documentElement();
     QDomNode node = root.firstChild();
 
     while(!node.isNull())
     {
         if (QString::compare(node.nodeName(),"VCGCamera")==0)
-            ReadShotFromQDomNode<Shotf>(shot,node);
+            ReadShotFromQDomNode(shot,node);
         else if (QString::compare(node.nodeName(),"CamParam")==0)
-            ReadShotFromOLDXML<Shotf>(shot,node);
+            ReadShotFromOLDXML(shot,node);
 
         else if (QString::compare(node.nodeName(),"ViewSettings")==0)
         {
@@ -1881,13 +1881,13 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
         node = node.nextSibling();
     }
 
-    loadShot(QPair<Shotf, float> (shot,trackball.track.sca));
+    loadShot(QPair<Shotm, float> (shot,trackball.track.sca));
 }
 QString GLArea::viewToText()
 {
     QString docString;
 
-    Shotf shot = shotFromTrackball().first;
+    Shotm shot = shotFromTrackball().first;
 
     QDomDocument doc("ViewState");
     QDomElement root = doc.createElement("project");
@@ -1931,9 +1931,9 @@ void GLArea::viewFromClipboard()
     loadViewFromViewStateFile(doc);
 }
 
-QPair<vcg::Shotf,float> GLArea::shotFromTrackball()
+QPair<Shotm,float> GLArea::shotFromTrackball()
 {
-    Shotf shot;
+    Shotm shot;
     initializeShot(shot);
 
     double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
@@ -1946,15 +1946,15 @@ QPair<vcg::Shotf,float> GLArea::shotFromTrackball()
     //Add translation S^(-1) R^(-1)(gl)
     //Shotd doesn't introduce scaling
     //---------------------------------------------------------------------
-    shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3f(0, 0, cameraDist)));
+    shot.Extrinsics.SetTra( shot.Extrinsics.Tra() + (Inverse(shot.Extrinsics.Rot())*Point3m(0, 0, cameraDist)));
 
-    vcg::Shotf newShot = track2ShotCPU<float>(shot, &trackball);
+    Shotm newShot = track2ShotCPU<Shotm::ScalarType>(shot, &trackball);
 
-    return QPair<Shotf, float> (newShot,trackball.track.sca);
+    return QPair<Shotm, float> (newShot,trackball.track.sca);
 }
 void GLArea::viewFromCurrentShot(QString kind)
 {
-    Shotf localShot;
+    Shotm localShot;
     if(kind=="Mesh" && this->md()->mm())   localShot = this->md()->mm()->cm.shot;
     if(kind=="Raster" && this->md()->rm()) localShot = this->md()->rm()->shot;
     if(!localShot.IsValid())
@@ -1963,13 +1963,13 @@ void GLArea::viewFromCurrentShot(QString kind)
         return;
     }
 
-    loadShot(QPair<Shotf, float>(localShot,trackball.track.sca));
+    loadShot(QPair<Shotm, float>(localShot,trackball.track.sca));
 }
 
 
-void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
+void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
 
-    Shotf shot = shotAndScale.first;
+    Shotm shot = shotAndScale.first;
 
     fov = shot.GetFovFromFocal();
 
@@ -2014,7 +2014,7 @@ void GLArea::loadShot(const QPair<vcg::Shotf,float> &shotAndScale){
 
 void GLArea::createOrthoView(QString dir)
 {
-    Shotf view;
+    Shotm view;
     initializeShot(view);
 
     fov =5;
@@ -2024,22 +2024,22 @@ void GLArea::createOrthoView(QString dir)
     trackball.Reset();
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
-    trackball.track.tra =  -this->md()->bbox().Center();
+    trackball.track.tra.Import(-this->md()->bbox().Center());
 
-    vcg::Matrix44f rot;
+    Matrix44m rot;
 
     if(dir == tr("Top"))
-        rot.SetRotateDeg(90,Point3f(1,0,0));
+        rot.SetRotateDeg(90,Point3m(1,0,0));
     else if(dir == tr("Bottom"))
-        rot.SetRotateDeg(90,Point3f(-1,0,0));
+        rot.SetRotateDeg(90,Point3m(-1,0,0));
     else if(dir == tr("Left"))
-        rot.SetRotateDeg(90,Point3f(0,1,0));
+        rot.SetRotateDeg(90,Point3m(0,1,0));
     else if(dir == tr("Right"))
-        rot.SetRotateDeg(90,Point3f(0,-1,0));
+        rot.SetRotateDeg(90,Point3m(0,-1,0));
     else if(dir == tr("Front"))
-        rot.SetRotateDeg(0,Point3f(0,1,0));
+        rot.SetRotateDeg(0,Point3m(0,1,0));
     else if(dir == tr("Back"))
-        rot.SetRotateDeg(180,Point3f(0,1,0));
+        rot.SetRotateDeg(180,Point3m(0,1,0));
 
     view.Extrinsics.SetRot(rot);
 
@@ -2050,11 +2050,11 @@ void GLArea::createOrthoView(QString dir)
     //Add translation S^(-1) R^(-1)(gl)
     //Shotd doesn't introduce scaling
     //---------------------------------------------------------------------
-    view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3f(0, 0, cameraDist)));
+    view.Extrinsics.SetTra( view.Extrinsics.Tra() + (Inverse(view.Extrinsics.Rot())*Point3m(0, 0, cameraDist)));
 
-    Shotf shot = track2ShotCPU(view, &trackball);
+    Shotm shot = track2ShotCPU(view, &trackball);
 
-    QPair<Shotf,float> shotAndScale = QPair<Shotf,float> (shot, trackball.track.sca);
+    QPair<Shotm,float> shotAndScale = QPair<Shotm,float> (shot, trackball.track.sca);
     loadShot(shotAndScale);
 }
 

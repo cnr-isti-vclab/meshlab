@@ -503,7 +503,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
         vertCoord.resize(m->cm.vert.size());
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
              if(!(*vi).IsD()) (*ci)=(*vi).P();
@@ -512,7 +512,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_VERTNORMAL)
     {
         vertNormal.resize(m->cm.vert.size());
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
              if(!(*vi).IsD()) (*ci)=(*vi).N();
@@ -521,7 +521,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
     if(changeMask & MeshModel::MM_FACENORMAL)
     {
         faceNormal.resize(m->cm.face.size());
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::FaceIterator fi;
         for(fi = m->cm.face.begin(), ci = faceNormal.begin(); fi != m->cm.face.end(); ++fi, ++ci)
          if(!(*fi).IsD()) (*ci) = (*fi).N();
@@ -593,7 +593,7 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
         if(vertCoord.size() != m->cm.vert.size()) return false;
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).P()=(*ci);
@@ -602,7 +602,7 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_VERTNORMAL)
     {
         if(vertNormal.size() != m->cm.vert.size()) return false;
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci=vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
             if(!(*vi).IsD()) (*vi).N()=(*ci);
@@ -611,7 +611,7 @@ bool MeshModelState::apply(MeshModel *_m)
     if(changeMask & MeshModel::MM_FACENORMAL)
     {
         if(faceNormal.size() != m->cm.face.size()) return false;
-        std::vector<Point3f>::iterator ci;
+        std::vector<Point3m>::iterator ci;
         CMeshO::FaceIterator fi;
         for(fi = m->cm.face.begin(), ci=faceNormal.begin(); fi != m->cm.face.end(); ++fi, ++ci)
             if(!(*fi).IsD()) (*fi).N()=(*ci);

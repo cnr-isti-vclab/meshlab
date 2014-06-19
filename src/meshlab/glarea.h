@@ -221,7 +221,7 @@ public:
     float lastRenderingTime() { return lastTime;}
     void drawGradient();
     void drawLight();
-	float getFov() { return fov; }
+    float getFov() { return fov; }
     bool showInterruptButton() const;
     void showInterruptButton(const bool& show);
 
@@ -236,8 +236,8 @@ signals :
         void transmitViewPos(QString name, vcg::Point3f dir);
         void transmitSurfacePos(QString name,vcg::Point3f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
-    void transmitShot(QString name, vcg::Shotf);
-    void transmitMatrix(QString name, vcg::Matrix44f);
+    void transmitShot(QString name, Shotm);
+    void transmitMatrix(QString name, Matrix44m);
     void updateLayerTable();
 public slots:
         void sendViewPos(QString name);
@@ -377,14 +377,14 @@ private:
 
     //-----------Shot support----------------------------
 public:
-  QPair<vcg::Shotf, float > shotFromTrackball();
+  QPair<Shotm, float > shotFromTrackball();
   void viewFromCurrentShot(QString kind);
   bool viewFromFile();
     void createOrthoView(QString);
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();
-  void loadShot(const QPair<vcg::Shotf, float> &) ;
+  void loadShot(const QPair<Shotm, float> &) ;
 
 private:
 
@@ -394,7 +394,7 @@ private:
   inline float viewRatio() const { return 1.75f; }
   inline float clipRatioNearDefault() const { return 0.3f; }
   inline float fovDefault() const { return 60.f; }
-  void initializeShot(vcg::Shotf &shot);
+  void initializeShot(Shotm &shot);
   void loadShotFromTextAlignFile(const QDomDocument &doc);
   void loadViewFromViewStateFile(const QDomDocument &doc);
 
@@ -463,7 +463,7 @@ private:
         refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
 
     vcg::Matrix44<T> model2;
-        model2 = (shotExtr)* track->Matrix();
+        model2 = (shotExtr)* vcg::Matrix44<T>::Construct(track->Matrix());
     vcg::Matrix44<T> model;
         model2.ToMatrix(model);
 

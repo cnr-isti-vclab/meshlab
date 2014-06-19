@@ -25,7 +25,7 @@
 #include <QMouseEvent>
 #include "mainwindow.h"
 
-using namespace vcg; 
+using namespace vcg;
 
 Splitter::Splitter ( QWidget * parent):QSplitter(parent){}
 Splitter::Splitter(Qt::Orientation orientation, QWidget *parent):QSplitter(orientation,parent){}
@@ -37,27 +37,27 @@ QSplitterHandle *Splitter::createHandle()
 
 MultiViewer_Container *Splitter::getRootContainer()
 {
-	Splitter * parentSplitter = qobject_cast<Splitter *>(this);
-	MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
-	while(!mvc)
-	{
-		parentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
-		mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
-	}
-	return mvc;
+    Splitter * parentSplitter = qobject_cast<Splitter *>(this);
+    MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
+    while(!mvc)
+    {
+        parentSplitter = qobject_cast<Splitter *>(parentSplitter->parent());
+        mvc= qobject_cast<MultiViewer_Container *>(parentSplitter);
+    }
+    return mvc;
 }
 
 SplitterHandle::SplitterHandle(Qt::Orientation orientation, QSplitter *parent):QSplitterHandle(orientation, parent){}
 
 void SplitterHandle::mousePressEvent ( QMouseEvent * e )
 {
-	QSplitterHandle::mousePressEvent(e);
+    QSplitterHandle::mousePressEvent(e);
 
-	if(e->button()== Qt::RightButton)
-	{
-		MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
-		if (window) window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
-	}
+    if(e->button()== Qt::RightButton)
+    {
+        MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
+        if (window) window->setHandleMenu(mapToGlobal(e->pos()), orientation(), splitter());
+    }
 }
 
 MultiViewer_Container::MultiViewer_Container(QWidget *parent)
@@ -70,29 +70,29 @@ MultiViewer_Container::MultiViewer_Container(QWidget *parent)
 }
 
 int MultiViewer_Container::getNextViewerId(){
-	int newId=-1;
+    int newId=-1;
 
   foreach(GLArea* view, viewerList)
   {
     if(newId < view->getId()) newId = view->getId();
   }
 
-	return ++newId;
+    return ++newId;
 }
 
 
 void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
-	/* The Viewers are organized like a BSP tree.
-	Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
-	HSplit
-	/   \
-	View1   VSplit
-	/   \
-	View2  HSplit
-	/
-	View3
-	In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
-	*/
+    /* The Viewers are organized like a BSP tree.
+    Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
+    HSplit
+    /   \
+    View1   VSplit
+    /   \
+    View2  HSplit
+    /
+    View3
+    In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
+    */
   //CASE 0: only when the first viewer is opened, just add it and return;
   if (viewerCounter()==0)
   {
@@ -102,7 +102,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient){
     //action for new viewer
     connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
     return;
-	}
+    }
 
   //CASE 1: happens only at the FIRST split;
   if (viewerCounter()==1)
@@ -232,32 +232,32 @@ currentId = viewerList.first()->getId();
 }
 
 void MultiViewer_Container::updateCurrent(int current){
-	int previousCurrentId = currentId;
-	currentId=current;
+    int previousCurrentId = currentId;
+    currentId=current;
   if(getViewer(previousCurrentId))
         update(previousCurrentId);
-	emit updateMainWindowMenus(); 
+    emit updateMainWindowMenus();
 }
 
 GLArea * MultiViewer_Container::getViewer(int id)
 {
   foreach ( GLArea* viewer, viewerList)
-		if (viewer->getId() == id)
-			return viewer;
-	return 0;
+        if (viewer->getId() == id)
+            return viewer;
+    return 0;
 }
 
 int MultiViewer_Container::getViewerByPicking(QPoint p){
   foreach ( GLArea* viewer, viewerList){
-		QPoint pViewer = viewer->mapFromGlobal(p);
-		if(viewer->visibleRegion().contains(pViewer))
-			return viewer->getId();
-	}
-	return -1;
+        QPoint pViewer = viewer->mapFromGlobal(p);
+        if(viewer->visibleRegion().contains(pViewer))
+            return viewer->getId();
+    }
+    return -1;
 }
 
 GLArea* MultiViewer_Container::currentView(){
-	return getViewer(currentId);
+    return getViewer(currentId);
 }
 
 int MultiViewer_Container::viewerCounter(){
@@ -266,7 +266,7 @@ int MultiViewer_Container::viewerCounter(){
 
 void MultiViewer_Container::updateAllViewer(){
   foreach ( GLArea* viewer, viewerList)
-		viewer->update();
+        viewer->update();
 }
 
 void MultiViewer_Container::resetAllTrackBall(){
@@ -275,46 +275,46 @@ void MultiViewer_Container::resetAllTrackBall(){
 }
 
 void MultiViewer_Container::update(int id){
-	getViewer(id)->update();
+    getViewer(id)->update();
 }
 
 void MultiViewer_Container::updateTrackballInViewers()
 {
-	GLArea* glArea = qobject_cast<GLArea*>(currentView());
-	if(glArea)
-	{
-    QPair<Shotf,float> shotAndScale = glArea->shotFromTrackball();
+    GLArea* glArea = qobject_cast<GLArea*>(currentView());
+    if(glArea)
+    {
+    QPair<Shotm,float> shotAndScale = glArea->shotFromTrackball();
     foreach(GLArea* viewer, viewerList)
-			if(viewer->getId() != currentId){
-				((GLArea*) viewer)->loadShot(shotAndScale);
-			}
-	}
+            if(viewer->getId() != currentId){
+                ((GLArea*) viewer)->loadShot(shotAndScale);
+            }
+    }
 }
 
 void MultiViewer_Container::closeEvent( QCloseEvent *event )
 {
-	if (meshDoc.hasBeenModified())
-	{
-		QMessageBox::StandardButton ret=QMessageBox::question(
-			this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(meshDoc.docLabel()),
-			QMessageBox::Yes|QMessageBox::No,
-			QMessageBox::No);
-		if(ret==QMessageBox::No)	// don't close please!
-		{	
-			event->ignore();
-			return;
-		}
-	}
-	bool close = true;
-	int ii = 0;
-	while(close && (ii < viewerList.size()))
-	{
-		close = viewerList.at(ii)->readyToClose();
-		++ii;
-	}
+    if (meshDoc.hasBeenModified())
+    {
+        QMessageBox::StandardButton ret=QMessageBox::question(
+            this,  tr("MeshLab"), tr("Project '%1' modified.\n\nClose without saving?").arg(meshDoc.docLabel()),
+            QMessageBox::Yes|QMessageBox::No,
+            QMessageBox::No);
+        if(ret==QMessageBox::No)	// don't close please!
+        {
+            event->ignore();
+            return;
+        }
+    }
+    bool close = true;
+    int ii = 0;
+    while(close && (ii < viewerList.size()))
+    {
+        close = viewerList.at(ii)->readyToClose();
+        ++ii;
+    }
 
-	if (close)
-		event->accept();
-	else
-		event->ignore();
+    if (close)
+        event->accept();
+    else
+        event->ignore();
 }

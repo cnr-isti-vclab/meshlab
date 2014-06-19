@@ -327,7 +327,7 @@ void MainWindow::updateSubFiltersMenu( const bool createmenuenabled,const bool v
     updateMenuItems(filterMenuTexture,validmeshdoc);
     filterMenuCamera->setEnabled(validmeshdoc);
     updateMenuItems(filterMenuCamera,validmeshdoc);
-    
+
 }
 
 void MainWindow::updateMenuItems(QMenu* menu,const bool enabled)
@@ -918,14 +918,14 @@ void MainWindow::runFilterScript()
                     {
                         MLXMLPluginInfo::XMLMap& parinfo = params[i];
 
-                        //if this is a mesh parameter and the index is valid 
+                        //if this is a mesh parameter and the index is valid
                         if(parinfo[MLXMLElNames::paramType]  == MLXMLElNames::meshType)
                         {
                             QString& parnm = parinfo[MLXMLElNames::paramName];
                             MeshModel* meshmdl = envwrap.evalMesh(parnm);
                             if( meshmdl == NULL)
                             {
-                                //parnm is associated with ,   
+                                //parnm is associated with ,
                                 printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), envwrap.evalInt(parnm) );
                                 printf("One of the filters in the script needs more meshes than you have loaded.\n");
                                 return;
@@ -938,8 +938,8 @@ void MainWindow::runFilterScript()
                     bool created = cppfilt->glContext->create(wid.context());
                     if ((!created) || (!cppfilt->glContext->isValid()))
                         throw MeshLabException("A valid GLContext is required by the filter to work.\n");
-                    
-                    
+
+
                     //WARNING!!!!!!!!!!!!
                     /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
                     meshDoc()->setBusy(true);
@@ -1150,12 +1150,12 @@ void MainWindow::startFilter()
                     bool jscode = (filt.xmlInfo->filterScriptCode(filt.act->text()) != "");
                     bool filtercpp = (ifilter != NULL) && (!jscode);
 
-                    /*Mock Parameters (there are no ones in the filter indeed) for the filter history.The filters with parameters are inserted by the applyClick of the XMLStdParDialog. 
+                    /*Mock Parameters (there are no ones in the filter indeed) for the filter history.The filters with parameters are inserted by the applyClick of the XMLStdParDialog.
                     That is the only place where I can easily evaluate the parameter values without writing a long, boring and horrible if on the filter type for the correct evaluation of the expressions contained inside the XMLWidgets*/
                     QMap<QString,QString> mock;
                     meshDoc()->filterHistory->addExecutedXMLFilter(fname,mock);
 
-                    executeFilter(&filt, mock, false);            
+                    executeFilter(&filt, mock, false);
                     meshDoc()->Log.Logf(GLLogStream::SYSTEM,"OUT OF SCOPE\n");
                 }
                 //delete env;
@@ -1462,7 +1462,10 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 
     bool ret = true;
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-    //meshDoc()->setBusy(true);
+    bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
+
+    if(!isinter) meshDoc()->setBusy(true);
+
     //RichParameterSet MergedEnvironment(params);
     //MergedEnvironment.join(currentGlobalParams);
 
@@ -1551,7 +1554,7 @@ void MainWindow::postFilterExecution()
         mfc->filterInterface->setInterrupt(false);
 
     QString fname = mfc->act->text();
-    //meshDoc()->setBusy(false);
+    meshDoc()->setBusy(false);
 
 
 
@@ -1924,7 +1927,7 @@ void MainWindow::saveProject()
     if (QString(fi.suffix()).toLower() == "aln")
     {
         vector<string> meshNameVector;
-        vector<Matrix44f> transfVector;
+        vector<Matrix44m> transfVector;
 
         foreach(MeshModel * mp, meshDoc()->meshList)
         {
@@ -2005,7 +2008,7 @@ bool MainWindow::openProject(QString fileName)
             meshDoc()->addNewMesh(relativeToProj,relativeToProj);
             openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
             if(openRes)
-                meshDoc()->mm()->cm.Tr=(*ir).trasformation;
+                meshDoc()->mm()->cm.Tr.Import((*ir).trasformation);
             else
                 meshDoc()->delMesh(meshDoc()->mm());
         }
@@ -2022,7 +2025,7 @@ bool MainWindow::openProject(QString fileName)
         {
             QString fullPath = meshDoc()->meshList[i]->fullName();
             meshDoc()->setBusy(true);
-            Matrix44f trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+            Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
             if (!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]))
                 meshDoc()->delMesh(meshDoc()->meshList[i]);
             else
@@ -2185,7 +2188,7 @@ bool MainWindow::appendProject(QString fileName)
                 meshDoc()->addNewMesh(relativeToProj,relativeToProj);
                 openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
                 if(openRes)
-                    meshDoc()->mm()->cm.Tr=(*ir).trasformation;
+                    meshDoc()->mm()->cm.Tr.Import((*ir).trasformation);
                 else
                     meshDoc()->delMesh(meshDoc()->mm());
             }
@@ -2202,7 +2205,7 @@ bool MainWindow::appendProject(QString fileName)
             {
                 QString fullPath = meshDoc()->meshList[i]->fullName();
                 meshDoc()->setBusy(true);
-                Matrix44f trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+                Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
                 if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]))
                     meshDoc()->delMesh(meshDoc()->meshList[i]);
                 else
@@ -2304,7 +2307,7 @@ bool MainWindow::importRaster(const QString& fileImg)
             if (!ret || (ImageInfo.CCDWidth==0.0f && ImageInfo.FocalLength35mmEquiv==0.0f))
             {
                 rm->shot.Intrinsics.ViewportPx = vcg::Point2i(rm->currentPlane->image.width(), rm->currentPlane->image.height());
-                rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
+                rm->shot.Intrinsics.CenterPx   = Point2m(float(rm->currentPlane->image.width()/2.0), float(rm->currentPlane->image.width()/2.0));
                 rm->shot.Intrinsics.PixelSizeMm[0]=36.0f/(float)rm->currentPlane->image.width();
                 rm->shot.Intrinsics.PixelSizeMm[1]=rm->shot.Intrinsics.PixelSizeMm[0];
                 rm->shot.Intrinsics.FocalMm = 50.0f;
@@ -2312,7 +2315,7 @@ bool MainWindow::importRaster(const QString& fileImg)
             else if (ImageInfo.CCDWidth!=0)
             {
                 rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-                rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
                 float ratio;
                 if (ImageInfo.Width>ImageInfo.Height)
                     ratio=(float)ImageInfo.Width/(float)ImageInfo.Height;
@@ -2325,7 +2328,7 @@ bool MainWindow::importRaster(const QString& fileImg)
             else
             {
                 rm->shot.Intrinsics.ViewportPx = vcg::Point2i(ImageInfo.Width, ImageInfo.Height);
-                rm->shot.Intrinsics.CenterPx   = vcg::Point2f(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
+                rm->shot.Intrinsics.CenterPx   = Point2m(float(ImageInfo.Width/2.0), float(ImageInfo.Height/2.0));
                 float ratioFocal=ImageInfo.FocalLength/ImageInfo.FocalLength35mmEquiv;
                 rm->shot.Intrinsics.PixelSizeMm[0]=(36.0f*ratioFocal)/(float)ImageInfo.Width;
                 rm->shot.Intrinsics.PixelSizeMm[1]=(24.0f*ratioFocal)/(float)ImageInfo.Height;
