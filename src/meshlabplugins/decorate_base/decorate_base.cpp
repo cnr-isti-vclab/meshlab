@@ -197,7 +197,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
         glColor4f(.1f,.4f,4.f,.6f);
         for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
         {
-          Point3f b=Barycenter(*fi);
+          Point3m b=Barycenter(*fi);
           glVertex(b);
           glVertex(b+(*fi).N()*LineLen);
         }
@@ -209,11 +209,11 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
             glColor4f(1.0,0.0,0.0,.8f);
             glVertex((*vi).P());
             glColor4f(0.0,1.0,0.0,.1f);
-            glVertex((*vi).P()+(*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25);
+            glVertex(Point3f::Construct((*vi).P())+(*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25);
             glColor4f(0.0,1.0,0.0,.8f);
             glVertex((*vi).P());
             glColor4f(0.0,1.0,0.0,.1f);
-            glVertex((*vi).P()+(*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25);
+            glVertex(Point3f::Construct((*vi).P())+(*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25);
           }
       glEnd();
       glPopAttrib();
@@ -416,8 +416,8 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     case DP_SHOW_BOUNDARY_TEX :
     {
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-      CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3f> >(m.cm,"BoundaryTexVector");
-        vector<Point3f> *BTVp = &btvH();
+      CMeshO::PerMeshAttributeHandle< vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<Point3m> >(m.cm,"BoundaryTexVector");
+        vector<Point3m> *BTVp = &btvH();
         if (BTVp->size() != 0)
         {
           glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
@@ -431,7 +431,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
           glColor(Color4b::Green);
           glDepthRange (0.0, 0.999);
           glEnableClientState (GL_VERTEX_ARRAY);
-          glVertexPointer(3,GL_FLOAT,sizeof(Point3f),&(BTVp->begin()[0]));
+          glVertexPointer(3,GL_FLOAT,sizeof(Point3m),&(BTVp->begin()[0]));
           glDrawArrays(GL_LINES,0,BTVp->size());
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
@@ -538,7 +538,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
     glGetIntegerv(GL_VIEWPORT,vp);
 
     // Mesh boundingBox
-    Box3f b(m.cm.bbox);
+    Box3m b(m.cm.bbox);
     glColor(Color4b::LightGray);
     glBoxWire(b);
 
@@ -547,7 +547,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 
     Point3d p1,p2;
 
-    Point3f c = b.Center();
+    Point3m c = b.Center();
 
     float s = 1.15f;
   const float LabelSpacing = 30;
@@ -576,7 +576,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 
 }
 
-void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
+void ExtraMeshDecoratePlugin::chooseX(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -585,7 +585,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,GLint *vp
     c[2] = 0;
 
     Point3d out1,out2;
-    Point3f in1,in2;
+    Point3m in1,in2;
 
     for (int i=0;i<8;i+=2)
     {
@@ -609,7 +609,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3f &box,double *mm,double *mp,GLint *vp
 }
 
 
-void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
+void ExtraMeshDecoratePlugin::chooseY(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -618,7 +618,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,GLint *vp
     c[2] = 0;
 
     Point3d out1,out2;
-    Point3f in1,in2;
+    Point3m in1,in2;
 
     for (int i=0;i<6;++i)
     {
@@ -642,7 +642,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3f &box,double *mm,double *mp,GLint *vp
     }
 }
 
-void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
+void ExtraMeshDecoratePlugin::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -651,7 +651,7 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3f &box,double *mm,double *mp,GLint *vp
     c[2] = 0;
 
     Point3d out1,out2;
-    Point3f in1,in2;
+    Point3m in1,in2;
 
     Point3d m;
 
@@ -736,7 +736,7 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
                         glVertex(Zero+v*i);
                     glEnd();
           for(i=firstTick; (i+labelMargin)<bVal;i+=tickScalarDistance)
-            glLabel::render(painter,Point3f::Construct(Zero+v*i),tr("%1   ").arg(i,4+neededZeros,'f',neededZeros),md);
+            glLabel::render(painter,Point3m::Construct(Zero+v*i),tr("%1   ").arg(i,4+neededZeros,'f',neededZeros),md);
                  glPointSize(1);
                  glBegin(GL_POINTS);
             for(i=firstTickTen;i<bVal;i+=tickDistTen)
@@ -778,10 +778,10 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glColor(Color4b::Cyan);
     Box3f b;
     if(absBBoxFlag) {
-            b=m.cm.bbox;
+            b.Import(m.cm.bbox);
             glColor(Color4b::Cyan);
     } else {
-            b=m.cm.trBB();
+            b.Import(m.cm.trBB());
             glColor(Color4b::Green);
     }
     Point3f mi=b.min;
@@ -1056,8 +1056,8 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
   case DP_SHOW_BOUNDARY_TEX :
   {
     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-    CMeshO::PerMeshAttributeHandle< vector<Point3f> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3f> >(m.cm,"BoundaryTexVector");
-    vector<Point3f> *BTVp = &btvH();
+    CMeshO::PerMeshAttributeHandle< vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<Point3m> >(m.cm,"BoundaryTexVector");
+    vector<Point3m> *BTVp = &btvH();
     BTVp->clear();
     vector<std::pair<CMeshO::FacePointer,int> > SaveTopoVec;
     CMeshO::FaceIterator fi;
@@ -1115,8 +1115,8 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
                (*fi).V0(i)->SetV();
             }
 
-            Point3f P1=((*fi).V0(i)->P()+(*fi).V1(i)->P())/2.0f;
-            Point3f P2=((*fi).V0(i)->P()+(*fi).V2(i)->P())/2.0f;
+            Point3m P1=((*fi).V0(i)->P()+(*fi).V1(i)->P())/2.0f;
+            Point3m P2=((*fi).V0(i)->P()+(*fi).V2(i)->P())/2.0f;
             FVp->push_back(make_pair((*fi).V0(i)->P(),vCol));
             FVp->push_back(make_pair(P1,bCol));
             FVp->push_back(make_pair(P2,bCol));
@@ -1250,7 +1250,7 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
   for(size_t i=0;i<m.cm.face.size();++i)
     if(!m.cm.face[i].IsD())
     {
-      Point3f bar=Barycenter(m.cm.face[i]);
+      Point3m bar=Barycenter(m.cm.face[i]);
       glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
     }
   glPopAttrib();
@@ -1265,7 +1265,7 @@ void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
   for(size_t i=0;i<m.cm.edge.size();++i)
     if(!m.cm.edge[i].IsD())
     {
-      Point3f bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
+      Point3m bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
       glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
     }
   glPopAttrib();
@@ -1291,7 +1291,7 @@ void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
 }
 
 
-void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotf &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
+void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
 {
   if(!ls.IsValid())
   {
@@ -1309,10 +1309,10 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotf &ls, int camera
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) typeBuf="Persp";
   if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       typeBuf="Ortho";
 
-  Point3f vp = ls.GetViewPoint();
-  Point3f ax0 = ls.Axis(0);
-  Point3f ax1 = ls.Axis(1);
-  Point3f ax2 = ls.Axis(2);
+  Point3m vp = ls.GetViewPoint();
+  Point3m ax0 = ls.Axis(0);
+  Point3m ax1 = ls.Axis(1);
+  Point3m ax2 = ls.Axis(2);
   float fov = ls.GetFovFromFocal();
   float focal = ls.Intrinsics.FocalMm;
 //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("ViewPoint %1 %2 %3").arg(vp[0]).arg(vp[1]).arg(vp[2]));
@@ -1342,7 +1342,7 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotf &ls, int camera
       focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
+void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
 {
   if(!ls.IsValid())  // no drawing if camera not valid
     return;
@@ -1350,10 +1350,10 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
   if((m!=NULL) && (!m->visible))  // no drawing if mesh invisible
     return;
 
-  Point3f vp = ls.GetViewPoint();
-  Point3f ax0 = ls.Axis(0);
-  Point3f ax1 = ls.Axis(1);
-  Point3f ax2 = ls.Axis(2);
+  Point3m vp = ls.GetViewPoint();
+  Point3m ax0 = ls.Axis(0);
+  Point3m ax1 = ls.Axis(1);
+  Point3m ax2 = ls.Axis(2);
 //  float fov = ls.GetFovFromFocal();
 //  float focal = ls.Intrinsics.FocalMm;
 
@@ -1404,9 +1404,9 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotf &ls, vcg::Color4b c
 
 
     // Now draw the frustum
-    Point3f viewportCenter = vp - (ax2*ls.Intrinsics.FocalMm * drawscale);
-    Point3f viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f * drawscale);
-    Point3f viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f * drawscale);
+    Point3m viewportCenter = vp - (ax2*ls.Intrinsics.FocalMm * drawscale);
+    Point3m viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f * drawscale);
+    Point3m viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f * drawscale);
 
 
     glBegin(GL_LINES);

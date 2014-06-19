@@ -31,7 +31,7 @@
 class QGLShaderProgram;
 typedef vcg::ColorHistogram<float>  CHist;
 
-typedef std::pair<vcg::Point3f,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
+typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
 class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 {
@@ -70,9 +70,9 @@ private:
 
   void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
 
-    void	chooseX(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &x1,vcg::Point3d &x2);
-    void	chooseY(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
-    void	chooseZ(vcg::Box3f &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
+    void	chooseX(Box3m &box, double *modelview, double *projection, GLint *viewport, vcg::Point3d &x1, vcg::Point3d &x2);
+    void	chooseY(Box3m &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
+    void	chooseZ(Box3m &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
   void drawHistogram(QGLWidget *gla, CHist &ch);
 
   vcg::Color4b textColor;
@@ -123,8 +123,8 @@ public:
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawEdgeLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
-  void DisplayCamera(MeshModel *m, vcg::Shotf &ls, int cameraSourceId, QPainter *painter, QFont qf);
-  void DrawCamera(MeshModel *m, vcg::Shotf &ls, vcg::Color4b camcolor, vcg::Matrix44f &currtr, RichParameterSet *rm, QPainter *painter, QFont qf);
+  void DisplayCamera(MeshModel *m, Shotm &ls, int cameraSourceId, QPainter *painter, QFont qf);
+  void DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter *painter, QFont qf);
   void PlaceTexParam(int TexInd, int TexNum);
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
