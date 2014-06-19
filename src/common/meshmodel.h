@@ -63,6 +63,7 @@
 typedef vcg::Point2<MESHLAB_SCALAR>   Point2m;
 typedef vcg::Point3<MESHLAB_SCALAR>   Point3m;
 typedef vcg::Plane3<MESHLAB_SCALAR>   Plane3m;
+typedef vcg::Segment3<MESHLAB_SCALAR> Segment3m;
 typedef vcg::Box3<MESHLAB_SCALAR>     Box3m;
 typedef vcg::Matrix44<MESHLAB_SCALAR> Matrix44m;
 typedef vcg::Matrix33<MESHLAB_SCALAR> Matrix33m;
