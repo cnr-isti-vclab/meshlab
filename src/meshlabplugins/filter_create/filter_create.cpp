@@ -179,13 +179,13 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       math::MarsenneTwisterRNG rng;
       tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
       for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
-        vi->P()=math::GeneratePointOnUnitSphereUniform<float>(rng);
+        vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
       tri::UpdateBounding<CMeshO>::Box(tt);
 
       const float SphereArea = 4*M_PI;
       float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
 
-      std::vector<Point3f> poissonSamples;
+      std::vector<Point3m> poissonSamples;
       tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
       tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
 
@@ -196,8 +196,8 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     }
     else
     {
-      std::vector<Point3f> regularSamples;
-      GenNormal<float>::Regular(pointNum,regularSamples);
+      std::vector<Point3m> regularSamples;
+      GenNormal<CMeshO::ScalarType>::Regular(pointNum,regularSamples);
       m->cm.Clear();
       for(size_t i=0;i<regularSamples.size();++i)
         tri::Allocator<CMeshO>::AddVertex(m->cm,regularSamples[i],regularSamples[i]);
@@ -227,7 +227,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     case CR_BOX:
     {
       float sz=par.getFloat("size");
-      Box3f b(Point3f(1,1,1)*(-sz/2),Point3f(1,1,1)*(sz/2));
+      Box3m b(Point3m(1,1,1)*(-sz/2),Point3m(1,1,1)*(sz/2));
       tri::Box<CMeshO>(m->cm,b);
             m->updateDataMask(MeshModel::MM_POLYGONAL);
 
