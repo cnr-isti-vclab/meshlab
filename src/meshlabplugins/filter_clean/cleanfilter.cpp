@@ -39,38 +39,38 @@ using namespace vcg;
 
 int SnapVertexBorder(CMeshO &m, float threshold,vcg::CallBackPos * cb);
 
-CleanFilter::CleanFilter() 
+CleanFilter::CleanFilter()
 {
-  typeList 
-		<< FP_BALL_PIVOTING 
-		<< FP_REMOVE_WRT_Q 
-		<< FP_REMOVE_ISOLATED_COMPLEXITY 
-		<< FP_REMOVE_ISOLATED_DIAMETER 
+  typeList
+        << FP_BALL_PIVOTING
+        << FP_REMOVE_WRT_Q
+        << FP_REMOVE_ISOLATED_COMPLEXITY
+        << FP_REMOVE_ISOLATED_DIAMETER
     << FP_REMOVE_TVERTEX_FLIP
     << FP_REMOVE_TVERTEX_COLLAPSE
     << FP_SNAP_MISMATCHED_BORDER
-		<< FP_REMOVE_DUPLICATE_FACE
+        << FP_REMOVE_DUPLICATE_FACE
     << FP_REMOVE_FOLD_FACE
     << FP_REMOVE_NON_MANIF_EDGE
     << FP_REMOVE_NON_MANIF_VERT
-		<< FP_MERGE_CLOSE_VERTEX
-		<< FP_COMPACT_FACE
-		<< FP_COMPACT_VERT;
+        << FP_MERGE_CLOSE_VERTEX
+        << FP_COMPACT_FACE
+        << FP_COMPACT_VERT;
 
   FilterIDType tt;
   foreach(tt , types())
-	    actionList << new QAction(filterName(tt), this);
+        actionList << new QAction(filterName(tt), this);
   AC(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
-	maxDiag1=0;
-	maxDiag2=-1;
-	minCC=25;
-	val1=1.0;
+    maxDiag1=0;
+    maxDiag2=-1;
+    minCC=25;
+    val1=1.0;
 
 }
 
 CleanFilter::~CleanFilter() {
-	for (int i = 0; i < actionList.count() ; i++ ) 
-		delete actionList.at(i);
+    for (int i = 0; i < actionList.count() ; i++ )
+        delete actionList.at(i);
 }
 
 QString CleanFilter::filterName(FilterIDType filter) const
@@ -121,8 +121,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
     case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non manifold vertices until it becomes 2-manifold.");
-	case FP_COMPACT_VERT:            return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
-	case FP_COMPACT_FACE:            return QString("Compact all the faces that have been deleted and put them to the end of the vector");
+    case FP_COMPACT_VERT:            return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
+    case FP_COMPACT_FACE:            return QString("Compact all the faces that have been deleted and put them to the end of the vector");
     default: assert(0);
   }
   return QString("error!");
@@ -143,20 +143,20 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_SNAP_MISMATCHED_BORDER:
     case FP_REMOVE_NON_MANIF_EDGE:
     case FP_REMOVE_NON_MANIF_VERT:
-	case FP_COMPACT_VERT:
-	case FP_COMPACT_FACE:
+    case FP_COMPACT_VERT:
+    case FP_COMPACT_FACE:
       return MeshFilterInterface::Cleaning;
     case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
-    default : assert(0);  
-	}
+    default : assert(0);
+    }
 }
 
  int CleanFilter::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-	case FP_COMPACT_FACE:
-	case FP_COMPACT_VERT:
+    case FP_COMPACT_FACE:
+    case FP_COMPACT_VERT:
     case FP_REMOVE_WRT_Q:
     case FP_BALL_PIVOTING: MeshModel::MM_VERTMARK;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
@@ -177,29 +177,29 @@ QString CleanFilter::filterName(FilterIDType filter) const
 }
 
 void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
-{ 
-	pair<float,float> qualityRange;
+{
+    pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_BALL_PIVOTING :
-		  parlst.addParam(new RichAbsPerc("BallRadius",(float)maxDiag1,0,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
-		  parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));		  
-		  parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
-		  parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
-		  break;
-    case FP_REMOVE_ISOLATED_DIAMETER:	 
-		  parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
-		  break;
-    case FP_REMOVE_ISOLATED_COMPLEXITY:	 
-		  parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
-		  break;
+          parlst.addParam(new RichAbsPerc("BallRadius",(float)maxDiag1,0,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
+          parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));
+          parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
+          parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
+          break;
+    case FP_REMOVE_ISOLATED_DIAMETER:
+          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
+          break;
+    case FP_REMOVE_ISOLATED_COMPLEXITY:
+          parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
+          break;
     case FP_REMOVE_WRT_Q:
           qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-		  parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
-		  break;
-	case FP_MERGE_CLOSE_VERTEX :
-		  parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
-		  break;
+          parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
+          break;
+    case FP_MERGE_CLOSE_VERTEX :
+          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+          break;
     case FP_SNAP_MISMATCHED_BORDER:
     parlst.addParam(new RichFloat("EdgeDistRatio",1/100.0f,"Edge Distance Ratio", "Collapse edge when the edge / distance ratio is greater than this value. E.g. for default value 1000 two straight border edges are collapsed if the central vertex dist from the straight line composed by the two edges less than a 1/1000 of the sum of the edges lenght. Larger values enforce that only vertexes very close to the line are removed."));
     parlst.addParam(new RichBool("UnifyVertices",true,"UnifyVertices","if true the snap vertices are weld together."));
@@ -248,36 +248,36 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
       Log("Removed %2 connected components out of %1", delInfo.second, delInfo.first);
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
-	  {
-      float minCC= par.getInt("MinComponentSize");		
+      {
+      float minCC= par.getInt("MinComponentSize");
       std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
-			Log("Removed %i connected components out of %i", delInfo.second, delInfo.first); 		
-	  }break;
+            Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
+      }break;
     case FP_REMOVE_WRT_Q:
-	  {
-			int deletedFN=0;
-			int deletedVN=0;
-      float val=par.getAbsPerc("MaxQualityThr");		
+      {
+            int deletedFN=0;
+            int deletedVN=0;
+      float val=par.getAbsPerc("MaxQualityThr");
       CMeshO::VertexIterator vi;
       for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-						if(!(*vi).IsD() && (*vi).Q()<val)
-						{
-							tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
-							deletedVN++;
-						}
-        
+                        if(!(*vi).IsD() && (*vi).Q()<val)
+                        {
+                            tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
+                            deletedVN++;
+                        }
+
       CMeshO::FaceIterator fi;
       for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
-				 if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() ) 
-						 {
-								tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
-								deletedFN++;
-						 }
-								 
-	  m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-			Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val); 		
+                 if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() )
+                         {
+                                tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+                                deletedFN++;
+                         }
 
-	  }break;
+      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+            Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val);
+
+      }break;
 
     case FP_REMOVE_TVERTEX_COLLAPSE :
     {
@@ -337,20 +337,20 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
       int total = SnapVertexBorder(m.cm, threshold,cb);
       Log("Successfully Splitted %d faces to snap", total);
     } break;
-	
+
   case FP_COMPACT_FACE :
-	  {
-		  vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-		  break;
-	  }
+      {
+          vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+          break;
+      }
   case FP_COMPACT_VERT :
-	  {
-		  vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-		  break;
-	  }
+      {
+          vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+          break;
+      }
   default : assert(0); // unknown filter;
-	}
-	return true;
+    }
+    return true;
 }
 
 
@@ -374,9 +374,9 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
   markerFunctor.SetMesh(&m);
   int faceFound;
   int K = 20;
-  Point3f startPt;
+  Point3m startPt;
   float maxDist = m.bbox.Diag()/20;
-  vector<Point3f> splitVertVec;
+  vector<Point3m> splitVertVec;
   vector<CMeshO::FacePointer> splitFaceVec;
   vector<int> splitEdgeVec;
   for(CMeshO::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
@@ -386,14 +386,14 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
         cb(percPos,"Snapping vertices");
         vector<CMeshO::FacePointer> faceVec;
         vector<float> distVec;
-        vector<Point3f> pointVec;
-        Point3f u;
+        vector<Point3m> pointVec;
+        Point3m u;
         startPt = (*vi).P();
         faceFound = unifGridFace.GetKClosest(PDistFunct,markerFunctor, K, startPt,maxDist, faceVec, distVec, pointVec);
 
         CMeshO::FacePointer bestFace = 0;
         float localThr, bestDist = std::numeric_limits<float>::max();
-        Point3f bestPoint;
+        Point3m bestPoint;
         int bestEdge;
 //        qDebug("Found %i face for vertex %i",faceFound,vi-m.vert.begin());
         for(int i=0;i<faceFound;++i)
@@ -505,9 +505,9 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
               if(face::IsBorder(*fadj,(adjBordInd+1)%3))
               {
                 // the colinearity test;
-                Point3f pp;
-                float dist;
-                SegmentPointDistance(Segment3f(V0->cP(),V2->cP()),V1->cP(),pp,dist);
+                Point3m pp;
+                CMeshO::ScalarType dist;
+                SegmentPointDistance(Segment3m(V0->cP(),V2->cP()),V1->cP(),pp,dist);
                 if(dist* threshold <  Distance(V0->cP(),V2->cP()) )
                 {
                   (*fi).V1(i)=V2;
@@ -532,7 +532,7 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
             }
           }
         }
-	  return total;
+      return total;
 
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(CleanFilter)
