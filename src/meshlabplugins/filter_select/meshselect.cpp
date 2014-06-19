@@ -257,7 +257,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   {
     CMeshO::FaceIterator   fi;
     bool usecam = par.getBool("usecamera");
-    Point3f viewpoint = par.getPoint3f("viewpoint");
+    Point3m viewpoint =  par.getPoint3m("viewpoint");
 
     // if usecamera but mesh does not have one
     if( usecam && !m.hasDataMask(MeshModel::MM_CAMERA) )
@@ -272,7 +272,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 
     // angle threshold in radians
     float limit = cos( math::ToRad(par.getDynamicFloat("anglelimit")) );
-    Point3f viewray;
+    Point3m viewray;
 
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD())
