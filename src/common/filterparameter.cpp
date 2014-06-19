@@ -87,9 +87,10 @@ void RichParameterSet::setValue(QString name,const Value& newval){ findParameter
      QString RichParameterSet::getString(QString name)   const { return findParameter(name)->val->getString();}
    Matrix44f RichParameterSet::getMatrix44(QString name) const { return findParameter(name)->val->getMatrix44f();}
      Point3f RichParameterSet::getPoint3f(QString name)  const { return findParameter(name)->val->getPoint3f();}
+     Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(QString name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getPoint3f());}
        Shotf RichParameterSet::getShotf(QString name)    const { return findParameter(name)->val->getShotf();}
        float RichParameterSet::getAbsPerc(QString name)  const { return findParameter(name)->val->getAbsPerc();}
-                 int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
+         int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
 QList<float> RichParameterSet::getFloatList(QString name)    const { return findParameter(name)->val->getFloatList();}
  MeshModel * RichParameterSet::getMesh(QString name)         const { return findParameter(name)->val->getMesh();}
        float RichParameterSet::getDynamicFloat(QString name) const { return findParameter(name)->val->getDynamicFloat();}
@@ -835,6 +836,10 @@ RichMatrix44f::~RichMatrix44f()
 }
 
 RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
+{
+
+}
+RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3d defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
 {
 
 }

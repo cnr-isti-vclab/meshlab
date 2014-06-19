@@ -56,6 +56,41 @@
 #include "GLLogStream.h"
 #include "filterscript.h"
 
+#ifndef MESHLAB_SCALAR
+#error "Fatal compilation error: MESHLAB_SCALAR must be defined"
+#endif
+
+typedef vcg::Point2<MESHLAB_SCALAR>   Point2m;
+typedef vcg::Point3<MESHLAB_SCALAR>   Point3m;
+typedef vcg::Plane3<MESHLAB_SCALAR>   Plane3m;
+typedef vcg::Box3<MESHLAB_SCALAR>     Box3m;
+typedef vcg::Matrix44<MESHLAB_SCALAR> Matrix44m;
+typedef vcg::Matrix33<MESHLAB_SCALAR> Matrix33m;
+typedef vcg::Shot<MESHLAB_SCALAR>     Shotm;
+
+namespace vcg
+{
+  namespace vertex
+  {
+    template <class T> class Coord3m: public Coord<vcg::Point3<MESHLAB_SCALAR>, T> {
+    public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Coord3m"));T::Name(name);}
+    };
+
+    template <class T> class Normal3m: public Normal<vcg::Point3<MESHLAB_SCALAR>, T> {
+    public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
+    };
+
+  }//end namespace vertex
+  namespace face
+  {
+    template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
+    public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
+    };
+  }//end namespace face
+}//end namespace vcg
+
+
+
 // Forward declarations needed for creating the used types
 class CVertexO;
 class CEdgeO;
@@ -73,9 +108,9 @@ class CUsedTypesO: public vcg::UsedTypes < vcg::Use<CVertexO>::AsVertexType,
 
 class CVertexO  : public vcg::Vertex< CUsedTypesO,
     vcg::vertex::InfoOcf,           /*  4b */
-    vcg::vertex::Coord3f,           /* 12b */
+    vcg::vertex::Coord3m,           /* 12b */
     vcg::vertex::BitFlags,          /*  4b */
-    vcg::vertex::Normal3f,          /* 12b */
+    vcg::vertex::Normal3m,          /* 12b */
     vcg::vertex::Qualityf,          /*  4b */
     vcg::vertex::Color4b,           /*  4b */
     vcg::vertex::VFAdjOcf,          /*  0b */
@@ -102,7 +137,7 @@ class CFaceO    : public vcg::Face<  CUsedTypesO,
     vcg::face::InfoOcf,              /* 4b */
     vcg::face::VertexRef,            /*12b */
     vcg::face::BitFlags,             /* 4b */
-    vcg::face::Normal3f,             /*12b */
+    vcg::face::Normal3m,             /*12b */
     vcg::face::QualityfOcf,          /* 0b */
     vcg::face::MarkOcf,              /* 0b */
     vcg::face::Color4bOcf,           /* 0b */
@@ -116,11 +151,11 @@ class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, v
 public :
     int sfn;    //The number of selected faces.
     int svn;    //The number of selected vertices.
-    vcg::Matrix44f Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
+    Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 
-    const vcg::Box3f &trBB()
+    const Box3m &trBB()
     {
-        static vcg::Box3f bb;
+        static Box3m bb;
         bb.SetNull();
         bb.Add(Tr,bbox);
         return bb;
@@ -354,7 +389,7 @@ public:
     MeshLabRenderRaster(const MeshLabRenderRaster& rm);
     ~MeshLabRenderRaster();
 
-    vcg::Shotf shot;
+    Shotm shot;
 
     ///The list of the registered images
     QList<Plane *> planeList;
@@ -680,9 +715,9 @@ public:
         return tot;
     }
 
-    vcg::Box3f bbox()
+    Box3m bbox()
     {
-        vcg::Box3f FullBBox;
+        Box3m FullBBox;
         foreach(MeshModel * mp, meshList)
             FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
         return FullBBox;
@@ -732,13 +767,13 @@ private:
     std::vector<float> vertQuality;
     std::vector<vcg::Color4b> vertColor;
     std::vector<vcg::Color4b> faceColor;
-    std::vector<vcg::Point3f> vertCoord;
-    std::vector<vcg::Point3f> vertNormal;
-    std::vector<vcg::Point3f> faceNormal;
+    std::vector<Point3m> vertCoord;
+    std::vector<Point3m> vertNormal;
+    std::vector<Point3m> faceNormal;
     std::vector<bool> faceSelection;
     std::vector<bool> vertSelection;
-    vcg::Matrix44f Tr;
-    vcg::Shotf shot;
+    Matrix44m Tr;
+    Shotm shot;
 public:
     // This function save the <mask> portion of a mesh into the private members of the MeshModelState class;
     void create(int _mask, MeshModel* _m);
