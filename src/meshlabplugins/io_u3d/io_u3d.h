@@ -56,7 +56,7 @@ class U3DIOPlugin : public QObject, public MeshIOInterface
 
 
 	void saveParameters(const RichParameterSet &par);
-	vcg::tri::io::u3dparametersclasses::Movie15Parameters _param;
+	vcg::tri::io::u3dparametersclasses::Movie15Parameters<CMeshO> _param;
 	
 };
 
