@@ -62,10 +62,10 @@ class MeshModel;
 class MainWindowInterface
 {
 public:
-  virtual void executeFilter(QAction *, RichParameterSet &, bool  isPreview = false ){}
+  virtual void executeFilter(QAction *, RichParameterSet &, bool  = false ){}
   //parexpval is a string map containing the parameter expression values set in the filter's dialog. 
   //These parameter expression values will be evaluated when the filter will start.
-  virtual void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& parexpval , bool  isPreview = false){}
+  virtual void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& , bool = false){}
   //virtual void executeFilter(MeshLabXMLFilterContainer*,Env& envcode , bool  isPreview = false) {}
 };
 
@@ -426,9 +426,9 @@ public:
     MeshRenderInterface() :MeshCommonInterface() {}
     virtual ~MeshRenderInterface() {}
 
-  virtual void Init(QAction * /*mode*/, MeshDocument &/*m*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/){}
-    virtual void Render(QAction * /*mode*/, MeshDocument &/*md*/, QMap<int,RenderMode>&/*rm*/, QGLWidget * /*parent*/) = 0;
-  virtual void Finalize(QAction * /*mode*/, MeshDocument */*m*/, GLArea * /*parent*/){}
+  virtual void Init(QAction * , MeshDocument &, QMap<int,RenderMode>&, QGLWidget * ){}
+    virtual void Render(QAction *, MeshDocument &, QMap<int,RenderMode>&, QGLWidget *) = 0;
+  virtual void Finalize(QAction *, MeshDocument *, GLArea *){}
     virtual bool isSupported() = 0;
     virtual QList<QAction *> actions() = 0;
 };
@@ -483,12 +483,12 @@ public:
   virtual QString decorationInfo(QAction *a) const {return decorationInfo(ID(a));}
 
 
-  virtual bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) {return false;}
-  virtual bool startDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet * /*param*/, GLArea * /*parent*/) {return false;}
-  virtual void decorateMesh(QAction * /*mode*/,  MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
-  virtual void decorateDoc(QAction * /*mode*/,  MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/, QPainter */*p*/, GLLogStream &/*log*/) = 0;
-  virtual void endDecorate(QAction * /*mode*/,   MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
-  virtual void endDecorate(QAction * /*mode*/,   MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/){}
+  virtual bool startDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) {return false;}
+  virtual bool startDecorate(QAction *, MeshModel &, RichParameterSet *, GLArea *) {return false;}
+  virtual void decorateMesh(QAction *,  MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
+  virtual void decorateDoc(QAction *,  MeshDocument &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
+  virtual void endDecorate(QAction *,   MeshModel &, RichParameterSet *, GLArea *){}
+  virtual void endDecorate(QAction *,   MeshDocument &, RichParameterSet *, GLArea *){}
 
   /** \brief tests if a decoration is applicable to a mesh.
    * used only for PerMesh Decorators.
@@ -496,9 +496,9 @@ public:
   On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
   It is invoked only for decoration of \i PerMesh class;
   */
-  virtual bool isDecorationApplicable(QAction */*action*/, const MeshModel& /*m*/, QString&/*MissingItems*/) const {return true;}
+  virtual bool isDecorationApplicable(QAction *, const MeshModel&, QString&) const {return true;}
 
-  virtual int getDecorationClass(QAction */*action*/) const =0;
+  virtual int getDecorationClass(QAction *) const =0;
 
   virtual QList<QAction *> actions() const { return actionList;}
   virtual QList<FilterIDType> types() const { return typeList;}
