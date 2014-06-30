@@ -47,9 +47,8 @@ void TriIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
 	}
 }
 
-bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *)
 {
-	bool result;
 	if(formatName.toUpper() == tr("TRI"))
 		{
 			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
@@ -71,10 +70,10 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			
 		return true;
 		}
-	return result;
+	return false;
 }
 
-bool TriIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool TriIOPlugin::save(const QString &, const QString &, MeshModel &, const int, const RichParameterSet &, vcg::CallBackPos *, QWidget *)
 {
 	assert(0);
 	return false;
@@ -105,7 +104,7 @@ QList<MeshIOInterface::Format> TriIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TriIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void TriIOPlugin::GetExportMaskCapability(QString &, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;
@@ -220,7 +219,7 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
   float x, y, z;
   for (int i = 0; i < numPoints; ++i) {
     err = readPoint(fp, TRIInverseBytes, x, y, z);
-		m.vert[i].P()=Point3f(x, y, z);
+		m.vert[i].P()=Point3m(x, y, z);
   }
 
   if (err) {
@@ -282,7 +281,7 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 			char texCode[4];
 			bool floatFlag=false;
 			
-			int ret=fread(texCode,sizeof(char),4,fp);
+			fread(texCode,sizeof(char),4,fp);
 			qDebug("TexString code is '%s' (int:%d) (float:%f)\n", texCode, *(int*)(&texCode[0]),  *(float*)(&texCode[0]));
 
 			if(feof(fp)){
