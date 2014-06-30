@@ -7,7 +7,6 @@ SUBDIRS       = common \
 # IO plugins
                 meshlabplugins/io_base\
                 meshlabplugins/io_3ds\
-                meshlabplugins/io_bre\
                 meshlabplugins/io_collada \
 				meshlabplugins/io_ctm \
                 meshlabplugins/io_json \
@@ -17,6 +16,7 @@ SUBDIRS       = common \
                 meshlabplugins/io_gts \
                 meshlabplugins/io_expe \
                 meshlabplugins/io_pdb \
+plugins_experimental/io_TXT \
 				meshlabplugins/filter_aging \
 				meshlabplugins/filter_ao \
                 meshlabplugins/filter_autoalign \
@@ -66,7 +66,8 @@ SUBDIRS       = common \
                 meshlabplugins/edit_measure \
                 meshlabplugins/edit_hole \
                 meshlabplugins/edit_paint\
-				meshlabplugins/edit_point\
+meshlabplugins/edit_point\
+plugins_experimental/edit_referencing \
                 meshlabplugins/edit_quality \
                 meshlabplugins/edit_texture \
 				meshlabplugins/edit_manipulators \
