@@ -505,11 +505,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       if(errorMessage != "") return false;
 
       if(ID(filter) == FF_GEOM_FUNC)  // set new vertex coord for this iteration
-        (*vi).P() = Point3f(newx,newy,newz);
+        (*vi).P() = Point3m(newx,newy,newz);
       if(ID(filter) == FF_VERT_COLOR) // set new color for this iteration
         (*vi).C() = Color4b(newx,newy,newz,newa);
       if(ID(filter) == FF_VERT_NORMAL) // set new color for this iteration
-        (*vi).N() = Point3f(newx,newy,newz);
+        (*vi).N() = Point3m(newx,newy,newz);
     }
 
     if(ID(filter) == FF_GEOM_FUNC) {
@@ -899,7 +899,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       }
     }
     // update bounding box, normals
-    Matrix44f rot; rot.SetRotateDeg(180,Point3f(0,1,0));
+    Matrix44m rot; rot.SetRotateDeg(180,Point3m(0,1,0));
     tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
     tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
     tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
@@ -910,9 +910,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     break;
   case FF_ISOSURFACE :
   {
-    SimpleVolume<SimpleVoxel> 	volume;
+    SimpleVolume<SimpleVoxel <float > > 	volume;
 
-    typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel> >	MyWalker;
+    typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel<float> > >	MyWalker;
     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
     MyWalker walker;
 
@@ -954,8 +954,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     Log("[MARCHING CUBES] Building mesh...");
     MyMarchingCubes					mc(m.cm, walker);
     walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, 0);
-    Matrix44f tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
-    Matrix44f sc; sc.SetIdentity(); sc.SetScale(step,step,step);
+    Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
+    Matrix44m sc; sc.SetIdentity(); sc.SetScale(step,step,step);
     tr=tr*sc;
 
     tri::UpdatePosition<CMeshO>::Matrix(m.cm,tr);
