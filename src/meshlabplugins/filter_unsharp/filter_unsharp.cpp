@@ -483,24 +483,24 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
         break;
   case FP_TWO_STEP_SMOOTH:
       {
-            tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-            tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-            int stepSmoothNum = par.getInt("stepSmoothNum");
-            // sigma==0 all is smoothed
-            // sigma==1 nothing is smoothed
-            float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
-            if(sigma<0) sigma=0;
+      tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+      tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+      int stepSmoothNum = par.getInt("stepSmoothNum");
+      // sigma==0 all is smoothed
+      // sigma==1 nothing is smoothed
+      float sigma   = cos(math::ToRad(par.getFloat("normalThr")));
+      if(sigma<0) sigma=0;
 
       int stepNormalNum = par.getInt("stepNormalNum");
-            int stepFitNum = par.getInt("stepFitNum");
+      int stepFitNum = par.getInt("stepFitNum");
       bool selectedFlag = par.getBool("Selected");
-            for(int i=0;i<stepSmoothNum;++i)
-            {
-                tri::UpdateNormal<CMeshO>::PerFaceNormalized(m.cm);
-                tri::Smooth<CMeshO>::VertexCoordPasoDobleFast(m.cm, stepNormalNum, sigma, stepFitNum,selectedFlag);
-            }
-            m.UpdateBoxAndNormals();
+      for(int i=0;i<stepSmoothNum;++i)
+      {
+        tri::UpdateNormal<CMeshO>::PerFaceNormalized(m.cm);
+        tri::Smooth<CMeshO>::VertexCoordPasoDoble(m.cm, stepNormalNum, sigma, stepFitNum,selectedFlag);
       }
+      m.UpdateBoxAndNormals();
+    }
         break;
     case FP_TAUBIN_SMOOTH :
       {
