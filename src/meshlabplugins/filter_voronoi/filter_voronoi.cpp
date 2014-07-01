@@ -63,10 +63,10 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     if(crossType == 0) // Linear Y
     {
       float range = m.cm.bbox.DimY();
-      for(int i=0;i<m.cm.vert.size();++i){
-        float q01 = .25f+(m.cm.vert[i].P().Y() - m.cm.bbox.min.Y())/(2.0f*range);
-        m.cm.vert[i].PD1()=Point3f(1,0,0)*q01;
-        m.cm.vert[i].PD2()=Point3f(0,1,0)*(sqrt(1-q01*q01));
+      for(size_t i=0;i<m.cm.vert.size();++i){
+        CMeshO::ScalarType q01 = .25f+(m.cm.vert[i].P().Y() - m.cm.bbox.min.Y())/(2.0f*range);
+        m.cm.vert[i].PD1().Import(Point3m(1,0,0)*q01);
+        m.cm.vert[i].PD2().Import(Point3m(0,1,0)*(sqrt(1-q01*q01)));
       }
     }
 
@@ -90,7 +90,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
 
     const int  sampleNum =env.evalInt("sampleNum");
     const int  iterNum =  env.evalInt("iterNum");
-    const float radiusVariance = env.evalFloat("radiusVariance");
+    const CMeshO::ScalarType radiusVariance = env.evalFloat("radiusVariance");
     const int distanceType=env.evalEnum("distanceType");
 
     MeshModel &m=*md.mm();
@@ -106,8 +106,8 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
    vector<CVertexO *> seedVec;
 //   tri::ClusteringSampler<CMeshO> cs(seedVec);
 //   tri::SurfaceSampling<CMeshO, vcg::tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
-   vector<Point3f> pointVec;
-   float radius=0;
+   vector<Point3m> pointVec;
+   CMeshO::ScalarType radius=0;
    tri::PoissonSampling<CMeshO>(m.cm,pointVec,sampleNum,radius,radiusVariance);
 
    tri::VoronoiProcessingParameter vpp;
@@ -134,7 +134,8 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
        md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
        if (intteruptreq) return true;
      }
-//     tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
+     om->updateDataMask(MeshModel::MM_FACEFACETOPO);
+     tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
    }
 
    if(distanceType==1)
@@ -175,8 +176,8 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     MeshModel *m= md.mm();
     m->updateDataMask(MeshModel::MM_FACEMARK);
 
-    float sampleSurfRadius = env.evalFloat("sampleSurfRadius");
-    float poissonRadius = env.evalFloat("poissonRadius");
+    CMeshO::ScalarType sampleSurfRadius = env.evalFloat("sampleSurfRadius");
+    CMeshO::ScalarType poissonRadius = env.evalFloat("poissonRadius");
     int sampleVolNum = env.evalInt("sampleVolNum");
     int poissonFlag = env.evalBool("poissonFiltering");
 
@@ -222,7 +223,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     Log("Sampling Surface at a radius %f ",sampleSurfRadius);
     vvs.Init(sampleSurfRadius);
     cb(30, "Sampling Volume...");
-    float poissonVolumeRadius=0;
+    CMeshO::ScalarType poissonVolumeRadius=0;
     vvs.BuildVolumeSampling(sampleVolNum,voronoiSeed,poissonVolumeRadius);
     Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
