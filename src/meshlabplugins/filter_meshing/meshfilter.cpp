@@ -1495,7 +1495,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
     for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
       tri::Allocator<CMeshO>::AddVertex(em->cm, vi->cP());
 
-    std::vector< typename tri::UpdateTopology<CMeshO>::PEdge > edgeVec;
+    std::vector<  tri::UpdateTopology<CMeshO>::PEdge > edgeVec;
     tri::UpdateTopology<CMeshO>::FillUniqueEdgeVector(m.cm,edgeVec,false);
 
     for(size_t i=0;i<edgeVec.size();++i)
