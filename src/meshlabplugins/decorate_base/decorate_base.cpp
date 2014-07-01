@@ -111,7 +111,7 @@ void ExtraMeshDecoratePlugin::decorateDoc(QAction *a, MeshDocument &md, RichPara
         else                          // selected mesh, draw & display data
         {
           DrawCamera(meshm, meshm->cm.shot, Color4b::Magenta, md.mm()->cm.Tr, rm, painter,qf);
-          DisplayCamera(meshm, meshm->cm.shot, 1, painter, qf);
+          DisplayCamera(meshm, meshm->cm.shot, 1);
         }
       }
     }
@@ -130,7 +130,7 @@ void ExtraMeshDecoratePlugin::decorateDoc(QAction *a, MeshDocument &md, RichPara
           else
           {
             DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
-            DisplayCamera(md.mm(), raster->shot, 2, painter, qf);
+            DisplayCamera(md.mm(), raster->shot, 2);
           }
         }
     }
@@ -1291,7 +1291,7 @@ void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
 }
 
 
-void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId, QPainter *painter, QFont /*qf*/)
+void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId)
 {
   if(!ls.IsValid())
   {
@@ -1304,7 +1304,6 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int camera
     return;
   }
 
-  int ln=0;
   const char *typeBuf;
   if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE) typeBuf="Persp";
   if(ls.Intrinsics.cameraType == Camera<float>::ORTHO)       typeBuf="Ortho";
