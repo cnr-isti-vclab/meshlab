@@ -97,7 +97,7 @@ public:
 
     tri::Allocator<CMeshO>::AddVertices(*m,1);
 
-    if(uvSpaceFlag) m->vert.back().P() = Point3f(float(tp[0]),float(tp[1]),0);
+    if(uvSpaceFlag) m->vert.back().P() = Point3m(float(tp[0]),float(tp[1]),0);
     else m->vert.back().P() = f.cP(0)*p[0] + f.cP(1)*p[1] +f.cP(2)*p[2];
 
     m->vert.back().N() = f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] +f.cV(2)->N()*p[2];
@@ -155,7 +155,7 @@ public:
   int             n_total_samples;
   int             n_samples;
   bool useVertexSampling;
-  float dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered.
+  CMeshO::ScalarType dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered.
   typedef tri::FaceTmark<CMeshO> MarkerFace;
   MarkerFace markerFunctor;
 
@@ -189,8 +189,8 @@ public:
 
   void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp)
   {
-    Point3f startPt = f.cP(0)*interp[0] + f.cP(1)*interp[1] +f.cP(2)*interp[2]; // point to be sampled
-    Point3f startN  = f.cV(0)->cN()*interp[0] + f.cV(1)->cN()*interp[1] +f.cV(2)->cN()*interp[2]; // Normal of the interpolated point
+    Point3m startPt = f.cP(0)*interp[0] + f.cP(1)*interp[1] +f.cP(2)*interp[2]; // point to be sampled
+    Point3m startN  = f.cV(0)->cN()*interp[0] + f.cV(1)->cN()*interp[1] +f.cV(2)->cN()*interp[2]; // Normal of the interpolated point
     AddSample(startPt,startN); // point to be sampled);
   }
 
@@ -203,8 +203,8 @@ public:
   float AddSample(const CMeshO::CoordType &startPt,const CMeshO::CoordType &startN)
   {
     // the results
-    Point3f       closestPt,      normf, bestq, ip;
-    float dist = dist_upper_bound;
+    Point3m       closestPt;
+    CMeshO::ScalarType dist = dist_upper_bound;
 
     // compute distance between startPt and the mesh S2
     CMeshO::FaceType   *nearestF=0;
@@ -305,8 +305,8 @@ public:
   {
     assert(m);
     // the results
-    Point3f       closestPt,      normf, bestq, ip;
-    float dist = dist_upper_bound;
+    Point3m       closestPt,      normf, bestq, ip;
+    CMeshO::ScalarType dist = dist_upper_bound;
     const CMeshO::CoordType &startPt= p.cP();
     // compute distance between startPt and the mesh S2
     if(useVertexSampling)
@@ -332,7 +332,7 @@ public:
       nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
       if(dist == dist_upper_bound) return ;
 
-      Point3f interp;
+      Point3m interp;
       InterpolationParameters(*nearestF,(*nearestF).cN(),closestPt, interp);
       interp[2]=1.0-interp[1]-interp[0];
 
@@ -843,7 +843,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     BaseSampler mps(&(mm->cm));
     tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
 
-    float radius = par.getAbsPerc("Radius");
+    CMeshO::ScalarType radius = par.getAbsPerc("Radius");
     int sampleNum = par.getInt("SampleNum");
     if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
           else sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
@@ -856,7 +856,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_POISSONDISK_SAMPLING :
   {
     MeshModel *curMM= md.mm();
-    float radius = par.getAbsPerc("Radius");
+    CMeshO::ScalarType radius = par.getAbsPerc("Radius");
     int sampleNum = par.getInt("SampleNum");
     if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
           else sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
@@ -1046,7 +1046,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
       return false; // can't continue, mesh can't be processed
     }
 
-    float voxelSize = par.getAbsPerc("CellSize");
+    CMeshO::ScalarType voxelSize = par.getAbsPerc("CellSize");
     float offsetThr = par.getAbsPerc("Offset");
     bool discretizeFlag = par.getBool("discretize");
     bool multiSampleFlag = par.getBool("multisample");
@@ -1058,7 +1058,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     baseMesh->updateDataMask(MeshModel::MM_FACEMARK);
 
     Point3i volumeDim;
-    Box3f volumeBox = baseMesh->cm.bbox;
+    Box3m volumeBox = baseMesh->cm.bbox;
     volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
     BestDim(volumeBox , voxelSize, volumeDim );
 
@@ -1066,7 +1066,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     Log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
     Log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
 
-    tri::Resampler<CMeshO,CMeshO,float>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
+    tri::Resampler<CMeshO,CMeshO>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
     tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
     if(mergeCloseVert)
     {
@@ -1124,7 +1124,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   {
     MeshModel* mmM = par.getMesh("ColoredMesh");
     MeshModel* mmV = par.getMesh("VertexMesh");
-    typedef vcg::SpatialHashTable<CMeshO::VertexType, float> SampleSHT;
+    typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
     SampleSHT sht;
     tri::VertTmark<CMeshO> markerFunctor;
     typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
@@ -1138,9 +1138,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 
     for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
     {
-      Point3f p = viv->cP();
+      Point3m p = viv->cP();
       if(sampleRadiusFlag) radius = viv->Q();
-      Box3f bb(p-Point3f(radius,radius,radius),p+Point3f(radius,radius,radius));
+      Box3m bb(p-Point3m(radius,radius,radius),p+Point3m(radius,radius,radius));
       GridGetInBox(sht, markerFunctor, bb, closests);
 
       for(size_t i=0; i<closests.size(); ++i)
@@ -1175,7 +1175,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     tri::Allocator<CMeshO>::CompactEveryVector(mmM->cm);
 
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
-    std::vector<Point3f> pvec;
+    std::vector<Point3m> pvec;
 
     tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
     qDebug("Generated %i points",int(pvec.size()));
