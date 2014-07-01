@@ -92,7 +92,7 @@ public:
 
 
 private:
-  void DrawGriddedCube(MeshModel &m, const vcg::Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
+  void DrawGriddedCube(MeshModel &m, const Box3m &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
   vcg::Shotf curShot;
 
 signals:

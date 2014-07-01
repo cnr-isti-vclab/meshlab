@@ -134,7 +134,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
   case DP_SHOW_GRID :
     {
       emit this->askViewerShot("me");
-      Box3f bb=m.bbox();
+      Box3m bb=m.bbox();
       float scaleBB = parset->getFloat(BoxRatioParam());
       float majorTick = parset->getFloat(GridMajorParam());
       float minorTick = parset->getFloat(GridMinorParam());
@@ -152,8 +152,8 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
 // Note minG/maxG is wider than minP/maxP.
 void DrawGridPlane(int axis,
                    int side, // 0 is min 1 is max
-                   Point3f minP, Point3f maxP,
-                   Point3f minG, Point3f maxG, // the box with vertex positions snapped to the grid (enlarging it).
+                   Point3m minP, Point3m maxP,
+                   Point3m minG, Point3m maxG, // the box with vertex positions snapped to the grid (enlarging it).
                    float majorTick, float minorTick,
                    Color4b lineColor)
 {
@@ -168,7 +168,7 @@ void DrawGridPlane(int axis,
   assert(minG[1] <= minP[1] && maxG[1]>=maxP[1]);
   assert(minG[2] <= minP[2] && maxG[2]>=maxP[2]);
   // We draw orizontal ande vertical lines onto the XY plane snapped with the major ticks
-  Point3f p1,p2;
+  Point3m p1,p2;
   p1[zAxis]=p2[zAxis] = side ? maxG[zAxis] : minG[zAxis] ;
 
   float aMin,aMax;
@@ -237,14 +237,14 @@ void DrawGridPlane(int axis,
    side 1, axis i == min on than i-th axis
    questo capita se il prodotto scalare tra il vettore normale entro della faccia
  */
-bool FrontFacing(Point3f viewPos,
+bool FrontFacing(Point3m viewPos,
                  int axis, int side,
-                 Point3f minP, Point3f maxP)
+                 Point3m minP, Point3m maxP)
 {
   assert (side==0 || side ==1);
   assert (axis>=0 && axis < 3);
-  Point3f N(0,0,0);
-  Point3f C = (minP+maxP)/2.0;
+  Point3m N(0,0,0);
+  Point3m C = (minP+maxP)/2.0;
 
   if(side == 1) {
       C[axis] = maxP[axis];
@@ -255,19 +255,19 @@ bool FrontFacing(Point3f viewPos,
     C[axis] = minP[axis];
     N[axis]=1;
   }
-  Point3f vpc = viewPos-C;
+  Point3m vpc = viewPos-C;
 //  qDebug("FaceCenter %f %f %f - %f %f %f",C[0],C[1],C[2],N[0],N[1],N[2]);
 //  qDebug("VPC        %f %f %f",vpc[0],vpc[1],vpc[2]);
   return vpc*N > 0;
 }
 void DrawFlatMesh(MeshModel &m, int axis, int side,
-                                            Point3f minG, Point3f maxG)
+                                            Point3m minG, Point3m maxG)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
     glPushMatrix();
-    Point3f trans = side?maxG:minG;
-    Point3f scale(1.0f,1.0f,1.0);
+    Point3m trans = side?maxG:minG;
+    Point3m scale(1.0f,1.0f,1.0);
     trans[(axis+1)%3]=0;
     trans[(axis+2)%3]=0;
     scale[axis]=0;
@@ -278,10 +278,10 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
+void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
-    Point3f minP,maxP, minG,maxG;
+    Point3m minP,maxP, minG,maxG;
     minP=bb.min;maxP=bb.max;
 
     // Make the box well rounded wrt to major tick
@@ -301,7 +301,7 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3f &bb, fl
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
-    Point3f viewPos = this->curShot.GetViewPoint();
+    Point3m viewPos = Point3m::Construct(this->curShot.GetViewPoint());
 //    qDebug("BG Grid MajorTick %4.2f MinorTick %4.2f  ## camera pos %7.3f %7.3f %7.3f", majorTick, minorTick, viewPos[0],viewPos[1],viewPos[2]);
 //    qDebug("BG Grid boxF %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minP[0],minP[1],minP[2],maxP[0],maxP[1],maxP[2]);
 //    qDebug("BG Grid boxG %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minG[0],minG[1],minG[2],maxG[0],maxG[1],maxG[2]);
