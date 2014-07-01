@@ -158,7 +158,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_COMPACT_FACE:
     case FP_COMPACT_VERT:
     case FP_REMOVE_WRT_Q:
-    case FP_BALL_PIVOTING: MeshModel::MM_VERTMARK;
+    case FP_BALL_PIVOTING: return MeshModel::MM_VERTMARK;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
     case FP_REMOVE_ISOLATED_DIAMETER:
       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK;
