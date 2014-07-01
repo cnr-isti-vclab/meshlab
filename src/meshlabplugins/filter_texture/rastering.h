@@ -69,13 +69,13 @@ public:
     {
         // Get Closest point
         CMeshO::CoordType closestPt;
-        float dist=dist_upper_bound;
+        CMeshO::ScalarType dist=dist_upper_bound;
         CMeshO::FaceType *nearestF;
         nearestF =  unifGridFace.GetClosest(PDistFunct, markerFunctor, v.cP(), dist_upper_bound, dist, closestPt);
         if (dist == dist_upper_bound) return;
 
         // Convert point to barycentric coords
-        vcg::Point3f interp;
+        CMeshO::CoordType interp;
         bool ret = InterpolationParameters(*nearestF, nearestF->cN(), closestPt, interp);
         assert(ret);
         interp[2]=1.0-interp[1]-interp[0];
@@ -265,7 +265,7 @@ public:
         if(usePointCloudSampling)
         {
             CMeshO::VertexType   *nearestV=0;
-            float dist=dist_upper_bound;
+            CMeshO::ScalarType dist=dist_upper_bound;
             nearestV =  vcg::tri::GetClosestVertex<CMeshO,VertexMeshGrid>(*srcMesh,unifGridVert,startPt,dist_upper_bound,dist); //(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
         //if(cb) cb(sampleCnt++*100/sampleNum,"Resampling Vertex attributes");
             //if(storeDistanceAsQualityFlag)  p.Q() = dist;
@@ -297,13 +297,13 @@ public:
         {
             CMeshO::CoordType closestPt;
             vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
-            float dist=dist_upper_bound;
+            CMeshO::ScalarType dist=dist_upper_bound;
             CMeshO::FaceType *nearestF;
             nearestF =  unifGridFace.GetClosest(PDistFunct, markerFunctor, startPt, dist_upper_bound, dist, closestPt);
             if (dist == dist_upper_bound) return;
 
             // Convert point to barycentric coords
-            vcg::Point3f interp;
+            CMeshO::CoordType interp;
             bool ret = vcg::InterpolationParameters(*nearestF, nearestF->N(), closestPt, interp);
                         // if the point is outside the nearest face,
             // then let's clamp it inside:
@@ -347,11 +347,11 @@ public:
                     c.lerp(nearestF->V(0)->cC(), nearestF->V(1)->cC(), nearestF->V(2)->cC(), interp);
                     break;
                 case 1 : { // Normal
-                    vcg::Point3f nn = nearestF->V(0)->cN()*interp[0]+
+                    CMeshO::CoordType nn = nearestF->V(0)->cN()*interp[0]+
                                            nearestF->V(1)->cN()*interp[1]+
                                            nearestF->V(2)->cN()*interp[2];
                     nn.Normalize();
-                    nn= ((nn+vcg::Point3f(1.0,1.0,1.0))/2.0f)*255.0f;
+                    nn= ((nn+CMeshO::CoordType(1.0,1.0,1.0))/2.0f)*255.0f;
                     c=vcg::Color4b(nn[0],nn[1],nn[2],255);
                 } break;
                 case 2 : { // Quality

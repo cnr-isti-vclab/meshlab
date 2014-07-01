@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -37,8 +37,8 @@
 
 using namespace vcg;
 
-FilterTexturePlugin::FilterTexturePlugin() 
-{ 
+FilterTexturePlugin::FilterTexturePlugin()
+{
     typeList << FP_VORONOI_ATLAS
             << FP_UV_WEDGE_TO_VERTEX
             << FP_UV_VERTEX_TO_WEDGE
@@ -53,7 +53,7 @@ FilterTexturePlugin::FilterTexturePlugin()
         actionList << new QAction(filterName(tt), this);
 }
 
-QString FilterTexturePlugin::filterName(FilterIDType filterId) const 
+QString FilterTexturePlugin::filterName(FilterIDType filterId) const
 {
     switch(filterId)
     {
@@ -70,7 +70,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
     }
 }
 
-// Info() must return the longer string describing each filtering action 
+// Info() must return the longer string describing each filtering action
 // (this string is used in the About plugin dialog)
 QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
 {
@@ -147,8 +147,8 @@ int FilterTexturePlugin::postCondition( QAction *a) const
     return MeshModel::MM_NONE;
 }
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
+// The FilterClass describes in which generic class of filters it fits.
+// This choice affect the submenu in which each filter will be placed
 // More than a single class can be choosen.
 FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
@@ -176,12 +176,12 @@ static QString extractFilenameWOExt(MeshModel* mm)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
+// For each parmeter you need to define,
+// - the name of the parameter,
+// - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst) 
+void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
     switch(ID(action)) {
     case FP_VORONOI_ATLAS :
@@ -402,10 +402,10 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     case FP_PLANAR_MAPPING : {
       m.updateDataMask(MeshModel::MM_WEDGTEXCOORD);
       // Get Parameters
-      Point3f planeVec[3][2] = {
-        {Point3f(1,0,0),Point3f(0,1,0)},  // XY
-        {Point3f(0,0,1),Point3f(1,0,0)},  // XZ
-        {Point3f(0,1,0),Point3f(0,0,1)}   // YZ
+      Point3m planeVec[3][2] = {
+        {Point3m(1,0,0),Point3m(0,1,0)},  // XY
+        {Point3m(0,0,1),Point3m(1,0,0)},  // XZ
+        {Point3m(0,1,0),Point3m(0,0,1)}   // YZ
       };
 
       int sideDim = par.getEnum("projectionPlane");
