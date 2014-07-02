@@ -356,8 +356,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 
 int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 {
-  tri::Allocator<CMeshO>::CompactVertexVector(m);
-  tri::Allocator<CMeshO>::CompactFaceVector(m);
+  tri::Allocator<CMeshO>::CompactEveryVector(m);
 
   tri::UpdateTopology<CMeshO>::FaceFace(m);
   tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m);
@@ -366,12 +365,11 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
   typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
   MetroMeshFaceGrid   unifGridFace;
   typedef tri::FaceTmark<CMeshO> MarkerFace;
-  MarkerFace markerFunctor;
+  MarkerFace markerFunctor(&m);
   vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
   tri::UpdateFlags<CMeshO>::FaceClearV(m);
   unifGridFace.Set(m.face.begin(),m.face.end());
 
-  markerFunctor.SetMesh(&m);
   int faceFound;
   int K = 20;
   Point3m startPt;
@@ -380,10 +378,9 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
   vector<CMeshO::FacePointer> splitFaceVec;
   vector<int> splitEdgeVec;
   for(CMeshO::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
-    if(!(*vi).IsD() && (*vi).IsB())
+    if((*vi).IsB())
       {
-        int percPos = (tri::Index(m,*vi) *100) / m.vn;
-        cb(percPos,"Snapping vertices");
+        cb((tri::Index(m,*vi) *100) / m.vn,"Snapping vertices");
         vector<CMeshO::FacePointer> faceVec;
         vector<float> distVec;
         vector<Point3m> pointVec;
@@ -425,18 +422,20 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
         } // end for each faceFound
 
         if(bestFace)
-          localThr = threshold*Distance(bestFace->P0(bestEdge),bestFace->P1(bestEdge));
-        if(bestDist < localThr && !bestFace->IsV())
         {
-          bestFace->SetV();
-          (*vi).C()= Color4b::Blue;
-          //bestFace->C()=Color4b::LightBlue;
-          (*vi).SetS();
-          splitVertVec.push_back(bestPoint);
-          splitEdgeVec.push_back(bestEdge);
-          splitFaceVec.push_back(bestFace);
+          localThr = threshold*Distance(bestFace->P0(bestEdge),bestFace->P1(bestEdge));
+          if(bestDist < localThr && !bestFace->IsV())
+          {
+            bestFace->SetV();
+            (*vi).C()= Color4b::Blue;
+            //bestFace->C()=Color4b::LightBlue;
+            (*vi).SetS();
+            splitVertVec.push_back(bestPoint);
+            splitEdgeVec.push_back(bestEdge);
+            splitFaceVec.push_back(bestFace);
+          }
         }
-      }
+      } // end for all border vertices
   tri::Allocator<CMeshO>::PointerUpdater<CMeshO::FacePointer> pu;
   CMeshO::VertexIterator firstVert = tri::Allocator<CMeshO>::AddVertices(m,splitVertVec.size());
   CMeshO::FaceIterator firstface = tri::Allocator<CMeshO>::AddFaces(m,splitVertVec.size(),pu);

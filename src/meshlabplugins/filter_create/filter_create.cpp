@@ -88,7 +88,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 // - the string shown in the dialog
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void FilterCreate::initParameterSet(QAction *action, MeshModel & m, RichParameterSet & parlst)
+void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichParameterSet & parlst)
 {
   switch(ID(action))	 {
 
