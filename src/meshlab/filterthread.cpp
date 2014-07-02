@@ -9,7 +9,7 @@
 FilterThread* FilterThread::_cur = NULL;
 
 FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md)
-:QThread(),_glwid(NULL),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md)
+:QThread(),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md),_glwid(NULL)
 {
     _glwid = new QGLWidget();
 }

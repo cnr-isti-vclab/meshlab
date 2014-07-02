@@ -5,7 +5,7 @@
 #include <QDialogButtonBox>
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
-    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),showHelp(false),env()
+    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)
 {
 
     curmask = 0;

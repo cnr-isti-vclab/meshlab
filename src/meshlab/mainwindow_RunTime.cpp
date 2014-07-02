@@ -1146,10 +1146,6 @@ void MainWindow::startFilter()
                 // if no dialog is created the filter must be executed immediatel
                 if(!xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()))
                 {
-                    MeshLabFilterInterface         *ifilter    = filt.filterInterface;
-                    bool jscode = (filt.xmlInfo->filterScriptCode(filt.act->text()) != "");
-                    bool filtercpp = (ifilter != NULL) && (!jscode);
-
                     /*Mock Parameters (there are no ones in the filter indeed) for the filter history.The filters with parameters are inserted by the applyClick of the XMLStdParDialog.
                     That is the only place where I can easily evaluate the parameter values without writing a long, boring and horrible if on the filter type for the correct evaluation of the expressions contained inside the XMLWidgets*/
                     QMap<QString,QString> mock;
@@ -1332,7 +1328,6 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
     {
         Env env;
         QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
-        bool err = val.isError();
         EnvWrap envwrap(env);
         //I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
         MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);

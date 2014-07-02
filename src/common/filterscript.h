@@ -34,24 +34,27 @@ class QDomElement;
 class FilterNameParameterValuesPair
 {
 public:
-    virtual QString filterName() const = 0;
-    virtual bool isXMLFilter() const = 0;
-}; 
+  virtual QString filterName() const = 0;
+  virtual bool isXMLFilter() const = 0;
+  virtual ~FilterNameParameterValuesPair(){}
+};
 
 class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
-    bool isXMLFilter() const {return true;}
-    QString filterName() const {return pair.first;}
-    QPair< QString , QMap<QString,QString> > pair;
+  ~XMLFilterNameParameterValuesPair(){}
+  bool isXMLFilter() const {return true;}
+  QString filterName() const {return pair.first;}
+  QPair< QString , QMap<QString,QString> > pair;
 };
 
 class OldFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
-    bool isXMLFilter() const {return false;}
-    QString filterName() const {return pair.first;}
-    QPair< QString , RichParameterSet > pair;
+  ~OldFilterNameParameterValuesPair(){}
+  bool isXMLFilter() const {return false;}
+  QString filterName() const {return pair.first;}
+  QPair< QString , RichParameterSet > pair;
 };
 
 /*
@@ -72,7 +75,7 @@ public:
 
     QList< FilterNameParameterValuesPair* > filtparlist;
     typedef QList< FilterNameParameterValuesPair* >::iterator iterator;
-    
+
 public slots:
     void addExecutedXMLFilter(const QString& name,const QMap<QString,QString>& parvalue);
 };

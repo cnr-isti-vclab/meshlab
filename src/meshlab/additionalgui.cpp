@@ -651,8 +651,6 @@ void MLSyntaxHighlighter::highlightBlock( const QString& text )
         index = keyword.indexIn(text, index + length);
     }
     QRegExp nokeyword = syntax.matchIdentifiersButNotReservedWords();
-    QString tmp = nokeyword.pattern();
-    SyntaxTreeNode* root = syntax.functionsLibrary()->getItem(QModelIndex());
     index = 0;
     //QTextCharFormat form;
     //form.setForeground(Qt::red);
@@ -660,10 +658,7 @@ void MLSyntaxHighlighter::highlightBlock( const QString& text )
     {
         index = nokeyword.indexIn(text,index);
         if (index >= 0)
-        {
-            bool matchedchar = colorTextIfInsideTree(nokeyword.cap(),root,index);
             index = index + nokeyword.matchedLength();
-        }
     }
     setCurrentBlockState(0);
 }
