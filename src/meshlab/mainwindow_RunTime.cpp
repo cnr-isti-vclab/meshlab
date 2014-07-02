@@ -1354,7 +1354,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
     //In this case I can only copy all the meshes in the document!
     if (ar == MLXMLElNames::variableArity)
     {
-        for(int ii = 0;meshDoc()->meshList.size();++ii)
+        for(size_t ii = 0;ii<meshDoc()->meshList.size();++ii)
             meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
         return;
     }
