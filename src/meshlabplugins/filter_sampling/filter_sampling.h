@@ -42,7 +42,6 @@ class FilterDocSampling : public QObject, public MeshFilterInterface
         FP_TEXEL_SAMPLING,
         FP_VERTEX_RESAMPLING,
         FP_UNIFORM_MESH_RESAMPLING,
-        FP_VORONOI_CLUSTERING,
         FP_VORONOI_COLORING,
         FP_DISK_COLORING,
         FP_POISSONDISK_SAMPLING,

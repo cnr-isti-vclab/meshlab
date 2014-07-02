@@ -362,7 +362,6 @@ FilterDocSampling::FilterDocSampling()
       << FP_TEXEL_SAMPLING
       << FP_VERTEX_RESAMPLING
       << FP_UNIFORM_MESH_RESAMPLING
-      << FP_VORONOI_CLUSTERING
       << FP_VORONOI_COLORING
       << FP_DISK_COLORING
       << FP_REGULAR_RECURSIVE_SAMPLING
@@ -387,7 +386,6 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
   case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling");
   case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer");
   case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling");
-  case FP_VORONOI_CLUSTERING  :  return QString("Voronoi Vertex Clustering");
   case FP_VORONOI_COLORING  :  return QString("Voronoi Vertex Coloring");
   case FP_DISK_COLORING  :  return QString("Disk Vertex Coloring");
   case FP_REGULAR_RECURSIVE_SAMPLING  :  return QString("Regular Recursive Sampling");
@@ -419,9 +417,6 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
   case FP_UNIFORM_MESH_RESAMPLING       :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
                                                           "The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
                                                           "The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume.");
-  case FP_VORONOI_CLUSTERING   :  return QString("Apply a clustering algorithm that builds voronoi cells over the mesh starting from random points,"
-                                                 "collapse each voronoi cell to a single vertex, and construct the triangulation according to the clusters adjacency relations.<br>"
-                                                 "Very similar to the technique described in <b>'Approximated Centroidal Voronoi Diagrams for Uniform Polygonal Mesh Coarsening'</b> - Valette Chassery - Eurographics 2004");
   case FP_VORONOI_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis.");
   case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
   case FP_REGULAR_RECURSIVE_SAMPLING   :  return QString("The bbox is recrusively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples.");
@@ -436,9 +431,6 @@ int FilterDocSampling::getRequirements(QAction *action)
 
   case FP_DISK_COLORING :
   case FP_VORONOI_COLORING : return  MeshModel::MM_VERTFACETOPO  | MeshModel::MM_VERTQUALITY| MeshModel::MM_VERTCOLOR;
-
-  case FP_VORONOI_CLUSTERING : return  MeshModel::MM_VERTFACETOPO;
-
   case FP_VERTEX_RESAMPLING :
   case FP_UNIFORM_MESH_RESAMPLING:
   case FP_REGULAR_RECURSIVE_SAMPLING:
@@ -630,16 +622,6 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                   "If true a <b> not</b> signed distance field is computed. "
                                   "In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. "
                                   "Is useful to convrt thin floating surfaces into <i> solid, thick meshes.</i>. t"));
-  } break;
-  case FP_VORONOI_CLUSTERING :
-  {
-    parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn/100, "Target vertex number",
-                                 "The final number of vertices."));
-    parlst.addParam(new RichInt ("RelaxIter", 1, "Relaxing Iterations",
-                                 "The final number of vertices."));
-    parlst.addParam(new RichInt ("RandSeed", 1, "Random Seed",
-                                 "The final number of vertices."));
-
   } break;
   case FP_VORONOI_COLORING :
   case FP_DISK_COLORING :
@@ -1076,26 +1058,6 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
     tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
   } break;
-  case FP_VORONOI_CLUSTERING :
-  {
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex(md.mm()->cm);
-    tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
-    tri::Allocator<CMeshO>::CompactFaceVector(md.mm()->cm);
-    int sampleNum = par.getInt("SampleNum");
-    int relaxIter = par.getInt("RelaxIter");
-    int randSeed = par.getInt("RandSeed");
-    CMeshO *cm = &md.mm()->cm;
-    vector<CMeshO::VertexType *> seedVec;
-    md.mm()->updateDataMask(MeshModel::MM_VERTMARK);
-    md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-    md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
-
-    tri::EuclideanDistance<CMeshO> edFunc;
-    tri::VoronoiProcessingParameter vpp;
-    tri::VoronoiProcessing<CMeshO>::VoronoiRelaxing(*cm, seedVec, relaxIter, edFunc, vpp, cb);
-
-  }
-    break;
   case FP_VORONOI_COLORING :
   {
     MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples
@@ -1199,7 +1161,6 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
   case FP_POISSONDISK_SAMPLING :
   case FP_REGULAR_RECURSIVE_SAMPLING :
   case FP_TEXEL_SAMPLING  :  return FilterDocSampling::Sampling;
-  case FP_VORONOI_CLUSTERING: return FilterDocSampling::Remeshing;
   case FP_UNIFORM_MESH_RESAMPLING: return FilterDocSampling::Remeshing;
   case FP_DISK_COLORING:
   case FP_VORONOI_COLORING: return MeshFilterInterface::FilterClass(FilterDocSampling::Sampling | FilterDocSampling::VertexColoring);
