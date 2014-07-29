@@ -1103,7 +1103,7 @@ XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
     {
         def = envir.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
     }
-    catch (ExpressionHasNotThisTypeException& ex)
+    catch (ExpressionHasNotThisTypeException& /*ex*/)
     {
         def = 0;
     }
@@ -1200,7 +1200,7 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
     {
         def = envir.evalInt(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
     }
-    catch (ExpressionHasNotThisTypeException& ex)
+    catch (ExpressionHasNotThisTypeException& /*ex*/)
     {
         def = 0;
     }

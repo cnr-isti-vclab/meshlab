@@ -1182,7 +1182,7 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 
     if(loadedMeshCounter-lastComunicatedValue>connectionInterval && !myLocalBuf.isOpen())
     {
-#if not defined(__DISABLE_AUTO_STATS__)
+#if !defined(__DISABLE_AUTO_STATS__)
         checkForUpdates(false);
 #endif
         int congratsMeshCounter = settings.value("congratsMeshCounter",50).toInt();

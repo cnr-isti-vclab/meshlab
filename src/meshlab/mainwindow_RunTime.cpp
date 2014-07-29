@@ -1341,7 +1341,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
                     if (tmp != NULL)
                         meshDoc()->renderState().add(tmp->id(),tmp->cm);
                 }
-                catch (ExpressionHasNotThisTypeException& e)
+                catch (ExpressionHasNotThisTypeException&)
                 {
                     QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
                     meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
@@ -1354,7 +1354,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
     //In this case I can only copy all the meshes in the document!
     if (ar == MLXMLElNames::variableArity)
     {
-        for(size_t ii = 0;ii<meshDoc()->meshList.size();++ii)
+        for(int ii = 0;ii<meshDoc()->meshList.size();++ii)
             meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
         return;
     }

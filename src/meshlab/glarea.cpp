@@ -378,7 +378,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     return H.front().second;
 }
 
-void GLArea::paintEvent(QPaintEvent */*event*/)
+void GLArea::paintEvent(QPaintEvent* /*event*/)
 {
     if (mvc() == NULL) return;
     QPainter painter(this);
@@ -1205,7 +1205,7 @@ void GLArea::initTexture(bool reloadAllTexture)
             }
         }
     }
-    int totalTextureNum=0, toBeUpdatedNum=0;
+    size_t totalTextureNum=0, toBeUpdatedNum=0;
     foreach (MeshModel *mp, this->md()->meshList)
     {
         totalTextureNum+=mp->cm.textures.size();
@@ -1214,7 +1214,7 @@ void GLArea::initTexture(bool reloadAllTexture)
 
     if(toBeUpdatedNum==0) return;
 
-    int singleMaxTextureSizeMpx = glas.maxTextureMemory/totalTextureNum;
+    int singleMaxTextureSizeMpx = int(glas.maxTextureMemory/totalTextureNum);
     int singleMaxTextureSize = RoundUpToTheNextHighestPowerOf2(int(sqrt(float(singleMaxTextureSizeMpx))*1024.0))/2;
 
     glEnable(GL_TEXTURE_2D);
