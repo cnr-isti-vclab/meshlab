@@ -627,7 +627,7 @@ float EnvWrap::evalFloat( const QString& nm )
         double result = evalDouble(nm);
         return (float) result;
     }
-    catch(ExpressionHasNotThisTypeException& exc)
+    catch(ExpressionHasNotThisTypeException& /*exc*/)
     {
         throw ExpressionHasNotThisTypeException("Float",nm);
     }
@@ -641,7 +641,7 @@ int EnvWrap::evalInt( const QString& nm )
         double result = evalDouble(nm);
         return (int) result;
     }
-    catch(ExpressionHasNotThisTypeException& exc)
+    catch(ExpressionHasNotThisTypeException&)
     {
         throw ExpressionHasNotThisTypeException("Int",nm);
     }
@@ -757,7 +757,7 @@ Shotm EnvWrap::evalShot( const QString& nm )
 Q_DECLARE_METATYPE(EnvWrap)
 Q_DECLARE_METATYPE(EnvWrap*)
 
-QScriptValue Env_ctor( QScriptContext */*context*/,QScriptEngine *engine )
+QScriptValue Env_ctor( QScriptContext * /*context*/,QScriptEngine *engine )
 {
     Env * env = new Env();
     return engine->newQObject(env, QScriptEngine::ScriptOwnership);
