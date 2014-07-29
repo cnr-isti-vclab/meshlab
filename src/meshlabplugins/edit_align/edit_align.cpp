@@ -185,7 +185,7 @@ void EditAlignPlugin::glueByPicking()
         return;
     }
 
-    Matrix44f oldTr = md->mm()->cm.Tr;
+    //Matrix44f oldTr = md->mm()->cm.Tr;
     md->mm()->cm.Tr.SetIdentity();
     AlignPairDialog *dd=new AlignPairDialog(this->alignDialog);
     dd->aa->initMesh(currentNode(), &meshTree);
@@ -212,7 +212,7 @@ void EditAlignPlugin::glueByPicking()
         ComputeRigidMatchMatrix(gluedPnt,freePnt,res);
 
     //md->mm()->cm.Tr=res;
-    currentNode()->tr()=res;
+    currentNode()->tr().Import(res);
     QString buf;
     // for(size_t i=0;i<freePnt.size();++i)
     //		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));
@@ -230,7 +230,7 @@ void EditAlignPlugin::glueManual()
     assert(currentNode()->glued==false);
     MeshModel *mm=md->mm();
     static QString oldLabelButton;
-    Matrix44f tran,mtran;
+    Matrix44f tran,mtran, tmp;
 
     switch(mode)
     {
@@ -239,7 +239,7 @@ void EditAlignPlugin::glueManual()
         mode = ALIGN_MOVE;
         md->mm()->visible=false;
         trackball.Reset();
-        trackball.center= mm->cm.trBB().Center();
+        trackball.center.Import(mm->cm.trBB().Center());
         trackball.radius= mm->cm.trBB().Diag()/2.0;
         toggleButtons();
         oldLabelButton=	alignDialog->ui.manualAlignButton->text();
@@ -251,7 +251,8 @@ void EditAlignPlugin::glueManual()
         toggleButtons();
         tran.SetTranslate(trackball.center);
         mtran.SetTranslate(-trackball.center);
-        mm->cm.Tr= (tran) * trackball.track.Matrix()*(mtran) * mm->cm.Tr;
+        tmp.Import(mm->cm.Tr);
+        mm->cm.Tr.Import((tran) * trackball.track.Matrix()*(mtran) * tmp);
         mm->visible=true;
         currentNode()->glued=true;
         alignDialog->ui.manualAlignButton->setText(oldLabelButton);

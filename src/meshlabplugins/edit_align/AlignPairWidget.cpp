@@ -99,6 +99,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
         glViewport (0, 0, (GLsizei) QTLogicalToDevice(this,width()/2), (GLsizei) QTLogicalToDevice(this,height()));
       else
         glViewport (QTLogicalToDevice(this,width()/2), 0, (GLsizei) QTLogicalToDevice(this,width()/2), (GLsizei) QTLogicalToDevice(this,height()));
+        
 
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();
@@ -111,8 +112,10 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
       tt[i]->GetView();
       tt[i]->Apply();
       vcg::Box3f bb;
-      if(i==0) bb=freeMesh->bbox();
-      else	   bb=gluedTree->gluedBBox();
+      if(i==0) 
+          bb.Import(freeMesh->bbox());
+      else	   
+          bb.Import(gluedTree->gluedBBox());
       vcg::GLW::DrawMode localDM=vcg::GLW::DMFlat;
       vcg::GLW::ColorMode localCM = vcg::GLW::CMPerMesh;
       if((freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR))&&(isUsingVertexColor)) localCM = vcg::GLW::CMPerVert;

@@ -43,8 +43,8 @@ public:
 //  MeshNode() { m=0;id=-1;}
   bool glued;
   MeshModel *m;
-  vcg::Matrix44f &tr() {return m->cm.Tr;}
-  const vcg::Box3f &bbox() const {return m->cm.bbox;}
+  Matrix44m &tr() {return m->cm.Tr;}
+  const Box3m &bbox() const {return m->cm.bbox;}
   int Id() {return m->id();}
 };
 
@@ -62,8 +62,8 @@ public:
     Param()
     {
       OGSize = 50000;
-      arcThreshold = 0.3;
-      recalcThreshold = 0.1;
+      arcThreshold = 0.3f;
+      recalcThreshold = 0.1f;
     }
   };
 
@@ -130,18 +130,18 @@ public:
   void ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap);
   void ProcessArc(int fixId, int movId, vcg::Matrix44d &MovToFix, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap);
 
-  inline vcg::Box3f bbox() {
-    vcg::Box3f FullBBox;
+  inline Box3m bbox() {
+    Box3m FullBBox;
     foreach(MeshNode *mp, nodeList)
-      FullBBox.Add(vcg::Matrix44f::Construct(mp->tr()),mp->bbox());
+      FullBBox.Add(Matrix44m::Construct(mp->tr()),mp->bbox());
     return FullBBox;
   }
 
-  inline vcg::Box3f gluedBBox() {
-    vcg::Box3f FullBBox;
+  inline Box3m gluedBBox() {
+    Box3m FullBBox;
     foreach(MeshNode *mp, nodeList)
       if(mp->glued)
-        FullBBox.Add(vcg::Matrix44f::Construct(mp->tr()),mp->bbox());
+        FullBBox.Add(Matrix44m::Construct(mp->tr()),mp->bbox());
     return FullBBox;
   }
 };

@@ -116,7 +116,7 @@ public:
     bool IsSet(int i) const {return cnt.test(i);}
     void Set(int i) {cnt.set(i);}
     void UnSet(int i) {cnt.reset(i);}
-    int Count() const { return cnt.count();}
+    size_t Count() const { return cnt.count();}
 
     // Return a vector with all the id of the meshes
     void Pack(std::vector<int> &v) const
