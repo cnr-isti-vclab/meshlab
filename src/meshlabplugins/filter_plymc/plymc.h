@@ -529,12 +529,15 @@ template<   class MeshType>
 void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBackPos *cb)
 {
 
-    typedef PlyMCTriEdgeCollapse<MeshType,BasicVertexPair<typename MeshType::VertexType> > MyColl;
+  typedef PlyMCTriEdgeCollapse<MeshType,BasicVertexPair<typename MeshType::VertexType> > MyColl;
+  typedef typename MeshType::FaceIterator FaceIterator;
+  typedef typename MeshType::CoordType CoordType;
+
 
     tri::UpdateBounding<MeshType>::Box(m);
     tri::UpdateTopology<MeshType>::VertexFace(m);
     TriEdgeCollapseMCParameter pp;
-    pp.bb=m.bbox;
+    pp.bb.Import(m.bbox);
     pp.preserveBBox=preserveBB;
     vcg::LocalOptimization<MeshType> DeciSession(m,&pp);
     if(absoluteError==0)
@@ -544,14 +547,12 @@ void MCSimplify( MeshType &m, float absoluteError, bool preserveBB, vcg::CallBac
       // If you have  2 vert over the same face xy they share z
 
       std::vector<float> ZSet;
-
-      typename MeshType::FaceIterator fi;
-      for(fi = m.face.begin();fi!=m.face.end();++fi)
+      for(FaceIterator fi = m.face.begin();fi!=m.face.end();++fi)
         if(!(*fi).IsD())
         {
-         Point3f v0=(*fi).V(0)->P();
-         Point3f v1=(*fi).V(1)->P();
-         Point3f v2=(*fi).V(2)->P();
+         CoordType v0=(*fi).V(0)->P();
+         CoordType v1=(*fi).V(1)->P();
+         CoordType v2=(*fi).V(2)->P();
          if(v0[2]==v1[2] && v0[1]!=v1[1] && v0[0]!=v1[0]) ZSet.push_back(v0[2]);
          if(v0[2]==v2[2] && v0[1]!=v1[1] && v2[0]!=v2[0]) ZSet.push_back(v0[2]);
          if(v1[2]==v2[2] && v1[1]!=v1[1] && v2[0]!=v2[0]) ZSet.push_back(v0[2]);
