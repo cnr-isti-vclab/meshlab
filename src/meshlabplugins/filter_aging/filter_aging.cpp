@@ -197,11 +197,11 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // if requested, add erosion attribute to vertexes and initialize it
             if(storeDispl) {
-                CMeshO::PerVertexAttributeHandle<Point3f> vah = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
+                CMeshO::PerVertexAttributeHandle<Point3m> vah = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "Erosion");
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
-                    vah[vi] = Point3f(0.0, 0.0, 0.0);
+                    vah[vi] = Point3m(0.0, 0.0, 0.0);
             }
-            CMeshO::PerVertexAttributeHandle<Point3f> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "Erosion");
+            CMeshO::PerVertexAttributeHandle<Point3m> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "Erosion");
 
             // vertexes along selection border will not be displaced
             if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
@@ -229,15 +229,15 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                            !(*fi).V(j)->IsV() &&
                            (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
                                 double noise;						// noise value
-                                Point3f dispDir = (*fi).V(j)->N();	// displacement direction
+                                Point3m dispDir = (*fi).V(j)->N();	// displacement direction
 
-                                Point3f p = (*fi).V(j)->P() / noiseScale;
+                                Point3m p = (*fi).V(j)->P() / noiseScale;
                                 noise = generateNoiseValue(octaves, p);
                                 // only values bigger than noiseClamp will be considered
                                 noise = (noise<noiseClamp?0.0:(noise-noiseClamp));
 
                                 // displacement offset
-                                Point3f offset = -(dispDir * chipDepth * noise) / dispSteps;
+                                Point3m offset = -(dispDir * chipDepth * noise) / dispSteps;
 
                                 (*fi).V(j)->P() += offset;
                                 if(faceIntersections(m.cm, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
@@ -359,17 +359,17 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosi
     AngleEdgePred aep = AngleEdgePred(150.0);
     GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
     gM.Set(m.face.begin(), m.face.end());
-    CMeshO::PerVertexAttributeHandle<Point3f> vah =
-        vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m, "Erosion");
+    CMeshO::PerVertexAttributeHandle<Point3m> vah =
+        vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m, "Erosion");
 
     for(CMeshO::FaceIterator fi=m.face.begin(); fi!=m.face.end(); fi++) {
         if((*fi).IsD()) continue;
         for(int j=0; j<3; j++) {
             if(aep(face::Pos<CMeshO::FaceType>(&*fi,j)) && !(*fi).V(j)->IsV() &&
                (!selected || ((*fi).IsS() && (*fi).FFp(j)->IsS())) ) {
-                    Point3f middlepos = Point3f(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
-                    Point3f oldpos = (*fi).V(j)->P();
-                    Point3f dirj = Point3f(((*fi).V(j)->P() - (*fi).V1(j)->P()) / 2.0);
+                    Point3m middlepos(((*fi).V2(j)->P() + (*fi).FFp(j)->V2((*fi).FFi(j))->P()) / 2.0);
+                    Point3m oldpos = (*fi).V(j)->P();
+                    Point3m dirj(((*fi).V(j)->P() - (*fi).V1(j)->P()) / 2.0);
                     (*fi).V(j)->P() = middlepos + dirj;
                     if(faceIntersections(m, face::Pos<CMeshO::FaceType>(&*fi,j), gM))
                         (*fi).V(j)->P() = oldpos;
