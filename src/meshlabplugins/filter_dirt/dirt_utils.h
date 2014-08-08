@@ -66,32 +66,32 @@ typedef FaceTmark<CMeshO> MarkerFace;
 
 
 CMeshO::CoordType RandomBaricentric();
-CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f);
+CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f);
 CMeshO::CoordType getBaricenter(CMeshO::FacePointer f);
 CMeshO::CoordType GetSafePosition(CMeshO::CoordType p,CMeshO::FacePointer f);
-CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force,float l,float t=1);
+CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,MeshLabScalar m,CMeshO::FacePointer &face,CMeshO::CoordType force,MeshLabScalar l,MeshLabScalar t=1);
 CMeshO::CoordType getRandomDirection();
-CMeshO::CoordType getVelocityComponent(float v,CMeshO::FacePointer f,CMeshO::CoordType g);
-CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,float m,float t);
+CMeshO::CoordType getVelocityComponent(MeshLabScalar v,CMeshO::FacePointer f,CMeshO::CoordType g);
+CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,MeshLabScalar m,MeshLabScalar t);
 
 int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point);
-float GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, float t,float l);
+MeshLabScalar GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, MeshLabScalar t,MeshLabScalar l);
 
-bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a);
-bool IsOnFace(Point3f p, CMeshO::FacePointer f);
-bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,int d,float threshold);
+bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,MeshLabScalar a);
+bool IsOnFace(Point3m p, CMeshO::FacePointer f);
+bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,int d,MeshLabScalar threshold);
 
 
 void ColorizeMesh(MeshModel* m);
 void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh);
-void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s);
+void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,MeshLabScalar k,MeshLabScalar s);
 void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray);
 void ComputeParticlesFallsPosition(MeshModel* cloud_mesh,MeshModel* base_mesh,CMeshO::CoordType dir);
-void associateParticles(MeshModel* b_m,MeshModel* c_m,float &m,float &v,CMeshO::CoordType g);
+void associateParticles(MeshModel* b_m,MeshModel* c_m,MeshLabScalar &m,MeshLabScalar &v,CMeshO::CoordType g);
 void prepareMesh(MeshModel* m);
-void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,Point3f dir,Point3f g,float a);
-void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l,Point3f g,float a);
-void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3f g,Point3f force,float l,float a,float t,int r_step);
+void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,MeshLabScalar l,int t,Point3m dir,Point3m g,MeshLabScalar a);
+void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,MeshLabScalar l,Point3m g,MeshLabScalar a);
+void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3m g,Point3m force,MeshLabScalar l,MeshLabScalar a,MeshLabScalar t,int r_step);
 
 
 #endif // DIRT_UTILS_H

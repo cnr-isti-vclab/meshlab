@@ -29,20 +29,20 @@ Return a random direction
 
 CMeshO::CoordType getRandomDirection(){
     CMeshO::CoordType dir;
-    dir = Point3f(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))-Point3f(0.5f,0.5f,0.5f);
+    dir = Point3m(rand()/MeshLabScalar(RAND_MAX),rand()/MeshLabScalar(RAND_MAX),rand()/MeshLabScalar(RAND_MAX))-Point3m(0.5f,0.5f,0.5f);
     dir = dir * 0.3f;
     return dir;
 }
 /**
 Verify if a point on that face fall out because of the inclination
 @param FacePointer f -  Pointer to the face
-@param Point3f     g -  Direction of the gravity
-@param float       a -  Adhesion Factor
+@param Point3m     g -  Direction of the gravity
+@param MeshLabScalar       a -  Adhesion Factor
 
 return true if a particle of that face fall out
 */
-bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a){
-    Point3f n=f->N();
+bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,MeshLabScalar a){
+    Point3m n=f->N();
     if(a>1) return false;
     if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((PI/2)*(1-a))) return true;
     return false;
@@ -50,31 +50,31 @@ bool CheckFallPosition(CMeshO::FacePointer f,Point3f g,float a){
 
 /**
 
-  @param Point3f p1 - Position of the initial point
-  @param Point3f p2 - Position of the intersection point
-  @param Point3f p3 - Position of the final point
-  @param float   t  - Time length
+  @param Point3m p1 - Position of the initial point
+  @param Point3m p2 - Position of the intersection point
+  @param Point3m p3 - Position of the final point
+  @param MeshLabScalar   t  - Time length
 
   @return elapsed time
 */
-float GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, float t){
-    float d1= Distance(p1,p2);
-    float d2= Distance(p2,p3);
+MeshLabScalar GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, MeshLabScalar t){
+    MeshLabScalar d1= Distance(p1,p2);
+    MeshLabScalar d2= Distance(p2,p3);
     if(d1+d2==0) return 0;
     return (d1/(d1+d2))*t;
 }
 
-float GetVelocity(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType g,float m,float v){
-    Point3f n=f->N();
-    float b=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
-    float distance=Distance(o_p,n_p);
-    Point3f force;
+MeshLabScalar GetVelocity(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType g,MeshLabScalar m,MeshLabScalar v){
+    Point3m n=f->N();
+    MeshLabScalar b=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
+    MeshLabScalar distance=Distance(o_p,n_p);
+    Point3m force;
     force[0]=g[0]-b*n[0];
     force[1]=g[1]-b*n[1];
     force[2]=g[2]-b*n[2];
     if(force.Norm()==0) return 0;
-    float acceleration=(force/m).Norm();
-    float n_v=math::Sqrt(pow(v,2)+(2*acceleration*distance));
+    MeshLabScalar acceleration=(force/m).Norm();
+    MeshLabScalar n_v=math::Sqrt(pow(v,2)+(2*acceleration*distance));
     return n_v;
 }
 /**
@@ -98,16 +98,16 @@ CMeshO::CoordType RandomBaricentric(){
 /**
 @def This funcion calculate the cartesian coordinates of a point given from its barycentric coordinates
 
-@param Point3f bc       - barycentric coordinates of the point
+@param Point3m bc       - barycentric coordinates of the point
 @param FacePointer f    - pointer to the face
 
 @return cartesian coordinates of the point
 */
-CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
+CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f){
     CMeshO::CoordType p;
-    Point3f p0=f->P(0);
-    Point3f p1=f->P(1);
-    Point3f p2=f->P(2);
+    Point3m p0=f->P(0);
+    Point3m p1=f->P(1);
+    Point3m p2=f->P(2);
     p=f->P(0)*bc[0]+f->P(1)*bc[1]+f->P(2)*bc[2];
     return p;
 }
@@ -120,7 +120,7 @@ CMeshO::CoordType fromBarCoords(Point3f bc,CMeshO::FacePointer f){
 @return The Baricenter of the face
 */
 CMeshO::CoordType getBaricenter(CMeshO::FacePointer f){
-    Point3f bc;
+    Point3m bc;
     bc[0]=0.33f;
     bc[1]=0.33f;
     bc[2]=1-bc[0]-bc[1];
@@ -129,11 +129,11 @@ CMeshO::CoordType getBaricenter(CMeshO::FacePointer f){
 }
 
 
-CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,float m,float t){
+CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,MeshLabScalar m,MeshLabScalar t){
     CMeshO::CoordType n_v;
-    Point3f n= face->N();
-    float b=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
-    Point3f f;
+    Point3m n= face->N();
+    MeshLabScalar b=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
+    Point3m f;
     //Compute force component along the face
     f[0]=force[0]-b*n[0];
     f[1]=force[1]-b*n[1];
@@ -154,15 +154,15 @@ CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,
 
 CMeshO::CoordType GetSafePosition(CMeshO::CoordType p,CMeshO::FacePointer f){
     CMeshO::CoordType safe_p;
-    Point3f bc;
+    Point3m bc;
     bc[0]=0.33f;
     bc[1]=0.33f;
     bc[2]=1-bc[0]-bc[1];
     CMeshO::CoordType pc=fromBarCoords(bc,f);
-    Ray3<float> ray=Ray3<float>(p,pc);
+    Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p,pc);
     ray.Normalize();
     Line3f line;
-    Point3f p1=pc-p;
+    Point3m p1=pc-p;
     safe_p=p+p1*0.02f;
     return safe_p;
 }
@@ -171,32 +171,32 @@ CMeshO::CoordType GetSafePosition(CMeshO::CoordType p,CMeshO::FacePointer f){
 /**
 @def Verify if a point lies on a face
 
-@param Point3f p   - Coordinates of the point
+@param Point3m p   - Coordinates of the point
 @param FacePointer f - Pointer to the face
 
 @return true if point p is on face f, false elsewhere.
 */
-bool IsOnFace(Point3f p, CMeshO::FacePointer f){
+bool IsOnFace(Point3m p, CMeshO::FacePointer f){
     //Compute vectors
-    Point3f a=f->V(0)->P();
-    Point3f b=f->V(2)->P();
-    Point3f c=f->V(1)->P();
+    Point3m a=f->V(0)->P();
+    Point3m b=f->V(2)->P();
+    Point3m c=f->V(1)->P();
 
-    Point3f v0 = c-a;
-    Point3f v1 = b-a;
-    Point3f v2 = p-a;
+    Point3m v0 = c-a;
+    Point3m v1 = b-a;
+    Point3m v2 = p-a;
 
     // Compute dot products
-    float dot00 = v0.dot(v0);
-    float dot01 = v0.dot(v1);
-    float dot02 = v0.dot(v2);
-    float dot11 = v1.dot(v1);
-    float dot12 = v1.dot(v2);
+    MeshLabScalar dot00 = v0.dot(v0);
+    MeshLabScalar dot01 = v0.dot(v1);
+    MeshLabScalar dot02 = v0.dot(v2);
+    MeshLabScalar dot11 = v1.dot(v1);
+    MeshLabScalar dot12 = v1.dot(v2);
 
     // Compute barycentric coordinates
-    float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    MeshLabScalar invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    MeshLabScalar u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    MeshLabScalar v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
     // Check if point is in triangle
     if(math::Abs(u)<0) u=0;
@@ -208,19 +208,19 @@ bool IsOnFace(Point3f p, CMeshO::FacePointer f){
 
 @param CoordType p   - coordinates of the point
 @param CoordType v   - velocity of the particle
-@param float     m   - mass of the particle
+@param MeshLabScalar     m   - mass of the particle
 @param FaceType face - pointer to the face
 @param CoordType dir - direction of the force
-@param float 	   l   - length of the movement
-@param float     t   - time step
+@param MeshLabScalar 	   l   - length of the movement
+@param MeshLabScalar     t   - time step
 
 @return new coordinates of the point
 */
-CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,float m,CMeshO::FacePointer &face,CMeshO::CoordType force,float l,float t){
-    Point3f new_pos;
-    Point3f n= face->N();
-    float a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
-    Point3f f;
+CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,MeshLabScalar m,CMeshO::FacePointer &face,CMeshO::CoordType force,MeshLabScalar l,MeshLabScalar t){
+    Point3m new_pos;
+    Point3m n= face->N();
+    MeshLabScalar a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
+    Point3m f;
     //Compute force component along the face
     f[0]=force[0]-a*n[0];
     f[1]=force[1]-a*n[1];
@@ -237,8 +237,8 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
         //QFileInfo text_file=QFileInfo(base_mesh->cm.textures[0].c_str());
         img.load(base_mesh->cm.textures[0].c_str());
         QPainter painter(&img);
-        float w=img.width();
-        float h=img.height();
+        MeshLabScalar w=img.width();
+        MeshLabScalar h=img.height();
         painter.setPen(Qt::black);
         painter.setBrush(Qt::SolidPattern);
         base_mesh->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -252,7 +252,7 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
             Point2f p0=Point2f(t0.U()*w,h-t0.V()*h);
             Point2f p1=Point2f(t1.U()*w,h-t1.V()*h);
             Point2f p2=Point2f(t2.U()*w,h-t2.V()*h);
-            Point3f bc;
+            Point3m bc;
             Point2f dbc;
             InterpolationParameters(*f,vi->P(),bc);
             dbc=p0*bc[0]+p1*bc[1]+p2*bc[2];
@@ -268,7 +268,7 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
 
 void ColorizeMesh(MeshModel* m){
     CMeshO::FaceIterator fi;
-    float dirtiness;
+    MeshLabScalar dirtiness;
     for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi){
         dirtiness=fi->Q();
         if(dirtiness==0){
@@ -299,8 +299,8 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
     CMeshO::CoordType v0=f->V(0)->P();
     CMeshO::CoordType v1=f->V(1)->P();
     CMeshO::CoordType v2=f->V(2)->P();
-    float dist[3];
-    Point3f int_points[3];
+    MeshLabScalar dist[3];
+    Point3m int_points[3];
     dist[0]=PSDist(p2,v0,v1,int_points[0]);
     dist[1]=PSDist(p2,v1,v2,int_points[1]);
     dist[2]=PSDist(p2,v2,v0,int_points[2]);
@@ -349,14 +349,14 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
 
 @param m MeshModel
 @param u CoordType dust direction
-@param k float
-@param s float
+@param k MeshLabScalar
+@param s MeshLabScalar
 
 @return nothing
 */
-void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
+void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,MeshLabScalar k,MeshLabScalar s){
     CMeshO::FaceIterator fi;
-    float d;
+    MeshLabScalar d;
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         d=k/s+(1+k/s)*pow(fi->N().dot(u),s);
         fi->Q()=d;
@@ -374,12 +374,12 @@ void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,float k,float s){
 */
 void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
 
-    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<float>(m->cm,std::string("exposure"));
+    CMeshO::PerFaceAttributeHandle<MeshLabScalar> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<MeshLabScalar>(m->cm,std::string("exposure"));
 
-    float dh=1.2;
-    float exp=0;
-    float di=0;
-    float xi=0;
+    MeshLabScalar dh=1.2;
+    MeshLabScalar exp=0;
+    MeshLabScalar di=0;
+    MeshLabScalar xi=0;
 
     CMeshO::FacePointer face;
     CMeshO::CoordType p_c;
@@ -398,14 +398,14 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
             p_c=fromBarCoords(RandomBaricentric(),&*fi);
             //Create a ray with p_c as origin and direction N
             p_c=p_c+NormalizedNormal(*fi)*0.1;
-            Ray3<float> ray=Ray3<float>(p_c,fi->N());
+            Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p_c,fi->N());
             di=0;
             face=0;
             face=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,1000,di);
 
             if(di!=0){
                 xi=xi+(dh/(dh-di));
-		
+
             }
         }
         exp=1-(xi/n_ray);
@@ -427,17 +427,17 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
     for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
         Particle<CMeshO> info=ph[vi];
         if((*vi).IsS()){
-            Point3f p_c=vi->P()+info.face->N().normalized()*0.1;
-            Ray3<float> ray=Ray3<float>(p_c,dir);
-            float di;
+            Point3m p_c=vi->P()+info.face->N().normalized()*0.1;
+            Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p_c,dir);
+            MeshLabScalar di;
             CMeshO::FacePointer new_f=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,base_mesh->cm.bbox.Diag(),di);
             if(new_f!=0){
                 ph[vi].face=new_f;
-                float u;
-                float v;
-                float t;
-                IntersectionRayTriangle<float>(ray,new_f->P(0),new_f->P(1),new_f->P(2),t,u,v);
-                Point3f bc(1-u-v,u,v);
+                MeshLabScalar u;
+                MeshLabScalar v;
+                MeshLabScalar t;
+                IntersectionRayTriangle<MeshLabScalar>(ray,new_f->P(0),new_f->P(1),new_f->P(2),t,u,v);
+                Point3m bc(1-u-v,u,v);
                 vi->P()=fromBarCoords(bc,new_f);
                 vi->ClearS();
                 new_f->C()=Color4b::Red;
@@ -462,19 +462,19 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
 
 @return ?
 */
-bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,float threshold){
+bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,MeshLabScalar threshold){
 
     //Handler
-    CMeshO::PerFaceAttributeHandle<float> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(m->cm,std::string("exposure"));
+    CMeshO::PerFaceAttributeHandle<MeshLabScalar> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<MeshLabScalar>(m->cm,std::string("exposure"));
 
     CMeshO::FaceIterator fi;
     CMeshO::CoordType p;
     cpv.clear();
     //dpv.clear();
-    float r=1;
-    float a0=0;
-    float a=0;
-    float a1=0;
+    MeshLabScalar r=1;
+    MeshLabScalar a0=0;
+    MeshLabScalar a=0;
+    MeshLabScalar a1=0;
 
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         int n_dust=0;
@@ -511,15 +511,15 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::v
 /**
 
 */
-void associateParticles(MeshModel* b_m,MeshModel* c_m,float &m,float &v,CMeshO::CoordType g){
+void associateParticles(MeshModel* b_m,MeshModel* c_m,MeshLabScalar &m,MeshLabScalar &v,CMeshO::CoordType g){
     MetroMeshFaceGrid   unifGridFace;
-    Point3f closestPt;
+    Point3m closestPt;
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (c_m->cm,std::string("ParticleInfo"));
     unifGridFace.Set(b_m->cm.face.begin(),b_m->cm.face.end());
     MarkerFace markerFunctor;
     markerFunctor.SetMesh(&(b_m->cm));
-    float dist=1;
-    float dist_upper_bound=dist;
+    MeshLabScalar dist=1;
+    MeshLabScalar dist_upper_bound=dist;
     CMeshO::VertexIterator vi;
     vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
     for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
@@ -535,11 +535,11 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,float &m,float &v,CMeshO::
 
 }
 
-CMeshO::CoordType getVelocityComponent(float v,CMeshO::FacePointer f,CMeshO::CoordType g){
+CMeshO::CoordType getVelocityComponent(MeshLabScalar v,CMeshO::FacePointer f,CMeshO::CoordType g){
     CMeshO::CoordType cV;
-    Point3f n= f->N();
-    float a=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
-    Point3f d;
+    Point3m n= f->N();
+    MeshLabScalar a=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
+    Point3m d;
     d[0]=g[0]-a*n[0];
     d[1]=g[1]-a*n[1];
     d[2]=g[2]-a*n[2];
@@ -591,16 +591,16 @@ void prepareMesh(MeshModel* m){
 /**
 @def This function move a particle over the mesh
 */
-void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,Point3f dir,Point3f g,float a){
+void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,MeshLabScalar l,int t,Point3m dir,Point3m g,MeshLabScalar a){
     if(CheckFallPosition(info.face,g,a)){
         p->SetS();
         return;
     }
-    float time=t;
+    MeshLabScalar time=t;
     if(dir.Norm()==0) dir=getRandomDirection();
-    Point3f new_pos;
-    Point3f current_pos;
-    Point3f int_pos;
+    Point3m new_pos;
+    Point3m current_pos;
+    Point3m int_pos;
     CMeshO::FacePointer current_face=info.face;
     CMeshO::FacePointer new_face;
     new_face=current_face;
@@ -609,9 +609,9 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,float l,int t,P
     while(!IsOnFace(new_pos,current_face)){
         int edge=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
         if(edge!=-1){
-            Point3f n = new_face->N();
+            Point3m n = new_face->N();
             if(CheckFallPosition(new_face,g,a))  p->SetS();
-            float elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time);
+            MeshLabScalar elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time);
             info.v=GetNewVelocity(info.v,current_face,new_face,g+dir,g,info.mass,elapsed_time);
             time=time-elapsed_time;
             current_pos=int_pos;
@@ -643,24 +643,24 @@ This function compute the repulsion beetwen particles
 @param MeshModel* b_m - base mesh
 @param MeshModel* c_m - cloud of points
 @param int k          - max number of particle to repulse
-@param float l        - lenght of the step
+@param MeshLabScalar l        - lenght of the step
 @return nothing       - adhesion factor
 */
-void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l,Point3f g,float a){
+void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,MeshLabScalar l,Point3m g,MeshLabScalar a){
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(c_m->cm,"ParticleInfo");
     MetroMeshVertexGrid v_grid;
-    std::vector< Point3<float> > v_points;
+    std::vector< Point3<MeshLabScalar> > v_points;
     std::vector<CMeshO::VertexPointer> vp;
-    std::vector<float> distances;
+    std::vector<MeshLabScalar> distances;
     v_grid.Set(c_m->cm.vert.begin(),c_m->cm.vert.end(),b_m->cm.bbox);
     CMeshO::VertexIterator vi;
     for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
         vcg::tri::GetKClosestVertex(c_m->cm,v_grid,k,vi->P(),EPSILON,vp,distances,v_points);
         for(unsigned int i=0;i<vp.size();i++){CMeshO::VertexPointer v = vp[i];
             if(v->P()!=vi->P() && !v->IsD() && !vi->IsD()){
-                Ray3<float> ray(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
+                Ray3<MeshLabScalar> ray(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
                 ray.Normalize();
-                Point3f dir=ray.Direction();
+                Point3m dir=ray.Direction();
                 dir.Normalize();
                 MoveParticle(ph[vp[i]],vp[i],0.01,1,dir,g,a);
             }
@@ -671,13 +671,13 @@ void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,float l,Point3f g,floa
 @def This function simulate the movement of the cloud mesh, it requires that every point is associated with a Particle data structure
 
 @param MeshModel cloud  - Mesh of points
-@param Point3f   force  - Direction of the force
-@param float     l      - Lenght of the  movementstep
-@param float     t   - Time Step
+@param Point3m   force  - Direction of the force
+@param MeshLabScalar     l      - Lenght of the  movementstep
+@param MeshLabScalar     t   - Time Step
 
 @return nothing
 */
-void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3f g,Point3f force,float l,float a,float t,int r_step){
+void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3m g,Point3m force,MeshLabScalar l,MeshLabScalar a,MeshLabScalar t,int r_step){
 
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
     CMeshO::VertexIterator vi;

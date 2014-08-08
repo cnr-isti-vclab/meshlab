@@ -52,10 +52,10 @@ FilterDirt::FilterDirt()
 
     typeList << FP_DIRT
              <<FP_CLOUD_MOVEMENT;
-    
+
     FilterIDType tt;
     foreach(tt , types())
-	actionList << new QAction(filterName(tt), this);
+    actionList << new QAction(filterName(tt), this);
 }
 
 QString FilterDirt::filterName(FilterIDType filterId) const
@@ -99,7 +99,7 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
     switch(ID(filter)){
 
     case FP_DIRT:{
-        par.addParam(new RichPoint3f("dust_dir",Point3f(0,1,0),"Direction","Direction of the dust source"));
+        par.addParam(new RichPoint3f("dust_dir",Point3m(0,1,0),"Direction","Direction of the dust source"));
         par.addParam(new RichInt("nparticles",3,"max particles x face","Max Number of Dust Particles to Generate Per Face"));
         par.addParam(new RichFloat("slippiness",1,"s","The surface slippines(large s means less sticky)"));
         par.addParam(new RichFloat("adhesion",0.2,"k","Factor to model the general adhesion"));
@@ -108,8 +108,8 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
         break;
     }
     case FP_CLOUD_MOVEMENT:{
-        par.addParam(new RichPoint3f("gravity_dir",Point3f(0,-1,0),"g","Direction of gravity"));
-        par.addParam(new RichPoint3f("force_dir",Point3f(0,0,0),"force","Direction of the force acting on the points cloud"));
+        par.addParam(new RichPoint3f("gravity_dir",Point3m(0,-1,0),"g","Direction of gravity"));
+        par.addParam(new RichPoint3f("force_dir",Point3m(0,0,0),"force","Direction of the force acting on the points cloud"));
         par.addParam(new RichInt("steps",1,"s","Simulation Steps"));
         par.addParam(new RichDynamicFloat("adhesion", 1.0f, 0.0f, 1.0f,"adhesion","Factor to model the general adhesion."));
         par.addParam(new RichFloat("velocity",0,"v","Initial velocity of the particle"));
@@ -124,7 +124,7 @@ void FilterDirt::initParameterSet(QAction* filter,MeshDocument &md, RichParamete
 }
 
 int FilterDirt::getRequirements(QAction */*action*/)
-{	
+{
     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCOLOR |MeshModel::MM_FACECOLOR;
 }
 
@@ -136,7 +136,7 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
     case FP_DIRT:{
         /*Get Parameters*/
 
-        Point3f dir=par.getPoint3f("dust_dir");
+        Point3m dir=par.getPoint3m("dust_dir");
         float s=par.getFloat("slippiness");
         float k=par.getFloat("adhesion");
         bool draw=par.getBool("draw_texture");
@@ -155,8 +155,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
             return false;
 
         }
-        
-        vector<Point3f> dust_points;
+
+        vector<Point3m> dust_points;
         prepareMesh(currMM);
         if(cb) (*cb)(10,"Computing Dust Amount...");
 
@@ -168,13 +168,13 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         if(cb) (*cb)(50,"Generating Particles...");
 
         GenerateParticles(currMM,dust_points,/*dust_particles,*/n_p,0.6);
-		RenderMode rm;
-		rm.drawMode = GLW::DMPoints;
+        RenderMode rm;
+        rm.drawMode = GLW::DMPoints;
         MeshModel* dmm=md.addNewMesh("","dust_mesh",true,rm);
         dmm->cm.Clear();
         tri::Allocator<CMeshO>::AddVertices(dmm->cm,dust_points.size());
         CMeshO::VertexIterator vi;
-        vector<Point3f>::iterator dvi=dust_points.begin();
+        vector<Point3m>::iterator dvi=dust_points.begin();
         if(cb) (*cb)(70,"Creating cloud Mesh...");
         for(vi=dmm->cm.vert.begin();vi!=dmm->cm.vert.end();++vi){
             vi->P()=(*dvi);
@@ -206,12 +206,12 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         }
 
         //Get Parameters
-        Point3f dir=par.getPoint3f("force_dir");
-        Point3f g=par.getPoint3f("gravity_dir");
-        float adhesion =par.getDynamicFloat("adhesion");
-        float l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
-        float v=par.getFloat("velocity");
-        float m=par.getFloat("mass");
+        Point3m dir=par.getPoint3m("force_dir");
+        Point3m g=par.getPoint3m("gravity_dir");
+        MeshLabScalar adhesion =par.getDynamicFloat("adhesion");
+        MeshLabScalar l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
+        MeshLabScalar v=par.getFloat("velocity");
+        MeshLabScalar m=par.getFloat("mass");
         int s=par.getInt("steps");
         bool colorize=par.getBool("colorize_mesh");
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){
@@ -229,11 +229,11 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         if(colorize) ColorizeMesh(base_mesh);
         break;
     }
-    
+
     default:{
         break;
     }
-    
+
     }
 
 
