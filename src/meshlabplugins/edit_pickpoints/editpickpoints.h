@@ -60,7 +60,7 @@ public:
 	//basically copied from void AlignPairWidget::drawPickedPoints in editalign plugin
 	//Draws all the picked points on the screen
 	//boundingBox - gives some indication how to scale the normal flags
-  void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox, QPainter *painter);
+  void drawPickedPoints(std::vector<PickedPointTreeWidgetItem*> &pointVector, Box3m &boundingBox, QPainter *painter);
 	
 private:
 	//the current place the mouse clicked

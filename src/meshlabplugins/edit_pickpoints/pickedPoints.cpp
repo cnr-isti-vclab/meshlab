@@ -63,17 +63,22 @@ const QString PickedPoints::False = "0";
 const std::string PickedPoints::Key = "PickedPoints";
 
 
-PickedPoints::PickedPoints(){
-	pointVector = new std::vector<PickedPoint *>();
+PickedPoints::PickedPoints()
+:pointVector()
+{
 }
 
-PickedPoints::~PickedPoints(){
-	delete pointVector;
+PickedPoints::~PickedPoints()
+{
+        for(size_t ii = 0; ii < pointVector.size();++ii)  
+            delete pointVector[ii];
+        pointVector.clear();
+
 }
 
 bool PickedPoints::open(QString filename){
 	QDomDocument doc;
-	pointVector->clear();
+	pointVector.clear();
 	
 	QFile file(filename);
 	
@@ -106,7 +111,7 @@ bool PickedPoints::open(QString filename){
 				QString y = element.attribute(yCoordinate);
 				QString z = element.attribute(zCoordinate);
 				
-				vcg::Point3f point(x.toFloat(), y.toFloat(), z.toFloat());
+				Point3m point(x.toDouble(), y.toDouble(), z.toDouble());
 				
 				QString presentString = element.attribute(active);
 				bool present = true;
@@ -165,12 +170,12 @@ bool PickedPoints::save(QString filename, QString dataFileName){
 	dataTag.appendChild(data);
 		
 	//create an element for each point
-	for (int i = 0; i < pointVector->size(); ++i) {
-		PickedPoint *pickedPoint = pointVector->at(i);
+	for (int i = 0; i < pointVector.size(); ++i) {
+		PickedPoint *pickedPoint = pointVector.at(i);
 		
 		QDomElement tag = doc.createElement(pointElementName);
 		
-		vcg::Point3f point = pickedPoint->point;
+		Point3m point = pickedPoint->point;
 		
 		tag.setAttribute(xCoordinate, point[0] );
 		tag.setAttribute(yCoordinate, point[1] );
@@ -197,42 +202,41 @@ bool PickedPoints::save(QString filename, QString dataFileName){
 	return true;	 
 }
 
-void PickedPoints::addPoint(QString name, vcg::Point3f point, bool present){
-	assert(pointVector);
-		
+void PickedPoints::addPoint(QString name, Point3m point, bool present)
+{	
 	PickedPoint *pickedPoint = new PickedPoint(name, point, present);
-	pointVector->push_back(pickedPoint);
+	pointVector.push_back(pickedPoint);
 }
 
-std::vector<PickedPoint*> * PickedPoints::getPickedPointVector()
+std::vector<PickedPoint*>& PickedPoints::getPickedPointVector()
 {
 	return pointVector;
 }
 
-std::vector<vcg::Point3f> * PickedPoints::getPoint3fVector()
+std::vector<Point3m> * PickedPoints::getPoint3Vector()
 {
-	std::vector<vcg::Point3f> *points = new std::vector<vcg::Point3f>();
+	std::vector<Point3m> *points = new std::vector<Point3m>();
 	
-	for(int i = 0; i < pointVector->size(); i++)
+	for(size_t i = 0; i < pointVector.size(); i++)
 	{
-		if(pointVector->at(i)->present )
-			points->push_back(pointVector->at(i)->point);
+		if(pointVector.at(i)->present )
+			points->push_back(pointVector.at(i)->point);
 	}
 	
 	return points;
 }
 
-void PickedPoints::translatePoints(vcg::Matrix44f &translation)
+void PickedPoints::translatePoints(Matrix44m &translation)
 {
-	for(int i = 0; i < pointVector->size(); i++)
+	for(size_t i = 0; i < pointVector.size(); i++)
 	{
-		PickedPoint* temp = pointVector->at(i);
+		PickedPoint* temp = pointVector.at(i);
 	
 		//qDebug() << " point was x" << temp->point[0] << " y " << temp->point[1] << " z " << temp->point[2];
 		
-		vcg::Point4f inputPoint(temp->point[0], temp->point[1], temp->point[2], 1);
+		Point4m inputPoint(temp->point[0], temp->point[1], temp->point[2], 1);
 		
-		vcg::Point4f resultPoint = translation * inputPoint;
+		Point4m resultPoint = translation * inputPoint;
 		
 		temp->point[0] = resultPoint[0];
 		temp->point[1] = resultPoint[1];

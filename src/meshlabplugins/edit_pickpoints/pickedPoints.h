@@ -38,7 +38,7 @@
 class PickedPoint
 {
 public:
-	PickedPoint(QString _name, vcg::Point3f _point, bool _present){
+	PickedPoint(QString _name, Point3m _point, bool _present){
 		name = _name;
 		point = _point;
 		present = _present;
@@ -52,7 +52,7 @@ public:
 	bool present;
 
 	//point
-	vcg::Point3f point;
+	Point3m point;
 };
 
 class PickedPoints
@@ -70,16 +70,16 @@ public:
 	bool save(QString filename, QString dataFileName);
 
 	//add a point to the map
-	void addPoint(QString name, vcg::Point3f point, bool present);
+	void addPoint(QString name, Point3m point, bool present);
 	
-	std::vector<PickedPoint*> * getPickedPointVector();
+	std::vector<PickedPoint*>& getPickedPointVector();
 	
 	//get a vector containing only active points
-	std::vector<vcg::Point3f> * getPoint3fVector();
+	std::vector<Point3m> * getPoint3Vector();
 	
 	//translate each point using the matrix
 	//if the mesh moves you can then translate the points useing this function
-	void translatePoints(vcg::Matrix44f &translation);
+	void translatePoints(Matrix44m &translation);
 	
 	//get the suggested filename for the points.  will be based on the mesh's filename
 	static QString getSuggestedPickedPointsFileName(const MeshModel &meshModel);
@@ -99,7 +99,7 @@ public:
 private:
 	
 	//data
-	std::vector<PickedPoint*> *pointVector;
+	std::vector<PickedPoint*> pointVector;
 	
 	//the template that was used to pick these points
 	//will be "" if no template was used

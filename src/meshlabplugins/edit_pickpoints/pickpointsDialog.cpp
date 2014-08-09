@@ -58,7 +58,6 @@ public:
 		{
 			unifGrid.Set(m->face.begin(),m->face.end());
 			markerFunctor.SetMesh(m);
-			
 			dist_upper_bound = m->bbox.Diag()/10.0f;
 		}
 	}
@@ -69,14 +68,14 @@ public:
 	
 	MarkerFace markerFunctor;
 	
-	float dist_upper_bound;
+	Scalarm dist_upper_bound;
 	
-	CMeshO::FaceType * getFace(vcg::Point3f &p) 
+	CMeshO::FaceType * getFace(Point3m &p) 
 	{
 		assert(m);
 		// the results
-		vcg::Point3f closestPt;
-		float dist = dist_upper_bound;
+		Point3m closestPt;
+		Scalarm dist = dist_upper_bound;
 		const CMeshO::CoordType &startPt = p;
 
 		// compute distance between startPt and the mesh S2
@@ -93,7 +92,7 @@ public:
 };
 
 PickedPointTreeWidgetItem::PickedPointTreeWidgetItem(
-		vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal,
+		Point3m &intputPoint, CMeshO::FaceType::NormalType &faceNormal,
 		QString name, bool _active) : QTreeWidgetItem(1001)
 {
 	//name
@@ -114,7 +113,7 @@ QString PickedPointTreeWidgetItem::getName(){
 	return text(0);
 }
 
-void PickedPointTreeWidgetItem::setPointAndNormal(vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal)
+void PickedPointTreeWidgetItem::setPointAndNormal(Point3m &intputPoint, CMeshO::FaceType::NormalType &faceNormal)
 {
 	point[0] = intputPoint[0];
 	point[1] = intputPoint[1];
@@ -136,11 +135,11 @@ void PickedPointTreeWidgetItem::setPointAndNormal(vcg::Point3f &intputPoint, CMe
 	setText(3, tempString);
 }
 
-vcg::Point3f PickedPointTreeWidgetItem::getPoint(){
+Point3m PickedPointTreeWidgetItem::getPoint(){
 	return point;
 }
 
-vcg::Point3f PickedPointTreeWidgetItem::getNormal(){
+Point3m PickedPointTreeWidgetItem::getNormal(){
 	return normal;
 }
 
@@ -258,7 +257,7 @@ PickPointsDialog::~PickPointsDialog()
 	delete getClosestFace;
 }
 
-void PickPointsDialog::addMoveSelectPoint(Point3f point, CMeshO::FaceType::NormalType faceNormal)
+void PickPointsDialog::addMoveSelectPoint(Point3m point, CMeshO::FaceType::NormalType faceNormal)
 {
 	if(currentMode == ADD_POINT)
 	{
@@ -323,7 +322,7 @@ void PickPointsDialog::recordNextPointForUndo()
 	recordPointForUndo = true;
 }
 
-void PickPointsDialog::selectOrMoveThisPoint(Point3f point){
+void PickPointsDialog::selectOrMoveThisPoint(Point3m point){
 	qDebug() << "point is: " << point[0] << " " << point[1] << " " << point[2];
 	
 	//the item closest to the given point
@@ -331,22 +330,22 @@ void PickPointsDialog::selectOrMoveThisPoint(Point3f point){
 	
 	//the smallest distance from the given point to one in the list
 	//so far....
-	float minDistanceSoFar = -1.0;
+	Scalarm minDistanceSoFar = -1.0;
 	
 	for(int i = 0; i < pickedPointTreeWidgetItemVector.size(); i++){
 		PickedPointTreeWidgetItem *item =
 			pickedPointTreeWidgetItemVector.at(i);
 		
-		Point3f tempPoint = item->getPoint();
+		Point3m tempPoint = item->getPoint();
 		
 		//qDebug() << "tempPoint is: " << tempPoint[0] << " " << tempPoint[1] << " " << tempPoint[2];
 		
-		float temp = sqrt(pow(point[0]-tempPoint[0],2) +
-						pow(point[1]-tempPoint[1],2) + 
-						pow(point[2]-tempPoint[2],2));
+		Scalarm temp = std::sqrt(std::pow(point[0]-tempPoint[0],2) +
+						std::pow(point[1]-tempPoint[1],2) + 
+						std::pow(point[2]-tempPoint[2],2));
 		//qDebug() << "distance is: " << temp;
 		
-		if(minDistanceSoFar < 0 || minDistanceSoFar > temp){
+		if(minDistanceSoFar < Scalarm(0) || minDistanceSoFar > temp){
 			minDistanceSoFar = temp;
 			closestItem = item;
 		}
@@ -377,7 +376,7 @@ bool PickPointsDialog::drawNormalAsPin()
 	return ui.pinRadioButton->isChecked();
 }
 
-void PickPointsDialog::addPoint(vcg::Point3f &point, QString &name, bool present)
+void PickPointsDialog::addPoint(Point3m &point, QString &name, bool present)
 {
 	//bool result = GLPickTri<CMeshO>::PickNearestFace(currentMousePosition.x(),gla->height()-currentMousePosition.y(),
 	//	mm.cm, face);
@@ -401,12 +400,12 @@ void PickPointsDialog::addPoint(vcg::Point3f &point, QString &name, bool present
 		addTreeWidgetItemForPoint(point, name, face->N(), present);
 	else
 	{
-		vcg::Point3f faceNormal;
+		Point3m faceNormal;
 		addTreeWidgetItemForPoint(point, name, faceNormal, present);
 	}
 }
 
-PickedPointTreeWidgetItem * PickPointsDialog::addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present)
+PickedPointTreeWidgetItem * PickPointsDialog::addTreeWidgetItemForPoint(Point3m &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present)
 {
 	PickedPointTreeWidgetItem *widgetItem =
 			new PickedPointTreeWidgetItem(point, faceNormal, name, present);
@@ -490,8 +489,8 @@ void PickPointsDialog::loadPickPointsTemplate(QString filename)
 	PickPointsTemplate::load(filename, &pointNameVector);
 	
 	for(int i = 0; i < pointNameVector.size(); i++){
-		vcg::Point3f point;
-		vcg::Point3f faceNormal;
+		Point3m point;
+		Point3m faceNormal;
 		PickedPointTreeWidgetItem *widgetItem = 
 			addTreeWidgetItemForPoint(point, pointNameVector.at(i), faceNormal, false);
 		widgetItem->clearPoint();
@@ -533,6 +532,7 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 	//make sure we start in pick mode
 	togglePickMode(true);
 	
+    meshModel->updateDataMask(MeshModel::MM_FACEMARK);
 	//set up the 
 	getClosestFace->init(&(meshModel->cm));
 	
@@ -549,11 +549,11 @@ void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla)
 			const QString &name = pickedPoints->getTemplateName();
 			setTemplateName(name);
 			
-			std::vector<PickedPoint*> * pickedPointVector = pickedPoints->getPickedPointVector();
+			std::vector<PickedPoint*>& pickedPointVector = pickedPoints->getPickedPointVector();
 			
 			PickedPoint *point;
-			for(int i = 0; i < pickedPointVector->size(); i++){
-				point = pickedPointVector->at(i);
+			for(size_t i = 0; i < pickedPointVector.size(); i++){
+				point = pickedPointVector.at(i);
 				
 				addPoint(point->point, point->name, point->present);
 			}
@@ -747,10 +747,10 @@ void PickPointsDialog::loadPoints(QString filename){
 	const QString &name = pickedPoints.getTemplateName();
 	setTemplateName(name);
 	
-	std::vector<PickedPoint*> *points = pickedPoints.getPickedPointVector();
+	std::vector<PickedPoint*>& points = pickedPoints.getPickedPointVector();
 	
-	for(int i = 0; i < points->size(); i++){
-		PickedPoint *pickedPoint = points->at(i);
+	for(size_t i = 0; i < points.size(); i++){
+		PickedPoint *pickedPoint = points.at(i);
 		
 		addPoint(pickedPoint->point, pickedPoint->name, pickedPoint->present);		
 	}
@@ -879,8 +879,8 @@ void PickPointsDialog::addPointToTemplate()
 	if(!templateLoaded)
 		setTemplateName("new Template");
 	
-	vcg::Point3f point;
-	vcg::Point3f faceNormal;
+	Point3m point;
+	Point3m faceNormal;
 	QString name("new point");
 	PickedPointTreeWidgetItem *widgetItem =
 		addTreeWidgetItemForPoint(point, name, faceNormal, false);
@@ -892,8 +892,8 @@ void PickPointsDialog::undo()
 {
 	if(NULL != lastPointToMove)
 	{		
-		vcg::Point3f tempPoint = lastPointToMove->getPoint();
-		vcg::Point3f tempNormal = lastPointToMove->getNormal();
+		Point3m tempPoint = lastPointToMove->getPoint();
+		Point3m tempNormal = lastPointToMove->getNormal();
 
 		lastPointToMove->setPointAndNormal(lastPointPosition, lastPointNormal);
 		

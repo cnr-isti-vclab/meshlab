@@ -48,7 +48,7 @@ class PickedPointTreeWidgetItem : public QTreeWidgetItem
 public:
 	//used when a point has just been picked and
 	//gives it an integer name
-	PickedPointTreeWidgetItem(vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal,
+	PickedPointTreeWidgetItem(Point3m &intputPoint, CMeshO::FaceType::NormalType &faceNormal,
 			QString name, bool _active);
 	
 	//set the name
@@ -58,13 +58,13 @@ public:
 	QString getName();
 	
 	//change the point and normal
-	void setPointAndNormal(vcg::Point3f &intputPoint, CMeshO::FaceType::NormalType &faceNormal);
+	void setPointAndNormal(Point3m &intputPoint, CMeshO::FaceType::NormalType &faceNormal);
 	
-	//return the Point3f
-	vcg::Point3f getPoint();
+	//return the Point3m
+	Point3m getPoint();
 	
 	//get the normal
-	vcg::Point3f getNormal();
+	Point3m getNormal();
 	
 	//clear the ponint datas
 	void clearPoint();
@@ -81,10 +81,10 @@ public:
 	
 private:
 	//the point
-	vcg::Point3f point;
+	Point3m point;
 	
 	//the normal of this point
-	vcg::Point3f normal;
+	Point3m normal;
 	
 	//whether this point is active
 	//inactive points are not drawn and when saved this is indicated
@@ -105,10 +105,10 @@ public:
 	enum Mode { ADD_POINT, MOVE_POINT, SELECT_POINT };
 	
 	//do soemthing with the point that was just picked(could be add,moving or select)
-	void addMoveSelectPoint(vcg::Point3f point, CMeshO::FaceType::NormalType faceNormal);
+	void addMoveSelectPoint(Point3m point, CMeshO::FaceType::NormalType faceNormal);
 	
 	//we need to move the point closest to this one or select it depending on the mode
-	void selectOrMoveThisPoint(vcg::Point3f point);
+	void selectOrMoveThisPoint(Point3m point);
 		
 	//return the vector
 	//useful if you want to draw the points
@@ -140,10 +140,10 @@ private:
 	
 	//add a new point and call it something 
 	//bool present tells us if the point has been picked yet
-	void addPoint(vcg::Point3f &point, QString &name,  bool present);
+	void addPoint(Point3m &point, QString &name,  bool present);
 	
 	//handle everything involved with adding a point to the tree widget
-	PickedPointTreeWidgetItem * addTreeWidgetItemForPoint(vcg::Point3f &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present);
+	PickedPointTreeWidgetItem * addTreeWidgetItemForPoint(Point3m &point, QString &name, CMeshO::FaceType::NormalType &faceNormal, bool present);
 	
 	//load the points from a file
 	void loadPoints(QString filename);
@@ -200,8 +200,8 @@ private:
 	
 	//variables needed for undo
 	PickedPointTreeWidgetItem *lastPointToMove;
-	vcg::Point3f lastPointPosition;
-	vcg::Point3f lastPointNormal;
+	Point3m lastPointPosition;
+	Point3m lastPointNormal;
 	bool recordPointForUndo;
 	
 	QString templateWorkingDirectory;

@@ -87,8 +87,8 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
     }
 
     //We have to calculate the position here because it doesnt work in the mouseEvent functions for some reason
-    Point3f pickedPoint;
-    if (moveSelectPoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)){
+    Point3m pickedPoint;
+    if (moveSelectPoint && Pick<Point3m>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint)){
             /* qDebug("Found point for move %i %i -> %f %f %f",
                     currentMousePosition.x(),
                     currentMousePosition.y(),
@@ -98,7 +98,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
             pickPointsDialog->selectOrMoveThisPoint(pickedPoint);
 
             moveSelectPoint = false;
-    } else if(registerPoint && Pick<Point3f>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint))
+    } else if(registerPoint && Pick<Point3m>(currentMousePosition.x(),gla->height()-currentMousePosition.y(),pickedPoint))
     {
         /* qDebug("Found point for add %i %i -> %f %f %f",
                 currentMousePosition.x(),
@@ -108,8 +108,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 
         //find the normal of the face we just clicked
         CFaceO *face;
-        bool result = GLPickTri<CMeshO>::PickClosestFace(currentMousePosition.x(),gla->height()-currentMousePosition.y(),
-                mm.cm, face);
+        bool result = GLPickTri<CMeshO>::PickClosestFace(currentMousePosition.x(),gla->height()-currentMousePosition.y(),mm.cm, face);
 
         if(!result){
             qDebug() << "find nearest face failed!";
@@ -173,7 +172,7 @@ bool EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
     return true;
 }
 
-void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea *gla)
+void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea * /*gla*/)
 {
     //qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
@@ -272,13 +271,12 @@ void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, 
 }
 
 void EditPickPointsPlugin::drawPickedPoints(
-    std::vector<PickedPointTreeWidgetItem*> &pointVector, vcg::Box3f &boundingBox, QPainter *painter)
+    std::vector<PickedPointTreeWidgetItem*> &pointVector, Box3m &boundingBox, QPainter *painter)
 {
     assert(glArea);
-
-    vcg::Point3f size = boundingBox.Dim();
+    Point3m size = boundingBox.Dim();
     //how we scale the object indicating the normal at each selected point
-    float scaleFactor = (size[0]+size[1]+size[2])/90.0;
+    Scalarm scaleFactor = (size[0]+size[1]+size[2])/90.0;
 
     //qDebug() << "scaleFactor: " << scaleFactor;
 
@@ -302,7 +300,7 @@ void EditPickPointsPlugin::drawPickedPoints(
         PickedPointTreeWidgetItem * item = pointVector[i];
         //if the point has been set (it may not be if a template has been loaded)
         if(item->isActive()){
-            Point3f point = item->getPoint();
+            Point3m point = item->getPoint();
             glColor(Color4b::Blue);
       glLabel::render(painter,point, QString(item->getName()));
 
@@ -330,29 +328,26 @@ void EditPickPointsPlugin::drawPickedPoints(
 
     glMatrixMode(GL_MODELVIEW);
 
-    Point3f yaxis;
-    yaxis[0] = 0;
-    yaxis[1] = 1;
-    yaxis[2] = 0;
+    Point3m yaxis(Scalarm(0),Scalarm(1),Scalarm(0));
 
     for(int i = 0; i < pointVector.size(); ++i)
     {
         PickedPointTreeWidgetItem * item = pointVector[i];
         //if the point has been set (it may not be if a template has been loaded)
         if(item->isActive()){
-            Point3f point = item->getPoint();
+            Point3m point = item->getPoint();
 
             if(showNormal)
             {
-                Point3f normal = item->getNormal();
+                Point3m normal = item->getNormal();
 
                 if(showPin)
                 {
                     //dot product
-                    float angle = (Angle(normal,yaxis) * 180.0 / PI);
+                    Scalarm angle = (Angle(normal,yaxis) * 180.0 / PI);
 
                     //cross product
-                    Point3f axis = yaxis^normal;
+                    Point3m axis = yaxis^normal;
                     //qDebug() << "angle: " << angle << " x" << axis[0] << " y" << axis[1] << " z" << axis[2];
 
                     //bluegreen and a little clear
@@ -412,7 +407,6 @@ void EditPickPointsPlugin::drawPickedPoints(
                         if(item->isSelected() )	glColor4f(0.0f, 1.0f, 0.0f, 0.7f);
 
                     glEnd();
-
                     glPopMatrix();
                 } else
                 {
@@ -424,15 +418,13 @@ void EditPickPointsPlugin::drawPickedPoints(
                     glEnd();
                 }
             }
-
             glColor(Color4b::Red);
-            glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
+            //glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
         }
     }
-
     glDisable(GL_BLEND);
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_DEPTH_TEST);
-
     glPopAttrib();
+
 }
