@@ -208,10 +208,10 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
         //Get Parameters
         Point3m dir=par.getPoint3m("force_dir");
         Point3m g=par.getPoint3m("gravity_dir");
-        MeshLabScalar adhesion =par.getDynamicFloat("adhesion");
-        MeshLabScalar l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
-        MeshLabScalar v=par.getFloat("velocity");
-        MeshLabScalar m=par.getFloat("mass");
+        Scalarm adhesion =par.getDynamicFloat("adhesion");
+        Scalarm l=base_mesh->cm.bbox.Diag()*0.01; //mm()->cm.bbox.Diag();
+        Scalarm v=par.getFloat("velocity");
+        Scalarm m=par.getFloat("mass");
         int s=par.getInt("steps");
         bool colorize=par.getBool("colorize_mesh");
         if(!HasPerVertexAttribute(cloud_mesh->cm,"ParticleInfo")){

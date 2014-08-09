@@ -29,7 +29,7 @@ Return a random direction
 
 CMeshO::CoordType getRandomDirection(){
     CMeshO::CoordType dir;
-    dir = Point3m(rand()/MeshLabScalar(RAND_MAX),rand()/MeshLabScalar(RAND_MAX),rand()/MeshLabScalar(RAND_MAX))-Point3m(0.5f,0.5f,0.5f);
+    dir = Point3m(rand()/Scalarm(RAND_MAX),rand()/Scalarm(RAND_MAX),rand()/Scalarm(RAND_MAX))-Point3m(0.5f,0.5f,0.5f);
     dir = dir * 0.3f;
     return dir;
 }
@@ -37,11 +37,11 @@ CMeshO::CoordType getRandomDirection(){
 Verify if a point on that face fall out because of the inclination
 @param FacePointer f -  Pointer to the face
 @param Point3m     g -  Direction of the gravity
-@param MeshLabScalar       a -  Adhesion Factor
+@param Scalarm       a -  Adhesion Factor
 
 return true if a particle of that face fall out
 */
-bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,MeshLabScalar a){
+bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,Scalarm a){
     Point3m n=f->N();
     if(a>1) return false;
     if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((PI/2)*(1-a))) return true;
@@ -53,28 +53,28 @@ bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,MeshLabScalar a){
   @param Point3m p1 - Position of the initial point
   @param Point3m p2 - Position of the intersection point
   @param Point3m p3 - Position of the final point
-  @param MeshLabScalar   t  - Time length
+  @param Scalarm   t  - Time length
 
   @return elapsed time
 */
-MeshLabScalar GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, MeshLabScalar t){
-    MeshLabScalar d1= Distance(p1,p2);
-    MeshLabScalar d2= Distance(p2,p3);
+Scalarm GetElapsedTime(CMeshO::CoordType p1,CMeshO::CoordType p2, CMeshO::CoordType p3, Scalarm t){
+    Scalarm d1= Distance(p1,p2);
+    Scalarm d2= Distance(p2,p3);
     if(d1+d2==0) return 0;
     return (d1/(d1+d2))*t;
 }
 
-MeshLabScalar GetVelocity(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType g,MeshLabScalar m,MeshLabScalar v){
+Scalarm GetVelocity(CMeshO::CoordType o_p,CMeshO::CoordType n_p,CMeshO::FacePointer f,CMeshO::CoordType g,Scalarm m,Scalarm v){
     Point3m n=f->N();
-    MeshLabScalar b=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
-    MeshLabScalar distance=Distance(o_p,n_p);
+    Scalarm b=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
+    Scalarm distance=Distance(o_p,n_p);
     Point3m force;
     force[0]=g[0]-b*n[0];
     force[1]=g[1]-b*n[1];
     force[2]=g[2]-b*n[2];
     if(force.Norm()==0) return 0;
-    MeshLabScalar acceleration=(force/m).Norm();
-    MeshLabScalar n_v=math::Sqrt(pow(v,2)+(2*acceleration*distance));
+    Scalarm acceleration=(force/m).Norm();
+    Scalarm n_v=math::Sqrt(pow(v,2)+(2*acceleration*distance));
     return n_v;
 }
 /**
@@ -129,10 +129,10 @@ CMeshO::CoordType getBaricenter(CMeshO::FacePointer f){
 }
 
 
-CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,MeshLabScalar m,MeshLabScalar t){
+CMeshO::CoordType GetNewVelocity(CMeshO::CoordType i_v,CMeshO::FacePointer face,CMeshO::FacePointer new_face,CMeshO::CoordType force,CMeshO::CoordType g,Scalarm m,Scalarm t){
     CMeshO::CoordType n_v;
     Point3m n= face->N();
-    MeshLabScalar b=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
+    Scalarm b=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
     Point3m f;
     //Compute force component along the face
     f[0]=force[0]-b*n[0];
@@ -159,7 +159,7 @@ CMeshO::CoordType GetSafePosition(CMeshO::CoordType p,CMeshO::FacePointer f){
     bc[1]=0.33f;
     bc[2]=1-bc[0]-bc[1];
     CMeshO::CoordType pc=fromBarCoords(bc,f);
-    Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p,pc);
+    Ray3<Scalarm> ray=Ray3<Scalarm>(p,pc);
     ray.Normalize();
     Line3f line;
     Point3m p1=pc-p;
@@ -187,16 +187,16 @@ bool IsOnFace(Point3m p, CMeshO::FacePointer f){
     Point3m v2 = p-a;
 
     // Compute dot products
-    MeshLabScalar dot00 = v0.dot(v0);
-    MeshLabScalar dot01 = v0.dot(v1);
-    MeshLabScalar dot02 = v0.dot(v2);
-    MeshLabScalar dot11 = v1.dot(v1);
-    MeshLabScalar dot12 = v1.dot(v2);
+    Scalarm dot00 = v0.dot(v0);
+    Scalarm dot01 = v0.dot(v1);
+    Scalarm dot02 = v0.dot(v2);
+    Scalarm dot11 = v1.dot(v1);
+    Scalarm dot12 = v1.dot(v2);
 
     // Compute barycentric coordinates
-    MeshLabScalar invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-    MeshLabScalar u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    MeshLabScalar v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    Scalarm invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    Scalarm u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    Scalarm v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
     // Check if point is in triangle
     if(math::Abs(u)<0) u=0;
@@ -208,18 +208,18 @@ bool IsOnFace(Point3m p, CMeshO::FacePointer f){
 
 @param CoordType p   - coordinates of the point
 @param CoordType v   - velocity of the particle
-@param MeshLabScalar     m   - mass of the particle
+@param Scalarm     m   - mass of the particle
 @param FaceType face - pointer to the face
 @param CoordType dir - direction of the force
-@param MeshLabScalar 	   l   - length of the movement
-@param MeshLabScalar     t   - time step
+@param Scalarm 	   l   - length of the movement
+@param Scalarm     t   - time step
 
 @return new coordinates of the point
 */
-CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,MeshLabScalar m,CMeshO::FacePointer &face,CMeshO::CoordType force,MeshLabScalar l,MeshLabScalar t){
+CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,Scalarm m,CMeshO::FacePointer &face,CMeshO::CoordType force,Scalarm l,Scalarm t){
     Point3m new_pos;
     Point3m n= face->N();
-    MeshLabScalar a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
+    Scalarm a=n[0]*force[0]+n[1]*force[1]+n[2]*force[2];
     Point3m f;
     //Compute force component along the face
     f[0]=force[0]-a*n[0];
@@ -237,8 +237,8 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
         //QFileInfo text_file=QFileInfo(base_mesh->cm.textures[0].c_str());
         img.load(base_mesh->cm.textures[0].c_str());
         QPainter painter(&img);
-        MeshLabScalar w=img.width();
-        MeshLabScalar h=img.height();
+        Scalarm w=img.width();
+        Scalarm h=img.height();
         painter.setPen(Qt::black);
         painter.setBrush(Qt::SolidPattern);
         base_mesh->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
@@ -268,7 +268,7 @@ void DrawDust(MeshModel *base_mesh,MeshModel *cloud_mesh){
 
 void ColorizeMesh(MeshModel* m){
     CMeshO::FaceIterator fi;
-    MeshLabScalar dirtiness;
+    Scalarm dirtiness;
     for(fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi){
         dirtiness=fi->Q();
         if(dirtiness==0){
@@ -299,7 +299,7 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
     CMeshO::CoordType v0=f->V(0)->P();
     CMeshO::CoordType v1=f->V(1)->P();
     CMeshO::CoordType v2=f->V(2)->P();
-    MeshLabScalar dist[3];
+    Scalarm dist[3];
     Point3m int_points[3];
     dist[0]=PSDist(p2,v0,v1,int_points[0]);
     dist[1]=PSDist(p2,v1,v2,int_points[1]);
@@ -349,14 +349,14 @@ int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePo
 
 @param m MeshModel
 @param u CoordType dust direction
-@param k MeshLabScalar
-@param s MeshLabScalar
+@param k Scalarm
+@param s Scalarm
 
 @return nothing
 */
-void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,MeshLabScalar k,MeshLabScalar s){
+void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,Scalarm k,Scalarm s){
     CMeshO::FaceIterator fi;
-    MeshLabScalar d;
+    Scalarm d;
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         d=k/s+(1+k/s)*pow(fi->N().dot(u),s);
         fi->Q()=d;
@@ -374,12 +374,12 @@ void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,MeshLabScalar k,Me
 */
 void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
 
-    CMeshO::PerFaceAttributeHandle<MeshLabScalar> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<MeshLabScalar>(m->cm,std::string("exposure"));
+    CMeshO::PerFaceAttributeHandle<Scalarm> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(m->cm,std::string("exposure"));
 
-    MeshLabScalar dh=1.2;
-    MeshLabScalar exp=0;
-    MeshLabScalar di=0;
-    MeshLabScalar xi=0;
+    Scalarm dh=1.2;
+    Scalarm exp=0;
+    Scalarm di=0;
+    Scalarm xi=0;
 
     CMeshO::FacePointer face;
     CMeshO::CoordType p_c;
@@ -398,7 +398,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
             p_c=fromBarCoords(RandomBaricentric(),&*fi);
             //Create a ray with p_c as origin and direction N
             p_c=p_c+NormalizedNormal(*fi)*0.1;
-            Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p_c,fi->N());
+            Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,fi->N());
             di=0;
             face=0;
             face=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,1000,di);
@@ -428,15 +428,15 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
         Particle<CMeshO> info=ph[vi];
         if((*vi).IsS()){
             Point3m p_c=vi->P()+info.face->N().normalized()*0.1;
-            Ray3<MeshLabScalar> ray=Ray3<MeshLabScalar>(p_c,dir);
-            MeshLabScalar di;
+            Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,dir);
+            Scalarm di;
             CMeshO::FacePointer new_f=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,base_mesh->cm.bbox.Diag(),di);
             if(new_f!=0){
                 ph[vi].face=new_f;
-                MeshLabScalar u;
-                MeshLabScalar v;
-                MeshLabScalar t;
-                IntersectionRayTriangle<MeshLabScalar>(ray,new_f->P(0),new_f->P(1),new_f->P(2),t,u,v);
+                Scalarm u;
+                Scalarm v;
+                Scalarm t;
+                IntersectionRayTriangle<Scalarm>(ray,new_f->P(0),new_f->P(1),new_f->P(2),t,u,v);
                 Point3m bc(1-u-v,u,v);
                 vi->P()=fromBarCoords(bc,new_f);
                 vi->ClearS();
@@ -462,19 +462,19 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
 
 @return ?
 */
-bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,MeshLabScalar threshold){
+bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,Scalarm threshold){
 
     //Handler
-    CMeshO::PerFaceAttributeHandle<MeshLabScalar> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<MeshLabScalar>(m->cm,std::string("exposure"));
+    CMeshO::PerFaceAttributeHandle<Scalarm> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(m->cm,std::string("exposure"));
 
     CMeshO::FaceIterator fi;
     CMeshO::CoordType p;
     cpv.clear();
     //dpv.clear();
-    MeshLabScalar r=1;
-    MeshLabScalar a0=0;
-    MeshLabScalar a=0;
-    MeshLabScalar a1=0;
+    Scalarm r=1;
+    Scalarm a0=0;
+    Scalarm a=0;
+    Scalarm a1=0;
 
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         int n_dust=0;
@@ -511,15 +511,15 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::v
 /**
 
 */
-void associateParticles(MeshModel* b_m,MeshModel* c_m,MeshLabScalar &m,MeshLabScalar &v,CMeshO::CoordType g){
+void associateParticles(MeshModel* b_m,MeshModel* c_m,Scalarm &m,Scalarm &v,CMeshO::CoordType g){
     MetroMeshFaceGrid   unifGridFace;
     Point3m closestPt;
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph= tri::Allocator<CMeshO>::AddPerVertexAttribute<Particle<CMeshO> > (c_m->cm,std::string("ParticleInfo"));
     unifGridFace.Set(b_m->cm.face.begin(),b_m->cm.face.end());
     MarkerFace markerFunctor;
     markerFunctor.SetMesh(&(b_m->cm));
-    MeshLabScalar dist=1;
-    MeshLabScalar dist_upper_bound=dist;
+    Scalarm dist=1;
+    Scalarm dist_upper_bound=dist;
     CMeshO::VertexIterator vi;
     vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
     for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
@@ -535,10 +535,10 @@ void associateParticles(MeshModel* b_m,MeshModel* c_m,MeshLabScalar &m,MeshLabSc
 
 }
 
-CMeshO::CoordType getVelocityComponent(MeshLabScalar v,CMeshO::FacePointer f,CMeshO::CoordType g){
+CMeshO::CoordType getVelocityComponent(Scalarm v,CMeshO::FacePointer f,CMeshO::CoordType g){
     CMeshO::CoordType cV;
     Point3m n= f->N();
-    MeshLabScalar a=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
+    Scalarm a=n[0]*g[0]+n[1]*g[1]+n[2]*g[2];
     Point3m d;
     d[0]=g[0]-a*n[0];
     d[1]=g[1]-a*n[1];
@@ -591,12 +591,12 @@ void prepareMesh(MeshModel* m){
 /**
 @def This function move a particle over the mesh
 */
-void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,MeshLabScalar l,int t,Point3m dir,Point3m g,MeshLabScalar a){
+void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,Scalarm l,int t,Point3m dir,Point3m g,Scalarm a){
     if(CheckFallPosition(info.face,g,a)){
         p->SetS();
         return;
     }
-    MeshLabScalar time=t;
+    Scalarm time=t;
     if(dir.Norm()==0) dir=getRandomDirection();
     Point3m new_pos;
     Point3m current_pos;
@@ -611,7 +611,7 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,MeshLabScalar l
         if(edge!=-1){
             Point3m n = new_face->N();
             if(CheckFallPosition(new_face,g,a))  p->SetS();
-            MeshLabScalar elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time);
+            Scalarm elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time);
             info.v=GetNewVelocity(info.v,current_face,new_face,g+dir,g,info.mass,elapsed_time);
             time=time-elapsed_time;
             current_pos=int_pos;
@@ -643,22 +643,22 @@ This function compute the repulsion beetwen particles
 @param MeshModel* b_m - base mesh
 @param MeshModel* c_m - cloud of points
 @param int k          - max number of particle to repulse
-@param MeshLabScalar l        - lenght of the step
+@param Scalarm l        - lenght of the step
 @return nothing       - adhesion factor
 */
-void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,MeshLabScalar l,Point3m g,MeshLabScalar a){
+void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,Scalarm l,Point3m g,Scalarm a){
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(c_m->cm,"ParticleInfo");
     MetroMeshVertexGrid v_grid;
-    std::vector< Point3<MeshLabScalar> > v_points;
+    std::vector< Point3<Scalarm> > v_points;
     std::vector<CMeshO::VertexPointer> vp;
-    std::vector<MeshLabScalar> distances;
+    std::vector<Scalarm> distances;
     v_grid.Set(c_m->cm.vert.begin(),c_m->cm.vert.end(),b_m->cm.bbox);
     CMeshO::VertexIterator vi;
     for(vi=c_m->cm.vert.begin();vi!=c_m->cm.vert.end();++vi){
         vcg::tri::GetKClosestVertex(c_m->cm,v_grid,k,vi->P(),EPSILON,vp,distances,v_points);
         for(unsigned int i=0;i<vp.size();i++){CMeshO::VertexPointer v = vp[i];
             if(v->P()!=vi->P() && !v->IsD() && !vi->IsD()){
-                Ray3<MeshLabScalar> ray(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
+                Ray3<Scalarm> ray(vi->P(),fromBarCoords(RandomBaricentric(),ph[vp[i]].face));
                 ray.Normalize();
                 Point3m dir=ray.Direction();
                 dir.Normalize();
@@ -672,12 +672,12 @@ void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,MeshLabScalar l,Point3
 
 @param MeshModel cloud  - Mesh of points
 @param Point3m   force  - Direction of the force
-@param MeshLabScalar     l      - Lenght of the  movementstep
-@param MeshLabScalar     t   - Time Step
+@param Scalarm     l      - Lenght of the  movementstep
+@param Scalarm     t   - Time Step
 
 @return nothing
 */
-void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3m g,Point3m force,MeshLabScalar l,MeshLabScalar a,MeshLabScalar t,int r_step){
+void MoveCloudMeshForward(MeshModel *cloud,MeshModel *base,Point3m g,Point3m force,Scalarm l,Scalarm a,Scalarm t,int r_step){
 
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(cloud->cm,"ParticleInfo");
     CMeshO::VertexIterator vi;
