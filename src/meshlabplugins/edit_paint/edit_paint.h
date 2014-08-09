@@ -93,7 +93,7 @@ private:
 
     std::vector<CMeshO::FacePointer> * selection; //currently selected faces
     std::vector< std::pair<CVertexO *, PickingData> > vertices; //touched vertices during last updateSelection
-    vcg::Point3f normal; //average normal of all vertices in "vertices"
+    Point3m normal; //average normal of all vertices in "vertices"
 
     std::vector<QPointF> circle;
     std::vector<QPointF> dense_circle;
@@ -216,19 +216,19 @@ class SinglePositionUndo : public QUndoCommand
 {
 
 public:
-    SinglePositionUndo(CVertexO * v, vcg::Point3f p, vcg::Point3f n, QUndoCommand * parent = 0) : QUndoCommand(parent){
+    SinglePositionUndo(CVertexO * v, Point3m p, Point3m n, QUndoCommand * parent = 0) : QUndoCommand(parent){
         vertex = v; original = p; normal = n;
     }
 
-    virtual void undo() {vcg::Point3f temp = vertex->P(); vertex->P() = original; original = temp;
+    virtual void undo() {Point3m temp = vertex->P(); vertex->P()= original; original = temp;
                          temp = vertex->N(); vertex->N() = normal; normal = temp;}
     virtual void redo() {undo();}
     virtual int id() {return MESH_PULL;}
 
 private:
     CVertexO* vertex;
-    vcg::Point3f original;
-    vcg::Point3f normal;
+    Point3m original;
+    Point3m normal;
 };
 
 
@@ -542,7 +542,7 @@ inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCe
  *
  * O(1)
  */
-inline void displaceAlongVector(CVertexO* vp, vcg::Point3f vector, float displacement)
+inline void displaceAlongVector(CVertexO* vp, Point3m vector, float displacement)
 {
     (*vp).P() += vector * displacement;
 }

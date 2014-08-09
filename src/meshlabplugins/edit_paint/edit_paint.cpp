@@ -204,17 +204,15 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
     glarea = gla;
 
     if (!latest_event.valid || latest_event.processed) return;
-
     latest_event.processed = true;
     glPushAttrib(GL_TRANSFORM_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-        glMultMatrix(m.cm.Tr);
-        glGetDoublev(GL_MODELVIEW_MATRIX, modelview_matrix);
-    glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glMultMatrix(m.cm.Tr);
+            glGetDoublev(GL_MODELVIEW_MATRIX, modelview_matrix);
+        glPopMatrix();
     glPopAttrib();
     glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
-
     viewport[0] = viewport[1] = 0;
     viewport[2] = gla->width(); viewport[3] = gla->height();
 
@@ -901,7 +899,7 @@ inline void EditPaintPlugin::updateSelection(MeshModel &m, vector< pair<CVertexO
     vector <CFaceO *> surround; /*< surrounding faces of a given face*/
     surround.reserve(6);
 
-    if (current_options & EPP_AVG_NORMAL ) normal = Point3f(0.0, 0.0, 0.0);
+    if (current_options & EPP_AVG_NORMAL ) normal = Point3m(0.0, 0.0, 0.0);
 
   tri::UnMarkAll(m.cm);
 
@@ -1065,28 +1063,28 @@ void EditPaintPlugin::update()
 void drawLine(GLArea * gla, QPoint & start, QPoint & cur) {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0,gla->width(),gla->height(),0,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glPushAttrib(GL_ENABLE_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_COLOR_LOGIC_OP);
-    float wi;
-    glGetFloatv(GL_LINE_WIDTH,&wi);
-    glLineWidth(4);
-    glLogicOp(GL_XOR);
-    glColor3f(1,1,1);
-    glBegin(GL_LINES);
-        glVertex2f(start.x(),start.y());
-        glVertex2f(cur.x(),cur.y());
-    glEnd();
-    glPopAttrib();
-    glPopMatrix(); // restore modelview
-    glLineWidth(wi);
+        glLoadIdentity();
+        glOrtho(0,gla->width(),gla->height(),0,-1,1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glPushAttrib(GL_ENABLE_BIT);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_LIGHTING);
+                glDisable(GL_TEXTURE_2D);
+                glEnable(GL_COLOR_LOGIC_OP);
+                float wi;
+                glGetFloatv(GL_LINE_WIDTH,&wi);
+                glLineWidth(4);
+                glLogicOp(GL_XOR);
+                glColor3f(1,1,1);
+                glBegin(GL_LINES);
+                    glVertex2f(start.x(),start.y());
+                    glVertex2f(cur.x(),cur.y());
+                glEnd();
+            glPopAttrib();
+        glPopMatrix(); // restore modelview
+        glLineWidth(wi);
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -1096,31 +1094,31 @@ void drawSimplePolyLine(GLArea * gla, QPoint & cur, float scale, vector<QPointF>
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0,gla->width(),gla->height(),0,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glPushAttrib(GL_ENABLE_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_COLOR_LOGIC_OP);
-    glLogicOp(GL_XOR);
-    glColor3f(1,1,1);
+        glLoadIdentity();
+        glOrtho(0,gla->width(),gla->height(),0,-1,1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glPushAttrib(GL_ENABLE_BIT);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_LIGHTING);
+                glDisable(GL_TEXTURE_2D);
+                glEnable(GL_COLOR_LOGIC_OP);
+                glLogicOp(GL_XOR);
+                glColor3f(1,1,1);
 
-    glBegin(GL_LINE_LOOP);
+                glBegin(GL_LINE_LOOP);
 
-    for (unsigned int k = 0; k < points->size(); k++)
-    {
-        glVertex2f(cur.x() + ( points->at(k).x() * scale ), cur.y() + ( points->at(k).y() * scale ));
-    }
+                for (unsigned int k = 0; k < points->size(); k++)
+                {
+                    glVertex2f(cur.x() + ( points->at(k).x() * scale ), cur.y() + ( points->at(k).y() * scale ));
+                }
 
-    glEnd();
+                glEnd();
 
-    glDisable(GL_LOGIC_OP);
-    glPopAttrib();
-    glPopMatrix(); // restore modelview
+                glDisable(GL_LOGIC_OP);
+            glPopAttrib();
+        glPopMatrix(); // restore modelview
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -1135,12 +1133,13 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
     gluUnProject ((double) mid.x(), mid.y(), 0.0, modelview_matrix, projection_matrix, viewport, &dX, &dY, &dZ);
     gluUnProject ((double) mid.x(), mid.y(), 1.0, modelview_matrix, projection_matrix, viewport, &dX2, &dY2, &dZ2);
 
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glLoadIdentity();
-    gluLookAt(dX,dY,dZ, dX2,dY2,dZ2, 1,0,0);
+        glLoadIdentity();
+        gluLookAt(dX,dY,dZ, dX2,dY2,dZ2, 1,0,0);
 
-    double mvmatrix2[16];
-    glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix2);
+        double mvmatrix2[16];
+        glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix2);
     glPopMatrix();
 
     double tx,ty,tz;
@@ -1164,9 +1163,9 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 
     float radius = scale; //TODO leftover
 
-  QVector<QPointF> proj_points(points->size());
+  QVector<QPointF> proj_points(int(points->size()));
 
-    for (unsigned int i = 0; i < points->size(); i++)
+    for (size_t i = 0; i < points->size(); i++)
     {
         /** calcs the far point of the line */
         fastMultiply(points->at(i).x() * radius, points->at(i).y() * radius, diag, inv_mvmatrix, &tx, &ty, &tz);
@@ -1221,32 +1220,32 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0,gla->width(),gla->height(),0,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glPushAttrib(GL_ENABLE_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_COLOR_LOGIC_OP);
-    glLogicOp(GL_XOR);
-    glColor3f(1,1,1);
+        glLoadIdentity();
+        glOrtho(0,gla->width(),gla->height(),0,-1,1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glPushAttrib(GL_ENABLE_BIT);
+                glDisable(GL_DEPTH_TEST);
+                glDisable(GL_LIGHTING);
+                glDisable(GL_TEXTURE_2D);
+                glEnable(GL_COLOR_LOGIC_OP);
+                glLogicOp(GL_XOR);
+                glColor3f(1,1,1);
 
-    /** draws the circle */
-    glBegin(GL_LINE_LOOP);
+                /** draws the circle */
+                glBegin(GL_LINE_LOOP);
 
-    for (unsigned int i = 0; i < points->size(); i++)
-    {
-        glVertex2f(proj_points[i].x(), proj_points[i].y());
-    }
+                for (unsigned int i = 0; i < points->size(); i++)
+                {
+                    glVertex2f(proj_points[i].x(), proj_points[i].y());
+                }
 
-    glEnd();
+                glEnd();
 
-    glDisable(GL_COLOR_LOGIC_OP);
-    glPopAttrib();
-    glPopMatrix(); // restore modelview
+                glDisable(GL_COLOR_LOGIC_OP);
+            glPopAttrib();
+        glPopMatrix(); // restore modelview
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
