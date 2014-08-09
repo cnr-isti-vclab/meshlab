@@ -127,10 +127,10 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             firstMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
-            typedef CMeshO::ScalarType scalar;
-            typedef Intercept<mpq_class,scalar> intercept;
-            const scalar d = par.getFloat("Delta");
-            const Point3f delta(d, d, d);
+//            typedef CMeshO::ScalarType scalar;
+            typedef Intercept<mpq_class,MeshLabScalar> intercept;
+            const MeshLabScalar d = par.getFloat("Delta");
+            const Point3m delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
             Log(0, "Rasterizing first volume...");
             InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta, subFreq, cb);
