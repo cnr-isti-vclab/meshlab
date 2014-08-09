@@ -240,7 +240,7 @@ public:
             {
                 QString fullPath = md.meshList[i]->fullName();
                 md.setBusy(true);
-                vcg::Matrix44f trm = md.meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
+                Matrix44m trm = md.meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
                 if (!importMesh(*md.meshList[i],fullPath))
                 {
                     md.delMesh(md.meshList[i]);
@@ -372,8 +372,8 @@ public:
                 }
                 QGLWidget wid;
                 iFilter->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-                bool res = iFilter->glContext->create();
-                if (!iFilter->glContext->isValid())
+                bool created = iFilter->glContext->create();
+                if ((!created) || (!iFilter->glContext->isValid())) 
                 {
                     fprintf(fp,"A valid GLContext is required by the filter to work.\n");
                     return false;
@@ -424,8 +424,8 @@ public:
                         }
                         QGLWidget wid;
                         cppfilt->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-                        bool res = cppfilt->glContext->create();
-                        if (!cppfilt->glContext->isValid())
+                        bool created = cppfilt->glContext->create();
+                        if ((!created) || (!cppfilt->glContext->isValid()))
                         {
                             fprintf(fp,"A valid GLContext is required by the filter to work.\n");
                             return false;
@@ -669,7 +669,6 @@ int main(int argc, char *argv[])
                     i = i + 2;
                     do
                     {
-                        char tt = argv[i][0];
                         switch (argv[i][0])
                         {
                         case commandline::vertex :
