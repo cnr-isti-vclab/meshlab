@@ -60,7 +60,7 @@
 #error "Fatal compilation error: MESHLAB_SCALAR must be defined"
 #endif
 
-typedef MESHLAB_SCALAR MeshLabScalar;
+typedef MESHLAB_SCALAR Scalarm;
 typedef vcg::Point2<MESHLAB_SCALAR>   Point2m;
 typedef vcg::Point3<MESHLAB_SCALAR>   Point3m;
 typedef vcg::Point4<MESHLAB_SCALAR>   Point4m;
