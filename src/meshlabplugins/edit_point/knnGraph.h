@@ -45,9 +45,9 @@ static void MakeKNNTree(_MyMeshType& m, int numOfNeighbours)
     }
     ConstDataWrapper<typename _MyMeshType::CoordType> DW(&(input[0]), input.size());
 
-    KdTree<float> tree(DW);
+    KdTree<Scalarm> tree(DW);
 
-    tree.setMaxNofNeighbors(neighboursVectSize);
+    //tree.setMaxNofNeighbors(neighboursVectSize);
 
     //For each vertex we insert the k-nearest neighbours in the associated vector.
     //If the number of the found vertices is less than the required we exclude the point with
@@ -56,11 +56,12 @@ static void MakeKNNTree(_MyMeshType& m, int numOfNeighbours)
 
     int neightId = -1;
     for (int j = 0; j < m.vn; j++) {
-        tree.doQueryK(m.vert[j].cP());
+        vcg::KdTree<Scalarm>::PriorityQueue p;
+        tree.doQueryK(m.vert[j].cP(),neighboursVectSize,p);
 
-        neighbours = tree.getNofFoundNeighbors();
-        for (int i = 0; i < neighbours; i++) {
-            neightId = tree.getNeighborId(i);
+        neighbours = p.getNofElements();
+        for (int i = 0; i < neighbours; ++i) {
+            neightId = p.getIndex(i);
             if (neightId < m.vn && (neightId != j))
                 kNeighboursVect[m.vert[j]]->push_back(&(m.vert[neightId]));
         }

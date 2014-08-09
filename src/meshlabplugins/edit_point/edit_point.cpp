@@ -132,7 +132,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 
         /* Borders points are drawn in yellow. */
         glBegin(GL_POINTS);
-        glColor4f(1,1,0,.5f);
+        glColor4f(1.0f,1.0f,0.0f,.5f);
 
         for(vector<CMeshO::VertexPointer>::iterator vi = BorderVector.begin(); vi != BorderVector.end(); ++vi)
         {
@@ -148,7 +148,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
             vcg::tri::OrientedDisk<CMeshO>(fittingCircle, 192, fittingPlane.Projection(startingVertex->cP()), fittingPlane.Direction(), this->fittingRadius);
 
             glBegin(GL_TRIANGLE_FAN);
-            glColor4f(0.69,0.93,0.93,.7f);
+            glColor4f(0.69f,0.93f,0.93f,.7f);
 
             CMeshO::VertexIterator vi;
             for (vi = fittingCircle.vert.begin(); vi != fittingCircle.vert.end(); vi++) {
