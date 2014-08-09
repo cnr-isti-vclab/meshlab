@@ -57,8 +57,8 @@ public:
 private:
   QFont qFont;
   
-  vcg::Matrix44f original_Transform;
-  vcg::Matrix44f delta_Transform;
+  Matrix44m original_Transform;
+  Matrix44m delta_Transform;
 
   ManipulatorType current_manip;
   ManipulatorMode current_manip_mode;
@@ -66,37 +66,37 @@ private:
   bool aroundOrigin;
 
   bool isSnapping;
-  float  snapto;
+  Scalarm  snapto;
 
   QString inputnumberstring;
-  float   inputnumber;
+  Scalarm   inputnumber;
 
   bool isMoving;
   vcg::Point2i startdrag;
   vcg::Point2i enddrag;
 
-  float currScreenOffset_X;   // horizontal offset (screen space)
-  float currScreenOffset_Y;   // vertical offset (screen space)
+  Scalarm currScreenOffset_X;   // horizontal offset (screen space)
+  Scalarm currScreenOffset_Y;   // vertical offset (screen space)
 
   // when the user is dragging, the mouse offset is stored here, 
   // two sets of variables are used, since the offset will be accumulated in 
   // the currOffset* variables when finished dragging
-  float displayOffset;        // mouse offset value (single axis)
-  float displayOffset_X;      // mouse X offset value
-  float displayOffset_Y;      // mouse Y offset value
-  float displayOffset_Z;      // mouse Z offset value
+  Scalarm displayOffset;        // mouse offset value (single axis)
+  Scalarm displayOffset_X;      // mouse X offset value
+  Scalarm displayOffset_Y;      // mouse Y offset value
+  Scalarm displayOffset_Z;      // mouse Z offset value
 
   // offset is accumulated here... user can change the offset by dragging mouse until 
   // satisfied, accumulating changes
   // if the user confirms, this offset is applied to the matrix
-  float currOffset;     // combined offset value (single axis)
-  float currOffset_X;     // X offset value
-  float currOffset_Y;     // Y offset value
-  float currOffset_Z;     // Z offset value
+  Scalarm currOffset;     // combined offset value (single axis)
+  Scalarm currOffset_X;     // X offset value
+  Scalarm currOffset_Y;     // Y offset value
+  Scalarm currOffset_Z;     // Z offset value
 
-  vcg::Point3f screen_xaxis;
-  vcg::Point3f screen_yaxis;
-  vcg::Point3f screen_zaxis;
+  Point3m screen_xaxis;
+  Point3m screen_yaxis;
+  Point3m screen_zaxis;
 
   void DrawCircle(float r, float g, float b);
   void DrawArrows(float r, float g, float b);
@@ -112,7 +112,7 @@ private:
   void applyMotion(MeshModel &model, GLArea *gla);
   void cancelMotion(MeshModel &model, GLArea *gla);
 
-  bool MyPick(const int &x, const int &y, vcg::Point3f &pp, float mydepth);
+  bool MyPick(const int &x, const int &y, Point3m &pp, float mydepth);
 
 signals:
   void suspendEditToggle();

@@ -41,8 +41,8 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
   inputnumberstring= "";
   inputnumber=0;
 
-  original_Transform = vcg::Matrix44f::Identity();
-  delta_Transform = vcg::Matrix44f::Identity();
+  original_Transform = Matrix44m::Identity();
+  delta_Transform = Matrix44m::Identity();
 }
 
 const QString EditManipulatorsPlugin::Info() 
@@ -101,7 +101,7 @@ void EditManipulatorsPlugin::applyMotion(MeshModel &model, GLArea *gla)
 
   // storing start matrix
   original_Transform = model.cm.Tr;
-  delta_Transform = vcg::Matrix44f::Identity();
+  delta_Transform = Matrix44m::Identity();
 
   gla->update();
 }
@@ -126,13 +126,13 @@ void EditManipulatorsPlugin::cancelMotion(MeshModel &model, GLArea *gla)
 
   // storing start matrix
   original_Transform = model.cm.Tr;
-  delta_Transform = vcg::Matrix44f::Identity();
+  delta_Transform = Matrix44m::Identity();
 
   gla->update();
 }
 
 // keyboard press
-void EditManipulatorsPlugin::keyPressEvent(QKeyEvent *e, MeshModel &model, GLArea *gla)
+void EditManipulatorsPlugin::keyPressEvent(QKeyEvent* e, MeshModel& /*model*/, GLArea* /*gla*/)
 {
   // shift pressed, entering snapping mode
   if(e->key() == Qt::Key_Shift)
@@ -294,12 +294,12 @@ void EditManipulatorsPlugin::resetOffsets()
 
 void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
 {
-  Box3f b;
+    Box3m b;
 	b = model.cm.bbox;
-	Point3f mi=b.min;
-	Point3f ma=b.max;
-	Point3f d3=(b.max-b.min)/4.0;
-	Point3f zz(0,0,0);
+	Point3m mi=b.min;
+	Point3m ma=b.max;
+	Point3m d3=(b.max-b.min)/4.0;
+	Point3m zz(0,0,0);
 
   // setup
 	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
@@ -366,139 +366,139 @@ void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
 
 void EditManipulatorsPlugin::DrawCubes(float r, float g, float b)
 {
-  glColor4f(r,g,b,1.0);
+  glColor4f(r,g,b,1.0f);
   glBegin (GL_LINES);
       // mid line
-    glVertex3f( 0.0,  0.0, -1.0);
-    glVertex3f( 0.0,  0.0,  1.0);
+    glVertex3f( 0.0f,  0.0f, -1.0f);
+    glVertex3f( 0.0f,  0.0f,  1.0f);
   glEnd ();
 
   glBegin (GL_LINES);
       // right cube
-    glVertex3f(  0.0,  0.0,  1.0);
-    glVertex3f(  0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.0,  1.0);
-    glVertex3f( -0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.0,  1.0);
-    glVertex3f(  0.0, -0.1,  1.1);
-    glVertex3f(  0.0,  0.0,  1.0);
-    glVertex3f(  0.0,  0.1,  1.1);
-    glVertex3f(  0.0,  0.0,  1.2);
-    glVertex3f(  0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.0,  1.2);
-    glVertex3f( -0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.0,  1.2);
-    glVertex3f(  0.0, -0.1,  1.1);
-    glVertex3f(  0.0,  0.0,  1.2);
-    glVertex3f(  0.0,  0.1,  1.1);
+    glVertex3f(  0.0f,  0.0f,  1.0f);
+    glVertex3f(  0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.0f);
+    glVertex3f( -0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.0f);
+    glVertex3f(  0.0f, -0.1f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.0f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.2f);
+    glVertex3f(  0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.2f);
+    glVertex3f( -0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.2f);
+    glVertex3f(  0.0f, -0.1f,  1.1f);
+    glVertex3f(  0.0f,  0.0f,  1.2f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
   glEnd ();
 
   glBegin (GL_LINES);
       // left cube
-    glVertex3f(  0.0,  0.0, -1.0);
-    glVertex3f(  0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.0, -1.0);
-    glVertex3f( -0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.0, -1.0);
-    glVertex3f(  0.0, -0.1, -1.1);
-    glVertex3f(  0.0,  0.0, -1.0);
-    glVertex3f(  0.0,  0.1, -1.1);
-    glVertex3f(  0.0,  0.0, -1.2);
-    glVertex3f(  0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.0, -1.2);
-    glVertex3f( -0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.0, -1.2);
-    glVertex3f(  0.0, -0.1, -1.1);
-    glVertex3f(  0.0,  0.0, -1.2);
-    glVertex3f(  0.0,  0.1, -1.1);
+    glVertex3f(  0.0f,  0.0f, -1.0f);
+    glVertex3f(  0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.0f);
+    glVertex3f( -0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.0f);
+    glVertex3f(  0.0f, -0.1f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.0f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.2f);
+    glVertex3f(  0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.2f);
+    glVertex3f( -0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.2f);
+    glVertex3f(  0.0f, -0.1f, -1.1f);
+    glVertex3f(  0.0f,  0.0f, -1.2f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
   glEnd ();
 
 
     // right cube
-  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f),0.5);
+  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f),0.5f);
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0,  1.2);
-    glVertex3f(  0.0,  0.1,  1.1);
-    glVertex3f( -0.1,  0.0,  1.1);
-    glVertex3f(  0.0, -0.1,  1.1);
-    glVertex3f(  0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.1,  1.1);
+    glVertex3f(  0.0f,  0.0f,  1.2f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
+    glVertex3f( -0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f, -0.1f,  1.1f);
+    glVertex3f(  0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
   glEnd();
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0,  1.0);
-    glVertex3f(  0.0,  0.1,  1.1);
-    glVertex3f( -0.1,  0.0,  1.1);
-    glVertex3f(  0.0, -0.1,  1.1);
-    glVertex3f(  0.1,  0.0,  1.1);
-    glVertex3f(  0.0,  0.1,  1.1);
+    glVertex3f(  0.0f,  0.0f,  1.0f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
+    glVertex3f( -0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f, -0.1f,  1.1f);
+    glVertex3f(  0.1f,  0.0f,  1.1f);
+    glVertex3f(  0.0f,  0.1f,  1.1f);
   glEnd();
 
       // left cube
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0, -1.2);
-    glVertex3f(  0.0,  0.1, -1.1);
-    glVertex3f( -0.1,  0.0, -1.1);
-    glVertex3f(  0.0, -0.1, -1.1);
-    glVertex3f(  0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.1, -1.1);
+    glVertex3f(  0.0f,  0.0f, -1.2f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
+    glVertex3f( -0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f, -0.1f, -1.1f);
+    glVertex3f(  0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
   glEnd();
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0, -1.0);
-    glVertex3f(  0.0,  0.1, -1.1);
-    glVertex3f( -0.1,  0.0, -1.1);
-    glVertex3f(  0.0, -0.1, -1.1);
-    glVertex3f(  0.1,  0.0, -1.1);
-    glVertex3f(  0.0,  0.1, -1.1);
+    glVertex3f(  0.0f,  0.0f, -1.0f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
+    glVertex3f( -0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f, -0.1f, -1.1f);
+    glVertex3f(  0.1f,  0.0f, -1.1f);
+    glVertex3f(  0.0f,  0.1f, -1.1f);
   glEnd();
 }
 
 void EditManipulatorsPlugin::DrawArrows(float r, float g, float b)
 {
-  glColor4f(r,g,b,1.0);
+  glColor4f(r,g,b,1.0f);
   glBegin (GL_LINES);
       // mid line
-    glVertex3f( 0.0,  0.0, -1.1);
-    glVertex3f( 0.0,  0.0,  1.1);
+    glVertex3f( 0.0f,  0.0f, -1.1f);
+    glVertex3f( 0.0f,  0.0f,  1.1f);
 
       // right arrow
-    glVertex3f(  0.0,  0.0,  1.1);
-    glVertex3f(  0.1,  0.1,  0.9);
-    glVertex3f(  0.0,  0.0,  1.1);
-    glVertex3f( -0.1,  0.1,  0.9);
-    glVertex3f(  0.0,  0.0,  1.1);
-    glVertex3f(  0.1, -0.1,  0.9);
-    glVertex3f(  0.0,  0.0,  1.1);
-    glVertex3f( -0.1, -0.1,  0.9);
+    glVertex3f(  0.0f,  0.0f,  1.1f);
+    glVertex3f(  0.1f,  0.1f,  0.9f);
+    glVertex3f(  0.0f,  0.0f,  1.1f);
+    glVertex3f( -0.1f,  0.1f,  0.9f);
+    glVertex3f(  0.0f,  0.0f,  1.1f);
+    glVertex3f(  0.1f, -0.1f,  0.9f);
+    glVertex3f(  0.0f,  0.0f,  1.1f);
+    glVertex3f( -0.1f, -0.1f,  0.9f);
 
       // left arrow
-    glVertex3f(  0.0,  0.0, -1.1);
-    glVertex3f(  0.1,  0.1, -0.9);
-    glVertex3f(  0.0,  0.0, -1.1);
-    glVertex3f( -0.1,  0.1, -0.9);
-    glVertex3f(  0.0,  0.0, -1.1);
-    glVertex3f(  0.1, -0.1, -0.9);
-    glVertex3f(  0.0,  0.0, -1.1);
-    glVertex3f( -0.1, -0.1, -0.9);
+    glVertex3f(  0.0f,  0.0f, -1.1f);
+    glVertex3f(  0.1f,  0.1f, -0.9f);
+    glVertex3f(  0.0f,  0.0f, -1.1f);
+    glVertex3f( -0.1f,  0.1f, -0.9f);
+    glVertex3f(  0.0f,  0.0f, -1.1f);
+    glVertex3f(  0.1f, -0.1f, -0.9f);
+    glVertex3f(  0.0f,  0.0f, -1.1f);
+    glVertex3f( -0.1f, -0.1f, -0.9f);
   glEnd ();
 
     // right arrow
-  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f), 0.5);
+  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f), 0.5f);
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0,  1.1);
-    glVertex3f(  0.1,  0.1,  0.9);
-    glVertex3f( -0.1,  0.1,  0.9);
-    glVertex3f( -0.1, -0.1,  0.9);
-    glVertex3f(  0.1, -0.1,  0.9);
-    glVertex3f(  0.1,  0.1,  0.9);
+    glVertex3f(  0.0f,  0.0f,  1.1f);
+    glVertex3f(  0.1f,  0.1f,  0.9f);
+    glVertex3f( -0.1f,  0.1f,  0.9f);
+    glVertex3f( -0.1f, -0.1f,  0.9f);
+    glVertex3f(  0.1f, -0.1f,  0.9f);
+    glVertex3f(  0.1f,  0.1f,  0.9f);
   glEnd();
       // left arrow
   glBegin (GL_TRIANGLE_FAN);
-    glVertex3f(  0.0,  0.0, -1.1);
-    glVertex3f(  0.1,  0.1, -0.9);
-    glVertex3f( -0.1,  0.1, -0.9);
-    glVertex3f( -0.1, -0.1, -0.9);
-    glVertex3f(  0.1, -0.1, -0.9);
-    glVertex3f(  0.1,  0.1, -0.9);
+    glVertex3f(  0.0f,  0.0f, -1.1f);
+    glVertex3f(  0.1f,  0.1f, -0.9f);
+    glVertex3f( -0.1f,  0.1f, -0.9f);
+    glVertex3f( -0.1f, -0.1f, -0.9f);
+    glVertex3f(  0.1f, -0.1f, -0.9f);
+    glVertex3f(  0.1f,  0.1f, -0.9f);
   glEnd();
 }
 
@@ -514,8 +514,7 @@ void EditManipulatorsPlugin::DrawCircle(float r, float g, float b)
     glVertex3d (cos (i * pi2 / nside), sin (i * pi2 / nside), 0.0);
   }
   glEnd();
-
-  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f), 0.5);
+  glColor4f(std::min(1.0f,r+0.2f), std::min(1.0f,g+0.2f), std::min(1.0f,b+0.2f), 0.5f);
   glBegin (GL_TRIANGLE_FAN);
   glVertex3d (0.0, 0.0, 0.0);
   int renderangle;
@@ -539,7 +538,7 @@ void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea
 {  
   glPushMatrix();
 
-  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
+  Point3m mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   new_mesh_origin = model.cm.Tr.GetColumn3(3);
@@ -558,16 +557,16 @@ void  EditManipulatorsPlugin::DrawTranslateManipulators(MeshModel &model, GLArea
       glTranslate(new_mesh_origin);      
       glScale(manipsize);
       glMultMatrix(Inverse(track_rotation));
-	    glRotatef (90, 0, 1, 0);
-	    DrawArrows(1.0,0.8,0.5);
-	    glRotatef (90, 1, 0, 0);
-	    DrawArrows(1.0,0.8,0.5);
+	    glRotatef (90.0f, 0.0f, 1.0f, 0.0f);
+	    DrawArrows(1.0f,0.8f,0.5f);
+	    glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
+	    DrawArrows(1.0f,0.8f,0.5f);
       break;
     case EditManipulatorsPlugin::ModX:
       glTranslate(new_mesh_origin);
       glScale(manipsize);
-	    glRotatef (90, 0, 1, 0);
-	    DrawArrows(1.0,0,0);
+	    glRotatef (90.0f, 0.0f, 1.0f, 0.0f);
+	    DrawArrows(1.0f,0.0f,0.0f);
       break;
     case EditManipulatorsPlugin::ModY:
       glTranslate(new_mesh_origin);
@@ -608,13 +607,13 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
 {  
   glPushMatrix();
 
-  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  Point3m mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
-  float manipsize = model.cm.bbox.Diag() / 2.0;
+  float manipsize(model.cm.bbox.Diag() / 2.0);
   Matrix44f track_rotation;
   gla->trackball.track.rot.ToMatrix(track_rotation);
 
@@ -629,10 +628,10 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
         glTranslate(mesh_origin);
       glScale(manipsize);
       glMultMatrix(Inverse(track_rotation));
-	    glRotatef (90, 0, 1, 0);
-	    DrawCubes(1.0,0.8,0.5);
-      glRotatef (90, 1, 0, 0);
-	    DrawCubes(1.0,0.8,0.5);
+	    glRotatef (90.0f, 0.0f, 1.0f, 0.0f);
+	    DrawCubes(1.0f,0.8f,0.5f);
+      glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
+	    DrawCubes(1.0f,0.8f,0.5f);
       break;
     case EditManipulatorsPlugin::ModX:
       if(!aroundOrigin)
@@ -640,8 +639,8 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
       else
         glTranslate(mesh_origin);
       glScale(manipsize);
-	    glRotatef (90, 0, 1, 0);
-	    DrawCubes(1.0,0,0);
+	    glRotatef (90.0f, 0.0f, 1.0f, 0.0f);
+	    DrawCubes(1.0f,0.0f,0.0f);
       break;
     case EditManipulatorsPlugin::ModY:
       if(!aroundOrigin)
@@ -649,8 +648,8 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
       else
         glTranslate(mesh_origin);
       glScale(manipsize);
-	    glRotatef (90, 1, 0, 0);
-	    DrawCubes(0,1.0,0);
+	    glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
+	    DrawCubes(0.0f,1.0f,0.0f);
       break;
     case EditManipulatorsPlugin::ModZ:
       if(!aroundOrigin)
@@ -694,7 +693,7 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 {  
   glPushMatrix();
 
-  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
+  Point3m mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis, new_mesh_origin;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   new_mesh_origin = model.cm.Tr.GetColumn3(3);
@@ -716,7 +715,7 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
         glTranslate(mesh_origin);
       glScale(manipsize);
       glMultMatrix(Inverse(track_rotation));
-	    DrawCircle(1.0,0.8,0.5);
+	    DrawCircle(1.0f,0.8f,0.5f);
       break;
     case EditManipulatorsPlugin::ModX:
        if(!aroundOrigin)
@@ -774,9 +773,9 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 	glPopMatrix();
 }
 
-void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, bool onlyActive)
+void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, bool /*onlyActive*/)
 {
-  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  Point3m mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
   mesh_boxcenter = original_Transform * model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
@@ -814,78 +813,78 @@ void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, boo
         glColor3f(1.0,0,0);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + Point3f(-10.0, 0.0, 0.0)); 	
-          glVertex(mesh_origin + Point3f(10.0, 0.0, 0.0));
+          glVertex(mesh_origin + Point3m(Scalarm(-10.0),Scalarm(0.0),Scalarm(0.0))); 	
+          glVertex(mesh_origin + Point3m(Scalarm(10.0), Scalarm(0.0),Scalarm(0.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + Point3f(-10.0, 0.0, 0.0)); 	
-          glVertex(mesh_boxcenter + Point3f(10.0, 0.0, 0.0));
+          glVertex(mesh_boxcenter + Point3m(Scalarm(-10.0),Scalarm(0.0),Scalarm(0.0))); 	
+          glVertex(mesh_boxcenter + Point3m(Scalarm(10.0),Scalarm(0.0),Scalarm(0.0)));
         }
         break;
       case EditManipulatorsPlugin::ModY:
         glColor3f(0,1.0,0);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + Point3f(0.0, -10.0, 0.0)); 	
-          glVertex(mesh_origin + Point3f(0.0, 10.0, 0.0));
+          glVertex(mesh_origin + Point3m(Scalarm(0.0),Scalarm(-10.0),Scalarm(0.0))); 	
+          glVertex(mesh_origin + Point3m(Scalarm(0.0),Scalarm(10.0),Scalarm(0.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + Point3f(0.0, -10.0, 0.0)); 	
-          glVertex(mesh_boxcenter + Point3f(0.0, 10.0, 0.0));
+          glVertex(mesh_boxcenter + Point3m(Scalarm(0.0), Scalarm(-10.0),Scalarm(0.0))); 	
+          glVertex(mesh_boxcenter + Point3m(Scalarm(0.0), Scalarm(10.0), Scalarm(0.0)));
         }
         break;
       case EditManipulatorsPlugin::ModZ:
         glColor3f(0,0,1.0);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + Point3f(0.0, 0.0, -10.0)); 	
-          glVertex(mesh_origin + Point3f(0.0, 0.0, 10.0));
+          glVertex(mesh_origin + Point3m(Scalarm(0.0),Scalarm(0.0),Scalarm(-10.0))); 	
+          glVertex(mesh_origin + Point3m(Scalarm(0.0),Scalarm(0.0),Scalarm(10.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + Point3f(0.0, 0.0, -10.0)); 	
-          glVertex(mesh_boxcenter + Point3f(0.0, 0.0, 10.0));
+          glVertex(mesh_boxcenter + Point3m(Scalarm(0.0),Scalarm(0.0), Scalarm(-10.0))); 	
+          glVertex(mesh_boxcenter + Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(10.0)));
         }
         break;
       case EditManipulatorsPlugin::ModXX:
-        glColor3f(1.0,0.5,0.5);
+        glColor3f(1.0f,0.5f,0.5f);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + (mesh_xaxis * -10.0f)); 	
-          glVertex(mesh_origin + (mesh_xaxis * 10.0f));
+          glVertex(mesh_origin + (mesh_xaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_origin + (mesh_xaxis * Scalarm(10.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + (mesh_xaxis * -10.0f)); 	
-          glVertex(mesh_boxcenter + (mesh_xaxis * 10.0f));
+          glVertex(mesh_boxcenter + (mesh_xaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_boxcenter + (mesh_xaxis * Scalarm(10.0)));
         }
         break;
       case EditManipulatorsPlugin::ModYY:
         glColor3f(0.5,1.0,0.5);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + (mesh_yaxis * -10.0f)); 	
-          glVertex(mesh_origin + (mesh_yaxis * 10.0f));
+          glVertex(mesh_origin + (mesh_yaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_origin + (mesh_yaxis * Scalarm(10.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + (mesh_yaxis * -10.0f)); 	
-          glVertex(mesh_boxcenter + (mesh_yaxis * 10.0f));
+          glVertex(mesh_boxcenter + (mesh_yaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_boxcenter + (mesh_yaxis * Scalarm(10.0)));
         }
         break;
       case EditManipulatorsPlugin::ModZZ:
         glColor3f(0.5,0.5,1.0);
         if(aroundOrigin || (current_manip == EditManipulatorsPlugin::ManMove))
         {
-          glVertex(mesh_origin + (mesh_zaxis * -10.0f)); 	
-          glVertex(mesh_origin + (mesh_zaxis * 10.0f));
+          glVertex(mesh_origin + (mesh_zaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_origin + (mesh_zaxis * Scalarm(10.0)));
         }
         else
         {
-          glVertex(mesh_boxcenter + (mesh_zaxis * -10.0f)); 	
-          glVertex(mesh_boxcenter + (mesh_zaxis * 10.0f));
+          glVertex(mesh_boxcenter + (mesh_zaxis * Scalarm(-10.0))); 	
+          glVertex(mesh_boxcenter + (mesh_zaxis * Scalarm(10.0)));
         }
         break;
       default: ;
@@ -898,19 +897,19 @@ void EditManipulatorsPlugin::DrawManipulators(MeshModel &model, GLArea *gla, boo
   glPopAttrib();
 }
 
-void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* painter)
+void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /*painter*/)
 {
   //
-  Point3f center, right, top, front;
+  Point3m center, right, top, front;
 
-  MyPick(gla->width()*0.5, gla->height()*0.5, center, 0.5);
-  MyPick(gla->width()*0.99, gla->height()*0.5, right, 0.5);
-  MyPick(gla->width()*0.5, gla->height()*0.01, top, 0.5);
-  MyPick(gla->width()*0.5, gla->height()*0.5, front, 0.01);
+  MyPick(gla->width()*0.5f, gla->height()*0.5f, center, 0.5f);
+  MyPick(gla->width()*0.99f, gla->height()*0.5f, right, 0.5f);
+  MyPick(gla->width()*0.5f, gla->height()*0.01f, top, 0.5f);
+  MyPick(gla->width()*0.5f, gla->height()*0.5f, front, 0.01f);
 
-  screen_xaxis = (right - center) * 2.0;
-  screen_yaxis = (top - center)   * 2.0;
-  screen_zaxis = (front - center) * 2.0;
+  screen_xaxis = (right - center) * Scalarm(2.0);
+  screen_yaxis = (top - center)   * Scalarm(2.0);
+  screen_zaxis = (front - center) * Scalarm(2.0);
 
   float diag = sqrt(screen_xaxis.Norm()*screen_xaxis.Norm() + screen_yaxis.Norm()*screen_yaxis.Norm());
 
@@ -1069,19 +1068,19 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* p
 
 void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool applymouseoffset, bool useinputnumber)
 {  
-  Matrix44f newmatrix;
+  Matrix44m newmatrix;
 
-  Matrix44f old_rotation;  
-  Matrix44f old_translation;  
-  Matrix44f old_meshcenter;
-  Matrix44f old_meshuncenter;
+  Matrix44m old_rotation;  
+  Matrix44m old_translation;  
+  Matrix44m old_meshcenter;
+  Matrix44m old_meshuncenter;
 
-  Point3f new_scale;
-  Point3f axis;
-  float mouseXoff;
-  float mouseYoff;
+  Point3m new_scale;
+  Point3m axis;
+  Scalarm mouseXoff;
+  Scalarm mouseYoff;
 
-  Point3f mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
+  Point3m mesh_boxcenter, mesh_origin, mesh_xaxis, mesh_yaxis, mesh_zaxis;
   mesh_boxcenter = model.cm.bbox.Center();
   mesh_origin = original_Transform.GetColumn3(3);
   mesh_xaxis = original_Transform.GetColumn3(0);
@@ -1104,13 +1103,13 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
       switch(current_manip_mode)          // which axis is active
       {
         case EditManipulatorsPlugin::ModX:
-          axis = Point3f(1.0, 0.0, 0.0);
+          axis = Point3m(1.0, 0.0, 0.0);
           break;
         case EditManipulatorsPlugin::ModY:
-          axis = Point3f(0.0, 1.0, 0.0);
+          axis = Point3m(0.0, 1.0, 0.0);
           break;
         case EditManipulatorsPlugin::ModZ:
-          axis = Point3f(0.0, 0.0, 1.0);
+          axis = Point3m(0.0, 0.0, 1.0);
           break;
         case EditManipulatorsPlugin::ModXX:
           axis = mesh_xaxis;
@@ -1121,7 +1120,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         case EditManipulatorsPlugin::ModZZ:
           axis = mesh_zaxis;
           break;
-        default: axis = Point3f(1.0, 1.0, 1.0); // it should never arrive here, anyway
+        default: axis = Point3m(1.0, 1.0, 1.0); // it should never arrive here, anyway
       }
 
       if(current_manip == EditManipulatorsPlugin::ManMove)
@@ -1168,7 +1167,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         delta_Transform.SetRotateDeg(displayOffset, axis);
 
         old_rotation = original_Transform;
-        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_rotation.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
         old_meshcenter.SetTranslate(old_rotation * (-mesh_boxcenter));
         old_meshuncenter.SetTranslate(old_rotation * mesh_boxcenter);
@@ -1203,7 +1202,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         delta_Transform.SetScale(new_scale);
 
         old_rotation = original_Transform;
-        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_rotation.SetColumn(3, Point3m(Scalarm(0.0),Scalarm(0.0),Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
         old_meshcenter.SetTranslate(-mesh_boxcenter);
         old_meshuncenter.SetTranslate(mesh_boxcenter);
@@ -1245,7 +1244,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
           displayOffset_Z *= snapto; 
         }
 
-        delta_Transform.SetTranslate(Point3f(displayOffset_X,displayOffset_Y,displayOffset_Z));  
+        delta_Transform.SetTranslate(Point3m(displayOffset_X,displayOffset_Y,displayOffset_Z));  
         newmatrix = delta_Transform * original_Transform;
       }
 
@@ -1270,7 +1269,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         delta_Transform.SetRotateDeg(displayOffset, screen_zaxis);
 
         old_rotation = original_Transform;
-        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_rotation.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
         old_meshcenter.SetTranslate(-mesh_boxcenter);
         old_meshuncenter.SetTranslate(mesh_boxcenter);
@@ -1306,7 +1305,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         delta_Transform.SetScale(new_scale);
 
         old_rotation = original_Transform;
-        old_rotation.SetColumn(3, Point3f(0.0, 0.0, 0.0));
+        old_rotation.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
         old_meshcenter.SetTranslate(-mesh_boxcenter);
         old_meshuncenter.SetTranslate(mesh_boxcenter);
@@ -1332,7 +1331,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
 }
 
 
-bool EditManipulatorsPlugin::MyPick(const int &x, const int &y, Point3f &pp, float mydepth)
+bool EditManipulatorsPlugin::MyPick(const int &x, const int &y, Point3m &pp, float mydepth)
 {
 	double res[3];
 	GLdouble mm[16],pm[16]; GLint vp[4];
@@ -1341,8 +1340,8 @@ bool EditManipulatorsPlugin::MyPick(const int &x, const int &y, Point3f &pp, flo
 	glGetIntegerv(GL_VIEWPORT,vp);
 	
 	gluUnProject(x,y,mydepth,mm,pm,vp,&res[0],&res[1],&res[2]);
-	pp=Point3f(res[0],res[1],res[2]);
-  return true;
+	pp=Point3m(Scalarm(res[0]),Scalarm(res[1]),Scalarm(res[2]));
+    return true;
 }
 
 bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
@@ -1364,7 +1363,7 @@ bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
 
   // storing start matrix
   original_Transform = model.cm.Tr;
-  delta_Transform = vcg::Matrix44f::Identity();
+  delta_Transform = Matrix44m::Identity();
 
   gla->update();
 	return true;
