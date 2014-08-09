@@ -30,14 +30,12 @@ FIRST RELEASE
 #ifndef _HANDLE_H_
 #define _HANDLE_H_
 
-#include <QObject>
-#include <QGraphicsItem>
-#include <QtGui>
+#include <QGraphicsObject>
 #include <limits>
 #include "common/util.h"
 
 /* Drag&Drop generic handle to be used in QGrahicsScenes */
-class Handle : public QObject, public QGraphicsItem
+class Handle : public QGraphicsObject
 {
 	Q_OBJECT
 

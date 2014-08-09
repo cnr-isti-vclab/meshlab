@@ -588,7 +588,7 @@ void QualityMapperDialog::initTF()
 		TYPE_2_COLOR( c, channelColor );
 
 		//adding to the TF view the TFHandles corresponding to the logical channel keys
-		for (int i=0; i<_transferFunction->getChannel(c).size(); i++)
+		for (size_t i=0; i<_transferFunction->getChannel(c).size(); i++)
 		{
 			val = _transferFunction->getChannel(c)[i];
 			this->addTfHandle( c,
@@ -1017,7 +1017,7 @@ void QualityMapperDialog::manageBorderTfHandles(TFHandle *handle)
 	TF_KEY *newKey = 0;
 	if ( _transferFunction->getChannel(handle->getChannel()).size() > 0 )
 	{
-		firstKey = _transferFunction->getChannel(handle->getChannel())[0];
+		firstKey = _transferFunction->getChannel(handle->getChannel())[size_t(0)];
 		if ( handle->getMyKey() == firstKey )
 		{
 			if ( ! _transferFunction->getChannel(handle->getChannel()).isHead(/*firstKey*/handle->getMyKey()) )

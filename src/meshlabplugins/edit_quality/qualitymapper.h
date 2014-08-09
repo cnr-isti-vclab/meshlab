@@ -56,7 +56,7 @@ public:
     //virtual void Decorate(MeshModel&, GLArea*);
     virtual void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
     virtual void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel&, GLArea*){};
+    virtual void mouseReleaseEvent(QMouseEvent *, MeshModel&, GLArea*){};
 
 	QPoint cur;
 	bool haveToPick;

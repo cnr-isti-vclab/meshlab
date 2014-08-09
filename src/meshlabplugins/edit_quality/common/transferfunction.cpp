@@ -231,9 +231,9 @@ TF_KEY* TfChannel::operator [](float xVal)
 }
 
 //operator redefinition. Returns the key in the key list whose index equals i
-TF_KEY* TfChannel::operator [](int i)
+TF_KEY* TfChannel::operator [](size_t i)
 {
-    if ((i >= 0) && (i<(int)KEYS.size()))
+    if ((i >= 0) && (i<KEYS.size()))
         return KEYS[i];
 
     return 0;
@@ -474,9 +474,9 @@ void TransferFunction::initTF()
 }
 
 //returns the size of the TF. It's defined as the maximum size of each channel
-int TransferFunction::size()
+size_t TransferFunction::size()
 {
-    int result = 0;
+    size_t result = 0;
     for (int i=0; i<NUMBER_OF_CHANNELS; i++)
         if ( _channels[i].size() > result )
             result = _channels[i].size();
@@ -561,10 +561,10 @@ QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 
     TF_KEY *val = 0;
     //for each channel...
-    for ( int i=0; i<NUMBER_OF_CHANNELS; i++)
+    for ( size_t i=0; i<NUMBER_OF_CHANNELS; i++)
     {
         //...for each key of the channel...
-        for (int j=0; j<_channels[i].size(); j++)
+        for (size_t j=0; j<_channels[i].size(); j++)
         {
             //saving the values couple
             val = _channels[i][j];

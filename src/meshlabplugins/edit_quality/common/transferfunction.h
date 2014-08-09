@@ -140,9 +140,9 @@ public:
 	void	updateKeysOrder(void);
 
 	TF_KEY* operator [](float idx);
-	TF_KEY* operator [](int idx);
+	TF_KEY* operator [](size_t idx);
 	
-	inline int size(void)	{	return KEYS.size();	}
+	inline size_t size(void)	{	return KEYS.size();	}
 
 #ifdef NOW_TESTING
 	void testInitChannel();
@@ -210,7 +210,7 @@ public:
 
 	TfChannel&	getChannel(int channel_code)	{return _channels[channel_code];}
 	TfChannel&	operator [](int i)				{ return _channels[_channels_order[i]];	}
-	int size();
+	size_t size();
 	QColor* buildColorBand(void);
 	QString saveColorBand(QString fileName, EQUALIZER_INFO& equalizerInfo);
 	vcg::Color4b getColorByQuality(float percentageQuality);
