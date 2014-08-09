@@ -41,7 +41,7 @@ Arc3D Camera
 // This function take in input a point in image space (e.g. with coords in range [0..1024]x[0..768]
 // a depth value and it returns the point in absolute 3D coords
 // 
-Point3f Arc3DCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M) const
+Point3m Arc3DCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M) const
 {
     Point3d m_temp = Kinv * Point3d(x,y,1);
     
@@ -68,7 +68,7 @@ Point3f Arc3DCamera::DepthTo3DPoint(double x, double y, double depth, Point3d &M
     dir.Normalize();
     Mundist = fp-dir*depth; 
 
-	Point3f correct((float)Mundist[0]-M[0],(float)Mundist[1]-M[1],(float)Mundist[2]-M[2]);
+	Point3m correct(Point3m::ScalarType(Mundist[0]-M[0]),Point3m::ScalarType(Mundist[1]-M[1]),Point3m::ScalarType(Mundist[2]-M[2]));
 	return correct; 
 }
 

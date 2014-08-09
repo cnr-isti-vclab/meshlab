@@ -21,6 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <common/meshmodel.h>
+
 namespace vcg
 {
 class Arc3DCamera
@@ -40,7 +42,7 @@ public:
 
   RadialDistortion rd;
 
-  Point3f DepthTo3DPoint(double x, double y, double depth, Point3d &M) const;
+  Point3m DepthTo3DPoint(double x, double y, double depth, Point3d &M) const;
 
   bool Open(const char * filename);
 };

@@ -77,7 +77,7 @@ public:
 	void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
 
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-	void LayerChanged(MeshDocument &/*md*/, MeshModel &/*oldMeshModel*/, GLArea */*parent*/)
+	void LayerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/)
 	{ 
 		// add code here to manage the external layer switching
 	}

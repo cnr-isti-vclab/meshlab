@@ -36,38 +36,38 @@
 class Arc3DModel
 {
 public:
-  int index;
-  QString cameraName;
-  QString maskName;
-  QString depthName;
-  QString textureName;
-  QString countName;
-  vcg::Arc3DCamera cam;
-  vcg::Shotf shot;
-  bool Init(QDomNode &node);
-  static QString ThumbName(QString &imageName);
+    int index;
+    QString cameraName;
+    QString maskName;
+    QString depthName;
+    QString textureName;
+    QString countName;
+    vcg::Arc3DCamera cam;
+    Shotm shot;
+    bool Init(QDomNode &node);
+    static QString ThumbName(QString &imageName);
 
-	bool BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
-		bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize,float scalingFactor);
-	vcg::Point3f TraCorrection(CMeshO &m, int subsampleFactor, int minCount, int smoothSteps);
-  void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
-  void AddCameraIcon(CMeshO &m);
-  bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );
-  void GenerateCountImage();
-  void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
-  void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask, float depthThr);
-  float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
-	void depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
-		bool dilation, int dilationNumPasses, int dilationWinsize, bool erosion, int erosionNumPasses, int erosionWinsize);
+    bool BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float minAngleCos, int smoothSteps,
+        bool dilation, int dilationPasses, int dilationSize, bool erosion, int erosionPasses, int erosionSize,float scalingFactor);
+    Point3m TraCorrection(CMeshO &m, int subsampleFactor, int minCount, int smoothSteps);
+    void SmartSubSample(int subsampleFactor, FloatImage &fli, CharImage &chi, FloatImage &subD,FloatImage &subQ, int minCount);
+    void AddCameraIcon(CMeshO &m);
+    bool CombineHandMadeMaskAndCount(CharImage &qualityImg, QString maskName );
+    void GenerateCountImage();
+    void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
+    void Laplacian2(FloatImage &depth, FloatImage &Q, int minCount, CharImage &mask, float depthThr);
+    float ComputeDepthJumpThr(FloatImage &depthImgf, float percentile);
+    void depthFilter(FloatImage &depthImgf, FloatImage &countImgf, float depthJumpThr, 
+        bool dilation, int dilationNumPasses, int dilationWinsize, bool erosion, int erosionNumPasses, int erosionWinsize);
 
-  QIcon *getIcon();
+    QIcon *getIcon();
 };
 
 class Arc3DReconstruction
 {
- public:
-  QString name, author, created;
-  QList<Arc3DModel> modelList;
+public:
+    QString name, author, created;
+    QList<Arc3DModel> modelList;
 };
 
 #endif
