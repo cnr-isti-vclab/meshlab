@@ -55,8 +55,8 @@ public:
   };
 
   CameraParameters() : _ccdWidth(0), _focalLength(0), _pixelSizeMm(0) {}
-  Point3f getTranslation();
-  Matrix44f getRotation();
+  Point3m getTranslation();
+  Matrix44m getRotation();
 
   //use this to access camera parameters values taken from photosynth json, using enum Field values as argument
   inline qreal &operator [] (const int i)

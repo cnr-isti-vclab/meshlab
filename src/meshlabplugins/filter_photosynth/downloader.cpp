@@ -21,29 +21,29 @@
  * CameraParameters *
  ********************/
 
-Point3f CameraParameters::getTranslation()
+Point3m CameraParameters::getTranslation()
 {
-  return Point3f(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Z], -_fields[CameraParameters::POS_Y]);
+  return Point3m(_fields[CameraParameters::POS_X], _fields[CameraParameters::POS_Z], -_fields[CameraParameters::POS_Y]);
 }
 
-Matrix44f CameraParameters::getRotation()
+Matrix44m CameraParameters::getRotation()
 {
   qreal a = _fields[CameraParameters::ROT_X] * _fields[CameraParameters::ROT_X] +
             _fields[CameraParameters::ROT_Y] * _fields[CameraParameters::ROT_Y] +
             _fields[CameraParameters::ROT_Z] * _fields[CameraParameters::ROT_Z];
   qreal w2 = 1 - a;
   qreal w = sqrt(w2);
-  Quaternion<float> q((float)w,(float)_fields[CameraParameters::ROT_X],(float)_fields[CameraParameters::ROT_Y],(float)_fields[CameraParameters::ROT_Z]);
-  Matrix44f rot;
+  Quaternion<CMeshO::ScalarType> q(w,_fields[CameraParameters::ROT_X],_fields[CameraParameters::ROT_Y],_fields[CameraParameters::ROT_Z]);
+  Matrix44m rot;
   q.ToMatrix(rot);
-  Matrix44f flip;
-  flip.SetRotateDeg(180,Point3f(1,0,0));
+  Matrix44m flip;
+  flip.SetRotateDeg(180,Point3m(1,0,0));
   // (rot * flip)^T = flip^T * rot^T
-  Matrix44f transposedFlippedRot = flip.transpose() * rot.transpose();
+  Matrix44m transposedFlippedRot = flip.transpose() * rot.transpose();
 
-  Matrix44f rotate90;
-  rotate90.SetRotateDeg(90,Point3f(1,0,0));
-  Matrix44f rotation = transposedFlippedRot * rotate90;
+  Matrix44m rotate90;
+  rotate90.SetRotateDeg(90,Point3m(1,0,0));
+  Matrix44m rotation = transposedFlippedRot * rotate90;
 
   return rotation;
 }
