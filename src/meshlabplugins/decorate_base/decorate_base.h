@@ -33,7 +33,7 @@ typedef vcg::ColorHistogram<float>  CHist;
 
 typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
-class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
+class DecorateBasePlugin : public QObject, public MeshDecorateInterface
 {
   Q_OBJECT
     MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
@@ -43,6 +43,7 @@ class ExtraMeshDecoratePlugin : public QObject, public MeshDecorateInterface
 
   enum {
     DP_SHOW_NORMALS,
+    DP_SHOW_CURVATURE,
     DP_SHOW_VERT,
     DP_SHOW_EDGE,
     DP_SHOW_NON_FAUX_EDGE,
@@ -78,7 +79,7 @@ private:
   vcg::Color4b textColor;
 public:
 
-  ExtraMeshDecoratePlugin()
+  DecorateBasePlugin()
   {
     typeList <<
                 DP_SHOW_VERT <<
@@ -88,6 +89,7 @@ public:
                 DP_SHOW_NON_MANIF_EDGE <<
                 DP_SHOW_NON_MANIF_VERT <<
                 DP_SHOW_NORMALS <<
+                DP_SHOW_CURVATURE <<
                 DP_SHOW_QUALITY_HISTOGRAM <<
                 DP_SHOW_QUALITY_CONTOUR <<
                 DP_SHOW_BOX_CORNERS <<
@@ -154,6 +156,9 @@ public:
   inline QString ShowNonRegular() const     { return  "MeshLab::Decoration::ShowNonRegular" ; }
   inline QString ShowSeparatrix() const     { return  "MeshLab::Decoration::ShowSeparatrix" ; }
   inline QString ShowBorderFlag() const     { return  "MeshLab::Decoration::ShowBorderFlag" ; }
+  inline QString ShowPerVertexCurvature() const     { return  "MeshLab::Decoration::ShowPerVertexCurvature" ; }
+  inline QString ShowPerFaceCurvature() const     { return  "MeshLab::Decoration::ShowPerFaceCurvature" ; }
+  inline QString CurvatureLength() const { return  "MeshLab::Decoration::CurvatureLength" ; }
 
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString TextureFaceColorParam() const   { return  "MeshLab::Decoration::TextureFaceColor" ; }
@@ -185,7 +190,6 @@ public:
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
   inline QString NormalVertFlag() const { return  "MeshLab::Decoration::NormalVertFlag" ; }
   inline QString NormalFaceFlag() const { return  "MeshLab::Decoration::NormalFaceFlag" ; }
-  inline QString NormalCurvFlag() const { return  "MeshLab::Decoration::NormalCurvFlag" ; }
 
   inline QString BBAbsParam() const { return  "MeshLab::Decoration::BBAbs" ; }
 

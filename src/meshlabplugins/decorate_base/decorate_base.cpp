@@ -34,7 +34,7 @@ using namespace vcg;
 using namespace std;
 
 
-QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
+QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
 {
   switch(filter)
   {
@@ -47,7 +47,8 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
   case DP_SHOW_BOUNDARY_TEX:      return tr("Draw the edge where there is a texture seam.");
   case DP_SHOW_NON_MANIF_EDGE:    return tr("Draw the non manifold edges of the current mesh");
   case DP_SHOW_NON_MANIF_VERT:    return tr("Draw the non manifold vertices of the current mesh");
-  case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals and per vertex principal curvature directions");
+  case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals");
+  case DP_SHOW_CURVATURE:           return tr("Draw per vertex/face principal curvature directions");
   case DP_SHOW_QUOTED_BOX:        return tr("Draw quoted box");
   case DP_SHOW_LABEL:             return tr("Draw on all the vertex/edge/face a label with their index<br> Useful for debugging<br>(WARNING: do not use it on large meshes)");
   case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
@@ -62,7 +63,7 @@ QString ExtraMeshDecoratePlugin::decorationInfo(FilterIDType filter) const
   return QString();
 }
 
-QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
+QString DecorateBasePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)
     {
@@ -73,7 +74,8 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_BOUNDARY_TEX:      return QString("Show Texture Seams");
     case DP_SHOW_NON_MANIF_EDGE:    return QString("Show Non Manif Edges");
     case DP_SHOW_NON_MANIF_VERT:    return QString("Show Non Manif Vertices");
-    case DP_SHOW_NORMALS:           return QString("Show Normal/Curvature");
+    case DP_SHOW_NORMALS:           return QString("Show Normal");
+    case DP_SHOW_CURVATURE:         return QString("Show Curvature");
     case DP_SHOW_BOX_CORNERS:       return QString("Show Box Corners");
     case DP_SHOW_AXIS:              return QString("Show Axis");
     case DP_SHOW_QUOTED_BOX:        return QString("Show Quoted Box");
@@ -91,7 +93,7 @@ QString ExtraMeshDecoratePlugin::decorationName(FilterIDType filter) const
     return QString("error!");
 }
 
-void ExtraMeshDecoratePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
+void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
 {
   QFont qf;
 
@@ -160,7 +162,7 @@ void ExtraMeshDecoratePlugin::decorateDoc(QAction *a, MeshDocument &md, RichPara
   } // end switch
 }
 
-void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
+void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
 {
   this->setLog(&_log);
   QFont qf;
@@ -171,6 +173,12 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     glMultMatrix(m.cm.Tr);
     switch (ID(a))
     {
+    case DP_SHOW_CURVATURE:
+    {
+      // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+      CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"CurvatureVector");
+      DrawLineVector(bvH());
+    } break;
     case DP_SHOW_NORMALS:
     {
       glPushAttrib(GL_ENABLE_BIT );
@@ -202,20 +210,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
           glVertex(b+(*fi).N()*LineLen);
         }
       }
-      if(rm->getBool(NormalCurvFlag())) // curv Vectors
-        if(m.hasDataMask(MeshModel::MM_VERTCURVDIR))
-          for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-          {
-            glColor4f(1.0,0.0,0.0,.8f);
-            glVertex((*vi).P());
-            glColor4f(0.0,1.0,0.0,.1f);
-            glVertex(Point3f::Construct((*vi).P())+(*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25);
-            glColor4f(0.0,1.0,0.0,.8f);
-            glVertex((*vi).P());
-            glColor4f(0.0,1.0,0.0,.1f);
-            glVertex(Point3f::Construct((*vi).P())+(*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25);
-          }
-      glEnd();
+     glEnd();
       glPopAttrib();
     } break;
     case DP_SHOW_BOX_CORNERS:
@@ -289,7 +284,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
 
             glEnable(GL_POINT_SMOOTH);
             glPointSize(6.f);
-            glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+            glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
             glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
 
 //        glDrawArrays(GL_POINTS,0,vvP->size());
@@ -317,7 +312,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
             glEnableClientState (GL_COLOR_ARRAY);
             glEnable(GL_POINT_SMOOTH);
             glPointSize(6.f);
-            glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(vvP->begin()[0].first));
+            glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
             glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
             glDrawArrays(GL_LINES,0,vvP->size());
             glDisableClientState (GL_COLOR_ARRAY);
@@ -431,7 +426,7 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
           glColor(Color4b::Green);
           glDepthRange (0.0, 0.999);
           glEnableClientState (GL_VERTEX_ARRAY);
-          glVertexPointer(3,GL_FLOAT,sizeof(Point3m),&(BTVp->begin()[0]));
+          glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
           glDrawArrays(GL_LINES,0,BTVp->size());
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
@@ -446,7 +441,8 @@ void ExtraMeshDecoratePlugin::decorateMesh(QAction *a, MeshModel &m, RichParamet
     } // end switch;
     glPopMatrix();
 }
-void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
+
+void DecorateBasePlugin::DrawLineVector(std::vector<PointPC> &EV)
 {
   glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_LIGHTING);
@@ -460,7 +456,8 @@ void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
   {
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
-    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(EV.begin()[0].first));
+
+    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(EV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
     glDrawArrays(GL_LINES,0,EV.size());
     glDisableClientState (GL_COLOR_ARRAY);
@@ -469,7 +466,7 @@ void ExtraMeshDecoratePlugin::DrawLineVector(std::vector<PointPC> &EV)
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::DrawTriVector(std::vector<PointPC> &TV)
+void DecorateBasePlugin::DrawTriVector(std::vector<PointPC> &TV)
 {
   glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_LIGHTING);
@@ -483,7 +480,7 @@ void ExtraMeshDecoratePlugin::DrawTriVector(std::vector<PointPC> &TV)
   {
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
-    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
     glDrawArrays(GL_TRIANGLES,0,TV.size());
     glDisableClientState (GL_COLOR_ARRAY);
@@ -492,7 +489,7 @@ void ExtraMeshDecoratePlugin::DrawTriVector(std::vector<PointPC> &TV)
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::DrawDotVector(std::vector<PointPC> &TV, float baseSize)
+void DecorateBasePlugin::DrawDotVector(std::vector<PointPC> &TV, float baseSize)
 {
   glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_LIGHTING);
@@ -507,7 +504,7 @@ void ExtraMeshDecoratePlugin::DrawDotVector(std::vector<PointPC> &TV, float base
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
     glPointSize(baseSize+0.5);
-    glVertexPointer(3,GL_FLOAT,sizeof(PointPC),&(TV.begin()[0].first));
+    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
     glDisableClientState (GL_COLOR_ARRAY);
     glColor(Color4b::DarkGray);
@@ -520,7 +517,7 @@ void ExtraMeshDecoratePlugin::DrawDotVector(std::vector<PointPC> &TV, float base
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
+void DecorateBasePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 {
     glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
     glDisable(GL_LIGHTING);
@@ -576,7 +573,7 @@ void ExtraMeshDecoratePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 
 }
 
-void ExtraMeshDecoratePlugin::chooseX(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
+void DecorateBasePlugin::chooseX(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -609,7 +606,7 @@ void ExtraMeshDecoratePlugin::chooseX(Box3m &box,double *mm,double *mp,GLint *vp
 }
 
 
-void ExtraMeshDecoratePlugin::chooseY(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
+void DecorateBasePlugin::chooseY(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -642,7 +639,7 @@ void ExtraMeshDecoratePlugin::chooseY(Box3m &box,double *mm,double *mp,GLint *vp
     }
 }
 
-void ExtraMeshDecoratePlugin::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
+void DecorateBasePlugin::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
 {
     float d = -std::numeric_limits<float>::max();
     Point3d c;
@@ -688,7 +685,7 @@ void ExtraMeshDecoratePlugin::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp
 
 
 
-void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont qf,float angle,bool rightAlign)
+void DecorateBasePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont qf,float angle,bool rightAlign)
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
@@ -763,10 +760,10 @@ void ExtraMeshDecoratePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, 
 }
 
 
-float ExtraMeshDecoratePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
-float ExtraMeshDecoratePlugin::niceRound(float val)	{return powf(10.f,ceil(log10(val)));}
+float DecorateBasePlugin::niceRound2(float Val,float base)	{return powf(base,ceil(log10(Val)/log10(base)));}
+float DecorateBasePlugin::niceRound(float val)	{return powf(10.f,ceil(log10(val)));}
 
-void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
+void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 {
     glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
     glDisable(GL_LIGHTING);
@@ -825,7 +822,7 @@ void ExtraMeshDecoratePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glPopAttrib();
 }
 
-int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
+int DecorateBasePlugin::getDecorationClass(QAction *action) const
 {
   switch(ID(action))
   {
@@ -836,6 +833,7 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_NON_MANIF_EDGE :
   case DP_SHOW_NON_MANIF_VERT :
   case DP_SHOW_NORMALS :
+  case DP_SHOW_CURVATURE :
   case DP_SHOW_QUALITY_HISTOGRAM :
   case DP_SHOW_QUALITY_CONTOUR :
   case DP_SHOW_BOX_CORNERS :
@@ -844,16 +842,16 @@ int ExtraMeshDecoratePlugin::getDecorationClass(QAction *action) const
   case DP_SHOW_TEXPARAM :
   /*case DP_SHOW_SELECTED_FACE :
   case DP_SHOW_SELECTED_VERT :*/
-  case DP_SHOW_BOUNDARY_TEX : return ExtraMeshDecoratePlugin::PerMesh;
-  case DP_SHOW_AXIS : return ExtraMeshDecoratePlugin::PerDocument;
-  case DP_SHOW_CAMERA : return ExtraMeshDecoratePlugin::PerDocument;
-  case DP_SHOW_SELECTED_MESH : return ExtraMeshDecoratePlugin::PerDocument;
+  case DP_SHOW_BOUNDARY_TEX : return DecorateBasePlugin::PerMesh;
+  case DP_SHOW_AXIS : return DecorateBasePlugin::PerDocument;
+  case DP_SHOW_CAMERA : return DecorateBasePlugin::PerDocument;
+  case DP_SHOW_SELECTED_MESH : return DecorateBasePlugin::PerDocument;
   }
   assert (0);
   return 0;
 }
 
-bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
+bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const
 {
   if( ID(action) == DP_SHOW_LABEL )
   {
@@ -870,14 +868,14 @@ bool ExtraMeshDecoratePlugin::isDecorationApplicable(QAction *action, const Mesh
   {
     if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
   }
-
   if( ID(action) == DP_SHOW_NON_MANIF_EDGE ) if(m.cm.fn==0) return false;
   if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0) return false;
+  if( ID(action) == DP_SHOW_CURVATURE ) return m.hasDataMask(MeshModel::MM_VERTCURVDIR) || m.hasDataMask(MeshModel::MM_FACECURVDIR);
 
   return true;
 }
 
-bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &, RichParameterSet *, GLArea *)
+bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichParameterSet *, GLArea *)
 {
   switch(ID(action))
   {
@@ -890,7 +888,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshDocument &, Ri
 }
 
 
-void ExtraMeshDecoratePlugin::endDecorate(QAction * action, MeshModel &m, RichParameterSet *, GLArea *)
+void DecorateBasePlugin::endDecorate(QAction * action, MeshModel &m, RichParameterSet *, GLArea *)
 {
   switch(ID(action))
   {
@@ -905,10 +903,47 @@ void ExtraMeshDecoratePlugin::endDecorate(QAction * action, MeshModel &m, RichPa
   }
 }
 
-bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
+bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParameterSet *rm, GLArea *gla)
 {
   switch(ID(action))
   {
+  case DP_SHOW_CURVATURE :
+  {
+    CMeshO::PerMeshAttributeHandle< vector<PointPC> > cvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"CurvatureVector");
+    vector<PointPC> *CVp = &cvH();
+    CVp->clear();
+    float NormalLen=rm->getFloat(CurvatureLength());
+    float LineLen = m.cm.bbox.Diag()*NormalLen;
+    if(rm->getBool(this->ShowPerVertexCurvature()))
+    {
+    for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+      if(!(*vi).IsD())
+      {
+        CVp->push_back(make_pair((*vi).P(),
+                                 Color4b::Green));
+        CVp->push_back(make_pair((*vi).P() +Point3m::Construct((*vi).PD1()/Norm((*vi).PD1())*LineLen*0.25),
+                       Color4b::Green));
+        CVp->push_back(make_pair((*vi).P(),
+                                 Color4b::Red));
+        CVp->push_back(make_pair((*vi).P()+Point3m::Construct((*vi).PD2()/Norm((*vi).PD2())*LineLen*0.25),
+                       Color4b::Red));
+      }
+    }
+    if(rm->getBool(this->ShowPerFaceCurvature()))
+    {
+      for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+        if(!(*fi).IsD())
+        {
+          Point3m bar =  Barycenter(*fi);
+          CVp->push_back(make_pair(bar, Color4b::Green));
+          CVp->push_back(make_pair(bar +(*fi).PD1()/Norm((*fi).PD1())*LineLen*0.25,
+                         Color4b::Green));
+          CVp->push_back(make_pair(bar, Color4b::Red));
+          CVp->push_back(make_pair(bar +(*fi).PD2()/Norm((*fi).PD2())*LineLen*0.25,
+                         Color4b::Red));
+        }
+    }
+  } break;
   case DP_SHOW_NON_FAUX_EDGE :
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"ExtraordinaryVertexVector");
@@ -1241,7 +1276,7 @@ bool ExtraMeshDecoratePlugin::startDecorate(QAction * action, MeshModel &m, Rich
  return true;
 }
 
-void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
+void DecorateBasePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
 {
   glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
   glDepthFunc(GL_ALWAYS);
@@ -1256,7 +1291,7 @@ void ExtraMeshDecoratePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
+void DecorateBasePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
 {
   glPushAttrib(GL_LIGHTING_BIT  | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
   glDepthFunc(GL_ALWAYS);
@@ -1272,7 +1307,7 @@ void ExtraMeshDecoratePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
 }
 
 
-void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
+void DecorateBasePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
 {
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
   glDepthFunc(GL_ALWAYS);
@@ -1285,13 +1320,13 @@ void ExtraMeshDecoratePlugin::DrawVertLabel(MeshModel &m,QPainter *painter)
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::setValue(QString /*name*/,Shotf newVal)
+void DecorateBasePlugin::setValue(QString /*name*/,Shotf newVal)
 {
     curShot=newVal;
 }
 
 
-void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId)
+void DecorateBasePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId)
 {
   if(!ls.IsValid())
   {
@@ -1341,7 +1376,7 @@ void ExtraMeshDecoratePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int camera
       focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
-void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
+void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
 {
   if(!ls.IsValid())  // no drawing if camera not valid
     return;
@@ -1445,7 +1480,7 @@ void ExtraMeshDecoratePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b c
   glPopAttrib();
 }
 
-void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
+void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *par, QFont qf)
 {
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -1509,13 +1544,13 @@ void ExtraMeshDecoratePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainte
 // This function performs the Scale/Translation transform
 // that is needed to correctly draw a single texture.
 // When more than a single texture is used they are stacked vertically
-void ExtraMeshDecoratePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
+void DecorateBasePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
 {
 
 }
 
 
-void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterSet *rm, QFont qf)
+void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterSet *rm, QFont qf)
 {
   if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
     glMatrixMode(GL_PROJECTION);
@@ -1583,7 +1618,7 @@ void ExtraMeshDecoratePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *
 
 }
 
-void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
 
      switch(ID(action)){
@@ -1611,8 +1646,12 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
       parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
       parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
       parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
-      parset.addParam(new RichBool(NormalCurvFlag(),true,"Curvature",""));
   } break;
+     case DP_SHOW_CURVATURE : {
+         parset.addParam(new RichFloat(CurvatureLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+         parset.addParam(new RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
+         parset.addParam(new RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
+     } break;
   case DP_SHOW_BOUNDARY :{
     assert(!parset.hasParameter(ShowBorderFlag()));
     parset.addParam(new RichBool(ShowBorderFlag(), true,"Show Border Faces","If true also the faces involved in border edges are shown in green"));
@@ -1657,4 +1696,4 @@ void ExtraMeshDecoratePlugin::initGlobalParameterSet(QAction *action, RichParame
 }
 
 
-MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshDecoratePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(DecorateBasePlugin)
