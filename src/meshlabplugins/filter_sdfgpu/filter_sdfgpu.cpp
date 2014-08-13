@@ -600,7 +600,7 @@ void SdfGpuPlugin::setupMesh(MeshDocument& md, ONPRIMITIVE onPrimitive )
 
 }
 
-void SdfGpuPlugin::setCamera(Point3f camDir, Box3f &meshBBox)
+void SdfGpuPlugin::setCamera(Point3f camDir, Box3f meshBBox)
 {
     GLfloat d = (meshBBox.Diag()/2.0),
             k = 0.1f;
@@ -1033,7 +1033,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
 
         mFboArray[j]->bind();
 
-        setCamera(dir, mm->cm.bbox);
+        setCamera(dir, Box3f::Construct(mm->cm.bbox));
 
         preRender(i);
 

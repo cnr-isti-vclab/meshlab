@@ -14,7 +14,7 @@ enum ONPRIMITIVE{ON_VERTICES=0, ON_FACES=1};
 class SdfGpuPlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
     Q_INTERFACES(MeshFilterInterface)
 
 public:
@@ -51,7 +51,7 @@ public:
     void releaseGL(MeshModel &m);
 
     //Setup camera orientation
-    void setCamera(vcg::Point3f camDir, vcg::Box3f &meshBBox);
+    void setCamera(vcg::Point3f camDir, vcg::Box3f meshBBox);
 
     //Calculate sdf or obscurance along a ray
     void TraceRay(int peelingIteration, const vcg::Point3f& dir, MeshModel* mm );
