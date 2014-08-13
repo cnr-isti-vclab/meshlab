@@ -114,7 +114,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
                 m.updateDataMask(MeshModel::MM_VERTCOLOR);
                 tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
                 tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
-                Point3f startPoint = par.getPoint3f("startPoint");
+                Point3m startPoint = par.getPoint3m("startPoint");
                 // first search the closest point on the surface;
                 CMeshO::VertexPointer startVertex=0;
                 float minDist= std::numeric_limits<float>::max();
