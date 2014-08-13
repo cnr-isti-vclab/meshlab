@@ -916,15 +916,15 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
     MyWalker walker;
 
-    Box3d rbb;
-    rbb.min[0]=par.getFloat("minX");
-    rbb.min[1]=par.getFloat("minY");
-    rbb.min[2]=par.getFloat("minZ");
-    rbb.max[0]=par.getFloat("maxX");
-    rbb.max[1]=par.getFloat("maxY");
-    rbb.max[2]=par.getFloat("maxZ");
+    Box3f RangeBBox;
+    RangeBBox.min[0]=par.getFloat("minX");
+    RangeBBox.min[1]=par.getFloat("minY");
+    RangeBBox.min[2]=par.getFloat("minZ");
+    RangeBBox.max[0]=par.getFloat("maxX");
+    RangeBBox.max[1]=par.getFloat("maxY");
+    RangeBBox.max[2]=par.getFloat("maxZ");
     double step=par.getFloat("voxelSize");
-    Point3i siz= Point3i::Construct((rbb.max-rbb.min)*(1.0/step));
+    Point3i siz= Point3i::Construct((RangeBBox.max-RangeBBox.min)*(1.0/step));
 
     Parser p;
     double x,y,z;
@@ -934,14 +934,14 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     std::string expr = par.getString("expr").toStdString();
     p.SetExpr(expr);
     Log("Filling a Volume of %i %i %i",siz[0],siz[1],siz[2]);
-    volume.Init(siz);
+    volume.Init(siz,RangeBBox);
     for(double i=0;i<siz[0];i++)
       for(double j=0;j<siz[1];j++)
         for(double k=0;k<siz[2];k++)
         {
-          x = rbb.min[0]+step*i;
-          y = rbb.min[1]+step*j;
-          z = rbb.min[2]+step*k;
+          x = RangeBBox.min[0]+step*i;
+          y = RangeBBox.min[1]+step*j;
+          z = RangeBBox.min[2]+step*k;
           try {
             volume.Val(i,j,k)=p.Eval();
           } catch(Parser::exception_type &e) {
@@ -954,11 +954,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     Log("[MARCHING CUBES] Building mesh...");
     MyMarchingCubes					mc(m.cm, walker);
     walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, 0);
-    Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
-    Matrix44m sc; sc.SetIdentity(); sc.SetScale(step,step,step);
-    tr=tr*sc;
+//    Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
+//    Matrix44m sc; sc.SetIdentity(); sc.SetScale(step,step,step);
+//    tr=tr*sc;
 
-    tri::UpdatePosition<CMeshO>::Matrix(m.cm,tr);
+//    tri::UpdatePosition<CMeshO>::Matrix(m.cm,tr);
     tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
     tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
     return true;
