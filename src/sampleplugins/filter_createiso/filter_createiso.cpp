@@ -39,27 +39,27 @@ Added the new sample filter plugin that removes border faces
 using namespace std;
 using namespace vcg;
 
-FilterCreateIso::FilterCreateIso() 
+FilterCreateIso::FilterCreateIso()
 {
   typeList << FP_CREATEISO;
-	
+
   FilterIDType tt;
   foreach(tt , types())
-		actionList << new QAction(filterName(tt), this);
-	
+        actionList << new QAction(filterName(tt), this);
+
 }
 
 FilterCreateIso::~FilterCreateIso() {
-	for (int i = 0; i < actionList.count() ; i++ ) 
-		delete actionList.at(i);
+    for (int i = 0; i < actionList.count() ; i++ )
+        delete actionList.at(i);
 }
 
  QString FilterCreateIso::filterName(FilterIDType filter) const
 {
-	switch(filter)
+    switch(filter)
   {
-	  case FP_CREATEISO :								return QString("Noisy Isosurface");
-  	default: assert(0);
+      case FP_CREATEISO :								return QString("Noisy Isosurface");
+    default: assert(0);
   }
   return QString("error!");
 }
@@ -68,8 +68,8 @@ FilterCreateIso::~FilterCreateIso() {
 {
   switch(filterId)
   {
-		case FP_CREATEISO:	     return tr("Create a isosurface perturbed by a noisy isosurface."); 
-  	default: assert(0);
+        case FP_CREATEISO:	     return tr("Create a isosurface perturbed by a noisy isosurface.");
+    default: assert(0);
   }
   return QString("error!");
 }
@@ -78,7 +78,7 @@ FilterCreateIso::~FilterCreateIso() {
 {
   switch(ID(a))
   {
-    case FP_CREATEISO : return MeshFilterInterface::MeshCreation;     
+    case FP_CREATEISO : return MeshFilterInterface::MeshCreation;
     default					  : return MeshFilterInterface::Generic;
   }
 }
@@ -93,47 +93,42 @@ FilterCreateIso::~FilterCreateIso() {
   return 0;
 }
 
-bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
+ bool FilterCreateIso::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
+ {
+   md.addNewMesh("",this->filterName(ID(filter)));
+   MeshModel &m=*(md.mm());
+   if(filter->text() == filterName(FP_CREATEISO) )
+   {
+
+     SimpleVolume<SimpleVoxel<Scalarm> > 	volume;
+
+     typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel<Scalarm> >	> MyWalker;
+     typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
+     MyWalker walker;
+
+     const int gridSize=par.getInt("Resolution");
+     // Simple initialization of the volume with some cool perlin noise
+     volume.Init(Point3i(gridSize,gridSize,gridSize), Box3f(Point3f(0,0,0),Point3f(1,1,1)));
+     for(int i=0;i<gridSize;i++)
+       for(int j=0;j<gridSize;j++)
+         for(int k=0;k<gridSize;k++)
+           volume.Val(i,j,k)=(j-gridSize/2)*(j-gridSize/2)+(k-gridSize/2)*(k-gridSize/2) + i*gridSize/5*(float)math::Perlin::Noise(i*.2,j*.2,k*.2);
+
+     printf("[MARCHING CUBES] Building mesh...");
+     MyMarchingCubes mc(m.cm, walker);
+     walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10,cb);
+     m.UpdateBoxAndNormals();
+   }
+   return true;
+ }
+ void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
-  md.addNewMesh("",this->filterName(ID(filter)));
-  MeshModel &m=*(md.mm());
-  CMeshO::FaceIterator fi;
-	CMeshO::VertexIterator vi;
-	if(filter->text() == filterName(FP_CREATEISO) )
-	{
-		
-		SimpleVolume<SimpleVoxel> 	volume;
-		
-		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel> >	MyWalker;
-		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
-		MyWalker walker;
-		
-		const int gridSize=par.getInt("Resolution");
-		// Simple initialization of the volume with some cool perlin noise
-		volume.Init(Point3i(gridSize,gridSize,gridSize));
-		for(int i=0;i<gridSize;i++)
-			for(int j=0;j<gridSize;j++)
-				for(int k=0;k<gridSize;k++)
-					volume.Val(i,j,k)=(j-gridSize/2)*(j-gridSize/2)+(k-gridSize/2)*(k-gridSize/2)  + i*gridSize/5*(float)math::Perlin::Noise(i*.2,j*.2,k*.2);
-		
-		
-		// MARCHING CUBES
-		printf("[MARCHING CUBES] Building mesh...");
-		MyMarchingCubes					mc(m.cm, walker);
-		walker.BuildMesh<MyMarchingCubes>(m.cm, volume, mc, (gridSize*gridSize)/10);
-		vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);																																			 
-		vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box		
-	}
-	return true;
-}
-void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
-{ 
-	pair<float,float> qualityRange;
+    pair<float,float> qualityRange;
   switch(ID(action))
   {
     case FP_CREATEISO :
-		  parlst.addParam(new RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
- 		  break;
+          parlst.addParam(new RichInt("Resolution",64,"Grid Resolution","Resolution of the side of the cubic grid used for the volume creation"));
+          break;
   default: break; // do not add any parameter for the other filters
   }
 }
