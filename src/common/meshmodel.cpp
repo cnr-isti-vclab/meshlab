@@ -678,17 +678,19 @@ void MeshModel::updateDataMask(int neededDataMask)
     cm.face.EnableVFAdjacency();
     tri::UpdateTopology<CMeshO>::VertexFace(cm);
   }
-  if((neededDataMask & MM_WEDGTEXCOORD)!=0)  cm.face.EnableWedgeTexCoord();
-  if((neededDataMask & MM_FACECOLOR)!=0)		  	cm.face.EnableColor();
-  if((neededDataMask & MM_FACEQUALITY)!=0)	  	cm.face.EnableQuality();
-  if((neededDataMask & MM_FACEMARK)!=0)		  		cm.face.EnableMark();
-  if((neededDataMask & MM_VERTMARK)!=0)		  		cm.vert.EnableMark();
-  if((neededDataMask & MM_VERTCURV)!=0)		  		cm.vert.EnableCurvature();
-  if((neededDataMask & MM_VERTCURVDIR)!=0)	  	cm.vert.EnableCurvatureDir();
-  if((neededDataMask & MM_VERTRADIUS)!=0)	  	cm.vert.EnableRadius();
-  if((neededDataMask & MM_VERTTEXCOORD)!=0)	cm.vert.EnableTexCoord();
 
-    currentDataMask |= neededDataMask;
+  if((neededDataMask & MM_WEDGTEXCOORD)!=0)  cm.face.EnableWedgeTexCoord();
+  if((neededDataMask & MM_FACECOLOR)!=0)     cm.face.EnableColor();
+  if((neededDataMask & MM_FACEQUALITY)!=0)   cm.face.EnableQuality();
+  if((neededDataMask & MM_FACECURVDIR)!=0)   cm.face.EnableCurvatureDir();
+  if((neededDataMask & MM_FACEMARK)!=0)	     cm.face.EnableMark();
+  if((neededDataMask & MM_VERTMARK)!=0)      cm.vert.EnableMark();
+  if((neededDataMask & MM_VERTCURV)!=0)      cm.vert.EnableCurvature();
+  if((neededDataMask & MM_VERTCURVDIR)!=0)   cm.vert.EnableCurvatureDir();
+  if((neededDataMask & MM_VERTRADIUS)!=0)    cm.vert.EnableRadius();
+  if((neededDataMask & MM_VERTTEXCOORD)!=0)  cm.vert.EnableTexCoord();
+
+  currentDataMask |= neededDataMask;
  }
 
 void MeshModel::clearDataMask(int unneededDataMask)

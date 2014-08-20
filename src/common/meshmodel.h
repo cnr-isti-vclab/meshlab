@@ -83,12 +83,21 @@ namespace vcg
     public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
     };
 
+    template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirTypeOcf<MESHLAB_SCALAR>, T> {
+    public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
+    };
+
   }//end namespace vertex
   namespace face
   {
     template <class T> class Normal3m: public NormalAbs<vcg::Point3<MESHLAB_SCALAR>, T> {
     public:  static void Name(std::vector<std::string> & name){name.push_back(std::string("Normal3m"));T::Name(name);}
     };
+
+    template <class T> class CurvatureDirmOcf: public CurvatureDirOcf<CurvatureDirOcfBaseType<MESHLAB_SCALAR>, T> {
+    public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirdOcf"));T::Name(name);}
+    };
+
   }//end namespace face
 }//end namespace vcg
 
@@ -120,8 +129,8 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
     vcg::vertex::MarkOcf,           /*  0b */
     vcg::vertex::TexCoordfOcf,      /*  0b */
     vcg::vertex::CurvaturefOcf,     /*  0b */
-    vcg::vertex::CurvatureDirfOcf,  /*  0b */
-    vcg::vertex::RadiusfOcf         /*  0b */
+    vcg::vertex::CurvatureDirmOcf,  /*  0b */
+    vcg::vertex::RadiusdOcf         /*  0b */
 >{
 };
 
@@ -146,6 +155,7 @@ class CFaceO    : public vcg::Face<  CUsedTypesO,
     vcg::face::Color4bOcf,           /* 0b */
     vcg::face::FFAdjOcf,             /* 0b */
     vcg::face::VFAdjOcf,             /* 0b */
+    vcg::face::CurvatureDirmOcf,     /* 0b */
     vcg::face::WedgeTexCoordfOcf     /* 0b */
 > {};
 
@@ -227,14 +237,15 @@ public:
         MM_FACEMARK	        = 0x00020000,
         MM_FACEFACETOPO     = 0x00040000,
         MM_FACENUMBER       = 0x00080000,
+        MM_FACECURVDIR      = 0x00100000,
 
-        MM_WEDGTEXCOORD     = 0x00100000,
-        MM_WEDGNORMAL       = 0x00200000,
-        MM_WEDGCOLOR        = 0x00400000,
+        MM_WEDGTEXCOORD     = 0x00200000,
+        MM_WEDGNORMAL       = 0x00400000,
+        MM_WEDGCOLOR        = 0x00800000,
 
         // 	Selection
-        MM_VERTFLAGSELECT   = 0x00800000,
-        MM_FACEFLAGSELECT   = 0x01000000,
+        MM_VERTFLAGSELECT   = 0x01000000,
+        MM_FACEFLAGSELECT   = 0x02000000,
 
         // Per Mesh Stuff....
         MM_CAMERA			= 0x08000000,
