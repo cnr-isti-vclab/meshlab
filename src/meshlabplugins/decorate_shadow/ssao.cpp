@@ -182,7 +182,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla){
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
         glUseProgram(this->_blurShaderProgram);
 
-        float blur_coef = 0.8;
+        float blur_coef(0.8f);
         GLfloat scale = 1/(this->_texW * blur_coef);
 
         GLuint scaleLoc = glGetUniformLocation(this->_blurShaderProgram, "scale");

@@ -62,9 +62,9 @@ bool ShadowMapping::init()
 }
 
 void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
-    vcg::Box3f bb = md.bbox();
-    vcg::Point3f center = bb.Center();
-    float diag = bb.Diag();
+    Box3m bb = md.bbox();
+    Point3m center = bb.Center();
+    Scalarm diag = bb.Diag();
 
     GLfloat lP[4];
     glGetLightfv(GL_LIGHT0, GL_POSITION, lP);

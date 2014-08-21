@@ -78,16 +78,16 @@ public:
         smShader= new ShadowMapping(0.1f);
         vsmShader= new VarianceShadowMapping(0.1f);
         vsmbShader= new VarianceShadowMappingBlur(0.1f);
-        _decoratorSSAO = new SSAO(0.1);
+        _decoratorSSAO = new SSAO(0.1f);
     }
 
 
 	QList<QAction *> actions () const {return actionList;}
-	bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
+	bool startDecorate(QAction * /*mode*/, MeshDocument & /*m*/, RichParameterSet  * /*parent*/ par, GLArea * /*parent*/);
 	void decorateMesh(QAction *, MeshModel &,  RichParameterSet  *, GLArea *, QPainter *, GLLogStream &){}
 	void decorateDoc(QAction *a, MeshDocument &m,  RichParameterSet  *, GLArea *gla, QPainter *p, GLLogStream &);
 	void initGlobalParameterSet(QAction *, RichParameterSet  & globalparam);
-	int getDecorationClass(QAction */*action*/) const { return MeshDecorateInterface::PerDocument; }
+	int getDecorationClass(QAction * /*action*/) const { return MeshDecorateInterface::PerDocument; }
 
 private:
     DecorateShader* smShader, *vsmShader, *vsmbShader;

@@ -57,7 +57,7 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
                         "Shader used to perform shadow mapping decoration",
                         "Shadow mapping method")
                     );
-            parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(),0.3,0,1.0f,"Shadow Intensity","Shadow Intensity"));
+            parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(),0.3f,0.0f,1.0f,"Shadow Intensity","Shadow Intensity"));
             break;
         }
 
