@@ -96,6 +96,9 @@ namespace io {
 	template<typename OpenMeshType>
 	class ImporterX3D : public UtilX3D
 	{
+        typedef typename OpenMeshType::ScalarType ScalarType;
+        typedef typename OpenMeshType::CoordType CoordType;
+
 	private:
 
 		
@@ -966,7 +969,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the nodes TriangleSet, TriangleFanSet, TriangleStripSet, and QuadSet
 		static int LoadSet(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									const TextureInfo& texture,
 									const QStringList& coordList,
 									const QStringList& colorList,
@@ -977,13 +980,13 @@ namespace io {
 		{
 			QString normalPerVertex = geometry.attribute("normalPerVertex", "true");
 			QString ccw = geometry.attribute("ccw", "true");
-			std::vector<vcg::Point4f> vertexSet;
+			std::vector< vcg::Point4<ScalarType> > vertexSet;
 			int index = 0;
 			std::vector<int> vertexFaceIndex;
 			//create list of vertex index
 			while (index + 2 < coordList.size())
 			{
-				vcg::Point4f vertex(coordList.at(index).toFloat(), coordList.at(index + 1).toFloat(), coordList.at(index + 2).toFloat(), 1.0);
+				vcg::Point4<ScalarType> vertex(coordList.at(index).toFloat(), coordList.at(index + 1).toFloat(), coordList.at(index + 2).toFloat(), 1.0);
 				size_t vi = 0;
 				bool found = false;
 				while (vi < vertexSet.size() && !found)
@@ -1007,8 +1010,8 @@ namespace io {
 			vcg::tri::Allocator<OpenMeshType>::AddVertices(m, vertexSet.size());
 			for (size_t vv = 0; vv < vertexSet.size(); vv++)
 			{
-				vcg::Point4f tmp = tMatrix * vertexSet.at(vv);
-				m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+				vcg::Point4<ScalarType> tmp = tMatrix * vertexSet.at(vv);
+				m.vert[offset + vv].P() = CoordType(tmp.X(),tmp.Y(),tmp.Z());
 				loadDefaultValuePerVertex(&(m.vert[offset + vv]), m, info->mask);
 				if (HasPerVertexColor(m) && (info->mask & vcg::tri::io::Mask::IOM_VERTCOLOR) && info->meshColor)
 					m.vert[offset + vv].C() = info->color;
@@ -1085,7 +1088,7 @@ namespace io {
 					int numVertex = count.at(ns);
 					int firstVertexIndex = vertexFaceIndex.at(index) + offset;
 					int secondVertexIndex = vertexFaceIndex.at(index + 1) + offset;
-					vcg::Point3f firstNormal, secondNormal;
+					CoordType firstNormal, secondNormal;
 					if (normalPerVertex == "true")
 					{
 						getNormal(normalList, index*3, firstNormal, tMatrix);
@@ -1160,13 +1163,13 @@ namespace io {
 				for (int ff = 0; ff < nFace; ff++)
 				{
 					//Tesselate the quadrangular face
-					std::vector<std::vector<vcg::Point3f> > polygonVect;
-					std::vector<Point3f> polygon;
+					std::vector<std::vector<CoordType> > polygonVect;
+					std::vector<CoordType> polygon;
 					for (int tt = 0; tt < 4; tt++)
 						polygon.push_back(m.vert[vertexFaceIndex.at(tt + ff*4) + offset].cP());
 					polygonVect.push_back(polygon);
 					std::vector<int> indexVect;
-					vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+					vcg::glu_tesselator::tesselate<CoordType>(polygonVect, indexVect);
 					faceVect.push_back(indexVect);
 					nTriFace += indexVect.size()/3;
 				}
@@ -1214,7 +1217,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the nodes IndexedTriangleSet, IndexedTriangleFanSet, IndexedTriangleStripSet, IndexedQuadSet
 		static int LoadIndexedSet(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const Matrix44<ScalarType>& tMatrix,
 									const TextureInfo& texture,
 									const QStringList& coordList,
 									const QStringList& colorList,
@@ -1240,8 +1243,8 @@ namespace io {
 					defValue = vcg::Color4b(Color4b::White);
 				for (int vv = 0; vv < nVertex; vv++)
 				{
-					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
-					m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+					Point4<ScalarType> tmp = tMatrix * Point4<ScalarType>(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
+					m.vert[offset + vv].P() = CoordType(tmp.X(),tmp.Y(),tmp.Z());
 					//Load normal per vertex
 					if (HasPerVertexNormal(m) && (info->mask & vcg::tri::io::Mask::IOM_VERTNORMAL) && normalPerVertex == "true")
 						getNormal(normalList, vv*3, m.vert[offset + vv].N(), tMatrix);
@@ -1383,8 +1386,8 @@ namespace io {
 					for (int ff = 0; ff < nFace; ff++)
 					{
 						//Tessellate the quadrangular face
-						std::vector<std::vector<vcg::Point3f> > polygonVect;
-						std::vector<Point3f> polygon;
+						std::vector<std::vector<CoordType> > polygonVect;
+						std::vector<CoordType> polygon;
 						for (int tt = 0; tt < 4; tt++)
 						{
 							size_t vertIndex = indexList.at(tt + ff*4).toInt() + offset;
@@ -1397,7 +1400,7 @@ namespace io {
 						}
 						polygonVect.push_back(polygon);
 						std::vector<int> indexVect;
-						vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+						vcg::glu_tesselator::tesselate<CoordType>(polygonVect, indexVect);
 						faceVect.push_back(indexVect);
 						nTriFace += indexVect.size()/3;
 					}
@@ -1444,7 +1447,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node ElevationGrid		
 		static int LoadElevationGrid(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									const TextureInfo& texture,
 									const QStringList& colorList,
 									const QStringList& normalList,
@@ -1486,10 +1489,10 @@ namespace io {
 			{
 				for (int j=0; j < xDimension; j++)
 				{
-					vcg::Point4f in(j * xSpacing, heightVector[i * xDimension + j], i * zSpacing, 1.0);
+					vcg::Point4<ScalarType> in(j * xSpacing, heightVector[i * xDimension + j], i * zSpacing, 1.0);
 					in = tMatrix * in;
 					index = i * xDimension + j;
-					m.vert[index + offsetVertex].P()= vcg::Point3f(in.X(), in.Y(), in.Z());
+					m.vert[index + offsetVertex].P()= CoordType(in.X(), in.Y(), in.Z());
 					loadDefaultValuePerVertex(&(m.vert[index + offsetVertex]), m, info->mask);
 					//Load color per vertex
 					if (HasPerVertexColor(m) && (info->mask & vcg::tri::io::Mask::IOM_VERTCOLOR))
@@ -1560,7 +1563,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node IndexedFaceSet
 		static int LoadIndexedFaceSet(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									const TextureInfo& texture,
 									const QStringList& coordList,
 									const QStringList& colorList,
@@ -1592,8 +1595,8 @@ namespace io {
 					defValue = vcg::Color4b(Color4b::White);
 				for (int vv = 0; vv < nVertex; vv++)
 				{
-					vcg::Point4f tmp = tMatrix * vcg::Point4f(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
-					m.vert[offset + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+					vcg::Point4<ScalarType> tmp = tMatrix * vcg::Point4<ScalarType>(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
+					m.vert[offset + vv].P() = CoordType(tmp.X(),tmp.Y(),tmp.Z());
 					//Load color per vertex
 					if (HasPerVertexColor(m) && (info->mask & vcg::tri::io::Mask::IOM_VERTCOLOR))
 					{
@@ -1618,8 +1621,8 @@ namespace io {
 				while(ci < coordIndex.size())
 				{
 					initPolygon = ci;
-					std::vector<std::vector<vcg::Point3f> > polygonVect;
-					std::vector<Point3f> polygon;
+					std::vector<std::vector<CoordType> > polygonVect;
+					std::vector<CoordType> polygon;
 					//Check if polygon is correct
 					while(ci < coordIndex.size() && coordIndex.at(ci) != "-1")
 					{
@@ -1648,7 +1651,7 @@ namespace io {
 						indexVect.push_back(2);
 					}
 					else
-						vcg::glu_tesselator::tesselate<vcg::Point3f>(polygonVect, indexVect);
+						vcg::glu_tesselator::tesselate<CoordType>(polygonVect, indexVect);
 					objVect.push_back(std::pair<int, std::vector<int> >(initPolygon, indexVect));
 					nFace += indexVect.size()/3;
 				}
@@ -1734,7 +1737,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node PointSet
 		static int LoadPointSet(QDomElement /* geometry */,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									const QStringList& coordList,
 									const QStringList& colorList,
 									int colorComponent,
@@ -1752,9 +1755,9 @@ namespace io {
 				defValue = vcg::Color4b(Color4b::White);
 			for (int vv = 0; vv < nVertex; vv++)
 			{
-				vcg::Point4f tmp(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
+				vcg::Point4<ScalarType> tmp(coordList.at(vv*3).toFloat(), coordList.at(vv*3 + 1).toFloat(), coordList.at(vv*3 + 2).toFloat(), 1.0);
 				tmp = tMatrix * tmp;			
-				m.vert[vv + offset].P() = vcg::Point3f(tmp.X(), tmp.Y(), tmp.Z());
+				m.vert[vv + offset].P() = CoordType(tmp.X(), tmp.Y(), tmp.Z());
 				//Load color per vertex
 				if (HasPerVertexColor(m) && (info->mask & vcg::tri::io::Mask::IOM_VERTCOLOR))
 					getColor(colorList, colorComponent, vv*colorComponent, m.vert[vv + offset].C(), defValue);
@@ -1773,7 +1776,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node Polypoint2D
 		static int LoadPolypoint2D(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									AdditionalInfoX3D* info,
 									CallBackPos *cb)
 		{
@@ -1787,9 +1790,9 @@ namespace io {
 				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, nVertex);
 				for (int vv = 0; vv < nVertex; vv++)
 				{
-					vcg::Point4f tmp(pointList.at(vv*2).toFloat(), pointList.at(vv*2 + 1).toFloat(), 0, 1.0);
+					vcg::Point4<ScalarType> tmp(pointList.at(vv*2).toFloat(), pointList.at(vv*2 + 1).toFloat(), 0, 1.0);
 					tmp = tMatrix * tmp;			
-					m.vert[vv + offset].P() = vcg::Point3f(tmp.X(), tmp.Y(), tmp.Z());
+					m.vert[vv + offset].P() = CoordType(tmp.X(), tmp.Y(), tmp.Z());
 					loadDefaultValuePerVertex(&(m.vert[vv + offset]), m, info->mask);
 				}
 			}
@@ -1803,7 +1806,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node TriangleSet2D
 		static int LoadTriangleSet2D(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									AdditionalInfoX3D* info,
 									CallBackPos *cb)
 		{
@@ -1812,12 +1815,12 @@ namespace io {
 			if (!vertices.isEmpty())
 			{
 				//Create list of vertex index
-				std::vector<vcg::Point4f> vertexSet;
+				std::vector< vcg::Point4<ScalarType> > vertexSet;
 				int index = 0;
 				std::vector<int> vertexFaceIndex;
 				while (index + 1 < vertices.size())
 				{
-					vcg::Point4f vertex(vertices.at(index).toFloat(), vertices.at(index + 1).toFloat(), 0, 1.0);
+					vcg::Point4<ScalarType> vertex(vertices.at(index).toFloat(), vertices.at(index + 1).toFloat(), 0, 1.0);
 					size_t vi = 0;
 					bool found = false;
 					while (vi < vertexSet.size() && !found)
@@ -1841,8 +1844,8 @@ namespace io {
 				vcg::tri::Allocator<OpenMeshType>::AddVertices(m, vertexSet.size());
 				for (size_t vv = 0; vv < vertexSet.size(); vv++)
 				{
-					vcg::Point4f tmp = tMatrix * vertexSet.at(vv);
-					m.vert[offsetVertex + vv].P() = vcg::Point3f(tmp.X(),tmp.Y(),tmp.Z());
+					vcg::Point4<ScalarType> tmp = tMatrix * vertexSet.at(vv);
+					m.vert[offsetVertex + vv].P() = CoordType(tmp.X(),tmp.Y(),tmp.Z());
 					loadDefaultValuePerVertex(&(m.vert[offsetVertex + vv]), m, info->mask); 
 				}
 				//Load face in the mesh
@@ -1867,7 +1870,7 @@ namespace io {
 		//Load in the mesh the geometry defined in the node Cylinder
 		static int LoadCylinder(QDomElement geometry,
 									OpenMeshType& m,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									AdditionalInfoX3D* info,
 									CallBackPos *cb)
 		{
@@ -2042,9 +2045,9 @@ namespace io {
 		
 		
 		//Create the transformation matrix from Trasform node 
-		inline static vcg::Matrix44f createTransformMatrix(QDomElement root, vcg::Matrix44f tMatrix)
+		inline static vcg::Matrix44<ScalarType> createTransformMatrix(QDomElement root, vcg::Matrix44<ScalarType> tMatrix)
 		{
-			vcg::Matrix44f t, tmp;
+			vcg::Matrix44<ScalarType> t, tmp;
 			t.SetIdentity();
 			QStringList coordList, center, scale;
 			findAndParseAttribute(coordList, root, "translation", "");
@@ -2059,13 +2062,13 @@ namespace io {
 			findAndParseAttribute(coordList, root, "rotation", "");
 			if(coordList.size() == 4)
 			{
-				tmp.SetRotateRad(coordList.at(3).toFloat(), vcg::Point3f(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
+				tmp.SetRotateRad(coordList.at(3).toFloat(), CoordType(coordList.at(0).toFloat(), coordList.at(1).toFloat(), coordList.at(2).toFloat()));
 				t *= tmp;
 			}
 			findAndParseAttribute(scale, root, "scaleOrientation", "");
 			if(scale.size() == 4)
 			{
-				tmp.SetRotateRad(scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				tmp.SetRotateRad(scale.at(3).toFloat(), CoordType(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
 				t *= tmp;
 			}
 			findAndParseAttribute(coordList, root, "scale", "");
@@ -2076,7 +2079,7 @@ namespace io {
 			}
 			if(scale.size() == 4)
 			{
-				tmp.SetRotateRad(-scale.at(3).toFloat(), vcg::Point3f(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
+				tmp.SetRotateRad(-scale.at(3).toFloat(), CoordType(scale.at(0).toFloat(), scale.at(1).toFloat(), scale.at(2).toFloat()));
 				t *= tmp;
 			}
 			if(center.size() == 3)
@@ -2093,7 +2096,7 @@ namespace io {
 		//Check the validity of Inline node and load the geometry from linked file
 		static int NavigateInline(OpenMeshType& m,
 									QDomElement root,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									AdditionalInfoX3D* info,
 									CallBackPos *cb)
 		{
@@ -2147,7 +2150,7 @@ namespace io {
 		
 		//Manage the ExternProtoDeclare node to permit the resolution of ProtoInstance node
 		static int NavigateExternProtoDeclare(QDomElement root,
-									const vcg::Matrix44f /* tMatrix */,
+									const vcg::Matrix44<ScalarType>& /* tMatrix */,
 									std::map<QString, QDomElement>& protoDeclareMap,
 									AdditionalInfoX3D* info)
 		{
@@ -2199,7 +2202,7 @@ namespace io {
 		//Check the validity of ProtoInstance node and load the geometry from relating ProtoDeclare 
 		static int NavigateProtoInstance(OpenMeshType& m,
 									QDomElement root,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									std::map<QString, QDomElement>& defMap,
 									std::map<QString, QDomElement>& protoDeclareMap,
 									AdditionalInfoX3D* info,
@@ -2280,14 +2283,14 @@ namespace io {
 		
 		
 		//If the index is valid, return the normal of index 'index'
-		inline static void getNormal(const QStringList& list, int index, vcg::Point3f& dest, const vcg::Matrix44f& tMatrix)
+		inline static void getNormal(const QStringList& list, int index, CoordType& dest, const vcg::Matrix44<ScalarType>& tMatrix)
 		{
 			if(!list.isEmpty() && (index + 2) < list.size())
 			{
-				vcg::Point3f normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
-				vcg::Matrix44f intr44 = vcg::Inverse(tMatrix);
+				CoordType normal(list.at(index).toFloat(), list.at(index + 1).toFloat(), list.at( index+ 2).toFloat());
+				vcg::Matrix44<ScalarType> intr44 = vcg::Inverse(tMatrix);
 				intr44.transposeInPlace();
-				Matrix33f intr33;
+				Matrix33<ScalarType> intr33;
 				for(unsigned int rr = 0; rr < 2; ++rr)
 				{
 					for(unsigned int cc = 0;cc < 2;++cc)
@@ -2321,7 +2324,7 @@ namespace io {
 		
 
 		//If the index is valid, return the texture coordinate of index 'index'
-		inline static bool getTextureCoord(const TextureInfo& textInfo, int index, const vcg::Point3f& vertex, vcg::TexCoord2<float>& dest, const vcg::Matrix44f& tMatrix, AdditionalInfoX3D* info)
+		inline static bool getTextureCoord(const TextureInfo& textInfo, int index, const CoordType& vertex, vcg::TexCoord2<float>& dest, const vcg::Matrix44<ScalarType>& tMatrix, AdditionalInfoX3D* info)
 		{
 			vcg::Point3f point;
 			vcg::TexCoord2<float> textCoord;
@@ -2330,15 +2333,16 @@ namespace io {
 				//TextureCoordinateGenerator
 				if (textInfo.mode == "COORD")
 				{
-					vcg::Point4f tmpVertex(vertex.X(), vertex.Y(), vertex.Z(), 1.0);
-					vcg::Matrix44f tmpMatrix = vcg::Inverse(tMatrix);
+					vcg::Point4<ScalarType> tmpVertex(vertex.X(), vertex.Y(), vertex.Z(), 1.0);
+					vcg::Matrix44<ScalarType> tmpMatrix = vcg::Inverse(tMatrix);
 					tmpVertex = tmpMatrix * tmpVertex;
 					point = vcg::Point3f(tmpVertex.X(), tmpVertex.Y(), 0.0);
 					textCoord.N() = textInfo.textureIndex;
 				}
 				else if (textInfo.mode == "SPHERE")
 				{
-					point = info->camera.Matrix() * vertex;
+                    CoordType tmppoint = info->camera.Matrix() * vertex;
+                    point.Import(tmppoint);
 					float u = point.X() / 2.0 + 0.5;
 					float v = point.Y() / 2.0 + 0.5;
 					u = (u - floorf(u));
@@ -2391,7 +2395,7 @@ namespace io {
 		//Navigate scene graph
 		static int NavigateScene(OpenMeshType& m,
 									QDomElement root,
-									const vcg::Matrix44f tMatrix,
+									const vcg::Matrix44<ScalarType>& tMatrix,
 									std::map<QString, QDomElement>& defMap,
 									std::map<QString, QDomElement>& protoDeclareMap,
 									AdditionalInfoX3D* info,
@@ -2402,37 +2406,37 @@ namespace io {
 			if (result != E_NOERROR) return result;
 			if (root.tagName() == "Viewpoint")
 			{
-				vcg::Point3f rot;
+				CoordType rot;
 				float angle = 0.0;
-				vcg::Point3f pos;
+				CoordType pos;
 				QString orientation = root.attribute("orientation");
 				QString position = root.attribute("position", "0 0 10");
 				QStringList list;
 				list = orientation.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 				if (list.size() == 4)
 				{
-					rot = vcg::Point3f(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat());
+					rot = CoordType(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat());
 					rot = rot.Normalize();
 					angle = list.at(3).toFloat();
 				}
 				else
 				{
-					rot = vcg::Point3f(0 ,0 ,1);
+					rot = CoordType(0 ,0 ,1);
 					angle = 0.0;
 				}
 				list.clear();
 				list = position.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 				if (list.size() == 3)
-					pos = vcg::Point3f(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat()); 
+					pos = CoordType(list.at(0).toFloat(), list.at(1).toFloat(), list.at(2).toFloat()); 
 				else
-					pos = vcg::Point3f(0, 0, 10);
+					pos = CoordType(0, 0, 10);
 				info->camera.SetIdentity();
 				info->camera.SetRotate(angle, rot);
 				info->camera.SetTranslate(pos);
 			}
 			if (root.tagName() == "Transform")
 			{
-				vcg::Matrix44f t = createTransformMatrix(root, tMatrix);
+				vcg::Matrix44<ScalarType> t = createTransformMatrix(root, tMatrix);
 				QDomElement child = root.firstChildElement();
 				while(!child.isNull())
 				{
@@ -2679,9 +2683,9 @@ public:
 		//Merge all meshes in the x3d's file in the templeted mesh m
 		static int Open(OpenMeshType& m, const char* filename, AdditionalInfoX3D*& info, CallBackPos *cb = 0)
 		{
-			vcg::Matrix44f tMatrix;
+			vcg::Matrix44<ScalarType> tMatrix;
 			tMatrix.SetIdentity();
-			std::vector<vcg::Matrix44f> matrixStack;
+			std::vector<vcg::Matrix44<ScalarType> > matrixStack;
 			matrixStack.push_back(tMatrix);
 			std::map<QString, QDomElement> defMap;
 			std::map<QString, QDomElement> protoDeclareMap;

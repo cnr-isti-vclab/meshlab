@@ -58,7 +58,7 @@ namespace io {
 	{
 	private:
 
-		typedef vcg::Point3f x3dPointType;
+		typedef Point3m x3dPointType;
 		typedef vcg::Color4b x3dColorType;
 		typedef vcg::TexCoord2<> x3dTexCoordType;
 

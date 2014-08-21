@@ -58,7 +58,7 @@
 namespace vcg {
 namespace tri {
 namespace io {
-	
+
 	class AdditionalInfoX3D : public AdditionalInfo
 	{
 	public: 
@@ -73,7 +73,7 @@ namespace io {
 
 		std::vector<bool> useTexture;
 
-		vcg::Similarityf camera;
+		Similaritym camera;
 
 		int lineNumberError;
 		std::vector<QString> filenameStack;
