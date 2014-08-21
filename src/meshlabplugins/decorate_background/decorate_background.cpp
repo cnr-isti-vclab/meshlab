@@ -92,7 +92,7 @@ bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*
     return true;
 }
 
-void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea *gla, QPainter *, GLLogStream &)
+void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea * /*gla*/, QPainter *, GLLogStream &)
 {
   static QString lastname("unitialized");
     switch(ID(a))
@@ -278,7 +278,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     glPopAttrib();
 }
 
-void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
+void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, Color4b frontColor, Color4b backColor)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     Point3m minP,maxP, minG,maxG;

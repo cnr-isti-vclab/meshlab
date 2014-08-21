@@ -88,11 +88,11 @@ public:
   void decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &_log);
   void decorateMesh(QAction *, MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &){}
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
-  int getDecorationClass(QAction */*action*/) const { return MeshDecorateInterface::PerDocument; }
+  int getDecorationClass(QAction * /*action*/) const { return MeshDecorateInterface::PerDocument; }
 
 
 private:
-  void DrawGriddedCube(MeshModel &m, const Box3m &bb, float majorTick, float minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
+  void DrawGriddedCube(MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
   vcg::Shotf curShot;
 
 signals:
