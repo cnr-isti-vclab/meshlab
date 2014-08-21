@@ -22,7 +22,7 @@ edit_referencingDialog::~edit_referencingDialog()
     delete ui;
 }
 
-void edit_referencingDialog::closeEvent(QCloseEvent *event)
+void edit_referencingDialog::closeEvent(QCloseEvent * /*event*/)
 {
     emit closing();
 }
@@ -31,7 +31,7 @@ void edit_referencingDialog::updateTable()
 {
     this->referencingPlugin->status_error = "";
     this->ui->tableWidget->clear();
-    this->ui->tableWidget->setRowCount(this->referencingPlugin->usePoint.size());
+    this->ui->tableWidget->setRowCount(int(this->referencingPlugin->usePoint.size()));
 
     this->ui->tableWidget->setHorizontalHeaderLabels(QString("Active; ID ;X (mov);Y (mov);Z (mov);X (ref);Y (ref);Z (ref);Error").split(";"));
 
@@ -215,7 +215,7 @@ void edit_referencingDialog::on_tableWidget_cellDoubleClicked(int row, int colum
     return;
 }
 
-void edit_referencingDialog::on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+void edit_referencingDialog::on_tableWidget_currentCellChanged(int /*currentRow*/, int /*currentColumn*/, int /*previousRow*/, int /*previousColumn*/)
 {
     this->referencingPlugin->status_error = "";
     this->referencingPlugin->glArea->update();

@@ -68,10 +68,9 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
   
-void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
+void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p)
 {
     //status
-    int pindex;
     int cindex;
 
     cindex = referencingDialog->ui->tableWidget->currentRow();
@@ -177,7 +176,7 @@ void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
+bool EditReferencingPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -216,7 +215,7 @@ bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
     return true;
 }
 
-void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea *gla)
+void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     assert(referencingDialog);
@@ -653,7 +652,7 @@ void EditReferencingPlugin::applyMatrix()
 {
     status_error = "";
 
-    Matrix44f newMat;
+    Matrix44m newMat;
 
     newMat.Import(transfMatrix);
 
