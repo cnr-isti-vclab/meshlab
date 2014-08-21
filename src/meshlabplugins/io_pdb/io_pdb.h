@@ -50,14 +50,15 @@ public:
 
 	//---------- PDB READER -----------//
 	bool parsePDB(const std::string &filename, CMeshO &m, const RichParameterSet &parlst, vcg::CallBackPos *cb=0); 
-	void mysscanf(const char* st, const char* format, float *f);
+	void mysscanf(const char* st, float *f);
+    void mysscanf(const char* st, double *f);
 	float getAtomRadius(const char* atomicElementCharP);
 	vcg::Color4b getAtomColor(const char* atomicElementCharP);
 
 private:
 
 	std::vector<std::string > atomDetails;
-	std::vector<vcg::Point3f> atomPos;
+	std::vector<Point3m> atomPos;
 	std::vector<vcg::Color4b> atomCol;
 	std::vector<float>        atomRad;
 

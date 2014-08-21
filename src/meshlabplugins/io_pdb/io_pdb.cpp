@@ -69,7 +69,7 @@ void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString 
 
 bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
-	bool normalsUpdated = false;
+	//bool normalsUpdated = false;
 
 	// initializing mask
 	mask = 0;
@@ -134,7 +134,7 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return true;
 }
 
-bool PDBIOPlugin::save(const QString &formatName,const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
+bool PDBIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
   assert(0); 
 	return false;
@@ -166,13 +166,13 @@ QList<MeshIOInterface::Format> PDBIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void PDBIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void PDBIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;
 }
 
-void PDBIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
+void PDBIOPlugin::initOpenParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL"))
@@ -180,7 +180,7 @@ void PDBIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/, Ric
 								"The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified");		
 	*/
 }
-void PDBIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par) 
+void PDBIOPlugin::initSaveParameter(const QString & /*format*/, MeshModel &/*m*/, RichParameterSet & /*par*/) 
 {
 	/*
 	if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
@@ -188,7 +188,7 @@ void PDBIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, Ric
 								"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format");		
   */
 }
-void PDBIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par) 
+void PDBIOPlugin::applyOpenParameter(const QString & /*format*/, MeshModel & /*m*/, const RichParameterSet & /*par*/) 
 {
   /*
 	if(format.toUpper() == tr("STL"))
@@ -241,14 +241,14 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 	//-- atoms parsing
 	for(atomIndex=0; atomIndex<atomDetails.size(); atomIndex++)
 	{
-		Point3f currAtomPos;
+		Point3m currAtomPos;
 		Color4b currAtomCol;
 		float   currAtomRad;
 
 		// position
-		mysscanf(atomDetails[atomIndex].substr( 31, 38).c_str(),"%f", &(currAtomPos.X()));
-		mysscanf(atomDetails[atomIndex].substr( 39, 46).c_str(),"%f", &(currAtomPos.Y()));
-		mysscanf(atomDetails[atomIndex].substr( 47, 54).c_str(),"%f", &(currAtomPos.Z()));
+		mysscanf(atomDetails[atomIndex].substr( 31, 38).c_str(), &(currAtomPos.X()));
+		mysscanf(atomDetails[atomIndex].substr( 39, 46).c_str(), &(currAtomPos.Y()));
+		mysscanf(atomDetails[atomIndex].substr( 47, 54).c_str(), &(currAtomPos.Z()));
 		atomPos.push_back(currAtomPos);
 
 		// color
@@ -305,9 +305,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 
 	if(parlst.getBool("interpspheres") && !surfacecreated)  	// jointed spheres marching cube 
 	{
-		SimpleVolume<SimpleVoxel> 	volume;
+		SimpleVolume<SimpleVoxelm> 	volume;
 	
-		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel> >	MyWalker;
+		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxelm> >	MyWalker;
 		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
 		MyWalker walker;
 		
@@ -331,7 +331,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		double step = parlst.getFloat("voxelsize");
 		Point3i siz= Point3i::Construct((rbb.max-rbb.min)*(1.0/step));
 					
-		volume.Init(siz);
+		volume.Init(siz,rbb);
 		float xpos,ypos,zpos;
 		for(double i=0;i<siz[0];i++)
 			for(double j=0;j<siz[1];j++)
@@ -360,8 +360,8 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		// MARCHING CUBES
 		MyMarchingCubes	mc(m, walker);
 		walker.BuildMesh<MyMarchingCubes>(m, volume, mc, 0);
-		Matrix44f tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
-		Matrix44f sc; sc.SetIdentity(); sc.SetScale(step,step,step);
+		Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
+		Matrix44m sc; sc.SetIdentity(); sc.SetScale(step,step,step);
 		tr=tr*sc;
 		
 		tri::UpdatePosition<CMeshO>::Matrix(m,tr);
@@ -374,9 +374,9 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 
 	if(parlst.getBool("metaballs") && !surfacecreated)  	// metaballs marching cube 
 	{
-		SimpleVolume<SimpleVoxel> 	volume;
+		SimpleVolume<SimpleVoxelm> 	volume;
 	
-		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxel> >	MyWalker;
+		typedef vcg::tri::TrivialWalker<CMeshO, SimpleVolume<SimpleVoxelm> >	MyWalker;
 		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
 		MyWalker walker;
 		
@@ -403,7 +403,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 					
 
 //	Log("Filling a Volume of %i %i %i",siz[0],siz[1],siz[2]);
-		volume.Init(siz);
+		volume.Init(siz,rbb);
 		float xpos,ypos,zpos;
 		for(double i=0;i<siz[0];i++)
 			for(double j=0;j<siz[1];j++)
@@ -433,8 +433,8 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		// MARCHING CUBES
 		MyMarchingCubes	mc(m, walker);
 		walker.BuildMesh<MyMarchingCubes>(m, volume, mc, 1);
-		Matrix44f tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
-		Matrix44f sc; sc.SetIdentity(); sc.SetScale(step,step,step);
+		Matrix44m tr; tr.SetIdentity(); tr.SetTranslate(rbb.min[0],rbb.min[1],rbb.min[2]);
+		Matrix44m sc; sc.SetIdentity(); sc.SetScale(step,step,step);
 		tr=tr*sc;
 		
 		//tri::io::ExporterPLY<CMeshO>::Save(m,"./pippo.ply");
@@ -507,13 +507,22 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 
 
 //-- helper function... parses + and - values with space
-void PDBIOPlugin::mysscanf(const char* st, const char* format, float *f)
+void PDBIOPlugin::mysscanf(const char* st, float *f)
 {
   if (!sscanf( st, "%f", f)) {
     if (sscanf( st, " - %f", f))
     *f=-*f; 
     else  *f=0.0;
   };
+}
+
+void PDBIOPlugin::mysscanf(const char* st, double *f)
+{
+    if (!sscanf( st, "%lf", f)) {
+        if (sscanf( st, " - %lf", f))
+            *f=-*f; 
+        else  *f=0.0;
+    };
 }
 
 
@@ -675,7 +684,7 @@ vcg::Color4b PDBIOPlugin::getAtomColor(const char* atomicElementCharP)
 	}                                                          
 
   std::string ss0,ss1,ss2;
-  size_t last=std::min(atomicElement.length(),atomicElement.find_first_of(' '));
+  std::min(atomicElement.length(),atomicElement.find_first_of(' '));
   ss0=atomicElement.substr(0,1);
 	vcg::Color4b color=vcg::Color4b::Black;                 
 	color=E2C[ss0];                                 
