@@ -108,8 +108,8 @@ void DecorateRasterProjPlugin::MeshDrawer::update( glw::Context &context, bool u
             vcg::Point3f *vertBuffer = new vcg::Point3f [ 2*meshData.vn ];
             for( int i=0, n=0; i<meshData.vn; ++i )
             {
-                vertBuffer[n++] = meshData.vert[i].P();
-                vertBuffer[n++] = meshData.vert[i].N();
+                vertBuffer[n++].Import(meshData.vert[i].P());
+                vertBuffer[n++].Import(meshData.vert[i].N());
             }
 
             m_VBOVertices = glw::createBuffer( context, 2*meshData.vn*sizeof(vcg::Point3f), vertBuffer );
@@ -267,9 +267,10 @@ void DecorateRasterProjPlugin::updateCurrentMesh( MeshDocument &m,
     }
 
     m_SceneBox.SetNull();
+
     for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
     {
-        m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox );
+        m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
         m->update( m_Context, areVBORequired );
     }
 }
@@ -279,8 +280,9 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 {
     // Recover the near and far clipping planes by considering the bounding box of the current mesh
     // in the camera space of the current raster.
-    float zNear, zFar;
-    GlShot< vcg::Shot<float> >::GetNearFarPlanes( m_CurrentRaster->shot, m_SceneBox, zNear, zFar );
+    Scalarm zNear, zFar;
+    vcg::Shotf tmpshot;
+    GlShot< Shotm >::GetNearFarPlanes( m_CurrentRaster->shot, m_SceneBox, zNear, zFar );
     if( zNear < 0.0001f )
         zNear = 0.1f;
     if( zFar < zNear )
@@ -288,7 +290,7 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 
 
     // Recover the view frustum of the current raster.
-    float l, r, b, t, focal;
+    Scalarm l, r, b, t, focal;
     m_CurrentRaster->shot.Intrinsics.GetFrustum( l, r, b, t, focal );
 
 
@@ -310,15 +312,15 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 
 
     // Extract the pose matrix from the current raster.
-    m_RasterPose =  m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix().transpose() ;
+    m_RasterPose.Import(m_CurrentRaster->shot.GetWorldToExtrinsicsMatrix().transpose());
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
-    const float biasMatData[16] = { 0.5f, 0.0f, 0.0f, 0.0f,
+    const Scalarm biasMatData[16] = { 0.5f, 0.0f, 0.0f, 0.0f,
                                     0.0f, 0.5f, 0.0f, 0.0f,
                                     0.0f, 0.0f, 0.5f, 0.0f,
                                     0.5f, 0.5f, 0.5f, 1.0f };
-    vcg::Matrix44f biasMat( biasMatData );
+    Matrix44m biasMat( biasMatData );
 
 
     // Update the shadow map projection matrix.
@@ -607,12 +609,13 @@ void DecorateRasterProjPlugin::setPointParameters( MeshDrawer &md,
     {
         if( par->getBool("MeshLab::Appearance::pointDistanceAttenuation") )
         {
-            vcg::Matrix44f mvMat;
-            glGetFloatv( GL_MODELVIEW_MATRIX, mvMat.V() );
+            Matrix44m mvMat;
+            vcg::glGetv( GL_MODELVIEW_MATRIX, mvMat);
             vcg::Transpose( mvMat );
-            float camDist = vcg::Norm( mvMat * md.mm()->cm.Tr * md.mm()->cm.bbox.Center() );
+            Scalarm camDist = vcg::Norm( mvMat * md.mm()->cm.Tr * md.mm()->cm.bbox.Center() );
 
-            float quadratic[3] = { 0.0f, 0.0f, 1.0f/(camDist*camDist) };
+            //WARNING! glPointParameterd function doesn't exist. We must use float.
+            float quadratic[3] = { 0.0f,0.0f, 1.0f/float(camDist*camDist) };
             glPointParameterfv( GL_POINT_DISTANCE_ATTENUATION, quadratic );
             glPointParameterf( GL_POINT_SIZE_MAX, 16.0f );
             glPointParameterf( GL_POINT_SIZE_MIN, 1.0f );
@@ -639,6 +642,7 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
         {
             if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
                 return;
+
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             updateCurrentMesh( m, *par );
@@ -688,20 +692,21 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                 m_Context.bindTexture2D( m_DepthTexture, 1 );
                 shader->setUniform( "u_ColorMap", 0 );
                 shader->setUniform( "u_DepthMap", 1 );
-                shader->setUniform4x4( "u_ProjMat", m_ShadowProj.V(), false );
-                shader->setUniform3( "u_Viewpoint", m_CurrentRaster->shot.GetViewPoint().V() );
-                vcg::Matrix44f lightToObj = ( gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
+                vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
+                shader->setUniform4x4( "u_ProjMat", tmp_shadowproj.V(), false );
+                vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
+                shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
+                vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
                 shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
                 shader->setUniform( "u_IsLightActivated", rm.lighting && par->getBool("MeshLab::Decoration::ProjRasterLighting") );
                 shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
                 shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
                 shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
-
                 for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
                 {
                     if( rm.drawMode == vcg::GLW::DMPoints )
                         setPointParameters( m.value(), par );
-                    shader->setUniform4x4( "u_ModelXf", vcg::Matrix44f(m->mm()->cm.Tr).transpose().V(), false );
+                    shader->setUniform4x4( "u_ModelXf", vcg::Matrix44f::Construct(m->mm()->cm.Tr).transpose().V(), false );
                     m->draw( m_Context );
                 }
 

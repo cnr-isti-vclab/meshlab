@@ -69,15 +69,15 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
     glw::Context            m_Context;
     bool                    m_ProjectOnAllMeshes;
 
-    vcg::Box3f              m_SceneBox;
+    Box3m              m_SceneBox;
     QMap<int,MeshDrawer>    m_Scene;
     MeshDrawer              *m_CurrentMesh;
 
     RasterModel             *m_CurrentRaster;
-    vcg::Matrix44f          m_RasterProj;
-    vcg::Matrix44f          m_RasterPose;
+    Matrix44m          m_RasterProj;
+    Matrix44m          m_RasterPose;
 
-    vcg::Matrix44f          m_ShadowProj;
+    Matrix44m          m_ShadowProj;
     glw::Texture2DHandle    m_DepthTexture;
     glw::Texture2DHandle    m_ColorTexture;
     glw::ProgramHandle      m_ShadowMapShader;
