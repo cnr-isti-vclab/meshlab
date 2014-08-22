@@ -45,7 +45,7 @@ RfxSpecialUniform::~RfxSpecialUniform()
 void RfxSpecialUniform::initialize(){
      float val[16];
 
-	vcg::Box3f bb;
+	 Box3m bb;
 	 std::pair<float, float> qMinMax;
 
      switch(this->_specialType){
