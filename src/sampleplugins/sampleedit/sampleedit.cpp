@@ -117,7 +117,7 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gl
   QString buf = QString("f%1\n (%3 %4 %5)").arg(QString::number(tri::Index(m.cm,fp))).arg(QString::number(tri::Index(m.cm,fp->V(0)))).arg(QString::number(tri::Index(m.cm,fp->V(1)))).arg(QString::number(tri::Index(m.cm,fp->V(2))));
   if( m.hasDataMask(MeshModel::MM_FACECOLOR) )
       buf +=QString(" - C(%1 %2 %3)").arg(QString::number(fp->C().X())).arg(QString::number(fp->C().Y())).arg(QString::number(fp->C().Z()));
-  Point3f c=Barycenter(*fp);
+  Point3m c=Barycenter(*fp);
   vcg::glLabel::render(p,c,buf);
   for(int i=0;i<3;++i)
     {
