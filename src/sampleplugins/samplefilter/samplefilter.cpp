@@ -88,7 +88,7 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParam
 											"Toggle the recomputation of the normals after the random displacement.\n\n"
 											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
 			parlst.addParam(new RichAbsPerc("Displacement",
-												m.cm.bbox.Diag()/100.0,0,m.cm.bbox.Diag(),
+												m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(),
 												"Max displacement",
 												"The vertex are displaced of a vector whose norm is bounded by this value"));
 											break;
@@ -110,10 +110,10 @@ bool ExtraSamplePlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichP
 		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
 		  cb(100*i/m.vert.size(), "Randomly Displacing...");
 
-		float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-		m.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);
+		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
 	}
 	
 	// Log function dump textual info in the lower part of the MeshLab screen. 
