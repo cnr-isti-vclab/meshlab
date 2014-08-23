@@ -24,10 +24,12 @@
 #include "filter_voronoi.h"
 #include<vcg/complex/algorithms/voronoi_processing.h>
 #include<vcg/complex/algorithms/update/curvature.h>
+#include<vcg/complex/algorithms/update/curvature_fitting.h>
 #include<vcg/complex/algorithms/update/quality.h>
 #include<vcg/complex/algorithms/smooth.h>
 #include<vcg/complex/algorithms/voronoi_volume_sampling.h>
 #include<vcg/complex/algorithms/polygon_support.h>
+#include<vcg/complex/algorithms/smooth_field.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -57,7 +59,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
   if(filterName == "Cross Field Creation")
   {
     MeshModel &m=*md.mm();
-    m.updateDataMask(MeshModel::MM_VERTCURVDIR);
+    m.updateDataMask(MeshModel::MM_VERTCURVDIR + MeshModel::MM_FACECURVDIR + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
 
     int crossType = env.evalEnum("crossType");
     if(crossType == 0) // Linear Y
@@ -77,7 +79,13 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
 
     if(crossType == 2) // Curvature
     {
+      m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+      m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+      tri::FieldSmoother<CMeshO>::InitByCurvature(m.cm);
+      tri::FieldSmoother<CMeshO>::SmoothParam par;
+      tri::FieldSmoother<CMeshO>::SmoothDirections(m.cm,par);
     }
+
     return true;
   }
 

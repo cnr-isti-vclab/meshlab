@@ -152,10 +152,13 @@
     <ENUM_GUI guiLabel="crossType"/>
    </PARAM>
   </FILTER>
-  <FILTER filterFunction="crossFieldColoring" filterName="Cross Field Coloring"   filterPre="MM_VERTCURVDIR" filterRasterArity="SingleRaster" filterClass="Generic" filterPost="MM_VERTCOLOR" filterArity="SingleMesh" filterIsInterruptible="false">
+  <FILTER filterFunction="crossFieldSmoothing" filterName="Cross Field Smoothing"   filterPre="MM_VERTCURVDIR" filterRasterArity="SingleRaster" filterClass="Generic" filterPost="MM_VERTCOLOR" filterArity="SingleMesh" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true">
+    <PARAM_HELP><![CDATA[]]></PARAM_HELP>
+    <CHECKBOX_GUI guiLabel="Preprocessing"/>
+   </PARAM>
   </FILTER>
  </PLUGIN>
 </MESHLAB_FILTER_INTERFACE>
-
