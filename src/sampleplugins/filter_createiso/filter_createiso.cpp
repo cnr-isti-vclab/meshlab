@@ -108,7 +108,7 @@ FilterCreateIso::~FilterCreateIso() {
 
      const int gridSize=par.getInt("Resolution");
      // Simple initialization of the volume with some cool perlin noise
-     volume.Init(Point3i(gridSize,gridSize,gridSize), Box3f(Point3f(0,0,0),Point3f(1,1,1)));
+     volume.Init(Point3i(gridSize,gridSize,gridSize), Box3m(Point3m(0,0,0),Point3m(1,1,1)));
      for(int i=0;i<gridSize;i++)
        for(int j=0;j<gridSize;j++)
          for(int k=0;k<gridSize;k++)
