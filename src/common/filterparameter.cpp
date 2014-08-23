@@ -86,9 +86,11 @@ void RichParameterSet::setValue(QString name,const Value& newval){ findParameter
      Color4b RichParameterSet::getColor4b(QString name)  const { return ColorConverter::ToColor4b(findParameter(name)->val->getColor());}
      QString RichParameterSet::getString(QString name)   const { return findParameter(name)->val->getString();}
    Matrix44f RichParameterSet::getMatrix44(QString name) const { return findParameter(name)->val->getMatrix44f();}
+   Matrix44<MESHLAB_SCALAR> RichParameterSet::getMatrix44m(QString name) const { return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getMatrix44f());}
      Point3f RichParameterSet::getPoint3f(QString name)  const { return findParameter(name)->val->getPoint3f();}
      Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(QString name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getPoint3f());}
        Shotf RichParameterSet::getShotf(QString name)    const { return findParameter(name)->val->getShotf();}
+       Shot<MESHLAB_SCALAR> RichParameterSet::getShotm(QString name)    const { return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getShotf());}
        float RichParameterSet::getAbsPerc(QString name)  const { return findParameter(name)->val->getAbsPerc();}
          int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
 QList<float> RichParameterSet::getFloatList(QString name)    const { return findParameter(name)->val->getFloatList();}
@@ -811,10 +813,8 @@ RichString::~RichString()
 
 }
 
-RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip))
-{
-
-}
+RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
+RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44d& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 
 RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& val,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new Matrix44fValue(val),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip))
 {
@@ -835,14 +835,8 @@ RichMatrix44f::~RichMatrix44f()
 
 }
 
-RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
-{
-
-}
-RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3d defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
-{
-
-}
+RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
+RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3d defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
 
 RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f val,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ):RichParameter(nm,new Point3fValue(val),new Point3fDecoration(new Point3fValue(defval),desc,tltip))
 {

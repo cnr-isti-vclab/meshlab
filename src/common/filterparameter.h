@@ -168,6 +168,7 @@ class Matrix44fValue : public Value
 {
 public:
     Matrix44fValue(const vcg::Matrix44f& val) :pval(val){}
+    Matrix44fValue(const vcg::Matrix44d& val) :pval(vcg::Matrix44f::Construct(val)){}
     inline vcg::Matrix44f getMatrix44f() const {return pval;}
     inline bool isMatrix44f() const {return true;}
     inline QString typeName() const {return QString("Matrix44f");}
@@ -565,6 +566,7 @@ class RichMatrix44f : public RichParameter
 {
 public:
     RichMatrix44f(const QString nm,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString());
+    RichMatrix44f(const QString nm,const vcg::Matrix44d& defval,const QString desc=QString(),const QString tltip=QString());
     RichMatrix44f(const QString nm,const vcg::Matrix44f& val,const vcg::Matrix44f& defval,const QString desc=QString(),const QString tltip=QString());
     void accept(Visitor& v);
     bool operator==(const RichParameter& rb);
@@ -787,9 +789,11 @@ public:
     float				getFloat(QString name) const;
     QString			getString(QString name) const;
     vcg::Matrix44f		getMatrix44(QString name) const;
+    vcg::Matrix44<MESHLAB_SCALAR>		getMatrix44m(QString name) const;
     vcg::Point3f getPoint3f(QString name) const;
     vcg::Point3<MESHLAB_SCALAR> getPoint3m(QString name) const;
     vcg::Shotf getShotf(QString name) const;
+    vcg::Shot<MESHLAB_SCALAR> getShotm(QString name) const;
     QColor		   getColor(QString name) const;
     vcg::Color4b getColor4b(QString name) const;
     float		     getAbsPerc(QString name) const;
