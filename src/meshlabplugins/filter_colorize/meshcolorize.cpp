@@ -363,7 +363,7 @@ break;
            if(!m.cm.face[i].IsV())
            {
              tri::PolygonSupport<CMeshO,CMeshO>::ExtractPolygon(&(m.cm.face[i]),vertVec,faceVec);
-             assert(faceVec.size()==vertVec.size()-2);
+             //assert(faceVec.size()==vertVec.size()-2);
 
              std::vector<CMeshO::CoordType> pointVec;
              for(size_t j=0;j<vertVec.size();++j)
