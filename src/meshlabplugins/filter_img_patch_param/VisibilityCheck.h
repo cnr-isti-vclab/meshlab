@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -78,9 +78,9 @@ class VisibilityCheck_VMV2002 : public VisibilityCheck
     friend class VisibilityCheck;
 
 private:
-	glw::RenderbufferHandle m_ColorRB;
-	glw::RenderbufferHandle m_DepthRB;
-	glw::FramebufferHandle  m_FrameBuffer;
+    glw::RenderbufferHandle m_ColorRB;
+    glw::RenderbufferHandle m_DepthRB;
+    glw::FramebufferHandle  m_FrameBuffer;
 
     vcg::Point2i            m_ViewportMin;
     vcg::Point2i            m_ViewportMax;
@@ -109,7 +109,10 @@ private:
     vcg::Matrix44f          m_Pose;
     vcg::Matrix44f          m_Proj;
     vcg::Matrix44f          m_ShadowProj;
-	glw::Texture2DHandle    m_ShadowMap;
+    vcg::Point3f            m_Viewpoint;
+    vcg::Point3f            m_ZAxis;
+
+    glw::Texture2DHandle    m_ShadowMap;
 
     glw::Texture2DHandle    m_VertexMap;
     glw::Texture2DHandle    m_NormalMap;

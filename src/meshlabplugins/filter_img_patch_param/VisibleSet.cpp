@@ -46,8 +46,8 @@ VisibleSet::VisibleSet( glw::Context &ctx,
 
     foreach( RasterModel *rm, rasterList )
     {
-        float zNear, zFar;
-        GlShot< vcg::Shot<float> >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
+        CMeshO::ScalarType zNear, zFar;
+        GlShot< Shotm >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
 
         if( zNear < depthMin )
             depthMin = zNear;
@@ -83,7 +83,7 @@ VisibleSet::VisibleSet( glw::Context &ctx,
 
 float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
 {
-    vcg::Point3f centroid = (f.V(0)->P() +
+    Point3m centroid = (f.V(0)->P() +
                              f.V(1)->P() +
                              f.V(2)->P()) / 3.0f;
 
@@ -99,7 +99,7 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
 
     if( (m_WeightMask & W_IMG_BORDER) && weight>0.0f )
     {
-        vcg::Point2f cam = rm->shot.Project( centroid );
+        Point2m cam = rm->shot.Project( centroid );
         weight *= 1.0f - std::max( std::abs(2.0f*cam.X()/rm->shot.Intrinsics.ViewportPx.X()-1.0f),
                                    std::abs(2.0f*cam.Y()/rm->shot.Intrinsics.ViewportPx.Y()-1.0f) );
     }
@@ -109,7 +109,7 @@ float VisibleSet::getWeight( const RasterModel *rm, CFaceO &f )
         float alpha[3];
         for(int i=0;i<3;++i)
         {
-          vcg::Point2f ppoint = rm->shot.Project( f.V(i)->P() );
+          Point2m ppoint = rm->shot.Project( f.V(i)->P() );
           if(ppoint[0] < 0 ||
              ppoint[1] < 0 ||
              ppoint[0] >= rm->currentPlane->image.width() ||

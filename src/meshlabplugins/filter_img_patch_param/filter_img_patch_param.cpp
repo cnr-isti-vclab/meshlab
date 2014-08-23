@@ -218,7 +218,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
     CMeshO &mesh = md.mm()->cm;
 
-    std::list<vcg::Shotf> initialShots;
+    std::list<Shotm> initialShots;
     QList<RasterModel*> activeRasters;
     foreach( RasterModel *rm, md.rasterList )
     {
@@ -685,18 +685,18 @@ void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
                                                 PatchVec &patches )
 {
     // Recovers the view frustum of the current raster.
-    float zNear, zFar;
-    GlShot< vcg::Shot<float> >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
+    CMeshO::ScalarType zNear, zFar;
+    GlShot< Shotm >::GetNearFarPlanes( rm->shot, mesh.bbox, zNear, zFar );
     if( zNear < 0.0001f )
         zNear = 0.1f;
     if( zFar < zNear )
         zFar = zNear + 1000.0f;
 
-    float l, r, b, t, focal;
+    CMeshO::ScalarType l, r, b, t, focal;
     rm->shot.Intrinsics.GetFrustum( l, r, b, t, focal );
 
     // Computes the camera perspective projection matrix from the frustum values.
-    vcg::Matrix44f camProj;
+    Matrix44m camProj;
     camProj.SetZero();
     camProj[0][0] = 2.0f*focal / (r-l);
     camProj[0][2] = (r+l) / (r-l);
@@ -706,14 +706,14 @@ void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
     camProj[2][3] = 2.0f*zNear*zFar / (zNear-zFar);
     camProj[3][2] = -1.0f;
 
-    vcg::Matrix44f cam2clip;
+    Matrix44m cam2clip;
     cam2clip.SetZero();
     cam2clip[0][0] = cam2clip[0][3] = 0.5f * rm->shot.Intrinsics.ViewportPx.X();
     cam2clip[1][1] = cam2clip[1][3] = 0.5f * rm->shot.Intrinsics.ViewportPx.Y();
     cam2clip[2][2] = cam2clip[3][3] = 1.0f;
 
     // Computes the full transform that goes from the mesh local space to the camera clipping space.
-    vcg::Matrix44f mesh2clip = cam2clip * camProj * rm->shot.GetWorldToExtrinsicsMatrix();
+    Matrix44m mesh2clip = cam2clip * camProj * rm->shot.GetWorldToExtrinsicsMatrix();
 
     for( PatchVec::iterator p=patches.begin(); p!=patches.end(); ++p )
     {
@@ -727,7 +727,7 @@ void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
         for( std::vector<CFaceO*>::iterator f=p->faces.begin(); f!=p->faces.end(); ++f )
             for( int i=0; i<3; ++i )
             {
-                vcg::Point3f &vp = (*f)->V(i)->P();
+                Point3m &vp = (*f)->V(i)->P();
 
                 (*f)->WT(i).U() = mesh2clip.GetRow3(0)*vp + mesh2clip[0][3];
                 (*f)->WT(i).V() = mesh2clip.GetRow3(1)*vp + mesh2clip[1][3];
@@ -742,7 +742,7 @@ void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
             TriangleUV fuv;
             for( int i=0; i<3; ++i )
             {
-                vcg::Point3f &vp = (*f)->V(i)->P();
+                Point3m &vp = (*f)->V(i)->P();
 
                 fuv.v[i].U() = mesh2clip.GetRow3(0)*vp + mesh2clip[0][3];
                 fuv.v[i].V() = mesh2clip.GetRow3(1)*vp + mesh2clip[1][3];

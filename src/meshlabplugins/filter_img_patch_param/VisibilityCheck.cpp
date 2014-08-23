@@ -97,14 +97,14 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
 
 
     // Initialize the OpenGL transform so as to place the camera on the current raster.
-    float zNear, zFar;
-    GlShot< vcg::Shot<float> >::GetNearFarPlanes( m_Raster->shot, m_Mesh->bbox, zNear, zFar );
+    CMeshO::ScalarType zNear, zFar;
+    GlShot< Shotm >::GetNearFarPlanes( m_Raster->shot, m_Mesh->bbox, zNear, zFar );
     if( zNear < 0.0001f )
         zNear = 0.1f;
     if( zFar < zNear )
         zFar = zNear + 1000.0f;
 
-    GlShot< vcg::Shot<float> >::SetView( m_Raster->shot, zNear, zFar );
+    GlShot< Shotm >::SetView( m_Raster->shot, zNear, zFar );
 
 
     // Perform the first rendering pass that initializes the depth buffer.
@@ -120,9 +120,9 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
     glBegin( GL_TRIANGLES );
         for( CMeshO::FaceIterator fi=m_Mesh->face.begin(); fi!=m_Mesh->face.end(); ++fi )
         {
-            glVertex3fv( fi->V(0)->P().V() );
-            glVertex3fv( fi->V(1)->P().V() );
-            glVertex3fv( fi->V(2)->P().V() );
+            glVertex( fi->V(0)->P());
+            glVertex( fi->V(1)->P() );
+            glVertex( fi->V(2)->P() );
         }
     glEnd();
 
@@ -152,7 +152,7 @@ bool VisibilityCheck_VMV2002::iteration( std::vector<unsigned char> &visBuffer )
                             (vertId>> 8) & 0xFF,
                             (vertId>>16) & 0xFF,
                             (vertId>>24) & 0xFF );
-                glVertex3fv( m_Mesh->vert[v].P().V() );
+                glVertex( m_Mesh->vert[v].P() );
             }
     glEnd();
 
@@ -242,8 +242,8 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
 {
     // Recover the near and far clipping planes by considering the bounding box of the current mesh
     // in the camera space of the current raster.
-    float zNear, zFar;
-    GlShot< vcg::Shot<float> >::GetNearFarPlanes( m_Raster->shot, m_Mesh->bbox, zNear, zFar );
+    CMeshO::ScalarType zNear, zFar;
+    GlShot< Shotm >::GetNearFarPlanes( m_Raster->shot, m_Mesh->bbox, zNear, zFar );
     if( zNear < 0.0001f )
         zNear = 0.1f;
     if( zFar < zNear )
@@ -251,7 +251,7 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
 
 
     // Recover the view frustum of the current raster.
-    float l, r, b, t, focal;
+    CMeshO::ScalarType l, r, b, t, focal;
     m_Raster->shot.Intrinsics.GetFrustum( l, r, b, t, focal );
 
 
@@ -267,7 +267,7 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
 
 
     // Extract the pose matrix from the current raster.
-    m_Pose = m_Raster->shot.GetWorldToExtrinsicsMatrix().transpose();
+    m_Pose.Import(m_Raster->shot.GetWorldToExtrinsicsMatrix().transpose());
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
@@ -276,7 +276,9 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
                                     0.0f, 0.0f, 0.5f, 0.0f,
                                     0.5f, 0.5f, 0.5f, 1.0f };
 
-    m_ShadowProj = m_Pose * m_Proj * vcg::Matrix44f(biasMatData);
+    m_ShadowProj.Import(m_Pose * m_Proj * vcg::Matrix44f(biasMatData));
+    m_Viewpoint.Import(m_Raster->shot.GetViewPoint());
+    m_ZAxis.Import(m_Raster->shot.Axis(2));
 }
 
 
@@ -314,11 +316,11 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     // Set up the OpenGL transformation matrices so as to place the viewpoint on the raster's camera.
     glMatrixMode( GL_PROJECTION );
     glPushMatrix();
-    glLoadMatrixf( m_Proj.V() );
+    vcg::glLoadMatrix( m_Proj.V() );
 
     glMatrixMode( GL_MODELVIEW );
     glPushMatrix();
-    glLoadMatrixf( m_Pose.V() );
+    vcg::glLoadMatrix( m_Pose.V() );
 
 
     // Perform an off-screen rendering pass so as to generate the a depth map of the model
@@ -338,13 +340,13 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
         glEnableClientState( GL_VERTEX_ARRAY );
 
-		m_Context.bindVertexBuffer( m_ShadowVBOVertices );
-		glVertexPointer( 3, GL_FLOAT, 0, 0 );
-		m_Context.unbindVertexBuffer();
+        m_Context.bindVertexBuffer( m_ShadowVBOVertices );
+        glVertexPointer( 3, vcg::GL_TYPE<Scalarm>::SCALAR(), 0, 0 );
+        m_Context.unbindVertexBuffer();
 
-		m_Context.bindIndexBuffer( m_ShadowVBOIndices );
-		glDrawElements( GL_TRIANGLES, 3*m_Mesh->fn, GL_UNSIGNED_INT, 0 );
-		m_Context.unbindIndexBuffer();
+        m_Context.bindIndexBuffer( m_ShadowVBOIndices );
+        glDrawElements( GL_TRIANGLES, 3*m_Mesh->fn, GL_UNSIGNED_INT, 0 );
+        m_Context.unbindIndexBuffer();
 
         glPopClientAttrib();
     }
@@ -353,9 +355,9 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glBegin( GL_TRIANGLES );
             for( CMeshO::FaceIterator fi=m_Mesh->face.begin(); fi!=m_Mesh->face.end(); ++fi )
             {
-                glVertex3fv( fi->V(0)->P().V() );
-                glVertex3fv( fi->V(1)->P().V() );
-                glVertex3fv( fi->V(2)->P().V() );
+                glVertex( fi->V(0)->P());
+                glVertex( fi->V(1)->P());
+                glVertex( fi->V(2)->P());
             }
         glEnd();
     }
@@ -438,7 +440,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
 {
     // Creates a first OpenGL texture into which normal vectors at each mesh vertex are stored.
     int mapH = (int) std::ceil( m_Mesh->vn / 2048.0f );
-    vcg::Point3f *mapData = new vcg::Point3f [ 2048*mapH ];
+    Point3m *mapData = new Point3m [ 2048*mapH ];
 
     for( int i=0; i<m_Mesh->vn; ++i )
         mapData[i] = m_Mesh->vert[i].N();
@@ -476,7 +478,7 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
     // Creates the VBO that will be used for the generation of the shadow map.
     if( s_AreVBOSupported )
     {
-        m_ShadowVBOVertices = glw::createBuffer( m_Context, m_Mesh->vn*sizeof(vcg::Point3f), mapData );
+        m_ShadowVBOVertices = glw::createBuffer( m_Context, m_Mesh->vn*sizeof(Point3m), mapData );
         delete [] mapData;
 
         unsigned int *indices = new unsigned int [ 3*m_Mesh->fn ];
@@ -510,9 +512,9 @@ void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
             m_FBuffer     = glw::createFramebuffer ( m_Context, glw::RenderTarget(), glw::renderbufferTarget(m_ColorBuffer) );
             glw::BoundReadDrawFramebufferHandle hfb = m_Context.bindReadDrawFramebuffer(m_FBuffer);
 
-		}
-		m_Context.unbindReadDrawFramebuffer();
-	}
+        }
+        m_Context.unbindReadDrawFramebuffer();
+    }
 }
 
 
@@ -545,8 +547,8 @@ void VisibilityCheck_ShadowMap::checkVisibility()
     boundShader->setUniform( "u_NormalMap", 1 );
     boundShader->setUniform( "u_SadowMap" , 2 );
     boundShader->setUniform4x4( "u_ShadowProj", m_ShadowProj.V(), false );
-    boundShader->setUniform3( "u_Viewpoint", m_Raster->shot.GetViewPoint().V() );
-    boundShader->setUniform3( "u_ZAxis", m_Raster->shot.Axis(2).V() );
+    boundShader->setUniform3( "u_Viewpoint", m_Viewpoint.V() );
+    boundShader->setUniform3( "u_ZAxis",  m_ZAxis.V());
     boundShader->setUniform( "u_PixelSize", 1.0f/m_VertexMap->width(), 1.0f/m_VertexMap->height() );
 
 
