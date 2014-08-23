@@ -40,7 +40,7 @@
 
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 #include <vcg/complex/algorithms/create/extended_marching_cubes.h>
-#include "trivial_walker.h"
+//#include "trivial_walker.h"
 // local optimization
 #include <vcg/complex/algorithms/local_optimization.h>
 #include <vcg/complex/algorithms/local_optimization/tri_edge_collapse.h>
@@ -455,7 +455,9 @@ void Process(vcg::CallBackPos *cb=0)
             if(cb) cb(50,"Step 2: Marching Cube...");
             else printf("Step 2: Marching Cube...\n");
             /**********************/
-            walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
+            walker.Init(VV,currentSubBox);
+            walker.BuildMesh(me,VV,mc,0);
+            //            walker.BuildMesh(me,VV,mc,currentSubBox,currentSubBoxRes);
 
             typename MCMesh::VertexIterator vi;
             Box3f bbb; bbb.Import(VV.SubPart);

@@ -383,6 +383,18 @@ public:
     }
     /************************************/
     // Funzioni di accesso ai dati
+  bool ValidCell(const Point3i &p1, const Point3i &p2) const
+  {
+     if(!cV(p1.X(),p1.Y(),p1.Z()).B() ) return false;
+     if(!cV(p2.X(),p1.Y(),p1.Z()).B() ) return false;
+     if(!cV(p1.X(),p2.Y(),p1.Z()).B() ) return false;
+     if(!cV(p2.X(),p2.Y(),p1.Z()).B() ) return false;
+     if(!cV(p1.X(),p1.Y(),p2.Z()).B() ) return false;
+     if(!cV(p2.X(),p1.Y(),p2.Z()).B() ) return false;
+     if(!cV(p1.X(),p2.Y(),p2.Z()).B() ) return false;
+     if(!cV(p2.X(),p2.Y(),p2.Z()).B() ) return false;
+    return true;
+  }
 
   float Val(const int &x,const int &y,const int &z) const {
     if(!cV(x,y,z).B())  return 1000;
@@ -1217,44 +1229,44 @@ void SlicedPPM( const char * filename,const char *tag,int SliceNum=1)
             fclose(fp);
         }
     }
- template < class VertexPointerType >
-  void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v)
-    {
-            float f1 = Val(p1.X(), p1.Y(), p1.Z());
-            float f2 = Val(p2.X(), p2.Y(), p2.Z());
-            float u = (float) f1/(f1-f2);
-            v->P().X() = (float) p1.X()*(1-u) + u*p2.X();
-            v->P().Y() = (float) p1.Y();
-            v->P().Z() = (float) p1.Z();
-      v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
-      v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
-    }
+template < class VertexPointerType >
+void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v, float /*thr*/)
+{
+  float f1 = Val(p1.X(), p1.Y(), p1.Z());
+  float f2 = Val(p2.X(), p2.Y(), p2.Z());
+  float u = (float) f1/(f1-f2);
+  v->P().X() = (float) p1.X()*(1-u) + u*p2.X();
+  v->P().Y() = (float) p1.Y();
+  v->P().Z() = (float) p1.Z();
+  v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
+  v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
+}
 
-  template < class VertexPointerType >
-  void GetYIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v)
-    {
-            float f1 = Val(p1.X(), p1.Y(), p1.Z());
-            float f2 = Val(p2.X(), p2.Y(), p2.Z());
-            float u = (float) f1/(f1-f2);
-            v->P().X() = (float) p1.X();
-            v->P().Y() = (float) p1.Y()*(1-u) + u*p2.Y();
-            v->P().Z() = (float) p1.Z();
-      v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
-            v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
-    }
+template < class VertexPointerType >
+void GetYIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v, float /*thr*/)
+{
+  float f1 = Val(p1.X(), p1.Y(), p1.Z());
+  float f2 = Val(p2.X(), p2.Y(), p2.Z());
+  float u = (float) f1/(f1-f2);
+  v->P().X() = (float) p1.X();
+  v->P().Y() = (float) p1.Y()*(1-u) + u*p2.Y();
+  v->P().Z() = (float) p1.Z();
+  v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
+  v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
+}
 
-    template < class VertexPointerType>
-  void GetZIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v)
-    {
-            float f1 = Val(p1.X(), p1.Y(), p1.Z());
-            float f2 = Val(p2.X(), p2.Y(), p2.Z());
-            float u = (float) f1/(f1-f2);
-            v->P().X() = (float) p1.X();
-            v->P().Y() = (float) p1.Y();
-            v->P().Z() = (float) p1.Z()*(1-u) + u*p2.Z();
-      v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
-            v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
-    }
+template < class VertexPointerType>
+void GetZIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointerType &v, float /*thr*/)
+{
+  float f1 = Val(p1.X(), p1.Y(), p1.Z());
+  float f2 = Val(p2.X(), p2.Y(), p2.Z());
+  float u = (float) f1/(f1-f2);
+  v->P().X() = (float) p1.X();
+  v->P().Y() = (float) p1.Y();
+  v->P().Z() = (float) p1.Z()*(1-u) + u*p2.Z();
+  v->Q()=cV(p1.X(), p1.Y(), p1.Z()).Q();
+  v->C()=cV(p1.X(), p1.Y(), p1.Z()).C4b();
+}
 
 };
 
