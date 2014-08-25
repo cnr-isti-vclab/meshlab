@@ -267,16 +267,18 @@ bool FilterZippering::simpleCheckRedundancy(   CMeshO::FacePointer f,   //face
 											   CMeshO::ScalarType max_dist,
 											   bool test) {   //Max search distance
 
-	Point3f qp = Barycenter(*f); //f barycenter
+	Point3m qp = Barycenter(*f); //f barycenter
 	//search for max_edge
-	float max_edge = max( Distance<float>(f->P(0),f->P(1)), max( Distance<float>(f->P(1),f->P(2)), Distance<float>(f->P(2),f->P(0)) ) );
-	float dist = max_dist; CMeshO::FacePointer nearestF = 0; Point3f closest;
+	Scalarm max_edge = max( Distance<Scalarm>(f->P(0),f->P(1)), max( Distance<Scalarm>(f->P(1),f->P(2)), Distance<Scalarm>(f->P(2),f->P(0)) ) );
+	Scalarm dist = max_dist; 
+    CMeshO::FacePointer nearestF = 0; 
+    Point3m closest;
 	tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&m->cm); UnMarkAll(m->cm);
 	face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
 	nearestF =  grid.GetClosest(PDistFunct, markerFunctor, qp, max_dist, dist, closest);
 	if (nearestF == 0) return false;	//too far away
-	float min_q = min( nearestF->V(0)->Q(), min( nearestF->V(1)->Q(), nearestF->V(2)->Q() ) ); //min distance of nearestF's vertices from M-border
-	float max_q = max( f->V(0)->Q(), max( f->V(1)->Q(), f->V(2)->Q() ) );					   //max distance of F's vertices from A-border
+	Scalarm min_q = min( nearestF->V(0)->Q(), min( nearestF->V(1)->Q(), nearestF->V(2)->Q() ) ); //min distance of nearestF's vertices from M-border
+	Scalarm max_q = max( f->V(0)->Q(), max( f->V(1)->Q(), f->V(2)->Q() ) );					   //max distance of F's vertices from A-border
 	if ( min_q <= max_edge ) return false;
 	if (test) if ( min_q <= max_q ) return false;
 	return true;
@@ -287,13 +289,13 @@ bool FilterZippering::simpleCheckRedundancy(   CMeshO::FacePointer f,   //face
  * @param f     Face containing point
  * @return      true if point lies on a border edge or vertex of f, false otherwise
  */
-bool FilterZippering::isOnBorder( Point3f point, CMeshO::FacePointer f )  {
+bool FilterZippering::isOnBorder( Point3<CMeshO::ScalarType> point, CMeshO::FacePointer f )  {
 	// for each edge, calculates distance point-edge
 	if ( f == 0 ) return false;	//null face
 
     //compute barycentric coords
-  Point3f bc;
-  InterpolationParameters<CMeshO::FaceType, float>( *f, f->N(), point, bc );
+  Point3m bc;
+  InterpolationParameters<CMeshO::FaceType, CMeshO::ScalarType>( *f, f->N(), point, bc );
     //search for max and min
   int min_el = min_element(&bc[0], &bc[0]+3) - &bc[0];
   int max_el = max_element(&bc[0], &bc[0]+3) - &bc[0];
@@ -342,12 +344,12 @@ bool FilterZippering::isAdjacent( CMeshO::FacePointer f1, CMeshO::FacePointer f2
  * @param pointers  Output vertex indices, will be used for creation of new faces
  */
 void FilterZippering::handleBorder( aux_info &info,                                             //Auxiliar information for triangulatio
-                                    Point3f N,                          //face normal (useful for proiection)
-                                    vector<Point3f> &/*coords*/,                     //output coords
+                                    Point3<CMeshO::ScalarType> N,                          //face normal (useful for proiection)
+                                    vector<Point3< CMeshO::ScalarType> > &/*coords*/,                     //output coords
                                     vector<int> &pointers ) {                              //output triangles
     // rotation matrix (will be used for projection on plane)
-    Matrix44f rot_matrix;
-    rot_matrix.SetRotateRad( Angle<CMeshO::ScalarType>( N, Point3f(0.0, 0.0, 1.0) ), N ^ Point3f(0.0, 0.0, 1.0) );
+    Matrix44m rot_matrix;
+    rot_matrix.SetRotateRad( Angle<CMeshO::ScalarType>( N, Point3m(0.0, 0.0, 1.0) ), N ^ Point3m(0.0, 0.0, 1.0) );
     //border refinement - brand new method?
     //Remove intersecating border
     for (size_t i = 0; i < info.border.size(); i ++) {
@@ -375,9 +377,9 @@ void FilterZippering::handleBorder( aux_info &info,                             
     for ( size_t j = 1; j < info.border[i].edges.size(); j++ ) {
             //check if P0 lies on trash edge, then split border (skip first edge)
       for ( size_t k = 0; k < info.trash[0].edges.size(); k++ ) {
-                float EPSILON=info.trash[0].edges[k].Length()/100.f;
-                vcg::Point3<float> clos;
-                float dist;
+                Scalarm EPSILON=info.trash[0].edges[k].Length()/100.f;
+                Point3m clos;
+                Scalarm dist;
                 vcg::SegmentPointDistance( info.trash[0].edges[k],info.border[i].edges[j].P0(),clos,dist);
                 if (dist<EPSILON)
                 {
@@ -419,7 +421,7 @@ void FilterZippering::handleBorder( aux_info &info,                             
     }
     //triangulation of Ccomponent
     for ( int i = 0; i < info.nCComponent(); i ++ ) {
-        vector< Point3f > points;  //coords vector
+        vector< Point3m > points;  //coords vector
         vector< int > vertices;          //vertices vector
         for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ )  {
             points.push_back( info.conn[i].edges[j].P0() );
@@ -427,7 +429,7 @@ void FilterZippering::handleBorder( aux_info &info,                             
         }
         if ( points.size() < 3 ) continue;
         vector< int > indices; int iters = 0;
-        vector< vector< Point3f > > outlines; outlines.push_back( points );
+        vector< vector< Point3m > > outlines; outlines.push_back( points );
         while ( indices.size() == 0 && ++iters < MAX_LOOP ) {
             glu_tesselator::tesselate( outlines, indices );    //glu tessellator
             if ( indices.size() == 0 )
@@ -453,18 +455,18 @@ void FilterZippering::handleBorder( aux_info &info,                             
 
 polyline FilterZippering::cutComponent( polyline comp,                                    //Component to be cut
                                         polyline border,                                  //border
-                                        Matrix44f rot_mat ) {     //Rotation matrix
+                                        Matrix44<CMeshO::ScalarType> rot_mat ) {     //Rotation matrix
 
-  Point3f startpoint = border.edges.front().P0();
-    Point3f endpoint = border.edges.back().P1();
-  Point2<CMeshO::ScalarType> startpoint2D ( (rot_mat * startpoint).X(), (rot_mat * startpoint).Y() );
-    Point2<CMeshO::ScalarType> endpoint2D ( (rot_mat * endpoint).X(), (rot_mat * endpoint).Y() );
+  Point3m startpoint = border.edges.front().P0();
+    Point3m endpoint = border.edges.back().P1();
+  Point2m startpoint2D ( (rot_mat * startpoint).X(), (rot_mat * startpoint).Y() );
+    Point2m endpoint2D ( (rot_mat * endpoint).X(), (rot_mat * endpoint).Y() );
     //int startedge = 0, endedge = 0; float min_dist_s = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], startpoint ), min_dist_e = SquaredDistance<CMeshO::ScalarType>( comp.edges[0], endpoint );
         int startedge = 0, endedge = 0;
-        Point3f clos;
-        float dist;
-        float min_dist_s; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], startpoint, clos,min_dist_s );
-        float min_dist_e; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], endpoint, clos,min_dist_e );
+        Point3m clos;
+        Scalarm dist;
+        Scalarm min_dist_s; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], startpoint, clos,min_dist_s );
+        Scalarm min_dist_e; vcg::SegmentPointDistance<CMeshO::ScalarType>( comp.edges[0], endpoint, clos,min_dist_e );
     bool v_start = false, v_end = false;
     // search where startpoint and endpoint lie
     for ( size_t i = 0; i < comp.edges.size(); i ++ ) {
@@ -478,8 +480,8 @@ polyline FilterZippering::cutComponent( polyline comp,                          
     p.edges.insert( p.edges.begin(), border.edges.begin(), border.edges.end() );
     p.verts.insert( p.verts.begin(), border.verts.begin(), border.verts.end() );
     // startedge == endedge
-    if ( startedge == endedge && !Convex<CMeshO::ScalarType>( startpoint2D, Point2<CMeshO::ScalarType> ( (rot_mat * border.edges.front().P1()).X(), (rot_mat * border.edges.front().P1()).Y() ) , endpoint2D ) ) {
-        Segment3<CMeshO::ScalarType> join( endpoint, startpoint );
+    if ( startedge == endedge && !Convex<CMeshO::ScalarType>( startpoint2D, Point2m ( (rot_mat * border.edges.front().P1()).X(), (rot_mat * border.edges.front().P1()).Y() ) , endpoint2D ) ) {
+        Segment3m join( endpoint, startpoint );
         p.edges.push_back( join ); p.verts.push_back( make_pair( border.verts.back().second, border.verts.front().first ) ); //Vertex pointers
         return p;
     }
@@ -487,35 +489,35 @@ polyline FilterZippering::cutComponent( polyline comp,                          
     // startedge!=endedge
     // search point on the right, create oriented segment and go on
     int step = -1;
-    Point3f c0 = border.edges.back().P0();
-    vector< Segment3<CMeshO::ScalarType> >::iterator edge_it = border.edges.end(); edge_it--;
+    Point3m c0 = border.edges.back().P0();
+    vector< Segment3m >::iterator edge_it = border.edges.end(); edge_it--;
     //too short segment; not reliable
-    while ( Distance<float>( rot_mat * c0, rot_mat * endpoint ) <= 5.0 * eps ) {
+    while ( Distance<Scalarm>( rot_mat * c0, rot_mat * endpoint ) <= 5.0 * eps ) {
         //previous
         c0 = (*edge_it).P0();
         if (edge_it != border.edges.begin()) edge_it--; else break;
     }
     if ( v_end ) {
-        if ( !Convex<CMeshO::ScalarType>( Point2<CMeshO::ScalarType> ( (rot_mat * c0).X(), (rot_mat * c0).Y() ), endpoint2D,
-                                               Point2<CMeshO::ScalarType> ( (rot_mat * comp.edges[(endedge+comp.edges.size()-1)%comp.edges.size()].P0()).X(), (rot_mat * comp.edges[(endedge+comp.edges.size()-1)%comp.edges.size()].P0()).Y() ) ) ) {
+        if ( !Convex<CMeshO::ScalarType>( Point2m ( (rot_mat * c0).X(), (rot_mat * c0).Y() ), endpoint2D,
+                                               Point2m ( (rot_mat * comp.edges[(endedge+comp.edges.size()-1)%comp.edges.size()].P0()).X(), (rot_mat * comp.edges[(endedge+comp.edges.size()-1)%comp.edges.size()].P0()).Y() ) ) ) {
             step = comp.edges.size() - 1;
         }
         else {
             step = comp.edges.size() + 1;
-            Segment3<CMeshO::ScalarType> s( comp.edges[endedge].P0(), comp.edges[endedge].P1() );
+            Segment3m s( comp.edges[endedge].P0(), comp.edges[endedge].P1() );
             p.edges.push_back( s ); step = comp.edges.size() + 1;
             p.verts.push_back( make_pair( comp.verts[endedge].first, comp.verts[endedge].second ) );
         }
     }
     else {
-        if ( !Convex<CMeshO::ScalarType>(   Point2<CMeshO::ScalarType> ( (rot_mat * c0).X(), (rot_mat * c0).Y() ), endpoint2D,
-                                                 Point2<CMeshO::ScalarType> ( (rot_mat * comp.edges[endedge].P0()).X(), (rot_mat * comp.edges[endedge].P0()).Y() ) ) ) {
-            Segment3<CMeshO::ScalarType> s( endpoint, comp.edges[endedge].P0() );
+        if ( !Convex<CMeshO::ScalarType>(   Point2m ( (rot_mat * c0).X(), (rot_mat * c0).Y() ), endpoint2D,
+                                                 Point2m ( (rot_mat * comp.edges[endedge].P0()).X(), (rot_mat * comp.edges[endedge].P0()).Y() ) ) ) {
+            Segment3m s( endpoint, comp.edges[endedge].P0() );
             p.edges.push_back( s ); step = comp.edges.size() - 1;
             p.verts.push_back( make_pair(border.verts.back().second, comp.verts[endedge].first ) );
         }
         else {
-            Segment3<CMeshO::ScalarType> s( endpoint, comp.edges[endedge].P1() );
+            Segment3m s( endpoint, comp.edges[endedge].P1() );
             p.edges.push_back( s ); step = comp.edges.size() + 1;
             p.verts.push_back( make_pair(border.verts.back().second, comp.verts[endedge].second ) );
         }
@@ -533,13 +535,13 @@ polyline FilterZippering::cutComponent( polyline comp,                          
     //last segment
     if ( v_start ) {
         if ( p.edges.back().P1() == comp.edges[startedge].P0() ) {
-            Segment3<CMeshO::ScalarType> s( comp.edges[startedge].P0() , comp.edges[startedge].P1() );
+            Segment3m s( comp.edges[startedge].P0() , comp.edges[startedge].P1() );
             p.edges.push_back( s );
             p.verts.push_back( make_pair ( comp.verts[startedge].first , comp.verts[startedge].second ) );
         }
     }
     else {
-        Segment3<CMeshO::ScalarType> s( p.edges.back().P1() , startpoint );
+        Segment3m s( p.edges.back().P1() , startpoint );
         p.edges.push_back( s );
         p.verts.push_back( make_pair ( p.verts.back().second, border.verts.front().first ) );
     }
@@ -554,19 +556,21 @@ polyline FilterZippering::cutComponent( polyline comp,                          
  * @return index of component
  */
 int FilterZippering::searchComponent(			aux_info &info,								//Auxiliar info
-                        Point3f P0,			//Start border point
-                        Point3f P1,			//End border point
+                        Point3<CMeshO::ScalarType> P0,			//Start border point
+                        Point3<CMeshO::ScalarType> P1,			//End border point
                                                 bool &conn ) {
     int nearestC = -1; int nearestT = -1;
-    float distanceC = 100000*eps; float distanceT = 100000*eps;
+    Scalarm distanceC = 100000*eps; 
+    Scalarm distanceT = 100000*eps;
 
 	for ( int i = 0; i < info.nCComponent(); i ++ ) {
 		//for each ccon search for edges nearest to P0 and P1
-		float distP0 = 200000*eps; float distP1 = 200000*eps;
+		Scalarm distP0 = 200000*eps; 
+        Scalarm distP1 = 200000*eps;
 	for ( size_t j = 0; j < info.conn[i].edges.size(); j ++ ) {
 	  //if ( SquaredDistance<float>( info.conn[i].edges[j], P0 ) < distP0 ) distP0 = SquaredDistance<float>( info.conn[i].edges[j], P0 );
-			float dist_test;
-			vcg::Point3f clos;
+			Scalarm dist_test;
+			Point3m clos;
 			vcg::SegmentPointSquaredDistance(info.conn[i].edges[j],P0,clos,dist_test);
 			if (dist_test<distP0)
 				distP0=dist_test;
@@ -581,10 +585,13 @@ int FilterZippering::searchComponent(			aux_info &info,								//Auxiliar info
 
   for ( size_t i = 0; i < info.nTComponent(); i ++ ) {
         //for each trash search for edges nearest to P0 and P1
-        float distP0 = 200000*eps; float distP1 = 200000*eps;
+        Scalarm distP0 = 200000*eps; 
+        Scalarm distP1 = 200000*eps;
     for ( size_t j = 0; j < info.trash[i].edges.size(); j ++ ) {
-      if ( SquaredDistance<float>( info.trash[i].edges[j], P0 ) < distP0 ) distP0 = SquaredDistance<float>( info.trash[i].edges[j], P0 );
-      if ( SquaredDistance<float>( info.trash[i].edges[j], P1 ) < distP1 ) distP1 = SquaredDistance<float>( info.trash[i].edges[j], P1 );
+      if ( SquaredDistance<Scalarm>( info.trash[i].edges[j], P0 ) < distP0 ) 
+          distP0 = SquaredDistance<Scalarm>( info.trash[i].edges[j], P0 );
+      if ( SquaredDistance<Scalarm>( info.trash[i].edges[j], P1 ) < distP1 ) 
+          distP1 = SquaredDistance<Scalarm>( info.trash[i].edges[j], P1 );
         }
         if ( distP0 + distP1 < distanceT ) { distanceT = distP0 + distP1; nearestT = i; }
     }
@@ -616,36 +623,38 @@ int  FilterZippering::sharesVertex( CMeshO::FacePointer f1, CMeshO::FacePointer 
  * @return true if there's intersection, false otherwise
  */
 bool FilterZippering::findIntersection(  CMeshO::FacePointer currentF,				//face
-										 Segment3<float> edge,					//edge
+										 Segment3<CMeshO::ScalarType> edge,					//edge
 										 int last_split,							//previously splitted edge
 										 int &splitted_edge,						//currently splitted edge
-										 Point3f &hit ) {	//approximate intersection point
+										 Point3<CMeshO::ScalarType> &hit ) {	//approximate intersection point
 	if ( currentF == NULL ) return false;
 	splitted_edge = -1;
 	Plane3<CMeshO::ScalarType> plane; plane.Init( currentF->P(0), currentF->N() ); //projection plane
-	Matrix44f rot_m; Point2f pt;	//matrix
-	rot_m.SetRotateRad( Angle<CMeshO::ScalarType>( currentF->N(), Point3f(0.0, 0.0, 1.0) ), currentF->N() ^ Point3f(0.0, 0.0, 1.0) );
-	Segment2f s(   Point2f((rot_m * plane.Projection(edge.P0())).X(), (rot_m * plane.Projection(edge.P0())).Y()),
-						Point2f((rot_m * plane.Projection(edge.P1())).X(), (rot_m * plane.Projection(edge.P1())).Y()) );	//projects edge on plane
+	Matrix44m rot_m; Point2m pt;	//matrix
+	rot_m.SetRotateRad( Angle<CMeshO::ScalarType>( currentF->N(), Point3m(0.0, 0.0, 1.0) ), currentF->N() ^ Point3m(0.0, 0.0, 1.0) );
+	Segment2m s(   Point2m((rot_m * plane.Projection(edge.P0())).X(), (rot_m * plane.Projection(edge.P0())).Y()),
+				   Point2m((rot_m * plane.Projection(edge.P1())).X(), (rot_m * plane.Projection(edge.P1())).Y()) );	//projects edge on plane
 	for ( int e = 0; e < 3; e ++ ) {
-		if ( e != last_split && SegmentSegmentIntersection( s, Segment2f( Point2f( (rot_m * currentF->P(e)).X(), (rot_m * currentF->P(e)).Y() ),
-																		  Point2f( (rot_m * currentF->P1(e)).X(), (rot_m * currentF->P1(e)).Y() ) ), pt ) ) {
+		if ( e != last_split && SegmentSegmentIntersection( s, Segment2m( Point2m( (rot_m * currentF->P(e)).X(), (rot_m * currentF->P(e)).Y() ),
+																		  Point2m( (rot_m * currentF->P1(e)).X(), (rot_m * currentF->P1(e)).Y() ) ), pt ) ) {
 			splitted_edge = e; break;
 		}
 	}
 	if (splitted_edge == -1) return false;	//No intersection!
 	// search intersection point (approximation)
 	Segment3<CMeshO::ScalarType> b_edge( currentF->P(splitted_edge), currentF->P1(splitted_edge) );
-	int sampleNum = SAMPLES_PER_EDGE; float step = 1.0 / (sampleNum + 1);
-	Point3f closest;    float min_dist = b_edge.Length();
+	int sampleNum = SAMPLES_PER_EDGE; 
+    Scalarm step = 1.0 / (sampleNum + 1);
+	Point3m closest;    
+    Scalarm min_dist = b_edge.Length();
 	for ( int k = 0; k <= sampleNum; k ++ ) {
-		Point3f currentP = edge.P0() + (edge.P1() - edge.P0())*(k*step);
+		Point3m currentP = edge.P0() + (edge.P1() - edge.P0())*(k*step);
 		if ( SquaredDistance( b_edge, currentP ) < min_dist ) {
 			closest = currentP; min_dist = SquaredDistance( b_edge, closest );
 		}
 	}
 	if ( min_dist >= b_edge.Length() ) return false; //point not found
-	hit = ClosestPoint<float>(b_edge, closest); //projection on edge
+	hit = ClosestPoint<Scalarm>(b_edge, closest); //projection on edge
 	return true;
 }
 
@@ -1125,7 +1134,7 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 			bool fit = false;
 			int vert = -1;
 			for ( int i = 0; i < 3; i ++ ) {
-				if ( vcg::Distance<float>(closestStart, startF->P(i)) < eps )
+				if ( vcg::Distance<Scalarm>(closestStart, startF->P(i)) < eps )
 					 vert = i;
 			}
 			if ( vert != -1 ) {
@@ -1134,8 +1143,8 @@ void FilterZippering::projectFace( CMeshO::FacePointer f,							//pointer to the
 				p.Set( startF, vert, startF->V(vert) );
 
 				do {
-					if ( vcg::Distance<float>(closestStart, p.V()->P()) < eps &&
-						 vcg::Distance<float>(closestEnd, p.F()->P1(p.E())) < eps &&
+					if ( vcg::Distance<Scalarm>(closestStart, p.V()->P()) < eps &&
+						 vcg::Distance<Scalarm>(closestEnd, p.F()->P1(p.E())) < eps &&
 						 face::IsBorder( *(p.F()), p.E() ) )
 						 fit = true;
 					p.FlipF();
@@ -1300,11 +1309,14 @@ void FilterZippering::handleBorderEdgeAF ( pair< int, int >& current_edge,						
         int shared; for ( int k = 0; k < 3; k ++ ) if ( startF->FFp(k) == endF ) shared = k;
         Segment3<CMeshO::ScalarType> shared_edge( startF->P(shared), startF->P1(shared) );
         int sampleNum = SAMPLES_PER_EDGE; float step = 1.0/(sampleNum+1);
-        Point3f closest;    float min_dist = shared_edge.Length();
+        Point3m closest;    
+        Scalarm min_dist = shared_edge.Length();
         //subsample the current border edge and search for point which is closest to the edge shared by startF and endF
-        for ( int k = 0; k <= sampleNum; k ++ ) {
-            Point3f currentP = a->cm.vert[current_edge.first].P() + ( a->cm.vert[current_edge.second].P() - a->cm.vert[current_edge.first].P() ) * (k*step);
-            if ( SquaredDistance( shared_edge, currentP ) < min_dist ) {
+        for ( int k = 0; k <= sampleNum; k ++ ) 
+        {
+            Point3m currentP = a->cm.vert[current_edge.first].P() + ( a->cm.vert[current_edge.second].P() - a->cm.vert[current_edge.first].P() ) * (k*step);
+            if ( SquaredDistance( shared_edge, currentP ) < min_dist ) 
+            {
                 closest = currentP;
                 min_dist = SquaredDistance( shared_edge, closest );
             }
@@ -1352,9 +1364,9 @@ void FilterZippering::handleBorderEdgeNF ( pair< int, int >& current_edge,						
     int cnt = 0;
     Segment3<CMeshO::ScalarType> s( a->cm.vert[current_edge.first].P(), a->cm.vert[current_edge.second].P() );
     //if they share a vertex and border edge pass trough the vertex, we split current face using the vertex
-    if ( w != -1 && (cnt++ == MAX_LOOP || SquaredDistance<float>( s, startF->P(w) ) <= eps) ) {
+    if ( w != -1 && (cnt++ == MAX_LOOP || SquaredDistance<Scalarm>( s, startF->P(w) ) <= eps) ) {
         //too short and it's a vertex, do nothing
-        if ( s.Length() < eps && vcg::Distance<float>( s.P0(), startF->P(w) ) < eps )
+        if ( s.Length() < eps && vcg::Distance<Scalarm>( s.P0(), startF->P(w) ) < eps )
             return;
         tri::Allocator<CMeshO>::PointerUpdater<CMeshO::VertexPointer> vpu;
         CMeshO::VertexIterator v = tri::Allocator<CMeshO>::AddVertices( a->cm, 1, vpu ); (*v).P() = startF->P(w);
@@ -1400,10 +1412,14 @@ bool FilterZippering::handleBorderEdgeBB ( std::pair< int, int >& current_edge,	
 	//Verify if the whole segment is on border
 	tri::FaceTmark<CMeshO> markerFunctor; markerFunctor.SetMesh(&a->cm);
 	face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
-	int sampleNum = SAMPLES_PER_EDGE; float step = 1.0/(sampleNum+1); bool border = true;
-	Point3f closestP;   float dist = 2*max_dist;
-	for ( int k = 0; k <= sampleNum; k ++ ) {
-		Point3f currentP = a->cm.vert[current_edge.first].P() + ( a->cm.vert[current_edge.second].P() - a->cm.vert[current_edge.first].P() ) * (k*step);
+	int sampleNum = SAMPLES_PER_EDGE; 
+    Scalarm step = 1.0/(sampleNum+1); 
+    bool border = true;
+	Point3m closestP;   
+    Scalarm dist = 2*max_dist;
+	for ( int k = 0; k <= sampleNum; k ++ ) 
+    {
+		Point3m currentP = a->cm.vert[current_edge.first].P() + ( a->cm.vert[current_edge.second].P() - a->cm.vert[current_edge.first].P() ) * (k*step);
 		CMeshO::FacePointer closestFace = grid_a.GetClosest(PDistFunct, markerFunctor, currentP, 2*max_dist, dist, closestP); //closest point on mesh
 		if ( !isOnBorder( closestP, closestFace ) ) return false;	//not completely on border; will be splitted later
 	}
@@ -1460,7 +1476,7 @@ void FilterZippering::handleBorderEdgeOB ( std::pair< int, int >& current_edge,	
 
 		do {
 			int tosplit;
-			Point3f closest;
+			Point3m closest;
 			cnt++;
 			if (!findIntersection( currentF, Segment3<CMeshO::ScalarType>(a->cm.vert[current_edge.first].P(),a->cm.vert[current_edge.second].P()), last_split, tosplit, closest )) {
 				stop = true; //no op
@@ -1650,7 +1666,7 @@ bool FilterZippering::applyFilter(QAction *filter, MeshDocument &md, RichParamet
 		vector<CMeshO::FacePointer>::iterator itr = unique( tbt_faces.begin(), tbt_faces.end() );
 		tbt_faces.resize(itr - tbt_faces.begin() );
 		//retriangulation of the faces and removal of the remaining part
-		vector< Point3f > coords; size_t patch_verts = verts.size();
+		vector< Point3m > coords; size_t patch_verts = verts.size();
 		for ( size_t i = 0; i < tbt_faces.size(); i ++ )	 {
 			if ( !tbt_faces[i]->IsD() ) {
 				handleBorder( map_info[tbt_faces[i]], tbt_faces[i]->N(), coords, verts );

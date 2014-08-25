@@ -61,7 +61,7 @@ struct aux_info {
 			//if segment is too short (it's basically a point) check if it's one of the vertices
 			for ( size_t i = 0; i < trash.size(); i ++ ) {
 				for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
-					if ( vcg::Distance<float>( trash[i].edges[j].P0(), c.P0() ) < eps ) return false;
+					if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), c.P0() ) < eps ) return false;
 				}
 			}
 		}
@@ -229,9 +229,9 @@ struct aux_info {
 
       for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
 				//if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
-				float dist;
-				vcg::Point3f clos;
-				vcg::SegmentPointSquaredDistance<float>(trash[i].edges[j], v->P(),clos,dist);
+				Scalarm dist;
+				Point3m clos;
+				vcg::SegmentPointSquaredDistance<Scalarm>(trash[i].edges[j], v->P(),clos,dist);
 				if (dist <= eps ) { 
 					 cnt++; split = j;
 				}	
@@ -255,7 +255,7 @@ struct aux_info {
 		if ( cnt == 2 ) {	// search for closest vertex and copy vertex coords
       for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
         for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
-					if ( vcg::Distance<float>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
+					if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
 						 v->P() = trash[i].edges[j].P0();
 					}	
 				}
@@ -336,7 +336,7 @@ private:
 								vcg::Point3<CMeshO::ScalarType> P1,			//End border point
 								bool &conn );
 		bool findIntersection(  CMeshO::FacePointer currentF,				//face
-								vcg::Segment3<float> edge,				//edge
+								vcg::Segment3<CMeshO::ScalarType> edge,				//edge
 								int last_split,							//last splitted edge
 								int &splitted_edge,						//currently splitted edge
 								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
