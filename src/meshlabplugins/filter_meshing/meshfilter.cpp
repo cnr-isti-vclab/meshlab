@@ -1491,19 +1491,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
   case FP_FAUX_EXTRACT :
   {
     MeshModel *em= md.addNewMesh("","EdgeMesh",true,RenderMode(GLW::DMWire));
-    tri::RequireCompactness(m.cm);
-    for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-      tri::Allocator<CMeshO>::AddVertex(em->cm, vi->cP());
-
-    std::vector<  tri::UpdateTopology<CMeshO>::PEdge > edgeVec;
-    tri::UpdateTopology<CMeshO>::FillUniqueEdgeVector(m.cm,edgeVec,false);
-
-    for(size_t i=0;i<edgeVec.size();++i)
-    {
-      int v0i = tri::Index(m.cm,edgeVec[i].v[0]);
-      int v1i = tri::Index(m.cm,edgeVec[i].v[1]);
-      tri::Allocator<CMeshO>::AddEdge(em->cm, &em->cm.vert[v0i],&em->cm.vert[v1i]);
-    }
+    BuildFromNonFaux(m.cm,em->cm);
   } break;
     case FP_VATTR_SEAM :
         {
