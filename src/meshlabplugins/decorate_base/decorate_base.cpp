@@ -403,10 +403,13 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
       bool showBorderFlag = rm->getBool(ShowBorderFlag());
       // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryVertVector");
+      CMeshO::PerMeshAttributeHandle< vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryEdgeVector");
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"BoundaryFaceVector");
-        DrawLineVector(bvH());
-          if(showBorderFlag) DrawTriVector(bfH());
-        this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary edges",bvH().size()/2);
+        DrawLineVector(beH());
+        if(showBorderFlag) DrawTriVector(bfH());
+        DrawDotVector(bvH(),5);
+        if(m.cm.fn==0) this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary vertex",bvH().size());
+               else this->RealTimeLog("Boundary",m.shortName(),"<b>%i</b> boundary edges", beH().size()/2);
     } break;
     case DP_SHOW_BOUNDARY_TEX :
     {
@@ -869,7 +872,7 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
     if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return false;
   }
   if( ID(action) == DP_SHOW_NON_MANIF_EDGE ) if(m.cm.fn==0) return false;
-  if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0) return false;
+  if( ID(action) == DP_SHOW_BOUNDARY ) if(m.cm.fn==0 && m.cm.en==0) return false;
   if( ID(action) == DP_SHOW_CURVATURE ) return m.hasDataMask(MeshModel::MM_VERTCURVDIR) || m.hasDataMask(MeshModel::MM_FACECURVDIR);
 
   return true;
@@ -1061,13 +1064,28 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
   case DP_SHOW_BOUNDARY :
   {
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"BoundaryVertVector");
+    CMeshO::PerMeshAttributeHandle< vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"BoundaryEdgeVector");
     CMeshO::PerMeshAttributeHandle< vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< vector<PointPC> >(m.cm,"BoundaryFaceVector");
     vector<PointPC> *BVp = &bvH();
+    vector<PointPC> *BEp = &beH();
     vector<PointPC> *BFp = &bfH();
     BVp->clear();
+    BEp->clear();
     BFp->clear();
     Color4b bCol=Color4b(0,255,0,32);
 
+    if(!m.cm.edge.empty())
+    {
+      vector<int> cntVec(m.cm.vert.size(),0);
+      for(CMeshO::EdgeIterator ei=m.cm.edge.begin(); ei!= m.cm.edge.end();++ei) if(!(*ei).IsD())
+      {
+          cntVec[tri::Index(m.cm,ei->V(0))]++;
+          cntVec[tri::Index(m.cm,ei->V(1))]++;
+      }
+
+      for(size_t i=0;i<cntVec.size();++i)
+        if(cntVec[i]==1) BVp->push_back(make_pair(m.cm.vert[i].P(),Color4b::Green));
+    }
     tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
     for(CMeshO::FaceIterator fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
     {
@@ -1076,8 +1094,8 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
         if((*fi).IsB(i))
         {
           isB=true;
-          BVp->push_back(make_pair((*fi).V0(i)->P(),Color4b::Green));
-          BVp->push_back(make_pair((*fi).V1(i)->P(),Color4b::Green));
+          BEp->push_back(make_pair((*fi).V0(i)->P(),Color4b::Green));
+          BEp->push_back(make_pair((*fi).V1(i)->P(),Color4b::Green));
         }
       if(isB)
       {
