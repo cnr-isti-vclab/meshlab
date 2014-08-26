@@ -8,7 +8,7 @@ HEADERS       += ../../../../vcglib/vcg/complex/algorithms/autoalign_4pcs.h \
 
 SOURCES       += filter_autoalign.cpp \
               ../../meshlabplugins/edit_align/align/AlignPair.cpp \
-              ../../meshlabplugins/edit_align/align/Guess.cpp \
+#              ../../meshlabplugins/edit_align/align/Guess.cpp \
               ../../meshlabplugins/edit_align/point_matching_scale.cpp \
               ../../../../vcglib/wrap/ply/plylib.cpp \
 

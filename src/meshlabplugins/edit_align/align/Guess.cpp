@@ -36,93 +36,7 @@ namespace tri
 {
 
 
-// Genera la matrice di rotazione che porta l'asse z a coincidere con Axis
-// e poi ruota di angle intorno a quell'asse.
 
-void GenMatrix(Matrix44f &a, Point3f Axis, float angleRad)
-{
-    const float eps=1e-10;
-    Point3f RotAx   = Axis ^ Point3f(0,0,1);
-  float RotAngleRad = Angle(Axis,Point3f(0,0,1));
-
-    if(math::Abs(RotAx.Norm())<eps) { // in questo caso Axis e' collineare con l'asse z
-            RotAx=Point3f(0,1,0);
-        }
-  //printf("Rotating around (%5.3f %5.3f %5.3f) %5.3f\n",RotAx[0],RotAx[1],RotAx[2],RotAngle);
-    a.SetRotateRad(RotAngleRad,RotAx);
-    Matrix44f rr;
-    rr.SetRotateRad( angleRad, Point3f(0,0,1));
-
-    a=rr*a;
-}
-
-
-
-// If i have k uniformly distributed directions, each of them subtends a solid angle of 4Pi/k steradian;
-// A given cone with an apex angle of <a>  subtends a solid angle of c = (1 - cos(a/2))*2Pi
-// (think to the cylindrical projection of a cone...)
-// examples:
-//  a=0 -> c= 0
-//  a=pi/2 c= 2pi
-//  a=120 = 2/3 pi -> (1-cos(pi/3)*2pi -> pi cioe' 1/4 di sfera.
-// quindi se ogni normale sottende un angolo solido di s ottengo che
-// s = (1 -  cos(a/2)) *2pi
-// s/2pi -1 = -cos (a/2)
-// 1 - s/2pi  = cos (a/2)
-// a/2 = acos( 1- s/2pi))
-// a = 2*acos(( 1 - s/2pi))
-
-void ComputeStep(const int directionNum, float &StepAngle, int &StepNum)
-{
-    float s = (4.0*M_PI)/directionNum; // solid angle subtended by each direction
-  float a = 2 * acos(1-s*2.0/M_PI );
-    a/=2;
-  StepNum= (int)ceil(2*M_PI/a);
-  StepAngle = 2.0*M_PI/ceil(2*M_PI/a);
-  //printf("%i normals\nSolid Angle sotteso %f\n angolo step %f (%f deg)\nInterized %f (%f deg) %i steps", k , s ,a,ToDeg(a),StepAngle,ToDeg(StepAngle),StepNum);
-}
-
-
-
-void Guess::GenRotMatrix()
-{
-    vector<Point3f> NV;
-    float AngleStep;
-    int i,j,AngleNum;
-
-    GenNormal<float>::Uniform(sqrt(float(pp.MatrixNum)),NV);
-    ComputeStep(NV.size(),AngleStep,AngleNum);
-    RotMVec.resize(NV.size()*AngleNum);
-    qDebug("Generated %li normals and %li rotations",NV.size(),RotMVec.size());
-    for(i=0;i<NV.size();++i)
-        for(j=0;j<AngleNum;++j)
-                GenMatrix(RotMVec[i*AngleNum+j],NV[i],j*AngleStep);
-}
-
-
-// After the init of the grids and of the sampled point vector
-// we have to find a starting translation
-// we choose the sune such that the baricenter of T*R*Mov is in the middle of the grid bbox.
-
-Point3f Guess::ComputeBaseTranslation(Matrix44f &baseRot) const
-{
-    Point3f movBarycenter = baseRot * this->movBarycenterBase;
-    return this->movBarycenterBase - movBarycenter ;
-}
-
-Matrix44f Guess::BuildTransformation(const Matrix44f &baseRot, const Point3f &BaseTrans) const
-{
- Matrix44f Tr;
- Tr.SetTranslate(BaseTrans);
- return Tr*baseRot;
-}
-
-Matrix44f Guess::BuildResult(const Matrix44f &baseRot, const Point3f &BaseTrans, const Point3f &BestTrans) const
-{
-  Matrix44f Tr;
-  Tr.SetTranslate(BestTrans);
-  return Tr*BuildTransformation(baseRot, BaseTrans);
-}
 
 // Fill movVert with the transformed version of movVertBase;
 void Guess::ApplyTransformation(const Point3f &BaseTranslation, const Matrix44f &BaseRot,
@@ -130,18 +44,6 @@ void Guess::ApplyTransformation(const Point3f &BaseTranslation, const Matrix44f 
                                                     std::vector< Point3f > &movNorm,
                                                     Box3f &movBox
                                                     ) const
-{
-    movBox.SetNull();
-    movVert.clear();
-    const Matrix44f baseTransf = BuildTransformation(BaseRot,BaseTranslation);
-
-    std::vector< Point3f >::const_iterator vi;
-    for(vi=this->movVertBase.begin();vi!=this->movVertBase.end();++vi)
-        {
-             movVert.push_back(baseTransf * (*vi));
-             movBox.Add(movVert.back());
-        }
-}
 
 /*
     Very Low level function
@@ -150,90 +52,12 @@ void Guess::ApplyTransformation(const Point3f &BaseTranslation, const Matrix44f 
     T * R * Mov has the greatest overlap with Fix
 */
 
-int Guess::SearchBestTranslation(	GridStaticObj<bool,float> &U,
-                                        const Matrix44f &BaseRot,
+int Guess::SearchBestTranslation(	GridStaticObj<bool,ScalarType> &U,
+                                        const Matrix44x &BaseRot,
                                         const int range,
-                                        Point3f &StartTrans,
-                                        Point3f &BestTrans  // miglior vettore di spostamento
+                                        Point3x &StartTrans,
+                                        Point3x &BestTrans  // miglior vettore di spostamento
                                         )
-{
-
-  const int wide1=(range*2+1);
-  const int wide2=wide1*wide1;
-
-
-  // the rotated and translated) set of vertexes;
-  std::vector< Point3f > movVert;
-  std::vector< Point3f > movNorm;
-  Box3f movBox;
-
-  ApplyTransformation(StartTrans, BaseRot,movVert,movNorm, movBox);
-
-  int t0=clock();
-
-//  qDebug("Start searchTranslate movVert %i(grid sz %i %i %i",movVert.size(), U.siz[0],U.siz[1],U.siz[2]);
-//  qDebug(" bbox ug  = %6.2f %6.2f %6.2f - %6.2f %6.2f %6.2f",U.bbox.min[0],U.bbox.min[1],U.bbox.min[2],U.bbox.max[1],U.bbox.max[1],U.bbox.max[2]);
-//  qDebug(" bbox mov = %6.2f %6.2f %6.2f - %6.2f %6.2f %6.2f",movBox.min[0],movBox.min[1],movBox.min[2],movBox.max[1],movBox.max[1],movBox.max[2]);
-  Point3i ip;
-  int i,ii,jj,kk;
-  std::vector<int> test((range*2+1)*(range*2+1)*(range*2+1),0);
-  //int bx,by,bz,ex,ey,ez;
-  Point3i b,e;
-  int testposii,testposjj;
-  // First Loop, for each point, attempt all the possible translations (2*range)^3 and
-  // if the translated point hits something increment the counter for that "translation"
-
-  for(i=0;i<movVert.size();++i)
-  {
-    Point3f tp; tp.Import(movVert[i]);
-    if(U.bbox.IsIn(tp)){
-      U.PToIP(tp,ip);
-      b[0] = std::max(0,ip[0]-range);
-      b[1] = std::max(0,ip[1]-range);
-      b[2] = std::max(0,ip[2]-range);
-      e[0] = std::min(U.siz[0],ip[0]+range);
-      e[1] = std::min(U.siz[1],ip[1]+range);
-      e[2] = std::min(U.siz[2],ip[2]+range);
-
-      for(ii=b[0];ii<e[0];++ii)
-      {
-        testposii=(ii-ip[0]+range)*wide2;
-        for(jj=b[1];jj<e[1];++jj)
-        {
-          testposjj=testposii+(jj-ip[1]+range)*wide1-ip[2]+range;
-          for(kk=b[2];kk<e[2];++kk)
-          {
-            if(U.Grid(ii,jj,kk))
-              ++test[testposjj+kk];
-            assert(ii >=0 && ii < U.siz[0]);
-            assert(jj >=0 && jj < U.siz[1]);
-            assert(kk >=0 && kk < U.siz[2]);
-          }
-        }
-      }
-    }
-  }
-  int maxfnd=0;
-  Point3i BestI;
-  for(ii=-range;ii<=range;++ii)
-    for(jj=-range;jj<=range;++jj)
-      for(kk=-range;kk<=range;++kk)
-      {
-        const int pos = (range+ii)*wide2+(range+jj)*wide1+range+kk;
-        if(test[pos]>maxfnd)
-        {
-          BestI=Point3i(ii,jj,kk);
-          BestTrans=Point3f(ii*U.voxel[0], jj*U.voxel[1], kk*U.voxel[2]);
-          maxfnd=test[pos];
-        }
-        //printf("Found %i su %i in %i\n",test[testcnt],movvert.size(),t1-t0);
-      }
-
-  int t1=clock();
-  //if(Verbose)
-  qDebug("BestTransl (%4i in %i msec) is %8.4f %8.4f %8.4f (%3i %3i %3i)",maxfnd, (1000*(t1-t0))/CLOCKS_PER_SEC,BestTrans[0],BestTrans[1],BestTrans[2],BestI[0],BestI[1],BestI[2]);
-  return maxfnd;
-}
 
 
 

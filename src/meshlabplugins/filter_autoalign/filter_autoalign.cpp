@@ -127,7 +127,7 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
       fpcs.par.deltaPerc  =  par.getFloat("tolerance");
       fpcs.par.seed       = par.getInt("randSeed");
       fpcs.Init(movMesh->cm,fixMesh->cm);
-      Matrix44f Tr;
+      Matrix44m Tr;
       bool res = fpcs.Align(Tr,cb);
 
       if(res)
@@ -142,7 +142,7 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
         if(showSample)
         {
           sampleMesh->cm.Clear();
-          for(int i=0;i<fpcs.subsetQ.size();++i)
+          for(size_t i=0;i<fpcs.subsetQ.size();++i)
             tri::Allocator<CMeshO>::AddVertex(sampleMesh->cm, fpcs.subsetQ[i]->P(), fpcs.subsetQ[i]->N());
           tri::UpdateBounding<CMeshO>::Box(sampleMesh->cm);
         }
@@ -163,25 +163,25 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
       MeshModel *sample=md.addOrGetMesh("sample", "sample",false);
       MeshModel *occ=md.addOrGetMesh("occ", "occ",false);
 
-      tri::Guess GG;
-      std::vector<tri::Guess::Result> ResultVec;
+      tri::Guess<Scalarm> GG;
+      std::vector<tri::Guess<Scalarm>::Result> ResultVec;
       GG.pp.MatrixNum = rotNum;
       GG.pp.GridSize =gridSize;
       GG.pp.SampleNum = sampleSize;
       GG.Init<CMeshO>(fixMesh->cm, movMesh->cm);
 
-      for(int i=0;i<GG.RotMVec.size();++i)
+      for(size_t i=0;i<GG.RotMVec.size();++i)
       {
-        Point3f baseTran =  GG.ComputeBaseTranslation(GG.RotMVec[i]);
-        Point3f bestTran;
+        Point3m baseTran =  GG.ComputeBaseTranslation(GG.RotMVec[i]);
+        Point3m bestTran;
         int res = GG.SearchBestTranslation(GG.u[0],GG.RotMVec[i],searchRange,baseTran,bestTran);
-        ResultVec.push_back(tri::Guess::Result(GG.BuildResult(GG.RotMVec[i],baseTran,bestTran), res, i, bestTran));
+        ResultVec.push_back(tri::Guess<Scalarm>::Result(GG.BuildResult(GG.RotMVec[i],baseTran,bestTran), res, i, bestTran));
       }
       sort(ResultVec.begin(),ResultVec.end());
-      movMesh->cm.Tr = ResultVec.back().m;
+      movMesh->cm.Tr.Import(ResultVec.back().m);
 
       tri::Build(sample->cm,GG.movVertBase);
-      sample->cm.Tr = ResultVec.back().m;
+      sample->cm.Tr.Import(ResultVec.back().m);
 
       qDebug("Result %i",ResultVec.back().score);
       GG.GenerateOccupancyMesh(occ->cm,0,ResultVec.back().m);
