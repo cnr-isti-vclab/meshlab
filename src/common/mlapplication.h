@@ -4,6 +4,25 @@
 #include <QApplication>
 #include <QString>
 
+template<typename T>
+struct MeshLabScalarTest
+{
+
+};
+
+template<>
+struct MeshLabScalarTest<float>
+{
+	static const QString floatingPointPrecision() {return QString("fp");}
+};
+
+template<>
+struct MeshLabScalarTest<double>
+{
+	static const QString floatingPointPrecision() {return QString("dp");}
+};
+
+
 class MeshLabApplication : public QApplication
 {
 public:
@@ -13,8 +32,8 @@ public:
     bool notify(QObject * rec, QEvent * ev);
     static const QString appName(){return tr("MeshLab"); }
     static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
-    static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw);}
-    static const QString appVer() {return tr("1.3.3"); }
+    static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
+    static const QString appVer() {return tr("1.3.4BETA"); }
     static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
     static const QString organization(){return tr("VCG");}
     static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}
