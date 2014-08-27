@@ -524,20 +524,21 @@ namespace commandline
 
 }
 
+struct OutFileMesh
+{
+    QString filename;
+    int mask;
+};
+
+struct OutProject
+{
+    QString filename;
+    bool overwrite;
+};
 
 int main(int argc, char *argv[])
 {
-    struct OutFileMesh
-    {
-        QString filename;
-        int mask;
-    };
 
-    struct OutProject
-    {
-        QString filename;
-        bool overwrite;
-    };
 
     FILE* logfp = stdout;
     FILE* dumpfp = NULL;
