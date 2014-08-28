@@ -138,7 +138,10 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
      for(int i=0;i<iterNum;++i)
      {
        cb(100*i/iterNum, "Relaxing...");
-       tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::VoronoiRelaxing(m.cm, seedVec, 1,dd,vpp);
+       if(env.evalEnum("relaxType")==2)
+         tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::RestrictedVoronoiRelaxing(m.cm, seedVec, 10,vpp);
+       else
+         tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::VoronoiRelaxing(m.cm, seedVec, 1,dd,vpp);
        md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
        if (intteruptreq) return true;
      }
@@ -236,7 +239,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
     cb(40, "Relaxing Volume...");
-    vvs.RelaxVoronoiSamples(relaxStep);
+    vvs.BarycentricRelaxVoronoiSamples(relaxStep);
 
     cb(50, "Building Scaffloding Volume...");
     vvs.BuildScaffoldingMesh(sm->cm,voxelRes,isoThr,elemType,surfFlag);

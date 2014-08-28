@@ -27,7 +27,7 @@
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Preprocessing"/>
    </PARAM>
-   <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 }" parDefault="1">
+   <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 | Restricted : 2 }" parDefault="1">
     <PARAM_HELP><![CDATA[
     At each relaxation step we search for each voronoi region the new position of the seed.
     According to the classical LLoyd relaxation strategy it should have been placed onto the
@@ -35,6 +35,7 @@
     <ul>
     <li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>
     <li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>
+    <li> Restricted: .</li>
     </ul>
     ]]></PARAM_HELP>
     <ENUM_GUI guiLabel="Relax Type"/>
