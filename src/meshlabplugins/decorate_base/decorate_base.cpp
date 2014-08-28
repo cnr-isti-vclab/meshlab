@@ -284,7 +284,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
 
             glEnable(GL_POINT_SMOOTH);
             glPointSize(6.f);
-            glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
+            glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
             glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
 
 //        glDrawArrays(GL_POINTS,0,vvP->size());
@@ -312,7 +312,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             glEnableClientState (GL_COLOR_ARRAY);
             glEnable(GL_POINT_SMOOTH);
             glPointSize(6.f);
-            glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
+            glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(vvP->begin()[0].first));
             glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(vvP->begin()[0].second));
             glDrawArrays(GL_LINES,0,vvP->size());
             glDisableClientState (GL_COLOR_ARRAY);
@@ -429,7 +429,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
           glColor(Color4b::Green);
           glDepthRange (0.0, 0.999);
           glEnableClientState (GL_VERTEX_ARRAY);
-          glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
+          glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
           glDrawArrays(GL_LINES,0,BTVp->size());
           glDisableClientState (GL_VERTEX_ARRAY);
           glPopAttrib();
@@ -460,7 +460,7 @@ void DecorateBasePlugin::DrawLineVector(std::vector<PointPC> &EV)
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
 
-    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(EV.begin()[0].first));
+    glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(EV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
     glDrawArrays(GL_LINES,0,EV.size());
     glDisableClientState (GL_COLOR_ARRAY);
@@ -483,7 +483,7 @@ void DecorateBasePlugin::DrawTriVector(std::vector<PointPC> &TV)
   {
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
-    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
+    glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
     glDrawArrays(GL_TRIANGLES,0,TV.size());
     glDisableClientState (GL_COLOR_ARRAY);
@@ -507,7 +507,7 @@ void DecorateBasePlugin::DrawDotVector(std::vector<PointPC> &TV, float baseSize)
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_COLOR_ARRAY);
     glPointSize(baseSize+0.5);
-    glVertexPointer(3,GL_TYPE<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
+    glVertexPointer(3,GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(TV.begin()[0].first));
     glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(TV.begin()[0].second));
     glDisableClientState (GL_COLOR_ARRAY);
     glColor(Color4b::DarkGray);

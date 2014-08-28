@@ -83,6 +83,7 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
     glw::ProgramHandle      m_ShadowMapShader;
 
 
+
     // Constructors / destructor.
 public:
     DecorateRasterProjPlugin();

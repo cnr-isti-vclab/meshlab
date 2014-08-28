@@ -341,7 +341,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glEnableClientState( GL_VERTEX_ARRAY );
 
         m_Context.bindVertexBuffer( m_ShadowVBOVertices );
-        glVertexPointer( 3, vcg::GL_TYPE<Scalarm>::SCALAR(), 0, 0 );
+        glVertexPointer( 3, vcg::GL_TYPE_NM<Scalarm>::SCALAR(), 0, 0 );
         m_Context.unbindVertexBuffer();
 
         m_Context.bindIndexBuffer( m_ShadowVBOIndices );

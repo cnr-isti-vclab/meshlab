@@ -283,10 +283,10 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
     Scalarm zNear, zFar;
     vcg::Shotf tmpshot;
     GlShot< Shotm >::GetNearFarPlanes( m_CurrentRaster->shot, m_SceneBox, zNear, zFar );
-    if( zNear < 0.0001f )
-        zNear = 0.1f;
+    if( zNear < Scalarm(0.0001) )
+        zNear = Scalarm(0.1);
     if( zFar < zNear )
-        zFar = zNear + 1000.0f;
+        zFar = zNear + Scalarm(1000.0);
 
 
     // Recover the view frustum of the current raster.
@@ -302,13 +302,13 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
     t *= normFactor;
 
     m_RasterProj.SetZero();
-    m_RasterProj[0][0] = 2.0f*zNear / (r-l);
+    m_RasterProj[0][0] = Scalarm(2.0)*zNear / (r-l);
     m_RasterProj[2][0] = (r+l) / (r-l);
-    m_RasterProj[1][1] = 2.0f*zNear / (t-b);
+    m_RasterProj[1][1] = Scalarm(2.0)*zNear / (t-b);
     m_RasterProj[2][1] = (t+b) / (t-b);
     m_RasterProj[2][2] = (zNear+zFar) / (zNear-zFar);
-    m_RasterProj[3][2] = 2.0f*zNear*zFar / (zNear-zFar);
-    m_RasterProj[2][3] = -1.0f;
+    m_RasterProj[3][2] = Scalarm(2.0)*zNear*zFar / (zNear-zFar);
+    m_RasterProj[2][3] = Scalarm(-1.0);
 
 
     // Extract the pose matrix from the current raster.
@@ -316,10 +316,10 @@ void DecorateRasterProjPlugin::updateShadowProjectionMatrix()
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
-    const Scalarm biasMatData[16] = { 0.5f, 0.0f, 0.0f, 0.0f,
-                                    0.0f, 0.5f, 0.0f, 0.0f,
-                                    0.0f, 0.0f, 0.5f, 0.0f,
-                                    0.5f, 0.5f, 0.5f, 1.0f };
+    const Scalarm biasMatData[16] = { Scalarm(0.5), Scalarm(0.0), Scalarm(0.0), Scalarm(0.0),
+                                    Scalarm(0.0), Scalarm(0.5), Scalarm(0.0), Scalarm(0.0),
+                                    Scalarm(0.0), Scalarm(0.0), Scalarm(0.5), Scalarm(0.0),
+                                    Scalarm(0.5), Scalarm(0.5), Scalarm(0.5), Scalarm(1.0) };
     Matrix44m biasMat( biasMatData );
 
 
@@ -335,18 +335,19 @@ void DecorateRasterProjPlugin::updateColorTexture()
     const int w = m_CurrentRaster->currentPlane->image.width();
     const int h = m_CurrentRaster->currentPlane->image.height();
 
+	 QImage tximg = QGLWidget::convertToGLFormat(m_CurrentRaster->currentPlane->image);
     // Recover image data and convert pixels to the adequate format for transfer onto the GPU.
-    GLubyte *texData = new GLubyte [ 4*w*h ];
-    for( int y=h-1, n=0; y>=0; --y )
-        for( int x=0; x<w; ++x )
-        {
-            QRgb pixel = m_CurrentRaster->currentPlane->image.pixel(x,y);
-            texData[n++] = (GLubyte) qRed  ( pixel );
-            texData[n++] = (GLubyte) qGreen( pixel );
-            texData[n++] = (GLubyte) qBlue ( pixel );
-            texData[n++] = (GLubyte) qAlpha ( pixel );
-        }
-
+	GLubyte *texData = new GLubyte [ 4*w*h ];
+	for( int y=h-1, n=0; y>=0; --y )
+	for( int x=0; x<w; ++x )
+	{
+	QRgb pixel = m_CurrentRaster->currentPlane->image.pixel(x,y);
+	//QRgb pixel = qRgb(0, 0 , 0);
+	texData[n++] = (GLubyte) qRed  ( pixel );
+	texData[n++] = (GLubyte) qGreen( pixel );
+	texData[n++] = (GLubyte) qBlue ( pixel );
+	texData[n++] = (GLubyte) qAlpha ( pixel );
+	}
     // Create and initialize the OpenGL texture object.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
     m_ColorTexture = glw::createTexture2D( m_Context, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, texData );
@@ -387,11 +388,13 @@ void DecorateRasterProjPlugin::updateDepthTexture()
     // from the viewpoint of the current raster's camera.
     glMatrixMode( GL_PROJECTION );
     glPushMatrix();
-    glLoadMatrixf( (GLfloat*) m_RasterProj.V() );
+	vcg::Matrix44f tmp_rast = vcg::Matrix44f::Construct(m_RasterProj);
+    glLoadMatrixf( (GLfloat*) tmp_rast.V() );
 
     glMatrixMode( GL_MODELVIEW );
     glPushMatrix();
-    glLoadMatrixf( (GLfloat*) m_RasterPose.V() );
+	vcg::Matrix44f tmp_rastpose = vcg::Matrix44f::Construct(m_RasterPose);
+    glLoadMatrixf( (GLfloat*) tmp_rastpose.V() );
 
 
 
@@ -472,7 +475,7 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
         varying vec3            v_RasterView;
         varying vec3            v_Light;
 
-        uniform sampler2DShadow u_ColorMap;
+        uniform sampler2D		u_ColorMap;
         uniform sampler2DShadow u_DepthMap;
         uniform bool            u_IsLightActivated;
         uniform bool            u_UseOriginalAlpha;
@@ -493,7 +496,7 @@ bool DecorateRasterProjPlugin::initShaders(std::string &logs)
             if( visibility <= 0.001 )
                 discard;
 
-            vec4 color = shadow2DProj( u_ColorMap, v_ProjVert );
+            vec4 color = texture2D( u_ColorMap, clipCoord.xy);
 
             if( u_IsLightActivated )
             {
@@ -693,6 +696,7 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                 shader->setUniform( "u_ColorMap", 0 );
                 shader->setUniform( "u_DepthMap", 1 );
                 vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
+
                 shader->setUniform4x4( "u_ProjMat", tmp_shadowproj.V(), false );
                 vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
                 shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
@@ -706,7 +710,8 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                 {
                     if( rm.drawMode == vcg::GLW::DMPoints )
                         setPointParameters( m.value(), par );
-                    shader->setUniform4x4( "u_ModelXf", vcg::Matrix44f::Construct(m->mm()->cm.Tr).transpose().V(), false );
+					vcg::Matrix44f tmpmat = vcg::Matrix44f::Construct(m->mm()->cm.Tr);
+                    shader->setUniform4x4( "u_ModelXf", tmpmat.transpose().V(), false );
                     m->draw( m_Context );
                 }
 
