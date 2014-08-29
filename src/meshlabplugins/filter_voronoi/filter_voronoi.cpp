@@ -116,14 +116,15 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
 //   tri::SurfaceSampling<CMeshO, vcg::tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
    vector<Point3m> pointVec;
    CMeshO::ScalarType radius=0;
-   tri::PoissonSampling<CMeshO>(m.cm,pointVec,sampleNum,radius,radiusVariance);
+   int randomSeed = env.evalInt("randomSeed");
+
+   tri::PoissonSampling<CMeshO>(m.cm,pointVec,sampleNum,radius,radiusVariance,0,randomSeed);
 
    tri::VoronoiProcessingParameter vpp;
    vpp.geodesicRelaxFlag = (env.evalEnum("relaxType")==0);
    vpp.colorStrategy = env.evalEnum("colorStrategy");
    vpp.deleteUnreachedRegionFlag=true;
-   vpp.refinementRatio=10;
-
+   vpp.refinementRatio=env.evalInt("refineFactor");
    if(env.evalBool("preprocessFlag"))
    {
      tri::VoronoiProcessing<CMeshO>::PreprocessForVoronoi(m.cm,radius,vpp);

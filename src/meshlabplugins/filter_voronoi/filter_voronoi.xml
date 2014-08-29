@@ -27,6 +27,15 @@
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Preprocessing"/>
    </PARAM>
+   <PARAM parName="refineFactor" parIsImportant="false" parType="Int" parDefault="10">
+    <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Refinement Factor."/>
+   </PARAM>
+   <PARAM parName="randomSeed" parIsImportant="false" parType="Int" parDefault="0">
+    <PARAM_HELP><![CDATA[ To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock.]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Random seed."/>
+   </PARAM>
+
    <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 | Restricted : 2 }" parDefault="1">
     <PARAM_HELP><![CDATA[
     At each relaxation step we search for each voronoi region the new position of the seed.
@@ -35,7 +44,7 @@
     <ul>
     <li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>
     <li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>
-    <li> Restricted: .</li>
+    <li> Restricted: the seed is placed in the barycenter of current voronoi region. Even if it is outside the surface. During the relaxation process the seed is free to move off the surface in a continuos way. Re-association to vertex is done at the end..</li>
     </ul>
     ]]></PARAM_HELP>
     <ENUM_GUI guiLabel="Relax Type"/>
