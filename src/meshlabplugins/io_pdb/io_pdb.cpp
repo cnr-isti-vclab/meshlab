@@ -311,7 +311,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
 		MyWalker walker;
 		
-		Box3d rbb;
+		Box3m rbb;
 		// calculating an enlarged bbox
 		rbb.min[0]=rbb.min[1]=rbb.min[2]= 100000;
 		rbb.max[0]=rbb.max[1]=rbb.max[2]=-100000;
@@ -380,7 +380,7 @@ bool PDBIOPlugin::parsePDB(const std::string &filename, CMeshO &m, const RichPar
 		typedef vcg::tri::MarchingCubes<CMeshO, MyWalker>	MyMarchingCubes;
 		MyWalker walker;
 		
-		Box3d rbb;
+		Box3m rbb;
 		// calculating an enlarged bbox
 		rbb.min[0]=rbb.min[1]=rbb.min[2]= 100000;
 		rbb.max[0]=rbb.max[1]=rbb.max[2]=-100000;
