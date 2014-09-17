@@ -683,7 +683,7 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
         clock();
 
         CMeshO::FaceIterator fi;
-        Point3m CameraPos(cam.t);
+        Point3m CameraPos = Point3m::Construct(cam.t);
         for(fi=m.face.begin();fi!=m.face.end();++fi)
         {
 
@@ -787,11 +787,11 @@ Point3m Arc3DModel::TraCorrection(CMeshO &m, int subsampleFactor, int minCount, 
 void Arc3DModel::AddCameraIcon(CMeshO &m)
 {
     tri::Allocator<CMeshO>::AddVertices(m,3);
-    m.vert[m.vert.size()-3].P()=Point3m::Construct(cam.t+Point3m(0,0,0));
+    m.vert[m.vert.size()-3].P()=Point3m::Construct(cam.t+Point3d(0,0,0));
     m.vert[m.vert.size()-3].C()=Color4b::Green;
-    m.vert[m.vert.size()-2].P()=Point3m::Construct(cam.t+Point3m(0,1,0));
+    m.vert[m.vert.size()-2].P()=Point3m::Construct(cam.t+Point3d(0,1,0));
     m.vert[m.vert.size()-2].C()=Color4b::Green;
-    m.vert[m.vert.size()-1].P()=Point3m::Construct(cam.t+Point3m(1,0,0));
+    m.vert[m.vert.size()-1].P()=Point3m::Construct(cam.t+Point3d(1,0,0));
     m.vert[m.vert.size()-1].C()=Color4b::Green;
 
     tri::Allocator<CMeshO>::AddFaces(m,1);
