@@ -91,6 +91,10 @@ namespace vcg
     public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("CurvatureDirmOcf"));T::Name(name);}
     };
 
+    template <class T> class RadiusmOcf: public RadiusOcf<MESHLAB_SCALAR, T> {
+    public:	static void Name(std::vector<std::string> & name){name.push_back(std::string("RadiusmOcf"));T::Name(name);}
+  };
+
   }//end namespace vertex
   namespace face
   {
@@ -134,7 +138,7 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
     vcg::vertex::TexCoordfOcf,      /*  0b */
     vcg::vertex::CurvaturefOcf,     /*  0b */
     vcg::vertex::CurvatureDirmOcf,  /*  0b */
-    vcg::vertex::RadiusdOcf         /*  0b */
+    vcg::vertex::RadiusmOcf         /*  0b */
 >{
 };
 
