@@ -159,14 +159,15 @@ void FilterScriptDialog::removeSelectedFilter()
     if(currentRow == -1)
         return;
 
-    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist[currentRow];
     QString filtername = ui->scriptListWidget->currentItem()->text();
     if (pair->filterName() == filtername)
+    {
+        ui->scriptListWidget->takeItem(currentRow);
         scriptPtr->filtparlist.removeAt(currentRow);
+    }
     else
         throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
-  
-	ui->scriptListWidget->takeItem(currentRow);
 }
 
 void FilterScriptDialog::editSelectedFilterParameters()
