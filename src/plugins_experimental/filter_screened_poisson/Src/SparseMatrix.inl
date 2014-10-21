@@ -448,9 +448,9 @@ void SparseSymmetricMatrix<T>::Multiply( const Vector<T2>& In , Vector<T2>& Out 
             {
                 const T2& in_i_ = in[i];
                 T2& out_i_ = out[i];
-				ConstPointer( MatrixEntry< T > ) temp;
-				ConstPointer( MatrixEntry< T > ) end;
-				for( temp = SparseMatrix< T >::m_ppElements[i] , end = temp+SparseMatrix< T >::rowSizes[i] ; temp!=end ; temp++ )
+                ConstPointer( MatrixEntry< T > ) temp;
+                ConstPointer( MatrixEntry< T > ) end;
+                for( temp = SparseMatrix< T >::m_ppElements[i] , end = temp+SparseMatrix< T >::rowSizes[i] ; temp!=end ; ++temp )
                 {
                     int j = temp->N;
                     T2 v = temp->Value;
