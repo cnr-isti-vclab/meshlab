@@ -8,14 +8,14 @@ are permitted provided that the following conditions are met:
 Redistributions of source code must retain the above copyright notice, this list of
 conditions and the following disclaimer. Redistributions in binary form must reproduce
 the above copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the distribution. 
+in the documentation and/or other materials provided with the distribution.
 
 Neither the name of the Johns Hopkins University nor the names of its contributors
 may be used to endorse or promote products derived from this software without specific
-prior written permission. 
+prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES
 OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
@@ -30,7 +30,7 @@ DAMAGE.
 #define __VECTOR_HPP
 
 
-#define Assert assert
+//#define Assert assert
 #include <assert.h>
 #include "Array.h"
 
@@ -38,63 +38,63 @@ template< class T >
 class Vector
 {
 public:
-	Vector( void );
-	Vector( const Vector<T>& V );
-	Vector( size_t N );
-	Vector( size_t N, ConstPointer( T ) pV );
-	~Vector( void );
+    Vector( void );
+    Vector( const Vector<T>& V );
+    Vector( size_t N );
+    Vector( size_t N, ConstPointer( T ) pV );
+    ~Vector( void );
 
-	const T& operator () (size_t i) const;
-	T& operator () (size_t i);
-	const T& operator [] (size_t i) const;
-	T& operator [] (size_t i);
+    const T& operator () (size_t i) const;
+    T& operator () (size_t i);
+    const T& operator [] (size_t i) const;
+    T& operator [] (size_t i);
 
-	void SetZero();
+    void SetZero();
 
-	size_t Dimensions() const;
-	void Resize( size_t N );
+    size_t Dimensions() const;
+    void Resize( size_t N );
 
-	Vector operator * (const T& A) const;
-	Vector operator / (const T& A) const;
-	Vector operator - (const T& A) const;
-	Vector operator + (const T& A) const;
-	Vector operator - (const Vector& V) const;
-	Vector operator + (const Vector& V) const;
+    Vector operator * (const T& A) const;
+    Vector operator / (const T& A) const;
+    Vector operator - (const T& A) const;
+    Vector operator + (const T& A) const;
+    Vector operator - (const Vector& V) const;
+    Vector operator + (const Vector& V) const;
 
-	Vector& operator *= ( const T& A );
-	Vector& operator /= ( const T& A );
-	Vector& operator += ( const T& A );
-	Vector& operator -= ( const T& A );
-	Vector& operator += ( const Vector& V );
-	Vector& operator -= ( const Vector& V );
+    Vector& operator *= ( const T& A );
+    Vector& operator /= ( const T& A );
+    Vector& operator += ( const T& A );
+    Vector& operator -= ( const T& A );
+    Vector& operator += ( const Vector& V );
+    Vector& operator -= ( const Vector& V );
 
-	Vector& Add( const Vector* V , int count );
-	Vector& AddScaled( const Vector& V , const T& scale );
-	Vector& SubtractScaled( const Vector& V , const T& scale );
-	static void Add( const Vector& V1 , const T& scale1 , const Vector& V2 , const T& scale2 , Vector& Out );
-	static void Add( const Vector& V1 , const T& scale1 , const Vector& V2 , Vector& Out );
+    Vector& Add( const Vector* V , int count );
+    Vector& AddScaled( const Vector& V , const T& scale );
+    Vector& SubtractScaled( const Vector& V , const T& scale );
+    static void Add( const Vector& V1 , const T& scale1 , const Vector& V2 , const T& scale2 , Vector& Out );
+    static void Add( const Vector& V1 , const T& scale1 , const Vector& V2 , Vector& Out );
 
-	Vector operator - () const;
+    Vector operator - () const;
 
-	Vector& operator = (const Vector& V);
+    Vector& operator = (const Vector& V);
 
-	T Dot( const Vector& V ) const;
+    T Dot( const Vector& V ) const;
 
-	T Length() const;
+    T Length() const;
 
-	T Average() const;
+    T Average() const;
 
-	T Norm( size_t Ln ) const;
-	void Normalize();
+    T Norm( size_t Ln ) const;
+    void Normalize();
 
-	bool write( FILE* fp ) const;
-	bool write( const char* fileName ) const;
-	bool read( FILE* fp );
-	bool read( const char* fileName );
+    bool write( FILE* fp ) const;
+    bool write( const char* fileName ) const;
+    bool read( FILE* fp );
+    bool read( const char* fileName );
 
-	Pointer( T ) m_pV;
+    Pointer( T ) m_pV;
 protected:
-	size_t m_N;
+    size_t m_N;
 
 };
 
