@@ -64,21 +64,21 @@ QScriptValue myprint (QScriptContext* sc, QScriptEngine* se);
 
 
 typedef Point3m VCGPoint3SI;
-typedef QVector<QVector<float> > Point3Vector;
+typedef QVector<QVector<Scalarm> > Point3Vector;
 
 
 class ScriptInterfaceUtilities
 {
 public:
-    static QVector<float> vcgPoint2ToVector2(const Point2m& p);
-    static Point2m vector2ToVcgPoint2(const QVector<float>& v);
-    static vcg::Point2i vector2ToVcgPoint2i(const QVector<float>& v);
-    static QVector<float> vcgPoint3ToVector3(const Point3m &p);
-    static Point3m vector3ToVcgPoint3(const QVector<float>& v);
-    static QVector<float> vcgPoint4ToVector4(const vcg::Point4f& p);
-    static vcg::Point4f vector4ToVcgPoint4(const QVector<float>& v);
-    static QVector<float> vcgMatrix44ToVector16(const vcg::Matrix44f& m);
-    static Matrix44m vector16ToVcgMatrix44(const QVector<float>& v);
+    static QVector<Scalarm> vcgPoint2ToVector2(const Point2m& p);
+    static Point2m vector2ToVcgPoint2(const QVector<Scalarm>& v);
+    static vcg::Point2i vector2ToVcgPoint2i(const QVector<Scalarm>& v);
+    static QVector<Scalarm> vcgPoint3ToVector3(const Point3m &p);
+    static Point3m vector3ToVcgPoint3(const QVector<Scalarm>& v);
+    static QVector<Scalarm> vcgPoint4ToVector4(const Point4m& p);
+    static Point4m vector4ToVcgPoint4(const QVector<Scalarm>& v);
+    static QVector<Scalarm> vcgMatrix44ToVector16(const Matrix44m& m);
+    static Matrix44m vector16ToVcgMatrix44(const QVector<Scalarm>& v);
 };
 
 //class VCGPoint3fSI : public QObject
@@ -104,15 +104,15 @@ public:
     VCGVertexSI(CMeshO::VertexType& v);
 
     //Q_INVOKABLE vcg::Point3f* p();
-    Q_INVOKABLE QVector<float> getP();
+    Q_INVOKABLE QVector<Scalarm> getP();
     Q_INVOKABLE VCGPoint3SI getPoint();
-    Q_INVOKABLE void setPC(const float x,const float y,const float z);
-    Q_INVOKABLE void setP(const QVector<float>& p);
+    Q_INVOKABLE void setPC(const Scalarm x,const Scalarm y,const Scalarm z);
+    Q_INVOKABLE void setP(const QVector<Scalarm>& p);
     Q_INVOKABLE void setPoint(const VCGPoint3SI& p);
-    Q_INVOKABLE QVector<float> getN();
+    Q_INVOKABLE QVector<Scalarm> getN();
     Q_INVOKABLE VCGPoint3SI getNormal();
     Q_INVOKABLE void setNormal(const VCGPoint3SI& p);
-    Q_INVOKABLE void setN(const float x,const float y,const float z);
+    Q_INVOKABLE void setN(const Scalarm x,const Scalarm y,const Scalarm z);
 
     CMeshO::VertexType& vv;
 };
@@ -146,13 +146,13 @@ public:
     MeshModelSI(MeshModel& meshModel,MeshDocumentSI* mdsi);
 
     Q_INVOKABLE int id() const;
-    Q_INVOKABLE float bboxDiag() const;
-    Q_INVOKABLE QVector<float> bboxMin() const;
-    Q_INVOKABLE QVector<float> bboxMax() const;
-Q_INVOKABLE inline float computeMinVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).first;  }
-Q_INVOKABLE inline float computeMaxVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).second; }
-Q_INVOKABLE inline float computeMinFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).first;  }
-Q_INVOKABLE inline float computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).second; }
+    Q_INVOKABLE Scalarm bboxDiag() const;
+    Q_INVOKABLE QVector<Scalarm> bboxMin() const;
+    Q_INVOKABLE QVector<Scalarm> bboxMax() const;
+Q_INVOKABLE inline Scalarm computeMinVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).first;  }
+Q_INVOKABLE inline Scalarm computeMaxVQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(mm.cm).second; }
+Q_INVOKABLE inline Scalarm computeMinFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).first;  }
+Q_INVOKABLE inline Scalarm computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(mm.cm).second; }
 
     Q_INVOKABLE QVector<VCGVertexSI*> vert();
     Q_INVOKABLE Point3Vector getVertPosArray();
@@ -187,8 +187,8 @@ QScriptValue VCGVertexScriptInterfaceToScriptValue(QScriptEngine* eng,VCGVertexS
 void VCGVertexScriptInterfaceFromScriptValue(const QScriptValue& val,VCGVertexSI*& out);
 
 
-Q_DECLARE_METATYPE(QVector<float>)
-Q_DECLARE_METATYPE(QVector<float>*)
+Q_DECLARE_METATYPE(QVector<Scalarm>)
+Q_DECLARE_METATYPE(QVector<Scalarm>*)
 Q_DECLARE_METATYPE(Point3Vector)
 Q_DECLARE_METATYPE(QVector<VCGVertexSI*>)
 
@@ -276,7 +276,7 @@ QScriptValue ShotSI_defctor(QScriptContext* c,QScriptEngine* e);
 
     inline QScriptValue VCGPoint3SI_multV3S( QScriptContext * c,QScriptEngine *e )
     {
-        return e->toScriptValue(*qscriptvalue_cast<VCGPoint3SI*>(c->argument(0)) * (float) c->argument(1).toNumber());
+        return e->toScriptValue(*qscriptvalue_cast<VCGPoint3SI*>(c->argument(0)) * (Scalarm) c->argument(1).toNumber());
     }
 
 

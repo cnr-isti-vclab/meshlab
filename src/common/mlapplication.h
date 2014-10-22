@@ -14,12 +14,14 @@ template<>
 struct MeshLabScalarTest<float>
 {
 	static const QString floatingPointPrecision() {return QString("fp");}
+    static const char* floatingPointPrecisionIOToken() {return "%f";}
 };
 
 template<>
 struct MeshLabScalarTest<double>
 {
 	static const QString floatingPointPrecision() {return QString("dp");}
+    static const char* floatingPointPrecisionIOToken() {return "%lf";}
 };
 
 
