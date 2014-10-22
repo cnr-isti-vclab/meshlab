@@ -28,6 +28,9 @@ DAMAGE.
 #include "Geometry.h"
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <io.h>
+#endif // _WIN32
 
 ///////////////////
 // CoredMeshData //
@@ -43,13 +46,18 @@ BufferedReadWriteFile::BufferedReadWriteFile( char* fileName , int bufferSize )
 {
 	_bufferIndex = 0;
 	_bufferSize = bufferSize;
-	if( fileName ) strcpy( _fileName , fileName ) , tempFile = false;
+	if( fileName ) strcpy( _fileName , fileName ) , tempFile = false , _fp = fopen( _fileName , "w+b" );
+	else
+	{
+		strcpy( _fileName , "PR_XXXXXX" );
 #ifdef _WIN32
-	else strcpy( _fileName , _tempnam( "." , "foo" ) ) , tempFile = true;
+		_mktemp( _fileName );
+		_fp = fopen( _fileName , "w+b" );
 #else // !_WIN32
-	else strcpy( _fileName , tempnam( "." , "foo" ) ) , tempFile = true;
+		_fp = fdopen( mkstemp( _fileName ) , "w+b" );
 #endif // _WIN32
-	_fp = fopen( _fileName , "w+b" );
+		tempFile = true;
+	}
 	if( !_fp ) fprintf( stderr , "[ERROR] Failed to open file: %s\n" , _fileName ) , exit( 0 );
 	_buffer = (char*) malloc( _bufferSize );
 }

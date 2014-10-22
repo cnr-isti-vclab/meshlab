@@ -26,6 +26,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#include <stdio.h>
+
 template<class Real>
 Real Random(void){return Real(rand())/RAND_MAX;}
 
