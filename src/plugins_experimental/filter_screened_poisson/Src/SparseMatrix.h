@@ -70,7 +70,6 @@ public:
 	~SparseMatrix();
 
 	void SetZero();
-	void SetIdentity();
 
 	SparseMatrix<T>& operator = (const SparseMatrix<T>& M);
 
@@ -78,19 +77,12 @@ public:
 	SparseMatrix<T>& operator *= (const T& V);
 
 
-	SparseMatrix<T> operator * (const SparseMatrix<T>& M) const;
-	SparseMatrix<T> Multiply( const SparseMatrix<T>& M ) const;
-	SparseMatrix<T> MultiplyTranspose( const SparseMatrix<T>& Mt ) const;
-
 	template<class T2>
 	Vector<T2> operator * (const Vector<T2>& V) const;
 	template<class T2>
 	Vector<T2> Multiply( const Vector<T2>& V ) const;
 	template<class T2>
 	void Multiply( const Vector<T2>& In , Vector<T2>& Out , int threads=1 ) const;
-
-
-	SparseMatrix<T> Transpose() const;
 
 	static int Solve			(const SparseMatrix<T>& M,const Vector<T>& b, int iters,Vector<T>& solution,const T eps=1e-8);
 
