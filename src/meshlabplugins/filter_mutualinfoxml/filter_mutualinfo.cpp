@@ -27,7 +27,7 @@
 #include <wrap/gl/shot.h>
 #include <wrap/gl/camera.h>
 
-bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap&env, vcg::CallBackPos * cb )
+bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap&env, vcg::CallBackPos * /*cb*/ )
 {
     if (md.mm() == NULL)
         return false;

@@ -87,7 +87,8 @@ void Parameters::initScale(CMeshO &mesh, int nsamples) {
   reset();
 
   const double step = 0.1;
-  for(int i = 0; i < size(); i++) {
+  for(int i = 0; i < size(); i++) 
+  {
     p[i] = step;
     Shot test = toShot(false);
     double diff = pixelDiff(test, mesh, nsamples)/step;
@@ -99,6 +100,7 @@ void Parameters::initScale(CMeshO &mesh, int nsamples) {
     }
     p[i] = 0.0;
   }
+
   /*scale[6] = 1;
   for(int i = 0; i < 300; i++) {
     p[6] = -20 + i*0.2;
