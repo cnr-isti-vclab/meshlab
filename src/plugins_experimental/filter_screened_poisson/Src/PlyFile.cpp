@@ -36,9 +36,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "PlyFile.h"
+#include "Ply.h"
 
-char *type_names[] = {
+const char *type_names[] = {
 	"invalid",
 	"char",
 	"short",
@@ -102,10 +102,10 @@ static int types_checked = 0;
 int equal_strings(const char *, const char *);
 
 /* find an element in a plyfile's list */
-PlyElement *find_element(PlyFile *, char *);
+PlyElement *find_element(PlyFile *, const char *);
 
 /* find a property in an element's list */
-PlyProperty *find_property(PlyElement *, char *, int *);
+PlyProperty *find_property(PlyElement *, const char *, int *);
 
 /* write to a file the word describing a PLY file data type */
 void write_scalar_type (FILE *, int);
@@ -146,7 +146,7 @@ void ascii_get_element(PlyFile *, char *);
 void binary_get_element(PlyFile *, char *);
 
 /* memory allocation */
-char *my_alloc(int, int, char *);
+char *my_alloc(int, int, const char *);
 
 /* byte ordering */
 void get_native_binary_type();
@@ -336,7 +336,7 @@ Describe a property of an element.
 
 void ply_describe_property(
 						   PlyFile *plyfile,
-						   char *elem_name,
+						   const char *elem_name,
 						   PlyProperty *prop
 						   )
 {
@@ -442,7 +442,7 @@ State how many of a given element will be written.
 
 void ply_element_count(
 					   PlyFile *plyfile,
-					   char *elem_name,
+					   const char *elem_name,
 					   int nelems
 					   )
 {
@@ -540,7 +540,7 @@ before a call to the routine ply_put_element().
  elem_name - name of element we're talking about
 ******************************************************************************/
 
-void ply_put_element_setup(PlyFile *plyfile, char *elem_name)
+void ply_put_element_setup(PlyFile *plyfile, const char *elem_name)
 {
 	PlyElement *elem;
 	
@@ -1479,7 +1479,7 @@ Open a polygon file for reading.
 	returns the element, or NULL if not found
   ******************************************************************************/
   
-  PlyElement *find_element(PlyFile *plyfile, char *element)
+  PlyElement *find_element(PlyFile *plyfile, const char *element)
   {
 	  int i;
 	  
@@ -1503,7 +1503,7 @@ Open a polygon file for reading.
 	returns a pointer to the property, or NULL if not found
   ******************************************************************************/
   
-  PlyProperty *find_property(PlyElement *elem, char *prop_name, int *index)
+  PlyProperty *find_property(PlyElement *elem, const char *prop_name, int *index)
   {
 	  int i;
 	  
@@ -2712,7 +2712,7 @@ Read an element from a binary file.
    fname - file name from which memory was requested
   ******************************************************************************/
   
-  char *my_alloc(int size, int lnum, char *fname)
+  char *my_alloc(int size, int lnum, const char *fname)
   {
 	  char *ptr;
 	  
