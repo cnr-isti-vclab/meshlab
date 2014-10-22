@@ -1186,7 +1186,7 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
         throw MeshLabException("Critical Error: A widget must have an instance of XMLStdParFrame as parent.");
     gla_curr = par->curr_gla;
     //int row = gridLay->rowCount() - 1;
-    this->setShotValue(paramName,vcg::Shotf());
+    this->setShotValue(paramName,Shotm());
     paramName = xmlWidgetTag[MLXMLElNames::paramName];
     descLab = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
     //gridLay->addWidget(descLab,row,0,Qt::AlignTop);
@@ -1212,7 +1212,7 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
         names << "Current Trackball";
         names << "Current Mesh";
         names << "Current Raster";
-        connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+        connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
         connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
         connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
         connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
@@ -1232,14 +1232,14 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 
 QString XMLShotWidget::getWidgetExpression()
 {
-    vcg::Matrix44f m = curShot.Extrinsics.Rot();
-    vcg::Point3f t = curShot.Extrinsics.Tra();
-    float foc = curShot.Intrinsics.FocalMm;
-    vcg::Point2f pxs = curShot.Intrinsics.PixelSizeMm;
-    vcg::Point2f cp = curShot.Intrinsics.CenterPx;
+    Matrix44m m = curShot.Extrinsics.Rot();
+    Point3m t = curShot.Extrinsics.Tra();
+    Scalarm foc = curShot.Intrinsics.FocalMm;
+    Point2m pxs = curShot.Intrinsics.PixelSizeMm;
+    Point2m cp = curShot.Intrinsics.CenterPx;
     vcg::Point2i vw = curShot.Intrinsics.ViewportPx;
-    vcg::Point2f dist = curShot.Intrinsics.DistorCenterPx;
-    float* k = curShot.Intrinsics.k;
+    Point2m dist = curShot.Intrinsics.DistorCenterPx;
+    Scalarm* k = curShot.Intrinsics.k;
     QString ms = "new " + MLXMLElNames::shotType + "([";
     for(int ii = 0;ii < 4;++ii)
         for(int jj = 0;jj < 4;++jj)
@@ -1281,12 +1281,12 @@ void XMLShotWidget::set( const QString & expr )
         throw MeshLabException(err);
     }
     int offset = 0;
-    vcg::Matrix44f rot;
+    Matrix44m rot;
     int ii = 0;
     for(ii = 0;ii < 16;++ii)
     {
         bool ok = false;
-        rot[ii / 4][ii % 4] = numbs[ii].toFloat(&ok);
+        rot[ii / 4][ii % 4] = Scalarm(numbs[ii].toDouble(&ok));
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
@@ -1295,7 +1295,7 @@ void XMLShotWidget::set( const QString & expr )
     }
     offset += ii;
     curShot.Extrinsics.SetRot(rot);
-    vcg::Point3f tra;
+    Point3m tra;
     for(ii = 0; ii < 3;++ii)
     {
         bool ok = false;
@@ -1316,7 +1316,7 @@ void XMLShotWidget::set( const QString & expr )
         throw MeshLabException(err);
     }
     ++offset;
-    vcg::Point2f tmp2vcf;
+    Point2m tmp2vcf;
     for(ii = 0; ii < 2;++ii)
     {
         bool ok = false;
@@ -1415,7 +1415,7 @@ void XMLShotWidget::getShot()
     }
 }
 
-void XMLShotWidget::setShotValue(QString name,vcg::Shotf newVal)
+void XMLShotWidget::setShotValue(QString name,Shotm newVal)
 {
     if(name==paramName)
     {

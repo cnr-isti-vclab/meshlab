@@ -364,7 +364,7 @@ public:
 
 public slots:
 	void  getShot();
-	void  setShotValue(QString name, vcg::Shotf val);
+	void  setShotValue(QString name, Shotm val);
 signals:
 	void askRasterShot(QString);
 	void askMeshShot(QString);
@@ -373,7 +373,7 @@ signals:
 
 protected:
 	QWidget *gla_curr;
-	vcg::Shotf curShot;
+	Shotm curShot;
 	//QLineEdit * shotLE;
 	QComboBox *getShotCombo;
 	QLabel* descLab;
