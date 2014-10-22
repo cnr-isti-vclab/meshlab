@@ -150,11 +150,12 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 	sData._cMap.clear() , sData._eMap.clear() , sData._fMap.clear();
 	sData._cMap.resize( sData.nodeCount * Square::CORNERS , 0 ) , sData._eMap.resize( sData.nodeCount * Square::EDGES , 0 ) , sData._fMap.resize( sData.nodeCount * Square::FACES , 0 );
 	sData.cTable.resize( sData.nodeCount ) , sData.eTable.resize( sData.nodeCount ) , sData.fTable.resize( sData.nodeCount );
-	TreeOctNode::ConstNeighborKey3 neighborKey;
-	neighborKey.set( depth );
-#pragma omp parallel for num_threads( threads ) firstprivate( neighborKey )
+	std::vector< TreeOctNode::ConstNeighborKey3 > neighborKeys( std::max< int >( 1 , threads ) );
+	for( int i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
+#pragma omp parallel for num_threads( threads )
 	for( int i=span.first ; i<span.second ; i++ )
 	{
+		TreeOctNode::ConstNeighborKey3& neighborKey = neighborKeys[ omp_get_thread_num() ];
 		TreeOctNode* node = treeNodes[i];
 		const TreeOctNode::ConstNeighbors3& neighbors = neighborKey.getNeighbors( node );
 		int d , off[3];
@@ -270,11 +271,12 @@ void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , i
 	sData._eMap.clear() , sData._fMap.clear();
 	sData._eMap.resize( sData.nodeCount * Square::CORNERS , 0 ) , sData._fMap.resize( sData.nodeCount * Square::EDGES , 0 );
 	sData.eTable.resize( sData.nodeCount ) , sData.fTable.resize( sData.nodeCount );
-	TreeOctNode::ConstNeighborKey3 neighborKey;
-	neighborKey.set( depth );
-#pragma omp parallel for num_threads( threads ) firstprivate( neighborKey )
+	std::vector< TreeOctNode::ConstNeighborKey3 > neighborKeys( std::max< int >( 1 , threads ) );
+	for( int i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
+#pragma omp parallel for num_threads( threads )
 	for( int i=span.first ; i<span.second ; i++ )
 	{
+		TreeOctNode::ConstNeighborKey3& neighborKey = neighborKeys[ omp_get_thread_num() ];
 		TreeOctNode* node = treeNodes[i];
 		const TreeOctNode::ConstNeighbors3& neighbors = neighborKey.getNeighbors( node );
 		int d , off[3];
