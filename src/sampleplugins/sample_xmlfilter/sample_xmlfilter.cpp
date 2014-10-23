@@ -38,21 +38,22 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 	{
 		MeshModel &m=*md.mm();
 		srand(time(NULL)); 
-		const float max_displacement =env.evalFloat("Displacement");
-
+		const Scalarm max_displacement(env.evalFloat("Displacement"));
+        
+        QList<int> meshlist;
+        meshlist << m.id();
 		for(unsigned int i = 0; i< m.cm.vert.size(); i++)
 		{
 			// Typical usage of the callback for showing a nice progress bar in the bottom. 
 		//	// First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
 			cb(100*i/m.cm.vert.size(), "Randomly Displacing...");
 
-			float rndax = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-			float rnday = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-			float rndaz = (float(2.0f*rand())/RAND_MAX - 1.0f ) *max_displacement;
-			m.cm.vert[i].P() += vcg::Point3f(rndax,rnday,rndaz);
+			Scalarm rndax((2.0*rand()/RAND_MAX - 1.0) * max_displacement);
+			Scalarm rnday((2.0*rand()/RAND_MAX - 1.0) * max_displacement);
+			Scalarm rndaz((2.0*rand()/RAND_MAX - 1.0) * max_displacement);
+			m.cm.vert[i].P() += Point3m(rndax,rnday,rndaz);
 			//if ( i % 1000 == 0)
-			QList<int> meshlist;
-			meshlist << m.id();
+			
 			md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOORD));
 			if (intteruptreq)
 				return true;
