@@ -169,6 +169,12 @@ Q_INVOKABLE inline Scalarm computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>
     MeshModel& mm;
 };
 
+
+//Q_DECLARE_METATYPE(Scalarm)
+//QScriptValue ScalarmToScriptValue(QScriptEngine* eng,Scalarm* const& in);
+//
+//void ScalarmFromScriptValue(const QScriptValue& val,Scalarm*& out);
+
 Q_DECLARE_METATYPE(MeshDocumentSI*)
 QScriptValue MeshDocumentScriptInterfaceToScriptValue(QScriptEngine* eng,MeshDocumentSI* const& in);
 

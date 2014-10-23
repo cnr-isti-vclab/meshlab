@@ -595,6 +595,7 @@ QScriptValue EnvWrap::evalExp( const QString& nm )
     if (!constStatement(nm))
         throw NotConstException(nm);
     QScriptValue result = env->evaluate(nm);
+    QString errmsg = result.toString();
     if (result.isError())
         throw ValueNotFoundException(nm);
     return result;
@@ -814,14 +815,18 @@ QScriptValue ShotSI_defctor( QScriptContext* /*c*/,QScriptEngine* e )
     return e->newQObject(shot, QScriptEngine::ScriptOwnership);
 }
 
+
+
 Env::Env()
     :QScriptEngine()
 {
+    qRegisterMetaType<Scalarm>("Scalarm");
     qScriptRegisterSequenceMetaType< QVector<Scalarm> >(this);
     qScriptRegisterSequenceMetaType<Point3Vector>(this);
     qScriptRegisterSequenceMetaType<QVector<VCGVertexSI*> >(this);
     qScriptRegisterMetaType(this,MeshModelScriptInterfaceToScriptValue,MeshModelScriptInterfaceFromScriptValue);
     qScriptRegisterMetaType(this,VCGVertexScriptInterfaceToScriptValue,VCGVertexScriptInterfaceFromScriptValue);
+    
     QScriptValue fun = newFunction(myprint, 1);
     globalObject().setProperty("print", fun);
 
