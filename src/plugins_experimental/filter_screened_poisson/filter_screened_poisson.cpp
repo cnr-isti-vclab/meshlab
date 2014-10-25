@@ -30,10 +30,13 @@
 void DumpOutput( const char* format , ... );
 void DumpOutput2( char* str , const char* format , ... );
 
+#include "Src/PointStream.h"
+
 #include "Src/MultiGridOctreeData.h"
 
 #include "filter_screened_poisson.h"
 #include <QtScript>
+
 void DumpOutput( const char* format , ... )
 {
   char buf[4096];
@@ -76,6 +79,7 @@ public:
   Real ScaleVal;
   bool ConfidenceFlag;
   bool NormalWeightsFlag;
+  bool DensityFlag;
   Real PointWeightVal;
   int AdaptiveExponentVal;
   int BoundaryTypeVal;
@@ -97,6 +101,7 @@ bool NonManifoldFlag;
     ScaleVal=1.1f;
     ConfidenceFlag=false;
     NormalWeightsFlag=false;
+    DensityFlag=false;
     PointWeightVal = 4.0f;
     AdaptiveExponentVal=1;
     BoundaryTypeVal=1;
@@ -109,188 +114,277 @@ bool NonManifoldFlag;
   }
 };
 
-template< class Real , int Degree >
-int Execute(CMeshO &m, CMeshO &pm, PoissonParam<Real> &pp)
+template< class Real >
+class MeshModelPointStream : public PointStream< Real >
+{
+  CMeshO &_m;
+  size_t _curPos;
+public:
+  MeshModelPointStream(  CMeshO &m):_m(m),_curPos(0)
+  {
+    vcg::tri::RequireCompactness(m);
+  }
+  ~MeshModelPointStream( void ){}
+  void reset( void ) { _curPos =0;}
+  bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+  {
+    if(_curPos>=_m.vn)
+      return false;
+
+    p[0] = _m.vert[_curPos].P()[0];
+    p[1] = _m.vert[_curPos].P()[1];
+    p[2] = _m.vert[_curPos].P()[2];
+    n[0] = _m.vert[_curPos].N()[0];
+    n[1] = _m.vert[_curPos].N()[1];
+    n[2] = _m.vert[_curPos].N()[2];
+    ++_curPos;
+    return true;
+  }
+};
+
+template< class Real >
+class MeshDocumentPointStream : public PointStream< Real >
+{
+  MeshDocument &_md;
+  MeshModel *_curMesh;
+  size_t _curPos;
+  size_t _totalSize;
+public:
+  MeshDocumentPointStream(  MeshDocument &md):_md(md),_curMesh(0),_curPos(0)
+  {
+    _totalSize=0;
+    MeshModel *m=0;
+    do
+    {
+      m=_md.nextVisibleMesh(m);
+      if(m!=0)
+      {
+        vcg::tri::RequireCompactness(m->cm);
+        _totalSize+=m->cm.vn;
+      }
+    } while(m);
+    qDebug("TotalSize %i",_totalSize);
+  }
+  ~MeshDocumentPointStream( void ){}
+  void reset( void ) { _curPos =0; _curMesh=0;}
+  bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+  {
+    Point3m nn(0,0,0);
+//    do
+    {
+      if((_curMesh==0) || (_curPos >= _curMesh->cm.vn) )
+      {
+        _curMesh = _md.nextVisibleMesh(_curMesh);
+        _curPos = 0;
+      }
+
+      if(_curMesh==0)
+        return false;
+      if(_curPos < _curMesh->cm.vn)
+      {
+        nn = _curMesh->cm.vert[_curPos].N();
+        Point3m tp = _curMesh->cm.Tr * _curMesh->cm.vert[_curPos].P();
+        Point4m np = _curMesh->cm.Tr *  Point4m(nn[0],nn[1],nn[2],0);
+//        Point3m tp = _curMesh->cm.vert[_curPos].P();
+//        Point3m np = nn;
+        p[0] = tp[0];
+        p[1] = tp[1];
+        p[2] = tp[2];
+        n[0] = np[0];
+        n[1] = np[1];
+        n[2] = np[2];
+        ++_curPos;
+      }
+    }
+    assert(nn!=Point3m(0,0,0));
+    return true;
+  }
+};
+
+
+template< class Real>
+bool Execute(PointStream< Real > *ps, CMeshO &pm, PoissonParam<Real> &pp, vcg::CallBackPos* cb)
+{
+  Reset< Real >();
+  XForm4x4< Real > xForm=XForm4x4< Real >::Identity();
+
+  cb(1,"Running Screened Poisson Reconstruction\n" );
+
+  double t;
+  double tt=Time();
+  Real isoValue = 0;
+
+  Octree< Real > tree;
+  tree.threads = 1;
+  if( pp.MaxSolveDepthVal<0 ) pp.MaxSolveDepthVal = pp.MaxDepthVal;
+
+  //    OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
+  OctNode< TreeNodeData >::SetAllocator( 0 );
+
+  //    int kernelDepth = KernelDepth.set ?  KernelDepth.value : Depth.value-2;
+  if(pp.KernelDepthVal<0) pp.KernelDepthVal =pp.MaxDepthVal-2;
+  if( pp.KernelDepthVal>pp.MaxDepthVal )
+    return false;
+
+  cb(10,"Creating Tree");
+  double maxMemoryUsage;
+  t=Time();
+  //     tree.maxMemoryUsage=0;
+  typename Octree< Real >::PointInfo* pointInfo = new typename Octree< Real >::PointInfo();
+  typename Octree< Real >::NormalInfo* normalInfo = new typename Octree< Real >::NormalInfo();
+  std::vector< Real >* kernelDensityWeights = new std::vector< Real >();
+  std::vector< Real >* centerWeights = new std::vector< Real >();
+  //    int SetTree( char* fileName , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
+  //		Real scaleFactor , bool useConfidence , bool useNormalWeight , Real constraintWeight , int adaptiveExponent ,
+  //		PointInfo& pointInfo , NormalInfo& normalInfo , std::vector< Real >& kernelDensityWeights , std::vector< Real >& centerWeights ,
+  //		int boundaryType=BSplineElements< Degree >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity , bool makeComplete=false );
+
+  TreeNodeData::NodeCount=0;
+  int pointCount = tree.template SetTree< Scalarm >(  0, pp.MinDepthVal , pp.MaxDepthVal , pp.FullDepthVal , pp.KernelDepthVal , pp.SamplesPerNodeVal ,
+                                                      pp.ScaleVal , pp.ConfidenceFlag , pp.NormalWeightsFlag , pp.PointWeightVal , pp.AdaptiveExponentVal ,
+                                                      *pointInfo , *normalInfo , *kernelDensityWeights , *centerWeights ,
+                                                      ps, pp.BoundaryTypeVal , xForm , pp.CompleteFlag );
+
+  DumpOutput("#             Tree set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+  DumpOutput( "Input Points: %d\n" , pointCount );
+  DumpOutput( "Leaves/Nodes: %d/%d\n" , tree.tree.leaves() , tree.tree.nodes() );
+  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
+
+  maxMemoryUsage = tree.maxMemoryUsage;
+  cb(20,"Settng Constraints");
+  t=Time() , tree.maxMemoryUsage=0;
+  Pointer( Real ) constraints = tree.SetLaplacianConstraints( *normalInfo );
+  delete normalInfo;
+  DumpOutput("#      Constraints set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
+  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
+
+  cb(70,"Solving Linear system");
+  t=Time() , tree.maxMemoryUsage=0;
+  Pointer( Real ) solution = tree.SolveSystem( *pointInfo , constraints , pp.ShowResidualFlag , pp.ItersVal , pp.MaxSolveDepthVal , pp.CGDepthVal , pp.CSSolverAccuracyVal );
+  delete pointInfo;
+  FreePointer( constraints );
+  DumpOutput( "# Linear system solved in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
+  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
+
+  CoredFileMeshData< PlyValueVertex< float > > mesh;
+
+  tree.maxMemoryUsage=0;
+  t=Time();
+  isoValue = tree.GetIsoValue( solution , *centerWeights );
+  delete centerWeights;
+  DumpOutput( "Got average in: %f\n" , Time()-t );
+  DumpOutput( "Iso-Value: %e\n" , isoValue );
+
+  cb(80,"Building Isosurface");
+  t = Time() , tree.maxMemoryUsage = 0;
+  assert(kernelDensityWeights);
+  tree.GetMCIsoSurface(  GetPointer( *kernelDensityWeights ) , solution , isoValue , mesh , true , !pp.NonManifoldFlag , false /*PolygonMesh.set*/ );
+  DumpOutput("#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
+  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
+  DumpOutput( "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
+
+  DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
+  FreePointer( solution );
+
+  cb(90,"Creating Mesh");
+  mesh.resetIterator();
+  int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
+
+  vcg::tri::Allocator<CMeshO>::AddVertices(pm,vm);
+
+
+  int i;
+  for (i=0; i < int(mesh.inCorePoints.size()); i++){
+    pm.vert[i].P()[0] = mesh.inCorePoints[i].point[0];
+    pm.vert[i].P()[1] = mesh.inCorePoints[i].point[1];
+    pm.vert[i].P()[2] = mesh.inCorePoints[i].point[2];
+    pm.vert[i].Q() = mesh.inCorePoints[i].value;
+  }
+  for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
+    PlyValueVertex< float > p;
+    mesh.nextOutOfCorePoint(p);
+    pm.vert[ii+i].P()[0] = p.point[0];
+    pm.vert[ii+i].P()[1] = p.point[1];
+    pm.vert[ii+i].P()[2] = p.point[2];
+    pm.vert[ii+i].Q() = p.value;
+  }
+
+  std::vector< CoredVertexIndex > polygon;
+
+  while(mesh.nextPolygon( polygon ))
+  {
+    assert(polygon.size()==3);
+    int indV[3];
+    for( int i=0 ; i<int(polygon.size()) ; i++ )
+    {
+      if( polygon[i].inCore ) indV[i] = polygon[i].idx;
+      else                    indV[i]= polygon[i].idx + int( mesh.inCorePoints.size() );
+    }
+    vcg::tri::Allocator<CMeshO>::AddFace(pm, &pm.vert[indV[0]], &pm.vert[indV[1]], &pm.vert[indV[2]]);
+  }
+  cb(100,"Done");
+  return 1;
+}
+template <class MeshType>
+void PoissonClean(MeshType &m, bool scaleNormal)
 {
 
-  XForm4x4< Real > xForm=XForm4x4< Real >::Identity();
-  int ThreadVal=1;
-  // All the following parameters defaulf values are taken from the original command line PoissonRecon.cpp
-
-  size_t stride = ((char *)&(m.vert[1].P()[0])) - ((char *)&(m.vert[0].P()[0]));
-  MemoryPointStream<Real> myPointStream( &(m.vert[0].P()[0]),stride,&(m.vert[0].N()[0]),stride,m.vert.size());
-
-    DumpOutput( "Running Screened Poisson Reconstruction (Version 6.11)\n" );
-
-    double t;
-    double tt=Time();
-    Real isoValue = 0;
-
-    Octree< Real , Degree > tree;
-    tree.threads = ThreadVal;
-    if( pp.MaxSolveDepthVal<0 ) pp.MaxSolveDepthVal = pp.MaxDepthVal;
-
-    OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
-
-//    t=Time();
-//    int kernelDepth = KernelDepth.set ?  KernelDepth.value : Depth.value-2;
-    if(pp.KernelDepthVal<0) pp.KernelDepthVal =pp.MaxDepthVal-2;
-    if( pp.KernelDepthVal>pp.MaxDepthVal )
-    {
-//        fprintf( stderr,"[ERROR] %s can't be greater than %s: %d <= %d\n" , KernelDepth.name , Depth.name , KernelDepth.value , Depth.value );
-        return EXIT_FAILURE;
-    }
-
-    double maxMemoryUsage;
-    t=Time();
-     tree.maxMemoryUsage=0;
-    typename Octree< Real , Degree >::PointInfo* pointInfo = new typename Octree< Real , Degree >::PointInfo();
-    typename Octree< Real , Degree >::NormalInfo* normalInfo = new typename Octree< Real , Degree >::NormalInfo();
-    std::vector< Real >* kernelDensityWeights = new std::vector< Real >();
-    std::vector< Real >* centerWeights = new std::vector< Real >();
-//    int SetTree( char* fileName , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
-//		Real scaleFactor , bool useConfidence , bool useNormalWeight , Real constraintWeight , int adaptiveExponent ,
-//		PointInfo& pointInfo , NormalInfo& normalInfo , std::vector< Real >& kernelDensityWeights , std::vector< Real >& centerWeights ,
-//		int boundaryType=BSplineElements< Degree >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity , bool makeComplete=false );
-
-
-//    int pointCount = tree.template SetTree< float >( In.value , MinDepth.value , Depth.value , FullDepth.value , kernelDepth , Real(SamplesPerNode.value) , Scale.value , Confidence.set , NormalWeights.set , PointWeight.value , AdaptiveExponent.value , *pointInfo , *normalInfo , *kernelDensityWeights , *centerWeights , BoundaryType.value , xForm , Complete.set );
-      int pointCount = tree.template SetTree< Scalarm >(  0, pp.MinDepthVal , pp.MaxDepthVal , pp.FullDepthVal , pp.KernelDepthVal , pp.SamplesPerNodeVal ,
-                                                        pp.ScaleVal , pp.ConfidenceFlag , pp.NormalWeightsFlag , pp.PointWeightVal , pp.AdaptiveExponentVal ,
-                                                        *pointInfo , *normalInfo , *kernelDensityWeights , *centerWeights ,
-                                                        &myPointStream, pp.BoundaryTypeVal , xForm , pp.CompleteFlag );
-//    if( !Density.set ) delete kernelDensityWeights , kernelDensityWeights = NULL;
-
-    DumpOutput("#             Tree set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-    DumpOutput( "Input Points: %d\n" , pointCount );
-    DumpOutput( "Leaves/Nodes: %d/%d\n" , tree.tree.leaves() , tree.tree.nodes() );
-    DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
-
-    maxMemoryUsage = tree.maxMemoryUsage;
-    t=Time() , tree.maxMemoryUsage=0;
-    Pointer( Real ) constraints = tree.SetLaplacianConstraints( *normalInfo );
-    delete normalInfo;
-    DumpOutput("#      Constraints set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-    DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
-    maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-
-    t=Time() , tree.maxMemoryUsage=0;
-    Pointer( Real ) solution = tree.SolveSystem( *pointInfo , constraints , pp.ShowResidualFlag , pp.ItersVal , pp.MaxSolveDepthVal , pp.CGDepthVal , pp.CSSolverAccuracyVal );
-    delete pointInfo;
-    FreePointer( constraints );
-    DumpOutput( "# Linear system solved in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-    DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
-    maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-
-    CoredFileMeshData< PlyValueVertex< float > > mesh;
-
-    tree.maxMemoryUsage=0;
-    t=Time();
-    isoValue = tree.GetIsoValue( solution , *centerWeights );
-    delete centerWeights;
-    DumpOutput( "Got average in: %f\n" , Time()-t );
-    DumpOutput( "Iso-Value: %e\n" , isoValue );
-
-//    if( VoxelGrid.set )
-//    {
-//        double t = Time();
-//        FILE* fp = fopen( VoxelGrid.value , "wb" );
-//        if( !fp ) fprintf( stderr , "Failed to open voxel file for writing: %s\n" , VoxelGrid.value );
-//        else
-//        {
-//            int res;
-//            Pointer( Real ) values = tree.Evaluate( solution , res , isoValue , VoxelDepth.value );
-//            fwrite( &res , sizeof(int) , 1 , fp );
-//            if( sizeof(Real)==sizeof(float) ) fwrite( values , sizeof(float) , res*res*res , fp );
-//            else
-//            {
-//                float *fValues = new float[res*res*res];
-//                for( int i=0 ; i<res*res*res ; i++ ) fValues[i] = float( values[i] );
-//                fwrite( fValues , sizeof(float) , res*res*res , fp );
-//                delete[] fValues;
-//            }
-//            fclose( fp );
-//            DeletePointer( values );
-//        }
-//        DumpOutput( "Got voxel grid in: %f\n" , Time()-t );
-//    }
-
-//    if( Out.set )
-//    {
-        t = Time() , tree.maxMemoryUsage = 0;
-        tree.GetMCIsoSurface( kernelDensityWeights ? GetPointer( *kernelDensityWeights ) : NullPointer< Real >() , solution , isoValue , mesh , true , !pp.NonManifoldFlag , false /*PolygonMesh.set*/ );
-//        if( PolygonMesh.set ) DumpOutput("#         Got polygons in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-//        else                  DumpOutput("#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-        DumpOutput("#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-        maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-        DumpOutput( "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
-
-//        if( NoComments.set )
-//        {
-//            if( ASCII.set ) PlyWritePolygons( Out.value , &mesh , PLY_ASCII         , NULL , 0 , iXForm );
-//            else            PlyWritePolygons( Out.value , &mesh , PLY_BINARY_NATIVE , NULL , 0 , iXForm );
-//        }
-//        else
-//        {
-//            if( ASCII.set ) PlyWritePolygons( Out.value , &mesh , PLY_ASCII         , comments , commentNum , iXForm );
-//            else            PlyWritePolygons( Out.value , &mesh , PLY_BINARY_NATIVE , comments , commentNum , iXForm );
-//        }
-        DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
-//    }
-    FreePointer( solution );
-
-
-    mesh.resetIterator();
-    int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
-    int fm = mesh.polygonCount();
-
-    vcg::tri::Allocator<CMeshO>::AddVertices(pm,vm);
-//    vcg::tri::Allocator<CMeshO>::AddFaces(pm,fm);
-
-     PlyValueVertex< float > p;
-    int i;
-    for (i=0; i < int(mesh.inCorePoints.size()); i++){
-//      p=mesh.inCorePoints[i];
-      pm.vert[i].P()[0] = mesh.inCorePoints[i].point[0];
-      pm.vert[i].P()[1] = mesh.inCorePoints[i].point[1];
-      pm.vert[i].P()[2] = mesh.inCorePoints[i].point[2];
-    }
-    for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
-      mesh.nextOutOfCorePoint(p);
-      pm.vert[ii+i].P()[0] = p.point[0];
-      pm.vert[ii+i].P()[1] = p.point[1];
-      pm.vert[ii+i].P()[2] = p.point[2];
-    }
-
-    std::vector< CoredVertexIndex > polygon;
-
-    while(mesh.nextPolygon( polygon ))
-    {
-      assert(polygon.size()==3);
-      int indV[3];
-      for( int i=0 ; i<int(polygon.size()) ; i++ )
-      {
-        if( polygon[i].inCore ) indV[i] = polygon[i].idx;
-        else                    indV[i]= polygon[i].idx + int( mesh.inCorePoints.size() );
-      }
-      vcg::tri::Allocator<CMeshO>::AddFace(pm,&pm.vert[indV[0]],&pm.vert[indV[1]],&pm.vert[indV[2]]);
-    }
-    return 1;
+  if(m.face.size()>0)
+    vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+  vcg::tri::Allocator<MeshType>::CompactEveryVector(m);
+  vcg::tri::UpdateNormal<MeshType>::NormalizePerVertex(m);
+  if(scaleNormal)
+  {
+    for(typename MeshType::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
+      vi->N() *= vi->Q();
+  }
 }
+
 bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
-    if (filterName == "Screened Poisson Surf. Reconstruction")
-    {
-      MeshModel *mm =md.mm();
-      MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
-      PoissonParam<Scalarm> pp;
+  if (filterName == "Screened Poisson Surf. Reconstruction")
+  {
+    MeshModel *mm =md.mm();
+    MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
+    md.setVisible(pm->id(),false);
 
-      pp.MaxDepthVal = env.evalInt("depth");
-      Execute<Scalarm,2>(mm->cm,pm->cm,pp);
-      pm->UpdateBoxAndNormals();
-      return true;
+    pm->updateDataMask(MeshModel::MM_VERTQUALITY);
+    PoissonParam<Scalarm> pp;
+
+    MeshModelPointStream<Scalarm> meshStream(mm->cm);
+    MeshDocumentPointStream<Scalarm> documentStream(md);
+
+    pp.MaxDepthVal = env.evalInt("depth");
+    pp.FullDepthVal = env.evalInt("fullDepth");
+    pp.CGDepthVal= env.evalInt("cgDepth");
+    pp.ScaleVal = env.evalFloat("scale");
+    pp.SamplesPerNodeVal = env.evalFloat("samplesPerNode");
+    pp.PointWeightVal = env.evalFloat("pointWeight");
+    pp.ItersVal = env.evalInt("iters");
+    pp.ConfidenceFlag = env.evalBool("confidence");
+    pp.NormalWeightsFlag = env.evalBool("nWeights");
+    pp.DensityFlag = true;
+    if(env.evalBool("visibleLayer"))
+    {
+      MeshModel *m=0;
+      while(m=md.nextVisibleMesh(m))
+        PoissonClean(m->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
+
+      Execute<Scalarm>(&documentStream,pm->cm,pp,cb);
     }
-    return false;
+    else
+    {
+      PoissonClean(mm->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
+      Execute<Scalarm>(&meshStream,pm->cm,pp,cb);
+    }
+    pm->UpdateBoxAndNormals();
+    md.setVisible(pm->id(),true);
+
+    return true;
+  }
+  return false;
 }
 
 

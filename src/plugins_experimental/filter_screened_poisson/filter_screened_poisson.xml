@@ -1,9 +1,19 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
 <PLUGIN pluginName="FilterScreenedPoissonPlugin" pluginAuthor="Paolo Cignoni" pluginEmail="paolo.cignoni@isti.cnr.it">
-<FILTER filterFunction="screenedPoissonSurfaceReconstruction" filterName="Screened Poisson Surf. Reconstruction" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Smoothing | Remeshing" filterPost="MM_FACENORMAL | MM_VERTCOORD | MM_VERTNORMAL" filterArity="SingleMesh" filterIsInterruptible="true">
-<FILTER_HELP><![CDATA[Screened Poisson Surface Reconstruction. .]]></FILTER_HELP>
+<FILTER filterFunction="screenedPoissonSurfaceReconstruction" filterName="Screened Poisson Surface Reconstruction" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Smoothing | Remeshing" filterPost="MM_FACENORMAL | MM_VERTCOORD | MM_VERTNORMAL" filterArity="SingleMesh" filterIsInterruptible="true">
+<FILTER_HELP><![CDATA[This surface reconstruction algorithm
+creates watertight surfaces from oriented point sets. In this work we extend the technique to explicitly
+incorporate the points as interpolation constraints.
+<br> The filter uses the original code of Michael Kazhdan and Matthew Bolitho implementing the algorithm described in the following paper:<br>
+<i>Michael Kazhdan, Hugues Hoppe</i>,<br>
+<b>"Screened Poisson surface reconstruction"</b><br>
+ACM Trans. Graphics, 32(3), 2013<br>
+]]></FILTER_HELP>
 <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-
+<PARAM parName="visibleLayer" parIsImportant="true" parType="Boolean" parDefault="false">
+<PARAM_HELP><![CDATA[Enabling this flag means that all the visible layers will be used for providing the points.]]></PARAM_HELP>
+  <CHECKBOX_GUI guiLabel="Merge all visible layers"/>
+  </PARAM>
    <PARAM parName="depth" parIsImportant="true" parType="Int" parDefault="8">
    <PARAM_HELP><![CDATA[This integer is the maximum depth of the tree that will be used for surface reconstruction.
    Running at depth d corresponds to solving on a voxel grid whose resolution is no larger than 2^d x 2^d x 2^d.
@@ -12,19 +22,13 @@
    The default value for this parameter is 8.]]></PARAM_HELP>
    <EDIT_GUI guiLabel="Reconstruction Depth"/>
    </PARAM>
-   <PARAM parName="fullDepth" parType="Int" parIsImportant="true" parDefault="5">
+   <PARAM parName="fullDepth" parType="Int" parIsImportant="false" parDefault="5">
    <PARAM_HELP><![CDATA[This integer specifies the depth beyond depth the octree will be adapted. At coarser depths,
    the octree will be complete, containing all 2^d x 2^d x 2^d nodes.
    The default value for this parameter is 5.]]></PARAM_HELP>
    <EDIT_GUI guiLabel="Adaptive Octree Depth"/>
    </PARAM>
-   <PARAM parName="voxelDepth" parType="Int" parIsImportant="true"  parDefault="5">
-   <PARAM_HELP><![CDATA[This integer is the depth of the regular grid over which the implicit function is to be sampled.
-   Running at depth d corresponds to sampling on a voxel grid whose resolution is 2^d x 2^d x 2^d.
-   The default value for this parameter is the value of the depth parameter]]></PARAM_HELP>
-   <EDIT_GUI guiLabel="Voxel Sampling Depth"/>
-   </PARAM>
-   <PARAM parName="cgDepth" parType="Int" parIsImportant="true" parDefault="0">
+   <PARAM parName="cgDepth" parType="Int" parIsImportant="false" parDefault="0">
    <PARAM_HELP><![CDATA[This integer is the depth up to which a conjugate-gradients solver will be used to solve the
    linear system. Beyond this depth Gauss-Seidel relaxation will be used.
    The default value for this parameter is 0.]]></PARAM_HELP>
@@ -66,12 +70,7 @@
    <PARAM parName="nWeights" parIsImportant="true" parType="Boolean" parDefault="false">
    <PARAM_HELP><![CDATA[Enabling this flag tells the reconstructor to use the size of the normals to modulate the
    interpolation weights. When the flag is not enabled, all points are given the same weight.]]></PARAM_HELP>
-   <CHECKBOX_GUI guiLabel="Weight Flat"/>
-   </PARAM>
-   <PARAM parName="density" parIsImportant="true" parType="Boolean" parDefault="false">
-   <PARAM_HELP><![CDATA[Enabling this flag tells the reconstructor to output the estimated depth values of the
-   iso-surface vertices.]]></PARAM_HELP>
-   <CHECKBOX_GUI guiLabel="Density Flag"/>
+   <CHECKBOX_GUI guiLabel="Weight Flag"/>
    </PARAM>
   </FILTER>
   </PLUGIN>
