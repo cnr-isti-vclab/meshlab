@@ -17,6 +17,7 @@ win32-msvc2005:  LIBS += ../../distrib/common.lib
 win32-msvc2008:  LIBS += ../../distrib/common.lib
 win32-msvc2010:  LIBS += ../../distrib/common.lib
 win32-msvc2012:  LIBS += ../../distrib/common.lib
+win32-msvc2013:  LIBS += ../../distrib/common.lib
 win32-g++:LIBS += -L../../distrib -lcommon
 linux-g++:LIBS += -L../../distrib -lcommon
 linux-g++-32:LIBS += -L../../distrib -lcommon
@@ -32,6 +33,7 @@ win32-msvc2005:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2008:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2010:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2012:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
+win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
@@ -54,6 +56,7 @@ win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2010:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2012:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc2013:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release,debug | release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG
@@ -76,3 +79,4 @@ contains(TEMPLATE,lib) {
 	win32-msvc2008: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2010: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2012: RCC_DIR = $(ConfigurationName)
+#	win32-msvc2013: RCC_DIR = $(ConfigurationName)
