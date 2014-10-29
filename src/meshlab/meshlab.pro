@@ -75,6 +75,7 @@ FORMS = ui/layerDialog.ui \
 	win32-msvc2008: RCC_DIR = $(ConfigurationName)
 	#win32-msvc2010: RCC_DIR = $(ConfigurationName)
 	#win32-msvc2012: RCC_DIR = $(ConfigurationName)
+	#win32-msvc2013: RCC_DIR = $(ConfigurationName)	
 
 
 RESOURCES = meshlab.qrc
@@ -111,6 +112,7 @@ win32-msvc2005:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2012:DEFINES += _CRT_SECURE_NO_DEPRECATE
+win32-msvc2013:DEFINES += _CRT_SECURE_NO_DEPRECATE
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)
@@ -129,6 +131,7 @@ win32-msvc2005:LIBS		+= -L../external/lib/win32-msvc2005 -ljhead -L../distrib -l
 win32-msvc2008:LIBS		+= -L../external/lib/win32-msvc2008 -ljhead -L../distrib -lcommon 
 win32-msvc2010:LIBS		+= -L../external/lib/win32-msvc2010 -ljhead -L../distrib -lcommon
 win32-msvc2012:LIBS		+= -L../external/lib/win32-msvc2012 -ljhead -L../distrib -lcommon
+win32-msvc2013:LIBS		+= -L../external/lib/win32-msvc2013 -ljhead -L../distrib -lcommon
 win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcommon
 
 #CONFIG(release,debug | release) {
