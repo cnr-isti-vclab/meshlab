@@ -76,9 +76,12 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 }
 
 void LayerDialog::keyPressEvent ( QKeyEvent * event )
-{
+{   MeshDocument *md = mw->meshDoc();
     if(event->key() == Qt::Key_Space )
-        mw->meshDoc()->advanceCurrentRaster(1);
+    {
+      RasterModel *rm= md->nextRaster(md->rm());
+        if(rm!=0) md->setCurrentRaster(rm->id());
+    }
 }
 
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
