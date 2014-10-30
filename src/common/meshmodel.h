@@ -330,10 +330,8 @@ public:
     }
     void setLabel(QString newName) {_label=newName;}
 
-
-public:
     bool visible; // used in rendering; Needed for toggling on and off the meshes
-
+    bool isVisible() { return visible; }
     MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
     //bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
     //bool RenderSelectedFace();
@@ -624,6 +622,8 @@ public:
     //set the current mesh to be the one with the given ID
     void setCurrentMesh( int new_curr_id );
 
+    void setVisible(int meshId, bool val);
+
     /// returns the raster with the given unique id
     RasterModel *getRaster(int i);
 
@@ -633,15 +633,40 @@ public:
     void setCurrent(RasterModel *newCur)  { setCurrentRaster(newCur->id());}
 
     /// methods to access the set of Meshes in a ordered fashion.
-    void advanceCurrentMesh(int pos) {advanceCurrentElement(meshList,currentMesh,pos);}
-    void advanceCurrentRaster(int pos) {advanceCurrentElement(rasterList,currentRaster,pos);}
-
-    template <class LayerElement>
-    void advanceCurrentElement(QList<LayerElement *>& elemList, LayerElement* curr, int pos)
+    MeshModel   *nextVisibleMesh(MeshModel *_m)
     {
-      assert(!elemList.empty() && elemList.contains(curr));
-      int currPos = elemList.indexOf(curr);
-      setCurrent(elemList.at((currPos+pos)%elemList.size()));
+      MeshModel *newM = nextMesh(_m);
+      if(newM==0)
+        return newM;
+
+      if(newM->isVisible())
+        return newM;
+      else
+        return nextVisibleMesh(newM);
+    }
+
+    MeshModel   *nextMesh(MeshModel *_m) {
+      if(_m==0 && meshList.size()>0)
+        return meshList.at(0);
+      for (int i = 0; i < meshList.size(); ++i) {
+          if (meshList.at(i) == _m)
+          {
+            if(i+1 < meshList.size())
+              return meshList.at(i+1);
+          }
+      }
+      return 0;
+    }
+    /// methods to access the set of Meshes in a ordered fashion.
+    RasterModel   *nextRaster(RasterModel *_rm) {
+      for (int i = 0; i < rasterList.size(); ++i) {
+          if (rasterList.at(i) == _rm)
+          {
+            if(i+1 < rasterList.size())
+              return rasterList.at(i+1);
+          }
+      }
+      return 0;
     }
 
     MeshModel *mm() {

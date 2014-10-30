@@ -656,6 +656,12 @@ bool MeshModelState::apply(MeshModel *_m)
 
 /**** DATAMASK STUFF ****/
 
+void MeshDocument::setVisible(int meshId, bool val)
+{
+  getMesh(meshId)->visible=val;
+  emit meshSetChanged();
+}
+
 bool MeshModel::hasDataMask(const int maskToBeTested) const
 {
   return ((currentDataMask & maskToBeTested)!= 0);
