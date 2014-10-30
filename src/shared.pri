@@ -1,12 +1,12 @@
+# This is the common include for all the plugins
+
 include (general.pri)
 VCGDIR = ../$$VCGDIR
-# this is the common include for all the plugins
 
 TEMPLATE      = lib
 CONFIG       += plugin
 QT += opengl
 QT += xml
-QT += xmlpatterns
 QT += script
 
 mac:LIBS += ../../common/libcommon.dylib
@@ -63,7 +63,7 @@ CONFIG(release,debug | release){
  }
 
 DESTDIR       = ../../distrib/plugins
-# uncomment in you local copy only in emergency cases. 
+# uncomment in you local copy only in emergency cases.
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive
 
@@ -75,8 +75,8 @@ contains(TEMPLATE,lib) {
 }
 
 
-	win32-msvc2005: RCC_DIR = $(ConfigurationName)
-	win32-msvc2008: RCC_DIR = $(ConfigurationName)
+  win32-msvc2005: RCC_DIR = $(ConfigurationName)
+  win32-msvc2008: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2010: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2012: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2013: RCC_DIR = $(ConfigurationName)
