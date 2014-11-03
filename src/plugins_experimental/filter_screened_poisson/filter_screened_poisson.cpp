@@ -21,6 +21,10 @@
 *                                                                           *
 ****************************************************************************/
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "Src/MarchingCubes.h"
 #include "Src/Octree.h"
 #include "Src/SparseMatrix.h"
@@ -36,6 +40,8 @@ void DumpOutput2( char* str , const char* format , ... );
 
 #include "filter_screened_poisson.h"
 #include <QtScript>
+
+
 
 void DumpOutput( const char* format , ... )
 {
@@ -344,7 +350,7 @@ void PoissonClean(MeshType &m, bool scaleNormal)
 
 bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
-  if (filterName == "Screened Poisson Surf. Reconstruction")
+  if (filterName == "Screened Poisson Surface Reconstruction")
   {
     MeshModel *mm =md.mm();
     MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
