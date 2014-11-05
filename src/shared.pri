@@ -7,6 +7,7 @@ TEMPLATE      = lib
 CONFIG       += plugin
 QT += opengl
 QT += xml
+QT += xmlpatterns
 QT += script
 
 mac:LIBS += ../../common/libcommon.dylib
