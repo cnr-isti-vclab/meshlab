@@ -63,7 +63,7 @@ class MainWindowInterface
 {
 public:
   virtual void executeFilter(QAction *, RichParameterSet &, bool  = false ){}
-  //parexpval is a string map containing the parameter expression values set in the filter's dialog. 
+  //parexpval is a string map containing the parameter expression values set in the filter's dialog.
   //These parameter expression values will be evaluated when the filter will start.
   virtual void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& , bool = false){}
   //virtual void executeFilter(MeshLabXMLFilterContainer*,Env& envcode , bool  isPreview = false) {}
@@ -480,6 +480,8 @@ public:
   */
   virtual QString decorationName(FilterIDType ) const =0;
   virtual QString decorationInfo(FilterIDType ) const =0;
+
+  virtual QString decorationName(QAction *a ) const {return decorationName(ID(a));}
   virtual QString decorationInfo(QAction *a) const {return decorationInfo(ID(a));}
 
 
@@ -505,14 +507,30 @@ public:
 protected:
   QList <QAction *> actionList;
   QList <FilterIDType> typeList;
-    virtual FilterIDType ID(QAction *a) const
-    {
-        foreach( FilterIDType tt, types())
+  virtual FilterIDType ID(QAction *a) const
+  {
+    foreach( FilterIDType tt, types())
       if( a->text() == this->decorationName(tt) ) return tt;
-        qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
-        assert(0);
-        return -1;
-    }
+    qDebug("unable to find the id corresponding to action  '%s'",qPrintable(a->text()));
+    assert(0);
+    return -1;
+  }
+  virtual FilterIDType ID(QString name) const
+  {
+    foreach( FilterIDType tt, types())
+      if( name == this->decorationName(tt) ) return tt;
+    qDebug("unable to find the id corresponding to action  '%s'",qPrintable(name));
+    assert(0);
+    return -1;
+  }
+public:
+  virtual QAction *action(QString name) const
+  {
+    foreach( QAction *tt, actions())
+      if( name == this->decorationName(ID(tt)) ) return tt;
+    qDebug("unable to find the id corresponding to action  '%s'",qPrintable(name));
+    return 0;
+  }
 };
 
 
