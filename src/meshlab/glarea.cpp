@@ -40,10 +40,11 @@
 using namespace std;
 using namespace vcg;
 
-GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
-    : QGLWidget(),interrbutshow(false)
+GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current)
+    : QGLWidget(parent),interrbutshow(false)
 {
-    this->setParent(mvcont);
+//    this->setParent(parent);
+//  this->setParent(mvcont);
     parentmultiview = mvcont;
     this->updateCustomSettingValues(*current);
     animMode=AnimNone;
@@ -55,7 +56,7 @@ GLArea::GLArea(MultiViewer_Container *mvcont, RichParameterSet *current)
     cfps=0;
     lastTime=0;
     hasToPick=false;
-    hasToSelect=false;
+    hasToSelectMesh=false;
     hasToGetPickPos=false;
     hasToUpdateTexture=false;
     helpVisible=false;
@@ -450,7 +451,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         }
         else
         {
-            if(hasToSelect) // right mouse click you have to select a mesh
+            if(hasToSelectMesh) // right mouse click you have to select a mesh
             {
                 int newId=RenderForSelection(pointToPick[0],pointToPick[1]);
                 if(newId>=0)
@@ -459,7 +460,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     md()->setCurrentMesh(newId);
                     update();
                 }
-                hasToSelect=false;
+                hasToSelectMesh=false;
             }
             //else
             foreach(MeshModel * mp, this->md()->meshList)
@@ -503,16 +504,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         if(iEdit) {
             iEdit->setLog(&md()->Log);
             iEdit->Decorate(*mm(),this,&painter);
-        }
-
-        // Draw the selection
-        if (mm() != NULL)
-        {
-            QMap<int,RenderMode>::iterator it = rendermodemap.find(mm()->id());
-            if ((it != rendermodemap.end()) && it.value().selectedFace)
-                mm()->renderSelectedFace();
-            if ((it != rendermodemap.end()) && it.value().selectedVert)
-                mm()->renderSelectedVert();
         }
 
         glPopAttrib();
@@ -747,7 +738,7 @@ void GLArea::displayInfo(QPainter *painter)
         if (it != rendermodemap.end())
         {
             RenderMode rm = it.value();
-            if(rm.selectedFace || rm.selectedVert || mm()->cm.sfn>0 || mm()->cm.svn>0 )
+            if( mm()->cm.sfn>0 || mm()->cm.svn>0 )
                 col1Text += QString("Selection: v:%1 f:%2\n").arg(mm()->cm.svn).arg(mm()->cm.sfn);
         }
         col1Text += GetMeshInfoString();
@@ -992,7 +983,7 @@ void GLArea::mousePressEvent(QMouseEvent*e)
     {
         if( e->button()==Qt::RightButton) // Select a new current mesh
         {
-            hasToSelect=true;
+            hasToSelectMesh=true;
             this->pointToPick=Point2i(QT2VCG_X(this,e),QT2VCG_Y(this,e));
         }
         else
@@ -1323,27 +1314,6 @@ void GLArea::setBackFaceCulling(bool enabled)
 {
     for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
         it.value().backFaceCull = enabled;
-    update();
-}
-
-void GLArea::setSelectFaceRendering(bool enabled)
-{
-    if (md()->mm() != NULL)
-    {
-        QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-        if (it != rendermodemap.end())
-            it.value().selectedFace = enabled;
-    }
-    update();
-}
-void GLArea::setSelectVertRendering(bool enabled)
-{
-    if (md()->mm() != NULL)
-    {
-        QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-        if (it != rendermodemap.end())
-            it.value().selectedVert = enabled;
-    }
     update();
 }
 
@@ -1875,8 +1845,6 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
         rm.backFaceCull = (attr.namedItem("BackFaceCull").nodeValue().section(' ',0,0).toInt() != 0);
         rm.doubleSideLighting = (attr.namedItem("DoubleSideLighting").nodeValue().section(' ',0,0).toInt() != 0);
         rm.fancyLighting = (attr.namedItem("FancyLighting").nodeValue().section(' ',0,0).toInt() != 0);
-        rm.selectedFace = (attr.namedItem("SelectedFace").nodeValue().section(' ',0,0).toInt() != 0);
-        rm.selectedVert = (attr.namedItem("SelectedVert").nodeValue().section(' ',0,0).toInt() != 0);
         }*/
         node = node.nextSibling();
     }
@@ -1910,8 +1878,6 @@ QString GLArea::viewToText()
     renderElem.setAttribute("BackFaceCull",rm.backFaceCull);
     renderElem.setAttribute("DoubleSideLighting",rm.doubleSideLighting);
     renderElem.setAttribute("FancyLighting",rm.fancyLighting);
-    renderElem.setAttribute("SelectedFace",rm.selectedFace);
-    renderElem.setAttribute("SelectedVert",rm.selectedVert);
     root.appendChild(renderElem);*/
 
     return doc.toString();

@@ -448,8 +448,6 @@ void MainWindow::updateMenus()
             rendtmp.setFancyLighting(rendtmp.fancyLighting && rm.fancyLighting);
             rendtmp.setDoubleFaceLighting(rendtmp.doubleSideLighting && rm.doubleSideLighting);
             rendtmp.setBackFaceCull(rendtmp.backFaceCull || rm.backFaceCull);
-            rendtmp.setSelectedFaceRendering(rendtmp.selectedFace|| rm.selectedFace);
-            rendtmp.setSelectedVertRendering(rendtmp.selectedVert || rm.selectedVert);
             ++ii;
         }
 
@@ -485,8 +483,6 @@ void MainWindow::updateMenus()
 
         setFancyLightingAct->setChecked(rendtmp.fancyLighting);
         setDoubleLightingAct->setChecked(rendtmp.doubleSideLighting);
-        setSelectFaceRenderingAct->setChecked(rendtmp.selectedFace);
-        setSelectVertRenderingAct->setChecked(rendtmp.selectedVert);
         renderModeTextureWedgeAct->setChecked(checktext);
 
         // Decorator Menu Checking and unChecking
@@ -548,7 +544,7 @@ void MainWindow::setSplit(QAction *qa)
     MultiViewer_Container *mvc = currentViewContainer();
     if(mvc)
     {
-        GLArea *glwClone=new GLArea(mvc, &currentGlobalParams);
+        GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
         if(qa->text() == tr("&Horizontally"))
             mvc->addView(glwClone, Qt::Vertical);
         else if(qa->text() == tr("&Vertically"))
@@ -798,21 +794,6 @@ void MainWindow::dropEvent ( QDropEvent * event )
     }
 }
 
-void MainWindow::delCurrentMesh()
-{
-    //MeshDoc accessed through current container
-    currentViewContainer()->meshDoc.delMesh(currentViewContainer()->meshDoc.mm());
-    currentViewContainer()->updateAllViewer();
-    updateMenus();
-}
-
-void MainWindow::delCurrentRaster()
-{
-    //MeshDoc accessed through current container
-    currentViewContainer()->meshDoc.delRaster(currentViewContainer()->meshDoc.rm());
-    updateMenus();
-}
-
 void MainWindow::endEdit()
 {
     GLA()->endEdit();
@@ -979,12 +960,6 @@ void MainWindow::runFilterScript()
             }
             if(classes & MeshModel::MM_CAMERA)
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
-        }
-
-        if(classes & MeshFilterInterface::Selection )
-        {
-            GLA()->setSelectFaceRendering(true);
-            GLA()->setSelectVertRendering(true);
         }
 
         if(classes & MeshFilterInterface::MeshCreation )
@@ -1269,11 +1244,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
             meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
 
-        if(iFilter->getClass(action) & MeshFilterInterface::Selection )
-        {
-            GLA()->setSelectVertRendering(true);
-            GLA()->setSelectFaceRendering(true);
-        }
         if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
             GLA()->resetTrackBall();
 
@@ -1596,11 +1566,6 @@ void MainWindow::postFilterExecution()
     //if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
     //	meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
 
-    if(mask & MeshFilterInterface::Selection )
-    {
-        GLA()->setSelectVertRendering(true);
-        GLA()->setSelectFaceRendering(true);
-    }
     if(mask & MeshFilterInterface::MeshCreation )
         GLA()->resetTrackBall();
 
@@ -1798,50 +1763,6 @@ void MainWindow::applyDecorateMode()
     GLA()->update();
 }
 
-//void MainWindow::setLight()
-//{
-//	RenderMode* rm = GLA()->getCurrentRenderMode();
-//	if (rm != NULL)
-//	{
-//		GLA()->setLight(!rm->lighting);
-//		updateMenus();
-//	}
-//};
-//
-//void MainWindow::setDoubleLighting()
-//{
-//	RenderMode* rm = GLA()->getCurrentRenderMode();
-//	if (rm != NULL)
-//		GLA()->setLightMode(!rm->doubleSideLighting,LDOUBLE);
-//}
-//
-//void MainWindow::setFancyLighting()
-//{
-//	RenderMode* rm = GLA()->getCurrentRenderMode();
-//	if (rm != NULL)
-//		GLA()->setLightMode(!rm->fancyLighting,LFANCY);
-//}
-//
-//void MainWindow::toggleBackFaceCulling()
-//{
-//	RenderMode* rm = GLA()->getCurrentRenderMode();
-//	if (rm != NULL)
-//		GLA()->setBackFaceCulling(!rm->backFaceCull);
-//}
-//
-//void MainWindow::toggleSelectFaceRendering()
-//{
-//  RenderMode* rm = GLA()->getCurrentRenderMode();
-//  if (rm != NULL)
-//    GLA()->setSelectFaceRendering(!rm->selectedFace);
-//}
-//
-//void MainWindow::toggleSelectVertRendering()
-//{
-//	RenderMode* rm = GLA()->getCurrentRenderMode();
-//	if (rm != NULL)
-//		GLA()->setSelectVertRendering(!rm->selectedVert);
-//}
 
 /*
 Save project. It saves the info of all the layers and the layer themselves. So
@@ -2225,7 +2146,7 @@ GLArea* MainWindow::newProject(const QString& projName)
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
     if (!filterMenu->actions().isEmpty())
         updateSubFiltersMenu(true,false);
-    GLArea *gla=new GLArea(mvcont, &currentGlobalParams);
+    GLArea *gla=new GLArea(this, mvcont, &currentGlobalParams);
     mvcont->addView(gla, Qt::Horizontal);
     if (projName.isEmpty())
     {

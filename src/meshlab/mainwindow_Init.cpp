@@ -323,14 +323,6 @@ void MainWindow::createActions()
     backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
     rendlist.push_back(backFaceCullAct);
 
-    setSelectFaceRenderingAct 	  = new RenderModeSelectedFaceRenderingAction(this);
-    setSelectFaceRenderingAct->setCheckable(true);
-    rendlist.push_back(setSelectFaceRenderingAct);
-
-    setSelectVertRenderingAct	  = new RenderModeSelectedVertRenderingAction(this);
-    setSelectVertRenderingAct->setCheckable(true);
-    rendlist.push_back(setSelectVertRenderingAct);
-
     connectRenderModeActionList(rendlist);
 
     //////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
@@ -530,13 +522,22 @@ void MainWindow::createToolBars()
     mainToolBar->addAction(showRasterAct);
 
     renderToolBar = addToolBar(tr("Render"));
-    //renderToolBar->setIconSize(QSize(32,32));
     renderToolBar->addActions(renderModeGroupAct->actions());
     renderToolBar->addAction(renderModeTextureWedgeAct);
     renderToolBar->addAction(setLightAct);
-    renderToolBar->addAction(setSelectFaceRenderingAct);
-    renderToolBar->addAction(setSelectVertRenderingAct);
+//    renderToolBar->addAction(setSelectFaceRenderingAct);
+//    renderToolBar->addAction(setSelectVertRenderingAct);
     connect(renderToolBar,SIGNAL(actionTriggered(QAction*)),this,SLOT(updateMenus()));
+
+    decoratorToolBar = addToolBar("Decorator");
+    foreach(MeshDecorateInterface *iDecorate,PM.meshDecoratePlugins())
+    {
+      foreach(QAction *decorateAction, iDecorate->actions())
+        {
+            if(!decorateAction->icon().isNull())
+                decoratorToolBar->addAction(decorateAction);
+        }
+    }
 
     editToolBar = addToolBar(tr("Edit"));
     editToolBar->addAction(suspendEditModeAct);
@@ -552,9 +553,7 @@ void MainWindow::createToolBars()
     }
     editToolBar->addSeparator();
 
-    //filterToolBar = new FixedToolBar(tr("Filter"),this);
     filterToolBar = addToolBar(tr("Filter"));
-//    filterToolBar->setIconSize(QSize(16,16));
     filterToolBar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     foreach(MeshFilterInterface *iFilter,PM.meshFilterPlugins())
@@ -568,7 +567,6 @@ void MainWindow::createToolBars()
             } //else qDebug() << "action was null";
         }
     }
-    //filterToolBar->installActionEventFilter();
 
     QWidget *spacerWidget = new QWidget();
     spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -643,8 +641,6 @@ void MainWindow::createMenus()
     renderModeMenu->addAction(backFaceCullAct);
     renderModeMenu->addActions(renderModeGroupAct->actions());
     renderModeMenu->addAction(renderModeTextureWedgeAct);
-    renderModeMenu->addAction(setSelectFaceRenderingAct);
-    renderModeMenu->addAction(setSelectVertRenderingAct);
 
     lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
     lightingModeMenu->addAction(setLightAct);

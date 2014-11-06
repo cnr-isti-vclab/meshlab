@@ -60,7 +60,7 @@ class GLArea : public QGLWidget
   //typedef vcg::Shot<double> Shot;
 
 public:
-    GLArea(MultiViewer_Container *mvcont, RichParameterSet *current);
+    GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current);
     ~GLArea();
     static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 
@@ -170,9 +170,6 @@ public slots:
         emit updateMainWindowMenus();
     }
 
-  void setSelectFaceRendering(bool enabled);
-  void setSelectVertRendering(bool enabled);
-
   void suspendEditToggle()
         {
             if(currentEditor==0) return;
@@ -277,7 +274,6 @@ protected:
     void mouseDoubleClickEvent ( QMouseEvent * event ) ;
     void wheelEvent(QWheelEvent*e);
     void tabletEvent(QTabletEvent *e);
-    bool drawSelection;
     void hideEvent(QHideEvent * event);
 
 private:
@@ -291,7 +287,7 @@ private:
     bool	hasToUpdateTexture;			// has to reload textures at the next redraw
     bool  hasToPick;							// has to pick during the next redraw.
     bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
-    bool hasToSelect;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
+    bool hasToSelectMesh;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
     QString nameToGetPickPos;         // the name of the parameter that has asked for the point on the surface
     bool interrbutshow;
     vcg::Point2i pointToPick;
@@ -313,14 +309,14 @@ private:
 
 public:
     QMap<int,RenderMode> rendermodemap;
-    //RenderMode rm;
+
     // view setting variables
     float fov;
     float clipRatioFar;
     float clipRatioNear;
     float nearPlane;
     float farPlane;
-  SnapshotSetting ss;
+    SnapshotSetting ss;
 
    // Store for each mesh if it is visible for the current viewer.
    QMap<int, bool> meshVisibilityMap;
