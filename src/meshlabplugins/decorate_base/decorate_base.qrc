@@ -6,5 +6,8 @@
     <qresource prefix="/images">
         <file>selected_face.png</file>
         <file>selected_vert.png</file>
+        <file>show_boundary.png</file>
+        <file>show_nonmanifold_edge.png</file>
+        <file>show_nonmanifold_vertex.png</file>
     </qresource>
 </RCC>

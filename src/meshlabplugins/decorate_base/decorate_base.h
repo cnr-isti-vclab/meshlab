@@ -59,9 +59,9 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_CAMERA,
     DP_SHOW_TEXPARAM,
     DP_SHOW_BOUNDARY_TEX,
-    DP_SHOW_SELECTED_MESH/*,
+    DP_SHOW_SELECTED_MESH ,
     DP_SHOW_SELECTED_FACE,
-    DP_SHOW_SELECTED_VERT*/
+    DP_SHOW_SELECTED_VERT
   };
 
 
@@ -99,18 +99,19 @@ public:
                 DP_SHOW_CAMERA <<
                 DP_SHOW_TEXPARAM <<
                 DP_SHOW_SELECTED_MESH <<
-                /*DP_SHOW_SELECTED_FACE <<
-                DP_SHOW_SELECTED_VERT <<*/
+                DP_SHOW_SELECTED_FACE <<
+                DP_SHOW_SELECTED_VERT <<
                 DP_SHOW_BOUNDARY_TEX;
 
     FilterIDType tt;
     foreach(tt , types())
     {
       actionList << new QAction(decorationName(tt), this);
-      /*if(tt==DP_SHOW_SELECTED_VERT)
-        actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
-      if(tt==DP_SHOW_SELECTED_FACE)
-        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));*/
+      if(tt==DP_SHOW_SELECTED_VERT)        actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
+      if(tt==DP_SHOW_SELECTED_FACE)        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));
+      if(tt==DP_SHOW_BOUNDARY)             actionList.last()->setIcon(QIcon(":/images/show_boundary.png"));
+      if(tt==DP_SHOW_NON_MANIF_EDGE)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_edge.png"));
+      if(tt==DP_SHOW_NON_MANIF_VERT)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_vertex.png"));
     }
 
   QAction *ap;
