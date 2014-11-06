@@ -261,13 +261,8 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 
 bool MeshDocument::hasBeenModified()
 {
-    int ii = 0;
-    while(ii < meshList.size())
-    {
-        if (meshList[ii]->meshModified())
-            return true;
-        ++ii;
-    }
+  foreach(MeshModel *m, meshList)
+    if(m->meshModified()) return true;
     return false;
 }
 

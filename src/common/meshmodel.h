@@ -144,7 +144,6 @@ class CVertexO  : public vcg::Vertex< CUsedTypesO,
 
 
 // The Main Edge Class
-// Currently it does not contains anything.
 class CEdgeO : public vcg::Edge<CUsedTypesO,
     vcg::edge::BitFlags,          /*  4b */
     vcg::edge::EVAdj,
@@ -183,7 +182,9 @@ public :
     }
 };
 
-/*An ack in order to avoid to duplicate code. Should be used as MeshLabRenderMesh class itself ONLY inside MeshLabRenderState and as DERIVED class in MeshModel*/
+/* An ack in order to avoid to duplicate code.
+ * Should be used as MeshLabRenderMesh class itself
+ * ONLY inside MeshLabRenderState and as DERIVED class in MeshModel*/
 
 class MeshLabRenderMesh
 {
@@ -333,10 +334,6 @@ public:
     bool visible; // used in rendering; Needed for toggling on and off the meshes
     bool isVisible() { return visible; }
     MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
-    //bool Render(vcg::GLW::DrawMode _dm, vcg::GLW::ColorMode _cm, vcg::GLW::TextureMode _tm);
-    //bool RenderSelectedFace();
-    //bool RenderSelectedVert();
-
 
     // This function is roughly equivalent to the updateDataMask,
     // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
@@ -470,8 +467,6 @@ public:
     bool backFaceCull;
     bool doubleSideLighting;
     bool fancyLighting;
-    bool selectedFace;
-    bool selectedVert;
 
     RenderMode(vcg::GLW::DrawMode dm) // :declist()
     {
@@ -491,8 +486,6 @@ public:
         backFaceCull = false;
         doubleSideLighting = false;
         fancyLighting = false;
-        selectedFace=false;
-        selectedVert=false;
     }
 
     inline void setDrawMode(const vcg::GLW::DrawMode dm)
@@ -528,16 +521,6 @@ public:
     inline void setFancyLighting(const bool ison)
     {
         fancyLighting = ison;
-    }
-
-    inline void setSelectedFaceRendering(const bool ison)
-    {
-        selectedFace = ison;
-    }
-
-    inline void setSelectedVertRendering(const bool ison)
-    {
-        selectedVert = ison;
     }
 
     inline QList<QAction*>& decoratorList()
