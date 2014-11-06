@@ -3231,24 +3231,36 @@
        style="fill:none;stroke:#00af00;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:none"
        d="m 352,336.36219 0,-52.0399"
        id="path4365"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <path
        style="fill:none;stroke:#b50000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:none;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 376.7952,316.7933 -51.42962,-17.14321 0,0"
        id="path4367"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <path
        style="fill:none;stroke:#0000b4;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:none;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 327.2048,316.7933 51.42963,-17.14321"
        id="path4369"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <text
        xml:space="preserve"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial Bold"
        x="364"
        y="326.36218"
        id="text5377"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360"><tspan
          sodipodi:role="line"
          id="tspan5379"
          x="364"
@@ -3259,7 +3271,10 @@
        x="356"
        y="292.36218"
        id="text5381"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360"><tspan
          sodipodi:role="line"
          id="tspan5383"
          x="356"
@@ -3270,7 +3285,10 @@
        x="334"
        y="326.36218"
        id="text5385"
-       sodipodi:linespacing="125%"><tspan
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360"><tspan
          sodipodi:role="line"
          id="tspan5387"
          x="334"
@@ -3279,19 +3297,28 @@
        style="fill:#00af00;fill-opacity:1;stroke:none"
        d="m 349,287.36218 6,0 -3,-7 z"
        id="path5763"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <path
        inkscape:connector-curvature="0"
        id="path5771"
        d="m 373,312.36218 0,6 7.5,-0.5 z"
        style="fill:#b50000;fill-opacity:1;stroke:none"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <path
        sodipodi:nodetypes="cccc"
        style="fill:#0000b4;fill-opacity:1;stroke:none"
        d="m 332,312.36218 0,6 -7.5,-0.5 z"
        id="path5773"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -3526,9 +3553,9 @@
        height="64"
        x="320"
        y="276.36218"
-       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/selected_vert.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90" />
+       inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <rect
        style="fill:none;stroke:none;display:inline"
        id="rect4319"
