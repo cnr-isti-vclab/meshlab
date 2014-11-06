@@ -1119,6 +1119,81 @@ void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
     update();
 }
 
+void GLArea::setDecorator(QString name, bool state)
+{
+  updateDecorator(name, false, state);
+}
+
+void GLArea::toggleDecorator(QString name)
+{
+  updateDecorator(name, true, false);
+}
+
+
+void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
+{
+  MeshDecorateInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
+  QAction *action = iDecorateTemp->action(name);
+
+  if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerDocument)
+  {
+      bool found=this->iPerDocDecoratorlist.removeOne(action);
+      if(found)
+      {
+          if(toggle || stateToSet==false){
+            iDecorateTemp->endDecorate(action,*md(),glas.currentGlobalParamSet,this);
+            iDecorateTemp->setLog(NULL);
+            this->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s",qPrintable(action->text()));
+          } else
+            this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+      }
+      else{
+        if(toggle || stateToSet==true){
+          iDecorateTemp->setLog(&(this->md()->Log));
+          bool ret = iDecorateTemp->startDecorate(action,*md(), glas.currentGlobalParamSet, this);
+          if(ret) {
+              this->iPerDocDecoratorlist.push_back(action);
+              this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+          }
+          else this->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s",qPrintable(action->text()));
+        } else
+           this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s",qPrintable(action->text()));
+      }
+  }
+
+  if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerMesh)
+  {
+    MeshModel &currentMeshModel = *mm();
+    bool found=this->iCurPerMeshDecoratorList().removeOne(action);
+    if(found)
+    {
+      if(toggle || stateToSet==false){
+        iDecorateTemp->endDecorate(action,currentMeshModel,glas.currentGlobalParamSet,this);
+        iDecorateTemp->setLog(NULL);
+        this->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+      } else
+        this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+    }
+    else{
+      if(toggle || stateToSet==true){
+        QString errorMessage;
+        if (iDecorateTemp->isDecorationApplicable(action,currentMeshModel,errorMessage)) {
+          iDecorateTemp->setLog(&md()->Log);
+          bool ret = iDecorateTemp->startDecorate(action,currentMeshModel, glas.currentGlobalParamSet, this);
+          if(ret) {
+            this->iCurPerMeshDecoratorList().push_back(action);
+            this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+          }
+          else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+        } else
+          this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s",qPrintable(action->text()));
+
+      }
+    }
+  }
+}
+
+
 void GLArea::setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode )
 {
     rm.drawMode = mode;
@@ -1290,10 +1365,10 @@ void GLArea::initTexture(bool reloadAllTexture)
 }
 
 
-void GLArea::setLight(bool state)
+void GLArea::setLight(bool setState)
 {
     for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-        it.value().lighting = state;
+        it.value().lighting = setState;
     update();
 }
 

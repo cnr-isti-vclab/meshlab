@@ -148,6 +148,11 @@ public slots:
     //current raster will be reloaded and repaint function will be called
     void completeUpdateRequested();
 
+    void setDecorator(QString name, bool state);
+    void toggleDecorator(QString name);
+
+    void updateDecorator(QString name, bool toggle, bool stateToSet);
+
     //slots for changing the draw rendering and texturing mode
     void setDrawMode(vcg::GLW::DrawMode mode);
     void setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode );
