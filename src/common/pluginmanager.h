@@ -39,69 +39,71 @@ class QScriptEngine;
 class PluginManager
 {
 private:
-	//MeshDocumentSI* currentDocInterface;
+    //MeshDocumentSI* currentDocInterface;
 public:
-	PluginManager();
-	~PluginManager();
-	enum TypeIO{IMPORT,EXPORT};
-	void loadPlugins(RichParameterSet& defaultGlobal);
-	QString pluginsCode() const;
-	void loadXMLPlugin(const QString& filename);
-	//MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
-	void deleteXMLPlugin(const QString& plugscriptname);
+    PluginManager();
+    ~PluginManager();
+    enum TypeIO{IMPORT,EXPORT};
+    void loadPlugins(RichParameterSet& defaultGlobal);
+    QString pluginsCode() const;
+    void loadXMLPlugin(const QString& filename);
+    //MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
+    void deleteXMLPlugin(const QString& plugscriptname);
 
-	inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
-	inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
-	inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
-	inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
-	inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
-	inline QVector<MeshLabFilterInterface*>& meshlabXMLfilterPlugins()  {return meshlabXMLFilterPlug;}
-	void knownIOFormats();
-	static QString getDefaultPluginDirPath();
+    inline QVector<MeshIOInterface*>& meshIOPlugins()  {return meshIOPlug;}
+    inline QVector<MeshFilterInterface*>& meshFilterPlugins()  {return meshFilterPlug;}
+    inline QVector<MeshRenderInterface*>& meshRenderPlugins()  {return meshRenderPlug;}
+    inline QVector<MeshDecorateInterface*>& meshDecoratePlugins()  {return meshDecoratePlug;}
+    inline QVector<MeshEditInterfaceFactory*>& meshEditFactoryPlugins()  {return meshEditInterfacePlug;}
+    inline QVector<MeshLabFilterInterface*>& meshlabXMLfilterPlugins()  {return meshlabXMLFilterPlug;}
+    void knownIOFormats();
+    static QString getDefaultPluginDirPath();
     //static QString getLocalPluginDirPath();
-	static QString getBaseDirPath();
+    static QString getBaseDirPath();
 
-	QMap<QString,RichParameterSet> generateFilterParameterMap();
+    QMap<QString,RichParameterSet> generateFilterParameterMap();
 
-	QDir pluginsDir;
-	QMap<QString, QAction*> actionFilterMap;
-	QMap<QString, MeshFilterInterface*> stringFilterMap;
+    MeshDecorateInterface* getDecoratorInterfaceByName(QString name);
 
-	//QMap<QString, QAction*> xmlActionFilterMap;
-	QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
-	QMap<QString,MeshIOInterface*> allKnowInputFormats;
-	QMap<QString,MeshIOInterface*> allKnowOutputFormats;
-	QStringList inpFilters;
-	QStringList outFilters;
-	//QMap<QString, XMLFilterInfo*> filterXMLFileMap;
+    QDir pluginsDir;
+    QMap<QString, QAction*> actionFilterMap;
+    QMap<QString, MeshFilterInterface*> stringFilterMap;
+
+    //QMap<QString, QAction*> xmlActionFilterMap;
+    QMap<QString,	MeshLabXMLFilterContainer> stringXMLFilterMap;
+    QMap<QString,MeshIOInterface*> allKnowInputFormats;
+    QMap<QString,MeshIOInterface*> allKnowOutputFormats;
+    QStringList inpFilters;
+    QStringList outFilters;
+    //QMap<QString, XMLFilterInfo*> filterXMLFileMap;
 
 
-	QVector<MeshIOInterface*> meshIOPlug;
-	QVector<MeshFilterInterface*> meshFilterPlug;
-	QVector<MeshRenderInterface*> meshRenderPlug;
-	QVector<MeshDecorateInterface*> meshDecoratePlug;
-	QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
-	//only useful for an easy destruction of the MLXMLPluginInfos
-	QVector<MLXMLPluginInfo*> xmlpluginfo;
-	QVector<MeshLabFilterInterface*> meshlabXMLFilterPlug;
-	QVector<QAction *> editActionList;
-	QVector<QAction *> decoratorActionList;
+    QVector<MeshIOInterface*> meshIOPlug;
+    QVector<MeshFilterInterface*> meshFilterPlug;
+    QVector<MeshRenderInterface*> meshRenderPlug;
+    QVector<MeshDecorateInterface*> meshDecoratePlug;
+    QVector<MeshEditInterfaceFactory*> meshEditInterfacePlug;
+    //only useful for an easy destruction of the MLXMLPluginInfos
+    QVector<MLXMLPluginInfo*> xmlpluginfo;
+    QVector<MeshLabFilterInterface*> meshlabXMLFilterPlug;
+    QVector<QAction *> editActionList;
+    QVector<QAction *> decoratorActionList;
 
-	QStringList pluginsLoaded;
+    QStringList pluginsLoaded;
 
     static QString osDependentFileBaseName(const QString& plname);
-	static QString osIndependentPluginName(const QString& plname);
-	static QString pluginNameSpace();
+    static QString osIndependentPluginName(const QString& plname);
+    static QString pluginNameSpace();
     //highlight and autocomplete
-	/*QStringList pluginnamespaces;
-	QStringList filterscriptnames;*/
-	QList<LibraryElementInfo> libinfolist;
-	//Env env;
+    /*QStringList pluginnamespaces;
+    QStringList filterscriptnames;*/
+    QList<LibraryElementInfo> libinfolist;
+    //Env env;
 
-	//void updateDocumentScriptBindings(MeshDocument& doc);
+    //void updateDocumentScriptBindings(MeshDocument& doc);
 private:
-	/*void loadPluginsCode();*/
-	QString scriptplugcode;
+    /*void loadPluginsCode();*/
+    QString scriptplugcode;
 
 };
 

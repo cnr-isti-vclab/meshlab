@@ -147,6 +147,17 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
   }
   knownIOFormats();
 }
+// Search among all the decorator plugins the one that contains a decoration with the given name
+MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(QString name)
+{
+  foreach(MeshDecorateInterface *tt, this->meshDecoratePlugins())
+  {
+    foreach( QAction *ac, tt->actions())
+      if( name == tt->decorationName(ac) ) return tt;
+  }
+  assert(0);
+  return 0;
+}
 
 /*
 This function create a map from filtername to dummy RichParameterSet.
