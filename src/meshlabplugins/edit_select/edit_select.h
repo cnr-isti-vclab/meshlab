@@ -57,7 +57,7 @@ public:
     std::vector<CMeshO::VertexPointer> LastSelVert;
 
 signals:
-    void setSelectionRendering(bool);
+    void setDecorator(QString,bool);
 
 private:
   typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed

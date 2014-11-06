@@ -243,10 +243,10 @@ bool EditSelectPlugin::StartEdit(MeshModel &m, GLArea *gla )
 {
  gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"),1,1));
 
- connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectFaceRendering(bool)) );
- connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectVertRendering(bool)) );
+ connect(this, SIGNAL(setDecorator(QString,bool)),gla,SLOT(setDecorator(QString,bool)) );
 
- setSelectionRendering(true);
+ setDecorator("Show Selected Faces",true);
+ setDecorator("Show Selected Vertices",true);
 
  if(selectionMode)
     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
