@@ -82,6 +82,7 @@ public:
   DecorateBasePlugin()
   {
     typeList <<
+                DP_SHOW_AXIS <<
                 DP_SHOW_VERT <<
                 //DP_SHOW_EDGE <<
                 DP_SHOW_NON_FAUX_EDGE <<
@@ -93,7 +94,6 @@ public:
                 DP_SHOW_QUALITY_HISTOGRAM <<
                 DP_SHOW_QUALITY_CONTOUR <<
                 DP_SHOW_BOX_CORNERS <<
-                DP_SHOW_AXIS <<
                 DP_SHOW_QUOTED_BOX <<
                 DP_SHOW_LABEL <<
                 DP_SHOW_CAMERA <<
@@ -112,6 +112,7 @@ public:
       if(tt==DP_SHOW_BOUNDARY)             actionList.last()->setIcon(QIcon(":/images/show_boundary.png"));
       if(tt==DP_SHOW_NON_MANIF_EDGE)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_edge.png"));
       if(tt==DP_SHOW_NON_MANIF_VERT)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_vertex.png"));
+      if(tt==DP_SHOW_AXIS)                 actionList.last()->setIcon(QIcon(":/images/show_axis.png"));
     }
 
   QAction *ap;
