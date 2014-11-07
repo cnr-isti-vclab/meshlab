@@ -73,7 +73,7 @@ bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, Q
       MissingItems.push_back("Camera");
 
   if (preMask & MeshModel::MM_FACENUMBER && (m.cm.fn==0))
-      MissingItems.push_back("Non empty Face Set");
+      MissingItems.push_back("Any Faces");
 
 
   return MissingItems.isEmpty();
