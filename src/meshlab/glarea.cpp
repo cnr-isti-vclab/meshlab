@@ -805,6 +805,9 @@ void GLArea::displayHelp()
         if(helpFile.open(QFile::ReadOnly))
             tableText=helpFile.readAll();
         else assert(0);
+#ifdef Q_OS_MAC
+        tableText.replace("Ctrl","Command");
+#endif
     }
     md()->Log.RealTimeLog("Quick Help","",tableText);
 }
