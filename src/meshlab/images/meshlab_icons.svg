@@ -20,6 +20,29 @@
    version="1.1">
   <defs
      id="defs3736">
+    <linearGradient
+       id="linearGradient4541">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop4543" />
+      <stop
+         style="stop-color:#474747;stop-opacity:1;"
+         offset="1"
+         id="stop4545" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4309">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop4311" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop4314" />
+    </linearGradient>
     <marker
        inkscape:stockid="Arrow1Sstart"
        orient="auto"
@@ -1083,6 +1106,501 @@
          stdDeviation="2.4000005"
          id="feGaussianBlur4356" />
     </filter>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4316"
+       cx="273"
+       cy="305.36218"
+       fx="273"
+       fy="305.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19543.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4318"
+       cx="270"
+       cy="306.36218"
+       fx="270"
+       fy="306.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19607.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4320"
+       cx="267"
+       cy="307.36218"
+       fx="267"
+       fy="307.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19671.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4322"
+       cx="285"
+       cy="301.36218"
+       fx="285"
+       fy="301.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19287.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4324"
+       cx="282"
+       cy="302.36218"
+       fx="282"
+       fy="302.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19351.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4326"
+       cx="279"
+       cy="303.36218"
+       fx="279"
+       fy="303.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19415.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4328"
+       cx="276"
+       cy="304.36218"
+       fx="276"
+       fy="304.36218"
+       r="0.5"
+       gradientTransform="matrix(1,0,0,33,0,-9739.5898)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4330"
+       cx="303"
+       cy="305.36218"
+       fx="303"
+       fy="305.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19543.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4332"
+       cx="306"
+       cy="306.36218"
+       fx="306"
+       fy="306.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19607.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4334"
+       cx="309"
+       cy="307.36218"
+       fx="309"
+       fy="307.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19671.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4336"
+       cx="291"
+       cy="301.36218"
+       fx="291"
+       fy="301.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19287.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4338"
+       cx="294"
+       cy="302.36218"
+       fx="294"
+       fy="302.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19351.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4340"
+       cx="297"
+       cy="303.36218"
+       fx="297"
+       fy="303.36218"
+       r="0.25"
+       gradientTransform="matrix(1,0,0,65,0,-19415.18)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4342"
+       cx="300"
+       cy="304.36218"
+       fx="300"
+       fy="304.36218"
+       r="0.5"
+       gradientTransform="matrix(1,0,0,33,0,-9739.5898)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4344"
+       cx="294"
+       cy="326.36218"
+       fx="294"
+       fy="326.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,214.00799)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4346"
+       cx="297"
+       cy="327.36218"
+       fx="297"
+       fy="327.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,214.66372)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4348"
+       cx="291"
+       cy="325.36218"
+       fx="291"
+       fy="325.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,213.35225)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4350"
+       cx="282"
+       cy="322.36218"
+       fx="282"
+       fy="322.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,211.38504)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4352"
+       cx="285"
+       cy="323.36218"
+       fx="285"
+       fy="323.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,212.04077)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4354"
+       cx="279"
+       cy="321.36218"
+       fx="279"
+       fy="321.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,210.7293)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4356"
+       cx="288"
+       cy="324.36218"
+       fx="288"
+       fy="324.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,0.36,0,207.5918)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4359"
+       cx="282"
+       cy="326.36218"
+       fx="282"
+       fy="326.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,214.00799)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4361"
+       cx="279"
+       cy="327.36218"
+       fx="279"
+       fy="327.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,214.66372)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4363"
+       cx="285"
+       cy="325.36218"
+       fx="285"
+       fy="325.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,213.35225)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4365"
+       cx="294"
+       cy="322.36218"
+       fx="294"
+       fy="322.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,211.38504)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4367"
+       cx="291"
+       cy="323.36218"
+       fx="291"
+       fy="323.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,212.04077)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4369"
+       cx="297"
+       cy="321.36218"
+       fx="297"
+       fy="321.36218"
+       r="12.2"
+       gradientTransform="matrix(1,0,0,0.3442623,0,210.7293)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4371"
+       cx="288"
+       cy="324.36218"
+       fx="288"
+       fy="324.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,0.36,0,207.5918)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4373"
+       cx="300"
+       cy="292.36218"
+       fx="300"
+       fy="292.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,190.9304)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4375"
+       cx="300"
+       cy="300.36218"
+       fx="300"
+       fy="300.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,196.15489)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4377"
+       cx="300"
+       cy="296.36218"
+       fx="300"
+       fy="296.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,193.54265)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4379"
+       cx="300"
+       cy="308.36218"
+       fx="300"
+       fy="308.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,201.37938)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4382"
+       cx="300"
+       cy="316.36218"
+       fx="300"
+       fy="316.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,206.60387)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4384"
+       cx="300"
+       cy="304.36218"
+       fx="300"
+       fy="304.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,0.36,0,194.7918)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4387"
+       cx="300"
+       cy="312.36218"
+       fx="300"
+       fy="312.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,203.99163)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4389"
+       cx="276"
+       cy="292.36218"
+       fx="276"
+       fy="292.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,190.9304)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4391"
+       cx="276"
+       cy="300.36218"
+       fx="276"
+       fy="300.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,196.15489)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4393"
+       cx="276"
+       cy="296.36218"
+       fx="276"
+       fy="296.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,193.54265)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4395"
+       cx="276"
+       cy="308.36218"
+       fx="276"
+       fy="308.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,201.37938)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4397"
+       cx="276"
+       cy="316.36218"
+       fx="276"
+       fy="316.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,206.60387)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4399"
+       cx="276"
+       cy="304.36218"
+       fx="276"
+       fy="304.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,0.36,0,194.7918)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4401"
+       cx="276"
+       cy="312.36218"
+       fx="276"
+       fy="312.36218"
+       r="12.25"
+       gradientTransform="matrix(1,0,0,0.34693878,0,203.99163)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4403"
+       cx="300"
+       cy="320.36218"
+       fx="300"
+       fy="320.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,0.36,0,205.0318)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4309"
+       id="radialGradient4405"
+       cx="276"
+       cy="304.36218"
+       fx="276"
+       fy="304.36218"
+       r="12.5"
+       gradientTransform="matrix(1,0,0,1.64,0,-194.7918)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4541"
+       id="radialGradient4547"
+       cx="288"
+       cy="307.71218"
+       fx="288"
+       fy="307.71218"
+       r="24.5"
+       gradientTransform="matrix(1,0,0,0.97346939,0,8.1637925)"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1094,20 +1612,20 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.7147485"
-     inkscape:cx="373.32526"
-     inkscape:cy="680.83841"
+     inkscape:zoom="6.858994"
+     inkscape:cx="314.6626"
+     inkscape:cy="736.0885"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      showguides="true"
      inkscape:grid-points="false"
-     inkscape:window-width="1400"
+     inkscape:window-width="1398"
      inkscape:window-height="856"
-     inkscape:window-x="40"
+     inkscape:window-x="42"
      inkscape:window-y="300"
      inkscape:grid-bbox="false"
-     inkscape:window-maximized="0"
+     inkscape:window-maximized="1"
      inkscape:guide-bbox="true">
     <inkscape:grid
        id="GridFromPre046Settings"
@@ -1138,7 +1656,8 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="BackFrames"
-     style="display:none">
+     style="display:inline"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#cccccc;fill-opacity:1;stroke:none"
        id="rect3743"
@@ -1306,7 +1825,10 @@
        width="64"
        height="64"
        x="256"
-       y="276.36218" />
+       y="276.36218"
+       inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+       inkscape:export-xdpi="360"
+       inkscape:export-ydpi="360" />
     <rect
        y="276.36218"
        x="320"
@@ -3319,6 +3841,372 @@
        inkscape:export-filename="/Users/cignoni/devel/meshlab/src/meshlab/images/show_axis.png"
        inkscape:export-xdpi="360"
        inkscape:export-ydpi="360" />
+    <g
+       id="g4407"
+       style="stroke:url(#radialGradient4547)">
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         sodipodi:nodetypes="ccc"
+         inkscape:connector-curvature="0"
+         id="path3413"
+         d="m 288,284.36218 0,32 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path3415"
+         d="m 288,316.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         d="m 288,308.36218 -24,8"
+         id="path3419"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:transform-center-y="14.999997"
+         inkscape:transform-center-x="-3"
+         inkscape:connector-curvature="0"
+         id="path3421"
+         d="m 288,300.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4214"
+         d="m 288,312.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,304.36218 -24,8"
+         id="path4216"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4218"
+         d="m 288,292.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,296.36218 -24,8"
+         id="path4220"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4222"
+         d="m 288,288.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4224"
+         d="m 288,308.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,300.36218 24,8"
+         id="path4226"
+         inkscape:connector-curvature="0"
+         inkscape:transform-center-x="3"
+         inkscape:transform-center-y="14.999997" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,312.36218 24,8"
+         id="path4230"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4233"
+         d="m 288,304.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,292.36218 24,8"
+         id="path4235"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4237"
+         d="m 288,296.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 288,288.36218 24,8"
+         id="path4239"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:transform-center-y="14.999997"
+         inkscape:transform-center-x="3"
+         inkscape:connector-curvature="0"
+         id="path4248"
+         d="m 276,320.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 285,317.36218 24,8"
+         id="path4250"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4252"
+         d="m 279,319.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 282,318.36218 24,8"
+         id="path4254"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4258"
+         d="m 273,321.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 267,323.36218 24,8"
+         id="path4260"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4262"
+         d="m 270,322.36218 24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 300,320.36218 -24,8"
+         id="path4264"
+         inkscape:connector-curvature="0"
+         inkscape:transform-center-x="-3"
+         inkscape:transform-center-y="14.999997" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4266"
+         d="m 291,317.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 297,319.36218 -24,8"
+         id="path4268"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4270"
+         d="m 294,318.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 303,321.36218 -24,8"
+         id="path4275"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4277"
+         d="m 309,323.36218 -24,8"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.40000000000000002;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 306,322.36218 -24,8"
+         id="path4279"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4281"
+         d="m 300,320.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         d="m 297,319.36218 0,-32"
+         id="path4283"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4285"
+         d="m 294,318.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 291,317.36218 0,-32"
+         id="path4287"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4289"
+         d="m 309,323.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 306,322.36218 0,-32"
+         id="path4291"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4293"
+         d="m 303,321.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:1px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 276,320.36218 0,-32"
+         id="path4295"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4297"
+         d="m 279,319.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 282,318.36218 0,-32"
+         id="path4299"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4301"
+         d="m 285,317.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 267,323.36218 0,-32"
+         id="path4303"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         inkscape:connector-curvature="0"
+         id="path4305"
+         d="m 270,322.36218 0,-32"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="360"
+         inkscape:export-xdpi="360"
+         inkscape:export-filename="/Users/cignoni/Documents/devel/meshlab/src/meshlabplugins/decorate_background/show_background_grid.png"
+         style="fill:none;stroke:url(#radialGradient4547);stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         d="m 273,321.36218 0,-32"
+         id="path4307"
+         inkscape:connector-curvature="0" />
+    </g>
   </g>
   <g
      inkscape:groupmode="layer"
