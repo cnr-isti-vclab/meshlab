@@ -1242,9 +1242,9 @@ void MainWindow::checkForUpdates(bool verboseFlag)
     QString BaseCommand("/~cignoni/meshlab.php");
 #endif
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     QString OS="Win";
-#elif defined( Q_WS_MAC)
+#elif defined( Q_OS_OSX)
     QString OS="Mac";
 #else
     QString OS="Lin";
