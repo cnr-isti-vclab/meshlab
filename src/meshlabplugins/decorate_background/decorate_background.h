@@ -64,21 +64,19 @@ inline QString GridColorFrontParam() const { return  "MeshLab::Decoration::GridC
 
 public:
 
-    DecorateBackgroundPlugin()
-    {
-    typeList
-    /*<< DP_SHOW_CUBEMAPPED_ENV*/
-    << DP_SHOW_GRID;
+DecorateBackgroundPlugin()
+{
+  typeList
+      /*<< DP_SHOW_CUBEMAPPED_ENV*/
+      << DP_SHOW_GRID;
 
-    FilterIDType tt;
-    foreach(tt , types()){
-        actionList << new QAction(decorationName(tt), this);
-    }
-    QAction *ap;
-    foreach(ap,actionList){
-        ap->setCheckable(true);
-    }
+  foreach(FilterIDType tt , types()){
+    actionList << new QAction(decorationName(tt), this);
+    if(tt==DP_SHOW_GRID)
+      actionList.last()->setIcon(QIcon(":/images/show_background_grid.png"));
+    actionList.last()->setCheckable(true);
   }
+}
 
     QList<QAction *> actions () const {return actionList;}
 

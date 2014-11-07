@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>show_background_grid.png</file>
+    </qresource>
+</RCC>
