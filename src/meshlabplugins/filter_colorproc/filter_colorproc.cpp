@@ -393,7 +393,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       math::SubtractiveRingRNG myrnd(seed);
       int numOfMeshes = md.meshList.size();
       int id = myrnd.generate(numOfMeshes);
-      if(seed!=0) id = seed;
+	  if (seed != 0) id = seed%numOfMeshes;
       foreach(MeshModel *mm, md.meshList)
       {
         mm->cm.C()=Color4b::Scatter(numOfMeshes+1,id);
