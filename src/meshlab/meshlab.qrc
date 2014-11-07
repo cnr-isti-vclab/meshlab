@@ -34,8 +34,6 @@
         <file>images/layer_edit_locked.png</file>
         <file>images/layer_edit_unlocked.png</file>
         <file>images/100mesh.html</file>
-        <file>images/selected_face.png</file>
-        <file>images/selected_vert.png</file>
         <file>images/facebook.gif</file>
         <file>images/onscreenHelp.txt</file>
         <file>images/splitV.png</file>
@@ -45,9 +43,9 @@
         <file>images/new_project.png</file>
         <file>images/cursors/plain_pick.png</file>
         <file>images/view_raster.png</file>
-		<file>images/ok.png</file>
-		<file>images/stop.png</file>
-		<file>images/search.png</file>
-		<file>images/dummy.png</file>
+    <file>images/ok.png</file>
+    <file>images/stop.png</file>
+    <file>images/search.png</file>
+    <file>images/dummy.png</file>
     </qresource>
 </RCC>
