@@ -27,6 +27,7 @@
 
 #include <QFileDialog>
 #include <QClipboard>
+#include <QLocale>
 
 #include <wrap/gl/picking.h>
 #include <wrap/qt/trackball.h>
@@ -724,22 +725,27 @@ void GLArea::displayInfo(QPainter *painter)
     {
         if(this->md()->size()==1)
         {
+			QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             col1Text += QString("Mesh: %1\n").arg(mm()->label());
-            col1Text += QString("Vertices: %1\n").arg(mm()->cm.vn);
-            col1Text += QString("Faces: %1\n").arg(mm()->cm.fn);
+			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " \n";
+			col1Text += "Faces: " + engLocale.toString(mm()->cm.vn) + " \n";
         }
         else
         {
-            col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
-            col1Text += QString("Vertices: %1 (%2)\n").arg(mm()->cm.vn).arg(this->md()->vn());
-            col1Text += QString("Faces: %1 (%2)\n").arg(mm()->cm.fn).arg(this->md()->fn());
+			QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+			col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
+			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(mm()->cm.vn) + ") \n";
+			col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(mm()->cm.fn) + ") \n";
         }
         QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
         if (it != rendermodemap.end())
         {
             RenderMode rm = it.value();
-            if( mm()->cm.sfn>0 || mm()->cm.svn>0 )
-                col1Text += QString("Selection: v:%1 f:%2\n").arg(mm()->cm.svn).arg(mm()->cm.sfn);
+			if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
+			{
+				QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+				col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
+			}
         }
         col1Text += GetMeshInfoString();
 
