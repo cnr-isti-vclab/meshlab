@@ -104,7 +104,7 @@ FilterColorProc::~FilterColorProc()
     case CP_WHITE_BAL : return "The filter provides a standard white balance transformation. It is done correcting the RGB channels with a factor such that, the brighter color in the mesh, that is supposed to be white, becomes really white.";
     case CP_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to verteces depends on their position in the space; it means that near verteces will be painted with similar colors.";
     case CP_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel.";
-    case CP_SCATTER_PER_MESH : return "Assigns a random color to each mesh in the document. Colors change every time the filter is executed, but are always chosen so that they differs as much as possible.";
+    case CP_SCATTER_PER_MESH : return "Assigns a random color to each visible mesh layer in the document. Colors change every time the filter is executed, but are always chosen so that they differs as much as possible.";
     default: assert(0);
   }
   return QString("error!");
@@ -126,12 +126,12 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
   {
     case CP_FILLING:
     {
-            float r = 255.0f, g = 255.0f, b = 255.0f;
-            par.addParam(new RichDynamicFloat("r", r, 0.0f, 255.0f,"Red:", "Sets the red component of the color."));
-            par.addParam(new RichDynamicFloat("g", g, 0, 255,"Green:", "Sets the green component of the color."));
-            par.addParam(new RichDynamicFloat("b", b, 0, 255,"Blue:", "Sets the blue component of the color."));
-            break;
-        }
+      float r = 255.0f, g = 255.0f, b = 255.0f;
+      par.addParam(new RichDynamicFloat("r", r, 0.0f, 255.0f,"Red:", "Sets the red component of the color."));
+      par.addParam(new RichDynamicFloat("g", g, 0, 255,"Green:", "Sets the green component of the color."));
+      par.addParam(new RichDynamicFloat("b", b, 0, 255, "Blue:", "Sets the blue component of the color."));
+      break;
+    }
     case CP_THRESHOLDING:
     {
       float threshold = 128.0f;
@@ -144,7 +144,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     case CP_BRIGHTNESS:
     {
       float brightness = 0.0f;
-            par.addParam(new RichDynamicFloat("brightness", brightness, -255.0f, 255.0f,"Brightness:","Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
+      par.addParam(new RichDynamicFloat("brightness", brightness, -255.0f, 255.0f,"Brightness:","Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
       break;
     }
     case CP_CONTRAST:
@@ -171,27 +171,28 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     }
     case CP_LEVELS:
     {
-            float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-            par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,  "Gamma:", ""));
-            par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", ""));
-            par.addParam(new RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,  "Max input level:", ""));
-            par.addParam(new RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
-            par.addParam(new RichDynamicFloat("out_max", out_max, 0.0f, 255.0f,"Max output level:", ""));
-            par.addParam(new RichBool("rCh", true, "Red Channel:", ""));
-            par.addParam(new RichBool("gCh", true, "Green Channel:", ""));
-            par.addParam(new RichBool("bCh", true, "Blue Channel:", ""));
-            break;
-        }
-        case CP_COLOURISATION:
-        {
-          float intensity = 0.5f;
+      float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
+      par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,  "Gamma:", ""));
+      par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", ""));
+      par.addParam(new RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,  "Max input level:", ""));
+      par.addParam(new RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
+      par.addParam(new RichDynamicFloat("out_max", out_max, 0.0f, 255.0f,"Max output level:", ""));
+      par.addParam(new RichBool("rCh", true, "Red Channel:", ""));
+      par.addParam(new RichBool("gCh", true, "Green Channel:", ""));
+      par.addParam(new RichBool("bCh", true, "Blue Channel:", ""));
+	  par.addParam(new RichBool("apply_to_all", false, "All visible layers", "if true, apply to all visible layers"));
+      break;
+	}
+	case CP_COLOURISATION:
+	{
+      float intensity = 0.5f;
       double hue, luminance, saturation;
-            ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
-            par.addParam(new RichDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh."));
-            par.addParam(new RichDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh."));
-            par.addParam(new RichDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh."));
-            par.addParam(new RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Intensity:", "Sets the intensity with which the color it's blended to the mesh."));
-            break;
+      ColorSpace<unsigned char>::RGBtoHSL(1.0, 0.0, 0.0, hue, saturation, luminance);
+      par.addParam(new RichDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh."));
+      par.addParam(new RichDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh."));
+      par.addParam(new RichDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh."));
+      par.addParam(new RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Intensity:", "Sets the intensity with which the color it's blended to the mesh."));
+      break;
     }
     case CP_DESATURATION:
     {
@@ -202,9 +203,9 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     case CP_EQUALIZE:
     {
       par.addParam(new RichBool("rCh", true, "Red Channel:", "Select the red channel."));
-            par.addParam(new RichBool("gCh", true, "Green Channel:", "Select the green channel."));
-            par.addParam(new RichBool("bCh", true, "Blue Channel:", "Select the blue channel.<br><br>If no channels are selected<br>filter works on Lightness."));
-            break;
+      par.addParam(new RichBool("gCh", true, "Green Channel:", "Select the green channel."));
+      par.addParam(new RichBool("bCh", true, "Blue Channel:", "Select the blue channel.<br><br>If no channels are selected<br>filter works on Lightness."));
+      break;
     }
     case CP_WHITE_BAL:
     {
@@ -213,13 +214,13 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
     }
     case CP_PERLIN_COLOR:
     {
-        par.addParam(new RichDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency:","Frequency of the Perlin Noise function. High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
-        break;
+      par.addParam(new RichDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency:","Frequency of the Perlin Noise function. High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
+      break;
     }
     case CP_COLOR_NOISE:
     {
-        par.addParam(new RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
-        break;
+      par.addParam(new RichInt("noiseBits", 1, "Noise bits:","Bits of noise added to each RGB channel. Example: 3 noise bits adds three random offsets in the [-4,+4] interval to each RGB channels."));
+      break;
     }
     case CP_SCATTER_PER_MESH:
     {
@@ -272,8 +273,8 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       bool selected = false;
       if(m->cm.sfn!=0) selected = true;
 
-                        vcg::tri::UpdateColor<CMeshO>::PerVertexBrightness(m->cm, brightness, selected);
-        return true;
+      vcg::tri::UpdateColor<CMeshO>::PerVertexBrightness(m->cm, brightness, selected);
+      return true;
     }
     case CP_CONTRAST:
     {
@@ -319,11 +320,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     case CP_LEVELS:
     {
       //reads the parameters...
-            float gamma = par.getDynamicFloat("gamma");
+      float gamma = par.getDynamicFloat("gamma");
       float  in_min = par.getDynamicFloat("in_min")/255;
       float  in_max = par.getDynamicFloat("in_max")/255;
       float  out_min = par.getDynamicFloat("out_min")/255;
       float  out_max = par.getDynamicFloat("out_max")/255;
+
+	  bool all_levels = par.getBool("apply_to_all");
 
       //builds incrementally a bitmask that indicates on which channels the filter works...
       unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
@@ -333,16 +336,27 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       //if no channels are checked, we intend to work on all rgb channels, so...
       if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
 
-      bool selected = false;
-      if(m->cm.sfn!=0) selected = true;
-      vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+	  bool selected = false;
+	  if (m->cm.sfn != 0) selected = true;
+
+	  if (all_levels)
+      {
+        foreach(MeshModel *mm, md.meshList)
+		  if (mm->isVisible())
+		    vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+      }
+	  else
+      {
+        vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+      }
+
       return true;
-        }
-        case CP_COLOURISATION:
-        {
-          //reads parameters and normalizes their values in [0,1]
-            float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
-            float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
+    }
+    case CP_COLOURISATION:
+    {
+      //reads parameters and normalizes their values in [0,1]
+      float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
+      float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
       float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
       float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
 
@@ -396,10 +410,11 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 	  if (seed != 0) id = seed%numOfMeshes;
       foreach(MeshModel *mm, md.meshList)
       {
-        mm->cm.C()=Color4b::Scatter(numOfMeshes+1,id);
+		if (mm->isVisible())
+          mm->cm.C()=Color4b::Scatter(numOfMeshes+1,id);
         id=(id+1)%numOfMeshes;
-     }
-    return true;
+      }
+      return true;
     }
     case CP_PERLIN_COLOR:
     {
