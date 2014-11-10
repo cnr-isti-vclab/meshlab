@@ -39,6 +39,7 @@ EditManipulatorsPlugin::EditManipulatorsPlugin()
   snapto = 1;
   resetOffsets();
   inputnumberstring= "";
+  inputnumbernegative = false;
   inputnumber=0;
 
   original_Transform = Matrix44m::Identity();
@@ -97,6 +98,7 @@ void EditManipulatorsPlugin::applyMotion(MeshModel &model, GLArea *gla)
   resetOffsets();
 
   inputnumberstring= "";
+  inputnumbernegative = false;
   inputnumber=0;
 
   // storing start matrix
@@ -122,6 +124,7 @@ void EditManipulatorsPlugin::cancelMotion(MeshModel &model, GLArea *gla)
   resetOffsets();
 
   inputnumberstring= "";
+  inputnumbernegative = false;
   inputnumber=0;
 
   // storing start matrix
@@ -147,11 +150,11 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
   // enter will apply, backspace to cancel
   if(current_manip != EditManipulatorsPlugin::ManNone)
   {
-	  if ((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
+	if ((e->key() == Qt::Key_Enter) || (e->key() == Qt::Key_Return))
     {
       applyMotion(model, gla);
     }
-	  if (e->key() == Qt::Key_Backspace) 
+	if (e->key() == Qt::Key_Backspace) 
     {
       cancelMotion(model, gla);
     }
@@ -173,7 +176,7 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
 
   if(current_manip == EditManipulatorsPlugin::ManNone)   // if no active manipulator, listen to T R S to select one
   {
-	  if (e->key() == Qt::Key_T) // translate
+	  if ((e->key() == Qt::Key_T) || (e->key() == Qt::Key_G)) // translate (I added also G to work like blender)
     {
       current_manip = EditManipulatorsPlugin::ManMove;
       resetOffsets();
@@ -233,30 +236,43 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
   // numerical input
   if(current_manip_mode != EditManipulatorsPlugin::ModNone)  // transform on one axis only
   {
-    if (e->key() == Qt::Key_1) {inputnumberstring += "1"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_2) {inputnumberstring += "2"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_3) {inputnumberstring += "3"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_4) {inputnumberstring += "4"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_5) {inputnumberstring += "5"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_6) {inputnumberstring += "6"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_7) {inputnumberstring += "7"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    if (e->key() == Qt::Key_8) {inputnumberstring += "8"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}    
-    if (e->key() == Qt::Key_9) {inputnumberstring += "9"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}   
+    if (e->key() == Qt::Key_1) inputnumberstring += "1";
+    if (e->key() == Qt::Key_2) inputnumberstring += "2";
+    if (e->key() == Qt::Key_3) inputnumberstring += "3";
+    if (e->key() == Qt::Key_4) inputnumberstring += "4";
+    if (e->key() == Qt::Key_5) inputnumberstring += "5";
+    if (e->key() == Qt::Key_6) inputnumberstring += "6";
+    if (e->key() == Qt::Key_7) inputnumberstring += "7";
+    if (e->key() == Qt::Key_8) inputnumberstring += "8";   
+    if (e->key() == Qt::Key_9) inputnumberstring += "9";
 
     if (e->key() == Qt::Key_0) 
     {
       if(inputnumberstring.length() == 0)
-        {inputnumberstring = "0"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+        inputnumberstring = "0.";
       if((inputnumberstring.length() >= 2) || (inputnumberstring[0]!=0))
-        {inputnumberstring += "0"; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    }    
+        inputnumberstring += "0";
+    }  
+
     if (e->key() == Qt::Key_Period)
     {
       if(inputnumberstring.length() == 0)
-        {inputnumberstring = "0."; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
+        inputnumberstring = "0.";
       else if(!inputnumberstring.contains("."))
-        {inputnumberstring += "."; inputnumber=inputnumberstring.toFloat(); UpdateMatrix(model,gla,false,true);}
-    }    
+        inputnumberstring += ".";
+    }  
+
+	if (e->key() == Qt::Key_Minus)
+    {
+		inputnumbernegative = !inputnumbernegative;
+	}
+
+	if (!inputnumbernegative)
+      inputnumber = inputnumberstring.toFloat();
+	else
+      inputnumber = -inputnumberstring.toFloat();
+
+	UpdateMatrix(model, gla, false, true);
   }
 
   //else e->ignore();
@@ -302,17 +318,17 @@ void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
 	Point3m zz(0,0,0);
 
   // setup
-	glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
-	glDisable(GL_LIGHTING);
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(1.0);
-	glColor(Color4b::Cyan);
+    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1.0);
+    glColor(Color4b::Cyan);
 
-  glPushMatrix();
-  glMultMatrix(original_Transform);
+    glPushMatrix();
+    glMultMatrix(original_Transform);
 
 	glBegin(GL_LINES);
 	glColor3f(1.0, 0.5, 0.5); glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],mi[2]+zz[2]);
@@ -350,10 +366,10 @@ void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
 
 
   //drawing mesh origin
- 	glBegin(GL_LINES);
-	glColor3f(1.0, 0.5, 0.5); glVertex3f(-2.0*d3[0],0.0,0.0); glVertex3f(2.0*d3[0],0.0,0.0);
-	glColor3f(0.5, 1.0, 0.5); glVertex3f(0.0,-2.0*d3[1],0.0); glVertex3f(0.0,2.0*d3[1],0.0);
-	glColor3f(0.5, 0.5, 1.0); glVertex3f(0.0,0.0,-2.0*d3[2]); glVertex3f(0.0,0.0,2.0*d3[2]);
+    glBegin(GL_LINES);
+    glColor3f(1.0, 0.5, 0.5); glVertex3f(-2.0*d3[0], 0.0, 0.0); glVertex3f(2.0*d3[0],0.0,0.0);
+	glColor3f(0.5, 1.0, 0.5); glVertex3f(0.0, -2.0*d3[1], 0.0); glVertex3f(0.0, 2.0*d3[1], 0.0);
+	glColor3f(0.5, 0.5, 1.0); glVertex3f(0.0, 0.0, -2.0*d3[2]); glVertex3f(0.0, 0.0, 2.0*d3[2]);
 	glEnd();
 
   // restore
@@ -979,7 +995,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     // display offset factor in single axis 
     if(current_manip_mode != EditManipulatorsPlugin::ModNone)
     {
-      StatusString2 += QString("  -  %1").arg(displayOffset);
+      StatusString2 += QString("   ::   %1").arg(displayOffset);
     }
 
     // viewport translation, display the XYZ offsets
@@ -1044,18 +1060,6 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
   }
 
   this->RealTimeLog("Manipulator","",qPrintable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
-
-  //debug debug
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("string - %1 - number - %2 -").arg(inputnumberstring).arg(inputnumber));
-
-  //
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("screenOff - %1 %2").arg(currScreenOffset_X).arg(currScreenOffset_Y));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("center - %1 %2 %3").arg(center[0]).arg(center[1]).arg(center[2]));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("right  - %1 %2 %3").arg(right[0]).arg(right[1]).arg(right[2]));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("top    - %1 %2 %3").arg(top[0]).arg(top[1]).arg(top[2]));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("screen x - %1 %2 %3").arg(screen_xaxis[0]).arg(screen_xaxis[1]).arg(screen_xaxis[2]));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("screen y - %1 %2 %3").arg(screen_yaxis[0]).arg(screen_yaxis[1]).arg(screen_yaxis[2]));
-  //glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("screen z - %1 %2 %3").arg(screen_zaxis[0]).arg(screen_zaxis[1]).arg(screen_zaxis[2]));
 
   // render original mesh BBox
   DrawMeshBox(model);
@@ -1359,6 +1363,7 @@ bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
   resetOffsets();
 
   inputnumberstring= "";
+  inputnumbernegative = false;
   inputnumber=0;
 
   // storing start matrix

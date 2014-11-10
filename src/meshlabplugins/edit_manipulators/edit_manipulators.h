@@ -69,6 +69,7 @@ private:
   Scalarm  snapto;
 
   QString inputnumberstring;
+  bool inputnumbernegative;
   Scalarm   inputnumber;
 
   bool isMoving;
