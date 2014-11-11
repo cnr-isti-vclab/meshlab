@@ -734,8 +734,8 @@ void GLArea::displayInfo(QPainter *painter)
         {
 			QLocale engLocale(QLocale::English, QLocale::UnitedStates);
 			col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
-			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(mm()->cm.vn) + ") \n";
-			col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(mm()->cm.fn) + ") \n";
+			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(this->md()->vn()) + ") \n";
+			col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
         QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
         if (it != rendermodemap.end())
