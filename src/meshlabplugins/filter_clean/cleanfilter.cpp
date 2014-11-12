@@ -360,7 +360,7 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 
   tri::UpdateTopology<CMeshO>::FaceFace(m);
   tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m);
-  tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m);
+  tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m);
   tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
   typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
   MetroMeshFaceGrid   unifGridFace;
