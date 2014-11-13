@@ -397,7 +397,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
             //For every f_face  get the central point
             p_c=fromBarCoords(RandomBaricentric(),&*fi);
             //Create a ray with p_c as origin and direction N
-            p_c=p_c+NormalizedNormal(*fi)*0.1;
+            p_c=p_c+TriangleNormal(*fi).Normalize()*0.1;
             Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,fi->N());
             di=0;
             face=0;

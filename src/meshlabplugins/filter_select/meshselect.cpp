@@ -319,7 +319,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   break;
   case FP_SELECT_BORDER:
                           tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
-                          tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+                          tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
                           tri::UpdateSelection<CMeshO>::FaceFromBorderFlag(m.cm);
                           tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
   break;
@@ -392,13 +392,13 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
   case CP_SELECT_TEXBORDER:
     tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
     tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+    tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
     tri::UpdateSelection<CMeshO>::VertexFromBorderFlag(m.cm);
 
     // Just to be sure restore standard topology and border flags
     tri::UpdateTopology<CMeshO>::FaceFace(m.cm);
     tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m.cm);
-    tri::UpdateFlags<CMeshO>::VertexBorderFromFace(m.cm);
+    tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
     break;
   case CP_SELECT_NON_MANIFOLD_FACE:
     tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm,true);

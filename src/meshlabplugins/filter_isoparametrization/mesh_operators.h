@@ -21,7 +21,7 @@ void UpdateStructures(MeshType *mesh)
     vcg::tri::UpdateComponentEP<MeshType>::Set(*mesh);
     vcg::tri::UpdateFlags<MeshType>::Clear(*mesh);
     vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(*mesh);
-    vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFace(*mesh);
+    vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFaceBorder(*mesh);
 }
 
 template <class MeshType>
@@ -30,7 +30,7 @@ void UpdateTopologies(MeshType *mesh)
     vcg::tri::UpdateTopology<MeshType>::FaceFace(*mesh);
     vcg::tri::UpdateTopology<MeshType>::VertexFace(*mesh);
     vcg::tri::UpdateFlags<MeshType>::FaceBorderFromFF(*mesh);
-    vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFace(*mesh);
+    vcg::tri::UpdateFlags<MeshType>::VertexBorderFromFaceBorder(*mesh);
 }
 
 template <class MeshType>
