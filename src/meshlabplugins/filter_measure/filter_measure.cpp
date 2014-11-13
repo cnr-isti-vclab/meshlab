@@ -31,6 +31,7 @@
 #include<vcg/complex/append.h>
 #include<vcg/simplex/face/pos.h>
 #include<vcg/complex/algorithms/bitquad_support.h>
+#include<vcg/complex/algorithms/mesh_to_matrix.h>
 #include<vcg/complex/algorithms/bitquad_optimization.h>
 #include "filter_measure.h"
 
@@ -242,27 +243,29 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
     if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
         {
             CMeshO &m=md.mm()->cm;
+            tri::Allocator<CMeshO>::CompactEveryVector(m);
             float RangeMin = env.evalFloat("HistMin");
             float RangeMax = env.evalFloat("HistMax");
             int binNum     = env.evalInt("binNum");
+            bool areaFlag  = env.evalBool("areaWeighted");
 
             Histogramf H;
             H.SetRange(RangeMin,RangeMax,binNum);
             if(filterName == "Per Vertex Quality Histogram")
             {
-                for(CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
-                    if(!(*vi).IsD())
-                    {
-                        assert(!math::IsNAN((*vi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
-                        H.Add((*vi).Q());
-                    }
+              vector<Scalarm> aVec(m.vn,1.0);
+              if(areaFlag)
+                tri::MeshToMatrix<CMeshO>::PerVertexArea(m,aVec);
+
+              for(size_t i=0;i<m.vn;++i)
+                H.Add(m.vert[i].Q(), aVec[i]);
             }else{
-                for(CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
-                    if(!(*fi).IsD())
-                    {
-                        assert(!math::IsNAN((*fi).Q()) && "You should never try to compute Histogram with Invalid Floating points numbers (NaN)");
-                        H.Add((*fi).Q());
-                    }
+              vector<Scalarm> aVec(m.fn,1.0);
+              if(areaFlag)
+                tri::MeshToMatrix<CMeshO>::PerFaceArea(m,aVec);
+
+              for(size_t i=0;i<m.fn;++i)
+                H.Add(m.face[i].Q(),aVec[i]);
             }
             Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
             for(int i=1;i<=binNum;++i)
