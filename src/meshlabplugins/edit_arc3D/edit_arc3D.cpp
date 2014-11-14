@@ -694,7 +694,7 @@ bool Arc3DModel::BuildMesh(CMeshO &m, int subsampleFactor, int minCount, float m
             }
             else
             {
-                Point3m n=vcg::Normal(*fi);
+                Point3m n=vcg::TriangleNormal(*fi);
                 n.Normalize();
                 Point3m dir=CameraPos-vcg::Barycenter(*fi);
                 dir.Normalize();

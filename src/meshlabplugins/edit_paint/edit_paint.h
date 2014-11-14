@@ -623,12 +623,7 @@ inline void updateNormal(CVertexO * v)
         CFaceO * temp=one_face->VFp(pos);
         if (one_face!=0 && !one_face->IsD())
         {
-            vcg::face::ComputeNormalizedNormal(*one_face);
-    /*		for (int lauf=0; lauf<3; lauf++)
-                if (pos!=lauf) {
-                    v->N()+=one_face->V(lauf)->cN();
-                }
-            vcg::face::ComputeNormalizedNormal(*one_face); */
+            one_face->N()=TriangleNormal(*one_face).Normalize();
             v->N() += one_face->N();
             pos=one_face->VFi(pos);
         }
