@@ -116,7 +116,10 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
     else if (formatName.toUpper() == tr("STL"))
   {
     if (!tri::io::ImporterSTL<CMeshO>::LoadMask(filename.c_str(), mask))
+    {
+      errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_CANTOPEN));
       return false;
+    }
     m.Enable(mask);
     int result = tri::io::ImporterSTL<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
     if (result != 0) // all the importers return 0 on success
@@ -189,8 +192,11 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
     {
         int loadMask;
         if (!tri::io::ImporterOFF<CMeshO>::LoadMask(filename.c_str(),loadMask))
-            return false;
-    m.Enable(loadMask);
+        {
+          errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterOFF<CMeshO>::ErrorMsg(tri::io::ImporterOFF<CMeshO>::InvalidFile));
+          return false;
+        }
+        m.Enable(loadMask);
 
         int result = tri::io::ImporterOFF<CMeshO>::Open(m.cm, filename.c_str(), mask, cb);
         if (result != 0)  // OFFCodes enum is protected
