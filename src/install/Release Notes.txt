@@ -74,5 +74,14 @@ It allows the creation of points randomly generated using a Poisson Disk distrib
 2014 06 17 New Filter: Build a Polyline with NonFaux Edges
 Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh
 
+2014 06 17 Removed Filter: Voronoi Clustering. substituted by the voronoi sampling filter.
 
+2014 08 26 Boundary Decorator
+Now works also with edgemesh showing endpoints. 
 
+2014 10 20 Screened Poisson Surface Reconstruction
+The latest version of the very powerful surface reconstruction algorithm.
+
+2014 11 13 Histogram computation
+Added area weighting counting to for vertex/face quality Histogram dumping filters
+ 
