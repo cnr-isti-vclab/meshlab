@@ -47,100 +47,100 @@ using namespace vcg;
 
 bool GtsIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & /*parlst*/, CallBackPos *cb, QWidget *parent)
 {
-	// initializing mask
-	mask = 0;
+    // initializing mask
+    mask = 0;
 
-	// initializing progress bar status
-	if (cb != NULL)		(*cb)(0, "Loading...");
+    // initializing progress bar status
+    if (cb != NULL)		(*cb)(0, "Loading...");
 
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-	QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
+    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
+    QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
 
-	string filename = QFile::encodeName(fileName).constData ();
+    string filename = QFile::encodeName(fileName).constData ();
 
-	bool normalsUpdated = false;
+    bool normalsUpdated = false;
 
-	if (formatName.toUpper() == tr("GTS"))
-	{
-		int loadMask;
-		if (!vcg::tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
-			return false;
-		m.Enable(loadMask);
+    if (formatName.toUpper() == tr("GTS"))
+    {
+        int loadMask;
+        if (!vcg::tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
+            return false;
+        m.Enable(loadMask);
 
-		vcg::tri::io::ImporterGTS<CMeshO>::Options opt;
-		opt.flipFaces = true;
+        vcg::tri::io::ImporterGTS<CMeshO>::Options opt;
+        opt.flipFaces = true;
 
-		int result = vcg::tri::io::ImporterGTS<CMeshO>::Open(m.cm, filename.c_str(), mask, opt, cb);
-		if (result != 0)
-		{
-			QMessageBox::warning(parent, tr("GTS Opening Error"),
-													 errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
+        int result = vcg::tri::io::ImporterGTS<CMeshO>::Open(m.cm, filename.c_str(), mask, opt, cb);
+        if (result != 0)
+        {
+            QMessageBox::warning(parent, tr("GTS Opening Error"),
+                                                     errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result)));
+            return false;
+        }
 
-		CMeshO::FaceIterator fi = m.cm.face.begin();
-		for (; fi != m.cm.face.end(); ++fi)
-			face::ComputeNormalizedNormal(*fi);
-	}
+        CMeshO::FaceIterator fi = m.cm.face.begin();
+        for (; fi != m.cm.face.end(); ++fi)
+            fi->N() = TriangleNormal(*fi).Normalize();
+    }
 
-	vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
-	if (!normalsUpdated)
-		vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
+    vcg::tri::UpdateBounding<CMeshO>::Box(m.cm);					// updates bounding box
+    if (!normalsUpdated)
+        vcg::tri::UpdateNormal<CMeshO>::PerVertex(m.cm);		// updates normals
 
-	if (cb != NULL)
-		(*cb)(99, "Done");
+    if (cb != NULL)
+        (*cb)(99, "Done");
 
-	return true;
+    return true;
 }
 
 bool GtsIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
-	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
-	string filename = QFile::encodeName(fileName).constData ();
-	string ex = formatName.toUtf8().data();
+    QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
+    string filename = QFile::encodeName(fileName).constData ();
+    string ex = formatName.toUtf8().data();
 
-	if( formatName.toUpper() == tr("GTS") )
-	{
-		int result = vcg::tri::io::ExporterGTS<CMeshO>::Save(m.cm,filename.c_str(),mask);
-		if(result!=0)
-		{
-			QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterGTS<CMeshO>::ErrorMsg(result)));
-			return false;
-		}
-		return true;
-	}
-	assert(0); // unknown format
-	return false;
+    if( formatName.toUpper() == tr("GTS") )
+    {
+        int result = vcg::tri::io::ExporterGTS<CMeshO>::Save(m.cm,filename.c_str(),mask);
+        if(result!=0)
+        {
+            QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(fileName, vcg::tri::io::ExporterGTS<CMeshO>::ErrorMsg(result)));
+            return false;
+        }
+        return true;
+    }
+    assert(0); // unknown format
+    return false;
 }
 
 /*
-	returns the list of the file's type which can be imported
+    returns the list of the file's type which can be imported
 */
 QList<MeshIOInterface::Format> GtsIOPlugin::importFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("GNU Triangulated Surface"		,tr("GTS"));
-	return formatList;
+    QList<Format> formatList;
+    formatList << Format("GNU Triangulated Surface"		,tr("GTS"));
+    return formatList;
 }
 
 /*
-	returns the list of the file's type which can be exported
+    returns the list of the file's type which can be exported
 */
 QList<MeshIOInterface::Format> GtsIOPlugin::exportFormats() const
 {
-	QList<Format> formatList;
-	formatList << Format("GNU Triangulated Surface"		,tr("GTS"));
-	return formatList;
+    QList<Format> formatList;
+    formatList << Format("GNU Triangulated Surface"		,tr("GTS"));
+    return formatList;
 }
 
 /*
-	returns the mask on the basis of the file's type.
-	otherwise it returns 0 if the file format is unknown
+    returns the mask on the basis of the file's type.
+    otherwise it returns 0 if the file format is unknown
 */
 void GtsIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
 {
-	if(format.toUpper() == tr("GTS")){capability=defaultBits= vcg::tri::io::ExporterGTS<CMeshO>::GetExportMaskCapability();}
-	return;
+    if(format.toUpper() == tr("GTS")){capability=defaultBits= vcg::tri::io::ExporterGTS<CMeshO>::GetExportMaskCapability();}
+    return;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(GtsIOPlugin)
