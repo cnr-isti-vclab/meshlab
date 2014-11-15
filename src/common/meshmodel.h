@@ -166,6 +166,7 @@ class CFaceO    : public vcg::Face<  CUsedTypesO,
     vcg::face::WedgeTexCoordfOcf     /* 0b */
 > {};
 
+
 class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, vcg::face::vector_ocf<CFaceO> >
 {
 public :
@@ -182,27 +183,35 @@ public :
     }
 };
 
-/* An ack in order to avoid to duplicate code.
- * Should be used as MeshLabRenderMesh class itself
- * ONLY inside MeshLabRenderState and as DERIVED class in MeshModel*/
-
-class MeshLabRenderMesh
+class BufferObjectsRendering : public vcg::GLW
 {
 public:
-    MeshLabRenderMesh();
-    ~MeshLabRenderMesh();
+    BufferObjectsRendering();
+    //constructor for the buffer objects initializing. 
+    BufferObjectsRendering(const CMeshO& m);
 
-    //WARNING!!!!!: the constructor create a copy of the mesh passed as parameter.
-    //The parameter should be const but this is impossible cause of vcg::tri::Append::MeshCopy implementation in the vcglib
-    MeshLabRenderMesh(CMeshO& mesh);
+    ~BufferObjectsRendering();
 
-    bool render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
-    bool renderSelectedFace();
-    bool renderSelectedVert();
+    //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
+    bool update(const CMeshO& mm,const int updateattributesmask);
 
-    vcg::GlTrimesh<CMeshO> glw;
-    CMeshO cm;
-    //RenderMode rm;
+    //render function for invoking buffer objects based rendering
+    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );  
+
+    //function to clear/deallocate the buffer objects memory space
+    void clearState();
+private:
+    QReadWriteLock _lock;
+};
+
+class GLWRendering : public vcg::GlTrimesh<CMeshO>
+{
+public:
+    GLWRendering();
+    GLWRendering(CMeshO& mm);
+    ~GLWRendering();
+
+    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
 };
 
 /*
@@ -213,7 +222,7 @@ It contains a single vcg mesh object with some additional information for keepin
 
 class MeshDocument;
 
-class MeshModel : public MeshLabRenderMesh
+class MeshModel
 {
 public:
     /*
@@ -268,6 +277,9 @@ public:
 
     MeshDocument *parent;
 
+    CMeshO cm;
+    BufferObjectsRendering bor;
+    GLWRendering glw;
 
 public:
     /*
@@ -530,45 +542,7 @@ public:
 
 }; // end class RenderMode
 Q_DECLARE_METATYPE(RenderMode)
-class MeshLabRenderState //: public QObject
-{
-    //Q_OBJECT
-public:
-    MeshLabRenderState();
-    ~MeshLabRenderState();
 
-    enum MESHLAB_RENDER_ENTITY {MESH,RASTER};
-    enum MESHLAB_RENDER_STATE_ACTION {READ,WRITE};
-    //copy the _rendermap[id] model in the mm model
-    void copyBack(const int id,CMeshO& mm) const;
-
-    //the add/update functions should have const parameters. This could NOT be possible cause of the implementation of vcg::tri::Append::MeshCopy function in the vcglib
-    void add(const int id,CMeshO& mm);
-    bool update(const int id,CMeshO& mm,const int updateattributesmask);
-    QMap<int,MeshLabRenderMesh*>::iterator remove(QMap<int,MeshLabRenderMesh*>::iterator it );
-
-    void add( const int id,const MeshLabRenderRaster& rm );
-    bool update(const int id,const MeshLabRenderRaster& rm,const int updateattributesmask);
-    QMap<int,MeshLabRenderRaster*>::iterator remove(QMap<int,MeshLabRenderRaster*>::iterator it );
-
-    void render(const int id,vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm  );
-    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
-    void clearState();
-
-    void lockRenderState(const MESHLAB_RENDER_ENTITY ent,const MESHLAB_RENDER_STATE_ACTION act);
-    void unlockRenderState(const MESHLAB_RENDER_ENTITY ent);
-
-    bool isEntityInRenderingState(const int id,const MESHLAB_RENDER_ENTITY ent);
-
-private:
-
-    void lockReadOrWrite(QReadWriteLock& mutex,const MESHLAB_RENDER_STATE_ACTION act);
-    QMap<int,MeshLabRenderMesh*> _meshmap;
-    QMap<int,MeshLabRenderRaster*> _rastermap;
-
-    QReadWriteLock _meshmut;
-    QReadWriteLock _rastermut;
-};
 
 
 //class RasterModelState : public QObject
@@ -616,7 +590,7 @@ public:
     void setCurrent(RasterModel *newCur)  { setCurrentRaster(newCur->id());}
 
     /// methods to access the set of Meshes in a ordered fashion.
-    MeshModel   *nextVisibleMesh(MeshModel *_m)
+    MeshModel   *nextVisibleMesh(MeshModel *_m = NULL)
     {
       MeshModel *newM = nextMesh(_m);
       if(newM==0)
@@ -628,7 +602,8 @@ public:
         return nextVisibleMesh(newM);
     }
 
-    MeshModel   *nextMesh(MeshModel *_m) {
+    MeshModel   *nextMesh(MeshModel *_m = NULL) 
+    {
       if(_m==0 && meshList.size()>0)
         return meshList.at(0);
       for (int i = 0; i < meshList.size(); ++i) {
@@ -641,7 +616,7 @@ public:
       return 0;
     }
     /// methods to access the set of Meshes in a ordered fashion.
-    RasterModel   *nextRaster(RasterModel *_rm) {
+    RasterModel   *nextRaster(RasterModel *_rm = NULL) {
       for (int i = 0; i < rasterList.size(); ++i) {
           if (rasterList.at(i) == _rm)
           {
@@ -672,10 +647,10 @@ public:
     //functions to update the document entities (meshes and/or rasters) during the filters execution
     //WARNING! please note that if you have to update both meshes and rasters calling updateRenderState function it's far more efficient
     //than calling in sequence updateRenderRasterStateMeshes and updateRenderStateRasters. Use them only if you have to update only rasters or only meshes.
-    void updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask);
+    /*void updateRenderState(const QList<int>& mm,const int meshupdatemask,const QList<int>& rm,const int rasterupdatemask);
 
     void updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask);
-    void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);
+    void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);*/
 
 
 private:
@@ -690,10 +665,8 @@ private:
 
     //it is the label of the document. it should only be something like Project_n (a temporary name for a new empty document) or the fullPathFilename.
     QString documentLabel;
-    MeshLabRenderState rendstate;
 public:
 
-    inline MeshLabRenderState& renderState() {return rendstate;}
     void setDocLabel(const QString& docLb) {documentLabel = docLb;}
     QString docLabel() const {return documentLabel;}
     QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
