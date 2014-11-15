@@ -150,7 +150,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
 
     glColor4f(1.0f, 1.0f, 1.0f, 0.1f);
 //    md.mm()->glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
-    md.mm()->render(GLW::DMFlat, GLW::CMNone, GLW::TMNone);
+    md.mm()->bor.render(GLW::DMFlat, GLW::CMNone, GLW::TMNone);
     glPopAttrib();
   } break;
 
@@ -436,10 +436,10 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
         }
     } break;
     case DP_SHOW_SELECTED_FACE :
-      m.renderSelectedFace();
+      //m.renderSelectedFace();
      break;
     case DP_SHOW_SELECTED_VERT :
-      m.renderSelectedVert();
+      //m.renderSelectedVert();
      break;
     } // end switch;
     glPopMatrix();
