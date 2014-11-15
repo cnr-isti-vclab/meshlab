@@ -507,6 +507,8 @@ private:
     QAction *onscreenHelpAct;
     QAction *checkUpdatesAct;
     ////////////////////////////////////////////////////
+
+    QSet<int> existingmeshesbeforefilterexecution;
     static QString getDecoratedFileName(const QString& name);
 
     void updateRenderToolBar( RenderModeAction* act );

@@ -1197,6 +1197,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     iFilter->glContext->create(filterWidget->context());
     try
     {
+        QSet<int> existingmeshesbeforefilterexecutionlocal;
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;meshDoc()->nextMesh(mm))
+            existingmeshesbeforefilterexecutionlocal.insert(mm->id());
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
 
         meshDoc()->setBusy(false);
@@ -1225,6 +1228,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
             MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
         }
+
+
         // at the end for filters that change the color, or selection set the appropriate rendering mode
         if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
             GLA()->setColorMode(vcg::GLW::CMPerFace);
@@ -1256,6 +1261,32 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
                 it.value().setTextureMode(GLW::TMPerWedgeMulti);
             GLA()->updateTexture();
         }
+
+        int fclasses =	iFilter->getClass(action);
+
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
+        {
+            int postCondMask = iFilter->postCondition(action);
+
+            //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
+            if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
+                postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
+
+            if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
+                postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
+
+            if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                postCondMask = postCondMask | MeshModel::MM_FACEQUALITY;
+
+            if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
+
+            //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
+            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
+                mm->bor.update(mm->cm,MeshModel::MM_ALL);
+            else
+                mm->bor.update(mm->cm,postCondMask);
+        }
     }
     catch (std::bad_alloc& bdall)
     {
@@ -1278,105 +1309,105 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
 {
    /* if (env.isNull())
         throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
-    if (meshDoc() == NULL)
-        return;
+    //if (meshDoc() == NULL)
+    //    return;
 
-    QString fname = mfc->act->text();
-    QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
+    //QString fname = mfc->act->text();
+    //QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
 
-    if ((ar == MLXMLElNames::singleMeshArity)&& (meshDoc()->mm() != NULL))
-    {
+    //if ((ar == MLXMLElNames::singleMeshArity)&& (meshDoc()->mm() != NULL))
+    //{
 
-        QTime tt;
-        tt.start();
-        meshDoc()->renderState().add(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
-        GLA()->Logf(0,"Elapsed time %d\n",tt.elapsed());
-        return;
-    }
+    //    QTime tt;
+    //    tt.start();
+    //    meshDoc()->renderState().add(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
+    //    GLA()->Logf(0,"Elapsed time %d\n",tt.elapsed());
+    //    return;
+    //}
 
-    if (ar == MLXMLElNames::fixedArity)
-    {
-        Env env;
-        QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
-        EnvWrap envwrap(env);
-        //I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
-        MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
-        for(int ii = 0;ii < params.size();++ii)
-        {
-            if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
-            {
-                try
-                {
-                    MeshModel* tmp = envwrap.evalMesh(params[ii][MLXMLElNames::paramName]);
-                    if (tmp != NULL)
-                        meshDoc()->renderState().add(tmp->id(),tmp->cm);
-                }
-                catch (ExpressionHasNotThisTypeException&)
-                {
-                    QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-                    meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
-                }
-            }
-        }
-        return;
-    }
+    //if (ar == MLXMLElNames::fixedArity)
+    //{
+    //    Env env;
+    //    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
+    //    EnvWrap envwrap(env);
+    //    //I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
+    //    MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
+    //    for(int ii = 0;ii < params.size();++ii)
+    //    {
+    //        if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
+    //        {
+    //            try
+    //            {
+    //                MeshModel* tmp = envwrap.evalMesh(params[ii][MLXMLElNames::paramName]);
+    //                if (tmp != NULL)
+    //                    meshDoc()->renderState().add(tmp->id(),tmp->cm);
+    //            }
+    //            catch (ExpressionHasNotThisTypeException&)
+    //            {
+    //                QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
+    //                meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+    //            }
+    //        }
+    //    }
+    //    return;
+    //}
 
-    //In this case I can only copy all the meshes in the document!
-    if (ar == MLXMLElNames::variableArity)
-    {
-        for(int ii = 0;ii<meshDoc()->meshList.size();++ii)
-            meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
-        return;
-    }
+    ////In this case I can only copy all the meshes in the document!
+    //if (ar == MLXMLElNames::variableArity)
+    //{
+    //    for(int ii = 0;ii<meshDoc()->meshList.size();++ii)
+    //        meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
+    //    return;
+    //}
 }
 
 void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc)
 {
-    if (meshDoc() == NULL)
-        return;
-    QString fname = mfc->act->text();
-    QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterRasterArity);
+    //if (meshDoc() == NULL)
+    //    return;
+    //QString fname = mfc->act->text();
+    //QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterRasterArity);
 
-    if ((ar == MLXMLElNames::singleRasterArity)&& (meshDoc()->rm() != NULL))
-    {
-        meshDoc()->renderState().add(meshDoc()->rm()->id(),*meshDoc()->rm());
-        return;
-    }
+    //if ((ar == MLXMLElNames::singleRasterArity)&& (meshDoc()->rm() != NULL))
+    //{
+    //    meshDoc()->renderState().add(meshDoc()->rm()->id(),*meshDoc()->rm());
+    //    return;
+    //}
 
-    if (ar == MLXMLElNames::fixedRasterArity)
-    {
-        // TO DO!!!!!! I have to add RasterType in order to understand which are the parameters working on Raster!!!
+    //if (ar == MLXMLElNames::fixedRasterArity)
+    //{
+    //    // TO DO!!!!!! I have to add RasterType in order to understand which are the parameters working on Raster!!!
 
-        //	//I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
-        //	MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
-        //	for(int ii = 0;ii < params.size();++ii)
-        //	{
-        //		if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
-        //		{
-        //			try
-        //			{
-        //				MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
-        //				if (tmp != NULL)
-        //					meshDoc()->renderState().add(tmp->id(),tmp->cm);
-        //			}
-        //			catch (ExpressionHasNotThisTypeException& e)
-        //			{
-        //				QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-        //				meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
-        //			}
-        //		}
-        //	}
-        return;
-    }
+    //    //	//I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
+    //    //	MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
+    //    //	for(int ii = 0;ii < params.size();++ii)
+    //    //	{
+    //    //		if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
+    //    //		{
+    //    //			try
+    //    //			{
+    //    //				MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
+    //    //				if (tmp != NULL)
+    //    //					meshDoc()->renderState().add(tmp->id(),tmp->cm);
+    //    //			}
+    //    //			catch (ExpressionHasNotThisTypeException& e)
+    //    //			{
+    //    //				QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
+    //    //				meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+    //    //			}
+    //    //		}
+    //    //	}
+    //    return;
+    //}
 
-    //In this case I can only copy all the meshes in the document!
-    if (ar == MLXMLElNames::variableRasterArity)
-    {
-        for(int ii = 0;meshDoc()->rasterList.size();++ii)
-            if (meshDoc()->rasterList[ii] != NULL)
-                meshDoc()->renderState().add(meshDoc()->rasterList[ii]->id(),*meshDoc()->rasterList[ii]);
-        return;
-    }
+    ////In this case I can only copy all the meshes in the document!
+    //if (ar == MLXMLElNames::variableRasterArity)
+    //{
+    //    for(int ii = 0;meshDoc()->rasterList.size();++ii)
+    //        if (meshDoc()->rasterList[ii] != NULL)
+    //            meshDoc()->renderState().add(meshDoc()->rasterList[ii]->id(),*meshDoc()->rasterList[ii]);
+    //    return;
+    //}
 }
 
 void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString,QString>& parexpval , bool  ispreview)
@@ -1391,11 +1422,11 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
     QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
     QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
     int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-    if (postCondMask != MeshModel::MM_NONE)
-        initDocumentMeshRenderState(mfc);
+    /*if (postCondMask != MeshModel::MM_NONE)
+    initDocumentMeshRenderState(mfc);
 
     initDocumentRasterRenderState(mfc);
-
+    */
     if(!ispreview)
         meshDoc()->Log.ClearBookmark();
     else
@@ -1463,6 +1494,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         funcall = funcall + ");";
         if (meshDoc() != NULL)
             meshDoc()->xmlhistory << funcall;
+        existingmeshesbeforefilterexecution.clear();
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;meshDoc()->nextMesh(mm))
+            existingmeshesbeforefilterexecution.insert(mm->id());
         if (filtercpp)
         {
             enableDocumentSensibleActionsContainer(false);
@@ -1497,7 +1531,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 void MainWindow::postFilterExecution()
 {
     emit filterExecuted();
-    meshDoc()->renderState().clearState();
+    //meshDoc()->renderState().clearState();
+    
+
     qApp->restoreOverrideCursor();
     qb->reset();
     //foreach(QAction* act,filterMenu->actions())
@@ -1515,10 +1551,42 @@ void MainWindow::postFilterExecution()
     QMap<QString,MeshLabXMLFilterContainer>::const_iterator mfc = PM.stringXMLFilterMap.find(obj->filterName());
     if (mfc == PM.stringXMLFilterMap.constEnd())
         return;
-    if (mfc->filterInterface != NULL)
-        mfc->filterInterface->setInterrupt(false);
-
     QString fname = mfc->act->text();
+    // at the end for filters that change the color, or selection set the appropriate rendering mode
+    QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
+    QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+    int fclasses =	MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
+    if (mfc->filterInterface != NULL)
+    {
+        mfc->filterInterface->setInterrupt(false);
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
+        {
+            QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+            QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+            int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
+
+            //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
+            if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
+                postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
+          
+            if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
+                 postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
+
+            if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                postCondMask = postCondMask | MeshModel::MM_FACEQUALITY;
+
+            if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
+           
+            //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
+            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
+                mm->bor.update(mm->cm,MeshModel::MM_ALL);
+            else
+                mm->bor.update(mm->cm,postCondMask);
+        }
+    }
+
+    existingmeshesbeforefilterexecution.clear();
     meshDoc()->setBusy(false);
 
 
@@ -1544,19 +1612,16 @@ void MainWindow::postFilterExecution()
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
     }
-    // at the end for filters that change the color, or selection set the appropriate rendering mode
-    QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
-    QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-    int mask =	MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
-    if(mask & MeshFilterInterface::FaceColoring ) {
+
+    if(fclasses & MeshFilterInterface::FaceColoring ) {
         GLA()->setColorMode(vcg::GLW::CMPerFace);
         meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
     }
-    if(mask & MeshFilterInterface::VertexColoring ){
+    if(fclasses & MeshFilterInterface::VertexColoring ){
         GLA()->setColorMode(vcg::GLW::CMPerVert);
         meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
     }
-    if(mask & MeshModel::MM_COLOR)
+    if(fclasses & MeshModel::MM_COLOR)
     {
         GLA()->setColorMode(vcg::GLW::CMPerMesh);
         meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
@@ -1566,10 +1631,10 @@ void MainWindow::postFilterExecution()
     //if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
     //	meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
 
-    if(mask & MeshFilterInterface::MeshCreation )
+    if(fclasses & MeshFilterInterface::MeshCreation )
         GLA()->resetTrackBall();
 
-    if(mask & MeshFilterInterface::Texture )
+    if(fclasses & MeshFilterInterface::Texture )
     {
         //WARNING!!!!! HERE IT SHOULD BE A CHECK IF THE FILTER IS FOR MESH OR FOR DOCUMENT (IN THIS CASE I SHOULD ACTIVATE ALL THE TEXTURE MODE FOR EVERYONE...)
         //NOW WE HAVE JUST TEXTURE FILTERS WORKING ON SINGLE MESH
@@ -1663,8 +1728,8 @@ void MainWindow::applyEditMode()
         GLA()->addMeshEditor(action, iEdit);
     }
     GLA()->setCurrentEditAction(action);
-
     updateMenus();
+    GLA()->update();
 }
 
 void MainWindow::applyRenderMode()
@@ -2279,6 +2344,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     }
 
     saveRecentFileList(fileName);
+    mm->bor.update(mm->cm,MeshModel::MM_ALL);
 
     if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
         GLA()->setColorMode(GLW::CMPerFace);

@@ -359,7 +359,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
         glLoadName(mp->id());
         QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
         if (it != rendermodemap.end())
-            mp->render(it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
+            mp->bor.render(it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
     }
 
     long hits;
@@ -487,10 +487,11 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
                     if(meshVisibilityMap[mp->id()])
                     {
-                        if (!md()->renderState().isEntityInRenderingState(id,MeshLabRenderState::MESH))
-                            mp->render(rm.drawMode,rm.colorMode,rm.textureMode);
+                        if (iEdit != NULL)
+                            mp->glw.render(rm.drawMode,rm.colorMode,rm.textureMode);
                         else
-                            md()->renderState().render(mp->id(),rm.drawMode,rm.colorMode,rm.textureMode);
+                            mp->bor.render(rm.drawMode,rm.colorMode,rm.textureMode);
+                        
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
