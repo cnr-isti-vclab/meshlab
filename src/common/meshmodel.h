@@ -187,20 +187,27 @@ class BufferObjectsRendering : public vcg::GLW
 {
 public:
     BufferObjectsRendering();
-    //constructor for the buffer objects initializing. 
-    BufferObjectsRendering(const CMeshO& m);
+    //constructor for the buffer objects initializing.
+    BufferObjectsRendering(CMeshO &m);
 
     ~BufferObjectsRendering();
-
+    void DrawPoints();
+    void DrawTriangles();
     //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
-    bool update(const CMeshO& mm,const int updateattributesmask);
+    bool update(CMeshO& mm,const int updateattributesmask);
 
     //render function for invoking buffer objects based rendering
-    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );  
+    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
 
     //function to clear/deallocate the buffer objects memory space
     void clearState();
 private:
+   GLuint positionBufferObject;
+   GLuint normalBufferObject;
+   GLuint indexBufferObject;
+   int vn;
+   int tn;
+
     QReadWriteLock _lock;
 };
 
@@ -602,7 +609,7 @@ public:
         return nextVisibleMesh(newM);
     }
 
-    MeshModel   *nextMesh(MeshModel *_m = NULL) 
+    MeshModel   *nextMesh(MeshModel *_m = NULL)
     {
       if(_m==0 && meshList.size()>0)
         return meshList.at(0);

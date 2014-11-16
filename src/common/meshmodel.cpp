@@ -750,7 +750,7 @@ BufferObjectsRendering::BufferObjectsRendering()
 }
 
 
-BufferObjectsRendering::BufferObjectsRendering( const CMeshO& m )
+BufferObjectsRendering::BufferObjectsRendering( CMeshO& m )
     :vcg::GLW(),_lock(QReadWriteLock::Recursive)
 {
     update(m,MeshModel::MM_ALL);
@@ -763,9 +763,48 @@ BufferObjectsRendering::~BufferObjectsRendering()
     clearState();
 }
 
+void BufferObjectsRendering::DrawPoints()
+{
+  glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+  glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
+  glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+
+  glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+  glNormalPointer(GL_FLOAT, 0, 0);               // last param is offset, not ptr
+  glEnableClientState(GL_NORMAL_ARRAY);             // activate vertex coords array
+
+  glDrawArrays(GL_POINTS, 0, vn*3);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+void BufferObjectsRendering::DrawTriangles()
+{
+  glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+  glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+  glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
+
+  glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+  glNormalPointer(GL_FLOAT, 0, 0);               // last param is offset, not ptr
+  glEnableClientState(GL_NORMAL_ARRAY);             // activate vertex coords array
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
+  glDrawElements( GL_TRIANGLES, tn*3, GL_UNSIGNED_INT,0);
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 void BufferObjectsRendering::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode colm,vcg::GLW::TextureMode tm )
 {
     QReadLocker locker(&_lock);
+
+//    glUseProgram(theProgram);
+
+if(dm== GLW::DMPoints) DrawPoints();
+else DrawTriangles();
+
+
     /*if (glw.m != NULL)
     {
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -786,133 +825,61 @@ void BufferObjectsRendering::render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode co
     }*/
 }
 
-bool BufferObjectsRendering::update(const CMeshO& mm,const int updateattributesmask)
+bool BufferObjectsRendering::update(CMeshO& mm,const int updateattributesmask)
 {
     if (updateattributesmask == MeshModel::MM_NONE)
         return false;
-    
+
     QWriteLocker locker(&_lock);
-
-    if (!(updateattributesmask & MeshModel::MM_VERTCOLOR) &
-        !(updateattributesmask & MeshModel::MM_VERTCOORD) &
-        !(updateattributesmask & MeshModel::MM_VERTQUALITY) &
-        !(updateattributesmask & MeshModel::MM_VERTNORMAL) &
-        !(updateattributesmask & MeshModel::MM_FACEFLAGSELECT) &
-        !(updateattributesmask & MeshModel::MM_VERTFLAGSELECT) &
-        !(updateattributesmask & MeshModel::MM_TRANSFMATRIX) &
-        !(updateattributesmask & MeshModel::MM_CAMERA))
+    tri::Allocator<CMeshO>::CompactEveryVector(mm);
+    tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(mm);
+    // prepear
+    QTime aa; aa.start();
+    std::vector<float> vv(mm.vn *3);
+    std::vector<float> nv(mm.vn *3);
+    vn = mm.vn;
+    for(size_t i=0;i<vn;++i)
     {
-      
-        return true;
+      mm.vert[i].N().Normalize();
+      vv[i*3+0] = mm.vert[i].P()[0];
+      vv[i*3+1] = mm.vert[i].P()[1];
+      vv[i*3+2] = mm.vert[i].P()[2];
+      nv[i*3+0] = mm.vert[i].N()[0];
+      nv[i*3+1] = mm.vert[i].N()[1];
+      nv[i*3+2] = mm.vert[i].N()[2];
+    }
+    tn = mm.fn;
+    std::vector<unsigned int> ti(tn *3);
+    for(size_t i=0;i<tn;++i)
+    {
+      ti[i*3+0] = tri::Index(mm,mm.face[i].V(0));
+      ti[i*3+1] = tri::Index(mm,mm.face[i].V(1));
+      ti[i*3+2] = tri::Index(mm,mm.face[i].V(2));
     }
 
-    if (updateattributesmask & MeshModel::MM_VERTCOLOR)
-    {
-        /*if(mm.vert.size() != (rm->cm.vert.size()))
-        {
-            return false;
-        }
-       
-        CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-        for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-            if(!(*mmvi).IsD())
-                (*rmvi).C()=(*mmvi).cC();*/
-        
-    }
+    qDebug("Buffer prepared in %i",aa.elapsed());
+    glGenBuffers(1, &positionBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, vn *3 *sizeof(GLfloat), &vv[0], GL_STATIC_DRAW);
 
-    if (updateattributesmask & MeshModel::MM_VERTCOORD)
-    {
-        /*if(mm.vert.size() != (rm->cm.vert.size()))
-        {
-            return false;
-        }
-        
-        CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-        for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-            if(!(*mmvi).IsD())
-                (*rmvi).P()=(*mmvi).cP();
-        */
-    }
+    glGenBuffers(1, &normalBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, vn *3 *sizeof(GLfloat), &nv[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    if (updateattributesmask & MeshModel::MM_VERTQUALITY)
-    {
-        /*if(mm.vert.size() != (rm->cm.vert.size()))
-        {
-            return false;
-        }
-        
-        CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-        for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-            if(!(*mmvi).IsD())
-                (*rmvi).Q()=(*mmvi).cQ();*/
-        
-    }
+    glGenBuffers(1, &indexBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tn *3 *sizeof(GLuint), &ti[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    if	(updateattributesmask & MeshModel::MM_VERTNORMAL)
-    {
-        /*if(mm.vert.size() != (rm->cm.vert.size()))
-        {
-            return false;
-        }
-       
-        CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-        for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-            if(!(*mmvi).IsD())
-                (*rmvi).N()=(*mmvi).cN();*/
-        
-    }
-
-    if(updateattributesmask & MeshModel::MM_FACEFLAGSELECT)
-    {
-        /*if(mm.face.size() != rm->cm.face.size())
-        {
-            return false;
-        }
-        CMeshO::FaceIterator rmfi = rm->cm.face.begin();
-        for(CMeshO::ConstFaceIterator mmfi = mm.face.begin(); mmfi != mm.face.end(); ++mmfi, ++rmfi)
-        {
-            if ((!(*mmfi).IsD()) && ((*mmfi).IsS()))
-                (*rmfi).SetS();
-            else
-                if (!(*mmfi).IsS())
-                    (*rmfi).ClearS();
-        }*/
-    }
-
-    if(updateattributesmask & MeshModel::MM_VERTFLAGSELECT)
-    {
-        /*if(mm.vert.size() != (rm->cm.vert.size()))
-        {
-            return false;
-        }
-        
-        CMeshO::VertexIterator rmvi = rm->cm.vert.begin();
-        for(CMeshO::ConstVertexIterator mmvi = mm.vert.begin(); mmvi != mm.vert.end(); ++mmvi, ++rmvi)
-        {
-            if ((!(*mmvi).IsD()) && ((*mmvi).IsS()))
-                (*rmvi).SetS();
-            else
-                if (!(*mmvi).IsS())
-                    (*rmvi).ClearS();
-        }*/
-        
-    }
-
-    if(updateattributesmask & MeshModel::MM_TRANSFMATRIX)
-    {
-        //rm->cm.Tr = mm.Tr;
-    }
-    if(updateattributesmask & MeshModel::MM_CAMERA)
-    {
-        //rm->cm.shot = mm.shot;
-    }
+    qDebug("Buffer feed in %i",aa.elapsed());
     return true;
 }
 
 void BufferObjectsRendering::clearState()
 {
     QWriteLocker locker(&_lock);
- 
+
     //TODO: delete frame objects
 }
 
