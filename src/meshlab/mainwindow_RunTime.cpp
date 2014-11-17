@@ -1532,7 +1532,7 @@ void MainWindow::postFilterExecution()
 {
     emit filterExecuted();
     //meshDoc()->renderState().clearState();
-    
+
 
     qApp->restoreOverrideCursor();
     qb->reset();
@@ -1568,7 +1568,7 @@ void MainWindow::postFilterExecution()
             //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
             if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
                 postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
-          
+
             if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
                  postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
 
@@ -1577,7 +1577,7 @@ void MainWindow::postFilterExecution()
 
             if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                 postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
-           
+
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
             if (!existingmeshesbeforefilterexecution.contains(mm->id()))
                 mm->bor.update(mm->cm,MeshModel::MM_ALL);
@@ -1945,10 +1945,8 @@ bool MainWindow::openProject(QString fileName)
         {
             QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
             meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-            openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
-            if(openRes)
-                meshDoc()->mm()->cm.Tr.Import((*ir).trasformation);
-            else
+            openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),ir->trasformation);
+            if(!openRes)
                 meshDoc()->delMesh(meshDoc()->mm());
         }
     }
@@ -1965,13 +1963,12 @@ bool MainWindow::openProject(QString fileName)
             QString fullPath = meshDoc()->meshList[i]->fullName();
             meshDoc()->setBusy(true);
             Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
-            if (!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]))
+            if (!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm))
                 meshDoc()->delMesh(meshDoc()->meshList[i]);
-            else
-                this->meshDoc()->meshList[i]->cm.Tr=trm;
         }
     }
 
+    ////// BUNDLER
     if (QString(fi.suffix()).toLower() == "out"){
 
         QString cameras_filename = fileName;
@@ -1986,15 +1983,6 @@ bool MainWindow::openProject(QString fileName)
         if(image_list_filename.isEmpty())
             return false;
 
-
-        //model_filename = QFileDialog::getOpenFileName(
-        //			this, tr("Open 3D model file"),
-        //			QFileInfo(fileName).absolutePath(),
-        //			tr("Bunler 3D model file (*.ply)")
-        //			);
-        //if(model_filename.isEmpty())
-        //  return false;
-
         if(!MeshDocumentFromBundler(*meshDoc(),cameras_filename,image_list_filename,model_filename)){
             QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
             return false;
@@ -2002,43 +1990,13 @@ bool MainWindow::openProject(QString fileName)
 
         GLA()->setColorMode(GLW::CMPerVert);
         GLA()->setDrawMode(GLW::DMPoints);
-        //else{
-        //	for (int i=0; i<meshDoc()->meshList.size(); i++)
-        //		{
-        //		  QString fullPath = meshDoc()->meshList[i]->fullName();
-        //		  meshDoc()->setBusy(true);
-        //		  loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
-        //		}
-        //}
-
-
     }
 
     //////NVM
-
     if (QString(fi.suffix()).toLower() == "nvm"){
 
         QString cameras_filename = fileName;
-        //QString image_list_filename;
         QString model_filename;
-
-        /*image_list_filename = QFileDialog::getOpenFileName(
-        this  ,  tr("Open image list file"),
-        QFileInfo(fileName).absolutePath(),
-        tr("Bundler images list file (*.txt)")
-        );
-        if(image_list_filename.isEmpty())
-        return false;*/
-
-
-        //model_filename = QFileDialog::getOpenFileName(
-        //			this, tr("Open 3D model file"),
-        //			QFileInfo(fileName).absolutePath(),
-        //			tr("Bunler 3D model file (*.ply)")
-        //			);
-        //if(model_filename.isEmpty())
-        //  return false;
-
 
         if(!MeshDocumentFromNvm(*meshDoc(),cameras_filename,model_filename)){
             QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
@@ -2046,20 +2004,8 @@ bool MainWindow::openProject(QString fileName)
         }
         GLA()->setColorMode(GLW::CMPerVert);
         GLA()->setDrawMode(GLW::DMPoints);
-
-        //else{
-        //	for (int i=0; i<meshDoc()->meshList.size(); i++)
-        //		{
-        //		  QString fullPath = meshDoc()->meshList[i]->fullName();
-        //		  meshDoc()->setBusy(true);
-        //		  loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]);
-        //		}
-        //}
-
-
     }
 
-    //////NVM
 
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
@@ -2119,16 +2065,11 @@ bool MainWindow::appendProject(QString fileName)
                 return false;
             }
 
-            bool openRes=true;
-            vector<RangeMap>::iterator ir;
-            for(ir=rmv.begin();ir!=rmv.end() && openRes;++ir)
+            for(vector<RangeMap>::iterator ir=rmv.begin();ir!=rmv.end();++ir)
             {
                 QString relativeToProj = fi.absoluteDir().absolutePath() + "/" + (*ir).filename.c_str();
                 meshDoc()->addNewMesh(relativeToProj,relativeToProj);
-                openRes = loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm());
-                if(openRes)
-                    meshDoc()->mm()->cm.Tr.Import((*ir).trasformation);
-                else
+                if(!loadMeshWithStandardParams(relativeToProj,this->meshDoc()->mm(),(*ir).trasformation))
                     meshDoc()->delMesh(meshDoc()->mm());
             }
         }
@@ -2145,10 +2086,8 @@ bool MainWindow::appendProject(QString fileName)
                 QString fullPath = meshDoc()->meshList[i]->fullName();
                 meshDoc()->setBusy(true);
                 Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
-                if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i]))
+                if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm))
                     meshDoc()->delMesh(meshDoc()->meshList[i]);
-                else
-                    this->meshDoc()->meshList[i]->cm.Tr=trm;
             }
         }
     }
@@ -2285,7 +2224,7 @@ bool MainWindow::importRaster(const QString& fileImg)
     return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar)
+bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr)
 {
     if ((GLA() == NULL) || (mm == NULL))
         return false;
@@ -2344,7 +2283,6 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     }
 
     saveRecentFileList(fileName);
-    mm->bor.update(mm->cm,MeshModel::MM_ALL);
 
     if( mask & vcg::tri::io::Mask::IOM_FACECOLOR)
         GLA()->setColorMode(GLW::CMPerFace);
@@ -2404,6 +2342,8 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
     if(delVertNum>0 || delFaceNum>0 )
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
+    mm->cm.Tr = mtr;
+    mm->bor.update(mm->cm,MeshModel::MM_ALL);
     meshDoc()->setBusy(false);
     return true;
 }
@@ -2524,7 +2464,7 @@ void MainWindow::openRecentProj()
     if (action)	openProject(action->data().toString());
 }
 
-bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
+bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr)
 {
     if ((meshDoc() == NULL) || (mm == NULL))
         return false;
@@ -2539,7 +2479,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath,MeshModel* mm)
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
         int mask = 0;
         QTime t;t.start();
-        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar);
+        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr);
         if(open)
         {
             GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());

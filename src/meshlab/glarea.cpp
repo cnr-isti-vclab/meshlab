@@ -359,7 +359,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
         glLoadName(mp->id());
         QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
         if (it != rendermodemap.end())
-            mp->bor.render(it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
+            mp->bor.render(md()->bbox(), it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
     }
 
     long hits;
@@ -490,8 +490,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         if (iEdit != NULL)
                             mp->glw.render(rm.drawMode,rm.colorMode,rm.textureMode);
                         else
-                            mp->bor.render(rm.drawMode,rm.colorMode,rm.textureMode);
-                        
+                            mp->bor.render(md()->bbox(), rm.drawMode,rm.colorMode,rm.textureMode);
+
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
@@ -575,6 +575,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     // Finally display HELP if requested
     if (isHelpVisible()) displayHelp();
 
+    glFinish();
+
     // Draw the log area background
     // on the bottom of the glArea
     if(infoAreaVisible)
@@ -590,7 +592,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     //Draw highlight if it is the current viewer
     if(mvc()->currentId==id)
         displayViewerHighlight();
-
 
     QString error = checkGLError::makeString("There are gl errors: ");
     if(!error.isEmpty()) {
@@ -726,27 +727,27 @@ void GLArea::displayInfo(QPainter *painter)
     {
         if(this->md()->size()==1)
         {
-			QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+            QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             col1Text += QString("Mesh: %1\n").arg(mm()->label());
-			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " \n";
-			col1Text += "Faces: " + engLocale.toString(mm()->cm.vn) + " \n";
+            col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " \n";
+            col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " \n";
         }
         else
         {
-			QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-			col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
-			col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(this->md()->vn()) + ") \n";
-			col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(this->md()->fn()) + ") \n";
+            QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+            col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
+            col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(this->md()->vn()) + ") \n";
+            col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
         QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
         if (it != rendermodemap.end())
         {
             RenderMode rm = it.value();
-			if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
-			{
-				QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-				col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
-			}
+            if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
+            {
+                QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+                col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
+            }
         }
         col1Text += GetMeshInfoString();
 
@@ -1451,9 +1452,9 @@ void GLArea::setView()
     farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
     if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
-    //qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
-    //qDebug("camera dist %f far  %f",cameraDist, farPlane);
-    //qDebug("Bb %f %f %f - %f %f %f", bb.min[0], bb.min[1], bb.min[2], bb.max[0], bb.max[1], bb.max[2]);
+//    qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
+//    qDebug("camera dist %f far  %f",cameraDist, farPlane);
+//    qDebug("Bb %f %f %f - %f %f %f", bb.min[0], bb.min[1], bb.min[2], bb.max[0], bb.max[1], bb.max[2]);
 
     if (!takeSnapTile)
     {
@@ -1502,15 +1503,16 @@ void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdoubl
 
 void GLArea::updateFps(float deltaTime)
 {
-    static float fpsVector[10];
+    const int avgSize =50;
+    static float fpsVector[avgSize];
     static int j=0;
     float averageFps=0;
     if (deltaTime>0) {
         fpsVector[j]=deltaTime;
         j=(j+1) % 10;
     }
-    for (int i=0;i<10;i++) averageFps+=fpsVector[i];
-    cfps=1000.0f/(averageFps/10);
+    for (int i=0;i<avgSize;i++) averageFps+=fpsVector[i];
+    cfps=1000.0f/(averageFps/avgSize);
     lastTime=deltaTime;
 }
 
@@ -1519,7 +1521,7 @@ void GLArea::resetTrackBall()
     trackball.Reset();
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
-    trackball.track.tra.Import(-this->md()->bbox().Center());
+//    trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
     fov=fovDefault();
     update();

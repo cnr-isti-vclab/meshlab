@@ -187,26 +187,62 @@ class BufferObjectsRendering : public vcg::GLW
 {
 public:
     BufferObjectsRendering();
-    //constructor for the buffer objects initializing.
-    BufferObjectsRendering(CMeshO &m);
-
     ~BufferObjectsRendering();
-    void DrawPoints();
-    void DrawTriangles();
+    void DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
+    void DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
+
     //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
-    bool update(CMeshO& mm,const int updateattributesmask);
+    bool update(CMeshO& mm, const int updateattributesmask);
+//    bool requestUpdate(CMeshO& mm, Box3m bb, const int updateattributesmask);
 
     //render function for invoking buffer objects based rendering
-    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
+    void render(const Box3m &bbDoc, vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm );
 
     //function to clear/deallocate the buffer objects memory space
     void clearState();
 private:
+
+    bool updateRequested;
+    CMeshO *m;
+    int updateattributesmask;
+
    GLuint positionBufferObject;
    GLuint normalBufferObject;
-   GLuint indexBufferObject;
+   GLuint colorBufferObject;
+   GLuint indexTriBufferObject;
+   GLuint indexEdgeBufferObject;
+
+   GLuint positionDupBufferObject;
+   GLuint normalDupBufferObject;
+   GLuint colorDupBufferObject;
+   GLuint normalFaceBufferObject;
+   GLuint colorFaceBufferObject;
+
+
+   bool HighPrecisionMode;
+
+   // For sake of precision the buffers are created so that their bb is centered at the origin.
+   // And in rendering we render them there (not in their original position).
+   // Problem 1 :  multiple meshes
+   // Solution 1: we hope that the meshes are more or less all in the same zone and we compute
+   // the transformation that maps all of them in a common position.
+   // P_1 = T_1 * P'_1
+   // P_2 = T_2 * P'_2
+   // Let C be a common translation
+   // When we render we render them as centered in C.
+
+   // To guarantee precision we have to pre-apply the matrix position
+   // P = M * p
+   // P = M * T * p'
+   //
+   //
+
+   Point3m bbCenter;
+   Matrix44m Tr;
+
    int vn;
    int tn;
+
 
     QReadWriteLock _lock;
 };

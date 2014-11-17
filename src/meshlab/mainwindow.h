@@ -116,8 +116,8 @@ private slots:
 
 public:
   bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-  bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar);
-  bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm);
+  bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar, const Matrix44m &mtr=Matrix44m::Identity());
+  bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm, const Matrix44m &mtr=Matrix44m::Identity());
 
 private slots:
     //////////// Slot Menu File //////////////////////
