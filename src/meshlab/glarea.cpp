@@ -1275,40 +1275,22 @@ void GLArea::initTexture(bool reloadAllTexture)
     {
         foreach (MeshModel *mp,this->md()->meshList)
         {
-            if(!mp->glw.TMId.empty())
-            {
-                glDeleteTextures(1,&(mp->glw.TMId[0]));
-                mp->glw.TMId.clear();
-            }
+          if(!mp->bor.TMId.empty())
+            glDeleteTextures(mp->bor.TMId.size(), &(mp->bor.TMId[0]));
+          mp->bor.TMId.clear();
         }
     }
-    size_t totalTextureNum=0, toBeUpdatedNum=0;
-    foreach (MeshModel *mp, this->md()->meshList)
-    {
-        totalTextureNum+=mp->cm.textures.size();
-        if(!mp->cm.textures.empty() && mp->glw.TMId.empty()) toBeUpdatedNum++;
-    }
-
-    if(toBeUpdatedNum==0) return;
-
-    int singleMaxTextureSizeMpx = int(glas.maxTextureMemory/totalTextureNum);
-    int singleMaxTextureSize = RoundUpToTheNextHighestPowerOf2(int(sqrt(float(singleMaxTextureSizeMpx))*1024.0))/2;
 
     glEnable(GL_TEXTURE_2D);
     GLint MaxTextureSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
-    if(singleMaxTextureSize < MaxTextureSize)
-    {
-        this->Logf(0,"There are too many textures (%i), reducing max texture size from %i to %i",totalTextureNum,MaxTextureSize,singleMaxTextureSize);
-        MaxTextureSize = singleMaxTextureSize;
-    }
-
     foreach (MeshModel *mp, this->md()->meshList)
     {
-        if(!mp->cm.textures.empty() && mp->glw.TMId.empty())
+        if(!mp->cm.textures.empty() && mp->bor.TMId.empty())
         {
             QString unexistingtext = "In mesh file <i>" + mp->fullName() + "</i> : Failure loading textures:<br>";
             bool sometextfailed = false;
+            Logf(GLLogStream::SYSTEM,"Loading textures");
             for(unsigned int i =0; i< mp->cm.textures.size();++i)
             {
                 QImage img, imgScaled, imgGL;
@@ -1317,26 +1299,18 @@ void GLArea::initTexture(bool reloadAllTexture)
                 sometextfailed = sometextfailed || !res;
                 if(!res)
                 {
-                    // Note that sometimes (in collada) the texture names could have been encoded with a url-like style (e.g. replacing spaces with '%20') so making some other attempt could be harmless
-                    QString ConvertedName = QString(mp->cm.textures[i].c_str()).replace(QString("%20"), QString(" "));
-                    res = img.load(ConvertedName);
+                    res = img.load(mp->cm.textures[i].c_str());
                     if(!res)
                     {
                         this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
                         unexistingtext += "<font color=red>" + QString(mp->cm.textures[i].c_str()) + "</font><br>";
                     }
-                    else
-                        this->Logf(0,"Warning, texture loading was successful only after replacing %%20 with spaces;\n Loaded texture %s instead of %s",qPrintable(ConvertedName),mp->cm.textures[i].c_str());
-                    /*mp->glw.TMId.push_back(0);
-                    glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
-                    glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
-                    glTexImage2D( GL_TEXTURE_2D, 0, 3, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );*/
                 }
                 if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
                 {
                     qDebug("DDS binding!");
                     int newTexId = bindTexture(QString(mp->cm.textures[i].c_str()));
-                    mp->glw.TMId.push_back(newTexId);
+                    mp->bor.TMId.push_back(newTexId);
                 }
                 if (!res)
                     res = img.load(":/images/dummy.png");
@@ -1347,15 +1321,13 @@ void GLArea::initTexture(bool reloadAllTexture)
                     int bestH=RoundUpToTheNextHighestPowerOf2(img.height() );
                     while(bestW>MaxTextureSize) bestW /=2;
                     while(bestH>MaxTextureSize) bestH /=2;
-
-                    Logf(GLLogStream::SYSTEM,"Loading textures");
                     Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
                     imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
                     imgGL=convertToGLFormat(imgScaled);
-                    mp->glw.TMId.push_back(0);
-                    glGenTextures( 1, (GLuint*)&(mp->glw.TMId.back()) );
-                    glBindTexture( GL_TEXTURE_2D, mp->glw.TMId.back() );
-                    qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->glw.TMId.back() ,imgGL.width(), imgGL.height());
+                    mp->bor.TMId.push_back(0);
+                    glGenTextures( 1, (GLuint*)&(mp->bor.TMId.back()) );
+                    glBindTexture( GL_TEXTURE_2D, mp->bor.TMId.back() );
+                    qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->bor.TMId.back() ,imgGL.width(), imgGL.height());
                     glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
                     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
                 }

@@ -183,14 +183,22 @@ public :
     }
 };
 
+/** This class provide vbo buffered rendering
+ *
+ * It can generate/update all the needed VBO buffers usually needed for efficient rendering.
+ *
+ */
+
 class BufferObjectsRendering : public vcg::GLW
 {
 public:
     BufferObjectsRendering();
     ~BufferObjectsRendering();
-    void DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
-    void DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
-
+    void DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
+    void DrawEdges(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
+    void DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, vcg::GLW::TextureMode tm );
+    void BuildTextureAggregatedTriangleChunks(CMeshO& mm, GLW::TextureMode tm,
+                                                                      std::vector<int> &chunkMap, std::vector<int> &chunkSizes );
     //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
     bool update(CMeshO& mm, const int updateattributesmask);
 //    bool requestUpdate(CMeshO& mm, Box3m bb, const int updateattributesmask);
@@ -200,16 +208,36 @@ public:
 
     //function to clear/deallocate the buffer objects memory space
     void clearState();
+
+    std::vector<unsigned int> TMId;
+
 private:
 
-    bool updateRequested;
-    CMeshO *m;
-    int updateattributesmask;
+    enum BufferObjectType	{
+      OTVertexPosition,
+      OTVertexNormal,
+      OTVertexColor,
+      OTVertexTexture,
+      OTTriangleIndex,
+      OTEdgeIndex,
+      OTFauxEdgeIndex,
+      OTVertexReplicatedPosition,
+      OTVertexReplicatedNormal,
+      OTVertexReplicatedColor,
+      OTFaceReplicatedNormal,
+      OTFaceReplicatedColor,
+      OTWedgeReplicatedTexture,
+      OTLast
+      } ;
 
-   GLuint positionBufferObject;
-   GLuint normalBufferObject;
-   GLuint colorBufferObject;
-   GLuint indexTriBufferObject;
+   GLuint bid[OTLast];
+
+   GLuint vertexPositionBO;
+   GLuint vertexNormalBO;
+   GLuint vertexTextureBO;
+   GLuint vertexColorBO;
+   std::vector<GLuint> indexTriBufferObject;
+   std::vector<GLuint> indexTriBufferObjectSz;
    GLuint indexEdgeBufferObject;
 
    GLuint positionDupBufferObject;
@@ -217,6 +245,8 @@ private:
    GLuint colorDupBufferObject;
    GLuint normalFaceBufferObject;
    GLuint colorFaceBufferObject;
+   GLuint edgeBufferObject;
+   GLuint edgeFauxBufferObject;
 
 
    bool HighPrecisionMode;
@@ -241,8 +271,9 @@ private:
    Matrix44m Tr;
 
    int vn;
+   int en;
+   int efn;
    int tn;
-
 
     QReadWriteLock _lock;
 };

@@ -24,7 +24,6 @@ void GLAreaSetting::initGlobalParameterSet( RichParameterSet * defaultGlobalPara
     defaultGlobalParamSet->addParam(new RichBool(pointDistanceAttenuationParam()	, true,"Perspective Varying Point Size","If true the size of the points is drawn with a size proprtional to the distance from the observer."));
     defaultGlobalParamSet->addParam(new RichBool(pointSmoothParam()	, false,"Antialiased Point","If true the points are drawn with small circles instead of fast squared dots."));
     defaultGlobalParamSet->addParam(new RichFloat(pointSizeParam()	, 2.0, "Point Size","The base size of points when drawn"));
-    defaultGlobalParamSet->addParam(new RichInt(maxTextureMemoryParam()	, 256, "Max Texture Memory (in MB)","The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
 
@@ -47,6 +46,5 @@ void GLAreaSetting::updateGlobalParameterSet( RichParameterSet& rps )
     pointDistanceAttenuation = rps.getBool(this->pointDistanceAttenuationParam());
     pointSmooth = rps.getBool(this->pointSmoothParam());
     pointSize = rps.getFloat(this->pointSizeParam());
-    maxTextureMemory = rps.getInt(this->maxTextureMemoryParam());
     currentGlobalParamSet=&rps;
 }

@@ -757,20 +757,33 @@ BufferObjectsRendering::~BufferObjectsRendering()
     clearState();
 }
 
-void BufferObjectsRendering::DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm)
+void BufferObjectsRendering::DrawEdges(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
+  glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
+  glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexEdgeBufferObject);
+  glDrawElements( GL_LINES, en*2, GL_UNSIGNED_INT,0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+void BufferObjectsRendering::DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, TextureMode tm)
+{
+  glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
   glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
   glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 
   if(nolm==GLW::NMPerVert) {
-    glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
     glNormalPointer(GL_FLOAT, 0, 0);               // last param is offset, not ptr
     glEnableClientState(GL_NORMAL_ARRAY);             // activate vertex coords array
   }
 
   if(colm == GLW::CMPerVert){
-    glBindBuffer(GL_ARRAY_BUFFER, colorBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
     glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);               // last param is offset, not ptr
     glEnableClientState(GL_COLOR_ARRAY);             // activate vertex coords array
   }
@@ -783,51 +796,73 @@ void BufferObjectsRendering::DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::Norm
   glDisableClientState(GL_COLOR_ARRAY);
 }
 
-void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm)
-{
+/// Two main path of rendering:
+/// Plain vertex attribute (normal, color, and texture must be absent or per vertex)
+/// Duplicated Vertex rendering (all the other cases)
 
-  if(nolm!=GLW::NMPerFace && colm != GLW::CMPerFace) {
-    glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, TextureMode tm)
+{
+  if(nm!=GLW::NMPerFace && cm != GLW::CMPerFace && tm != GLW::TMPerWedge)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
-    glNormalPointer(GL_FLOAT, 0, 0);
-    glEnableClientState(GL_NORMAL_ARRAY);
+    if(nm == GLW::NMPerVert){
+      glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
+      glNormalPointer(GL_FLOAT, 0, 0);
+      glEnableClientState(GL_NORMAL_ARRAY);
+    }
 
-    if(colm == GLW::CMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, colorBufferObject);
+    if(cm == GLW::CMPerVert){
+      glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
       glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
       glEnableClientState(GL_COLOR_ARRAY);
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject);
-    glDrawElements( GL_TRIANGLES, tn*3, GL_UNSIGNED_INT,0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    if(tm == GLW::TMPerVert){
+      glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
+      glTexCoordPointer(2,GL_FLOAT, 0, 0);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+
+    for(size_t i=0;i<indexTriBufferObject.size();++i)
+    {
+      if(tm==GLW::TMPerVert)
+      {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D,TMId[i]);
+      }
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
+      glDrawElements( GL_TRIANGLES, indexTriBufferObjectSz[i], GL_UNSIGNED_INT,0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      glDisable(GL_TEXTURE_2D);
+    }
   }
-  else
+
+  else /// Duplicated Vertex Pipeline
   {
     glBindBuffer(GL_ARRAY_BUFFER, positionDupBufferObject);
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
-    if(nolm == GLW::NMPerVert){
+    if(nm == GLW::NMPerVert){
       glBindBuffer(GL_ARRAY_BUFFER, normalDupBufferObject);
       glNormalPointer(GL_FLOAT, 0, 0);
       glEnableClientState(GL_NORMAL_ARRAY);
     }
-    if(nolm == GLW::NMPerFace){
+    if(nm == GLW::NMPerFace){
       glBindBuffer(GL_ARRAY_BUFFER, normalFaceBufferObject);
       glNormalPointer(GL_FLOAT, 0, 0);
       glEnableClientState(GL_NORMAL_ARRAY);
     }
 
-    if(colm == GLW::CMPerVert){
+    if(cm == GLW::CMPerVert){
       glBindBuffer(GL_ARRAY_BUFFER, colorDupBufferObject);
       glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
       glEnableClientState(GL_COLOR_ARRAY);
     }
-    if(colm == GLW::CMPerFace){
+    if(cm == GLW::CMPerFace){
       glBindBuffer(GL_ARRAY_BUFFER, colorFaceBufferObject);
       glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
       glEnableClientState(GL_COLOR_ARRAY);
@@ -855,16 +890,43 @@ void BufferObjectsRendering::render(const Box3m &bbDoc, vcg::GLW::DrawMode dm,vc
       glMultMatrix(Tr);
     }
 
-    if(dm== GLW::DMPoints) DrawPoints(colm,GLW::NMPerVert);
+    if(dm== GLW::DMPoints) DrawPoints(colm,GLW::NMPerVert,tm);
+    else
+    if(dm==GLW::DMWire) DrawEdges(GLW::CMNone,GLW::NMNone);
     else
     {
       if( dm==GLW::DMSmooth)
-        DrawTriangles(colm,GLW::NMPerVert);
+        DrawTriangles(colm,GLW::NMPerVert,tm);
       else
-        DrawTriangles(colm,GLW::NMPerFace);
+        DrawTriangles(colm,GLW::NMPerFace,tm);
     }
     glPopMatrix();
 }
+
+// First lets find the per texture triangle sort list.
+// In order to aggreagate the triangles according to their id.
+void BufferObjectsRendering::BuildTextureAggregatedTriangleChunks(CMeshO& mm, GLW::TextureMode tm,
+                                                                  std::vector<int> &chunkMap, std::vector<int> &chunkSizes )
+{
+  if(tm==GLW::TMNone)
+  {
+    chunkMap.resize(mm.fn);
+    for(size_t i=0;i<mm.fn;++i) // replicated coords
+      chunkMap[i]=i;
+    chunkSizes.resize(1);
+    chunkSizes[0]=mm.fn;
+    return;
+   }
+    std::vector<std::vector<int> > tmpVV(mm.textures.size());
+  for(size_t i=0;i<tn;++i) // replicated coords
+  {
+    int texId = mm.face[i].WT(0).N();
+    tmpVV[texId].push_back(i);
+  }
+ // TO BE FINISHED AND USED!!!!
+}
+
+
 
 bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 {
@@ -878,12 +940,6 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
     std::vector<Point3f> pv(mm.vn);
     std::vector<Point3f> nv(mm.vn);
     std::vector<Color4b> cv(mm.vn); // Per vertex Colors
-
-    std::vector<Point3f> rpv(mm.fn*3);
-    std::vector<Point3f> rnv(mm.fn*3);
-    std::vector<Color4b> rcv(mm.fn*3);
-    std::vector<Point3f> rnt(mm.fn*3);
-    std::vector<Color4b> rct(mm.fn*3);
 
     vn = mm.vn;
 
@@ -920,42 +976,100 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
       }
     }
 
+    if(tri::HasPerVertexTexCoord(mm))
+    {
+      std::vector<float> tv(mm.vn*2); // Per vertex Textures
+      for(size_t i=0;i<vn;++i)
+      {
+        tv[i*2+0]= mm.vert[i].T().U();
+        tv[i*2+1]= mm.vert[i].T().V();
+      }
+      glGenBuffers(1, &vertexTextureBO);
+      glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
+      glBufferData(GL_ARRAY_BUFFER, vn *2 *sizeof(GLfloat), &tv[0], GL_STATIC_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
     tn = mm.fn;
-    std::vector<unsigned int> ti(tn *3);
+    std::vector < std::vector<unsigned int> > ti;
+    if(mm.textures.size()>1 && tri::HasPerVertexTexCoord(mm))
+    {
+      ti.resize(mm.textures.size());
+      for(size_t i=0;i<tn;++i)
+      {
+        int tid= mm.face[i].V(0)->T().n();
+        ti[tid].push_back(tri::Index(mm,mm.face[i].V(0)));
+        ti[tid].push_back(tri::Index(mm,mm.face[i].V(1)));
+        ti[tid].push_back(tri::Index(mm,mm.face[i].V(2)));
+      }
+    }
+    else
+    {
+      ti.resize(1);
+      ti[0].resize(tn*3);
+      for(size_t i=0;i<tn;++i)
+      {
+        ti[0][i*3+0] = tri::Index(mm,mm.face[i].V(0));
+        ti[0][i*3+1] = tri::Index(mm,mm.face[i].V(1));
+        ti[0][i*3+2] = tri::Index(mm,mm.face[i].V(2));
+      }
+    }
+
+    // Build the vector with all the unique edge pairs
+    std::vector<std::pair<unsigned int, unsigned int> > ev;
     for(size_t i=0;i<tn;++i)
     {
-      ti[i*3+0] = tri::Index(mm,mm.face[i].V(0));
-      ti[i*3+1] = tri::Index(mm,mm.face[i].V(1));
-      ti[i*3+2] = tri::Index(mm,mm.face[i].V(2));
+      unsigned int i0 = tri::Index(mm,mm.face[i].V(0));
+      unsigned int i1 = tri::Index(mm,mm.face[i].V(1));
+      unsigned int i2 = tri::Index(mm,mm.face[i].V(2));
+      if(i0<i1)  ev.push_back(std::make_pair(i0,i1));
+      else       ev.push_back(std::make_pair(i1,i0));
+      if(i1<i2)  ev.push_back(std::make_pair(i1,i2));
+      else       ev.push_back(std::make_pair(i2,i1));
+      if(i2<i0)  ev.push_back(std::make_pair(i2,i0));
+      else       ev.push_back(std::make_pair(i0,i2));
     }
+    std::sort(ev.begin(),ev.end());
+    std::vector<std::pair<unsigned int, unsigned int> >::iterator newEnd =
+        std::unique(ev.begin(), ev.end());
+    ev.resize(newEnd-ev.begin());
+    en=ev.size();
+
+
+      std::vector<Point3f> rpv(mm.fn*3);
+      std::vector<Point3f> rnv(mm.fn*3);
+      std::vector<Color4b> rcv(mm.fn*3);
+      std::vector<Point3f> rnt(mm.fn*3);
+      std::vector<Color4b> rct(mm.fn*3);
+
     // Now doing the replicated stuff
-    for(size_t i=0;i<tn;++i) // replicated coords
+     for(size_t i=0;i<tn;++i) // replicated coords
     {
       rpv[i*3+0] = pv[tri::Index(mm,mm.face[i].V(0))];
       rpv[i*3+1] = pv[tri::Index(mm,mm.face[i].V(1))];
       rpv[i*3+2] = pv[tri::Index(mm,mm.face[i].V(2))];
     }
-    for(size_t i=0;i<tn;++i) // replicated colors
+    for(size_t i=0;i<tn;++i) // replicated per vertex colors
     {
       rcv[i*3+0] = cv[tri::Index(mm,mm.face[i].V(0))];
       rcv[i*3+1] = cv[tri::Index(mm,mm.face[i].V(1))];
       rcv[i*3+2] = cv[tri::Index(mm,mm.face[i].V(2))];
     }
-    for(size_t i=0;i<tn;++i) // replicated normals
+    for(size_t i=0;i<tn;++i) // replicated per vertex normals
     {
       rnv[i*3+0] = nv[tri::Index(mm,mm.face[i].V(0))];
       rnv[i*3+1] = nv[tri::Index(mm,mm.face[i].V(1))];
       rnv[i*3+2] = nv[tri::Index(mm,mm.face[i].V(2))];
     }
     if(tri::HasPerFaceColor(mm)){
-      for(size_t i=0;i<tn;++i) // replicated colors
+      for(size_t i=0;i<tn;++i) // replicated face colors
       {
         rct[i*3+0]=mm.face[i].C();
         rct[i*3+1]=mm.face[i].C();
         rct[i*3+2]=mm.face[i].C();
       }
     }
-    for(size_t i=0;i<tn;++i) // replicated normals
+    for(size_t i=0;i<tn;++i) // replicated face normals
     {
       rnt[i*3+0].Import(mm.face[i].N().Normalize());
       rnt[i*3+1].Import(mm.face[i].N().Normalize());
@@ -964,16 +1078,16 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 
 
     qDebug("Buffer prepared in %i",aa.elapsed());
-    glGenBuffers(1, &positionBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+    glGenBuffers(1, &vertexPositionBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
     glBufferData(GL_ARRAY_BUFFER, vn *3 *sizeof(GLfloat), &pv[0], GL_STATIC_DRAW);
 
     glGenBuffers(1, &positionDupBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, positionDupBufferObject);
     glBufferData(GL_ARRAY_BUFFER, tn * 9 *sizeof(GLfloat), &rpv[0], GL_STATIC_DRAW);
 
-    glGenBuffers(1, &normalBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, normalBufferObject);
+    glGenBuffers(1, &vertexNormalBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
     glBufferData(GL_ARRAY_BUFFER, vn *3 *sizeof(GLfloat), &nv[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -987,24 +1101,38 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
     glBufferData(GL_ARRAY_BUFFER, tn * 9 *sizeof(GLfloat), &rnt[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &colorBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, colorBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, vn *4*sizeof(GLbyte), &cv[0], GL_STATIC_DRAW);
+    glGenBuffers(1, &vertexColorBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
+    glBufferData(GL_ARRAY_BUFFER, vn*4*sizeof(GLbyte), &cv[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glGenBuffers(1, &colorDupBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, colorDupBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, tn *3*4*sizeof(GLbyte), &rcv[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, tn*3*4*sizeof(GLbyte), &rcv[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glGenBuffers(1, &colorFaceBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, colorFaceBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, tn *3*4*sizeof(GLbyte), &rct[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, tn*3*4*sizeof(GLbyte), &rct[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenBuffers(1, &indexTriBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tn *3 *sizeof(GLuint), &ti[0], GL_STATIC_DRAW);
+
+
+    glGenBuffers(1, &indexEdgeBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexEdgeBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, en *2 *sizeof(GLuint), &ev[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+    indexTriBufferObject.resize(ti.size());
+    indexTriBufferObjectSz.resize(ti.size());
+    for(size_t i=0;i<ti.size();++i)
+    {
+      indexTriBufferObjectSz[i]=ti[i].size();
+      glGenBuffers(1, &indexTriBufferObject[i]);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, ti[i].size() *sizeof(GLuint), &ti[i][0], GL_STATIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
     qDebug("Buffer feed in %i",aa.elapsed());
     return true;
