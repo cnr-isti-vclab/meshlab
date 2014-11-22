@@ -29,6 +29,7 @@
 #include <wrap/gl/math.h>
 #include "scriptinterface.h"
 #include <vcg/complex/append.h>
+#include "mlexception.h"
 
 using namespace vcg;
 
@@ -36,30 +37,30 @@ using namespace vcg;
 //deletes each meshModel
 MeshDocument::~MeshDocument()
 {
-  foreach(MeshModel *mmp, meshList)
-    delete mmp;
-  foreach(RasterModel* rmp,rasterList)
-      delete rmp;
-  delete filterHistory;
+    foreach(MeshModel *mmp, meshList)
+        delete mmp;
+    foreach(RasterModel* rmp,rasterList)
+        delete rmp;
+    delete filterHistory;
 }
 
 //returns the mesh ata given position in the list
 MeshModel *MeshDocument::getMesh(int i)
 {
-  foreach(MeshModel *mmp, meshList)
-  {
-    if(mmp->id() == i) return mmp;
-  }
-  //assert(0);
-  return 0;
+    foreach(MeshModel *mmp, meshList)
+    {
+        if(mmp->id() == i) return mmp;
+    }
+    //assert(0);
+    return 0;
 }
 
 MeshModel *MeshDocument::getMesh(QString name)
 {
     foreach(MeshModel *mmp, meshList)
-            {
-                if(mmp->shortName() == name) return mmp;
-            }
+    {
+        if(mmp->shortName() == name) return mmp;
+    }
     //assert(0);
     return 0;
 }
@@ -90,111 +91,111 @@ void MeshDocument::setCurrentMesh( int i)
 //returns the raster at a given position in the list
 RasterModel *MeshDocument::getRaster(int i)
 {
-  foreach(RasterModel *rmp, rasterList)
-  {
-    if(rmp->id() == i) return rmp;
-  }
-  //assert(0);
-  return 0;
+    foreach(RasterModel *rmp, rasterList)
+    {
+        if(rmp->id() == i) return rmp;
+    }
+    //assert(0);
+    return 0;
 }
 
 //if i is <0 it means that no currentRaster is set
 void MeshDocument::setCurrentRaster( int i)
 {
-  if(i<0)
-  {
-      currentRaster=0;
-      return;
-  }
-
-  foreach(RasterModel *rmp, rasterList)
-  {
-    if(rmp->id() == i)
+    if(i<0)
     {
-      currentRaster = rmp;
-      return;
+        currentRaster=0;
+        return;
     }
-  }
-  assert(0);
-  return;
+
+    foreach(RasterModel *rmp, rasterList)
+    {
+        if(rmp->id() == i)
+        {
+            currentRaster = rmp;
+            return;
+        }
+    }
+    assert(0);
+    return;
 }
 
 template <class LayerElement>
 QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
 {
-  QString newName=meshLabel;
-  typename QList<LayerElement*>::iterator mmi;
+    QString newName=meshLabel;
+    typename QList<LayerElement*>::iterator mmi;
 
-  for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
-  {
-    if((*mmi)->label() == newName) // if duplicated name found
+    for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
     {
-      QFileInfo fi((*mmi)->label());
-      QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
-      QString suffix = fi.suffix();
-      bool ok;
+        if((*mmi)->label() == newName) // if duplicated name found
+        {
+            QFileInfo fi((*mmi)->label());
+            QString baseName = fi.baseName(); //  all characters in the file up to the first '.' Eg "/tmp/archive.tar.gz" -> "archive"
+            QString suffix = fi.suffix();
+            bool ok;
 
-      // if name ends with a number between parenthesis (XXX),
-      // it was himself a duplicated name, and we need to
-      // just increase the number between parenthesis
-      int numDisamb;
-      int startDisamb;
-      int endDisamb;
+            // if name ends with a number between parenthesis (XXX),
+            // it was himself a duplicated name, and we need to
+            // just increase the number between parenthesis
+            int numDisamb;
+            int startDisamb;
+            int endDisamb;
 
-      startDisamb = baseName.lastIndexOf("(");
-      endDisamb   = baseName.lastIndexOf(")");
-      if((startDisamb!=-1)&&(endDisamb!=-1))
-        numDisamb = (baseName.mid((startDisamb+1),(endDisamb-startDisamb-1))).toInt(&ok);
-      else
-        numDisamb = 0;
+            startDisamb = baseName.lastIndexOf("(");
+            endDisamb   = baseName.lastIndexOf(")");
+            if((startDisamb!=-1)&&(endDisamb!=-1))
+                numDisamb = (baseName.mid((startDisamb+1),(endDisamb-startDisamb-1))).toInt(&ok);
+            else
+                numDisamb = 0;
 
-      if(startDisamb!=-1)
-        newName = baseName.left(startDisamb)+ "(" + QString::number(numDisamb+1) + ")";
-      else
-        newName = baseName + "(" + QString::number(numDisamb+1) + ")";
+            if(startDisamb!=-1)
+                newName = baseName.left(startDisamb)+ "(" + QString::number(numDisamb+1) + ")";
+            else
+                newName = baseName + "(" + QString::number(numDisamb+1) + ")";
 
-      if (suffix != QString(""))
-      newName = newName + "." + suffix;
+            if (suffix != QString(""))
+                newName = newName + "." + suffix;
 
-      // now recurse to see if the new name is free
-      newName = NameDisambiguator(elemList, newName);
+            // now recurse to see if the new name is free
+            newName = NameDisambiguator(elemList, newName);
+        }
     }
-  }
-  return newName;
+    return newName;
 }
 
 /*
- When you create a new mesh it can be either a newly created one or an opened one.
- If it is an opened one the fullpathname is meaningful and the label, by default is just the short name.
- If it is a newly created one the fullpath is an empty string and the user has to provide a label.
- */
+When you create a new mesh it can be either a newly created one or an opened one.
+If it is an opened one the fullpathname is meaningful and the label, by default is just the short name.
+If it is a newly created one the fullpath is an empty string and the user has to provide a label.
+*/
 
 MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
 {
-  MeshModel*newMM = this->getMesh(label);
-  if(newMM==0)  newMM=this->addNewMesh(fullPath,label,setAsCurrent,rm);
-  return newMM;
+    MeshModel*newMM = this->getMesh(label);
+    if(newMM==0)  newMM=this->addNewMesh(fullPath,label,setAsCurrent,rm);
+    return newMM;
 }
 
 MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
 {
-  QString newlabel = NameDisambiguator(this->meshList,label);
+    QString newlabel = NameDisambiguator(this->meshList,label);
 
-  if(!fullPath.isEmpty())
-  {
-      QFileInfo fi(fullPath);
-      fullPath = fi.absoluteFilePath();
-  }
+    if(!fullPath.isEmpty())
+    {
+        QFileInfo fi(fullPath);
+        fullPath = fi.absoluteFilePath();
+    }
 
-  MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
-  meshList.push_back(newMesh);
-  emit meshSetChanged();
-  qRegisterMetaType<RenderMode>("RenderMode");
-  emit meshAdded(newMesh->id(),rm);
-  if(setAsCurrent)
-    this->setCurrentMesh(newMesh->id());
+    MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
+    meshList.push_back(newMesh);
+    emit meshSetChanged();
+    qRegisterMetaType<RenderMode>("RenderMode");
+    emit meshAdded(newMesh->id(),rm);
+    if(setAsCurrent)
+        this->setCurrentMesh(newMesh->id());
 
-  return newMesh;
+    return newMesh;
 }
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
@@ -204,7 +205,7 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
     if((currentMesh == mmToDel) && (meshList.size() != 0))
         setCurrentMesh(this->meshList.at(0)->id());
     else if (meshList.size() == 0)
-            setCurrentMesh(-1);
+        setCurrentMesh(-1);
 
     int index = mmToDel->id();
     delete mmToDel;
@@ -216,20 +217,20 @@ bool MeshDocument::delMesh(MeshModel *mmToDel)
 
 RasterModel * MeshDocument::addNewRaster(/*QString fullPathFilename*/)
 {
-  QFileInfo info(fullPathFilename);
-  QString newLabel=info.fileName();
-  QString newName = NameDisambiguator(this->rasterList, newLabel);
+    QFileInfo info(fullPathFilename);
+    QString newLabel=info.fileName();
+    QString newName = NameDisambiguator(this->rasterList, newLabel);
 
-  RasterModel *newRaster=new RasterModel(this, newLabel);
+    RasterModel *newRaster=new RasterModel(this, newLabel);
     rasterList.push_back(newRaster);
 
     //Add new plane
-  //Plane *plane = new Plane(newRaster, fullPathFilename, QString());
-  //newRaster->addPlane(plane);
+    //Plane *plane = new Plane(newRaster, fullPathFilename, QString());
+    //newRaster->addPlane(plane);
 
     this->setCurrentRaster(newRaster->id());
 
-  emit rasterSetChanged();
+    emit rasterSetChanged();
     return newRaster;
 }
 
@@ -262,8 +263,8 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 
 bool MeshDocument::hasBeenModified()
 {
-  foreach(MeshModel *m, meshList)
-    if(m->meshModified()) return true;
+    foreach(MeshModel *m, meshList)
+        if(m->meshModified()) return true;
     return false;
 }
 
@@ -336,84 +337,84 @@ MeshDocument::MeshDocument() : QObject(),Log(),xmlhistory()
 
 void MeshModel::Clear()
 {
-  meshModified() = false;
-  glw.m=&cm;
-  // These data are always active on the mesh
-  currentDataMask = MM_NONE;
-  currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
-  currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
+    meshModified() = false;
+    glw.m=&cm;
+    // These data are always active on the mesh
+    currentDataMask = MM_NONE;
+    currentDataMask |= MM_VERTCOORD | MM_VERTNORMAL | MM_VERTFLAG ;
+    currentDataMask |= MM_FACEVERT  | MM_FACENORMAL | MM_FACEFLAG ;
 
-  visible=true;
-  cm.Tr.SetIdentity();
-  cm.sfn=0;
-  cm.svn=0;
+    visible=true;
+    cm.Tr.SetIdentity();
+    cm.sfn=0;
+    cm.svn=0;
 }
 
 void MeshModel::UpdateBoxAndNormals()
 {
-  tri::UpdateBounding<CMeshO>::Box(cm);
-  if(cm.fn>0) {
-    tri::UpdateNormal<CMeshO>::PerFaceNormalized(cm);
-    tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(cm);
-  }
+    tri::UpdateBounding<CMeshO>::Box(cm);
+    if(cm.fn>0) {
+        tri::UpdateNormal<CMeshO>::PerFaceNormalized(cm);
+        tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(cm);
+    }
 }
 
 MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName)
-:bor(),glw()
+    :bor(),glw()
 {
 
-  Clear();
-  parent=_parent;
-  _id=parent->newMeshId();
-  if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
-  if(!labelName.isEmpty())     this->_label=labelName;
+    Clear();
+    parent=_parent;
+    _id=parent->newMeshId();
+    if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
+    if(!labelName.isEmpty())     this->_label=labelName;
 }
 
 QString MeshModel::relativePathName() const
 {
-  QDir documentDir (documentPathName());
-  QString relPath=documentDir.relativeFilePath(this->fullPathFileName);
+    QDir documentDir (documentPathName());
+    QString relPath=documentDir.relativeFilePath(this->fullPathFileName);
 
-  if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
-      qDebug("Error we have a mesh that is not in the same folder of the project: %s ",qPrintable(relPath));
+    if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
+        qDebug("Error we have a mesh that is not in the same folder of the project: %s ",qPrintable(relPath));
 
-  return relPath;
+    return relPath;
 }
 
 QString MeshModel::documentPathName() const
 {
-  return parent->pathName();
+    return parent->pathName();
 }
 
 int MeshModel::io2mm(int single_iobit)
 {
     switch(single_iobit)
     {
-        case tri::io::Mask::IOM_NONE					: return  MM_NONE;
-        case tri::io::Mask::IOM_VERTCOORD		: return  MM_VERTCOORD;
-        case tri::io::Mask::IOM_VERTCOLOR		: return  MM_VERTCOLOR;
-        case tri::io::Mask::IOM_VERTFLAGS		: return  MM_VERTFLAG;
-        case tri::io::Mask::IOM_VERTQUALITY	: return  MM_VERTQUALITY;
-        case tri::io::Mask::IOM_VERTNORMAL		: return  MM_VERTNORMAL;
-        case tri::io::Mask::IOM_VERTTEXCOORD : return  MM_VERTTEXCOORD;
-        case tri::io::Mask::IOM_VERTRADIUS		: return  MM_VERTRADIUS;
+    case tri::io::Mask::IOM_NONE					: return  MM_NONE;
+    case tri::io::Mask::IOM_VERTCOORD		: return  MM_VERTCOORD;
+    case tri::io::Mask::IOM_VERTCOLOR		: return  MM_VERTCOLOR;
+    case tri::io::Mask::IOM_VERTFLAGS		: return  MM_VERTFLAG;
+    case tri::io::Mask::IOM_VERTQUALITY	: return  MM_VERTQUALITY;
+    case tri::io::Mask::IOM_VERTNORMAL		: return  MM_VERTNORMAL;
+    case tri::io::Mask::IOM_VERTTEXCOORD : return  MM_VERTTEXCOORD;
+    case tri::io::Mask::IOM_VERTRADIUS		: return  MM_VERTRADIUS;
 
-        case tri::io::Mask::IOM_FACEINDEX   		: return  MM_FACEVERT  ;
-        case tri::io::Mask::IOM_FACEFLAGS   		: return  MM_FACEFLAG  ;
-        case tri::io::Mask::IOM_FACECOLOR   		: return  MM_FACECOLOR  ;
-        case tri::io::Mask::IOM_FACEQUALITY 		: return  MM_FACEQUALITY;
-        case tri::io::Mask::IOM_FACENORMAL  		: return  MM_FACENORMAL ;
+    case tri::io::Mask::IOM_FACEINDEX   		: return  MM_FACEVERT  ;
+    case tri::io::Mask::IOM_FACEFLAGS   		: return  MM_FACEFLAG  ;
+    case tri::io::Mask::IOM_FACECOLOR   		: return  MM_FACECOLOR  ;
+    case tri::io::Mask::IOM_FACEQUALITY 		: return  MM_FACEQUALITY;
+    case tri::io::Mask::IOM_FACENORMAL  		: return  MM_FACENORMAL ;
 
-        case tri::io::Mask::IOM_WEDGTEXCOORD 		: return  MM_WEDGTEXCOORD;
-        case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
-        case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
+    case tri::io::Mask::IOM_WEDGTEXCOORD 		: return  MM_WEDGTEXCOORD;
+    case tri::io::Mask::IOM_WEDGCOLOR				: return  MM_WEDGCOLOR;
+    case tri::io::Mask::IOM_WEDGNORMAL   		: return  MM_WEDGNORMAL  ;
 
-        case tri::io::Mask::IOM_BITPOLYGONAL   	: return  MM_POLYGONAL  ;
+    case tri::io::Mask::IOM_BITPOLYGONAL   	: return  MM_POLYGONAL  ;
 
-        default:
-            assert(0);
-            return MM_NONE;  // FIXME: Returning this is not the best solution (!)
-            break;
+    default:
+        assert(0);
+        return MM_NONE;  // FIXME: Returning this is not the best solution (!)
+        break;
     } ;
 }
 
@@ -433,16 +434,16 @@ Plane::Plane(const QString pathName, const int _semantic)
 }
 
 RasterModel::RasterModel(MeshDocument *parent, QString _rasterName)
-: MeshLabRenderRaster()
+    : MeshLabRenderRaster()
 {
-  _id=parent->newRasterId();
-  par = parent;
-  this->_label= _rasterName;
-  visible=true;
+    _id=parent->newRasterId();
+    par = parent;
+    this->_label= _rasterName;
+    visible=true;
 }
 
 RasterModel::RasterModel()
-: MeshLabRenderRaster()
+    : MeshLabRenderRaster()
 {
 
 }
@@ -454,7 +455,7 @@ MeshLabRenderRaster::MeshLabRenderRaster()
 }
 
 MeshLabRenderRaster::MeshLabRenderRaster( const MeshLabRenderRaster& rm )
-:shot(rm.shot),planeList()
+    :shot(rm.shot),planeList()
 {
     for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)
     {
@@ -505,7 +506,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
         std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-             if(!(*vi).IsD()) (*ci)=(*vi).P();
+            if(!(*vi).IsD()) (*ci)=(*vi).P();
     }
 
     if(changeMask & MeshModel::MM_VERTNORMAL)
@@ -514,7 +515,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
         std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertNormal.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-             if(!(*vi).IsD()) (*ci)=(*vi).N();
+            if(!(*vi).IsD()) (*ci)=(*vi).N();
     }
 
     if(changeMask & MeshModel::MM_FACENORMAL)
@@ -523,17 +524,17 @@ void MeshModelState::create(int _mask, MeshModel* _m)
         std::vector<Point3m>::iterator ci;
         CMeshO::FaceIterator fi;
         for(fi = m->cm.face.begin(), ci = faceNormal.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-         if(!(*fi).IsD()) (*ci) = (*fi).N();
+            if(!(*fi).IsD()) (*ci) = (*fi).N();
     }
 
     if(changeMask & MeshModel::MM_FACECOLOR)
     {
-       m->updateDataMask(MeshModel::MM_FACECOLOR);
+        m->updateDataMask(MeshModel::MM_FACECOLOR);
         faceColor.resize(m->cm.face.size());
         std::vector<Color4b>::iterator ci;
         CMeshO::FaceIterator fi;
         for(fi = m->cm.face.begin(), ci = faceColor.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-         if(!(*fi).IsD()) (*ci) = (*fi).C();
+            if(!(*fi).IsD()) (*ci) = (*fi).C();
     }
 
     if(changeMask & MeshModel::MM_FACEFLAGSELECT)
@@ -542,7 +543,7 @@ void MeshModelState::create(int _mask, MeshModel* _m)
         std::vector<bool>::iterator ci;
         CMeshO::FaceIterator fi;
         for(fi = m->cm.face.begin(), ci = faceSelection.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-         if(!(*fi).IsD()) (*ci) = (*fi).IsS();
+            if(!(*fi).IsD()) (*ci) = (*fi).IsS();
     }
 
     if(changeMask & MeshModel::MM_VERTFLAGSELECT)
@@ -554,32 +555,32 @@ void MeshModelState::create(int _mask, MeshModel* _m)
             if(!(*vi).IsD()) (*ci) = (*vi).IsS();
     }
 
-  if(changeMask & MeshModel::MM_TRANSFMATRIX)
-      Tr = m->cm.Tr;
-  if(changeMask & MeshModel::MM_CAMERA)
-      this->shot = m->cm.shot;
+    if(changeMask & MeshModel::MM_TRANSFMATRIX)
+        Tr = m->cm.Tr;
+    if(changeMask & MeshModel::MM_CAMERA)
+        this->shot = m->cm.shot;
 }
 
 bool MeshModelState::apply(MeshModel *_m)
 {
-  if(_m != m)
-      return false;
-  if(changeMask & MeshModel::MM_VERTCOLOR)
-  {
-      if(vertColor.size() != m->cm.vert.size()) return false;
-      std::vector<Color4b>::iterator ci;
-      CMeshO::VertexIterator vi;
-      for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-          if(!(*vi).IsD()) (*vi).C()=(*ci);
-  }
-  if(changeMask & MeshModel::MM_FACECOLOR)
-  {
-      if(faceColor.size() != m->cm.face.size()) return false;
-      std::vector<Color4b>::iterator ci;
-      CMeshO::FaceIterator fi;
-      for(fi = m->cm.face.begin(), ci = faceColor.begin(); fi != m->cm.face.end(); ++fi, ++ci)
-          if(!(*fi).IsD()) (*fi).C()=(*ci);
-  }
+    if(_m != m)
+        return false;
+    if(changeMask & MeshModel::MM_VERTCOLOR)
+    {
+        if(vertColor.size() != m->cm.vert.size()) return false;
+        std::vector<Color4b>::iterator ci;
+        CMeshO::VertexIterator vi;
+        for(vi = m->cm.vert.begin(), ci = vertColor.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
+            if(!(*vi).IsD()) (*vi).C()=(*ci);
+    }
+    if(changeMask & MeshModel::MM_FACECOLOR)
+    {
+        if(faceColor.size() != m->cm.face.size()) return false;
+        std::vector<Color4b>::iterator ci;
+        CMeshO::FaceIterator fi;
+        for(fi = m->cm.face.begin(), ci = faceColor.begin(); fi != m->cm.face.end(); ++fi, ++ci)
+            if(!(*fi).IsD()) (*fi).C()=(*ci);
+    }
     if(changeMask & MeshModel::MM_VERTQUALITY)
     {
         if(vertQuality.size() != m->cm.vert.size()) return false;
@@ -657,81 +658,81 @@ bool MeshModelState::apply(MeshModel *_m)
 
 void MeshDocument::setVisible(int meshId, bool val)
 {
-  getMesh(meshId)->visible=val;
-  emit meshSetChanged();
+    getMesh(meshId)->visible=val;
+    emit meshSetChanged();
 }
 
 bool MeshModel::hasDataMask(const int maskToBeTested) const
 {
-  return ((currentDataMask & maskToBeTested)!= 0);
+    return ((currentDataMask & maskToBeTested)!= 0);
 }
-  void MeshModel::updateDataMask(MeshModel *m)
+void MeshModel::updateDataMask(MeshModel *m)
 {
-  updateDataMask(m->currentDataMask);
+    updateDataMask(m->currentDataMask);
 }
 
 void MeshModel::updateDataMask(int neededDataMask)
 {
-  if((neededDataMask & MM_FACEFACETOPO)!=0)
-  {
-    cm.face.EnableFFAdjacency();
-    tri::UpdateTopology<CMeshO>::FaceFace(cm);
-  }
-  if((neededDataMask & MM_VERTFACETOPO)!=0)
-  {
-    cm.vert.EnableVFAdjacency();
-    cm.face.EnableVFAdjacency();
-    tri::UpdateTopology<CMeshO>::VertexFace(cm);
-  }
+    if((neededDataMask & MM_FACEFACETOPO)!=0)
+    {
+        cm.face.EnableFFAdjacency();
+        tri::UpdateTopology<CMeshO>::FaceFace(cm);
+    }
+    if((neededDataMask & MM_VERTFACETOPO)!=0)
+    {
+        cm.vert.EnableVFAdjacency();
+        cm.face.EnableVFAdjacency();
+        tri::UpdateTopology<CMeshO>::VertexFace(cm);
+    }
 
-  if((neededDataMask & MM_WEDGTEXCOORD)!=0)  cm.face.EnableWedgeTexCoord();
-  if((neededDataMask & MM_FACECOLOR)!=0)     cm.face.EnableColor();
-  if((neededDataMask & MM_FACEQUALITY)!=0)   cm.face.EnableQuality();
-  if((neededDataMask & MM_FACECURVDIR)!=0)   cm.face.EnableCurvatureDir();
-  if((neededDataMask & MM_FACEMARK)!=0)	     cm.face.EnableMark();
-  if((neededDataMask & MM_VERTMARK)!=0)      cm.vert.EnableMark();
-  if((neededDataMask & MM_VERTCURV)!=0)      cm.vert.EnableCurvature();
-  if((neededDataMask & MM_VERTCURVDIR)!=0)   cm.vert.EnableCurvatureDir();
-  if((neededDataMask & MM_VERTRADIUS)!=0)    cm.vert.EnableRadius();
-  if((neededDataMask & MM_VERTTEXCOORD)!=0)  cm.vert.EnableTexCoord();
+    if((neededDataMask & MM_WEDGTEXCOORD)!=0)  cm.face.EnableWedgeTexCoord();
+    if((neededDataMask & MM_FACECOLOR)!=0)     cm.face.EnableColor();
+    if((neededDataMask & MM_FACEQUALITY)!=0)   cm.face.EnableQuality();
+    if((neededDataMask & MM_FACECURVDIR)!=0)   cm.face.EnableCurvatureDir();
+    if((neededDataMask & MM_FACEMARK)!=0)	     cm.face.EnableMark();
+    if((neededDataMask & MM_VERTMARK)!=0)      cm.vert.EnableMark();
+    if((neededDataMask & MM_VERTCURV)!=0)      cm.vert.EnableCurvature();
+    if((neededDataMask & MM_VERTCURVDIR)!=0)   cm.vert.EnableCurvatureDir();
+    if((neededDataMask & MM_VERTRADIUS)!=0)    cm.vert.EnableRadius();
+    if((neededDataMask & MM_VERTTEXCOORD)!=0)  cm.vert.EnableTexCoord();
 
-  currentDataMask |= neededDataMask;
- }
+    currentDataMask |= neededDataMask;
+}
 
 void MeshModel::clearDataMask(int unneededDataMask)
 {
-  if( ( (unneededDataMask & MM_VERTFACETOPO)!=0)	&& hasDataMask(MM_VERTFACETOPO)) {cm.face.DisableVFAdjacency();
-                                                                                    cm.vert.DisableVFAdjacency(); }
-  if( ( (unneededDataMask & MM_FACEFACETOPO)!=0)	&& hasDataMask(MM_FACEFACETOPO))	cm.face.DisableFFAdjacency();
+    if( ( (unneededDataMask & MM_VERTFACETOPO)!=0)	&& hasDataMask(MM_VERTFACETOPO)) {cm.face.DisableVFAdjacency();
+    cm.vert.DisableVFAdjacency(); }
+    if( ( (unneededDataMask & MM_FACEFACETOPO)!=0)	&& hasDataMask(MM_FACEFACETOPO))	cm.face.DisableFFAdjacency();
 
-  if( ( (unneededDataMask & MM_WEDGTEXCOORD)!=0)	&& hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.DisableWedgeTexCoord();
-  if( ( (unneededDataMask & MM_FACECOLOR)!=0)			&& hasDataMask(MM_FACECOLOR))			cm.face.DisableColor();
-  if( ( (unneededDataMask & MM_FACEQUALITY)!=0)		&& hasDataMask(MM_FACEQUALITY))		cm.face.DisableQuality();
-  if( ( (unneededDataMask & MM_FACEMARK)!=0)			&& hasDataMask(MM_FACEMARK))			cm.face.DisableMark();
-  if( ( (unneededDataMask & MM_VERTMARK)!=0)			&& hasDataMask(MM_VERTMARK))			cm.vert.DisableMark();
-  if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
-  if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
-  if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
-  if( ( (unneededDataMask & MM_VERTTEXCOORD)!=0)	&& hasDataMask(MM_VERTTEXCOORD))	cm.vert.DisableTexCoord();
+    if( ( (unneededDataMask & MM_WEDGTEXCOORD)!=0)	&& hasDataMask(MM_WEDGTEXCOORD)) 	cm.face.DisableWedgeTexCoord();
+    if( ( (unneededDataMask & MM_FACECOLOR)!=0)			&& hasDataMask(MM_FACECOLOR))			cm.face.DisableColor();
+    if( ( (unneededDataMask & MM_FACEQUALITY)!=0)		&& hasDataMask(MM_FACEQUALITY))		cm.face.DisableQuality();
+    if( ( (unneededDataMask & MM_FACEMARK)!=0)			&& hasDataMask(MM_FACEMARK))			cm.face.DisableMark();
+    if( ( (unneededDataMask & MM_VERTMARK)!=0)			&& hasDataMask(MM_VERTMARK))			cm.vert.DisableMark();
+    if( ( (unneededDataMask & MM_VERTCURV)!=0)			&& hasDataMask(MM_VERTCURV))			cm.vert.DisableCurvature();
+    if( ( (unneededDataMask & MM_VERTCURVDIR)!=0)		&& hasDataMask(MM_VERTCURVDIR))		cm.vert.DisableCurvatureDir();
+    if( ( (unneededDataMask & MM_VERTRADIUS)!=0)		&& hasDataMask(MM_VERTRADIUS))		cm.vert.DisableRadius();
+    if( ( (unneededDataMask & MM_VERTTEXCOORD)!=0)	&& hasDataMask(MM_VERTTEXCOORD))	cm.vert.DisableTexCoord();
 
-  currentDataMask = currentDataMask & (~unneededDataMask);
+    currentDataMask = currentDataMask & (~unneededDataMask);
 }
 
 void MeshModel::Enable(int openingFileMask)
 {
-  if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD )
-      updateDataMask(MM_VERTTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD )
-      updateDataMask(MM_WEDGTEXCOORD);
-  if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    )
-      updateDataMask(MM_VERTCOLOR);
-  if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    )
-      updateDataMask(MM_FACECOLOR);
-  if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
-  if( openingFileMask & tri::io::Mask::IOM_CAMERA       ) updateDataMask(MM_CAMERA);
-  if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
-  if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  ) updateDataMask(MM_FACEQUALITY);
-  if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
+    if( openingFileMask & tri::io::Mask::IOM_VERTTEXCOORD )
+        updateDataMask(MM_VERTTEXCOORD);
+    if( openingFileMask & tri::io::Mask::IOM_WEDGTEXCOORD )
+        updateDataMask(MM_WEDGTEXCOORD);
+    if( openingFileMask & tri::io::Mask::IOM_VERTCOLOR    )
+        updateDataMask(MM_VERTCOLOR);
+    if( openingFileMask & tri::io::Mask::IOM_FACECOLOR    )
+        updateDataMask(MM_FACECOLOR);
+    if( openingFileMask & tri::io::Mask::IOM_VERTRADIUS   ) updateDataMask(MM_VERTRADIUS);
+    if( openingFileMask & tri::io::Mask::IOM_CAMERA       ) updateDataMask(MM_CAMERA);
+    if( openingFileMask & tri::io::Mask::IOM_VERTQUALITY  ) updateDataMask(MM_VERTQUALITY);
+    if( openingFileMask & tri::io::Mask::IOM_FACEQUALITY  ) updateDataMask(MM_FACEQUALITY);
+    if( openingFileMask & tri::io::Mask::IOM_BITPOLYGONAL ) updateDataMask(MM_POLYGONAL);
 }
 
 bool& MeshModel::meshModified()
@@ -747,7 +748,7 @@ int MeshModel::dataMask() const
 BufferObjectsRendering::BufferObjectsRendering()
     :vcg::GLW(),_lock(QReadWriteLock::Recursive)
 {
-  this->HighPrecisionMode =false;
+    this->HighPrecisionMode =false;
 }
 
 
@@ -759,41 +760,41 @@ BufferObjectsRendering::~BufferObjectsRendering()
 
 void BufferObjectsRendering::DrawEdges(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
-  glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
-  glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
+    glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
+    glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexEdgeBufferObject);
-  glDrawElements( GL_LINES, en*2, GL_UNSIGNED_INT,0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexEdgeBufferObject);
+    glDrawElements( GL_LINES, en*2, GL_UNSIGNED_INT,0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 
 void BufferObjectsRendering::DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, TextureMode tm)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
-  glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
-  glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
+    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
+    glVertexPointer(3, GL_FLOAT, 0, 0);               // last param is offset, not ptr
+    glEnableClientState(GL_VERTEX_ARRAY);             // activate vertex coords array
 
-  if(nolm==GLW::NMPerVert) {
-    glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
-    glNormalPointer(GL_FLOAT, 0, 0);               // last param is offset, not ptr
-    glEnableClientState(GL_NORMAL_ARRAY);             // activate vertex coords array
-  }
+    if(nolm==GLW::NMPerVert) {
+        glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
+        glNormalPointer(GL_FLOAT, 0, 0);               // last param is offset, not ptr
+        glEnableClientState(GL_NORMAL_ARRAY);             // activate vertex coords array
+    }
 
-  if(colm == GLW::CMPerVert){
-    glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
-    glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);               // last param is offset, not ptr
-    glEnableClientState(GL_COLOR_ARRAY);             // activate vertex coords array
-  }
+    if(colm == GLW::CMPerVert){
+        glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
+        glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);               // last param is offset, not ptr
+        glEnableClientState(GL_COLOR_ARRAY);             // activate vertex coords array
+    }
 
-  glDrawArrays(GL_POINTS, 0, vn);
+    glDrawArrays(GL_POINTS, 0, vn);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
 }
 
 /// Two main path of rendering:
@@ -802,78 +803,107 @@ void BufferObjectsRendering::DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::Norm
 
 void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, TextureMode tm)
 {
-  if(nm!=GLW::NMPerFace && cm != GLW::CMPerFace && tm != GLW::TMPerWedge)
-  {
-    glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
-
-    if(nm == GLW::NMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
-      glNormalPointer(GL_FLOAT, 0, 0);
-      glEnableClientState(GL_NORMAL_ARRAY);
-    }
-
-    if(cm == GLW::CMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
-      glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
-      glEnableClientState(GL_COLOR_ARRAY);
-    }
-
-    if(tm == GLW::TMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
-      glTexCoordPointer(2,GL_FLOAT, 0, 0);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
-
-    for(size_t i=0;i<indexTriBufferObject.size();++i)
+    if(nm!=GLW::NMPerFace && cm != GLW::CMPerFace && tm != GLW::TMPerWedge)
     {
-      if(tm==GLW::TMPerVert)
-      {
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D,TMId[i]);
-      }
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
-      glDrawElements( GL_TRIANGLES, indexTriBufferObjectSz[i], GL_UNSIGNED_INT,0);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      glDisable(GL_TEXTURE_2D);
-    }
-  }
+        glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, 0, 0);
 
-  else /// Duplicated Vertex Pipeline
-  {
-    glBindBuffer(GL_ARRAY_BUFFER, positionDupBufferObject);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
+        if(nm == GLW::NMPerVert){
+            glBindBuffer(GL_ARRAY_BUFFER, vertexNormalBO);
+            glNormalPointer(GL_FLOAT, 0, 0);
+            glEnableClientState(GL_NORMAL_ARRAY);
+        }
 
-    if(nm == GLW::NMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, normalDupBufferObject);
-      glNormalPointer(GL_FLOAT, 0, 0);
-      glEnableClientState(GL_NORMAL_ARRAY);
-    }
-    if(nm == GLW::NMPerFace){
-      glBindBuffer(GL_ARRAY_BUFFER, normalFaceBufferObject);
-      glNormalPointer(GL_FLOAT, 0, 0);
-      glEnableClientState(GL_NORMAL_ARRAY);
-    }
+        if(cm == GLW::CMPerVert){
+            glBindBuffer(GL_ARRAY_BUFFER, vertexColorBO);
+            glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
+            glEnableClientState(GL_COLOR_ARRAY);
+        }
 
-    if(cm == GLW::CMPerVert){
-      glBindBuffer(GL_ARRAY_BUFFER, colorDupBufferObject);
-      glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
-      glEnableClientState(GL_COLOR_ARRAY);
-    }
-    if(cm == GLW::CMPerFace){
-      glBindBuffer(GL_ARRAY_BUFFER, colorFaceBufferObject);
-      glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
-      glEnableClientState(GL_COLOR_ARRAY);
+        if(tm == GLW::TMPerVert){
+            glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
+            glTexCoordPointer(2,GL_FLOAT, 0, 0);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+
+        for(size_t i=0;i<indexTriBufferObject.size();++i)
+        {
+            if(tm==GLW::TMPerVert)
+            {
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D,TMId[i]);
+            }
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
+            glDrawElements( GL_TRIANGLES, indexTriBufferObjectSz[i], GL_UNSIGNED_INT,0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glDisable(GL_TEXTURE_2D);
+        }
     }
 
-    glDrawArrays(GL_TRIANGLES, 0, tn*3);
-  }
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+    else /// Duplicated Vertex Pipeline
+    {   
+        glBindBuffer(GL_ARRAY_BUFFER, positionDupBufferObject);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, 0, 0);
+
+        if(nm == GLW::NMPerVert){
+            glBindBuffer(GL_ARRAY_BUFFER, normalDupBufferObject);
+            glNormalPointer(GL_FLOAT, 0, 0);
+            glEnableClientState(GL_NORMAL_ARRAY);
+        }
+        if(nm == GLW::NMPerFace){
+            glBindBuffer(GL_ARRAY_BUFFER, normalDupBufferObject);
+            //glBindBuffer(GL_ARRAY_BUFFER, normalFaceBufferObject);
+            glNormalPointer(GL_FLOAT, 0, 0);
+            glEnableClientState(GL_NORMAL_ARRAY);
+        }
+
+        if(cm == GLW::CMPerVert){
+            glBindBuffer(GL_ARRAY_BUFFER, colorDupBufferObject);
+            glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
+            glEnableClientState(GL_COLOR_ARRAY);
+        }
+        if(cm == GLW::CMPerFace){
+            glBindBuffer(GL_ARRAY_BUFFER, colorFaceBufferObject);
+            glColorPointer(4,GL_UNSIGNED_BYTE, 0, 0);
+            glEnableClientState(GL_COLOR_ARRAY);
+        }
+
+        if (tm != GLW::TMPerWedgeMulti)
+            glDrawArrays(GL_TRIANGLES, 0, tn*3);
+        else
+        {
+            glEnable(GL_TEXTURE_2D);
+            
+            glBindBuffer(GL_ARRAY_BUFFER, wedgeTextBufferObject);
+            glTexCoordPointer(2,GL_FLOAT, 0, 0);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+            int i = 0;
+            
+            for(std::map< int,std::vector<size_t> >::const_iterator it = chunkMap.cbegin();it != chunkMap.cend();++it)
+            {
+                if (it->first != -1)
+                    glBindTexture(GL_TEXTURE_2D,TMId[it->first]);
+                else
+                    glBindTexture(GL_TEXTURE_2D,0);
+
+                //unsigned short pixels[2048 * 1024 * 4];
+                //glGetTexImage(GL_TEXTURE_2D,0, GL_RGBA,GL_UNSIGNED_SHORT_4_4_4_4,&pixels);
+
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,chunkMapBufferObject[i]);
+                glDrawElements( GL_TRIANGLES, it->second.size() * 3, GL_UNSIGNED_INT,0);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                ++i;
+            }
+            glDisable(GL_TEXTURE_2D);
+        }
+    }
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void BufferObjectsRendering::render(const Box3m &bbDoc, vcg::GLW::DrawMode dm,vcg::GLW::ColorMode colm,vcg::GLW::TextureMode tm )
@@ -886,47 +916,22 @@ void BufferObjectsRendering::render(const Box3m &bbDoc, vcg::GLW::DrawMode dm,vc
     }
     else
     {
-      glTranslate(-bbDoc.Center());
-      glMultMatrix(Tr);
+        glTranslate(-bbDoc.Center());
+        glMultMatrix(Tr);
     }
 
     if(dm== GLW::DMPoints) DrawPoints(colm,GLW::NMPerVert,tm);
     else
-    if(dm==GLW::DMWire) DrawEdges(GLW::CMNone,GLW::NMNone);
-    else
-    {
-      if( dm==GLW::DMSmooth)
-        DrawTriangles(colm,GLW::NMPerVert,tm);
-      else
-        DrawTriangles(colm,GLW::NMPerFace,tm);
-    }
-    glPopMatrix();
+        if(dm==GLW::DMWire) DrawEdges(GLW::CMNone,GLW::NMNone);
+        else
+        {
+            if( dm==GLW::DMSmooth)
+                DrawTriangles(colm,GLW::NMPerVert,tm);
+            else
+                DrawTriangles(colm,GLW::NMPerFace,tm);
+        }
+        glPopMatrix();
 }
-
-// First lets find the per texture triangle sort list.
-// In order to aggreagate the triangles according to their id.
-void BufferObjectsRendering::BuildTextureAggregatedTriangleChunks(CMeshO& mm, GLW::TextureMode tm,
-                                                                  std::vector<int> &chunkMap, std::vector<int> &chunkSizes )
-{
-  if(tm==GLW::TMNone)
-  {
-    chunkMap.resize(mm.fn);
-    for(size_t i=0;i<mm.fn;++i) // replicated coords
-      chunkMap[i]=i;
-    chunkSizes.resize(1);
-    chunkSizes[0]=mm.fn;
-    return;
-   }
-    std::vector<std::vector<int> > tmpVV(mm.textures.size());
-  for(size_t i=0;i<tn;++i) // replicated coords
-  {
-    int texId = mm.face[i].WT(0).N();
-    tmpVV[texId].push_back(i);
-  }
- // TO BE FINISHED AND USED!!!!
-}
-
-
 
 bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 {
@@ -948,135 +953,197 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 
     if(this->HighPrecisionMode)
     {
-      Box3m localBB;
-      localBB.Add(mm.Tr,mm.bbox);
-      Point3m localBBC =localBB.Center();
+        Box3m localBB;
+        localBB.Add(mm.Tr,mm.bbox);
+        Point3m localBBC =localBB.Center();
 
-      Tr.SetTranslate(localBBC);
-      bbCenter.Import(localBBC);
+        Tr.SetTranslate(localBBC);
+        bbCenter.Import(localBBC);
 
-      Matrix33m  mat33(mm.Tr,3);
-      for(size_t i=0;i<vn;++i)
-      {
-        pv[i].Import(mm.Tr*mm.vert[i].P() - localBBC);
-        nv[i].Import(mat33*mm.vert[i].N());
-        nv[i].Normalize();
-        cv[i]=mm.vert[i].C();
-      }
+        Matrix33m  mat33(mm.Tr,3);
+        for(size_t i=0;i<vn;++i)
+        {
+            pv[i].Import(mm.Tr*mm.vert[i].P() - localBBC);
+            nv[i].Import(mat33*mm.vert[i].N());
+            nv[i].Normalize();
+            cv[i]=mm.vert[i].C();
+        }
     } else {
-      qDebug("Low Precision buffers");
-      Tr = mm.Tr;
-      bbCenter = mm.bbox.Center();
-      for(size_t i=0;i<vn;++i)
-      {
-        pv[i].Import(mm.vert[i].P());
-        nv[i].Import(mm.vert[i].N());
-        nv[i].Normalize();
-        cv[i]=mm.vert[i].C();
-      }
-    }
-
-    if(tri::HasPerVertexTexCoord(mm))
-    {
-      std::vector<float> tv(mm.vn*2); // Per vertex Textures
-      for(size_t i=0;i<vn;++i)
-      {
-        tv[i*2+0]= mm.vert[i].T().U();
-        tv[i*2+1]= mm.vert[i].T().V();
-      }
-      glGenBuffers(1, &vertexTextureBO);
-      glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
-      glBufferData(GL_ARRAY_BUFFER, vn *2 *sizeof(GLfloat), &tv[0], GL_STATIC_DRAW);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+        qDebug("Low Precision buffers");
+        Tr = mm.Tr;
+        bbCenter = mm.bbox.Center();
+        for(size_t i=0;i<vn;++i)
+        {
+            pv[i].Import(mm.vert[i].P());
+            nv[i].Import(mm.vert[i].N());
+            nv[i].Normalize();
+            cv[i]=mm.vert[i].C();
+        }
     }
 
     tn = mm.fn;
     std::vector < std::vector<unsigned int> > ti;
-    if(mm.textures.size()>1 && tri::HasPerVertexTexCoord(mm))
+    // Build the vector with all the unique edge pairs
+    std::vector<std::pair<unsigned int, unsigned int> > ev;
+
+    std::vector<Point3f> rpv(mm.fn*3);
+    std::vector<Point3f> rnv(mm.fn*3);
+    std::vector<Color4b> rcv(mm.fn*3);
+    std::vector<Point3f> rnt(mm.fn*3);
+    std::vector<Color4b> rct(mm.fn*3);
+
+    if (tri::HasPerWedgeTexCoord(mm))
     {
-      ti.resize(mm.textures.size());
-      for(size_t i=0;i<tn;++i)
-      {
-        int tid= mm.face[i].V(0)->T().n();
-        ti[tid].push_back(tri::Index(mm,mm.face[i].V(0)));
-        ti[tid].push_back(tri::Index(mm,mm.face[i].V(1)));
-        ti[tid].push_back(tri::Index(mm,mm.face[i].V(2)));
-      }
+        //std::vector<vcg::TexCoord2f> wtv(mm.fn*3);
+        std::vector<float> wtv(mm.fn*3*2);
+        chunkMap.clear();
+        //AggregatedTriangleChunkMap
+        for(size_t i=0;i<tn;++i) // replicated coords
+        {
+            int texId = mm.face[i].WT(0).N();
+            chunkMap[texId].push_back(i);
+        }
+        
+        int k = 0;
+        int t = 0;
+        chunkMapBufferObject.resize(chunkMap.size());
+        for(std::map< int,std::vector<size_t> >::iterator it = chunkMap.begin();it != chunkMap.end();++it)
+        {
+            std::vector<GLuint> vindex(it->second.size()*3);
+            for(size_t j = 0;j<it->second.size();++j)
+            {
+                size_t indf(it->second[j]);
+
+                vindex[j*3+0]=k*3+0;
+                vindex[j*3+1]=k*3+1;
+                vindex[j*3+2]=k*3+2;
+
+                rpv[k*3+0].Import(mm.face[indf].V(0)->P());
+                rpv[k*3+1].Import(mm.face[indf].V(1)->P());
+                rpv[k*3+2].Import(mm.face[indf].V(2)->P());
+
+                rnv[k*3+0].Import(mm.face[indf].V(0)->N().Normalize());
+                rnv[k*3+1].Import(mm.face[indf].V(1)->N().Normalize());
+                rnv[k*3+2].Import(mm.face[indf].V(2)->N().Normalize());
+
+                rcv[k*3+0] = mm.face[indf].V(0)->C();
+                rcv[k*3+1] = mm.face[indf].V(1)->C();
+                rcv[k*3+2] = mm.face[indf].V(2)->C();
+
+                wtv[k*6+0]=mm.face[indf].WT(0).U();
+                wtv[k*6+1]=mm.face[indf].WT(0).V();
+                wtv[k*6+2]=mm.face[indf].WT(1).U();
+                wtv[k*6+3]=mm.face[indf].WT(1).V();
+                wtv[k*6+4]=mm.face[indf].WT(2).U();
+                wtv[k*6+5]=mm.face[indf].WT(2).V();
+                
+
+                ++k;  
+            }
+
+            glGenBuffers(1, &chunkMapBufferObject[t]);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunkMapBufferObject[t]);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, it->second.size() * 3 * sizeof(GLuint), &vindex[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+            ++t;
+        }
+
+
+        if (k != tn)
+            throw MeshLabException("Mesh has not been properly partitioned");
+
+        glGenBuffers(1, &wedgeTextBufferObject);
+        glBindBuffer(GL_ARRAY_BUFFER, wedgeTextBufferObject);
+        glBufferData(GL_ARRAY_BUFFER, wtv.size() * sizeof(GLfloat), &wtv[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
     else
     {
-      ti.resize(1);
-      ti[0].resize(tn*3);
-      for(size_t i=0;i<tn;++i)
-      {
-        ti[0][i*3+0] = tri::Index(mm,mm.face[i].V(0));
-        ti[0][i*3+1] = tri::Index(mm,mm.face[i].V(1));
-        ti[0][i*3+2] = tri::Index(mm,mm.face[i].V(2));
-      }
-    }
+        if(tri::HasPerVertexTexCoord(mm))
+        {
+            std::vector<float> tv(mm.vn*2); // Per vertex Textures
+            for(size_t i=0;i<vn;++i)
+            {
+                tv[i*2+0]= mm.vert[i].T().U();
+                tv[i*2+1]= mm.vert[i].T().V();
+            }
+            glGenBuffers(1, &vertexTextureBO);
+            glBindBuffer(GL_ARRAY_BUFFER, vertexTextureBO);
+            glBufferData(GL_ARRAY_BUFFER, vn *2 *sizeof(GLfloat), &tv[0], GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
 
-    // Build the vector with all the unique edge pairs
-    std::vector<std::pair<unsigned int, unsigned int> > ev;
-    for(size_t i=0;i<tn;++i)
-    {
-      unsigned int i0 = tri::Index(mm,mm.face[i].V(0));
-      unsigned int i1 = tri::Index(mm,mm.face[i].V(1));
-      unsigned int i2 = tri::Index(mm,mm.face[i].V(2));
-      if(i0<i1)  ev.push_back(std::make_pair(i0,i1));
-      else       ev.push_back(std::make_pair(i1,i0));
-      if(i1<i2)  ev.push_back(std::make_pair(i1,i2));
-      else       ev.push_back(std::make_pair(i2,i1));
-      if(i2<i0)  ev.push_back(std::make_pair(i2,i0));
-      else       ev.push_back(std::make_pair(i0,i2));
-    }
-    std::sort(ev.begin(),ev.end());
-    std::vector<std::pair<unsigned int, unsigned int> >::iterator newEnd =
-        std::unique(ev.begin(), ev.end());
-    ev.resize(newEnd-ev.begin());
-    en=ev.size();
+        if(mm.textures.size()>1 && tri::HasPerVertexTexCoord(mm))
+        {
+            ti.resize(mm.textures.size());
+            for(size_t i=0;i<tn;++i)
+            {
+                int tid= mm.face[i].V(0)->T().n();
+                ti[tid].push_back(tri::Index(mm,mm.face[i].V(0)));
+                ti[tid].push_back(tri::Index(mm,mm.face[i].V(1)));
+                ti[tid].push_back(tri::Index(mm,mm.face[i].V(2)));
+            }
+        }
+        else
+        {
+            ti.resize(1);
+            ti[0].resize(tn*3);
+            for(size_t i=0;i<tn;++i)
+            {
+                ti[0][i*3+0] = tri::Index(mm,mm.face[i].V(0));
+                ti[0][i*3+1] = tri::Index(mm,mm.face[i].V(1));
+                ti[0][i*3+2] = tri::Index(mm,mm.face[i].V(2));
+            }
+        }
 
+        bool perfcol = tri::HasPerFaceColor(mm);
+        // Now doing the replicated stuff
+        for(size_t i=0;i<tn;++i) // replicated coords
+        {
+            unsigned int i0 = tri::Index(mm,mm.face[i].V(0));
+            unsigned int i1 = tri::Index(mm,mm.face[i].V(1));
+            unsigned int i2 = tri::Index(mm,mm.face[i].V(2));
+            if(i0<i1)  ev.push_back(std::make_pair(i0,i1));
+            else       ev.push_back(std::make_pair(i1,i0));
+            if(i1<i2)  ev.push_back(std::make_pair(i1,i2));
+            else       ev.push_back(std::make_pair(i2,i1));
+            if(i2<i0)  ev.push_back(std::make_pair(i2,i0));
+            else       ev.push_back(std::make_pair(i0,i2));
+            
 
-      std::vector<Point3f> rpv(mm.fn*3);
-      std::vector<Point3f> rnv(mm.fn*3);
-      std::vector<Color4b> rcv(mm.fn*3);
-      std::vector<Point3f> rnt(mm.fn*3);
-      std::vector<Color4b> rct(mm.fn*3);
-
-    // Now doing the replicated stuff
-     for(size_t i=0;i<tn;++i) // replicated coords
-    {
-      rpv[i*3+0] = pv[tri::Index(mm,mm.face[i].V(0))];
-      rpv[i*3+1] = pv[tri::Index(mm,mm.face[i].V(1))];
-      rpv[i*3+2] = pv[tri::Index(mm,mm.face[i].V(2))];
-    }
-    for(size_t i=0;i<tn;++i) // replicated per vertex colors
-    {
-      rcv[i*3+0] = cv[tri::Index(mm,mm.face[i].V(0))];
-      rcv[i*3+1] = cv[tri::Index(mm,mm.face[i].V(1))];
-      rcv[i*3+2] = cv[tri::Index(mm,mm.face[i].V(2))];
-    }
-    for(size_t i=0;i<tn;++i) // replicated per vertex normals
-    {
-      rnv[i*3+0] = nv[tri::Index(mm,mm.face[i].V(0))];
-      rnv[i*3+1] = nv[tri::Index(mm,mm.face[i].V(1))];
-      rnv[i*3+2] = nv[tri::Index(mm,mm.face[i].V(2))];
-    }
-    if(tri::HasPerFaceColor(mm)){
-      for(size_t i=0;i<tn;++i) // replicated face colors
-      {
-        rct[i*3+0]=mm.face[i].C();
-        rct[i*3+1]=mm.face[i].C();
-        rct[i*3+2]=mm.face[i].C();
-      }
-    }
-    for(size_t i=0;i<tn;++i) // replicated face normals
-    {
-      rnt[i*3+0].Import(mm.face[i].N().Normalize());
-      rnt[i*3+1].Import(mm.face[i].N().Normalize());
-      rnt[i*3+2].Import(mm.face[i].N().Normalize());
-    }
+            rpv[i*3+0] = pv[tri::Index(mm,mm.face[i].V(0))];
+            rpv[i*3+1] = pv[tri::Index(mm,mm.face[i].V(1))];
+            rpv[i*3+2] = pv[tri::Index(mm,mm.face[i].V(2))];
 
 
+            rcv[i*3+0] = cv[tri::Index(mm,mm.face[i].V(0))];
+            rcv[i*3+1] = cv[tri::Index(mm,mm.face[i].V(1))];
+            rcv[i*3+2] = cv[tri::Index(mm,mm.face[i].V(2))];
+        
+
+            rnv[i*3+0] = nv[tri::Index(mm,mm.face[i].V(0))];
+            rnv[i*3+1] = nv[tri::Index(mm,mm.face[i].V(1))];
+            rnv[i*3+2] = nv[tri::Index(mm,mm.face[i].V(2))];
+               
+            if (perfcol)
+            {
+                rct[i*3+0]=mm.face[i].C();
+                rct[i*3+1]=mm.face[i].C();
+                rct[i*3+2]=mm.face[i].C();
+            }
+        
+            rnt[i*3+0].Import(mm.face[i].N().Normalize());
+            rnt[i*3+1].Import(mm.face[i].N().Normalize());
+            rnt[i*3+2].Import(mm.face[i].N().Normalize());
+        }
+
+        std::sort(ev.begin(),ev.end());
+        std::vector<std::pair<unsigned int, unsigned int> >::iterator newEnd =
+            std::unique(ev.begin(), ev.end());
+        ev.resize(newEnd-ev.begin());
+        en=ev.size();
+    }
     qDebug("Buffer prepared in %i",aa.elapsed());
     glGenBuffers(1, &vertexPositionBO);
     glBindBuffer(GL_ARRAY_BUFFER, vertexPositionBO);
@@ -1117,21 +1184,21 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 
 
 
-    glGenBuffers(1, &indexEdgeBufferObject);
+    /*glGenBuffers(1, &indexEdgeBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexEdgeBufferObject);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, en *2 *sizeof(GLuint), &ev[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
 
 
     indexTriBufferObject.resize(ti.size());
     indexTriBufferObjectSz.resize(ti.size());
     for(size_t i=0;i<ti.size();++i)
     {
-      indexTriBufferObjectSz[i]=ti[i].size();
-      glGenBuffers(1, &indexTriBufferObject[i]);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, ti[i].size() *sizeof(GLuint), &ti[i][0], GL_STATIC_DRAW);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        indexTriBufferObjectSz[i]=ti[i].size();
+        glGenBuffers(1, &indexTriBufferObject[i]);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexTriBufferObject[i]);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ti[i].size() *sizeof(GLuint), &ti[i][0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     qDebug("Buffer feed in %i",aa.elapsed());

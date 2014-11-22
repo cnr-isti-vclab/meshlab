@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <map>
 
 #include <vcg/complex/complex.h>
 
@@ -197,8 +198,6 @@ public:
     void DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
     void DrawEdges(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
     void DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, vcg::GLW::TextureMode tm );
-    void BuildTextureAggregatedTriangleChunks(CMeshO& mm, GLW::TextureMode tm,
-                                                                      std::vector<int> &chunkMap, std::vector<int> &chunkSizes );
     //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
     bool update(CMeshO& mm, const int updateattributesmask);
 //    bool requestUpdate(CMeshO& mm, Box3m bb, const int updateattributesmask);
@@ -247,7 +246,12 @@ private:
    GLuint colorFaceBufferObject;
    GLuint edgeBufferObject;
    GLuint edgeFauxBufferObject;
+   GLuint wedgeTextBufferObject;
+   GLuint wedgeNormBufferObject;
+   GLuint wedgeColorBufferObject;
 
+   std::vector<GLuint> chunkMapBufferObject;
+   std::map< int, std::vector<size_t> >  chunkMap;
 
    bool HighPrecisionMode;
 
