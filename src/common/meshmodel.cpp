@@ -882,19 +882,17 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::Nor
 
             int i = 0;
             
+            int firsttriangleoffset = 0;
             for(std::map< int,std::vector<size_t> >::const_iterator it = chunkMap.cbegin();it != chunkMap.cend();++it)
             {
+                
                 if (it->first != -1)
                     glBindTexture(GL_TEXTURE_2D,TMId[it->first]);
                 else
                     glBindTexture(GL_TEXTURE_2D,0);
 
-                //unsigned short pixels[2048 * 1024 * 4];
-                //glGetTexImage(GL_TEXTURE_2D,0, GL_RGBA,GL_UNSIGNED_SHORT_4_4_4_4,&pixels);
-
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,chunkMapBufferObject[i]);
-                glDrawElements( GL_TRIANGLES, it->second.size() * 3, GL_UNSIGNED_INT,0);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+                glDrawArrays(GL_TRIANGLES,firsttriangleoffset,it->second.size() * 3);
+                firsttriangleoffset += it->second.size() * 3; 
                 ++i;
             }
             glDisable(GL_TEXTURE_2D);
@@ -1006,17 +1004,11 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
         
         int k = 0;
         int t = 0;
-        chunkMapBufferObject.resize(chunkMap.size());
         for(std::map< int,std::vector<size_t> >::iterator it = chunkMap.begin();it != chunkMap.end();++it)
         {
-            std::vector<GLuint> vindex(it->second.size()*3);
             for(size_t j = 0;j<it->second.size();++j)
             {
                 size_t indf(it->second[j]);
-
-                vindex[j*3+0]=k*3+0;
-                vindex[j*3+1]=k*3+1;
-                vindex[j*3+2]=k*3+2;
 
                 rpv[k*3+0].Import(mm.face[indf].V(0)->P());
                 rpv[k*3+1].Import(mm.face[indf].V(1)->P());
@@ -1040,11 +1032,6 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
 
                 ++k;  
             }
-
-            glGenBuffers(1, &chunkMapBufferObject[t]);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunkMapBufferObject[t]);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, it->second.size() * 3 * sizeof(GLuint), &vindex[0], GL_STATIC_DRAW);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
             ++t;
         }
