@@ -250,7 +250,7 @@ private:
    GLuint wedgeNormBufferObject;
    GLuint wedgeColorBufferObject;
 
-   std::map< int, std::vector<size_t> >  chunkMap;
+   std::vector< std::pair<short,size_t> > texIndNumTrianglesV;
 
    bool HighPrecisionMode;
 

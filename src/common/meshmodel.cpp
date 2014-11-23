@@ -879,21 +879,18 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::Nor
             glBindBuffer(GL_ARRAY_BUFFER, wedgeTextBufferObject);
             glTexCoordPointer(2,GL_FLOAT, 0, 0);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-            int i = 0;
             
             int firsttriangleoffset = 0;
-            for(std::map< int,std::vector<size_t> >::const_iterator it = chunkMap.cbegin();it != chunkMap.cend();++it)
+            for(size_t ii = 0; ii < texIndNumTrianglesV.size();++ii)
             {
                 
-                if (it->first != -1)
-                    glBindTexture(GL_TEXTURE_2D,TMId[it->first]);
+                if (texIndNumTrianglesV[ii].first != -1)
+                    glBindTexture(GL_TEXTURE_2D,TMId[texIndNumTrianglesV[ii].first]);
                 else
                     glBindTexture(GL_TEXTURE_2D,0);
 
-                glDrawArrays(GL_TRIANGLES,firsttriangleoffset,it->second.size() * 3);
-                firsttriangleoffset += it->second.size() * 3; 
-                ++i;
+                glDrawArrays(GL_TRIANGLES,firsttriangleoffset,texIndNumTrianglesV[ii].second * 3);
+                firsttriangleoffset += texIndNumTrianglesV[ii].second * 3; 
             }
             glDisable(GL_TEXTURE_2D);
         }
@@ -994,7 +991,7 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
     {
         //std::vector<vcg::TexCoord2f> wtv(mm.fn*3);
         std::vector<float> wtv(mm.fn*3*2);
-        chunkMap.clear();
+        std::map< short, std::vector<size_t> >  chunkMap;
         //AggregatedTriangleChunkMap
         for(size_t i=0;i<tn;++i) // replicated coords
         {
@@ -1004,8 +1001,16 @@ bool BufferObjectsRendering::update(CMeshO& mm, const int updateattributesmask)
         
         int k = 0;
         int t = 0;
-        for(std::map< int,std::vector<size_t> >::iterator it = chunkMap.begin();it != chunkMap.end();++it)
+        texIndNumTrianglesV.resize(chunkMap.size());
+
+        //It makes explicit that there are not untextured triangles
+        if (chunkMap.find(-1) == chunkMap.end())
+            texIndNumTrianglesV.insert(texIndNumTrianglesV.begin(),std::make_pair(-1,0));
+
+        texIndNumTrianglesV.resize(chunkMap.size());
+        for(std::map< short,std::vector<size_t> >::iterator it = chunkMap.begin();it != chunkMap.end();++it)
         {
+            texIndNumTrianglesV[t] = std::make_pair(it->first,it->second.size());
             for(size_t j = 0;j<it->second.size();++j)
             {
                 size_t indf(it->second[j]);
