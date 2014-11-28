@@ -190,27 +190,39 @@ public :
  *
  */
 
-class BufferObjectsRendering : public vcg::GLW
+class BufferObjectsRendering : public QObject
 {
+    Q_OBJECT
 public:
-    BufferObjectsRendering();
+    BufferObjectsRendering(bool highprecmode);
     ~BufferObjectsRendering();
-    void DrawPoints(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
-    void DrawEdges(vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm);
+    void DrawPoints(vcg::GLW::ColorMode colm);
+    void DrawWire(vcg::GLW::ColorMode colm);
+    void DrawFlatWire(vcg::GLW::ColorMode colm,vcg::GLW::TextureMode textm);
     void DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, vcg::GLW::TextureMode tm );
-    //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
-    bool update(CMeshO& mm, const int updateattributesmask);
+   
+
 //    bool requestUpdate(CMeshO& mm, Box3m bb, const int updateattributesmask);
 
     //render function for invoking buffer objects based rendering
-    void render(const Box3m &bbDoc, vcg::GLW::DrawMode dm, vcg::GLW::ColorMode cm, vcg::GLW::TextureMode tm );
+    void render(const Box3m &bbDoc, vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode norm, vcg::GLW::ColorMode colm, vcg::GLW::TextureMode textm );
 
     //function to clear/deallocate the buffer objects memory space
     void clearState();
 
+    void clearState(int updateattributesmask,vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode norm, vcg::GLW::ColorMode colm, vcg::GLW::TextureMode textm);
     std::vector<unsigned int> TMId;
 
+public slots:
+        //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
+    bool update(CMeshO& mm, int updateattributesmask,vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode nolm,vcg::GLW::ColorMode colm, vcg::GLW::TextureMode tm );
 private:
+    bool updateIndexedAttributesPipeline(CMeshO& mm, int updateattributesmask,vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
+    bool updateReplicatedAttributesPipeline(CMeshO& mm, int updateattributesmask,vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
+
+    void importPerVertexAttributes( const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv);
+    void importPerVertexAttributes(const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv,std::vector<vcg::Color4b>& cv,std::vector<float>& tv);
+    
 
     enum BufferObjectType	{
       OTVertexPosition,
@@ -254,6 +266,11 @@ private:
 
    bool HighPrecisionMode;
 
+   vcg::GLW::ColorMode cm; 
+   vcg::GLW::NormalMode nm; 
+   vcg::GLW::TextureMode tm;
+   vcg::GLW::DrawMode dm;
+
    // For sake of precision the buffers are created so that their bb is centered at the origin.
    // And in rendering we render them there (not in their original position).
    // Problem 1 :  multiple meshes
@@ -278,7 +295,7 @@ private:
    int efn;
    int tn;
 
-    QReadWriteLock _lock;
+   QReadWriteLock _lock;
 };
 
 class GLWRendering : public vcg::GlTrimesh<CMeshO>
@@ -288,7 +305,7 @@ public:
     GLWRendering(CMeshO& mm);
     ~GLWRendering();
 
-    void render(vcg::GLW::DrawMode dm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
+    void render(vcg::GLW::DrawMode dm,vcg::GLW::NormalMode nm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
 };
 
 /*
@@ -567,7 +584,7 @@ public:
 
     void Init()
     {
-        drawMode	= vcg::GLW::DMFlat;
+        drawMode	= vcg::GLW::DMSmooth;
         colorMode = vcg::GLW::CMNone;
         textureMode = vcg::GLW::TMNone;
 
