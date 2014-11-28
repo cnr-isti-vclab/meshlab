@@ -359,7 +359,7 @@ int GLArea::RenderForSelection(int pickX, int pickY)
         glLoadName(mp->id());
         QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
         if (it != rendermodemap.end())
-            mp->bor.render(md()->bbox(), it.value().drawMode,vcg::GLW::CMNone,vcg::GLW::TMNone);
+            mp->bor.render(md()->bbox(), it.value().drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(it.value().drawMode),vcg::GLW::CMNone,vcg::GLW::TMNone);
     }
 
     long hits;
@@ -485,12 +485,13 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
                     mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
                     mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
+                    vcg::GLW::NormalMode nm  = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
                     if(meshVisibilityMap[mp->id()])
                     {
                         if (iEdit != NULL)
-                            mp->glw.render(rm.drawMode,rm.colorMode,rm.textureMode);
+                            mp->glw.render(rm.drawMode,nm,rm.colorMode,rm.textureMode);
                         else
-                            mp->bor.render(md()->bbox(), rm.drawMode,rm.colorMode,rm.textureMode);
+                            mp->bor.render(md()->bbox(), rm.drawMode,nm,rm.colorMode,rm.textureMode);
 
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)

@@ -1281,11 +1281,13 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                 postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
 
+            RenderMode rm = GLA()->rendermodemap[mm->id()];
+            vcg::GLW::NormalMode nmmode = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
             if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
-                mm->bor.update(mm->cm,MeshModel::MM_ALL);
+                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
             else
-                mm->bor.update(mm->cm,postCondMask);
+                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
         }
     }
     catch (std::bad_alloc& bdall)
@@ -1578,11 +1580,19 @@ void MainWindow::postFilterExecution()
             if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                 postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
 
+            QMap<int,RenderMode>::const_iterator ci = GLA()->rendermodemap.find(mm->id());
+            RenderMode rm;
+            vcg::GLW::NormalMode nm = vcg::GLW::NMNone;
+            if (ci != GLA()->rendermodemap.end())
+            {
+                rm = ci.value();
+                nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
+            }
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
             if (!existingmeshesbeforefilterexecution.contains(mm->id()))
-                mm->bor.update(mm->cm,MeshModel::MM_ALL);
+                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
             else
-                mm->bor.update(mm->cm,postCondMask);
+                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
         }
     }
 
@@ -2343,7 +2353,8 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     if(delVertNum>0 || delFaceNum>0 )
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
     mm->cm.Tr = mtr;
-    mm->bor.update(mm->cm,MeshModel::MM_ALL);
+    vcg::GLW::NormalMode nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
+    mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
     meshDoc()->setBusy(false);
     return true;
 }
@@ -2921,26 +2932,37 @@ void MainWindow::updateRenderMode( )
     {
         for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
         {
-            act->updateRenderMode(it.value());
+            RenderMode& rm = it.value();
+            act->updateRenderMode(rm);
             //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
             //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
             //The enum-value depends from the enabled attributes of input mesh.
             if (textact != NULL)
-                setBestTextureModePerMesh(textact,it.key(),it.value());
+                setBestTextureModePerMesh(textact,it.key(),rm);
+            MeshModel* mmod = meshDoc()->getMesh(it.key());
+            if (mmod == NULL)
+                throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+            mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
+            
         }
     }
     else
     {
         QMap<int,RenderMode>::iterator it = rmode.find(meshid);
+        RenderMode& rm = it.value();
         if (it == rmode.end())
             throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
-        act->updateRenderMode(it.value());
+        act->updateRenderMode(rm);
         updateMenus();
         //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
         //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
         //The enum-value depends from the enabled attributes of input mesh.
         if (textact != NULL)
-            setBestTextureModePerMesh(textact,meshid,it.value());
+            setBestTextureModePerMesh(textact,meshid,rm);
+        MeshModel* mmod = meshDoc()->getMesh(it.key());
+        if (mmod == NULL)
+            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+        mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
     }
     GLA()->update();
 }
