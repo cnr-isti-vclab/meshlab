@@ -2942,7 +2942,8 @@ void MainWindow::updateRenderMode( )
             MeshModel* mmod = meshDoc()->getMesh(it.key());
             if (mmod == NULL)
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-            mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
+            if (act->isBufferObjectUpdateRequired())
+                mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
             
         }
     }
@@ -2962,7 +2963,8 @@ void MainWindow::updateRenderMode( )
         MeshModel* mmod = meshDoc()->getMesh(it.key());
         if (mmod == NULL)
             throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-        mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
+        if (act->isBufferObjectUpdateRequired())
+            mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
     }
     GLA()->update();
 }

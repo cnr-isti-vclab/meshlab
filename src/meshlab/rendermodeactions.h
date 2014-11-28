@@ -16,6 +16,7 @@ public:
     void updateRenderMode(QList<RenderMode>& rmlist);
     virtual void updateRenderMode(RenderMode& rm) = 0;
     virtual bool isRenderModeEnabled(const RenderMode& rm) const = 0;
+    virtual bool isBufferObjectUpdateRequired() const;
 
 private:
     void commonInit(const unsigned int meshid);
@@ -32,6 +33,7 @@ public:
 protected:
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModePointsAction : public RenderModeAction
@@ -43,6 +45,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeWireAction : public RenderModeAction
@@ -54,6 +57,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeHiddenLinesAction : public RenderModeAction
@@ -76,6 +80,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 
@@ -88,6 +93,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeSmoothAction : public RenderModeAction
@@ -99,6 +105,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeTexturePerVertAction : public RenderModeAction
@@ -110,6 +117,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeTexturePerWedgeAction : public RenderModeAction
@@ -121,6 +129,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeDoubleLightingAction : public RenderModeAction
@@ -176,6 +185,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeColorModePerMeshAction : public RenderModeAction
@@ -187,6 +197,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeColorModePerVertexAction : public RenderModeAction
@@ -198,6 +209,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 class RenderModeColorModePerFaceAction : public RenderModeAction
@@ -209,6 +221,7 @@ public:
 
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
 };
 
 

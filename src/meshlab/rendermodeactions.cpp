@@ -37,6 +37,11 @@ void RenderModeAction::updateRenderMode( QList<RenderMode>& rmlist )
         updateRenderMode(rmlist[ii]);
 }
 
+bool RenderModeAction::isBufferObjectUpdateRequired() const
+{
+    return false;
+}
+
 RenderModeBBoxAction::RenderModeBBoxAction( QObject* parent)
     :RenderModeAction(QIcon(":/images/bbox.png"),QString("&Bounding box"), parent)
 {
@@ -55,6 +60,11 @@ void RenderModeBBoxAction::updateRenderMode( RenderMode& rm )
 bool RenderModeBBoxAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return (rm.drawMode == vcg::GLW::DMBox);
+}
+
+bool RenderModeBBoxAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }
 
 RenderModePointsAction::RenderModePointsAction( QObject* parent)
@@ -79,6 +89,11 @@ bool RenderModePointsAction::isRenderModeEnabled( const RenderMode& rm ) const
     return (rm.drawMode == vcg::GLW::DMPoints);
 }
 
+bool RenderModePointsAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 
 RenderModeWireAction::RenderModeWireAction( QObject* parent)
     :RenderModeAction(QIcon(":/images/wire.png"),QString("&Wireframe"), parent)
@@ -100,6 +115,11 @@ void RenderModeWireAction::updateRenderMode( RenderMode& rm )
 bool RenderModeWireAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return (rm.drawMode == vcg::GLW::DMWire);
+}
+
+bool RenderModeWireAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }
 
 RenderModeHiddenLinesAction::RenderModeHiddenLinesAction( QObject* parent)
@@ -146,6 +166,11 @@ bool RenderModeFlatLinesAction::isRenderModeEnabled( const RenderMode& rm ) cons
     return (rm.drawMode == vcg::GLW::DMFlatWire);
 }
 
+bool RenderModeFlatLinesAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 
 RenderModeFlatAction::RenderModeFlatAction( QObject* parent)
     :RenderModeAction(QIcon(":/images/flat.png"),QString("&Flat"), parent)
@@ -167,6 +192,11 @@ void RenderModeFlatAction::updateRenderMode( RenderMode& rm )
 bool RenderModeFlatAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return (rm.drawMode == vcg::GLW::DMFlat);
+}
+
+bool RenderModeFlatAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }
 
 
@@ -192,6 +222,11 @@ bool RenderModeSmoothAction::isRenderModeEnabled( const RenderMode& rm ) const
     return (rm.drawMode == vcg::GLW::DMSmooth);
 }
 
+bool RenderModeSmoothAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 
 RenderModeTexturePerVertAction::RenderModeTexturePerVertAction( QObject* parent)
     :RenderModeAction(QIcon(":/images/textures.png"),QString("&Texture"),parent)
@@ -215,6 +250,11 @@ bool RenderModeTexturePerVertAction::isRenderModeEnabled( const RenderMode& rm )
     return (rm.textureMode == vcg::GLW::TMPerVert);
 }
 
+bool RenderModeTexturePerVertAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 RenderModeTexturePerWedgeAction::RenderModeTexturePerWedgeAction( QObject* parent)
     :RenderModeAction(QIcon(":/images/textures.png"),QString("&Texture"),parent)
 {
@@ -235,6 +275,11 @@ void RenderModeTexturePerWedgeAction::updateRenderMode( RenderMode& rm )
 bool RenderModeTexturePerWedgeAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return ((rm.textureMode == vcg::GLW::TMPerWedgeMulti) || (rm.textureMode == vcg::GLW::TMPerWedge));
+}
+
+bool RenderModeTexturePerWedgeAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }
 
 
@@ -349,6 +394,11 @@ bool RenderModeColorModeNoneAction::isRenderModeEnabled( const RenderMode& rm ) 
     return (rm.colorMode == vcg::GLW::CMNone);
 }
 
+bool RenderModeColorModeNoneAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 
 RenderModeColorModePerMeshAction::RenderModeColorModePerMeshAction( QObject* parent)
     :RenderModeAction(QString("Per &Mesh"),parent)
@@ -370,6 +420,11 @@ void RenderModeColorModePerMeshAction::updateRenderMode( RenderMode& rm )
 bool RenderModeColorModePerMeshAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return (rm.colorMode == vcg::GLW::CMPerMesh);
+}
+
+bool RenderModeColorModePerMeshAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }
 
 RenderModeColorModePerVertexAction::RenderModeColorModePerVertexAction( QObject* parent)
@@ -394,6 +449,11 @@ bool RenderModeColorModePerVertexAction::isRenderModeEnabled( const RenderMode& 
     return (rm.colorMode == vcg::GLW::CMPerVert);
 }
 
+bool RenderModeColorModePerVertexAction::isBufferObjectUpdateRequired() const
+{
+    return true;
+}
+
 RenderModeColorModePerFaceAction::RenderModeColorModePerFaceAction( QObject* parent)
     :RenderModeAction(QString("Per &Face"),parent)
 {
@@ -414,4 +474,9 @@ void RenderModeColorModePerFaceAction::updateRenderMode( RenderMode& rm )
 bool RenderModeColorModePerFaceAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
     return (rm.colorMode == vcg::GLW::CMPerFace);
+}
+
+bool RenderModeColorModePerFaceAction::isBufferObjectUpdateRequired() const
+{
+    return true;
 }

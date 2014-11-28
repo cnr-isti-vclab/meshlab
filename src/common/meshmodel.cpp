@@ -778,7 +778,10 @@ void BufferObjectsRendering::DrawFlatWire(vcg::GLW::ColorMode colm,vcg::GLW::Tex
     glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
     glColor3f(.3f,.3f,.3f);
    
-    DrawWire(vcg::GLW::CMNone);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    DrawTriangles(vcg::GLW::CMNone,vcg::GLW::NMPerFace,vcg::GLW::TMNone);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     glPopAttrib();  
 }
 
@@ -978,26 +981,14 @@ bool BufferObjectsRendering::update(CMeshO& mm, int updateattributesmask,vcg::GL
         res = updateIndexedAttributesPipeline(mm,updateattributesmask,colm,nolm,vcg::GLW::TMNone);
     else
     {
-        if ((drawm == vcg::GLW::DMFlatWire) && ((colm == vcg::GLW::CMPerFace) || (textm == vcg::GLW::TMPerWedge) || (textm == vcg::GLW::TMPerWedgeMulti)))
+        if (((!vcg::tri::HasPerFaceColor(mm)) || (colm != GLW::CMPerFace)) 
+            && (nolm != GLW::NMPerFace) 
+            && ((!vcg::tri::HasPerWedgeTexCoord(mm)) || ((textm != GLW::TMPerWedge) && (textm != GLW::TMPerWedgeMulti))))
         {
-            //this is necessary for the drawWire(vcg::GLW::CMNone) in the DrawFlatWire rendering pipeline
-            //I need to have the indexes of the vertices and the vertices positions for an efficient rendering of the wired triangulation on top of the mesh.
-            //These two info are imported by the updateIndexAttributesPipeline
-        
-            res = updateIndexedAttributesPipeline(mm,updateattributesmask,vcg::GLW::CMNone,vcg::GLW::NMPerVert,vcg::GLW::TMNone);
-            res &= updateReplicatedAttributesPipeline(mm,updateattributesmask,colm,nolm,textm);
+            res = updateIndexedAttributesPipeline(mm,updateattributesmask,colm,nolm,textm);
         }
         else
-        {
-            if (((!vcg::tri::HasPerFaceColor(mm)) || (colm != GLW::CMPerFace)) 
-                && (nolm != GLW::NMPerFace) 
-                && ((!vcg::tri::HasPerWedgeTexCoord(mm)) || ((textm != GLW::TMPerWedge) && (textm != GLW::TMPerWedgeMulti))))
-            {
-                res = updateIndexedAttributesPipeline(mm,updateattributesmask,colm,nolm,textm);
-            }
-            else
-                res = updateReplicatedAttributesPipeline(mm,updateattributesmask,colm,nolm,textm);
-        }
+            res = updateReplicatedAttributesPipeline(mm,updateattributesmask,colm,nolm,textm);
     }
     qDebug("Buffer feed in %i",aa.elapsed());
     return res;
