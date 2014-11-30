@@ -197,7 +197,7 @@ public:
     BufferObjectsRendering(bool highprecmode);
     ~BufferObjectsRendering();
     void DrawPoints(vcg::GLW::ColorMode colm);
-    void DrawWire(vcg::GLW::ColorMode colm);
+    void DrawWire(vcg::GLW::ColorMode colm,vcg::GLW::NormalMode norm);
     void DrawFlatWire(vcg::GLW::ColorMode colm,vcg::GLW::TextureMode textm);
     void DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, vcg::GLW::TextureMode tm );
    
@@ -224,52 +224,35 @@ private:
     void importPerVertexAttributes(const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv,std::vector<vcg::Color4b>& cv,std::vector<float>& tv);
     
 
-    enum BufferObjectType	{
-      OTVertexPosition,
-      OTVertexNormal,
-      OTVertexColor,
-      OTVertexTexture,
-      OTTriangleIndex,
-      OTEdgeIndex,
-      OTFauxEdgeIndex,
-      OTVertexReplicatedPosition,
-      OTVertexReplicatedNormal,
-      OTVertexReplicatedColor,
-      OTFaceReplicatedNormal,
-      OTFaceReplicatedColor,
-      OTWedgeReplicatedTexture,
-      OTLast
-      } ;
+    //enum BufferObjectType	{
+    //  OTVertexPosition,
+    //  OTVertexNormal,
+    //  OTVertexColor,
+    //  OTVertexTexture,
+    //  OTTriangleIndex,
+    //  OTEdgeIndex,
+    //  OTFauxEdgeIndex,
+    //  OTVertexReplicatedPosition,
+    //  OTVertexReplicatedNormal,
+    //  OTVertexReplicatedColor,
+    //  OTFaceReplicatedNormal,
+    //  OTFaceReplicatedColor,
+    //  OTWedgeReplicatedTexture,
+    //  OTLast
+    //  } ;
 
-   GLuint bid[OTLast];
+   //GLuint bid[OTLast];
 
-   GLuint vertexPositionBO;
-   GLuint vertexNormalBO;
-   GLuint vertexTextureBO;
-   GLuint vertexColorBO;
-   std::vector<GLuint> indexTriBufferObject;
-   std::vector<GLuint> indexTriBufferObjectSz;
-   GLuint indexEdgeBufferObject;
+   GLuint positionBO;
+   GLuint normalBO;
+   GLuint textureBO;
+   GLuint colorBO;
+   std::vector<GLuint> indexTriBO;
+   std::vector<GLuint> indexTriBOSz;
 
-   GLuint positionDupBufferObject;
-   GLuint normalDupBufferObject;
-   GLuint colorDupBufferObject;
-   GLuint normalFaceBufferObject;
-   GLuint colorFaceBufferObject;
-   GLuint edgeBufferObject;
-   GLuint edgeFauxBufferObject;
-   GLuint wedgeTextBufferObject;
-   GLuint wedgeNormBufferObject;
-   GLuint wedgeColorBufferObject;
-
-   std::vector< std::pair<short,size_t> > texIndNumTrianglesV;
+   std::vector< std::pair<short,GLuint> > texIndNumTrianglesV;
 
    bool HighPrecisionMode;
-
-   vcg::GLW::ColorMode cm; 
-   vcg::GLW::NormalMode nm; 
-   vcg::GLW::TextureMode tm;
-   vcg::GLW::DrawMode dm;
 
    // For sake of precision the buffers are created so that their bb is centered at the origin.
    // And in rendering we render them there (not in their original position).
@@ -291,8 +274,6 @@ private:
    Matrix44m Tr;
 
    int vn;
-   int en;
-   int efn;
    int tn;
 
    QReadWriteLock _lock;
