@@ -1224,7 +1224,7 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
             rpv[i*3+1] = pv[tri::Index(mm,mm.face[i].V(1))];
             rpv[i*3+2] = pv[tri::Index(mm,mm.face[i].V(2))];
 
-            if (perfcol)
+            if (pervertcol)
             {
                 rcv[i*3+0] = cv[tri::Index(mm,mm.face[i].V(0))];
                 rcv[i*3+1] = cv[tri::Index(mm,mm.face[i].V(1))];
