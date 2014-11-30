@@ -886,9 +886,7 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::N
             glEnableClientState(GL_COLOR_ARRAY);
         }
 
-        if (textm != GLW::TMPerWedgeMulti)
-            glDrawArrays(GL_TRIANGLES, 0, tn*3);
-        else
+        if ((textm == GLW::TMPerWedgeMulti) || (textm == GLW::TMPerWedge) || (textm == GLW::TMPerVert))
         {
             glEnable(GL_TEXTURE_2D);
             
@@ -910,6 +908,8 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::N
             }
             glDisable(GL_TEXTURE_2D);
         }
+        else
+            glDrawArrays(GL_TRIANGLES, 0, tn*3);
     }
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -1053,7 +1053,8 @@ bool BufferObjectsRendering::updateIndexedAttributesPipeline(CMeshO& mm, int upd
     {
         for(size_t i=0;i<tn;++i)
         {
-            short tid= mm.face[i].V(0)->T().n();
+            //VCGLib doesn't yet support multitexturing per vertex
+            short tid= 0/*mm.face[i].V(0)->T().N()*/;
             ti[tid].push_back(tri::Index(mm,mm.face[i].V(0)));
             ti[tid].push_back(tri::Index(mm,mm.face[i].V(1)));
             ti[tid].push_back(tri::Index(mm,mm.face[i].V(2)));
@@ -1129,23 +1130,32 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
     std::vector<Point3f> rpv(mm.fn*3);
     std::vector<Point3f> rnv(mm.fn*3);
     std::vector<Color4b> rcv(mm.fn*3);
+    std::vector<float> rtv(mm.fn*3*2);
     //std::vector<Point3f> rnt(mm.fn*3);
     //std::vector<Color4b> rct(mm.fn*3);
     bool perfcol = tri::HasPerFaceColor(mm) && (colm == vcg::GLW::CMPerFace);
     bool perfnorm = tri::HasPerFaceNormal(mm) && (norm == vcg::GLW::NMPerFace);
     bool pervertcol = tri::HasPerVertexColor(mm) && (colm == vcg::GLW::CMPerVert);
     bool pervertnorm = tri::HasPerVertexNormal(mm) && (norm == vcg::GLW::NMPerVert);
+    bool perverttext = tri::HasPerVertexTexCoord(mm) && (textm == vcg::GLW::TMPerVert);
+    bool perwedgetext = tri::HasPerWedgeTexCoord(mm) && ((textm == vcg::GLW::TMPerWedgeMulti) || (textm == vcg::GLW::TMPerWedge));
 
-    if (tri::HasPerWedgeTexCoord(mm) /*&  (updateattributesmask & MeshModel::MM_WEDGTEXCOORD)*/)
+    if (perwedgetext || perverttext)
     {
         //std::vector<vcg::TexCoord2f> wtv(mm.fn*3);
-        std::vector<float> wtv(mm.fn*3*2);
         std::map< short, std::vector<GLuint> >  chunkMap;
         //AggregatedTriangleChunkMap
         for(size_t i=0;i<tn;++i) // replicated coords
         {
-            int texId = mm.face[i].WT(0).N();
-            chunkMap[texId].push_back(GLuint(i));
+            int textId = -1;
+            if ((textm == vcg::GLW::TMPerWedgeMulti) || (textm == vcg::GLW::TMPerWedge))
+                textId = mm.face[i].WT(0).N();
+            else
+            {
+                //VCGLib doesn't yet support multitexturing per vertex
+                textId = 0 /*mm.face[i].V(0)->T().N()*/;      
+            }
+            chunkMap[textId].push_back(GLuint(i));
         }
 
         int k = 0;
@@ -1192,12 +1202,25 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
                     rcv[k*3+2] = mm.face[indf].C();
                 }
 
-                wtv[k*6+0]=mm.face[indf].WT(0).U();
-                wtv[k*6+1]=mm.face[indf].WT(0).V();
-                wtv[k*6+2]=mm.face[indf].WT(1).U();
-                wtv[k*6+3]=mm.face[indf].WT(1).V();
-                wtv[k*6+4]=mm.face[indf].WT(2).U();
-                wtv[k*6+5]=mm.face[indf].WT(2).V();
+                if (perwedgetext)
+                {
+                    rtv[k*6+0]=mm.face[indf].WT(0).U();
+                    rtv[k*6+1]=mm.face[indf].WT(0).V();
+                    rtv[k*6+2]=mm.face[indf].WT(1).U();
+                    rtv[k*6+3]=mm.face[indf].WT(1).V();
+                    rtv[k*6+4]=mm.face[indf].WT(2).U();
+                    rtv[k*6+5]=mm.face[indf].WT(2).V();
+                }
+                else if (perverttext)
+                {
+                    rtv[k*6+0]=mm.face[indf].V(0)->T().U();
+                    rtv[k*6+1]=mm.face[indf].V(0)->T().V();
+                    rtv[k*6+2]=mm.face[indf].V(1)->T().U();
+                    rtv[k*6+3]=mm.face[indf].V(1)->T().V();
+                    rtv[k*6+4]=mm.face[indf].V(2)->T().U();
+                    rtv[k*6+5]=mm.face[indf].V(2)->T().V();
+                }
+
 
                 ++k;  
             }
@@ -1209,10 +1232,6 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
         if (k != tn)
             throw MeshLabException("Mesh has not been properly partitioned");
 
-        glGenBuffers(1, &textureBO);
-        glBindBuffer(GL_ARRAY_BUFFER, textureBO);
-        glBufferData(GL_ARRAY_BUFFER, wtv.size() * sizeof(GLfloat), &wtv[0], GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
     else
     {
@@ -1274,6 +1293,14 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
         glGenBuffers(1, &colorBO);
         glBindBuffer(GL_ARRAY_BUFFER, colorBO);
         glBufferData(GL_ARRAY_BUFFER, tn*3*4*sizeof(GLbyte), &rcv[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    if ((textm == GLW::TMPerVert) || (textm == GLW::TMPerWedge) || (textm == GLW::TMPerWedgeMulti))
+    {
+        glGenBuffers(1, &textureBO);
+        glBindBuffer(GL_ARRAY_BUFFER, textureBO);
+        glBufferData(GL_ARRAY_BUFFER, rtv.size() * sizeof(GLfloat), &rtv[0], GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
@@ -1363,7 +1390,7 @@ void BufferObjectsRendering::importPerVertexAttributes( const CMeshO& mm,std::ve
             if (textureperv) 
             {
                 tv[i*2+0] = mm.vert[i].cT().U();
-                tv[i*2+0] = mm.vert[i].cT().V();
+                tv[i*2+1] = mm.vert[i].cT().V();
             }
         }
     } 
@@ -1381,7 +1408,7 @@ void BufferObjectsRendering::importPerVertexAttributes( const CMeshO& mm,std::ve
             if (textureperv) 
             {
                 tv[i*2+0] = mm.vert[i].cT().U();
-                tv[i*2+0] = mm.vert[i].cT().V();
+                tv[i*2+1] = mm.vert[i].cT().V();
             }
         }
     }
