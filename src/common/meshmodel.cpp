@@ -914,7 +914,7 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::N
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
-    //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -973,6 +973,8 @@ bool BufferObjectsRendering::update(CMeshO& mm, int updateattributesmask,vcg::GL
 
     QTime aa; aa.start();
     bool res = false;
+
+    clearState(updateattributesmask,drawm,nolm,colm,textm);
 
     switch (drawm)
     {
@@ -1276,9 +1278,7 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
     glBindBuffer(GL_ARRAY_BUFFER, positionBO);
     glBufferData(GL_ARRAY_BUFFER, tn * 9 *sizeof(GLfloat), &rpv[0], GL_STATIC_DRAW);
 
-    if (norm == GLW::NMNone)
-        glDeleteBuffers(1,&normalBO);
-    else
+    if (norm != GLW::CMNone)
     {
         glGenBuffers(1, &normalBO);
         glBindBuffer(GL_ARRAY_BUFFER, normalBO);
@@ -1286,9 +1286,7 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    if (colm == GLW::CMNone)
-        glDeleteBuffers(1,&colorBO);
-    else
+    if (colm != GLW::CMNone)
     {
         glGenBuffers(1, &colorBO);
         glBindBuffer(GL_ARRAY_BUFFER, colorBO);
@@ -1296,7 +1294,7 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    if ((textm == GLW::TMPerVert) || (textm == GLW::TMPerWedge) || (textm == GLW::TMPerWedgeMulti))
+    if (textm != GLW::TMNone) 
     {
         glGenBuffers(1, &textureBO);
         glBindBuffer(GL_ARRAY_BUFFER, textureBO);
@@ -1311,12 +1309,81 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
 void BufferObjectsRendering::clearState()
 {
     QWriteLocker locker(&_lock);
-
-    //TODO: delete frame objects
+    glDeleteBuffers(1,&positionBO);
+    glDeleteBuffers(1,&normalBO);
+    glDeleteBuffers(1,&colorBO);
+    glDeleteBuffers(1,&textureBO);
+    if (indexTriBO.size() > 0)
+    {
+        glDeleteBuffers(indexTriBO.size(),&indexTriBO[0]);
+        indexTriBO.clear();
+        indexTriBOSz.clear();
+    }
 }
+
 void BufferObjectsRendering::clearState( int updateattributesmask,vcg::GLW::DrawMode drawm,vcg::GLW::NormalMode norm,vcg::GLW::ColorMode colm, vcg::GLW::TextureMode tm )
 {
-     QWriteLocker locker(&_lock);
+    QWriteLocker locker(&_lock);
+
+    if (updateattributesmask & MeshModel::MM_VERTCOORD) 
+        glDeleteBuffers(1,&positionBO);
+
+    if ((updateattributesmask & MeshModel::MM_VERTNORMAL) || (updateattributesmask & MeshModel::MM_FACENORMAL) || (updateattributesmask & MeshModel::MM_VERTCOORD) )
+        glDeleteBuffers(1,&normalBO);
+
+    switch(drawm)
+    {
+        case(vcg::GLW::DMPoints):
+        {
+            glDeleteBuffers(1,&textureBO);
+            
+            if (((colm == GLW::CMPerVert) && (updateattributesmask & MeshModel::MM_VERTCOLOR)) || (colm != GLW::CMPerVert))
+                glDeleteBuffers(1,&colorBO);
+            break;
+        }
+        case(vcg::GLW::DMWire):
+        {
+            glDeleteBuffers(1,&textureBO);
+
+            if (((colm == GLW::CMPerVert) && (updateattributesmask & MeshModel::MM_VERTCOLOR)) || 
+                ((colm == GLW::CMPerFace) && (updateattributesmask & MeshModel::MM_FACECOLOR)) || 
+                (colm == GLW::CMNone))
+            {
+                glDeleteBuffers(1,&colorBO);
+            }
+            break;
+        }
+        case(vcg::GLW::DMFlatWire):
+        case(vcg::GLW::DMSmooth):
+        case(vcg::GLW::DMFlat):
+        {
+            if (((tm == GLW::TMPerVert) && (updateattributesmask & MeshModel::MM_VERTTEXCOORD)) || 
+                ((tm == GLW::TMPerWedge) && (updateattributesmask & MeshModel::MM_WEDGTEXCOORD)) ||
+                ((tm == GLW::TMPerWedgeMulti) && (updateattributesmask & MeshModel::MM_WEDGTEXCOORD)) ||
+                (tm == GLW::TMNone))
+            {
+                glDeleteBuffers(1,&textureBO);
+            }
+
+            if (((colm == GLW::CMPerVert) && (updateattributesmask & MeshModel::MM_VERTCOLOR)) || 
+                ((colm == GLW::CMPerFace) && (updateattributesmask & MeshModel::MM_FACECOLOR)) || 
+                (colm == GLW::CMNone))
+            {
+                glDeleteBuffers(1,&colorBO);
+            }
+            break;
+        }
+    } 
+
+    //if ((norm == vcg::GLW::NMPerFace) || (colm == vcg::GLW::CMPerFace) || (tm == vcg::GLW::TMPerWedgeMulti) || (tm == vcg::GLW::TMPerWedge))
+    //{
+        if (indexTriBO.size() > 0)
+        {
+            glDeleteBuffers(indexTriBO.size(),&indexTriBO[0]);
+            indexTriBO.clear();
+            indexTriBOSz.clear();
+        }
+ /*   }*/
 }
 
 void BufferObjectsRendering::importPerVertexAttributes( const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv)

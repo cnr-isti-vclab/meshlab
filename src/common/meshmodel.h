@@ -222,7 +222,6 @@ private:
 
     void importPerVertexAttributes( const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv);
     void importPerVertexAttributes(const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv,std::vector<vcg::Color4b>& cv,std::vector<float>& tv);
-    
 
     //enum BufferObjectType	{
     //  OTVertexPosition,
