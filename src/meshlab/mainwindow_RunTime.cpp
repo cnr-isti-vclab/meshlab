@@ -2919,7 +2919,7 @@ void MainWindow::updateRenderMode( )
     QMap<int,RenderMode>& rmode = GLA()->rendermodemap;
 
     RenderModeAction* act = qobject_cast<RenderModeAction*>(sender());
-    RenderModeTexturePerVertAction* textact = qobject_cast<RenderModeTexturePerVertAction*>(act);
+    RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(act);
 
     //act->data contains the meshid to which the action is referred.
     //if the meshid is -1 the action is intended to be per-document and not per mesh
