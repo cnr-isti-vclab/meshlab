@@ -29,7 +29,6 @@
 #include<vcg/complex/algorithms/smooth.h>
 #include<vcg/complex/algorithms/voronoi_volume_sampling.h>
 #include<vcg/complex/algorithms/polygon_support.h>
-#include<vcg/complex/algorithms/smooth_field.h>
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -81,9 +80,9 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     {
       m.updateDataMask(MeshModel::MM_VERTFACETOPO);
       m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-      tri::FieldSmoother<CMeshO>::InitByCurvature(m.cm);
-      tri::FieldSmoother<CMeshO>::SmoothParam par;
-      tri::FieldSmoother<CMeshO>::SmoothDirections(m.cm,par);
+//      tri::FieldSmoother<CMeshO>::InitByCurvature(m.cm);
+//      tri::FieldSmoother<CMeshO>::SmoothParam par;
+//      tri::FieldSmoother<CMeshO>::SmoothDirections(m.cm,par);
     }
 
     return true;
@@ -115,6 +114,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
 //   tri::ClusteringSampler<CMeshO> cs(seedVec);
 //   tri::SurfaceSampling<CMeshO, vcg::tri::ClusteringSampler<CMeshO> >::SamplingRandomGenerator().initialize(randSeed);
    vector<Point3m> pointVec;
+   vector<bool> fixedVec;
    CMeshO::ScalarType radius=0;
    int randomSeed = env.evalInt("randomSeed");
 
@@ -125,12 +125,15 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
    vpp.colorStrategy = env.evalEnum("colorStrategy");
    vpp.deleteUnreachedRegionFlag=true;
    vpp.refinementRatio=env.evalInt("refineFactor");
+   vpp.seedPerturbationAmount = env.evalDouble("perturbAmount");
+   vpp.seedPerturbationProbability = env.evalDouble("perturbProbability");
    if(env.evalBool("preprocessFlag"))
    {
      tri::VoronoiProcessing<CMeshO>::PreprocessForVoronoi(m.cm,radius,vpp);
    }
-   tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion(m.cm,pointVec,seedVec);
 
+   tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion(m.cm,pointVec,seedVec);
+   fixedVec.resize(pointVec.size(),false);
    QList<int> meshlist; meshlist << m.id();
 
    if(distanceType==0) // Uniform Euclidean Distance
@@ -140,10 +143,14 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
      {
        cb(100*i/iterNum, "Relaxing...");
        if(env.evalEnum("relaxType")==2)
-         tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::RestrictedVoronoiRelaxing(m.cm, seedVec, 10,vpp);
+       {
+         tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::RestrictedVoronoiRelaxing(m.cm, pointVec, fixedVec, 10,vpp);
+         tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion(m.cm,pointVec,seedVec);
+         tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(m.cm,seedVec,dd);
+       }
        else
          tri::VoronoiProcessing<CMeshO, EuclideanDistance<CMeshO> >::VoronoiRelaxing(m.cm, seedVec, 1,dd,vpp);
-       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
+//       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
        if (intteruptreq) return true;
      }
      om->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -157,7 +164,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
      {
        cb(100*i/iterNum, "Relaxing...");
        tri::VoronoiProcessing<CMeshO, IsotropicDistance<CMeshO> >::VoronoiRelaxing(m.cm, seedVec, 1,id,vpp);
-       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
+//       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
        if (intteruptreq) return true;
      }
 //     tri::VoronoiProcessing<CMeshO>::ConvertVoronoiDiagramToMesh(m.cm,om->cm,poly->cm,seedVec, vpp);
@@ -170,13 +177,13 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
        BasicCrossFunctor<CMeshO> bcf(m.cm);
        AnisotropicDistance<CMeshO> ad(m.cm,bcf);
        tri::VoronoiProcessing<CMeshO, AnisotropicDistance<CMeshO> >::VoronoiRelaxing(m.cm, seedVec, 1, ad, vpp);
-       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
+//       md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
        if (intteruptreq) return true;
      }
      //      tri::VoronoiProcessing<CMeshO, AnisotropicDistance<CMeshO> >::ConvertVoronoiDiagramToMesh(m.cm,om->cm,seedVec, ad, vpp);
    }
 
-   md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
+//   md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
    if (intteruptreq) return true;
 
    om->UpdateBoxAndNormals();
