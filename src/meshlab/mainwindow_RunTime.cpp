@@ -1198,7 +1198,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     try
     {
         QSet<int> existingmeshesbeforefilterexecutionlocal;
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;meshDoc()->nextMesh(mm))
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
             existingmeshesbeforefilterexecutionlocal.insert(mm->id());
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
 
@@ -1497,7 +1497,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         if (meshDoc() != NULL)
             meshDoc()->xmlhistory << funcall;
         existingmeshesbeforefilterexecution.clear();
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;meshDoc()->nextMesh(mm))
+        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
             existingmeshesbeforefilterexecution.insert(mm->id());
         if (filtercpp)
         {
@@ -2944,7 +2944,7 @@ void MainWindow::updateRenderMode( )
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
             if (act->isBufferObjectUpdateRequired())
                 mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
-            
+
         }
     }
     else
