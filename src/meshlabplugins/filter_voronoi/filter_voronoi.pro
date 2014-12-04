@@ -1,7 +1,6 @@
 include (../../shared.pri)
 
-HEADERS       += filter_voronoi.h \
-    voronoi_volume_sampling.h
+HEADERS       += filter_voronoi.h
 
 SOURCES       += filter_voronoi.cpp
 
