@@ -31,6 +31,14 @@
     <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Refinement Factor."/>
    </PARAM>
+   <PARAM parName="perturbProbability" parIsImportant="false" parType="Real" parDefault="0">
+    <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Perturbation Probability."/>
+   </PARAM>
+   <PARAM parName="perturbAmount" parIsImportant="false" parType="Real" parDefault="0.001">
+    <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Perturbation Amount."/>
+   </PARAM>
    <PARAM parName="randomSeed" parIsImportant="false" parType="Int" parDefault="0">
     <PARAM_HELP><![CDATA[ To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Random seed."/>
