@@ -36,10 +36,6 @@
 using namespace vcg;
 using namespace std;
 
-FilterVoronoiPlugin::FilterVoronoiPlugin()
-{
-}
-
 bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
   if(filterName == "Cross Field Coloring")

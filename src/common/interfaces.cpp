@@ -195,7 +195,7 @@ void MeshLabFilterInterface::initConvertingMap(QMap<QString,MeshModel::MeshEleme
 }
 
 MeshLabFilterInterface::MeshLabFilterInterface()
-:MeshLabInterface(),glContext(NULL),intteruptreq(false)
+:QObject(),glContext(NULL),intteruptreq(false)
 {
     //if (!init)
     //{

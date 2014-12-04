@@ -20,11 +20,10 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef _FILTER_ICP_H_
-#define _FILTER_ICP_H_
+#ifndef _FILTER_VORONOI_H_
+#define _FILTER_VORONOI_H_
 
 #include <common/interfaces.h>
-//class QScriptEngine;
 
 class FilterVoronoiPlugin : public MeshLabFilterInterface
 {
@@ -32,8 +31,6 @@ class FilterVoronoiPlugin : public MeshLabFilterInterface
     MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
     Q_INTERFACES(MeshLabFilterInterface)
 public:
-
-    FilterVoronoiPlugin();
 
     bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) ;
 };
