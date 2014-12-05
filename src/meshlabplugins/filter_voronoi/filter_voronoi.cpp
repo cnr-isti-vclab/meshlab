@@ -269,6 +269,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     bool vertCylFlag = env.evalBool("vertCylFlag");
     bool vertSphFlag = env.evalBool("vertSphFlag");
     bool faceExtFlag = env.evalBool("faceExtFlag");
+    int cylinderSideNum = env.evalInt("cylinderSideNum");
 
     sm->cm.Clear();
     sm->updateDataMask(MeshModel::MM_FACEFACETOPO);
@@ -276,8 +277,8 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
     tri::Allocator<CMeshO>::CompactEveryVector(m->cm);
-    if(edgeCylFlag) tri::BuildCylinderEdgeShell(m->cm,sm->cm,edgeCylRadius);
-    if(vertCylFlag) tri::BuildCylinderVertexShell(m->cm,sm->cm,vertCylRadius,edgeCylRadius);
+    if(edgeCylFlag) tri::BuildCylinderEdgeShell(m->cm,sm->cm,edgeCylRadius,cylinderSideNum);
+    if(vertCylFlag) tri::BuildCylinderVertexShell(m->cm,sm->cm,vertCylRadius,edgeCylRadius,cylinderSideNum);
     if(vertSphFlag) tri::BuildSphereVertexShell(m->cm,sm->cm,vertSphRadius);
     if(faceExtFlag) tri::BuildPrismFaceShell(m->cm,sm->cm,faceExtHeight,faceExtInset);
 

@@ -160,6 +160,11 @@
     <PARAM_HELP><![CDATA[ If true only the Non-Faux edges will be considered for conversion ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Ignore faux edges"/>
    </PARAM>
+   <PARAM parName="cylinderSideNum" parIsImportant="false" parType="Int" parDefault="16">
+    <PARAM_HELP><![CDATA[ Number of sides of the cylinder (both edge and vertex)]]></PARAM_HELP>
+    <EDIT_GUI guiLabel="Cylinder Side"/>
+   </PARAM>
+
   </FILTER>
   <FILTER filterFunction="crossFieldCreation" filterName="Cross Field Creation"   filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Normal" filterPost="MM_VERTCURVDIR" filterArity="SingleMesh" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
