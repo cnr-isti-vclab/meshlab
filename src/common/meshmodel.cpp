@@ -173,7 +173,8 @@ If it is a newly created one the fullpath is an empty string and the user has to
 MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
 {
     MeshModel*newMM = this->getMesh(label);
-    if(newMM==0)  newMM=this->addNewMesh(fullPath,label,setAsCurrent,rm);
+    if(newMM==0)  
+        newMM=this->addNewMesh(fullPath,label,setAsCurrent,rm);
     return newMM;
 }
 
@@ -746,8 +747,9 @@ int MeshModel::dataMask() const
 }
 
 BufferObjectsRendering::BufferObjectsRendering(bool highprecmode)
-    :QObject(),_lock(QReadWriteLock::Recursive)
+    :QObject(),_lock(QReadWriteLock::Recursive),vn(0),tn(0)
 {
+    QReadLocker locker(&_lock);
     this->HighPrecisionMode =highprecmode;
 }
 
@@ -921,6 +923,8 @@ void BufferObjectsRendering::DrawTriangles(vcg::GLW::ColorMode colm, vcg::GLW::N
 void BufferObjectsRendering::render(const Box3m &bbDoc, vcg::GLW::DrawMode drawm,vcg::GLW::NormalMode norm,vcg::GLW::ColorMode colm,vcg::GLW::TextureMode textm )
 {
     QReadLocker locker(&_lock);
+    if (vn == 0)
+        return;
     glPushMatrix();
     if(!HighPrecisionMode)
     {
@@ -966,7 +970,8 @@ void BufferObjectsRendering::render(const Box3m &bbDoc, vcg::GLW::DrawMode drawm
 
 bool BufferObjectsRendering::update(CMeshO& mm, int updateattributesmask,vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode nolm,vcg::GLW::ColorMode colm, vcg::GLW::TextureMode textm )
 {
-    if (updateattributesmask == MeshModel::MM_NONE)
+    QWriteLocker locker(&_lock);
+    if ((updateattributesmask == MeshModel::MM_NONE) || (mm.vn == 0))
         return false;
 
     tri::Allocator<CMeshO>::CompactEveryVector(mm);
@@ -1112,6 +1117,13 @@ bool BufferObjectsRendering::updateIndexedAttributesPipeline(CMeshO& mm, int upd
         ++ii;
     }
 
+
+    long long unsigned int mem = 0;
+    for(std::map< short, std::vector<GLuint> >::iterator it = ti.begin();it != ti.end();++it)
+        mem += it->second.size() * sizeof(GLuint);
+        
+    mem += pv.size() * 3 *sizeof(GLfloat) + nv.size() * 3 *sizeof(GLfloat) + cv.size() * 4 *sizeof(GLfloat) + tv.size() * sizeof(GLfloat);
+    qDebug("occupied video graphics: %llu\n",mem);
     return true;
 }
 
@@ -1223,13 +1235,11 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
                     rtv[k*6+5]=mm.face[indf].V(2)->T().V();
                 }
 
-
                 ++k;
             }
 
             ++t;
         }
-
 
         if (k != tn)
             throw MeshLabException("Mesh has not been properly partitioned");
@@ -1302,6 +1312,8 @@ bool BufferObjectsRendering::updateReplicatedAttributesPipeline(CMeshO& mm, int 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
+    long long unsigned int mem = rpv.size() * 3 *sizeof(GLfloat) + rnv.size() * 3 *sizeof(GLfloat) + rcv.size() * sizeof(GLuint) + rtv.size() * sizeof(GLfloat);
+    qDebug("occupied video graphics: %llu\n",mem);
     return true;
 }
 
