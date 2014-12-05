@@ -937,12 +937,17 @@ void MainWindow::fillFilterMenu()
     QMap<QString,MeshLabXMLFilterContainer>::iterator xmlit;
     for(xmlit =  PM.stringXMLFilterMap.begin(); xmlit != PM.stringXMLFilterMap.end();++xmlit)
     {
-        //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
-        QAction *filterAction = xmlit.value().act;
-        MLXMLPluginInfo* info = xmlit.value().xmlInfo;
-        QString filterName = xmlit.key();
         try
         {
+            //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
+            QAction *filterAction = xmlit.value().act;
+            if (filterAction == NULL)
+                throw MeshLabException("Invalid filter action value.");
+            MLXMLPluginInfo* info = xmlit.value().xmlInfo;
+            if (filterAction == NULL)
+                throw MeshLabException("Invalid filter info value.");
+            QString filterName = xmlit.key();
+
             QString help = info->filterHelp(filterName);
             filterAction->setToolTip(help + getDecoratedFileName(filterAction->data().toString()));
             connect(filterAction,SIGNAL(triggered()),this,SLOT(startFilter()));

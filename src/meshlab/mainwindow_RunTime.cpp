@@ -1002,6 +1002,8 @@ void MainWindow::startFilter()
 
     QStringList missingPreconditions;
     QAction *action = qobject_cast<QAction *>(sender());
+    if (action == NULL)
+        throw MeshLabException("Invalid filter action value.");
     MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
     if (meshDoc() == NULL)
         return;
@@ -1047,12 +1049,13 @@ void MainWindow::startFilter()
     }
     else // NEW XML PHILOSOPHY
     {
-        MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
-        QString fname = action->text();
-        MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
         try
         {
-            if ((filt.xmlInfo == NULL) || (filt.act == NULL))
+            MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
+            QString fname = action->text();
+            MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
+            
+            if ((iXMLFilter == NULL) || (filt.xmlInfo == NULL) || (filt.act == NULL))
                 throw MeshLabException("An invalid MLXMLPluginInfo handle has been detected in startFilter function.");
             QString filterClasses = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
             QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
@@ -1075,8 +1078,6 @@ void MainWindow::startFilter()
                 }
             }
             //INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
-
-
 
             //Inside the MapList there are QMap<QString,QString> containing info about parameters. In particular:
             // "type" - "Boolean","Real" etc
@@ -1419,6 +1420,9 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
     MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
     bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
     bool filtercpp = (iFilter != NULL) && (!jscode);
+
+    if ((!filtercpp) && (!jscode))
+        throw MeshLabException("A not-C++ and not-JaveScript filter has been invoked.There is something really wrong in MeshLab.");
 
     QString fname = mfc->act->text();
     QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
