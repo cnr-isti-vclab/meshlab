@@ -139,8 +139,9 @@ QString MLXMLPluginInfo::guiTypeSwitchQueryText(const QString& var)
     QString caseENUM("case element (" + MLXMLElNames::enumWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::enumWidgetTag,var) + "</p>/string()");
     QString caseMESH("case element (" + MLXMLElNames::meshWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::meshWidgetTag,var) + "</p>/string()");
     QString caseSHOT("case element (" + MLXMLElNames::shotWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::shotWidgetTag,var) + "</p>/string()");
+    QString caseSTRING("case element (" + MLXMLElNames::stringWidgetTag + ") return <p>" + defaultGuiInfo(MLXMLElNames::stringWidgetTag,var) + "</p>/string()");
     QString errorMsg = "default return \"" + MLXMLPluginInfo::guiErrorMsg() + "\"";
-    return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + caseSLIDER + " " + caseENUM + " " + caseMESH + " " + caseSHOT + " " + errorMsg;
+    return base + " " + caseABS + " " + caseBOOL + " " + caseEDIT + " " + caseVEC + " " + caseCOLOR + " " + caseSLIDER + " " + caseENUM + " " + caseMESH + " " + caseSHOT + " " + caseSTRING + " " + errorMsg;
 }
 
 QStringList MLXMLPluginInfo::filterNames()
@@ -1030,6 +1031,11 @@ QString MLXMLUtilityFunctions::generateEvalParam( const MLXMLParamSubTree& param
 
     if (ptype == MLXMLElNames::shotType)
         result += "vcg::Shotf " + lowvarname + " = " + envname + ".evalShot(\"" + varname + "\");";
+
+    if (ptype == MLXMLElNames::stringType)
+        result += "QString " + lowvarname + " = " + envname + ".evalString(\"" + varname + "\");";
+
+
     return result;
 }
 
@@ -1120,6 +1126,7 @@ void MLXMLElNames::initMLXMLTypeList( QStringList& ls )
     ls << MLXMLElNames::enumType;
     ls << MLXMLElNames::meshType;
     ls << MLXMLElNames::shotType;
+    ls << MLXMLElNames::stringType;
 }
 
 void MLXMLElNames::initMLXMLGUITypeList( QStringList& ls )
@@ -1133,6 +1140,7 @@ void MLXMLElNames::initMLXMLGUITypeList( QStringList& ls )
     ls << MLXMLElNames::colorWidgetTag;
     ls << MLXMLElNames::enumWidgetTag;
     ls << MLXMLElNames::shotWidgetTag;
+    ls << MLXMLElNames::stringWidgetTag;
 }
 
 void MLXMLElNames::initMLXMLArityValuesList( QStringList& ls )
@@ -1172,11 +1180,17 @@ void MLXMLElNames::initMLXMLGUIListForType( const QString& mlxmltype,QStringList
     if (mlxmltype == MLXMLElNames::meshType)
         ls << MLXMLElNames::meshWidgetTag;
 
+    if (mlxmltype == MLXMLElNames::stringType)
+        ls << MLXMLElNames::stringWidgetTag;
+
     if (mlxmltype == MLXMLElNames::enumType)
         ls << MLXMLElNames::enumWidgetTag;
 
     if (mlxmltype == MLXMLElNames::shotType)
         ls << MLXMLElNames::shotWidgetTag;
+
+    if (mlxmltype == MLXMLElNames::stringType)
+        ls << MLXMLElNames::stringWidgetTag;
 }
 
 void MLXMLElNames::initMLXMLTreeTag( QStringList& ls )

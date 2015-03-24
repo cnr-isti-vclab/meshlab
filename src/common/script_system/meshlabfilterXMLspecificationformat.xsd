@@ -69,6 +69,7 @@
 	 <xs:element ref='ENUM_GUI'/>
 	 <xs:element ref='MESH_GUI'/>
 	 <xs:element ref='SHOT_GUI'/>
+	 <xs:element ref='STRING_GUI'/>
     </xs:choice>
    </xs:sequence>
    <xs:attribute name='parType' use='required'>
@@ -81,6 +82,7 @@
 	  <xs:pattern value='Color'/>
 	  <xs:pattern value='Mesh'/>
 	  <xs:pattern value='CameraShot'/>
+	  <xs:pattern value='String'/>
 	  <xs:pattern value='Enum \{(\s*\S+(\s*\S*)*\s*\:\s*\d+\s*(\|)?)+\}'/>
      </xs:restriction>
     </xs:simpleType>
@@ -103,6 +105,12 @@
  </xs:element>
  
  <xs:element name='EDIT_GUI'>
+  <xs:complexType>
+   <xs:attribute name='guiLabel' type='xs:string' use='required'/>
+  </xs:complexType>
+ </xs:element>
+ 
+ <xs:element name='STRING_GUI'>
   <xs:complexType>
    <xs:attribute name='guiLabel' type='xs:string' use='required'/>
   </xs:complexType>

@@ -582,6 +582,9 @@ XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap&
 
     if (guiType == MLXMLElNames::shotWidgetTag)
         return new XMLShotWidget(widgetTable,env,parent);
+
+    if (guiType == MLXMLElNames::stringWidgetTag)
+        return new XMLStringWidget(widgetTable,env,parent);
     return NULL;
 }
 
@@ -598,7 +601,7 @@ XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
     //gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
     //gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
     connect(lineEdit,SIGNAL(editingFinished()),parent,SIGNAL(parameterChanged()));
-    connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
+//    connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
 
     setVisibility(isImportant);
 }
@@ -622,20 +625,20 @@ void XMLEditWidget::updateVisibility( const bool vis )
     setVisibility(vis);
 }
 
-void XMLEditWidget::tooltipEvaluation()
-{
-    try
-    {
-        QString exp = lineEdit->selectedText();
-        QString res = env.evalString(exp);
-        lineEdit->setToolTip(res);
-    }
-    catch (MeshLabException& /*e*/)
-    {
-        //WARNING!!! it's needed otherwise there is a stack overflow due to the Qt selection mechanism!
-        return;
-    }
-}
+//void XMLEditWidget::tooltipEvaluation()
+//{
+//    try
+//    {
+//        QString exp = lineEdit->selectedText();
+//        QString res = env.evalString(exp);
+//        lineEdit->setToolTip(res);
+//    }
+//    catch (MeshLabException& /*e*/)
+//    {
+//        //WARNING!!! it's needed otherwise there is a stack overflow due to the Qt selection mechanism!
+//        return;
+//    }
+//}
 
 QString XMLEditWidget::getWidgetExpression()
 {
@@ -657,6 +660,67 @@ void XMLEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
     }
     XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
+
+XMLStringWidget::XMLStringWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent)
+    :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
+{
+    fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
+    lineEdit = new QLineEdit(this);
+    //int row = gridLay->rowCount() -1;
+
+    fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+    lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
+
+    //gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
+    //gridLay->addWidget(lineEdit,row,1,Qt::AlignTop);
+    connect(lineEdit,SIGNAL(editingFinished()),parent,SIGNAL(parameterChanged()));
+//    connect(lineEdit,SIGNAL(selectionChanged()),this,SLOT(tooltipEvaluation()));
+
+    setVisibility(isImportant);
+}
+
+
+
+XMLStringWidget::~XMLStringWidget()
+{
+
+}
+
+
+
+void XMLStringWidget::set( const QString& nwExpStr )
+{
+    lineEdit->setText(nwExpStr);
+}
+
+void XMLStringWidget::updateVisibility( const bool vis )
+{
+    setVisibility(vis);
+}
+
+
+QString XMLStringWidget::getWidgetExpression()
+{
+    return QString("\"")+this->lineEdit->text()+QString("\"");
+}
+
+void XMLStringWidget::setVisibility( const bool vis )
+{
+    fieldDesc->setVisible(vis);
+    this->lineEdit->setVisible(vis);
+}
+
+void XMLStringWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+{
+    if (lay !=NULL)
+    {
+        lay->addWidget(fieldDesc,r,0);
+        lay->addWidget(lineEdit,r,1);
+    }
+    XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+}
+
+
 
 XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap& envir,QWidget* parent )
     :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
