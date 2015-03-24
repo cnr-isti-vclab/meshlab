@@ -259,7 +259,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                                    "The current implementation of these schemes don't handle vertices of valence > 12");
     case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant subdivision method and it works for every triangle and has rules for extraordinary vertices.<br>");
     case FP_BUTTERFLY_SS                     : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
-    case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint");
+    case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
     case FP_REFINE_CATMULL                   : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
     case FP_REFINE_HALF_CATMULL              : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
                                                    "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
