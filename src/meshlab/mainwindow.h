@@ -36,8 +36,6 @@
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
-#include "mainwindowsettingnames.h"
-
 
 #include <QtScript>
 #include <QDir>
@@ -59,9 +57,17 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QToolBar;
 
-class MainWindowSetting : public MainWindowSettingNames
+class MainWindowSetting 
 {
 public:
+
+	bool permeshtoolbar;
+	static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
+
+	////WARNING!!!! REMOVE THESE LINES AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
+	//QString sketchfabkey;
+	//static QString sketchFabKeyCode() {return "MeshLab::Plugins::sketchFabKeyCode";}
+	///***********************************************************************************************************/
 
     static void initGlobalParameterSet(RichParameterSet* gblset);
     void updateGlobalParameterSet( RichParameterSet& rps );

@@ -1344,11 +1344,13 @@ int MainWindow::longestActionWidthInAllMenus()
 void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 {
     glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
-	glbset->addParam(new RichString(sketchFabKeyCode(),"0000000","SketchFab KeyCode",""));
+
+	//WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
+	glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode","0000000","SketchFab KeyCode",""));
+	/****************************************************************************************************************/
 }
 
 void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 {
     permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
-	sketchfabkey = rps.getString(sketchFabKeyCode());
 }

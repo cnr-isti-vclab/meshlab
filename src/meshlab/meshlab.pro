@@ -35,7 +35,6 @@ HEADERS = ../common/interfaces.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
     $$VCGDIR/wrap/gl/trimesh.h \
-	mainwindowsettingnames.h \
 	filterthread.h
 SOURCES = main.cpp \
     mainwindow_Init.cpp \

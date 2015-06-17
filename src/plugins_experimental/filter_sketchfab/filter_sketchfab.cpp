@@ -34,7 +34,6 @@
 #include <QScriptEngine>
 
 #include "filter_sketchfab.h"
-#include <meshlab/mainwindowsettingnames.h>
 
 using namespace std;
 using namespace vcg;
@@ -47,7 +46,7 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
 
       qDebug("Export to SketchFab start ");
 
-      QString APIToken=env.evalString(Env::convertToAMLScriptValidName(MainWindowSettingNames::sketchFabKeyCode()));
+      QString APIToken=env.evalString(Env::convertToAMLScriptValidName("MeshLab::Plugins::sketchFabKeyCode"));
 
       qDebug("APIToken = '%s' ",qPrintable(APIToken));
 
