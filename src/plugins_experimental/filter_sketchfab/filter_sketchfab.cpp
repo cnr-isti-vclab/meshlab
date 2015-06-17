@@ -43,8 +43,14 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
 {
     if (filterName == "Export to SketchFab")
     {
+
       qDebug("Export to SketchFab start ");
-      QString APIToken=env.evalString("APIToken");
+
+      // ********** PER GUIDO *************
+      // Qui mi aspetto che nell'ambiente ci sia gia' le cose globali (Quelle che uno definisce dalle preferences).
+
+      QString APIToken=env.evalString(SketchFabKeyCode());
+
       qDebug("APIToken = '%s' ",qPrintable(APIToken));
 
       if(APIToken.isEmpty())
@@ -140,7 +146,16 @@ bool FilterSketchFabPlugin::upload()
     qDebug() << "Model uploaded with id" << uid;
     return true;
 }
+/* *********** PER GUIDO ****************
+ * Ovviamente mi aspetto anche che uno debba aggiungere la propria funzione di inizializzazione una volta per tutte come per le altre globali...
+ *
+ *
 
+void FilterSketchFabPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
+{
+  parset.addParam(new RichString(SketchFabKeyCode(),"0000000","SketchFab KeyCode",""));
+}
+*/
 
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePlugin)

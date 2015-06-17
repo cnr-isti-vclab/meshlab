@@ -42,7 +42,8 @@ public slots:
     void finished();
     void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
-
+private:
+    inline QString SketchFabKeyCode() const     { return  "MeshLab::Filter::SketchFabKeyCode" ; }
 };
 
 #endif
