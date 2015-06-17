@@ -887,7 +887,7 @@ void MainWindow::runFilterScript()
                     cppfilt->setLog(&meshDoc()->Log);
 
                     Env env ;
-                    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
+                    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM,this->currentGlobalPars());
                     XMLFilterNameParameterValuesPair* xmlfilt = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
                     QMap<QString,QString>& parmap = xmlfilt->pair.second;
                     for(QMap<QString,QString>::const_iterator it = parmap.constBegin();it != parmap.constEnd();++it)
@@ -1506,7 +1506,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         if (filtercpp)
         {
             enableDocumentSensibleActionsContainer(false);
-            FilterThread* ft = new FilterThread(fname,parexpval,PM,*(meshDoc()));
+            FilterThread* ft = new FilterThread(fname,parexpval,PM,*(meshDoc()),this);
 
             connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
             connect(ft,SIGNAL(threadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
@@ -1519,7 +1519,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
             QTime t;
             t.start();
             Env env;
-            env.loadMLScriptEnv(*meshDoc(),PM);
+            env.loadMLScriptEnv(*meshDoc(),PM,currentGlobalPars());
             QScriptValue result = env.evaluate(funcall);
             scriptCodeExecuted(result,t.elapsed(),"");
             postFilterExecution();

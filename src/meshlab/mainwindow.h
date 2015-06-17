@@ -36,6 +36,7 @@
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
+#include "mainwindowsettingnames.h"
 
 
 #include <QtScript>
@@ -58,15 +59,12 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QToolBar;
 
-class MainWindowSetting
+class MainWindowSetting : public MainWindowSettingNames
 {
 public:
 
     static void initGlobalParameterSet(RichParameterSet* gblset);
     void updateGlobalParameterSet( RichParameterSet& rps );
-
-    bool permeshtoolbar;
-    static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 };
 
 class MainWindow : public QMainWindow, public MainWindowInterface

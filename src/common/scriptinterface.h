@@ -222,6 +222,11 @@ public:
     QString output();
     void appendOutput(const QString& output);
     QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm);
+
+	//It's a temporary solution to access the global parameters still expressed with the old parameter set class 
+	QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm,const RichParameterSet& global);
+
+	static QString convertToAMLScriptValidName(const QString& name);
 };
 
 QScriptValue Env_ctor(QScriptContext *context,QScriptEngine *engine);

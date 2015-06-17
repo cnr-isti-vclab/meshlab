@@ -544,7 +544,7 @@ private:
     PluginManager& _pm;
     MeshDocument *_meshdocument;
     MainWindowInterface* _mwi;
-    QWidget _gla;
+    QWidget* _gla;
     bool _showhelp;
 };
 

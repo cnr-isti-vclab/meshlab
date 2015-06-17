@@ -9,7 +9,8 @@ class FilterThread : public QThread
     Q_OBJECT
 public:
     //Ideally PluginManager parameter should be const
-    FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md);
+    //and MainWindow parameter should not exist!
+	FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md,MainWindow* mw);
     ~FilterThread();
     inline bool succeed() const {return _success;}
     inline QString filterName() const {return _fname;}
@@ -29,8 +30,10 @@ private:
     MeshDocument& _md;
     QGLWidget* _glwid;
     bool _success;
-    
 
+	//WARNING!!!!!!!!!!!!!!!MainWindow parameter should not exist at all! it has been introduced only to give access to global parameters to the script environment
+    MainWindow* _mw;
+	/*****************************************************************************************************************************************************************/
 };
 
 #endif // FILTERTHREAD_H

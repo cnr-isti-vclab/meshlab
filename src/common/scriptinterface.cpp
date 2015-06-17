@@ -891,11 +891,30 @@ QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm )
     code += lang.getExternalLibrariesCode();
     QScriptValue applyFun = newFunction(PluginInterfaceApplyXML, &pm);
     globalObject().setProperty("_applyFilter", applyFun);
-
     //QScriptValue res = env.evaluate(QString(PM.pluginsCode()));
     code += pm.pluginsCode();
     QScriptValue res = evaluate(code);
     return res;
+}
+
+QScriptValue Env::loadMLScriptEnv( MeshDocument& md,PluginManager& pm,const RichParameterSet& global )
+{
+	QScriptValue res = loadMLScriptEnv(md,pm);
+	/*if (res.isError())
+		throw JavaScriptException("A current environment evaluation generated a JavaScript Error: " + res.toString() + "\n");*/
+	for(int ii = 0;ii < global.paramList.size();++ii)
+	{
+		RichParameterValueToStringVisitor v;
+		global.paramList[ii]->accept(v);
+		insertExpressionBinding(Env::convertToAMLScriptValidName(global.paramList[ii]->name),v.stringvalue);
+	}
+	return res;
+}
+
+QString Env::convertToAMLScriptValidName( const QString& name )
+{
+	QString cp(name);
+	return cp.replace("::","_");
 }
 
 

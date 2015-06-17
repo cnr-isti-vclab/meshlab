@@ -8,8 +8,8 @@
 
 FilterThread* FilterThread::_cur = NULL;
 
-FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md)
-:QThread(),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md),_glwid(NULL)
+FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& parexpval,PluginManager& pm, MeshDocument& md,MainWindow* mw)
+:QThread(),_fname(fname),_parexpval(parexpval),_pm(pm),_md(md),_glwid(NULL),_mw(mw)
 {
     _glwid = new QGLWidget();
 }
@@ -29,7 +29,12 @@ void FilterThread::run()
     try
     {
         Env env;
-        QScriptValue val = env.loadMLScriptEnv(_md,_pm);
+		QScriptValue val;
+	
+		if (_mw != NULL)
+			val = env.loadMLScriptEnv(_md,_pm,_mw->currentGlobalPars());
+		else
+			val = env.loadMLScriptEnv(_md,_pm);
         if (val.isError())
             throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + val.toString() + "\n");
 

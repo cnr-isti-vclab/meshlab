@@ -3,6 +3,7 @@
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QDialogButtonBox>
+#include "mainwindow.h"
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
     :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)
@@ -154,8 +155,13 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
     //curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
     if(curParMap.isEmpty() && !isPreviewable())
         return false;
+	
+	GLArea* tmpgl = qobject_cast<GLArea*>(curgla);
 
-    env.loadMLScriptEnv(*md,pm);
+	if ((tmpgl != NULL) && (tmpgl->mw() != NULL))
+		env.loadMLScriptEnv(*md,pm,tmpgl->mw()->currentGlobalPars());
+	else
+		env.loadMLScriptEnv(*md,pm);
     QTime tt;
     tt.start();
     createFrame();
@@ -1547,7 +1553,14 @@ void OldScriptingSystemXMLParamDialog::createFrame()
 
         QVBoxLayout *vboxLayout = new QVBoxLayout(this);
         setLayout(vboxLayout);
-        _env.loadMLScriptEnv(*_meshdocument,_pm);
+		
+		GLArea* tmpgl = qobject_cast<GLArea*>(_gla);
+
+		if (tmpgl != NULL)
+			_env.loadMLScriptEnv(*_meshdocument,_pm,tmpgl->mw()->currentGlobalPars());
+		else
+			_env.loadMLScriptEnv(*_meshdocument,_pm);
+
         EnvWrap envwrap(_env);
         _stdparframe = new XMLStdParFrame(this);
         _stdparframe->loadFrameContent(mplist, envwrap,_meshdocument);

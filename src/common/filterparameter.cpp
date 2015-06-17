@@ -1097,3 +1097,130 @@ RichSaveFile::~RichSaveFile()
 {
 
 }
+
+void RichParameterValueToStringVisitor::visit( RichBool& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	if (pd.val->getBool())
+		stringvalue = "true";
+	else
+		stringvalue = "false";
+}
+
+void RichParameterValueToStringVisitor::visit( RichInt& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = QString::number(pd.val->getInt());
+}
+
+void RichParameterValueToStringVisitor::visit( RichFloat& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = QString::number(pd.val->getFloat());
+}
+
+void RichParameterValueToStringVisitor::visit( RichString& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = pd.val->getString();
+}
+
+void RichParameterValueToStringVisitor::visit( RichMatrix44f& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	QString tmp("[");
+	vcg::Matrix44f mat = pd.val->getMatrix44f();
+	for(int ii = 0;ii < 4;++ii)
+	{
+		for(int jj = 0;jj < 4;++jj)
+			tmp = tmp + QString::number(mat[ii][jj]) + ",";
+	}
+	tmp.replace(tmp.lastIndexOf(","),1,"]");
+	stringvalue = tmp;
+}
+
+void RichParameterValueToStringVisitor::visit( RichPoint3f& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	QString tmp("[");
+	vcg::Point3f mat = pd.val->getPoint3f();
+	for(int ii = 0;ii < 3;++ii)
+	{
+		tmp = tmp + QString::number(mat[ii]) + ",";
+	}
+	tmp.replace(tmp.lastIndexOf(","),1,"]");
+	stringvalue = tmp;
+}
+
+void RichParameterValueToStringVisitor::visit( RichShotf& pd )
+{
+
+}
+
+void RichParameterValueToStringVisitor::visit( RichColor& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	QString tmp("[");
+	QColor mat = pd.val->getColor();
+	tmp = tmp + QString::number(mat.red()) + "," + QString::number(mat.green()) + "," + QString::number(mat.blue()) + "," + QString::number(mat.alpha()) + "]";
+	stringvalue = tmp;
+}
+
+void RichParameterValueToStringVisitor::visit( RichAbsPerc& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = QString::number(pd.val->getAbsPerc());
+}
+
+void RichParameterValueToStringVisitor::visit( RichEnum& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = QString::number(pd.val->getEnum());
+}
+
+void RichParameterValueToStringVisitor::visit( RichFloatList& pd )
+{
+
+}
+
+void RichParameterValueToStringVisitor::visit( RichDynamicFloat& pd )
+{
+	if (pd.val == NULL)
+		return;
+	stringvalue.clear();
+	stringvalue = QString::number(pd.val->getDynamicFloat());
+}
+
+void RichParameterValueToStringVisitor::visit( RichOpenFile& pd )
+{
+
+}
+
+void RichParameterValueToStringVisitor::visit( RichSaveFile& pd )
+{
+
+}
+
+void RichParameterValueToStringVisitor::visit( RichMesh& pd )
+{
+
+}
+
