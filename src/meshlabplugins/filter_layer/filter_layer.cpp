@@ -80,7 +80,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
     case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transfered.");
-    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transfered."); 
+    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transfered.");
     case FP_DELETE_MESH :  return QString("The current mesh layer is deleted");
     case FP_DELETE_NON_VISIBLE_MESH :  return QString("All the non visible mesh layers are deleted");
     case FP_DELETE_RASTER :  return QString("The current raster layer is deleted");
@@ -156,13 +156,13 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     case  FP_RENAME_MESH:          md.mm()->setLabel(par.getString("newName"));  break;
     case  FP_RENAME_RASTER:          md.rm()->setLabel(par.getString("newName"));  break;
     case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("mesh"));           break;
-    case  FP_DELETE_MESH :    
-        if(md.mm()) 
-            md.delMesh(md.mm());    
+    case  FP_DELETE_MESH :
+        if(md.mm())
+            md.delMesh(md.mm());
         break;
-    case  FP_DELETE_NON_VISIBLE_MESH :    
+    case  FP_DELETE_NON_VISIBLE_MESH :
         foreach(MeshModel *mmp, md.meshList)
-        { 
+        {
             if(!mmp->visible)
             {
                 md.delMesh(mmp);
@@ -170,9 +170,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
         }
         break;
     case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm());            break;
-    case  FP_DELETE_NON_SELECTED_RASTER :    
+    case  FP_DELETE_NON_SELECTED_RASTER :
         foreach(RasterModel *rmp, md.rasterList)
-        { 
+        {
             if(!rmp->visible)
             {
                 md.delRaster(rmp);
@@ -186,7 +186,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             rm.drawMode = GLW::DMPoints;
             if (currentmesh->hasDataMask(MeshModel::MM_VERTCOLOR))
                 rm.colorMode = GLW::CMPerVert;
-            
+
             MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset",true,rm);
             destmesh->updateDataMask(currentmesh);
             numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentmesh->cm);
@@ -195,7 +195,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             if(par.getBool("DeleteOriginal"))	// delete original faces
             {
                 CMeshO::VertexIterator vi;
-         
+
                 int delfaces = tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(currentmesh->cm);
                 for(CMeshO::FaceIterator fi=currentmesh->cm.face.begin();fi!=currentmesh->cm.face.end();++fi)
                     if(!(*fi).IsD() && (*fi).IsS() )
@@ -316,6 +316,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             bool alsoUnreferenced = par.getBool("AlsoUnreferenced");
 
             MeshModel *destMesh= md.addNewMesh("","Merged Mesh");
+
             QList<MeshModel *> toBeDeletedList;
 
             int cnt=0;
@@ -330,9 +331,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                     toBeDeletedList.push_back(mmp);
                     if(!alsoUnreferenced)
                         vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
+                    destMesh->updateDataMask(mmp);
                     tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
                     tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
-                    destMesh->updateDataMask(mmp);
                 }
             }
             }
@@ -386,7 +387,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     {
     case FP_RENAME_MESH :
     case FP_SPLITSELECTEDFACES :
-    case FP_SPLITSELECTEDVERTICES: 
+    case FP_SPLITSELECTEDVERTICES:
     case FP_DUPLICATE :
     case FP_FLATTEN :
     case FP_SELECTCURRENT :
