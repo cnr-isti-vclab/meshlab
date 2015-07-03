@@ -40,12 +40,11 @@ void MeshLabXMLStdDialog::createFrame()
 void MeshLabXMLStdDialog::loadFrameContent()
 {
     assert(qf);
-    qf->hide();
+//    qf->hide();
     QLabel *ql;
 
 
     QGridLayout *gridLayout = new QGridLayout(qf);
-    qf->setLayout(gridLayout);
     QString fname(curmfc->act->text());
     setWindowTitle(fname);
     ql = new QLabel("<i>"+curmfc->xmlInfo->filterHelp(fname)+"</i>",qf);
@@ -64,23 +63,19 @@ void MeshLabXMLStdDialog::loadFrameContent()
     //int buttonRow = 2;  // the row where the line of buttons start
 
     helpButton = new QPushButton("Help", qf);
-    //helpButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     closeButton = new QPushButton("Close", qf);
-    //closeButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     applyButton = new QPushButton("Apply", qf);
-    //applyButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     defaultButton = new QPushButton("Default", qf);
-    //defaultButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
     applyButton->setFocus();
-    bool onlyimportant = true;
-    connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
 #ifdef Q_OS_MAC
     // Hack needed on mac for correct sizes of button in the bottom of the dialog.
-    helpButton->setMinimumSize(100, 25);
-    closeButton->setMinimumSize(100,25);
-    applyButton->setMinimumSize(100,25);
-    defaultButton->setMinimumSize(100, 25);
+    helpButton->setStyleSheet("QPushButton {min-height: 30px; } ");
+    closeButton->setStyleSheet("QPushButton {min-height: 30px; }");
+    applyButton->setStyleSheet("QPushButton {min-height: 30px; }");
+    defaultButton->setStyleSheet("QPushButton {min-height: 30px; }");
 #endif
+    bool onlyimportant = true;
+    connect(this->parentWidget(),SIGNAL(filterExecuted()),this,SLOT(postFilterExecution()));
     QString postCond = curmfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
     QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
     curmask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
@@ -116,15 +111,9 @@ void MeshLabXMLStdDialog::loadFrameContent()
     gridLayout->addWidget(closeButton,  secButLine,0,Qt::AlignBottom);
     gridLayout->addWidget(applyButton,  secButLine,1,Qt::AlignBottom);
 
-
+    qf->setLayout(gridLayout);
     qf->showNormal();
-    qf->adjustSize();
-
-    //set the minimum size so it will shrink down to the right size	after the help is toggled
-    //this->setMinimumSize(qf->sizeHint());
     this->showNormal();
-    this->adjustSize();
-    //setSizePolicy(QSizePolicy::Minimum,QSizePolicy::MinimumExpanding);
 }
 
 bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginManager& pm,MeshDocument * md, MainWindowInterface *mwi, QWidget *gla/*=0*/ )
@@ -155,13 +144,13 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
     //curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
     if(curParMap.isEmpty() && !isPreviewable())
         return false;
-	
-	GLArea* tmpgl = qobject_cast<GLArea*>(curgla);
 
-	if ((tmpgl != NULL) && (tmpgl->mw() != NULL))
-		env.loadMLScriptEnv(*md,pm,tmpgl->mw()->currentGlobalPars());
-	else
-		env.loadMLScriptEnv(*md,pm);
+    GLArea* tmpgl = qobject_cast<GLArea*>(curgla);
+
+    if ((tmpgl != NULL) && (tmpgl->mw() != NULL))
+        env.loadMLScriptEnv(*md,pm,tmpgl->mw()->currentGlobalPars());
+    else
+        env.loadMLScriptEnv(*md,pm);
     QTime tt;
     tt.start();
     createFrame();
@@ -1553,13 +1542,13 @@ void OldScriptingSystemXMLParamDialog::createFrame()
 
         QVBoxLayout *vboxLayout = new QVBoxLayout(this);
         setLayout(vboxLayout);
-		
-		GLArea* tmpgl = qobject_cast<GLArea*>(_gla);
 
-		if (tmpgl != NULL)
-			_env.loadMLScriptEnv(*_meshdocument,_pm,tmpgl->mw()->currentGlobalPars());
-		else
-			_env.loadMLScriptEnv(*_meshdocument,_pm);
+        GLArea* tmpgl = qobject_cast<GLArea*>(_gla);
+
+        if (tmpgl != NULL)
+            _env.loadMLScriptEnv(*_meshdocument,_pm,tmpgl->mw()->currentGlobalPars());
+        else
+            _env.loadMLScriptEnv(*_meshdocument,_pm);
 
         EnvWrap envwrap(_env);
         _stdparframe = new XMLStdParFrame(this);
