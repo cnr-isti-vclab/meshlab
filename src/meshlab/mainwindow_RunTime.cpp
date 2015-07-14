@@ -545,13 +545,15 @@ void MainWindow::setSplit(QAction *qa)
     if(mvc)
     {
         GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
+		bool r = glwClone->isSharing();
         if(qa->text() == tr("&Horizontally"))
-            mvc->addView(glwClone, Qt::Vertical);
+            mvc->addView(glwClone,Qt::Vertical);
         else if(qa->text() == tr("&Vertically"))
-            mvc->addView(glwClone, Qt::Horizontal);
+            mvc->addView(glwClone,Qt::Horizontal);
 
         //The loading of the raster must be here
-        if(GLA()->isRaster()){
+        if(GLA()->isRaster())
+        {
             glwClone->setIsRaster(true);
             if(this->meshDoc()->rm()->id()>=0)
                 glwClone->loadRaster(this->meshDoc()->rm()->id());
@@ -1284,11 +1286,14 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
             RenderMode rm = GLA()->rendermodemap[mm->id()];
             vcg::GLW::NormalMode nmmode = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
+
+
+//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
-                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
-            else
-                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
+//            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
+//                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
+//            else
+//                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
         }
     }
     catch (std::bad_alloc& bdall)
@@ -1592,11 +1597,12 @@ void MainWindow::postFilterExecution()
                 rm = ci.value();
                 nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
             }
+//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
-                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
-            else
-                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+//            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
+//                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+//            else
+//                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
         }
     }
 
@@ -2114,9 +2120,11 @@ bool MainWindow::appendProject(QString fileName)
     return true;
 }
 
-GLArea* MainWindow::newProject(const QString& projName)
+void MainWindow::newProject(const QString& projName)
 {
-    MultiViewer_Container *mvcont = new MultiViewer_Container(mdiarea);
+	if (gpumeminfo == NULL)
+        return;
+    MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mdiarea);
     mdiarea->addSubWindow(mvcont);
     connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
@@ -2138,7 +2146,6 @@ GLArea* MainWindow::newProject(const QString& projName)
     layerDialog->updateTable();
     layerDialog->updateDecoratorParsView();
     mvcont->showMaximized();
-    return gla;
 }
 
 
@@ -2358,8 +2365,22 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
     mm->cm.Tr = mtr;
     vcg::GLW::NormalMode nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
-    mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+
+//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
+    //mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+	MultiViewer_Container* mv = GLA()->mvc();
+	if (mv != NULL)
+	{
+		for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+		{
+			GLArea* ar = mv->getViewer(glarid);
+			if (ar != NULL)
+				ar->setupRequestedAttributesPerMesh(mm->id());
+		}
+	}
+
     meshDoc()->setBusy(false);
+
     return true;
 }
 
@@ -2450,6 +2471,16 @@ bool MainWindow::importMesh(QString fileName)
                 postOpenDialog.exec();
                 pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
             }
+			/*MultiViewer_Container* mv = GLA()->mvc();
+			if (mv != NULL)
+			{
+			for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+			{
+			GLArea* ar = mv->getViewer(glarid);
+			if (ar != NULL)
+			MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode(mm->id(),*ar);
+			}
+			}*/
         }
         else
         {
@@ -2946,9 +2977,9 @@ void MainWindow::updateRenderMode( )
             MeshModel* mmod = meshDoc()->getMesh(it.key());
             if (mmod == NULL)
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-            if (act->isBufferObjectUpdateRequired())
-                mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
 
+			GLA()->setupRequestedAttributesPerMesh(it.key());
+			
         }
     }
     else
@@ -2967,8 +2998,8 @@ void MainWindow::updateRenderMode( )
         MeshModel* mmod = meshDoc()->getMesh(it.key());
         if (mmod == NULL)
             throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-        if (act->isBufferObjectUpdateRequired())
-            mmod->bor.update(mmod->cm,MeshModel::MM_ALL,rm.drawMode,vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode),rm.colorMode,rm.textureMode);
+        
+		GLA()->setupRequestedAttributesPerMesh(it.key());
     }
     GLA()->update();
 }

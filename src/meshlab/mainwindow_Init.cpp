@@ -51,7 +51,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-:mwsettings(),xmlfiltertimer(),wama()
+:mwsettings(),xmlfiltertimer(),wama(),gpumeminfo(NULL)
 {
     //xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
     //Subsequently restart function will be invoked.
@@ -96,9 +96,11 @@ MainWindow::MainWindow()
     }
     // Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
     loadMeshLabSettings();
+    mwsettings.updateGlobalParameterSet(currentGlobalParams);
     createActions();
     createToolBars();
     createMenus();
+	gpumeminfo = new MLThreadSafeMemoryInfo(mwsettings.maxgpumem);
     stddialog = 0;
     xmldialog = 0;
     setAcceptDrops(true);
@@ -132,57 +134,10 @@ MainWindow::MainWindow()
     connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
 }
 
-void MainWindow::init()
+MainWindow::~MainWindow()
 {
-    PM.loadPlugins(defaultGlobalParams);
-    QSettings settings;
-    QVariant vers = settings.value(MeshLabApplication::versionRegisterKeyName());
-    //should update those values only after I run MeshLab for the very first time or after I installed a new version
-    if (!vers.isValid() || vers.toString() < MeshLabApplication::appVer())
-    {
-        settings.setValue(MeshLabApplication::pluginsPathRegisterKeyName(),PluginManager::getDefaultPluginDirPath());
-        settings.setValue(MeshLabApplication::versionRegisterKeyName(),MeshLabApplication::appVer());
-        settings.setValue(MeshLabApplication::wordSizeKeyName(),QSysInfo::WordSize);
-        foreach(QString plfile,PM.pluginsLoaded)
-            settings.setValue(PluginManager::osIndependentPluginName(plfile),MeshLabApplication::appVer());
-    }
-    // Now load from the registry the settings and  merge the hardwired values got from the PM.loadPlugins with the ones found in the registry.
-    loadMeshLabSettings();
-    createActions();
-    createToolBars();
-    createMenus();
-    stddialog = 0;
-    xmldialog = 0;
-    setAcceptDrops(true);
-    mdiarea->setAcceptDrops(true);
-    setWindowTitle(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
-    setStatusBar(new QStatusBar(this));
-    globalStatusBar()=statusBar();
-    qb=new QProgressBar(this);
-    qb->setMaximum(100);
-    qb->setMinimum(0);
-    qb->reset();
-    statusBar()->addPermanentWidget(qb,0);
-    //updateMenus();
-    newProject();
-    //PM should be initialized before passing it to PluginGeneratorGUI
-    plugingui = new PluginGeneratorGUI(PM,this);
-    plugingui->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
-    addDockWidget(Qt::LeftDockWidgetArea,plugingui);
-    connect(plugingui,SIGNAL(scriptCodeExecuted(const QScriptValue&,const int,const QString&)),this,SLOT(scriptCodeExecuted(const QScriptValue&,const int,const QString&)));
-    connect(plugingui,SIGNAL(insertXMLPluginRequested(const QString&,const QString& )),this,SLOT(loadAndInsertXMLPlugin(const QString&,const QString&)));
-    connect(plugingui,SIGNAL(historyRequest()),this,SLOT(sendHistory()));
-    //QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
-    //wid->showMaximized();
-    //ar->update();
-
-    //qb->setAutoClose(true);
-    //qb->setMinimumDuration(0);
-    //qb->reset();
-    connect(this, SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
-    connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
+	delete gpumeminfo;
 }
-
 
 void MainWindow::createActions()
 {
@@ -1116,7 +1071,8 @@ void MainWindow::loadMeshLabSettings()
                 //  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
                 //         "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
             }
-            else currentGlobalParams.addParam(rpar);
+            else
+                currentGlobalParams.addParam(rpar);
         }
     }
 
@@ -1343,14 +1299,22 @@ int MainWindow::longestActionWidthInAllMenus()
 
 void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 {
+    glbset->addParam(new RichInt(maximumDedicatedGPUMem(),350,"Maximum GPU Memory Dedicated to MeshLab (Mb)","Maximum GPU Memory Dedicated to MeshLab (megabyte) for the rendering process. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
     glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	//WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
 	glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode","0000000","SketchFab KeyCode",""));
 	/****************************************************************************************************************/
+	
+	if (MeshLabScalarTest<Scalarm>::doublePrecision())
+		glbset->addParam(new RichBool(highPrecisionRendering(),false,"High Precision Rendering","If true all the models in the scene will be rendered at the center of the world"));
 }
 
 void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 {
+    maxgpumem = (long long unsigned int)rps.getInt(maximumDedicatedGPUMem()) * 1000000;
     permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
+	highprecision = false;
+	if (MeshLabScalarTest<Scalarm>::doublePrecision())
+		highprecision = rps.getBool(highPrecisionRendering());
 }

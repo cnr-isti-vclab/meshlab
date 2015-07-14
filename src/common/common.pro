@@ -99,7 +99,6 @@ HEADERS += filterparameter.h \
   mlapplication.h \
   scriptsyntax.h \
   searcher.h \
-  $$VCGDIR/wrap/gl/trimesh.h \
     meshlabdocumentxml.h
 SOURCES += filterparameter.cpp \
     interfaces.cpp \

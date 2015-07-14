@@ -72,19 +72,21 @@ public:
 
 	void meshAttributesUpdated(int mask);
 
-	bool setupRequestedAttributes(unsigned int viewid,vcg::GLFeederInfo::ReqAtts& rq);
+	vcg::GLFeederInfo::ReqAtts setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated);
 
 	void deAllocateBO();
 	
-	void drawWire(unsigned int viewid);
+	void drawWire(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawFlatWire(unsigned int viewid);
+	void drawFlatWire(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawPoints(unsigned int viewid);
+	void drawPoints(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawTriangles(unsigned int viewid);
+	void drawTriangles(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawBBox(unsigned int viewid);
+	void drawBBox(vcg::GLFeederInfo::ReqAtts& rq);
+
+	inline CMeshO& mesh() {return _mesh;}
 private:
 	mutable QReadWriteLock _lock;
 	MLThreadSafeTextureNamesContainer _textids;
@@ -115,9 +117,10 @@ public:
 
 	void deAllocateGPUSharedData();
 
-	void renderScene(GLArea& glarea);
+	vcg::GLFeederInfo::ReqAtts setupRequestedAttributesPerMesh( int meshid,const vcg::GLFeederInfo::ReqAtts& req,bool& allocated);
+	//bool setupRequestedAttributes(unsigned int meshid,unsigned int viewid,vcg::GLFeederInfo::ReqAtts& rq);
 
-	MLThreadSafeGLMeshAttributesFeeder* meshAttributeFeeder(int meshid) const;
+	MLThreadSafeGLMeshAttributesFeeder* meshAttributesFeeder(int meshid) const;
 	inline const Point3m& globalSceneCenter() const {return _globalscenecenter;}
 
 public slots:
@@ -141,6 +144,8 @@ private:
 struct MLSceneRenderModeAdapter
 {
 	static void renderModeToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
+    static void renderMesh(unsigned int meshid, GLArea& area);
+	/*static bool setupRequestedAttributesAccordingToRenderMode(unsigned int meshid,GLArea& area);*/
 private:
 	static vcg::GLFeederInfo::PRIMITIVE_MODALITY renderModeToPrimitiveModality(const RenderMode& rm);
 	static void renderModeColorToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);

@@ -36,6 +36,7 @@
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
+#include "ml_thread_safe_memory_info.h"
 
 #include <QtScript>
 #include <QDir>
@@ -61,16 +62,17 @@ class MainWindowSetting
 {
 public:
 
+	static void initGlobalParameterSet(RichParameterSet* gblset);
+    void updateGlobalParameterSet( RichParameterSet& rps );
+
+	long long unsigned int maxgpumem;
+	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMem";}
+
 	bool permeshtoolbar;
 	static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 
-	////WARNING!!!! REMOVE THESE LINES AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
-	//QString sketchfabkey;
-	//static QString sketchFabKeyCode() {return "MeshLab::Plugins::sketchFabKeyCode";}
-	///***********************************************************************************************************/
-
-    static void initGlobalParameterSet(RichParameterSet* gblset);
-    void updateGlobalParameterSet( RichParameterSet& rps );
+	bool highprecision;
+	static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
 };
 
 class MainWindow : public QMainWindow, public MainWindowInterface
@@ -86,7 +88,7 @@ public:
 
 
   MainWindow();
-  void init();
+  ~MainWindow();
     static bool QCallBack(const int pos, const char * str);
     //const QString appName() const {return tr("MeshLab v")+appVer(); }
   //const QString appVer() const {return tr("1.3.2"); }
@@ -97,7 +99,7 @@ signals:
     void updateLayerTable();
 
 private slots:
-  GLArea* newProject(const QString& projName = QString());
+  void newProject(const QString& projName = QString());
   void saveProject();
 
 public slots:
@@ -266,6 +268,7 @@ private:
     LayerDialog *layerDialog;
     PluginGeneratorGUI* plugingui;
     QSignalMapper *windowMapper;
+	MLThreadSafeMemoryInfo* gpumeminfo;
 
 
     //QMap<QThread*,Env*> envtobedeleted;
@@ -296,6 +299,7 @@ public:
     return &currentViewContainer()->meshDoc;
   }
 
+  inline MLThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;} 
   const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
   RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
   const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }

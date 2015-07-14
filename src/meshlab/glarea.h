@@ -29,7 +29,6 @@
 #include <vcg/space/line3.h>
 #include <vcg/math/matrix44.h>
 #include <wrap/gl/math.h>
-#include <wrap/gl/trimesh.h>
 #include <wrap/gui/trackball.h>
 #include <vcg/math/shot.h>
 #include <wrap/gl/shot.h>
@@ -57,31 +56,30 @@ class GLArea : public QGLWidget
 {
     Q_OBJECT
 
-  //typedef vcg::Shot<double> Shot;
+    //typedef vcg::Shot<double> Shot;
 
 public:
-    GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current);
+    GLArea(QWidget *parent,MultiViewer_Container *mvcont, RichParameterSet *current);
     ~GLArea();
     static void initGlobalParameterSet( RichParameterSet * /*globalparam*/);
 
 private:
-  int id;  //the very important unique id of each subwindow.
-  MultiViewer_Container* parentmultiview;
+    int id;  //the very important unique id of each subwindow.
+    MultiViewer_Container* parentmultiview;
 
 public:
-  int getId() {return id;}
+    int getId() {return id;}
+    // Layer Management stuff.
 
-  // Layer Management stuff.
+    //MultiViewer_Container *mvc()
+    MultiViewer_Container * mvc()
+    {
+        return parentmultiview;
+    }
 
-  //MultiViewer_Container *mvc()
-  MultiViewer_Container * mvc()
-  {
-      return parentmultiview;
-  }
-
-  MainWindow *mw();
-  MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
-  inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
+    MainWindow *mw();
+    MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
+    inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
 
     vcg::Trackball trackball;
     vcg::Trackball trackball_light;
@@ -94,23 +92,23 @@ public:
     QAction *getLastAppliedFilter()							{return lastFilterRef;}
     void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-  //RenderMode*  getCurrentRenderMode();
-  RenderMode* getCurrentRenderMode()
-  {
-      if ((md() != NULL) && (md()->mm() != NULL))
-      {
-          QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-          if (it != rendermodemap.end())
-              return &it.value();
-      }
-      return NULL;
-  }
+    //RenderMode*  getCurrentRenderMode();
+    RenderMode* getCurrentRenderMode()
+    {
+        if ((md() != NULL) && (md()->mm() != NULL))
+        {
+            QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
+            if (it != rendermodemap.end())
+                return &it.value();
+        }
+        return NULL;
+    }
 
-  void updateFps(float deltaTime);
+    void updateFps(float deltaTime);
 
-  bool isCurrent() { if (mvc() == NULL) return false;return mvc()->currentId == this->id;}
+    bool isCurrent() { if (mvc() == NULL) return false;return mvc()->currentId == this->id;}
 
-  void showTrackBall(bool b)		{trackBallVisible = b; update();}
+    void showTrackBall(bool b)		{trackBallVisible = b; update();}
     bool isHelpVisible()      {return helpVisible;}
     bool isTrackBallVisible()		{return trackBallVisible;}
     bool isDefaultTrackBall()   {return activeDefaultTrackball;}
@@ -135,11 +133,18 @@ public:
     MeshRenderInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
 
-  // Edit Mode management
+
+	/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS FUNCTION IS UGLY!!!!! it takes the requested rendering mode directly from the correspondent value found in the rendermodemap!!!!!!!
+	be sure to have correctly setup it in the render mode map before call this function*/ 
+	bool setupRequestedAttributesPerMesh(int meshid);
+	/*****************************************************************************************************************************************************************************/
+
+
+    // Edit Mode management
     // In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state
     // in which the mouse event are redirected back to the GLArea to drive the camera trackball
     // The decorate function of the current active editor is still called.
-  // EndEdit is called only when you press again the same button or when you change editor.
+    // EndEdit is called only when you press again the same button or when you change editor.
 public slots:
     void updateTexture(); // slot for forcing the texture reload.
     void resetTrackBall();
@@ -175,19 +180,19 @@ public slots:
         emit updateMainWindowMenus();
     }
 
-  void suspendEditToggle()
-        {
-            if(currentEditor==0) return;
-            static QCursor qc;
-            if(suspendedEditor) {
-                            suspendedEditor=false;
-                            setCursor(qc);
-            }	else {
-                            suspendedEditor=true;
-                            qc=cursor();
-                            setCursorTrack(0);
-            }
+    void suspendEditToggle()
+    {
+        if(currentEditor==0) return;
+        static QCursor qc;
+        if(suspendedEditor) {
+            suspendedEditor=false;
+            setCursor(qc);
+        }	else {
+            suspendedEditor=true;
+            qc=cursor();
+            setCursorTrack(0);
         }
+    }
 
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
@@ -228,24 +233,24 @@ public:
     void showInterruptButton(const bool& show);
 
 
-// the following pairs of slot/signal implements a very simple message passing mechanism.
-// a widget that has a pointer to the glarea call the sendViewDir() slot and
-// setup a connect to recive the transmitViewDir signal that actually contains the point3f.
-// This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
-// See the Point3fWidget code.
+    // the following pairs of slot/signal implements a very simple message passing mechanism.
+    // a widget that has a pointer to the glarea call the sendViewDir() slot and
+    // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
+    // This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
+    // See the Point3fWidget code.
 signals :
-        void transmitViewDir(QString name, vcg::Point3f dir);
-        void transmitViewPos(QString name, vcg::Point3f dir);
-        void transmitSurfacePos(QString name,vcg::Point3f dir);
+    void transmitViewDir(QString name, vcg::Point3f dir);
+    void transmitViewPos(QString name, vcg::Point3f dir);
+    void transmitSurfacePos(QString name,vcg::Point3f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
     void transmitShot(QString name, Shotm);
     void transmitMatrix(QString name, Matrix44m);
     void updateLayerTable();
 public slots:
-        void sendViewPos(QString name);
-        void sendSurfacePos(QString name);
-        void sendViewDir(QString name);
-        void sendCameraPos(QString name);
+    void sendViewPos(QString name);
+    void sendSurfacePos(QString name);
+    void sendViewDir(QString name);
+    void sendCameraPos(QString name);
     void sendMeshShot(QString name);
     void sendMeshMatrix(QString name);
     void sendViewerShot(QString name);
@@ -262,16 +267,16 @@ protected:
     int RoundUpToTheNextHighestPowerOf2(unsigned int v);
 
     void initTexture(bool reloadAllTexture);
-  void displayInfo(QPainter *painter);
-  void displayRealTimeLog(QPainter *painter);
+    void displayInfo(QPainter *painter);
+    void displayRealTimeLog(QPainter *painter);
 
-  void displayMatrix(QPainter *painter, QRect areaRect);
+    void displayMatrix(QPainter *painter, QRect areaRect);
     void displayViewerHighlight();
-  void displayHelp();
+    void displayHelp();
 
     QString GetMeshInfoString();
-  void paintEvent(QPaintEvent *event);
-  void keyReleaseEvent ( QKeyEvent * e );
+    void paintEvent(QPaintEvent *event);
+    void keyReleaseEvent ( QKeyEvent * e );
     void keyPressEvent ( QKeyEvent * e );
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -312,8 +317,12 @@ private:
     //the last model that start edit was called with
     MeshModel *lastModelEdited;
 
+    MLSceneGLSharedDataContext* shared;
 public:
+    inline MLSceneGLSharedDataContext* getSceneGLSharedContext() {return shared;}
+
     QMap<int,RenderMode> rendermodemap;
+	QMap<int,vcg::GLFeederInfo::ReqAtts> reqattsmap;
 
     // view setting variables
     float fov;
@@ -323,16 +332,16 @@ public:
     float farPlane;
     SnapshotSetting ss;
 
-   // Store for each mesh if it is visible for the current viewer.
-   QMap<int, bool> meshVisibilityMap;
+    // Store for each mesh if it is visible for the current viewer.
+    QMap<int, bool> meshVisibilityMap;
 
-     // Store for each raster if it is visible for the current viewer.
-   QMap<int, bool> rasterVisibilityMap;
+    // Store for each raster if it is visible for the current viewer.
+    QMap<int, bool> rasterVisibilityMap;
 
- // Add an entry in the mesh visibility map
-  void meshSetVisibility(MeshModel *mp, bool visibility);
+    // Add an entry in the mesh visibility map
+    void meshSetVisibility(MeshModel *mp, bool visibility);
 
-// Add an entry in the raster visibility map
+    // Add an entry in the raster visibility map
     void addRasterSetVisibility(int rasterId, bool visibility);
 
 public slots:
@@ -353,7 +362,7 @@ private:
     enum AnimMode { AnimNone, AnimSpin, AnimInterp};
     AnimMode animMode;
     int tileCol, tileRow, totalCols, totalRows;   // snapshot: total number of subparts and current subpart rendered
-  int  currSnapLayer;            // snapshot: total number of layers and current layer rendered
+    int  currSnapLayer;            // snapshot: total number of layers and current layer rendered
     void setCursorTrack(vcg::TrackMode *tm);
 
     //-----------Raster support----------------------------
@@ -378,26 +387,26 @@ private:
 
     //-----------Shot support----------------------------
 public:
-  QPair<Shotm, float > shotFromTrackball();
-  void viewFromCurrentShot(QString kind);
-  bool viewFromFile();
+    QPair<Shotm, float > shotFromTrackball();
+    void viewFromCurrentShot(QString kind);
+    bool viewFromFile();
     void createOrthoView(QString);
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();
-  void loadShot(const QPair<Shotm, float> &) ;
+    void loadShot(const QPair<Shotm, float> &) ;
 
 private:
 
     float getCameraDistance();
 
-  // This parameter is the one that controls HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
-  inline float viewRatio() const { return 1.75f; }
-  inline float clipRatioNearDefault() const { return 0.3f; }
-  inline float fovDefault() const { return 60.f; }
-  void initializeShot(Shotm &shot);
-  void loadShotFromTextAlignFile(const QDomDocument &doc);
-  void loadViewFromViewStateFile(const QDomDocument &doc);
+    // This parameter is the one that controls HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
+    inline float viewRatio() const { return 1.75f; }
+    inline float clipRatioNearDefault() const { return 0.3f; }
+    inline float fovDefault() const { return 60.f; }
+    void initializeShot(Shotm &shot);
+    void loadShotFromTextAlignFile(const QDomDocument &doc);
+    void loadViewFromViewStateFile(const QDomDocument &doc);
 
 
     /*
@@ -460,16 +469,16 @@ private:
         _far = 100;
 
         //get shot extrinsics matrix
-    vcg::Matrix44<T> shotExtr;
+        vcg::Matrix44<T> shotExtr;
         refCamera.GetWorldToExtrinsicsMatrix().ToMatrix(shotExtr);
 
-    vcg::Matrix44<T> model2;
+        vcg::Matrix44<T> model2;
         model2 = (shotExtr)* vcg::Matrix44<T>::Construct(track->Matrix());
-    vcg::Matrix44<T> model;
+        vcg::Matrix44<T> model;
         model2.ToMatrix(model);
 
         //get translation out of modelview
-    vcg::Point3<T> tra;
+        vcg::Point3<T> tra;
         tra[0] = model[0][3]; tra[1] = model[1][3]; tra[2] = model[2][3];
         model[0][3] = model[1][3] = model[2][3] = 0;
 
@@ -481,7 +490,7 @@ private:
         view.Extrinsics.SetRot(model);
 
         //get pure translation out of modelview
-    vcg::Matrix44<T> imodel = model;
+        vcg::Matrix44<T> imodel = model;
         vcg::Transpose(imodel);
         tra = -(imodel*tra);
         tra *= idet;
@@ -501,7 +510,7 @@ private:
     template <class T>
     void shot2Track(const vcg::Shot<T> &from, const float cameraDist, vcg::Trackball &tb){
 
-    vcg::Quaternion<T> qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
+        vcg::Quaternion<T> qfrom; qfrom.FromMatrix(from.Extrinsics.Rot());
 
         tb.track.rot = vcg::Quaternionf::Construct(qfrom);
         tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));

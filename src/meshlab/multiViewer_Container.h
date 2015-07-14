@@ -29,6 +29,10 @@
 #include <QSplitterHandle>
 
 #include "../common/meshmodel.h"
+#include <GL/glew.h>
+#include "ml_scene_renderer.h"
+#include "ml_thread_safe_memory_info.h"
+
 
 // Class list
 class GLArea;
@@ -70,10 +74,10 @@ class MultiViewer_Container : public Splitter
 	typedef vcg::Shot<double> Shot;
 
 public:
-    MultiViewer_Container(QWidget *parent);
-    ~MultiViewer_Container() {}
-	
-  void addView(GLArea* viewer,  Qt::Orientation);
+    MultiViewer_Container(MLThreadSafeMemoryInfo& meminfo,bool highprec,QWidget *parent);
+    ~MultiViewer_Container();
+
+    void addView(GLArea *viewer, Qt::Orientation);
 	void removeView(int);
 	
   GLArea* currentView();
@@ -89,13 +93,17 @@ public:
 
 	void updateTrackballInViewers();
 
+    inline MLSceneGLSharedDataContext* sharedDataContext() {return scenecontext;}
+
 protected:
 	void closeEvent(QCloseEvent *event);
 public:
 	MeshDocument meshDoc;
-  int currentId;
+    MLSceneGLSharedDataContext* scenecontext;
 
-  GLLogStream *LogPtr() {return &meshDoc.Log;}
+	int currentId;
+
+	GLLogStream *LogPtr() {return &meshDoc.Log;}
 
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow

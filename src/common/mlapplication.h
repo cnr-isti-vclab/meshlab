@@ -15,6 +15,7 @@ struct MeshLabScalarTest<float>
 {
 	static const QString floatingPointPrecision() {return QString("fp");}
     static const char* floatingPointPrecisionIOToken() {return "%f";}
+	static bool doublePrecision() {return false;}
 };
 
 template<>
@@ -22,6 +23,7 @@ struct MeshLabScalarTest<double>
 {
 	static const QString floatingPointPrecision() {return QString("dp");}
     static const char* floatingPointPrecisionIOToken() {return "%lf";}
+	static bool doublePrecision() {return true;}
 };
 
 
@@ -35,7 +37,7 @@ public:
     static const QString appName(){return tr("MeshLab"); }
     static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
     static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
-    static const QString appVer() {return tr("1.3.4BETA"); }
+    static const QString appVer() {return tr("1.4.0"); }
     static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
     static const QString organization(){return tr("VCG");}
     static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}

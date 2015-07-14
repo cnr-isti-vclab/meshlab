@@ -184,109 +184,6 @@ public :
     }
 };
 
-/** This class provide vbo buffered rendering
- *
- * It can generate/update all the needed VBO buffers usually needed for efficient rendering.
- *
- */
-
-class BufferObjectsRendering : public QObject
-{
-    Q_OBJECT
-public:
-    BufferObjectsRendering(bool highprecmode);
-    ~BufferObjectsRendering();
-    void DrawPoints(vcg::GLW::ColorMode colm);
-    void DrawWire(vcg::GLW::ColorMode colm,vcg::GLW::NormalMode norm);
-    void DrawFlatWire(vcg::GLW::ColorMode colm,vcg::GLW::TextureMode textm);
-    void DrawTriangles(vcg::GLW::ColorMode cm, vcg::GLW::NormalMode nm, vcg::GLW::TextureMode tm );
-   
-
-//    bool requestUpdate(CMeshO& mm, Box3m bb, const int updateattributesmask);
-
-    //render function for invoking buffer objects based rendering
-    void render(const Box3m &bbDoc, vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode norm, vcg::GLW::ColorMode colm, vcg::GLW::TextureMode textm );
-
-    //function to clear/deallocate the buffer objects memory space
-    void clearState();
-
-    void clearState(int updateattributesmask,vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode norm, vcg::GLW::ColorMode colm, vcg::GLW::TextureMode textm);
-    std::vector<unsigned int> TMId;
-
-public slots:
-        //buffer objects update function. Info are collected from the mm and inserted inside the correspondent buffer objects
-    bool update(CMeshO& mm, int updateattributesmask,vcg::GLW::DrawMode drawm, vcg::GLW::NormalMode nolm,vcg::GLW::ColorMode colm, vcg::GLW::TextureMode tm );
-private:
-    bool updateIndexedAttributesPipeline(CMeshO& mm, int updateattributesmask,vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
-    bool updateReplicatedAttributesPipeline(CMeshO& mm, int updateattributesmask,vcg::GLW::ColorMode colm, vcg::GLW::NormalMode nolm, vcg::GLW::TextureMode tm );
-
-    void importPerVertexAttributes( const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv);
-    void importPerVertexAttributes(const CMeshO& mm,std::vector<vcg::Point3f>& pv,std::vector<vcg::Point3f>& nv,std::vector<vcg::Color4b>& cv,std::vector<float>& tv);
-
-    //enum BufferObjectType	{
-    //  OTVertexPosition,
-    //  OTVertexNormal,
-    //  OTVertexColor,
-    //  OTVertexTexture,
-    //  OTTriangleIndex,
-    //  OTEdgeIndex,
-    //  OTFauxEdgeIndex,
-    //  OTVertexReplicatedPosition,
-    //  OTVertexReplicatedNormal,
-    //  OTVertexReplicatedColor,
-    //  OTFaceReplicatedNormal,
-    //  OTFaceReplicatedColor,
-    //  OTWedgeReplicatedTexture,
-    //  OTLast
-    //  } ;
-
-   //GLuint bid[OTLast];
-
-   GLuint positionBO;
-   GLuint normalBO;
-   GLuint textureBO;
-   GLuint colorBO;
-   std::vector<GLuint> indexTriBO;
-   std::vector<GLuint> indexTriBOSz;
-
-   std::vector< std::pair<short,GLuint> > texIndNumTrianglesV;
-
-   bool HighPrecisionMode;
-
-   // For sake of precision the buffers are created so that their bb is centered at the origin.
-   // And in rendering we render them there (not in their original position).
-   // Problem 1 :  multiple meshes
-   // Solution 1: we hope that the meshes are more or less all in the same zone and we compute
-   // the transformation that maps all of them in a common position.
-   // P_1 = T_1 * P'_1
-   // P_2 = T_2 * P'_2
-   // Let C be a common translation
-   // When we render we render them as centered in C.
-
-   // To guarantee precision we have to pre-apply the matrix position
-   // P = M * p
-   // P = M * T * p'
-   //
-   //
-
-   Point3m bbCenter;
-   Matrix44m Tr;
-
-   int vn;
-   int tn;
-
-   QReadWriteLock _lock;
-};
-
-class GLWRendering : public vcg::GlTrimesh<CMeshO>
-{
-public:
-    GLWRendering();
-    GLWRendering(CMeshO& mm);
-    ~GLWRendering();
-
-    void render(vcg::GLW::DrawMode dm,vcg::GLW::NormalMode nm,vcg::GLW::ColorMode cm,vcg::GLW::TextureMode tm );
-};
 
 /*
 MeshModel Class
@@ -352,8 +249,6 @@ public:
     MeshDocument *parent;
 
     CMeshO cm;
-    BufferObjectsRendering bor;
-    GLWRendering glw;
 
 public:
     /*
@@ -617,8 +512,6 @@ public:
 }; // end class RenderMode
 Q_DECLARE_METATYPE(RenderMode)
 
-
-
 //class RasterModelState : public QObject
 //{
 //	Q_OBJECT
@@ -794,10 +687,10 @@ public:
 
     Box3m bbox()
     {
-        Box3m FullBBox;
-        foreach(MeshModel * mp, meshList)
-            FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
-        return FullBBox;
+		Box3m FullBBox;
+		foreach(MeshModel * mp, meshList)
+			FullBBox.Add(mp->cm.Tr,mp->cm.bbox);
+		return FullBBox;
     }
 
     bool hasBeenModified();
@@ -818,6 +711,8 @@ signals:
 
     ///whenever the meshList is changed
     void meshSetChanged();
+
+	void meshAdded(int index);
     void meshAdded(int index,RenderMode rm);
     void meshRemoved(int index);
 
