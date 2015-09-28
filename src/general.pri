@@ -8,25 +8,11 @@ DEFINES += MESHLAB_SCALAR=float
 VCGDIR = ../../../vcglib
 GLEWDIR = ../external/glew-1.7.0
 
-#mac:QMAKE_CXX = g++-4.2
-macx:QMAKE_CXX=clang++
-macx:QMAKE_CFLAGS_X86_64 += -mmacosx-version-min=10.7
-macx:QMAKE_CXXFLAGS_X86_64 = $$QMAKE_CFLAGS_X86_64
-#macx:QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+CONFIG += c++11
 
-# uncomment to try Eigen
-# DEFINES += VCG_USE_EIGEN
-# CONFIG += warn_off
+QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
-
-#macx:QMAKE_CXX=g++-4.2
-macx: {
-  contains(QMAKE_CXX,clang++) {
-    MACLIBDIR = ../../external/lib/macx64
-    } else {
-    MACLIBDIR = ../../external/lib/macx32
-  }
-}
+MACLIBDIR = ../../external/lib/macx64
 
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
