@@ -100,7 +100,7 @@ MainWindow::MainWindow()
     createActions();
     createToolBars();
     createMenus();
-	gpumeminfo = new MLThreadSafeMemoryInfo(mwsettings.maxgpumem);
+    gpumeminfo = new MLThreadSafeMemoryInfo(mwsettings.maxgpumem);
     stddialog = 0;
     xmldialog = 0;
     setAcceptDrops(true);
@@ -136,7 +136,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-	delete gpumeminfo;
+    delete gpumeminfo;
 }
 
 void MainWindow::createActions()
@@ -1302,19 +1302,19 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
     glbset->addParam(new RichInt(maximumDedicatedGPUMem(),350,"Maximum GPU Memory Dedicated to MeshLab (Mb)","Maximum GPU Memory Dedicated to MeshLab (megabyte) for the rendering process. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
     glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
-	//WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
-	glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode","0000000","SketchFab KeyCode",""));
-	/****************************************************************************************************************/
-	
-	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		glbset->addParam(new RichBool(highPrecisionRendering(),false,"High Precision Rendering","If true all the models in the scene will be rendered at the center of the world"));
+    //WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
+    glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode","0000000","SketchFab KeyCode",""));
+    /****************************************************************************************************************/
+
+    if (MeshLabScalarTest<Scalarm>::doublePrecision())
+        glbset->addParam(new RichBool(highPrecisionRendering(),false,"High Precision Rendering","If true all the models in the scene will be rendered at the center of the world"));
 }
 
 void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 {
-    maxgpumem = (long long unsigned int)rps.getInt(maximumDedicatedGPUMem()) * 1000000;
+    maxgpumem = (std::ptrdiff_t) rps.getInt(maximumDedicatedGPUMem()) * 1000000;
     permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
-	highprecision = false;
-	if (MeshLabScalarTest<Scalarm>::doublePrecision())
-		highprecision = rps.getBool(highPrecisionRendering());
+    highprecision = false;
+    if (MeshLabScalarTest<Scalarm>::doublePrecision())
+        highprecision = rps.getBool(highPrecisionRendering());
 }

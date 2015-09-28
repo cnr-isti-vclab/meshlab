@@ -32,24 +32,24 @@
 class MLThreadSafeMemoryInfo : public vcg::NotThreadSafeMemoryInfo
 {
 public:
-	MLThreadSafeMemoryInfo(long long unsigned int originalmem);
+    MLThreadSafeMemoryInfo(std::ptrdiff_t originalmem);
 
-	~MLThreadSafeMemoryInfo();
+    ~MLThreadSafeMemoryInfo();
 
-	void acquiredMemory(long long unsigned int mem);
+    void acquiredMemory(std::ptrdiff_t mem);
 
-	long long unsigned int usedMemory() const;
+    std::ptrdiff_t usedMemory() const;
 
-	long long unsigned int currentFreeMemory() const;
+    std::ptrdiff_t currentFreeMemory() const;
 
-	void releasedMemory(long long unsigned int mem = 0);
-	
-	bool isAdditionalMemoryAvailable(long long unsigned int mem);
+    void releasedMemory(std::ptrdiff_t mem = 0);
+
+    bool isAdditionalMemoryAvailable(std::ptrdiff_t mem);
 private:
-	//mutable objects can be modified from the declared const functions
-	//in this way we have not to modified the basic vcg::MemoryInfo interface for the logically const functions
-	//whose need to lock the mutex for a simple reading operation
-	mutable QReadWriteLock lock;
+    //mutable objects can be modified from the declared const functions
+    //in this way we have not to modified the basic vcg::MemoryInfo interface for the logically const functions
+    //whose need to lock the mutex for a simple reading operation
+    mutable QReadWriteLock lock;
 };
 
 #endif

@@ -58,21 +58,21 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QToolBar;
 
-class MainWindowSetting 
+class MainWindowSetting
 {
 public:
 
-	static void initGlobalParameterSet(RichParameterSet* gblset);
+    static void initGlobalParameterSet(RichParameterSet* gblset);
     void updateGlobalParameterSet( RichParameterSet& rps );
 
-	long long unsigned int maxgpumem;
-	inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMem";}
+    std::ptrdiff_t maxgpumem;
+    inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMem";}
 
-	bool permeshtoolbar;
-	static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
+    bool permeshtoolbar;
+    static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 
-	bool highprecision;
-	static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
+    bool highprecision;
+    static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
 };
 
 class MainWindow : public QMainWindow, public MainWindowInterface
@@ -268,7 +268,7 @@ private:
     LayerDialog *layerDialog;
     PluginGeneratorGUI* plugingui;
     QSignalMapper *windowMapper;
-	MLThreadSafeMemoryInfo* gpumeminfo;
+    MLThreadSafeMemoryInfo* gpumeminfo;
 
 
     //QMap<QThread*,Env*> envtobedeleted;
@@ -299,7 +299,7 @@ public:
     return &currentViewContainer()->meshDoc;
   }
 
-  inline MLThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;} 
+  inline MLThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;}
   const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
   RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
   const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
