@@ -30,8 +30,8 @@
 
 #include "../common/meshmodel.h"
 #include <GL/glew.h>
-#include "ml_scene_renderer.h"
-#include "ml_thread_safe_memory_info.h"
+#include "../common/ml_scene_renderer.h"
+#include "../common/ml_thread_safe_memory_info.h"
 
 
 // Class list

@@ -1299,7 +1299,7 @@ int MainWindow::longestActionWidthInAllMenus()
 
 void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 {
-    glbset->addParam(new RichInt(maximumDedicatedGPUMem(),350,"Maximum GPU Memory Dedicated to MeshLab (Mb)","Maximum GPU Memory Dedicated to MeshLab (megabyte) for the rendering process. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+    glbset->addParam(new RichInt(maximumDedicatedGPUMem(),350,"Maximum GPU Memory Dedicated to MeshLab (Mb)","Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
     glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
     //WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
@@ -1308,13 +1308,16 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 
     if (MeshLabScalarTest<Scalarm>::doublePrecision())
         glbset->addParam(new RichBool(highPrecisionRendering(),false,"High Precision Rendering","If true all the models in the scene will be rendered at the center of the world"));
+	glbset->addParam(new RichInt(maxTextureMemoryParam()	, 256, "Max Texture Memory (in MB)","The maximum quantity of texture memory allowed to load mesh textures"));
 }
 
 void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 {
-    maxgpumem = (std::ptrdiff_t) rps.getInt(maximumDedicatedGPUMem()) * 1000000;
+    maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float) (1024 * 1024);
+
     permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
     highprecision = false;
     if (MeshLabScalarTest<Scalarm>::doublePrecision())
         highprecision = rps.getBool(highPrecisionRendering());
+	maxTextureMemory = (std::ptrdiff_t) rps.getInt(this->maxTextureMemoryParam()) * (float) (1024 * 1024);
 }

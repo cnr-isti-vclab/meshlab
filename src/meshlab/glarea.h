@@ -146,7 +146,7 @@ public:
     // The decorate function of the current active editor is still called.
     // EndEdit is called only when you press again the same button or when you change editor.
 public slots:
-    void updateTexture(); // slot for forcing the texture reload.
+    void setupTextureEnv(GLuint textid);
     void resetTrackBall();
     void showRaster(bool resetViewFlag);
 
@@ -264,9 +264,7 @@ public:
 protected:
 
     void initializeGL();
-    int RoundUpToTheNextHighestPowerOf2(unsigned int v);
 
-    void initTexture(bool reloadAllTexture);
     void displayInfo(QPainter *painter);
     void displayRealTimeLog(QPainter *painter);
 
@@ -323,6 +321,7 @@ public:
 
     QMap<int,RenderMode> rendermodemap;
 	QMap<int,vcg::GLFeederInfo::ReqAtts> reqattsmap;
+    QMap<int,bool> boallocated;
 
     // view setting variables
     float fov;

@@ -31,12 +31,13 @@
 
 #include "../common/pluginmanager.h"
 #include "../common/scriptinterface.h"
+#include "../common/ml_thread_safe_memory_info.h"
 #include "glarea.h"
 #include "layerDialog.h"
 #include "stdpardialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
-#include "ml_thread_safe_memory_info.h"
+
 
 #include <QtScript>
 #include <QDir>
@@ -61,18 +62,20 @@ class QToolBar;
 class MainWindowSetting
 {
 public:
-
     static void initGlobalParameterSet(RichParameterSet* gblset);
     void updateGlobalParameterSet( RichParameterSet& rps );
 
     std::ptrdiff_t maxgpumem;
-    inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMem";}
+    inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
 
     bool permeshtoolbar;
     static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 
     bool highprecision;
     static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
+
+    std::ptrdiff_t maxTextureMemory;
+    inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
 };
 
 class MainWindow : public QMainWindow, public MainWindowInterface
@@ -87,11 +90,11 @@ public:
     void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& parexpval , bool  isPreview = false);
 
 
-  MainWindow();
-  ~MainWindow();
+    MainWindow();
+    ~MainWindow();
     static bool QCallBack(const int pos, const char * str);
     //const QString appName() const {return tr("MeshLab v")+appVer(); }
-  //const QString appVer() const {return tr("1.3.2"); }
+    //const QString appVer() const {return tr("1.3.2"); }
     MainWindowSetting mwsettings;
 signals:
     void dispatchCustomSettings(RichParameterSet& rps);
@@ -99,131 +102,131 @@ signals:
     void updateLayerTable();
 
 private slots:
-  void newProject(const QString& projName = QString());
-  void saveProject();
+    void newProject(const QString& projName = QString());
+    void saveProject();
 
 public slots:
-  bool importMeshWithLayerManagement(QString fileName=QString());
-  bool importRaster(const QString& fileImg = QString());
-  bool openProject(QString fileName=QString());
-  bool appendProject(QString fileName=QString());
-  void updateCustomSettings();
+    bool importMeshWithLayerManagement(QString fileName=QString());
+    bool importRaster(const QString& fileImg = QString());
+    bool openProject(QString fileName=QString());
+    bool appendProject(QString fileName=QString());
+    void updateCustomSettings();
+    void updateRenderMode();
 
-
-  void updateRenderMode();
 private slots:
-  bool importMesh(QString fileName=QString());
-  void endEdit();
-  void updateDocumentScriptBindings();
-  void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
-  void postFilterExecution(/*MeshLabXMLFilterContainer* mfc*/);
-  //void evaluateExpression(const Expression& exp,Value** res);
-  void updateProgressBar(const int pos,const QString& text);
+   bool importMesh(QString fileName=QString());
+   void endEdit();
+   void updateDocumentScriptBindings();
+   void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
+   void postFilterExecution(/*MeshLabXMLFilterContainer* mfc*/);
+                //void evaluateExpression(const Expression& exp,Value** res);
+   void updateProgressBar(const int pos,const QString& text);
+   void updateTexture(int meshid);
 
 public:
-  bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-  bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar, const Matrix44m &mtr=Matrix44m::Identity());
-  bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm, const Matrix44m &mtr=Matrix44m::Identity());
+    bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
+    bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar, const Matrix44m &mtr=Matrix44m::Identity());
+    bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm, const Matrix44m &mtr=Matrix44m::Identity());
 
-private slots:
-    //////////// Slot Menu File //////////////////////
-  void reload();
-  void reloadAllMesh();
-  void openRecentMesh();
-    void openRecentProj();
-    bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
-    bool save(const bool saveAllPossibleAttributes = false);
-    bool saveSnapshot();
-    void changeFileExtension(const QString&);
-    ///////////Slot Menu Edit ////////////////////////
-    void applyEditMode();
-    void suspendEditMode();
-    ///////////Slot Menu Filter ////////////////////////
-    void startFilter();
-    void applyLastFilter();
-    void runFilterScript();
-    void showFilterScript();
-    void showXMLPluginEditorGui();
-  void showTooltip(QAction*);
-  /////////// Slot Menu Render /////////////////////
-   //void renderBbox();
-    //void renderPoint();
-/*    void renderWire();
-    void renderFlat();
-    void renderFlatLine();
-    void renderHiddenLines();
-    void renderSmooth();
-    void renderTexture();
-    void setLight();
-    void setDoubleLighting();
-    void setFancyLighting();*/
+    private slots:
+        //////////// Slot Menu File //////////////////////
+        void reload();
+        void reloadAllMesh();
+        void openRecentMesh();
+        void openRecentProj();
+        bool saveAs(QString fileName = QString(),const bool saveAllPossibleAttributes = false);
+        bool save(const bool saveAllPossibleAttributes = false);
+        bool saveSnapshot();
+        void changeFileExtension(const QString&);
+        ///////////Slot Menu Edit ////////////////////////
+        void applyEditMode();
+        void suspendEditMode();
+        ///////////Slot Menu Filter ////////////////////////
+        void startFilter();
+        void applyLastFilter();
+        void runFilterScript();
+        void showFilterScript();
+        void showXMLPluginEditorGui();
+        void showTooltip(QAction*);
+        /////////// Slot Menu Render /////////////////////
+        //void renderBbox();
+        //void renderPoint();
+        /*    void renderWire();
+        void renderFlat();
+        void renderFlatLine();
+        void renderHiddenLines();
+        void renderSmooth();
+        void renderTexture();
+        void setLight();
+        void setDoubleLighting();
+        void setFancyLighting();*/
 
-    //void setColorMode(QAction *qa);
- //   void setColorNoneMode();
-    //void setPerMeshColorMode();
-    //void setPerVertexColorMode();
-    //void setPerFaceColorMode();
+        //void setColorMode(QAction *qa);
+        //   void setColorNoneMode();
+        //void setPerMeshColorMode();
+        //void setPerVertexColorMode();
+        //void setPerFaceColorMode();
 
-    void applyRenderMode();
-    //void applyColorMode();
-    /* void toggleBackFaceCulling();
-    void toggleSelectFaceRendering();
-    void toggleSelectVertRendering();*/
-    void applyDecorateMode();
+        void applyRenderMode();
+        //void applyColorMode();
+        /* void toggleBackFaceCulling();
+        void toggleSelectFaceRendering();
+        void toggleSelectVertRendering();*/
+        void applyDecorateMode();
 
-  void switchOffDecorator(QAction* );
-    ///////////Slot Menu View ////////////////////////
-    void fullScreen();
-    void showToolbarFile();
-    void showToolbarRender();
-    void showInfoPane();
-    void showTrackBall();
-    void resetTrackBall();
-    void showLayerDlg(bool visible);
-    void showRaster();
-    ///////////Slot Menu Windows /////////////////////
-    void updateWindowMenu();
-    void updateMenus();
-    void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
-    void updateMenuItems(QMenu* menu,const bool enabled);
-    void updateStdDialog();
-    void updateXMLStdDialog();
-    void enableDocumentSensibleActionsContainer(const bool enable);
+        void switchOffDecorator(QAction* );
+        ///////////Slot Menu View ////////////////////////
+        void fullScreen();
+        void showToolbarFile();
+        void showToolbarRender();
+        void showInfoPane();
+        void showTrackBall();
+        void resetTrackBall();
+        void showLayerDlg(bool visible);
+        void showRaster();
+        ///////////Slot Menu Windows /////////////////////
+        void updateWindowMenu();
+        void updateMenus();
+        void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
+        void updateMenuItems(QMenu* menu,const bool enabled);
+        void updateStdDialog();
+        void updateXMLStdDialog();
+        void enableDocumentSensibleActionsContainer(const bool enable);
 
-    //void updatePerViewApplicationStatus();
-    void setSplit(QAction *qa);
-    void setUnsplit();
-    void linkViewers();
-    void viewFrom(QAction *qa);
-    void readViewFromFile();
-  void viewFromCurrentMeshShot();
-  void viewFromCurrentRasterShot();
-  void copyViewToClipBoard();
-    void pasteViewFromClipboard();
-    ///////////Slot PopUp Menu Handles /////////////////////
-    void splitFromHandle(QAction * qa);
-    void unsplitFromHandle(QAction * qa);
+        //void updatePerViewApplicationStatus();
+        void setSplit(QAction *qa);
+        void setUnsplit();
+        void linkViewers();
+        void viewFrom(QAction *qa);
+        void readViewFromFile();
+        void viewFromCurrentMeshShot();
+        void viewFromCurrentRasterShot();
+        void copyViewToClipBoard();
+        void pasteViewFromClipboard();
+        ///////////Slot PopUp Menu Handles /////////////////////
+        void splitFromHandle(QAction * qa);
+        void unsplitFromHandle(QAction * qa);
 
-    ///////////Slot Menu Preferences /////////////////
-    void setCustomize();
-    ///////////Slot Menu Help ////////////////////////
-    void about();
-    void aboutPlugins();
-    void helpOnline();
-    void helpOnscreen();
-    void submitBug();
-    void checkForUpdates(bool verboseFlag=true);
+        ///////////Slot Menu Preferences /////////////////
+        void setCustomize();
+        ///////////Slot Menu Help ////////////////////////
+        void about();
+        void aboutPlugins();
+        void helpOnline();
+        void helpOnscreen();
+        void submitBug();
+        void checkForUpdates(bool verboseFlag=true);
 
-    ///////////Slot General Purpose ////////////////////////
+        ///////////Slot General Purpose ////////////////////////
 
-    void dropEvent ( QDropEvent * event );
-    void dragEnterEvent(QDragEnterEvent *);
-    void connectionDone(QNetworkReply *reply);
-    void sendHistory();
+        void dropEvent ( QDropEvent * event );
+        void dragEnterEvent(QDragEnterEvent *);
+        void connectionDone(QNetworkReply *reply);
+        void sendHistory();
 
-    ///////////Solt Wrapper for QMdiArea //////////////////
-    void wrapSetActiveSubWindow(QWidget* window);
-    void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
+        ///////////Solt Wrapper for QMdiArea //////////////////
+        void wrapSetActiveSubWindow(QWidget* window);
+        void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
 private:
 
     int longestActionWidthInMenu(QMenu* m,const int longestwidth);
@@ -243,16 +246,18 @@ private:
     void fillEditMenu();
     void createToolBars();
     void loadMeshLabSettings();
-  // void loadPlugins();
+    // void loadPlugins();
     void keyPressEvent(QKeyEvent *);
     void updateRecentFileActions();
     void updateRecentProjActions();
-  void saveRecentFileList(const QString &fileName);
+    void saveRecentFileList(const QString &fileName);
     void saveRecentProjectList(const QString &projName);
     void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
     void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
     void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
+
+    void deallocateReqAttsConsideringAllOtherGLArea(GLArea* ar,const int meshid,const RenderMode& currentrendmode,const RenderMode& newrendermode);
 
     QNetworkAccessManager *httpReq;
     QBuffer myLocalBuf;
@@ -273,12 +278,12 @@ private:
 
     //QMap<QThread*,Env*> envtobedeleted;
 
-        /*
-        Note this part should be detached from MainWindow just like the loading plugin part.
+    /*
+    Note this part should be detached from MainWindow just like the loading plugin part.
 
-        For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values.
-        At the start up the initGlobalParameterSet function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
-        At the start up the currentGlobalParams is filled with the values saved in the registry.
+    For each running instance of meshlab, for the global params we have default (hardwired) values and current(saved,modified) values.
+    At the start up the initGlobalParameterSet function (of decorations and of glarea and of ... ) is called with the empty RichParameterSet defaultGlobalParams (to collect the default values)
+    At the start up the currentGlobalParams is filled with the values saved in the registry.
     */
 
     RichParameterSet currentGlobalParams;
@@ -294,43 +299,44 @@ private:
 public:
     PluginManager PM;
 
-  MeshDocument *meshDoc() {
-    assert(currentViewContainer());
-    return &currentViewContainer()->meshDoc;
-  }
+    MeshDocument *meshDoc() {
+        assert(currentViewContainer());
+        return &currentViewContainer()->meshDoc;
+    }
 
-  inline MLThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;}
-  const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
-  RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
-  const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
+    inline MLThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;} 
+    const RichParameterSet& currentGlobalPars() const { return currentGlobalParams; }
+    RichParameterSet& currentGlobalPars() { return currentGlobalParams; }
+    const RichParameterSet& defaultGlobalPars() const { return defaultGlobalParams; }
+
 
     GLArea *GLA() const {
-//	  if(mdiarea->currentSubWindow()==0) return 0;
-    MultiViewer_Container *mvc = currentViewContainer();
-    if(!mvc) return 0;
-    GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
-      return glw;
+        //	  if(mdiarea->currentSubWindow()==0) return 0;
+        MultiViewer_Container *mvc = currentViewContainer();
+        if(!mvc) return 0;
+        GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
+        return glw;
     }
 
-  MultiViewer_Container* currentViewContainer() const {
-    MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
-    if(mvc) return mvc;
-    if(mvc==0 && mdiarea->currentSubWindow()!=0 ){
-            mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-      if(mvc) return mvc;
-        }
-    QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
-    foreach(QMdiSubWindow *subwinPtr,subwinList)
-    {
-        MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(subwinPtr);
+    MultiViewer_Container* currentViewContainer() const {
+        MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
         if(mvc) return mvc;
-        if(mvc==0 && subwinPtr!=0){
-          mvc = qobject_cast<MultiViewer_Container *>(subwinPtr->widget());
-          if(mvc) return mvc;
+        if(mvc==0 && mdiarea->currentSubWindow()!=0 ){
+            mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+            if(mvc) return mvc;
         }
-    }
+        QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
+        foreach(QMdiSubWindow *subwinPtr,subwinList)
+        {
+            MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(subwinPtr);
+            if(mvc) return mvc;
+            if(mvc==0 && subwinPtr!=0){
+                mvc = qobject_cast<MultiViewer_Container *>(subwinPtr->widget());
+                if(mvc) return mvc;
+            }
+        }
 
-    return 0;
+        return 0;
     }
 
 
@@ -338,11 +344,11 @@ public:
 
     const PluginManager& pluginManager() const { return PM; }
 
-  static QStatusBar *&globalStatusBar()
-  {
-    static QStatusBar *_qsb=0;
-    return _qsb;
-  }
+    static QStatusBar *&globalStatusBar()
+    {
+        static QStatusBar *_qsb=0;
+        return _qsb;
+    }
     QMenu* meshLayerMenu() { return filterMenuMeshLayer; }
     QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
     void connectRenderModeActionList(QList<RenderModeAction*>& actlist);
@@ -362,30 +368,30 @@ private:
 
     ///////// Menus ///////////////
     QMenu *fileMenu;
-  QMenu *filterMenu;
-  QMenu* recentProjMenu;
-  QMenu* recentFileMenu;
+    QMenu *filterMenu;
+    QMenu* recentProjMenu;
+    QMenu* recentFileMenu;
 
-  QMenu *filterMenuSelect;
-  QMenu *filterMenuClean;
-  QMenu *filterMenuCreate;
-  QMenu *filterMenuRemeshing;
-  QMenu *filterMenuPolygonal;
-  QMenu *filterMenuColorize;
-  QMenu *filterMenuSmoothing;
-  QMenu *filterMenuQuality;
-  QMenu *filterMenuMeshLayer;
-  QMenu *filterMenuRasterLayer;
-  QMenu *filterMenuNormal;
-  QMenu *filterMenuRangeMap;
-  QMenu *filterMenuPointSet;
-  QMenu *filterMenuSampling;
-  QMenu *filterMenuTexture;
-  QMenu *filterMenuCamera;
+    QMenu *filterMenuSelect;
+    QMenu *filterMenuClean;
+    QMenu *filterMenuCreate;
+    QMenu *filterMenuRemeshing;
+    QMenu *filterMenuPolygonal;
+    QMenu *filterMenuColorize;
+    QMenu *filterMenuSmoothing;
+    QMenu *filterMenuQuality;
+    QMenu *filterMenuMeshLayer;
+    QMenu *filterMenuRasterLayer;
+    QMenu *filterMenuNormal;
+    QMenu *filterMenuRangeMap;
+    QMenu *filterMenuPointSet;
+    QMenu *filterMenuSampling;
+    QMenu *filterMenuTexture;
+    QMenu *filterMenuCamera;
 
     QMenu *editMenu;
 
-  //Render Menu and SubMenu ////
+    //Render Menu and SubMenu ////
     QMenu *shadersMenu;
     QMenu *renderMenu;
     QMenu *renderModeMenu;
@@ -412,25 +418,25 @@ private:
     MyToolButton* searchButton;
     SearchMenu* searchMenu;
     //////////// Actions Menu File ///////////////////////
-  QAction *newProjectAct;
-  QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
-  QAction  *importMeshAct,   *exportMeshAct,  *exportMeshAsAct;
-  QAction  *importRasterAct;
-  QAction *closeProjectAct;
-  QAction *reloadMeshAct;
-  QAction *reloadAllMeshAct;
-  QAction *saveSnapshotAct;
-  QAction *recentFileActs[MAXRECENTFILES];
-  QAction *recentProjActs[MAXRECENTFILES];
+    QAction *newProjectAct;
+    QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
+    QAction  *importMeshAct,   *exportMeshAct,  *exportMeshAsAct;
+    QAction  *importRasterAct;
+    QAction *closeProjectAct;
+    QAction *reloadMeshAct;
+    QAction *reloadAllMeshAct;
+    QAction *saveSnapshotAct;
+    QAction *recentFileActs[MAXRECENTFILES];
+    QAction *recentProjActs[MAXRECENTFILES];
     QAction *separatorAct;
     QAction *exitAct;
-  //////
-  QAction *lastFilterAct;
-  QAction *runFilterScriptAct;
-  QAction *showFilterScriptAct;
-  QAction* showFilterEditAct;
-  /////////// Actions Menu Edit  /////////////////////
-  QAction *suspendEditModeAct;
+    //////
+    QAction *lastFilterAct;
+    QAction *runFilterScriptAct;
+    QAction *showFilterScriptAct;
+    QAction* showFilterEditAct;
+    /////////// Actions Menu Edit  /////////////////////
+    QAction *suspendEditModeAct;
     /////////// Actions Menu Render /////////////////////
     QActionGroup *renderModeGroupAct;
     RenderModeAction *renderBboxAct;
@@ -494,8 +500,8 @@ private:
     QAction *viewRightAct;
     QAction *viewFrontAct;
     QAction *viewBackAct;
-  QAction *viewFromMeshAct;
-  QAction *viewFromRasterAct;
+    QAction *viewFromMeshAct;
+    QAction *viewFromRasterAct;
     QAction *viewFromFileAct;
 
     ///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////
@@ -526,33 +532,33 @@ private:
 /// Event filter that is installed to intercept the open events sent directly by the Operative System
 class FileOpenEater : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  FileOpenEater(MainWindow *_mainWindow)
-  {
-    mainWindow= _mainWindow;
-    noEvent=true;
-  }
+    FileOpenEater(MainWindow *_mainWindow)
+    {
+        mainWindow= _mainWindow;
+        noEvent=true;
+    }
 
-  MainWindow *mainWindow;
-  bool noEvent;
+    MainWindow *mainWindow;
+    bool noEvent;
 
 protected:
 
-  bool eventFilter(QObject *obj, QEvent *event)
-  {
-    if (event->type() == QEvent::FileOpen) {
-      noEvent=false;
-      QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
-      mainWindow->importMeshWithLayerManagement(fileEvent->file());
-      qDebug("event fileopen %s",qPrintable(fileEvent->file()));
-      return true;
-    } else {
-      // standard event processing
-      return QObject::eventFilter(obj, event);
+    bool eventFilter(QObject *obj, QEvent *event)
+    {
+        if (event->type() == QEvent::FileOpen) {
+            noEvent=false;
+            QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
+            mainWindow->importMeshWithLayerManagement(fileEvent->file());
+            qDebug("event fileopen %s",qPrintable(fileEvent->file()));
+            return true;
+        } else {
+            // standard event processing
+            return QObject::eventFilter(obj, event);
+        }
     }
-  }
 };
 
 #endif

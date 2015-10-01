@@ -21,35 +21,45 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef __ML_THREAD_SAFE_MEMORY_INFO_H
-#define __ML_THREAD_SAFE_MEMORY_INFO_H
+#include "ml_thread_safe_memory_info.h"
 
-#include <QReadWriteLock>
-
-#include <wrap/system/memory_info.h>
-
-
-class MLThreadSafeMemoryInfo : public vcg::NotThreadSafeMemoryInfo
+MLThreadSafeMemoryInfo::MLThreadSafeMemoryInfo( std::ptrdiff_t originalmem ) 
+	:vcg::NotThreadSafeMemoryInfo(originalmem),lock(QReadWriteLock::Recursive)
 {
-public:
-    MLThreadSafeMemoryInfo(std::ptrdiff_t originalmem);
 
-    ~MLThreadSafeMemoryInfo();
+}
 
-    void acquiredMemory(std::ptrdiff_t mem);
+MLThreadSafeMemoryInfo::~MLThreadSafeMemoryInfo()
+{
+}
 
-    std::ptrdiff_t usedMemory() const;
+void MLThreadSafeMemoryInfo::acquiredMemory(std::ptrdiff_t mem)
+{
+	QWriteLocker locker(&lock);
+	vcg::NotThreadSafeMemoryInfo::acquiredMemory(mem);
+}
 
-    std::ptrdiff_t currentFreeMemory() const;
+std::ptrdiff_t MLThreadSafeMemoryInfo::usedMemory() const
+{
+	QReadLocker locker(&lock);
+	return vcg::NotThreadSafeMemoryInfo::usedMemory();
+	
+}
 
-    void releasedMemory(std::ptrdiff_t mem = 0);
+std::ptrdiff_t MLThreadSafeMemoryInfo::currentFreeMemory() const
+{
+	QReadLocker locker(&lock);
+	return vcg::NotThreadSafeMemoryInfo::currentFreeMemory();
+}
 
-    bool isAdditionalMemoryAvailable(std::ptrdiff_t mem);
-private:
-    //mutable objects can be modified from the declared const functions
-    //in this way we have not to modified the basic vcg::MemoryInfo interface for the logically const functions
-    //whose need to lock the mutex for a simple reading operation
-    mutable QReadWriteLock lock;
-};
+void MLThreadSafeMemoryInfo::releasedMemory(std::ptrdiff_t mem)
+{
+	QWriteLocker locker(&lock);
+	vcg::NotThreadSafeMemoryInfo::releasedMemory(mem);
+}
 
-#endif
+bool MLThreadSafeMemoryInfo::isAdditionalMemoryAvailable( std::ptrdiff_t mem )
+{
+	QReadLocker locker(&lock);
+	return vcg::NotThreadSafeMemoryInfo::isAdditionalMemoryAvailable(mem);
+}

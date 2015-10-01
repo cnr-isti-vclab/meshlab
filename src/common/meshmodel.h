@@ -192,6 +192,7 @@ It contains a single vcg mesh object with some additional information for keepin
 */
 
 class MeshDocument;
+class MLThreadSafeGLMeshAttributesFeeder;
 
 class MeshModel
 {
@@ -246,11 +247,11 @@ public:
         MM_ALL				= 0xffffffff
     };
 
+    MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
+
     MeshDocument *parent;
 
     CMeshO cm;
-
-public:
     /*
     Bitmask denoting what fields are currently used in the mesh
     it is composed by MeshElement enums.
@@ -272,6 +273,7 @@ private:
     QString _label;
     int _id;
     bool modified;
+    MLThreadSafeGLMeshAttributesFeeder* feeder;
 
 public:
     void Clear();
@@ -314,7 +316,6 @@ public:
 
     bool visible; // used in rendering; Needed for toggling on and off the meshes
     bool isVisible() { return visible; }
-    MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
 
     // This function is roughly equivalent to the updateDataMask,
     // but it takes in input a mask coming from a filetype instead of a filter requirement (like topology etc)
@@ -330,6 +331,8 @@ public:
     bool& meshModified();
     static int io2mm(int single_iobit);
 
+    void setMLThreadSafeGLMeshAttributesFeeder(MLThreadSafeGLMeshAttributesFeeder* ptr) {feeder = ptr;}
+    MLThreadSafeGLMeshAttributesFeeder* getMLThreadSafeGLMeshAttributesFeeder() {return feeder;}
 
 };// end class MeshModel
 
@@ -526,6 +529,8 @@ Q_DECLARE_METATYPE(RenderMode)
 //};
 //class FilterScript;
 
+class MLSceneGLSharedDataContext;
+
 class MeshDocument : public QObject
 {
     Q_OBJECT
@@ -694,12 +699,16 @@ public:
     }
 
     bool hasBeenModified();
+
+    MLSceneGLSharedDataContext* sharedDataProxy();
+    void setMLSceneGLSharedDataContext(MLSceneGLSharedDataContext* shared);
+
 private:
     MeshModel *currentMesh;
     //the current raster model
     RasterModel* currentRaster;
 
-
+    MLSceneGLSharedDataContext* _shareddataproxy;
 
 signals:
     ///whenever the current mesh is changed (e.g. the user click on a different mesh)

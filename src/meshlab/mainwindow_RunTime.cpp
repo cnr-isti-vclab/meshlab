@@ -545,7 +545,6 @@ void MainWindow::setSplit(QAction *qa)
     if(mvc)
     {
         GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
-		bool r = glwClone->isSharing();
         if(qa->text() == tr("&Horizontally"))
             mvc->addView(glwClone,Qt::Vertical);
         else if(qa->text() == tr("&Vertically"))
@@ -932,7 +931,7 @@ void MainWindow::runFilterScript()
                     delete cppfilt->glContext;
                     GLA()->completeUpdateRequested();
                     connect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
-                   /* executeFilter(&cont,*env);*/
+                    /* executeFilter(&cont,*env);*/
                     QStringList filterClassesList = cont.xmlInfo->filterAttribute(filtnm,MLXMLElNames::filterClass).split(QRegExp("\\W+"), QString::SkipEmptyParts);
                     classes = MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
                 }
@@ -1056,7 +1055,7 @@ void MainWindow::startFilter()
             MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
             QString fname = action->text();
             MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
-            
+
             if ((iXMLFilter == NULL) || (filt.xmlInfo == NULL) || (filt.act == NULL))
                 throw MeshLabException("An invalid MLXMLPluginInfo handle has been detected in startFilter function.");
             QString filterClasses = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
@@ -1262,7 +1261,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
             if (it != GLA()->rendermodemap.end())
                 it.value().setTextureMode(GLW::TMPerWedgeMulti);
-            GLA()->updateTexture();
+            updateTexture(meshDoc()->mm()->id());
         }
 
         int fclasses =	iFilter->getClass(action);
@@ -1288,12 +1287,12 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             vcg::GLW::NormalMode nmmode = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
 
 
-//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
+            //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-//            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
-//                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
-//            else
-//                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
+            //            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
+            //                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
+            //            else
+            //                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
         }
     }
     catch (std::bad_alloc& bdall)
@@ -1315,8 +1314,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
 {
-   /* if (env.isNull())
-        throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
+    /* if (env.isNull())
+    throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
     //if (meshDoc() == NULL)
     //    return;
 
@@ -1581,7 +1580,7 @@ void MainWindow::postFilterExecution()
                 postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
 
             if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
-                 postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
+                postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
 
             if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                 postCondMask = postCondMask | MeshModel::MM_FACEQUALITY;
@@ -1597,12 +1596,12 @@ void MainWindow::postFilterExecution()
                 rm = ci.value();
                 nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
             }
-//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
+            //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-//            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
-//                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
-//            else
-//                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+            //            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
+            //                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
+            //            else
+            //                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
         }
     }
 
@@ -1661,7 +1660,7 @@ void MainWindow::postFilterExecution()
         QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
         if (it != GLA()->rendermodemap.end())
             it.value().setTextureMode(GLW::TMPerWedgeMulti);
-        GLA()->updateTexture();
+        updateTexture(meshDoc()->mm()->id());
     }
     /* QMap<QThread*,Env*>::iterator it = envtobedeleted.find(obj);
     if (it == envtobedeleted.end())
@@ -2122,7 +2121,7 @@ bool MainWindow::appendProject(QString fileName)
 
 void MainWindow::newProject(const QString& projName)
 {
-	if (gpumeminfo == NULL)
+    if (gpumeminfo == NULL)
         return;
     MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mdiarea);
     mdiarea->addSubWindow(mvcont);
@@ -2314,6 +2313,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     //renderModeTextureWedgeAct->setEnabled(false);
     if(!meshDoc()->mm()->cm.textures.empty())
     {
+        updateTexture(meshDoc()->mm()->id());
         renderModeTextureWedgeAct->setChecked(true);
         //renderModeTextureWedgeAct->setEnabled(true);
         if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
@@ -2366,18 +2366,16 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     mm->cm.Tr = mtr;
     vcg::GLW::NormalMode nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
 
-//WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-    //mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
-	MultiViewer_Container* mv = GLA()->mvc();
-	if (mv != NULL)
-	{
-		for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
-		{
-			GLArea* ar = mv->getViewer(glarid);
-			if (ar != NULL)
-				ar->setupRequestedAttributesPerMesh(mm->id());
-		}
-	}
+    MultiViewer_Container* mv = GLA()->mvc();
+    if (mv != NULL)
+    {
+        for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+        {
+            GLArea* ar = mv->getViewer(glarid);
+            if (ar != NULL)
+                ar->setupRequestedAttributesPerMesh(mm->id());
+        }
+    }
 
     meshDoc()->setBusy(false);
 
@@ -2471,16 +2469,16 @@ bool MainWindow::importMesh(QString fileName)
                 postOpenDialog.exec();
                 pCurrentIOPlugin->applyOpenParameter(extension, *mm, par);
             }
-			/*MultiViewer_Container* mv = GLA()->mvc();
-			if (mv != NULL)
-			{
-			for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
-			{
-			GLArea* ar = mv->getViewer(glarid);
-			if (ar != NULL)
-			MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode(mm->id(),*ar);
-			}
-			}*/
+            /*MultiViewer_Container* mv = GLA()->mvc();
+            if (mv != NULL)
+            {
+            for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+            {
+            GLArea* ar = mv->getViewer(glarid);
+            if (ar != NULL)
+            MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode(mm->id(),*ar);
+            }
+            }*/
         }
         else
         {
@@ -2885,6 +2883,76 @@ bool MainWindow::QCallBack(const int pos, const char * str)
     return true;
 }
 
+void MainWindow::updateTexture(int meshid)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if ((mvc == NULL) || (meshDoc() == NULL)) 
+        return;
+
+    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+    if (shared == NULL)
+        return;
+
+    MeshModel* mymesh = meshDoc()->getMesh(meshid);
+    if (mymesh  == NULL)
+        return;
+
+    shared->deAllocateTexturesPerMesh(mymesh->id());
+
+    int textmemMB = int(mwsettings.maxTextureMemory / ((float) 1024 * 1024));
+
+    size_t totalTextureNum = 0;
+    foreach (MeshModel *mp, meshDoc()->meshList)
+        totalTextureNum+=mp->cm.textures.size();
+
+    int singleMaxTextureSizeMpx = int(textmemMB/totalTextureNum);
+    bool sometextfailed = false;
+    QString unexistingtext = "In mesh file <i>" + mymesh->fullName() + "</i> : Failure loading textures:<br>";
+    for(size_t i =0; i< mymesh->cm.textures.size();++i)
+    {
+        QImage img;
+        QFileInfo fi(mymesh->cm.textures[i].c_str());
+        QString filename = fi.absoluteFilePath();
+        bool res = img.load(filename);
+        sometextfailed = sometextfailed || !res;
+        if(!res)
+        {
+            res = img.load(filename);
+            if(!res)
+            {
+                QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
+                meshDoc()->Log.Log(GLLogStream::WARNING,qPrintable(errmsg));
+                unexistingtext += "<font color=red>" + filename + "</font><br>";
+            }
+        }
+
+/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
+        //if(!res && filename.endsWith("dds",Qt::CaseInsensitive))
+        //{
+        //    qDebug("DDS binding!");
+        //    int newTexId = shared->bindTexture(filename);
+        //    shared->txtcont.push_back(newTexId);
+        //}
+/*PLEASE EXPLAIN ME!*********************************************************************************************************************************************************************************/
+
+        if (!res)
+            res = img.load(":/images/dummy.png");
+        GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
+   
+        if (sometextfailed)
+            QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+
+        for(int tt = 0;tt < mvc->viewerCounter();++tt)
+        {
+            GLArea* ar = mvc->getViewer(tt);
+            if (ar != NULL)
+                ar->setupTextureEnv(textid);
+        }
+    }
+    if (sometextfailed)
+        QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+}
+
 void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
     this->QCallBack(pos,qPrintable(text));
@@ -2968,6 +3036,7 @@ void MainWindow::updateRenderMode( )
         for(QMap<int,RenderMode>::iterator it =	rmode.begin();it != rmode.end();++it)
         {
             RenderMode& rm = it.value();
+            RenderMode old = rm;
             act->updateRenderMode(rm);
             //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
             //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
@@ -2978,14 +3047,15 @@ void MainWindow::updateRenderMode( )
             if (mmod == NULL)
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
 
-			GLA()->setupRequestedAttributesPerMesh(it.key());
-			
+            deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+            GLA()->setupRequestedAttributesPerMesh(it.key());
         }
     }
     else
     {
         QMap<int,RenderMode>::iterator it = rmode.find(meshid);
         RenderMode& rm = it.value();
+        RenderMode old = rm;
         if (it == rmode.end())
             throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
         act->updateRenderMode(rm);
@@ -2998,10 +3068,38 @@ void MainWindow::updateRenderMode( )
         MeshModel* mmod = meshDoc()->getMesh(it.key());
         if (mmod == NULL)
             throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-        
-		GLA()->setupRequestedAttributesPerMesh(it.key());
+
+        deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+        GLA()->setupRequestedAttributesPerMesh(it.key());
     }
     GLA()->update();
+}
+
+void MainWindow::deallocateReqAttsConsideringAllOtherGLArea(GLArea* ar,const int meshid,const RenderMode& currentrendmode,const RenderMode& newrendermode)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if ((mvc == NULL) || (ar == NULL))
+        return;
+
+    int currentid = ar->getId();
+    vcg::GLFeederInfo::ReqAtts oldatts;
+    MLSceneRenderModeAdapter::renderModeToReqAtts(currentrendmode,oldatts);
+    vcg::GLFeederInfo::ReqAtts newatts;
+    MLSceneRenderModeAdapter::renderModeToReqAtts(newrendermode,newatts);
+    oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,newatts);
+    for(int ii = 0; ii < mvc->viewerCounter();++ii)
+    {
+        GLArea* otherarea = mvc->getViewer(ii);
+        if ((ii != currentid) && (otherarea != NULL))
+        {
+            vcg::GLFeederInfo::ReqAtts othermeshview;
+            MLSceneRenderModeAdapter::renderModeToReqAtts(mvc->getViewer(ii)->rendermodemap[meshid],othermeshview);
+            oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,othermeshview);
+        }
+    }
+    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
+    if (feed != NULL)
+        feed->invalidateRequestedAttributes(oldatts);
 }
 
 void MainWindow::connectRenderModeActionList(QList<RenderModeAction*>& actlist)

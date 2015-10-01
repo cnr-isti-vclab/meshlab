@@ -68,6 +68,7 @@ MultiViewer_Container::MultiViewer_Container(MLThreadSafeMemoryInfo& meminfo, bo
     scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,100000,NULL);
 	scenecontext->setHidden(true);
 	scenecontext->initializeGL();
+    meshDoc.setMLSceneGLSharedDataContext(scenecontext);
 	currentId=-1;
 }
 

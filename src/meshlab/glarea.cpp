@@ -21,7 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "../common/interfaces.h"
+#include <common/interfaces.h>
+#include <common/ml_scene_renderer.h>
 #include "glarea.h"
 #include "mainwindow.h"
 
@@ -372,13 +373,14 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    if (shared->highPrecisionRendering())
-        glTranslate(-shared->globalSceneCenter());
+    /*if (shared->highPrecisionRendering())
+        glTranslate(-shared->globalSceneCenter());*/
 
     foreach(MeshModel * mp, this->md()->meshList)
     {
         glLoadName(mp->id());
-        MLSceneRenderModeAdapter::renderMesh((unsigned int) mp->id(),*this);
+        //MLSceneRenderModeAdapter::renderMesh((unsigned int) mp->id(),*this);
+        //renderMesh(this->context(),MLThreadSafeGLMeshAttributesFeeder& feed,const RenderMode& rm,RichParameterSet& rps);
     }
 
     long hits;
@@ -410,11 +412,11 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     QTime time;
     time.start();
 
-    if(!this->md()->isBusy())
-    {
-        initTexture(hasToUpdateTexture);
-        hasToUpdateTexture=false;
-    }
+    //if(!this->md()->isBusy())
+    //{
+    //    initTexture(hasToUpdateTexture);
+    //    hasToUpdateTexture=false;
+    //}
 
     glClearColor(1.0,1.0,1.0,0.0);
     glEnable(GL_DEPTH_TEST);
@@ -467,6 +469,9 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 }
                 hasToSelectMesh=false;
             }
+            MLSceneGLSharedDataContext* datacont = mvc()->sharedDataContext();
+            if (datacont == NULL)
+                return;
             //else
             foreach(MeshModel * mp, this->md()->meshList)
             {
@@ -485,13 +490,9 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         glEnable(GL_CULL_FACE);
                     else
                         glDisable(GL_CULL_FACE);
-                    //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-                    //Mesh visibility is read from the viewer visibility map, not from the mesh
-                    //                    mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
-                    //                    mp->glw.SetHintParami(GLW::HNPPointDistanceAttenuation,glas.pointDistanceAttenuation?1:0);
-                    //                    mp->glw.SetHintParami(GLW::HNPPointSmooth,glas.pointSmooth?1:0);
-                    //                    vcg::GLW::NormalMode nm  = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
-					MLSceneRenderModeAdapter::renderMesh((unsigned int) mp->id(),*this);
+                    MLThreadSafeGLMeshAttributesFeeder* feeder = datacont->meshAttributesFeeder(mp->id());
+                    if (feeder != NULL)
+					    MLSceneRenderModeAdapter::renderMesh(*(context()),*feeder,rm,glas.pointSize,glas.pointSmooth,glas.pointDistanceAttenuation);
                     QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                     for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                     {
@@ -755,6 +756,39 @@ void GLArea::displayInfo(QPainter *painter)
         else col0Text += QString("FOV: Ortho\n");
         if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
+
+        enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
+        RenderingType rendtype = FULL_IMMEDIATE_MODE;
+        for(QMap<int,bool>::const_iterator mit = boallocated.begin();mit != boallocated.end();++mit)
+        {
+            if (mit.value() == true)
+            {
+                rendtype = MIXED;
+                if ((rendtype == MIXED) && (mit == boallocated.end() - 1))
+                    rendtype = FULL_BO;
+
+            }
+        }
+
+        switch(rendtype)
+        {
+        case(FULL_BO):
+            {
+                col0Text += QString("BO_RENDERING");
+                break;
+            }
+        case(MIXED):
+            {
+                col0Text += QString("MIXED_RENDERING");
+                break;
+            }
+        case(FULL_IMMEDIATE_MODE):
+            {
+                col0Text += QString("IMMEDIATE_MODE_RENDERING");
+                break;
+            }
+        }
+
         if (clipRatioNear!=clipRatioNearDefault())
             col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
@@ -1089,8 +1123,8 @@ void GLArea::wheelEvent(QWheelEvent*e)
         //        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.1f, notch),0.01f,50000.0f); break;
         case Qt::ControlModifier                       : clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); break;
         case Qt::ShiftModifier                         : fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
-        case Qt::AltModifier                           : glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
-
+        case Qt::AltModifier                           : 
+            glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
             //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //foreach(MeshModel * mp, this->md()->meshList)
             //	mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
@@ -1262,124 +1296,6 @@ void GLArea::setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode)
     rm.textureMode = mode;
     update();
 }
-
-void GLArea::updateTexture()
-{
-	makeCurrent();
-    hasToUpdateTexture = true;
-}
-
-// compute the next highest power of 2 of 32-bit v
-int GLArea::RoundUpToTheNextHighestPowerOf2(unsigned int v)
-{
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v;
-}
-/** \brief Manage the loading/allocation of the textures of the meshes
-
-It is called at every redraw for within the paint event with an active gl context.
-
-It assumes that:
-- there is a single shared gl wrapper for each mesh for all the contexts (eg same texture id for different glareas),
-
-- No attempt of avoiding texture duplication if two models share the same texture file there are two texture id.
-
-- the values stored in the glwrapper for the texture id (glw.TMId()) is an indicator if there is the need of
-loading a texture (empty vector means load that texture).
-
-*/
-
-void GLArea::initTexture(bool reloadAllTexture)
-{
-	makeCurrent();
-    if (mvc() == NULL)
-        return;
-    if(reloadAllTexture) // ALL the texture must to be re-loaded, so we clear all the TMId vectors
-    {
-        //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-        foreach (MeshModel *mp,this->md()->meshList)
-        {
-            //          if(!mp->bor.TMId.empty())
-            //            glDeleteTextures(mp->bor.TMId.size(), &(mp->bor.TMId[0]));
-            //          mp->bor.TMId.clear();
-        }
-    }
-
-    glEnable(GL_TEXTURE_2D);
-    GLint MaxTextureSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE,&MaxTextureSize);
-    foreach (MeshModel *mp, this->md()->meshList)
-    {
-        //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-        if(!mp->cm.textures.empty() /*&& mp->bor.TMId.empty()*/)
-        {
-            QString unexistingtext = "In mesh file <i>" + mp->fullName() + "</i> : Failure loading textures:<br>";
-            bool sometextfailed = false;
-            Logf(GLLogStream::SYSTEM,"Loading textures");
-            for(unsigned int i =0; i< mp->cm.textures.size();++i)
-            {
-                QImage img, imgScaled, imgGL;
-                QFileInfo fi(mp->cm.textures[i].c_str());
-                bool res = img.load(fi.absoluteFilePath());
-                sometextfailed = sometextfailed || !res;
-                if(!res)
-                {
-                    res = img.load(mp->cm.textures[i].c_str());
-                    if(!res)
-                    {
-                        this->Logf(0,"Failure of loading texture %s",mp->cm.textures[i].c_str());
-                        unexistingtext += "<font color=red>" + QString(mp->cm.textures[i].c_str()) + "</font><br>";
-                    }
-                }
-                if(!res && QString(mp->cm.textures[i].c_str()).endsWith("dds",Qt::CaseInsensitive))
-                {
-                    qDebug("DDS binding!");
-                    int newTexId = bindTexture(QString(mp->cm.textures[i].c_str()));
-                    //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-                    //mp->bor.TMId.push_back(newTexId);
-                }
-                if (!res)
-                    res = img.load(":/images/dummy.png");
-                if(res)
-                {
-                    // image has to be scaled to a 2^n size. We choose the first 2^N >= picture size.
-                    int bestW=RoundUpToTheNextHighestPowerOf2(img.width()  );
-                    int bestH=RoundUpToTheNextHighestPowerOf2(img.height() );
-                    while(bestW>MaxTextureSize) bestW /=2;
-                    while(bestH>MaxTextureSize) bestH /=2;
-                    Logf(GLLogStream::SYSTEM,"	Texture[ %3i ] =  '%s' ( %6i x %6i ) -> ( %6i x %6i )",	i,mp->cm.textures[i].c_str(), img.width(), img.height(),bestW,bestH);
-                    imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-                    imgGL=convertToGLFormat(imgScaled);
-                    //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-                    //mp->bor.TMId.push_back(0);
-                    //glGenTextures( 1, (GLuint*)&(mp->bor.TMId.back()) );
-                    //glBindTexture( GL_TEXTURE_2D, mp->bor.TMId.back() );
-                    //qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",mp->bor.TMId.back() ,imgGL.width(), imgGL.height());
-                    //glTexImage2D( GL_TEXTURE_2D, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-                    //gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imgGL.width(), imgGL.height(), GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-                }
-                if(glas.textureMagFilter == 0 ) 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-                else	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-                if(glas.textureMinFilter == 0 ) 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-                else	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-
-                glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            }
-            if (sometextfailed)
-                QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
-
-        }
-    }
-    glDisable(GL_TEXTURE_2D);
-
-}
-
 
 void GLArea::setLight(bool setState)
 {
@@ -2189,6 +2105,7 @@ void GLArea::meshAdded( int index,RenderMode rm )
 	vcg::GLFeederInfo::ReqAtts req;
 	MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
 	reqattsmap[index] = req;
+    boallocated[index] = false;
     emit updateLayerTable();
 }
 
@@ -2196,6 +2113,7 @@ void GLArea::meshRemoved( int index )
 {
     rendermodemap.remove(index);
 	reqattsmap.remove(index);
+    boallocated.remove(index);
     emit updateLayerTable();
 }
 
@@ -2214,11 +2132,34 @@ bool GLArea::setupRequestedAttributesPerMesh( int meshid )
 			vcg::GLFeederInfo::ReqAtts rq;
 			MLSceneRenderModeAdapter::renderModeToReqAtts(itrm.value(),rq);
 			vcg::GLFeederInfo::ReqAtts rr = shared->setupRequestedAttributesPerMesh(meshid,rq,allocated);
-			if (allocated)
-				reqattsmap[meshid] = rr;
-			else
-				reqattsmap[meshid] = vcg::GLFeederInfo::ReqAtts();
+		    reqattsmap[meshid] = rr;
 		}
 	}
+    boallocated[meshid] = allocated;
+    if (!allocated)
+    {
+        QString immrenderinginfo = QString("mesh[%1] -> immediate mode rendering").arg(meshid);
+        this->Logf(GLLogStream::WARNING,qPrintable(immrenderinginfo));
+    }
 	return allocated;
+}
+
+void GLArea::setupTextureEnv( GLuint textid )
+{
+    makeCurrent();
+    glPushAttrib(GL_ENABLE_BIT);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D,textid);
+    if(glas.textureMagFilter == 0 ) 	
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    else	
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    if(glas.textureMinFilter == 0 ) 	
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    else	
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glBindTexture(GL_TEXTURE_2D,0);
+    glPopAttrib();
 }

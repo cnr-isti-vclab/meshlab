@@ -30,6 +30,7 @@
 #include "scriptinterface.h"
 #include <vcg/complex/append.h>
 #include "mlexception.h"
+#include "ml_scene_renderer.h"
 
 using namespace vcg;
 
@@ -336,6 +337,17 @@ MeshDocument::MeshDocument() : QObject(),Log(),xmlhistory()
     currentRaster = 0;
     busy=false;
     filterHistory = new FilterScript();
+    setMLSceneGLSharedDataContext(NULL);
+}
+
+MLSceneGLSharedDataContext* MeshDocument::sharedDataProxy()
+{
+    return _shareddataproxy;
+}
+
+void MeshDocument::setMLSceneGLSharedDataContext(MLSceneGLSharedDataContext* shared)
+{
+    _shareddataproxy = shared;
 }
 
 void MeshModel::Clear()
@@ -369,6 +381,7 @@ MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelN
     _id=parent->newMeshId();
     if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
     if(!labelName.isEmpty())     this->_label=labelName;
+    setMLThreadSafeGLMeshAttributesFeeder(NULL);
 }
 
 QString MeshModel::relativePathName() const

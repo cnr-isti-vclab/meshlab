@@ -25,19 +25,13 @@
 #define __ML_SCENE_RENDERER_H
 
 #include <GL/glew.h>
-#include "../common/meshmodel.h"
 #include <wrap/gl/gl_mesh_attributes_feeder.h>
+#include "scriptinterface.h"
 
-#include <QGLWidget>
-#include <QObject>
 #include <QMap>
-
-
-
-
+#include <QGLWidget>
 
 class MLThreadSafeMemoryInfo;
-
 
 class MLThreadSafeGLMeshAttributesFeeder : public vcg::GLMeshAttributesFeeder<CMeshO>
 {
@@ -51,7 +45,7 @@ public:
 		size_t size() const;
 		bool empty() const;
 		void clear();
-		GLuint& operator[](size_t ii);
+		GLuint& operator[](size_t ii) {return _tmid[ii];};
 		inline std::vector<GLuint>& textId() {return _tmid;};
 	private:
 		std::vector<GLuint> _tmid;
@@ -74,7 +68,11 @@ public:
 
 	vcg::GLFeederInfo::ReqAtts setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated);
 
+    vcg::GLFeederInfo::ReqAtts removeRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq);
+
 	void deAllocateBO();
+
+    void deAllocateTextures();
 	
 	void drawWire(vcg::GLFeederInfo::ReqAtts& rq);
 
@@ -87,69 +85,71 @@ public:
 	void drawBBox(vcg::GLFeederInfo::ReqAtts& rq);
 
 	inline CMeshO& mesh() {return _mesh;}
+
+	inline MLThreadSafeTextureNamesContainer& textureIDContainer() {return _textids;}
 private:
 	mutable QReadWriteLock _lock;
 	MLThreadSafeTextureNamesContainer _textids;
 };
 
-class GLArea;
+class MeshDocument;
 
 class MLSceneGLSharedDataContext : public QGLWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
 
-	MLSceneGLSharedDataContext(MeshDocument& md,MLThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles = 100000,QWidget* parent = NULL);
+    MLSceneGLSharedDataContext(MeshDocument& md,MLThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles = 100000,QWidget* parent = NULL);
 
-	~MLSceneGLSharedDataContext();
+    ~MLSceneGLSharedDataContext();
 
-	MLThreadSafeMemoryInfo& memoryInfoManager() const
-	{
-		return _gpumeminfo;
-	}
-	
-	inline bool highPrecisionRendering() const
-	{
-		return _highprecision;
-	}
+    MLThreadSafeMemoryInfo& memoryInfoManager() const
+    {
+        return _gpumeminfo;
+    }
 
-	void initializeGL();
+    inline bool highPrecisionRendering() const
+    {
+        return _highprecision;
+    }
 
-	void deAllocateGPUSharedData();
+    void initializeGL();
 
-	vcg::GLFeederInfo::ReqAtts setupRequestedAttributesPerMesh( int meshid,const vcg::GLFeederInfo::ReqAtts& req,bool& allocated);
-	//bool setupRequestedAttributes(unsigned int meshid,unsigned int viewid,vcg::GLFeederInfo::ReqAtts& rq);
+    void deAllocateGPUSharedData();
+    vcg::GLFeederInfo::ReqAtts setupRequestedAttributesPerMesh(int meshid,const vcg::GLFeederInfo::ReqAtts& req,bool& allocated);
+    void removeRequestedAttributesPerMesh(int meshid,const vcg::GLFeederInfo::ReqAtts& req);
 
-	MLThreadSafeGLMeshAttributesFeeder* meshAttributesFeeder(int meshid) const;
-	inline const Point3m& globalSceneCenter() const {return _globalscenecenter;}
+    void deAllocateTexturesPerMesh(int meshid);
+    GLuint allocateTexturePerMesh(int meshid,const QImage& img,size_t maxdimtextmb);
+    //bool setupRequestedAttributes(unsigned int meshid,unsigned int viewid,vcg::GLFeederInfo::ReqAtts& rq);
+
+    MLThreadSafeGLMeshAttributesFeeder* meshAttributesFeeder(int meshid) const;
 
 public slots:
-	void meshInserted(int meshid);
-	void meshRemoved(int meshid);
+    void meshInserted(int meshid);
+    void meshRemoved(int meshid);
 
 private:
-	void computeSceneGlobalCenter();
+    MeshDocument& _md;	
+    QMap< int, MLThreadSafeGLMeshAttributesFeeder* > _scene;
 
-	QMap< int, MLThreadSafeGLMeshAttributesFeeder* > _scene;
-	MeshDocument& _md;	
-	MLThreadSafeMemoryInfo& _gpumeminfo;
-	size_t _perbatchtriangles;
-	Point3m _globalscenecenter;
-	bool _highprecision;
-
-	GLuint _vaohandle;
+    MLThreadSafeMemoryInfo& _gpumeminfo;
+    size_t _perbatchtriangles;
+    bool _highprecision;
 }; 
 
-//WARNING!!!!!!!THIS CLASS MUST BE CONSIDERED AS HIGHLY TEMPORARY. IT MUST BE REMOVED AS SOON AS POSSIBLE!
+class QGLContext;
+
 struct MLSceneRenderModeAdapter
 {
 	static void renderModeToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
-    static void renderMesh(unsigned int meshid, GLArea& area);
 	/*static bool setupRequestedAttributesAccordingToRenderMode(unsigned int meshid,GLArea& area);*/
+    static void renderMesh(QGLContext& area,MLThreadSafeGLMeshAttributesFeeder& feed,const RenderMode& rm,int pointsz,bool pointsmooth,bool pointatt);
 private:
 	static vcg::GLFeederInfo::PRIMITIVE_MODALITY renderModeToPrimitiveModality(const RenderMode& rm);
 	static void renderModeColorToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
 	static void renderModeTextureToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
+    
 };
 
 #endif

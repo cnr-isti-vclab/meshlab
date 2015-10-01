@@ -35,9 +35,7 @@ HEADERS = ../common/interfaces.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
-	filterthread.h \
-	ml_thread_safe_memory_info.h \
-	ml_scene_renderer.h
+	filterthread.h 
 SOURCES = main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
@@ -57,11 +55,9 @@ SOURCES = main.cpp \
 	rendermodeactions.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
-	$$GLEWDIR/src/glew.c \
+	#$$GLEWDIR/src/glew.c \
     glarea_setting.cpp \
-	filterthread.cpp \
-	ml_thread_safe_memory_info.cpp \
-	ml_scene_renderer.cpp
+	filterthread.cpp 
 
 FORMS = ui/layerDialog.ui \
     ui/filterScriptDialog.ui \

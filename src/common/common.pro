@@ -99,7 +99,9 @@ HEADERS += filterparameter.h \
   mlapplication.h \
   scriptsyntax.h \
   searcher.h \
-    meshlabdocumentxml.h
+    meshlabdocumentxml.h \
+	ml_thread_safe_memory_info.h \
+	ml_scene_renderer.h
 SOURCES += filterparameter.cpp \
     interfaces.cpp \
     filterscript.cpp \
@@ -113,7 +115,9 @@ SOURCES += filterparameter.cpp \
   searcher.cpp \
     $$GLEWCODE \
     meshlabdocumentxml.cpp \
-    meshlabdocumentbundler.cpp
+    meshlabdocumentbundler.cpp \
+	ml_thread_safe_memory_info.cpp \
+	ml_scene_renderer.cpp
 
 #	win32-msvc2005: RCC_DIR = $(ConfigurationName)
 #	win32-msvc2008: RCC_DIR = $(ConfigurationName)

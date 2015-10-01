@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "decorate_base.h"
+#include <common/ml_scene_renderer.h>
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/bitquad_support.h>
@@ -149,8 +150,24 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
     glPointSize(3);
 
     glColor4f(1.0f, 1.0f, 1.0f, 0.1f);
-//    md.mm()->glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
-    md.mm()->bor.render(GLW::DMFlat, GLW::CMNone, GLW::TMNone);
+    MLSceneGLSharedDataContext* sharedcont = md.sharedDataProxy();
+    if (sharedcont != NULL)
+    {
+        MLThreadSafeGLMeshAttributesFeeder* feed = sharedcont->meshAttributesFeeder(md.mm()->id());
+        if ((feed != NULL) && (gla != NULL))
+        {
+            RenderMode* currentrm = gla->getCurrentRenderMode();
+            if (currentrm != NULL)
+            {
+                RenderMode tmprm = *currentrm;
+                tmprm.colorMode = vcg::GLW::CMNone;
+                tmprm.textureMode = vcg::GLW::TMNone;
+            
+                //MLSceneRenderModeAdapter::renderMesh(*gla->context(),*feed,tmprm,gla->glas.pointSize,gla->glas.pointSmooth,gla->glas.pointSize);
+            }
+        }
+    }
+    
     glPopAttrib();
   } break;
 
@@ -184,8 +201,6 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
       glPushAttrib(GL_ENABLE_BIT );
       float NormalLen=rm->getFloat(NormalLength());
       float LineLen = m.cm.bbox.Diag()*NormalLen;
-      CMeshO::VertexIterator vi;
-      CMeshO::FaceIterator fi;
       glDisable(GL_LIGHTING);
       glDisable(GL_TEXTURE_2D);
       glEnable(GL_BLEND);
@@ -194,7 +209,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
       if(rm->getBool(NormalVertFlag())) // vert Normals
       {
         glColor4f(.4f,.4f,1.f,.6f);
-        for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+        for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
         {
           glVertex((*vi).P());
           glVertex((*vi).P()+(*vi).N()*LineLen);
@@ -203,7 +218,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
       if(rm->getBool(NormalFaceFlag())) // face Normals
       {
         glColor4f(.1f,.4f,4.f,.6f);
-        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+        for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
         {
           Point3m b=Barycenter(*fi);
           glVertex(b);
@@ -241,10 +256,21 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             float baseSize = rm->getDynamicFloat(this->VertDotSizeParam());
 
             glPointSize(baseSize+0.5);
-            m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
-            glColor(Color4b::White);
-            glPointSize(baseSize-1);
-            m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
+            //m.glw.DrawPointsBase<GLW::NMNone,GLW::CMNone>();
+            MLSceneGLSharedDataContext* shared = gla->getSceneGLSharedContext();
+            if (shared != NULL)
+            {
+                MLThreadSafeGLMeshAttributesFeeder* meshthr = shared->meshAttributesFeeder(m.id());
+                vcg::GLFeederInfo::ReqAtts rq;
+                rq[vcg::GLFeederInfo::ATT_VERTPOSITION] = true;
+                rq[vcg::GLFeederInfo::ATT_VERTNORMAL] = true;
+                if (meshthr != NULL)
+                    meshthr->drawPoints(rq);
+                glColor(Color4b::White);
+                glPointSize(baseSize-1);
+                if (meshthr != NULL)
+                    meshthr->drawPoints(rq);
+            }
             glPopAttrib();
         } break;
 
@@ -261,8 +287,11 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
       Color4b lineColor=rm->getColor4b(this->ShowFauxEdgeColor());
       lineColor[3]=128;
       glColor(lineColor);
+            
             glDepthRange (0.0, 0.999);
-            m.glw.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
+            vcg::GlTrimesh<CMeshO> tmpglmesh;
+            tmpglmesh.m  = &(m.cm);
+            tmpglmesh.DrawWirePolygonal<GLW::NMNone,GLW::CMNone>();
             glPopAttrib();
 
       CMeshO::PerMeshAttributeHandle< vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"ExtraordinaryVertexVector");
@@ -859,7 +888,8 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
   if( ID(action) == DP_SHOW_LABEL )
   {
     if(m.cm.vn <1000 && m.cm.fn<2000) return true;
-    else {
+    else 
+    {
       ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ");
       return false;
     }
@@ -1583,9 +1613,8 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
     glScalef(0.9f,0.9f,0.9f);
 
     QString textureName("-- no texture --");
-    if(!m.glw.TMId.empty())
-      textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");
-    //, QPainter *qDebug(qPrintable(textureName));
+/*if(!m.glw.TMId.empty())
+    textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");*/
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
     checkGLError::debugInfo("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
@@ -1605,11 +1634,11 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 
     bool faceColor = rm->getBool(this->TextureFaceColorParam());
 
-    if(!m.glw.TMId.empty())
-    {
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
-    }
+/*if(!m.glw.TMId.empty())
+{
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
+}*/
 
     glBegin(GL_TRIANGLES);
       for(size_t i=0;i<m.cm.face.size();++i)
