@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -25,8 +25,8 @@
 #define __ML_SCENE_RENDERER_H
 
 #include <GL/glew.h>
-#include <wrap/gl/gl_mesh_attributes_feeder.h>
 #include "scriptinterface.h"
+#include <wrap/gl/gl_mesh_attributes_feeder.h>
 
 #include <QMap>
 #include <QGLWidget>
@@ -36,60 +36,60 @@ class MLThreadSafeMemoryInfo;
 class MLThreadSafeGLMeshAttributesFeeder : public vcg::GLMeshAttributesFeeder<CMeshO>
 {
 public:
-	struct MLThreadSafeTextureNamesContainer
-	{
-		MLThreadSafeTextureNamesContainer();
-		~MLThreadSafeTextureNamesContainer();
+    struct MLThreadSafeTextureNamesContainer
+    {
+        MLThreadSafeTextureNamesContainer();
+        ~MLThreadSafeTextureNamesContainer();
 
-		void push_back(GLuint textid);
-		size_t size() const;
-		bool empty() const;
-		void clear();
-		GLuint& operator[](size_t ii) {return _tmid[ii];};
-		inline std::vector<GLuint>& textId() {return _tmid;};
-	private:
-		std::vector<GLuint> _tmid;
-		mutable QReadWriteLock _lock;
-	};
+        void push_back(GLuint textid);
+        size_t size() const;
+        bool empty() const;
+        void clear();
+        GLuint& operator[](size_t ii) {return _tmid[ii];};
+        inline std::vector<GLuint>& textId() {return _tmid;};
+    private:
+        std::vector<GLuint> _tmid;
+        mutable QReadWriteLock _lock;
+    };
 
 
-	MLThreadSafeGLMeshAttributesFeeder(CMeshO& mesh,MLThreadSafeMemoryInfo& gpumeminfo,size_t perbatchtriangles);
-	~MLThreadSafeGLMeshAttributesFeeder() {};
+    MLThreadSafeGLMeshAttributesFeeder(CMeshO& mesh,MLThreadSafeMemoryInfo& gpumeminfo,size_t perbatchtriangles);
+    ~MLThreadSafeGLMeshAttributesFeeder() {};
 
-	void setPerBatchTriangles(size_t perbatchtriangles);
-	
-	size_t perBatchTriangles() const;
-	
-	bool renderedWithBO() const;
-	
-	GLuint bufferObjectHandle() const;
+    void setPerBatchTriangles(size_t perbatchtriangles);
 
-	void meshAttributesUpdated(int mask);
+    size_t perBatchTriangles() const;
 
-	vcg::GLFeederInfo::ReqAtts setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated);
+    bool renderedWithBO() const;
+
+    GLuint bufferObjectHandle() const;
+
+    void meshAttributesUpdated(int mask);
+
+    vcg::GLFeederInfo::ReqAtts setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated);
 
     vcg::GLFeederInfo::ReqAtts removeRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq);
 
-	void deAllocateBO();
+    void deAllocateBO();
 
     void deAllocateTextures();
-	
-	void drawWire(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawFlatWire(vcg::GLFeederInfo::ReqAtts& rq);
+    void drawWire(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawPoints(vcg::GLFeederInfo::ReqAtts& rq);
+    void drawFlatWire(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawTriangles(vcg::GLFeederInfo::ReqAtts& rq);
+    void drawPoints(vcg::GLFeederInfo::ReqAtts& rq);
 
-	void drawBBox(vcg::GLFeederInfo::ReqAtts& rq);
+    void drawTriangles(vcg::GLFeederInfo::ReqAtts& rq);
 
-	inline CMeshO& mesh() {return _mesh;}
+    void drawBBox(vcg::GLFeederInfo::ReqAtts& rq);
 
-	inline MLThreadSafeTextureNamesContainer& textureIDContainer() {return _textids;}
+    inline CMeshO& mesh() {return _mesh;}
+
+    inline MLThreadSafeTextureNamesContainer& textureIDContainer() {return _textids;}
 private:
-	mutable QReadWriteLock _lock;
-	MLThreadSafeTextureNamesContainer _textids;
+    mutable QReadWriteLock _lock;
+    MLThreadSafeTextureNamesContainer _textids;
 };
 
 class MeshDocument;
@@ -130,26 +130,26 @@ public slots:
     void meshRemoved(int meshid);
 
 private:
-    MeshDocument& _md;	
+    MeshDocument& _md;
     QMap< int, MLThreadSafeGLMeshAttributesFeeder* > _scene;
 
     MLThreadSafeMemoryInfo& _gpumeminfo;
     size_t _perbatchtriangles;
     bool _highprecision;
-}; 
+};
 
 class QGLContext;
 
 struct MLSceneRenderModeAdapter
 {
-	static void renderModeToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
-	/*static bool setupRequestedAttributesAccordingToRenderMode(unsigned int meshid,GLArea& area);*/
+    static void renderModeToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
+    /*static bool setupRequestedAttributesAccordingToRenderMode(unsigned int meshid,GLArea& area);*/
     static void renderMesh(QGLContext& area,MLThreadSafeGLMeshAttributesFeeder& feed,const RenderMode& rm,int pointsz,bool pointsmooth,bool pointatt);
 private:
-	static vcg::GLFeederInfo::PRIMITIVE_MODALITY renderModeToPrimitiveModality(const RenderMode& rm);
-	static void renderModeColorToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
-	static void renderModeTextureToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
-    
+    static vcg::GLFeederInfo::PRIMITIVE_MODALITY renderModeToPrimitiveModality(const RenderMode& rm);
+    static void renderModeColorToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
+    static void renderModeTextureToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
+
 };
 
 #endif
