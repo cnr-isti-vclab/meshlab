@@ -1164,7 +1164,7 @@ void RichParameterValueToStringVisitor::visit( RichPoint3f& pd )
     stringvalue = tmp;
 }
 
-void RichParameterValueToStringVisitor::visit( RichShotf& pd )
+void RichParameterValueToStringVisitor::visit( RichShotf& /*pd*/ )
 {
 
 }
@@ -1196,7 +1196,7 @@ void RichParameterValueToStringVisitor::visit( RichEnum& pd )
     stringvalue = QString::number(pd.val->getEnum());
 }
 
-void RichParameterValueToStringVisitor::visit( RichFloatList& pd )
+void RichParameterValueToStringVisitor::visit( RichFloatList& /*pd*/ )
 {
 
 }
@@ -1209,17 +1209,17 @@ void RichParameterValueToStringVisitor::visit( RichDynamicFloat& pd )
     stringvalue = QString::number(pd.val->getDynamicFloat());
 }
 
-void RichParameterValueToStringVisitor::visit( RichOpenFile& pd )
+void RichParameterValueToStringVisitor::visit( RichOpenFile& /*pd*/ )
 {
 
 }
 
-void RichParameterValueToStringVisitor::visit( RichSaveFile& pd )
+void RichParameterValueToStringVisitor::visit( RichSaveFile& /*pd*/ )
 {
 
 }
 
-void RichParameterValueToStringVisitor::visit( RichMesh& pd )
+void RichParameterValueToStringVisitor::visit( RichMesh& /*pd*/ )
 {
 
 }
