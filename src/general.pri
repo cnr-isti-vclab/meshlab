@@ -10,7 +10,7 @@ GLEWDIR = ../external/glew-1.7.0
 
 CONFIG += c++11
 
-QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
+macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
 MACLIBDIR = ../../external/lib/macx64
 

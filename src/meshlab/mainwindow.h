@@ -257,7 +257,9 @@ private:
     void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
     void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
 
-    void deallocateReqAttsConsideringAllOtherGLArea(GLArea* ar,const int meshid,const RenderMode& currentrendmode,const RenderMode& newrendermode);
+
+    void updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(int meshid,int updatemask);
+    void deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(const int meshid,GLArea* gla,const RenderMode& currentrendmode,const RenderMode& newrendermode);
 
     QNetworkAccessManager *httpReq;
     QBuffer myLocalBuf;
@@ -521,8 +523,17 @@ private:
     QAction *onscreenHelpAct;
     QAction *checkUpdatesAct;
     ////////////////////////////////////////////////////
+    struct MeshModelTmpData
+    {
+        int _mask;
+        size_t _nvert;
+        size_t _nface;
 
-    QSet<int> existingmeshesbeforefilterexecution;
+        MeshModelTmpData(int mask,size_t nvert,size_t nface)
+            :_mask(mask),_nvert(nvert),_nface(nface)
+        {}
+    };
+    QMap<int,MeshModelTmpData> existingmeshesbeforefilterexecution;
     static QString getDecoratedFileName(const QString& name);
 
     void updateRenderToolBar( RenderModeAction* act );

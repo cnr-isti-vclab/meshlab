@@ -29,11 +29,11 @@ bool MLThreadSafeGLMeshAttributesFeeder::renderedWithBO() const
     return GLMeshAttributesFeeder<CMeshO>::isPossibleToUseBORendering();
 }
 
-void MLThreadSafeGLMeshAttributesFeeder::meshAttributesUpdated( int mask )
-{
-    QWriteLocker locker(&_lock);
-    GLMeshAttributesFeeder<CMeshO>::meshAttributesUpdated(mask);
-}
+//void MLThreadSafeGLMeshAttributesFeeder::meshAttributesUpdated( int mask )
+//{
+//    QWriteLocker locker(&_lock);
+//    GLMeshAttributesFeeder<CMeshO>::meshAttributesUpdated(mask);
+//}
 
 vcg::GLFeederInfo::ReqAtts MLThreadSafeGLMeshAttributesFeeder::setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated )
 {
@@ -180,10 +180,22 @@ void MLThreadSafeGLMeshAttributesFeeder::deAllocateBO()
     GLMeshAttributesFeeder<CMeshO>::buffersDeAllocationRequested();
 }
 
+void MLThreadSafeGLMeshAttributesFeeder::deAllocateBO(const vcg::GLFeederInfo::ReqAtts& req)
+{
+    QWriteLocker locker(&_lock);
+    GLMeshAttributesFeeder<CMeshO>::buffersDeAllocationRequested(req);
+}
+
 void MLThreadSafeGLMeshAttributesFeeder::deAllocateTextures()
 {
     QWriteLocker locker(&_lock);
     _textids.clear();
+}
+
+void MLThreadSafeGLMeshAttributesFeeder::invalidateRequestedAttributes( vcg::GLFeederInfo::ReqAtts& rq )
+{
+    QWriteLocker locker(&_lock);
+    GLMeshAttributesFeeder<CMeshO>::invalidateRequestedAttributes(rq);
 }
 
 MLThreadSafeGLMeshAttributesFeeder::MLThreadSafeTextureNamesContainer::MLThreadSafeTextureNamesContainer()
@@ -596,6 +608,32 @@ vcg::GLFeederInfo::PRIMITIVE_MODALITY MLSceneRenderModeAdapter::renderModeToPrim
             return vcg::GLFeederInfo::PR_NONE;
     }
     return vcg::GLFeederInfo::PR_NONE;
+}
+
+vcg::GLFeederInfo::ReqAtts MLSceneRenderModeAdapter::convertUpdateMaskToMinimalReqAtts( int updatemask,const MeshModel& m,const RenderMode& rm )
+{
+    vcg::GLFeederInfo::ReqAtts res;
+    if (updatemask & MeshModel::MM_NONE)
+        return res;
+    MLSceneRenderModeAdapter::renderModeToReqAtts(rm,res);
+
+    if ((updatemask & MeshModel::MM_UNKNOWN) || (updatemask & MeshModel::MM_ALL) || (updatemask & MeshModel::MM_VERTNUMBER) || (updatemask & MeshModel::MM_FACENUMBER) || (updatemask & MeshModel::MM_VERTFACETOPO) || (updatemask & MeshModel::MM_FACEFACETOPO))
+    {
+        vcg::GLFeederInfo::ReqAtts::computeARequestedAttributesSetCompatibleWithMesh(res,m.cm);
+        return res;
+    }
+
+    res[vcg::GLFeederInfo::ATT_VERTPOSITION] = (updatemask & MeshModel::MM_VERTCOORD);
+    res[vcg::GLFeederInfo::ATT_VERTNORMAL] = (updatemask & MeshModel::MM_VERTNORMAL);
+    res[vcg::GLFeederInfo::ATT_FACENORMAL] = (updatemask & MeshModel::MM_FACENORMAL);
+    res[vcg::GLFeederInfo::ATT_VERTCOLOR] = (updatemask & MeshModel::MM_VERTCOLOR);
+    res[vcg::GLFeederInfo::ATT_FACECOLOR] = (updatemask & MeshModel::MM_FACECOLOR);
+    res[vcg::GLFeederInfo::ATT_MESHCOLOR] = (updatemask & MeshModel::MM_COLOR);
+    res[vcg::GLFeederInfo::ATT_VERTTEXTURE] = (updatemask & MeshModel::MM_VERTTEXCOORD);
+    res[vcg::GLFeederInfo::ATT_WEDGETEXTURE] = (updatemask & MeshModel::MM_WEDGTEXCOORD);
+
+    vcg::GLFeederInfo::ReqAtts::computeARequestedAttributesSetCompatibleWithMesh(res,m.cm);
+    return res;
 }
 
 //bool MLSceneRenderModeAdapter::setupRequestedAttributesAccordingToRenderMode( unsigned int meshid,GLArea& area )

@@ -64,13 +64,19 @@ public:
 
     GLuint bufferObjectHandle() const;
 
-    void meshAttributesUpdated(int mask);
+    //void meshAttributesUpdated(int mask);
 
     vcg::GLFeederInfo::ReqAtts setupRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq,bool& allocated);
 
     vcg::GLFeederInfo::ReqAtts removeRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq);
 
+    void invalidateRequestedAttributes(vcg::GLFeederInfo::ReqAtts& rq);
+
+    //Deallocate all the BO
     void deAllocateBO();
+
+    //Deallocate just the BO requested by the req parameter
+    void deAllocateBO(const vcg::GLFeederInfo::ReqAtts& req);
 
     void deAllocateTextures();
 
@@ -83,6 +89,8 @@ public:
     void drawTriangles(vcg::GLFeederInfo::ReqAtts& rq);
 
     void drawBBox(vcg::GLFeederInfo::ReqAtts& rq);
+
+    
 
     inline CMeshO& mesh() {return _mesh;}
 
@@ -145,6 +153,7 @@ struct MLSceneRenderModeAdapter
     static void renderModeToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);
     /*static bool setupRequestedAttributesAccordingToRenderMode(unsigned int meshid,GLArea& area);*/
     static void renderMesh(QGLContext& area,MLThreadSafeGLMeshAttributesFeeder& feed,const RenderMode& rm,int pointsz,bool pointsmooth,bool pointatt);
+    static vcg::GLFeederInfo::ReqAtts convertUpdateMaskToMinimalReqAtts(int updatemask,const MeshModel& m,const RenderMode& rm);
 private:
     static vcg::GLFeederInfo::PRIMITIVE_MODALITY renderModeToPrimitiveModality(const RenderMode& rm);
     static void renderModeColorToReqAtts(const RenderMode& rm,vcg::GLFeederInfo::ReqAtts& rq);

@@ -1199,9 +1199,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     iFilter->glContext->create(filterWidget->context());
     try
     {
-        QSet<int> existingmeshesbeforefilterexecutionlocal;
+        existingmeshesbeforefilterexecution.clear();
         for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
-            existingmeshesbeforefilterexecutionlocal.insert(mm->id());
+            existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN()));
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
 
         meshDoc()->setBusy(false);
@@ -1265,7 +1265,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         }
 
         int fclasses =	iFilter->getClass(action);
-
+        MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
         for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
         {
             int postCondMask = iFilter->postCondition(action);
@@ -1283,16 +1283,23 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                 postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
 
-            RenderMode rm = GLA()->rendermodemap[mm->id()];
-            vcg::GLW::NormalMode nmmode = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
+            QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
+            if (existit != existingmeshesbeforefilterexecution.end())
+            {
+                RenderMode rm = GLA()->rendermodemap[mm->id()];
+                int updatemask = MeshModel::MM_NONE;
+                if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) || (postCondMask == MeshModel::MM_UNKNOWN) || (postCondMask == MeshModel::MM_ALL) || (postCondMask == MeshModel::MM_VERTNUMBER) || (postCondMask == MeshModel::MM_FACENUMBER) || (postCondMask == MeshModel::MM_VERTFACETOPO) || (postCondMask == MeshModel::MM_FACEFACETOPO))
+                    updatemask = MeshModel::MM_ALL;
+                else
+                    //masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
+                    //this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
+                    updatemask = (existit->_mask ^ mm->dataMask()) | postCondMask;
 
-
-            //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-            //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-            //            if (!existingmeshesbeforefilterexecutionlocal.contains(mm->id()))
-            //                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
-            //            else
-            //                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nmmode,rm.colorMode,rm.textureMode);
+                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),updatemask);
+            }
+            else
+                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),(int) MeshModel::MM_ALL);     
+            existingmeshesbeforefilterexecution.clear();
         }
     }
     catch (std::bad_alloc& bdall)
@@ -1506,7 +1513,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
             meshDoc()->xmlhistory << funcall;
         existingmeshesbeforefilterexecution.clear();
         for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
-            existingmeshesbeforefilterexecution.insert(mm->id());
+            existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN()));
         if (filtercpp)
         {
             enableDocumentSensibleActionsContainer(false);
@@ -1596,6 +1603,23 @@ void MainWindow::postFilterExecution()
                 rm = ci.value();
                 nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
             }
+
+            QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
+            if (existit != existingmeshesbeforefilterexecution.end())
+            {
+                RenderMode rm = GLA()->rendermodemap[mm->id()];
+                int updatemask = MeshModel::MM_NONE;
+                if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) || (postCondMask == MeshModel::MM_UNKNOWN) || (postCondMask == MeshModel::MM_ALL) || (postCondMask == MeshModel::MM_VERTNUMBER) || (postCondMask == MeshModel::MM_FACENUMBER) || (postCondMask == MeshModel::MM_VERTFACETOPO) || (postCondMask == MeshModel::MM_FACEFACETOPO))
+                    updatemask = MeshModel::MM_ALL;
+                else
+                    //masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
+                    //this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
+                    updatemask = (existit->_mask ^ mm->dataMask()) | postCondMask;
+
+                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),updatemask);
+            }
+            else
+                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),(int) MeshModel::MM_ALL); 
             //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
             //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
             //            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
@@ -3046,8 +3070,8 @@ void MainWindow::updateRenderMode( )
             MeshModel* mmod = meshDoc()->getMesh(it.key());
             if (mmod == NULL)
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-
-            deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+            
+            deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(it.key(),GLA(),old,rm);
             GLA()->setupRequestedAttributesPerMesh(it.key());
         }
     }
@@ -3069,37 +3093,10 @@ void MainWindow::updateRenderMode( )
         if (mmod == NULL)
             throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
 
-        deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+        deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(it.key(),GLA(),old,rm);
         GLA()->setupRequestedAttributesPerMesh(it.key());
     }
     GLA()->update();
-}
-
-void MainWindow::deallocateReqAttsConsideringAllOtherGLArea(GLArea* ar,const int meshid,const RenderMode& currentrendmode,const RenderMode& newrendermode)
-{
-    MultiViewer_Container* mvc = currentViewContainer();
-    if ((mvc == NULL) || (ar == NULL))
-        return;
-
-    int currentid = ar->getId();
-    vcg::GLFeederInfo::ReqAtts oldatts;
-    MLSceneRenderModeAdapter::renderModeToReqAtts(currentrendmode,oldatts);
-    vcg::GLFeederInfo::ReqAtts newatts;
-    MLSceneRenderModeAdapter::renderModeToReqAtts(newrendermode,newatts);
-    oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,newatts);
-    for(int ii = 0; ii < mvc->viewerCounter();++ii)
-    {
-        GLArea* otherarea = mvc->getViewer(ii);
-        if ((ii != currentid) && (otherarea != NULL))
-        {
-            vcg::GLFeederInfo::ReqAtts othermeshview;
-            MLSceneRenderModeAdapter::renderModeToReqAtts(mvc->getViewer(ii)->rendermodemap[meshid],othermeshview);
-            oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,othermeshview);
-        }
-    }
-    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
-    if (feed != NULL)
-        feed->invalidateRequestedAttributes(oldatts);
 }
 
 void MainWindow::connectRenderModeActionList(QList<RenderModeAction*>& actlist)
@@ -3132,4 +3129,61 @@ void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int m
         vcg::GLW::TextureMode texmode = getBestTextureRenderModePerMesh(meshid);
         rm.setTextureMode(texmode);
     }
+}
+
+void MainWindow::updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(int meshid,int updatemask)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if ((meshDoc() == NULL) || (mvc == NULL))
+        return;
+    vcg::GLFeederInfo::ReqAtts res;
+    MeshModel* mm = meshDoc()->getMesh(meshid);
+    if (mm == NULL)
+        return;
+    for(int ii = 0; ii < mvc->viewerCounter();++ii)
+    {
+
+        GLArea* glar = mvc->getViewer(ii);
+        if (glar != NULL)
+        {
+            QMap<int,RenderMode>::const_iterator it =glar->rendermodemap.find(meshid);
+            if (it != NULL)
+            {
+                vcg::GLFeederInfo::ReqAtts reqattperglarea;
+                reqattperglarea = MLSceneRenderModeAdapter::convertUpdateMaskToMinimalReqAtts(updatemask,*mm,it.value());
+                res = vcg::GLFeederInfo::ReqAtts::setUnion(res,reqattperglarea);
+            }
+        }       
+    }
+    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
+    bool allocated;
+    feed->invalidateRequestedAttributes(res);
+    feed->setupRequestedAttributes(res,allocated);
+}
+
+void MainWindow::deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(const int meshid,GLArea* gla,const RenderMode& currentrendmode,const RenderMode& newrendermode)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if ((meshDoc() == NULL) || (mvc == NULL))
+        return;
+    if (gla == NULL)
+        return;
+    vcg::GLFeederInfo::ReqAtts oldatts;
+    MLSceneRenderModeAdapter::renderModeToReqAtts(currentrendmode,oldatts);
+    vcg::GLFeederInfo::ReqAtts newatts;
+    MLSceneRenderModeAdapter::renderModeToReqAtts(newrendermode,newatts);
+    oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,newatts);
+    for(int ii = 0; ii < mvc->viewerCounter();++ii)
+    {
+        GLArea* otherarea = mvc->getViewer(ii);
+        if ((otherarea != NULL) && (otherarea->getId() != gla->getId()))
+        {
+            vcg::GLFeederInfo::ReqAtts othermeshview;
+            MLSceneRenderModeAdapter::renderModeToReqAtts(otherarea->rendermodemap[meshid],othermeshview);
+            oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,othermeshview);
+        }
+    }
+    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
+    if (feed != NULL)
+        feed->deAllocateBO(oldatts);
 }
