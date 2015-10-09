@@ -1156,7 +1156,6 @@ from the user defined dialog
 
 void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
 {
-
     MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
 
     qb->show();
@@ -1203,7 +1202,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
             existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN()));
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
-
         meshDoc()->setBusy(false);
 
         qApp->restoreOverrideCursor();
@@ -3142,23 +3140,26 @@ void MainWindow::updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGL
         return;
     for(int ii = 0; ii < mvc->viewerCounter();++ii)
     {
-
         GLArea* glar = mvc->getViewer(ii);
         if (glar != NULL)
         {
             QMap<int,RenderMode>::const_iterator it =glar->rendermodemap.find(meshid);
             if (it != NULL)
             {
+               
                 vcg::GLFeederInfo::ReqAtts reqattperglarea;
                 reqattperglarea = MLSceneRenderModeAdapter::convertUpdateMaskToMinimalReqAtts(updatemask,*mm,it.value());
                 res = vcg::GLFeederInfo::ReqAtts::setUnion(res,reqattperglarea);
+
             }
         }       
     }
     MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
     bool allocated;
+    mvc->sharedDataContext()->makeCurrent();
     feed->invalidateRequestedAttributes(res);
     feed->setupRequestedAttributes(res,allocated);
+    mvc->sharedDataContext()->doneCurrent();
 }
 
 void MainWindow::deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(const int meshid,GLArea* gla,const RenderMode& currentrendmode,const RenderMode& newrendermode)
