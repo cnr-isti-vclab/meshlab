@@ -757,38 +757,42 @@ void GLArea::displayInfo(QPainter *painter)
         if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
 
-        enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
-        RenderingType rendtype = FULL_IMMEDIATE_MODE;
-        for(QMap<int,bool>::const_iterator mit = boallocated.begin();mit != boallocated.end();++mit)
+        MeshDocument* doc = md();
+        if ((doc!= NULL) && (shared != NULL))
         {
-            if (mit.value() == true)
+            enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
+            RenderingType rendtype = FULL_IMMEDIATE_MODE;
+            for(MeshModel* mit = doc->nextMesh();mit != NULL;mit =doc->nextMesh(mit))
             {
-                rendtype = MIXED;
-                if ((rendtype == MIXED) && (mit == boallocated.end() - 1))
-                    rendtype = FULL_BO;
+                MLThreadSafeGLMeshAttributesFeeder* feed = shared->meshAttributesFeeder(mit->id());
+                if ((feed != NULL) && (feed->isPossibleToUseBORendering()))
+                {
+                    rendtype = MIXED;
+                    if ((rendtype == MIXED) && (doc->nextMesh(mit) == NULL))
+                        rendtype = FULL_BO;
 
+                }
+            }
+
+            switch(rendtype)
+            {
+            case(FULL_BO):
+                {
+                    col0Text += QString("BO_RENDERING");
+                    break;
+                }
+            case(MIXED):
+                {
+                    col0Text += QString("MIXED_RENDERING");
+                    break;
+                }
+            case(FULL_IMMEDIATE_MODE):
+                {
+                    col0Text += QString("IMMEDIATE_MODE_RENDERING");
+                    break;
+                }
             }
         }
-
-        switch(rendtype)
-        {
-        case(FULL_BO):
-            {
-                col0Text += QString("BO_RENDERING");
-                break;
-            }
-        case(MIXED):
-            {
-                col0Text += QString("MIXED_RENDERING");
-                break;
-            }
-        case(FULL_IMMEDIATE_MODE):
-            {
-                col0Text += QString("IMMEDIATE_MODE_RENDERING");
-                break;
-            }
-        }
-
         if (clipRatioNear!=clipRatioNearDefault())
             col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
@@ -2105,7 +2109,6 @@ void GLArea::meshAdded( int index,RenderMode rm )
 	vcg::GLFeederInfo::ReqAtts req;
 	MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
 	reqattsmap[index] = req;
-    boallocated[index] = false;
     emit updateLayerTable();
 }
 
@@ -2113,7 +2116,6 @@ void GLArea::meshRemoved( int index )
 {
     rendermodemap.remove(index);
 	reqattsmap.remove(index);
-    boallocated.remove(index);
     emit updateLayerTable();
 }
 
@@ -2135,7 +2137,6 @@ bool GLArea::setupRequestedAttributesPerMesh( int meshid )
 		    reqattsmap[meshid] = rr;
 		}
 	}
-    boallocated[meshid] = allocated;
     if (!allocated)
     {
         QString immrenderinginfo = QString("mesh[%1] -> immediate mode rendering").arg(meshid);

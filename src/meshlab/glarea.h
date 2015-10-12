@@ -321,7 +321,6 @@ public:
 
     QMap<int,RenderMode> rendermodemap;
 	QMap<int,vcg::GLFeederInfo::ReqAtts> reqattsmap;
-    QMap<int,bool> boallocated;
 
     // view setting variables
     float fov;
