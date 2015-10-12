@@ -44,7 +44,9 @@ vcg::GLFeederInfo::ReqAtts MLThreadSafeGLMeshAttributesFeeder::setupRequestedAtt
 vcg::GLFeederInfo::ReqAtts MLThreadSafeGLMeshAttributesFeeder::removeRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq)
 {
     QWriteLocker locker(&_lock);
-    return GLMeshAttributesFeeder<CMeshO>::removeRequestedAttributes(rq);
+    //return GLMeshAttributesFeeder<CMeshO>::removeRequestedAttributes(rq);
+    GLMeshAttributesFeeder<CMeshO>::buffersDeAllocationRequested(rq);
+    return _currallocatedboatt;
 }
 
 void MLThreadSafeGLMeshAttributesFeeder::drawWire(vcg::GLFeederInfo::ReqAtts& rq)
@@ -180,19 +182,13 @@ void MLThreadSafeGLMeshAttributesFeeder::deAllocateBO()
     GLMeshAttributesFeeder<CMeshO>::buffersDeAllocationRequested();
 }
 
-void MLThreadSafeGLMeshAttributesFeeder::deAllocateBO(const vcg::GLFeederInfo::ReqAtts& req)
-{
-    QWriteLocker locker(&_lock);
-    GLMeshAttributesFeeder<CMeshO>::buffersDeAllocationRequested(req);
-}
-
 void MLThreadSafeGLMeshAttributesFeeder::deAllocateTextures()
 {
     QWriteLocker locker(&_lock);
     _textids.clear();
 }
 
-void MLThreadSafeGLMeshAttributesFeeder::invalidateRequestedAttributes( vcg::GLFeederInfo::ReqAtts& rq )
+void MLThreadSafeGLMeshAttributesFeeder::invalidateRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq )
 {
     QWriteLocker locker(&_lock);
     GLMeshAttributesFeeder<CMeshO>::invalidateRequestedAttributes(rq);
@@ -261,7 +257,7 @@ vcg::GLFeederInfo::ReqAtts MLSceneGLSharedDataContext::setupRequestedAttributesP
 {
     allocated = false;
     MLThreadSafeGLMeshAttributesFeeder* meshfeed = meshAttributesFeeder(meshid);
-    vcg::GLFeederInfo::ReqAtts rr = req;
+    vcg::GLFeederInfo::ReqAtts rr;
     if (meshfeed != NULL)
     {
         makeCurrent();
@@ -270,6 +266,30 @@ vcg::GLFeederInfo::ReqAtts MLSceneGLSharedDataContext::setupRequestedAttributesP
     }
     return rr;
 }
+
+void MLSceneGLSharedDataContext::removeRequestedAttributesPerMesh( int meshid,const vcg::GLFeederInfo::ReqAtts& req )
+{
+    MLThreadSafeGLMeshAttributesFeeder* meshfeed = meshAttributesFeeder(meshid);
+    vcg::GLFeederInfo::ReqAtts rr;
+    if (meshfeed != NULL)
+    {
+        makeCurrent();
+        meshfeed->removeRequestedAttributes(req);
+        doneCurrent();
+    }
+}
+
+void MLSceneGLSharedDataContext::invalidateRequestedAttributesPerMesh( int meshid,const vcg::GLFeederInfo::ReqAtts& req )
+{
+    MLThreadSafeGLMeshAttributesFeeder* meshfeed = meshAttributesFeeder(meshid);
+    if (meshfeed != NULL)
+    {
+        makeCurrent();
+        meshfeed->invalidateRequestedAttributes(req);
+        doneCurrent();
+    }
+}
+
 
 void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int meshid )
 {

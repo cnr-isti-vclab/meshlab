@@ -3154,12 +3154,13 @@ void MainWindow::updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGL
             }
         }       
     }
-    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
-    bool allocated;
-    mvc->sharedDataContext()->makeCurrent();
-    feed->invalidateRequestedAttributes(res);
-    feed->setupRequestedAttributes(res,allocated);
-    mvc->sharedDataContext()->doneCurrent();
+    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+    bool allocated = false;
+    if (shared != NULL)
+    {
+        shared->invalidateRequestedAttributesPerMesh(meshid,res);
+        shared->setupRequestedAttributesPerMesh(meshid,res,allocated);
+    }
 }
 
 void MainWindow::deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(const int meshid,GLArea* gla,const RenderMode& currentrendmode,const RenderMode& newrendermode)
@@ -3184,7 +3185,7 @@ void MainWindow::deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsi
             oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,othermeshview);
         }
     }
-    MLThreadSafeGLMeshAttributesFeeder* feed = mvc->sharedDataContext()->meshAttributesFeeder(meshid);
-    if (feed != NULL)
-        feed->deAllocateBO(oldatts);
+    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+    if (shared != NULL)
+        shared->removeRequestedAttributesPerMesh(meshid,oldatts);
 }

@@ -70,13 +70,10 @@ public:
 
     vcg::GLFeederInfo::ReqAtts removeRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq);
 
-    void invalidateRequestedAttributes(vcg::GLFeederInfo::ReqAtts& rq);
+    void invalidateRequestedAttributes(const vcg::GLFeederInfo::ReqAtts& rq);
 
     //Deallocate all the BO
     void deAllocateBO();
-
-    //Deallocate just the BO requested by the req parameter
-    void deAllocateBO(const vcg::GLFeederInfo::ReqAtts& req);
 
     void deAllocateTextures();
 
@@ -126,6 +123,7 @@ public:
     void deAllocateGPUSharedData();
     vcg::GLFeederInfo::ReqAtts setupRequestedAttributesPerMesh(int meshid,const vcg::GLFeederInfo::ReqAtts& req,bool& allocated);
     void removeRequestedAttributesPerMesh(int meshid,const vcg::GLFeederInfo::ReqAtts& req);
+    void invalidateRequestedAttributesPerMesh(int meshid,const vcg::GLFeederInfo::ReqAtts& req);
 
     void deAllocateTexturesPerMesh(int meshid);
     GLuint allocateTexturePerMesh(int meshid,const QImage& img,size_t maxdimtextmb);
