@@ -38,7 +38,6 @@ $Log: samplefilter.cpp,v $
 #include <vcg/complex/algorithms/clustering.h>
 #include <vcg/simplex/face/distance.h>
 #include <vcg/complex/algorithms/geodesic.h>
-#include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/algorithms/voronoi_processing.h>
 
 using namespace vcg;
@@ -118,133 +117,6 @@ public:
   }
 }; // end class BaseSampler
 
-
-/* This sampler is used to perform compute the Hausdorff measuring.
- * It keep internally the spatial indexing structure used to find the closest point
- * and the partial integration results needed to compute the average and rms error values.
- * Averaged values assume that the samples are equi-distributed (e.g. a good unbiased montecarlo sampling of the surface).
- */
-class HausdorffSampler
-{
-  typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
-  typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
-public:
-
-  HausdorffSampler(CMeshO* _m, CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 ) :markerFunctor(_m)
-  {
-    m=_m;
-    init(_sampleMesh,_closestMesh);
-  }
-
-  CMeshO *m;           /// the mesh for which we search the closest points.
-  CMeshO *samplePtMesh;  /// the mesh containing the sample points
-  CMeshO *closestPtMesh; /// the mesh containing the corresponding closest points that have been found
-
-  MetroMeshVertexGrid   unifGridVert;
-  MetroMeshFaceGrid   unifGridFace;
-
-  // Parameters
-  double          min_dist;
-  double          max_dist;
-  double          mean_dist;
-  double          RMS_dist;   /// from the wikipedia defintion RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
-  double          volume;
-  double          area_S1;
-  Histogramf hist;
-  // globals parameters driving the samples.
-  int             n_total_samples;
-  int             n_samples;
-  bool useVertexSampling;
-  CMeshO::ScalarType dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered.
-  typedef tri::FaceTmark<CMeshO> MarkerFace;
-  MarkerFace markerFunctor;
-
-
-  float getMeanDist() const { return mean_dist / n_total_samples; }
-  float getMinDist() const { return min_dist ; }
-  float getMaxDist() const { return max_dist ; }
-  float getRMSDist() const { return sqrt(RMS_dist / n_total_samples); }
-
-  void init(CMeshO* _sampleMesh=0, CMeshO* _closestMesh=0 )
-  {
-    samplePtMesh =_sampleMesh;
-    closestPtMesh = _closestMesh;
-    if(m)
-    {
-      tri::UpdateNormal<CMeshO>::PerFaceNormalized(*m);
-      if(m->fn==0) useVertexSampling = true;
-      else useVertexSampling = false;
-
-      if(useVertexSampling) unifGridVert.Set(m->vert.begin(),m->vert.end());
-      else  unifGridFace.Set(m->face.begin(),m->face.end());
-      markerFunctor.SetMesh(m);
-      hist.SetRange(0.0, m->bbox.Diag()/100.0, 100);
-    }
-    min_dist = std::numeric_limits<double>::max();
-    max_dist = 0;
-    mean_dist =0;
-    RMS_dist = 0;
-    n_total_samples = 0;
-  }
-
-  void AddFace(const CMeshO::FaceType &f, CMeshO::CoordType interp)
-  {
-    Point3m startPt = f.cP(0)*interp[0] + f.cP(1)*interp[1] +f.cP(2)*interp[2]; // point to be sampled
-    Point3m startN  = f.cV(0)->cN()*interp[0] + f.cV(1)->cN()*interp[1] +f.cV(2)->cN()*interp[2]; // Normal of the interpolated point
-    AddSample(startPt,startN); // point to be sampled);
-  }
-
-  void AddVert(CMeshO::VertexType &p)
-  {
-    p.Q()=AddSample(p.cP(),p.cN());
-  }
-
-
-  float AddSample(const CMeshO::CoordType &startPt,const CMeshO::CoordType &startN)
-  {
-    // the results
-    Point3m       closestPt;
-    CMeshO::ScalarType dist = dist_upper_bound;
-
-    // compute distance between startPt and the mesh S2
-    CMeshO::FaceType   *nearestF=0;
-    CMeshO::VertexType   *nearestV=0;
-    vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
-    dist=dist_upper_bound;
-    if(useVertexSampling)
-      nearestV =  tri::GetClosestVertex<CMeshO,MetroMeshVertexGrid>(*m,unifGridVert,startPt,dist_upper_bound,dist);
-    else
-      nearestF =  unifGridFace.GetClosest(PDistFunct,markerFunctor,startPt,dist_upper_bound,dist,closestPt);
-
-    // update distance measures
-    if(dist == dist_upper_bound)
-      return dist;
-
-    if(dist > max_dist) max_dist = dist;        // L_inf
-    if(dist < min_dist) min_dist = dist;        // L_inf
-
-    mean_dist += dist;	        // L_1
-    RMS_dist  += dist*dist;     // L_2
-    n_total_samples++;
-
-    hist.Add((float)fabs(dist));
-    if(samplePtMesh)
-    {
-      tri::Allocator<CMeshO>::AddVertices(*samplePtMesh,1);
-      samplePtMesh->vert.back().P() = startPt;
-      samplePtMesh->vert.back().Q() = dist;
-      samplePtMesh->vert.back().N() = startN;
-    }
-    if(closestPtMesh)
-    {
-      tri::Allocator<CMeshO>::AddVertices(*closestPtMesh,1);
-      closestPtMesh->vert.back().P() = closestPt;
-      closestPtMesh->vert.back().Q() = dist;
-      closestPtMesh->vert.back().N() = startN;
-    }
-    return dist;
-  }
-}; // end class HausdorffSampler
 
 
 /* This sampler is used to transfer the detail of a mesh onto another one.
@@ -944,7 +816,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 
     MeshModel *samplePtMesh =0;
     MeshModel *closestPtMesh =0;
-    HausdorffSampler hs(&(mm1->cm));
+    HausdorffSampler<CMeshO> hs(&(mm1->cm));
     if(saveSampleFlag)
     {
       closestPtMesh=md.addNewMesh("","Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one
@@ -961,11 +833,11 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     qDebug("Max sampling distance %f on a bbox diag of %f",distUpperBound,mm1->cm.bbox.Diag());
 
     if(sampleVert)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler>::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
+      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
     if(sampleEdge)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler>::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
+      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
     if(sampleFace)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler>::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 
     Log("Hausdorff Distance computed");
     Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
