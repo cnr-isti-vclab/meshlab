@@ -251,7 +251,7 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
   else glDrawArrays(GL_POINTS, 0, mesh->vn);
 
 
-
+  if (render) delete[] render;
   render = new unsigned char[wt*ht];
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
