@@ -147,10 +147,11 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 
             QList<int> rl;
             rl << md.rm()->id();
-            md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
+            md.documentUpdated();
+			
         }
-        this->glContext->doneCurrent();
-
+		this->glContext->doneCurrent();
+		
         // it is safe to delete after copying data to VBO
         delete []vertices;
         delete []normals;
