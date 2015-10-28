@@ -54,9 +54,9 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
             QStringList rgbmode = (QStringList() << "[0-255]" << "[0.0-1.0]");
 
             parlst.addParam(new RichInt("rowToSkip", 0, "Header Row to be skipped", "The number of lines that must be skipped at the beginning of the file. Generally, these files have one or more 'header' lines, before the point list"));
-            parlst.addParam(new RichEnum("separator", 0, separator,"separator between","The separator between values in the point description."));
-            parlst.addParam(new RichEnum("strformat", 0, strformat,"separator between","The separator between values in the point description."));
-            parlst.addParam(new RichEnum("rgbmode", 0, rgbmode,"separator between","The separator between values in the point description."));
+            parlst.addParam(new RichEnum("strformat", 0, strformat,"Point format","Which values are specified for each point, and in which order."));
+            parlst.addParam(new RichEnum("separator", 0, separator,"Separator","The separator between individual values in the point(s) description."));
+            parlst.addParam(new RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
     }
 }
 
