@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>edit_mutualcorrsDialog</class>
+ <widget class="QWidget" name="edit_mutualcorrsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>614</width>
+    <height>535</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Raster registration using mutual correspondences</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="spacing">
+    <number>6</number>
+   </property>
+   <property name="leftMargin">
+    <number>9</number>
+   </property>
+   <property name="topMargin">
+    <number>9</number>
+   </property>
+   <property name="rightMargin">
+    <number>9</number>
+   </property>
+   <property name="bottomMargin">
+    <number>9</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="frame">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="mutCorr">
+         <attribute name="title">
+          <string>Mutual Correspondences</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>5</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>5</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QTableWidget" name="tableWidget">
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>65</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Active</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (3D)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (3D)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Z (3D)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (2D)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (2D)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>error</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="addLine">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Add New Point</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="delLine">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Delete Current Point</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="loadFromFile">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Load Correspondences From File</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="exportToFile">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Export all Correspondences to file...</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="pickCurrent">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Pick current point on Model</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="buttonPickRef">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Pick current point on Image</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item alignment="Qt::AlignRight">
+             <widget class="QLabel" name="renderingLabel">
+              <property name="text">
+               <string>Rendering Mode  </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="renderingBox">
+              <item>
+               <property name="text">
+                <string>Combined</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Normal Map</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Color per Vertex</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Specular</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Silhouette</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Specular Combined</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkFocal">
+              <property name="text">
+               <string>Optimize Focal</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="leftMargin">
+             <number>5</number>
+            </property>
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelIter">
+              <property name="text">
+               <string>Num. of Iterations</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinIter">
+              <property name="minimum">
+               <number>10</number>
+              </property>
+              <property name="maximum">
+               <number>5000</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>100</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelTolerance">
+              <property name="text">
+               <string>Tolerance</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="spinTolerance">
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>200.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.100000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelVar">
+              <property name="text">
+               <string>Expected Variance</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="spinVariance">
+              <property name="decimals">
+               <number>2</number>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>2.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelBackg">
+              <property name="text">
+               <string>Background Weight </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBackg">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>2</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Use Mutual Info </string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QSlider" name="mutcorrSlider">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="singleStep">
+               <number>10</number>
+              </property>
+              <property name="value">
+               <number>10</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksBelow</enum>
+              </property>
+              <property name="tickInterval">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Use Correspondences</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="buttonApply">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Apply Mutual Information Registration</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Help  and Info</string>
+         </attribute>
+         <widget class="QLabel" name="label_3">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>10</y>
+            <width>541</width>
+            <height>451</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This component gives the possibility to align a raster model on a model. &lt;br/&gt;It works as the previous mutual information filter, with the additional possibility to set and use correspondences to “drive” the alignment. The main options are:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Rendering mode&lt;/span&gt;: the rendering mode that will be used to calculate mutual information&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Optimize Focal&lt;/span&gt;: optimize focal length in addition to camera extrinsics&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Num. of iterations&lt;/span&gt;: number of iterations of the convergence method&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Tolerance&lt;/span&gt;: tolerance in the change of value of Mutual Information. It influences the convergence&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Expected variance&lt;/span&gt;: the amount of perturbation in camera parameters to reach the alignment&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Background weight&lt;/span&gt;: weight of the pixels of the background in the MI calculation. 2 means 50%, 3 means 33% and so on.&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Use MI / Use correspondences&lt;/span&gt;: weight of MI and correspondences in the alignment phase. If the slider is all on the left, pure MI is used, if it’s all on the right, only the correspondences are used. If no correspondences are available, pure MI is used. The default value of the slider is usually a good compromise between the two contributions.&lt;/p&gt;&lt;p&gt;To set up a correspondence, click on “&lt;span style=&quot; font-weight:600;&quot;&gt;Add new point&lt;/span&gt;”. The click on the point line in the table to select it. Then click on “&lt;span style=&quot; font-weight:600;&quot;&gt;Pick current point on model&lt;/span&gt;” and double click on the 3D model to set the 3D point, then click on “&lt;span style=&quot; font-weight:600;&quot;&gt;Pick current point on image&lt;/span&gt;” and double click on the image to set the 2D correspondence.&lt;br/&gt;The point can be removed or made “&lt;span style=&quot; font-weight:600;&quot;&gt;inactive&lt;/span&gt;” (double click on “&lt;span style=&quot; font-weight:600;&quot;&gt;active&lt;/span&gt;” in the Table). In that case, the point won’t be used when alignment is preformed. The last column gives the current alignment error of the pixel (it’s calculated at the end of any alignment iteration).&lt;/p&gt;&lt;p&gt;Please refer to these papers if you use this component:&lt;/p&gt;&lt;p&gt;M. Sottile, M. Dellepiane, P. Cignoni, R. Scopigno, &lt;span style=&quot; font-style:italic;&quot;&gt;Mutual Correspondences: an hybrid method for image-to-geometry registration&lt;/span&gt;, Eurographics Italian Chapter Conference 2010, page 81-88 - Nov 2010&lt;/p&gt;&lt;p&gt;M. Corsini, M. Dellepiane, F. Ponchio, R. Scopigno, &lt;span style=&quot; font-style:italic;&quot;&gt;Image-to-Geometry Registration: a Mutual Information Method exploiting Illumination-related Geometric Properties&lt;/span&gt;, Computer Graphics Forum, Volume 28, Number 7, page 1755-1764 - 2009&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
