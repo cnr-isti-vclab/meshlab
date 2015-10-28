@@ -236,15 +236,17 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
   // numerical input
   if(current_manip_mode != EditManipulatorsPlugin::ModNone)  // transform on one axis only
   {
-    if (e->key() == Qt::Key_1) inputnumberstring += "1";
-    if (e->key() == Qt::Key_2) inputnumberstring += "2";
-    if (e->key() == Qt::Key_3) inputnumberstring += "3";
-    if (e->key() == Qt::Key_4) inputnumberstring += "4";
-    if (e->key() == Qt::Key_5) inputnumberstring += "5";
-    if (e->key() == Qt::Key_6) inputnumberstring += "6";
-    if (e->key() == Qt::Key_7) inputnumberstring += "7";
-    if (e->key() == Qt::Key_8) inputnumberstring += "8";   
-    if (e->key() == Qt::Key_9) inputnumberstring += "9";
+	bool hasNumberChanged = false;
+
+	if (e->key() == Qt::Key_1) { inputnumberstring += "1"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_2) { inputnumberstring += "2"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_3) { inputnumberstring += "3"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_4) { inputnumberstring += "4"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_5) { inputnumberstring += "5"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_6) { inputnumberstring += "6"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_7) { inputnumberstring += "7"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_8) { inputnumberstring += "8"; hasNumberChanged = true; }
+	if (e->key() == Qt::Key_9) { inputnumberstring += "9"; hasNumberChanged = true; }
 
     if (e->key() == Qt::Key_0) 
     {
@@ -252,6 +254,8 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
         inputnumberstring = "0.";
       if((inputnumberstring.length() >= 2) || (inputnumberstring[0]!=0))
         inputnumberstring += "0";
+
+	  hasNumberChanged = true;
     }  
 
     if (e->key() == Qt::Key_Period)
@@ -260,11 +264,14 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
         inputnumberstring = "0.";
       else if(!inputnumberstring.contains("."))
         inputnumberstring += ".";
+
+	  hasNumberChanged = true;
     }  
 
 	if (e->key() == Qt::Key_Minus)
     {
 		inputnumbernegative = !inputnumbernegative;
+		hasNumberChanged = true;
 	}
 
 	if (!inputnumbernegative)
@@ -272,7 +279,8 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
 	else
       inputnumber = -inputnumberstring.toFloat();
 
-	UpdateMatrix(model, gla, false, true);
+	if (hasNumberChanged)
+		UpdateMatrix(model, gla, false, true);
   }
 
   //else e->ignore();
@@ -630,6 +638,8 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
   float manipsize(model.cm.bbox.Diag() / 2.0);
+  Matrix44f original_rot = original_Transform;
+  original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
   gla->trackball.track.rot.ToMatrix(track_rotation);
 
@@ -676,27 +686,39 @@ void  EditManipulatorsPlugin::DrawScaleManipulators(MeshModel &model, GLArea *gl
 	    DrawCubes(0,0,1.0);
       break;
     case EditManipulatorsPlugin::ModXX:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    glRotatef (90, 0, 1, 0);
-	    DrawCubes(1.0,0.5,0.5);
+		if (!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		glRotatef (90, 0, 1, 0);
+		DrawCubes(1.0,0.5,0.5);
       break;
     case EditManipulatorsPlugin::ModYY:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    glRotatef (90, 1, 0, 0);
-	    DrawCubes(0.5,1.0,0.5);
+		if (!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		glRotatef (90, 1, 0, 0);
+		DrawCubes(0.5,1.0,0.5);
       break;
     case EditManipulatorsPlugin::ModZZ:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    DrawCubes(0.5,0.5,1.0);
+		if (!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		DrawCubes(0.5,0.5,1.0);
       break;
     default: ;
   }
@@ -717,6 +739,8 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
   float manipsize = model.cm.bbox.Diag() / 2.0;
+  Matrix44f original_rot = original_Transform;
+  original_rot.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
   Matrix44f track_rotation;
   gla->trackball.track.rot.ToMatrix(track_rotation);
   
@@ -760,28 +784,40 @@ void  EditManipulatorsPlugin::DrawRotateManipulators(MeshModel &model, GLArea *g
 	    DrawCircle(0,0,1.0);
       break;
     case EditManipulatorsPlugin::ModXX:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    glRotatef (90, 0, 1, 0);
-	    DrawCircle(1.0,0.5,0.5);
-      break;
+		if(!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		glRotatef (90, 0, 1, 0);
+		DrawCircle(1.0,0.5,0.5);
+		break;
     case EditManipulatorsPlugin::ModYY:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    glRotatef (-90, 1, 0, 0);
-	    DrawCircle(0.5,1.0,0.5);
-      break;
+		if(!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		glRotatef (-90, 1, 0, 0);
+		DrawCircle(0.5,1.0,0.5);
+		break;
     case EditManipulatorsPlugin::ModZZ:
-      if(!aroundOrigin)
-        glTranslate(model.cm.bbox.Center());
-      glMultMatrix(original_Transform);
-      glScale(manipsize);
-	    DrawCircle(0.5,0.5,1.0);
-      break;
+		if (!aroundOrigin)
+		{
+			glTranslate(mesh_boxcenter);
+			glMultMatrix(original_rot);
+		}
+		else
+			glMultMatrix(original_Transform);
+		glScale(manipsize);
+		DrawCircle(0.5,0.5,1.0);
+		break;
     default: ;
   }
 	
@@ -1074,10 +1110,12 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
 {  
   Matrix44m newmatrix;
 
-  Matrix44m old_rotation;  
+  Matrix44m old_rotation; 
   Matrix44m old_translation;  
   Matrix44m old_meshcenter;
   Matrix44m old_meshuncenter;
+  Matrix44m old_meshcenter_untr;
+  Matrix44m old_meshuncenter_untr;
 
   Point3m new_scale;
   Point3m axis;
@@ -1090,6 +1128,9 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
   mesh_xaxis = original_Transform.GetColumn3(0);
   mesh_yaxis = original_Transform.GetColumn3(1);
   mesh_zaxis = original_Transform.GetColumn3(2);
+  vcg::Normalize(mesh_xaxis);
+  vcg::Normalize(mesh_yaxis);
+  vcg::Normalize(mesh_zaxis);
 
   delta_Transform.SetIdentity();
   newmatrix.SetIdentity();
@@ -1199,22 +1240,44 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         if(useinputnumber)
           displayOffset = inputnumber;
 
-        new_scale[0] = (axis[0]==0)?1.0:(axis[0] * displayOffset);
-        new_scale[1] = (axis[1]==0)?1.0:(axis[1] * displayOffset);
-        new_scale[2] = (axis[2]==0)?1.0:(axis[2] * displayOffset);
 
-        delta_Transform.SetScale(new_scale);
+		if ((current_manip_mode == EditManipulatorsPlugin::ModX) || (current_manip_mode == EditManipulatorsPlugin::ModXX))
+		{
+			delta_Transform.SetScale(Point3m(displayOffset, Scalarm(1.0), Scalarm(1.0)));
+		}
+		if ((current_manip_mode == EditManipulatorsPlugin::ModY) || (current_manip_mode == EditManipulatorsPlugin::ModYY))
+		{
+			delta_Transform.SetScale(Point3m(Scalarm(1.0), displayOffset, Scalarm(1.0)));
+		}
+		if ((current_manip_mode == EditManipulatorsPlugin::ModZ) || (current_manip_mode == EditManipulatorsPlugin::ModZZ))
+		{
+			delta_Transform.SetScale(Point3m(Scalarm(1.0), Scalarm(1.0), displayOffset));
+		}
 
         old_rotation = original_Transform;
         old_rotation.SetColumn(3, Point3m(Scalarm(0.0),Scalarm(0.0),Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
-        old_meshcenter.SetTranslate(-mesh_boxcenter);
-        old_meshuncenter.SetTranslate(mesh_boxcenter);
+		old_meshcenter.SetTranslate(old_rotation * (-mesh_boxcenter));
+		old_meshuncenter.SetTranslate(old_rotation * mesh_boxcenter);
+		old_meshcenter_untr.SetTranslate(-mesh_boxcenter);
+		old_meshuncenter_untr.SetTranslate(mesh_boxcenter);
 
-        if(aroundOrigin)
-          newmatrix = old_translation * delta_Transform * old_rotation;
-        else
-          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
+		if ((current_manip_mode == EditManipulatorsPlugin::ModX) || (current_manip_mode == EditManipulatorsPlugin::ModY) || (current_manip_mode == EditManipulatorsPlugin::ModZ))
+		{
+			if (aroundOrigin)
+				newmatrix = old_translation * delta_Transform * old_rotation;
+			else
+				newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
+		}
+		else // local axis
+		{
+			if (aroundOrigin)
+				newmatrix = old_translation * old_rotation * delta_Transform;
+			else
+				newmatrix = old_translation * old_rotation * old_meshuncenter_untr * delta_Transform * old_meshcenter_untr;
+		}
+
+
       }
       else
         newmatrix = original_Transform;  // it should never arrive here, anyway
@@ -1275,8 +1338,8 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         old_rotation = original_Transform;
         old_rotation.SetColumn(3, Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)));
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
-        old_meshcenter.SetTranslate(-mesh_boxcenter);
-        old_meshuncenter.SetTranslate(mesh_boxcenter);
+		old_meshcenter.SetTranslate(old_rotation * (-mesh_boxcenter));
+		old_meshuncenter.SetTranslate(old_rotation * mesh_boxcenter);
 
         if(aroundOrigin)
           newmatrix = old_translation * delta_Transform * old_rotation;
@@ -1313,11 +1376,13 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         old_translation.SetTranslate(original_Transform.GetColumn3(3));
         old_meshcenter.SetTranslate(-mesh_boxcenter);
         old_meshuncenter.SetTranslate(mesh_boxcenter);
+		old_meshcenter_untr.SetTranslate(-mesh_boxcenter);
+		old_meshuncenter_untr.SetTranslate(mesh_boxcenter);
 
         if(aroundOrigin)
-          newmatrix = old_translation * delta_Transform * old_rotation;
+			newmatrix = old_translation * old_rotation * delta_Transform;
         else
-          newmatrix = old_translation * old_meshuncenter * delta_Transform * old_meshcenter * old_rotation;
+			newmatrix = old_translation * old_rotation * old_meshuncenter_untr * delta_Transform * old_meshcenter_untr;
       }
 
     }
