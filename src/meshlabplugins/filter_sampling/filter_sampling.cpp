@@ -469,6 +469,8 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                   "if enabled, we store the distance of the transferred value as in the vertex quality"));
     parlst.addParam(new RichAbsPerc("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
                                     tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering attributes.")));
+	parlst.addParam(new RichBool ("onSelected", false, "Only on selection",	"If checked, only transfer to selected vertices on TARGET mesh"));
+
   } break;
   case FP_UNIFORM_MESH_RESAMPLING :
   {
@@ -864,6 +866,8 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
     srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
+	
+	bool onlySelected = par.getBool("onSelected");
 
     RedetailSampler rs;
     rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
@@ -876,7 +880,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     rs.selectionFlag=par.getBool("SelectionTransfer");
     rs.storeDistanceAsQualityFlag=par.getBool("QualityDistance");
 
-    if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag  && !rs.normalFlag && !rs.selectionFlag)
+    if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag && !rs.normalFlag && !rs.selectionFlag)
     {
       errorMessage = QString("You have to choose at least one attribute to be sampled");
       return false;
@@ -888,7 +892,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
     qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
 
-    tri::SurfaceSampling<CMeshO,RedetailSampler>::VertexUniform(trgMesh->cm,rs,trgMesh->cm.vn);
+	tri::SurfaceSampling<CMeshO, RedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
 
     if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
 
