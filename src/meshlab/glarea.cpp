@@ -527,6 +527,13 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             hasToGetPickPos=false;
         }
     }
+	if (hasToPick && hasToGetPickCoords)
+	{
+		Point2f pp(pointToPick[0], pointToPick[1]);
+		hasToPick = false;
+		emit transmitPickedPos(nameToGetPickCoords, pp);
+		hasToGetPickCoords = false;
+	}
     foreach(QAction * p , iPerDocDecoratorlist)
     {
         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
@@ -1479,6 +1486,13 @@ void GLArea::sendSurfacePos(QString name)
     qDebug("sendSurfacePos %s",qPrintable(name));
     nameToGetPickPos = name;
     hasToGetPickPos=true;
+}
+
+void GLArea::sendPickedPos(QString name)
+{
+	qDebug("sendPickedPos %s", qPrintable(name));
+	nameToGetPickCoords = name;
+	hasToGetPickCoords = true;
 }
 
 void GLArea::sendViewDir(QString name)

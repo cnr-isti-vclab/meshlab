@@ -242,6 +242,7 @@ signals :
     void transmitViewDir(QString name, vcg::Point3f dir);
     void transmitViewPos(QString name, vcg::Point3f dir);
     void transmitSurfacePos(QString name,vcg::Point3f dir);
+	void transmitPickedPos(QString name, vcg::Point2f dir);
     void transmitCameraPos(QString name,vcg::Point3f dir);
     void transmitShot(QString name, Shotm);
     void transmitMatrix(QString name, Matrix44m);
@@ -249,6 +250,7 @@ signals :
 public slots:
     void sendViewPos(QString name);
     void sendSurfacePos(QString name);
+	void sendPickedPos(QString name);
     void sendViewDir(QString name);
     void sendCameraPos(QString name);
     void sendMeshShot(QString name);
@@ -295,8 +297,10 @@ private:
     bool	hasToUpdateTexture;			// has to reload textures at the next redraw
     bool  hasToPick;							// has to pick during the next redraw.
     bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
-    bool hasToSelectMesh;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
+	bool hasToGetPickCoords;							// if we are waiting for a double click for getting a position on the GLArea that has to be sent back using signal/slots (for parameters)
+	bool hasToSelectMesh;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
     QString nameToGetPickPos;         // the name of the parameter that has asked for the point on the surface
+	QString nameToGetPickCoords;         // the name of the parameter that has asked for the point on the GLArea
     bool interrbutshow;
     vcg::Point2i pointToPick;
 
