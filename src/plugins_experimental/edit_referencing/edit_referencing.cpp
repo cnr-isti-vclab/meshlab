@@ -42,6 +42,9 @@ EditReferencingPlugin::EditReferencingPlugin() {
 
     referencingDialog = NULL;
 
+    //referencing mode
+    referencingMode = EditReferencingPlugin::REF_ABSOLUTE;
+
     //setup
     usePoint.reserve(MAX_REFPOINTS);
     pointID.reserve(MAX_REFPOINTS);
@@ -49,12 +52,24 @@ EditReferencingPlugin::EditReferencingPlugin() {
     refPoints.reserve(MAX_REFPOINTS);
     pointError.reserve(MAX_REFPOINTS);
 
+    useDistance.reserve(MAX_REFPOINTS);
+    distanceID.reserve(MAX_REFPOINTS);
+    distPointA.reserve(MAX_REFPOINTS);
+    distPointB.reserve(MAX_REFPOINTS);
+    currDist.reserve(MAX_REFPOINTS);
+    targDist.reserve(MAX_REFPOINTS);
+	scaleFact.reserve(MAX_REFPOINTS);
+    distError.reserve(MAX_REFPOINTS);
+	globalScale = 0.0;
+
     transfMatrix.SetIdentity();
 
     lastname = 0;
 
+    lastAskedPick = EditReferencingPlugin::REF_ABSOLUTE;
+
     referencingResults.clear();
-    referencingResults.reserve(2048);
+    referencingResults.reserve(4096);
 }
 
 const QString EditReferencingPlugin::Info()
@@ -67,8 +82,16 @@ void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     gla->update();
     cur=event->pos();
 }
-  
-void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p)
+
+void EditReferencingPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
+{
+	if (referencingMode == EditReferencingPlugin::REF_ABSOLUTE)
+		DecorateAbsolute(m, gla, p);
+	else if (referencingMode == EditReferencingPlugin::REF_SCALE)
+		DecorateScale(m, gla, p);
+}
+
+void EditReferencingPlugin::DecorateAbsolute(MeshModel &m, GLArea * /*gla*/, QPainter *p)
 {
     //status
     int cindex;
@@ -80,6 +103,7 @@ void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p
         status_line1.sprintf("Active Point: %s",pointID[cindex].toStdString().c_str());
 
     this->RealTimeLog("Edit Referencing", m.shortName(),
+                      "Absolute Referencing<br>"
                       "%s<br>"
                       "%s<br>"
                       "%s<br>"
@@ -176,6 +200,108 @@ void EditReferencingPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p
 
 }
 
+void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPainter *p)
+{
+	//status
+	int cindex;
+
+	cindex = referencingDialog->ui->tableWidgetDist->currentRow();
+	if (cindex == -1)
+	{
+		status_line1.sprintf("Active Distance: ----");
+	}
+	else
+	{
+		status_line1.sprintf("Active Distance: %s", distanceID[cindex].toStdString().c_str());
+
+		if ((currDist[cindex] != 0.0) && (targDist[cindex] != 0.0))
+			status_line2.sprintf("%.3f  -->  %.3f", currDist[cindex], targDist[cindex]);
+		else
+			status_line2.sprintf(" ");
+	}
+
+	if (globalScale!=0)
+		status_line3.sprintf("SCENE SCALE: %.3f", globalScale);
+	else
+		status_line3.sprintf("NO VALID SCENE SCALE");
+
+	this->RealTimeLog("Edit Referencing", m.shortName(),
+		"Scale Referencing<br>"
+		"%s<br>"
+		"%s<br><br>"
+		"%s<br>"
+		"%s",
+		status_line1.toStdString().c_str(),
+		status_line2.toStdString().c_str(),
+		status_line3.toStdString().c_str(),
+		status_error.toStdString().c_str());
+
+	// draw picked distances
+	if (true)
+	{
+		int pindex;
+		vcg::Point3d currPointA, currPointB;
+		QString buf;
+		float lineLen = m.cm.bbox.Diag() / 50.0;
+
+		glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+		glLineWidth(2.0f);
+
+		glDisable(GL_LIGHTING);
+
+		for (pindex = 0; pindex<useDistance.size(); pindex++)
+		{
+			if (pindex == cindex)            //if current
+				glColor3ub(200, 200, 0);
+			else if (useDistance[pindex])    //if active
+				glColor3ub(100, 100, 0);
+			else
+				glColor3ub(70, 70, 0);
+
+			currPointA = distPointA[pindex];
+			currPointB = distPointB[pindex];
+
+			glBegin(GL_LINES);
+			glVertex3f(currPointA[0] - lineLen, currPointA[1], currPointA[2]);
+			glVertex3f(currPointA[0] + lineLen, currPointA[1], currPointA[2]);
+			glVertex3f(currPointA[0], currPointA[1] - lineLen, currPointA[2]);
+			glVertex3f(currPointA[0], currPointA[1] + lineLen, currPointA[2]);
+			glVertex3f(currPointA[0], currPointA[1], currPointA[2] - lineLen);
+			glVertex3f(currPointA[0], currPointA[1], currPointA[2] + lineLen);
+			glEnd();
+
+			glBegin(GL_LINES);
+			glVertex3f(currPointB[0] - lineLen, currPointB[1], currPointB[2]);
+			glVertex3f(currPointB[0] + lineLen, currPointB[1], currPointB[2]);
+			glVertex3f(currPointB[0], currPointB[1] - lineLen, currPointB[2]);
+			glVertex3f(currPointB[0], currPointB[1] + lineLen, currPointB[2]);
+			glVertex3f(currPointB[0], currPointB[1], currPointB[2] - lineLen);
+			glVertex3f(currPointB[0], currPointB[1], currPointB[2] + lineLen);
+			glEnd();
+
+			buf = distanceID[pindex] + " (A)";
+			vcg::glLabel::render(p, currPointA, buf);
+			buf = distanceID[pindex] + " (B)";
+			vcg::glLabel::render(p, currPointB, buf);
+
+			if (pindex == cindex)            //if current
+				glColor3ub(255, 255, 0);
+			else if (useDistance[pindex])    //if active
+				glColor3ub(155, 155, 0);
+			else
+				glColor3ub(75, 75, 0);
+
+			glBegin(GL_LINES);
+			glVertex3f(currPointA[0], currPointA[1], currPointA[2]);
+			glVertex3f(currPointB[0], currPointB[1], currPointB[2]);
+			glEnd();
+		}
+
+		glEnable(GL_LIGHTING);
+		glPopAttrib();
+	}
+}
+
 bool EditReferencingPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
@@ -193,9 +319,16 @@ bool EditReferencingPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
         connect(referencingDialog->ui->buttonPickRef,SIGNAL(clicked()),this,SLOT(pickCurrentRefPoint()));
         connect(referencingDialog->ui->buttonCalculate,SIGNAL(clicked()),this,SLOT(calculateMatrix()));
         connect(referencingDialog->ui->buttonApply,SIGNAL(clicked()),this,SLOT(applyMatrix()));
-
         connect(referencingDialog->ui->loadFromFile,SIGNAL(clicked()),this,SLOT(loadFromFile()));
         connect(referencingDialog->ui->exportToFile,SIGNAL(clicked()),this,SLOT(saveToFile()));
+
+        connect(referencingDialog->ui->addDistance,SIGNAL(clicked()),this,SLOT(addNewDistance()));
+        connect(referencingDialog->ui->delDistance,SIGNAL(clicked()),this,SLOT(delCurrentDistance()));
+        connect(referencingDialog->ui->bttPickPointA,SIGNAL(clicked()),this,SLOT(pickCurrDistPA()));
+        connect(referencingDialog->ui->bttPickPointB,SIGNAL(clicked()),this,SLOT(pickCurrDistPB()));
+		connect(referencingDialog->ui->bttApplyScale, SIGNAL(clicked()), this, SLOT(applyScale()));
+		connect(referencingDialog->ui->bttLoadDistances, SIGNAL(clicked()), this, SLOT(loadDistances()));
+		connect(referencingDialog->ui->bttExportScaling, SIGNAL(clicked()), this, SLOT(exportScaling()));
 
         //connecting other actions
     }
@@ -227,6 +360,48 @@ void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/)
     pickedPoints.clear();
     refPoints.clear();
     pointError.clear();
+
+    useDistance.clear();
+    distanceID.clear();
+    distPointA.clear();
+    distPointB.clear();
+    currDist.clear();
+    targDist.clear();
+	scaleFact.clear();
+    distError.clear();
+}
+
+void EditReferencingPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoint)
+{
+    status_error = "";
+
+    int pindex;
+    if(lastAskedPick == EditReferencingPlugin::REF_ABSOLUTE)
+        pindex = referencingDialog->ui->tableWidget->currentRow();
+    else if(lastAskedPick == EditReferencingPlugin::REF_SCALE)
+        pindex = referencingDialog->ui->tableWidgetDist->currentRow();
+
+    if(name=="currentMOV")
+        pickedPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+    else if(name=="currentREF")
+        refPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+	else if (name == "currentPA")
+	{
+		distPointA[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+		updateDistances();
+	}
+	else if (name == "currentPB")
+	{
+		distPointB[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+		updateDistances();
+	}
+
+    status_line2 = "";
+
+    // update dialog
+    referencingDialog->updateTable();
+    referencingDialog->updateTableDist();
+    glArea->update();
 }
 
 void EditReferencingPlugin::addNewPoint()
@@ -302,7 +477,8 @@ void EditReferencingPlugin::pickCurrentPoint()
         return;
     }
 
-    emit askSurfacePos("current");
+    lastAskedPick = EditReferencingPlugin::REF_ABSOLUTE;
+    emit askSurfacePos("currentMOV");
     status_line2 = "Double-click on model to pick point";
     glArea->update();
 }
@@ -319,25 +495,9 @@ void EditReferencingPlugin::pickCurrentRefPoint()
         return;
     }
 
+    lastAskedPick = EditReferencingPlugin::REF_ABSOLUTE;
     emit askSurfacePos("currentREF");
     status_line2 = "Double-click on model to pick point";
-    glArea->update();
-}
-
-void EditReferencingPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoint)
-{
-    status_error = "";
-    int pindex = referencingDialog->ui->tableWidget->currentRow();
-
-    if(name=="current")
-        pickedPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
-    else
-        refPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
-
-    status_line2 = "";
-
-    // update dialog
-    referencingDialog->updateTable();
     glArea->update();
 }
 
@@ -672,4 +832,244 @@ void EditReferencingPlugin::applyMatrix()
     }
 
     glArea->update();
+}
+
+void EditReferencingPlugin::updateDistances()
+{
+	// recalculate all current distances
+	int dindex;
+	Point3d currPA, currPB;
+
+	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	{
+		currPA = distPointA[dindex];
+		currPB = distPointB[dindex];
+
+		currDist[dindex] = (currPA - currPB).Norm();
+	}
+
+	// now update scale
+	double curr_scale = 0;
+	int numValid = 0;
+	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	{
+		if (currDist[dindex] == 0.0)
+		{
+			scaleFact[dindex] = 0.0;
+		}
+		else
+		{
+			scaleFact[dindex] = targDist[dindex] / currDist[dindex];
+
+			if ((useDistance[dindex]) && (!scaleFact[dindex] == 0.0))
+			{
+				curr_scale += scaleFact[dindex];
+				numValid++;
+			}
+		}
+	}
+
+	globalScale = (numValid == 0) ? 0.0 : curr_scale / (double)numValid;
+
+	if (globalScale == 0.0)
+		this->referencingDialog->ui->bttApplyScale->setEnabled(false);
+	else
+		this->referencingDialog->ui->bttApplyScale->setEnabled(true);
+
+	// finally update error
+	for (dindex = 0; dindex < useDistance.size(); dindex++)
+	{
+		distError[dindex] = (currDist[dindex] * globalScale) - targDist[dindex];
+	}
+
+	referencingDialog->updateTableDist();
+	glArea->update();
+}
+
+void EditReferencingPlugin::addNewDistance()
+{
+    status_error = "";
+    int pindex;
+    bool alreadyThere;
+    QString newname;
+
+    // i do not want to have too many refs
+    if(useDistance.size() > MAX_REFPOINTS)
+    {
+        status_error = "Too many points";
+        return;
+    }
+
+    // I should check the name is really new... hehe :)
+    do
+    {
+        alreadyThere = false;
+        newname = "DD" + QString::number(lastname++);
+        for(pindex=0; pindex<distanceID.size(); pindex++)
+        {
+            if(distanceID[pindex] == newname)
+               alreadyThere=true;
+        }
+    }
+    while(alreadyThere);
+
+    useDistance.push_back(new bool(true));
+    distanceID.push_back(newname);
+    distPointA.push_back(Point3d(0.0, 0.0, 0.0));
+    distPointB.push_back(Point3d(0.0, 0.0, 0.0));
+    currDist.push_back(0.0);
+    targDist.push_back(0.0);
+	scaleFact.push_back(0.0);
+    distError.push_back(0.0);
+
+    // update dialog
+	updateDistances();
+    referencingDialog->updateTableDist();
+    glArea->update();
+}
+
+void EditReferencingPlugin::deleteCurrentDistance()
+{
+    status_error = "";
+    int pindex = referencingDialog->ui->tableWidgetDist->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    usePoint.erase(usePoint.begin() + pindex);
+    pointID.erase(pointID.begin() + pindex);
+    pickedPoints.erase(pickedPoints.begin() + pindex);
+    refPoints.erase(refPoints.begin() + pindex);
+    pointError.erase(pointError.begin() + pindex);
+
+    // update dialog
+	updateDistances();
+    referencingDialog->updateTableDist();
+    glArea->update();
+}
+
+void EditReferencingPlugin::pickCurrDistPA()
+{
+    status_error = "";
+    int pindex = referencingDialog->ui->tableWidgetDist->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    lastAskedPick = EditReferencingPlugin::REF_SCALE;
+    emit askSurfacePos("currentPA");
+    status_line2 = "Double-click on model to pick point";
+    glArea->update();
+}
+
+void EditReferencingPlugin::pickCurrDistPB()
+{
+    status_error = "";
+    int pindex = referencingDialog->ui->tableWidgetDist->currentRow();
+
+    // if nothing selected, skip
+    if(pindex == -1)
+    {
+        status_error = "No point selected";
+        return;
+    }
+
+    lastAskedPick = EditReferencingPlugin::REF_SCALE;
+    emit askSurfacePos("currentPB");
+    status_line2 = "Double-click on model to pick point";
+    glArea->update();
+}
+
+void EditReferencingPlugin::applyScale()
+{
+	status_error = "";
+
+	Matrix44m newMat;
+	newMat.Identity();
+	newMat.SetScale(globalScale, globalScale, globalScale);
+
+	if (this->referencingDialog->ui->cbAllLayersScale->isChecked())
+	{
+		foreach(MeshModel *mmp, glArea->md()->meshList)
+		{
+			if (mmp->visible)
+			{
+				mmp->cm.Tr = newMat * glArea->mm()->cm.Tr;
+			}
+		}
+	}
+	else
+	{
+		glArea->mm()->cm.Tr = newMat * glArea->mm()->cm.Tr;
+	}
+
+	glArea->update();
+}
+
+void EditReferencingPlugin::loadDistances()
+{
+	// load from file
+}
+
+void EditReferencingPlugin::exportScaling()
+{
+	// saving to file
+	status_error = "";
+	// saving
+	int pindex;
+
+	QString openFileName = "";
+	openFileName = QFileDialog::getSaveFileName(NULL, "Save Scaling Process", QDir::currentPath(), "Text file (*.txt)");
+
+	if (openFileName != "")
+	{
+		// opening file
+		QFile openFile(openFileName);
+
+		if (openFile.open(QIODevice::ReadWrite))
+		{
+			QTextStream openFileTS(&openFile);
+
+			openFileTS << "-------SCALING DATA---------" << "\n\n";
+
+			// writign results
+			openFileTS << "--------------------------\n";
+			for (pindex = 0; pindex<useDistance.size(); pindex++)
+			{
+				openFileTS << (useDistance[pindex]?"Active":"Inactive") << " " << distanceID[pindex] << " " <<
+					distPointA[pindex][0] << " " << distPointA[pindex][1] << " " << distPointA[pindex][2] << " " <<
+					distPointB[pindex][0] << " " << distPointB[pindex][1] << " " << distPointB[pindex][2] << " " <<
+					currDist[pindex] << " " << targDist[pindex] << " " << distError[pindex] << "\n";
+			}
+			openFileTS << "--------------------------\n";
+
+			// writing reference
+			openFileTS << "\n"  << "--- scaling results ---" << "\n";
+
+			openFileTS << "\n" << "SCALE FACTOR: " << globalScale << "\n";
+
+			for (pindex = 0; pindex<useDistance.size(); pindex++)
+			{
+				if ((useDistance[pindex] == true)&&(scaleFact[pindex]!=0.0))
+				{
+					openFileTS << "\n" << distanceID[pindex] << "\n";
+					openFileTS << "A: " << distPointA[pindex][0] << " " << distPointA[pindex][1] << " " << distPointA[pindex][2] << "\n";
+					openFileTS << "B: " << distPointB[pindex][0] << " " << distPointB[pindex][1] << " " << distPointB[pindex][2] << "\n";
+					openFileTS << "Current Distance: " << currDist[pindex] << " Target Distance: " << targDist[pindex] << " Residual Error: " << distError[pindex] << "\n";
+				}
+			}
+
+			openFile.close();
+		}
+	}
+
+
 }

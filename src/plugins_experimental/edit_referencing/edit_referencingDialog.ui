@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>494</height>
+    <width>700</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <property name="spacing">
     <number>6</number>
    </property>
@@ -90,7 +90,7 @@
                <enum>QAbstractItemView::SelectRows</enum>
               </property>
               <attribute name="horizontalHeaderDefaultSectionSize">
-               <number>65</number>
+               <number>71</number>
               </attribute>
               <column>
                <property name="text">
@@ -272,7 +272,7 @@
             <item row="1" column="0">
              <widget class="QCheckBox" name="cbApplyToAll">
               <property name="text">
-               <string>Apply to all VISIBLE layers</string>
+               <string>Apply to all visible layers</string>
               </property>
              </widget>
             </item>
@@ -321,24 +321,234 @@
         </widget>
         <widget class="QWidget" name="distRef">
          <attribute name="title">
-          <string>Distance Reference</string>
+          <string>Scale Reference</string>
          </attribute>
-         <widget class="QLabel" name="label">
-          <property name="geometry">
-           <rect>
-            <x>210</x>
-            <y>70</y>
-            <width>201</width>
-            <height>111</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>used to scale scene given distances between picked points: useful for scaling to correct size data coming from SFM, PHOTOGRAMMETRY and DENSE STEREO                    NOT YET IMPLEMENTED</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QTableWidget" name="tableWidgetDist">
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>53</number>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Active</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (a)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (a)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Z (a)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>X (b)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Y (b)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Z (b)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Curr. Dist.</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Targ. Dist.</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Scale</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Error</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="topMargin">
+             <number>5</number>
+            </property>
+            <property name="rightMargin">
+             <number>5</number>
+            </property>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>SCALE FACTOR :</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_scale">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>---</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QPushButton" name="addDistance">
+              <property name="text">
+               <string>Add New Distance</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="delDistance">
+              <property name="text">
+               <string>Remove Current Distance</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="bttLoadDistances">
+              <property name="text">
+               <string>Load Distances from File</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="bttExportScaling">
+              <property name="text">
+               <string>Export Scaling Data</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="bttPickPointA">
+              <property name="text">
+               <string>Pick Current Point A</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="bttPickPointB">
+              <property name="text">
+               <string>Pick Current Point B</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="cbAllLayersScale">
+              <property name="text">
+               <string>Apply to All Visible Layers</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QPushButton" name="bttApplyScale">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Apply</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>

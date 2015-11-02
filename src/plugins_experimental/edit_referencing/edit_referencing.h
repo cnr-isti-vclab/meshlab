@@ -38,6 +38,9 @@ class EditReferencingPlugin : public QObject, public MeshEditInterface
 	Q_INTERFACES(MeshEditInterface)
 		
 public:
+
+    enum refModeType {REF_ABSOLUTE, REF_SCALE};
+
     EditReferencingPlugin();
     virtual ~EditReferencingPlugin() {}
 
@@ -46,12 +49,16 @@ public:
     bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
     void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
 
-    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
+    void Decorate(MeshModel &/*m*/, GLArea *parent, QPainter *p);
+	void DecorateAbsolute(MeshModel &/*m*/, GLArea *parent, QPainter *p);
+	void DecorateScale(MeshModel &/*m*/, GLArea *parent, QPainter *p);
     void Decorate (MeshModel &/*m*/, GLArea * ){};
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 		
+	void updateDistances();
+
     QPoint cur;
     QFont qFont;
 
@@ -61,16 +68,33 @@ public:
     // used to draw over the rendering
     GLArea *glArea;
 
-    //referencing data
+    //referencing mode
+    refModeType                  referencingMode;
+
+    //referencing data (points)
     std::vector<bool>            usePoint;
     std::vector<QString>         pointID;
     std::vector<vcg::Point3d>    pickedPoints;
     std::vector<vcg::Point3d>    refPoints;
     std::vector<double>          pointError;
 
+    //referencing data (distances)
+    std::vector<bool>            useDistance;
+    std::vector<QString>         distanceID;
+    std::vector<vcg::Point3d>    distPointA;
+    std::vector<vcg::Point3d>    distPointB;
+    std::vector<double>          currDist;
+    std::vector<double>          targDist;
+	std::vector<double>          scaleFact;
+    std::vector<double>          distError;
+	double globalScale;
+
+
     vcg::Matrix44d transfMatrix;
 
     int lastname;
+
+    refModeType lastAskedPick;
 
     bool validMatrix;
     bool isMatrixRigid;
@@ -85,19 +109,26 @@ public:
     QString referencingResults;
 
 public slots:
-    void addNewPoint();
-    void deleteCurrentPoint();
 
-    void pickCurrentPoint();
-    void pickCurrentRefPoint();
     void receivedSurfacePoint(QString name,vcg::Point3f pPoint);
 
-    void loadFromFile();
+    void addNewPoint();
+    void deleteCurrentPoint();
+    void pickCurrentPoint();
+    void pickCurrentRefPoint();
+	void calculateMatrix();
+	void applyMatrix();
+	void loadFromFile();
     void saveToFile();
 
-    void calculateMatrix();
+    void addNewDistance();
+    void deleteCurrentDistance();
+    void pickCurrDistPA();
+	void pickCurrDistPB();
+	void applyScale();
+	void loadDistances();
+	void exportScaling();
 
-    void applyMatrix();
 
 signals:
     void askSurfacePos(QString);

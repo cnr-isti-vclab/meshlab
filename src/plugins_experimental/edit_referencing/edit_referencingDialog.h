@@ -25,17 +25,26 @@ public:
 
     virtual void closeEvent(QCloseEvent *event);
 
-    void updateTable();     // update the referencing data displayed in the dialog table
+    void updateTable();      // update the absolute referencing data displayed in the dialog table
+    void updateTableDist();  // update the scale referencing data displayed in the dialog table
 
 signals:
     void closing();
 
 private slots:
+    void on_tabWidget_currentChanged(int index);
+
     void on_tableWidget_itemChanged(QTableWidgetItem *item);
 
     void on_tableWidget_cellDoubleClicked(int row, int column);
 
     void on_tableWidget_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
+
+    void on_tableWidgetDist_itemChanged(QTableWidgetItem *item);
+
+    void on_tableWidgetDist_cellDoubleClicked(int row, int column);
+
+    void on_tableWidgetDist_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
 
 private:
     EditReferencingPlugin *referencingPlugin;
