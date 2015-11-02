@@ -85,65 +85,69 @@ QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
   }
   return QString("error!");
 }
+
+const QString PossibleOperators("<br>It's possibile to use parenthesis <b>()</b>, and predefined operators:<br>"
+	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, <b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator)<br><br>");
+
 const QString PerVertexAttributeString(	"It's possibile to use the following per-vertex variables in the expression:<br>"
-										"x, y, z, nx, ny, nz (normal), r, g, b, a (color), q (quality), rad, vi (index), vtu, vtv (tex coord ) <br>"
+										"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> (quality), "
+										"<b>rad</b> (radius), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture index), "
 										"and all custom <i>vertex attributes</i> already defined by user.<br>");
 
-const QString PerFaceAttributeString(	"It's possibile to use per-face variables like attributes associated to the three vertex of every face.<br>"
-										"<b>x0,y0,z0</b> for <b>first vertex</b>; x1,y1,z1 for second vertex; x2,y2,z2 for third vertex.<br>"
-										"and also <b>nx0,ny0,nz0</b> nx1,ny1,nz1 etc. for <b>normals</b> and <b>r0,g0,b0,a0</b> for <b>color</b>,"
-										"<b>q0,q1,q2</b> for <b>quality</b> wtu0, wtv0, wtu1, wtv1,wtu2, wtv2 (per wedge tex coord ).<br>");
+const QString PerFaceAttributeString("It's possibile to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
+										"<b>x0,y0,z0</b> for the first vertex; <b>x1,y1,z1</b> for the second vertex; <b>x2,y2,z2</b> for the third vertex; "
+										"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex color, "
+										"<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> (per wedge texture coords), <b>ti</b> (texture index), "
+										"<b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal.<br>");
 
 // long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
-		case FF_VERT_SELECTION : return tr(	"Boolean function using muparser lib to perform vertex selection over current mesh.<br>"
-											"It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
-											"<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")
-                                             +PerVertexAttributeString;
+		case FF_VERT_SELECTION : return tr(	"Boolean function using muparser lib to perform vertex selection over current mesh.<br>")
+			+ PossibleOperators + PerVertexAttributeString;
 
-		case FF_FACE_SELECTION : return tr(	"Boolean function using muparser lib to perform faces selection over current mesh.<br>"
-											"It's possibile to use parenthesis, per-vertex variables and boolean operator:<br>"
-											"<b>(</b>,<b>)</b>,<b>and</b>,<b>or</b>,<b><</b><b>></b>,<b>=</b><br>")+PerFaceAttributeString;
+		case FF_FACE_SELECTION : return tr(	"Boolean function using muparser lib to perform faces selection over current mesh.<br>") 
+			+ PossibleOperators + PerFaceAttributeString;
 
 		case FF_GEOM_FUNC :  return tr(	"Geometric function using muparser lib to generate new Coord<br>"
-										"You can change x,y,z for every vertex according to the function specified.<br>")+PerVertexAttributeString;
+			"You can change x,y,z for every vertex according to the function specified.<br>") + PerVertexAttributeString;
 
-		case FF_FACE_COLOR : return tr(	"Color function using muparser lib to generate new RGB color for every face<br>"
-										"Insert three function each one for red, green and blue channel respectively.<br>")+PerFaceAttributeString;
-		case FF_VERT_COLOR : return tr(	"Color function using muparser lib to generate new RGB color for every vertex<br>"
-										"Insert three function each one for red, green and blue channel respectively.<br>")+PerVertexAttributeString;
+		case FF_FACE_COLOR : return tr(	"Color function using muparser lib to generate new RGBA color for every face<br>"
+			"Red, Green, Blue and Alpha channels may be defined specifying a funcion in their respective fields.<br>") + PerFaceAttributeString;
 
-		case FF_VERT_QUALITY : return tr("Quality function using muparser to generate new Quality for every vertex<br>")+PerVertexAttributeString;
+		case FF_VERT_COLOR : return tr(	"Color function using muparser lib to generate new RGBA color for every vertex<br>"
+			"Red, Green, Blue and Alpha channels may be defined specifying a funcion in their respective fields.<br>") + PerVertexAttributeString;
 
-		case FF_VERT_TEXTURE_FUNC : return tr("Texture function using muparser to generate new texture coords for every vertex<br>")+PerVertexAttributeString;
+		case FF_VERT_QUALITY: return tr("Quality function using muparser to generate new Quality for every vertex<br>") + PerVertexAttributeString;
 
-		case FF_VERT_NORMAL : return tr("Normal function using muparser to generate new Normal for every vertex<br>")+PerVertexAttributeString;
+		case FF_VERT_TEXTURE_FUNC: return tr("Texture function using muparser to generate new texture coords for every vertex<br>") + PerVertexAttributeString;
+
+		case FF_VERT_NORMAL: return tr("Normal function using muparser to generate new Normal for every vertex<br>") + PerVertexAttributeString;
 
         case FF_FACE_QUALITY : return tr("Quality function using muparser to generate new Quality for every face<br>"
-                                         "Insert three function each one for quality of the three vertex of a face<br>")+PerFaceAttributeString;
+			"Insert three function each one for quality of the three vertex of a face<br>") +PerFaceAttributeString;
 
 		case FF_WEDGE_TEXTURE_FUNC : return tr("Texture function using muparser to generate new per wedge tex coords for every face<br>"
-                                     "Insert six functions each u v for each one of the three vertex of a face<br>")+PerFaceAttributeString;
+			"Insert six functions each u v for each one of the three vertex of a face<br>") +PerFaceAttributeString;
 
         case FF_DEF_VERT_ATTRIB : return tr("Add a new Per-Vertex scalar attribute to current mesh and fill it with the defined function.<br>"
-                                       "The name specified below can be used in other filter function")+PerVertexAttributeString;
+			"The name specified below can be used in other filter function") +PerVertexAttributeString;
 
         case FF_DEF_FACE_ATTRIB : return tr("Add a new Per-Face attribute to current mesh.<br>"
-                                       "You can specify custom name and a function to generate attribute's value<br>"
-                     "It's possible to use per-face variables in the expression:<br>")+PerFaceAttributeString+
-                     tr("<font color=\"#FF0000\">The attribute name specified below can be used in other filter function</font>");
+			"You can specify custom name and a function to generate attribute's value<br>"
+			"It's possible to use per-face variables in the expression:<br>") +PerFaceAttributeString+
+			tr("<font color=\"#FF0000\">The attribute name specified below can be used in other filter function</font>");
 
         case FF_GRID : return tr("Generate a new 2D Grid mesh with number of vertices on X and Y axis specified by user with absolute length/height.<br>"
-                                 "It's possible to center Grid on origin.");
+			"It's possible to center Grid on origin.");
 
         case FF_ISOSURFACE : return tr("Generate a new mesh that corresponds to the 0 valued isosurface defined by the scalar field generated by the given expression");
 
         case FF_REFINE : return tr("Refine current mesh with user defined parameters.<br>"
-                                   "Specify a Boolean Function needed to select which edges will be cut for refinement purpose.<br>"
-                                   "Each edge is identified with first and second vertex.<br>"
-                   "Arguments accepted are first and second vertex attributes:<br>")+PerVertexAttributeString;
+			"Specify a Boolean Function needed to select which edges will be cut for refinement purpose.<br>"
+			"Each edge is identified with first and second vertex.<br>"
+			"Arguments accepted are first and second vertex attributes:<br>") + PossibleOperators + PerFaceAttributeString;
 
         default : assert(0);
     }
@@ -259,48 +263,55 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
                                    "type a boolean function that will be evaluated in order to select a subset of faces<br>"));
     break;
 
-  case FF_GEOM_FUNC :
-    parlst.addParam(new RichString("x","x", "func x = ", "insert function to generate new coord for x"));
-    parlst.addParam(new RichString("y","y", "func y = ", "insert function to generate new coord for y"));
-    parlst.addParam(new RichString("z","sin(x+y)", "func z = ", "insert function to generate new coord for z"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
+  case FF_GEOM_FUNC:
+	  parlst.addParam(new RichString("x", "x", "func x = ", "insert function to generate new coord for x"));
+	  parlst.addParam(new RichString("y", "y", "func y = ", "insert function to generate new coord for y"));
+	  parlst.addParam(new RichString("z", "sin(x+y)", "func z = ", "insert function to generate new coord for z"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
 
-  case FF_VERT_NORMAL :
-    parlst.addParam(new RichString("x","-nx", "func x = ", "insert function to generate new x for the normal"));
-    parlst.addParam(new RichString("y","-ny", "func y = ", "insert function to generate new y for the normal"));
-    parlst.addParam(new RichString("z","-nz", "func z = ", "insert function to generate new z for the normal"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
-
-  case FF_FACE_COLOR:
-    parlst.addParam(new RichString("r","255", "func r = ", "function to generate Red component. Expected Range 0-255"));
-    parlst.addParam(new RichString("g","0", "func g = ", "function to generate Green component. Expected Range 0-255"));
-    parlst.addParam(new RichString("b","255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
-    parlst.addParam(new RichString("a","255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
-
-  case FF_FACE_QUALITY:
-    parlst.addParam(new RichString("q","x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
-    parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
-    parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
+  case FF_VERT_NORMAL:
+	  parlst.addParam(new RichString("x", "-nx", "func x = ", "insert function to generate new x for the normal"));
+	  parlst.addParam(new RichString("y", "-ny", "func y = ", "insert function to generate new y for the normal"));
+	  parlst.addParam(new RichString("z", "-nz", "func z = ", "insert function to generate new z for the normal"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
 
   case FF_VERT_COLOR:
-    parlst.addParam(new RichString("x","255", "func r = ", "function to generate Red component. Expected Range 0-255"));
-    parlst.addParam(new RichString("y","255", "func g = ", "function to generate Green component. Expected Range 0-255"));
-    parlst.addParam(new RichString("z","0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
-    parlst.addParam(new RichString("a","255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
+	  parlst.addParam(new RichString("x", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("y", "255", "func g = ", "function to generate Green component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("z", "0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
 
   case FF_VERT_TEXTURE_FUNC:
-    parlst.addParam(new RichString("u","x", "func u = ", "function to generate u texture coord. Expected Range 0-1"));
-    parlst.addParam(new RichString("v","y", "func v = ", "function to generate v texture coord. Expected Range 0-1"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
+	  parlst.addParam(new RichString("u", "x", "func u = ", "function to generate u texture coord. Expected Range 0-1"));
+	  parlst.addParam(new RichString("v", "y", "func v = ", "function to generate v texture coord. Expected Range 0-1"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
+
+  case FF_VERT_QUALITY:
+	  parlst.addParam(new RichString("q", "vi", "func q = ", "function to generate new Quality for every vertex"));
+	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
+	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
+
+  case FF_FACE_COLOR:
+	  parlst.addParam(new RichString("r", "255", "func r = ", "function to generate Red component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("g", "0", "func g = ", "function to generate Green component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("b", "255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
+	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
+
+  case FF_FACE_QUALITY:
+	  parlst.addParam(new RichString("q", "x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
+	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
+	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  break;
 
   case FF_WEDGE_TEXTURE_FUNC:
     parlst.addParam(new RichString("u0","x0", "func u0 = ", "function to generate u texture coord. of wedge 0. Expected Range 0-1"));
@@ -309,13 +320,6 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
     parlst.addParam(new RichString("v1","y1", "func v1 = ", "function to generate v texture coord. of wedge 1. Expected Range 0-1"));
     parlst.addParam(new RichString("u2","x2", "func u2 = ", "function to generate u texture coord. of wedge 2. Expected Range 0-1"));
     parlst.addParam(new RichString("v2","y2", "func v2 = ", "function to generate v texture coord. of wedge 2. Expected Range 0-1"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
-    break;
-
-  case FF_VERT_QUALITY:
-    parlst.addParam(new RichString("q","vi", "func q = ", "function to generate new Quality for every vertex"));
-    parlst.addParam(new RichBool("normalize",false,"normalize","if checked normalize all quality values in range [0..1]"));
-    parlst.addParam(new RichBool("map",false,"map into color", "if checked map quality generated values into per-vertex color"));
 	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
     break;
 
@@ -1076,8 +1080,9 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
   {
     vtu=(*vi).T().U();
     vtv=(*vi).T().V();
+	ti = (*vi).T().N();
   }
-  else { vtu=vtv=0; }
+  else { vtu=vtv=ti=0; }
 
   // if user-defined attributes exist (vector is not empty)
   //  set variables to explicit value obtained through attribute's handler
@@ -1152,13 +1157,18 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 
     // set face color attributes
     if(HasPerFaceColor(m)){
-        r = (*fi).C()[0];
-        g = (*fi).C()[1];
-        b = (*fi).C()[2];
-		a = (*fi).C()[3];
+        fr = (*fi).C()[0];
+        fg = (*fi).C()[1];
+        fb = (*fi).C()[2];
+		fa = (*fi).C()[3];
     } else {
-        r=g=b=a=255;
+        fr=fg=fb=fa=255;
     }
+
+	//face normal
+	fnx = (*fi).N()[0];
+	fny = (*fi).N()[1];
+	fnz = (*fi).N()[2];
 
     // zero based index of face
     f = fi - m.face.begin();
@@ -1176,8 +1186,9 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 		wtv1=(*fi).WT(1).V();
 		wtu2=(*fi).WT(2).U();
 		wtv2=(*fi).WT(2).V();
+		ti = (*fi).WT(0).N();
 	}
-	else { wtu0=wtv0=wtu1=wtv1=wtu2=wtv2=0; }
+	else { wtu0=wtv0=wtu1=wtv1=wtu2=wtv2=ti=0; }
 
 
     // if user-defined attributes exist (vector is not empty)
@@ -1206,6 +1217,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	p.DefineVar("rad",&rad);
 	p.DefineVar("vtu",&vtu);
 	p.DefineVar("vtv",&vtv);
+	p.DefineVar("ti", &ti);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed
@@ -1300,13 +1312,18 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
     p.DefineVar("q2", &q2);
 
     // face color
-    p.DefineVar("r", &r);
-    p.DefineVar("g", &g);
-    p.DefineVar("b", &b);
-	p.DefineVar("a", &b);
+    p.DefineVar("fr", &fr);
+    p.DefineVar("fg", &fg);
+    p.DefineVar("fb", &fb);
+	p.DefineVar("fa", &fa);
+
+	// face normal
+	p.DefineVar("fnx", &fnx);
+	p.DefineVar("fny", &fny);
+	p.DefineVar("fnz", &fnz);
 
 	// face quality
-	p.DefineVar("q", &fq);
+	p.DefineVar("fq", &fq);
 
     // index
     p.DefineVar("fi",&f);
@@ -1314,12 +1331,14 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
     p.DefineVar("vi1",&v1i);
     p.DefineVar("vi2",&v2i);
 
+	// texture
 	p.DefineVar("wtu0",&wtu0);
 	p.DefineVar("wtv0",&wtv0);
 	p.DefineVar("wtu1",&wtu1);
 	p.DefineVar("wtv1",&wtv1);
 	p.DefineVar("wtu2",&wtu2);
 	p.DefineVar("wtv2",&wtv2);
+	p.DefineVar("ti", &ti);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed
