@@ -36,21 +36,21 @@ using namespace vcg;
 FilterFunctionPlugin::FilterFunctionPlugin()
 {
     typeList
-        << FF_VERT_SELECTION
-        << FF_FACE_SELECTION
-        << FF_GEOM_FUNC
-        << FF_WEDGE_TEXTURE_FUNC
-        << FF_VERT_TEXTURE_FUNC
-        << FF_FACE_COLOR
-        << FF_VERT_COLOR
-        << FF_VERT_QUALITY
-    << FF_VERT_NORMAL
-        << FF_FACE_QUALITY
-        << FF_DEF_VERT_ATTRIB
-        << FF_DEF_FACE_ATTRIB
-        << FF_GRID
-        << FF_ISOSURFACE
-        << FF_REFINE;
+		<< FF_VERT_SELECTION
+		<< FF_FACE_SELECTION
+		<< FF_GEOM_FUNC
+		<< FF_WEDGE_TEXTURE_FUNC
+		<< FF_VERT_TEXTURE_FUNC
+		<< FF_FACE_COLOR
+		<< FF_VERT_COLOR
+		<< FF_VERT_QUALITY
+		<< FF_VERT_NORMAL
+		<< FF_FACE_QUALITY
+		<< FF_DEF_VERT_ATTRIB
+		<< FF_DEF_FACE_ATTRIB
+		<< FF_GRID
+		<< FF_ISOSURFACE
+		<< FF_REFINE;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -66,22 +66,23 @@ FilterFunctionPlugin::~FilterFunctionPlugin()
 QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-  case FF_VERT_SELECTION :     return QString("Conditional Vertex Selection");
-  case FF_FACE_SELECTION :     return QString("Conditional Face Selection");
-  case FF_GEOM_FUNC :          return QString("Geometric Function");
-  case FF_FACE_COLOR :         return QString("Per Face Color Function");
-  case FF_FACE_QUALITY :       return QString("Per Face Quality Function");
-  case FF_VERT_COLOR :         return QString("Per Vertex Color Function");
-  case FF_VERT_QUALITY :       return QString("Per Vertex Quality Function");
-  case FF_VERT_TEXTURE_FUNC :  return QString("Per Vertex Texture Function");
-  case FF_WEDGE_TEXTURE_FUNC : return QString("Per Wedge Texture Function");
-  case FF_VERT_NORMAL :        return QString("Per Vertex Normal Function");
-  case FF_DEF_VERT_ATTRIB :    return QString("Define New Per Vertex Attribute");
-  case FF_DEF_FACE_ATTRIB :    return QString("Define New Per Face Attribute");
-  case FF_GRID :               return QString("Grid Generator");
-  case FF_REFINE :             return QString("Refine User-Defined");
-  case FF_ISOSURFACE :         return QString("Implicit Surface");
-  default : assert(0);
+	  case FF_VERT_SELECTION:     return QString("Conditional Vertex Selection");
+	  case FF_FACE_SELECTION:     return QString("Conditional Face Selection");
+	  case FF_GEOM_FUNC:          return QString("Geometric Function");
+	  case FF_FACE_COLOR:         return QString("Per Face Color Function");
+	  case FF_FACE_QUALITY:       return QString("Per Face Quality Function");
+	  case FF_VERT_COLOR:         return QString("Per Vertex Color Function");
+	  case FF_VERT_QUALITY:       return QString("Per Vertex Quality Function");
+	  case FF_VERT_TEXTURE_FUNC:  return QString("Per Vertex Texture Function");
+	  case FF_WEDGE_TEXTURE_FUNC: return QString("Per Wedge Texture Function");
+	  case FF_VERT_NORMAL:        return QString("Per Vertex Normal Function");
+	  case FF_DEF_VERT_ATTRIB:    return QString("Define New Per Vertex Attribute");
+	  case FF_DEF_FACE_ATTRIB:    return QString("Define New Per Face Attribute");
+	  case FF_GRID:               return QString("Grid Generator");
+	  case FF_REFINE:             return QString("Refine User-Defined");
+	  case FF_ISOSURFACE:         return QString("Implicit Surface");
+
+	  default: assert(0);
   }
   return QString("error!");
 }
@@ -91,14 +92,14 @@ const QString PossibleOperators("<br>It's possibile to use parenthesis <b>()</b>
 
 const QString PerVertexAttributeString(	"It's possibile to use the following per-vertex variables in the expression:<br>"
 										"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> (quality), "
-										"<b>rad</b> (radius), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture index), "
+										"<b>rad</b> (radius), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
 										"and all custom <i>vertex attributes</i> already defined by user.<br>");
 
 const QString PerFaceAttributeString("It's possibile to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
-										"<b>x0,y0,z0</b> for the first vertex; <b>x1,y1,z1</b> for the second vertex; <b>x2,y2,z2</b> for the third vertex; "
-										"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex color, "
-										"<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> (per wedge texture coords), <b>ti</b> (texture index), "
-										"<b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal.<br>");
+										"<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex position, <b>x2,y2,z2</b> for the third vertex position, "
+										"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, "
+										"<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> for per-wedge texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex selection (1 yes, 0 no) "
+										"<b>fr,fg,fb,fa</b> for face color, <b>fq</b> for face quality, <b>fnx,fny,fnz</b> for face normal, <b>fsel</b> face selection (1 yes, 0 no).<br>");
 
 // long string describing each filtering action
 QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
@@ -158,23 +159,23 @@ FilterFunctionPlugin::FilterClass FilterFunctionPlugin::getClass(QAction *a)
 {
   switch(ID(a))
   {
-  case FF_FACE_SELECTION :
-  case FF_VERT_SELECTION	: return MeshFilterInterface::Selection;
-  case FF_FACE_QUALITY		: return FilterClass( Quality + FaceColoring );
-  case FF_VERT_QUALITY		: return FilterClass( Quality + VertexColoring );
-  case FF_VERT_TEXTURE_FUNC		: return MeshFilterInterface::Texture;
-  case FF_VERT_COLOR			:	return MeshFilterInterface::VertexColoring;
-  case FF_VERT_NORMAL			:	return MeshFilterInterface::Normal;
-  case FF_FACE_COLOR			: return MeshFilterInterface::FaceColoring;
-  case FF_WEDGE_TEXTURE_FUNC			: return MeshFilterInterface::Texture;
-  case FF_ISOSURFACE			: return MeshFilterInterface::MeshCreation;
-  case FF_GRID						: return MeshFilterInterface::MeshCreation;
-  case FF_REFINE					: return MeshFilterInterface::Remeshing;
-  case FF_GEOM_FUNC				: return MeshFilterInterface::Smoothing;
-  case FF_DEF_VERT_ATTRIB	: return MeshFilterInterface::Layer;
-  case FF_DEF_FACE_ATTRIB	: return MeshFilterInterface::Layer;
+	  case FF_FACE_SELECTION:
+	  case FF_VERT_SELECTION: return MeshFilterInterface::Selection;
+	  case FF_FACE_QUALITY: return FilterClass(Quality + FaceColoring);
+	  case FF_VERT_QUALITY: return FilterClass(Quality + VertexColoring);
+	  case FF_VERT_TEXTURE_FUNC: return MeshFilterInterface::Texture;
+	  case FF_VERT_COLOR:	return MeshFilterInterface::VertexColoring;
+	  case FF_VERT_NORMAL:	return MeshFilterInterface::Normal;
+	  case FF_FACE_COLOR: return MeshFilterInterface::FaceColoring;
+	  case FF_WEDGE_TEXTURE_FUNC: return MeshFilterInterface::Texture;
+	  case FF_ISOSURFACE: return MeshFilterInterface::MeshCreation;
+	  case FF_GRID: return MeshFilterInterface::MeshCreation;
+	  case FF_REFINE: return MeshFilterInterface::Remeshing;
+	  case FF_GEOM_FUNC: return MeshFilterInterface::Smoothing;
+	  case FF_DEF_VERT_ATTRIB: return MeshFilterInterface::Layer;
+	  case FF_DEF_FACE_ATTRIB: return MeshFilterInterface::Layer;
 
-  default			  : return MeshFilterInterface::Generic;
+	  default: return MeshFilterInterface::Generic;
   }
 }
 
@@ -182,32 +183,32 @@ int FilterFunctionPlugin::postCondition(QAction *action) const
 {
   switch(ID(action))
   {
-  case FF_VERT_SELECTION :
-  case FF_FACE_SELECTION :
-    return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
-  case FF_FACE_COLOR		:
-    return MeshModel::MM_FACECOLOR;
-  case FF_GEOM_FUNC :
-    return MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
-  case FF_VERT_COLOR :
-    return MeshModel::MM_VERTCOLOR;
-  case FF_VERT_NORMAL :
-    return MeshModel::MM_VERTNORMAL;
-  case FF_VERT_TEXTURE_FUNC :
-    return MeshModel::MM_VERTTEXCOORD;
-  case FF_WEDGE_TEXTURE_FUNC :
-    return MeshModel::MM_WEDGTEXCOORD;
-  case FF_VERT_QUALITY :
-    return MeshModel::MM_VERTQUALITY+MeshModel::MM_VERTCOLOR;
-  case FF_FACE_QUALITY  :
-    return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
+	case FF_VERT_SELECTION:
+	case FF_FACE_SELECTION:
+		return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+	case FF_FACE_COLOR:
+		return MeshModel::MM_FACECOLOR;
+	case FF_GEOM_FUNC:
+		return MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
+	case FF_VERT_COLOR:
+		return MeshModel::MM_VERTCOLOR;
+	case FF_VERT_NORMAL:
+		return MeshModel::MM_VERTNORMAL;
+	case FF_VERT_TEXTURE_FUNC:
+		return MeshModel::MM_VERTTEXCOORD;
+	case FF_WEDGE_TEXTURE_FUNC:
+		return MeshModel::MM_WEDGTEXCOORD;
+	case FF_VERT_QUALITY:
+		return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
+	case FF_FACE_QUALITY:
+		return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
 
-  case FF_DEF_VERT_ATTRIB :
-  case FF_GRID :
-  case FF_ISOSURFACE :
-  case FF_DEF_FACE_ATTRIB :
-  case FF_REFINE :
-    return MeshModel::MM_UNKNOWN;
+	case FF_DEF_VERT_ATTRIB:
+	case FF_GRID:
+	case FF_ISOSURFACE:
+	case FF_DEF_FACE_ATTRIB:
+	case FF_REFINE:
+		return MeshModel::MM_UNKNOWN;
   }
   return MeshModel::MM_UNKNOWN;
 }
@@ -216,23 +217,22 @@ int FilterFunctionPlugin::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
-  case FF_VERT_SELECTION :
-  case FF_GEOM_FUNC :
-  case FF_VERT_COLOR :
-  case FF_VERT_NORMAL :
-  case FF_VERT_QUALITY :
-  case FF_VERT_TEXTURE_FUNC:
-  case FF_WEDGE_TEXTURE_FUNC:
-  case FF_DEF_VERT_ATTRIB :
-  case FF_GRID :
-  case FF_ISOSURFACE :
-  case FF_DEF_FACE_ATTRIB :
-  case FF_FACE_SELECTION  : return 0;
-  case FF_FACE_QUALITY    : return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
-  case FF_FACE_COLOR      : return MeshModel::MM_FACECOLOR;
-  case FF_REFINE :
-    return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-  default: assert(0);
+	case FF_VERT_SELECTION :
+	case FF_GEOM_FUNC :
+	case FF_VERT_COLOR :
+	case FF_VERT_NORMAL :
+	case FF_VERT_QUALITY :
+	case FF_VERT_TEXTURE_FUNC:
+	case FF_WEDGE_TEXTURE_FUNC:
+	case FF_DEF_VERT_ATTRIB :
+	case FF_GRID :
+	case FF_ISOSURFACE :
+	case FF_DEF_FACE_ATTRIB :
+	case FF_FACE_SELECTION  : return 0;
+	case FF_FACE_QUALITY    : return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
+	case FF_FACE_COLOR      : return MeshModel::MM_FACECOLOR;
+	case FF_REFINE          : return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+	default: assert(0);
   }
   return 0;
 }
@@ -1071,6 +1071,8 @@ void FilterFunctionPlugin::setAttributes(CMeshO::VertexIterator &vi, CMeshO &m)
 
   q = (*vi).Q();     // quality
 
+  vsel = ((*vi).IsS()) ? 1.0 : 0.0;    //selection
+
   if(tri::HasPerVertexRadius(m)) rad = (*vi).R();
   else rad=0;
 
@@ -1190,6 +1192,11 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 	}
 	else { wtu0=wtv0=wtu1=wtv1=wtu2=wtv2=ti=0; }
 
+	//selection
+	vsel0 = ((*fi).V(0)->IsS()) ? 1.0 : 0.0;
+	vsel1 = ((*fi).V(1)->IsS()) ? 1.0 : 0.0;
+	vsel2 = ((*fi).V(2)->IsS()) ? 1.0 : 0.0;
+	fsel = ((*fi).IsS()) ? 1.0 : 0.0;
 
     // if user-defined attributes exist (vector is not empty)
     //  set variables to explicit value obtained through attribute's handler
@@ -1218,6 +1225,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 	p.DefineVar("vtu",&vtu);
 	p.DefineVar("vtv",&vtv);
 	p.DefineVar("ti", &ti);
+	p.DefineVar("vsel", &vsel);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed
@@ -1339,6 +1347,12 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 	p.DefineVar("wtu2",&wtu2);
 	p.DefineVar("wtv2",&wtv2);
 	p.DefineVar("ti", &ti);
+
+	//selection
+	p.DefineVar("vsel0", &vsel0);
+	p.DefineVar("vsel1", &vsel1);
+	p.DefineVar("vsel2", &vsel2);
+	p.DefineVar("fsel", &fsel);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed

@@ -38,9 +38,9 @@ class FilterFunctionPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 protected:
-	double x,y,z,nx,ny,nz,r,g,b,a,q,rad,vtu,vtv;
-	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,a0,r1,g1,b1,a1,r2,g2,b2,a2,q0,q1,q2,wtu0,wtv0,wtu1,wtv1,wtu2,wtv2;
-	double fr, fg, fb, fa, fnx, fny, fnz, fq;
+	double x,y,z,nx,ny,nz,r,g,b,a,q,rad,vtu,vtv,vsel;
+	double x0,y0,z0,x1,y1,z1,x2,y2,z2,nx0,ny0,nz0,nx1,ny1,nz1,nx2,ny2,nz2,r0,g0,b0,a0,r1,g1,b1,a1,r2,g2,b2,a2,q0,q1,q2,wtu0,wtv0,wtu1,wtv1,wtu2,wtv2,vsel0,vsel1,vsel2;
+	double fr,fg,fb,fa,fnx,fny,fnz,fq,fsel;
 	double v,f,v0i,v1i,v2i,ti;
 	std::vector<std::string> v_attrNames;  // names of the <float> per vertex attributes
 	std::vector<double>      v_attrValue;  // values of the <float> per vertex attributes
