@@ -34,7 +34,7 @@ class VertexSampler
     typedef vcg::tri::FaceTmark<CMeshO> MarkerFace;
 
     CMeshO &srcMesh;
-    QImage &srcImg;
+    vector <QImage> &srcImgs;
     float dist_upper_bound;
 
     MetroMeshGrid unifGridFace;
@@ -46,8 +46,8 @@ class VertexSampler
     int vertexNo, vertexCnt, start, offset;
 
 public:
-    VertexSampler(CMeshO &_srcMesh, QImage &_srcImg, float upperBound) :
-    srcMesh(_srcMesh), srcImg(_srcImg), dist_upper_bound(upperBound)
+	VertexSampler(CMeshO &_srcMesh, vector <QImage> &_srcImg, float upperBound) :
+    srcMesh(_srcMesh), srcImgs(_srcImg), dist_upper_bound(upperBound)
     {
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);
@@ -80,14 +80,14 @@ public:
         assert(ret);
         interp[2]=1.0-interp[1]-interp[0];
 
-        int w=srcImg.width(), h=srcImg.height();
+		int w = srcImgs[nearestF->cWT(0).N()].width(), h = srcImgs[nearestF->cWT(0).N()].height();
         int x, y;
         x = w * (interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U());
         y = h * (1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V()));
         // repeat mode
         x = (x%w + w)%w;
         y = (y%h + h)%h;
-        QRgb px = srcImg.pixel(x, y);
+		QRgb px = srcImgs[nearestF->cWT(0).N()].pixel(x, y);
         v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
     }
 };

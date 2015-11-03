@@ -891,11 +891,18 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             // Check whether is possible to access source mesh texture
             CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
             CheckError(srcMesh->cm.textures.empty(), "Source mesh doesn't have any associated texture");
+
+			vector <QImage> srcImgs;
+			srcImgs.resize(srcMesh->cm.textures.size());
             QString path(srcMesh->fullName());
-            path = path.left(std::max<int>(path.lastIndexOf('\\'),path.lastIndexOf('/'))+1).append(srcMesh->cm.textures[0].c_str());
-            CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
-            QImage srcImg;
-            CheckError(!srcImg.load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+
+			for (int textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
+			{
+				path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(srcMesh->cm.textures[textInd].c_str());
+				CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
+
+				CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+			}
 
             trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
 
@@ -903,7 +910,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 
             // Colorizing vertices
-            VertexSampler vs(srcMesh->cm, srcImg, upperbound);
+			VertexSampler vs(srcMesh->cm, srcImgs, upperbound);
             vs.InitCallback(cb, trgMesh->cm.vn);
             tri::SurfaceSampling<CMeshO,VertexSampler>::VertexUniform(trgMesh->cm,vs,trgMesh->cm.vn);
         }
