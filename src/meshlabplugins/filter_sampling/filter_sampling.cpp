@@ -62,6 +62,7 @@ public:
     m=_m;
     uvSpaceFlag = false;
     qualitySampling=false;
+    perFaceNormal=false;
     tex=0;
   }
   CMeshO *m;
@@ -70,6 +71,8 @@ public:
   int texSamplingHeight;
   bool uvSpaceFlag;
   bool qualitySampling;
+  bool perFaceNormal;  // default false; if true the sample normal is the face normal, otherwise it is interpolated
+
   void reset()
   {
     m->Clear();
@@ -85,8 +88,9 @@ public:
   {
     tri::Allocator<CMeshO>::AddVertices(*m,1);
     m->vert.back().P() = f.cP(0)*p[0] + f.cP(1)*p[1] +f.cP(2)*p[2];
-    m->vert.back().N() = f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] + f.cV(2)->N()*p[2];
 
+    if(perFaceNormal) m->vert.back().N() = f.cN();
+       else m->vert.back().N() = f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] + f.cV(2)->N()*p[2];
     if (qualitySampling)
       m->vert.back().Q() = f.cV(0)->Q()*p[0] + f.cV(1)->Q()*p[1] + f.cV(2)->Q()*p[2];
   }
@@ -338,6 +342,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichBool("Weighted",  false,
                                  "Quality Weighted Sampling",
                                  "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
+    parlst.addParam(new RichBool("PerFaceNormal",  false,
+                                 "Per Face Normal",
+                                 "If true for each sample we take the normal of the sampled face, otherwise the normal interpolated from the vertex normals."));
     parlst.addParam(new RichFloat("RadiusVariance", 1, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"));
     parlst.addParam(new RichBool("ExactNum",  true,
                                  "Exact Sample Num",
