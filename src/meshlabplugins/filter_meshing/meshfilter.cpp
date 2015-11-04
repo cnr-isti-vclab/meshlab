@@ -1568,6 +1568,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 return false;
             }
 
+			// the mesh has to be correctly transformed
+			if (m.cm.Tr != Matrix44m::Identity())
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+
             switch(RefPlane(par.getEnum("relativeTo")))
             {
                 case REF_CENTER:  planeCenter = bbox.Center()+ planeAxis*planeOffset*(bbox.Diag()/2.0);      break;
@@ -1594,7 +1598,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             vcg::IntersectionPlaneMesh<CMeshO, CMeshO, CMeshO::ScalarType>(orig->cm, slicingPlane, cap->cm );
             tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 
-            if(par.getBool("createSectionSurface"))
+			// the mesh has to return to its original position
+			if (m.cm.Tr != Matrix44m::Identity())
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, Inverse(m.cm.Tr), true);
+			
+			if(par.getBool("createSectionSurface"))
             {
                 sectionName.append("_mesh");
                 MeshModel* cap2= md.addNewMesh("",sectionName);
