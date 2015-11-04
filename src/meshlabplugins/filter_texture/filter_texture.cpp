@@ -193,6 +193,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
     case FP_PLANAR_MAPPING :
       parlst.addParam(new RichEnum("projectionPlane", 0, QStringList("XY") << "XZ"<<"YZ","Projection plane","Choose the projection plane"));
       parlst.addParam(new RichBool("aspectRatio", false, "Preserve Ratio", "If checked the resulting parametrization will preserve the original apsect ratio of the model otherwise it will fill up the whole 0..1 uv space"));
+	  parlst.addParam(new RichFloat("sideGutter", 0.0, "Side Gutter", "Leave an empty space around the parametrization area of the specified size (in texture space); accepted range [0.0 - 0.5]."));
       break;
     case FP_BASIC_TRIANGLE_MAPPING :
         parlst.addParam(new RichInt("sidedim", 0, "Quads per line", "Indicates how many triangles have to be put on each line (every quad contains two triangles)\nLeave 0 for automatic calculation"));
@@ -410,7 +411,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
       int sideDim = par.getEnum("projectionPlane");
       bool aspectRatio = par.getBool("aspectRatio");
-      tri::UpdateTexture<CMeshO>::WedgeTexFromPlane(m.cm, planeVec[sideDim][0], planeVec[sideDim][1], aspectRatio);
+	  float sideGutter = par.getFloat("sideGutter");
+	  tri::UpdateTexture<CMeshO>::WedgeTexFromPlane(m.cm, planeVec[sideDim][0], planeVec[sideDim][1], aspectRatio, sideGutter);
     }
     break;
     case FP_BASIC_TRIANGLE_MAPPING :
