@@ -182,7 +182,7 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
 
   //Uniform sampling of directions over a sphere
   std::vector<Point3f> unifDirVec;
-  GenNormal<float>::Uniform(numViews,unifDirVec);
+  GenNormal<float>::Fibonacci(numViews,unifDirVec);
 
 
   Log(0, "Number of rays: %i ", unifDirVec.size() );

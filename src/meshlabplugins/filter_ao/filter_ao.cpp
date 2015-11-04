@@ -138,7 +138,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
 
 
     std::vector<Point3f> unifDirVec;
-    GenNormal<float>::Uniform(numViews,unifDirVec);
+    GenNormal<float>::Fibonacci(numViews,unifDirVec);
 
     std::vector<Point3f> coneDirVec;
     GenNormal<float>::UniformCone(numViews, coneDirVec, math::ToRad(coneAngle), coneDir);
