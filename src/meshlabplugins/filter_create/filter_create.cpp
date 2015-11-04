@@ -110,7 +110,17 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
     break;
   case CR_RANDOM_SPHERE :
     parlst.addParam(new RichInt("pointNum",100,"Point Num","Number of points (approximate)."));
-    parlst.addParam(new RichBool("randomFlag",true,"Random","If true the points are randomly generated using a Poisson Disk distribution. Otherwise the Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used."));
+    parlst.addParam(new RichEnum("sphereGenTech", 3,
+                                 QStringList() << "Montecarlo" << "Poisson Sampling" << "DiscoBall" << "Octahedron" << "Fibonacci",
+                                 tr("Generation Technique:"),
+                                 tr("Generation Technique:"
+                                        "<b>Montecarlo</b>: The points are randomly generated with an uniform distribution.<br>"
+                                        "<b>Poisson Disk</b>: The points are to follow a poisson disk distribution.<br>"
+                                        "<b>Disco Ball</b> Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used. <br>"
+                                        "<b>Recursive Octahedron</b> Points are genereate on the vertex of a recursively subdivided octahedron <br>"
+                                        "<b>Fibonacci</b> . "
+                                        )));
+
     break;
   case CR_BOX :
     parlst.addParam(new RichFloat("size",1,"Scale factor","Scales the new mesh"));
@@ -164,20 +174,29 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
     }
   case CR_RANDOM_SPHERE:
   {
-    CMeshO tt;
 
     int pointNum = par.getInt("pointNum");
-    bool randomFlag=par.getBool("randomFlag");
+    int sphereGenTech = par.getEnum("sphereGenTech");
+    math::MarsenneTwisterRNG rng;
+    m->cm.Clear();
+    std::vector<Point3m> sampleVec;
 
-    if(randomFlag)
+
+    switch(sphereGenTech)
+    {
+    case 0: // Montecarlo
+    {
+      for(int i=0;i<pointNum;++i)
+        sampleVec.push_back(math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng));
+    } break;
+    case 1: // Poisson Disk
     {
       int oversamplingFactor =100;
       if(pointNum <= 100) oversamplingFactor = 1000;
       if(pointNum >= 10000) oversamplingFactor = 50;
       if(pointNum >= 100000) oversamplingFactor = 20;
-
-      math::MarsenneTwisterRNG rng;
-      tri::Allocator<CMeshO>::AddVertices(tt,pointNum*50);
+      CMeshO tt;
+      tri::Allocator<CMeshO>::AddVertices(tt,pointNum*oversamplingFactor);
       for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
         vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
       tri::UpdateBounding<CMeshO>::Box(tt);
@@ -185,23 +204,24 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
       const float SphereArea = 4*M_PI;
       float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
 
-      std::vector<Point3m> poissonSamples;
-      tri::TrivialSampler<CMeshO> pdSampler(poissonSamples);
+      std::vector<Point3m> sampleVec;
+      tri::TrivialSampler<CMeshO> pdSampler(sampleVec);
       tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
-
       tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
-      m->cm.Clear();
-      for(size_t i=0;i<poissonSamples.size();++i)
-        tri::Allocator<CMeshO>::AddVertex(m->cm,poissonSamples[i],poissonSamples[i]);
+    } break;
+    case 2: // Disco Ball
+      GenNormal<CMeshO::ScalarType>::DiscoBall(pointNum,sampleVec);
+      break;
+    case 3: // Recursive Oct
+      GenNormal<CMeshO::ScalarType>::RecursiveOctahedron(pointNum,sampleVec);
+      break;
+    case 4: // Fibonacci
+       GenNormal<CMeshO::ScalarType>::Fibonacci(pointNum,sampleVec);
+    break;
     }
-    else
-    {
-      std::vector<Point3m> regularSamples;
-      GenNormal<CMeshO::ScalarType>::Regular(pointNum,regularSamples);
-      m->cm.Clear();
-      for(size_t i=0;i<regularSamples.size();++i)
-        tri::Allocator<CMeshO>::AddVertex(m->cm,regularSamples[i],regularSamples[i]);
-    }
+    for(size_t i=0;i<sampleVec.size();++i)
+      tri::Allocator<CMeshO>::AddVertex(m->cm,sampleVec[i],sampleVec[i]);
+
   } break;
 
   case CR_SPHERE_CAP:
