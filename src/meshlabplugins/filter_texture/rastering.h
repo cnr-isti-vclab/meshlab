@@ -94,7 +94,7 @@ public:
 
 class RasterSampler
 {
-    QImage &trgImg;
+    vector<QImage> &trgImgs;
 
     // Callback stuff
     vcg::CallBackPos *cb;
@@ -102,7 +102,7 @@ class RasterSampler
     int faceNo, faceCnt, start, offset;
 
 public:
-    RasterSampler(QImage &_img) : trgImg(_img) {}
+	RasterSampler(vector<QImage> &_imgs) : trgImgs(_imgs) {}
 
     void InitCallback(vcg::CallBackPos *_cb, int _faceNo, int _start=0, int _offset=100)
     {
@@ -130,10 +130,10 @@ public:
         if (edgeDist != 0.0)
             alpha=254-edgeDist*128;
 
-        if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - 1 - tp.Y())) < alpha)
+		if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
         {
             c.lerp(f.cV(0)->cC(), f.cV(1)->cC(), f.cV(2)->cC(), p);
-            trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
+			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
         }
         if (cb)
         {
@@ -148,8 +148,8 @@ class TransferColorSampler
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
     typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
-    QImage &trgImg;
-    QImage *srcImg;
+    vector <QImage> &trgImgs;
+	vector <QImage> *srcImgs;
     float dist_upper_bound;
     bool fromTexture;
     MetroMeshGrid unifGridFace;
@@ -197,8 +197,8 @@ class TransferColorSampler
     }*/
 
 public:
-    TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, float upperBound, int _vertexMode)
-    : trgImg(_trgImg), dist_upper_bound(upperBound)
+    TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, float upperBound, int _vertexMode)
+    : trgImgs(_trgImgs), dist_upper_bound(upperBound)
     {
         srcMesh=&_srcMesh;
         usePointCloudSampling = _srcMesh.face.empty();
@@ -215,11 +215,9 @@ public:
         }
     }
 
-    TransferColorSampler(CMeshO &_srcMesh, QImage &_trgImg, QImage *_srcImg, float upperBound)
-    : trgImg(_trgImg), dist_upper_bound(upperBound)
+	TransferColorSampler(CMeshO &_srcMesh, vector <QImage> &_trgImgs, vector <QImage> *_srcImgs, float upperBound)
+		: trgImgs(_trgImgs), srcImgs(_srcImgs), dist_upper_bound(upperBound)
     {
-        assert(_srcImg != NULL);
-        srcImg = _srcImg;
         unifGridFace.Set(_srcMesh.face.begin(),_srcMesh.face.end());
         markerFunctor.SetMesh(&_srcMesh);
         fromTexture = true;
@@ -291,7 +289,7 @@ public:
                     rr = gg = bb = q;
                 } break;
             }
-            trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(rr, gg, bb, 255));
+			trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(rr, gg, bb, 255));
         }
         else // sampling from a mesh
         {
@@ -323,19 +321,19 @@ public:
               interp[2]=1.0-interp[1]-interp[0];
             }
 
-        if (alpha==255 || qAlpha(trgImg.pixel(tp.X(), trgImg.height() - 1 - tp.Y())) < alpha)
+		if (alpha == 255 || qAlpha(trgImgs[f.cWT(0).N()].pixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y())) < alpha)
         {
             if (fromTexture)
             {
-                int w=srcImg->width(), h=srcImg->height();
+				int w = (*srcImgs)[nearestF->cWT(0).N()].width(), h = (*srcImgs)[nearestF->cWT(0).N()].height();
                 int x, y;
                 x = w * (interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U());
                 y = h * (1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V()));
                 // texture repeat mode
                 x = (x%w + w)%w;
                 y = (y%h + h)%h;
-                QRgb px = srcImg->pixel(x, y);
-                trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(qRed(px), qGreen(px), qBlue(px), alpha));
+				QRgb px = (*srcImgs)[nearestF->cWT(0).N()].pixel(x, y);
+				trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(qRed(px), qGreen(px), qBlue(px), alpha));
             }
             else
             {
@@ -362,7 +360,7 @@ public:
                 } break;
                 default: assert(0);
                 }
-                trgImg.setPixel(tp.X(), trgImg.height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
+				trgImgs[f.cWT(0).N()].setPixel(tp.X(), trgImgs[f.cWT(0).N()].height() - 1 - tp.Y(), qRgba(c[0], c[1], c[2], alpha));
             }
         }
             if (cb)
