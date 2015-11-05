@@ -74,7 +74,7 @@ EditReferencingPlugin::EditReferencingPlugin() {
 
 const QString EditReferencingPlugin::Info()
 {
-    return tr("Reference layers using fiducial points.");
+    return tr("Reference layer(s) using fiducial points or scale layer(s) using reference distances.");
 }
  
 void EditReferencingPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
@@ -302,7 +302,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	}
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
+bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -342,6 +342,16 @@ bool EditReferencingPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
     status_line2 = "";
     status_line3 = "";
     status_error = "";
+
+	// reading current transformations for all layers
+	layersOriginalTransf.resize(glArea->md()->meshList.size());
+	int lind = 0;
+	foreach(MeshModel *mmp, glArea->md()->meshList)
+	{
+		layersOriginalTransf[lind].Import(mmp->cm.Tr);
+		lind++;
+	}
+	originalTransf.Import(m.cm.Tr);
 
     glArea->update();
 
@@ -415,6 +425,8 @@ void EditReferencingPlugin::addNewPoint()
     if(usePoint.size() > MAX_REFPOINTS)
     {
         status_error = "Too many points";
+		referencingDialog->updateTable();
+		glArea->update();
         return;
     }
 
@@ -435,7 +447,7 @@ void EditReferencingPlugin::addNewPoint()
     pointID.push_back(newname);
     pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
     refPoints.push_back(Point3d(0.0, 0.0, 0.0));
-    pointError.push_back(0.0);
+    pointError.push_back(-1.0);
 
     // update dialog
     referencingDialog->updateTable();
@@ -451,6 +463,7 @@ void EditReferencingPlugin::deleteCurrentPoint()
     if(pindex == -1)
     {
         status_error = "No point selected";
+		glArea->update();
         return;
     }
 
@@ -474,6 +487,7 @@ void EditReferencingPlugin::pickCurrentPoint()
     if(pindex == -1)
     {
         status_error = "No point selected";
+		glArea->update();
         return;
     }
 
@@ -492,6 +506,7 @@ void EditReferencingPlugin::pickCurrentRefPoint()
     if(pindex == -1)
     {
         status_error = "No point selected";
+		glArea->update();
         return;
     }
 
@@ -516,112 +531,89 @@ void EditReferencingPlugin::loadFromFile()  //import reference list
             QString firstline, secondline;
             double newX = 0.0, newY = 0.0, newZ = 0.0;
             bool parseXOK=true, parseYOK=true, parseZOK=true;
+			bool found = false;
+			QString separator = "";
+
+			// clearing data
+			usePoint.clear();
+			pointID.clear();
+			pickedPoints.clear();
+			refPoints.clear();
+			pointError.clear();
 
             //getting first line, to see if there is an header
             if(!openFile.atEnd())
                 firstline = QString(openFile.readLine()).simplified();
             else
-                {
-                openFile.close();
+			{
+				status_error = "point list format not recognized";
+				referencingDialog->updateTable();
+				glArea->update();
                 return;
             }
 
-            // getting second line, to decide separator
-            if(!openFile.atEnd())
-                secondline = QString(openFile.readLine()).simplified();
-            else
-                {openFile.close(); return;}
+			// discovering the separator 
+			vector <QString> possible_separators = { QString(" "), QString(","), QString(";") };
 
-            // testing
-            bool found = false;
-            QString separator = "";
-            tokenizedLine = secondline.split(" ", QString::SkipEmptyParts);
-            if(tokenizedLine.size()==4)
-            {
-                newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                if(parseXOK && parseZOK && parseZOK)
-                    {separator=" "; found = true;}
-            }
+			int sind = 0;
+			while ((!found) || (sind<possible_separators.size()))
+			{
+				tokenizedLine = firstline.split(possible_separators[sind], QString::SkipEmptyParts);
+				if (tokenizedLine.size() == 4 || (tokenizedLine.size() == 5 && firstline.right(1) == possible_separators[sind]))
+				{
+					newX = tokenizedLine.at(1).toDouble(&parseXOK);
+					newY = tokenizedLine.at(2).toDouble(&parseYOK);
+					newZ = tokenizedLine.at(3).toDouble(&parseZOK);
+					if (parseXOK && parseYOK && parseZOK)
+					{
+						separator = possible_separators[sind]; found = true;
+					}
+				}
+				sind++;
+			}
 
-            tokenizedLine = secondline.split(";", QString::SkipEmptyParts);
-            if(tokenizedLine.size()==4 || (tokenizedLine.size()==5 && secondline.right(1)==";"))
-            {
-                newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                if(parseXOK && parseZOK && parseZOK)
-                    {separator=";"; found = true;}
-            }
+			if (!found)
+			{
+				status_error = "point list format not recognized";
+				openFile.close();
+				referencingDialog->updateTableDist();
+				glArea->update();
+				return;
+			}
 
-            tokenizedLine = secondline.split(",", QString::SkipEmptyParts);
-            if(tokenizedLine.size()==4 || (tokenizedLine.size()==5 && secondline.right(1)==","))
-            {
-                newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                if(parseXOK && parseZOK && parseZOK)
-                    {separator=","; found = true;}
-            }
+			// inserting first line
+			tokenizedLine = firstline.split(separator, QString::SkipEmptyParts);
+			newX = tokenizedLine.at(1).toDouble(&parseXOK);
+			newY = tokenizedLine.at(2).toDouble(&parseYOK);
+			newZ = tokenizedLine.at(3).toDouble(&parseZOK);
+			{
+				usePoint.push_back(new bool(true));
+				pointID.push_back(tokenizedLine.at(0));
+				pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
+				refPoints.push_back(Point3d(newX, newY, newZ));
+				pointError.push_back(-1.0);
+			}
 
-            if(!found)
-                {openFile.close(); return;}
+			// and now, the rest of the file
+			while (!openFile.atEnd()) {
+				QString newline = QString(openFile.readLine()).simplified();
 
-            // was firstline really a header?
-            tokenizedLine = firstline.split(separator, QString::SkipEmptyParts);
-            if(tokenizedLine.size()==4 || (tokenizedLine.size()==5 && firstline.right(1)==separator))
-            {
-                newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                if(parseXOK && parseZOK && parseZOK)    // no, it was not an header, inserting
-                {
-                    usePoint.push_back(new bool(true));
-                    pointID.push_back(tokenizedLine.at(0));
-                    pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
-                    refPoints.push_back(Point3d(newX, newY, newZ));
-                    pointError.push_back(0.0);
-                }
-            }
-
-            // back to second line
-            tokenizedLine = secondline.split(separator, QString::SkipEmptyParts);
-            if(tokenizedLine.size()==4 || (tokenizedLine.size()==5 && secondline.right(1)==separator))
-            {
-                newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                if(parseXOK && parseZOK && parseZOK)    //inserting
-                {
-                    usePoint.push_back(new bool(true));
-                    pointID.push_back(tokenizedLine.at(0));
-                    pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
-                    refPoints.push_back(Point3d(newX, newY, newZ));
-                    pointError.push_back(0.0);
-                }
-            }
-
-            // and now, the rest
-            while (!openFile.atEnd()) {
-                QString newline = QString(openFile.readLine()).simplified();
-
-                tokenizedLine = newline.split(separator, QString::SkipEmptyParts);
-                if(tokenizedLine.size()==4 || (tokenizedLine.size()==5 && newline.right(1)==separator))
-                {
-                    newX = tokenizedLine.at(1).toDouble(&parseXOK);
-                    newY = tokenizedLine.at(2).toDouble(&parseYOK);
-                    newZ = tokenizedLine.at(3).toDouble(&parseZOK);
-                    if(parseXOK && parseZOK && parseZOK)    //inserting
-                    {
-                        usePoint.push_back(new bool(true));
-                        pointID.push_back(tokenizedLine.at(0));
-                        pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
-                        refPoints.push_back(Point3d(newX, newY, newZ));
-                        pointError.push_back(0.0);
-                    }
-                }
-            }
+				tokenizedLine = newline.split(separator, QString::SkipEmptyParts);
+				if (tokenizedLine.size() == 4 || (tokenizedLine.size() == 5 && newline.right(1) == separator))
+				{
+					newX = tokenizedLine.at(1).toDouble(&parseXOK);
+					newY = tokenizedLine.at(2).toDouble(&parseYOK);
+					newZ = tokenizedLine.at(3).toDouble(&parseZOK);
+					if (parseXOK && parseYOK && parseZOK)   //inserting
+					{
+						usePoint.push_back(new bool(true));
+						pointID.push_back(tokenizedLine.at(0));
+						pickedPoints.push_back(Point3d(0.0, 0.0, 0.0));
+						refPoints.push_back(Point3d(newX, newY, newZ));
+						pointError.push_back(-1.0);
+					}
+				}
+			}
 
             // update dialog
             referencingDialog->updateTable();
@@ -629,6 +621,12 @@ void EditReferencingPlugin::loadFromFile()  //import reference list
 
             openFile.close();
         }
+		else
+		{
+			status_error = "cannot open file";
+			referencingDialog->updateTable();
+			glArea->update();
+		}
     }
 }
 
@@ -680,6 +678,11 @@ void EditReferencingPlugin::saveToFile() // export reference list + picked point
 
             openFile.close();
         }
+		else
+		{
+			status_error = "cannot save file";
+			glArea->update();
+		}
     }
 }
 
@@ -688,7 +691,6 @@ void EditReferencingPlugin::calculateMatrix()
     status_error = "";
     vector<vcg::Point3d> FixP;
     vector<vcg::Point3d> MovP;
-    vector<int> IndexP;
 
     int pindex = 0;
     float TrError=0;
@@ -701,8 +703,6 @@ void EditReferencingPlugin::calculateMatrix()
     FixP.reserve(MAX_REFPOINTS);
     MovP.clear();
     MovP.reserve(MAX_REFPOINTS);
-    IndexP.clear();
-    IndexP.reserve(MAX_REFPOINTS);
 
     referencingDialog->ui->buttonApply->setEnabled(false);
     validMatrix=false;
@@ -716,7 +716,6 @@ void EditReferencingPlugin::calculateMatrix()
         {
             MovP.push_back(pickedPoints[pindex]);
             FixP.push_back(refPoints[pindex]);
-            IndexP.push_back(pindex);
         }
 
         // while iterating, set all errors to zero
@@ -727,19 +726,20 @@ void EditReferencingPlugin::calculateMatrix()
     if(MovP.size() < 4)
     {
         // tell the user the problem
-        status_error = "There has to be at least 4 points";
+        status_error = "There have to be at least 4 points";
+		referencingDialog->updateTable();
+		glArea->update();
 
         // cleaning up
         FixP.clear();
         MovP.clear();
-        IndexP.clear();
 
         return;
     }
 
     // formatting results for saving
     referencingResults.clear();
-    referencingResults.reserve(2048);
+    referencingResults.reserve(4096);
     referencingResults.append("----Referencing Results----\n\n");
 
     if(referencingDialog->ui->cbAllowScaling->checkState() == Qt::Checked)
@@ -790,12 +790,18 @@ void EditReferencingPlugin::calculateMatrix()
 
     referencingResults.append("\n\nResidual Errors:\n\n");
 
-    for(pindex=0; pindex<MovP.size(); pindex++)
+	for (pindex = 0; pindex<usePoint.size(); pindex++)
     {
-      TrError = (FixP[IndexP[pindex]] - (transfMatrix * MovP[IndexP[pindex]])).Norm();
-      pointError[IndexP[pindex]] = TrError;
-      this->Log(GLLogStream::FILTER, "%s: %f",pointID[IndexP[pindex]].toStdString().c_str(),TrError);
-      referencingResults.append(QString("Point %1: %2\n").arg(pointID[IndexP[pindex]]).arg(QString::number(TrError)));
+		if (usePoint[pindex])
+		{
+			pointError[pindex] = (refPoints[pindex] - (transfMatrix * pickedPoints[pindex])).Norm();
+			this->Log(GLLogStream::FILTER, "%s: %f", pointID[pindex].toStdString().c_str(), pointError[pindex]);
+			referencingResults.append(QString("Point %1: %2\n").arg(pointID[pindex]).arg(QString::number(pointError[pindex])));
+		}
+		else
+		{
+			pointError[pindex] = -1.0;
+		}
     }
 
     // update dialog
@@ -805,7 +811,6 @@ void EditReferencingPlugin::calculateMatrix()
     // cleaning up
     FixP.clear();
     MovP.clear();
-    IndexP.clear();
 }
 
 void EditReferencingPlugin::applyMatrix()
@@ -818,17 +823,19 @@ void EditReferencingPlugin::applyMatrix()
 
     if(referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
     {
+		int lind = 0;
         foreach(MeshModel *mmp, glArea->md()->meshList)
         {
             if(mmp->visible)
             {
-                mmp->cm.Tr = newMat * glArea->mm()->cm.Tr;
+				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
             }
+			lind++;
         }
     }
     else
     {
-        glArea->mm()->cm.Tr = newMat * glArea->mm()->cm.Tr;
+		glArea->mm()->cm.Tr = newMat * originalTransf;
     }
 
     glArea->update();
@@ -996,19 +1003,21 @@ void EditReferencingPlugin::applyScale()
 	newMat.Identity();
 	newMat.SetScale(globalScale, globalScale, globalScale);
 
-	if (this->referencingDialog->ui->cbAllLayersScale->isChecked())
+	if (referencingDialog->ui->cbApplyToAll->checkState() == Qt::Checked)
 	{
+		int lind = 0;
 		foreach(MeshModel *mmp, glArea->md()->meshList)
 		{
 			if (mmp->visible)
 			{
-				mmp->cm.Tr = newMat * glArea->mm()->cm.Tr;
+				mmp->cm.Tr = newMat * layersOriginalTransf[lind];
 			}
+			lind++;
 		}
 	}
 	else
 	{
-		glArea->mm()->cm.Tr = newMat * glArea->mm()->cm.Tr;
+		glArea->mm()->cm.Tr = newMat * originalTransf;
 	}
 
 	glArea->update();
@@ -1016,7 +1025,137 @@ void EditReferencingPlugin::applyScale()
 
 void EditReferencingPlugin::loadDistances()
 {
-	// load from file
+	status_error = "";
+	QString openFileName = "";
+	
+	openFileName = QFileDialog::getOpenFileName(NULL, "Import a List of Distances (ascii .txt)", QDir::currentPath(), "Text file (*.txt)");
+	{
+		// opening file
+		QFile openFile(openFileName);
+
+		if (openFile.open(QIODevice::ReadOnly))
+		{
+			QStringList tokenizedLine;
+			QString firstline;
+			double newXa = 0.0, newYa = 0.0, newZa = 0.0, newXb = 0.0, newYb = 0.0, newZb = 0.0, newDist = 0.0;
+			bool parseXaOK = true, parseYaOK = true, parseZaOK = true, parseXbOK = true, parseYbOK = true, parseZbOK = true, parseDistOK = true;
+			bool found = false;
+			QString separator = "";
+
+			useDistance.clear();
+			distanceID.clear();
+			distPointA.clear();
+			distPointB.clear();
+			currDist.clear();
+			targDist.clear();
+			scaleFact.clear();
+			distError.clear();
+
+			//getting first line, to understand separator
+			if (!openFile.atEnd())
+				firstline = QString(openFile.readLine()).simplified();
+			else
+			{
+				status_error = "distance list format not recognized";
+				openFile.close();
+				referencingDialog->updateTableDist();
+				glArea->update();
+				return;
+			}
+
+			// discovering the separator 
+			vector <QString> possible_separators = { QString(" "), QString(","), QString(";") };
+
+			int sind = 0;
+			while ((!found) || (sind<possible_separators.size()))
+			{
+				tokenizedLine = firstline.split(possible_separators[sind], QString::SkipEmptyParts);
+				if (tokenizedLine.size() == 8 || (tokenizedLine.size() == 9 && firstline.right(1) == possible_separators[sind]))
+				{
+					newXa = tokenizedLine.at(1).toDouble(&parseXaOK);
+					newYa = tokenizedLine.at(2).toDouble(&parseYaOK);
+					newZa = tokenizedLine.at(3).toDouble(&parseZaOK);
+					newXb = tokenizedLine.at(4).toDouble(&parseXbOK);
+					newYb = tokenizedLine.at(5).toDouble(&parseYbOK);
+					newZb = tokenizedLine.at(6).toDouble(&parseZbOK);
+					newDist = tokenizedLine.at(7).toDouble(&parseDistOK);
+					if (parseXaOK && parseYaOK && parseZaOK && parseXbOK && parseYbOK && parseZbOK && parseDistOK)
+					{
+						separator = possible_separators[sind]; found = true;
+					}
+				}
+				sind++;
+			}
+
+			if (!found)
+			{
+				status_error = "distance list format not recognized";
+				openFile.close();
+				referencingDialog->updateTableDist();
+				glArea->update();
+				return;
+			}
+
+			// inserting first line
+			tokenizedLine = firstline.split(separator, QString::SkipEmptyParts);
+			newXa = tokenizedLine.at(1).toDouble(&parseXaOK);
+			newYa = tokenizedLine.at(2).toDouble(&parseYaOK);
+			newZa = tokenizedLine.at(3).toDouble(&parseZaOK);
+			newXb = tokenizedLine.at(4).toDouble(&parseXbOK);
+			newYb = tokenizedLine.at(5).toDouble(&parseYbOK);
+			newZb = tokenizedLine.at(6).toDouble(&parseZbOK);
+			newDist = tokenizedLine.at(7).toDouble(&parseDistOK);
+			{
+				useDistance.push_back(new bool(true));
+				distanceID.push_back(tokenizedLine.at(0));
+				distPointA.push_back(Point3d(newXa, newYa, newZa));
+				distPointB.push_back(Point3d(newXb, newYb, newZb));
+				currDist.push_back(0.0);
+				targDist.push_back(newDist);
+				scaleFact.push_back(0.0);
+				distError.push_back(0.0);
+			}
+
+			// and now, the rest of the file
+			while (!openFile.atEnd()) {
+				QString newline = QString(openFile.readLine()).simplified();
+
+				tokenizedLine = newline.split(separator, QString::SkipEmptyParts);
+				if (tokenizedLine.size() == 8 || (tokenizedLine.size() == 9 && newline.right(1) == separator))
+				{
+					newXa = tokenizedLine.at(1).toDouble(&parseXaOK);
+					newYa = tokenizedLine.at(2).toDouble(&parseYaOK);
+					newZa = tokenizedLine.at(3).toDouble(&parseZaOK);
+					newXb = tokenizedLine.at(4).toDouble(&parseXbOK);
+					newYb = tokenizedLine.at(5).toDouble(&parseYbOK);
+					newZb = tokenizedLine.at(6).toDouble(&parseZbOK);
+					newDist = tokenizedLine.at(7).toDouble(&parseDistOK);
+					if (parseXaOK && parseYaOK && parseZaOK && parseXbOK && parseYbOK && parseZbOK && parseDistOK)    //inserting
+					{
+						useDistance.push_back(new bool(true));
+						distanceID.push_back(tokenizedLine.at(0));
+						distPointA.push_back(Point3d(newXa, newYa, newZa));
+						distPointB.push_back(Point3d(newXb, newYb, newZb));
+						currDist.push_back(0.0);
+						targDist.push_back(newDist);
+						scaleFact.push_back(0.0);
+						distError.push_back(0.0);
+					}
+				}
+			}
+
+			openFile.close();
+			referencingDialog->updateTableDist();
+			updateDistances();
+			glArea->update();
+		}
+		else
+		{
+			status_error = "cannot open file";
+			referencingDialog->updateTable();
+			glArea->update();
+		}
+	}
 }
 
 void EditReferencingPlugin::exportScaling()
@@ -1038,18 +1177,24 @@ void EditReferencingPlugin::exportScaling()
 		{
 			QTextStream openFileTS(&openFile);
 
-			openFileTS << "-------SCALING DATA---------" << "\n\n";
+			openFileTS << "---------------------SCALING DATA----------------------" << "\n\n";
 
 			// writign results
-			openFileTS << "--------------------------\n";
+			openFileTS << "-------------------------------------------------------\n";
+			openFileTS << "[active][ID][Xa][Ya][Za][Xb][Yb][Zb][CurrD][TargD][Err]\n";
+			openFileTS << "-------------------------------------------------------\n";
 			for (pindex = 0; pindex<useDistance.size(); pindex++)
 			{
-				openFileTS << (useDistance[pindex]?"Active":"Inactive") << " " << distanceID[pindex] << " " <<
+				openFileTS << (useDistance[pindex] ? "Active" : "Inactive") << " " << distanceID[pindex] << " " <<
 					distPointA[pindex][0] << " " << distPointA[pindex][1] << " " << distPointA[pindex][2] << " " <<
 					distPointB[pindex][0] << " " << distPointB[pindex][1] << " " << distPointB[pindex][2] << " " <<
-					currDist[pindex] << " " << targDist[pindex] << " " << distError[pindex] << "\n";
+					currDist[pindex] << " " << targDist[pindex] << " ";
+				if (useDistance[pindex])
+					openFileTS << distError[pindex] << " \n";
+				else
+					openFileTS << "--" << " \n";
 			}
-			openFileTS << "--------------------------\n";
+			openFileTS << "-------------------------------------------------------\n";
 
 			// writing reference
 			openFileTS << "\n"  << "--- scaling results ---" << "\n";

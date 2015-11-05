@@ -78,7 +78,12 @@ void edit_referencingDialog::updateTable()
         refZ->setBackground(QBrush(QColor::fromRgb(155, 233, 233)));
         this->ui->tableWidget->setItem(pindex, 7, refZ);
 
-        QTableWidgetItem* error = new QTableWidgetItem(QString::number(this->referencingPlugin->pointError[pindex]));
+		QTableWidgetItem* error;
+		if (this->referencingPlugin->pointError[pindex] == -1.0)
+			error = new QTableWidgetItem("--");
+		else
+			error = new QTableWidgetItem(QString::number(this->referencingPlugin->pointError[pindex]));
+
         error->setFlags(error->flags() ^ Qt::ItemIsEditable);
         error->setBackground(QBrush(QColor::fromRgbF(0.9, 0.7, 0.7)));
         this->ui->tableWidget->setItem(pindex, 8, error);
@@ -91,7 +96,12 @@ void edit_referencingDialog::updateTable()
 void edit_referencingDialog::on_tabWidget_currentChanged(int index)
 {
     this->referencingPlugin->referencingMode = (EditReferencingPlugin::refModeType)index;
-    this->referencingPlugin->glArea->update();
+	this->referencingPlugin->status_line1 = "";
+	this->referencingPlugin->status_line2 = "";
+	this->referencingPlugin->status_line3 = "";
+	this->referencingPlugin->status_error = "";
+
+	this->referencingPlugin->glArea->update();
 }
 
 void edit_referencingDialog::on_tableWidget_itemChanged(QTableWidgetItem *item)
@@ -289,17 +299,18 @@ void edit_referencingDialog::updateTableDist()
 		QTableWidgetItem* scal = new QTableWidgetItem(QString::number(this->referencingPlugin->scaleFact[pindex]));
 		scal->setFlags(scal->flags() ^ Qt::ItemIsEditable);
 		if (this->referencingPlugin->scaleFact[pindex] == 0.0)
-			scal->setBackground(QBrush(QColor::fromRgbF(0.9, 0.3, 0.3)));
+			scal->setBackground(QBrush(QColor::fromRgbF(0.9, 0.5, 0.5)));
 		else
 			scal->setBackground(QBrush(QColor::fromRgbF(1.0, 1.0, 1.0)));
 		this->ui->tableWidgetDist->setItem(pindex, 10, scal);
 
-        QTableWidgetItem* error = new QTableWidgetItem(QString::number(this->referencingPlugin->distError[pindex]));
-        error->setFlags(error->flags() ^ Qt::ItemIsEditable);
-		if (this->referencingPlugin->scaleFact[pindex] == 0.0)
-			error->setBackground(QBrush(QColor::fromRgbF(0.5, 0.3, 0.3)));
+        QTableWidgetItem* error;
+		if (this->referencingPlugin->useDistance[pindex])
+			error = new QTableWidgetItem(QString::number(this->referencingPlugin->distError[pindex]));
 		else
-			error->setBackground(QBrush(QColor::fromRgbF(0.9, 0.8, 0.8)));
+			error = new QTableWidgetItem("--");
+        error->setFlags(error->flags() ^ Qt::ItemIsEditable);
+		error->setBackground(QBrush(QColor::fromRgbF(0.9, 0.8, 0.8)));
         this->ui->tableWidgetDist->setItem(pindex, 11, error);
     }
 

@@ -71,6 +71,10 @@ public:
     //referencing mode
     refModeType                  referencingMode;
 
+	// original transform(s)
+	std::vector<Matrix44m>		layersOriginalTransf;
+	Matrix44m					originalTransf;
+
     //referencing data (points)
     std::vector<bool>            usePoint;
     std::vector<QString>         pointID;
