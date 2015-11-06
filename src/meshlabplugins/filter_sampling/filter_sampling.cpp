@@ -818,6 +818,16 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
       sampleFace=false;
     }
 
+	// the meshes have to be transformed
+	// only if source different from target (if single mesh, it does not matter)
+	if (mm0 != mm1)
+	{
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, mm0->cm.Tr, true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, mm1->cm.Tr, true);
+	}
+
     mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
     mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
     mm1->updateDataMask(MeshModel::MM_FACEMARK);
@@ -848,6 +858,16 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     if(sampleFace)
       tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
 
+	// the meshes have to return to their original position
+	// only if source different from target (if single mesh, it does not matter)
+	if (mm0 != mm1)
+	{
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, Inverse(mm0->cm.Tr), true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
+	}
+
     Log("Hausdorff Distance computed");
     Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
     Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
@@ -871,27 +891,43 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
     MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
     float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
-    srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
+	bool onlySelected = par.getBool("onSelected");
+	bool colorT = par.getBool("ColorTransfer");
+	bool geomT = par.getBool("GeomTransfer");
+	bool normalT = par.getBool("NormalTransfer");
+	bool qualityT = par.getBool("QualityTransfer");
+	bool selectionT = par.getBool("SelectionTransfer");
+	bool distquality = par.getBool("QualityDistance");
+
+	if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
+	{
+		errorMessage = QString("You have to choose at least one attribute to be sampled");
+		return false;
+	}
+
+	// the meshes have to be transformed
+	// only if source different from target (if single mesh, it does not matter)
+	if (srcMesh != trgMesh)
+	{
+		if (srcMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, srcMesh->cm.Tr, true);
+		if (trgMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, trgMesh->cm.Tr, true);
+	}
+	
+	srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 	
-	bool onlySelected = par.getBool("onSelected");
-
     RedetailSampler rs;
     rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
 
     rs.dist_upper_bound = upperbound;
-    rs.colorFlag=par.getBool("ColorTransfer");
-    rs.coordFlag=par.getBool("GeomTransfer");
-    rs.normalFlag=par.getBool("NormalTransfer");
-    rs.qualityFlag=par.getBool("QualityTransfer");
-    rs.selectionFlag=par.getBool("SelectionTransfer");
-    rs.storeDistanceAsQualityFlag=par.getBool("QualityDistance");
-
-    if(!rs.colorFlag && !rs.coordFlag && !rs.qualityFlag && !rs.normalFlag && !rs.selectionFlag)
-    {
-      errorMessage = QString("You have to choose at least one attribute to be sampled");
-      return false;
-    }
+	rs.colorFlag = colorT;
+	rs.coordFlag = geomT;
+	rs.normalFlag = normalT;
+	rs.qualityFlag = qualityT;
+	rs.selectionFlag = selectionT;
+	rs.storeDistanceAsQualityFlag = distquality;
 
     if(rs.colorFlag)   trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
     if(rs.qualityFlag) trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
@@ -902,6 +938,16 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 	tri::SurfaceSampling<CMeshO, RedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
 
     if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
+
+	// the meshes have to return to their original position
+	// only if source different from target (if single mesh, it does not matter)
+	if (srcMesh != trgMesh)
+	{
+		if (srcMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, Inverse(srcMesh->cm.Tr), true);
+		if (trgMesh->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, Inverse(trgMesh->cm.Tr), true);
+	}
 
   } break;
   case FP_UNIFORM_MESH_RESAMPLING :
