@@ -35,6 +35,18 @@ $Log: editmeasure.h,v $
 #include <common/interfaces.h>
 #include <wrap/gui/rubberband.h>
 
+//--------------------------------------
+class measure
+{
+public:
+	QString ID;
+	vcg::Point3f startP;
+	vcg::Point3f endP;
+	float length;
+};
+//--------------------------------------
+
+
 class EditMeasurePlugin : public QObject, public MeshEditInterface
 {
   Q_OBJECT
@@ -50,11 +62,16 @@ public:
   virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &, GLArea * );
+  virtual void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea *);
 
 private:
   QFont qFont;
   vcg::Rubberband rubberband;
+  vcg::Rubberband measureband;
   bool was_ready;
+
+  int mName;
+  std::vector<measure>	measures;
   
 signals:
   void suspendEditToggle();
