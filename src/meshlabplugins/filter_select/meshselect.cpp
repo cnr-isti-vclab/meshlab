@@ -70,6 +70,21 @@ SelectionFilterPlugin::SelectionFilterPlugin()
             actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
             actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
       }
+	  if (tt == FP_SELECT_ALL){
+		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
+	  }
+	  if (tt == FP_SELECT_NONE){
+		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
+	  }
+	  if (tt == FP_SELECT_INVERT){
+		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
+	  }
+	  if (tt == FP_SELECT_DILATE){
+		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
+	  }
+	  if (tt == FP_SELECT_ERODE){
+		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
+	  }
     }
 }
 

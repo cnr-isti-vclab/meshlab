@@ -182,17 +182,19 @@ void MainWindow::createActions()
     connect(exportMeshAct, SIGNAL(triggered()), this, SLOT(save()));
 
     exportMeshAsAct = new QAction(QIcon(":/images/save.png"),tr("&Export Mesh As..."), this);
+	exportMeshAsAct->setShortcutContext(Qt::ApplicationShortcut);
+	exportMeshAsAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_E);
     connect(exportMeshAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-  reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
-  reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-  reloadMeshAct->setShortcut(Qt::ALT+Qt::Key_R);
-  connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
+    reloadMeshAct = new QAction(QIcon(":/images/reload.png"),tr("&Reload"), this);
+    reloadMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+    reloadMeshAct->setShortcut(Qt::ALT+Qt::Key_R);
+    connect(reloadMeshAct, SIGNAL(triggered()), this, SLOT(reload()));
 
-  reloadAllMeshAct = new QAction(tr("&Reload All"), this);
-  reloadAllMeshAct->setShortcutContext(Qt::ApplicationShortcut);
-  reloadAllMeshAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_R);
-  connect(reloadAllMeshAct, SIGNAL(triggered()), this, SLOT(reloadAllMesh()));
+    reloadAllMeshAct = new QAction(tr("&Reload All"), this);
+    reloadAllMeshAct->setShortcutContext(Qt::ApplicationShortcut);
+    reloadAllMeshAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_R);
+    connect(reloadAllMeshAct, SIGNAL(triggered()), this, SLOT(reloadAllMesh()));
 
     importRasterAct = new QAction(QIcon(":/images/open.png"),tr("Import Raster..."), this);
     connect(importRasterAct, SIGNAL(triggered()), this, SLOT(importRaster()));
@@ -327,7 +329,6 @@ void MainWindow::createActions()
     showRasterAct->setChecked(true);
     showRasterAct->setShortcut(Qt::SHIFT + Qt::Key_R);
     connect(showRasterAct, SIGNAL(triggered()), this, SLOT(showRaster()));
-
 
     //////////////Action Menu EDIT /////////////////////////////////////////////////////////////////////////
     suspendEditModeAct = new QAction (QIcon(":/images/no_edit.png"),tr("Not editing"), this);
