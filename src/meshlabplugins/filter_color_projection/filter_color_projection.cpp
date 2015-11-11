@@ -118,6 +118,7 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
                 false,
                 "Only on selecton",
                 "If true, projection is only done for selected vertices"));
+			parlst.addParam(new RichColor("blankColor", QColor(0, 0, 0, 0), "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
@@ -151,6 +152,7 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
                 false,
                 "use image alpha weight",
                 "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
+			parlst.addParam(new RichColor("blankColor", QColor(0, 0, 0, 0), "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
@@ -223,6 +225,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
         bool use_depth = par.getBool("usedepth");
         bool onselection = par.getBool("onselection");
         float eta = par.getFloat("deptheta");
+		QColor blank = par.getColor("blankColor");
 
 
         float depth=0;     // depth of point (distance from camera)
@@ -270,6 +273,9 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                 // pray is the vector from the point-to-be-colored to the camera center
                 Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
 
+				if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
+					(*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
+
                 //if inside image
                 if(pp[0]>0 && pp[1]>0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
                 {
@@ -307,8 +313,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
 
     case FP_MULTIIMAGETRIVIALPROJ :
     {
-
-
       bool onselection = par.getBool("onselection");
       float eta = par.getFloat("deptheta");
       bool  useangle = par.getBool("useangle");
@@ -316,6 +320,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       bool  useborders = par.getBool("useborders");
       bool  usesilhouettes = par.getBool("usesilhouettes");
       bool  usealphamask =  par.getBool("usealpha");
+	  QColor blank = par.getColor("blankColor");
 
       float  depth=0;     // depth of point (distance from camera)
       float  pdepth=0;    // depth value of projected point (from depth map)
@@ -453,7 +458,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                 // pray is the vector from the point-to-be-colored to the camera center
                 Point3m pray = (raster->shot.GetViewPoint() - (*vi).P()).Normalize();
 
-
                 //if inside image
                 if(pp[0]>=0 && pp[1]>=0 && pp[0]<raster->shot.Intrinsics.ViewportPx[0] && pp[1]<raster->shot.Intrinsics.ViewportPx[1])
                 {
@@ -551,6 +555,11 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                                       (acc_blu[buff_ind] / weights[buff_ind]) *255.0,
                                       255);
           }
+		  else
+		  {
+			  if ((blank.red() != 0) || (blank.green() != 0) || (blank.blue() != 0) || (blank.alpha() != 0))
+				  (*vi).C() = vcg::Color4b(blank.red(), blank.green(), blank.blue(), blank.alpha());
+		  }
         }
         buff_ind++;
       }
@@ -569,11 +578,11 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
       delete[]  acc_grn;
       delete[]  acc_blu;
 
-        } break;
+    } break;
 
 
-        case FP_MULTIIMAGETRIVIALPROJTEXTURE :
-        {
+    case FP_MULTIIMAGETRIVIALPROJTEXTURE :
+    {
 
             if(!tri::HasPerWedgeTexCoord(md.mm()->cm))
             {
@@ -591,7 +600,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
           bool  usesilhouettes = par.getBool("usesilhouettes");
           bool  usealphamask =  par.getBool("usealpha");
           QString textName = par.getString("textName");
-
 
           int textW = texsize;
           int textH = texsize;
