@@ -402,8 +402,6 @@ private:
 
     //View Menu and SubMenu //////
     QMenu *viewMenu;
-    QMenu *trackBallMenu;
-    QMenu *logMenu;
     QMenu *toolBarMenu;
     //////////////////////////////
     QMenu *windowsMenu;

@@ -636,22 +636,20 @@ void MainWindow::createMenus()
 
     // Shaders SUBmenu
     shadersMenu = renderMenu->addMenu(tr("&Shaders"));
-
     renderMenu->addSeparator();
 
     //////////////////// Menu View ////////////////////////////////////////////////////////////////////////////
-    viewMenu		= menuBar()->addMenu(tr("&View"));
+    viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(fullScreenAct);
+	viewMenu->addSeparator();
     viewMenu->addAction(showLayerDlgAct);
     viewMenu->addAction(showRasterAct);
-
-    trackBallMenu = viewMenu->addMenu(tr("&Trackball"));
-    trackBallMenu->addAction(showTrackBallAct);
-    trackBallMenu->addAction(resetTrackBallAct);
-
-    logMenu = viewMenu->addMenu(tr("&Info"));
-    logMenu->addAction(showInfoPaneAct);
-
+	viewMenu->addSeparator();
+	viewMenu->addAction(showTrackBallAct);
+	viewMenu->addAction(resetTrackBallAct);
+	viewMenu->addSeparator();
+	viewMenu->addAction(showInfoPaneAct);
+	viewMenu->addSeparator();
     toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
     toolBarMenu->addAction(showToolbarStandardAct);
     toolBarMenu->addAction(showToolbarRenderAct);
@@ -667,7 +665,6 @@ void MainWindow::createMenus()
    /* preferencesMenu->addAction(showFilterEditAct);
     preferencesMenu->addSeparator();*/
     preferencesMenu->addAction(setCustomizeAct);
-
 
     //////////////////// Menu Help ////////////////////////////////////////////////////////////////
     helpMenu = menuBar()->addMenu(tr("&Help"));

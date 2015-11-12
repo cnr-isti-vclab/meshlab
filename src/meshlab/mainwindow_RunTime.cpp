@@ -378,8 +378,10 @@ void MainWindow::updateMenus()
     renderMenu->setEnabled(!editMenu->actions().isEmpty());
     updateMenuItems(renderMenu,activeDoc);
     fullScreenAct->setEnabled(activeDoc);
-    trackBallMenu->setEnabled(activeDoc);
-    logMenu->setEnabled(activeDoc);
+	showLayerDlgAct->setEnabled(activeDoc);
+	showTrackBallAct->setEnabled(activeDoc);
+	resetTrackBallAct->setEnabled(activeDoc);
+	showInfoPaneAct->setEnabled(activeDoc);
     windowsMenu->setEnabled(activeDoc);
     preferencesMenu->setEnabled(activeDoc);
 
@@ -515,8 +517,8 @@ void MainWindow::updateMenus()
     if(GLA())
     {
         showLayerDlgAct->setChecked(layerDialog->isVisible());
-        showRasterAct->setChecked(GLA()->isRaster());
-        showRasterAct->setEnabled(meshDoc()->rm() != 0);
+		showRasterAct->setEnabled(meshDoc()->rm() != 0);
+		showRasterAct->setChecked(GLA()->isRaster());
         //if(GLA()->layerDialog->isVisible())
         layerDialog->updateTable();
         layerDialog->updateLog(meshDoc()->Log);
