@@ -519,7 +519,8 @@ void MainWindow::createToolBars()
             if(!filterAction->icon().isNull())
             {
                 // tooltip = iFilter->filterInfo(filterAction) + "<br>" + getDecoratedFileName(filterAction->data().toString());
-                filterToolBar->addAction(filterAction);
+				if (filterAction->priority() != QAction::LowPriority)
+					filterToolBar->addAction(filterAction);
             } //else qDebug() << "action was null";
         }
     }
@@ -555,7 +556,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(exportMeshAct);
     fileMenu->addAction(exportMeshAsAct);
     fileMenu->addAction(reloadMeshAct);
-  fileMenu->addAction(reloadAllMeshAct);
+    fileMenu->addAction(reloadAllMeshAct);
     fileMenu->addSeparator();
     fileMenu->addAction(importRasterAct);
     fileMenu->addSeparator();
