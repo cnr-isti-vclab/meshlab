@@ -818,7 +818,7 @@ void GLArea::displayInfo(QPainter *painter)
             }
         }
         if (clipRatioNear!=clipRatioNearDefault())
-            col0Text += QString("Clipping Near:%1\n").arg(clipRatioNear,7,'f',2);
+            col0Text += QString("\nClipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
         painter->drawText(Column_0, Qt::AlignLeft | Qt::TextWordWrap, col0Text);
         if(mm()->cm.Tr != Matrix44m::Identity() ) displayMatrix(painter, Column_2);
@@ -1438,7 +1438,7 @@ void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdoubl
 
         glOrtho(fLeft   + tDimX * tileCol, fLeft   + tDimX * (tileCol+1),     /* left, right */
                 fBottom + tDimY * tileRow, fBottom + tDimY * (tileRow+1),     /* bottom, top */
-                cameraDist - 2.f*clipRatioNear, cameraDist+2.f*clipRatioFar);
+                zNear, zFar);
     }
     else
     {
