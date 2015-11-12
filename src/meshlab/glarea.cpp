@@ -732,9 +732,12 @@ void GLArea::displayInfo(QPainter *painter)
     qFont.setFamily("Helvetica");
     qFont.setPixelSize(12);
     painter->setFont(qFont);
-    float barHeight = qFont.pixelSize()*5;
-    QFontMetrics metrics = QFontMetrics(font());
-    int border = qMax(4, metrics.leading());
+    QFontMetrics metrics = QFontMetrics(qFont);
+    int border = qMax(4, metrics.leading()) / 2;
+    int numLines = 4;
+    if ((this->md()->size()>0) && ((mm()->cm.sfn + mm()->cm.svn) > 0))
+      numLines = 5;
+    float barHeight = ((metrics.height() + metrics.leading())*numLines) + 2 * border;
 
     QRect Column_0(width()/10, this->height()-barHeight+border, width()/2, this->height()-border);
     QRect Column_1(width()/2 , this->height()-barHeight+border, width()*3/4,   this->height()-border);
@@ -761,8 +764,8 @@ void GLArea::displayInfo(QPainter *painter)
         {
             QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
-            col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + " (" + engLocale.toString(this->md()->vn()) + ") \n";
-            col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + " (" + engLocale.toString(this->md()->fn()) + ") \n";
+            col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + "    (" + engLocale.toString(this->md()->vn()) + ") \n";
+            col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + "    (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
         QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
         if (it != rendermodemap.end())
@@ -794,7 +797,6 @@ void GLArea::displayInfo(QPainter *painter)
                     rendtype = MIXED;
                     if ((rendtype == MIXED) && (doc->nextMesh(mit) == NULL))
                         rendtype = FULL_BO;
-
                 }
             }
 
