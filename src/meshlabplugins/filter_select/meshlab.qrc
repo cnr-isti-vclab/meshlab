@@ -3,5 +3,10 @@
         <file>images/delete_face.png</file>
         <file>images/delete_facevert.png</file>
         <file>images/delete_vert.png</file>
+        <file>images/sel_all.png</file>
+        <file>images/sel_none.png</file>
+        <file>images/sel_inv.png</file>
+        <file>images/sel_plus.png</file>
+        <file>images/sel_minus.png</file>
     </qresource>
 </RCC>

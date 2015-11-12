@@ -61,29 +61,42 @@ SelectionFilterPlugin::SelectionFilterPlugin()
       if(tt==FP_SELECT_DELETE_VERT){
             actionList.last()->setShortcut(QKeySequence ("Ctrl+Del"));
             actionList.last()->setIcon(QIcon(":/images/delete_vert.png"));
+			actionList.last()->setPriority(QAction::HighPriority);
       }
       if(tt==FP_SELECT_DELETE_FACE){
             actionList.last()->setShortcut(QKeySequence (Qt::Key_Delete));
             actionList.last()->setIcon(QIcon(":/images/delete_face.png"));
+			actionList.last()->setPriority(QAction::HighPriority);
       }
       if(tt==FP_SELECT_DELETE_FACEVERT){
             actionList.last()->setShortcut(QKeySequence ("Shift+Del"));
             actionList.last()->setIcon(QIcon(":/images/delete_facevert.png"));
+			actionList.last()->setPriority(QAction::HighPriority);
       }
 	  if (tt == FP_SELECT_ALL){
 		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_A);
+		  actionList.last()->setIcon(QIcon(":/images/sel_all.png"));
+		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
 	  if (tt == FP_SELECT_NONE){
 		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_D);
+		  actionList.last()->setIcon(QIcon(":/images/sel_none.png"));
+		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
 	  if (tt == FP_SELECT_INVERT){
 		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_I);
+		  actionList.last()->setIcon(QIcon(":/images/sel_inv.png"));
+		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
 	  if (tt == FP_SELECT_DILATE){
 		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Plus);
+		  actionList.last()->setIcon(QIcon(":/images/sel_plus.png"));
+		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
 	  if (tt == FP_SELECT_ERODE){
 		  actionList.last()->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Minus);
+		  actionList.last()->setIcon(QIcon(":/images/sel_minus.png"));
+		  actionList.last()->setPriority(QAction::LowPriority);
 	  }
     }
 }
