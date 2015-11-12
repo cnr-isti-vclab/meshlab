@@ -134,6 +134,10 @@ void SaveMaskExporterDialog::SetMaskCapability()
     checkAndEnable(ui->check_iom_vertnormal,   vcg::tri::io::Mask::IOM_VERTNORMAL,   capability, defaultBits);
     checkAndEnable(ui->check_iom_vertradius,   vcg::tri::io::Mask::IOM_VERTRADIUS,   capability, defaultBits);
 
+	// point cloud fix: if a point cloud, probably you'd want to save vertex normals
+	if ((m->cm.fn == 0) && (m->cm.en == 0))
+		ui->check_iom_vertnormal->setChecked(true);
+
     //face
     checkAndEnable(ui->check_iom_facequality, vcg::tri::io::Mask::IOM_FACEQUALITY, capability, defaultBits );
     checkAndEnable(ui->check_iom_faceflags,   vcg::tri::io::Mask::IOM_FACEFLAGS,   capability, defaultBits );
@@ -147,13 +151,11 @@ void SaveMaskExporterDialog::SetMaskCapability()
 
     checkAndEnable(ui->check_iom_polygonal,   vcg::tri::io::Mask::IOM_BITPOLYGONAL,   capability, defaultBits );
 
-
     //camera THIS ONE HAS TO BE CORRECTED !!!!
     //bool camval = m->cm.shot.IsValid();
     //int res = capability & vcg::tri::io::Mask::IOM_CAMERA;
-  ui->check_iom_camera->setDisabled( ((capability & vcg::tri::io::Mask::IOM_CAMERA)==0) || (m->cm.shot.IsValid() == false));
-  ui->check_iom_camera->setChecked ( ((capability & vcg::tri::io::Mask::IOM_CAMERA)!=0) && (m->cm.shot.IsValid()));
-
+    ui->check_iom_camera->setDisabled( ((capability & vcg::tri::io::Mask::IOM_CAMERA)==0) || (m->cm.shot.IsValid() == false));
+    ui->check_iom_camera->setChecked ( ((capability & vcg::tri::io::Mask::IOM_CAMERA)!=0) && (m->cm.shot.IsValid()));
 
     if(capability == 0)
         ui->NoneButton->setChecked(true);
@@ -164,24 +166,24 @@ void SaveMaskExporterDialog::updateMask()
 {
     int newmask = 0;
 
-    if( ui->check_iom_vertflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
-    if( ui->check_iom_vertcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
-    if( ui->check_iom_vertquality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
-    if( ui->check_iom_verttexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
-    if( ui->check_iom_vertnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
-    if( ui->check_iom_vertradius->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_VERTRADIUS;}
+    if( ui->check_iom_vertflags->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTFLAGS;}
+    if( ui->check_iom_vertcolor->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_VERTCOLOR;}
+    if( ui->check_iom_vertquality->isChecked()  ) { newmask |= vcg::tri::io::Mask::IOM_VERTQUALITY;}
+    if( ui->check_iom_verttexcoord->isChecked() ) { newmask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD;}
+    if( ui->check_iom_vertnormal->isChecked()   ) { newmask |= vcg::tri::io::Mask::IOM_VERTNORMAL;}
+    if( ui->check_iom_vertradius->isChecked()   ) { newmask |= vcg::tri::io::Mask::IOM_VERTRADIUS;}
 
-    if( ui->check_iom_faceflags->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
-    if( ui->check_iom_facecolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
-    if( ui->check_iom_facequality->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
-    if( ui->check_iom_facenormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
+    if( ui->check_iom_faceflags->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_FACEFLAGS;}
+    if( ui->check_iom_facecolor->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_FACECOLOR;}
+    if( ui->check_iom_facequality->isChecked()  ) { newmask |= vcg::tri::io::Mask::IOM_FACEQUALITY;}
+    if( ui->check_iom_facenormal->isChecked()   ) { newmask |= vcg::tri::io::Mask::IOM_FACENORMAL;}
 
-    if( ui->check_iom_wedgcolor->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
-    if( ui->check_iom_wedgtexcoord->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
-    if( ui->check_iom_wedgnormal->isChecked()	) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
+    if( ui->check_iom_wedgcolor->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_WEDGCOLOR;}
+    if( ui->check_iom_wedgtexcoord->isChecked() ) { newmask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;}
+    if( ui->check_iom_wedgnormal->isChecked()   ) { newmask |= vcg::tri::io::Mask::IOM_WEDGNORMAL;}
 
-    if( ui->check_iom_camera->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
-    if( ui->check_iom_polygonal->isChecked()		) { newmask |= vcg::tri::io::Mask::IOM_BITPOLYGONAL;}
+    if( ui->check_iom_camera->isChecked()       ) { newmask |= vcg::tri::io::Mask::IOM_CAMERA;}
+    if( ui->check_iom_polygonal->isChecked()    ) { newmask |= vcg::tri::io::Mask::IOM_BITPOLYGONAL;}
 
     for(unsigned int i=0;i<m->cm.textures.size();i++)
         m->cm.textures[i] = ui->listTextureName->item(i)->text().toStdString();
