@@ -297,12 +297,29 @@ void GLArea::drawGradient()
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor(glas.backgroundTopColor);  	glVertex2f(-1, 1);
-    glColor(glas.backgroundBotColor);	glVertex2f(-1,-1);
-    glColor(glas.backgroundTopColor);		glVertex2f( 1, 1);
-    glColor(glas.backgroundBotColor);	glVertex2f( 1,-1);
-    glEnd();
+	if (!takeSnapTile)
+	{
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor(glas.backgroundTopColor);  glVertex2f(-1, 1);
+		glColor(glas.backgroundBotColor);  glVertex2f(-1, -1);
+		glColor(glas.backgroundTopColor);  glVertex2f(1, 1);
+		glColor(glas.backgroundBotColor);  glVertex2f(1, -1);
+		glEnd();
+	}
+	else
+	{
+		float xb = (-tileCol * 2) - 1;
+		float yb = (-tileRow * 2) - 1;
+		float xt = ((totalCols - tileCol) * 2) - 1;
+		float yt = ((totalRows - tileRow) * 2) - 1;
+
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor(glas.backgroundTopColor);  glVertex2f(xb, yt);
+		glColor(glas.backgroundBotColor);  glVertex2f(xb, yb);
+		glColor(glas.backgroundTopColor);  glVertex2f(xt, yt);
+		glColor(glas.backgroundBotColor);  glVertex2f(xt, yb);
+		glEnd();
+	}
 
     glPopAttrib();
     glPopMatrix(); // restore modelview
