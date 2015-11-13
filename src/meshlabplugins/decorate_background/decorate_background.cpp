@@ -33,72 +33,74 @@
 
 using namespace vcg;
 
+QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
+{
+  switch (id)
+  {
+    case DP_SHOW_CUBEMAPPED_ENV:  return tr("Cube mapped background");
+    case DP_SHOW_GRID:            return tr("Background Grid");
+  }
+  assert(0);
+  return QString();
+}
+
 QString DecorateBackgroundPlugin::decorationInfo(FilterIDType id) const
 {
   switch(id)
-    {
-    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
-  case DP_SHOW_GRID :      return tr("Draws a gridded background that can be used as a reference.");
-    }
-    assert(0);
-    return QString();
-}
-QString DecorateBackgroundPlugin::decorationName(FilterIDType id) const
-{
-    switch(id)
-    {
-    case DP_SHOW_CUBEMAPPED_ENV :      return tr("Cube mapped background");
-  case DP_SHOW_GRID :      return tr("Background Grid");
-    }
-    assert(0);
-    return QString();
+  {
+    case DP_SHOW_CUBEMAPPED_ENV :  return tr("Draws a customizable cube mapped background that is sync with trackball rotation");
+    case DP_SHOW_GRID :            return tr("Draws a gridded background that can be used as a reference.");
+  }
+  assert(0);
+  return QString();
 }
 
 void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
-  switch(ID(action)){
-  case DP_SHOW_CUBEMAPPED_ENV :
-  if(!parset.hasParameter(CubeMapPathParam()))
+  switch(ID(action))
+  {
+    case DP_SHOW_CUBEMAPPED_ENV :
+      if(!parset.hasParameter(CubeMapPathParam()))
       {
-    QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
-    //parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
-  }
-  break;
-  case DP_SHOW_GRID :
-      parset.addParam(new RichFloat(BoxRatioParam(),2.0,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
+        QString cubemapDirPath = PluginManager::getBaseDirPath() + QString("/textures/cubemaps/uffizi.jpg");
+        //parset.addParam(new RichString(CubeMapPathParam(), cubemapDirPath,"",""));
+      }
+    break;
+    case DP_SHOW_GRID :
+      parset.addParam(new RichFloat(BoxRatioParam(),1.2,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
       parset.addParam(new RichFloat(GridMajorParam(),10,"Major Spacing",""));
       parset.addParam(new RichFloat(GridMinorParam(),1,"Minor Spacing",""));
       parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
       parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
-      parset.addParam(new RichColor(GridColorBackParam(),QColor(Color4b::Gray),"Back Grid Color",""));
-      parset.addParam(new RichColor(GridColorFrontParam(),QColor(Color4b::Gray),"Front grid Color",""));
-
+	  parset.addParam(new RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
+      parset.addParam(new RichColor(GridColorFrontParam(),QColor(22,139,119,255),"Front grid Color",""));
     break;
   }
 }
 
 bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
 {
-  switch(ID(action)){
+  switch(ID(action))
+  {
     case DP_SHOW_CUBEMAPPED_ENV :
-    if(parset->findParameter(CubeMapPathParam())== NULL) qDebug("CubeMapPath was not setted!!!");
-      cubemapFileName = parset->getString(CubeMapPathParam());
+      if(parset->findParameter(CubeMapPathParam())== NULL) qDebug("CubeMapPath was not setted!!!");
+        cubemapFileName = parset->getString(CubeMapPathParam());
     break;
-  case DP_SHOW_GRID:
-    connect(gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
-    connect(this,SIGNAL(askViewerShot(QString)),gla,SLOT(sendViewerShot(QString)));
-  break;
+    case DP_SHOW_GRID:
+		/*QMetaObject::Connection aaa =*/ connect(gla, SIGNAL(transmitShot(QString, vcg::Shotf)), this, SLOT(setValue(QString, vcg::Shotf)));
+		/*QMetaObject::Connection bbb =*/ connect(this, SIGNAL(askViewerShot(QString)), gla, SLOT(sendViewerShot(QString)));
+    break;
   }
-    return true;
+  return true;
 }
 
-void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea * /*gla*/, QPainter *, GLLogStream &)
+void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichParameterSet * parset,GLArea * gla, QPainter *, GLLogStream &)
 {
   static QString lastname("unitialized");
-    switch(ID(a))
+  switch(ID(a))
+  {
+    case DP_SHOW_CUBEMAPPED_ENV :
     {
-      case DP_SHOW_CUBEMAPPED_ENV :
-        {
       if(!cm.IsValid() || (lastname != cubemapFileName ) )
       {
         qDebug( "Current CubeMapPath Dir: %s ",qPrintable(cubemapFileName));
@@ -130,21 +132,24 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
             glMatrixMode(GL_PROJECTION);
             glPopMatrix();
             glMatrixMode(GL_MODELVIEW);
-    } break;
-  case DP_SHOW_GRID :
+    } 
+    break;
+    case DP_SHOW_GRID :
     {
-      emit this->askViewerShot("me");
-      Box3m bb=m.bbox();
+      emit this->askViewerShot("backGrid");
       float scaleBB = parset->getFloat(BoxRatioParam());
-      float majorTick = parset->getFloat(GridMajorParam());
-      float minorTick = parset->getFloat(GridMinorParam());
+      float majorTick = fabs(parset->getFloat(GridMajorParam()));
+	  float minorTick = fabs(parset->getFloat(GridMinorParam()));
       bool backFlag = parset->getBool(GridBackParam());
       bool shadowFlag = parset->getBool(ShowShadowParam());
       Color4b backColor = parset->getColor4b(GridColorBackParam());
       Color4b frontColor = parset->getColor4b(GridColorFrontParam());
-      bb.Offset((bb.max-bb.min)*(scaleBB-1.0));
-      DrawGriddedCube(*m.mm(),bb,majorTick,minorTick,backFlag,shadowFlag,backColor,frontColor);
-    } break;
+	  Box3m bb = m.bbox();
+	  float scalefactor = std::max(0.2, (scaleBB - 1.0));
+	  bb.Offset((bb.max - bb.min)*(scalefactor/2.0));
+	  DrawGriddedCube(*m.mm(), bb, majorTick, minorTick, backFlag, shadowFlag, backColor, frontColor);
+    } 
+    break;
   }
 }
 
@@ -159,87 +164,98 @@ void DrawGridPlane(int axis,
 {
   int xAxis = (1+axis)%3;
   int yAxis = (2+axis)%3;
-  int zAxis = (0+axis)%3; // the axis perpendicular to the plane we want to draw (e.g. if i want to draw plane xy I wrote '2')
+  int zAxis = (0+axis)%3; // the axis perpendicular to the plane we want to draw (e.g. if i want to draw plane xy I write '2')
 
   Color4b majorColor=lineColor;
-  Color4b minorColor=lineColor;
-  minorColor[3]=127;
-  assert(minG[0] <= minP[0] && maxG[0]>=maxP[0]);
-  assert(minG[1] <= minP[1] && maxG[1]>=maxP[1]);
-  assert(minG[2] <= minP[2] && maxG[2]>=maxP[2]);
-  // We draw orizontal ande vertical lines onto the XY plane snapped with the major ticks
-  Point3m p1,p2;
-  p1[zAxis]=p2[zAxis] = side ? maxG[zAxis] : minG[zAxis] ;
+  Color4b minorColor;
+  Color4b axisColor;
+  minorColor[0] = std::min(255.0, lineColor[0] * 2.0); // minorcolor is 2 times brighter and half solid w.r.t. majorcolor
+  minorColor[1] = std::min(255.0, lineColor[1] * 2.0);
+  minorColor[2] = std::min(255.0, lineColor[2] * 2.0);
+  minorColor[3] = std::min(127.0, lineColor[3] / 2.0);
+  axisColor[0] = lineColor[0] * 0.66; // axiscolor is 2/3 darker w.r.t. majorcolor
+  axisColor[1] = lineColor[1] * 0.66;
+  axisColor[2] = lineColor[2] * 0.66;
+  axisColor[3] = 255;
 
-  float aMin,aMax;
-  // first draw the vertical lines (e.g we iterate on the X with fixed Y extents)
+  // We draw orizontal and vertical lines onto the XY plane snapped with the major ticks
+  Point3m p1,p2,p3,p4;
+  p1[zAxis] = p2[zAxis] = p3[zAxis] = p4[zAxis] = side ? maxG[zAxis] : minG[zAxis];
+
+  float aMin,aMax,bMin,bMax;
+
+  p1[yAxis] = minG[yAxis];
+  p2[yAxis] = maxG[yAxis];
+  p3[xAxis] = minG[xAxis];
+  p4[xAxis] = maxG[xAxis];
+  aMin = minG[xAxis];
+  aMax = maxG[xAxis];
+  bMin = minG[yAxis];
+  bMax = maxG[yAxis];
+
+  glLineWidth(0.5f);
+  glColor(minorColor);
   glBegin(GL_LINES);
-  p1[yAxis]=minG[yAxis];
-  p2[yAxis]=maxG[yAxis];
-  aMin =minG[xAxis];
-  aMax =maxG[xAxis];
-
-  for(float alpha=aMin;alpha<=aMax;alpha+=majorTick)
+  for (float alpha = aMin; alpha <= aMax; alpha += minorTick)
   {
-    p1[xAxis]=p2[xAxis]=alpha;
-    glColor(majorColor);
-    glVertex(p1); glVertex(p2);
-    glColor(minorColor);
-    for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax; alpha2+=minorTick) {
-      p1[xAxis]=p2[xAxis]=alpha2;
-      glVertex(p1); glVertex(p2);
-    }
+	  p1[xAxis] = p2[xAxis] = alpha;
+	  glVertex(p1); glVertex(p2);
   }
-
-  p1[xAxis]=minG[xAxis];
-  p2[xAxis]=maxG[xAxis];
-  aMin = minG[yAxis];
-  aMax = maxG[yAxis];
-
-  for(float alpha=aMin;alpha<=aMax;alpha+=majorTick)
+  for (float alpha = bMin; alpha <= bMax; alpha += minorTick)
   {
-    p1[yAxis]=p2[yAxis]=alpha;
-    glColor(majorColor);
-    glVertex(p1); glVertex(p2);
-    glColor(minorColor);
-    for(float alpha2 = alpha+minorTick; alpha2<alpha+majorTick && alpha2<=aMax ;alpha2+=minorTick) {
-      p1[yAxis]=p2[yAxis]=alpha2;
-      glVertex(p1); glVertex(p2);
-    }
+      p3[yAxis] = p4[yAxis] = alpha;
+      glVertex(p3); glVertex(p4);
   }
   glEnd();
+
+  glLineWidth(1.0f);
   glColor(majorColor);
+  glBegin(GL_LINES);
+  for (float alpha = aMin; alpha <= aMax; alpha += majorTick)
+  {
+      p1[xAxis] = p2[xAxis] = alpha;
+      glVertex(p1); glVertex(p2);
+  }
+  for (float alpha = bMin; alpha <= bMax; alpha += majorTick)
+  {
+      p3[yAxis] = p4[yAxis] = alpha;
+      glVertex(p3); glVertex(p4);
+  }
+  glEnd();
 
   // Draw the axis
-  glLineWidth(1.0f);
+  glColor(axisColor);
+  glLineWidth(1.5f);
   glBegin(GL_LINES);
   if(minP[xAxis]*maxP[xAxis] <0 )
   {
-    p1[yAxis]=minP[yAxis];
-    p2[yAxis]=maxP[yAxis];
+    p1[yAxis]=minG[yAxis];
+    p2[yAxis]=maxG[yAxis];
     p1[xAxis]=p2[xAxis]=0;
     glVertex(p1);
     glVertex(p2);
   }
   if(minP[yAxis]*maxP[yAxis] <0 )
   {
-    p1[xAxis]=minP[xAxis];
-    p2[xAxis]=maxP[xAxis];
+    p1[xAxis]=minG[xAxis];
+    p2[xAxis]=maxG[xAxis];
     p1[yAxis]=p2[yAxis]=0;
     glVertex(p1);
     glVertex(p2);
   }
   glEnd();
-
 }
+
 /* return true if the side of a box is front facing with respet of the give viewpoint.
    side 0, axis i == min on than i-th axis
    side 1, axis i == min on than i-th axis
    questo capita se il prodotto scalare tra il vettore normale entro della faccia
  */
 bool FrontFacing(Point3m viewPos,
-                 int axis, int side,
-                 Point3m minP, Point3m maxP)
+                 int axis,
+                 int side,
+                 Point3m minP, 
+                 Point3m maxP)
 {
   assert (side==0 || side ==1);
   assert (axis>=0 && axis < 3);
@@ -260,8 +276,8 @@ bool FrontFacing(Point3m viewPos,
 //  qDebug("VPC        %f %f %f",vpc[0],vpc[1],vpc[2]);
   return vpc*N > 0;
 }
-void DrawFlatMesh(MeshModel &m, int axis, int side,
-                                            Point3m minG, Point3m maxG)
+
+void DrawFlatMesh(MeshModel &m, int axis, int side, Point3m minG, Point3m maxG)
 {
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
@@ -273,7 +289,7 @@ void DrawFlatMesh(MeshModel &m, int axis, int side,
     scale[axis]=0;
     glTranslate(trans);
     glScale(scale);
-    m.render(GLW::DMFlat,GLW::CMNone,GLW::TMNone);
+//    m.render(GLW::DMFlat,GLW::CMNone,GLW::TMNone);
     glPopMatrix();
     glPopAttrib();
 }
@@ -284,21 +300,25 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, Sc
     Point3m minP,maxP, minG,maxG;
     minP=bb.min;maxP=bb.max;
 
-    // Make the box well rounded wrt to major tick
+    // Make the box well rounded wrt to major tick (only increase)
     for(int i=0;i<3;++i) // foreach axis
     {
-        if(minP[i] > 0 ) minG[i] = minP[i] - fmod(minP[i],majorTick) - majorTick;
-        if(minP[i] ==0 ) minG[i] = majorTick;
-        if(minP[i] < 0 ) minG[i] = minP[i] + fmod(fabs(minP[i]),majorTick) - majorTick;
-        if(maxP[i] > 0 ) maxG[i] = maxP[i] - fmod(maxP[i],majorTick) + majorTick;
-        if(maxP[i] ==0 ) maxG[i] = majorTick;
-        if(maxP[i] < 0 ) maxG[i] = maxP[i] + fmod(fabs(maxP[i]),majorTick);
+      if (minP[i] == 0) 
+        minG[i] = -majorTick;
+      else
+        minG[i] = minP[i] + fmod(fabs(minP[i]), majorTick) - majorTick;
+
+      if (maxP[i] == 0) 
+        maxG[i] =  majorTick;
+	  else
+        maxG[i] = maxP[i] - fmod(fabs(maxP[i]), majorTick) + majorTick;
     }
 
     glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
     glColor3f(0.8f,0.8f,0.8f);
-    glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_LINE_SMOOTH);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     Point3m viewPos = Point3m::Construct(this->curShot.GetViewPoint());
@@ -316,9 +336,13 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, Sc
             }
         }
 
+	glDisable(GL_BLEND);
     glPopAttrib();
 }
 
-void  DecorateBackgroundPlugin::setValue(QString /*name*/, vcg::Shotf val) {curShot=val;}
+void  DecorateBackgroundPlugin::setValue(QString name, vcg::Shotf val) 
+{
+	curShot=val;
+}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(DecorateBackgroundPlugin)
