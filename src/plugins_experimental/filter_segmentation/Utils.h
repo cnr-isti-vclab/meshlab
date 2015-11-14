@@ -24,14 +24,6 @@
 class Cluster;
 class Segmenter;
 
-inline float computeFaceArea(CFaceO &face) {
-    return 0.5f * Norm((face.cP(1) - face.cP(0)) ^ (face.cP(2) - face.cP(0)));
-}
-
-inline vcg::Point3f computeFaceCentroid(CFaceO &face) {
-    return (face.cP(0) + face.cP(1) + face.cP(2)) / 3.f;
-}
-
 inline float metricNormalDeviation(const vcg::Point3f& segNormal, const vcg::Point3f& faceNormal) {
     float dotP = segNormal * faceNormal;
     return 1.f - fabsf(dotP);
@@ -56,13 +48,13 @@ protected:
 public:
     MeshFaceFunctor(CMeshO *mesh) : mesh_(mesh) {}
     MeshFaceFunctor() : mesh_(NULL) {}
-    virtual ~MeshFaceFunctor() {};
+    virtual ~MeshFaceFunctor() {}
     //called for the center face
     virtual void initCenter(const CMeshO::FacePointer &){}
     //called after all faces are visited
     virtual void saveResults(const CMeshO::FacePointer &){}
     //called for each neighboring face
-    virtual void operator()(const CMeshO::FacePointer&){};
+    virtual void operator()(const CMeshO::FacePointer&){}
 
 };
 
@@ -79,13 +71,13 @@ public:
     void initCenter(const CMeshO::FacePointer &fh){
         N_sum = fh->N();
         num = 1;
-        area_sum = computeFaceArea(*fh);
+        area_sum = vcg::DoubleArea(*fh);
     }
     //called for each neighboring face
     void operator()(const CMeshO::FacePointer& fh){
         N_sum += fh->N();
         num++;
-        area_sum += computeFaceArea(*fh);
+        area_sum += vcg::DoubleArea(*fh);
     };
 
     vcg::Point3f getAverageNormal(){

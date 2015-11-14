@@ -72,6 +72,7 @@ protected:
     float seg_eThreshold;   // we will hold the 1.f-cosf(seg_eThresholdDegrees*PI/180.f) as the error weight;
     float seg_eThresholdDegrees;
     bool  seg_localNeighbAware;
+    bool  seg_generateDecomp;
     float seg_localNeighbDist;
     float seg_areaThreshold;
     bool seg_hierarchical;

@@ -18,8 +18,6 @@
 #ifndef HC_SEGMENTER_INCLUDED
 #define HC_SEGMENTER_INCLUDED
 
-#include <vector>
-#include <set>
 #include "Segmenter.h"
 #include <common/interfaces.h>
 

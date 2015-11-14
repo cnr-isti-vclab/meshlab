@@ -56,28 +56,17 @@ public:
     // public set functions
     void setArea(float area) { area_ = area; }
     void setId(unsigned int i) { id_ = i; }
-    void setAvgNormal(const vcg::Point3f& normal) { normal_ = normal; };
-    void setCentroid(const vcg::Point3f& center) { centroid_ = center; };
+    void setAvgNormal(const vcg::Point3f& normal) { normal_ = normal; }
+    void setCentroid(const vcg::Point3f& center) { centroid_ = center; }
 
     // public get functions
     float getArea() { return area_; }
     int  getId() { return id_; }
-    const vcg::Point3f& getAvgNormal() { return normal_; };
-    const vcg::Point3f& getCentroid() { return centroid_; };
+    const vcg::Point3f& getAvgNormal() { return normal_; }
+    const vcg::Point3f& getCentroid() { return centroid_; }
 
-    void updateAvgNormal() {
-        vcg::Point3d tmpNormal = (faceNormalSum_ / area_).Normalize();
-        normal_[0] = tmpNormal[0];
-        normal_[1] = tmpNormal[1];
-        normal_[2] = tmpNormal[2];
-    }
-
-    void updateCentroid() {
-        vcg::Point3d tmpCentroid = (centroidSum_ / area_).Normalize();
-        centroid_[0] = tmpCentroid[0];
-        centroid_[1] = tmpCentroid[1];
-        centroid_[2] = tmpCentroid[2];
-    }
+    void updateAvgNormal() {   normal_.Import(faceNormalSum_.Normalize()); }
+    void updateCentroid() {  centroid_.Import(centroidSum_.Normalize()); }
 };
 
 #endif // CLUSTER_INCLUDED

@@ -19,22 +19,20 @@
 using namespace std;
 using namespace vcg;
 
-#define PI 3.14159265f
-
 void Segmenter::setMesh(CMeshO *meshObj) {
     meshObj_ = meshObj;
-    Segmenter::faceClusterPairs = tri::Allocator<CMeshO>::AddPerFaceAttribute<Cluster *>(*meshObj_, string("Segment"));
-    Segmenter::faceMarks = tri::Allocator<CMeshO>::AddPerFaceAttribute<int>(*meshObj_, string("Mark"));
-    Segmenter::faceTmpMarks = tri::Allocator<CMeshO>::AddPerFaceAttribute<int>(*meshObj_, string("TmpMark"));
-    Segmenter::faceArea = tri::Allocator<CMeshO>::AddPerFaceAttribute<float>(*meshObj_, string("Area"));
-    Segmenter::faceCentroid = tri::Allocator<CMeshO>::AddPerFaceAttribute<vcg::Point3f>(*meshObj_, string("Centroid"));
+    Segmenter::faceClusterPairs = tri::Allocator<CMeshO>::GetPerFaceAttribute<Cluster *>(*meshObj_, string("Segment"));
+    Segmenter::faceMarks = tri::Allocator<CMeshO>::GetPerFaceAttribute<int>(*meshObj_, string("Mark"));
+    Segmenter::faceTmpMarks = tri::Allocator<CMeshO>::GetPerFaceAttribute<int>(*meshObj_, string("TmpMark"));
+    Segmenter::faceArea = tri::Allocator<CMeshO>::GetPerFaceAttribute<float>(*meshObj_, string("Area"));
+    Segmenter::faceCentroid = tri::Allocator<CMeshO>::GetPerFaceAttribute<vcg::Point3f>(*meshObj_, string("Centroid"));
 
     for (CMeshO::FaceIterator i = meshObj_->face.begin(); i != meshObj_->face.end(); ++i) {
         Segmenter::faceClusterPairs[*i] = NULL;
         Segmenter::faceMarks[*i] = -1;
         Segmenter::faceTmpMarks[*i] = -1;
-        Segmenter::faceArea[*i] = computeFaceArea(*i);
-        Segmenter::faceCentroid[*i] = computeFaceCentroid(*i);
+        Segmenter::faceArea[*i] = vcg::DoubleArea(*i)*0.5f;
+        Segmenter::faceCentroid[*i] = vcg::Barycenter(*i);
     }
     computeTotalAreaAndInitPFA();
 }

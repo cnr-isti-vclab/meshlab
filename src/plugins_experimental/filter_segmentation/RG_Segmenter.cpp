@@ -16,14 +16,7 @@
 
 #include "RG_Segmenter.h"
 #include "Cluster.h"
-
-#include <common/interfaces.h>
-#include <QObject>
-
-#include <limits.h>
-#include <math.h>
 #include <deque>
-#include <map>
 
 using namespace vcg;
 using namespace std;

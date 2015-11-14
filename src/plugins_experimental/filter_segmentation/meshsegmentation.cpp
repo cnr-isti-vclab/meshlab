@@ -37,17 +37,15 @@
 //-------------------------------------------------------//
 
 #include "meshsegmentation.h"
-#include "src/Segmenter.h"
-#include "src/RG_Segmenter.h"
-#include "src/HC_Segmenter.h"
+#include "Segmenter.h"
+#include "RG_Segmenter.h"
+#include "HC_Segmenter.h"
 
 using namespace std;
 using namespace vcg;
 
-#define PI 3.14159265f
-
 float degreesToError(float angle) {
-    return 1.f - cosf(angle*PI / 180.f);
+    return 1.f - cosf(angle*M_PI / 180.f);
 }
 
 CMeshO::PerFaceAttributeHandle<int> Segmenter::faceMarks = CMeshO::PerFaceAttributeHandle<int>();
@@ -72,6 +70,7 @@ SegmentationPlugin::SegmentationPlugin(void)
     seg_localNeighbAware = false;
     seg_localNeighbDist = 6.f;
     seg_hierarchical = false;
+    seg_generateDecomp = false;
     seg_fifoRegionGrowing = false;
 }
 
@@ -101,7 +100,8 @@ QString SegmentationPlugin::filterInfo(FilterIDType filterID) const
 {
     switch (filterID)
     {
-	case FP_SEGMENTATION	  : return tr("Segment a mesh into distinct facets using a region-growing or a hierarchical bottom-up approach.<br><br>This work was funded by the EC FP7 STREP project “PRESIOUS”, grant no. 600533.");
+	case FP_SEGMENTATION	  : return tr("Segment a mesh into distinct facets using a region-growing or a hierarchical bottom-up approach.<br><br>"
+                                          "This work was funded by the EC FP7 STREP project PRESIOUS, grant no. 600533.");
     default                   : assert(0);
     }
 
@@ -141,6 +141,10 @@ void SegmentationPlugin::initParameterSet(QAction * action, MeshModel & m, RichP
                                         seg_localNeighbAware, 
                                         "Local Neighborhood Aware", 
                                         "The decision for the inclusion of each vertex to a segment\nis based on a local neighborhood aware metric. Slower but handles curved surfaces."));
+        parlst.addParam(new RichBool  ( "GenerateDecomposition", 
+                                        seg_generateDecomp, 
+                                        "Generate Decomposition", 
+                                        "If true a new layer is generated for each segment, otherwise the original mesh is colored according to segmentation and cluster id is written into face quality."));
         parlst.addParam(new RichFloat ( "LocalNeighbDist", 
                                         seg_localNeighbDist, 
                                         "Distance in units for the local neighborhood", 
@@ -152,18 +156,12 @@ void SegmentationPlugin::initParameterSet(QAction * action, MeshModel & m, RichP
 }
 
 int SegmentationPlugin::getRequirements(QAction *action)
-{
-    switch (ID(action))
-    {
-    case FP_SEGMENTATION: return MeshModel::MM_VERTFACETOPO;
-    default: assert(0);
-    }
-    return 0;
-}
+{    return 0; }
 
 bool SegmentationPlugin::applyFilter(QAction * filter, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
     MeshModel & m = *md.mm();
+    md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
     md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
     md.mm()->visible = false;
     switch (ID(filter))
@@ -171,10 +169,11 @@ bool SegmentationPlugin::applyFilter(QAction * filter, MeshDocument & md, RichPa
     case FP_SEGMENTATION:
     {
         seg_hierarchical       = par.getBool("Hierarchical");
-        seg_fifoRegionGrowing = par.getBool("RgFIFO");
+        seg_fifoRegionGrowing  = par.getBool("RgFIFO");
         seg_eThresholdDegrees  = par.getFloat("ErrorThreshold");
         seg_areaThreshold      = par.getFloat("AreaThreshold");
         seg_localNeighbAware   = par.getBool("LocalNeighbAware");
+        seg_generateDecomp     = par.getBool("GenerateDecomposition");
         seg_localNeighbDist    = par.getFloat("LocalNeighbDist");
 
         Segmenter *segmenter;
@@ -200,18 +199,18 @@ bool SegmentationPlugin::applyFilter(QAction * filter, MeshDocument & md, RichPa
         segmenter->setWeightThreshold(degreesToError(seg_eThresholdDegrees));
         segmenter->setLnDistance(seg_localNeighbDist);
 
-        clock_t start, end;
-        start = clock();
+        clock_t start = clock();
         segmenter->createClusters();
-        end = clock();
+        clock_t end = clock();
         Log("Segmentation finished (%f sec). Number of segments %i", (float)(end - start) / (float)CLOCKS_PER_SEC, segmenter->getNumClusters());
         start = clock(); 
         segmenter->postProcessClusters(seg_areaThreshold);
         end = clock();
         Log("Post-Processing finished (%f sec). Number of segments %i", (float)(end - start) / (float)CLOCKS_PER_SEC, segmenter->getNumClusters());
 
-        Colorizer painter;
-        if (cb) { cb(100, "Creating Mesh Layers"); }
+        if( seg_generateDecomp )
+        {
+        if (cb) { cb(100, "Creating Mesh Layers"); }        
         // Now copy each cluster to a new mesh object
         for (size_t i = 0; i < segmenter->getNumClusters(); ++i) {
             char name[256];
@@ -233,13 +232,19 @@ bool SegmentationPlugin::applyFilter(QAction * filter, MeshDocument & md, RichPa
                 pm.cm.face[f_i].V(2) = &(pm.cm.vert[f_i * 3 + 2]);
             }
             tri::Clean<CMeshO>::RemoveDuplicateVertex(pm.cm);
-            tri::Allocator<CMeshO>::CompactFaceVector(pm.cm);
-            tri::Allocator<CMeshO>::CompactVertexVector(pm.cm);
+            tri::Allocator<CMeshO>::CompactEveryVector(pm.cm);
             pm.updateDataMask(MeshModel::MM_FACECOLOR);
-            Point3f rgbColor = painter.getColor(segmenter->clusterList_[i]->getId());
-            Color4b new_col = Color4b(255 * rgbColor[0], 255 * rgbColor[1], 255*rgbColor[2], 255);
-            tri::UpdateColor<CMeshO>::PerFaceConstant(pm.cm, new_col, false);  //calls the function that does the real job
+            tri::UpdateColor<CMeshO>::PerFaceConstant(pm.cm, Color4b::Scatter( segmenter->getNumClusters(),i), false);  //calls the function that does the real job
             pm.UpdateBoxAndNormals();
+        }
+        }
+        else
+        {
+          for (size_t i = 0; i < segmenter->getNumClusters(); ++i) {
+            for (size_t f_i = 0; f_i < segmenter->clusterList_[i]->faces_.size(); ++f_i){
+              segmenter->clusterList_[i]->faces_[f_i]->C()=Color4b::Scatter( segmenter->getNumClusters(),i); 
+            }
+          }
         }
     } break;
     }
