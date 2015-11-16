@@ -87,7 +87,7 @@ bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*
         cubemapFileName = parset->getString(CubeMapPathParam());
     break;
     case DP_SHOW_GRID:
-		/*QMetaObject::Connection aaa =*/ connect(gla, SIGNAL(transmitShot(QString, vcg::Shotf)), this, SLOT(setValue(QString, vcg::Shotf)));
+		/*QMetaObject::Connection aaa =*/ connect(gla, SIGNAL(transmitShot(QString, Shotm)), this, SLOT(setValue(QString, Shotm)));
 		/*QMetaObject::Connection bbb =*/ connect(this, SIGNAL(askViewerShot(QString)), gla, SLOT(sendViewerShot(QString)));
     break;
   }
@@ -340,7 +340,7 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MeshModel &m, const Box3m &bb, Sc
     glPopAttrib();
 }
 
-void  DecorateBackgroundPlugin::setValue(QString name, vcg::Shotf val) 
+void  DecorateBackgroundPlugin::setValue(QString name, Shotm val) 
 {
 	curShot=val;
 }

@@ -91,13 +91,13 @@ DecorateBackgroundPlugin()
 
 private:
   void DrawGriddedCube(MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
-  vcg::Shotf curShot;
+  Shotm curShot;
 
 signals:
   void askViewerShot(QString);
 
 public slots:
-  void  setValue(QString, vcg::Shotf val);
+  void  setValue(QString, Shotm val);
 
 };
 
