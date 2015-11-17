@@ -100,8 +100,14 @@ QString SegmentationPlugin::filterInfo(FilterIDType filterID) const
 {
     switch (filterID)
     {
-	case FP_SEGMENTATION	  : return tr("Segment a mesh into distinct facets using a region-growing or a hierarchical bottom-up approach.<br><br>"
-                                          "This work was funded by the EC FP7 STREP project PRESIOUS, grant no. 600533.");
+	case FP_SEGMENTATION	  : return tr("Segment a mesh into distinct facets using a region-growing or a hierarchical "
+                                          "bottom-up approach. The approach is tailored to distinguish the regions of a fragmented object "
+                                          "that belong to the original surface from the fractured ones using the algorithms described in:<br><br>"
+                                          "<b>A. Andreadis,  P. Mavridis and G. Papaioannou</b><br>"
+                                          "<i>\"Facet Extraction and Classification for the Reassembly of Fractured 3D Objects\"</i><br>"
+                                          "<a href=\"http://dx.doi.org/10.2312/egp.20141060\">DOI = 10.2312/egp.20141060</a> Eurographics (Posters) 2014<br>"
+                                          "<br>"
+                                          "The developement of this plugin was partially supported by the EC FP7 STREP project PRESIOUS, no. 600533.");
     default                   : assert(0);
     }
 
