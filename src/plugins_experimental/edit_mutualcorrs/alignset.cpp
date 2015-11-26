@@ -38,14 +38,14 @@ AlignSet::~AlignSet() {
 void AlignSet::initializeGL() {
 
   programs[COLOR] = createShaders("varying vec4 color; void main() { gl_Position = ftransform(); color = gl_Color; }",
-    "varying vec4 color; void main() { gl_FragColor = color; }");
+    "varying vec4 color; void main() { color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11)); gl_FragColor = color; }");
   programs[NORMALMAP] = createShaders("varying vec3 normal; void main() { normal = gl_NormalMatrix * gl_Normal;	gl_Position = ftransform(); }",
     "varying vec3 normal; void main() { "
     "vec3 color = normalize(normal); color = color * 0.5 + 0.5; gl_FragColor = vec4(color, 1.0); }");
   programs[COMBINE] = createShaders("varying vec3 normal; varying vec4 color; void main() { "
     "normal = gl_NormalMatrix * gl_Normal; gl_Position = ftransform(); color = gl_Color; }",
     "varying vec3 normal; varying vec4 color; void main() { "
-    "vec3 ncolor = normalize(normal); ncolor = ncolor * 0.5 + 0.5; "
+    "vec3 ncolor = normalize(normal); ncolor = ncolor * 0.5 + 0.5; color.rgb = dot(color.rgb, float3(0.3, 0.59, 0.11));"
     "float t = color.x*color.x; gl_FragColor = (1.0-t)*color + t*(vec4(ncolor, 1.0)); }");
   programs[SPECULAR] = createShaders("varying vec3 reflection; void main() { "
     "vec3 normal = normalize(gl_NormalMatrix * gl_Normal); vec4 position = gl_ModelViewMatrix * gl_Vertex; "
@@ -115,11 +115,15 @@ void AlignSet::resize(int max_side) {
     for (int x = 0; x < w; x++) {
       color.setRgb(im.pixel(x, y));
       unsigned char c = (unsigned char)(color.red() * 0.3f + color.green() * 0.59f + color.blue() * 0.11f);
+	  /*QRgb value = qRgb(c, c, c);
+	  im.setPixel(x, y, value);*/
+	  
       target[offset] = c;
       histo[c]++;
       offset++;
     }
   }
+  /*im.save("controllo.jpg");*/
 #ifdef RESCALE_HISTO
   int cumulative[256];
   cumulative[0] = histo[0];
@@ -288,8 +292,8 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
 
   glFinish();
   /*QImage l=fbo.toImage();
-  l.save("rendering.jpg");*/
-  fbo.release();
+  l.save("rendering.jpg");
+  fbo.release();*/
 
 }
 
