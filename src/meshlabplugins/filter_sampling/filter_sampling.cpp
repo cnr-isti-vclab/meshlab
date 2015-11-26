@@ -1070,7 +1070,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 
     tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
     qDebug("Generated %i points",int(pvec.size()));
-    tri::Build(mm->cm,pvec);
+    tri::BuildMeshFromCoordVector(mm->cm,pvec);
   }
     break;
   default : assert(0);
