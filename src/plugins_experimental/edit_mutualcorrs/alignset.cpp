@@ -236,7 +236,7 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
 
 //	err = glGetError();
 
-
+  glEnable(GL_DEPTH_TEST);
   int start = 0;
   int tot = 30000;
   if (mesh->fn>0)
@@ -265,6 +265,9 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
     case 4: break;
   }
 
+  QImage l = fbo.toImage();
+  l.save("rendering.jpg");
+
   //err = glGetError();
 
   glDisableClientState(GL_VERTEX_ARRAY);                // deactivate vertex array
@@ -291,9 +294,8 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
   GlShot< vcg::Shot<float> >::UnsetView();
 
   glFinish();
-  /*QImage l=fbo.toImage();
-  l.save("rendering.jpg");
-  fbo.release();*/
+  
+  fbo.release();
 
 }
 
