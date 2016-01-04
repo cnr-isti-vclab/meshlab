@@ -49,7 +49,7 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
   case DP_SHOW_NON_MANIF_EDGE:    return tr("Draw the non manifold edges of the current mesh");
   case DP_SHOW_NON_MANIF_VERT:    return tr("Draw the non manifold vertices of the current mesh");
   case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals");
-  case DP_SHOW_CURVATURE:           return tr("Draw per vertex/face principal curvature directions");
+  case DP_SHOW_CURVATURE:         return tr("Draw per vertex/face principal curvature directions");
   case DP_SHOW_QUOTED_BOX:        return tr("Draw quoted box");
   case DP_SHOW_LABEL:             return tr("Draw on all the vertex/edge/face a label with their index<br> Useful for debugging<br>(WARNING: do not use it on large meshes)");
   case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
@@ -230,11 +230,12 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
     } break;
     case DP_SHOW_BOX_CORNERS:
       {
-        DrawBBoxCorner(m,rm->getBool(this->BBAbsParam()));
-        this->RealTimeLog("Bounding Box",m.shortName(),"<table>"
-                          "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
-                          "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
-                          "</table>",m.cm.bbox.min[0],m.cm.bbox.min[1],m.cm.bbox.min[2],m.cm.bbox.max[0],m.cm.bbox.max[1],m.cm.bbox.max[2]);
+        bool untrasformed = rm->getBool(this->BBAbsParam());
+        DrawBBoxCorner(m, untrasformed);
+        this->RealTimeLog("Bounding Box", m.shortName(), "<table>"
+            "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+            "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+            "</table>", m.cm.bbox.min[0], m.cm.bbox.min[1], m.cm.bbox.min[2], m.cm.bbox.max[0], m.cm.bbox.max[1], m.cm.bbox.max[2]);
       }
       break;
     case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
@@ -553,7 +554,7 @@ void DecorateBasePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
 {
     glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
     glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -579,7 +580,7 @@ void DecorateBasePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
     Point3m c = b.Center();
 
     float s = 1.15f;
-  const float LabelSpacing = 30;
+    const float LabelSpacing = 30;
     chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
     glPushMatrix();
     glScalef(1,s,s);
@@ -806,17 +807,21 @@ void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glLineWidth(1.0);
     glColor(Color4b::Cyan);
     Box3f b;
+	b.Import(m.cm.bbox);
     if(absBBoxFlag) {
-            b.Import(m.cm.bbox);
-            glColor(Color4b::Cyan);
+        glColor(Color4b::Cyan);
     } else {
-            b.Import(m.cm.trBB());
-            glColor(Color4b::Green);
+        glColor(Color4b::Green);
     }
     Point3f mi=b.min;
     Point3f ma=b.max;
     Point3f d3=(b.max-b.min)/4.0;
     Point3f zz(0,0,0);
+
+	glPushMatrix();
+	if (absBBoxFlag)
+		glMultMatrix(Inverse(m.cm.Tr));
+
     glBegin(GL_LINES);
     glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],mi[2]+zz[2]);
     glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+zz[0],mi[1]+d3[1],mi[2]+zz[2]);
@@ -849,8 +854,9 @@ void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
     glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]-d3[0],ma[1]+zz[1],ma[2]+zz[2]);
     glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]-d3[1],ma[2]+zz[2]);
     glVertex3f(ma[0],ma[1],ma[2]); glVertex3f(ma[0]+zz[0],ma[1]+zz[1],ma[2]-d3[2]);
-
     glEnd();
+
+    glPopMatrix();
     glPopAttrib();
 }
 
@@ -1671,8 +1677,8 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
      switch(ID(action)){
   case DP_SHOW_BOX_CORNERS :
   {
-    parset.addParam(new RichBool(this->BBAbsParam(), true,"Abs. Pos","If true the bbox is drawn in the absolute position "
-                                 "(instead of the position transformed by the Transfrmation matrix associated to the current MeshModel"));
+    parset.addParam(new RichBool(this->BBAbsParam(), false, "Draw Untrasformed","If true the bbox is drawn in the original, untrasformed position "
+                                 "(instead of the position obtained by transforming it using the matrix associated to the current Layer)"));
   }    break;
   case DP_SHOW_TEXPARAM : {
     assert(!parset.hasParameter(TextureStyleParam()));
