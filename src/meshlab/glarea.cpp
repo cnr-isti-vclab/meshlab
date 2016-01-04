@@ -200,7 +200,7 @@ void GLArea::pasteTile()
     QString outfile;
 	makeCurrent();
     glPushAttrib(GL_ENABLE_BIT);
-    QImage tileBuffer=grabFrameBuffer(true).mirrored(false,true);
+    QImage tileBuffer=grabFrameBuffer(false).mirrored(false,true);
     if(ss.tiledSave)
     {
         outfile=QString("%1/%2_%3-%4.png")
@@ -910,7 +910,8 @@ void GLArea::saveSnapshot()
             meshSetVisibility(mm(),true);
 
             takeSnapTile=true;
-            repaint();
+			for (int tilenum = 0; tilenum < (ss.resolution*ss.resolution); tilenum++)
+				repaint();
             currSnapLayer++;
         }
 
