@@ -34,6 +34,9 @@ class FilterMeasurePlugin : public MeshLabFilterInterface
 
 public:
     bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
+
+private:
+	Matrix33m computePrincipalAxisCloud(CMeshO & m);
 };
 
 #endif

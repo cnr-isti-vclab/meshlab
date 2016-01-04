@@ -123,10 +123,10 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
             Log("         %8i polygons \n",nPolys);
             Log("         %8i large polygons (with internal faux vertexes)",nLargePolys);
 
-      if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-          this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
-          return false;
-      }
+            if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
+                this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
+                return false;
+            }
 
       //
       //   i
@@ -176,51 +176,112 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
     if(filterName == "Compute Geometric Measures")
     {
       CMeshO &m=md.mm()->cm;
-      tri::Inertia<CMeshO> I(m);
-      float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-      float Volume = I.Mass();
+	  bool watertight=false;
+	  bool pointcloud=false;
 
-      int edgeNum=0,edgeBorderNum=0,edgeNonManifNum=0;
-      tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum,edgeNonManifNum);
-      bool watertight = (edgeBorderNum==0) && (edgeNonManifNum==0);
-      if(!watertight)
-         Log("Mesh is not 'watertight', no information on volume, barycenter and inertia tensor.");
+	  // bounding box
+	  Log("Mesh Bounding Box Size %f  %f  %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
+	  Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
+	  Log("Mesh Bounding Box min %f  %f  %f", m.bbox.min[0], m.bbox.min[1], m.bbox.min[2]);
+	  Log("Mesh Bounding Box max %f  %f  %f", m.bbox.max[0], m.bbox.max[1], m.bbox.max[2]);
 
-      Log("Mesh Bounding Box Size %f %f %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
-      Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
-      if(watertight) Log("Mesh Volume  is %f", Volume);
-      Log("Mesh Surface is %f", Area);
-      Distribution<float> eDist;
-      tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m,eDist,false);
-      Log("Mesh Total Len of %i Edges is %f Avg Len %f",int(eDist.Cnt()), eDist.Sum(),eDist.Avg());
-      tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m,eDist,true);
-      Log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))",int(eDist.Cnt()), eDist.Sum(),eDist.Avg());
+	  // is pointcloud?
+	  if((m.fn == 0) && (m.vn !=0))
+		  pointcloud = true;
 
-      Point3m bc=tri::Stat<CMeshO>::ComputeShellBarycenter(m);
-      Log("Thin shell barycenter  %9.6f  %9.6f  %9.6f",bc[0],bc[1],bc[2]);
+	  if (pointcloud)
+	  {
+		  // cloud barycenter
+		  Point3m bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
+		  Log("Pointcloud (vertex) barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
 
-      if(watertight)
-      {
-        Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+		  // if there is vertex quality, also provide weighted barycenter
+		  if (tri::HasPerVertexQuality(m))
+		  {
+			  bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, true);
+			  Log("Pointcloud (vertex) barycenter, weighted by verytex quality:");
+			  Log("  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		  }
 
-        Matrix33m IT;
-        I.InertiaTensor(IT);
-        Log("Inertia Tensor is :");
-        Log("    | %9.6f  %9.6f  %9.6f |",IT[0][0],IT[0][1],IT[0][2]);
-        Log("    | %9.6f  %9.6f  %9.6f |",IT[1][0],IT[1][1],IT[1][2]);
-        Log("    | %9.6f  %9.6f  %9.6f |",IT[2][0],IT[2][1],IT[2][2]);
+		  // principal axis
+		  Matrix33m PCA;
+		  PCA = computePrincipalAxisCloud(m);
+		  Log("Principal Axes are :");
+		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+	  }
+	  else
+	  {
+		  // area
+		  float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
+		  Log("Mesh Surface is %f", Area);
 
-        Matrix33m PCA;
-        Point3m pcav;
-        I.InertiaTensorEigen(PCA,pcav);
-        Log("Principal axes are :");
-        Log("    | %9.6f  %9.6f  %9.6f |",PCA[0][0],PCA[0][1],PCA[0][2]);
-        Log("    | %9.6f  %9.6f  %9.6f |",PCA[1][0],PCA[1][1],PCA[1][2]);
-        Log("    | %9.6f  %9.6f  %9.6f |",PCA[2][0],PCA[2][1],PCA[2][2]);
+		  // edges
+		  Distribution<float> eDist;
+		  tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
+		  Log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
+		  tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
+		  Log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
 
-        Log("axis momenta are :");
-        Log("    | %9.6f  %9.6f  %9.6f |",pcav[0],pcav[1],pcav[2]);
-      }
+		  // Thin shell barycenter
+		  Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
+		  Log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+
+		  // cloud barycenter
+		  bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
+		  Log("Vertices barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+
+		  // is watertight?
+		  int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
+		  tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum, edgeNonManifNum);
+		  watertight = (edgeBorderNum == 0) && (edgeNonManifNum == 0);
+		  if (watertight)
+		  {
+			  tri::Inertia<CMeshO> I(m);
+
+			  // volume
+			  float Volume = I.Mass();
+			  Log("Mesh Volume  is %f", Volume);
+
+			  // center of mass
+			  Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+
+			  // inertia tensor
+			  Matrix33m IT;
+			  I.InertiaTensor(IT);
+			  Log("Inertia Tensor is :");
+			  Log("    | %9.6f  %9.6f  %9.6f |", IT[0][0], IT[0][1], IT[0][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", IT[1][0], IT[1][1], IT[1][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", IT[2][0], IT[2][1], IT[2][2]);
+
+			  // principal axis
+			  Matrix33m PCA;
+			  Point3m pcav;
+			  I.InertiaTensorEigen(PCA, pcav);
+			  Log("Principal axes are :");
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+
+			  Log("axis momenta are :");
+			  Log("    | %9.6f  %9.6f  %9.6f |", pcav[0], pcav[1], pcav[2]);
+
+		  }
+		  else
+		  {
+			  Log("Mesh is not 'watertight', no information on volume, barycenter and inertia tensor.");
+
+			  // principal axis
+			  Matrix33m PCA;
+			  PCA = computePrincipalAxisCloud(m);
+			  Log("Principal axes are :");
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+		  }
+
+	  }
       return true;
         }
         /************************************************************/
@@ -235,8 +296,8 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 
             Log("   Min %f Max %f",DD.Min(),DD.Max());
             Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));
-            Log("   StdDev		%f",DD.StandardDeviation());
-            Log("   Variance  %f",DD.Variance());
+            Log("   StdDev     %f",DD.StandardDeviation());
+            Log("   Variance   %f",DD.Variance());
             return true;
         }
 
@@ -284,6 +345,33 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
             return true;
         }
     return false;
+}
+
+// function to calculate prioncipal axis for pointclouds or non-watertight meshes
+Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO & m)
+{
+	Matrix33m cov;
+	Point3m bp(0, 0, 0);
+	vector<Point3m> PtVec;
+	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	if (!(*vi).IsD()) 
+	{
+		PtVec.push_back((*vi).cP());
+		bp += (*vi).cP();
+	}
+
+	bp /= m.vn;
+
+	cov.Covariance(PtVec, bp);
+
+	Matrix33m eigenvecMatrix;
+	Eigen::Matrix3d em;
+	cov.ToEigenMatrix(em);
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eig(em);
+	Eigen::Matrix3d c_vec = eig.eigenvectors();
+	eigenvecMatrix.FromEigenMatrix(c_vec);
+
+	return eigenvecMatrix;
 }
 
 
