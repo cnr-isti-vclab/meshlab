@@ -1597,6 +1597,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             MeshModel* cap= md.addNewMesh("",sectionName,true,RenderMode(GLW::DMWire));
             vcg::IntersectionPlaneMesh<CMeshO, CMeshO, CMeshO::ScalarType>(orig->cm, slicingPlane, cap->cm );
             tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
+			tri::UpdateBounding<CMeshO>::Box(cap->cm);
 
 			// the mesh has to return to its original position
 			if (m.cm.Tr != Matrix44m::Identity())
