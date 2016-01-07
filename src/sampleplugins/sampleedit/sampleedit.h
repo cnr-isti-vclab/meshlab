@@ -45,13 +45,24 @@ public:
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-		
-  void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea *gla, QPainter *p);
+	void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea *);
 
+    void drawFace(CMeshO::FacePointer fp,MeshModel &m, GLArea *gla, QPainter *p);
+	void drawVert(CMeshO::VertexPointer vp, MeshModel &m, GLArea *gla, QPainter *p);
+
+private:
     QPoint cur;
 	QFont qFont;
     bool haveToPick;
-	CMeshO::FacePointer curFacePtr;
+	int pickmode;
+	CMeshO::FacePointer   curFacePtr;
+	CMeshO::VertexPointer curVertPtr;
+	std::vector<CMeshO::FacePointer>   NewFaceSel;
+	std::vector<CMeshO::VertexPointer> NewVertSel;
+	int pIndex;
+
+signals:
+	void suspendEditToggle();
 
 };
 
