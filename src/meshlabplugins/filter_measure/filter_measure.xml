@@ -1,25 +1,36 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
   <PLUGIN pluginName="FilterMeasure" pluginAuthor="Guido Ranzuglia" pluginEmail="guido.ranzuglia@isti.cnr.it">
+  
   <FILTER filterName="Compute Topological Measures" filterFunction="computeTopoMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Compute a set of topological measures over a mesh.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   </FILTER>
+  
   <FILTER filterName="Compute Topological Measures for Quad Meshes" filterFunction="computeTopoMeasureQuad" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Compute a set of geometric measures over a mesh.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   </FILTER>
+  
   <FILTER filterName="Compute Geometric Measures" filterFunction="computeGeomMeasure" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
-    <FILTER_HELP><![CDATA[Compute a set of geometric measures over a mesh.It computes: bounding box volume and diagonal, surface area, thin shell barycenter, and an Inertia Matrix.Open the layer dialog to see the results.]]></FILTER_HELP>
+    <FILTER_HELP><![CDATA[Compute a set of geometric measures of a mesh/pointcloud. Bounding box extents and diagonal, principal axis, thin shell barycenter (mesh only), vertex barycenter and quality-weighted barycenter (pointcloud only), surface area (mesh only), volume (closed mesh) and Inertia tensor Matrix (closed mesh). Open the layer dialog to see the results.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   </FILTER>
+  
+  <FILTER filterName="Compute Area/Perimeter of selection" filterFunction="computeSelectionAreaPerimeter" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
+    <FILTER_HELP><![CDATA[Compute area and perimeter of the FACE selection. Open the layer dialog to see the results.]]></FILTER_HELP>
+    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
+  </FILTER>  
+  
   <FILTER filterName="Per Vertex Quality Stat" filterFunction="computeVertQualityStat" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   </FILTER>
+  
   <FILTER filterName="Per Face Quality Stat" filterFunction="computeFaceQualityStat" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   </FILTER>
+  
   <FILTER filterName="Per Vertex Quality Histogram" filterFunction="computeVertQualityHistogram" filterClass="Measure" filterPre="MM_VERTQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Compute an histogram of the values of the per-vertex quality. It can be useful to evaluate the distribution of the quality value over the surface. It can be discrete (e.g. based on vertex count or area weighted).]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
@@ -41,8 +52,8 @@
       <PARAM_HELP><![CDATA[The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into.]]></PARAM_HELP>
       <EDIT_GUI guiLabel="Bin number" />
     </PARAM>
-
   </FILTER>
+  
   <FILTER filterName="Per Face Quality Histogram" filterFunction="computeFaceQualityHistogram" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
   <FILTER_HELP><![CDATA[Compute an histogram of the values of the per-vertex quality.]]></FILTER_HELP>
   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
@@ -59,5 +70,6 @@
     <EDIT_GUI guiLabel="Bin number" />
   </PARAM>
   </FILTER>
+  
   </PLUGIN>
 </MESHLAB_FILTER_INTERFACE>

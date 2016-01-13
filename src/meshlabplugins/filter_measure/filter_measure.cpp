@@ -42,309 +42,363 @@ using namespace vcg;
 // Core Function doing the actual mesh processing.
 bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
 {
-    if (filterName == "Compute Topological Measures")
-        {
-            CMeshO &m=md.mm()->cm;
-            tri::Allocator<CMeshO>::CompactFaceVector(m);
-            tri::Allocator<CMeshO>::CompactVertexVector(m);
-            md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-            md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
+	if (filterName == "Compute Topological Measures")
+	{
+		CMeshO &m = md.mm()->cm;
+		tri::Allocator<CMeshO>::CompactFaceVector(m);
+		tri::Allocator<CMeshO>::CompactVertexVector(m);
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		md.mm()->updateDataMask(MeshModel::MM_VERTFACETOPO);
 
-            int edgeNonManifFFNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m,true);
-            int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
-            tri::UpdateSelection<CMeshO>::VertexClear(m);
-            tri::UpdateSelection<CMeshO>::FaceClear(m);
+		int edgeNonManifFFNum = tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m, true);
+		int faceEdgeManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+		tri::UpdateSelection<CMeshO>::VertexClear(m);
+		tri::UpdateSelection<CMeshO>::FaceClear(m);
 
-            int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m,true);
-            tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
-            int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
-            int edgeNum=0,edgeBorderNum=0,edgeNonManifNum=0;
-            tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum,edgeNonManifNum);
-            assert(edgeNonManifFFNum == edgeNonManifNum );
-            int holeNum;
-            Log("V: %6i E: %6i F:%6i",m.vn,edgeNum,m.fn);
-            int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
-            Log("Unreferenced Vertices %i",unrefVertNum);
-            Log("Boundary Edges %i",edgeBorderNum);
+		int vertManifNum = tri::Clean<CMeshO>::CountNonManifoldVertexFF(m, true);
+		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m);
+		int faceVertManif = tri::UpdateSelection<CMeshO>::FaceCount(m);
+		int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
+		tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum, edgeNonManifNum);
+		assert(edgeNonManifFFNum == edgeNonManifNum);
+		int holeNum;
+		Log("V: %6i E: %6i F:%6i", m.vn, edgeNum, m.fn);
+		int unrefVertNum = tri::Clean<CMeshO>::CountUnreferencedVertex(m);
+		Log("Unreferenced Vertices %i", unrefVertNum);
+		Log("Boundary Edges %i", edgeBorderNum);
 
-            int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
-            Log("Mesh is composed by %i connected component(s)\n",connectedComponentsNum);
+		int connectedComponentsNum = tri::Clean<CMeshO>::CountConnectedComponents(m);
+		Log("Mesh is composed by %i connected component(s)\n", connectedComponentsNum);
 
-            if(edgeNonManifFFNum==0 && vertManifNum==0){
-                Log("Mesh is two-manifold ");
-            }
+		if (edgeNonManifFFNum == 0 && vertManifNum == 0){
+			Log("Mesh is two-manifold ");
+		}
 
-            if(edgeNonManifFFNum!=0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n",edgeNonManifFFNum,faceEdgeManif);
-            if(vertManifNum!=0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n",vertManifNum,faceVertManif);
+		if (edgeNonManifFFNum != 0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n", edgeNonManifFFNum, faceEdgeManif);
+		if (vertManifNum != 0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n", vertManifNum, faceVertManif);
 
-            // For Manifold meshes compute some other stuff
-            if(vertManifNum==0 && edgeNonManifFFNum==0)
-            {
-                holeNum = tri::Clean<CMeshO>::CountHoles(m);
-                Log("Mesh has %i holes",holeNum);
+		// For Manifold meshes compute some other stuff
+		if (vertManifNum == 0 && edgeNonManifFFNum == 0)
+		{
+			holeNum = tri::Clean<CMeshO>::CountHoles(m);
+			Log("Mesh has %i holes", holeNum);
 
-                int genus = tri::Clean<CMeshO>::MeshGenus(m.vn-unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
-                Log("Genus is %i",genus);
-            }
-            else
-            {
-                Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
-                Log("Genus is undefined (non 2-manifold mesh)");
-            }
+			int genus = tri::Clean<CMeshO>::MeshGenus(m.vn - unrefVertNum, edgeNum, m.fn, holeNum, connectedComponentsNum);
+			Log("Genus is %i", genus);
+		}
+		else
+		{
+			Log("Mesh has a undefined number of holes (non 2-manifold mesh)");
+			Log("Genus is undefined (non 2-manifold mesh)");
+		}
 
-            return true;
-        }
+		return true;
+	}
 
     /************************************************************/
-    if (filterName == "Compute Topological Measures for Quad Meshes")
-        {
-            CMeshO &m=md.mm()->cm;
-            md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-            md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
+	if (filterName == "Compute Topological Measures for Quad Meshes")
+	{
+		CMeshO &m = md.mm()->cm;
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		md.mm()->updateDataMask(MeshModel::MM_FACEQUALITY);
 
-            if (! tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m)){
-                this->errorMessage = "Error: mesh has a not consistent FF adjacency";
-                return false;
-            }
-            if (! tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
+		if (!tri::Clean<CMeshO>::IsFFAdjacencyConsistent(m))
+		{
+			this->errorMessage = "Error: mesh has a not consistent FF adjacency";
+			return false;
+		}
+		if (!tri::Clean<CMeshO>::HasConsistentPerFaceFauxFlag(m)) {
 
-                this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
-                return false;
-            }
+			this->errorMessage = "QuadMesh problem: mesh has a not consistent FauxEdge tagging";
+			return false;
+		}
 
-            int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
-            int nTris = tri::Clean<CMeshO>::CountBitTris(m);
-            int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
-            int nLargePolys = tri::Clean<CMeshO>::CountBitLargePolygons(m);
-            if(nLargePolys>0) nQuads=0;
+		int nQuads = tri::Clean<CMeshO>::CountBitQuads(m);
+		int nTris = tri::Clean<CMeshO>::CountBitTris(m);
+		int nPolys = tri::Clean<CMeshO>::CountBitPolygons(m);
+		int nLargePolys = tri::Clean<CMeshO>::CountBitLargePolygons(m);
+		if (nLargePolys>0) nQuads = 0;
 
-            Log("Mesh has %8i triangles \n",nTris);
-            Log("         %8i quads \n",nQuads);
-            Log("         %8i polygons \n",nPolys);
-            Log("         %8i large polygons (with internal faux vertexes)",nLargePolys);
+		Log("Mesh has %8i triangles \n", nTris);
+		Log("         %8i quads \n", nQuads);
+		Log("         %8i polygons \n", nPolys);
+		Log("         %8i large polygons (with internal faux vertexes)", nLargePolys);
 
-            if (! tri::Clean<CMeshO>::IsBitTriQuadOnly(m)) {
-                this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
-                return false;
-            }
+		if (!tri::Clean<CMeshO>::IsBitTriQuadOnly(m))
+		{
+			this->errorMessage = "QuadMesh problem: the mesh is not TriQuadOnly";
+			return false;
+		}
 
-      //
-      //   i
-      //
-      //
-      //   i+1     i+2
-      tri::UpdateFlags<CMeshO>::FaceClearV(m);
-      Distribution<float> AngleD; // angle distribution
-      Distribution<float> RatioD; // ratio distribution
-      tri::UpdateFlags<CMeshO>::FaceClearV(m);
-      for(CMeshO::FaceIterator fi=m.face.begin();fi!=m.face.end();++fi)
-        if(!fi->IsV())
-        {
-          fi->SetV();
-          // Collect the vertices
-          Point3m qv[4];
-          bool quadFound=false;
-          for(int i=0;i<3;++i)
-          {
-            if((*fi).IsF(i) && !(*fi).IsF((i+1)%3) && !(*fi).IsF((i+2)%3) )
-            {
-              qv[0] = fi->V0(i)->P(),
-                  qv[1] = fi->FFp(i)->V2( fi->FFi(i) )->P(),
-                  qv[2] = fi->V1(i)->P(),
-                  qv[3] = fi->V2(i)->P();
-              quadFound=true;
-            }
-          }
-          assert(quadFound);
-          for(int i=0;i<4;++i)
-            AngleD.Add(fabs(90-math::ToDeg(Angle(qv[(i+0)%4] - qv[(i+1)%4], qv[(i+2)%4] - qv[(i+1)%4]))));
-          float edgeLen[4];
+		//
+		//   i
+		//
+		//
+		//   i+1     i+2
+		tri::UpdateFlags<CMeshO>::FaceClearV(m);
+		Distribution<float> AngleD; // angle distribution
+		Distribution<float> RatioD; // ratio distribution
+		tri::UpdateFlags<CMeshO>::FaceClearV(m);
+		for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
+		if (!fi->IsV())
+		{
+			fi->SetV();
+			// Collect the vertices
+			Point3m qv[4];
+			bool quadFound = false;
+			for (int i = 0; i<3; ++i)
+			{
+				if ((*fi).IsF(i) && !(*fi).IsF((i + 1) % 3) && !(*fi).IsF((i + 2) % 3))
+				{
+					qv[0] = fi->V0(i)->P(),
+						qv[1] = fi->FFp(i)->V2(fi->FFi(i))->P(),
+						qv[2] = fi->V1(i)->P(),
+						qv[3] = fi->V2(i)->P();
+					quadFound = true;
+				}
+			}
+			assert(quadFound);
+			for (int i = 0; i<4; ++i)
+				AngleD.Add(fabs(90 - math::ToDeg(Angle(qv[(i + 0) % 4] - qv[(i + 1) % 4], qv[(i + 2) % 4] - qv[(i + 1) % 4]))));
+			float edgeLen[4];
 
-          for(int i=0;i<4;++i)
-            edgeLen[i]=Distance(qv[(i+0)%4],qv[(i+1)%4]);
-          std::sort(edgeLen,edgeLen+4);
-          RatioD.Add(edgeLen[0]/edgeLen[3]);
-        }
+			for (int i = 0; i<4; ++i)
+				edgeLen[i] = Distance(qv[(i + 0) % 4], qv[(i + 1) % 4]);
+			std::sort(edgeLen, edgeLen + 4);
+			RatioD.Add(edgeLen[0] / edgeLen[3]);
+		}
 
-      Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-                          AngleD.Avg(), AngleD.Min(), AngleD.Max(),AngleD.StandardDeviation(),AngleD.Percentile(0.05),AngleD.Percentile(0.95));
+		Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
+			AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05), AngleD.Percentile(0.95));
 
-      Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
-      return true;
-        }
-        /************************************************************/
-    if(filterName == "Compute Geometric Measures")
-    {
-      CMeshO &m=md.mm()->cm;
-	  bool watertight=false;
-	  bool pointcloud=false;
+		Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
+		return true;
+	}
 
-	  // bounding box
-	  Log("Mesh Bounding Box Size %f  %f  %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
-	  Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
-	  Log("Mesh Bounding Box min %f  %f  %f", m.bbox.min[0], m.bbox.min[1], m.bbox.min[2]);
-	  Log("Mesh Bounding Box max %f  %f  %f", m.bbox.max[0], m.bbox.max[1], m.bbox.max[2]);
+	/************************************************************/
+	if (filterName == "Compute Geometric Measures")
+	{
+		CMeshO &m = md.mm()->cm;
+		bool watertight = false;
+		bool pointcloud = false;
 
-	  // is pointcloud?
-	  if((m.fn == 0) && (m.vn !=0))
-		  pointcloud = true;
+		// bounding box
+		Log("Mesh Bounding Box Size %f  %f  %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
+		Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
+		Log("Mesh Bounding Box min %f  %f  %f", m.bbox.min[0], m.bbox.min[1], m.bbox.min[2]);
+		Log("Mesh Bounding Box max %f  %f  %f", m.bbox.max[0], m.bbox.max[1], m.bbox.max[2]);
 
-	  if (pointcloud)
-	  {
-		  // cloud barycenter
-		  Point3m bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
-		  Log("Pointcloud (vertex) barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+		// is pointcloud?
+		if ((m.fn == 0) && (m.vn != 0))
+			pointcloud = true;
 
-		  // if there is vertex quality, also provide weighted barycenter
-		  if (tri::HasPerVertexQuality(m))
-		  {
-			  bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, true);
-			  Log("Pointcloud (vertex) barycenter, weighted by verytex quality:");
-			  Log("  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
-		  }
+		if (pointcloud)
+		{
+			// cloud barycenter
+			Point3m bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
+			Log("Pointcloud (vertex) barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
 
-		  // principal axis
-		  Matrix33m PCA;
-		  PCA = computePrincipalAxisCloud(m);
-		  Log("Principal Axes are :");
-		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
-		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
-		  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
-	  }
-	  else
-	  {
-		  // area
-		  float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
-		  Log("Mesh Surface is %f", Area);
+			// if there is vertex quality, also provide weighted barycenter
+			if (tri::HasPerVertexQuality(m))
+			{
+				bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, true);
+				Log("Pointcloud (vertex) barycenter, weighted by verytex quality:");
+				Log("  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+			}
 
-		  // edges
-		  Distribution<float> eDist;
-		  tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
-		  Log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
-		  tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
-		  Log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
+			// principal axis
+			Matrix33m PCA;
+			PCA = computePrincipalAxisCloud(m);
+			Log("Principal Axes are :");
+			Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+			Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+			Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+		}
+		else
+		{
+			// area
+			float Area = tri::Stat<CMeshO>::ComputeMeshArea(m);
+			Log("Mesh Surface Area is %f", Area);
 
-		  // Thin shell barycenter
-		  Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
-		  Log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+			// edges
+			Distribution<float> eDist;
+			tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, false);
+			Log("Mesh Total Len of %i Edges is %f Avg Len %f", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
+			tri::Stat<CMeshO>::ComputeFaceEdgeLengthDistribution(m, eDist, true);
+			Log("Mesh Total Len of %i Edges is %f Avg Len %f (including faux edges))", int(eDist.Cnt()), eDist.Sum(), eDist.Avg());
 
-		  // cloud barycenter
-		  bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
-		  Log("Vertices barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
+			// Thin shell barycenter
+			Point3m bc = tri::Stat<CMeshO>::ComputeShellBarycenter(m);
+			Log("Thin shell (faces) barycenter:  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
 
-		  // is watertight?
-		  int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
-		  tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum, edgeNonManifNum);
-		  watertight = (edgeBorderNum == 0) && (edgeNonManifNum == 0);
-		  if (watertight)
-		  {
-			  tri::Inertia<CMeshO> I(m);
+			// cloud barycenter
+			bc = tri::Stat<CMeshO>::ComputeCloudBarycenter(m, false);
+			Log("Vertices barycenter  %9.6f  %9.6f  %9.6f", bc[0], bc[1], bc[2]);
 
-			  // volume
-			  float Volume = I.Mass();
-			  Log("Mesh Volume  is %f", Volume);
+			// is watertight?
+			int edgeNum = 0, edgeBorderNum = 0, edgeNonManifNum = 0;
+			tri::Clean<CMeshO>::CountEdgeNum(m, edgeNum, edgeBorderNum, edgeNonManifNum);
+			watertight = (edgeBorderNum == 0) && (edgeNonManifNum == 0);
+			if (watertight)
+			{
+				tri::Inertia<CMeshO> I(m);
 
-			  // center of mass
-			  Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
+				// volume
+				float Volume = I.Mass();
+				Log("Mesh Volume  is %f", Volume);
 
-			  // inertia tensor
-			  Matrix33m IT;
-			  I.InertiaTensor(IT);
-			  Log("Inertia Tensor is :");
-			  Log("    | %9.6f  %9.6f  %9.6f |", IT[0][0], IT[0][1], IT[0][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", IT[1][0], IT[1][1], IT[1][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", IT[2][0], IT[2][1], IT[2][2]);
+				// center of mass
+				Log("Center of Mass  is %f %f %f", I.CenterOfMass()[0], I.CenterOfMass()[1], I.CenterOfMass()[2]);
 
-			  // principal axis
-			  Matrix33m PCA;
-			  Point3m pcav;
-			  I.InertiaTensorEigen(PCA, pcav);
-			  Log("Principal axes are :");
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+				// inertia tensor
+				Matrix33m IT;
+				I.InertiaTensor(IT);
+				Log("Inertia Tensor is :");
+				Log("    | %9.6f  %9.6f  %9.6f |", IT[0][0], IT[0][1], IT[0][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", IT[1][0], IT[1][1], IT[1][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", IT[2][0], IT[2][1], IT[2][2]);
 
-			  Log("axis momenta are :");
-			  Log("    | %9.6f  %9.6f  %9.6f |", pcav[0], pcav[1], pcav[2]);
+				// principal axis
+				Matrix33m PCA;
+				Point3m pcav;
+				I.InertiaTensorEigen(PCA, pcav);
+				Log("Principal axes are :");
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
 
-		  }
-		  else
-		  {
-			  Log("Mesh is not 'watertight', no information on volume, barycenter and inertia tensor.");
+				Log("axis momenta are :");
+				Log("    | %9.6f  %9.6f  %9.6f |", pcav[0], pcav[1], pcav[2]);
 
-			  // principal axis
-			  Matrix33m PCA;
-			  PCA = computePrincipalAxisCloud(m);
-			  Log("Principal axes are :");
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
-			  Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
-		  }
+			}
+			else
+			{
+				Log("Mesh is not 'watertight', no information on volume, barycenter and inertia tensor.");
 
-	  }
-      return true;
-        }
-        /************************************************************/
-    if((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat") )
-        {
-            CMeshO &m=md.mm()->cm;
-            Distribution<float> DD;
-            if(filterName == "Per Vertex Quality Stat")
-                tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
-            else
-                tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
+				// principal axis
+				Matrix33m PCA;
+				PCA = computePrincipalAxisCloud(m);
+				Log("Principal axes are :");
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[0][0], PCA[0][1], PCA[0][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[1][0], PCA[1][1], PCA[1][2]);
+				Log("    | %9.6f  %9.6f  %9.6f |", PCA[2][0], PCA[2][1], PCA[2][2]);
+			}
 
-            Log("   Min %f Max %f",DD.Min(),DD.Max());
-            Log("   Avg %f Med %f",DD.Avg(),DD.Percentile(0.5f));
-            Log("   StdDev     %f",DD.StandardDeviation());
-            Log("   Variance   %f",DD.Variance());
-            return true;
-        }
+		}
+		return true;
+	}
 
-    if((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram") )
-        {
-            CMeshO &m=md.mm()->cm;
-            tri::Allocator<CMeshO>::CompactEveryVector(m);
-            float RangeMin = env.evalFloat("HistMin");
-            float RangeMax = env.evalFloat("HistMax");
-            int binNum     = env.evalInt("binNum");
-            bool areaFlag  = env.evalBool("areaWeighted");
+	/************************************************************/
+	if (filterName == "Compute Area/Perimeter of selection")
+	{
+		CMeshO &m = md.mm()->cm;
+		if (m.sfn == 0) // no face selected, fail
+		{
+			Log("There is no face selection!");
+			return false;
+		}
 
-            Histogramf H;
-            H.SetRange(RangeMin,RangeMax,binNum);
-            if(filterName == "Per Vertex Quality Histogram")
-            {
-              vector<Scalarm> aVec(m.vn,1.0);
-              if(areaFlag)
-                tri::MeshToMatrix<CMeshO>::PerVertexArea(m,aVec);
+		Log("Selection is %i triangles", m.sfn);
 
-              for(size_t i=0;i<m.vn;++i)
-                H.Add(m.vert[i].Q(), aVec[i]);
-            }else{
-              vector<Scalarm> aVec(m.fn,1.0);
-              if(areaFlag)
-                tri::MeshToMatrix<CMeshO>::PerFaceArea(m,aVec);
+		double sArea=0;
+		for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
+		if (!(*fi).IsD())
+		if ((*fi).IsS())
+		{
+			sArea += DoubleArea(*fi) / 2.0;
+		}
+		Log("Selection Surface Area is %f", sArea);
 
-              for(size_t i=0;i<m.fn;++i)
-                H.Add(m.face[i].Q(),aVec[i]);
-            }
-            if(areaFlag)
-            {
-              Log("(         -inf..%15.7f) : %15.7f",RangeMin,H.BinCountInd(0));
-              for(int i=1;i<=binNum;++i)
-                Log("[%15.7f..%15.7f) : %15.7f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
-              Log("[%15.7f..             +inf) : %15.7f",RangeMax,H.BinCountInd(binNum+1));
-            }
-            else
-            {
-              Log("(         -inf..%15.7f) : %4.0f",RangeMin,H.BinCountInd(0));
-              for(int i=1;i<=binNum;++i)
-                Log("[%15.7f..%15.7f) : %4.0f",H.BinLowerBound(i),H.BinUpperBound(i),H.BinCountInd(i));
-              Log("[%15.7f..             +inf) : %4.0f",RangeMax,H.BinCountInd(binNum+1));
-            }
-            return true;
-        }
-    return false;
+		int ePerimeter = 0;
+		double sPerimeter = 0.0;
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
+		if (!(*fi).IsD())
+		if ((*fi).IsS())
+		{
+			for (int ei = 0; ei < 3; ei++)
+			{
+				CMeshO::FacePointer adjf = (*fi).FFp(ei);
+
+				if (adjf == &(*fi) || !(adjf->IsS()))
+				{
+					ePerimeter += 1;
+					sPerimeter += ((*fi).V(ei)->P() - (*fi).V((ei+1)%3)->P()).Norm();
+				}
+			}
+		}
+
+		Log("Selection border is %i edges", ePerimeter);
+		Log("Perimeter is %f", sPerimeter);
+
+		return true;
+	}
+
+	/************************************************************/
+	if ((filterName == "Per Vertex Quality Stat") || (filterName == "Per Face Quality Stat"))
+	{
+		CMeshO &m = md.mm()->cm;
+		Distribution<float> DD;
+		if (filterName == "Per Vertex Quality Stat")
+			tri::Stat<CMeshO>::ComputePerVertexQualityDistribution(m, DD, false);
+		else
+			tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m, DD, false);
+
+		Log("   Min %f Max %f", DD.Min(), DD.Max());
+		Log("   Avg %f Med %f", DD.Avg(), DD.Percentile(0.5f));
+		Log("   StdDev     %f", DD.StandardDeviation());
+		Log("   Variance   %f", DD.Variance());
+		return true;
+	}
+
+	/************************************************************/
+	if ((filterName == "Per Vertex Quality Histogram") || (filterName == "Per Face Quality Histogram"))
+	{
+		CMeshO &m = md.mm()->cm;
+		tri::Allocator<CMeshO>::CompactEveryVector(m);
+		float RangeMin = env.evalFloat("HistMin");
+		float RangeMax = env.evalFloat("HistMax");
+		int binNum = env.evalInt("binNum");
+		bool areaFlag = env.evalBool("areaWeighted");
+
+		Histogramf H;
+		H.SetRange(RangeMin, RangeMax, binNum);
+		if (filterName == "Per Vertex Quality Histogram")
+		{
+			vector<Scalarm> aVec(m.vn, 1.0);
+			if (areaFlag)
+				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
+
+			for (size_t i = 0; i<m.vn; ++i)
+				H.Add(m.vert[i].Q(), aVec[i]);
+		}
+		else{
+			vector<Scalarm> aVec(m.fn, 1.0);
+			if (areaFlag)
+				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
+
+			for (size_t i = 0; i<m.fn; ++i)
+				H.Add(m.face[i].Q(), aVec[i]);
+		}
+		if (areaFlag)
+		{
+			Log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
+			for (int i = 1; i <= binNum; ++i)
+				Log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+			Log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
+		}
+		else
+		{
+			Log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
+			for (int i = 1; i <= binNum; ++i)
+				Log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+			Log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
+		}
+		return true;
+	}
+
+	// should never reach this :)
+	return false;
 }
 
 // function to calculate prioncipal axis for pointclouds or non-watertight meshes
