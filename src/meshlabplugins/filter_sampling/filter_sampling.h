@@ -39,6 +39,7 @@ class FilterDocSampling : public QObject, public MeshFilterInterface
         FP_CLUSTERED_SAMPLING,
         FP_STRATIFIED_SAMPLING,
         FP_HAUSDORFF_DISTANCE,
+		FP_DISTANCE_REFERENCE,
         FP_TEXEL_SAMPLING,
         FP_VERTEX_RESAMPLING,
         FP_UNIFORM_MESH_RESAMPLING,

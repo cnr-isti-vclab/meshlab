@@ -221,6 +221,126 @@ public:
   }
 }; // end class RedetailSampler
 
+//--------------------------------------------------------------------
+// simple sampler to calculate
+// it is very similar to the hausdorff sampler, but more immediate to use
+class SimpleDistanceSampler
+{
+	typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
+	typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
+
+public:
+
+	SimpleDistanceSampler(CMeshO* _m, bool signedDist=false) :markerFunctor(_m)
+	{
+		m = _m;
+		useSigned = signedDist;
+		init();
+	}
+
+	CMeshO *m;           /// the reference mesh
+
+	MetroMeshVertexGrid   unifGridVert;
+	MetroMeshFaceGrid     unifGridFace;
+
+	bool useVertexSampling;
+	CMeshO::ScalarType dist_upper_bound;  // samples that have a distance beyond this threshold distance are not considered.
+	tri::FaceTmark<CMeshO> markerFunctor;
+
+	bool useSigned;
+
+	// distance data
+	int  n_total_samples;
+	double          min_dist;
+	double          max_dist;
+	double          mean_dist;
+	double          RMS_dist;   /// from the wikipedia defintion RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
+
+	float getMeanDist() const { return mean_dist / n_total_samples; }
+	float getMinDist() const  { return min_dist; }
+	float getMaxDist() const  { return max_dist; }
+	float getRMSDist() const  { return sqrt(RMS_dist / n_total_samples); }
+
+	void init()
+	{
+		if (m->fn == 0) // if no faces, we can only use points
+		{
+			useVertexSampling = true;
+			unifGridVert.Set(m->vert.begin(), m->vert.end());
+		}
+		else 
+		{
+			useVertexSampling = false;
+			unifGridFace.Set(m->face.begin(), m->face.end());
+			markerFunctor.SetMesh(m);
+		}
+
+		min_dist = std::numeric_limits<double>::max();
+		max_dist = std::numeric_limits<double>::min();
+		mean_dist = 0;
+		RMS_dist = 0;
+		n_total_samples = 0;
+	}
+
+	void AddVert(CMeshO::VertexType &p)
+	{
+		p.Q() = AddSample(p.cP(), p.cN());
+	}
+
+	float AddSample(const CMeshO::CoordType &startPt, const CMeshO::CoordType &startN)
+	{
+		// the results
+		CMeshO::CoordType closestPt;
+		CMeshO::CoordType closestNm;
+		CMeshO::ScalarType dist = dist_upper_bound;
+
+		// compute distance between startPt and the mesh S2
+		CMeshO::FaceType   *nearestF = 0;
+		CMeshO::VertexType *nearestV = 0;
+		vcg::face::PointDistanceBaseFunctor<CMeshO::ScalarType> PDistFunct;
+
+		if (useVertexSampling)
+		{
+			nearestV = tri::GetClosestVertex<CMeshO, MetroMeshVertexGrid>(*m, unifGridVert, startPt, std::numeric_limits<CMeshO::ScalarType>::max(), dist);
+			if (nearestV == NULL)
+			{
+				qDebug("SHOULD NEVER GET HERE - no closest vert found");
+				return 0.0;
+			}
+			closestPt = nearestV->P();
+			closestNm = nearestV->N();
+		}
+		else
+		{
+			nearestF = unifGridFace.GetClosest(PDistFunct, markerFunctor, startPt, std::numeric_limits<CMeshO::ScalarType>::max(), dist, closestPt);
+			if (nearestF == NULL)
+			{
+				qDebug("SHOULD NEVER GET HERE - no closest face found");
+				return 0.0;
+			}
+			closestNm = nearestF->N();
+		}
+
+		// check sign of distance
+		if ((useSigned) && (((startPt - closestPt).Normalize()*(closestNm)) < 0.0))
+		{
+			dist = -dist;
+		}
+
+		if (dist > max_dist) max_dist = dist;
+		if (dist < min_dist) min_dist = dist;
+
+		mean_dist += dist;	       
+		RMS_dist += dist*dist;     
+		n_total_samples++;
+
+		return dist;
+	}
+}; 
+
+//--------------------------------------------------------------------
+
+
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -235,6 +355,7 @@ FilterDocSampling::FilterDocSampling()
       << FP_CLUSTERED_SAMPLING
       << FP_POISSONDISK_SAMPLING
       << FP_HAUSDORFF_DISTANCE
+	  << FP_DISTANCE_REFERENCE
       << FP_TEXEL_SAMPLING
       << FP_VERTEX_RESAMPLING
       << FP_UNIFORM_MESH_RESAMPLING
@@ -259,6 +380,7 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
   case FP_CLUSTERED_SAMPLING :  return QString("Clustered Vertex Subsampling");
   case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
   case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance");
+  case FP_DISTANCE_REFERENCE:  return QString("Distance from Reference Mesh");
   case FP_TEXEL_SAMPLING  :  return QString("Texel Sampling");
   case FP_VERTEX_RESAMPLING  :  return QString("Vertex Attribute Transfer");
   case FP_UNIFORM_MESH_RESAMPLING  :  return QString("Uniform Mesh Resampling");
@@ -286,6 +408,7 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
                                                  "<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
                                                  " Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
   case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh.");
+  case FP_DISTANCE_REFERENCE   :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
   case FP_TEXEL_SAMPLING       :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
   case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
                                                  "For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
@@ -311,7 +434,8 @@ int FilterDocSampling::getRequirements(QAction *action)
   case FP_UNIFORM_MESH_RESAMPLING:
   case FP_REGULAR_RECURSIVE_SAMPLING:
   case FP_HAUSDORFF_DISTANCE :	return  MeshModel::MM_FACEMARK;
-  case FP_ELEMENT_SUBSAMPLING    :
+  case FP_DISTANCE_REFERENCE :
+  case FP_ELEMENT_SUBSAMPLING :
   case FP_MONTECARLO_SAMPLING :
   case FP_POISSONDISK_SAMPLING :
   case FP_POINTCLOUD_SIMPLIFICATION :
@@ -394,6 +518,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                  tr("Choose what mesh element has to be used for the subsampling. At most one point sample will be added for each one of the chosen elements")));
     parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn/10, "Number of samples", "The desired number of elements that must be chosen. Being a subsampling of the original elements if this number should not be larger than the number of elements of the original mesh."));
     break;
+
   case FP_POINTCLOUD_SIMPLIFICATION :
     parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
     parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
@@ -416,6 +541,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichBool("ExactNumFlag", false, "Exact number of samples", "If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer."));
     parlst.addParam(new RichFloat("RadiusVariance", 1, "Radius Variance", "The radius of the disk is allowed to vary between r and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"));
     break;
+
   case FP_TEXEL_SAMPLING :
     parlst.addParam(new RichInt (	"TextureW", 512, "Texture Width",
                                     "A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>"
@@ -427,31 +553,48 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichBool(	"RecoverColor", md.mm()->cm.textures.size()>0, "RecoverColor",
                                     "The generated point cloud has the current texture color"));
     break;
-  case FP_HAUSDORFF_DISTANCE :
-  {
-    MeshModel *vertexMesh= md.mm();
-    foreach (vertexMesh, md.meshList)
-      if (vertexMesh != md.mm())  break;
 
-    parlst.addParam(new RichMesh ("SampledMesh", md.mm(),&md, "Sampled Mesh",
-                                  "The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
-    parlst.addParam(new RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
-                                  "The mesh that is sampled for the comparison."));
-    parlst.addParam(new RichBool ("SaveSample", false, "Save Samples",
-                                  "Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));
-    parlst.addParam(new RichBool ("SampleVert", true, "Sample Vertexes",
-                                  "For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
-                                  "It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
-                                  "the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
-                                  "On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
-    parlst.addParam(new RichBool ("SampleEdge", true, "Sample Edges", "See the above comment."));
-    parlst.addParam(new RichBool ("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
-    parlst.addParam(new RichBool ("SampleFace", true, "Sample Faces", "See the above comment."));
-    parlst.addParam(new RichInt ("SampleNum", md.mm()->cm.vn, "Number of samples",
-                                 "The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
-    parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag()/20.0, 0.0f, md.mm()->cm.bbox.Diag(),
-                                    tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max.")));
+  case FP_HAUSDORFF_DISTANCE:
+  {
+		MeshModel *vertexMesh = md.mm();
+		foreach(vertexMesh, md.meshList)
+		if (vertexMesh != md.mm())  break;
+
+		parlst.addParam(new RichMesh("SampledMesh", md.mm(), &md, "Sampled Mesh",
+			"The mesh whose surface is sampled. For each sample we search the closest point on the Target Mesh."));
+		parlst.addParam(new RichMesh("TargetMesh", vertexMesh, &md, "Target Mesh",
+			"The mesh that is sampled for the comparison."));
+		parlst.addParam(new RichBool("SaveSample", false, "Save Samples",
+			"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));
+		parlst.addParam(new RichBool("SampleVert", true, "Sample Vertexes",
+			"For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
+			"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
+			"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
+			"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
+		parlst.addParam(new RichBool("SampleEdge", true, "Sample Edges", "See the above comment."));
+		parlst.addParam(new RichBool("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
+		parlst.addParam(new RichBool("SampleFace", true, "Sample Faces", "See the above comment."));
+		parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
+			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
+		parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
+			tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max.")));
   } break;
+
+  case FP_DISTANCE_REFERENCE:
+  {
+		MeshModel *vertexMesh = md.mm();
+		foreach(vertexMesh, md.meshList)
+		if (vertexMesh != md.mm())  break;
+
+		parlst.addParam(new RichMesh("MeasureMesh", md.mm(), &md, "Measured Mesh/PointCloud",
+			"The Mesh/Pointcloud that is measured, vertex by vertex, computing distance from the REFERENCE mesh/pointcloud."));
+		parlst.addParam(new RichMesh("RefMesh", vertexMesh, &md, "Reference Mesh/PointCloud",
+			"The Mesh/Pointcloud that is used as a reference, to measure distance from."));
+
+		parlst.addParam(new RichBool("SignedDist", true, "Cumpute Signed Distance",
+			"If TRUE, the distance is signed; if FALSE, it will compute the distance absolute value."));
+  } break;
+
   case FP_VERTEX_RESAMPLING:
   {
     MeshModel *vertexMesh= md.mm();
@@ -886,6 +1029,50 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
   }
     break;
+
+  case FP_DISTANCE_REFERENCE:
+  {
+								// DO STUFF
+	MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
+	MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
+
+	bool useSigned = par.getBool("SignedDist");
+
+	// the meshes have to return to their original position
+	// only if source different from target (if single mesh, it does not matter)
+	if (mm0 != mm1)
+	{
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, mm0->cm.Tr, true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, mm1->cm.Tr, true);
+	}
+
+	// add quality to vertex of measured mesh
+	mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
+	// if reference has faces, recompute and normalize normals
+	if (mm1->cm.fn > 0)
+	{
+		tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm1->cm);
+		tri::UpdateNormal<CMeshO>::PerVertexNormalized(mm1->cm);
+	}
+	mm1->updateDataMask(MeshModel::MM_FACEMARK);
+
+	SimpleDistanceSampler ds(&(mm1->cm), useSigned);
+
+	tri::SurfaceSampling<CMeshO, SimpleDistanceSampler>::AllVertex(mm0->cm, ds);
+
+	// the meshes have to return to their original position
+	// only if source different from target (if single mesh, it does not matter)
+	if (mm0 != mm1)
+	{
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, Inverse(mm0->cm.Tr), true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
+	}
+  } break;
+
   case	 FP_VERTEX_RESAMPLING :
   {
     MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
@@ -987,6 +1174,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
     tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
   } break;
+
   case FP_VORONOI_COLORING :
   {
     MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples
@@ -1017,7 +1205,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     MeshModel* mmV = par.getMesh("VertexMesh");
     typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
     SampleSHT sht;
-    tri::VertTmark<CMeshO> markerFunctor;
+	tri::EmptyTMark<CMeshO> markerFunctor;
     typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
     tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
     tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
@@ -1083,6 +1271,7 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
   {
   case FP_VERTEX_RESAMPLING :
   case FP_HAUSDORFF_DISTANCE :
+  case FP_DISTANCE_REFERENCE :
   case FP_ELEMENT_SUBSAMPLING    :
   case FP_MONTECARLO_SAMPLING :
   case FP_STRATIFIED_SAMPLING :
