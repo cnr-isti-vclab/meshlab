@@ -182,10 +182,10 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
       }
       break;
     case FP_SELECT_FACE_FROM_VERT:
-      parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
+      parlst.addParam(new RichBool("Inclusive", true, "Strict Selection", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
     case FP_SELECT_VERT_FROM_FACE:
-      parlst.addParam(new RichBool("Inclusive", true, "Inclusive Sel.", "If true only the vertices with <b>all</b> the incident face selected are selected. Otherwise any vertex with at least one incident selected face will be selected."));
+      parlst.addParam(new RichBool("Inclusive", true, "Strict Selection", "If true only the vertices with <b>all</b> the incident face selected are selected. Otherwise any vertex with at least one incident selected face will be selected."));
       break;
 
     case FP_SELECT_BY_VERT_QUALITY:

@@ -253,9 +253,6 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
     parlst.addParam(new RichString("condSelect","(q < 0)", "boolean function",
                                    "type a boolean function that will be evaluated in order to select a subset of vertices<br>"
                                    "example: (y > 0) and (ny > 0)"));
-
-    parlst.addParam(new RichBool("strictSelect",true,"Strict face selection", "If checked a face is selected if <b>ALL</b> its vertices are selected. <br>"
-                                 "If unchecked a face is selected if <b>at least one</b> of its vertices is selected"));
     break;
 
   case FF_FACE_SELECTION :
@@ -409,12 +406,6 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
         numvert++;
       } else (*vi).ClearS();
     }
-
-    // strict face selection
-    if(par.getBool("strictSelect"))
-      tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(m.cm);
-    else
-      tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
 
     // if succeded log stream contains number of vertices and time elapsed
     Log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
