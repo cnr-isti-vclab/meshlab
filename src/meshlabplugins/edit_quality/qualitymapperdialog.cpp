@@ -960,8 +960,13 @@ void QualityMapperDialog::moveAheadChannel( TF_CHANNELS channelCode )
 		//changing z order of TF handles
 		QGraphicsItem *item = 0;
 		for (int i=0; i<NUMBER_OF_CHANNELS; i++)
-			foreach( item, _transferFunctionHandles[i] )
-				item->setZValue( ((i + 1)*2.0f) + 1 );
+			foreach(item, _transferFunctionHandles[i])
+			{
+				if (i == channelCode)
+					item->setZValue(10.0);
+				else
+					item->setZValue(((i + 1)*2.0f) + 1);
+			}
 
 		//all done. Drawing updated TF
 		this->drawTransferFunction();
