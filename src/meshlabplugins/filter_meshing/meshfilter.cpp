@@ -209,13 +209,13 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicated Vertex");
     case FP_SELECT_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
     case FP_SELECT_FACES_BY_EDGE             : return tr("Select Faces with edges longer than...");
-    case FP_QUADRIC_SIMPLIFICATION           : return tr("Quadric Edge Collapse Decimation");
-    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Quadric Edge Collapse Decimation (with texture)");
-    case FP_CLUSTERING                       : return tr("Clustering decimation");
+	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
+    case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
     case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
     case FP_INVERT_FACES                     : return tr("Invert Faces Orientation");
-    case FP_SCALE                            : return tr("Transform: Scale");
-    case FP_CENTER                           : return tr("Transform: Move, Translate, Center");
+    case FP_SCALE                            : return tr("Transform: Scale, Normalize");
+    case FP_CENTER                           : return tr("Transform: Translate, Center");
     case FP_ROTATE                           : return tr("Transform: Rotate");
     case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
     case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
@@ -247,68 +247,68 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
     switch (filterID)
     {
-    case FP_REFINE_LS3_LOOP									 : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. "
-                                                                   "<br>See:"
-                                                                   "<i>Boye', S. Guennebaud, G. & Schlick, C.</i> <br>"
-                                                                   "<b>Least squares subdivision surfaces</b><br>"
-                                                                   "Computer Graphics Forum, 2010.<br/><br/>"
-                                                                   "Alternatives weighting schemes are based on the paper: "
-                                                                   "<i>Barthe, L. & Kobbelt, L.</i><br>"
-                                                                   "<b>Subdivision scheme tuning around extraordinary vertices</b><br>"
-                                                                   "Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
-                                                                   "The current implementation of these schemes don't handle vertices of valence > 12");
+	case FP_REFINE_LS3_LOOP                    : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. "
+                                                           "<br>See:"
+                                                           "<i>Boye', S. Guennebaud, G. & Schlick, C.</i> <br>"
+                                                           "<b>Least squares subdivision surfaces</b><br>"
+                                                           "Computer Graphics Forum, 2010.<br/><br/>"
+                                                           "Alternatives weighting schemes are based on the paper: "
+                                                           "<i>Barthe, L. & Kobbelt, L.</i><br>"
+                                                           "<b>Subdivision scheme tuning around extraordinary vertices</b><br>"
+                                                           "Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
+                                                           "The current implementation of these schemes don't handle vertices of valence > 12");
     case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant subdivision method and it works for every triangle and has rules for extraordinary vertices.<br>");
-    case FP_BUTTERFLY_SS                     : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
-    case FP_MIDPOINT                         : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
-    case FP_REFINE_CATMULL                   : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
-    case FP_REFINE_HALF_CATMULL              : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
-                                                   "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
-                                                   "(it adds only a single vertex for each triangle instead of four)."
-                                                   "<br> See: <br>"
-                                                   "<b>4-8 Subdivision</b>"
-                                                   "<br> <i>Luiz Velho, Denis Zorin </i>"
-                                                   "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
-    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
-    case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged");
-    case FP_SELECT_FACES_BY_AREA             : return tr("Remove null faces (the one with area equal to zero)");
-    case FP_SELECT_FACES_BY_EDGE             : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
-    case FP_CLUSTERING                       : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
-    case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
-    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
-    case FP_REORIENT                         : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
-                                                         "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
-                                                         "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
-                                                         "all the faces. If the surface is not orientable (e.g. it is non manifold or non orientable like a moebius "
-                                                         "strip) the filter will not build a consistent orientation simply because it is not possible. The filter can end up in a consistent orientation that can be exactly the opposite of the expected one; in that case simply invert the whole mesh orientation.");
-    case FP_INVERT_FACES                     : return tr("Invert faces orientation, flipping the normals of the mesh. <br>"
-                                                   "If requested, it tries to guess the right orientation; "
-                                                   "mainly it decide to flip all the faces if the minimum/maximum vertexes have not outward point normals for a few directions.<br>"
-                                                   "Works well for single component watertight objects.");
-    case FP_SCALE                            : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
-    case FP_CENTER                           : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
-    case FP_ROTATE                           : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
-    case FP_ROTATE_FIT                       : return tr("Generate a matrix transformation that roto traslate the mesh so that the selected set of points fit well the XY plane and passes through the origin. If some faces are selected all the vertices incidenet on the faces are sued. It reports on the log the average error of the fitting (in mesh units).");
-    case FP_PRINCIPAL_AXIS                   : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia."
-                                                   "If the mesh is watertight the Itertia tensor is computed assuming the interior of the mesh has a uniform density."
-                                                   "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
-    case FP_FLIP_AND_SWAP                    : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
-    case FP_RESET_TRANSFORM                  : return tr("Set the current transformation matrix to the Identity. ");
-    case FP_FREEZE_TRANSFORM                 : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
-    case FP_NORMAL_EXTRAPOLATION             : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
-    case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
-    case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute the principal directions of curvature with several algorithms");
-    case FP_CLOSE_HOLES                      : return tr("Close holes smaller than a given threshold");
-    case FP_CYLINDER_UNWRAP                  : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
-    case FP_QUAD_PAIRING                     : return tr("Convert into a tri-mesh into a quad mesh by pairing triangles.");
-    case FP_QUAD_DOMINANT                    : return tr("Convert into a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
-    case FP_MAKE_PURE_TRI                    : return tr("Convert into a tri-mesh by splitting any polygonal face.");
-    case FP_FAUX_CREASE                      : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.<br>"
-                                                         "Angle between face normal is considered signed according to convexity/concavity."
-                                                         "Convex angles are positive and concave are negative.");
-    case FP_VATTR_SEAM                       : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
-                                                   "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
-                                                   "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
-    case FP_SLICE_WITH_A_PLANE                       : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
+    case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
+    case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
+    case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
+    case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
+                                                           "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
+                                                           "(it adds only a single vertex for each triangle instead of four)."
+                                                           "<br> See: <br>"
+                                                           "<b>4-8 Subdivision</b>"
+                                                           "<br> <i>Luiz Velho, Denis Zorin </i>"
+                                                           "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
+    case FP_REMOVE_UNREFERENCED_VERTEX         : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
+    case FP_REMOVE_DUPLICATED_VERTEX           : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged");
+    case FP_SELECT_FACES_BY_AREA               : return tr("Remove null faces (the one with area equal to zero)");
+    case FP_SELECT_FACES_BY_EDGE               : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
+    case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
+    case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
+    case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
+    case FP_REORIENT                           : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
+                                                           "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
+                                                           "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
+                                                           "all the faces. If the surface is not orientable (e.g. it is non manifold or non orientable like a moebius "
+                                                           "strip) the filter will not build a consistent orientation simply because it is not possible. The filter can end up in a consistent orientation that can be exactly the opposite of the expected one; in that case simply invert the whole mesh orientation.");
+    case FP_INVERT_FACES                       : return tr("Invert faces orientation, flipping the normals of the mesh. <br>"
+                                                           "If requested, it tries to guess the right orientation; "
+                                                           "mainly it decide to flip all the faces if the minimum/maximum vertexes have not outward point normals for a few directions.<br>"
+                                                           "Works well for single component watertight objects.");
+    case FP_SCALE                              : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
+    case FP_CENTER                             : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
+    case FP_ROTATE                             : return tr("Generate a matrix transformation that rotates the mesh. The mesh can be rotated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
+    case FP_ROTATE_FIT                         : return tr("Generate a matrix transformation that rotates the mesh so that the selection fits one of the main planes XY YZ ZX. May also translate such that the selection centroid rest on the origin. It reports on the log the average error of the fitting (in mesh units).");
+    case FP_PRINCIPAL_AXIS                     : return tr("Generate a matrix transformation that rotates the mesh aligning it to its principal axis of inertia."
+                                                           "If the mesh is watertight the Itertia tensor is computed assuming the interior of the mesh has a uniform density."
+                                                           "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
+    case FP_FLIP_AND_SWAP                      : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
+    case FP_RESET_TRANSFORM                    : return tr("Set the current transformation matrix to the Identity. ");
+    case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
+    case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
+    case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
+    case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
+    case FP_CLOSE_HOLES                        : return tr("Close holes smaller than a given threshold");
+    case FP_CYLINDER_UNWRAP                    : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
+    case FP_QUAD_PAIRING                       : return tr("Convert into a tri-mesh into a quad mesh by pairing triangles.");
+    case FP_QUAD_DOMINANT                      : return tr("Convert into a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
+    case FP_MAKE_PURE_TRI                      : return tr("Convert into a tri-mesh by splitting any polygonal face.");
+    case FP_FAUX_CREASE                        : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.<br>"
+                                                           "Angle between face normal is considered signed according to convexity/concavity."
+                                                           "Convex angles are positive and concave are negative.");
+    case FP_VATTR_SEAM                         : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
+                                                           "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
+                                                           "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
+    case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
     case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
 
     default                                  : assert(0);
@@ -336,8 +336,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         methods.push_back("Normal Cycles");
         methods.push_back("Pseudoinverse Quadric Fitting");
         parlst.addParam(new RichEnum("Method", 3, methods, tr("Method:"), tr("Choose a method")));
-        parlst.addParam(new RichEnum("CurvatureType", 0, QStringList()<<"Mean Curvature"<<"Gaussian Curvature"<<"None", tr("Color Mapping"),
-                            QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
+        parlst.addParam(new RichEnum("CurvatureType", 0, QStringList()<<"Mean Curvature"<<"Gaussian Curvature"<<"None", tr("Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
         parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
 
         break;
@@ -415,100 +414,106 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
         parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
         break;
+
     case FP_RESET_TRANSFORM:
         parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
         break;
+
     case FP_FREEZE_TRANSFORM:
         parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
         break;
+
     case FP_INVERT_FACES:
         parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
         parlst.addParam(new RichBool ("onlySelected",false,"Flip only selected faces","If selected, only selected faces will be affected"));
         break;
-    case FP_ROTATE_FIT:
-        {
-            parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
-            parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
-        }
-        break;
-    case FP_ROTATE:
-        {
-            QStringList rotMethod;
-            rotMethod.push_back("X axis");
-            rotMethod.push_back("Y axis");
-            rotMethod.push_back("Z axis");
-            rotMethod.push_back("custom axis");
-            parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
-            QStringList rotCenter;
-            rotCenter.push_back("origin");
-            rotCenter.push_back("barycenter");
-            rotCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-            parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
-            parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
-            parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
-            parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
-            parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
 
-        }
+    case FP_ROTATE_FIT:
+		QStringList planes;
+		planes.push_back("XY plane");
+		planes.push_back("YZ plane");
+		planes.push_back("ZX plane");
+		parlst.addParam(new RichEnum("targetPlane", 0, planes, "Rotate to fit:", "Choose the plane where the selection will fit"));
+		QStringList raxis;
+		raxis.push_back("any axis");
+		raxis.push_back("X axis");
+		raxis.push_back("Y axis");
+		raxis.push_back("Z axis");
+		parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
+		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
+		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the transformation applied to this layer"));
         break;
+
+    case FP_ROTATE:
+		QStringList rotMethod;
+		rotMethod.push_back("X axis");
+		rotMethod.push_back("Y axis");
+		rotMethod.push_back("Z axis");
+		rotMethod.push_back("custom axis");
+		parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+		QStringList rotCenter;
+		rotCenter.push_back("origin");
+		rotCenter.push_back("barycenter");
+		rotCenter.push_back("custom point");
+		parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+		parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
+		parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
+        break;
+
     case FP_PRINCIPAL_AXIS:
-        {
-            parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
-            parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
-            parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
-        }
+		parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
         break;
+
     case FP_CENTER:
-        {
-            Box3m &bb=m.cm.bbox;
-            parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Absolute translation amount along the X axis"));
-            parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Absolute translation amount along the Y axis"));
-            parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Absolute translation amount along the Z axis"));
-            parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-            parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
-            parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
-        }
+		Box3m &bb=m.cm.bbox;
+		parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Amount of translation along the X axis (in model units)"));
+		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Amount of translation along the Y axis (in model units)"));
+		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Amount of translation along the Z axis (in model units)"));
+		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
         break;
 
     case FP_SCALE:
-        {
-            parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
-            parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
-            parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
-            parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
-            QStringList scaleCenter;
-            scaleCenter.push_back("origin");
-            scaleCenter.push_back("barycenter");
-            scaleCenter.push_back("custom point");
-            parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
-            parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-            parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
-            parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
-        }
-        break;
+		parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
+		parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
+		parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
+		parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
+		QStringList scaleCenter;
+		scaleCenter.push_back("origin");
+		scaleCenter.push_back("barycenter");
+		scaleCenter.push_back("custom point");
+		parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
+		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
+		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all layers", "All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
+		break;
 
     case FP_FAUX_CREASE:
-      parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease."
-                                     "If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
-        parlst.addParam(new RichFloat ("AngleDegPos", 45.0f,"Convex Angle Thr. (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
-        break;
+		parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease. If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
+		parlst.addParam(new RichFloat ("AngleDegPos", 45.0f,"Convex Angle Thr. (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
+		break;
 
     case FP_NORMAL_EXTRAPOLATION:
-        parlst.addParam(new RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
-        parlst.addParam(new RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
-        parlst.addParam(new RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
-        parlst.addParam(new RichPoint3f("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+		parlst.addParam(new RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
+		parlst.addParam(new RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
+		parlst.addParam(new RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
+		parlst.addParam(new RichPoint3f("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+		break;
 
-        break;
-
-    case FP_NORMAL_SMOOTH_POINTCLOUD:
-        parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to smooth normals."));
-        parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
-        break;
+	case FP_NORMAL_SMOOTH_POINTCLOUD:
+		parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to smooth normals."));
+		parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
+		break;
 
     case FP_VATTR_SEAM:
         {
@@ -548,24 +553,21 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
             }
         }
         break;
+
     case FP_SLICE_WITH_A_PLANE:
-        {
-            QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
-            parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
-            //	  parlst.addParam(new RichSaveFile ("filename","output.svg",QString("svg"),QString("Output File"),QString("Name of the svg files and of the folder containing them, it is automatically created in the Sample folder of the Meshlab tree")));
-            //	  parlst.addParam(new RichFloat("length",29,"Dimension on the longer axis (cm)","specify the dimension in cm of the longer axis of the current mesh, this will be the output dimension of the svg"));
-            parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
-            parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
-            // BBox min=0, BBox center=1, Origin=2
-            parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
-            parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
-        }
+		QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
+		parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
+		parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+		parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
+		parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
         break;
+
     case FP_QUAD_DOMINANT:
-        {
-            QStringList opt = QStringList() <<"Fewest triangles"<< "(in between)" <<"Better quad shape";
-            parlst.addParam(new RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
-        }
+		QStringList opt = QStringList() <<"Fewest triangles"<< "(in between)" <<"Better quad shape";
+		parlst.addParam(new RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
+		break;
+
     default:
         break;
     }
@@ -738,7 +740,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                     if(mmp->visible)
                     {
                         tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr,true);
-                        tri::UpdateBounding<CMeshO>::Box(mmp->cm);
+						tri::UpdateBounding<CMeshO>::Box(mmp->cm);
+						mmp->cm.shot.ApplyRigidTransformation(mmp->cm.Tr);
                         mmp->cm.Tr.SetIdentity();
                     }
                 }
@@ -747,6 +750,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             {
                 tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
                 tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
                 m.cm.Tr.SetIdentity();
             }
         }break;
@@ -824,148 +828,200 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
         } break;
 
     case FP_RESET_TRANSFORM :
-        {
-            bool all=par.getBool("allLayers");
-            if(all)
-            {
-                foreach(MeshModel *mmp, md.meshList)
-                {
-                    if(mmp->visible)
-                    {
-                        mmp->cm.Tr.SetIdentity();
-                    }
-                }
-            }
-            else
-            {
+	{
+		bool all=par.getBool("allLayers");
+		if(all)
+		{
+			foreach(MeshModel *mmp, md.meshList)
+				if(mmp->visible)
+					mmp->cm.Tr.SetIdentity();
+		}
+		else
+		{
                 m.cm.Tr.SetIdentity();
-            }
-        }break;
+		}
+	}break;
 
-    case FP_ROTATE_FIT:
-        {
-            if (par.getBool("ToAll"))
-            {
-                if (!par.getBool("Freeze"))
-                {
-                    errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
-                    return false;
-                }
-            }
-            Box3m selBox; //il bbox delle facce selezionate
-            std::vector< Point3m > selected_pts; //devo copiare i punti per il piano di fitting
+	case FP_ROTATE_FIT:
+	{
+		Box3m selBox; //boundingbox of the selected vertices
+		std::vector< Point3m > selected_pts; //copy of selected vertices, for plane fitting
 
-            if(m.cm.svn==0 || m.cm.sfn!=0 )
-            {
-                tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
-                tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
-            }
+		if (m.cm.svn == 0 || m.cm.sfn == 0) // if no selection, fail
+			return false;
 
-            for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-                if(!(*vi).IsD() && (*vi).IsS() ){
-                    Point3m p = (*vi).P();
-                    selBox.Add(p);
-                    selected_pts.push_back(p);
-                }
-                Log("Using %i vertexes to build a fitting  plane",int(selected_pts.size()));
-                Plane3m plane;
-                FitPlaneToPointSet(selected_pts,plane);
-                float errorSum=0;
-                for(size_t i=0;i<selected_pts.size();++i)
-                    errorSum+=fabs(SignedDistancePlanePoint(plane,selected_pts[i]));
+		if (m.cm.svn == 0 || m.cm.sfn != 0)
+		{
+			tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+		}
 
-                Log("Fitting Plane avg error is %f",errorSum/float(selected_pts.size()));
+		for (CMeshO::VertexIterator vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+			if (!(*vi).IsD() && (*vi).IsS())
+			{
+				Point3m p = (*vi).P();
+				selBox.Add(p);
+				selected_pts.push_back(p);
+			}
+		Log("Using %i vertexes to build a fitting  plane", int(selected_pts.size()));
+		Plane3m plane;
+		FitPlaneToPointSet(selected_pts, plane);
+		float errorSum = 0;
+		for (size_t i = 0; i < selected_pts.size(); ++i)
+			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
+		Log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
+		Log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
 
-                Log("New Z axis is %f %f %f",plane.Direction()[0],plane.Direction()[1],plane.Direction()[2]);
+		Matrix44m tr1; // translation matrix the centroid of selected points 
+		tr1.SetTranslate(-selBox.Center());
 
-                Matrix44m tr1; tr1.SetTranslate(-selBox.Center());
-                Point3m rotAxis=Point3m(0,0,1) ^ plane.Direction();
-                rotAxis.Normalize();
-                float angleRad = Angle(Point3m(0,0,1),plane.Direction());
-                Matrix44m rt; rt.SetRotateRad(-angleRad,rotAxis);
-                m.cm.Tr = rt*tr1;
-        }
-        if(par.getBool("Freeze")&& !par.getBool("ToAll")){
-            tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-            tri::UpdateBounding<CMeshO>::Box(m.cm);
-            m.cm.Tr.SetIdentity();
-        }
-        else if(par.getBool("ToAll")){
-            Matrix44m transf=m.cm.Tr;
-            for (int i=0; i<md.meshList.size(); i++)
-            {
-                md.meshList[i]->cm.Tr=transf;
-                tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-                md.meshList[i]->cm.Tr.SetIdentity();
-                md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-            }
-            for (int i=0; i<md.rasterList.size(); i++)
-                md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-        }
+		Point3m targetPlane;
+		Point3m rotAxis;
+		float angleRad;
+		switch (par.getEnum("targetPlane"))
+		{
+			case 0:
+				targetPlane = Point3m(0, 0, 1);
+				break;
+			case 1:
+				targetPlane = Point3m(1, 0, 0);
+				break;
+			case 2:
+				targetPlane = Point3m(0, 1, 0);
+				break;
+		}
+		rotAxis = targetPlane ^ plane.Direction();
+		angleRad = Angle(targetPlane, plane.Direction());
 
+		if(par.getEnum("rotAxis")!=0)
+		{
+			Point3m projDir;
+			switch (par.getEnum("rotAxis"))
+			{
+				case 1:
+					rotAxis = -Point3m(1, 0, 0);
+					projDir = Point3m(0.0, plane.Direction().Y(), plane.Direction().Z());
+					break;
+				case 2:
+					rotAxis = -Point3m(0, 1, 0);
+					projDir = Point3m(plane.Direction().X(), 0.0, plane.Direction().Z());
+					break;
+				case 3:
+					rotAxis = -Point3m(0, 0, 1);
+					projDir = Point3m(plane.Direction().X(), plane.Direction().Y(), 0.0);
+					break;
+			}
+			angleRad = Angle(targetPlane, projDir);
+			float angleSign = (targetPlane ^ projDir) * rotAxis;
+			if (angleSign < 0)
+				angleRad = -angleRad;
+			else if (angleSign == 0)
+				angleRad = 0;
+		}
 
+		rotAxis.Normalize();
+		Matrix44m rt; 
+		rt.SetRotateRad(-angleRad, rotAxis);
 
-        break;
+		Log("Rotation axis is [%f, %f, %f]", rotAxis.X(), rotAxis.Y(), rotAxis.Z());
+		Log("Rotation angle is %f", -angleRad);
 
-    case FP_ROTATE :
-        {
-            if (par.getBool("ToAll"))
-            {
-                if (!par.getBool("Freeze"))
-                {
-                    errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
-                    return false;
+		Matrix44m transfM;
+		if (par.getBool("ToOrigin"))
+			transfM = rt*tr1;
+		else
+			transfM = rt;
 
-                }
-            }
-            Matrix44m trRot; trRot.SetIdentity();
-            Point3m axis, tranVec;
-            Matrix44m trTran,trTranInv;
+		m.cm.Tr = transfM;
 
-            switch(par.getEnum("rotAxis"))
-            {
+		if (par.getBool("Freeze"))
+		{
+			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+			tri::UpdateBounding<CMeshO>::Box(m.cm);
+			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+			m.cm.Tr.SetIdentity();
+		}
+
+		if (par.getBool("ToAll"))
+		{
+			for (int i = 0; i < md.meshList.size(); i++)
+			{
+				if (md.meshList[i] != &m)	// if is not the current one
+				{
+					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
+					if (par.getBool("Freeze"))
+					{
+						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+						md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
+						md.meshList[i]->cm.Tr.SetIdentity();
+					}
+				}
+			}
+			for (int i = 0; i < md.rasterList.size(); i++)
+				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+		}
+	} break;
+
+	case FP_ROTATE :
+	{
+		Matrix44m trRot, trTran, trTranInv, transfM;
+		Point3m axis, tranVec;
+
+		switch(par.getEnum("rotAxis"))
+		{
             case 0: axis=Point3m(1,0,0); break;
             case 1: axis=Point3m(0,1,0);break;
             case 2: axis=Point3m(0,0,1);break;
             case 3: axis=par.getPoint3m("customAxis");break;
-            }
-            switch(par.getEnum("rotCenter"))
-            {
-            case 0: tranVec=Point3m(0,0,0); break;
-            case 1: tranVec=m.cm.bbox.Center(); break;
-            case 2: tranVec=par.getPoint3m("customCenter");break;
-            }
+		}
+		switch(par.getEnum("rotCenter"))
+		{
+			case 0: tranVec=Point3m(0,0,0); break;
+			case 1: tranVec=m.cm.trBB().Center(); break;
+			case 2: tranVec=par.getPoint3m("customCenter");break;
+		}
 
-            float angleDeg= par.getDynamicFloat("angle");
-            float snapAngle = par.getFloat("snapAngle");
-            if(par.getBool("snapFlag"))
-                angleDeg = floor(angleDeg / snapAngle)*snapAngle;
+		float angleDeg= par.getDynamicFloat("angle");
+		float snapAngle = par.getFloat("snapAngle");
+		if(par.getBool("snapFlag"))
+			angleDeg = floor(angleDeg / snapAngle)*snapAngle;
 
-            trRot.SetRotateDeg(angleDeg,axis);
-            trTran.SetTranslate(tranVec);
-            trTranInv.SetTranslate(-tranVec);
-            m.cm.Tr=trTran*trRot*trTranInv;
+		trRot.SetRotateDeg(angleDeg,axis);
+		trTran.SetTranslate(tranVec);
+		trTranInv.SetTranslate(-tranVec);
+		transfM = trTran*trRot*trTranInv;
 
-            if(par.getBool("Freeze")&& !par.getBool("ToAll")){
-                tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(m.cm);
-                m.cm.Tr.SetIdentity();
-            }
-            else if(par.getBool("ToAll")){
-                Matrix44m transf=m.cm.Tr;
-                for (int i=0; i<md.meshList.size(); i++)
-                {
-                    md.meshList[i]->cm.Tr=transf;
-                    tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
-                    tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-                    md.meshList[i]->cm.Tr.SetIdentity();
-                    md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-                }
-                for (int i=0; i<md.rasterList.size(); i++)
-                    md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-            }
-        } break;
+		m.cm.Tr = transfM * m.cm.Tr;
+
+		if (par.getBool("Freeze"))
+		{
+			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+			tri::UpdateBounding<CMeshO>::Box(m.cm);
+			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+			m.cm.Tr.SetIdentity();
+		}
+
+		if (par.getBool("ToAll"))
+		{
+			for (int i = 0; i < md.meshList.size(); i++)
+			{
+				if (md.meshList[i] != &m)	// if is not the current one
+				{
+					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
+					if (par.getBool("Freeze"))
+					{
+						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+						md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
+						md.meshList[i]->cm.Tr.SetIdentity();
+					}
+				}
+			}
+			for (int i = 0; i < md.rasterList.size(); i++)
+				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+		}
+	} break;
 
     case FP_PRINCIPAL_AXIS:
         {
@@ -1053,13 +1109,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                     tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
                     md.meshList[i]->cm.Tr.SetIdentity();
                     md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-
-
                 }
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
                     md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-
                 }
 
             }
@@ -1068,143 +1121,113 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
     case FP_CENTER:
         {
-            if (par.getBool("ToAll"))
-            {
-                if (!par.getBool("Freeze"))
-                {
-                    errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
-                    return false;
+			Matrix44m transfM;
+			Point3m translation(0.0, 0.0, 0.0);
 
-                }
-            }
-            Matrix44m trTran; trTran.SetIdentity();
+			translation.X() = par.getDynamicFloat("axisX");
+			translation.Y() = par.getDynamicFloat("axisY");
+			translation.Z() = par.getDynamicFloat("axisZ");
 
-            float xScale= par.getDynamicFloat("axisX");
-            float yScale= par.getDynamicFloat("axisY");
-            float zScale= par.getDynamicFloat("axisZ");
+			if (par.getBool("centerFlag"))
+				translation = -m.cm.trBB().Center();
 
-            trTran.SetTranslate(xScale,yScale,zScale);
-            if(par.getBool("centerFlag"))
-                trTran.SetTranslate(-m.cm.bbox.Center());
+			transfM.SetTranslate(translation.X(), translation.Y(), translation.Z());
 
-            m.cm.Tr=trTran;
-            if(par.getBool("Freeze") && !par.getBool("ToAll")){
-                tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(m.cm);
-                m.cm.Tr.SetIdentity();
-            }
-            else if (par.getBool("ToAll"))
-            {
-                Matrix44m transf=trTran;
-                for (int i=0; i<md.meshList.size(); i++)
-                {
-                    md.meshList[i]->cm.Tr=transf;
-                    tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
-                    tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-                    md.meshList[i]->cm.Tr.SetIdentity();
-                    md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+			m.cm.Tr = transfM * m.cm.Tr;
 
+			if (par.getBool("Freeze"))
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+				m.cm.Tr.SetIdentity();
+			}
 
-                }
-                for (int i=0; i<md.rasterList.size(); i++)
-                {
-                    md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-
-                }
-
-            }
+			if (par.getBool("ToAll"))
+			{
+				for (int i = 0; i < md.meshList.size(); i++)
+				{
+					if (md.meshList[i] != &m)	// if is not the current one
+					{
+						md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
+						if (par.getBool("Freeze"))
+						{
+							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+							md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
+							md.meshList[i]->cm.Tr.SetIdentity();
+						}
+					}
+				}
+				for (int i = 0; i < md.rasterList.size(); i++)
+					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+			}
 
         } break;
 
-    case FP_SCALE:
-        {
-            if (par.getBool("ToAll"))
-            {
-                if (!par.getBool("uniformFlag") || !par.getBool("Freeze"))
-                {
-                    errorMessage="Warning: the scaling is applied to all elements only when 'Uniform Scaling' and 'Freeze Matrix' checkboxes are selected. Nothing done.";
-                    return false;
+	case FP_SCALE:
+	{
 
-                }
-                else
-                {
-                    Matrix44m trScale; trScale.SetIdentity();
-                    Point3m tranVec;
-                    Matrix44m trTran,trTranInv;
+		Matrix44m transfM, scaleTran, trTran, trTranInv;
+		Point3m tranVec;
+		
+		float xScale = par.getFloat("axisX");
+		float yScale = par.getFloat("axisY");
+		float zScale = par.getFloat("axisZ");
 
-                    float xScale= par.getFloat("axisX");
-                    trScale.SetScale(xScale,xScale,xScale);
+		if (par.getBool("uniformFlag"))
+			scaleTran.SetScale(xScale, xScale, xScale);
+		else
+			scaleTran.SetScale(xScale, yScale, zScale);
 
-                    if(par.getBool("unitFlag"))
-                    {
-                        float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
-                        trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
-                    }
-                    switch(par.getEnum("scaleCenter"))
-                    {
-                    case 0: tranVec=Point3m(0,0,0); break;
-                    case 1: tranVec=m.cm.bbox.Center(); break;
-                    case 2: tranVec=par.getPoint3m("customCenter");break;
-                    }
+		if (par.getBool("unitFlag"))
+		{
+			float maxSide = max(m.cm.bbox.DimX(), max(m.cm.bbox.DimY(), m.cm.bbox.DimZ()));
+			scaleTran.SetScale(1.0 / maxSide, 1.0 / maxSide, 1.0 / maxSide);
+		}
 
-                    trTran.SetTranslate(tranVec);
-                    trTranInv.SetTranslate(-tranVec);
-                    for (int i=0; i<md.meshList.size(); i++)
-                    {
-                        md.meshList[i]->cm.Tr=trTran*trScale*trTranInv;
-                        tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-                        m.UpdateBoxAndNormals();
-                        md.meshList[i]->cm.Tr.SetIdentity();
-                        md.meshList[i]->cm.shot.ApplyRigidTransformation(trTran);
-                        md.meshList[i]->cm.shot.RescalingWorld(trScale[0][0], false);
-                        md.meshList[i]->cm.shot.ApplyRigidTransformation(trTranInv);
+		switch (par.getEnum("scaleCenter"))
+		{
+			case 0: tranVec = Point3m(0, 0, 0); break;
+			case 1: tranVec = m.cm.trBB().Center(); break;
+			case 2: tranVec = par.getPoint3m("customCenter"); break;
+		}
+		trTran.SetTranslate(tranVec);
+		trTranInv.SetTranslate(-tranVec);
 
-                    }
-                    for (int i=0; i<md.rasterList.size(); i++)
-                    {
-                        md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
-                        md.rasterList[i]->shot.RescalingWorld(trScale[0][0], false);
-                        md.rasterList[i]->shot.ApplyRigidTransformation(trTranInv);
-                    }
-                }
-            }
-            else
-            {
-                Matrix44m trScale; trScale.SetIdentity();
-                Point3m tranVec;
-                Matrix44m trTran,trTranInv;
+		transfM = trTran*scaleTran*trTranInv;
 
-                float xScale= par.getFloat("axisX");
-                float yScale= par.getFloat("axisY");
-                float zScale= par.getFloat("axisZ");
-                if(par.getBool("uniformFlag"))
-                    trScale.SetScale(xScale,xScale,xScale);
-                else
-                    trScale.SetScale(xScale,yScale,zScale);
-                if(par.getBool("unitFlag"))
-                {
-                    float maxSide= max(m.cm.bbox.DimX(),max(m.cm.bbox.DimY(),m.cm.bbox.DimZ()));
-                    trScale.SetScale(1.0/maxSide,1.0/maxSide,1.0/maxSide);
-                }
-                switch(par.getEnum("scaleCenter"))
-                {
-                case 0: tranVec=Point3m(0,0,0); break;
-                case 1: tranVec=m.cm.bbox.Center(); break;
-                case 2: tranVec=par.getPoint3m("customCenter");break;
-                }
+		m.cm.Tr = transfM * m.cm.Tr;
 
-                trTran.SetTranslate(tranVec);
-                trTranInv.SetTranslate(-tranVec);
+		if (par.getBool("Freeze"))
+		{
+			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+			tri::UpdateBounding<CMeshO>::Box(m.cm);
+			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+			m.cm.Tr.SetIdentity();
+		}
 
-                m.cm.Tr=trTran*trScale*trTranInv;
-                if(par.getBool("Freeze")){
-                    tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                    tri::UpdateBounding<CMeshO>::Box(m.cm);
-                    m.cm.Tr.SetIdentity();
-                }
-            }
+		if (par.getBool("ToAll"))
+		{
+			for (int i = 0; i < md.meshList.size(); i++)
+			{
+				if (md.meshList[i] != &m)	// if is not the current one
+				{
+					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
+					if (par.getBool("Freeze"))
+					{
+						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+						md.meshList[i]->cm.shot.ApplyRigidTransformation(transfM);
+						md.meshList[i]->cm.Tr.SetIdentity();
+					}
+				}
+			}
+			for (int i = 0; i < md.rasterList.size(); i++)
+				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+		}
 
-        } break;
+	} break;
 
     case FP_FLIP_AND_SWAP:
         {
@@ -1230,6 +1253,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             if(par.getBool("Freeze")){
                 tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
                 tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
                 m.cm.Tr.SetIdentity();
             }
         } break;
