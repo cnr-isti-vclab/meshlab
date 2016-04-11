@@ -429,6 +429,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
 
     case FP_ROTATE_FIT:
+	{
 		QStringList planes;
 		planes.push_back("XY plane");
 		planes.push_back("YZ plane");
@@ -443,9 +444,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
 		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
 		parlst.addParam(new RichBool("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the transformation applied to this layer"));
-        break;
+	} break;
 
     case FP_ROTATE:
+	{
 		QStringList rotMethod;
 		rotMethod.push_back("X axis");
 		rotMethod.push_back("Y axis");
@@ -464,7 +466,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
 		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
-        break;
+	} break;
 
     case FP_PRINCIPAL_AXIS:
 		parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
@@ -473,6 +475,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
 
     case FP_CENTER:
+	{
 		Box3m &bb=m.cm.bbox;
 		parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Amount of translation along the X axis (in model units)"));
 		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Amount of translation along the Y axis (in model units)"));
@@ -480,9 +483,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
 		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
-        break;
+	} break;
 
     case FP_SCALE:
+	{
 		parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
 		parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
 		parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
@@ -496,7 +500,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
 		parlst.addParam(new RichBool("ToAll", false, "Apply to all layers", "All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
-		break;
+	} break;
 
     case FP_FAUX_CREASE:
 		parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease. If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
@@ -554,19 +558,21 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         }
         break;
 
-    case FP_SLICE_WITH_A_PLANE:
+	case FP_SLICE_WITH_A_PLANE:
+	{
 		QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
 		parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
 		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
 		parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
 		parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
 		parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
-        break;
+	} break;
 
-    case FP_QUAD_DOMINANT:
+	case FP_QUAD_DOMINANT:
+	{
 		QStringList opt = QStringList() <<"Fewest triangles"<< "(in between)" <<"Better quad shape";
 		parlst.addParam(new RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
-		break;
+	} break;
 
     default:
         break;
@@ -847,8 +853,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		Box3m selBox; //boundingbox of the selected vertices
 		std::vector< Point3m > selected_pts; //copy of selected vertices, for plane fitting
 
-		if (m.cm.svn == 0 || m.cm.sfn == 0) // if no selection, fail
+		if (m.cm.svn == 0 && m.cm.sfn == 0) // if no selection, fail
+		{
+			errorMessage = "No selection";
 			return false;
+		}
 
 		if (m.cm.svn == 0 || m.cm.sfn != 0)
 		{
