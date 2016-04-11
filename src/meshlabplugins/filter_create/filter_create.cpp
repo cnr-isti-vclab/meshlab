@@ -37,7 +37,8 @@ FilterCreate::FilterCreate()
 {
     typeList << CR_BOX<< CR_ANNULUS << CR_SPHERE<< CR_SPHERE_CAP
              << CR_RANDOM_SPHERE<< CR_ICOSAHEDRON<< CR_DODECAHEDRON
-             << CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS;
+             << CR_TETRAHEDRON<<CR_OCTAHEDRON<<CR_CONE<<CR_TORUS
+			 << CR_FITPLANE;
 
   foreach(FilterIDType tt , types())
       actionList << new QAction(filterName(tt), this);
@@ -57,6 +58,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
   case CR_TETRAHEDRON: return QString("Tetrahedron");
   case CR_CONE: return QString("Cone");
   case CR_TORUS: return QString("Torus");
+  case CR_FITPLANE: return QString("Fit a plane to selection");
   default : assert(0);
   }
 }
@@ -77,6 +79,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
   case CR_TETRAHEDRON: return QString("Create a Tetrahedron");
   case CR_CONE: return QString("Create a Cone");
   case CR_TORUS: return QString("Create a Torus");
+  case CR_FITPLANE: return QString("Create a quad on the plane fitting the selection");
   default : assert(0);
   }
 }
@@ -131,12 +134,26 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
     parlst.addParam(new RichFloat("h",3,"Height","Height of the Cone"));
     parlst.addParam(new RichInt("subdiv",36,"Side","Number of sides of the polygonal approximation of the cone"));
     break;
+
   case CR_TORUS:
     parlst.addParam(new RichFloat("hRadius",3,"Horizontal Radius","Radius of the whole horizontal ring of the torus"));
     parlst.addParam(new RichFloat("vRadius",1,"Vertical Radius","Radius of the vertical section of the ring"));
     parlst.addParam(new RichInt("hSubdiv",24,"Horizontal Subdivision","Subdivision step of the ring"));
     parlst.addParam(new RichInt("vSubdiv",12,"Vertical Subdivision","Number of sides of the polygonal approximation of the torus section"));
     break;
+
+  case CR_FITPLANE:
+	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "Howe large is the plane, with respect to the size of the selction: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
+	  parlst.addParam(new RichInt("subdiv", 5, "Plane XY subivisions", "Subdivision steps of plane borders"));
+	  parlst.addParam(new RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
+	  parlst.addParam(new RichEnum("orientation", 1,
+		  QStringList() << "quasi-Straight Fit" << "Best Fit",
+		  tr("Plane orientation"),
+		  tr("Orientation:"
+		  "<b>quasi-Straight Fit</b>: The fitting plane wil be placed (as much as possible) straight with the axis. Works better if the selected area is already almost straight<br>"
+		  "<b>Best Fit</b>: The fitting plane wil be placed and sized trying to best fit to the selected area.<br>"
+		  )));
+	  break;
   default : return;
   }
 }
@@ -144,166 +161,362 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 // The Real Core Function doing the actual mesh processing.
 bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
 {
-    MeshModel* m=md.addNewMesh("",this->filterName(ID(filter)));
-  switch(ID(filter))	 {
-    case CR_TETRAHEDRON :
-      tri::Tetrahedron<CMeshO>(m->cm);
-      break;
+	MeshModel & currM = *md.mm();
+	MeshModel* m;
+
+	switch(ID(filter))	 
+	{
+	case CR_TETRAHEDRON :
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Tetrahedron<CMeshO>(m->cm);
+		break;
     case CR_ICOSAHEDRON:
-      tri::Icosahedron<CMeshO>(m->cm);
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Icosahedron<CMeshO>(m->cm);
+		break;
+	case CR_DODECAHEDRON:
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Dodecahedron<CMeshO>(m->cm);
+		m->updateDataMask(MeshModel::MM_POLYGONAL);
+		break;
+	case CR_OCTAHEDRON:
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Octahedron<CMeshO>(m->cm);
+		break;
+	case CR_ANNULUS:
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"), par.getFloat("externalRadius"), par.getInt("sides"));
       break;
-    case CR_DODECAHEDRON:
-      tri::Dodecahedron<CMeshO>(m->cm);
-      m->updateDataMask(MeshModel::MM_POLYGONAL);
-      break;
-    case CR_OCTAHEDRON:
-      tri::Octahedron<CMeshO>(m->cm);
-      break;
-    case CR_ANNULUS:
-      tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"),
-                                par.getFloat("externalRadius"),par.getInt("sides"));
-      break;
-    case CR_TORUS:
+
+	case CR_TORUS:
     {
-      float hRadius=par.getFloat("hRadius");
-      float vRadius=par.getFloat("vRadius");
-      int hSubdiv=par.getInt("hSubdiv");
-      int vSubdiv=par.getInt("vSubdiv");
-      tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
-        break;
-    }
-  case CR_RANDOM_SPHERE:
-  {
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		float hRadius=par.getFloat("hRadius");
+		float vRadius=par.getFloat("vRadius");
+		int hSubdiv=par.getInt("hSubdiv");
+		int vSubdiv=par.getInt("vSubdiv");
+		tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
+	} break;
 
-    int pointNum = par.getInt("pointNum");
-    int sphereGenTech = par.getEnum("sphereGenTech");
-    math::MarsenneTwisterRNG rng;
-    m->cm.Clear();
-    std::vector<Point3m> sampleVec;
+	case CR_FITPLANE:
+	{
+		Box3m selBox; //boundingbox of the selected vertices
+		std::vector< Point3m > selected_pts; //copy of selected vertices, for plane fitting
+
+		if (&currM == NULL)
+		{
+			errorMessage = "No mesh layer selected"; 
+			return false;
+		}
+
+		if (currM.cm.svn == 0 && currM.cm.sfn == 0) // if no selection, fail
+		{
+			errorMessage = "No selection";
+			return false;
+		}
+
+		m = md.addNewMesh("", "Fitted Plane");
+
+		if (currM.cm.svn == 0 || currM.cm.sfn != 0)
+		{
+			tri::UpdateSelection<CMeshO>::VertexClear(currM.cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currM.cm);
+		}
+
+		Point3m Naccum = Point3m(0.0, 0.0, 0.0);
+		for (CMeshO::VertexIterator vi = currM.cm.vert.begin(); vi != currM.cm.vert.end(); ++vi)
+		if (!(*vi).IsD() && (*vi).IsS())
+		{
+			Point3m p = (*vi).P();
+			selBox.Add(p);
+			selected_pts.push_back(p);
+			Naccum = Naccum + (*vi).N();
+		}
+		Log("Using %i vertexes to build a fitting  plane", int(selected_pts.size()));
+		Plane3m plane;
+		FitPlaneToPointSet(selected_pts, plane);
+		plane.Normalize();
+		// check if normal of the interpolated plane is coherent with average normal of the used points, otherwise, flip
+		// i do this because plane fitter does not take in account source noramls, and a fliped fit is terrible to see
+		Naccum = (Naccum / (CMeshO::ScalarType)selected_pts.size()).Normalize();
+		if ((plane.Direction() * Naccum) < 0.0)
+			plane.Set(-plane.Direction(), -plane.Offset());
+
+		float errorSum = 0;
+		for (size_t i = 0; i < selected_pts.size(); ++i)
+			errorSum += fabs(SignedDistancePlanePoint(plane, selected_pts[i]));
+		Log("Fitting Plane avg error is %f", errorSum / float(selected_pts.size()));
+		Log("Fitting Plane normal is [%f, %f, %f]", plane.Direction().X(), plane.Direction().Y(), plane.Direction().Z());
+		Log("Fitting Plane offset is %f", plane.Offset());
+
+		// find center of selection on plane
+		Point3m centerP;
+		for (size_t i = 0; i < selected_pts.size(); ++i)
+		{
+			centerP += plane.Projection(selected_pts[i]);
+		}
+		centerP /= selected_pts.size();
+		Log("center [%f, %f, %f]", centerP.X(), centerP.Y(), centerP.Z());
+
+		// find horizontal and vertical axis
+		Point3m dirH, dirV;
+
+		int orientation = par.getEnum("orientation");
+
+		if (orientation == 0)
+		{
+			if ((plane.Direction().X() <= plane.Direction().Y()) && (plane.Direction().X() <= plane.Direction().Z()))
+			dirH = Point3m(1.0, 0.0, 0.0) ^ plane.Direction();
+			else if ((plane.Direction().Y() <= plane.Direction().X()) && (plane.Direction().Y() <= plane.Direction().Z()))
+				dirH = Point3m(0.0, 1.0, 0.0) ^ plane.Direction();
+			else
+				dirH = Point3m(0.0, 0.0, 1.0) ^ plane.Direction();
+
+			dirH.Normalize();
+			dirV = dirH ^ plane.Direction();
+			dirV.Normalize();
+		}
+		else
+		{
+			Matrix33m cov;
+			vector<Point3m> PtVec;
+			for (size_t i = 0; i < selected_pts.size(); ++i)
+				PtVec.push_back(plane.Projection(selected_pts[i]));
+
+			cov.Covariance(PtVec, centerP);
+			Matrix33f eigenvecMatrix;
+			Point3f eigenvecVector;
+			Eigen::Matrix3d em;
+			cov.ToEigenMatrix(em);
+			Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eig(em);
+			Eigen::Vector3d c_val = eig.eigenvalues();
+			Eigen::Matrix3d c_vec = eig.eigenvectors();
+
+			eigenvecMatrix.FromEigenMatrix(c_vec);
+			eigenvecVector.FromEigenVector(c_val);
+
+			// max eigenvector is best horizontal axis, but is not guarantee is orthogonal to plane normal, so
+			// I use eigenvector ^ plane direction and assign it to vertical plane axis
+			if ((eigenvecVector[0]<=eigenvecVector[1]) && (eigenvecVector[0]<=eigenvecVector[2]))
+				dirV = Point3m(eigenvecMatrix[0][0], eigenvecMatrix[0][1], eigenvecMatrix[0][2]) ^ plane.Direction();
+			if ((eigenvecVector[1]<=eigenvecVector[0]) && (eigenvecVector[1]<=eigenvecVector[2]))
+				dirV = Point3m(eigenvecMatrix[1][0], eigenvecMatrix[1][1], eigenvecMatrix[1][2]) ^ plane.Direction();
+			else
+				dirV = Point3m(eigenvecMatrix[2][0], eigenvecMatrix[2][1], eigenvecMatrix[2][2]) ^ plane.Direction();
+
+			dirV.Normalize();
+			dirH = plane.Direction() ^ dirV;
+			dirH.Normalize();
+		}
+
+		Log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
+		Log("V [%f, %f, %f]", dirV.X(), dirV.Y(), dirV.Z());
 
 
-    switch(sphereGenTech)
+		// find extent
+		float dimH = -1000000;
+		float dimV = -1000000;
+		for (size_t i = 0; i < selected_pts.size(); ++i)
+		{
+			Point3m pp = plane.Projection(selected_pts[i]);
+			float distH = fabs(((pp - centerP) * dirH));
+			float distV = fabs(((pp - centerP) * dirV));
+
+			if (distH > dimH)
+				dimH = distH;
+			if (distV > dimV)
+				dimV = distV;
+		}
+		float exScale = par.getFloat("extent");
+		dimV = dimV * exScale;
+		dimH = dimH * exScale;
+		Log("extent on plane [%f, %f]", dimV, dimH);
+
+		int vertNum = par.getInt("subdiv") + 1;
+		if (vertNum <= 1) vertNum = 2;
+		int numV, numH;
+		numV = numH = vertNum;
+
+		// UV vector, just in case
+		float *UUs, *VVs;
+		UUs = new float[numH*numV];
+		VVs = new float[numH*numV];
+
+		int vind = 0;
+		for (int ir = 0; ir < numV; ir++)
+		for (int ic = 0; ic < numH; ic++)
+			{
+				Point3m newP = (centerP + (dirV * -dimV) + (dirH * -dimH)); 
+				newP = newP + (dirH * ic * (2.0 * dimH / (numH-1))) + (dirV * ir * (2.0 * dimV / (numV-1)));
+				tri::Allocator<CMeshO>::AddVertex(m->cm, newP, plane.Direction());
+				UUs[vind] = ic * (1.0 / (numH - 1));
+				VVs[vind] = ir * (1.0 / (numV - 1));
+				vind++;
+			}
+		
+		FaceGrid(m->cm, numH, numV);
+
+		bool hasUV = par.getBool("hasuv");
+		if (hasUV)
+		{
+			m->updateDataMask(MeshModel::MM_WEDGTEXCOORD);
+
+			CMeshO::FaceIterator fi;
+			for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi)
+			{
+				for (int i = 0; i<3; ++i)
+				{
+					int vind = (*fi).V(i)->Index();
+					(*fi).WT(i).U() = UUs[vind];
+					(*fi).WT(i).V() = VVs[vind];
+				}
+			}
+		}
+		delete[] UUs;	// delete temporary UV storage
+		delete[] VVs;
+
+	} break;
+
+	case CR_RANDOM_SPHERE:
+	{
+		int pointNum = par.getInt("pointNum");
+		int sphereGenTech = par.getEnum("sphereGenTech");
+		math::MarsenneTwisterRNG rng;
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		m->cm.Clear();
+		std::vector<Point3m> sampleVec;
+
+
+		switch(sphereGenTech)
+		{
+			case 0: // Montecarlo
+			{
+				for(int i=0;i<pointNum;++i)
+					sampleVec.push_back(math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng));
+			} break;
+			case 1: // Poisson Disk
+			{
+				int oversamplingFactor =100;
+				if(pointNum <= 100) oversamplingFactor = 1000;
+				if(pointNum >= 10000) oversamplingFactor = 50;
+				if(pointNum >= 100000) oversamplingFactor = 20;
+				CMeshO tt;
+				tri::Allocator<CMeshO>::AddVertices(tt,pointNum*oversamplingFactor);
+				for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
+					vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
+				tri::UpdateBounding<CMeshO>::Box(tt);
+
+				const float SphereArea = 4*M_PI;
+				float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
+
+				std::vector<Point3m> sampleVec;
+				tri::TrivialSampler<CMeshO> pdSampler(sampleVec);
+				tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
+				tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
+			} break;
+			case 2: // Disco Ball
+				GenNormal<CMeshO::ScalarType>::DiscoBall(pointNum,sampleVec);
+				break;
+			case 3: // Recursive Oct
+				GenNormal<CMeshO::ScalarType>::RecursiveOctahedron(pointNum,sampleVec);
+				break;
+			case 4: // Fibonacci
+				GenNormal<CMeshO::ScalarType>::Fibonacci(pointNum,sampleVec);
+				break;
+		}
+		for(size_t i=0;i<sampleVec.size();++i)
+			tri::Allocator<CMeshO>::AddVertex(m->cm,sampleVec[i],sampleVec[i]);
+	} break;
+
+	case CR_SPHERE_CAP:
+	{
+		int rec = par.getInt("subdiv");
+		const float angleDeg = par.getFloat("angle");
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
+		tri::SphericalCap(m->cm,math::ToRad(angleDeg),rec);
+	} break;
+
+	case CR_SPHERE:
     {
-    case 0: // Montecarlo
-    {
-      for(int i=0;i<pointNum;++i)
-        sampleVec.push_back(math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng));
-    } break;
-    case 1: // Poisson Disk
-    {
-      int oversamplingFactor =100;
-      if(pointNum <= 100) oversamplingFactor = 1000;
-      if(pointNum >= 10000) oversamplingFactor = 50;
-      if(pointNum >= 100000) oversamplingFactor = 20;
-      CMeshO tt;
-      tri::Allocator<CMeshO>::AddVertices(tt,pointNum*oversamplingFactor);
-      for(CMeshO::VertexIterator vi=tt.vert.begin();vi!=tt.vert.end();++vi)
-        vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
-      tri::UpdateBounding<CMeshO>::Box(tt);
+		int rec = par.getInt("subdiv");
+		float radius = par.getFloat("radius");
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		m->cm.face.EnableFFAdjacency();
+		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		assert(tri::HasPerVertexTexCoord(m->cm) == false);
+		tri::Sphere<CMeshO>(m->cm,rec);
+		tri::UpdatePosition<CMeshO>::Scale(m->cm,radius);
+	} break;
 
-      const float SphereArea = 4*M_PI;
-      float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
-
-      std::vector<Point3m> sampleVec;
-      tri::TrivialSampler<CMeshO> pdSampler(sampleVec);
-      tri::SurfaceSampling<CMeshO, tri::TrivialSampler<CMeshO> >::PoissonDiskParam pp;
-      tri::SurfaceSampling<CMeshO,tri::TrivialSampler<CMeshO> >::PoissonDiskPruning(pdSampler, tt, poissonRadius, pp);
-    } break;
-    case 2: // Disco Ball
-      GenNormal<CMeshO::ScalarType>::DiscoBall(pointNum,sampleVec);
-      break;
-    case 3: // Recursive Oct
-      GenNormal<CMeshO::ScalarType>::RecursiveOctahedron(pointNum,sampleVec);
-      break;
-    case 4: // Fibonacci
-       GenNormal<CMeshO::ScalarType>::Fibonacci(pointNum,sampleVec);
-    break;
-    }
-    for(size_t i=0;i<sampleVec.size();++i)
-      tri::Allocator<CMeshO>::AddVertex(m->cm,sampleVec[i],sampleVec[i]);
-
-  } break;
-
-  case CR_SPHERE_CAP:
-  {
-    int rec = par.getInt("subdiv");
-    const float angleDeg = par.getFloat("angle");
-    m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    tri::UpdateTopology<CMeshO>::FaceFace(m->cm);
-    tri::SphericalCap(m->cm,math::ToRad(angleDeg),rec);
-  } break;
-
-  case CR_SPHERE:
-    {
-        int rec = par.getInt("subdiv");
-        float radius = par.getFloat("radius");
-        m->cm.face.EnableFFAdjacency();
-        m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-        assert(tri::HasPerVertexTexCoord(m->cm) == false);
-        tri::Sphere<CMeshO>(m->cm,rec);
-        tri::UpdatePosition<CMeshO>::Scale(m->cm,radius);
-        break;
-    }
     case CR_BOX:
     {
       float sz=par.getFloat("size");
       Box3m b(Point3m(1,1,1)*(-sz/2),Point3m(1,1,1)*(sz/2));
+	  m = md.addNewMesh("", this->filterName(ID(filter)));
       tri::Box<CMeshO>(m->cm,b);
             m->updateDataMask(MeshModel::MM_POLYGONAL);
+	} break;
 
-      break;
-    }
-    case CR_CONE:
-      float r0=par.getFloat("r0");
-      float r1=par.getFloat("r1");
-      float h=par.getFloat("h");
-      int subdiv=par.getInt("subdiv");
-      tri::Cone<CMeshO>(m->cm,r0,r1,h,subdiv);
-      break;
-   }
-     tri::UpdateBounding<CMeshO>::Box(m->cm);
-   tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
+	case CR_CONE:
+	{
+		float r0 = par.getFloat("r0");
+		float r1 = par.getFloat("r1");
+		float h = par.getFloat("h");
+		int subdiv = par.getInt("subdiv");
+		m = md.addNewMesh("", this->filterName(ID(filter)));
+		tri::Cone<CMeshO>(m->cm, r0, r1, h, subdiv);
+	} break;
+
+	}//CASE FILTER
+
+	tri::UpdateBounding<CMeshO>::Box(m->cm);
+	tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m->cm);
     return true;
 }
 
  MeshFilterInterface::FilterClass FilterCreate::getClass(QAction *a)
 {
-  switch(ID(a))
-  {
-    case CR_BOX:
-    case CR_TETRAHEDRON:
-    case CR_ICOSAHEDRON:
-    case CR_DODECAHEDRON:
-    case CR_SPHERE:
-    case CR_SPHERE_CAP:
-    case CR_ANNULUS:
-    case CR_RANDOM_SPHERE:
-    case CR_OCTAHEDRON:
-    case CR_CONE:
-    case CR_TORUS:
-      return MeshFilterInterface::MeshCreation;
-      break;
-    default: assert(0);
-              return MeshFilterInterface::Generic;
+	switch(ID(a))
+	{
+		case CR_BOX:
+		case CR_TETRAHEDRON:
+		case CR_ICOSAHEDRON:
+		case CR_DODECAHEDRON:
+		case CR_SPHERE:
+		case CR_SPHERE_CAP:
+		case CR_ANNULUS:
+		case CR_RANDOM_SPHERE:
+		case CR_OCTAHEDRON:
+		case CR_CONE:
+		case CR_TORUS:
+		case CR_FITPLANE:
+			return MeshFilterInterface::MeshCreation;
+			break;
+		default: 
+			assert(0);
+			return MeshFilterInterface::Generic;
   }
 }
 
 QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
  {
-    switch(filterID)
-    {
-        case CR_BOX : return QString("box");
-        case CR_ANNULUS : return QString("annulus");
-        case CR_SPHERE: return QString("sphere");
-        case CR_SPHERE_CAP: return QString("spherecap");
-        case CR_RANDOM_SPHERE: return QString("randomsphere");
-        case CR_ICOSAHEDRON: return QString("icosahedron");
-        case CR_DODECAHEDRON: return QString("dodecahedron");
-        case CR_OCTAHEDRON: return QString("octahedron");
-        case CR_TETRAHEDRON: return QString("tetrahedron");
-        case CR_CONE: return QString("cone");
-        case CR_TORUS: return QString("torus");
-        default : assert(0);
+	switch(filterID)
+	{
+		case CR_BOX : return QString("box");
+		case CR_ANNULUS : return QString("annulus");
+		case CR_SPHERE: return QString("sphere");
+		case CR_SPHERE_CAP: return QString("spherecap");
+		case CR_RANDOM_SPHERE: return QString("randomsphere");
+		case CR_ICOSAHEDRON: return QString("icosahedron");
+		case CR_DODECAHEDRON: return QString("dodecahedron");
+		case CR_OCTAHEDRON: return QString("octahedron");
+		case CR_TETRAHEDRON: return QString("tetrahedron");
+		case CR_CONE: return QString("cone");
+		case CR_TORUS: return QString("torus");
+		case CR_FITPLANE:  return QString("fitplane");
+		default : assert(0);
     }
  }
 

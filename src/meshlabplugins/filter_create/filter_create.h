@@ -44,7 +44,7 @@ class FilterCreate : public QObject, public MeshFilterInterface
         CR_OCTAHEDRON,
         CR_CONE,
         CR_TORUS,
-
+		CR_FITPLANE,
   } ;
 
   FilterCreate();
