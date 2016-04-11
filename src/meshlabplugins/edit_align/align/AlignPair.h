@@ -92,7 +92,7 @@ public:
 			int BorderDiscarded;
 			int SampleTested;  // quanti punti ho testato con la mindist
 			int SampleUsed;    // quanti punti ho scelto per la computematrix
-      double pcl50;
+			double pcl50;
 			double pclhi;
 			double AVG;
 			double RMS;
@@ -132,12 +132,12 @@ public:
 
 	Param()
 	{
-	  SampleNum    = 1000;
-	  MaxPointNum     = 100000;
-	  MinPointNum  =  30;
+	  SampleNum    = 2000;
+	  MaxPointNum  = 100000;
+	  MinPointNum  = 30;
 
-	  MaxIterNum   =   50;
-	  TrgDistAbs  = 0.05f;	// se si inquadra un quadrato 10cm x 10cm significa 0.05 mm
+	  MaxIterNum   = 75;
+	  TrgDistAbs   = 0.005f;	
 
 	  MinDistAbs   = 10;
 	  MaxAngleRad  = math::ToRad(45.0);
@@ -177,8 +177,8 @@ public:
 	int EndStepNum; // numero di iterazioni da considerare per decidere se icp ha converso.
 	
   //double PassLoFilter; // Filtraggio utilizzato per decidere quali punti scegliere tra quello trovati abbastanza
-  double PassHiFilter;   // vicini. Espresso in percentili. Di solito si scarta il quelli sopra il 75 e quelli sotto il 5
-  double ReduceFactorPerc; // At each step we discard the points farther than a given threshold. The threshold is iterativeley reduced;
+	double PassHiFilter;   // vicini. Espresso in percentili. Di solito si scarta il quelli sopra il 75 e quelli sotto il 5
+	double ReduceFactorPerc; // At each step we discard the points farther than a given threshold. The threshold is iterativeley reduced;
                             // StartMinDist= min(StartMinDist, 5.0*H.Percentile(ap.ReduceFactorPerc))
 
 
@@ -187,9 +187,9 @@ public:
 	int UGExpansionFactor; // Grandezza della UG per la mesh fix come rapporto del numero di facce della mesh fix 
 
 														// Nel caso si usi qualche struttura multiresolution
-  int   MinFixVertNum;			// Gli allineamenti si fanno mettendo nella ug come mesh fix una semplificata;
+	int MinFixVertNum;			// Gli allineamenti si fanno mettendo nella ug come mesh fix una semplificata;
 	float MinFixVertNumPerc;  // si usa il max tra MinFixVertNum e OrigMeshSize*MinFixVertNumPerc
-  bool UseVertexOnly;       // if true all the Alignment pipeline ignores faces and works over point clouds.
+	bool UseVertexOnly;       // if true all the Alignment pipeline ignores faces and works over point clouds.
 
 	double MaxShear;
 	double MaxScale;
@@ -217,11 +217,11 @@ public:
 	int FixName;
 
 	Matrix44d Tr;
-  std::vector<Point3d> Pfix;		// vertici corrispondenti su fix (rossi)
+	std::vector<Point3d> Pfix;		// vertici corrispondenti su fix (rossi)
 	std::vector<Point3d> Nfix; 		// normali corrispondenti su fix (rossi)
 	std::vector<Point3d> Pmov;		// vertici scelti su mov (verdi) prima della trasformazione in ingresso (Original Point Target)
 	std::vector<Point3d> Nmov; 		// normali scelti su mov (verdi)
-  Histogramf H;
+	Histogramf H;
 	Stat as;
 	Param ap;
 	ErrorCode status;

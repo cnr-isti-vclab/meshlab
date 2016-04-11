@@ -93,6 +93,8 @@ public slots:
 		void glueManual();
 		void glueByPicking();
 		void alignParam();
+		void setAlignParamMM();
+		void setAlignParamM();
 		void meshTreeParam();
 		void alignParamCurrent();
 	void setBaseMesh();

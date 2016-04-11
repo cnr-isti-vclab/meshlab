@@ -112,6 +112,8 @@ bool EditAlignPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
         alignDialog=new AlignDialog(gla->window(),this);
         connect(alignDialog->ui.meshTreeParamButton,SIGNAL(clicked()),this,SLOT(meshTreeParam()));
         connect(alignDialog->ui.icpParamButton,SIGNAL(clicked()),this,SLOT(alignParam()));
+		connect(alignDialog->ui.icpParamDefMMButton, SIGNAL(clicked()), this, SLOT(setAlignParamMM()));
+		connect(alignDialog->ui.icpParamDefMButton, SIGNAL(clicked()), this, SLOT(setAlignParamM()));
         connect(alignDialog->ui.icpParamCurrentButton,SIGNAL(clicked()),this,SLOT(alignParamCurrent()));
         connect(alignDialog->ui.icpButton,SIGNAL(clicked()),this,SLOT(process()));
         connect(alignDialog->ui.manualAlignButton,SIGNAL(clicked()),this,SLOT(glueManual()));
@@ -308,6 +310,30 @@ void EditAlignPlugin:: alignParam()
     AlignParameter::RichParameterSetToAlignPairParam(alignParamSet, defaultAP);
 }
 
+void EditAlignPlugin::setAlignParamMM()
+{
+	defaultAP.SampleNum = 2000;
+	defaultAP.MinDistAbs = 10.0;
+	defaultAP.TrgDistAbs = 0.005;
+	defaultAP.MaxIterNum = 75;
+	defaultAP.ReduceFactorPerc = 0.8;
+	defaultAP.PassHiFilter = 0.75;
+	defaultAP.MatchMode = AlignPair::Param::MMRigid;
+	QMessageBox::warning(0, "Align tool", "ICP Default Parameters set for MILLIMETERS");
+}
+
+void EditAlignPlugin::setAlignParamM()
+{
+	defaultAP.SampleNum = 2000;
+	defaultAP.MinDistAbs = 0.3;
+	defaultAP.TrgDistAbs = 0.0005;
+	defaultAP.MaxIterNum = 75;
+	defaultAP.ReduceFactorPerc = 0.8;
+	defaultAP.PassHiFilter = 0.75;
+	defaultAP.MatchMode = AlignPair::Param::MMRigid;
+	QMessageBox::warning(0, "Align tool", "ICP Default Parameters set for METERS");
+}
+
 void EditAlignPlugin::glueHere()
 {
     MeshNode *mn=currentNode();
@@ -412,6 +438,8 @@ void EditAlignPlugin::toggleButtons()
         alignDialog->ui.recalcButton->setEnabled(false);
         alignDialog->ui.icpButton->setEnabled(false);
         alignDialog->ui.icpParamButton->setEnabled(false);
+		alignDialog->ui.icpParamDefMMButton->setEnabled(false);
+		alignDialog->ui.icpParamDefMButton->setEnabled(false);
         alignDialog->ui.alignTreeWidget->setEnabled(false);
         alignDialog->ui.baseMeshButton->setEnabled(false);
 
@@ -422,6 +450,8 @@ void EditAlignPlugin::toggleButtons()
         alignDialog->ui.recalcButton->setEnabled(true);
         alignDialog->ui.icpButton->setEnabled(true);
         alignDialog->ui.icpParamButton->setEnabled(true);
+		alignDialog->ui.icpParamDefMMButton->setEnabled(true);
+		alignDialog->ui.icpParamDefMButton->setEnabled(true);
         alignDialog->ui.alignTreeWidget->setEnabled(true);
         alignDialog->ui.baseMeshButton->setEnabled(true);
         break;
