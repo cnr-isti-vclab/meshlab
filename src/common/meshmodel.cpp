@@ -30,7 +30,8 @@
 #include "scriptinterface.h"
 #include <vcg/complex/append.h>
 #include "mlexception.h"
-#include "ml_scene_renderer.h"
+#include "ml_shared_data_context.h"
+
 
 using namespace vcg;
 
@@ -337,18 +338,8 @@ MeshDocument::MeshDocument() : QObject(),Log(),xmlhistory()
     currentRaster = 0;
     busy=false;
     filterHistory = new FilterScript();
-    setMLSceneGLSharedDataContext(NULL);
 }
 
-MLSceneGLSharedDataContext* MeshDocument::sharedDataProxy()
-{
-    return _shareddataproxy;
-}
-
-void MeshDocument::setMLSceneGLSharedDataContext(MLSceneGLSharedDataContext* shared)
-{
-    _shareddataproxy = shared;
-}
 
 void MeshModel::Clear()
 {
@@ -381,7 +372,6 @@ MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelN
     _id=parent->newMeshId();
     if(!fullFileName.isEmpty())   this->fullPathFileName=fullFileName;
     if(!labelName.isEmpty())     this->_label=labelName;
-    setMLThreadSafeGLMeshAttributesFeeder(NULL);
 }
 
 QString MeshModel::relativePathName() const
@@ -759,3 +749,37 @@ int MeshModel::dataMask() const
     return currentDataMask;
 }
 
+//RenderMode RenderMode::computeARenderModeSetCompatibleWithMesh(const CMeshO& mesh,const RenderMode& rm)
+//{
+//    RenderMode result(rm);
+//    if (mesh.VN() == 0)
+//    {
+//        result.atts.reset();
+//        return rm;
+//    }
+//    bool validfaces = (mesh.FN() > 0);
+//
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION];
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] &= vcg::tri::HasPerVertexNormal(mesh);
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= vcg::tri::HasPerFaceNormal(mesh) && validfaces;
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] &=  vcg::tri::HasPerVertexColor(mesh);
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &=  vcg::tri::HasPerFaceColor(mesh) && validfaces;
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR];
+//
+//    //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+//    //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
+//    //The enum-value depends from the enabled attributes of input mesh.
+//    bool wedgetexture = vcg::tri::HasPerWedgeTexCoord(mesh) && validfaces;
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= (vcg::tri::HasPerVertexTexCoord(mesh) && (!wedgetexture));
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] &= wedgetexture;
+//    return result;
+//}
+
+RenderMode RenderMode::defaultRenderingAtts()
+{
+    RenderMode result;
+    result.pmmask = (unsigned int) vcg::GLMeshAttributesInfo::PR_SOLID;
+    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    return result;
+}

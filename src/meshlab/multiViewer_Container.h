@@ -30,9 +30,7 @@
 
 #include "../common/meshmodel.h"
 #include <GL/glew.h>
-#include "../common/ml_scene_renderer.h"
-#include "../common/ml_thread_safe_memory_info.h"
-
+#include "../common/ml_shared_data_context.h"
 
 // Class list
 class GLArea;
@@ -69,51 +67,54 @@ protected:
 
 class MultiViewer_Container : public Splitter
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	typedef vcg::Shot<double> Shot;
+        typedef vcg::Shot<double> Shot;
 
 public:
-    MultiViewer_Container(MLThreadSafeMemoryInfo& meminfo,bool highprec,QWidget *parent);
+    MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo,bool highprec,size_t perbatchprimitives,QWidget *parent);
     ~MultiViewer_Container();
 
     void addView(GLArea *viewer, Qt::Orientation);
-	void removeView(int);
-	
-  GLArea* currentView();
-  int getNextViewerId();
-  int viewerCounter();
+    void removeView(int);
 
-  void updateAllViewer();
-  void resetAllTrackBall();
-	void update(int id);
+    GLArea* currentView();
+    int getNextViewerId();
+    int viewerCounter();
 
-  GLArea* getViewer(int id);
-	int getViewerByPicking(QPoint);
+    void updateAllViewer();
+    void resetAllTrackBall();
+    void update(int id);
 
-	void updateTrackballInViewers();
+    GLArea* getViewer(int id);
+    int getViewerByPicking(QPoint);
+
+    void updateTrackballInViewers();
 
     inline MLSceneGLSharedDataContext* sharedDataContext() {return scenecontext;}
 
 protected:
-	void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event);
 public:
-	MeshDocument meshDoc;
+    MeshDocument meshDoc;
     MLSceneGLSharedDataContext* scenecontext;
 
-	int currentId;
+    int currentId;
 
-	GLLogStream *LogPtr() {return &meshDoc.Log;}
+    GLLogStream *LogPtr() {return &meshDoc.Log;}
 
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
+    void updateDocumentViewer();
 
 public slots:
 
-	// Called when we change viewer, set the current viewer
+        // Called when we change viewer, set the current viewer
     void updateCurrent(int current);
 private:
-  QList<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
+    void patchForCorrectResize(QSplitter* split); 
+public:
+    QList<GLArea *> viewerList; /// widgets for the OpenGL contexts and images
 };
 
 #endif // __MULTIVIEWER_CONTAINER_H__

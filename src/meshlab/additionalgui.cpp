@@ -1032,8 +1032,31 @@ int& SearchMenu::searchLineWidth()
     return fixedwidthsize;
 }
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
-MyToolButton::MyToolButton( QWidget * parent /*= 0 */ ) : QToolButton( parent )
+MyToolButton::MyToolButton( int msecdelay,QWidget * parent /*= 0 */ ) 
+    : QToolButton( parent )
 {
+    if (msecdelay != 0)
+    {
+        setPopupMode(QToolButton::DelayedPopup);
+        DelayedToolButtonPopUpStyle* delstyle = new DelayedToolButtonPopUpStyle(msecdelay);
+        setStyle(delstyle);
+    }
+    else
+        setPopupMode(QToolButton::InstantPopup);
+}
+
+MyToolButton::MyToolButton( QAction* act, int msecdelay /*= 0*/,QWidget * parent /*= 0*/ )
+    :QToolButton(parent)
+{
+    if (msecdelay != 0)
+    {
+        setPopupMode(QToolButton::DelayedPopup);
+        DelayedToolButtonPopUpStyle* delstyle = new DelayedToolButtonPopUpStyle(msecdelay);
+        setStyle(delstyle);
+    }
+    else
+        setPopupMode(QToolButton::InstantPopup);
+    setDefaultAction(act);
 }
 
 void MyToolButton::paintEvent( QPaintEvent * )
@@ -1085,3 +1108,16 @@ bool MenuWithToolTip::event(QEvent * e)
   return QMenu::event(e);
 }
 
+
+DelayedToolButtonPopUpStyle::DelayedToolButtonPopUpStyle( int msec )
+    :QProxyStyle()
+{
+    _msec = msec;
+}
+
+int DelayedToolButtonPopUpStyle::styleHint(QStyle::StyleHint sh, const QStyleOption * opt /*= 0*/, const QWidget * widget /*= 0*/, QStyleHintReturn * hret /*= 0*/ ) const
+{
+    if (sh == QProxyStyle::SH_ToolButton_PopupDelay)
+        return _msec;
+    return QProxyStyle::styleHint(sh,opt,widget,hret);
+}

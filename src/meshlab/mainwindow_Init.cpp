@@ -39,6 +39,7 @@
 #include <QDesktopServices>
 #include <QStatusBar>
 #include <QMenuBar>
+#include <QWidgetAction>
 #include "mainwindow.h"
 #include "plugindialog.h"
 #include "customDialog.h"
@@ -55,13 +56,16 @@ MainWindow::MainWindow()
 {
     //xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
     //Subsequently restart function will be invoked.
+    setContextMenuPolicy (Qt::NoContextMenu); 
     xmlfiltertimer.start();
     //xmlfiltertimer.elapsed();
 
     //workspace = new QWorkspace(this);
     mdiarea = new QMdiArea(this);
     layerDialog = new LayerDialog(this);
+    connect(layerDialog,SIGNAL(toBeShow()),this,SLOT(updateLayerDialog()));
     layerDialog->setAllowedAreas (    Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
     addDockWidget(Qt::RightDockWidgetArea,layerDialog);
 
 
@@ -100,7 +104,7 @@ MainWindow::MainWindow()
     createActions();
     createToolBars();
     createMenus();
-    gpumeminfo = new MLThreadSafeMemoryInfo(mwsettings.maxgpumem);
+    gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
     stddialog = 0;
     xmldialog = 0;
     setAcceptDrops(true);
@@ -170,7 +174,6 @@ void MainWindow::createActions()
     //closeProjectAct->setShortcutContext(Qt::ApplicationShortcut);
     //closeAct->setShortcut(Qt::CTRL+Qt::Key_C);
     connect(closeProjectAct, SIGNAL(triggered()),mdiarea, SLOT(closeActiveSubWindow()));
-    //connect(closeProjectAct, SIGNAL(triggered()),this, SLOT(closeProjectWindow()));
     importMeshAct = new QAction(QIcon(":/images/import_mesh.png"),tr("&Import Mesh..."), this);
     importMeshAct->setShortcutContext(Qt::ApplicationShortcut);
     importMeshAct->setShortcut(Qt::CTRL+Qt::Key_I);
@@ -223,64 +226,39 @@ void MainWindow::createActions()
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
     //////////////Render Actions for Toolbar and Menu /////////////////////////////////////////////////////////
-    QList<RenderModeAction*> rendlist;
-    renderModeGroupAct = new QActionGroup(this);
-
-    renderBboxAct	  = new RenderModeBBoxAction(renderModeGroupAct);
-    renderBboxAct->setCheckable(true);
-    rendlist.push_back(renderBboxAct);
-
-    renderModePointsAct	  = new RenderModePointsAction(renderModeGroupAct);
-    renderModePointsAct->setCheckable(true);
-    rendlist.push_back(renderModePointsAct);
-
-    renderModeWireAct		  = new RenderModeWireAction(renderModeGroupAct);
-    renderModeWireAct->setCheckable(true);
-    rendlist.push_back(renderModeWireAct);
-
-    renderModeFlatLinesAct = new RenderModeFlatLinesAction(renderModeGroupAct);
-    renderModeFlatLinesAct->setCheckable(true);
-    rendlist.push_back(renderModeFlatLinesAct);
-
-    renderModeFlatAct		  = new RenderModeFlatAction(renderModeGroupAct);
-    renderModeFlatAct->setCheckable(true);
-    rendlist.push_back(renderModeFlatAct);
-
-    renderModeSmoothAct	  = new RenderModeSmoothAction(renderModeGroupAct);
-    renderModeSmoothAct->setCheckable(true);
-    rendlist.push_back(renderModeSmoothAct);
-
-    renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(this);
-    renderModeTextureWedgeAct->setCheckable(true);
-    rendlist.push_back(renderModeTextureWedgeAct);
+  
 
     //renderModeTextureWedgeAct  = new RenderModeTexturePerWedgeAction(this);
     //renderModeTextureWedgeAct->setCheckable(true);
     //rendlist.push_back(renderModeTextureWedgeAct);
 
-    setLightAct	  = new RenderModeLightOnOffAction(this);
-    setLightAct->setCheckable(true);
-    rendlist.push_back(setLightAct);
 
-    setDoubleLightingAct = new RenderModeDoubleLightingAction(this);
-    setDoubleLightingAct->setCheckable(true);
-    setDoubleLightingAct->setShortcutContext(Qt::ApplicationShortcut);
-    setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
-    rendlist.push_back(setDoubleLightingAct);
 
-    setFancyLightingAct   = new RenderModeFancyLightingAction(this);
-    setFancyLightingAct->setCheckable(true);
-    setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
-    setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_Y);
-    rendlist.push_back(setFancyLightingAct);
+/* QList<RenderModeAction*> rendlist;  
 
-    backFaceCullAct 	  = new RenderModeFaceCullAction(this);
-    backFaceCullAct->setCheckable(true);
-    backFaceCullAct->setShortcutContext(Qt::ApplicationShortcut);
-    backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
-    rendlist.push_back(backFaceCullAct);
+setLightAct	  = new RenderModeLightOnOffAction(this);
+setLightAct->setCheckable(true);
+rendlist.push_back(setLightAct);
 
-    connectRenderModeActionList(rendlist);
+setDoubleLightingAct = new RenderModeDoubleLightingAction(this);
+setDoubleLightingAct->setCheckable(true);
+setDoubleLightingAct->setShortcutContext(Qt::ApplicationShortcut);
+setDoubleLightingAct->setShortcut(Qt::CTRL+Qt::Key_D);
+rendlist.push_back(setDoubleLightingAct);
+
+setFancyLightingAct   = new RenderModeFancyLightingAction(this);
+setFancyLightingAct->setCheckable(true);
+setFancyLightingAct->setShortcutContext(Qt::ApplicationShortcut);
+setFancyLightingAct->setShortcut(Qt::CTRL+Qt::Key_Y);
+rendlist.push_back(setFancyLightingAct);
+
+backFaceCullAct 	  = new RenderModeFaceCullAction(this);
+backFaceCullAct->setCheckable(true);
+backFaceCullAct->setShortcutContext(Qt::ApplicationShortcut);
+backFaceCullAct->setShortcut(Qt::CTRL+Qt::Key_K);
+rendlist.push_back(backFaceCullAct);
+
+connectRenderModeActionList(rendlist);*/
 
     //////////////Action Menu View ////////////////////////////////////////////////////////////////////////////
     fullScreenAct = new QAction (tr("&FullScreen"), this);
@@ -293,11 +271,6 @@ void MainWindow::createActions()
     showToolbarStandardAct->setCheckable(true);
     showToolbarStandardAct->setChecked(true);
     connect(showToolbarStandardAct, SIGNAL(triggered()), this, SLOT(showToolbarFile()));
-
-    showToolbarRenderAct = new QAction (tr("&Render"), this);
-    showToolbarRenderAct->setCheckable(true);
-    showToolbarRenderAct->setChecked(true);
-    connect(showToolbarRenderAct, SIGNAL(triggered()), this, SLOT(showToolbarRender()));
 
     showInfoPaneAct= new QAction (tr("Show Info &Panel"), this);
     showInfoPaneAct->setCheckable(true);
@@ -477,14 +450,6 @@ void MainWindow::createToolBars()
     mainToolBar->addAction(showLayerDlgAct);
     mainToolBar->addAction(showRasterAct);
 
-    renderToolBar = addToolBar(tr("Render"));
-    renderToolBar->addActions(renderModeGroupAct->actions());
-    renderToolBar->addAction(renderModeTextureWedgeAct);
-    renderToolBar->addAction(setLightAct);
-//    renderToolBar->addAction(setSelectFaceRenderingAct);
-//    renderToolBar->addAction(setSelectVertRenderingAct);
-    connect(renderToolBar,SIGNAL(actionTriggered(QAction*)),this,SLOT(updateMenus()));
-
     decoratorToolBar = addToolBar("Decorator");
     foreach(MeshDecorateInterface *iDecorate,PM.meshDecoratePlugins())
     {
@@ -533,8 +498,8 @@ void MainWindow::createToolBars()
     searchToolBar->setMovable(false);
     searchToolBar->setFloatable(false);
     searchToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-    searchButton = new MyToolButton(this);
-    searchButton->setPopupMode(QToolButton::InstantPopup);
+    searchButton = new MyToolButton(0,this);
+    //searchButton->setPopupMode(QToolButton::InstantPopup);
     searchButton->setIcon(QIcon(":/images/search.png"));
 
     searchToolBar->addWidget(searchButton);
@@ -583,56 +548,9 @@ void MainWindow::createMenus()
     //////////////////// Menu Filter //////////////////////////////////////////////////////////////////////////
     filterMenu = menuBar()->addMenu(tr("Fi&lters"));
     fillFilterMenu();
-    //filterMenu = menuBar()->addMenu(tr("Fi&lters"));
-    //filterMenu->addAction(lastFilterAct);
-    //filterMenu->addAction(showFilterScriptAct);
-    //filterMenu->addAction(showScriptEditAct);
-    //filterMenu->addAction(showFilterEditAct);
-    //filterMenu->addSeparator();
-
 
     //////////////////// Menu Render //////////////////////////////////////////////////////////////////////////
     renderMenu		= menuBar()->addMenu(tr("&Render"));
-
-    renderModeMenu=renderMenu->addMenu(tr("Render &Mode"));
-    renderModeMenu->addAction(backFaceCullAct);
-    renderModeMenu->addActions(renderModeGroupAct->actions());
-    renderModeMenu->addAction(renderModeTextureWedgeAct);
-
-    lightingModeMenu=renderMenu->addMenu(tr("&Lighting"));
-    lightingModeMenu->addAction(setLightAct);
-    lightingModeMenu->addAction(setDoubleLightingAct);
-    lightingModeMenu->addAction(setFancyLightingAct);
-
-    // Color SUBmenu
-    colorModeMenu = renderMenu->addMenu(tr("&Color"));
-
-    colorModeGroupAct = new QActionGroup(this);	colorModeGroupAct->setExclusive(true);
-
-    QList<RenderModeAction*> rendlist;
-    colorModeNoneAct = new RenderModeColorModeNoneAction(colorModeGroupAct);
-    colorModeNoneAct->setCheckable(true);
-    colorModeNoneAct->setChecked(true);
-    rendlist.push_back(colorModeNoneAct);
-
-    colorModePerMeshAct = new RenderModeColorModePerMeshAction(colorModeGroupAct);
-    colorModePerMeshAct->setCheckable(true);
-    rendlist.push_back(colorModePerMeshAct);
-
-    colorModePerVertexAct = new RenderModeColorModePerVertexAction(colorModeGroupAct);
-    colorModePerVertexAct->setCheckable(true);
-    rendlist.push_back(colorModePerVertexAct);
-
-    colorModePerFaceAct = new RenderModeColorModePerFaceAction(colorModeGroupAct);
-    colorModePerFaceAct->setCheckable(true);
-    rendlist.push_back(colorModePerFaceAct);
-
-    connectRenderModeActionList(rendlist);
-
-    colorModeMenu->addAction(colorModeNoneAct);
-    colorModeMenu->addAction(colorModePerMeshAct);
-    colorModeMenu->addAction(colorModePerVertexAct);
-    colorModeMenu->addAction(colorModePerFaceAct);
 
     // Shaders SUBmenu
     shadersMenu = renderMenu->addMenu(tr("&Shaders"));
@@ -652,7 +570,6 @@ void MainWindow::createMenus()
 	viewMenu->addSeparator();
     toolBarMenu	= viewMenu->addMenu(tr("&ToolBars"));
     toolBarMenu->addAction(showToolbarStandardAct);
-    toolBarMenu->addAction(showToolbarRenderAct);
     connect(toolBarMenu,SIGNAL(aboutToShow()),this,SLOT(updateMenus()));
 
     //////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
@@ -776,23 +693,6 @@ void MainWindow::fillFilterMenu()
     filterMenuCamera = new MenuWithToolTip(tr("Camera"),this);
     filterMenu->addMenu(filterMenuCamera);
 
-//#if !defined(Q_OS_MAC)
-//	connect(filterMenuSelect, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuClean, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuCreate, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuRemeshing, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuPolygonal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuColorize, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuQuality, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuNormal, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuMeshLayer,   SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuRasterLayer, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuRangeMap, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuPointSet, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuSampling, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuTexture, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//	connect(filterMenuCamera, SIGNAL(hovered(QAction*)), this, SLOT(showTooltip(QAction*)) );
-//#endif
 
     QMap<QString,MeshFilterInterface *>::iterator msi;
     for(msi =  PM.stringFilterMap.begin(); msi != PM.stringFilterMap.end();++msi)
@@ -1299,6 +1199,8 @@ int MainWindow::longestActionWidthInAllMenus()
 void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 {
     glbset->addParam(new RichInt(maximumDedicatedGPUMem(),350,"Maximum GPU Memory Dedicated to MeshLab (Mb)","Maximum GPU Memory Dedicated to MeshLab (megabyte) for the storing of the geometry attributes. The dedicated memory must NOT be all the GPU memory presents on the videocard."));
+    glbset->addParam(new RichInt(perBatchPrimitives(),100000,"Per batch primitives loaded in GPU","Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
+
     glbset->addParam(new RichBool(perMeshRenderingToolBar()	,true,"Show Per-Mesh Rendering Side ToolBar","If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
     //WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
@@ -1313,10 +1215,19 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 {
     maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float) (1024 * 1024);
-
+    perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
     permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
     highprecision = false;
     if (MeshLabScalarTest<Scalarm>::doublePrecision())
         highprecision = rps.getBool(highPrecisionRendering());
 	maxTextureMemory = (std::ptrdiff_t) rps.getInt(this->maxTextureMemoryParam()) * (float) (1024 * 1024);
+}
+
+void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
+{
+    dt._mask = vcg::GLMeshAttributesInfo::PR_SOLID;
+    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
+    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
 }

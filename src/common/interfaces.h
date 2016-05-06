@@ -214,7 +214,6 @@ public:
 
 };
 
-
 /**
   \brief The MeshFilterInterface class provide the interface of the filter plugins.
 

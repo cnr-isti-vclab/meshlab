@@ -36,18 +36,15 @@
 #include <QTimer>
 #include <QTime>
 
-#include "../common/interfaces.h"
+#include <common/interfaces.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "rendermodeactions.h"
 #include "multiViewer_Container.h"
 
-class MultiViewer_Container;
-
 #define SSHOT_BYTES_PER_PIXEL 4
 
 enum LightingModel{LDOUBLE,LFANCY};
-
 
 class MeshModel;
 class MainWindow;
@@ -319,12 +316,11 @@ private:
     //the last model that start edit was called with
     MeshModel *lastModelEdited;
 
-    MLSceneGLSharedDataContext* shared;
 public:
-    inline MLSceneGLSharedDataContext* getSceneGLSharedContext() {return shared;}
+    inline MLSceneGLSharedDataContext* getSceneGLSharedContext() {return ((mvc() != NULL)? mvc()->sharedDataContext() : NULL);}
 
     QMap<int,RenderMode> rendermodemap;
-	QMap<int,vcg::GLFeederInfo::ReqAtts> reqattsmap;
+    QMap<int,bool> boallocated;
 
     // view setting variables
     float fov;

@@ -11,7 +11,10 @@
         <file>images/eye48.png</file>
         <file>images/eye_256_splash.png</file>
         <file>images/flat.png</file>
-        <file>images/flatlines.png</file>
+        <file>images/poly_wire.png</file>
+		<file>images/per_vertex.png</file>
+		<file>images/per_face.png</file>
+		<file>images/per_mesh.png</file>
         <file>images/info.png</file>
         <file>images/lightoff.png</file>
         <file>images/lighton.png</file>

@@ -30,7 +30,9 @@ $Log: stdpardialog.cpp,v $
 
 #include <QTreeWidgetItem>
 #include <QDockWidget>
-#include "../common/filterparameter.h"
+#include <common/filterparameter.h>
+#include <common/ml_shared_data_context.h>
+#include "ml_render_gui.h"
 
 class MainWindow;
 class QTreeWidget;
@@ -51,17 +53,20 @@ namespace Ui
 }
 
 class MeshTreeWidgetItem : public QTreeWidgetItem
-{
+{ 
 public:
-    MeshTreeWidgetItem(MeshModel *,QTreeWidget* tree,QWidget* additional);
+    MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame);
+    MeshTreeWidgetItem(QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame);
     ~MeshTreeWidgetItem();
 
-    MeshModel* m;
+    MLRenderToolbar* _rendertoolbar;
+    MLRenderParametersFrame* _frame;
+    int _meshid;
 };
 
 class RasterTreeWidgetItem : public QTreeWidgetItem
 {
-    public:
+public:
     RasterTreeWidgetItem(RasterModel *);
 
     RasterModel *r;
@@ -82,11 +87,11 @@ public:
     DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
     ~DecoratorParamsTreeWidget();
 
-public slots:
-    void save();
-    void reset();
-    void apply();
-    void load();
+    public slots:
+        void save();
+        void reset();
+        void apply();
+        void load();
 
 private:
     float osDependentButtonHeightScaleFactor();
@@ -106,16 +111,17 @@ public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
     void updateLog(GLLogStream &Log);
-     void updateDecoratorParsView();
-
+    void updateDecoratorParsView();
+    void reset();
 public slots:
-  void keyPressEvent ( QKeyEvent * event );
-  void updateTable();
-  void rasterItemClicked(QTreeWidgetItem * , int );
-  void meshItemClicked(QTreeWidgetItem * , int );
-  void showEvent ( QShowEvent * event );
-  void showContextMenu(const QPoint& pos);
-  void adaptLayout(QTreeWidgetItem * item);
+    void keyPressEvent ( QKeyEvent * event );
+    void updateTable(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& dtf);
+    void rasterItemClicked(QTreeWidgetItem * , int );
+    void meshItemClicked(QTreeWidgetItem * , int );
+    void showEvent ( QShowEvent * event );
+    void showContextMenu(const QPoint& pos);
+    void adaptLayout(QTreeWidgetItem * item);
+    void renderingModalityChanged(const MLRenderingData& data);
 
 private:
     Ui::layerDialog* ui;
@@ -127,18 +133,19 @@ private:
     //It stores if the treeWidgetItems are expanded or not
     QMap< QPair<int ,int> ,  bool> expandedMap;
     //QList<QToolBar*> tobedel;
-  void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
+    void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
     void updateColumnNumber(const QTreeWidgetItem * item);
     //QVector<QTreeWidgetItem*> tobedeleted;
-
     void updateExpandedMap(int meshId, int tagId, bool expanded);
+    void updateMeshItemSelectionStatus();
 
     //it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar.
     //used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
     QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
-
+    MeshTreeWidgetItem* docitem;
 signals:
     void removeDecoratorRequested(QAction* );
+    void toBeShow();
 };
 
 

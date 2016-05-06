@@ -3,6 +3,7 @@
 
 #include <QApplication>
 #include <QString>
+#include <wrap/gl/gl_mesh_attributes_info.h>
 
 template<typename T>
 struct MeshLabScalarTest

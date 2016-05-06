@@ -87,41 +87,34 @@ win32-msvc2013:DEFINES += _CRT_SECURE_NO_WARNINGS
 
 
 # Input
-HEADERS += filterparameter.h \
-    filterscript.h \
-    GLLogStream.h \
-    interfaces.h \
-    meshmodel.h \
-    pluginmanager.h \
-  scriptinterface.h \
-  xmlfilterinfo.h \
-  mlexception.h \
-  mlapplication.h \
-  scriptsyntax.h \
-  searcher.h \
-    meshlabdocumentxml.h \
-	ml_thread_safe_memory_info.h \
-	ml_scene_renderer.h
-SOURCES += filterparameter.cpp \
-    interfaces.cpp \
-    filterscript.cpp \
-    GLLogStream.cpp \
-    meshmodel.cpp \
-    pluginmanager.cpp \
-  scriptinterface.cpp \
-  xmlfilterinfo.cpp \
-  mlapplication.cpp \
-  scriptsyntax.cpp \
-  searcher.cpp \
-    $$GLEWCODE \
-    meshlabdocumentxml.cpp \
-    meshlabdocumentbundler.cpp \
-	ml_thread_safe_memory_info.cpp \
-	ml_scene_renderer.cpp
-
-#	win32-msvc2005: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2008: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2010: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2012: RCC_DIR = $(ConfigurationName)
-
-#RESOURCES = common.qrc
+HEADERS += 	filterparameter.h \
+			filterscript.h \
+			GLLogStream.h \
+			interfaces.h \
+			ml_mesh_type.h \
+			meshmodel.h \
+			pluginmanager.h \
+			scriptinterface.h \
+			xmlfilterinfo.h \
+			mlexception.h \
+			mlapplication.h \
+			scriptsyntax.h \
+			meshlabdocumentxml.h \
+			ml_shared_data_context.h \
+			meshlabdocumentxml.h
+			
+SOURCES += 	filterparameter.cpp \
+			interfaces.cpp \
+			filterscript.cpp \
+			GLLogStream.cpp \
+			meshmodel.cpp \
+			pluginmanager.cpp \
+			scriptinterface.cpp \
+			xmlfilterinfo.cpp \
+			mlapplication.cpp \
+			scriptsyntax.cpp \
+			searcher.cpp \
+			$$GLEWCODE \
+			meshlabdocumentxml.cpp \
+			meshlabdocumentbundler.cpp \
+			ml_shared_data_context.cpp 

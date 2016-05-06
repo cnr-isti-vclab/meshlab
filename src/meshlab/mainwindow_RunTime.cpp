@@ -35,13 +35,13 @@
 #include "xmlgeneratorgui.h"
 #include "filterthread.h"
 
-
 #include <QToolBar>
 #include <QToolTip>
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QProgressBar>
 #include <QDesktopServices>
+
 
 
 #include "../common/scriptinterface.h"
@@ -248,26 +248,6 @@ void MainWindow::updateWindowMenu()
     }
 }
 
-//void MainWindow::setColorNoneMode()
-//{
-//	GLA()->setColorMode(GLW::CMNone);
-//}
-//
-//void MainWindow::setPerMeshColorMode()
-//{
-//	GLA()->setColorMode(GLW::CMPerMesh);
-//}
-//
-//void MainWindow::setPerVertexColorMode()
-//{
-//	GLA()->setColorMode(GLW::CMPerVert);
-//}
-//
-//void MainWindow::setPerFaceColorMode()
-//{
-//	GLA()->setColorMode(GLW::CMPerFace);
-//}
-
 void MainWindow::enableDocumentSensibleActionsContainer(const bool allowed)
 {
     QAction* fileact = fileMenu->menuAction();
@@ -348,6 +328,25 @@ void MainWindow::switchOffDecorator(QAction* decorator)
     }
 }
 
+void MainWindow::updateLayerDialog()
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if (mvc == NULL)
+        return;
+    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+    if (shared == NULL)
+        return;
+    if(GLA())
+    {
+        MLSceneGLSharedDataContext::PerMeshRenderingDataMap dtf;
+        shared->getRenderInfoPerMeshView(GLA()->context(),dtf);
+        layerDialog->updateTable(dtf);
+        layerDialog->updateLog(meshDoc()->Log);
+        layerDialog->updateDecoratorParsView();
+    }
+}
+
+
 void MainWindow::updateMenus()
 {
     bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
@@ -385,9 +384,6 @@ void MainWindow::updateMenus()
     windowsMenu->setEnabled(activeDoc);
     preferencesMenu->setEnabled(activeDoc);
 
-    renderToolBar->setEnabled(activeDoc);
-
-    showToolbarRenderAct->setChecked(renderToolBar->isVisible());
     showToolbarStandardAct->setChecked(mainToolBar->isVisible());
     if(activeDoc && GLA())
     {
@@ -453,40 +449,6 @@ void MainWindow::updateMenus()
             ++ii;
         }
 
-        foreach(QAction* ac,renderModeGroupAct->actions())
-            ac->setChecked(false);
-
-        switch (rendtmp.drawMode)
-        {
-        case GLW::DMBox:				renderBboxAct->setChecked(true);                break;
-        case GLW::DMPoints:			renderModePointsAct->setChecked(true);      		break;
-        case GLW::DMWire: 			renderModeWireAct->setChecked(true);      			break;
-        case GLW::DMFlat:				renderModeFlatAct->setChecked(true);    				break;
-        case GLW::DMSmooth:			renderModeSmoothAct->setChecked(true);  				break;
-        case GLW::DMFlatWire:		renderModeFlatLinesAct->setChecked(true);				break;
-        default: break;
-        }
-
-        foreach(QAction* ac,colorModeGroupAct->actions())
-            ac->setChecked(false);
-
-        switch (rendtmp.colorMode)
-        {
-        case GLW::CMNone:	colorModeNoneAct->setChecked(true);	      break;
-        case GLW::CMPerMesh:	colorModePerMeshAct->setChecked(true);	      break;
-        case GLW::CMPerVert:	colorModePerVertexAct->setChecked(true);  break;
-        case GLW::CMPerFace:	colorModePerFaceAct->setChecked(true);    break;
-        default: break;
-        }
-
-        backFaceCullAct->setChecked(rendtmp.backFaceCull);
-        setLightAct->setIcon(rendtmp.lighting ? QIcon(":/images/lighton.png") : QIcon(":/images/lightoff.png") );
-        setLightAct->setChecked(rendtmp.lighting);
-
-        setFancyLightingAct->setChecked(rendtmp.fancyLighting);
-        setDoubleLightingAct->setChecked(rendtmp.doubleSideLighting);
-        renderModeTextureWedgeAct->setChecked(checktext);
-
         // Decorator Menu Checking and unChecking
         // First uncheck and disable all the decorators
         foreach (QAction *a, PM.decoratorActionList)
@@ -517,12 +479,8 @@ void MainWindow::updateMenus()
     if(GLA())
     {
         showLayerDlgAct->setChecked(layerDialog->isVisible());
-		showRasterAct->setEnabled(meshDoc()->rm() != 0);
-		showRasterAct->setChecked(GLA()->isRaster());
-        //if(GLA()->layerDialog->isVisible())
-        layerDialog->updateTable();
-        layerDialog->updateLog(meshDoc()->Log);
-        layerDialog->updateDecoratorParsView();
+        showRasterAct->setEnabled(meshDoc()->rm() != 0);
+        showRasterAct->setChecked(GLA()->isRaster());
     }
     else
     {
@@ -531,11 +489,9 @@ void MainWindow::updateMenus()
             a->setChecked(false);
             a->setEnabled(false);
         }
-        if(layerDialog->isVisible())
-        {
-            layerDialog->updateTable();
-            layerDialog->updateDecoratorParsView();
-        }
+
+        
+        layerDialog->setVisible(false);
     }
     if (searchMenu != NULL)
         searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
@@ -551,7 +507,7 @@ void MainWindow::setSplit(QAction *qa)
             mvc->addView(glwClone,Qt::Vertical);
         else if(qa->text() == tr("&Vertically"))
             mvc->addView(glwClone,Qt::Horizontal);
-
+        
         //The loading of the raster must be here
         if(GLA()->isRaster())
         {
@@ -582,7 +538,8 @@ void MainWindow::setUnsplit()
 }
 
 //set the split/unsplit menu that appears right clicking on a splitter's handle
-void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin){
+void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin)
+{
     MultiViewer_Container *mvc =  currentViewContainer();
     int epsilon =10;
     splitMenu->clear();
@@ -1147,6 +1104,124 @@ void MainWindow::startFilter()
     }
 }
 
+
+void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if (mvc != NULL)
+    {
+        MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+        if (shared != NULL)
+        {
+            for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
+            {
+                bool currentmeshnewlycreated = false;
+                //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
+                if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
+                    postcondmask = postcondmask | MeshModel::MM_FACECOLOR;
+
+                if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
+                    postcondmask = postcondmask | MeshModel::MM_VERTCOLOR;
+
+                if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                    postcondmask = postcondmask | MeshModel::MM_FACEQUALITY;
+
+                if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
+                    postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
+
+                
+                MLRenderingData dttoberendered;
+                QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
+                if (existit != existingmeshesbeforefilterexecution.end())
+                {
+                    bool connectivitychanged = false;
+                    int updatemask = MeshModel::MM_NONE;
+                    if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) || bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) || bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
+                    {    
+                        updatemask = MeshModel::MM_ALL;
+                        connectivitychanged = true;
+                    }
+                    else
+                    {
+                        //masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
+                        //this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
+                        updatemask = (existit->_mask ^ mm->dataMask()) | postcondmask;
+                        connectivitychanged = false;
+                    }
+
+                    vcg::GLMeshAttributesInfo::RendAtts dttoupdate;
+                    //1) we convert the meshmodel updating mask to a RendAtts structure 
+                    MLBridgeStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts(updatemask,dttoupdate);
+                    //2) The correspondent bos to the updated rendering attributes are set to invalid 
+                    shared->meshAttributesUpdated(mm->id(),connectivitychanged,dttoupdate);
+
+                    //3) we took the current rendering modality for the mesh in the active gla
+                    MLRenderingData curr;
+                    shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),curr);
+
+                    //4) we add to the current rendering modality in the current GLArea just the minimum attributes having been updated
+                    //   WARNING!!!! There are priorities policies!
+                    //               ex1) suppose that the current rendering modality is PR_POINTS and ATT_VERTPOSITION, ATT_VERTNORMAL,ATT_VERTCOLOR
+                    //               if i updated, for instance, just the ATT_FACECOLOR, we switch off in the active GLArea the per ATT_VERTCOLOR attribute
+                    //               and turn on the ATT_FACECOLOR
+                    //               ex2) suppose that the current rendering modality is PR_POINTS and ATT_VERTPOSITION, ATT_VERTNORMAL,ATT_VERTCOLOR
+                    //               if i updated, for instance, both the ATT_FACECOLOR and the ATT_VERTCOLOR, we continue to render the updated value of the ATT_VERTCOLOR
+                    //               ex3) suppose that the current rendering modality is PR_POINTS and we run a surface reconstruction filter
+                    //               in the current GLA() we switch from the PR_POINTS to PR_SOLID primitive rendering modality. In the other GLArea we maintain the per points visualization
+                    MLBridgeStandAloneFunctions::updatedRenderingAttsAddedToRenderingAttsAccordingToPriorities(dttoupdate,curr._atts,dttoberendered._atts);  
+                    if (mm->cm.VN() == 0)
+                        dttoberendered._mask = vcg::GLMeshAttributesInfo::PR_NONE;
+                    else
+                        dttoberendered._mask = (curr._mask & vcg::GLMeshAttributesInfo::PR_BBOX) | (curr._mask & vcg::GLMeshAttributesInfo::PR_POINTS);
+
+                    if (mm->cm.FN() == 0)
+                    {
+                        dttoberendered._mask = dttoberendered._mask | vcg::GLMeshAttributesInfo::PR_POINTS;
+                        if (mm->cm.EN() > 0)
+                            dttoberendered._mask = dttoberendered._mask | vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES;
+                    }
+                    else
+                    {
+                        dttoberendered._mask = dttoberendered._mask | (curr._mask & vcg::GLMeshAttributesInfo::PR_SOLID) | (curr._mask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
+                        if (mm->hasDataMask(MeshModel::MM_POLYGONAL))
+                        {
+                            dttoberendered._mask = dttoberendered._mask | (curr._mask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+                            if ((existit->_mask & MeshModel::MM_POLYGONAL) == 0)
+                                dttoberendered._mask = dttoberendered._mask | vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES;
+                        }
+                        if (existit->_nface == 0)
+                             dttoberendered._mask = dttoberendered._mask | vcg::GLMeshAttributesInfo::PR_SOLID;
+                    }
+
+                    currentmeshnewlycreated = false;
+                }
+                else 
+                {
+                    //A new mesh has been created by the filter. I have to add it in the shared context data structure
+                    newmeshcreated = true;
+                    currentmeshnewlycreated = true;
+                    defaultPerViewRenderingData(dttoberendered);
+                }
+                MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mm,dttoberendered._mask,dttoberendered._atts,dttoberendered._mask,dttoberendered._atts);
+                foreach(GLArea* gla,mvc->viewerList)
+                {
+                    if (gla  != NULL)
+                    {
+                        MLRenderingData curr;
+                        shared->getRenderInfoPerMeshView(mm->id(),gla->context(),curr);
+                        if ((currentmeshnewlycreated) || (gla == GLA()))
+                            shared->setRequestedAttributesPerMeshView(mm->id(),gla->context(),dttoberendered);
+                        else
+                            shared->setRequestedAttributesPerMeshView(mm->id(),gla->context(),curr);
+                    //                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),(int) MeshModel::MM_ALL);  
+                    }
+                }
+               shared->manageBuffers(mm->id());
+            }
+        }
+    }
+}
+
 /*
 callback function that actually start the chosen filter.
 it is called once the parameters have been filled.
@@ -1159,7 +1234,6 @@ from the user defined dialog
 void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
 {
     MeshFilterInterface         *iFilter    = qobject_cast<        MeshFilterInterface *>(action->parent());
-
     qb->show();
     iFilter->setLog(&meshDoc()->Log);
 
@@ -1198,11 +1272,15 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     QGLFormat defForm = QGLFormat::defaultFormat();
     iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
     iFilter->glContext->create(filterWidget->context());
+    bool newmeshcreated = false;
     try
     {
         existingmeshesbeforefilterexecution.clear();
         for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
+        {
+            int dt = mm->dataMask();
             existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN()));
+        }
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
         meshDoc()->setBusy(false);
 
@@ -1233,19 +1311,15 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 
         // at the end for filters that change the color, or selection set the appropriate rendering mode
-        if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) {
-            GLA()->setColorMode(vcg::GLW::CMPerFace);
+        if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) 
             meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
-        }
-        if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring ){
-            GLA()->setColorMode(vcg::GLW::CMPerVert);
+        
+        if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring )
             meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-        }
+        
         if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-        {
-            GLA()->setColorMode(vcg::GLW::CMPerMesh);
             meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
-        }
+        
 
 
         if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
@@ -1259,48 +1333,16 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             //WARNING!!!!! HERE IT SHOULD BE A CHECK IF THE FILTER IS FOR MESH OR FOR DOCUMENT (IN THIS CASE I SHOULD ACTIVATE ALL THE TEXTURE MODE FOR EVERYONE...)
             //NOW WE HAVE JUST TEXTURE FILTERS WORKING ON SINGLE MESH
             QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
-            if (it != GLA()->rendermodemap.end())
-                it.value().setTextureMode(GLW::TMPerWedgeMulti);
+            //if (it != GLA()->rendermodemap.end())
+            //    it.value().setTextureMode(GLW::TMPerWedgeMulti);
             updateTexture(meshDoc()->mm()->id());
         }
-
+      
         int fclasses =	iFilter->getClass(action);
-        MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
-        {
-            int postCondMask = iFilter->postCondition(action);
-
-            //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
-            if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
-                postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
-
-            if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
-                postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
-
-            if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
-                postCondMask = postCondMask | MeshModel::MM_FACEQUALITY;
-
-            if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
-                postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
-
-            QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
-            if (existit != existingmeshesbeforefilterexecution.end())
-            {
-                RenderMode rm = GLA()->rendermodemap[mm->id()];
-                int updatemask = MeshModel::MM_NONE;
-                if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) || (postCondMask == MeshModel::MM_UNKNOWN) || (postCondMask == MeshModel::MM_ALL) || (postCondMask == MeshModel::MM_VERTNUMBER) || (postCondMask == MeshModel::MM_FACENUMBER) || (postCondMask == MeshModel::MM_VERTFACETOPO) || (postCondMask == MeshModel::MM_FACEFACETOPO))
-                    updatemask = MeshModel::MM_ALL;
-                else
-                    //masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
-                    //this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
-                    updatemask = (existit->_mask ^ mm->dataMask()) | postCondMask;
-
-                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),updatemask);
-            }
-            else
-                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),(int) MeshModel::MM_ALL);     
-            existingmeshesbeforefilterexecution.clear();
-        }
+        //MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
+        int postCondMask = iFilter->postCondition(action);
+        updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
+        existingmeshesbeforefilterexecution.clear();
     }
     catch (std::bad_alloc& bdall)
     {
@@ -1310,9 +1352,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
     }
     qb->reset();
-
+    layerDialog->setVisible(layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->size() > 0)));
+    updateLayerDialog();
     updateMenus();
-    GLA()->update(); //now there is the container
     MultiViewer_Container* mvc = currentViewContainer();
     if(mvc)
         mvc->updateAllViewer();
@@ -1556,11 +1598,6 @@ void MainWindow::postFilterExecution()
     //foreach(QAction* act,filterMenu->actions())
     //    act->setEnabled(true);
     enableDocumentSensibleActionsContainer(true);
-    updateMenus();
-    GLA()->update(); //now there is the container
-    MultiViewer_Container* mvc = currentViewContainer();
-    if(mvc)
-        mvc->updateAllViewer();
 
     FilterThread* obj = qobject_cast<FilterThread*>(QObject::sender());
     if (obj == NULL)
@@ -1573,62 +1610,18 @@ void MainWindow::postFilterExecution()
     QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
     QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
     int fclasses =	MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
+    bool newmeshcreated = false;
     if (mfc->filterInterface != NULL)
     {
         mfc->filterInterface->setInterrupt(false);
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm = meshDoc()->nextMesh(mm))
-        {
-            QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
-            QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-            int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-
-            //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
-            if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
-                postCondMask = postCondMask | MeshModel::MM_FACECOLOR;
-
-            if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
-                postCondMask = postCondMask | MeshModel::MM_VERTCOLOR;
-
-            if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
-                postCondMask = postCondMask | MeshModel::MM_FACEQUALITY;
-
-            if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
-                postCondMask = postCondMask | MeshModel::MM_VERTQUALITY;
-
-            QMap<int,RenderMode>::const_iterator ci = GLA()->rendermodemap.find(mm->id());
-            RenderMode rm;
-            vcg::GLW::NormalMode nm = vcg::GLW::NMNone;
-            if (ci != GLA()->rendermodemap.end())
-            {
-                rm = ci.value();
-                nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
-            }
-
-            QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
-            if (existit != existingmeshesbeforefilterexecution.end())
-            {
-                RenderMode rm = GLA()->rendermodemap[mm->id()];
-                int updatemask = MeshModel::MM_NONE;
-                if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) || (postCondMask == MeshModel::MM_UNKNOWN) || (postCondMask == MeshModel::MM_ALL) || (postCondMask == MeshModel::MM_VERTNUMBER) || (postCondMask == MeshModel::MM_FACENUMBER) || (postCondMask == MeshModel::MM_VERTFACETOPO) || (postCondMask == MeshModel::MM_FACEFACETOPO))
-                    updatemask = MeshModel::MM_ALL;
-                else
-                    //masks differences bitwise operator (^) -> remove the attributes that didn't apparently change + the ones that for sure changed according to the postCondition function
-                    //this operation has been introduced in order to minimize problems with filters that didn't declared properly the postCondition mask 
-                    updatemask = (existit->_mask ^ mm->dataMask()) | postCondMask;
-
-                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),updatemask);
-            }
-            else
-                updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(mm->id(),(int) MeshModel::MM_ALL); 
-            //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-            //init the buffer object structures for the newly created mesh. It covers both the MeshCreating filters and the filters creating a new layer (i.e. poisson)
-            //            if (!existingmeshesbeforefilterexecution.contains(mm->id()))
-            //                mm->bor.update(mm->cm,MeshModel::MM_ALL,rm.drawMode,nm,rm.colorMode,rm.textureMode);
-            //            else
-            //                mm->bor.update(mm->cm,postCondMask,rm.drawMode,nm,rm.colorMode,rm.textureMode);
-        }
+        QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
+        QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+        int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
+        updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
+        MultiViewer_Container* mvc = currentViewContainer();
+        if(mvc)
+            mvc->updateAllViewer();
     }
-
     existingmeshesbeforefilterexecution.clear();
     meshDoc()->setBusy(false);
 
@@ -1699,6 +1692,10 @@ void MainWindow::postFilterExecution()
     envtobedeleted.erase(it);
     delete tmpenv;
     }*/
+
+    layerDialog->setVisible((layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->size() > 0))));
+    updateLayerDialog();
+    updateMenus();
     delete obj;
 }
 
@@ -2049,10 +2046,11 @@ bool MainWindow::openProject(QString fileName)
         GLA()->setDrawMode(GLW::DMPoints);
     }
 
-
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
-    this->currentViewContainer()->resetAllTrackBall();
+    MultiViewer_Container* mvc = currentViewContainer();
+    if (mvc != NULL)
+        mvc->resetAllTrackBall();
     qb->reset();
     saveRecentProjectList(fileName);
     showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 1));
@@ -2147,14 +2145,18 @@ void MainWindow::newProject(const QString& projName)
 {
     if (gpumeminfo == NULL)
         return;
-    MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mdiarea);
+    MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mdiarea);
+    connect(&mvcont->meshDoc,SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
+    connect(&mvcont->meshDoc,SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
     mdiarea->addSubWindow(mvcont);
     connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
+    connect(mvcont,SIGNAL(updateDocumentViewer()),this,SLOT(updateLayerDialog()));
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
     if (!filterMenu->actions().isEmpty())
         updateSubFiltersMenu(true,false);
     GLArea *gla=new GLArea(this, mvcont, &currentGlobalParams);
     mvcont->addView(gla, Qt::Horizontal);
+    
     if (projName.isEmpty())
     {
         static int docCounter = 1;
@@ -2165,9 +2167,7 @@ void MainWindow::newProject(const QString& projName)
         mvcont->meshDoc.setDocLabel(projName);
     mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
     //if(mdiarea->isVisible())
-
-    layerDialog->updateTable();
-    layerDialog->updateDecoratorParsView();
+    updateLayerDialog();
     mvcont->showMaximized();
 }
 
@@ -2333,13 +2333,10 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     if( mask & vcg::tri::io::Mask::IOM_VERTCOLOR)
         GLA()->setColorMode(GLW::CMPerVert);
 
-    renderModeTextureWedgeAct->setChecked(false);
-    //renderModeTextureWedgeAct->setEnabled(false);
     if(!meshDoc()->mm()->cm.textures.empty())
     {
+
         updateTexture(meshDoc()->mm()->id());
-        renderModeTextureWedgeAct->setChecked(true);
-        //renderModeTextureWedgeAct->setEnabled(true);
         if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
             GLA()->setTextureMode(rm,GLW::TMPerVert);
         if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
@@ -2390,14 +2387,23 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     mm->cm.Tr = mtr;
     vcg::GLW::NormalMode nm = vcg::GlTrimesh<CMeshO>::convertDrawModeToNormalMode(rm.drawMode);
 
-    MultiViewer_Container* mv = GLA()->mvc();
+    MultiViewer_Container* mv = currentViewContainer();
     if (mv != NULL)
     {
-        for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+        MLSceneGLSharedDataContext* shared = mv->sharedDataContext();
+        if (shared != NULL)
         {
-            GLArea* ar = mv->getViewer(glarid);
-            if (ar != NULL)
-                ar->setupRequestedAttributesPerMesh(mm->id());
+            QList<QGLContext*> contlist;
+            for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
+            {
+                GLArea* ar = mv->getViewer(glarid);
+                if (ar != NULL)
+                    contlist.push_back(ar->context());
+            }
+            MLRenderingData defdt;
+            defaultPerViewRenderingData(defdt);
+            shared->setRequestedAttributesPerMeshViews(mm->id(),contlist,defdt);
+            layerDialog->renderingModalityChanged(defdt);
         }
     }
 
@@ -2416,7 +2422,7 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
     }
     bool res = importMesh(fileName);
     if (layerDialog != NULL)
-        showLayerDlg(layervisible || meshDoc()->meshList.size() > 1);
+        showLayerDlg(layervisible || meshDoc()->meshList.size());
     return res;
 }
 
@@ -2799,10 +2805,6 @@ void MainWindow::showToolbarFile(){
     mainToolBar->setVisible(!mainToolBar->isVisible());
 }
 
-void MainWindow::showToolbarRender(){
-    renderToolBar->setVisible(!renderToolBar->isVisible());
-}
-
 void MainWindow::showInfoPane()  {if(GLA() != 0)	GLA()->infoAreaVisible =!GLA()->infoAreaVisible;}
 void MainWindow::showTrackBall() {if(GLA() != 0) 	GLA()->showTrackBall(!GLA()->isTrackBallVisible());}
 void MainWindow::resetTrackBall(){if(GLA() != 0)	GLA()->resetTrackBall();}
@@ -2829,30 +2831,12 @@ void MainWindow::setCustomize()
     dialog.exec();
 }
 
-//void MainWindow::renderBbox()        { GLA()->setDrawMode(GLW::DMBox     ); }
-//void MainWindow::renderPoint()       { GLA()->setDrawMode(GLW::DMPoints  ); }
-//void MainWindow::renderWire()        { GLA()->setDrawMode(GLW::DMWire    ); }
-//void MainWindow::renderFlat()        { GLA()->setDrawMode(GLW::DMFlat    ); }
-//void MainWindow::renderFlatLine()    { GLA()->setDrawMode(GLW::DMFlatWire); }
-//void MainWindow::renderHiddenLines() { GLA()->setDrawMode(GLW::DMHidden  ); }
-//void MainWindow::renderSmooth()      { GLA()->setDrawMode(GLW::DMSmooth  ); }
-//void MainWindow::renderTexture()
-//{
-//    QAction *a = qobject_cast<QAction* >(sender());
-//  if( tri::HasPerVertexTexCoord(meshDoc()->mm()->cm))
-//    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerVert);
-//  if( tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm))
-//    GLA()->setTextureMode(!a->isChecked() ? GLW::TMNone : GLW::TMPerWedgeMulti);
-//}
-
-
 void MainWindow::fullScreen(){
     if(!isFullScreen())
     {
         toolbarState = saveState();
         menuBar()->hide();
         mainToolBar->hide();
-        renderToolBar->hide();
         globalStatusBar()->hide();
         setWindowState(windowState()^Qt::WindowFullScreen);
         bool found=true;
@@ -3039,6 +3023,111 @@ void MainWindow::updateRenderToolBar( RenderModeAction* /*act*/ )
     //}
 }
 
+
+void convertGLMeshAttributsInfoIntoString(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask,vcg::GLMeshAttributesInfo::RendAtts& atts,QString& result)
+{
+    result += "PRIMITIVE_MODALITY_MASK: ";
+    QString tmp;
+    if (pmmask & vcg::GLMeshAttributesInfo::PR_BBOX)
+        tmp += "PR_BBOX ";
+    if (pmmask & vcg::GLMeshAttributesInfo::PR_POINTS)
+        tmp += "PR_POINTS ";
+    if (pmmask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES)
+        tmp += "PR_WIREFRAME_EDGES ";
+    if (pmmask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES)
+        tmp += "PR_WIREFRAME_TRIANGLES ";
+    if (pmmask & vcg::GLMeshAttributesInfo::PR_SOLID)
+        tmp += "PR_SOLID ";
+    tmp = tmp.trimmed();
+    tmp.replace(" ","|");
+    result += tmp + "\n";
+    tmp.clear();
+    
+    QList<QString> lst;
+    lst << "ATT_VERTPOS" << "ATT_VERTNORM" << "ATT_FACENORM" << "ATT_VERTCOL" << "ATT_FACECOL" << "ATT_PERMESHCOL" << "ATT_VERTTEXT" << "ATT_WEDGETEXT";
+    for(unsigned int ii = 0;ii < vcg::GLMeshAttributesInfo::ATT_NAMES::enumArity();++ii)
+        tmp += " | " + lst[ii] + " - " + (atts[ii] ? "true" : "false");
+    result += tmp;
+}
+
+void MainWindow::updateRenderMode( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask,vcg::GLMeshAttributesInfo::RendAtts atts )
+{
+    QString rmstring;
+    convertGLMeshAttributsInfoIntoString(pmmask,atts,rmstring);
+    GLLogStream st;
+    st.Log(0,qPrintable(rmstring));
+    layerDialog->updateLog(st);
+
+    //if ((GLA() == NULL) || (meshDoc() == NULL))
+    //    return;
+
+    //RenderModeAction* act = qobject_cast<RenderModeAction*>(sender());
+    //RenderModeTexturePerWedgeAction* textact = qobject_cast<RenderModeTexturePerWedgeAction*>(act);
+
+    //    
+    ////act->data contains the meshid to which the action is referred.
+    ////if the meshid is -1 the action is intended to be per-document and not per mesh
+    //bool isvalidid = true;
+    //int meshid = act->data().toInt(&isvalidid);
+    //if (!isvalidid)
+    //    throw MeshLabException("A RenderModeAction contains a non-integer data id.");
+
+    //if (meshid == -1)
+    //{
+    //    foreach(MeshModel* mp,meshDoc()->meshList)
+    //    {
+    //        
+    //        RenderMode& rm = it.value();
+    //        RenderMode old = rm;
+
+    //        //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+    //        //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
+    //        //The enum-value depends from the enabled attributes of input mesh.
+    //        if (textact != NULL)
+    //            setBestTextureModePerMesh(textact,it.key(),rm);
+
+    //        MeshModel* mmod = meshDoc()->getMesh(it.key());
+    //        if (mmod != NULL)
+    //        {
+    //            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+    //            act->updateRenderMode(rm);
+    //            if (textact != NULL)
+    //                setBestTextureModePerMesh(textact,it.key(),rm);
+
+    //            deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+
+    //            GLA()->setupRequestedAttributesPerMesh(it.key());
+    //        }
+    //        else throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+
+    //        GLA()->setupRequestedAttributesPerMesh(it.key());
+    //    }
+    //}
+    //else
+    //{
+    //    QMap<int,RenderMode>::iterator it = rmode.find(meshid);
+    //    RenderMode& rm = it.value();
+    //    RenderMode old = rm;
+    //    if (it == rmode.end())
+    //        throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
+    //    MeshModel* mmod = meshDoc()->getMesh(it.key());
+    //    if (mmod == NULL)
+    //        throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+    //    act->updateRenderMode(rm);
+    //    updateMenus();
+    //    //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+    //    //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
+    //    //The enum-value depends from the enabled attributes of input mesh.
+    //    if (textact != NULL)
+    //        setBestTextureModePerMesh(textact,meshid,rm);
+
+    //    deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
+    //    GLA()->setupRequestedAttributesPerMesh(it.key());
+    //}
+    //GLA()->update();
+}
+
+
 void MainWindow::updateRenderMode( )
 {
     if ((GLA() == NULL) || (meshDoc() == NULL))
@@ -3061,18 +3150,29 @@ void MainWindow::updateRenderMode( )
         {
             RenderMode& rm = it.value();
             RenderMode old = rm;
+
             act->updateRenderMode(rm);
             //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
             //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
             //The enum-value depends from the enabled attributes of input mesh.
             if (textact != NULL)
                 setBestTextureModePerMesh(textact,it.key(),rm);
+
             MeshModel* mmod = meshDoc()->getMesh(it.key());
-            if (mmod == NULL)
+            if (mmod != NULL)
+            {
                 throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
-            
-            deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(it.key(),GLA(),old,rm);
-            GLA()->setupRequestedAttributesPerMesh(it.key());
+                act->updateRenderMode(rm);
+                if (textact != NULL)
+                    setBestTextureModePerMesh(textact,it.key(),rm);
+
+//                deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm;)
+                
+                GLA()->setupRequestedAttributesPerMesh(it.key());
+            }
+            else throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
+
+			GLA()->setupRequestedAttributesPerMesh(it.key());
         }
     }
     else
@@ -3082,6 +3182,9 @@ void MainWindow::updateRenderMode( )
         RenderMode old = rm;
         if (it == rmode.end())
             throw MeshLabException("A RenderModeAction contains a non-valid data meshid.");
+        MeshModel* mmod = meshDoc()->getMesh(it.key());
+        if (mmod == NULL)
+            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
         act->updateRenderMode(rm);
         updateMenus();
         //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
@@ -3089,11 +3192,8 @@ void MainWindow::updateRenderMode( )
         //The enum-value depends from the enabled attributes of input mesh.
         if (textact != NULL)
             setBestTextureModePerMesh(textact,meshid,rm);
-        MeshModel* mmod = meshDoc()->getMesh(it.key());
-        if (mmod == NULL)
-            throw MeshLabException("A RenderModeAction referred to a non-existent mesh.");
 
-        deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(it.key(),GLA(),old,rm);
+//        deallocateReqAttsConsideringAllOtherGLArea(GLA(),it.key(),old,rm);
         GLA()->setupRequestedAttributesPerMesh(it.key());
     }
     GLA()->update();
@@ -3105,89 +3205,77 @@ void MainWindow::connectRenderModeActionList(QList<RenderModeAction*>& actlist)
         connect(actlist[ii],SIGNAL(triggered()),this,SLOT(updateRenderMode()));
 }
 
-vcg::GLW::TextureMode MainWindow::getBestTextureRenderModePerMesh(const int meshid)
+void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm)
 {
     MeshModel* mesh = NULL;
     if ((meshDoc() == NULL) || ((mesh  = meshDoc()->getMesh(meshid)) == NULL))
-        return vcg::GLW::TMNone;
-
-    if (mesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-        return vcg::GLW::TMPerWedgeMulti;
-
-    if (mesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
-        return vcg::GLW::TMPerVert;
-
-    return vcg::GLW::TMNone;
-}
-
-void MainWindow::setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm)
-{
-    if ((textact == NULL) || !textact->isChecked())
-        rm.setTextureMode(vcg::GLW::TMNone);
-    else
     {
-        vcg::GLW::TextureMode texmode = getBestTextureRenderModePerMesh(meshid);
-        rm.setTextureMode(texmode);
+        bool clicked = (textact != NULL) && (textact->isChecked());
+        MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mesh,rm.pmmask,rm.atts,rm.pmmask,rm.atts);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] && clicked;
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] && clicked;
     }
 }
 
-void MainWindow::updatePerMeshRenderingDataAccordingToUpdateMaskConsideringAllGLArea(int meshid,int updatemask)
+void MainWindow::getCurrentRenderingData(MLRenderingData& rdata) const
+{
+
+}
+
+void MainWindow::meshAdded(int mid)
 {
     MultiViewer_Container* mvc = currentViewContainer();
-    if ((meshDoc() == NULL) || (mvc == NULL))
-        return;
-    vcg::GLFeederInfo::ReqAtts res;
-    MeshModel* mm = meshDoc()->getMesh(meshid);
-    if (mm == NULL)
-        return;
-    for(int ii = 0; ii < mvc->viewerCounter();++ii)
+    if (mvc != NULL)
     {
-        GLArea* glar = mvc->getViewer(ii);
-        if (glar != NULL)
+        MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+        if (shared != NULL)
         {
-            QMap<int,RenderMode>::const_iterator it =glar->rendermodemap.find(meshid);
-            if (it != NULL)
+            shared->meshInserted(mid);
+            QList<QGLContext*> contlist;
+            for(int glarid = 0;glarid < mvc->viewerCounter();++glarid)
             {
-               
-                vcg::GLFeederInfo::ReqAtts reqattperglarea;
-                reqattperglarea = MLSceneRenderModeAdapter::convertUpdateMaskToMinimalReqAtts(updatemask,*mm,it.value());
-                res = vcg::GLFeederInfo::ReqAtts::setUnion(res,reqattperglarea);
-
+                GLArea* ar = mvc->getViewer(glarid);
+                if (ar != NULL)
+                    contlist.push_back(ar->context());
             }
-        }       
-    }
-    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
-    bool allocated = false;
-    if (shared != NULL)
-    {
-        shared->invalidateRequestedAttributesPerMesh(meshid,res);
-        shared->setupRequestedAttributesPerMesh(meshid,res,allocated);
-    }
-}
-
-void MainWindow::deallocateNotMoreNecessaryPerMeshAndPerGLAreaRenderingDataConsideringAllOtherGLArea(const int meshid,GLArea* gla,const RenderMode& currentrendmode,const RenderMode& newrendermode)
-{
-    MultiViewer_Container* mvc = currentViewContainer();
-    if ((meshDoc() == NULL) || (mvc == NULL))
-        return;
-    if (gla == NULL)
-        return;
-    vcg::GLFeederInfo::ReqAtts oldatts;
-    MLSceneRenderModeAdapter::renderModeToReqAtts(currentrendmode,oldatts);
-    vcg::GLFeederInfo::ReqAtts newatts;
-    MLSceneRenderModeAdapter::renderModeToReqAtts(newrendermode,newatts);
-    oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,newatts);
-    for(int ii = 0; ii < mvc->viewerCounter();++ii)
-    {
-        GLArea* otherarea = mvc->getViewer(ii);
-        if ((otherarea != NULL) && (otherarea->getId() != gla->getId()))
-        {
-            vcg::GLFeederInfo::ReqAtts othermeshview;
-            MLSceneRenderModeAdapter::renderModeToReqAtts(otherarea->rendermodemap[meshid],othermeshview);
-            oldatts = vcg::GLFeederInfo::ReqAtts::setComplement(oldatts,othermeshview);
+            MLRenderingData defdt;
+            defaultPerViewRenderingData(defdt);
+            shared->setRequestedAttributesPerMeshViews(mid,contlist,defdt);
         }
     }
-    MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
-    if (shared != NULL)
-        shared->removeRequestedAttributesPerMesh(meshid,oldatts);
+    if (layerDialog != NULL)
+        updateLayerDialog();
+}
+
+void MainWindow::meshRemoved(int mid)
+{
+    MultiViewer_Container* mvc = currentViewContainer();
+    if (mvc != NULL)
+    {
+        MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+        if (shared != NULL)
+            shared->meshRemoved(mid);
+    }
+    if (layerDialog != NULL)
+        updateLayerDialog();
+
+}
+
+void MainWindow::primitiveModalityUpdateRequested( unsigned int mmid,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask )
+{
+    MultiViewer_Container* cont = currentViewContainer();
+    if (cont != NULL)
+    {
+        MLSceneGLSharedDataContext* share = cont->sharedDataContext();
+        if ((share != NULL) && (GLA() != NULL))
+        {
+            MLRenderingData dt;
+            share->getRenderInfoPerMeshView(mmid,GLA()->context(),dt);
+            dt._mask = pmmask;
+            share->setRequestedAttributesPerMeshView(mmid,GLA()->context(),dt);
+            share->manageBuffers(mmid);
+            GLA()->update();
+        }
+    }
+    
 }

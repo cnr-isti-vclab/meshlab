@@ -1,40 +1,34 @@
 #include "rendermodeactions.h"
 #include <QObject>
 
-RenderModeAction::RenderModeAction( const QIcon& icn,const QString& title,QObject* parent )
-    :QAction(icn,title,parent)
+RenderModeAction::RenderModeAction( QObject* parent )
+    :QAction(parent)
 {
+    setCheckable(true);
+    setChecked(false);
     commonInit(-1);
 }
 
-RenderModeAction::RenderModeAction( const QString& title,QObject* parent )
-    :QAction(title,parent)
+RenderModeAction::RenderModeAction( const unsigned int meshid,QObject* parent )
+    :QAction(parent)
 {
-    commonInit(-1);
-}
-
-RenderModeAction::RenderModeAction( const unsigned int meshid,const QString& title,QObject* parent )
-    :QAction(title,parent)
-{
+    setCheckable(true);
+    setChecked(false);
     commonInit(meshid);
 }
 
-RenderModeAction::RenderModeAction( const unsigned int meshid,const QIcon& icn,const QString& title,QObject* parent )
-    :QAction(icn,title,parent)
+
+
+unsigned int RenderModeAction::meshId() const
 {
-    commonInit(meshid);
+    bool isvalidid = false;
+    return data().toUInt(&isvalidid);
 }
+
 
 void RenderModeAction::commonInit(const unsigned int meshid)
 {
     setData(QVariant(meshid));
-}
-
-
-void RenderModeAction::updateRenderMode( QList<RenderMode>& rmlist )
-{
-    for(int ii = 0; ii < rmlist.size();++ii)
-        updateRenderMode(rmlist[ii]);
 }
 
 bool RenderModeAction::isBufferObjectUpdateRequired() const
@@ -43,23 +37,30 @@ bool RenderModeAction::isBufferObjectUpdateRequired() const
 }
 
 RenderModeBBoxAction::RenderModeBBoxAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/bbox.png"),QString("&Bounding box"), parent)
+    :RenderModeAction(parent)
 {
+    setIcon(QIcon(":/images/bbox.png"));
+    setText(QString("Bounding Box"));
 }
 
 RenderModeBBoxAction::RenderModeBBoxAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/bbox.png"),QString("&Bounding box"), parent)
+    :RenderModeAction(meshid,parent)
 {
+    setIcon(QIcon(":/images/bbox.png"));
+    setText(QString("Bounding Box"));
 }
 
-void RenderModeBBoxAction::updateRenderMode( RenderMode& rm )
+void RenderModeBBoxAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMBox);
+    if (!isRenderModeEnabled(rm))
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_BBOX);
+    else
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_BBOX);
 }
 
 bool RenderModeBBoxAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.drawMode == vcg::GLW::DMBox);
+    return (rm.pmmask & vcg::GLMeshAttributesInfo::PR_BBOX);
 }
 
 bool RenderModeBBoxAction::isBufferObjectUpdateRequired() const
@@ -68,25 +69,38 @@ bool RenderModeBBoxAction::isBufferObjectUpdateRequired() const
 }
 
 RenderModePointsAction::RenderModePointsAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/points.png"),QString("&Points"), parent)
+    :RenderModeAction(parent)
 {
-
+    setIcon(QIcon(":/images/points.png"));
+    setText(QString("Points"));
 }
 
 RenderModePointsAction::RenderModePointsAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/points.png"),QString("&Points"), parent)
+    :RenderModeAction(meshid, parent)
 {
-
+    setIcon(QIcon(":/images/points.png"));
+    setText(QString("Points"));
 }
 
-void RenderModePointsAction::updateRenderMode( RenderMode& rm )
+void RenderModePointsAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMPoints);
+    if (!isRenderModeEnabled(rm))
+    {
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_POINTS);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    }
+    else
+    {
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_POINTS);
+        //BBOX doesn't require ATT_VERTPOS. If it is the last remaining PRIMITIVE_MODALITY i do not need to request the ATT_VERTPOSITION bo
+        if ((rm.pmmask == vcg::GLMeshAttributesInfo::PR_BBOX) || (rm.pmmask == vcg::GLMeshAttributesInfo::PR_NONE))
+            rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = false;
+    }
 }
 
 bool RenderModePointsAction::isRenderModeEnabled( const RenderMode& rm ) const
-{
-    return (rm.drawMode == vcg::GLW::DMPoints);
+{    
+    return ((rm.pmmask & vcg::GLMeshAttributesInfo::PR_POINTS) && (rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION]));
 }
 
 bool RenderModePointsAction::isBufferObjectUpdateRequired() const
@@ -96,25 +110,37 @@ bool RenderModePointsAction::isBufferObjectUpdateRequired() const
 
 
 RenderModeWireAction::RenderModeWireAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/wire.png"),QString("&Wireframe"), parent)
+    :RenderModeAction(parent)
 {
-
+    setIcon(QIcon(":/images/wire.png"));
+    setText(QString("Wireframe"));
 }
 
 RenderModeWireAction::RenderModeWireAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/wire.png"),QString("&Wireframe"), parent)
+    :RenderModeAction(meshid,parent)
 {
 
 }
 
-void RenderModeWireAction::updateRenderMode( RenderMode& rm )
+void RenderModeWireAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMWire);
+    if (!isRenderModeEnabled(rm))
+    {
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    }
+    else
+    {
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
+        //BBOX doesn't require ATT_VERTPOS. If it is the last remaining PRIMITIVE_MODALITY i do not need to request the ATT_VERTPOSITION bo
+        if ((rm.pmmask == vcg::GLMeshAttributesInfo::PR_BBOX) || (rm.pmmask == vcg::GLMeshAttributesInfo::PR_NONE))
+            rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = false;
+    }
 }
 
 bool RenderModeWireAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.drawMode == vcg::GLW::DMWire);
+    return (((rm.pmmask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES) || (rm.pmmask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES)) && (rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION]));
 }
 
 bool RenderModeWireAction::isBufferObjectUpdateRequired() const
@@ -122,76 +148,109 @@ bool RenderModeWireAction::isBufferObjectUpdateRequired() const
     return true;
 }
 
-RenderModeHiddenLinesAction::RenderModeHiddenLinesAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/backlines.png"),QString("&Hidden Lines"),parent)
+RenderModeQuadWireAction::RenderModeQuadWireAction( QObject* parent )
+    :RenderModeAction(parent)
 {
-
+    setIcon(QIcon(":/images/poly_wire.png"));
+    setText(QString("Quads Wireframe"));
 }
 
-RenderModeHiddenLinesAction::RenderModeHiddenLinesAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/backlines.png"),QString("&Hidden Lines"),parent)
+RenderModeQuadWireAction::RenderModeQuadWireAction( const unsigned int meshid,QObject* parent )
+    :RenderModeAction(meshid,parent)
 {
-
+    setIcon(QIcon(":/images/poly_wire.png"));
+    setText(QString("Quads Wireframe"));
 }
 
-void RenderModeHiddenLinesAction::updateRenderMode( RenderMode& rm )
+void RenderModeQuadWireAction::updateRenderMode( RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMHidden);
+    if (!isRenderModeEnabled(rm))
+    {
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    }
+    else
+    {
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+        //BBOX doesn't require ATT_VERTPOS. If it is the last remaining PRIMITIVE_MODALITY i do not need to request the ATT_VERTPOSITION bo
+        if ((rm.pmmask == vcg::GLMeshAttributesInfo::PR_BBOX) || (rm.pmmask == vcg::GLMeshAttributesInfo::PR_NONE))
+            rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = false;
+    }
 }
 
-bool RenderModeHiddenLinesAction::isRenderModeEnabled( const RenderMode& rm ) const
+bool RenderModeQuadWireAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.drawMode == vcg::GLW::DMHidden);
+    return ((rm.pmmask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES) && (rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION]));
 }
 
-RenderModeFlatLinesAction::RenderModeFlatLinesAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/flatlines.png"),QString("Flat &Lines"), parent)
-{
-
-}
-
-RenderModeFlatLinesAction::RenderModeFlatLinesAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/flatlines.png"),QString("Flat &Lines"), parent)
-{
-
-}
-
-void RenderModeFlatLinesAction::updateRenderMode( RenderMode& rm )
-{
-    rm.setDrawMode(vcg::GLW::DMFlatWire);
-}
-
-bool RenderModeFlatLinesAction::isRenderModeEnabled( const RenderMode& rm ) const
-{
-    return (rm.drawMode == vcg::GLW::DMFlatWire);
-}
-
-bool RenderModeFlatLinesAction::isBufferObjectUpdateRequired() const
+bool RenderModeQuadWireAction::isBufferObjectUpdateRequired() const
 {
     return true;
 }
 
 
-RenderModeFlatAction::RenderModeFlatAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/flat.png"),QString("&Flat"), parent)
-{
 
+RenderModeHiddenLinesAction::RenderModeHiddenLinesAction( QObject* parent)
+    :RenderModeAction(parent)
+{
+    setIcon(QIcon(":/images/backlines.png"));
+    setText(QString("Back Face Culling"));
+}
+
+RenderModeHiddenLinesAction::RenderModeHiddenLinesAction( const unsigned int meshid,QObject* parent)
+    :RenderModeAction(meshid,parent)
+{
+    setIcon(QIcon(":/images/backlines.png"));
+    setText(QString("Back Face Culling"));
+}
+
+void RenderModeHiddenLinesAction::updateRenderMode(RenderMode& rm )
+{
+    //rm.setDrawMode(vcg::GLW::DMHidden);
+}
+
+bool RenderModeHiddenLinesAction::isRenderModeEnabled( const RenderMode& rm ) const
+{
+    //return (rm.drawMode == vcg::GLW::DMHidden);
+    return false;
+}
+
+
+
+RenderModeFlatAction::RenderModeFlatAction( QObject* parent)
+    :RenderModeAction(parent)
+{
+    setIcon(QIcon(":/images/flat.png"));
+    setText(QString("Flat"));
 }
 
 RenderModeFlatAction::RenderModeFlatAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/flat.png"),QString("&Flat"), parent)
+    :RenderModeAction(meshid, parent)
 {
-
+    setIcon(QIcon(":/images/flat.png"));
+    setText(QString("Flat"));
 }
 
-void RenderModeFlatAction::updateRenderMode( RenderMode& rm )
+void RenderModeFlatAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMFlat);
+    if (!isRenderModeEnabled(rm))
+    {
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_SOLID);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = true;
+    }
+    else
+    {
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_SOLID);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = false;
+        if ((rm.pmmask == vcg::GLMeshAttributesInfo::PR_BBOX) || (rm.pmmask == vcg::GLMeshAttributesInfo::PR_NONE))
+            rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = false;
+    }
 }
 
 bool RenderModeFlatAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.drawMode == vcg::GLW::DMFlat);
+    return ((rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL]) && (rm.pmmask & vcg::GLMeshAttributesInfo::PR_SOLID) && (rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION]));
 }
 
 bool RenderModeFlatAction::isBufferObjectUpdateRequired() const
@@ -201,25 +260,39 @@ bool RenderModeFlatAction::isBufferObjectUpdateRequired() const
 
 
 RenderModeSmoothAction::RenderModeSmoothAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/smooth.png"),QString("&Smooth"), parent)
+    :RenderModeAction(parent)
 {
-
+    setIcon(QIcon(":/images/smooth.png"));
+    setText(QString("Smooth"));
 }
 
 RenderModeSmoothAction::RenderModeSmoothAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/smooth.png"),QString("&Smooth"), parent)
+    :RenderModeAction(meshid,parent)
 {
-
+    setIcon(QIcon(":/images/smooth.png"));
+    setText(QString("Smooth"));
 }
 
-void RenderModeSmoothAction::updateRenderMode( RenderMode& rm )
+void RenderModeSmoothAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setDrawMode(vcg::GLW::DMSmooth);
+    if (!isRenderModeEnabled(rm))
+    {
+        rm.addPrimitiveModality(vcg::GLMeshAttributesInfo::PR_SOLID);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    }
+    else
+    {
+        rm.removePrimitiveModality(vcg::GLMeshAttributesInfo::PR_SOLID);
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = false;
+        if ((rm.pmmask == vcg::GLMeshAttributesInfo::PR_BBOX) || (rm.pmmask == vcg::GLMeshAttributesInfo::PR_NONE))
+            rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = false;
+    }
 }
 
 bool RenderModeSmoothAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.drawMode == vcg::GLW::DMSmooth);
+    return ((rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL]) && (rm.pmmask & vcg::GLMeshAttributesInfo::PR_SOLID) && (rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION]));
 }
 
 bool RenderModeSmoothAction::isBufferObjectUpdateRequired() const
@@ -229,25 +302,31 @@ bool RenderModeSmoothAction::isBufferObjectUpdateRequired() const
 
 
 RenderModeTexturePerVertAction::RenderModeTexturePerVertAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/textures.png"),QString("&Texture"),parent)
+    :RenderModeAction(/*QIcon(":/images/textures.png"),QString("&Texture"),*/parent)
 {
-
+    setIcon(QIcon(":/images/textures.png"));
+    setText(QString("Per-Vert Texture"));
 }
 
 RenderModeTexturePerVertAction::RenderModeTexturePerVertAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/textures.png"),QString("&Texture"),parent)
+    :RenderModeAction(meshid/*,QIcon(":/images/textures.png"),QString("&Texture")*/,parent)
 {
-
+    setIcon(QIcon(":/images/textures.png"));
+    setText(QString("Per-Vert Texture"));
 }
 
-void RenderModeTexturePerVertAction::updateRenderMode( RenderMode& rm )
+void RenderModeTexturePerVertAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setTextureMode(!isChecked() ? vcg::GLW::TMNone : vcg::GLW::TMPerVert);
+    //rm.setTextureMode(!isChecked() ? vcg::GLW::TMNone : vcg::GLW::TMPerVert);
+    if (!isRenderModeEnabled(rm))
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = true;
+    else
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = false;
 }
 
 bool RenderModeTexturePerVertAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.textureMode == vcg::GLW::TMPerVert);
+    return rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE];
 }
 
 bool RenderModeTexturePerVertAction::isBufferObjectUpdateRequired() const
@@ -256,25 +335,32 @@ bool RenderModeTexturePerVertAction::isBufferObjectUpdateRequired() const
 }
 
 RenderModeTexturePerWedgeAction::RenderModeTexturePerWedgeAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/textures.png"),QString("&Texture"),parent)
+    :RenderModeAction(/*QIcon(":/images/textures.png"),QString("&Texture"),*/parent)
 {
-
+    setIcon(QIcon(":/images/textures.png"));
+    setText(QString("Per-Wedge Texture"));
 }
 
 RenderModeTexturePerWedgeAction::RenderModeTexturePerWedgeAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/textures.png"),QString("&Texture"),parent)
+    :RenderModeAction(meshid/*,QIcon(":/images/textures.png"),QString("&Texture")*/,parent)
 {
-
+    setIcon(QIcon(":/images/textures.png"));
+    setText(QString("Per-Wedge Texture"));
 }
 
-void RenderModeTexturePerWedgeAction::updateRenderMode( RenderMode& rm )
+void RenderModeTexturePerWedgeAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setTextureMode((!isChecked() ? vcg::GLW::TMNone : vcg::GLW::TMPerWedgeMulti));
+    //rm.setTextureMode((!isChecked() ? vcg::GLW::TMNone : vcg::GLW::TMPerWedgeMulti));
+    if (!isRenderModeEnabled(rm))
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+    else
+        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = false;
 }
 
 bool RenderModeTexturePerWedgeAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return ((rm.textureMode == vcg::GLW::TMPerWedgeMulti) || (rm.textureMode == vcg::GLW::TMPerWedge));
+    //return ((rm.textureMode == vcg::GLW::TMPerWedgeMulti) || (rm.textureMode == vcg::GLW::TMPerWedge));
+    return rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE];
 }
 
 bool RenderModeTexturePerWedgeAction::isBufferObjectUpdateRequired() const
@@ -284,18 +370,18 @@ bool RenderModeTexturePerWedgeAction::isBufferObjectUpdateRequired() const
 
 
 RenderModeDoubleLightingAction::RenderModeDoubleLightingAction( QObject* parent)
-    :RenderModeAction(QString("&Double side lighting"),parent)
+    :RenderModeAction(/*QString("&Double side lighting"),*/parent)
 {
-
+    setText(QString("Double side lighting"));
 }
 
 RenderModeDoubleLightingAction::RenderModeDoubleLightingAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("&Double side lighting"),parent)
+    :RenderModeAction(meshid/*,QString("&Double side lighting")*/,parent)
 {
-
+    setText(QString("Double side lighting"));
 }
 
-void RenderModeDoubleLightingAction::updateRenderMode( RenderMode& rm )
+void RenderModeDoubleLightingAction::updateRenderMode(RenderMode& rm )
 {
     rm.setDoubleFaceLighting(isChecked());
 }
@@ -306,18 +392,18 @@ bool RenderModeDoubleLightingAction::isRenderModeEnabled( const RenderMode& rm )
 }
 
 RenderModeFancyLightingAction::RenderModeFancyLightingAction( QObject* parent)
-    :RenderModeAction(QString("&Fancy Lighting"),parent)
+    :RenderModeAction(/*QString("&Fancy Lighting"),*/parent)
 {
-
+    setText(QString("Fancy Lighting"));
 }
 
 RenderModeFancyLightingAction::RenderModeFancyLightingAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("&Fancy Lighting"),parent)
+    :RenderModeAction(meshid,/*QString("&Fancy Lighting"),*/parent)
 {
-
+    setText(QString("Fancy Lighting"));
 }
 
-void RenderModeFancyLightingAction::updateRenderMode( RenderMode& rm )
+void RenderModeFancyLightingAction::updateRenderMode(RenderMode& rm )
 {
     rm.setFancyLighting(isChecked());
 }
@@ -329,18 +415,20 @@ bool RenderModeFancyLightingAction::isRenderModeEnabled( const RenderMode& rm ) 
 
 
 RenderModeLightOnOffAction::RenderModeLightOnOffAction( QObject* parent)
-    :RenderModeAction(QIcon(":/images/lighton.png"),QString("&Light on/off"),parent)
+    :RenderModeAction(/*QIcon(":/images/lighton.png"),QString("&Light on/off"),*/parent)
 {
-
+    setIcon(QIcon(":/images/lighton.png"));
+    setText(QString("Light on/off"));  
 }
 
 RenderModeLightOnOffAction::RenderModeLightOnOffAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QIcon(":/images/lighton.png"),QString("&Light on/off"),parent)
+    :RenderModeAction(meshid/*,QIcon(":/images/lighton.png"),QString("&Light on/off")*/,parent)
 {
-
+    setIcon(QIcon(":/images/lighton.png"));
+    setText(QString("Light on/off"));  
 }
 
-void RenderModeLightOnOffAction::updateRenderMode( RenderMode& rm )
+void RenderModeLightOnOffAction::updateRenderMode(RenderMode& rm )
 {
     rm.setLighting(isChecked());
 }
@@ -351,18 +439,18 @@ bool RenderModeLightOnOffAction::isRenderModeEnabled( const RenderMode& rm ) con
 }
 
 RenderModeFaceCullAction::RenderModeFaceCullAction( QObject* parent)
-    :RenderModeAction(QString("BackFace &Culling"),parent)
+    :RenderModeAction(/*QString("BackFace &Culling"),*/parent)
 {
-
+    setText(QString("BackFace Culling"));
 }
 
 RenderModeFaceCullAction::RenderModeFaceCullAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("BackFace &Culling"),parent)
+    :RenderModeAction(meshid/*,QString("BackFace &Culling")*/,parent)
 {
-
+    setText(QString("BackFace Culling"));
 }
 
-void RenderModeFaceCullAction::updateRenderMode( RenderMode& rm )
+void RenderModeFaceCullAction::updateRenderMode(RenderMode& rm )
 {
     rm.setBackFaceCull(isChecked());
 }
@@ -373,25 +461,27 @@ bool RenderModeFaceCullAction::isRenderModeEnabled( const RenderMode& rm ) const
 }
 
 RenderModeColorModeNoneAction::RenderModeColorModeNoneAction( QObject* parent)
-    :RenderModeAction(QString("&None"),parent)
+    :RenderModeAction(/*QString("&None"),*/parent)
 {
-
+    setText(QString("None"));
 }
 
 RenderModeColorModeNoneAction::RenderModeColorModeNoneAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("&None"),parent)
+    :RenderModeAction(meshid/*,QString("&None")*/,parent)
 {
-
+    setText(QString("None"));
 }
 
-void RenderModeColorModeNoneAction::updateRenderMode( RenderMode& rm )
+void RenderModeColorModeNoneAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setColorMode(vcg::GLW::CMNone);
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = false;
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = false;
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = false;
 }
 
 bool RenderModeColorModeNoneAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.colorMode == vcg::GLW::CMNone);
+    return (!rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] && !rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && !rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR]);
 }
 
 bool RenderModeColorModeNoneAction::isBufferObjectUpdateRequired() const
@@ -401,25 +491,27 @@ bool RenderModeColorModeNoneAction::isBufferObjectUpdateRequired() const
 
 
 RenderModeColorModePerMeshAction::RenderModeColorModePerMeshAction( QObject* parent)
-    :RenderModeAction(QString("Per &Mesh"),parent)
+    :RenderModeAction(/*QString("Per &Mesh"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_mesh.png"));
+    setText(QString("Per-Mesh Color"));  
 }
 
 RenderModeColorModePerMeshAction::RenderModeColorModePerMeshAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("Per &Mesh"),parent)
+    :RenderModeAction(meshid,/*QString("Per &Mesh"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_mesh.png"));
+    setText(QString("Per-Mesh Color"));
 }
 
-void RenderModeColorModePerMeshAction::updateRenderMode( RenderMode& rm )
+void RenderModeColorModePerMeshAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setColorMode(vcg::GLW::CMPerMesh);
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = true;
 }
 
 bool RenderModeColorModePerMeshAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.colorMode == vcg::GLW::CMPerMesh);
+    return (vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR);
 }
 
 bool RenderModeColorModePerMeshAction::isBufferObjectUpdateRequired() const
@@ -428,25 +520,27 @@ bool RenderModeColorModePerMeshAction::isBufferObjectUpdateRequired() const
 }
 
 RenderModeColorModePerVertexAction::RenderModeColorModePerVertexAction( QObject* parent)
-    :RenderModeAction(QString("Per &Vertex"),parent)
+    :RenderModeAction(/*QString("Per &Vertex"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_vertex.png"));
+    setText(QString("Per-Vertex Color"));
 }
 
 RenderModeColorModePerVertexAction::RenderModeColorModePerVertexAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("Per &Vertex"),parent)
+    :RenderModeAction(meshid,/*QString("Per &Vertex"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_vertex.png"));
+    setText(QString("Per-Vertex Color"));
 }
 
-void RenderModeColorModePerVertexAction::updateRenderMode( RenderMode& rm )
+void RenderModeColorModePerVertexAction::updateRenderMode(RenderMode& rm )
 {
-    rm.setColorMode(vcg::GLW::CMPerVert);
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
 }
 
 bool RenderModeColorModePerVertexAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.colorMode == vcg::GLW::CMPerVert);
+    return rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR];
 }
 
 bool RenderModeColorModePerVertexAction::isBufferObjectUpdateRequired() const
@@ -455,28 +549,32 @@ bool RenderModeColorModePerVertexAction::isBufferObjectUpdateRequired() const
 }
 
 RenderModeColorModePerFaceAction::RenderModeColorModePerFaceAction( QObject* parent)
-    :RenderModeAction(QString("Per &Face"),parent)
+    :RenderModeAction(/*QString("Per &Face Color"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_face.png"));
+    setText(QString("Per-Face Color"));
 }
 
 RenderModeColorModePerFaceAction::RenderModeColorModePerFaceAction( const unsigned int meshid,QObject* parent)
-    :RenderModeAction(meshid,QString("Per &Face"),parent)
+    :RenderModeAction(meshid,/*QString("Per &Face"),*/parent)
 {
-
+    setIcon(QIcon(":/images/per_face.png"));
+    setText(QString("Per-Face Color"));
 }
 
-void RenderModeColorModePerFaceAction::updateRenderMode( RenderMode& rm )
+void RenderModeColorModePerFaceAction::updateRenderMode(RenderMode& rm )
 {
-    rm.colorMode = vcg::GLW::CMPerFace;
+    rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR];
 }
 
 bool RenderModeColorModePerFaceAction::isRenderModeEnabled( const RenderMode& rm ) const
 {
-    return (rm.colorMode == vcg::GLW::CMPerFace);
+    return rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR];
 }
 
 bool RenderModeColorModePerFaceAction::isBufferObjectUpdateRequired() const
 {
     return true;
 }
+
+

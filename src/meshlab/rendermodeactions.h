@@ -8,15 +8,13 @@ class RenderModeAction : public QAction
 {
     Q_OBJECT
 public:
-    RenderModeAction(const QString& title,QObject* parent);
-    RenderModeAction(const unsigned int meshid,const QString& title,QObject* parent);
-    RenderModeAction(const QIcon& icn,const QString& title,QObject* parent);
-    RenderModeAction(const unsigned int meshid,const QIcon& icn,const QString& title,QObject* parent);
+    RenderModeAction(QObject* parent);
+    RenderModeAction(const unsigned int meshid,QObject* parent);
 
-    void updateRenderMode(QList<RenderMode>& rmlist);
     virtual void updateRenderMode(RenderMode& rm) = 0;
     virtual bool isRenderModeEnabled(const RenderMode& rm) const = 0;
     virtual bool isBufferObjectUpdateRequired() const;
+    unsigned int meshId() const;
 
 private:
     void commonInit(const unsigned int meshid);
@@ -60,6 +58,19 @@ public:
     bool isBufferObjectUpdateRequired() const;
 };
 
+
+class RenderModeQuadWireAction : public RenderModeAction
+{
+    Q_OBJECT
+public:
+    RenderModeQuadWireAction(QObject* parent);
+    RenderModeQuadWireAction(const unsigned int meshid,QObject* parent);
+
+    void updateRenderMode(RenderMode& rm);
+    bool isRenderModeEnabled(const RenderMode& rm) const;
+    bool isBufferObjectUpdateRequired() const;
+};
+
 class RenderModeHiddenLinesAction : public RenderModeAction
 {
     Q_OBJECT
@@ -70,19 +81,6 @@ public:
     void updateRenderMode(RenderMode& rm);
     bool isRenderModeEnabled(const RenderMode& rm) const;
 };
-
-class RenderModeFlatLinesAction : public RenderModeAction
-{
-    Q_OBJECT
-public:
-    RenderModeFlatLinesAction(QObject* parent);
-    RenderModeFlatLinesAction(const unsigned int meshid,QObject* parent);
-
-    void updateRenderMode(RenderMode& rm);
-    bool isRenderModeEnabled(const RenderMode& rm) const;
-    bool isBufferObjectUpdateRequired() const;
-};
-
 
 class RenderModeFlatAction : public RenderModeAction
 {

@@ -21,10 +21,13 @@
 *                                                                           *
 ****************************************************************************/
 
+
+
 #include <common/interfaces.h>
-#include <common/ml_scene_renderer.h>
+
 #include "glarea.h"
 #include "mainwindow.h"
+#include "multiViewer_Container.h"
 
 #include <QFileDialog>
 #include <QClipboard>
@@ -40,11 +43,12 @@
 #include <wrap/io_trimesh/import_ply.h>
 #include<QOpenGLContext>
 
+
 using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current)
-    : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false),rendermodemap(),reqattsmap()
+    : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false),rendermodemap()
 {
 	makeCurrent();
     parentmultiview = mvcont;
@@ -76,8 +80,8 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     nearPlane = .2f;
     farPlane = 5.f;
 
-    if (mvcont != NULL)
-        shared = mvcont->sharedDataContext();
+    //if (mvcont != NULL)
+    //    shared = mvcont->sharedDataContext();
 
     id = mvcont->getNextViewerId();
 
@@ -104,9 +108,15 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
 	{
 		RenderMode rm;
         rendermodemap[mesh->id()] = rm;
-		vcg::GLFeederInfo::ReqAtts req;
-		MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
-		reqattsmap[mesh->id()] = req;
+		vcg::GLMeshAttributesInfo::RendAtts req;
+
+
+        //////////////////**********************************************************///////////////////////
+		/*MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
+		reqattsmap[mesh->id()] = req;*/
+        //////////////////**********************************************************///////////////////////
+
+
 	}
     /*getting the meshlab MainWindow from parent, which is QWorkspace.
     *note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
@@ -126,7 +136,6 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
 GLArea::~GLArea()
 {
     rendermodemap.clear();
-	reqattsmap.clear();
 }
 
 /*
@@ -493,23 +502,27 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             foreach(MeshModel * mp, this->md()->meshList)
             {
                 QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
-                if ((it != rendermodemap.end()) && (meshVisibilityMap[mp->id()]))
+                if (meshVisibilityMap[mp->id()])
                 {
                     RenderMode rm = it.value();
                     setLightModel(rm);
-                    if(rm.colorMode != GLW::CMNone)
+                    MLRenderingData curr;
+                    datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
+                    if (curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR])
                     {
                         glEnable(GL_COLOR_MATERIAL);
                         glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
                     }
-                    else glColor(Color4b::LightGray);
+                    else 
+                        glColor(Color4b(Color4b::LightGray));
                     if(rm.backFaceCull)
                         glEnable(GL_CULL_FACE);
                     else
                         glDisable(GL_CULL_FACE);
-                    MLThreadSafeGLMeshAttributesFeeder* feeder = datacont->meshAttributesFeeder(mp->id());
-                    if (feeder != NULL)
-					    MLSceneRenderModeAdapter::renderMesh(*(context()),*feeder,rm,glas.pointSize,glas.pointSmooth,glas.pointDistanceAttenuation);
+                  
+                    datacont->setMeshTransformationMatrix(mp->id(),mp->cm.Tr);
+					datacont->draw(mp->id(),context());
+
                     QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                     for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                     {
@@ -784,41 +797,38 @@ void GLArea::displayInfo(QPainter *painter)
         if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
 
-        MeshDocument* doc = md();
-        if ((doc!= NULL) && (shared != NULL))
+        enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
+        RenderingType rendtype = FULL_IMMEDIATE_MODE;
+        for(QMap<int,bool>::const_iterator mit = boallocated.begin();mit != boallocated.end();++mit)
         {
-            enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
-            RenderingType rendtype = FULL_IMMEDIATE_MODE;
-            for(MeshModel* mit = doc->nextMesh();mit != NULL;mit =doc->nextMesh(mit))
+            if (mit.value() == true)
             {
-                MLThreadSafeGLMeshAttributesFeeder* feed = shared->meshAttributesFeeder(mit->id());
-                if ((feed != NULL) && (feed->isPossibleToUseBORendering()))
-                {
-                    rendtype = MIXED;
-                    if ((rendtype == MIXED) && (doc->nextMesh(mit) == NULL))
-                        rendtype = FULL_BO;
-                }
-            }
+                rendtype = MIXED;
+                if ((rendtype == MIXED) && (mit == boallocated.end() - 1))
+                    rendtype = FULL_BO;
 
-            switch(rendtype)
-            {
-            case(FULL_BO):
-                {
-                    col0Text += QString("BO_RENDERING");
-                    break;
-                }
-            case(MIXED):
-                {
-                    col0Text += QString("MIXED_RENDERING");
-                    break;
-                }
-            case(FULL_IMMEDIATE_MODE):
-                {
-                    col0Text += QString("IMMEDIATE_MODE_RENDERING");
-                    break;
-                }
             }
         }
+
+        switch(rendtype)
+        {
+        case(FULL_BO):
+            {
+                col0Text += QString("BO_RENDERING");
+                break;
+            }
+        case(MIXED):
+            {
+                col0Text += QString("MIXED_RENDERING");
+                break;
+            }
+        case(FULL_IMMEDIATE_MODE):
+            {
+                col0Text += QString("IMMEDIATE_MODE_RENDERING");
+                break;
+            }
+        }
+
         if (clipRatioNear!=clipRatioNearDefault())
             col0Text += QString("\nClipping Near:%1\n").arg(clipRatioNear,7,'f',2);
         painter->drawText(Column_1, Qt::AlignLeft | Qt::TextWordWrap, col1Text);
@@ -1152,20 +1162,40 @@ void GLArea::wheelEvent(QWheelEvent*e)
         switch(e->modifiers())
         {
         //        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.1f, notch),0.01f,50000.0f); break;
-        case Qt::ControlModifier                       : clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); break;
-        case Qt::ShiftModifier                         : fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); break;
-        case Qt::AltModifier                           : 
-            glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
-            //WARNING!!!!!!!!!!!!!!!! TOBEDELETED
-            //foreach(MeshModel * mp, this->md()->meshList)
-            //	mp->glw.SetHintParamf(GLW::HNPPointSize,glas.pointSize);
-            break;
+        case Qt::ControlModifier: 
+            {
+                clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); 
+                break;
+            }
+        case Qt::ShiftModifier: 
+            {
+                fov = math::Clamp(fov+1.2f*notch,5.0f,90.0f); 
+                break;
+            }
+        case Qt::AltModifier:
+            { 
+                glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
+                MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
+                if (cont != NULL)
+                {
+
+                    MLPerViewGLOptions opt;
+                    opt._perpoint_pointsize = glas.pointSize;
+                    opt._perpoint_pointsmooth = glas.pointSmooth;
+                    opt._perpoint_pointattenuation = glas.pointDistanceAttenuation;
+                    foreach(MeshModel * mp, this->md()->meshList)
+                        cont->setGLOptions(mp->id(),context(),opt);
+                }
+                break;
+            }
         default:
-            if(isRaster())
-                this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
-            else
-                trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
-            break;
+            {            
+                if(isRaster())
+                    this->opacity = math::Clamp( opacity*powf(1.2f, notch),0.1f,1.0f);
+                else
+                    trackball.MouseWheel( e->delta()/ float(WHEEL_STEP));
+                break;
+            }
         }
     }
     update();
@@ -2140,16 +2170,18 @@ void GLArea::completeUpdateRequested()
 void GLArea::meshAdded( int index,RenderMode rm )
 {
     rendermodemap[index] = rm;
-	vcg::GLFeederInfo::ReqAtts req;
-	MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
-	reqattsmap[index] = req;
+//	vcg::GLMeshAttributesInfo::ReqAtts req;
+//	MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
+//	reqattsmap[index] = req;
+    boallocated[index] = false;
     emit updateLayerTable();
 }
 
 void GLArea::meshRemoved( int index )
 {
     rendermodemap.remove(index);
-	reqattsmap.remove(index);
+//	reqattsmap.remove(index);
+    boallocated.remove(index);
     emit updateLayerTable();
 }
 
@@ -2165,12 +2197,20 @@ bool GLArea::setupRequestedAttributesPerMesh( int meshid )
 		QMap<int,RenderMode>::iterator itrm = rendermodemap.find(meshid);
 		if (itrm != rendermodemap.end())
 		{
-			vcg::GLFeederInfo::ReqAtts rq;
-			MLSceneRenderModeAdapter::renderModeToReqAtts(itrm.value(),rq);
-			vcg::GLFeederInfo::ReqAtts rr = shared->setupRequestedAttributesPerMesh(meshid,rq,allocated);
-		    reqattsmap[meshid] = rr;
+/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1*/
+//vcg::GLMeshAttributesInfo::RendAtts rq;
+//MLSceneRenderModeAdapter::renderModeToReqAtts(itrm.value(),rq);
+//vcg::GLMeshAttributesInfo::RendAtts rr = shared->setupRequestedAttributesPerMesh(meshid,rq,allocated);
+//if (allocated)
+//	reqattsmap[meshid] = rr;
+//else
+//	reqattsmap[meshid] = vcg::GLMeshAttributesInfo::ReqAtts();
+            /*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1*/
+
 		}
 	}
+
+    boallocated[meshid] = allocated;
     if (!allocated)
     {
         QString immrenderinginfo = QString("mesh[%1] -> immediate mode rendering").arg(meshid);

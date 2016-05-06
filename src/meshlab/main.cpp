@@ -28,41 +28,41 @@
 int main(int argc, char *argv[])
 {
 
-  MeshLabApplication app(argc, argv);
-  QLocale::setDefault(QLocale::C);
-  QCoreApplication::setOrganizationName(MeshLabApplication::organization());
+    MeshLabApplication app(argc, argv);
+    QLocale::setDefault(QLocale::C);
+    QCoreApplication::setOrganizationName(MeshLabApplication::organization());
 #if QT_VERSION >= 0x050100
- // Enable support for highres images (added in Qt 5.1, but off by default)
-  QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    // Enable support for highres images (added in Qt 5.1, but off by default)
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
-  QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
-  QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
+    QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
+    QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
 
-        if(argc>1)
+    if(argc>1)
+    {
+        QString helpOpt1="-h";
+        QString helpOpt2="--help";
+        if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
         {
-            QString helpOpt1="-h";
-            QString helpOpt2="--help";
-            if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
-            {
-                printf("\n\n"
-                             "    MeshLab: an open source mesh processing system\n"
-                             "          Paolo Cignoni (and many many others) \n"
-                             "              Visual Computing Lab\n"
-                             "                  ISTI - CNR \n\n"
-                             "usage:\n\n"
-                             "    meshlab [meshfile] \n\n"
-                             "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
-                             );
+            printf("\n\n"
+                "    MeshLab: an open source mesh processing system\n"
+                "          Paolo Cignoni (and many many others) \n"
+                "              Visual Computing Lab\n"
+                "                  ISTI - CNR \n\n"
+                "usage:\n\n"
+                "    meshlab [meshfile] \n\n"
+                "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
+                );
             exit(-1);
-            }
         }
+    }
 
-  MainWindow window;
-  window.showMaximized();
+    MainWindow window;
+    window.showMaximized();
 
-  // This event filter is installed to intercept the open events sent directly by the Operative System.
-  FileOpenEater *filterObj=new FileOpenEater(&window);
+    // This event filter is installed to intercept the open events sent directly by the Operative System.
+    FileOpenEater *filterObj=new FileOpenEater(&window);
     app.installEventFilter(filterObj);
     app.processEvents();
 
@@ -71,17 +71,17 @@ int main(int argc, char *argv[])
         QString helpOpt1="-h";
         QString helpOpt2="--help";
         if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
-        printf(
+            printf(
             "usage:\n"
             "meshlab <meshfile>\n"
             "Look at http://meshlab.sourceforge.net/wiki\n"
             "for a longer documentation\n"
-        );
+            );
 
-    if(QString(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString(argv[1]).endsWith("aln",Qt::CaseInsensitive) || QString(argv[1]).endsWith("out",Qt::CaseInsensitive) || QString(argv[1]).endsWith("nvm",Qt::CaseInsensitive))
-      window.openProject(argv[1]);
-    else
-      window.importMeshWithLayerManagement(argv[1]);
+        if(QString(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString(argv[1]).endsWith("aln",Qt::CaseInsensitive) || QString(argv[1]).endsWith("out",Qt::CaseInsensitive) || QString(argv[1]).endsWith("nvm",Qt::CaseInsensitive))
+            window.openProject(argv[1]);
+        else
+            window.importMeshWithLayerManagement(argv[1]);
     }
     //else 	if(filterObj->noEvent) window.open();
     return app.exec();

@@ -32,6 +32,7 @@ HEADERS = ../common/interfaces.h \
 	xmlgeneratorgui.h \
 	snapshotsetting.h \
 	rendermodeactions.h \
+	ml_render_gui.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
@@ -53,6 +54,7 @@ SOURCES = main.cpp \
 	additionalgui.cpp \
 	xmlgeneratorgui.cpp \
 	rendermodeactions.cpp \
+	ml_render_gui.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
 	#$$GLEWDIR/src/glew.c \

@@ -61,14 +61,13 @@ void SplitterHandle::mousePressEvent ( QMouseEvent * e )
 	}
 }
 
-MultiViewer_Container::MultiViewer_Container(MLThreadSafeMemoryInfo& meminfo, bool highprec, QWidget *parent)
+MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo, bool highprec,size_t perbatchprimitives,QWidget *parent)
     : Splitter(parent),meshDoc()
 {
 	setChildrenCollapsible(false);
-    scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,100000,NULL);
+    scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives);
 	scenecontext->setHidden(true);
 	scenecontext->initializeGL();
-    meshDoc.setMLSceneGLSharedDataContext(scenecontext);
 	currentId=-1;
 }
 
@@ -76,7 +75,10 @@ MultiViewer_Container::~MultiViewer_Container()
 {
     /*for(int ii = 0;ii < viewerList.size();++ii)
         delete viewerList[ii];*/
-	delete scenecontext;
+	
+    //WARNING!!!! here it's just destroyed the pointer to the MLSceneGLSharedDataContext
+    //the data contained in the GPU are deallocated in the closeEvent function
+    delete scenecontext;
 }
 
 int MultiViewer_Container::getNextViewerId(){
@@ -91,17 +93,31 @@ int MultiViewer_Container::getNextViewerId(){
 }
 
 
+/*********************************************************************************************************/
+/*********************************************************************************************************/
+/*WARNING!!!!!!!!!!!! Horizontal and Vertical in QT are the opposite on how we consider them in Meshlab*/
+/*********************************************************************************************************/
+/*********************************************************************************************************/
+
+
 void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 {
-	/* The Viewers are organized like a BSP tree.
+	
+    MLRenderingData dt;
+    MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
+    if ((window != NULL) && (scenecontext != NULL))
+    {
+        window->defaultPerViewRenderingData(dt);
+        scenecontext->addView(viewer->context(),dt);
+    }
+    /* The Viewers are organized like a BSP tree.
 	Every new viewer is added within an Horizontal splitter. Its orientation could change according to next insertions.
-	HSplit
-	/   \
+	  HSplit
+	/       \
 	View1   VSplit
-	/   \
-	View2  HSplit
-	/
-	View3
+	        /   \
+	      View2  View3
+
 	In the GUI, when a viewer is splitted, the new one appears on its right (the space is split in two equal portions).
 	*/
 	//CASE 0: only when the first viewer is opened, just add it and return;
@@ -109,7 +125,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	{
 		viewerList.append(viewer);
 		addWidget(viewer);
-		currentId = viewer->getId();
+		updateCurrent(viewer->getId());
 		//action for new viewer
 		connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 		return;
@@ -119,8 +135,8 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	if (viewerCounter()==1)
 	{
 		viewerList.append(viewer);
-		addWidget(viewer);
 		this->setOrientation(orient);
+        addWidget(viewer);
 		QList<int> sizes;
 		if(this->orientation()== Qt::Horizontal){
 			sizes.append(this->width()/2);
@@ -135,7 +151,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 		this->setHandleWidth(2);
 		this->setChildrenCollapsible(false);
 
-		currentId = viewer->getId();
+		updateCurrent(viewer->getId());
 		//action for new viewer
 		connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 		return;
@@ -168,7 +184,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 	newSplitter->setHandleWidth(2);
 	newSplitter->setChildrenCollapsible(false);
 
-	currentId = viewer->getId();
+	updateCurrent(viewer->getId());
 	//action for new viewer
 	connect(viewer, SIGNAL(currentViewerChanged(int)), this, SLOT(updateCurrent(int)));
 	return;
@@ -183,7 +199,8 @@ void MultiViewer_Container::removeView(int viewerId)
 			viewer = viewerList.at(i);
 	}
 	assert(viewer);
-
+    if (viewer != NULL)
+        scenecontext->removeView(viewer->context());
     Splitter* parentSplitter = qobject_cast<Splitter *>(viewer->parent());
 	int currentIndex = parentSplitter->indexOf(viewer);
 
@@ -192,7 +209,7 @@ void MultiViewer_Container::removeView(int viewerId)
 	if(viewerList.count()==2)
 	{
 		viewerList.removeAll(viewer);
-		currentId = viewerList.first()->getId();
+        updateCurrent(viewerList.first()->getId());
 		return;
 	}
 
@@ -212,16 +229,20 @@ void MultiViewer_Container::removeView(int viewerId)
 
 		Splitter *siblingSplitter = qobject_cast<Splitter *>(this->widget(insertIndex));
 		assert(siblingSplitter);
+        siblingSplitter->hide();
+        siblingSplitter->deleteLater();
 
 		QWidget *sonLeft = siblingSplitter->widget(0);
 		QWidget *sonRight = siblingSplitter->widget(1);
 		this->setOrientation(siblingSplitter->orientation());
-		this->insertWidget(0,sonLeft);
+        this->insertWidget(0,sonLeft);
 		this->insertWidget(1,sonRight);
-		siblingSplitter->deleteLater();
+
+        patchForCorrectResize(this);
 		viewerList.removeAll(viewer);
-		currentId = viewerList.first()->getId();
-		return;
+		//currentId = viewerList.first()->getId();
+		updateCurrent(viewerList.first()->getId());
+        return;
 	}
 
 	// Final case. Very generic, not son of the root.
@@ -235,19 +256,25 @@ void MultiViewer_Container::removeView(int viewerId)
 	else siblingIndex = 0;
 
 	QWidget  *siblingWidget = parentSplitter->widget(siblingIndex);
-	assert(siblingWidget);
-	parentParentSplitter->insertWidget(parentIndex,siblingWidget);
-	parentSplitter->deleteLater();
+
+    parentSplitter->hide();
+    parentSplitter->deleteLater();
+    parentParentSplitter->insertWidget(parentIndex,siblingWidget);
+    
+    patchForCorrectResize(parentParentSplitter);
 	viewerList.removeAll(viewer);
-	currentId = viewerList.first()->getId();
+	updateCurrent(viewerList.first()->getId());
 }
 
-void MultiViewer_Container::updateCurrent(int current){
+void MultiViewer_Container::updateCurrent(int current)
+{
 	int previousCurrentId = currentId;
 	currentId=current;
 	if(getViewer(previousCurrentId))
 		update(previousCurrentId);
-	emit updateMainWindowMenus();
+    emit updateMainWindowMenus();
+    if (current != previousCurrentId)
+        emit updateDocumentViewer();     
 }
 
 GLArea * MultiViewer_Container::getViewer(int id)
@@ -319,6 +346,7 @@ void MultiViewer_Container::closeEvent( QCloseEvent *event )
 	}
 	bool close = true;
 	int ii = 0;
+    scenecontext->deAllocateGPUSharedData();
 	while(close && (ii < viewerList.size()))
 	{
 		close = viewerList.at(ii)->readyToClose();
@@ -329,4 +357,34 @@ void MultiViewer_Container::closeEvent( QCloseEvent *event )
 		event->accept();
 	else
 		event->ignore();
+}
+
+void MultiViewer_Container::patchForCorrectResize( QSplitter* split )
+{
+    /***************************patch to avoid a qt problem**********************/
+    /*in qt it's not possible to remove a widget from a splitter (no comment....).
+    it's not sufficient to hide it.
+    it looks like that anyway the framework allocates space on the screen also for the hidden splitter. 
+    So we have to resize all the visible glareas to half of the size of the new splitter in which they are going to be inserted and set, 
+    by hand, to zero the size of the splitter that is going to be deleted */
+    /***************************************************************************/
+
+    QSize sz = split->size();
+    int newsz = 0;
+    if(split->orientation() == Qt::Horizontal)
+        newsz = sz.width()/2;
+    else
+        newsz = sz.height()/2;
+    
+    QList<int> newwigsizes;
+    for(int ii = 0;ii < split->count();++ii)
+    {
+        QWidget* tmpwid = split->widget(ii);
+        if (tmpwid->isVisible())
+            newwigsizes.push_back(newsz);
+        else
+            newwigsizes.push_back(0);
+    }
+
+    split->setSizes(newwigsizes);
 }

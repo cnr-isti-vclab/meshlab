@@ -22,6 +22,7 @@
 #include "../common/searcher.h"
 #include <QToolTip>
 #include <QSyntaxHighlighter>
+#include <QProxyStyle>
 
 class CheckBoxListItemDelegate : public QStyledItemDelegate
 {
@@ -231,16 +232,29 @@ private:
     MLAutoCompleter* comp;
 };
 
+class DelayedToolButtonPopUpStyle : public QProxyStyle
+{
+public:
+    DelayedToolButtonPopUpStyle(int msec);
+
+    int styleHint(QStyle::StyleHint sh, const QStyleOption * opt = 0, const QWidget * widget = 0, QStyleHintReturn * hret = 0) const;
+private:
+    int _msec;
+};
+
 //MyToolButton class has been introduced to overcome the "always on screen small down arrow visualization problem" officially recognized qt bug.
 class MyToolButton : public QToolButton
 {
     Q_OBJECT
 public:
-    MyToolButton( QWidget * parent = 0 );
+    MyToolButton( int msecdelay = 0,QWidget * parent = 0 );
+    MyToolButton(QAction* act, int msecdelay = 0,QWidget * parent = 0);
 public slots:
     void openMenu();
 protected:
     void paintEvent( QPaintEvent * );
+    //void mouseReleaseEvent(QMouseEvent * ev);
+    //void mousePressEvent(QMouseEvent * ev);
 };
 
 class MenuLineEdit : public QLineEdit
@@ -285,11 +299,11 @@ private:
     void alignToParentGeometry();
     void selectTextIfNotEmpty();
     int nextEnabledAction( const int k,const int currentind,const QList<QAction*>& acts,QAction*& nextact) const;
-    private slots:
-        void edited(const QString& text);
-        void setLineEditFocus();
-        void onAboutToShowEvent();
-        void changeFocus(const int k);
+private slots:
+    void edited(const QString& text);
+    void setLineEditFocus();
+    void onAboutToShowEvent();
+    void changeFocus(const int k);
 };
 
 #endif
