@@ -58,6 +58,7 @@ private slots:
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>& acts);
+    void activatedAction(MLRenderingAction*);
 
 private:
     //if meshid is -1 it means that the actions are intended to be deployed to all the document and not to a specific mesh model
@@ -85,7 +86,6 @@ public:
     virtual ~MLRenderingParametersFrame();
     virtual void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt) = 0;
     virtual void setAssociatedMeshId(int meshid) = 0;
-    virtual void getAllRenderingActions(QList<MLRenderingAction*>& acts) = 0;
     static MLRenderingParametersFrame* factory(MLRenderingAction* act,int meshid,QWidget* parent);
     static void destroy(MLRenderingParametersFrame* pf);
 
@@ -105,7 +105,6 @@ public:
     ~MLRenderingSolidParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
-    void getAllRenderingActions(QList<MLRenderingAction*>& acts);
 
 private:
     void initGui();
@@ -114,22 +113,71 @@ private:
     MLRenderingToolbar* _texttool;
 };
 
-//class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
-//{
-//    Q_OBJECT
-//public:
-//    MLRenderingSolidParametersFrame(QWidget* parent);
-//    MLRenderingSolidParametersFrame(int meshid,QWidget* parent);    
-//    ~MLRenderingSolidParametersFrame();
-//    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
-//    void setAssociatedMeshId(int meshid);
-//
-//private:
-//    void initGui();
-//    MLRenderingToolbar* _shadingtool;
-//    MLRenderingToolbar* _colortool;
-//    MLRenderingToolbar* _texttool;
-//};
+class MLRenderingWireParametersFrame : public MLRenderingParametersFrame
+{
+    Q_OBJECT
+public:
+    MLRenderingWireParametersFrame(QWidget* parent);
+    MLRenderingWireParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingWireParametersFrame();
+    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void setAssociatedMeshId(int meshid);
+
+private:
+    void initGui();
+    MLRenderingToolbar* _wiretool;
+    MLRenderingToolbar* _shadingtool;
+    MLRenderingToolbar* _colortool;
+    MLRenderingToolbar* _texttool;
+};
+
+class MLRenderingPointsParametersFrame : public MLRenderingParametersFrame
+{
+    Q_OBJECT
+public:
+    MLRenderingPointsParametersFrame(QWidget* parent);
+    MLRenderingPointsParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingPointsParametersFrame();
+    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void setAssociatedMeshId(int meshid);
+
+private:
+    void initGui();
+    MLRenderingToolbar* _shadingtool;
+    MLRenderingToolbar* _colortool;
+    MLRenderingToolbar* _texttool;
+};
+
+class MLRenderingLightingParametersFrame : public MLRenderingParametersFrame
+{
+    Q_OBJECT
+public:
+    MLRenderingLightingParametersFrame(QWidget* parent);
+    MLRenderingLightingParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingLightingParametersFrame();
+    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void setAssociatedMeshId(int meshid);
+
+private:
+    void initGui();
+    MLRenderingToolbar* _lighttool;
+};
+
+class MLRenderingBBoxParametersFrame : public MLRenderingParametersFrame
+{
+    Q_OBJECT
+public:
+    MLRenderingBBoxParametersFrame(QWidget* parent);
+    MLRenderingBBoxParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingBBoxParametersFrame();
+    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void setAssociatedMeshId(int meshid);
+
+private:
+    void initGui();
+    MLRenderingToolbar* _colortool;
+};
+
 //
 //
 //class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
@@ -182,7 +230,7 @@ private:
 
     int _meshid;
 public slots:
-    void switchTab(const QString& name);
+    void switchTab(int meshid,const QString& tabname,const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
 
 signals:

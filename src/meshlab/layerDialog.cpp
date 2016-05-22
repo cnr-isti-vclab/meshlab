@@ -373,7 +373,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
             rendertb->setIconSize(QSize(16,16));
             rendertb->setAccordingToRenderingData((*rdit));
             connect(rendertb,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-		    MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
+		    connect(rendertb,SIGNAL(activatedAction(MLRenderingAction*)),this,SLOT(actionActivated(MLRenderingAction*)));
+            MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
             item->setExpanded(expandedMap.value(qMakePair(item->_meshid,-1)));
            /* QTreeWidgetItem* childitem = new QTreeWidgetItem();
             item->addChild(childitem);
@@ -732,6 +733,15 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
     mw->GLA()->update();
 }
 
+void LayerDialog::actionActivated( MLRenderingAction* ract )
+{
+    if ((mw == NULL) || (ract == NULL))
+        return;
+    MLRenderingData dt;
+    mw->getRenderingData(ract->meshId(),dt);
+    tabw->switchTab(ract->meshId(),ract->text(),dt);
+}
+
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)
     :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar)
 {                                               
@@ -749,16 +759,6 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
         setText(2, meshName);
         _meshid = meshmodel->id();
     }
-}
-
-MeshTreeWidgetItem::MeshTreeWidgetItem(QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)
-    :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar)
-{
-    setIcon(0,QIcon(":/images/layer_eye_open.png"));
-
-    if (rendertoolbar != NULL)
-        tree->setItemWidget(this,3,_rendertoolbar);
-    _meshid = -1;
 }
 
 MeshTreeWidgetItem::~MeshTreeWidgetItem()

@@ -56,7 +56,6 @@ class MeshTreeWidgetItem : public QTreeWidgetItem
 { 
 public:
     MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar);
-    MeshTreeWidgetItem(QTreeWidget* tree,MLRenderingToolbar* rendertoolbar);
     ~MeshTreeWidgetItem();
     void updateVisibility(bool isvisible);
 
@@ -123,6 +122,7 @@ public slots:
     void showContextMenu(const QPoint& pos);
     void adaptLayout(QTreeWidgetItem * item);
     void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>&);
+    void actionActivated(MLRenderingAction* ract);
 
 private:
     Ui::layerDialog* ui;
