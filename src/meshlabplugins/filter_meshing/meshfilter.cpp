@@ -1523,7 +1523,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
   case FP_FAUX_EXTRACT :
   {
-    MeshModel *em= md.addNewMesh("","EdgeMesh",true,RenderMode(GLW::DMWire));
+//WARNING!!!! the RenderMode(GLW::DMWire) should be useless but...
+    MeshModel *em= md.addNewMesh("","EdgeMesh",true/*,RenderMode(GLW::DMWire)*/);
     BuildFromNonFaux(m.cm,em->cm);
   } break;
     case FP_VATTR_SEAM :
@@ -1627,7 +1628,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             sectionName.append(QString::number(planeOffset));
 
             //this is used to generate svg slices
-            MeshModel* cap= md.addNewMesh("",sectionName,true,RenderMode(GLW::DMWire));
+//WARNING!!!! it should be useless....
+            MeshModel* cap= md.addNewMesh("",sectionName,true/*,RenderMode(GLW::DMWire)*/);
             vcg::IntersectionPlaneMesh<CMeshO, CMeshO, CMeshO::ScalarType>(orig->cm, slicingPlane, cap->cm );
             tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 			tri::UpdateBounding<CMeshO>::Box(cap->cm);
