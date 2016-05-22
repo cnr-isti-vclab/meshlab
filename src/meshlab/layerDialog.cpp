@@ -36,7 +36,6 @@ $Log: stdpardialog.cpp,v $
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
-#include "rendermodeactions.h"
 
 using namespace std;
 

@@ -45,7 +45,6 @@
 #include "customDialog.h"
 #include "saveSnapshotDialog.h"
 #include "ui_congratsDialog.h"
-#include "rendermodeactions.h"
 
 
 
