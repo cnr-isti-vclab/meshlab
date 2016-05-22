@@ -44,7 +44,7 @@ void MLSceneGLSharedDataContext::setRequestedAttributesPerMeshView( int mmid,QGL
     if (man != NULL)
     {
         MLRenderingData outdt;
-        MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mm,perviewdata._mask,perviewdata._atts,outdt._mask,outdt._atts);
+        MLBridgeStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm,perviewdata,outdt);
 
         man->setPerViewInfo(viewerid,outdt._mask,outdt._atts);
         man->setGLOptions(viewerid,outdt._opts);
@@ -64,7 +64,7 @@ void MLSceneGLSharedDataContext::setRequestedAttributesPerMeshViews( int mmid,co
     if (man != NULL)
     {
         MLRenderingData outdt;
-        MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mm,perviewdata._mask,perviewdata._atts,outdt._mask,outdt._atts);
+        MLBridgeStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm,perviewdata,outdt);
         foreach(QGLContext* vid,viewerid)
         {
             man->setPerViewInfo(vid,outdt._mask,outdt._atts);
@@ -148,7 +148,10 @@ void MLSceneGLSharedDataContext::meshInserted( int mmid )
 {
     MeshModel* mesh = _md.getMesh(mmid);
     if (mesh != NULL)
+    {
         _meshboman[mmid] = new PerMeshMultiViewManager(mesh->cm,_gpumeminfo,_perbatchtriangles);
+        _meshboman[mmid]->setDebugMode(true);
+    }
 }
 
 void MLSceneGLSharedDataContext::meshRemoved(int mmid)
@@ -211,13 +214,14 @@ void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 
 void MLSceneGLSharedDataContext::addView( QGLContext* viewerid,const MLRenderingData& dt)
 {
-
     for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
     {
         MeshModel* mesh = _md.getMesh(it.key());
         if (mesh != NULL)
+        {
             setRequestedAttributesPerMeshView(it.key(),viewerid,dt);
-
+            manageBuffers(it.key());
+        }
     }
 }
 
@@ -284,12 +288,47 @@ void MLSceneGLSharedDataContext::manageBuffers( int mmid )
     }
 }
 
-void MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh( MeshModel* meshmodel,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& inputpm,const vcg::GLMeshAttributesInfo::RendAtts& inputatts, 
-                                                                                                           vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& outputpm,     vcg::GLMeshAttributesInfo::RendAtts& outputatts )
+void MLSceneGLSharedDataContext::setDebugMode(int mmid,bool activatedebugmodality )
+{
+    MeshModel* mm = _md.getMesh(mmid);
+    if (mm == NULL)
+        return;
+
+    PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+    if (man != NULL)
+        man->setDebugMode(activatedebugmodality);
+}
+
+void MLSceneGLSharedDataContext::getLog( int mmid,vcg::GLMeshAttributesInfo::DebugInfo& info)
+{
+    MeshModel* mm = _md.getMesh(mmid);
+    if (mm == NULL)
+        return;
+  
+    PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+    if (man != NULL)
+        man->getLog(info);
+    return;
+}
+
+bool MLSceneGLSharedDataContext::isBORenderingAvailable( int mmid )
+{
+    MeshModel* mm = _md.getMesh(mmid);
+    if (mm == NULL)
+        return false;
+
+    PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+    if (man != NULL)
+        return man->isBORenderingAvailable();
+    return false;
+}
+
+void MLBridgeStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)
+                                                                                      
 {
     //we use tmp value in order to avoid problems (resetting of the output values at the beginning of the function) if the (&inputpm == &outputpm) || (&inputatts == &outputatts)
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK tmpoutputpm = outputpm;
-    vcg::GLMeshAttributesInfo::RendAtts tmpoutputatts = outputatts;
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK tmpoutputpm = outputdt._mask;
+    vcg::GLMeshAttributesInfo::RendAtts tmpoutputatts = outputdt._atts;
 
     tmpoutputpm = 0;
     tmpoutputatts.reset();
@@ -298,39 +337,40 @@ void MLBridgeStandAloneFunctions::computeRequestedRenderingAttributesCompatibleW
     CMeshO& mesh = meshmodel->cm;
     if (mesh.VN() == 0)
     {
-        outputpm = tmpoutputpm;
-        outputatts = tmpoutputatts;
+        outputdt._mask = tmpoutputpm;
+        outputdt._atts = tmpoutputatts;
         return;
     }
 
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] && meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] && meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
 
     bool validfaces = (mesh.FN() > 0);
     if (!validfaces)
     {
-        outputpm = (unsigned int) ((inputpm & vcg::GLMeshAttributesInfo::PR_POINTS) | (inputpm & vcg::GLMeshAttributesInfo::PR_BBOX));
-        outputatts = tmpoutputatts;
+        outputdt._mask = (unsigned int) ((inputdt._mask & vcg::GLMeshAttributesInfo::PR_POINTS) | (inputdt._mask & vcg::GLMeshAttributesInfo::PR_BBOX));
+        outputdt._atts = tmpoutputatts;
         return;
     }
-
-    tmpoutputpm = inputpm;
-    if ((inputpm & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES) && (!meshmodel->hasDataMask(MeshModel::MM_POLYGONAL)))
+    
+    tmpoutputpm = inputdt._mask;
+    if ((inputdt._mask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES) && (!meshmodel->hasDataMask(MeshModel::MM_POLYGONAL)))
         tmpoutputpm = tmpoutputpm & (!vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
 
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] && meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] && meshmodel->hasDataMask(MeshModel::MM_COLOR);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] && meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] && meshmodel->hasDataMask(MeshModel::MM_COLOR);
 
     //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
     //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
     //The enum-value depends from the enabled attributes of input mesh.
     bool wedgetexture = meshmodel->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] && (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
-    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = inputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] && wedgetexture;
-    outputatts = tmpoutputatts;
-    outputpm = tmpoutputpm;
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] && (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
+    tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = inputdt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] && wedgetexture;
+    outputdt._atts = tmpoutputatts;
+    outputdt._mask = tmpoutputpm;
+    outputdt._opts = inputdt._opts;
 }
 
 void MLBridgeStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts )

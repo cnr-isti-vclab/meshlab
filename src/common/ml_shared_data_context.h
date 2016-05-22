@@ -36,16 +36,6 @@
 class MeshModel;
 class MeshDocument;
 
-struct MLBridgeStandAloneFunctions
-{
-    static void computeRequestedRenderingAttributesCompatibleWithMesh( MeshModel* meshmodel,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& inputpm,const vcg::GLMeshAttributesInfo::RendAtts& inputatts, 
-                                                                                         vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& outputpm,     vcg::GLMeshAttributesInfo::RendAtts& outputatts );
-
-    static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts);
-    
-    static void updatedRenderingAttsAddedToRenderingAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result); 
-};
-
 struct MLPerViewGLOptions : public vcg::PerViewPerRenderingModalityGLOptions
 {
     bool _visible;
@@ -53,6 +43,9 @@ struct MLPerViewGLOptions : public vcg::PerViewPerRenderingModalityGLOptions
     bool _backfacecull;
     bool _doublesidelighting;
     bool _fancylighting;
+
+    bool _vertexsel;
+    bool _facesel;
 
      MLPerViewGLOptions()
         :vcg::PerViewPerRenderingModalityGLOptions(),_visible(true),_lighting(true),_backfacecull(false),_doublesidelighting(false),_fancylighting(false)
@@ -110,6 +103,16 @@ struct MLRenderingData
     }
 };
 
+struct MLBridgeStandAloneFunctions
+{
+    static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
+
+    static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts);
+
+    static void updatedRenderingAttsAddedToRenderingAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result); 
+};
+
+
 class MLSceneGLSharedDataContext : public QGLWidget
 {
     Q_OBJECT
@@ -130,7 +133,8 @@ public:
         return _highprecision;
     }
     
-
+    //Given a QGLContext the PerMeshRenderingDataMap contains the way per each mesh contained in MeshDocument all the current rendering data (eg. flat/smooth shading? pervertex/perface/permesh color?) 
+    //and the 'meaningful' gl parameters used in the rendering system
     typedef QMap<int,MLRenderingData> PerMeshRenderingDataMap; 
 
     void initializeGL();
@@ -148,6 +152,10 @@ public:
     void meshInserted(int mmid);
     void meshRemoved(int mmid);
     void manageBuffers(int mmid);
+    void setDebugMode(int mmid,bool activatedebugmodality);
+    void getLog(int mmid,vcg::GLMeshAttributesInfo::DebugInfo& debug);
+    bool isBORenderingAvailable(int mmid);
+
 public slots:
     void meshDeallocated(int mmid);
     void setRequestedAttributesPerMeshViews(int mmid,const QList<QGLContext*>& viewerid,const MLRenderingData& perviewdata);

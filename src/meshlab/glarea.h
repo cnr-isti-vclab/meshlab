@@ -39,7 +39,6 @@
 #include <common/interfaces.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
-#include "rendermodeactions.h"
 #include "multiViewer_Container.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
@@ -89,17 +88,17 @@ public:
     QAction *getLastAppliedFilter()							{return lastFilterRef;}
     void		setLastAppliedFilter(QAction *qa)		{lastFilterRef = qa;}
 
-    //RenderMode*  getCurrentRenderMode();
-    RenderMode* getCurrentRenderMode()
-    {
-        if ((md() != NULL) && (md()->mm() != NULL))
-        {
-            QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-            if (it != rendermodemap.end())
-                return &it.value();
-        }
-        return NULL;
-    }
+    ////RenderMode*  getCurrentRenderMode();
+    //RenderMode* getCurrentRenderMode()
+    //{
+    //    if ((md() != NULL) && (md()->mm() != NULL))
+    //    {
+    //        QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
+    //        if (it != rendermodemap.end())
+    //            return &it.value();
+    //    }
+    //    return NULL;
+    //}
 
     void updateFps(float deltaTime);
 
@@ -110,12 +109,13 @@ public:
     bool isTrackBallVisible()		{return trackBallVisible;}
     bool isDefaultTrackBall()   {return activeDefaultTrackball;}
 
-    void toggleHelpVisible()      {helpVisible = !helpVisible; update();}
-    void setBackFaceCulling(bool enabled);
-    void setLight(bool state);
-    void setLightMode(bool state,LightingModel lmode);
     void saveSnapshot();
-    void setLightModel(RenderMode& rm);
+    void toggleHelpVisible()      {helpVisible = !helpVisible; update();}
+  /*  void setBackFaceCulling(bool enabled);
+    void setLight(bool state);
+    void setLightMode(bool state,LightingModel lmode);*/
+    
+   // void setLightModel(RenderMode& rm);
     void setView();
 
     int RenderForSelection(int pickX, int pickY);
@@ -129,12 +129,6 @@ public:
     void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
     MeshRenderInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
-
-
-	/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS FUNCTION IS UGLY!!!!! it takes the requested rendering mode directly from the correspondent value found in the rendermodemap!!!!!!!
-	be sure to have correctly setup it in the render mode map before call this function*/ 
-	bool setupRequestedAttributesPerMesh(int meshid);
-	/*****************************************************************************************************************************************************************************/
 
 
     // Edit Mode management
@@ -156,12 +150,12 @@ public slots:
     void updateDecorator(QString name, bool toggle, bool stateToSet);
 
     //slots for changing the draw rendering and texturing mode
-    void setDrawMode(vcg::GLW::DrawMode mode);
+   /* void setDrawMode(vcg::GLW::DrawMode mode);
     void setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode );
     void setColorMode(vcg::GLW::ColorMode mode);
     void setColorMode(RenderMode& rm,vcg::GLW::ColorMode mode);
     void setTextureMode(vcg::GLW::TextureMode mode);
-    void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);
+    void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
     void updateCustomSettingValues(RichParameterSet& rps);
 
     void endEdit(){
@@ -284,6 +278,8 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
+    void GLArea::setLightModel(MLRenderingData& rm);
+
     QMap<QString,QCursor> curMap;
     void pasteTile();
     void setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar, float cameraDist);
@@ -319,9 +315,6 @@ private:
 public:
     inline MLSceneGLSharedDataContext* getSceneGLSharedContext() {return ((mvc() != NULL)? mvc()->sharedDataContext() : NULL);}
 
-    QMap<int,RenderMode> rendermodemap;
-    QMap<int,bool> boallocated;
-
     // view setting variables
     float fov;
     float clipRatioFar;
@@ -347,7 +340,7 @@ public slots:
     void updateRasterSetVisibilities();
 
 private slots:
-    void meshAdded(int index,RenderMode rm);
+    void meshAdded(int index);
     void meshRemoved(int index);
 
 private:

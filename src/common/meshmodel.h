@@ -40,8 +40,6 @@
 #include <vcg/complex/algorithms/update/selection.h>
 #include <vcg/complex/algorithms/update/topology.h>
 
-
-#include <wrap/gl/trimesh.h>
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
@@ -304,104 +302,104 @@ public:
     };
 };// end class RasterModel
 
-class RenderMode
-{
-private:
-    QList<QAction*> declist;
-
-public:
-    vcg::GLW::DrawMode	drawMode;
-    vcg::GLW::ColorMode	colorMode;
-    vcg::GLW::TextureMode	textureMode;
-
-
-
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask;
-    vcg::GLMeshAttributesInfo::RendAtts atts;
-
-    bool lighting;
-    bool backFaceCull;
-    bool doubleSideLighting;
-    bool fancyLighting;
-
-    RenderMode(vcg::GLW::DrawMode dm) // :declist()
-    {
-      Init();
-      drawMode=dm;
-    }
-
-    RenderMode() {  Init(); }
-
-    void Init()
-    {
-        drawMode	= vcg::GLW::DMSmooth;
-        colorMode = vcg::GLW::CMNone;
-        textureMode = vcg::GLW::TMNone;
-        
-        pmmask = vcg::GLMeshAttributesInfo::PR_SOLID;
-        atts = vcg::GLMeshAttributesInfo::RendAtts();
-        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-
-        lighting = true;
-        backFaceCull = false;
-        doubleSideLighting = false;
-        fancyLighting = false;
-    }
-
-    inline void addPrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY addedpm)
-    {
-        pmmask = pmmask | addedpm;
-    }
-
-    inline void removePrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY removedpm)
-    {
-        pmmask = pmmask & (~removedpm);
-    }
-
-    inline void setDrawMode(const vcg::GLW::DrawMode dm)
-    {
-        drawMode = dm;
-    }
-
-    inline void setColorMode(const vcg::GLW::ColorMode cm)
-    {
-        colorMode = cm;
-    }
-
-    inline void setTextureMode(const vcg::GLW::TextureMode tm)
-    {
-        textureMode = tm;
-    }
-
-    inline void setLighting(const bool ison)
-    {
-        lighting = ison;
-    }
-
-    inline void setBackFaceCull(const bool ison)
-    {
-        backFaceCull = ison;
-    }
-
-    inline void setDoubleFaceLighting(const bool ison)
-    {
-        doubleSideLighting = ison;
-    }
-
-    inline void setFancyLighting(const bool ison)
-    {
-        fancyLighting = ison;
-    }
-
-    inline QList<QAction*>& decoratorList()
-    {
-        return declist;
-    }
-
-    static RenderMode defaultRenderingAtts();
-}; // end class RenderMode
-Q_DECLARE_METATYPE(RenderMode)
+//class RenderMode
+//{
+//private:
+//    QList<QAction*> declist;
+//
+//public:
+//    vcg::GLW::DrawMode	drawMode;
+//    vcg::GLW::ColorMode	colorMode;
+//    vcg::GLW::TextureMode	textureMode;
+//
+//
+//
+//    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask;
+//    vcg::GLMeshAttributesInfo::RendAtts atts;
+//
+//    bool lighting;
+//    bool backFaceCull;
+//    bool doubleSideLighting;
+//    bool fancyLighting;
+//
+//    RenderMode(vcg::GLW::DrawMode dm) // :declist()
+//    {
+//      Init();
+//      drawMode=dm;
+//    }
+//
+//    RenderMode() {  Init(); }
+//
+//    void Init()
+//    {
+//        drawMode	= vcg::GLW::DMSmooth;
+//        colorMode = vcg::GLW::CMNone;
+//        textureMode = vcg::GLW::TMNone;
+//        
+//        pmmask = vcg::GLMeshAttributesInfo::PR_SOLID;
+//        atts = vcg::GLMeshAttributesInfo::RendAtts();
+//        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+//        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+//
+//        lighting = true;
+//        backFaceCull = false;
+//        doubleSideLighting = false;
+//        fancyLighting = false;
+//    }
+//
+//    inline void addPrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY addedpm)
+//    {
+//        pmmask = pmmask | addedpm;
+//    }
+//
+//    inline void removePrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY removedpm)
+//    {
+//        pmmask = pmmask & (~removedpm);
+//    }
+//
+//    inline void setDrawMode(const vcg::GLW::DrawMode dm)
+//    {
+//        drawMode = dm;
+//    }
+//
+//    inline void setColorMode(const vcg::GLW::ColorMode cm)
+//    {
+//        colorMode = cm;
+//    }
+//
+//    inline void setTextureMode(const vcg::GLW::TextureMode tm)
+//    {
+//        textureMode = tm;
+//    }
+//
+//    inline void setLighting(const bool ison)
+//    {
+//        lighting = ison;
+//    }
+//
+//    inline void setBackFaceCull(const bool ison)
+//    {
+//        backFaceCull = ison;
+//    }
+//
+//    inline void setDoubleFaceLighting(const bool ison)
+//    {
+//        doubleSideLighting = ison;
+//    }
+//
+//    inline void setFancyLighting(const bool ison)
+//    {
+//        fancyLighting = ison;
+//    }
+//
+//    inline QList<QAction*>& decoratorList()
+//    {
+//        return declist;
+//    }
+//
+//    static RenderMode defaultRenderingAtts();
+//}; // end class RenderMode
+//Q_DECLARE_METATYPE(RenderMode)
 
 //class RasterModelState : public QObject
 //{
@@ -550,9 +548,7 @@ private:
 
 public:
     ///add a new mesh with the given name
-    MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true,const RenderMode& rm = RenderMode());
-
-    MeshModel *addOrGetMesh(QString fullPath, QString Label, bool setAsCurrent=true,const RenderMode& rm = RenderMode());
+    MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
 
     ///remove the mesh from the list and delete it from memory
     bool delMesh(MeshModel *mmToDel);
@@ -604,7 +600,6 @@ signals:
     void meshSetChanged();
 
 	void meshAdded(int index);
-    void meshAdded(int index,RenderMode rm);
     void meshRemoved(int index);
 
     ///whenever the rasterList is changed

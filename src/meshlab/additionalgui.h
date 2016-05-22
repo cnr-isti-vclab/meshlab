@@ -306,4 +306,35 @@ private slots:
     void changeFocus(const int k);
 };
 
+//class ColorPicker : public QWidget
+//{
+//
+//    Q_OBJECT
+//
+//public:
+//    ColorWidget(QWidget *p, RichColor* newColor);
+//    ~ColorWidget();
+//
+//    void addWidgetToGridLayout(QGridLayout* lay,const int r);
+//    void collectWidgetValue();
+//    void resetWidgetValue();
+//    void setWidgetValue(const Value& nv);
+//    void initWidgetValue();
+//
+//private:
+//    void  updateColorInfo(const ColorValue& newColor);
+//    QPushButton* colorButton;
+//    QLabel* colorLabel;
+//    QLabel* descLabel;
+//    QColor pickcol;
+//
+//
+//signals:
+//    void pickedColor(QColor col);
+//private slots:
+//    void pickColor();
+//protected:
+//    QHBoxLayout* vlay;
+//};
+
 #endif

@@ -46,6 +46,9 @@
      </widget>
     </item>
     <item>
+     <layout class="QVBoxLayout" name="renderingLayout"/>
+    </item>
+    <item>
      <layout class="QVBoxLayout" name="rasterLayout">
       <item>
        <widget class="QTreeWidget" name="rasterTreeWidget">

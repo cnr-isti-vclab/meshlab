@@ -48,7 +48,7 @@ using namespace std;
 using namespace vcg;
 
 GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet *current)
-    : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false),rendermodemap()
+    : QGLWidget(parent,mvcont->sharedDataContext()),interrbutshow(false)
 {
 	makeCurrent();
     parentmultiview = mvcont;
@@ -101,23 +101,8 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
     connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
     connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
-    connect(md(),SIGNAL(meshAdded(int,RenderMode)),this,SLOT(meshAdded(int,RenderMode)));
     connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
-    foreach(MeshModel* mesh,md()->meshList)
-	{
-		RenderMode rm;
-        rendermodemap[mesh->id()] = rm;
-		vcg::GLMeshAttributesInfo::RendAtts req;
-
-
-        //////////////////**********************************************************///////////////////////
-		/*MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
-		reqattsmap[mesh->id()] = req;*/
-        //////////////////**********************************************************///////////////////////
-
-
-	}
     /*getting the meshlab MainWindow from parent, which is QWorkspace.
     *note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
     *which takes care about the window frame (its parent is the QWorkspace again).
@@ -135,7 +120,6 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
 
 GLArea::~GLArea()
 {
-    rendermodemap.clear();
 }
 
 /*
@@ -465,19 +449,27 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if(!this->md()->isBusy())
     {
         glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-        if (iRenderer)
+        
+        
+        if ((iRenderer) && (parentmultiview != NULL))
         {
-            iRenderer->Render(currentShader, *this->md(), rendermodemap, this);
-            foreach(MeshModel * mp, this->md()->meshList)
+            MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
+            if (shared != NULL)
             {
-                if (mp->visible)
+                MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
+                shared->getRenderInfoPerMeshView(context(),dt);
+        
+                iRenderer->Render(currentShader, *this->md(), dt, this);
+                foreach(MeshModel * mp, this->md()->meshList)
                 {
-                    QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
-                    for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
+                    if (mp->visible)
                     {
-                        MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-                        decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+                        QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
+                        for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
+                        {
+                            MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+                            decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+                        }
                     }
                 }
             }
@@ -501,13 +493,16 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             //else
             foreach(MeshModel * mp, this->md()->meshList)
             {
-                QMap<int,RenderMode>::iterator it = rendermodemap.find(mp->id());
                 if (meshVisibilityMap[mp->id()])
                 {
-                    RenderMode rm = it.value();
-                    setLightModel(rm);
+//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! That's really important
+/*RenderMode rm = it.value();
+setLightModel(rm);*/
+/////////////////////////////////////////////////////////////////////////////////////
+
                     MLRenderingData curr;
                     datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
+                    setLightModel(curr);
                     if (curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR])
                     {
                         glEnable(GL_COLOR_MATERIAL);
@@ -515,11 +510,13 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     }
                     else 
                         glColor(Color4b(Color4b::LightGray));
-                    if(rm.backFaceCull)
+
+                    
+                    if(curr._opts._backfacecull)
                         glEnable(GL_CULL_FACE);
                     else
                         glDisable(GL_CULL_FACE);
-                  
+
                     datacont->setMeshTransformationMatrix(mp->id(),mp->cm.Tr);
 					datacont->draw(mp->id(),context());
 
@@ -732,7 +729,7 @@ void GLArea::displayRealTimeLog(QPainter *painter)
 void GLArea::displayInfo(QPainter *painter)
 {
 	makeCurrent();
-    if (mvc() == NULL)
+    if ((mvc() == NULL) || (md() == NULL))
         return;
     painter->endNativePainting();
     painter->save();
@@ -780,16 +777,13 @@ void GLArea::displayInfo(QPainter *painter)
             col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + "    (" + engLocale.toString(this->md()->vn()) + ") \n";
             col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + "    (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
-        QMap<int,RenderMode>::iterator it = rendermodemap.find(md()->mm()->id());
-        if (it != rendermodemap.end())
+        
+        if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
         {
-            RenderMode rm = it.value();
-            if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
-            {
-                QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-                col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
-            }
+            QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+            col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
         }
+                
         col1Text += GetMeshInfoString();
 
         if(fov>5) col0Text += QString("FOV: %1\n").arg(fov);
@@ -799,17 +793,24 @@ void GLArea::displayInfo(QPainter *painter)
 
         enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
         RenderingType rendtype = FULL_IMMEDIATE_MODE;
-        for(QMap<int,bool>::const_iterator mit = boallocated.begin();mit != boallocated.end();++mit)
+        if (parentmultiview != NULL)
         {
-            if (mit.value() == true)
+            MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
+            if (shared != NULL)
             {
-                rendtype = MIXED;
-                if ((rendtype == MIXED) && (mit == boallocated.end() - 1))
-                    rendtype = FULL_BO;
-
+                int hh = 0;
+                foreach(MeshModel* meshmod,md()->meshList)
+                {
+                    if (shared->isBORenderingAvailable(meshmod->id()))
+                    {
+                        rendtype = MIXED;
+                        if ((rendtype == MIXED) && (hh == md()->meshList.size() - 1))
+                            rendtype = FULL_BO;
+                    }
+                    ++hh;
+                }
             }
         }
-
         switch(rendtype)
         {
         case(FULL_BO):
@@ -1313,89 +1314,89 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
     }
 }
 
-void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
+//void GLArea::setDrawMode(vcg::GLW::DrawMode mode)
+//{
+//	makeCurrent();
+//	for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//		it.value().drawMode = mode;
+//	update();
+//}
+//
+//void GLArea::setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode )
+//{
+//	makeCurrent();
+//    rm.drawMode = mode;
+//    update();
+//}
+//
+//void GLArea::setColorMode(vcg::GLW::ColorMode mode)
+//{
+//	makeCurrent();
+//    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//        it.value().colorMode = mode;
+//    update();
+//}
+//
+//void GLArea::setColorMode( RenderMode& rm,vcg::GLW::ColorMode mode )
+//{
+//	makeCurrent();
+//    rm.colorMode = mode;
+//    update();
+//}
+//
+//void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
+//{
+//	makeCurrent();
+//    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//        it.value().textureMode = mode;
+//    update();
+//}
+//
+//void GLArea::setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode)
+//{
+//	makeCurrent();
+//    rm.textureMode = mode;
+//    update();
+//}
+//
+//void GLArea::setLight(bool setState)
+//{
+//	makeCurrent();
+//    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//        it.value().lighting = setState;
+//    update();
+//}
+//
+//void GLArea::setLightMode(bool state,LightingModel lmode)
+//{
+//	makeCurrent();
+//    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//    {
+//        switch(lmode)
+//        {
+//        case LDOUBLE:		it.value().doubleSideLighting = state;	break;
+//        case LFANCY:		it.value().fancyLighting = state; break;
+//        }
+//    }
+//    update();
+//}
+//
+//void GLArea::setBackFaceCulling(bool enabled)
+//{
+//	makeCurrent();
+//    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
+//        it.value().backFaceCull = enabled;
+//    update();
+//}
+//
+void GLArea::setLightModel(MLRenderingData& dt)
 {
-	makeCurrent();
-	for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-		it.value().drawMode = mode;
-	update();
-}
-
-void GLArea::setDrawMode(RenderMode& rm,vcg::GLW::DrawMode mode )
-{
-	makeCurrent();
-    rm.drawMode = mode;
-    update();
-}
-
-void GLArea::setColorMode(vcg::GLW::ColorMode mode)
-{
-	makeCurrent();
-    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-        it.value().colorMode = mode;
-    update();
-}
-
-void GLArea::setColorMode( RenderMode& rm,vcg::GLW::ColorMode mode )
-{
-	makeCurrent();
-    rm.colorMode = mode;
-    update();
-}
-
-void GLArea::setTextureMode(vcg::GLW::TextureMode mode)
-{
-	makeCurrent();
-    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-        it.value().textureMode = mode;
-    update();
-}
-
-void GLArea::setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode)
-{
-	makeCurrent();
-    rm.textureMode = mode;
-    update();
-}
-
-void GLArea::setLight(bool setState)
-{
-	makeCurrent();
-    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-        it.value().lighting = setState;
-    update();
-}
-
-void GLArea::setLightMode(bool state,LightingModel lmode)
-{
-	makeCurrent();
-    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-    {
-        switch(lmode)
-        {
-        case LDOUBLE:		it.value().doubleSideLighting = state;	break;
-        case LFANCY:		it.value().fancyLighting = state; break;
-        }
-    }
-    update();
-}
-
-void GLArea::setBackFaceCulling(bool enabled)
-{
-	makeCurrent();
-    for(QMap<int,RenderMode>::iterator it = rendermodemap.begin();it != rendermodemap.end();++it)
-        it.value().backFaceCull = enabled;
-    update();
-}
-
-void GLArea::setLightModel(RenderMode& rm)
-{
-	makeCurrent();
-    if (rm.lighting)
+    makeCurrent();
+    if (dt._opts._lighting) 
     {
         glEnable(GL_LIGHTING);
 
-        if (rm.doubleSideLighting)
+        if (dt._opts._doublesidelighting)
             glEnable(GL_LIGHT1);
         else
             glDisable(GL_LIGHT1);
@@ -1407,7 +1408,7 @@ void GLArea::setLightModel(RenderMode& rm)
         glLightfv(GL_LIGHT1, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
         glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
         glLightfv(GL_LIGHT1, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
-        if(rm.fancyLighting)
+        if(dt._opts._fancylighting)
         {
             glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.fancyFLightDiffuseColor).V());
             glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.fancyBLightDiffuseColor).V());
@@ -2167,56 +2168,14 @@ void GLArea::completeUpdateRequested()
 //	return NULL;
 //}
 
-void GLArea::meshAdded( int index,RenderMode rm )
+void GLArea::meshAdded( int index)
 {
-    rendermodemap[index] = rm;
-//	vcg::GLMeshAttributesInfo::ReqAtts req;
-//	MLSceneRenderModeAdapter::renderModeToReqAtts(rm,req);
-//	reqattsmap[index] = req;
-    boallocated[index] = false;
     emit updateLayerTable();
 }
 
 void GLArea::meshRemoved( int index )
 {
-    rendermodemap.remove(index);
-//	reqattsmap.remove(index);
-    boallocated.remove(index);
     emit updateLayerTable();
-}
-
-
-/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS FUNCTION IS UGLY!!!!! it takes the requested rendering mode directly from the correspondent value found in the rendermodemap!!!!!!!
-be sure to have correctly setup it in the render mode map before call this function*/ 
-bool GLArea::setupRequestedAttributesPerMesh( int meshid )
-{
-	bool allocated = false;
-	MLSceneGLSharedDataContext* shared = getSceneGLSharedContext();
-	if (shared != NULL)
-	{
-		QMap<int,RenderMode>::iterator itrm = rendermodemap.find(meshid);
-		if (itrm != rendermodemap.end())
-		{
-/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1*/
-//vcg::GLMeshAttributesInfo::RendAtts rq;
-//MLSceneRenderModeAdapter::renderModeToReqAtts(itrm.value(),rq);
-//vcg::GLMeshAttributesInfo::RendAtts rr = shared->setupRequestedAttributesPerMesh(meshid,rq,allocated);
-//if (allocated)
-//	reqattsmap[meshid] = rr;
-//else
-//	reqattsmap[meshid] = vcg::GLMeshAttributesInfo::ReqAtts();
-            /*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1*/
-
-		}
-	}
-
-    boallocated[meshid] = allocated;
-    if (!allocated)
-    {
-        QString immrenderinginfo = QString("mesh[%1] -> immediate mode rendering").arg(meshid);
-        this->Logf(GLLogStream::WARNING,qPrintable(immrenderinginfo));
-    }
-	return allocated;
 }
 
 void GLArea::setupTextureEnv( GLuint textid )

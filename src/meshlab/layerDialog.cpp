@@ -46,10 +46,20 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
     setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow );
     this-> QWidget::setAttribute( Qt::WA_MacAlwaysShowToolWindow);
     setVisible(false);
-    LayerDialog::ui->setupUi(this);
+    ui->setupUi(this);
     mw=qobject_cast<MainWindow *>(parent);
-    this->layout();
 
+    /*Horrible trick*/
+    _docitem = new QTreeWidgetItem();
+    _docitem->setHidden(true);
+    _globaldoctool = new MLRenderingSideToolbar();
+    _globaldoctool->setIconSize(QSize(16,16));
+    _globaldoctool->setVisible(false);
+    ///////////////////////////////////
+
+    createRenderingDataParsView();
+    if (tabw != NULL)
+        ui->renderingLayout->addWidget(tabw);
     // The following connection is used to associate the click with the change of the current mesh.
     connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 
@@ -70,7 +80,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
 
 void LayerDialog::keyPressEvent ( QKeyEvent * event )
 {   MeshDocument *md = mw->meshDoc();
-    if(event->key() == Qt::Key_Space )
+    if((md != NULL) && (event->key() == Qt::Key_Space ))
     {
       RasterModel *rm= md->nextRaster(md->rm());
         if(rm!=0) md->setCurrentRaster(rm->id());
@@ -79,10 +89,12 @@ void LayerDialog::keyPressEvent ( QKeyEvent * event )
 
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 {
-    MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
-    if(mItem)
+    if(item)
     {
-        int clickedId= mItem->_meshid;
+        int clickedId= -1;
+        MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
+        if (mItem != NULL)
+            clickedId= mItem->_meshid;
         switch(col)
         {
         case 0 :
@@ -96,13 +108,12 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
                 if(QApplication::keyboardModifiers() == Qt::ControlModifier)
                 {
                     foreach(MeshModel *mp, md->meshList)
-                    {
                         mw->GLA()->meshSetVisibility(mp, false);
-                    }
                 }
 
                 //Toggle visibility of current mesh
-                mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
+                if (mItem != NULL)
+                    mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
 
                 // EVEN NICER TRICK.
                 // If the user has pressed alt when clicking on the eye icon, all layers will get visible
@@ -124,8 +135,9 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
                     }
                     mw->GLA()->meshSetVisibility(md->getMesh(clickedId), !md->getMesh(clickedId)->visible);
                 }
-
-                mw->meshDoc()->setCurrentMesh(clickedId);
+                if (mItem != NULL)
+                    mw->meshDoc()->setCurrentMesh(clickedId);
+                updateGlobalProjectVisibility();
             } break;
         case 1 :
 
@@ -133,10 +145,16 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 
         case 3 :
             //the user has chosen to switch the layer
-            mw->meshDoc()->setCurrentMesh(clickedId);
-            this->updateDecoratorParsView();
+            if (mItem != NULL)
+                mw->meshDoc()->setCurrentMesh(clickedId);
+            /*this->updateDecoratorParsView(clickedId);*/
+            //updateRenderingDataParsView();
             break;
         }
+        MLRenderingData dt;
+        if (clickedId != -1)
+            mw->getRenderingData(clickedId,dt);
+        tabw->setAssociatedMeshIdAndRenderingData(clickedId,dt);
         //make sure the right row is colored or that they right eye is drawn (open or closed)
         updateMeshItemSelectionStatus();
         mw->GLA()->update();
@@ -318,18 +336,25 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		return;
 	}
 	MeshDocument *md=mw->meshDoc();
-	this->setWindowTitle(md->docLabel());
+    if (md == NULL)
+        return;
 	
 	/*for(int ii = 0;ii < tobedel.size();++ii)
 		delete tobedel[ii];*/
 	ui->meshTreeWidget->clear();
 
 	ui->meshTreeWidget->setColumnCount(4);
-	ui->meshTreeWidget->setColumnWidth(0,40);
-	ui->meshTreeWidget->setColumnWidth(1,40);
-	//ui->meshTreeWidget->setColumnWidth(2,40);
 	ui->meshTreeWidget->header()->hide();
+
+    _docitem = new QTreeWidgetItem();
+    _docitem->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
+    _globaldoctool = new MLRenderingSideToolbar(this);
+    _globaldoctool->setIconSize(QSize(16,16));
+
+   updateProjectName(md->docLabel());
+    
 	int maxwidth = 0;
+    QList<QTreeWidgetItem*> itms;
 	MeshTreeWidgetItem *selitem = NULL;
 	foreach(MeshModel* mmd, md->meshList)
 	{
@@ -345,18 +370,25 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
         MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator rdit = dtf.find(mmd->id());
         if (rdit != dtf.end())
         {
-		    MLRenderToolbar* rendertb = new MLRenderToolbar(mmd->id(),rdit->_mask,this);
-            connect(rendertb,SIGNAL(primitiveModalityUpdateRequested(unsigned int,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK)),mw,SLOT(primitiveModalityUpdateRequested(unsigned int,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK)));
-		    MLRenderParametersFrame* renderfm = new MLRenderParametersFrame(this);
-		    MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb,renderfm);
-		    item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
-		    ui->meshTreeWidget->addTopLevelItem(item);
+		    MLRenderingSideToolbar* rendertb = new MLRenderingSideToolbar(mmd->id(),this);
+            rendertb->setIconSize(QSize(16,16));
+            rendertb->setAccordingToRenderingData((*rdit));
+            connect(rendertb,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+		    MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
+            item->setExpanded(expandedMap.value(qMakePair(item->_meshid,-1)));
+           /* QTreeWidgetItem* childitem = new QTreeWidgetItem();
+            item->addChild(childitem);
+            MLRenderingParametersFrame* renderfm = new MLRenderingParametersFrame(mmd->id(),(*rdit),this);
+            ui->meshTreeWidget->setItemWidget(childitem,3,renderfm);*/
+            addDefaultNotes(item,mmd);
+            itms.push_back(item);
 		    //Adding default annotations
-		    addDefaultNotes(item, mmd);
+		    
         }
         else
              throw MeshLabException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
 	}
+    _docitem->addChildren(itms);
 
 	int wid = 0;
 	for(int i=0; i< ui->meshTreeWidget->columnCount(); i++)
@@ -365,6 +397,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		wid += ui->meshTreeWidget->columnWidth(i);
 	}
 	ui->meshTreeWidget->setMinimumWidth(wid);
+    updateGlobalProjectVisibility();
 	updateMeshItemSelectionStatus();
 	if (md->rasterList.size() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
@@ -372,8 +405,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 	ui->rasterTreeWidget->clear();
 	ui->rasterTreeWidget->setColumnCount(4);
-	ui->rasterTreeWidget->setColumnWidth(0,40);
-	ui->rasterTreeWidget->setColumnWidth(1,20);
+	//ui->rasterTreeWidget->setColumnWidth(0,40);
+	//ui->rasterTreeWidget->setColumnWidth(1,20);
 	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
 	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
 	ui->rasterTreeWidget->header()->hide();
@@ -587,17 +620,6 @@ void LayerDialog::updateDecoratorParsView()
     //ui->decParsTree->expandAll();
 }
 
-void LayerDialog::renderingModalityChanged(const MLRenderingData& data )
-{
-    for(int ii = 0;ii < ui->meshTreeWidget->topLevelItemCount();++ii)
-    {
-        //QTreeWidgetItem is NOT derived from QObject. The usual qobject_cast is not effective
-        MeshTreeWidgetItem* itm = dynamic_cast<MeshTreeWidgetItem*>(ui->meshTreeWidget->topLevelItem(ii));
-        if (itm != NULL)
-            itm->_rendertoolbar->setPrimitiveModality(data._mask);
-    }
-}
-
 void LayerDialog::updateMeshItemSelectionStatus()
 {
     MeshDocument* md = mw->meshDoc();
@@ -639,15 +661,84 @@ void LayerDialog::reset()
     ui->rasterTreeWidget->clear();
 }
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame)
-    :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar),_frame(frame)
+void LayerDialog::updateRenderingDataParsView(int meshid,const MLRenderingData& dt )
 {
+    tabw->setAssociatedMeshIdAndRenderingData(meshid,dt);
+}
+
+void LayerDialog::createRenderingDataParsView()
+{
+    if (_globaldoctool != NULL)
+    {
+        tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions(),this);
+        tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
+        connect(tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+    }
+}
+
+void LayerDialog::updateProjectName( const QString& name )
+{
+    setWindowTitle(name);
+    QFileInfo fi(name);
+    _docitem->setText(1,"");
+    QFont fnt;
+    fnt.setBold(true);
+    _docitem->setFont(2,fnt);
+    _docitem->setText(2,fi.baseName());
+    ui->meshTreeWidget->addTopLevelItem(_docitem);
+    ui->meshTreeWidget->setItemWidget(_docitem,3,_globaldoctool);
+}
+
+void LayerDialog::updateGlobalProjectVisibility()
+{
+    if (mw == NULL)
+        return;
+    MeshDocument* md = mw->meshDoc();
+    if (md == NULL)
+        return;
+    bool allhidden = true;
+    for(int ii = 0;ii < ui->meshTreeWidget->topLevelItemCount();++ii)
+    {
+        QTreeWidgetItem* qitm = ui->meshTreeWidget->topLevelItem(ii);
+        MeshTreeWidgetItem* mitm = dynamic_cast<MeshTreeWidgetItem*>(qitm);
+        if (mitm != NULL)
+        {
+            MeshModel* mm = md->getMesh(mitm->_meshid);
+            if (mm != NULL)
+            {
+                allhidden = allhidden && !(mm->isVisible());
+                mitm->updateVisibility(mm->isVisible());
+            }
+        }
+    }
+
+    if ((!md->meshList.isEmpty()) && allhidden)
+        _docitem->setIcon(0,QIcon(":/images/layer_eye_close.png"));
+    else
+        _docitem->setIcon(0,QIcon(":/images/layer_eye_open.png"));
+}
+
+void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
+{
+    if (mw == NULL)
+        return;
+    MLRenderingData dt;
+    mw->getRenderingData(meshid,dt);
+    foreach(MLRenderingAction* act,acts)
+    {
+        if (act != NULL)
+            act->updateRenderingData(dt);
+    }
+    mw->setRenderingData(meshid,dt);
+    mw->GLA()->update();
+}
+
+MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)
+    :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar)
+{                                               
     if (meshmodel != NULL)
     {
-        if(meshmodel->visible)
-            setIcon(0,QIcon(":/images/layer_eye_open.png"));
-        else
-            setIcon(0,QIcon(":/images/layer_eye_close.png"));
+        updateVisibility(meshmodel->visible);
         setText(1, QString::number(meshmodel->id()));
 
         QString meshName = meshmodel->label();
@@ -655,13 +746,14 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
             meshName += " *";
         if (_rendertoolbar != NULL)
             tree->setItemWidget(this,3,_rendertoolbar);
+
         setText(2, meshName);
         _meshid = meshmodel->id();
     }
 }
 
-MeshTreeWidgetItem::MeshTreeWidgetItem(QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame)
-    :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar),_frame(frame)
+MeshTreeWidgetItem::MeshTreeWidgetItem(QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)
+    :QTreeWidgetItem(tree),_rendertoolbar(rendertoolbar)
 {
     setIcon(0,QIcon(":/images/layer_eye_open.png"));
 
@@ -674,6 +766,14 @@ MeshTreeWidgetItem::~MeshTreeWidgetItem()
 {
     /*if (addwid->parent() == NULL)
         delete addwid;*/
+}
+
+void MeshTreeWidgetItem::updateVisibility( bool isvisible )
+{
+    if(isvisible)
+        setIcon(0,QIcon(":/images/layer_eye_open.png"));
+    else
+        setIcon(0,QIcon(":/images/layer_eye_close.png"));
 }
 
 RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)

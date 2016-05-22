@@ -115,15 +115,13 @@ private slots:
     void meshAdded(int mid);
     void meshRemoved(int mid);
 
+
 public slots:
     bool importMeshWithLayerManagement(QString fileName=QString());
     bool importRaster(const QString& fileImg = QString());
     bool openProject(QString fileName=QString());
     bool appendProject(QString fileName=QString());
     void updateCustomSettings();
-    void updateRenderMode();
-    void updateRenderMode(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask,vcg::GLMeshAttributesInfo::RendAtts atts);
-    void primitiveModalityUpdateRequested(unsigned int mmid,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask);
 private slots:
 
     bool importMesh(QString fileName=QString());
@@ -141,6 +139,8 @@ public:
     bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm, const Matrix44m &mtr=Matrix44m::Identity());
     
     void defaultPerViewRenderingData(MLRenderingData& dt) const;
+    void getRenderingData(int mid,MLRenderingData& dt) const;
+    void setRenderingData(int mid,const MLRenderingData& dt);
 private slots:
     //////////// Slot Menu File //////////////////////
     void reload();
@@ -183,7 +183,6 @@ private slots:
     void updateXMLStdDialog();
     void enableDocumentSensibleActionsContainer(const bool enable);
     void updateLayerDialog();
-
     //void updatePerViewApplicationStatus();
     void setSplit(QAction *qa);
     void setUnsplit();
@@ -218,7 +217,7 @@ private slots:
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
 private:
-    
+    void addRenderingSystemLogInfo(unsigned mmid);
     int longestActionWidthInMenu(QMenu* m,const int longestwidth);
     int longestActionWidthInMenu( QMenu* m);
     int longestActionWidthInAllMenus();
@@ -282,9 +281,8 @@ private:
     QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
 
-    vcg::GLW::TextureMode getBestTextureRenderModePerMesh(const int meshid);
-    void setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm);
-    void getCurrentRenderingData(MLRenderingData& rdata) const;
+    //vcg::GLW::TextureMode getBestTextureRenderModePerMesh(const int meshid);
+    //void setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm);
 public:
     PluginManager PM;
 
@@ -338,7 +336,6 @@ public:
     void setHandleMenu(QPoint point, Qt::Orientation orientation, QSplitter *origin);
     QMenu* meshLayerMenu() { return filterMenuMeshLayer; }
     QMenu* rasterLayerMenu() { return filterMenuRasterLayer; }
-    void connectRenderModeActionList(QList<RenderModeAction*>& actlist);
 
 private:
     //the xml filters run in a different thread. The xmlfiltertimer starts on executeFilter and stops on postFilterExecution
@@ -494,8 +491,6 @@ private:
     };
     QMap<int,MeshModelTmpData> existingmeshesbeforefilterexecution;
     static QString getDecoratedFileName(const QString& name);
-
-    void updateRenderToolBar( RenderModeAction* act );
 };
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System

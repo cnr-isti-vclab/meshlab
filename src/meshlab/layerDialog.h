@@ -20,19 +20,18 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-History
 
-$Log: stdpardialog.cpp,v $
-****************************************************************************/
+
 #ifndef LAYER_DIALOG_H
 #define LAYER_DIALOG_H
 
 #include <QTreeWidgetItem>
 #include <QDockWidget>
+#include <QTabWidget>
 #include <common/filterparameter.h>
 #include <common/ml_shared_data_context.h>
 #include "ml_render_gui.h"
+
 
 class MainWindow;
 class QTreeWidget;
@@ -52,15 +51,16 @@ namespace Ui
     class layerDialog;
 }
 
+
 class MeshTreeWidgetItem : public QTreeWidgetItem
 { 
 public:
-    MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame);
-    MeshTreeWidgetItem(QTreeWidget* tree,MLRenderToolbar* rendertoolbar,MLRenderParametersFrame* frame);
+    MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar);
+    MeshTreeWidgetItem(QTreeWidget* tree,MLRenderingToolbar* rendertoolbar);
     ~MeshTreeWidgetItem();
+    void updateVisibility(bool isvisible);
 
-    MLRenderToolbar* _rendertoolbar;
-    MLRenderParametersFrame* _frame;
+    MLRenderingToolbar* _rendertoolbar;
     int _meshid;
 };
 
@@ -112,6 +112,7 @@ public:
     ~LayerDialog();
     void updateLog(GLLogStream &Log);
     void updateDecoratorParsView();
+    void updateRenderingDataParsView(int meshid,const MLRenderingData& dt);
     void reset();
 public slots:
     void keyPressEvent ( QKeyEvent * event );
@@ -121,7 +122,7 @@ public slots:
     void showEvent ( QShowEvent * event );
     void showContextMenu(const QPoint& pos);
     void adaptLayout(QTreeWidgetItem * item);
-    void renderingModalityChanged(const MLRenderingData& data);
+    void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>&);
 
 private:
     Ui::layerDialog* ui;
@@ -134,15 +135,23 @@ private:
     QMap< QPair<int ,int> ,  bool> expandedMap;
     //QList<QToolBar*> tobedel;
     void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
+
     void updateColumnNumber(const QTreeWidgetItem * item);
     //QVector<QTreeWidgetItem*> tobedeleted;
     void updateExpandedMap(int meshId, int tagId, bool expanded);
     void updateMeshItemSelectionStatus();
+    void createRenderingDataParsView();
+    void updateProjectName(const QString& name);
+    void updateGlobalProjectVisibility();
 
     //it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar.
     //used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
     QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
-    MeshTreeWidgetItem* docitem;
+    QTreeWidgetItem* _docitem;
+    MLRenderingSideToolbar* _globaldoctool;
+
+
+    MLRenderingParametersTab* tabw;
 signals:
     void removeDecoratorRequested(QAction* );
     void toBeShow();

@@ -166,21 +166,8 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
     return newName;
 }
 
-/*
-When you create a new mesh it can be either a newly created one or an opened one.
-If it is an opened one the fullpathname is meaningful and the label, by default is just the short name.
-If it is a newly created one the fullpath is an empty string and the user has to provide a label.
-*/
 
-MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
-{
-    MeshModel*newMM = this->getMesh(label);
-    if(newMM==0)  
-        newMM=this->addNewMesh(fullPath,label,setAsCurrent,rm);
-    return newMM;
-}
-
-MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent,const RenderMode& rm)
+MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
 {
     QString newlabel = NameDisambiguator(this->meshList,label);
 
@@ -193,9 +180,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
     MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
     meshList.push_back(newMesh);
     emit meshSetChanged();
-    qRegisterMetaType<RenderMode>("RenderMode");
 	emit meshAdded(newMesh->id());
-    emit meshAdded(newMesh->id(),rm);
     
 	if(setAsCurrent)
         this->setCurrentMesh(newMesh->id());
@@ -775,11 +760,11 @@ int MeshModel::dataMask() const
 //    return result;
 //}
 
-RenderMode RenderMode::defaultRenderingAtts()
-{
-    RenderMode result;
-    result.pmmask = (unsigned int) vcg::GLMeshAttributesInfo::PR_SOLID;
-    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-    return result;
-}
+//RenderMode RenderMode::defaultRenderingAtts()
+//{
+//    RenderMode result;
+//    result.pmmask = (unsigned int) vcg::GLMeshAttributesInfo::PR_SOLID;
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+//    return result;
+//}

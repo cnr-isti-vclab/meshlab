@@ -75,6 +75,7 @@ MainWindow::MainWindow()
     // Permette di passare da una finestra all'altra e tenere aggiornato il workspace
     connect(windowMapper, SIGNAL(mapped(QWidget*)),this, SLOT(wrapSetActiveSubWindow(QWidget *)));
     // Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
+    connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateLayerDialog()));
     connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateMenus()));
     connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateWindowMenu()));
     connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)),this, SLOT(updateStdDialog()));
@@ -134,7 +135,7 @@ MainWindow::MainWindow()
     //qb->setAutoClose(true);
     //qb->setMinimumDuration(0);
     //qb->reset();
-    connect(this, SIGNAL(updateLayerTable()), layerDialog, SLOT(updateTable()));
+    connect(this, SIGNAL(updateLayerTable()), this, SLOT(updateLayerDialog()));
     connect(layerDialog,SIGNAL(removeDecoratorRequested(QAction*)),this,SLOT(switchOffDecorator(QAction*)));
 }
 
@@ -1158,7 +1159,8 @@ void MainWindow::submitBug()
 void MainWindow::wrapSetActiveSubWindow(QWidget* window){
     QMdiSubWindow* subwindow;
     subwindow = dynamic_cast<QMdiSubWindow*>(window);
-    if(subwindow!= NULL){
+    if(subwindow!= NULL)
+    {
         mdiarea->setActiveSubWindow(subwindow);
     }else{
         qDebug("Type of window is not a QMdiSubWindow*");
