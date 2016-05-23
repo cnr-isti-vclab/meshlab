@@ -422,11 +422,11 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     QTime time;
     time.start();
 
-    //if(!this->md()->isBusy())
-    //{
-    //    initTexture(hasToUpdateTexture);
-    //    hasToUpdateTexture=false;
-    //}
+    /*if(!this->md()->isBusy())
+    {
+        initTexture(hasToUpdateTexture);
+        hasToUpdateTexture=false;
+    }*/
 
     glClearColor(1.0,1.0,1.0,0.0);
     glEnable(GL_DEPTH_TEST);
@@ -495,11 +495,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             {
                 if (meshVisibilityMap[mp->id()])
                 {
-//WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! That's really important
-/*RenderMode rm = it.value();
-setLightModel(rm);*/
-/////////////////////////////////////////////////////////////////////////////////////
-
                     MLRenderingData curr;
                     datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
                     setLightModel(curr);
@@ -527,7 +522,6 @@ setLightModel(rm);*/
                         decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
                     }
                 }
-                //}
             }
 
         }

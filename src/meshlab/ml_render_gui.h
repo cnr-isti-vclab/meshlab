@@ -178,44 +178,6 @@ private:
     MLRenderingToolbar* _colortool;
 };
 
-//
-//
-//class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
-//{
-//    Q_OBJECT
-//public:
-//    MLRenderingSolidParametersFrame(QWidget* parent);
-//    MLRenderingSolidParametersFrame(int meshid,QWidget* parent);    
-//    ~MLRenderingSolidParametersFrame();
-//    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
-//    void setAssociatedMeshId(int meshid);
-//
-//private:
-//    void initGui();
-//    MLRenderingToolbar* _shadingtool;
-//    MLRenderingToolbar* _colortool;
-//    MLRenderingToolbar* _texttool;
-//};
-//
-//
-//class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
-//{
-//    Q_OBJECT
-//public:
-//    MLRenderingSolidParametersFrame(QWidget* parent);
-//    MLRenderingSolidParametersFrame(int meshid,QWidget* parent);    
-//    ~MLRenderingSolidParametersFrame();
-//    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
-//    void setAssociatedMeshId(int meshid);
-//
-//private:
-//    void initGui();
-//    MLRenderingToolbar* _shadingtool;
-//    MLRenderingToolbar* _colortool;
-//    MLRenderingToolbar* _texttool;
-//};
-
-
 class MLRenderingParametersTab : public QTabWidget
 {
     Q_OBJECT
