@@ -278,17 +278,17 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
-    void GLArea::setLightModel(MLRenderingData& rm);
+    void setLightModel(MLRenderingData& rm);
 
     QMap<QString,QCursor> curMap;
     void pasteTile();
     void setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar, float cameraDist);
 
-    bool  helpVisible;				// Help on screen
-    bool	trackBallVisible;		// Draws the trackball ?
-    bool  activeDefaultTrackball; // keep track on active trackball
-    bool	hasToUpdateTexture;			// has to reload textures at the next redraw
-    bool  hasToPick;							// has to pick during the next redraw.
+    bool helpVisible;				// Help on screen
+    bool trackBallVisible;		// Draws the trackball ?
+    bool activeDefaultTrackball; // keep track on active trackball
+    bool hasToUpdateTexture;			// has to reload textures at the next redraw
+    bool hasToPick;							// has to pick during the next redraw.
     bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
 	bool hasToGetPickCoords;							// if we are waiting for a double click for getting a position on the GLArea that has to be sent back using signal/slots (for parameters)
 	bool hasToSelectMesh;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
