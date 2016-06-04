@@ -7,7 +7,7 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
   {
     return QApplication::notify(rec,ev);
   }
-  catch (MeshLabException& e)
+  catch (MLException& e)
   {
     qCritical("%s",e.what());
   }

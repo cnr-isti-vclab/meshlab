@@ -73,7 +73,24 @@ public:
         return parentmultiview;
     }
 
-    MainWindow *mw();
+    void requestForRenderingAttsUpdate( int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES attname )
+    {
+        if (parentmultiview != NULL)
+        {
+            MLSceneGLSharedDataContext* cont = parentmultiview->sharedDataContext();
+            if (cont != NULL)
+            {
+                vcg::GLMeshAttributesInfo::RendAtts atts;
+                atts[attname] = true;
+                cont->meshAttributesUpdated(meshid,false,atts);
+                cont->manageBuffers(meshid);
+            }
+        }
+    }
+
+
+    MainWindow * mw();
+
     MeshModel *mm(){ if (mvc() == NULL) return NULL;return mvc()->meshDoc.mm();}
     inline MeshDocument *md() {if (mvc() == NULL) return NULL;return &(mvc()->meshDoc);}
 
@@ -108,7 +125,6 @@ public:
     bool isHelpVisible()      {return helpVisible;}
     bool isTrackBallVisible()		{return trackBallVisible;}
     bool isDefaultTrackBall()   {return activeDefaultTrackball;}
-
     void saveSnapshot();
     void toggleHelpVisible()      {helpVisible = !helpVisible; update();}
   /*  void setBackFaceCulling(bool enabled);
@@ -129,7 +145,8 @@ public:
     void setRenderer(MeshRenderInterface *rend, QAction *shader){	iRenderer = rend; currentShader = shader;}
     MeshRenderInterface * getRenderer() { return iRenderer; }
     QAction* getCurrentShaderAction() {return currentShader;}
-
+    
+    
 
     // Edit Mode management
     // In the glArea we can have a active Editor that can toggled into a ''suspendeed'' state
@@ -162,7 +179,7 @@ public slots:
         if(iEdit && currentEditor)
         {
             if (mm() != NULL)
-                iEdit->EndEdit(*mm(),this);
+                iEdit->EndEdit(*mm(),this,parentmultiview->sharedDataContext());
         }
         iEdit= 0;
         currentEditor=0;
@@ -238,6 +255,7 @@ signals :
     void transmitShot(QString name, Shotm);
     void transmitMatrix(QString name, Matrix44m);
     void updateLayerTable();
+
 public slots:
     void sendViewPos(QString name);
     void sendSurfacePos(QString name);
@@ -249,6 +267,8 @@ public slots:
     void sendViewerShot(QString name);
     void sendRasterShot(QString name);
 
+
+    
 
 public:
     vcg::Point3f getViewDir();
@@ -278,7 +298,7 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
-    void setLightModel(MLRenderingData& rm);
+    void setLightingColors(const MLPerViewGLOptions& opts);
 
     QMap<QString,QCursor> curMap;
     void pasteTile();
@@ -507,7 +527,7 @@ private:
         tb.track.tra =  (vcg::Point3f::Construct(-from.Extrinsics.Tra()));
         tb.track.tra += vcg::Point3f::Construct(tb.track.rot.Inverse().Rotate(vcg::Point3f(0,0,cameraDist)))*(1/tb.track.sca);
     }
-
+   
 };
 
 

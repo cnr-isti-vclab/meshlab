@@ -1242,7 +1242,7 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
 {
     XMLStdParFrame* par = qobject_cast<XMLStdParFrame*>(p);
     if (par == NULL)
-        throw MeshLabException("Critical Error: A widget must have an instance of XMLStdParFrame as parent.");
+        throw MLException("Critical Error: A widget must have an instance of XMLStdParFrame as parent.");
     gla_curr = par->curr_gla;
     //int row = gridLay->rowCount() - 1;
     this->setShotValue(paramName,Shotm());
@@ -1337,7 +1337,7 @@ void XMLShotWidget::set( const QString & expr )
     if (numbs.size() != 32)
     {
         QString err = "Something bad happened in XMLShotWidget::set function: expected expression should match the following format : new " + MLXMLElNames::shotType + "(rotmat[0],....,rotmat[15],travec[0],..,travec[2],foc,pxs[0],pxs[1],centpxs[0],centpxs[1],viewpxs[0],viewpxs[1],distcent[0],distcent[1],k[0],...,k[3])";
-        throw MeshLabException(err);
+        throw MLException(err);
     }
     int offset = 0;
     Matrix44m rot;
@@ -1349,7 +1349,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1362,7 +1362,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1372,7 +1372,7 @@ void XMLShotWidget::set( const QString & expr )
     if (!ok)
     {
         QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-        throw MeshLabException(err);
+        throw MLException(err);
     }
     ++offset;
     Point2m tmp2vcf;
@@ -1383,7 +1383,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1395,7 +1395,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1408,7 +1408,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1420,7 +1420,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1432,7 +1432,7 @@ void XMLShotWidget::set( const QString & expr )
         if (!ok)
         {
             QString err = "Something bad happened in XMLShotWidget::set function: bad value conversion to float.";
-            throw MeshLabException(err);
+            throw MLException(err);
         }
     }
     offset += ii;
@@ -1538,7 +1538,7 @@ void OldScriptingSystemXMLParamDialog::createFrame()
         QString fname(_mfc.act->text());
         MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
         if (mplist.size() != _paramvalues.size())
-            MeshLabException("OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. The mplist and _paramvalues MUST have the same number of items.");
+            MLException("OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. The mplist and _paramvalues MUST have the same number of items.");
 
         QVBoxLayout *vboxLayout = new QVBoxLayout(this);
         setLayout(vboxLayout);
@@ -1559,7 +1559,7 @@ void OldScriptingSystemXMLParamDialog::createFrame()
             if (it == _paramvalues.end())
             {
                 QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
-                throw MeshLabException(err);
+                throw MLException(err);
             }
             _stdparframe->xmlfieldwidgets[ii]->set(it.value());
             //in this dialog we will not make distinction between important/not-important parameters
@@ -1595,14 +1595,14 @@ void OldScriptingSystemXMLParamDialog::getAccept()
         QString fname(_mfc.act->text());
         MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
         if (_stdparframe->xmlfieldwidgets.size() != _paramvalues.size())
-            MeshLabException("OldScriptingSystemXMLParamDialog::getAccept() : Something really bad happened. The _stdparframe->xmlfieldwidgets and _paramvalues MUST have the same number of items.");
+            MLException("OldScriptingSystemXMLParamDialog::getAccept() : Something really bad happened. The _stdparframe->xmlfieldwidgets and _paramvalues MUST have the same number of items.");
         for(int ii = 0;ii < mplist.size();++ii)
         {
             QMap<QString,QString>::iterator it = _paramvalues.find(mplist[ii][MLXMLElNames::paramName]);
             if (it == _paramvalues.end())
             {
                 QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
-                throw MeshLabException(err);
+                throw MLException(err);
             }
             it.value() = _stdparframe->xmlfieldwidgets[ii]->getWidgetExpression();
         }

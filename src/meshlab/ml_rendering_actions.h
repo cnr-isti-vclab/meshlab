@@ -11,16 +11,15 @@ class MLRenderingAction : public QAction
 public:
     MLRenderingAction(QObject* parent);
     MLRenderingAction(int meshid,QObject* parent);
-    
-    MLRenderingAction* copyAction(const MLRenderingAction* tocopy,QObject* newactionparent);
 
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
+    virtual bool isCheckableConditionValid(MeshModel*) const {return true;}
     int meshId() const;
     void setMeshId(int meshid);
+
 protected:
-    virtual MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const = 0;
-    void copyActionState(const MLRenderingAction* tocopy);
+    bool isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,const MLRenderingData& rd) const;
 };
 
 class MLRenderingBBoxAction : public MLRenderingAction
@@ -29,12 +28,9 @@ class MLRenderingBBoxAction : public MLRenderingAction
 public:
     MLRenderingBBoxAction(QObject* parent);
     MLRenderingBBoxAction(int meshid,QObject* parent);
-
+    bool isOnOffOption(MLRenderingAction* onact = 0,MLRenderingAction* offact = 0);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
-
 };
 
 class MLRenderingPointsAction : public MLRenderingAction
@@ -46,8 +42,6 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
 class MLRenderingWireAction : public MLRenderingAction
@@ -59,8 +53,6 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
 class MLRenderingSolidAction : public MLRenderingAction
@@ -72,73 +64,81 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
-class MLRenderingEdgeWireAction : public MLRenderingAction
+class MLRenderingFauxEdgeWireAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingEdgeWireAction(QObject* parent);
-    MLRenderingEdgeWireAction(int meshid,QObject* parent);
+    MLRenderingFauxEdgeWireAction(QObject* parent);
+    MLRenderingFauxEdgeWireAction(int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+    bool isCheckableConditionValid(MeshModel*) const;
 };
 
-class MLRenderingHiddenLinesAction : public MLRenderingAction
+class MLRenderingPerFaceNormalAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingHiddenLinesAction(QObject* parent);
-    MLRenderingHiddenLinesAction(int meshid,QObject* parent);
+    MLRenderingPerFaceNormalAction(QObject* parent);
+    MLRenderingPerFaceNormalAction(int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
-class MLRenderingFlatAction : public MLRenderingAction
+class MLRenderingPerVertexNormalAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingFlatAction(QObject* parent);
-    MLRenderingFlatAction(int meshid,QObject* parent);
+    MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+private:
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
 
-class MLRenderingSmoothAction : public MLRenderingAction
+class MLRenderingNoneNormalAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingSmoothAction(QObject* parent);
-    MLRenderingSmoothAction(int meshid,QObject* parent);
+    MLRenderingNoneNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingNoneNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+private:
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
+
+class MLRenderingPointsDotAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingPointsDotAction(QObject* parent);
+    MLRenderingPointsDotAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
 
 class MLRenderingPerVertTextCoordAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerVertTextCoordAction(QObject* parent);
-    MLRenderingPerVertTextCoordAction(int meshid,QObject* parent);
+    MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+    bool isCheckableConditionValid(MeshModel*) const;
+private:
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingPerWedgeTextCoordAction : public MLRenderingAction
@@ -150,8 +150,7 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+    bool isCheckableConditionValid(MeshModel*) const;
 };
 
 class MLRenderingDoubleLightingAction : public MLRenderingAction
@@ -163,8 +162,6 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
 class MLRenderingFancyLightingAction : public MLRenderingAction
@@ -176,21 +173,19 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
-class MLRenderingLightOnOffAction : public MLRenderingAction
+class MLRenderingNoShadingAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingLightOnOffAction(QObject* parent);
-    MLRenderingLightOnOffAction(int meshid,QObject* parent);
+    MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+private:
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingFaceCullAction : public MLRenderingAction
@@ -202,23 +197,39 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
 };
 
 class MLRenderingPerMeshColorAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerMeshColorAction(QObject* parent);
-    MLRenderingPerMeshColorAction(int meshid,QObject* parent);
+    MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     void setColor(const QColor& col);
     void setColor(const vcg::Color4b& col);
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+
+    vcg::Color4b& getColor();
+private:
+    vcg::Color4b _col;
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+};
+
+class MLRenderingBBoxPerMeshColorAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingBBoxPerMeshColorAction(QObject* parent);
+    MLRenderingBBoxPerMeshColorAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+    void setColor(const QColor& col);
+    void setColor(const vcg::Color4b& col);
+
+    vcg::Color4b& getColor();
 private:
     vcg::Color4b _col;
 };
@@ -227,13 +238,13 @@ class MLRenderingPerVertexColorAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerVertexColorAction(QObject* parent);
-    MLRenderingPerVertexColorAction(int meshid,QObject* parent);
+    MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+private:
+    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingPerFaceColorAction : public MLRenderingAction
@@ -245,8 +256,7 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+    bool isCheckableConditionValid(MeshModel*) const;
 };
 
 class MLRenderingUserDefinedColorAction : public MLRenderingAction
@@ -258,13 +268,171 @@ public:
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    void setColor(const QColor& col);
     void setColor(const vcg::Color4b& col);
-protected:
-    MLRenderingAction* copyCtr(const MLRenderingAction* tocopy,QObject* newactionparent) const;
+    void setColor(const QColor& col);
+
+    vcg::Color4b& getColor();
 private:
     vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    vcg::Color4b _coluser;
+};
+
+class MLRenderingBBoxUserDefinedColorAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingBBoxUserDefinedColorAction(QObject* parent);
+    MLRenderingBBoxUserDefinedColorAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+    void setColor(const QColor& col);
+    void setColor(const vcg::Color4b& col);
+
+    vcg::Color4b& getColor();
+private:
     vcg::Color4b _col;
+};
+
+
+class MLRenderingFloatAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingFloatAction(QObject* parent);
+    MLRenderingFloatAction(int meshid,QObject* parent);
+
+    void setValue(float value) {_value = value;}
+    float getValue() {return _value;}
+
+    virtual void updateRenderingData(MLRenderingData& rd) = 0;
+    virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
+    virtual float getValueFromRenderingData(const MLRenderingData& rd) const = 0;
+protected:
+    float _value;
+};
+
+class MLRenderingPointsSizeAction : public MLRenderingFloatAction
+{
+    Q_OBJECT
+public:
+    MLRenderingPointsSizeAction(QObject* parent);
+    MLRenderingPointsSizeAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+    float getValueFromRenderingData(const MLRenderingData& rd) const;
+};
+
+class MLRenderingWireWidthAction : public MLRenderingFloatAction
+{
+    Q_OBJECT
+public:
+    MLRenderingWireWidthAction(QObject* parent);
+    MLRenderingWireWidthAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+    float getValueFromRenderingData(const MLRenderingData& rd) const;
+};
+
+class MLRenderingSelectionAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingSelectionAction(QObject* parent);
+    MLRenderingSelectionAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingVertSelectionAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingVertSelectionAction(QObject* parent);
+    MLRenderingVertSelectionAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingFaceSelectionAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingFaceSelectionAction(QObject* parent);
+    MLRenderingFaceSelectionAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingEdgeDecoratorAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingEdgeDecoratorAction(QObject* parent);
+    MLRenderingEdgeDecoratorAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingBoundaryAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingBoundaryAction(QObject* parent);
+    MLRenderingBoundaryAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingManifoldAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingManifoldAction(QObject* parent);
+    MLRenderingManifoldAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingTexBorderAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingTexBorderAction(QObject* parent);
+    MLRenderingTexBorderAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+//class MLRenderingLightColorAction : public MLRenderingAction
+//{
+//    Q_OBJECT
+//public:
+//    MLRenderingLightColorAction(QObject* parent);
+//    MLRenderingLightColorAction(int meshid,QObject* parent);
+//
+//    void updateRenderingData(MLRenderingData& rd);
+//    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+//};
+
+class MLRenderingDotAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingDotAction(QObject* parent);
+    MLRenderingDotAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
 
 #endif

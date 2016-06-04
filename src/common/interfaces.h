@@ -486,7 +486,7 @@ public:
 
   virtual bool startDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) {return false;}
   virtual bool startDecorate(QAction *, MeshModel &, RichParameterSet *, GLArea *) {return false;}
-  virtual void decorateMesh(QAction *,  MeshModel &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
+  virtual void decorateMesh(QAction *,  MeshModel &, RichParameterSet *,QPainter *, GLLogStream &) = 0;
   virtual void decorateDoc(QAction *,  MeshDocument &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
   virtual void endDecorate(QAction *,   MeshModel &, RichParameterSet *, GLArea *){}
   virtual void endDecorate(QAction *,   MeshDocument &, RichParameterSet *, GLArea *){}
@@ -549,16 +549,16 @@ public:
     static const QString Info();
 
   // Called when the user press the first time the button
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/){return true;}
-    virtual bool StartEdit(MeshDocument &md, GLArea *parent)
+    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* cont){return true;}
+    virtual bool StartEdit(MeshDocument &md, GLArea *parent,MLSceneGLSharedDataContext* cont)
     {
         //assert(NULL != md.mm());
         if ( md.mm() != NULL)
-            return (StartEdit(*(md.mm()), parent));
+            return (StartEdit(*(md.mm()), parent,cont));
         else return false;
     }
     // Called when the user press the second time the button
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){}
+    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* cont){}
 
 
     // There are two classes of editing tools, the one that works on a single layer at a time
@@ -571,11 +571,11 @@ public:
     //selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
     //they are not expecting.
     // If your editing plugins is not singleMesh you MUST reimplement this to correctly handle the change of layer.
-    virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent)
+    virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent,MLSceneGLSharedDataContext* cont)
     {
         assert(this->isSingleMeshEdit());
-        EndEdit(oldMeshModel, parent);
-        StartEdit(md, parent);
+        EndEdit(oldMeshModel, parent,cont);
+        StartEdit(md, parent,cont);
     }
 
   virtual void Decorate(MeshModel &m, GLArea *parent, QPainter * /*p*/) { Decorate(m,parent); }

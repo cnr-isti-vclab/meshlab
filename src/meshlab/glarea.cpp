@@ -417,6 +417,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     QPainter painter(this);
     painter.beginNativePainting();
     makeCurrent();
+
     if(!isValid() ) return;
 
     QTime time;
@@ -468,7 +469,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
                             MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-                            decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+                            decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,&painter,md()->Log);
                         }
                     }
                 }
@@ -490,27 +491,33 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             MLSceneGLSharedDataContext* datacont = mvc()->sharedDataContext();
             if (datacont == NULL)
                 return;
-            //else
+
             foreach(MeshModel * mp, this->md()->meshList)
             {
                 if (meshVisibilityMap[mp->id()])
                 {
                     MLRenderingData curr;
                     datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
-                    setLightModel(curr);
-                    if (curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] || curr._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR])
-                    {
-                        glEnable(GL_COLOR_MATERIAL);
-                        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-                    }
-                    else 
-                        glColor(Color4b(Color4b::LightGray));
-
+                    MLPerViewGLOptions opts;
+                    if (curr.get(opts) == false)
+                        throw MLException(QString("GLArea: invalid MLPerViewGLOptions"));
+                    setLightingColors(opts);
                     
-                    if(curr._opts._backfacecull)
+                    //union of all the attributes requested at least by a modality rendering
+                    vcg::GLMeshAttributesInfo::RendAtts unionatts;
+                    for(int pm = 0;pm < (int)vcg::GLMeshAttributesInfo::PR_ARITY;++pm)
+                    {
+                        vcg::GLMeshAttributesInfo::RendAtts tmp;
+                        if (curr.get(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(pm),tmp) == false)
+                            throw MLException(QString("GLArea: invalid PRIMITIVE_MODALITY"));
+                        unionatts = vcg::GLMeshAttributesInfo::RendAtts::unionSet(unionatts,tmp);
+                    }
+                    
+                    if(opts._back_face_cull)
                         glEnable(GL_CULL_FACE);
                     else
                         glDisable(GL_CULL_FACE);
+
 
                     datacont->setMeshTransformationMatrix(mp->id(),mp->cm.Tr);
 					datacont->draw(mp->id(),context());
@@ -519,11 +526,10 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                     {
                         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-                        decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, this,&painter,md()->Log);
+                        decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, &painter,md()->Log);
                     }
                 }
             }
-
         }
         if(iEdit) {
             iEdit->setLog(&md()->Log);
@@ -622,13 +628,14 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if(!error.isEmpty()) {
         Logf(GLLogStream::WARNING,qPrintable(error));
     }
-
     //check if viewers are linked
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
     if(window && window->linkViewersAct->isChecked() && mvc()->currentId==id)
         mvc()->updateTrackballInViewers();
 	//doneCurrent();
     painter.endNativePainting();
+    //glFinish();
+    //doneCurrent();
 }
 
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
@@ -943,7 +950,7 @@ void GLArea::manageCurrentMeshChange()
             assert(lastModelEdited);  // if there is an editor that works on a single mesh
         // last model edited should always be set when start edit is called
 
-        iEdit->LayerChanged(*this->md(), *lastModelEdited, this);
+        iEdit->LayerChanged(*this->md(), *lastModelEdited, this,parentmultiview->sharedDataContext());
 
         //now update the last model edited
         //TODO this is not the best design....   iEdit should maybe keep track of the model on its own
@@ -962,6 +969,7 @@ void GLArea::updateAllPerMeshDecorators()
 	makeCurrent();
     for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
     {
+        
         MeshModel *m = md()->getMesh(i.key());
         foreach(QAction *p , i.value())
         {
@@ -983,7 +991,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
     iEdit = actionToMeshEditMap.value(currentEditor);
     assert(iEdit);
     lastModelEdited = this->md()->mm();
-    if (!iEdit->StartEdit(*this->md(), this))
+    if (!iEdit->StartEdit(*this->md(), this,parentmultiview->sharedDataContext()))
     {
         //iEdit->EndEdit(*(this->md()->mm()), this);
         endEdit();
@@ -1173,11 +1181,10 @@ void GLArea::wheelEvent(QWheelEvent*e)
                 MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
                 if (cont != NULL)
                 {
-
                     MLPerViewGLOptions opt;
                     opt._perpoint_pointsize = glas.pointSize;
-                    opt._perpoint_pointsmooth = glas.pointSmooth;
-                    opt._perpoint_pointattenuation = glas.pointDistanceAttenuation;
+                    opt._perpoint_pointsmooth_enabled = glas.pointSmooth;
+                    opt._perpoint_pointattenuation_enabled = glas.pointDistanceAttenuation;
                     foreach(MeshModel * mp, this->md()->meshList)
                         cont->setGLOptions(mp->id(),context(),opt);
                 }
@@ -1383,32 +1390,26 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 //    update();
 //}
 //
-void GLArea::setLightModel(MLRenderingData& dt)
+void GLArea::setLightingColors(const MLPerViewGLOptions& opts)
 {
     makeCurrent();
-    if (dt._opts._lighting) 
+    if (opts._double_side_lighting)
+        glEnable(GL_LIGHT1);
+    else
+        glDisable(GL_LIGHT1);
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
+    glLightfv(GL_LIGHT0, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
+    glLightfv(GL_LIGHT1, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
+    if(opts._fancy_lighting)
     {
-        glEnable(GL_LIGHTING);
-
-        if (dt._opts._doublesidelighting)
-            glEnable(GL_LIGHT1);
-        else
-            glDisable(GL_LIGHT1);
-
-        glLightfv(GL_LIGHT0, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
-        glLightfv(GL_LIGHT0, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
-
-        glLightfv(GL_LIGHT1, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
-        glLightfv(GL_LIGHT1, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
-        if(dt._opts._fancylighting)
-        {
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.fancyFLightDiffuseColor).V());
-            glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.fancyBLightDiffuseColor).V());
-        }
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.fancyFLightDiffuseColor).V());
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.fancyBLightDiffuseColor).V());
     }
-    else glDisable(GL_LIGHTING);
 }
 
 void GLArea::setView()
@@ -2120,16 +2121,6 @@ void GLArea::createOrthoView(QString dir)
 //}
 
 
-MainWindow * GLArea::mw()
-{
-    QObject * curParent = parent();
-    while(qobject_cast<MainWindow *>(curParent) == 0)
-    {
-        curParent = curParent->parent();
-    }
-    return qobject_cast<MainWindow *>(curParent);
-}
-
 bool GLArea::showInterruptButton() const
 {
     return interrbutshow;
@@ -2191,3 +2182,14 @@ void GLArea::setupTextureEnv( GLuint textid )
     glBindTexture(GL_TEXTURE_2D,0);
     glPopAttrib();
 }
+
+MainWindow * GLArea::mw()
+{
+    QObject * curParent = parent();
+    while(qobject_cast<MainWindow *>(curParent) == 0)
+    {
+        curParent = curParent->parent();
+    }
+    return qobject_cast<MainWindow *>(curParent);
+}
+

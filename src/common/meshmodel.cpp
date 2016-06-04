@@ -749,7 +749,7 @@ int MeshModel::dataMask() const
 //    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= vcg::tri::HasPerFaceNormal(mesh) && validfaces;
 //    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] &=  vcg::tri::HasPerVertexColor(mesh);
 //    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &=  vcg::tri::HasPerFaceColor(mesh) && validfaces;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR];
+//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR];
 //
 //    //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
 //    //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.

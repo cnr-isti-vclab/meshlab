@@ -18,6 +18,8 @@
 #include <QDir>
 #include <QComboBox>
 #include <QPushButton>
+#include <QLabel>
+#include <QSlider>
 #include "../common/scriptsyntax.h"
 #include "../common/searcher.h"
 #include <QToolTip>
@@ -306,35 +308,21 @@ private slots:
     void changeFocus(const int k);
 };
 
-//class ColorPicker : public QWidget
-//{
-//
-//    Q_OBJECT
-//
-//public:
-//    ColorWidget(QWidget *p, RichColor* newColor);
-//    ~ColorWidget();
-//
-//    void addWidgetToGridLayout(QGridLayout* lay,const int r);
-//    void collectWidgetValue();
-//    void resetWidgetValue();
-//    void setWidgetValue(const Value& nv);
-//    void initWidgetValue();
-//
-//private:
-//    void  updateColorInfo(const ColorValue& newColor);
-//    QPushButton* colorButton;
-//    QLabel* colorLabel;
-//    QLabel* descLabel;
-//    QColor pickcol;
-//
-//
-//signals:
-//    void pickedColor(QColor col);
-//private slots:
-//    void pickColor();
-//protected:
-//    QHBoxLayout* vlay;
-//};
+class MLFloatSlider : public QSlider 
+{
+    Q_OBJECT
+
+public:
+    MLFloatSlider(QWidget *parent = 0);
+
+    void setValue(float val);
+
+signals:
+    void floatValueChanged(float value);
+
+public slots:
+    void notifyValueChanged(int value);
+};
+
 
 #endif

@@ -19,11 +19,11 @@
 #include "qstyleoption.h"
 #include "additionalgui.h"
 
-class XMLWidgetException : public MeshLabException
+class XMLWidgetException : public MLException
 {
 public:
     XMLWidgetException(const QString& text)
-        :MeshLabException(QString("XML Widget Error: ") + text){}
+        :MLException(QString("XML Widget Error: ") + text){}
 
     ~XMLWidgetException() throw() {}
 };

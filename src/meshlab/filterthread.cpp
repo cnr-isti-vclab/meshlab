@@ -40,7 +40,7 @@ void FilterThread::run()
 
         QMap<QString,MeshLabXMLFilterContainer>::iterator it =_pm.stringXMLFilterMap.find(_fname);
         if ((it == _pm.stringXMLFilterMap.end()) || (it->xmlInfo == NULL))
-            throw MeshLabException("Filter " + _fname + " has not been found.\n");
+            throw MLException("Filter " + _fname + " has not been found.\n");
         if (it->filterInterface != NULL)
         {
 
@@ -56,9 +56,9 @@ void FilterThread::run()
             delete it->filterInterface->glContext;
         }
         else
-            throw MeshLabException("There is not yet support for not-C++ filters.");
+            throw MLException("There is not yet support for not-C++ filters.");
     }
-    catch (MeshLabException& e)
+    catch (MLException& e)
     {
         _md.Log.Log(GLLogStream::SYSTEM,e.what());
     }

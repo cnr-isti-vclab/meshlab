@@ -1,6 +1,8 @@
 #include "ml_rendering_actions.h"
 #include <wrap/qt/col_qt_convert.h>
 #include <QObject>
+#include <QString>
+#include <common/meshmodel.h>
 
 MLRenderingAction::MLRenderingAction( QObject* parent )
     :QAction(parent)
@@ -30,12 +32,11 @@ void MLRenderingAction::setMeshId(int meshid)
     setData(QVariant(meshid));
 }
 
-MLRenderingAction* MLRenderingAction::copyAction( const MLRenderingAction* tocopy,QObject* newactionparent )
+bool MLRenderingAction::isRenderingDataEnabled( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,const MLRenderingData& rd ) const
 {
-    MLRenderingAction* res = tocopy->copyCtr(tocopy,newactionparent);
-    res->setMeshId(tocopy->meshId());
-    res->setChecked(tocopy->isChecked());
-    return res;
+    vcg::GLMeshAttributesInfo::RendAtts atts;
+    rd.get(pm,atts);
+    return atts[att];
 }
 
 MLRenderingBBoxAction::MLRenderingBBoxAction( QObject* parent)
@@ -54,21 +55,20 @@ MLRenderingBBoxAction::MLRenderingBBoxAction( int meshid,QObject* parent)
 
 void MLRenderingBBoxAction::updateRenderingData(MLRenderingData& rd)
 {
-    if (isChecked())
-        rd._mask = vcg::GLMeshAttributesInfo::addPrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_BBOX);
-    else
-        rd._mask = vcg::GLMeshAttributesInfo::removePrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_BBOX);
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perbbox_enabled = isChecked();
+        rd.set(opts);
+    }
 }
 
 bool MLRenderingBBoxAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return (bool)(rd._mask & vcg::GLMeshAttributesInfo::PR_BBOX);
-}
-
-MLRenderingAction* MLRenderingBBoxAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingBBoxAction(newactionparent);
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._perbbox_enabled);
 }
 
 MLRenderingPointsAction::MLRenderingPointsAction( QObject* parent)
@@ -87,21 +87,12 @@ MLRenderingPointsAction::MLRenderingPointsAction( int meshid,QObject* parent)
 
 void MLRenderingPointsAction::updateRenderingData(MLRenderingData& rd )
 {
-    if (isChecked())
-        rd._mask = vcg::GLMeshAttributesInfo::addPrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_POINTS);
-    else
-        rd._mask = vcg::GLMeshAttributesInfo::removePrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_POINTS);
+    rd.set(vcg::GLMeshAttributesInfo::PR_POINTS,isChecked());
 }
 
 bool MLRenderingPointsAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {    
-    return (bool)(rd._mask & vcg::GLMeshAttributesInfo::PR_POINTS);
-}
-
-MLRenderingAction* MLRenderingPointsAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingPointsAction(newactionparent);
+    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_POINTS);
 }
 
 MLRenderingWireAction::MLRenderingWireAction( QObject* parent)
@@ -120,253 +111,190 @@ MLRenderingWireAction::MLRenderingWireAction( int meshid,QObject* parent)
 
 void MLRenderingWireAction::updateRenderingData(MLRenderingData& rd )
 {
-    if (isChecked())
-        rd._mask = vcg::GLMeshAttributesInfo::addPrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
-    else
-        rd._mask = vcg::GLMeshAttributesInfo::removePrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
+    rd.set(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,isChecked());
 }
 
 bool MLRenderingWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return (bool)(rd._mask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
-}
-
-MLRenderingAction* MLRenderingWireAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingWireAction(newactionparent);
+    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
 }
 
 MLRenderingSolidAction::MLRenderingSolidAction( QObject* parent )
     :MLRenderingAction(parent)
 {
     setIcon(QIcon(":/images/smooth.png"));
-    setText(QString("Solid"));
+    setText(QString("Fill"));
 }
 
 MLRenderingSolidAction::MLRenderingSolidAction( int meshid,QObject* parent )
     :MLRenderingAction(meshid,parent)
 {
     setIcon(QIcon(":/images/smooth.png"));
-    setText(QString("Solid"));
+    setText(QString("Fill"));
 }
 
 void MLRenderingSolidAction::updateRenderingData( MLRenderingData& rd )
 {
-    if (isChecked())
-        rd._mask = vcg::GLMeshAttributesInfo::addPrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_SOLID);
-    else
-        rd._mask = vcg::GLMeshAttributesInfo::removePrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_SOLID);
+    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,isChecked());
 }
 
 bool MLRenderingSolidAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return (bool)(rd._mask & vcg::GLMeshAttributesInfo::PR_SOLID);
+    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_SOLID);
 }
 
-MLRenderingAction* MLRenderingSolidAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingSolidAction(newactionparent);
-}
-
-MLRenderingEdgeWireAction::MLRenderingEdgeWireAction( QObject* parent )
+MLRenderingFauxEdgeWireAction::MLRenderingFauxEdgeWireAction( QObject* parent )
     :MLRenderingAction(parent)
 {
     setText(QString("Edges Wireframe"));
 }
 
-MLRenderingEdgeWireAction::MLRenderingEdgeWireAction( int meshid,QObject* parent )
+MLRenderingFauxEdgeWireAction::MLRenderingFauxEdgeWireAction( int meshid,QObject* parent )
     :MLRenderingAction(meshid,parent)
 {
     setText(QString("Edges Wireframe"));
 }
 
-void MLRenderingEdgeWireAction::updateRenderingData( MLRenderingData& rd )
+void MLRenderingFauxEdgeWireAction::updateRenderingData( MLRenderingData& rd )
 {
-    if (isChecked())
-        rd._mask = vcg::GLMeshAttributesInfo::addPrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
-    else
-        rd._mask = vcg::GLMeshAttributesInfo::removePrimitiveModality(rd._mask,vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+    rd.set(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES,isChecked());
 }
 
-bool MLRenderingEdgeWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+bool MLRenderingFauxEdgeWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return (bool)(rd._mask & vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
 }
 
-MLRenderingAction* MLRenderingEdgeWireAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+bool MLRenderingFauxEdgeWireAction::isCheckableConditionValid( MeshModel* mm) const
 {
-    (void*) tocopy;
-    return new MLRenderingEdgeWireAction(newactionparent);
+    return mm->hasDataMask(MeshModel::MM_POLYGONAL);
 }
 
-MLRenderingHiddenLinesAction::MLRenderingHiddenLinesAction( QObject* parent)
+MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Back Face Culling"));
+    setText(QString("Face"));
 }
 
-MLRenderingHiddenLinesAction::MLRenderingHiddenLinesAction( int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
-{
-    setText(QString("Back Face Culling"));
-}
-
-void MLRenderingHiddenLinesAction::updateRenderingData(MLRenderingData& rd )
-{
-     rd._opts._backfacecull = isChecked();
-}
-
-bool MLRenderingHiddenLinesAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
-{
-    return (rd._opts._backfacecull);
-}
-
-MLRenderingAction* MLRenderingHiddenLinesAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingHiddenLinesAction(newactionparent);
-}
-
-MLRenderingFlatAction::MLRenderingFlatAction( QObject* parent)
-    :MLRenderingAction(parent)
-{
-    setText(QString("Flat"));
-}
-
-MLRenderingFlatAction::MLRenderingFlatAction( int meshid,QObject* parent)
+MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid, parent)
 {
-    setText(QString("Flat"));
+    setText(QString("Face"));
 }
 
-void MLRenderingFlatAction::updateRenderingData(MLRenderingData& rd )
+void MLRenderingPerFaceNormalAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = isChecked(); 
+    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL,isChecked()); 
 }
 
-bool MLRenderingFlatAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+bool MLRenderingPerFaceNormalAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL];
+    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL,rd);
 }
 
-MLRenderingAction* MLRenderingFlatAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(parent),_pm(pm)
 {
-    (void*) tocopy;
-    return new MLRenderingFlatAction(newactionparent);
+    setText(QString("Vert"));
 }
 
-MLRenderingSmoothAction::MLRenderingSmoothAction( QObject* parent)
-    :MLRenderingAction(parent)
+MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
 {
-    setText(QString("Smooth"));
+    setText(QString("Vert"));
 }
 
-MLRenderingSmoothAction::MLRenderingSmoothAction( int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
+void MLRenderingPerVertexNormalAction::updateRenderingData(MLRenderingData& rd )
 {
-    setText(QString("Smooth"));
+    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL,isChecked()); 
 }
 
-void MLRenderingSmoothAction::updateRenderingData(MLRenderingData& rd )
+bool MLRenderingPerVertexNormalAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = isChecked();
+    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL,rd);
 }
 
-bool MLRenderingSmoothAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(-1,parent),_pm(pm)
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL];
+    setText(QString("Enabled"));
 }
 
-MLRenderingAction* MLRenderingSmoothAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
 {
-    (void*) tocopy;
-    return new MLRenderingSmoothAction(newactionparent);
-}
-
-MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction( QObject* parent)
-    :MLRenderingAction(parent)
-{
-    setText(QString("Per-Vert"));
-}
-
-MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction( int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
-{
-    setText(QString("Per-Vert"));
+    setText(QString("Enabled"));
 }
 
 void MLRenderingPerVertTextCoordAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = isChecked();
+    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE,isChecked()); 
 }
 
 bool MLRenderingPerVertTextCoordAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE];
+    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE,rd);
 }
 
-MLRenderingAction* MLRenderingPerVertTextCoordAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+bool MLRenderingPerVertTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
 {
-    (void*) tocopy;
-    return new MLRenderingPerVertTextCoordAction(newactionparent);
+    return mm->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 }
 
-MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction( QObject* parent)
+MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Per-Wedge"));
 }
 
-MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction( int meshid,QObject* parent)
+MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Per-Wedge"));
 }
 
 void MLRenderingPerWedgeTextCoordAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = isChecked();
+    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE,isChecked()); 
 }
 
 bool MLRenderingPerWedgeTextCoordAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE];
+    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE,rd);
 }
 
-MLRenderingAction* MLRenderingPerWedgeTextCoordAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+bool MLRenderingPerWedgeTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
 {
-    (void*) tocopy;
-    return new MLRenderingPerWedgeTextCoordAction(newactionparent);
+    return mm->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
 }
+
 
 MLRenderingDoubleLightingAction::MLRenderingDoubleLightingAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Double side lighting"));
+    setText(QString("Enabled"));
 }
 
 MLRenderingDoubleLightingAction::MLRenderingDoubleLightingAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Double side lighting"));
+    setText(QString("Enabled"));
 }
 
 void MLRenderingDoubleLightingAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._opts._doublesidelighting = !rd._opts._doublesidelighting;
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._double_side_lighting = isChecked();
+        rd.set(opts);
+    }
 }
 
 bool MLRenderingDoubleLightingAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._opts._doublesidelighting;
-}
-
-MLRenderingAction* MLRenderingDoubleLightingAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingDoubleLightingAction(newactionparent);
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._double_side_lighting);
 }
 
 MLRenderingFancyLightingAction::MLRenderingFancyLightingAction( QObject* parent)
@@ -383,49 +311,92 @@ MLRenderingFancyLightingAction::MLRenderingFancyLightingAction( int meshid,QObje
 
 void MLRenderingFancyLightingAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._opts._fancylighting = isChecked();
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._fancy_lighting = isChecked();
+        rd.set(opts);
+    }
 }
 
 bool MLRenderingFancyLightingAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._opts._fancylighting;
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._fancy_lighting);
 }
 
-MLRenderingAction* MLRenderingFancyLightingAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+MLRenderingNoShadingAction::MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(parent),_pm(pm)
 {
-    (void*) tocopy;
-    return new MLRenderingFancyLightingAction(newactionparent);
+    //setIcon(QIcon(":/images/lighton.png"));
+    setText(QString("None")); 
+    setToolTip(QString("Light on/off"));
 }
 
-
-MLRenderingLightOnOffAction::MLRenderingLightOnOffAction( QObject* parent)
-    :MLRenderingAction(parent)
+MLRenderingNoShadingAction::MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
 {
-    setIcon(QIcon(":/images/lighton.png"));
-    setText(QString("Light on/off"));  
+    //setIcon(QIcon(":/images/lighton.png"));
+    setText(QString("None")); 
+    setToolTip(QString("Light on/off"));
 }
 
-MLRenderingLightOnOffAction::MLRenderingLightOnOffAction( int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
+void MLRenderingNoShadingAction::updateRenderingData(MLRenderingData& rd )
 {
-    setIcon(QIcon(":/images/lighton.png"));
-    setText(QString("Light on/off"));  
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+ 
+    if (valid)
+    {
+        switch (_pm)
+        {
+        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+            {
+                opts._perpoint_noshading = isChecked();
+                break;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                opts._perwire_noshading = isChecked();
+                break;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+            {
+                opts._persolid_noshading = isChecked();
+                break;
+            }
+        }
+        rd.set(opts);
+    }
 }
 
-void MLRenderingLightOnOffAction::updateRenderingData(MLRenderingData& rd )
+bool MLRenderingNoShadingAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    rd._opts._lighting = isChecked();
-}
-
-bool MLRenderingLightOnOffAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
-{
-    return rd._opts._lighting;
-}
-
-MLRenderingAction* MLRenderingLightOnOffAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingLightOnOffAction(newactionparent);
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        switch (_pm)
+        {
+        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+            {
+                return opts._perpoint_noshading;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                return opts._perwire_noshading;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+            {
+                return opts._persolid_noshading;
+            }
+        }
+    }
+    return false;
 }
 
 MLRenderingFaceCullAction::MLRenderingFaceCullAction( QObject* parent)
@@ -442,197 +413,711 @@ MLRenderingFaceCullAction::MLRenderingFaceCullAction( int meshid,QObject* parent
 
 void MLRenderingFaceCullAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._opts._backfacecull = isChecked();
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._back_face_cull = isChecked();
+        rd.set(opts);
+    }
 }
 
 bool MLRenderingFaceCullAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._opts._backfacecull;
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._back_face_cull);
 }
 
-MLRenderingAction* MLRenderingFaceCullAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(-1,parent),_pm(pm)
 {
-    (void*) tocopy;
-    return new MLRenderingFaceCullAction(newactionparent);
+    setText(QString("Mesh"));  
 }
 
-
-MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction( QObject* parent)
-    :MLRenderingAction(parent)
+MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
 {
-    setText(QString("Per-Mesh"));  
-}
-
-MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
-{
-    setText(QString("Per-Mesh"));
+    setText(QString("Mesh"));
 }
 
 void MLRenderingPerMeshColorAction::updateRenderingData(MLRenderingData& rd)
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR] = isChecked();
-    rd._opts._permesh_color = _col;
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._permesh_color = _col;
+        switch (_pm)
+        {
+        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+            {
+                opts._perpoint_mesh_color_enabled = isChecked();
+                break;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                opts._perwire_mesh_color_enabled = isChecked();
+                break;
+            }
+        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+            {
+                opts._persolid_mesh_color_enabled = isChecked();
+                break;
+            }
+        }
+        rd.set(opts);
+    }
 }
 
 bool MLRenderingPerMeshColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_MESHCOLOR];
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        switch (_pm)
+        {
+        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+            {
+                return opts._perpoint_mesh_color_enabled;
+
+            }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                return opts._perwire_mesh_color_enabled;
+
+            }
+        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+            {
+                return opts._persolid_mesh_color_enabled;
+            }
+        }
+    }
+    return false;
 }
 
-MLRenderingAction* MLRenderingPerMeshColorAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+void MLRenderingPerMeshColorAction::setColor( const QColor& col )
 {
-    MLRenderingPerMeshColorAction* tmp = new MLRenderingPerMeshColorAction(newactionparent);
-    const MLRenderingPerMeshColorAction* tmpcopy = qobject_cast<const MLRenderingPerMeshColorAction*>(tocopy);
-    if (tmpcopy != NULL)
-        tmp->_col = tmpcopy->_col;
-    return tmp;
+    _col = vcg::ColorConverter::ToColor4b(col);
 }
 
-MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(QObject* parent)
-    :MLRenderingAction(parent)
+void MLRenderingPerMeshColorAction::setColor( const vcg::Color4b& col )
 {
-    setText(QString("Per-Vertex"));
+    _col = col;
 }
 
-MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(int meshid,QObject* parent)
-    :MLRenderingAction(meshid,parent)
+vcg::Color4b& MLRenderingPerMeshColorAction::getColor()
 {
-    setText(QString("Per-Vertex"));
+    return _col;
+}
+
+MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+    :MLRenderingAction(-1,parent),_pm(pm)
+{
+    setText(QString("Vert"));
+}
+
+MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+    :MLRenderingAction(meshid,parent),_pm(pm)
+{
+    setText(QString("Vert"));
 }
 
 void MLRenderingPerVertexColorAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = isChecked();
+    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR,isChecked());
 }
 
 bool MLRenderingPerVertexColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR];
-}
-
-MLRenderingAction* MLRenderingPerVertexColorAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
-{
-    (void*) tocopy;
-    return new MLRenderingPerVertexColorAction(newactionparent);
+    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR,rd);
 }
 
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Per-Face"));
+    setText(QString("Face"));
 }
 
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Per-Face"));
+    setText(QString("Face"));
 }
 
 void MLRenderingPerFaceColorAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = isChecked();
+   rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR,isChecked());
 }
 
 bool MLRenderingPerFaceColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR];
+    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR,rd);
 }
 
-MLRenderingAction* MLRenderingPerFaceColorAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+bool MLRenderingPerFaceColorAction::isCheckableConditionValid( MeshModel* mm) const
 {
-    (void*) tocopy;
-    return new MLRenderingPerFaceColorAction(newactionparent);
+    return mm->hasDataMask(MeshModel::MM_FACECOLOR);
 }
-
-
 
 MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent )
-    :MLRenderingAction(-1,parent),_pm(pm),_col(vcg::Color4b::DarkGray)
+    :MLRenderingAction(-1,parent),_pm(pm),_coluser(vcg::Color4b::DarkGray)
 {
-    setText(QString("User-Defined"));
+    setText(QString("User-Def"));
 }
 
 MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid, QObject* parent )
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
-    setText(QString("User-Defined"));
+    setText(QString("User-Def"));
 }
 
 void MLRenderingUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
 {
-    switch(_pm) 
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
     {
+        switch (_pm)
+        {
         case (vcg::GLMeshAttributesInfo::PR_POINTS):
-        {
-            rd._opts._use_perpoint_fixedcolor = !(rd._opts._use_perpoint_fixedcolor);
-            if (rd._opts._use_perpoint_fixedcolor)
-                rd._opts._perpoint_fixedcolor = _col;
-            break;
-        }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                opts._perpoint_fixed_color_enabled = isChecked();
+                opts._perpoint_fixed_color = _coluser;
+                break;
+            }
         case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        {
-            rd._opts._use_peredge_fixedcolor = !(rd._opts._use_peredge_fixedcolor);
-            if (rd._opts._use_peredge_fixedcolor)
-                rd._opts._peredge_fixedcolor = _col;
-            break;
-        }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                opts._perwire_fixed_color_enabled = isChecked();
+                opts._perwire_fixed_color = _coluser;
+                break;
+            }
         case (vcg::GLMeshAttributesInfo::PR_SOLID):
-        {
-            rd._opts._use_perface_fixedcolor = !(rd._opts._use_perface_fixedcolor);
-            if (rd._opts._use_perface_fixedcolor)
-                rd._opts._perface_fixedcolor = _col;
-            break;
+            {
+                opts._persolid_fixed_color_enabled = isChecked();
+                opts._persolid_fixed_color = _coluser;
+                break;
+            }
         }
-        default:
-            break;
+        rd.set(opts);
     }
 }
 
 bool MLRenderingUserDefinedColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    switch(_pm) 
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
     {
+        switch (_pm)
+        {
         case (vcg::GLMeshAttributesInfo::PR_POINTS):
-        {
-            
-            return (rd._opts._use_perpoint_fixedcolor);
-            break;
-        }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                return opts._perpoint_fixed_color_enabled;
+                
+            }
         case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        {
-            
-            return (rd._opts._use_peredge_fixedcolor);
-            break;
-        }
+        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+            {
+                return opts._perwire_fixed_color_enabled;
+                
+            }
         case (vcg::GLMeshAttributesInfo::PR_SOLID):
-        {
-            return (rd._opts._use_perface_fixedcolor);
-            break;
+            {
+                return opts._persolid_fixed_color_enabled;
+            }
         }
-        default:
-            break;
     }
     return false;
 }
 
+void MLRenderingUserDefinedColorAction::setColor( const vcg::Color4b& col )
+{
+    _coluser = col;
+}
+
 void MLRenderingUserDefinedColorAction::setColor( const QColor& col )
+{
+    _coluser = vcg::ColorConverter::ToColor4b(col);
+}
+
+vcg::Color4b& MLRenderingUserDefinedColorAction::getColor()
+{
+    return _coluser;
+}
+
+
+MLRenderingSelectionAction::MLRenderingSelectionAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setIcon(QIcon(":/images/selected.png"));
+    setText(QString("Selection"));
+}
+
+MLRenderingSelectionAction::MLRenderingSelectionAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setIcon(QIcon(":/images/selected.png"));
+    setText(QString("Selection"));
+}
+
+void MLRenderingSelectionAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._sel_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingSelectionAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._sel_enabled);
+}
+
+MLRenderingPointsDotAction::MLRenderingPointsDotAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Dot");
+}
+
+MLRenderingPointsDotAction::MLRenderingPointsDotAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Dot");
+}
+
+void MLRenderingPointsDotAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perpoint_dot_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingPointsDotAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._perpoint_dot_enabled);
+}
+
+MLRenderingVertSelectionAction::MLRenderingVertSelectionAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Vert Selection");
+
+}
+
+MLRenderingVertSelectionAction::MLRenderingVertSelectionAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Vert Selection");
+}
+
+void MLRenderingVertSelectionAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._vertex_sel = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingVertSelectionAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._vertex_sel);
+}
+
+MLRenderingFaceSelectionAction::MLRenderingFaceSelectionAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Face Selection");
+
+}
+
+MLRenderingFaceSelectionAction::MLRenderingFaceSelectionAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Face Selection");
+}
+
+void MLRenderingFaceSelectionAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._face_sel = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingFaceSelectionAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    return (valid && opts._face_sel);
+}
+
+MLRenderingBBoxPerMeshColorAction::MLRenderingBBoxPerMeshColorAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Mesh");
+}
+
+MLRenderingBBoxPerMeshColorAction::MLRenderingBBoxPerMeshColorAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Mesh");
+}
+
+void MLRenderingBBoxPerMeshColorAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perbbox_mesh_color_enabled = isChecked();
+        opts._permesh_color = _col;
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingBBoxPerMeshColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._perbbox_mesh_color_enabled;
+    return false;
+}
+
+void MLRenderingBBoxPerMeshColorAction::setColor( const QColor& col )
 {
     _col = vcg::ColorConverter::ToColor4b(col);
 }
 
-void MLRenderingUserDefinedColorAction::setColor( const vcg::Color4b& col )
+void MLRenderingBBoxPerMeshColorAction::setColor( const vcg::Color4b& col )
 {
     _col = col;
 }
 
-MLRenderingAction* MLRenderingUserDefinedColorAction::copyCtr( const MLRenderingAction* tocopy,QObject* newactionparent ) const
+MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
 {
-    MLRenderingUserDefinedColorAction* tmp = new MLRenderingUserDefinedColorAction(_pm,newactionparent);
-    const MLRenderingUserDefinedColorAction* tmpcopy = qobject_cast<const MLRenderingUserDefinedColorAction*>(tocopy);
-    if (tmpcopy != NULL)
-        tmp->_col = tmpcopy->_col;
-    return tmp;
+    setText("User-Def");
+}
+
+MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("User-Def");
+}
+
+void MLRenderingBBoxUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perbbox_fixed_color_enabled = isChecked();
+        opts._perbbox_fixed_color = _col;
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingBBoxUserDefinedColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._perbbox_fixed_color_enabled;
+    return false;
+}
+
+void MLRenderingBBoxUserDefinedColorAction::setColor( const QColor& col )
+{
+    _col = vcg::ColorConverter::ToColor4b(col);
+}
+
+void MLRenderingBBoxUserDefinedColorAction::setColor( const vcg::Color4b& col )
+{
+    _col = col;
+}
+
+vcg::Color4b& MLRenderingBBoxUserDefinedColorAction::getColor()
+{
+    return _col;
+}
+
+
+MLRenderingEdgeDecoratorAction::MLRenderingEdgeDecoratorAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setIcon(QIcon(":/images/border.png"));
+    setText("Edge Decorators");
+}
+
+MLRenderingEdgeDecoratorAction::MLRenderingEdgeDecoratorAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setIcon(QIcon(":/images/border.png"));
+    setText("Edge Decorators");
+}
+
+
+void MLRenderingEdgeDecoratorAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_extra_enabled = isChecked();
+        rd.set(opts);
+    }  
+}
+
+bool MLRenderingEdgeDecoratorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_extra_enabled;
+    return false;
+}
+
+MLRenderingBoundaryAction::MLRenderingBoundaryAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+     setText("Boundary");
+}
+
+MLRenderingBoundaryAction::MLRenderingBoundaryAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+     setText("Boundary");
+}
+
+void MLRenderingBoundaryAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_boundary_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingBoundaryAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_boundary_enabled;
+    return false;
+}
+
+MLRenderingManifoldAction::MLRenderingManifoldAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("2-Manifold Decorator");
+}
+
+MLRenderingManifoldAction::MLRenderingManifoldAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("2-Manifold Decorator");
+}
+
+void MLRenderingManifoldAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_manifold_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingManifoldAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_manifold_enabled;
+    return false;
+}
+
+MLRenderingTexBorderAction::MLRenderingTexBorderAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Texture Borders Decorator");
+}
+
+MLRenderingTexBorderAction::MLRenderingTexBorderAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Texture Borders Decorator");
+}
+
+void MLRenderingTexBorderAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_text_boundary_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingTexBorderAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_text_boundary_enabled;
+    return false;
+}
+
+MLRenderingDotAction::MLRenderingDotAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Dot Decorator");
+}
+
+MLRenderingDotAction::MLRenderingDotAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Dot Decorator");
+}
+
+void MLRenderingDotAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perpoint_dot_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingDotAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._perpoint_dot_enabled;
+    return false;
+}
+
+MLRenderingPointsSizeAction::MLRenderingPointsSizeAction( QObject* parent )
+    :MLRenderingFloatAction(-1,parent)
+{
+    setText("Point Size");
+}
+
+MLRenderingPointsSizeAction::MLRenderingPointsSizeAction( int meshid,QObject* parent )
+    :MLRenderingFloatAction(meshid,parent)
+{
+    setText("Point Size");
+}
+
+void MLRenderingPointsSizeAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perpoint_pointsize = _value;
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingPointsSizeAction::isRenderingDataEnabled( const MLRenderingData& /*rd*/ ) const
+{
+    return true;
+}
+
+float MLRenderingPointsSizeAction::getValueFromRenderingData( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        return opts._perpoint_pointsize;
+    }
+    return 0.0f;
+}
+
+MLRenderingWireWidthAction::MLRenderingWireWidthAction( QObject* parent )
+    :MLRenderingFloatAction(-1,parent)
+{
+    setText("Edge Width");
+}
+
+MLRenderingWireWidthAction::MLRenderingWireWidthAction( int meshid,QObject* parent )
+    :MLRenderingFloatAction(meshid,parent)
+{
+    setText("Edge Width");
+}
+
+void MLRenderingWireWidthAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perwire_wirewidth = _value;
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingWireWidthAction::isRenderingDataEnabled( const MLRenderingData& /*rd*/ ) const
+{
+    return true;
+}
+
+float MLRenderingWireWidthAction::getValueFromRenderingData( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        return opts._perwire_wirewidth;
+    }
+    return 0.0f;
+}
+
+MLRenderingFloatAction::MLRenderingFloatAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+
+
+}
+
+MLRenderingFloatAction::MLRenderingFloatAction(int meshid, QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+
+
 }

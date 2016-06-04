@@ -111,8 +111,9 @@ public:
     ~LayerDialog();
     void updateLog(GLLogStream &Log);
     void updateDecoratorParsView();
-    void updateRenderingDataParsView(int meshid,const MLRenderingData& dt);
+    void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
+    MLRenderingParametersTab* createRenderingParametersTab();
 public slots:
     void keyPressEvent ( QKeyEvent * event );
     void updateTable(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& dtf);
@@ -122,6 +123,7 @@ public slots:
     void showContextMenu(const QPoint& pos);
     void adaptLayout(QTreeWidgetItem * item);
     void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>&);
+    void updateRenderingDataAccordingToAction(int meshid,MLRenderingAction*);
     void actionActivated(MLRenderingAction* ract);
 
 private:
@@ -133,23 +135,20 @@ private:
     QAction* removeCurrentRasterAct;
     //It stores if the treeWidgetItems are expanded or not
     QMap< QPair<int ,int> ,  bool> expandedMap;
+    
     //QList<QToolBar*> tobedel;
     void addDefaultNotes(QTreeWidgetItem * parent, MeshModel *meshModel);
-
     void updateColumnNumber(const QTreeWidgetItem * item);
     //QVector<QTreeWidgetItem*> tobedeleted;
     void updateExpandedMap(int meshId, int tagId, bool expanded);
     void updateMeshItemSelectionStatus();
-    void createRenderingDataParsView();
+    
     void updateProjectName(const QString& name);
     void updateGlobalProjectVisibility();
 
-    //it maintains mapping between the main toolbar action and the per mesh corresponding action in the side toolbar.
-    //used when an action in the main toolbar is selected. A signal is emitted informing the current meshtreewidgetitem that it has to update its own side toolbar.
-    QMap<QAction*, QMap<MeshTreeWidgetItem*,QAction*> > maintb_sidetb_map;
     QTreeWidgetItem* _docitem;
     MLRenderingSideToolbar* _globaldoctool;
-
+    int _previd;
 
     MLRenderingParametersTab* tabw;
 signals:

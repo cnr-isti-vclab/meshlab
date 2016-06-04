@@ -121,7 +121,7 @@ void FilterScriptDialog::moveSelectedFilterUp()
 	if (pair->filterName() == filtername)
         scriptPtr->filtparlist.insert(currentRow-1, pair);
     else
-        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+        throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 	
 	//move item up on ui
 	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
@@ -143,7 +143,7 @@ void FilterScriptDialog::moveSelectedFilterDown()
     if (pair->filterName() == filtername)
         scriptPtr->filtparlist.insert(currentRow+1, pair);
     else
-        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+        throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 
     //move item up on ui
     QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
@@ -167,7 +167,7 @@ void FilterScriptDialog::removeSelectedFilter()
         scriptPtr->filtparlist.removeAt(currentRow);
     }
     else
-        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+        throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 }
 
 void FilterScriptDialog::editSelectedFilterParameters()
@@ -187,7 +187,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
         else 
             editXMLParameters(currentRow);
     else
-        throw MeshLabException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+        throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
 }
 
 FilterScriptDialog::~FilterScriptDialog()
@@ -207,7 +207,7 @@ void FilterScriptDialog::editOldParameters( const int row )
     MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
     if(NULL == mainWindow)
-        throw MeshLabException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
+        throw MLException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
 
     //get a pointer to this action and filter from the main window so we can get the 
     //description of the parameters from the filter
@@ -253,7 +253,7 @@ void FilterScriptDialog::editXMLParameters( const int row )
     MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
 
     if(NULL == mainWindow)
-        throw MeshLabException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
+        throw MLException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
     
     QString fname = ui->scriptListWidget->currentItem()->text();
     XMLFilterNameParameterValuesPair* xmlparval = reinterpret_cast<XMLFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
@@ -262,7 +262,7 @@ void FilterScriptDialog::editXMLParameters( const int row )
     if (it == mainWindow->PM.stringXMLFilterMap.end())
     {
         QString err = "FilterScriptDialog::editXMLParameters : filter " + fname + " has not been found.";
-        throw MeshLabException(err);
+        throw MLException(err);
     }
 
     OldScriptingSystemXMLParamDialog xmldialog(xmlparval->pair.second,it.value(),mainWindow->PM,mainWindow->meshDoc(),mainWindow,this,mainWindow->GLA());

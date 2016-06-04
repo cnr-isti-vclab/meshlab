@@ -107,7 +107,7 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
     if ((window != NULL) && (scenecontext != NULL))
     {
-        window->defaultPerViewRenderingData(dt);
+        //window->defaultPerViewRenderingData(dt);
         scenecontext->addView(viewer->context(),dt);
     }
     /* The Viewers are organized like a BSP tree.

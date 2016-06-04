@@ -39,7 +39,8 @@ $Log: stdpardialog.cpp,v $
 
 using namespace std;
 
-LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
+LayerDialog::LayerDialog(QWidget *parent )    
+    : QDockWidget(parent)
 {
     ui = new Ui::layerDialog();
     setWindowFlags( windowFlags() | Qt::WindowStaysOnTopHint | Qt::SubWindow );
@@ -47,7 +48,7 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
     setVisible(false);
     ui->setupUi(this);
     mw=qobject_cast<MainWindow *>(parent);
-
+    _previd = -1;
     /*Horrible trick*/
     _docitem = new QTreeWidgetItem();
     _docitem->setHidden(true);
@@ -56,9 +57,12 @@ LayerDialog::LayerDialog(QWidget *parent )    : QDockWidget(parent)
     _globaldoctool->setVisible(false);
     ///////////////////////////////////
 
-    createRenderingDataParsView();
+    MLRenderingParametersTab* tabw = createRenderingParametersTab();
     if (tabw != NULL)
+    {
+        tabw->setVisible(true);
         ui->renderingLayout->addWidget(tabw);
+    }
     // The following connection is used to associate the click with the change of the current mesh.
     connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 
@@ -94,12 +98,17 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
         MeshTreeWidgetItem *mItem = dynamic_cast<MeshTreeWidgetItem *>(item);
         if (mItem != NULL)
             clickedId= mItem->_meshid;
+       
+        MeshDocument  *md= mw->meshDoc();
+        if (md == NULL)
+            return;
+
         switch(col)
         {
         case 0 :
             {
                 //the user has clicked on one of the eyes
-                MeshDocument  *md= mw->meshDoc();
+                
 
                 // NICE TRICK.
                 // If the user has pressed ctrl when clicking on the eye icon, only that layer will remain visible
@@ -150,10 +159,16 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
             //updateRenderingDataParsView();
             break;
         }
-        MLRenderingData dt;
         if (clickedId != -1)
-            mw->getRenderingData(clickedId,dt);
-        tabw->setAssociatedMeshIdAndRenderingData(clickedId,dt);
+        {
+            MLSceneGLSharedDataContext* shared = mw->currentViewContainer()->sharedDataContext();
+            if (shared != NULL)
+            {
+                MLRenderingData dt;
+                shared->getRenderInfoPerMeshView(clickedId,mw->GLA()->context(),dt);
+                updateRenderingParametersTab(clickedId,dt);
+            }
+        }
         //make sure the right row is colored or that they right eye is drawn (open or closed)
         updateMeshItemSelectionStatus();
         mw->GLA()->update();
@@ -337,6 +352,11 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	MeshDocument *md=mw->meshDoc();
     if (md == NULL)
         return;
+
+    /*int previd = currentMeshItemId();
+    QSet<int> tabsrelatedtodeletedmeshes;
+    for(QMap<int,MLRenderingParametersTab*>::const_iterator pit = _partabs.begin(); pit != _partabs.end(); ++pit)
+        tabsrelatedtodeletedmeshes.insert(pit.key());*/
 	
 	/*for(int ii = 0;ii < tobedel.size();++ii)
 		delete tobedel[ii];*/
@@ -374,19 +394,17 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
             rendertb->setAccordingToRenderingData((*rdit));
             connect(rendertb,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 		    connect(rendertb,SIGNAL(activatedAction(MLRenderingAction*)),this,SLOT(actionActivated(MLRenderingAction*)));
+            
             MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
             item->setExpanded(expandedMap.value(qMakePair(item->_meshid,-1)));
-           /* QTreeWidgetItem* childitem = new QTreeWidgetItem();
-            item->addChild(childitem);
-            MLRenderingParametersFrame* renderfm = new MLRenderingParametersFrame(mmd->id(),(*rdit),this);
-            ui->meshTreeWidget->setItemWidget(childitem,3,renderfm);*/
+
             addDefaultNotes(item,mmd);
             itms.push_back(item);
 		    //Adding default annotations
 		    
         }
         else
-             throw MeshLabException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
+             throw MLException("Something bad happened! Mesh id has not been found in the rendermapmode map.");
 	}
     _docitem->addChildren(itms);
 
@@ -399,6 +417,18 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 	ui->meshTreeWidget->setMinimumWidth(wid);
     updateGlobalProjectVisibility();
 	updateMeshItemSelectionStatus();
+
+    //for(QSet<int>::const_iterator tit = tabsrelatedtodeletedmeshes.begin();tit != tabsrelatedtodeletedmeshes.end();++tit)
+    //{
+    //    QMap<int,MLRenderingParametersTab*>::iterator it = _partabs.find((*tit));
+    //    if ((it != _partabs.end()) && (it.key() != -1))
+    //    {
+    //        //the current MLParametersTab refers to a deleted mesh, i have to delete the MLParametersTab 
+    //        delete it.value();
+    //    }
+    //}
+    //tabsrelatedtodeletedmeshes.clear();
+
 	if (md->rasterList.size() > 0)
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	else
@@ -553,6 +583,11 @@ void LayerDialog::updateExpandedMap(int meshId, int tagId, bool expanded)
     expandedMap.insert(qMakePair(meshId, tagId),expanded);
 }
 
+void LayerDialog::actionActivated(MLRenderingAction* ract)
+{
+    if (ract != NULL)
+        tabw->switchTab(ract->meshId(),ract->text());
+}
 
 LayerDialog::~LayerDialog()
 {
@@ -661,19 +696,29 @@ void LayerDialog::reset()
     ui->rasterTreeWidget->clear();
 }
 
-void LayerDialog::updateRenderingDataParsView(int meshid,const MLRenderingData& dt )
+void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData& dt )
 {
-    tabw->setAssociatedMeshIdAndRenderingData(meshid,dt);
+    if (tabw != NULL)
+    {
+        tabw->setAssociatedMeshId(meshid);
+        if ((mw != NULL) && (mw->meshDoc() != NULL))
+            tabw->updateVisibility(mw->meshDoc()->getMesh(meshid));    
+        tabw->updateGUIAccordingToRenderingData(dt);
+    }
 }
 
-void LayerDialog::createRenderingDataParsView()
+MLRenderingParametersTab* LayerDialog::createRenderingParametersTab()
 {
     if (_globaldoctool != NULL)
     {
-        tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions(),this);
+        tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions());
         tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
         connect(tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+        connect(tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+        tabw->setVisible(false);
+        return tabw;
     }
+    return NULL;
 }
 
 void LayerDialog::updateProjectName( const QString& name )
@@ -733,13 +778,18 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
     mw->GLA()->update();
 }
 
-void LayerDialog::actionActivated( MLRenderingAction* ract )
+void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
 {
-    if ((mw == NULL) || (ract == NULL))
+    if (mw == NULL)
         return;
     MLRenderingData dt;
-    mw->getRenderingData(ract->meshId(),dt);
-    tabw->switchTab(ract->meshId(),ract->text(),dt);
+    mw->getRenderingData(meshid,dt);
+
+    if (act != NULL)
+        act->updateRenderingData(dt);
+
+    mw->setRenderingData(meshid,dt);
+    mw->GLA()->update();
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)

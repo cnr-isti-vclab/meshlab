@@ -38,7 +38,6 @@ int main(int argc, char *argv[])
 
     QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
     QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
-
     if(argc>1)
     {
         QString helpOpt1="-h";

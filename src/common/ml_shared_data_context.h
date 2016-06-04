@@ -25,6 +25,7 @@
 #define __ML_SHARED_DATA_CONTEXT_H
 
 #include <GL/glew.h>
+#include <QTimer>
 
 #include "ml_mesh_type.h"
 #include <wrap/qt/qt_thread_safe_mesh_attributes_multi_viewer_bo_manager.h>
@@ -36,35 +37,71 @@
 class MeshModel;
 class MeshDocument;
 
-struct MLPerViewGLOptions : public vcg::PerViewPerRenderingModalityGLOptions
+struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 {
+    /*IN THIS MOMENT IT'S IGNORED! for the rendering process we use the flag contained in the meshmodel class*/
     bool _visible;
-    bool _lighting;
-    bool _backfacecull;
-    bool _doublesidelighting;
-    bool _fancylighting;
+    /*****************************/
 
-    bool _vertexsel;
-    bool _facesel;
+    bool _peredge_extra_enabled;
+    bool _peredge_boundary_enabled;
+    bool _peredge_manifold_enabled;
+    bool _peredge_text_boundary_enabled;
+
+    bool _back_face_cull;
+    bool _double_side_lighting;
+    bool _fancy_lighting;
+    
+    vcg::Color4b _base_light_ambient_color;
+    vcg::Color4b _base_light_diffuse_color;
+    vcg::Color4b _base_light_specular_color;
+
+    bool _fancy_lighting_enabled;
+    vcg::Color4b _fancy_f_light_diffuse_color;
+    vcg::Color4b _fancy_b_light_diffuse_color;
+
+    bool _sel_enabled;
+    bool _vertex_sel;
+    bool _face_sel;
+
 
      MLPerViewGLOptions()
-        :vcg::PerViewPerRenderingModalityGLOptions(),_visible(true),_lighting(true),_backfacecull(false),_doublesidelighting(false),_fancylighting(false)
-    {
-    }
+         :vcg::RenderingModalityGLOptions()
+     {
+        _visible = true;
+        _peredge_extra_enabled = false;
+        _peredge_boundary_enabled = true;
+        _peredge_manifold_enabled = true;
+        _peredge_text_boundary_enabled = false;
+        _back_face_cull = false;
+        _double_side_lighting = false;
+        _fancy_lighting = false;
+        _sel_enabled = false;    
+        _vertex_sel = true;
+        _face_sel = true;
+        
+        _base_light_ambient_color = vcg::Color4b(32,32,32,255); 
+        _base_light_diffuse_color = vcg::Color4b(204,204,204,255);
+        _base_light_specular_color = vcg::Color4b(255,255,255,255);
 
-    ~ MLPerViewGLOptions()
-    {
-    }
+        _fancy_lighting_enabled = false;
+        _fancy_f_light_diffuse_color = vcg::Color4b(255,204,204,255);
+        _fancy_b_light_diffuse_color = vcg::Color4b(204,204,255,255);
+     }
+
+     ~ MLPerViewGLOptions()
+     {
+     }
 
      MLPerViewGLOptions(const  MLPerViewGLOptions& opts)
-        :vcg::PerViewPerRenderingModalityGLOptions(opts)
+        :vcg::RenderingModalityGLOptions(opts)
     {
         copyData(opts);
     }
     
      MLPerViewGLOptions& operator=(const MLPerViewGLOptions& opts)
     {
-        vcg::PerViewPerRenderingModalityGLOptions::operator=(opts);
+        vcg::RenderingModalityGLOptions::operator=(opts);
         copyData(opts);
         return (*this);
     }
@@ -72,15 +109,38 @@ private:
     void copyData(const  MLPerViewGLOptions& opts)
     {
         _visible = opts._visible;
-        _lighting = opts._lighting;
-        _backfacecull = opts._backfacecull;
-        _doublesidelighting = opts._doublesidelighting;
-        _fancylighting = opts._fancylighting;
+        _peredge_extra_enabled = opts._peredge_extra_enabled;
+        _peredge_boundary_enabled = opts._peredge_boundary_enabled;
+        _peredge_manifold_enabled = opts._peredge_manifold_enabled;
+        _peredge_text_boundary_enabled = opts._peredge_text_boundary_enabled;
+        _back_face_cull = opts._back_face_cull;
+        _double_side_lighting = opts._double_side_lighting;
+        _fancy_lighting = opts._fancy_lighting;
+        _sel_enabled = opts._sel_enabled;
+        _face_sel = opts._face_sel;
+
+        _base_light_ambient_color = opts._base_light_ambient_color;
+        _base_light_diffuse_color = opts._base_light_diffuse_color;
+        _base_light_specular_color = opts._base_light_specular_color;
+
+        _fancy_lighting_enabled = opts._fancy_lighting_enabled;
+        _fancy_f_light_diffuse_color = opts._fancy_f_light_diffuse_color;
+        _fancy_b_light_diffuse_color = opts._fancy_b_light_diffuse_color;
     }
 };
 
-struct MLRenderingData
+class MLRenderingData : public vcg::PerViewData<MLPerViewGLOptions>
 {
+public:
+    MLRenderingData();
+    MLRenderingData(const MLRenderingData& dt);
+
+    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& atts);
+    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,bool onoff);
+    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool onoff);
+    void set(const MLPerViewGLOptions& opts);
+};
+/*{
     vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK _mask;
     vcg::GLMeshAttributesInfo::RendAtts _atts;
     MLPerViewGLOptions _opts;
@@ -100,16 +160,32 @@ struct MLRenderingData
         for(unsigned int ii = 0;ii < vcg::GLMeshAttributesInfo::ATT_NAMES::enumArity();++ii)
             dt._atts[ii] = true;
         dt._mask = vcg::GLMeshAttributesInfo::PR_BBOX | vcg::GLMeshAttributesInfo::PR_POINTS | vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES | vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES | vcg::GLMeshAttributesInfo::PR_SOLID;
-    }
-};
+   }
+};*/
 
-struct MLBridgeStandAloneFunctions
+struct MLPoliciesStandAloneFunctions
 {
     static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
 
     static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts);
 
-    static void updatedRenderingAttsAddedToRenderingAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result); 
+    static void updatedRendAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result); 
+
+    static void maskMeaninglessAttributesPerPrimitiveModality( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::RendAtts& atts );
+
+    static void setAttributePriorities(vcg::GLMeshAttributesInfo::RendAtts& atts);
+
+    static void setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt );
+
+    static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
+
+    static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm);
+
+    static bool isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm);
+
+    static bool isPrimitiveModalityWorthToBeActivated(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful);
+    
+    static void filterFauxUdpateAccordingToMeshMask(MeshModel* m,vcg::GLMeshAttributesInfo::RendAtts& atts);   
 };
 
 
@@ -133,8 +209,8 @@ public:
         return _highprecision;
     }
     
-    //Given a QGLContext the PerMeshRenderingDataMap contains the way per each mesh contained in MeshDocument all the current rendering data (eg. flat/smooth shading? pervertex/perface/permesh color?) 
-    //and the 'meaningful' gl parameters used in the rendering system
+    //Given a QGLContext the PerMeshRenderingDataMap contains the rendering data per each mesh contained in the MeshDocument (eg. flat/smooth shading? pervertex/perface/permesh color?) 
+    //and the 'meaningful' gl parameters used by the rendering system
     typedef QMap<int,MLRenderingData> PerMeshRenderingDataMap; 
 
     void initializeGL();
@@ -158,14 +234,14 @@ public:
 
 public slots:
     void meshDeallocated(int mmid);
-    void setRequestedAttributesPerMeshViews(int mmid,const QList<QGLContext*>& viewerid,const MLRenderingData& perviewdata);
     void setRequestedAttributesPerMeshView(int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata);
     void setGLOptions(int mmid,QGLContext* viewid,const MLPerViewGLOptions& opts);
 
-    void addView(QGLContext* viewerid,const MLRenderingData& dt);
+    void addView(QGLContext* viewerid,MLRenderingData& dt);
     void removeView(QGLContext* viewerid);
     void meshAttributesUpdated(int mmid,bool conntectivitychanged,const vcg::GLMeshAttributesInfo::RendAtts& dt);
-
+    void updateGPUMemInfo();
+    void updateRequested(int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES name);
 private:
     typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO,QGLContext*,MLPerViewGLOptions> PerMeshMultiViewManager; 
     PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid ) const;
@@ -176,6 +252,11 @@ private:
     vcg::QtThreadSafeMemoryInfo& _gpumeminfo;
     size_t _perbatchtriangles;
     bool _highprecision;
+    QTimer* _timer;
+
+signals:
+    void currentAllocatedGPUMem(int all,int current);
+
 }; 
 
 #endif

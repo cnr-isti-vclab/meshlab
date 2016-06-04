@@ -680,10 +680,10 @@ void PluginGeneratorGUI::executeCurrentCode()
             emit scriptCodeExecuted(result,time,env.output());
         }
         else
-            throw MeshLabException("System Error: A FilterGeneratorTab object has been expected.");
+            throw MLException("System Error: A FilterGeneratorTab object has been expected.");
     }
     else
-        throw MeshLabException("System Error: A valid MeshLabDocument has not correctly been associated with PluginGeneratorGUI. Code cannot be executed.");
+        throw MLException("System Error: A valid MeshLabDocument has not correctly been associated with PluginGeneratorGUI. Code cannot be executed.");
 }
 
 void PluginGeneratorGUI::addNewFilter()

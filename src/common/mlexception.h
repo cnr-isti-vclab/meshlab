@@ -3,13 +3,13 @@
 
 #include <exception>
 
-class MeshLabException : public std::exception
+class MLException : public std::exception
 {
 public:
-	MeshLabException(const QString& text)
+	MLException(const QString& text)
 		:std::exception(),excText(text){_ba = excText.toLocal8Bit();}
 
-	~MeshLabException() throw() {}
+	~MLException() throw() {}
 	inline const char* what() const throw() {return _ba.constData();}
 
 protected:
@@ -18,76 +18,76 @@ protected:
 
 };
 
-class MeshLabXMLParsingException : public MeshLabException
+class MeshLabXMLParsingException : public MLException
 {
 public:
         MeshLabXMLParsingException(const QString& text)
-                :MeshLabException(QString("Error While parsing the XML filter plugin descriptors: ") + text){}
+                :MLException(QString("Error While parsing the XML filter plugin descriptors: ") + text){}
 
         ~MeshLabXMLParsingException() throw() {}
 };
 
 
-class ParsingException : public MeshLabException
+class ParsingException : public MLException
 {
 public:
         ParsingException(const QString& text)
-                :MeshLabException(QString("Parsing Error: ") + text){}
+                :MLException(QString("Parsing Error: ") + text){}
 
         ~ParsingException() throw() {}
 };
 
-class ValueNotFoundException : public MeshLabException
+class ValueNotFoundException : public MLException
 {
 public:
         ValueNotFoundException(const QString& valName)
-                :MeshLabException(QString("Value Name: ") + valName +  QString(" has not been defined in current environment.")){}
+                :MLException(QString("Value Name: ") + valName +  QString(" has not been defined in current environment.")){}
 
         ~ValueNotFoundException() throw() {}
 };
 
-class NotConstException : public MeshLabException
+class NotConstException : public MLException
 {
 public:
 	NotConstException(const QString& exp)
-		:MeshLabException(QString("Expression: ") + exp +  QString(" is not a const expression. Expression contains an assignment operator \"=\".")){}
+		:MLException(QString("Expression: ") + exp +  QString(" is not a const expression. Expression contains an assignment operator \"=\".")){}
 
 	~NotConstException() throw() {}
 };
 
 
-class QueryException : public MeshLabException
+class QueryException : public MLException
 {
 public:
 	QueryException(const QString& syntaxError)
-		:MeshLabException(QString("Query Error: ") + syntaxError){}
+		:MLException(QString("Query Error: ") + syntaxError){}
 
 	~QueryException() throw() {}
 };
 
-class JavaScriptException : public MeshLabException
+class JavaScriptException : public MLException
 {
 public:
 	JavaScriptException(const QString& syntaxError)
-		:MeshLabException(QString("JavaScript Error: ") + syntaxError){}
+		:MLException(QString("JavaScript Error: ") + syntaxError){}
 
 	~JavaScriptException() throw() {}
 };
 
-class ExpressionHasNotThisTypeException :  public MeshLabException
+class ExpressionHasNotThisTypeException :  public MLException
 {
 public:
 	ExpressionHasNotThisTypeException(const QString& expectedType,const QString& exp)
-		:MeshLabException(QString("Expression: ") + exp + " cannot be evaluated to a " + expectedType + "'s value."){}
+		:MLException(QString("Expression: ") + exp + " cannot be evaluated to a " + expectedType + "'s value."){}
 
 	~ExpressionHasNotThisTypeException() throw() {}
 };
 
-class InvalidInvariantException : public MeshLabException
+class InvalidInvariantException : public MLException
 {
 public:
 	InvalidInvariantException(const QString& invarianterror)
-		:MeshLabException(QString("WARNING! Invalid Invariant: ") + invarianterror){}
+		:MLException(QString("WARNING! Invalid Invariant: ") + invarianterror){}
 
 	~InvalidInvariantException() throw() {}
 };

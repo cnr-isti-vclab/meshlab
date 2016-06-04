@@ -9,7 +9,8 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QDebug>
- #include <QMetaEnum>
+#include <QMetaEnum>
+#include <qgl.h>
 
 CheckBoxListItemDelegate::CheckBoxListItemDelegate(QObject *parent)
 : QStyledItemDelegate(parent)
@@ -1063,7 +1064,7 @@ void MyToolButton::paintEvent( QPaintEvent * )
 {
     QStylePainter p(this);
     QStyleOptionToolButton opt;
-    initStyleOption( & opt );
+    initStyleOption( & opt ); 
     opt.features &= (~ QStyleOptionToolButton::HasMenu);
     p.drawComplexControl( QStyle::CC_ToolButton, opt );
 }
@@ -1120,4 +1121,21 @@ int DelayedToolButtonPopUpStyle::styleHint(QStyle::StyleHint sh, const QStyleOpt
     if (sh == QProxyStyle::SH_ToolButton_PopupDelay)
         return _msec;
     return QProxyStyle::styleHint(sh,opt,widget,hret);
+}
+
+MLFloatSlider::MLFloatSlider( QWidget *parent /*= 0*/ ) 
+    : QSlider(parent)
+{
+    connect(this, SIGNAL(valueChanged(int)),
+        this, SLOT(notifyValueChanged(int)));
+}
+
+void MLFloatSlider::notifyValueChanged( int value )
+{
+    emit floatValueChanged(float(value));
+}
+
+void MLFloatSlider::setValue( float val )
+{
+    setSliderPosition(int(val));
 }

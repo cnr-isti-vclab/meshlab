@@ -40,7 +40,7 @@
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
 #include "multiViewer_Container.h"
-
+#include "ml_render_gui.h"
 
 #include <QtScript>
 #include <QDir>
@@ -122,6 +122,7 @@ public slots:
     bool openProject(QString fileName=QString());
     bool appendProject(QString fileName=QString());
     void updateCustomSettings();
+
 private slots:
 
     bool importMesh(QString fileName=QString());
@@ -216,6 +217,7 @@ private slots:
     void wrapSetActiveSubWindow(QWidget* window);
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
+    void updateGPUMemBar(int,int);
 private:
     void addRenderingSystemLogInfo(unsigned mmid);
     int longestActionWidthInMenu(QMenu* m,const int longestwidth);
@@ -261,7 +263,7 @@ private:
     PluginGeneratorGUI* plugingui;
     QSignalMapper *windowMapper;
     vcg::QtThreadSafeMemoryInfo* gpumeminfo;
-
+    QProgressBar* nvgpumeminfo;
 
     //QMap<QThread*,Env*> envtobedeleted;
 
@@ -484,9 +486,10 @@ private:
         int _mask;
         size_t _nvert;
         size_t _nface;
+        size_t _nedge;
 
-        MeshModelTmpData(int mask,size_t nvert,size_t nface)
-            :_mask(mask),_nvert(nvert),_nface(nface)
+        MeshModelTmpData(int mask,size_t nvert,size_t nface,size_t nedge)
+            :_mask(mask),_nvert(nvert),_nface(nface),_nedge(nedge)
         {}
     };
     QMap<int,MeshModelTmpData> existingmeshesbeforefilterexecution;
@@ -524,6 +527,7 @@ protected:
         }
     }
 };
+
 
 #endif
 #endif

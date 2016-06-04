@@ -27,25 +27,99 @@
 #include <QPushButton>
 #include <QToolBar>
 #include <QFrame>
+#include <QToolButton>
+#include <QTabWidget>
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_rendering_actions.h"
 #include "additionalgui.h"
 
+class MLRenderingColorPicker : public QToolButton
+{
+    Q_OBJECT
+
+public:
+    MLRenderingColorPicker(int meshid,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p);
+    MLRenderingColorPicker(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p);
+    ~MLRenderingColorPicker();
+
+    void setColor(QColor& def);
+//protected:
+//    void paintEvent( QPaintEvent * );
+protected:
+    void initGui();
+    void  updateColorInfo();
+    QPushButton* _cbutton;
+public:
+    MLRenderingUserDefinedColorAction* _act;
+
+signals:
+    void userDefinedColorAction(int,MLRenderingAction*);
+protected slots:
+    void pickColor();
+};
+
+class MLRenderingBBoxColorPicker : public QToolButton
+{
+    Q_OBJECT
+public:
+    MLRenderingBBoxColorPicker(QWidget* parent);
+    MLRenderingBBoxColorPicker(int meshid,QWidget* parent);
+    ~MLRenderingBBoxColorPicker();
+
+    void setColor(QColor& def);
+protected:
+    void initGui();
+    void  updateColorInfo();
+    QPushButton* _cbutton;
+    MLRenderingBBoxUserDefinedColorAction* _act;
+
+signals:
+    void userDefinedColorAction(int,MLRenderingAction*);
+protected slots:
+    void pickColor();
+};
+
+class MLRenderingFloatSlider : public MLFloatSlider
+{
+    Q_OBJECT
+
+public:
+    MLRenderingFloatSlider(int meshid,QWidget *p);
+    MLRenderingFloatSlider(QWidget *p);
+    ~MLRenderingFloatSlider();
+
+    void setRenderingFloatAction(MLRenderingFloatAction* act);
+    void setAccordingToRenderingData(const MLRenderingData& dt);
+    void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void setAssociatedMeshId(int meshid);
+
+private:
+    MLRenderingFloatAction* _act;
+    int _meshid;
+
+private slots:
+    void valueChanged(float);
+signals:
+    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
+};
 
 class MLRenderingToolbar : public QToolBar
 {
     Q_OBJECT
 public:
-    MLRenderingToolbar(bool exclusive,QWidget* parent = NULL);
-    MLRenderingToolbar(int meshid,bool exclusive,QWidget* parent = NULL);
+    MLRenderingToolbar(QWidget* parent = NULL);
+    MLRenderingToolbar(int meshid,QWidget* parent = NULL);
 
     ~MLRenderingToolbar();
 
-    void addRenderingAction( MLRenderingAction* act );
+    virtual void addRenderingAction( MLRenderingAction* act );
+    void addColorPicker(MLRenderingColorPicker* pick);
+    void addColorPicker(MLRenderingBBoxColorPicker* pick);
     void setAccordingToRenderingData(const MLRenderingData& dt);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     QList<MLRenderingAction*>& getRenderingActions();
-    void getRenderingActionsCopy(QList<MLRenderingAction*>& acts,QObject* newparent = 0) const;
     void setAssociatedMeshId(int meshid);
+    void updateVisibility(MeshModel* mm);
 
 protected:
     QList<MLRenderingAction*> _acts;
@@ -54,15 +128,15 @@ protected:
 
 private slots:
     void toggle(QAction* act);
+    void extraUpdateRequired(int,MLRenderingAction*);
 
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>& acts);
     void activatedAction(MLRenderingAction*);
-
-private:
+protected:
     //if meshid is -1 it means that the actions are intended to be deployed to all the document and not to a specific mesh model
-    bool _exclusive;
+    QActionGroup* _actgroup;
 };
 
 class MLRenderingSideToolbar: public MLRenderingToolbar
@@ -78,14 +152,44 @@ private:
     void initGui();
 };
 
+class MLRenderingOnOffToolbar : public QToolBar
+{
+    Q_OBJECT
+public:
+    MLRenderingOnOffToolbar(int meshid,QWidget* parent = NULL);
+    MLRenderingOnOffToolbar(MLRenderingAction* act,QWidget* parent = NULL);
+    MLRenderingOnOffToolbar(MLRenderingAction* act,int meshid,QWidget* parent = NULL);
+    ~MLRenderingOnOffToolbar();
+
+    void setRenderingAction(MLRenderingAction* act);
+    void setAssociatedMeshId(int meshid);
+    void setAccordingToRenderingData(const MLRenderingData& dt);
+    void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void updateVisibility(MeshModel* mm);
+private:
+    void initGui();
+    int _meshid;
+    MLRenderingAction* _act;
+    QAction* _onact;
+    QAction* _offact;
+
+signals:
+    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
+
+private slots:
+    void toggle(QAction* act);
+};
+
 class MLRenderingParametersFrame : public QFrame
 {
     Q_OBJECT
 public:
     MLRenderingParametersFrame(int meshid,QWidget* parent);
-    virtual ~MLRenderingParametersFrame();
+    virtual ~MLRenderingParametersFrame(); 
     virtual void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt) = 0;
     virtual void setAssociatedMeshId(int meshid) = 0;
+    virtual void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const = 0;
+    virtual void updateVisibility(MeshModel* mm) {}
     static MLRenderingParametersFrame* factory(MLRenderingAction* act,int meshid,QWidget* parent);
     static void destroy(MLRenderingParametersFrame* pf);
 
@@ -94,6 +198,7 @@ protected:
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
+    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
 };
 
 class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
@@ -105,12 +210,14 @@ public:
     ~MLRenderingSolidParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void updateVisibility(MeshModel* mm);
 
 private:
     void initGui();
     MLRenderingToolbar* _shadingtool;
     MLRenderingToolbar* _colortool;
-    MLRenderingToolbar* _texttool;
+    MLRenderingOnOffToolbar* _texttool;
 };
 
 class MLRenderingWireParametersFrame : public MLRenderingParametersFrame
@@ -122,13 +229,16 @@ public:
     ~MLRenderingWireParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void updateVisibility(MeshModel* mm);
 
 private:
     void initGui();
-    MLRenderingToolbar* _wiretool;
+    
     MLRenderingToolbar* _shadingtool;
     MLRenderingToolbar* _colortool;
-    MLRenderingToolbar* _texttool;
+    MLRenderingOnOffToolbar* _edgetool;
+    MLRenderingFloatSlider* _dimension;
 };
 
 class MLRenderingPointsParametersFrame : public MLRenderingParametersFrame
@@ -140,28 +250,67 @@ public:
     ~MLRenderingPointsParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void updateVisibility(MeshModel* mm);
 
 private:
     void initGui();
     MLRenderingToolbar* _shadingtool;
     MLRenderingToolbar* _colortool;
-    MLRenderingToolbar* _texttool;
+    MLRenderingOnOffToolbar* _texttool;
+    MLRenderingFloatSlider* _dimension;
 };
 
-class MLRenderingLightingParametersFrame : public MLRenderingParametersFrame
+class MLRenderingSelectionParametersFrame : public MLRenderingParametersFrame
 {
     Q_OBJECT
 public:
-    MLRenderingLightingParametersFrame(QWidget* parent);
-    MLRenderingLightingParametersFrame(int meshid,QWidget* parent);    
-    ~MLRenderingLightingParametersFrame();
+    MLRenderingSelectionParametersFrame(QWidget* parent);
+    MLRenderingSelectionParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingSelectionParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
 
 private:
     void initGui();
-    MLRenderingToolbar* _lighttool;
+    MLRenderingOnOffToolbar* _vertexseltool;
+    MLRenderingOnOffToolbar* _faceseltool;
 };
+
+class MLRenderingEdgeDecoratorParametersFrame : public MLRenderingParametersFrame
+{
+    Q_OBJECT
+public:
+    MLRenderingEdgeDecoratorParametersFrame(QWidget* parent);
+    MLRenderingEdgeDecoratorParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingEdgeDecoratorParametersFrame();
+    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+
+private:
+    void initGui();
+    MLRenderingOnOffToolbar* _boundarytool;
+    MLRenderingOnOffToolbar* _manifoldtool;
+    MLRenderingOnOffToolbar* _texturebordertool;
+};
+
+//class MLRenderingGlobalParametersFrame : public MLRenderingParametersFrame
+//{
+//    Q_OBJECT
+//public:
+//    MLRenderingGlobalParametersFrame(QWidget* parent);
+//    MLRenderingGlobalParametersFrame(int meshid,QWidget* parent);    
+//    ~MLRenderingGlobalParametersFrame();
+//    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+//    void setAssociatedMeshId(int meshid);
+//    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+//
+//private:
+//    void initGui();
+//    MLRenderingToolbar* _lighttool;
+//};
 
 class MLRenderingBBoxParametersFrame : public MLRenderingParametersFrame
 {
@@ -172,34 +321,41 @@ public:
     ~MLRenderingBBoxParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    void updateVisibility(MeshModel* mm) {}
 
 private:
     void initGui();
     MLRenderingToolbar* _colortool;
+    MLRenderingColorPicker* _userdef;
 };
 
 class MLRenderingParametersTab : public QTabWidget
 {
     Q_OBJECT
 public:
-    MLRenderingParametersTab(int meshid,const QList<MLRenderingAction*>& tab, QWidget* parent);
+    MLRenderingParametersTab(int meshid,const QList<MLRenderingAction*>& tab, QWidget* parent = NULL);
     ~MLRenderingParametersTab();
 
-    void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
+    void updateGUIAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshIdAndRenderingData(int meshid,const MLRenderingData& dt);
+    void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+    int associatedMeshId() const {return _meshid;}
+    void updateVisibility(MeshModel* mm);
 private:
     void initGui(const QList<MLRenderingAction*>& tab);
 
     int _meshid;
 public slots:
-    void switchTab(int meshid,const QString& tabname,const MLRenderingData& dt);
+    void switchTab(int meshid,const QString& tabname);
     void setAssociatedMeshId(int meshid);
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
+    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
+
 private:
     QMap<QString,MLRenderingParametersFrame*> _parframe;
 };
-
 
 #endif

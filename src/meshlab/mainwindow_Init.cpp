@@ -117,6 +117,9 @@ MainWindow::MainWindow()
     qb->setMinimum(0);
     qb->reset();
     statusBar()->addPermanentWidget(qb,0);
+
+    nvgpumeminfo = new QProgressBar(this);
+    statusBar()->addPermanentWidget(nvgpumeminfo,0);
     //updateMenus();
     newProject();
     //PM should be initialized before passing it to PluginGeneratorGUI
@@ -796,10 +799,10 @@ void MainWindow::fillFilterMenu()
             //MeshLabFilterInterface * iFilter= xmlit.value().filterInterface;
             QAction *filterAction = xmlit.value().act;
             if (filterAction == NULL)
-                throw MeshLabException("Invalid filter action value.");
+                throw MLException("Invalid filter action value.");
             MLXMLPluginInfo* info = xmlit.value().xmlInfo;
             if (filterAction == NULL)
-                throw MeshLabException("Invalid filter info value.");
+                throw MLException("Invalid filter info value.");
             QString filterName = xmlit.key();
 
             QString help = info->filterHelp(filterName);
@@ -1226,9 +1229,12 @@ void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
 {
-    dt._mask = vcg::GLMeshAttributesInfo::PR_SOLID;
-    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
-    dt._atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+    vcg::GLMeshAttributesInfo::RendAtts tmpatts;
+    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
+    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+    dt.set(vcg::GLMeshAttributesInfo::PR_SOLID,tmpatts);
+    MLPerViewGLOptions opts;
+    dt.set(opts);
 }

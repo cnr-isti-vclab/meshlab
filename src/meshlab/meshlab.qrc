@@ -23,8 +23,10 @@
         <file>images/points.png</file>
         <file>images/reload.png</file>
         <file>images/save.png</file>
+		<file>images/selected.png</file>
         <file>images/smooth.png</file>
         <file>images/snapshot.png</file>
+		<file>images/border.png</file>
         <file>images/textures.png</file>
         <file>images/wire.png</file>
         <file>images/layers.png</file>
