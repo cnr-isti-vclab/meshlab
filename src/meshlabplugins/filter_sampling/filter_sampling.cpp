@@ -126,14 +126,14 @@ public:
 /* This sampler is used to transfer the detail of a mesh onto another one.
  * It keep internally the spatial indexing structure used to find the closest point
  */
-class RedetailSampler
+class LocalRedetailSampler
 {
   typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshGrid;
   typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > VertexMeshGrid;
 
 public:
 
-  RedetailSampler():m(0) {}
+  LocalRedetailSampler():m(0) {}
 
   CMeshO *m;           /// the source mesh for which we search the closest points (e.g. the mesh from which we take colors etc).
   CallBackPos *cb;
@@ -696,9 +696,9 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_ELEMENT_SUBSAMPLING :
   {
     MeshModel *curMM= md.mm();
-    RenderMode rm;
-    rm.drawMode = GLW::DMPoints;
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    /*RenderMode rm;
+    rm.drawMode = GLW::DMPoints;*/
+    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true/*,rm*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
 
     BaseSampler mps(&(mm->cm));
@@ -717,10 +717,10 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   {
     MeshModel *curMM= md.mm();
     if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
-    RenderMode rm;
+    /*RenderMode rm;
     rm.drawMode = GLW::DMPoints;
-    rm.colorMode = GLW::CMPerVert;
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    rm.colorMode = GLW::CMPerVert;*/
+    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true/*,rm*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     bool RecoverColor = par.getBool("RecoverColor");
     BaseSampler mps(&(mm->cm));
     mps.texSamplingWidth=par.getInt("TextureW");
@@ -747,7 +747,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
 
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Montecarlo Samples",false,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Montecarlo Samples",false/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
     BaseSampler mps(&(mm->cm));
 
@@ -775,7 +775,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     }
 
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Subdiv Samples",true,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Subdiv Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
     int samplingMethod = par.getEnum("Sampling");
     BaseSampler mps(&(mm->cm));
@@ -804,7 +804,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_CLUSTERED_SAMPLING :
   {
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Cluster Samples",true,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Cluster Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     int samplingMethod = par.getEnum("Sampling");
     float threshold = par.getAbsPerc("Threshold");
     bool selected = par.getBool("Selected");
@@ -844,7 +844,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
   case FP_POINTCLOUD_SIMPLIFICATION :
   {
     MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Simplified",true,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Simplified",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
     BaseSampler mps(&(mm->cm));
     tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
@@ -886,7 +886,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
       return false; // cannot continue
     }
 
-    MeshModel *mm= md.addNewMesh("","Poisson-disk Samples",false,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Poisson-disk Samples",false/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
     mm->updateDataMask(curMM);
 
     Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
@@ -902,7 +902,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
       MeshModel *mcm;
       if(par.getBool("SaveMontecarlo"))
       {
-        mcm=md.addNewMesh("","Montecarlo Samples",false,RenderMode(GLW::DMPoints));
+        mcm=md.addNewMesh("","Montecarlo Samples",false/*,RenderMode(GLW::DMPoints)*/);
       presampledMesh=&(mcm->cm);
       }
       else
@@ -1105,7 +1105,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 	srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 	
-    RedetailSampler rs;
+    LocalRedetailSampler rs;
     rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
 
     rs.dist_upper_bound = upperbound;
@@ -1122,7 +1122,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
     qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
 
-	tri::SurfaceSampling<CMeshO, RedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
+	tri::SurfaceSampling<CMeshO, LocalRedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
 
     if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
 
@@ -1248,7 +1248,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     float offset=par.getAbsPerc("Offset");
 
     MeshModel *mmM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Recur Samples",true,RenderMode(GLW::DMPoints)); // After Adding a mesh to a MeshDocument the new mesh is the current one
+    MeshModel *mm= md.addNewMesh("","Recur Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
 
     tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
     tri::Allocator<CMeshO>::CompactEveryVector(mmM->cm);
@@ -1256,7 +1256,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
     std::vector<Point3m> pvec;
 
-    tri::SurfaceSampling<CMeshO,RedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
+    tri::SurfaceSampling<CMeshO,LocalRedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
     qDebug("Generated %i points",int(pvec.size()));
     tri::BuildMeshFromCoordVector(mm->cm,pvec);
   }
