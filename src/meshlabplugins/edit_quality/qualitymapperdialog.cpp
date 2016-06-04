@@ -41,7 +41,7 @@ void TFDoubleClickCatcher::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event
 
 
 //class constructor
-QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla) : QDockWidget(parent), mesh(m)
+QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont) : QDockWidget(parent), mesh(m),_cont(cont)
 {
 	ui.setupUi(this);
 
@@ -52,7 +52,7 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
 
 	this->gla = gla;
-
+    connect(this,SIGNAL(updateRequested(int,vcg::GLMeshAttributesInfo::ATT_NAMES)),_cont,SLOT(updateRequested(int,vcg::GLMeshAttributesInfo::ATT_NAMES)));
 	_histogram_info = 0;
 	_equalizer_histogram = 0;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
@@ -1107,7 +1107,11 @@ void QualityMapperDialog::on_applyButton_clicked()
 
 	applyColorByVertexQuality((MeshModel&)mesh, _transferFunction, minQuality, maxQuality, (float)_equalizerMidHandlePercentilePosition, brightness);
 
-	gla->update();
+    vcg::GLMeshAttributesInfo::RendAtts atts;
+    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
+	emit updateRequested(mesh.id(),vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR);
+    gla->update();
+    
 }
 
 /* 

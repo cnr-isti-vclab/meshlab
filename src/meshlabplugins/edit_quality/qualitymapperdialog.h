@@ -123,7 +123,7 @@ class QualityMapperDialog : public QDockWidget
 	Q_OBJECT
 
 public:
-	QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla=0);
+	QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla=0,MLSceneGLSharedDataContext* cont = 0);
 	~QualityMapperDialog();
 	
 	void ComputePerVertexQualityHistogram( CMeshO& m, Frange range, Histogramf *h, int bins=50000);
@@ -151,6 +151,7 @@ private:
 	GRAPHICS_ITEMS_LIST _equalizerHistogramBars;
 	MID_HANDLE_SIGNAL_DIRECTION	_signalDir;
 
+    MLSceneGLSharedDataContext* _cont;
 	//Transfer Function items
 public:
 	TransferFunction *_transferFunction;
@@ -194,6 +195,7 @@ private:
 signals:
 	void suspendEditToggle();
 	void closingDialog();
+    void updateRequested(int, vcg::GLMeshAttributesInfo::ATT_NAMES);
 
 private slots:
 	void on_midPercentageLine_editingFinished();

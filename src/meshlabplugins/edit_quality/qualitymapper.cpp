@@ -45,24 +45,23 @@ const QString QualityMapperPlugin::Info()
 	return tr("Colorize mesh vertexes by Quality");
 }
 
-bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
-{
-    
+bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
+{ 
 	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
 	{
 			QMessageBox::warning(gla, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 
 			return false;
 	}
-    QMap<int,RenderMode>::iterator it = gla->rendermodemap.find(m.id());  
     m.updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-    if (it != gla->rendermodemap.end())
-    {
-        it.value().setColorMode(GLW::CMPerVert);
-        gla->update();
-    }
-    
+
+/*if (it != gla->rendermodemap.end())
+{
+    it.value().setColorMode(GLW::CMPerVert);
+    gla->update();
+}
+*/
 	if(_qualityMapperDialog==0)
-		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla);
+		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla,cont);
 
 	//drawing histogram
 	//bool ret = _qualityMapperDialog->initEqualizerHistogram();
@@ -77,12 +76,11 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla )
 
 	//dialog ready to be displayed. Show it now!
 	_qualityMapperDialog->show();
-
 	connect(_qualityMapperDialog, SIGNAL(closingDialog()),gla,SLOT(endEdit()) );
 	return true;
 }
 
-void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea * )
+void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea *,MLSceneGLSharedDataContext* cont)
 {
 	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )

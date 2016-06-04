@@ -51,8 +51,8 @@ public:
     ~QualityMapperPlugin(void){};
 
 	static const QString Info();
-    virtual bool StartEdit(MeshModel&, GLArea*);
-    virtual void EndEdit(MeshModel&, GLArea*);
+    virtual bool StartEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
+    virtual void EndEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
     //virtual void Decorate(MeshModel&, GLArea*);
     virtual void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
     virtual void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};
