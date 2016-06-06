@@ -759,7 +759,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
                 importMesh(path);
             }
         }
-        showLayerDlg(layervis || meshDoc()->meshList.size() > 1);
+        showLayerDlg(layervis || meshDoc()->meshList.size() > 0);
     }
 }
 
