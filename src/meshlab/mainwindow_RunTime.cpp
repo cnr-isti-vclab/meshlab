@@ -134,7 +134,6 @@ void MainWindow::createXMLStdPluginWnd()
     //connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(close()));
 }
 
-
 // When we switch the current model (and we change the active window)
 // we have to close the stddialog.
 // this one is called when user switch current window.
