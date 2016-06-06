@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QWidgetAction>
 #include <QStylePainter>
+#include <QApplication>
 #include <wrap/qt/col_qt_convert.h>
 
 MLRenderingToolbar::MLRenderingToolbar(QWidget* parent )
@@ -124,6 +125,7 @@ void MLRenderingToolbar::getCurrentRenderingDataAccordingToGUI( MLRenderingData&
     }
 }
 
+
 MLRenderingSideToolbar::MLRenderingSideToolbar(QWidget* parent /*= NULL*/ )
     :MLRenderingToolbar(parent)
 {
@@ -145,6 +147,26 @@ void MLRenderingSideToolbar::initGui()
     addRenderingAction(new MLRenderingSolidAction(_meshid,this));
     addRenderingAction(new MLRenderingSelectionAction(_meshid,this));
     addRenderingAction(new MLRenderingEdgeDecoratorAction(_meshid,this));
+}
+
+void MLRenderingSideToolbar::toggle( QAction* clickedact )
+{
+    if ((clickedact != NULL) && (_actgroup != NULL))
+    {
+        Qt::KeyboardModifiers mod = QApplication::keyboardModifiers();
+        if (_actgroup != NULL)
+        {
+            if (mod == Qt::ControlModifier)
+            {
+                foreach(MLRenderingAction* act,_acts)
+                {
+                    if (act != NULL)
+                        act->setChecked(clickedact == act);
+                }
+            }
+        }
+    }
+    MLRenderingToolbar::toggle(clickedact);
 }
 
 MLRenderingParametersFrame::MLRenderingParametersFrame( int meshid,QWidget* parent )
@@ -195,7 +217,6 @@ MLRenderingSolidParametersFrame::MLRenderingSolidParametersFrame( int meshid,QWi
 
 void MLRenderingSolidParametersFrame::initGui()
 {   
-    
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
     _shadingtool = new MLRenderingToolbar(_meshid,this);
@@ -558,14 +579,16 @@ MLRenderingEdgeDecoratorParametersFrame::MLRenderingEdgeDecoratorParametersFrame
 MLRenderingEdgeDecoratorParametersFrame::~MLRenderingEdgeDecoratorParametersFrame()
 {
     delete _boundarytool;
-    delete _manifoldtool;
+    delete _edgemanifoldtool;
+    delete _vertmanifoldtool;
     delete _texturebordertool;
 }
 
 void MLRenderingEdgeDecoratorParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRenderingData& dt ) const
 {
     _boundarytool->getRenderingDataAccordingToGUI(dt);
-    _manifoldtool->getRenderingDataAccordingToGUI(dt);
+    _edgemanifoldtool->getRenderingDataAccordingToGUI(dt);
+    _vertmanifoldtool->getRenderingDataAccordingToGUI(dt);
     _texturebordertool->getRenderingDataAccordingToGUI(dt);
 }
 
@@ -573,14 +596,16 @@ void MLRenderingEdgeDecoratorParametersFrame::getCurrentRenderingDataAccordingTo
 void MLRenderingEdgeDecoratorParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
     _boundarytool->setAccordingToRenderingData(dt);
-    _manifoldtool->setAccordingToRenderingData(dt);
+    _edgemanifoldtool->setAccordingToRenderingData(dt);
+    _vertmanifoldtool->setAccordingToRenderingData(dt);
     _texturebordertool->setAccordingToRenderingData(dt);
 }
 
 void MLRenderingEdgeDecoratorParametersFrame::setAssociatedMeshId( int meshid )
 {
     _boundarytool->setAssociatedMeshId(meshid);
-    _manifoldtool->setAssociatedMeshId(meshid);
+    _edgemanifoldtool->setAssociatedMeshId(meshid);
+    _vertmanifoldtool->setAssociatedMeshId(meshid);
     _texturebordertool->setAssociatedMeshId(meshid);
 }
 
@@ -598,20 +623,28 @@ void MLRenderingEdgeDecoratorParametersFrame::initGui()
     layout->addWidget(_boundarytool,0,1,Qt::AlignLeft);
     connect(_boundarytool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
-    QLabel* manifoldlab = new QLabel("Manifold",this);
-    manifoldlab->setFont(boldfont);
-    layout->addWidget(manifoldlab,1,0,Qt::AlignLeft);
-    _manifoldtool = new MLRenderingOnOffToolbar(_meshid,this);
-    _manifoldtool->setRenderingAction(new MLRenderingManifoldAction(_meshid,_manifoldtool));
-    layout->addWidget(_manifoldtool,1,1,Qt::AlignLeft);
-    connect(_manifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+    QLabel* vertmanifoldlab = new QLabel("No-Manif Verts",this);
+    vertmanifoldlab->setFont(boldfont);
+    layout->addWidget(vertmanifoldlab,1,0,Qt::AlignLeft);
+    _vertmanifoldtool = new MLRenderingOnOffToolbar(_meshid,this);
+    _vertmanifoldtool->setRenderingAction(new MLRenderingVertManifoldAction(_meshid,_vertmanifoldtool));
+    layout->addWidget(_vertmanifoldtool,1,1,Qt::AlignLeft);
+    connect(_vertmanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+
+    QLabel* edgemanifoldlab = new QLabel("No-Manif Edges",this);
+    edgemanifoldlab->setFont(boldfont);
+    layout->addWidget(edgemanifoldlab,2,0,Qt::AlignLeft);
+    _edgemanifoldtool = new MLRenderingOnOffToolbar(_meshid,this);
+    _edgemanifoldtool->setRenderingAction(new MLRenderingEdgeManifoldAction(_meshid,_edgemanifoldtool));
+    layout->addWidget(_edgemanifoldtool,2,1,Qt::AlignLeft);
+    connect(_edgemanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     QLabel* textureborderlab = new QLabel("Texture Border",this);
     textureborderlab->setFont(boldfont);
-    layout->addWidget(textureborderlab,2,0,Qt::AlignLeft);
+    layout->addWidget(textureborderlab,3,0,Qt::AlignLeft);
     _texturebordertool = new MLRenderingOnOffToolbar(_meshid,this);
-    _texturebordertool->setRenderingAction(new MLRenderingTexBorderAction(_meshid,_manifoldtool));
-    layout->addWidget(_texturebordertool,2,1,Qt::AlignLeft);
+    _texturebordertool->setRenderingAction(new MLRenderingTexBorderAction(_meshid,_texturebordertool));
+    layout->addWidget(_texturebordertool,3,1,Qt::AlignLeft);
     connect(_texturebordertool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     setMinimumSize(layout->sizeHint());

@@ -378,16 +378,28 @@ public:
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
 
-class MLRenderingManifoldAction : public MLRenderingAction
+class MLRenderingEdgeManifoldAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingManifoldAction(QObject* parent);
-    MLRenderingManifoldAction(int meshid,QObject* parent);
+    MLRenderingEdgeManifoldAction(QObject* parent);
+    MLRenderingEdgeManifoldAction(int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
+
+class MLRenderingVertManifoldAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingVertManifoldAction(QObject* parent);
+    MLRenderingVertManifoldAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
 
 class MLRenderingTexBorderAction : public MLRenderingAction
 {

@@ -125,15 +125,16 @@ protected:
     QList<MLRenderingAction*> _acts;
     int _meshid;
     MLRenderingAction* _previoussel;
-
-private slots:
-    void toggle(QAction* act);
+protected slots:
+    virtual void toggle(QAction* act);
     void extraUpdateRequired(int,MLRenderingAction*);
 
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>& acts);
     void activatedAction(MLRenderingAction*);
+    
+
 protected:
     //if meshid is -1 it means that the actions are intended to be deployed to all the document and not to a specific mesh model
     QActionGroup* _actgroup;
@@ -148,6 +149,9 @@ public:
     MLRenderingSideToolbar(int meshid,QWidget* parent = NULL);
 
     ~MLRenderingSideToolbar() {}
+private slots:
+    void toggle(QAction* act);
+
 private:
     void initGui();
 };
@@ -292,7 +296,8 @@ public:
 private:
     void initGui();
     MLRenderingOnOffToolbar* _boundarytool;
-    MLRenderingOnOffToolbar* _manifoldtool;
+    MLRenderingOnOffToolbar* _vertmanifoldtool;
+    MLRenderingOnOffToolbar* _edgemanifoldtool;
     MLRenderingOnOffToolbar* _texturebordertool;
 };
 

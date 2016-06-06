@@ -45,7 +45,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 
     bool _peredge_extra_enabled;
     bool _peredge_boundary_enabled;
-    bool _peredge_manifold_enabled;
+    bool _peredge_edgemanifold_enabled;
+    bool _peredge_vertmanifold_enabled;
     bool _peredge_text_boundary_enabled;
 
     bool _back_face_cull;
@@ -71,7 +72,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
         _visible = true;
         _peredge_extra_enabled = false;
         _peredge_boundary_enabled = true;
-        _peredge_manifold_enabled = true;
+        _peredge_edgemanifold_enabled = true;
+        _peredge_vertmanifold_enabled  = true;
         _peredge_text_boundary_enabled = false;
         _back_face_cull = false;
         _double_side_lighting = false;
@@ -111,7 +113,8 @@ private:
         _visible = opts._visible;
         _peredge_extra_enabled = opts._peredge_extra_enabled;
         _peredge_boundary_enabled = opts._peredge_boundary_enabled;
-        _peredge_manifold_enabled = opts._peredge_manifold_enabled;
+        _peredge_edgemanifold_enabled = opts._peredge_edgemanifold_enabled;
+        _peredge_vertmanifold_enabled = opts._peredge_vertmanifold_enabled;
         _peredge_text_boundary_enabled = opts._peredge_text_boundary_enabled;
         _back_face_cull = opts._back_face_cull;
         _double_side_lighting = opts._double_side_lighting;

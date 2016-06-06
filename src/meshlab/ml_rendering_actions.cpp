@@ -934,35 +934,67 @@ bool MLRenderingBoundaryAction::isRenderingDataEnabled( const MLRenderingData& r
     return false;
 }
 
-MLRenderingManifoldAction::MLRenderingManifoldAction( QObject* parent )
+MLRenderingEdgeManifoldAction::MLRenderingEdgeManifoldAction( QObject* parent )
     :MLRenderingAction(-1,parent)
 {
-    setText("2-Manifold Decorator");
+    setText("No 2-Manifold Edges Decorator");
 }
 
-MLRenderingManifoldAction::MLRenderingManifoldAction( int meshid,QObject* parent )
+MLRenderingEdgeManifoldAction::MLRenderingEdgeManifoldAction( int meshid,QObject* parent )
     :MLRenderingAction(meshid,parent)
 {
-    setText("2-Manifold Decorator");
+    setText("No 2-Manifold Edges Decorator");
 }
 
-void MLRenderingManifoldAction::updateRenderingData( MLRenderingData& rd )
+void MLRenderingEdgeManifoldAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
     bool valid = rd.get(opts);
     if (valid)
     {
-        opts._peredge_manifold_enabled = isChecked();
+        opts._peredge_edgemanifold_enabled = isChecked();
         rd.set(opts);
     }
 }
 
-bool MLRenderingManifoldAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+bool MLRenderingEdgeManifoldAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
     MLPerViewGLOptions opts;
     bool valid = rd.get(opts);
     if (valid)
-        return opts._peredge_manifold_enabled;
+        return opts._peredge_edgemanifold_enabled;
+    return false;
+}
+
+MLRenderingVertManifoldAction::MLRenderingVertManifoldAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("No 2-Manifold Vertices Decorator");
+}
+
+MLRenderingVertManifoldAction::MLRenderingVertManifoldAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("No 2-Manifold Vertices Decorator");
+}
+
+void MLRenderingVertManifoldAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_vertmanifold_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingVertManifoldAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_vertmanifold_enabled;
     return false;
 }
 
