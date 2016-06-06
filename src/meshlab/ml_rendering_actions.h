@@ -102,19 +102,6 @@ private:
     vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
 };
 
-class MLRenderingNoneNormalAction : public MLRenderingAction
-{
-    Q_OBJECT
-public:
-    MLRenderingNoneNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingNoneNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
-
-    void updateRenderingData(MLRenderingData& rd);
-    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
-};
-
 class MLRenderingPointsDotAction : public MLRenderingAction
 {
     Q_OBJECT

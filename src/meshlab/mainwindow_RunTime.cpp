@@ -49,7 +49,7 @@
 #include "../common/meshlabdocumentbundler.h"
 #include "../common/mlapplication.h"
 #include "../common/filterscript.h"
-#include <rpcndr.h>
+
 
 
 using namespace std;
