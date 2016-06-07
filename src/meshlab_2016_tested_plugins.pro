@@ -17,7 +17,7 @@ SUBDIRS       = common \
 				meshlabplugins/filter_sampling \
 				meshlabplugins/edit_quality \
 				meshlabplugins/filter_meshing \
-#				meshlabplugins/filter_create\
+				meshlabplugins/filter_voronoi \
 #				meshlabplugins/filter_colorize\
 #				meshlabplugins/filter_meshing \
 #				meshlabplugins/filter_sampling \
