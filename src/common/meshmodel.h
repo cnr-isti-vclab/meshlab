@@ -549,6 +549,8 @@ private:
 public:
     ///add a new mesh with the given name
     MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
+    MeshModel *addOrGetMesh(QString fullPath, QString Label, bool setAsCurrent=true);
+    
 
     ///remove the mesh from the list and delete it from memory
     bool delMesh(MeshModel *mmToDel);

@@ -188,6 +188,17 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
     return newMesh;
 }
 
+MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool setAsCurrent)
+{
+  MeshModel *newMesh = getMesh(label);
+  if(newMesh) {
+    if(setAsCurrent)
+        this->setCurrentMesh(newMesh->id());
+    return newMesh;
+  }
+  return addNewMesh(fullPath,label,setAsCurrent);
+}
+
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
     if(!meshList.removeOne(mmToDel))
