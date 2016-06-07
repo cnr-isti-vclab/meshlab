@@ -196,20 +196,20 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     int sampleVolNum = env.evalInt("sampleVolNum");
     int poissonFlag = env.evalBool("poissonFiltering");
 
-    MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false,RenderMode(GLW::DMPoints));
-    MeshModel  *pVm= md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false,RenderMode(GLW::DMPoints));
-    MeshModel  *pSm= md.addOrGetMesh("Surface Sampling","Surface Sampling",false,RenderMode(GLW::DMPoints));
+    MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
+    MeshModel  *pVm= md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
+    MeshModel  *pSm= md.addOrGetMesh("Surface Sampling","Surface Sampling",false);
     mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
     pSm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-    VoronoiVolumeSampling<CMeshO> vvs(m->cm, pVm->cm);
+    VoronoiVolumeSampling<CMeshO> vvs(m->cm);
     Log("Sampling Surface at a radius %f ",sampleSurfRadius);
     cb(1, "Init");
     vvs.Init(sampleSurfRadius);
     cb(30, "Sampling Volume...");
-    vvs.BuildVolumeSampling(sampleVolNum,0,poissonRadius,cb);
+    vvs.BuildVolumeSampling(sampleVolNum,0,poissonRadius,0);
     tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
     tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mcVm->cm);
-    vvs.ThicknessEvaluator();
+    //vvs.ThicknessEvaluator();
     tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.poissonSurfaceMesh);
     return true;
   }
@@ -217,10 +217,10 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
   {
     MeshModel *m= md.mm();
     m->updateDataMask(MeshModel::MM_FACEMARK);
-    MeshModel   *pm= md.addOrGetMesh("Poisson-disk Samples","Poisson-disk Samples",false,RenderMode(GLW::DMPoints));
-    MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false,RenderMode(GLW::DMPoints));
-    MeshModel  *vsm= md.addOrGetMesh("Voronoi Seeds","Voronoi Seeds",false,RenderMode(GLW::DMPoints));
-    MeshModel   *sm= md.addOrGetMesh("Scaffolding","Scaffolding",false,RenderMode(GLW::DMFlat));
+    MeshModel   *pm= md.addOrGetMesh("Poisson-disk Samples","Poisson-disk Samples",false);
+    MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
+    MeshModel  *vsm= md.addOrGetMesh("Voronoi Seeds","Voronoi Seeds",false);
+    MeshModel   *sm= md.addOrGetMesh("Scaffolding","Scaffolding",false);
 
     pm->updateDataMask(m);
     cb(10, "Sampling Surface...");
@@ -234,19 +234,25 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     int surfFlag = env.evalBool("surfFlag");
     int elemType = env.evalEnum("elemType");
 
-    VoronoiVolumeSampling<CMeshO> vvs(m->cm,vsm->cm);
+    VoronoiVolumeSampling<CMeshO> vvs(m->cm);
+    VoronoiVolumeSampling<CMeshO>::Param par;
+    
     Log("Sampling Surface at a radius %f ",sampleSurfRadius);
     vvs.Init(sampleSurfRadius);
     cb(30, "Sampling Volume...");
     CMeshO::ScalarType poissonVolumeRadius=0;
-    vvs.BuildVolumeSampling(sampleVolNum,voronoiSeed,poissonVolumeRadius);
+    vvs.BuildVolumeSampling(sampleVolNum,voronoiSeed,poissonVolumeRadius,0);
     Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
     cb(40, "Relaxing Volume...");
     vvs.BarycentricRelaxVoronoiSamples(relaxStep);
-
+ 
     cb(50, "Building Scaffloding Volume...");
-    vvs.BuildScaffoldingMesh(sm->cm,voxelRes,isoThr,elemType,surfFlag);
+    par.isoThr = isoThr;
+    par.surfFlag = surfFlag;
+    par.elemType = elemType;
+    par.voxelSide = voxelRes;
+    vvs.BuildScaffoldingMesh(sm->cm,par);
     cb(90, "Final Smoothing...");
     tri::Smooth<CMeshO>::VertexCoordLaplacian(sm->cm, smoothStep);
     sm->UpdateBoxAndNormals();
@@ -259,7 +265,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
   {
     MeshModel *m= md.mm();
     m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-    MeshModel *sm= md.addOrGetMesh("Shell Mesh","Shell Mesh",false,RenderMode(GLW::DMFlat));
+    MeshModel *sm= md.addOrGetMesh("Shell Mesh","Shell Mesh",false);
     float edgeCylRadius = env.evalFloat("edgeCylRadius");
     float vertCylRadius = env.evalFloat("vertCylRadius");
     float vertSphRadius = env.evalFloat("vertSphRadius");
