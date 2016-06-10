@@ -321,7 +321,7 @@ public:
   * \sa errorMsg
   * \sa initParameterSet
   */
-    virtual bool applyFilter(QAction *   filter, MeshDocument &md,   RichParameterSet & par,       vcg::CallBackPos *cb) =0;
+  virtual bool applyFilter(QAction *   filter, MeshDocument &md,   RichParameterSet & par,       vcg::CallBackPos *cb) =0;
 
   /** \brief tests if a filter is applicable to a mesh.
   This function is a handy wrapper used by the framework for the \a getPreConditions callback;
@@ -381,10 +381,7 @@ public:
       int previewOnCreatedAttributes(QAction* act,const MeshModel& mm);
     QString generatedScriptCode;
 
-    /** If you need to init your QGLContext in order to use GPU redefine this function. */
-    virtual bool initGLContext() {return true;}
-
-    QGLContext* glContext;
+    MLPluginGLContext* glContext;
 protected:
     // Each plugins exposes a set of filtering possibilities.
         // Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id.
@@ -627,7 +624,7 @@ public:
     MeshLabFilterInterface();
     virtual ~MeshLabFilterInterface() {}
 
-    QGLContext* glContext;
+    MLPluginGLContext* glContext;
 
     static void initConvertingMap(QMap<QString,MeshModel::MeshElement>& convertingMap);
     static void initConvertingCategoryMap(QMap<QString,MeshFilterInterface::FilterClass>& convertingMap);
@@ -656,6 +653,8 @@ protected:
     // this string is used to pass back to the framework error messages in case of failure of a filter apply.
     QString errorMessage;
     bool intteruptreq;
+signals:
+    void renderingDataRequested(int);
 };
 
 #if (QT_VERSION  >= 0x050000)

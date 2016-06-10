@@ -831,9 +831,18 @@ void MainWindow::runFilterScript()
                 }
             }
             //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
-            QGLWidget wid;
-            iFilter->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-            bool created = iFilter->glContext->create(wid.context());
+
+            bool created = false;
+            MLSceneGLSharedDataContext* shar = NULL;
+            if (currentViewContainer() != NULL)
+            {
+                shar = currentViewContainer()->sharedDataContext();
+                //GLA() is only the parent
+                QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+                QGLFormat defForm = QGLFormat::defaultFormat();
+                iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+                created = iFilter->glContext->create(filterWidget->context());
+            }
             if ((!created) || (!iFilter->glContext->isValid()))
                 throw MLException("A valid GLContext is required by the filter to work.\n");
             meshDoc()->setBusy(true);
@@ -883,9 +892,17 @@ void MainWindow::runFilterScript()
                         }
                     }
                     disconnect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
-                    QGLWidget wid;
-                    cppfilt->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-                    bool created = cppfilt->glContext->create(wid.context());
+                    MLSceneGLSharedDataContext* shar = NULL;
+                    bool created = false;
+                    if (currentViewContainer() != NULL)
+                    {
+                        shar = currentViewContainer()->sharedDataContext();
+                        //GLA() is only the parent
+                        QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+                        QGLFormat defForm = QGLFormat::defaultFormat();
+                        cppfilt->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+                        created = cppfilt->glContext->create(filterWidget->context());
+                    }
                     if ((!created) || (!cppfilt->glContext->isValid()))
                         throw MLException("A valid GLContext is required by the filter to work.\n");
 
@@ -1203,7 +1220,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         curr.set(pm,rd);
                         MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     }
-                    shared->setRequestedAttributesPerMeshView(mm->id(),GLA()->context(),curr);
+                    shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
                 }
                 else 
@@ -1215,12 +1232,12 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     foreach(GLArea* gla,mvc->viewerList)
                     {
                         if (gla != NULL)
-                            shared->setRequestedAttributesPerMeshView(mm->id(),gla->context(),dttoberendered);
+                            shared->setRenderingDataPerMeshView(mm->id(),gla->context(),dttoberendered);
                     }
                 }
                shared->manageBuffers(mm->id());
                updateLayerDialog();
-               addRenderingSystemLogInfo(mm->id());
+               //addRenderingSystemLogInfo(mm->id());
             }
         }
     }
@@ -1271,11 +1288,16 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     RichParameterSet MergedEnvironment(params);
     MergedEnvironment.join(currentGlobalParams);
 
-    //GLA() is only the parent
-    QGLWidget* filterWidget = new QGLWidget(GLA());
-    QGLFormat defForm = QGLFormat::defaultFormat();
-    iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
-    iFilter->glContext->create(filterWidget->context());
+    MLSceneGLSharedDataContext* shar = NULL;
+    if (currentViewContainer() != NULL)
+    {
+        shar = currentViewContainer()->sharedDataContext();
+        //GLA() is only the parent
+        QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+        QGLFormat defForm = QGLFormat::defaultFormat();
+        iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+        iFilter->glContext->create(filterWidget->context());
+    }
     bool newmeshcreated = false;
     try
     {
@@ -1568,7 +1590,13 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
             connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
             connect(ft,SIGNAL(threadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
             connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
-
+            
+            /*if ((_mw != NULL) && (_mw->currentViewContainer() != NULL))
+            {    
+                QGLWidget* tmpglwid = new QGLWidget(NULL,currentViewContainer()->sharedDataContext());
+                filtercpp->glContext = new MLPluginGLContext(QGLFormat::defaultFormat(),tmpglwid->context()->device(),(*currentViewContainer()->sharedDataContext()));
+                bool res = it->filterInterface->glContext->create(tmpglwid->context());
+            }*/
             ft->start();
         }
         else
@@ -1595,8 +1623,6 @@ void MainWindow::postFilterExecution()
 {
     emit filterExecuted();
     //meshDoc()->renderState().clearState();
-
-
     qApp->restoreOverrideCursor();
     qb->reset();
     //foreach(QAction* act,filterMenu->actions())
@@ -2429,7 +2455,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
             {
                 GLArea* ar = mv->getViewer(glarid);
                 if (ar != NULL)
-                    shared->setRequestedAttributesPerMeshView(mm->id(),ar->context(),defdt);
+                    shared->setRenderingDataPerMeshView(mm->id(),ar->context(),defdt);
             }
             shared->manageBuffers(mm->id());
             updateLayerDialog();
@@ -3151,7 +3177,7 @@ void MainWindow::meshAdded(int mid)
                     {
                         GLArea* ar = mvc->getViewer(glarid);
                         if (ar != NULL)
-                            shared->setRequestedAttributesPerMeshView(mid,ar->context(),defdt);
+                            shared->setRenderingDataPerMeshView(mid,ar->context(),defdt);
                     }
                     shared->manageBuffers(mid);
                 }
@@ -3192,9 +3218,9 @@ void MainWindow::setRenderingData(int mid,const MLRenderingData& dt)
         MLSceneGLSharedDataContext* share = cont->sharedDataContext();
         if ((share != NULL) && (GLA() != NULL))
         {
-            share->setRequestedAttributesPerMeshView(mid,GLA()->context(),dt);
+            share->setRenderingDataPerMeshView(mid,GLA()->context(),dt);
             share->manageBuffers(mid);
-            addRenderingSystemLogInfo(mid);
+            //addRenderingSystemLogInfo(mid);
         }
     }
 }

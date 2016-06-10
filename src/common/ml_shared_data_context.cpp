@@ -12,6 +12,13 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
     
     _timer = new QTimer(this);
     connect(_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
+    
+    /*connection intended for the plugins living in another thread*/
+    connect(this,SIGNAL(initPerMeshViewRequest(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
+    connect(this,SIGNAL(removePerMeshViewRequest(QGLContext*)),this,SLOT(removePerMeshViewRequested(QGLContext*)),Qt::BlockingQueuedConnection);
+    connect(this,SIGNAL(setPerMeshViewRenderingDataRequest(QGLContext*)),this,SLOT(setPerMeshViewRenderingDataRequested(QGLContext*)),Qt::BlockingQueuedConnection);
+    /****************************************************************/
+
     _timer->start(1000);
     updateGPUMemInfo();
 }
@@ -42,7 +49,7 @@ void MLSceneGLSharedDataContext::initializeGL()
     
 }
 
-void MLSceneGLSharedDataContext::setRequestedAttributesPerMeshView( int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata )
+void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata )
 {
     MeshModel* mm = _md.getMesh(mmid);
     if (mm == NULL)
@@ -189,7 +196,7 @@ void MLSceneGLSharedDataContext::setGLOptions( int mmid,QGLContext* viewid,const
         man->setGLOptions(viewid,opts);
 }
 
-void MLSceneGLSharedDataContext::draw( int mmid,QGLContext* viewid )
+void MLSceneGLSharedDataContext::draw( int mmid,QGLContext* viewid ) const
 {
     PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
     if (man != NULL)
@@ -219,8 +226,22 @@ void MLSceneGLSharedDataContext::addView( QGLContext* viewerid,MLRenderingData& 
         if (mesh != NULL)
         {
             MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mesh,dt);
-            setRequestedAttributesPerMeshView(it.key(),viewerid,dt);
+            setRenderingDataPerMeshView(it.key(),viewerid,dt);
             manageBuffers(it.key());
+        }
+    }
+}
+
+void MLSceneGLSharedDataContext::addView(QGLContext* viewerid)
+{
+    for(MeshIDManMap::iterator it = _meshboman.begin();it != _meshboman.end();++it)
+    {
+        MeshModel* mesh = _md.getMesh(it.key());
+        if (mesh != NULL)
+        {
+            MLRenderingData dt;
+            setRenderingDataPerMeshView(it.key(),viewerid,dt);
+            //manageBuffers(it.key());
         }
     }
 }
@@ -345,6 +366,39 @@ void MLSceneGLSharedDataContext::updateRequested( int meshid,vcg::GLMeshAttribut
     meshAttributesUpdated(meshid,false,att);
     manageBuffers(meshid);
     
+}
+
+void MLSceneGLSharedDataContext::initPerMeshViewRequested( int meshid,QGLContext* cont,const MLRenderingData& dt)
+{
+    addView(cont);
+    setRenderingDataPerMeshView(meshid,cont,dt);
+    manageBuffers(meshid);
+}
+
+void MLSceneGLSharedDataContext::setPerMeshViewRenderingDataRequested( int meshid,QGLContext* cont,const MLRenderingData& dt )
+{
+    setRenderingDataPerMeshView(meshid,cont,dt);
+    manageBuffers(meshid);
+}
+
+void MLSceneGLSharedDataContext::removePerMeshViewRequested(QGLContext* cont )
+{
+    removeView(cont);
+}
+
+void MLSceneGLSharedDataContext::requestInitPerMeshView( int meshid,QGLContext* cont,const MLRenderingData& dt )
+{
+    emit initPerMeshViewRequest(meshid,cont,dt);
+}
+
+void MLSceneGLSharedDataContext::requestRemovePerMeshView(QGLContext* cont )
+{
+    emit removePerMeshViewRequest(cont);
+}
+
+void MLSceneGLSharedDataContext::requestSetPerMeshViewRenderingData( int meshid,QGLContext* cont,const MLRenderingData& dt )
+{
+    emit setPerMeshViewRenderingDataRequest(meshid,cont,dt);
 }
 
 void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)                                                                                    
@@ -602,6 +656,22 @@ void MLPoliciesStandAloneFunctions::filterFauxUdpateAccordingToMeshMask( MeshMod
     atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 }
 
+vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh( MeshModel* m )
+{
+    if (m != NULL)
+    {
+        if (m->cm.FN() > 0)
+            return MLRenderingData::PR_SOLID;
+        else
+            if ((m->cm.VN() > 0) && (m->cm.EN() > 0))
+                return MLRenderingData::PR_WIREFRAME_EDGES;
+            else
+                if (m->cm.VN() > 0)
+                    return MLRenderingData::PR_POINTS;
+    }
+    return MLRenderingData::PR_ARITY;
+}
+
 //void MLPoliciesStandAloneFunctions::bestPrimitiveModalityMaskAfterUpdate( MeshModel* meshmodel,int meshmodelmask,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& inputpm,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& outputpm )
 //{
 //    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK tmpmask = 0;
@@ -654,3 +724,55 @@ void MLRenderingData::set( const MLPerViewGLOptions& opts )
 {
     vcg::PerViewData<MLPerViewGLOptions>::set(opts);
 }
+
+
+MLPluginGLContext::MLPluginGLContext(const QGLFormat& frmt,QPaintDevice* dvc,MLSceneGLSharedDataContext& cont )
+    :QGLContext(frmt,dvc),_shared(cont)
+{
+
+}
+
+MLPluginGLContext::~MLPluginGLContext()
+{
+}
+
+void MLPluginGLContext::drawMeshModel( int meshid) const
+{
+    MLPluginGLContext* id = const_cast<MLPluginGLContext*>(this);
+    _shared.draw(meshid,id);
+}
+
+void MLPluginGLContext::setRenderingData( int meshid,MLRenderingData& dt )
+{
+    /*_shared.setRenderingDataPerMeshView(meshid,this,dt);
+    _shared.manageBuffers(meshid);*/
+}
+
+void MLPluginGLContext::initPerViewRenderingData(int meshid,MLRenderingData& dt)
+{
+    _shared.requestInitPerMeshView(meshid,this,dt);
+}
+
+void MLPluginGLContext::removePerViewRenderindData()
+{
+    _shared.requestRemovePerMeshView(this);
+}
+
+void MLPluginGLContext::smoothModalitySuggestedRenderingData( MLRenderingData& dt )
+{
+    vcg::GLMeshAttributesInfo::RendAtts att;
+    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    dt.set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY::PR_SOLID,att);
+}
+
+void MLPluginGLContext::pointModalitySuggestedRenderingData( MLRenderingData& dt )
+{
+    vcg::GLMeshAttributesInfo::RendAtts att;
+    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
+    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+    dt.set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY::PR_POINTS,att);
+}
+
+
+

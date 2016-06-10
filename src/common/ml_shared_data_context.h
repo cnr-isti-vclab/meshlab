@@ -142,6 +142,10 @@ public:
     bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,bool onoff);
     bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool onoff);
     void set(const MLPerViewGLOptions& opts);
+
+    typedef vcg::GLMeshAttributesInfo::RendAtts RendAtts;
+    typedef vcg::GLMeshAttributesInfo::ATT_NAMES ATT_NAMES; 
+    typedef vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY PRIMITIVE_MODALITY;
 };
 /*{
     vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK _mask;
@@ -188,6 +192,8 @@ struct MLPoliciesStandAloneFunctions
 
     static bool isPrimitiveModalityWorthToBeActivated(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful);
     
+    static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(MeshModel* m);
+
     static void filterFauxUdpateAccordingToMeshMask(MeshModel* m,vcg::GLMeshAttributesInfo::RendAtts& atts);   
 };
 
@@ -219,7 +225,7 @@ public:
     void initializeGL();
     void deAllocateGPUSharedData();
 
-    void draw(int mmid,QGLContext* viewid);
+    void draw(int mmid,QGLContext* viewid) const;
     void setSceneTransformationMatrix(const Matrix44m& m);
     void setMeshTransformationMatrix(int mmid,const Matrix44m& m);
     
@@ -235,16 +241,30 @@ public:
     void getLog(int mmid,vcg::GLMeshAttributesInfo::DebugInfo& debug);
     bool isBORenderingAvailable(int mmid);
 
+    /*functions intended for the plugins living in another thread*/
+    void requestInitPerMeshView(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void requestRemovePerMeshView(QGLContext* cont);
+    void requestSetPerMeshViewRenderingData(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    /***************************************/
 public slots:
     void meshDeallocated(int mmid);
-    void setRequestedAttributesPerMeshView(int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata);
+    void setRenderingDataPerMeshView(int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata);
     void setGLOptions(int mmid,QGLContext* viewid,const MLPerViewGLOptions& opts);
 
+    void addView(QGLContext* viewerid);
     void addView(QGLContext* viewerid,MLRenderingData& dt);
+	
+
     void removeView(QGLContext* viewerid);
     void meshAttributesUpdated(int mmid,bool conntectivitychanged,const vcg::GLMeshAttributesInfo::RendAtts& dt);
     void updateGPUMemInfo();
     void updateRequested(int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES name);
+    
+    /*slots intended for the plugins living in another thread*/
+    void initPerMeshViewRequested(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void removePerMeshViewRequested(QGLContext* cont);
+    void setPerMeshViewRenderingDataRequested(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    /***************************************/
 private:
     typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO,QGLContext*,MLPerViewGLOptions> PerMeshMultiViewManager; 
     PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid ) const;
@@ -258,8 +278,30 @@ private:
     QTimer* _timer;
 
 signals:
+    
     void currentAllocatedGPUMem(int all,int current);
-
+    /*signals intended for the plugins living in another thread*/
+    void initPerMeshViewRequest(int,QGLContext*,const MLRenderingData&);
+    void removePerMeshViewRequest(QGLContext*);
+    void setPerMeshViewRenderingDataRequest(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    /***************************************/
 }; 
+
+class MLPluginGLContext : public QGLContext
+{
+public:
+    MLPluginGLContext(const QGLFormat& frmt,QPaintDevice* dvc,MLSceneGLSharedDataContext& shared);
+    ~MLPluginGLContext();
+
+    void initPerViewRenderingData(int meshid,MLRenderingData& dt);
+    void removePerViewRenderindData();
+    void setRenderingData(int meshid,MLRenderingData& dt);
+    void drawMeshModel( int meshid) const;
+
+    static void smoothModalitySuggestedRenderingData(MLRenderingData& dt);
+    static void pointModalitySuggestedRenderingData(MLRenderingData& dt); 
+private:
+    MLSceneGLSharedDataContext& _shared;
+};
 
 #endif
