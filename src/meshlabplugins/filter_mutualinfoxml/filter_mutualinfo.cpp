@@ -38,12 +38,13 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
         if (md.rasterList.size()==0)
         {
             Log(0, "You need a Raster Model to apply this filter!");
-            return false;
+            //return false;
         }
         else
             align.image=&md.rm()->currentPlane->image;
 
         align.mesh=&md.mm()->cm;
+        align.meshid = md.mm()->id();
 
         int rendmode = env.evalEnum("RenderingMode");
         solver.optimize_focal = env.evalBool("EstimateFocal");
@@ -80,18 +81,6 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 
 ///// Loading geometry
 
-        vcg::Point3f *vertices = new vcg::Point3f[align.mesh->vn];
-        vcg::Point3f *normals = new vcg::Point3f[align.mesh->vn];
-        vcg::Color4b *colors = new vcg::Color4b[align.mesh->vn];
-        unsigned int *indices = new unsigned int[align.mesh->fn*3];
-
-        for(int i = 0; i < align.mesh->vn; i++)
-        {
-            vertices[i].Import(align.mesh->vert[i].P());
-            normals[i].Import(align.mesh->vert[i].N());
-            colors[i] = align.mesh->vert[i].C();
-        }
-
         align.shot = vcg::Shotf::Construct(env.evalShot("Shot"));
 
         align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
@@ -100,28 +89,12 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 ///// Initialize GLContext
 
         Log( "Initialize GL");
-        this->glContext->makeCurrent();
-            if (this->initGL() == false)
-                return false;
+        align.setGLContext(glContext);
+        glContext->makeCurrent(); 
+        if (this->initGL() == false)
+            return false;
 
-            Log( "Done");
-
-            for(int i = 0; i < align.mesh->fn; i++)
-                for(int k = 0; k < 3; k++)
-                    indices[k+i*3] = align.mesh->face[i].V(k) - &*align.mesh->vert.begin();
-
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.vbo);
-            glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), vertices, GL_STATIC_DRAW_ARB);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.nbo);
-            glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Point3f), normals, GL_STATIC_DRAW_ARB);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, align.cbo);
-            glBufferDataARB(GL_ARRAY_BUFFER_ARB, align.mesh->vn*sizeof(vcg::Color4b), colors, GL_STATIC_DRAW_ARB);
-            glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
-            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.ibo);
-            glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, align.mesh->fn*3*sizeof(unsigned int),
-                indices, GL_STATIC_DRAW_ARB);
-            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
+        Log( "Done");
 
 ///// Mutual info calculation: every 30 iterations, the mail glarea is updated
         int rounds=(int)(solver.maxiter/30);
@@ -147,16 +120,12 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 
             QList<int> rl;
             rl << md.rm()->id();
+
+            //md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
+
             md.documentUpdated();
-			
         }
 		this->glContext->doneCurrent();
-		
-        // it is safe to delete after copying data to VBO
-        delete []vertices;
-        delete []normals;
-        delete []colors;
-        delete []indices;
 
 
         return true;

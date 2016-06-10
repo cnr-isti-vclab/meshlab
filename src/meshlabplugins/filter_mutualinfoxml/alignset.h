@@ -28,6 +28,7 @@ class AlignSet {
 
   int wt,ht;
   CMeshO* mesh;
+  int meshid;
   QImage* image;
   double imageRatio;
   vcg::Shot<float> shot;
@@ -35,7 +36,7 @@ class AlignSet {
   QList<PointCorrespondence*> *correspList; //List that includes corresponces involving the model
   double error; //alignment error in px
 
-  GLuint vbo, nbo, cbo, ibo;  // vertex buffer object (vertices, normals, colors indices)
+  //GLuint vbo, nbo, cbo, ibo;  // vertex buffer object (vertices, normals, colors indices)
 
   GLint programs[6];
   
@@ -47,6 +48,7 @@ class AlignSet {
   AlignSet();
   ~AlignSet();
 
+  void setGLContext(MLPluginGLContext* cont);
   void initializeGL();
 
   int width() { return wt; }
@@ -67,7 +69,7 @@ class AlignSet {
   void resetAlign();
 
  private:
-  
+  MLPluginGLContext* _cont;
   
  
   GLuint createShaderFromFiles(QString basename); // converted into shader/basename.vert .frag
