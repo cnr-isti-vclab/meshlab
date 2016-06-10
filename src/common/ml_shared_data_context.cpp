@@ -14,9 +14,15 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
     connect(_timer,SIGNAL(timeout()),this,SLOT(updateGPUMemInfo()));
     
     /*connection intended for the plugins living in another thread*/
-    connect(this,SIGNAL(initPerMeshViewRequest(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
-    connect(this,SIGNAL(removePerMeshViewRequest(QGLContext*)),this,SLOT(removePerMeshViewRequested(QGLContext*)),Qt::BlockingQueuedConnection);
-    connect(this,SIGNAL(setPerMeshViewRenderingDataRequest(QGLContext*)),this,SLOT(setPerMeshViewRenderingDataRequested(QGLContext*)),Qt::BlockingQueuedConnection);
+    connect(this,SIGNAL(initPerMeshViewRequestMT(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
+    connect(this,SIGNAL(removePerMeshViewRequestMT(QGLContext*)),this,SLOT(removePerMeshViewRequested(QGLContext*)),Qt::BlockingQueuedConnection);
+    connect(this,SIGNAL(setPerMeshViewRenderingDataRequestMT(int,QGLContext*,const MLRenderingData&)),this,SLOT(setPerMeshViewRenderingDataRequested(int,QGLContext*,const MLRenderingData&)),Qt::BlockingQueuedConnection);
+    /****************************************************************/
+
+    /*connection intended for the plugins living in the same thread*/
+    connect(this,SIGNAL(initPerMeshViewRequestST(int,QGLContext*,const MLRenderingData&)),this,SLOT(initPerMeshViewRequested(int,QGLContext*,const MLRenderingData&)),Qt::DirectConnection);
+    connect(this,SIGNAL(removePerMeshViewRequestST(QGLContext*)),this,SLOT(removePerMeshViewRequested(QGLContext*)),Qt::DirectConnection);
+    connect(this,SIGNAL(setPerMeshViewRenderingDataRequestST(int,QGLContext*,const MLRenderingData&)),this,SLOT(setPerMeshViewRenderingDataRequested(int,QGLContext*,const MLRenderingData&)),Qt::DirectConnection);
     /****************************************************************/
 
     _timer->start(1000);
@@ -386,19 +392,31 @@ void MLSceneGLSharedDataContext::removePerMeshViewRequested(QGLContext* cont )
     removeView(cont);
 }
 
-void MLSceneGLSharedDataContext::requestInitPerMeshView( int meshid,QGLContext* cont,const MLRenderingData& dt )
+void MLSceneGLSharedDataContext::requestInitPerMeshView(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt )
 {
-    emit initPerMeshViewRequest(meshid,cont,dt);
+    QThread* tt = thread();
+    if (callingthread != tt)
+        emit initPerMeshViewRequestMT(meshid,cont,dt);
+    else
+        emit initPerMeshViewRequestST(meshid,cont,dt);
 }
 
-void MLSceneGLSharedDataContext::requestRemovePerMeshView(QGLContext* cont )
+void MLSceneGLSharedDataContext::requestRemovePerMeshView(QThread* callingthread,QGLContext* cont )
 {
-    emit removePerMeshViewRequest(cont);
+    QThread* tt = thread();
+    if (callingthread != tt)
+        emit removePerMeshViewRequestMT(cont);
+    else
+        emit removePerMeshViewRequestST(cont);
 }
 
-void MLSceneGLSharedDataContext::requestSetPerMeshViewRenderingData( int meshid,QGLContext* cont,const MLRenderingData& dt )
+void MLSceneGLSharedDataContext::requestSetPerMeshViewRenderingData(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt )
 {
-    emit setPerMeshViewRenderingDataRequest(meshid,cont,dt);
+    QThread* tt = thread();
+    if (callingthread != tt)
+        emit setPerMeshViewRenderingDataRequestMT(meshid,cont,dt);
+    else
+        emit setPerMeshViewRenderingDataRequestST(meshid,cont,dt);
 }
 
 void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)                                                                                    
@@ -744,18 +762,17 @@ void MLPluginGLContext::drawMeshModel( int meshid) const
 
 void MLPluginGLContext::setRenderingData( int meshid,MLRenderingData& dt )
 {
-    /*_shared.setRenderingDataPerMeshView(meshid,this,dt);
-    _shared.manageBuffers(meshid);*/
+    _shared.requestSetPerMeshViewRenderingData(QThread::currentThread(),meshid,this,dt);
 }
 
 void MLPluginGLContext::initPerViewRenderingData(int meshid,MLRenderingData& dt)
 {
-    _shared.requestInitPerMeshView(meshid,this,dt);
+    _shared.requestInitPerMeshView(QThread::currentThread(),meshid,this,dt);
 }
 
 void MLPluginGLContext::removePerViewRenderindData()
 {
-    _shared.requestRemovePerMeshView(this);
+    _shared.requestRemovePerMeshView(QThread::currentThread(),this);
 }
 
 void MLPluginGLContext::smoothModalitySuggestedRenderingData( MLRenderingData& dt )

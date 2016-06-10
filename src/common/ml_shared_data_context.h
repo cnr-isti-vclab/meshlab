@@ -241,10 +241,10 @@ public:
     void getLog(int mmid,vcg::GLMeshAttributesInfo::DebugInfo& debug);
     bool isBORenderingAvailable(int mmid);
 
-    /*functions intended for the plugins living in another thread*/
-    void requestInitPerMeshView(int meshid,QGLContext* cont,const MLRenderingData& dt);
-    void requestRemovePerMeshView(QGLContext* cont);
-    void requestSetPerMeshViewRenderingData(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    /*functions intended for the plugins (they emit different signals according if the calling thread is different from the one where the MLSceneGLSharedDataContext object lives)*/
+    void requestInitPerMeshView(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void requestRemovePerMeshView(QThread* callingthread,QGLContext* cont);
+    void requestSetPerMeshViewRenderingData(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt);
     /***************************************/
 public slots:
     void meshDeallocated(int mmid);
@@ -259,7 +259,8 @@ public slots:
     void meshAttributesUpdated(int mmid,bool conntectivitychanged,const vcg::GLMeshAttributesInfo::RendAtts& dt);
     void updateGPUMemInfo();
     void updateRequested(int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES name);
-    
+
+private slots:
     /*slots intended for the plugins living in another thread*/
     void initPerMeshViewRequested(int meshid,QGLContext* cont,const MLRenderingData& dt);
     void removePerMeshViewRequested(QGLContext* cont);
@@ -280,10 +281,17 @@ private:
 signals:
     
     void currentAllocatedGPUMem(int all,int current);
+
+    /*signals intended for the plugins living in the same thread*/
+    void initPerMeshViewRequestST(int,QGLContext*,const MLRenderingData&);
+    void removePerMeshViewRequestST(QGLContext*);
+    void setPerMeshViewRenderingDataRequestST(int,QGLContext*,const MLRenderingData&);
+    /***************************************/
+
     /*signals intended for the plugins living in another thread*/
-    void initPerMeshViewRequest(int,QGLContext*,const MLRenderingData&);
-    void removePerMeshViewRequest(QGLContext*);
-    void setPerMeshViewRenderingDataRequest(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void initPerMeshViewRequestMT(int,QGLContext*,const MLRenderingData&);
+    void removePerMeshViewRequestMT(QGLContext*);
+    void setPerMeshViewRenderingDataRequestMT(int,QGLContext*,const MLRenderingData&);
     /***************************************/
 }; 
 
