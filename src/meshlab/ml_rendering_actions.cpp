@@ -32,9 +32,9 @@ void MLRenderingAction::setMeshId(int meshid)
     setData(QVariant(meshid));
 }
 
-bool MLRenderingAction::isRenderingDataEnabled( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,const MLRenderingData& rd ) const
+bool MLRenderingAction::isRenderingDataEnabled( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,const MLRenderingData& rd ) const
 {
-    vcg::GLMeshAttributesInfo::RendAtts atts;
+    MLRenderingData::RendAtts atts;
     rd.get(pm,atts);
     return atts[att];
 }
@@ -87,12 +87,12 @@ MLRenderingPointsAction::MLRenderingPointsAction( int meshid,QObject* parent)
 
 void MLRenderingPointsAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_POINTS,isChecked());
+    rd.set(MLRenderingData::PR_POINTS,isChecked());
 }
 
 bool MLRenderingPointsAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {    
-    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_POINTS);
+    return rd.isPrimitiveActive(MLRenderingData::PR_POINTS);
 }
 
 MLRenderingWireAction::MLRenderingWireAction( QObject* parent)
@@ -111,12 +111,12 @@ MLRenderingWireAction::MLRenderingWireAction( int meshid,QObject* parent)
 
 void MLRenderingWireAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,isChecked());
+    rd.set(MLRenderingData::PR_WIREFRAME_TRIANGLES,isChecked());
 }
 
 bool MLRenderingWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES);
+    return rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES);
 }
 
 MLRenderingSolidAction::MLRenderingSolidAction( QObject* parent )
@@ -135,12 +135,12 @@ MLRenderingSolidAction::MLRenderingSolidAction( int meshid,QObject* parent )
 
 void MLRenderingSolidAction::updateRenderingData( MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,isChecked());
+    rd.set(MLRenderingData::PR_SOLID,isChecked());
 }
 
 bool MLRenderingSolidAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_SOLID);
+    return rd.isPrimitiveActive(MLRenderingData::PR_SOLID);
 }
 
 MLRenderingFauxEdgeWireAction::MLRenderingFauxEdgeWireAction( QObject* parent )
@@ -157,12 +157,12 @@ MLRenderingFauxEdgeWireAction::MLRenderingFauxEdgeWireAction( int meshid,QObject
 
 void MLRenderingFauxEdgeWireAction::updateRenderingData( MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES,isChecked());
+    rd.set(MLRenderingData::PR_WIREFRAME_EDGES,isChecked());
 }
 
 bool MLRenderingFauxEdgeWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd.isPrimitiveActive(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES);
+    return rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES);
 }
 
 bool MLRenderingFauxEdgeWireAction::isCheckableConditionValid( MeshModel* mm) const
@@ -184,21 +184,21 @@ MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( int meshid,QObje
 
 void MLRenderingPerFaceNormalAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL,isChecked()); 
+    rd.set(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACENORMAL,isChecked()); 
 }
 
 bool MLRenderingPerFaceNormalAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL,rd);
+    return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACENORMAL,rd);
 }
 
-MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(parent),_pm(pm)
 {
     setText(QString("Vert"));
 }
 
-MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Vert"));
@@ -206,21 +206,21 @@ MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(vcg::GLMeshAt
 
 void MLRenderingPerVertexNormalAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL,isChecked()); 
+    rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_VERTNORMAL,isChecked()); 
 }
 
 bool MLRenderingPerVertexNormalAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL,rd);
+    return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTNORMAL,rd);
 }
 
-MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(-1,parent),_pm(pm)
 {
     setText(QString("Enabled"));
 }
 
-MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Enabled"));
@@ -228,12 +228,12 @@ MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(vcg::GLMesh
 
 void MLRenderingPerVertTextCoordAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE,isChecked()); 
+    rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE,isChecked()); 
 }
 
 bool MLRenderingPerVertTextCoordAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE,rd);
+    return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE,rd);
 }
 
 bool MLRenderingPerVertTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
@@ -253,12 +253,12 @@ MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(int meshi
 
 void MLRenderingPerWedgeTextCoordAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE,isChecked()); 
+    rd.set(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE,isChecked()); 
 }
 
 bool MLRenderingPerWedgeTextCoordAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE,rd);
+    return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE,rd);
 }
 
 bool MLRenderingPerWedgeTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
@@ -327,7 +327,7 @@ bool MLRenderingFancyLightingAction::isRenderingDataEnabled( const MLRenderingDa
     return (valid && opts._fancy_lighting);
 }
 
-MLRenderingNoShadingAction::MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+MLRenderingNoShadingAction::MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(parent),_pm(pm)
 {
     //setIcon(QIcon(":/images/lighton.png"));
@@ -335,7 +335,7 @@ MLRenderingNoShadingAction::MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo
     setToolTip(QString("Light on/off"));
 }
 
-MLRenderingNoShadingAction::MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+MLRenderingNoShadingAction::MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     //setIcon(QIcon(":/images/lighton.png"));
@@ -352,18 +352,18 @@ void MLRenderingNoShadingAction::updateRenderingData(MLRenderingData& rd )
     {
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 opts._perpoint_noshading = isChecked();
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 opts._perwire_noshading = isChecked();
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 opts._persolid_noshading = isChecked();
                 break;
@@ -381,16 +381,16 @@ bool MLRenderingNoShadingAction::isRenderingDataEnabled( const MLRenderingData& 
     {
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 return opts._perpoint_noshading;
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 return opts._perwire_noshading;
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 return opts._persolid_noshading;
             }
@@ -429,13 +429,13 @@ bool MLRenderingFaceCullAction::isRenderingDataEnabled( const MLRenderingData& r
     return (valid && opts._back_face_cull);
 }
 
-MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(-1,parent),_pm(pm)
 {
     setText(QString("Mesh"));  
 }
 
-MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Mesh"));
@@ -450,18 +450,18 @@ void MLRenderingPerMeshColorAction::updateRenderingData(MLRenderingData& rd)
         opts._permesh_color = _col;
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 opts._perpoint_mesh_color_enabled = isChecked();
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 opts._perwire_mesh_color_enabled = isChecked();
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 opts._persolid_mesh_color_enabled = isChecked();
                 break;
@@ -479,18 +479,18 @@ bool MLRenderingPerMeshColorAction::isRenderingDataEnabled( const MLRenderingDat
     {
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 return opts._perpoint_mesh_color_enabled;
 
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 return opts._perwire_mesh_color_enabled;
 
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 return opts._persolid_mesh_color_enabled;
             }
@@ -514,13 +514,13 @@ vcg::Color4b& MLRenderingPerMeshColorAction::getColor()
     return _col;
 }
 
-MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent)
+MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(-1,parent),_pm(pm)
 {
     setText(QString("Vert"));
 }
 
-MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
+MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Vert"));
@@ -528,12 +528,12 @@ MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(vcg::GLMeshAttr
 
 void MLRenderingPerVertexColorAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR,isChecked());
+    rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_VERTCOLOR,isChecked());
 }
 
 bool MLRenderingPerVertexColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(_pm,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR,rd);
+    return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTCOLOR,rd);
 }
 
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(QObject* parent)
@@ -550,12 +550,12 @@ MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(int meshid,QObject*
 
 void MLRenderingPerFaceColorAction::updateRenderingData(MLRenderingData& rd )
 {
-   rd.set(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR,isChecked());
+   rd.set(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACECOLOR,isChecked());
 }
 
 bool MLRenderingPerFaceColorAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return MLRenderingAction::isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PR_SOLID,vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR,rd);
+    return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACECOLOR,rd);
 }
 
 bool MLRenderingPerFaceColorAction::isCheckableConditionValid( MeshModel* mm) const
@@ -563,13 +563,13 @@ bool MLRenderingPerFaceColorAction::isCheckableConditionValid( MeshModel* mm) co
     return mm->hasDataMask(MeshModel::MM_FACECOLOR);
 }
 
-MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent )
+MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent )
     :MLRenderingAction(-1,parent),_pm(pm),_coluser(vcg::Color4b::DarkGray)
 {
     setText(QString("User-Def"));
 }
 
-MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid, QObject* parent )
+MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderingData::PRIMITIVE_MODALITY pm,int meshid, QObject* parent )
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("User-Def"));
@@ -583,20 +583,20 @@ void MLRenderingUserDefinedColorAction::updateRenderingData( MLRenderingData& rd
     {
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 opts._perpoint_fixed_color_enabled = isChecked();
                 opts._perpoint_fixed_color = _coluser;
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 opts._perwire_fixed_color_enabled = isChecked();
                 opts._perwire_fixed_color = _coluser;
                 break;
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 opts._persolid_fixed_color_enabled = isChecked();
                 opts._persolid_fixed_color = _coluser;
@@ -615,18 +615,18 @@ bool MLRenderingUserDefinedColorAction::isRenderingDataEnabled( const MLRenderin
     {
         switch (_pm)
         {
-        case (vcg::GLMeshAttributesInfo::PR_POINTS):
+        case (MLRenderingData::PR_POINTS):
             {
                 return opts._perpoint_fixed_color_enabled;
                 
             }
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-        case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+        case (MLRenderingData::PR_WIREFRAME_EDGES):
             {
                 return opts._perwire_fixed_color_enabled;
                 
             }
-        case (vcg::GLMeshAttributesInfo::PR_SOLID):
+        case (MLRenderingData::PR_SOLID):
             {
                 return opts._persolid_fixed_color_enabled;
             }

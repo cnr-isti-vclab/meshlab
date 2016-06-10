@@ -1229,12 +1229,12 @@ void MainWindowSetting::updateGlobalParameterSet( RichParameterSet& rps )
 
 void MainWindow::defaultPerViewRenderingData(MLRenderingData& dt) const
 {
-    vcg::GLMeshAttributesInfo::RendAtts tmpatts;
-    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
-    tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
-    dt.set(vcg::GLMeshAttributesInfo::PR_SOLID,tmpatts);
+    MLRenderingData::RendAtts tmpatts;
+    tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+    tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+    tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+    tmpatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+    dt.set(MLRenderingData::PR_SOLID,tmpatts);
     MLPerViewGLOptions opts;
     dt.set(opts);
 }

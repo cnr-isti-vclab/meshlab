@@ -38,8 +38,8 @@ class MLRenderingColorPicker : public QToolButton
     Q_OBJECT
 
 public:
-    MLRenderingColorPicker(int meshid,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p);
-    MLRenderingColorPicker(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p);
+    MLRenderingColorPicker(int meshid,MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p);
+    MLRenderingColorPicker(MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p);
     ~MLRenderingColorPicker();
 
     void setColor(QColor& def);

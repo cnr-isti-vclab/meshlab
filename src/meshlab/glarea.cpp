@@ -504,13 +504,13 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     setLightingColors(opts);
                     
                     //union of all the attributes requested at least by a modality rendering
-                    vcg::GLMeshAttributesInfo::RendAtts unionatts;
-                    for(int pm = 0;pm < (int)vcg::GLMeshAttributesInfo::PR_ARITY;++pm)
+                    MLRenderingData::RendAtts unionatts;
+                    for(int pm = 0;pm < (int)MLRenderingData::PR_ARITY;++pm)
                     {
-                        vcg::GLMeshAttributesInfo::RendAtts tmp;
-                        if (curr.get(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(pm),tmp) == false)
+                        MLRenderingData::RendAtts tmp;
+                        if (curr.get(MLRenderingData::PRIMITIVE_MODALITY(pm),tmp) == false)
                             throw MLException(QString("GLArea: invalid PRIMITIVE_MODALITY"));
-                        unionatts = vcg::GLMeshAttributesInfo::RendAtts::unionSet(unionatts,tmp);
+                        unionatts = MLRenderingData::RendAtts::unionSet(unionatts,tmp);
                     }
                     
                     if(opts._back_face_cull)

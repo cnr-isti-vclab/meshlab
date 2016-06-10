@@ -73,14 +73,14 @@ public:
         return parentmultiview;
     }
 
-    void requestForRenderingAttsUpdate( int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES attname )
+    void requestForRenderingAttsUpdate( int meshid,MLRenderingData::ATT_NAMES attname )
     {
         if (parentmultiview != NULL)
         {
             MLSceneGLSharedDataContext* cont = parentmultiview->sharedDataContext();
             if (cont != NULL)
             {
-                vcg::GLMeshAttributesInfo::RendAtts atts;
+                MLRenderingData::RendAtts atts;
                 atts[attname] = true;
                 cont->meshAttributesUpdated(meshid,false,atts);
                 cont->manageBuffers(meshid);

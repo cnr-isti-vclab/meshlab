@@ -264,7 +264,7 @@ void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
     doneCurrent();
 }
 
-void MLSceneGLSharedDataContext::meshAttributesUpdated(int mmid,bool conntectivitychanged,const vcg::GLMeshAttributesInfo::RendAtts& atts)
+void MLSceneGLSharedDataContext::meshAttributesUpdated(int mmid,bool conntectivitychanged,const MLRenderingData::RendAtts& atts)
 {
     MeshModel* mm = _md.getMesh(mmid);
     if (mm == NULL)
@@ -326,7 +326,7 @@ void MLSceneGLSharedDataContext::setDebugMode(int mmid,bool activatedebugmodalit
         man->setDebugMode(activatedebugmodality);
 }
 
-void MLSceneGLSharedDataContext::getLog( int mmid,vcg::GLMeshAttributesInfo::DebugInfo& info)
+void MLSceneGLSharedDataContext::getLog( int mmid,MLRenderingData::DebugInfo& info)
 {
     MeshModel* mm = _md.getMesh(mmid);
     if (mm == NULL)
@@ -365,9 +365,9 @@ void MLSceneGLSharedDataContext::updateGPUMemInfo()
     emit currentAllocatedGPUMem((int)allmem,(int)currentallocated);
 }
 
-void MLSceneGLSharedDataContext::updateRequested( int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES name )
+void MLSceneGLSharedDataContext::updateRequested( int meshid,MLRenderingData::ATT_NAMES name )
 {
-    vcg::GLMeshAttributesInfo::RendAtts att;
+    MLRenderingData::RendAtts att;
     att[name] = true;
     meshAttributesUpdated(meshid,false,att);
     manageBuffers(meshid);
@@ -431,27 +431,27 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
     }
     bool validfaces = (mesh.FN() > 0);
 
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
-    for(size_t pmind = 0;pmind < size_t(vcg::GLMeshAttributesInfo::PR_ARITY); ++pmind)
+    MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
+    for(size_t pmind = 0;pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
     {
-        vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pmc = vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(pmind);
+        MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);
 
             
-        vcg::GLMeshAttributesInfo::RendAtts tmpoutputatts;
-        if (inputdt.get(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(pmind),tmpoutputatts))
+        MLRenderingData::RendAtts tmpoutputatts;
+        if (inputdt.get(MLRenderingData::PRIMITIVE_MODALITY(pmind),tmpoutputatts))
         {
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] &= meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
 
             //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
             //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
             //The enum-value depends from the enabled attributes of input mesh.
             bool wedgetexture = meshmodel->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
-            tmpoutputatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] &= validfaces && wedgetexture;
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
+            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= validfaces && wedgetexture;
             if (MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(meshmodel,pmc))
                 outputdt.set(pmc,tmpoutputatts);
         }
@@ -463,59 +463,59 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
     MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(meshmodel,outputdt);
 }
 
-void MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts)
+void MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int meshmodelmask,MLRenderingData::RendAtts& atts)
 {
     atts.reset();
     //connectivitychanged = bool(meshmodelmask | MeshModel::MM_FACEFACETOPO) || bool(meshmodelmask | MeshModel::MM_VERTFACETOPO) || bool(meshmodelmask | MeshModel::MM_VERTNUMBER) || bool(meshmodelmask | MeshModel::MM_FACENUMBER);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = bool(meshmodelmask & MeshModel::MM_VERTCOORD);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = bool(meshmodelmask & MeshModel::MM_VERTNORMAL);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = bool(meshmodelmask & MeshModel::MM_FACENORMAL);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = bool(meshmodelmask & MeshModel::MM_VERTCOLOR);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = bool(meshmodelmask & MeshModel::MM_FACECOLOR);
-    //atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR] = bool(meshmodelmask & MeshModel::MM_COLOR);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = bool(meshmodelmask & MeshModel::MM_VERTTEXCOORD);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = bool(meshmodelmask & MeshModel::MM_WEDGTEXCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = bool(meshmodelmask & MeshModel::MM_VERTCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = bool(meshmodelmask & MeshModel::MM_VERTNORMAL);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = bool(meshmodelmask & MeshModel::MM_FACENORMAL);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = bool(meshmodelmask & MeshModel::MM_VERTCOLOR);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = bool(meshmodelmask & MeshModel::MM_FACECOLOR);
+    //atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = bool(meshmodelmask & MeshModel::MM_COLOR);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = bool(meshmodelmask & MeshModel::MM_VERTTEXCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = bool(meshmodelmask & MeshModel::MM_WEDGTEXCOORD);
 }
 
-void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModality( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::RendAtts& atts )
+void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModality( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::RendAtts& atts )
 {
     switch(pm)
     {
-    case (vcg::GLMeshAttributesInfo::PR_POINTS):
+    case (MLRenderingData::PR_POINTS):
         {
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = false;
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = false;
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = false;
             return;
         }
-    case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
-    case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+    case (MLRenderingData::PR_WIREFRAME_EDGES):
+    case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
         {
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = false;
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = false;
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = false;
-            atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = false;  
+            atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = false;
+            atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = false;  
             return;
         }
-    case (vcg::GLMeshAttributesInfo::PR_SOLID):
+    case (MLRenderingData::PR_SOLID):
         {
             return;
         }
     }
 }
 
-void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result)
+void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
 {
-    vcg::GLMeshAttributesInfo::RendAtts filteredupdated = updated;
-    vcg::GLMeshAttributesInfo::RendAtts tmp = current;
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION];
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL];
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] = (tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL]);
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR];
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] = (tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR]);
-    //tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR] = (tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR] || filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR]) && !(filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR]);
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE];
-    tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE]);
+    MLRenderingData::RendAtts filteredupdated = updated;
+    MLRenderingData::RendAtts tmp = current;
+    tmp[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
+    tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
+    tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
+    tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
+    tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+    //tmp[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+    tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
+    tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
     result = tmp;
 }
 
@@ -530,23 +530,23 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
     }
     else
     {
-        vcg::GLMeshAttributesInfo::RendAtts tmpatts;
-        tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-        tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-        tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
-        tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = true;
+        MLRenderingData::RendAtts tmpatts;
+        tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+        tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+        tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+        tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = true;
 
-        dt.set(vcg::GLMeshAttributesInfo::PR_POINTS,tmpatts);
+        dt.set(MLRenderingData::PR_POINTS,tmpatts);
        
         if (meshmodel->cm.FN() > 0)
         {
-            dt.set(vcg::GLMeshAttributesInfo::PR_POINTS,false);
+            dt.set(MLRenderingData::PR_POINTS,false);
             tmpatts.reset();
-            tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-            tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-            tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
-            tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = true;
-            dt.set(vcg::GLMeshAttributesInfo::PR_SOLID,tmpatts);
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+            dt.set(MLRenderingData::PR_SOLID,tmpatts);
         }
         else
         {
@@ -554,10 +554,10 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             {
                 dt.reset();
                 tmpatts.reset();
-                tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-                tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-                tmpatts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = true;
-                dt.set(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES,tmpatts);
+                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+                dt.set(MLRenderingData::PR_WIREFRAME_EDGES,tmpatts);
                 return;
             }
         }
@@ -566,7 +566,7 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
 }
 
 
-bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm)
+bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm)
 {
     bool validvert = (m->cm.VN() > 0);
     bool validfaces = (m->cm.FN() > 0);
@@ -574,20 +574,20 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(MeshMo
     return MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(validvert,validfaces,validedges,m->dataMask(),pm);
 }
 
-bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm)
+bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const MLRenderingData::PRIMITIVE_MODALITY pm)
 {
     switch(pm)
     {
-    case(vcg::GLMeshAttributesInfo::PR_POINTS):
+    case(MLRenderingData::PR_POINTS):
         {
             return validvert;
         }
-    case(vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
+    case(MLRenderingData::PR_WIREFRAME_EDGES):
         {
             return (validvert) && ((meshmask & MeshModel::MM_POLYGONAL) || ((!validfaces) && (validedges)));
         }
-    case(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
-    case(vcg::GLMeshAttributesInfo::PR_SOLID):
+    case(MLRenderingData::PR_WIREFRAME_TRIANGLES):
+    case(MLRenderingData::PR_SOLID):
         {
             return validvert && validfaces;
         }
@@ -595,7 +595,7 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(bo
     return false;
 }
 
-bool MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful)
+bool MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(MLRenderingData::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful)
 {
     (void) pm;
     if ((!wasmeanigful) && (ismeaningful))
@@ -605,11 +605,11 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(vcg::G
     return false;
 }
 
-void MLPoliciesStandAloneFunctions::setAttributePriorities(vcg::GLMeshAttributesInfo::RendAtts& atts )
+void MLPoliciesStandAloneFunctions::setAttributePriorities(MLRenderingData::RendAtts& atts )
 {
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= !(atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL]);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &= !(atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR]);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= !(atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE]);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= !(atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= !(atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= !(atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
 }
 
 void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt )
@@ -625,33 +625,33 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
         vcg::Color4b def = mm->cm.C();
         glopts._permesh_color = def;
     }
-    for(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm = vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(0);pm < vcg::GLMeshAttributesInfo::PR_ARITY;pm = vcg::GLMeshAttributesInfo::next(pm))
+    for(MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0);pm < MLRenderingData::PR_ARITY;pm = MLRenderingData::next(pm))
     {
-        vcg::GLMeshAttributesInfo::RendAtts atts;
+        MLRenderingData::RendAtts atts;
         if (dt.get(pm,atts))
         {
             switch(pm)
             {
-            case (vcg::GLMeshAttributesInfo::PR_POINTS):
+            case (MLRenderingData::PR_POINTS):
                 {
-                    glopts._perpoint_noshading = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL];
-                    glopts._perpoint_mesh_color_enabled = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
+                    glopts._perpoint_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
+                    glopts._perpoint_mesh_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
                     glopts._perpoint_fixed_color_enabled = !(glopts._perpoint_mesh_color_enabled);
                     break;
                 }
-            case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES):
-            case (vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
                 {
-                    glopts._perwire_noshading = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL];
-                    glopts._perwire_mesh_color_enabled = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
+                    glopts._perwire_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
+                    glopts._perwire_mesh_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
                     glopts._perwire_fixed_color_enabled = !(glopts._perpoint_mesh_color_enabled);
                     break;
                 }
-            case (vcg::GLMeshAttributesInfo::PR_SOLID):
+            case (MLRenderingData::PR_SOLID):
                 {
-                    glopts._persolid_noshading = (!atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL]) && (!atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL]);
-                    glopts._persolid_mesh_color_enabled = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] && permeshcolor;
-                    glopts._persolid_fixed_color_enabled = !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] && !atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] && !permeshcolor;
+                    glopts._persolid_noshading = (!atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]) && (!atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]);
+                    glopts._persolid_mesh_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && permeshcolor;
+                    glopts._persolid_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && !permeshcolor;
                     break;
                 }
             }
@@ -660,21 +660,21 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
     dt.set(glopts);
 }
 
-void MLPoliciesStandAloneFunctions::filterFauxUdpateAccordingToMeshMask( MeshModel* m,vcg::GLMeshAttributesInfo::RendAtts& atts )
+void MLPoliciesStandAloneFunctions::filterFauxUdpateAccordingToMeshMask( MeshModel* m,MLRenderingData::RendAtts& atts )
 {
     if (m == NULL)
         return;
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] &= m->hasDataMask(MeshModel::MM_VERTCOORD);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] &= m->hasDataMask(MeshModel::MM_VERTNORMAL);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= m->hasDataMask(MeshModel::MM_FACENORMAL);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] &= m->hasDataMask(MeshModel::MM_VERTCOLOR);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &= m->hasDataMask(MeshModel::MM_FACECOLOR);
-    //atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR]
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] &= m->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] &= m->hasDataMask(MeshModel::MM_VERTCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= m->hasDataMask(MeshModel::MM_VERTNORMAL);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= m->hasDataMask(MeshModel::MM_FACENORMAL);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= m->hasDataMask(MeshModel::MM_VERTCOLOR);
+    atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= m->hasDataMask(MeshModel::MM_FACECOLOR);
+    //atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR]
+    atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= m->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 }
 
-vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh( MeshModel* m )
+MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh( MeshModel* m )
 {
     if (m != NULL)
     {
@@ -690,12 +690,12 @@ vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bes
     return MLRenderingData::PR_ARITY;
 }
 
-//void MLPoliciesStandAloneFunctions::bestPrimitiveModalityMaskAfterUpdate( MeshModel* meshmodel,int meshmodelmask,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& inputpm,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK& outputpm )
+//void MLPoliciesStandAloneFunctions::bestPrimitiveModalityMaskAfterUpdate( MeshModel* meshmodel,int meshmodelmask,const MLRenderingData::PRIMITIVE_MODALITY_MASK& inputpm,MLRenderingData::PRIMITIVE_MODALITY_MASK& outputpm )
 //{
-//    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK tmpmask = 0;
+//    MLRenderingData::PRIMITIVE_MODALITY_MASK tmpmask = 0;
 //    if (meshmodel->cm.VN() == 0)
 //    {
-//        outputpm = vcg::GLMeshAttributesInfo::PR_NONE;
+//        outputpm = MLRenderingData::PR_NONE;
 //        return;
 //    }
 //
@@ -713,17 +713,17 @@ MLRenderingData::MLRenderingData( const MLRenderingData& dt )
 {
 }
 
-bool MLRenderingData::set( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& atts )
+bool MLRenderingData::set( MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& atts )
 {
-    vcg::GLMeshAttributesInfo::RendAtts tmp(atts);
+    MLRenderingData::RendAtts tmp(atts);
     MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModality(pm,tmp);
     //MLPoliciesStandAloneFunctions::setAttributePriorities(tmp);
     return PerViewData<MLPerViewGLOptions>::set(pm,tmp);
 }
 
-bool MLRenderingData::set( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,bool onoff )
+bool MLRenderingData::set( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,bool onoff )
 {
-    vcg::GLMeshAttributesInfo::RendAtts tmp;
+    MLRenderingData::RendAtts tmp;
     bool valid = this->get(pm,tmp);
     if (valid)
     {
@@ -733,7 +733,7 @@ bool MLRenderingData::set( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg:
     return false;
 }
 
-bool MLRenderingData::set( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool onoff )
+bool MLRenderingData::set( MLRenderingData::PRIMITIVE_MODALITY pm,bool onoff )
 {
     return vcg::PerViewData<MLPerViewGLOptions>::set(pm,onoff);
 }
@@ -777,18 +777,18 @@ void MLPluginGLContext::removePerViewRenderindData()
 
 void MLPluginGLContext::smoothModalitySuggestedRenderingData( MLRenderingData& dt )
 {
-    vcg::GLMeshAttributesInfo::RendAtts att;
-    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-    dt.set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY::PR_SOLID,att);
+    MLRenderingData::RendAtts att;
+    att[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+    att[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+    dt.set(MLRenderingData::PRIMITIVE_MODALITY::PR_SOLID,att);
 }
 
 void MLPluginGLContext::pointModalitySuggestedRenderingData( MLRenderingData& dt )
 {
-    vcg::GLMeshAttributesInfo::RendAtts att;
-    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-    att[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
-    dt.set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY::PR_POINTS,att);
+    MLRenderingData::RendAtts att;
+    att[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+    att[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+    dt.set(MLRenderingData::PRIMITIVE_MODALITY::PR_POINTS,att);
 }
 
 

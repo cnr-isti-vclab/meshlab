@@ -138,9 +138,9 @@ public:
     MLRenderingData();
     MLRenderingData(const MLRenderingData& dt);
 
-    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& atts);
-    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,bool onoff);
-    bool set(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool onoff);
+    bool set(MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& atts);
+    bool set(MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,bool onoff);
+    bool set(MLRenderingData::PRIMITIVE_MODALITY pm,bool onoff);
     void set(const MLPerViewGLOptions& opts);
 
     typedef vcg::GLMeshAttributesInfo::RendAtts RendAtts;
@@ -148,25 +148,25 @@ public:
     typedef vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY PRIMITIVE_MODALITY;
 };
 /*{
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK _mask;
-    vcg::GLMeshAttributesInfo::RendAtts _atts;
+    MLRenderingData::PRIMITIVE_MODALITY_MASK _mask;
+    MLRenderingData::RendAtts _atts;
     MLPerViewGLOptions _opts;
 
     MLRenderingData()
-        :_mask((unsigned int) vcg::GLMeshAttributesInfo::PR_NONE),_atts(),_opts()
+        :_mask((unsigned int) MLRenderingData::PR_NONE),_atts(),_opts()
     {
     }
 
-    MLRenderingData(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK mask,const vcg::GLMeshAttributesInfo::RendAtts& atts,const MLPerViewGLOptions& opts)
+    MLRenderingData(MLRenderingData::PRIMITIVE_MODALITY_MASK mask,const MLRenderingData::RendAtts& atts,const MLPerViewGLOptions& opts)
         :_mask(mask),_atts(atts),_opts(opts)
     {
     }
 
     static void all(MLRenderingData& dt)
     {
-        for(unsigned int ii = 0;ii < vcg::GLMeshAttributesInfo::ATT_NAMES::enumArity();++ii)
+        for(unsigned int ii = 0;ii < MLRenderingData::ATT_NAMES::enumArity();++ii)
             dt._atts[ii] = true;
-        dt._mask = vcg::GLMeshAttributesInfo::PR_BBOX | vcg::GLMeshAttributesInfo::PR_POINTS | vcg::GLMeshAttributesInfo::PR_WIREFRAME_EDGES | vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES | vcg::GLMeshAttributesInfo::PR_SOLID;
+        dt._mask = MLRenderingData::PR_BBOX | MLRenderingData::PR_POINTS | MLRenderingData::PR_WIREFRAME_EDGES | MLRenderingData::PR_WIREFRAME_TRIANGLES | MLRenderingData::PR_SOLID;
    }
 };*/
 
@@ -174,27 +174,27 @@ struct MLPoliciesStandAloneFunctions
 {
     static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
 
-    static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,vcg::GLMeshAttributesInfo::RendAtts& atts);
+    static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,MLRenderingData::RendAtts& atts);
 
-    static void updatedRendAttsAccordingToPriorities(const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,const vcg::GLMeshAttributesInfo::RendAtts& updated,const vcg::GLMeshAttributesInfo::RendAtts& current,vcg::GLMeshAttributesInfo::RendAtts& result); 
+    static void updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result); 
 
-    static void maskMeaninglessAttributesPerPrimitiveModality( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::RendAtts& atts );
+    static void maskMeaninglessAttributesPerPrimitiveModality( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::RendAtts& atts );
 
-    static void setAttributePriorities(vcg::GLMeshAttributesInfo::RendAtts& atts);
+    static void setAttributePriorities(MLRenderingData::RendAtts& atts);
 
     static void setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt );
 
     static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
 
-    static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm);
+    static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm);
 
-    static bool isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm);
+    static bool isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const MLRenderingData::PRIMITIVE_MODALITY pm);
 
-    static bool isPrimitiveModalityWorthToBeActivated(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful);
+    static bool isPrimitiveModalityWorthToBeActivated(MLRenderingData::PRIMITIVE_MODALITY pm,bool wasvisualized,bool wasmeanigful,bool ismeaningful);
     
     static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(MeshModel* m);
 
-    static void filterFauxUdpateAccordingToMeshMask(MeshModel* m,vcg::GLMeshAttributesInfo::RendAtts& atts);   
+    static void filterFauxUdpateAccordingToMeshMask(MeshModel* m,MLRenderingData::RendAtts& atts);   
 };
 
 
@@ -238,7 +238,7 @@ public:
     void meshRemoved(int mmid);
     void manageBuffers(int mmid);
     void setDebugMode(int mmid,bool activatedebugmodality);
-    void getLog(int mmid,vcg::GLMeshAttributesInfo::DebugInfo& debug);
+    void getLog(int mmid,MLRenderingData::DebugInfo& debug);
     bool isBORenderingAvailable(int mmid);
 
     /*functions intended for the plugins (they emit different signals according if the calling thread is different from the one where the MLSceneGLSharedDataContext object lives)*/
@@ -256,9 +256,9 @@ public slots:
 	
 
     void removeView(QGLContext* viewerid);
-    void meshAttributesUpdated(int mmid,bool conntectivitychanged,const vcg::GLMeshAttributesInfo::RendAtts& dt);
+    void meshAttributesUpdated(int mmid,bool conntectivitychanged,const MLRenderingData::RendAtts& dt);
     void updateGPUMemInfo();
-    void updateRequested(int meshid,vcg::GLMeshAttributesInfo::ATT_NAMES name);
+    void updateRequested(int meshid,MLRenderingData::ATT_NAMES name);
 
 private slots:
     /*slots intended for the plugins living in another thread*/

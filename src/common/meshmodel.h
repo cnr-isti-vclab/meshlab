@@ -314,8 +314,8 @@ public:
 //
 //
 //
-//    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY_MASK pmmask;
-//    vcg::GLMeshAttributesInfo::RendAtts atts;
+//    MLRenderingData::PRIMITIVE_MODALITY_MASK pmmask;
+//    MLRenderingData::RendAtts atts;
 //
 //    bool lighting;
 //    bool backFaceCull;
@@ -336,10 +336,10 @@ public:
 //        colorMode = vcg::GLW::CMNone;
 //        textureMode = vcg::GLW::TMNone;
 //        
-//        pmmask = vcg::GLMeshAttributesInfo::PR_SOLID;
-//        atts = vcg::GLMeshAttributesInfo::RendAtts();
-//        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-//        atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+//        pmmask = MLRenderingData::PR_SOLID;
+//        atts = MLRenderingData::RendAtts();
+//        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+//        atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 //
 //        lighting = true;
 //        backFaceCull = false;
@@ -347,12 +347,12 @@ public:
 //        fancyLighting = false;
 //    }
 //
-//    inline void addPrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY addedpm)
+//    inline void addPrimitiveModality(MLRenderingData::PRIMITIVE_MODALITY addedpm)
 //    {
 //        pmmask = pmmask | addedpm;
 //    }
 //
-//    inline void removePrimitiveModality(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY removedpm)
+//    inline void removePrimitiveModality(MLRenderingData::PRIMITIVE_MODALITY removedpm)
 //    {
 //        pmmask = pmmask & (~removedpm);
 //    }

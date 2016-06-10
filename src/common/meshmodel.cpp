@@ -755,27 +755,27 @@ int MeshModel::dataMask() const
 //    }
 //    bool validfaces = (mesh.FN() > 0);
 //
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION];
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] &= vcg::tri::HasPerVertexNormal(mesh);
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACENORMAL] &= vcg::tri::HasPerFaceNormal(mesh) && validfaces;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] &=  vcg::tri::HasPerVertexColor(mesh);
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FACECOLOR] &=  vcg::tri::HasPerFaceColor(mesh) && validfaces;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR] = result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_FIXEDCOLOR];
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= vcg::tri::HasPerVertexNormal(mesh);
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= vcg::tri::HasPerFaceNormal(mesh) && validfaces;
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &=  vcg::tri::HasPerVertexColor(mesh);
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &=  vcg::tri::HasPerFaceColor(mesh) && validfaces;
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = result.atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR];
 //
 //    //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
 //    //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
 //    //The enum-value depends from the enabled attributes of input mesh.
 //    bool wedgetexture = vcg::tri::HasPerWedgeTexCoord(mesh) && validfaces;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] &= (vcg::tri::HasPerVertexTexCoord(mesh) && (!wedgetexture));
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] &= wedgetexture;
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= (vcg::tri::HasPerVertexTexCoord(mesh) && (!wedgetexture));
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= wedgetexture;
 //    return result;
 //}
 
 //RenderMode RenderMode::defaultRenderingAtts()
 //{
 //    RenderMode result;
-//    result.pmmask = (unsigned int) vcg::GLMeshAttributesInfo::PR_SOLID;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = true;
-//    result.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = true;
+//    result.pmmask = (unsigned int) MLRenderingData::PR_SOLID;
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 //    return result;
 //}

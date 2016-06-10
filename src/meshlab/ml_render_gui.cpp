@@ -225,9 +225,9 @@ void MLRenderingSolidParametersFrame::initGui()
     boldfont.setBold(true);
     shadelab->setFont(boldfont);
     layout->addWidget(shadelab,0,0,Qt::AlignLeft);
-    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PR_SOLID,_meshid,_shadingtool));
+    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
     _shadingtool->addRenderingAction(new MLRenderingPerFaceNormalAction(_meshid,_shadingtool));
-    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PR_SOLID,_meshid,_shadingtool));
+    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
     
@@ -236,10 +236,10 @@ void MLRenderingSolidParametersFrame::initGui()
     colorlab->setFont(boldfont);
     layout->addWidget(colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
-    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PR_SOLID,_meshid,_colortool));
+    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerFaceColorAction(_meshid,_colortool));
-    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PR_SOLID,_meshid,_colortool));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,vcg::GLMeshAttributesInfo::PR_SOLID,_colortool);
+    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
+    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_SOLID,_colortool);
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -342,8 +342,8 @@ void MLRenderingWireParametersFrame::initGui()
     boldfont.setBold(true);
     shadelab->setFont(boldfont);
     layout->addWidget(shadelab,0,0,Qt::AlignLeft);
-    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 
@@ -351,9 +351,9 @@ void MLRenderingWireParametersFrame::initGui()
     colorlab->setFont(boldfont);
     layout->addWidget(colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
-    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,vcg::GLMeshAttributesInfo::PR_WIREFRAME_TRIANGLES,_colortool);
+    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
+    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
+    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_WIREFRAME_TRIANGLES,_colortool);
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -457,9 +457,9 @@ void MLRenderingPointsParametersFrame::initGui()
     boldfont.setBold(true);
     shadelab->setFont(boldfont);
     layout->addWidget(shadelab,0,0,Qt::AlignLeft);
-    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PR_POINTS,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS,_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingDotAction(_meshid,this));
-    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PR_POINTS,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 
@@ -467,9 +467,9 @@ void MLRenderingPointsParametersFrame::initGui()
     colorlab->setFont(boldfont);
     layout->addWidget(colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
-    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PR_POINTS,_meshid,this));
-    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PR_POINTS,_meshid,this));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,vcg::GLMeshAttributesInfo::PR_POINTS,_colortool);
+    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid,this));
+    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid,this));
+    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_POINTS,_colortool);
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -479,7 +479,7 @@ void MLRenderingPointsParametersFrame::initGui()
     textlab->setFont(boldfont);
     layout->addWidget(textlab,2,0,Qt::AlignLeft);
     _texttool = new MLRenderingOnOffToolbar(_meshid,this);
-    _texttool->setRenderingAction(new MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PR_POINTS,_meshid,_texttool));
+    _texttool->setRenderingAction(new MLRenderingPerVertTextCoordAction(MLRenderingData::PR_POINTS,_meshid,_texttool));
     layout->addWidget(_texttool,2,1,Qt::AlignLeft);
     connect(_texttool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
@@ -795,7 +795,7 @@ void MLRenderingParametersTab::getCurrentRenderingDataAccordingToGUI( MLRenderin
             it.value()->getCurrentRenderingDataAccordingToGUI(dt);
 }
 
-MLRenderingColorPicker::MLRenderingColorPicker( int meshid,vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p )
+MLRenderingColorPicker::MLRenderingColorPicker( int meshid,MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p )
     :QToolButton(p),_act(NULL)
 {
     _act = new MLRenderingUserDefinedColorAction(pr,meshid,this);
@@ -803,7 +803,7 @@ MLRenderingColorPicker::MLRenderingColorPicker( int meshid,vcg::GLMeshAttributes
     initGui();
 }
 
-MLRenderingColorPicker::MLRenderingColorPicker( vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pr,QWidget *p )
+MLRenderingColorPicker::MLRenderingColorPicker( MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p )
     :QToolButton(p),_act(NULL)
 {
     _act = new MLRenderingUserDefinedColorAction(pr,-1,this);

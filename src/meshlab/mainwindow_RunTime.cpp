@@ -1184,7 +1184,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         connectivitychanged = false;
                     }
 
-                    vcg::GLMeshAttributesInfo::RendAtts dttoupdate;
+                    MLRenderingData::RendAtts dttoupdate;
                     //1) we convert the meshmodel updating mask to a RendAtts structure 
                     MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts(updatemask,dttoupdate);
                     //2) The correspondent bos to the updated rendering attributes are set to invalid 
@@ -1203,14 +1203,14 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     //               if i updated, for instance, both the ATT_FACECOLOR and the ATT_VERTCOLOR, we continue to render the updated value of the ATT_VERTCOLOR
                     //               ex3) suppose that the current rendering modality is PR_POINTS and we run a surface reconstruction filter
                     //               in the current GLA() we switch from the PR_POINTS to PR_SOLID primitive rendering modality. In the other GLArea we maintain the per points visualization
-                    for(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm = vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY(0);pm < vcg::GLMeshAttributesInfo::PR_ARITY;pm = vcg::GLMeshAttributesInfo::next(pm))
+                    for(MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0);pm < MLRenderingData::PR_ARITY;pm = MLRenderingData::next(pm))
                     {
                         bool wasprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo((existit->_nvert > 0),(existit->_nface > 0),(existit->_nedge > 0),existit->_mask,pm);
                         bool isprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(mm,pm);
                         bool isworthtobevisualized = MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(pm,curr.isPrimitiveActive(pm),wasprimitivemodalitymeaningful,isprimitivemodalitymeaningful);
                
 
-                        vcg::GLMeshAttributesInfo::RendAtts rd;
+                        MLRenderingData::RendAtts rd;
                         if (isworthtobevisualized)
                         {
                             curr.get(pm,rd);
@@ -3146,8 +3146,8 @@ void MainWindow::sendHistory()
 //    {
 //        bool clicked = (textact != NULL) && (textact->isChecked());
 //        MLPoliciesStandAloneFunctions::computeRequestedRenderingAttributesCompatibleWithMesh(mesh,rm.pmmask,rm.atts,rm.pmmask,rm.atts);
-//        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] = rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTTEXTURE] && clicked;
-//        rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] = rm.atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_WEDGETEXTURE] && clicked;
+//        rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] && clicked;
+//        rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = rm.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] && clicked;
 //    }
 //}
 
@@ -3232,7 +3232,7 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
     MultiViewer_Container* cont = currentViewContainer();
     if (cont != NULL)
     {
-        vcg::GLMeshAttributesInfo::DebugInfo deb;
+        MLRenderingData::DebugInfo deb;
         MLSceneGLSharedDataContext* share = cont->sharedDataContext();
         if ((share != NULL) && (GLA() != NULL))
         {

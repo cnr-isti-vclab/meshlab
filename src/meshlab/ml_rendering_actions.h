@@ -19,7 +19,7 @@ public:
     void setMeshId(int meshid);
 
 protected:
-    bool isRenderingDataEnabled(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,vcg::GLMeshAttributesInfo::ATT_NAMES att,const MLRenderingData& rd) const;
+    bool isRenderingDataEnabled(MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,const MLRenderingData& rd) const;
 };
 
 class MLRenderingBBoxAction : public MLRenderingAction
@@ -93,13 +93,13 @@ class MLRenderingPerVertexNormalAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingPerVertexNormalAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingPointsDotAction : public MLRenderingAction
@@ -118,14 +118,14 @@ class MLRenderingPerVertTextCoordAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingPerVertTextCoordAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     bool isCheckableConditionValid(MeshModel*) const;
 private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingPerWedgeTextCoordAction : public MLRenderingAction
@@ -166,13 +166,13 @@ class MLRenderingNoShadingAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingNoShadingAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingFaceCullAction : public MLRenderingAction
@@ -190,8 +190,8 @@ class MLRenderingPerMeshColorAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingPerMeshColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -201,7 +201,7 @@ public:
     vcg::Color4b& getColor();
 private:
     vcg::Color4b _col;
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingBBoxPerMeshColorAction : public MLRenderingAction
@@ -225,13 +225,13 @@ class MLRenderingPerVertexColorAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingPerVertexColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
 class MLRenderingPerFaceColorAction : public MLRenderingAction
@@ -250,8 +250,8 @@ class MLRenderingUserDefinedColorAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingUserDefinedColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,QObject* parent);
-    MLRenderingUserDefinedColorAction(vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+    MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
+    MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -260,7 +260,7 @@ public:
 
     vcg::Color4b& getColor();
 private:
-    vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY _pm;
+    MLRenderingData::PRIMITIVE_MODALITY _pm;
     vcg::Color4b _coluser;
 };
 
