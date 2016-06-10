@@ -187,11 +187,11 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component)
     GlShot< vcg::Shot<float> >::SetView(shot, 0.5*_near, 2*_far);
 
     //	err = glGetError();
+    int program = programs[mode]; //standard pipeline
+    
 
     bool use_colors = false;
     bool use_normals = false;
-    int program = programs[mode]; //standard pipeline
-    
 
     switch(mode){
     case COLOR:
@@ -216,28 +216,26 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component)
 
     //    err = glGetError();
     MLRenderingData dt;
-    dt.set(vcg::GLMeshAttributesInfo::PR_SOLID,mesh->FN() > 0);
+    dt.set(MLRenderingData::PR_SOLID,mesh->FN() > 0);
     if ((mesh->FN() == 0) && (mesh->VN() > 0))
     {
-        dt.set(vcg::GLMeshAttributesInfo::PR_POINTS,true);
+        dt.set(MLRenderingData::PR_POINTS,true);
     }
 
     bool validvert = mesh->VN() > 0;
-    vcg::GLMeshAttributesInfo::RendAtts atts;
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTPOSITION] = validvert;
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTNORMAL] = validvert && use_normals;
-    atts[vcg::GLMeshAttributesInfo::ATT_NAMES::ATT_VERTCOLOR] = validvert && use_colors;
+    MLRenderingData::RendAtts atts;
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = validvert;
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = validvert && use_normals;
+    atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = validvert && use_colors;
 
     if (validvert)
     {
         if (mesh->FN() > 0)   
-            dt.set(vcg::GLMeshAttributesInfo::PR_SOLID,atts);
+            dt.set(MLRenderingData::PR_SOLID,atts);
         else
-            dt.set(vcg::GLMeshAttributesInfo::PR_POINTS,atts);
+            dt.set(MLRenderingData::PR_POINTS,atts);
     }
     
-
-
     if (_cont != NULL)
     {
         _cont->setRenderingData(meshid,dt);

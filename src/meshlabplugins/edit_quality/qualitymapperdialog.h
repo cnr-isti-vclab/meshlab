@@ -195,7 +195,7 @@ private:
 signals:
 	void suspendEditToggle();
 	void closingDialog();
-    void updateRequested(int, vcg::GLMeshAttributesInfo::ATT_NAMES);
+    void updateRequested(int, MLRenderingData::ATT_NAMES);
 
 private slots:
 	void on_midPercentageLine_editingFinished();
