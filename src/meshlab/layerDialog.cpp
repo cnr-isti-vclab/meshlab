@@ -145,7 +145,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
                 }
                 if (mItem != NULL)
                     mw->meshDoc()->setCurrentMesh(clickedId);
-                updateGlobalProjectVisibility();
+                updatePerMeshItemVisibility();
             } break;
         case 1 :
 
@@ -170,7 +170,7 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
             }
         }
         //make sure the right row is colored or that they right eye is drawn (open or closed)
-        updateMeshItemSelectionStatus();
+        updatePerMeshItemSelectionStatus();
         mw->GLA()->update();
     }
 }
@@ -178,76 +178,77 @@ void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)
 void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
 {
     RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(item);
-    if(rItem)
+    if ((rItem) && (mw != NULL) && (mw->meshDoc() != NULL))
     {
-        int clickedId= rItem->r->id();
-
-        switch(col)
+        
+        int clickedId= rItem->_rasterid;
+        RasterModel* rm = mw->meshDoc()->getRaster(clickedId);
+        if (rm != NULL)
         {
-        case 0 :
+            switch(col)
             {
-                //the user has clicked on the "V" or "X"
-                MeshDocument  *md= mw->meshDoc();
-
-                // NICE TRICK.
-                // If the user has pressed ctrl when clicking on the icon, only that layer will remain visible
-                //
-                if(QApplication::keyboardModifiers() == Qt::ControlModifier)
+            case 0 :
                 {
-                    foreach(RasterModel *rp, md->rasterList)
+                    //the user has clicked on the "V" or "X"
+                    MeshDocument  *md= mw->meshDoc();
+
+                    // NICE TRICK.
+                    // If the user has pressed ctrl when clicking on the icon, only that layer will remain visible
+                    //
+                    if(QApplication::keyboardModifiers() == Qt::ControlModifier)
                     {
-                        rp->visible = false;
+                        foreach(RasterModel *rp, md->rasterList)
+                        {
+                            rp->visible = false;
+                        }
                     }
-                }
 
-                if(rItem->r->visible){
-                    rItem->r->visible = false;
-                }
-                else{
-                    rItem->r->visible = true;
-                }
+                    if(rm->visible){
+                        rm->visible = false;
+                    }
+                    else{
+                        rm->visible = true;
+                    }
 
-                // EVEN NICER TRICK.
-                // If the user has pressed alt when clicking on the icon, all layers will get visible
-                // Very useful after you turned all layer invis using the previous option and want to avoid
-                // clicking on all of them...
-                if(QApplication::keyboardModifiers() == Qt::AltModifier)
+                    // EVEN NICER TRICK.
+                    // If the user has pressed alt when clicking on the icon, all layers will get visible
+                    // Very useful after you turned all layer invis using the previous option and want to avoid
+                    // clicking on all of them...
+                    if(QApplication::keyboardModifiers() == Qt::AltModifier)
+                    {
+                        foreach(RasterModel *rp, md->rasterList)
+                        {
+                            rp->visible = true;
+                        }
+                    }
+
+                    if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
+                    {
+                        foreach(RasterModel *rp, md->rasterList)
+                        {
+                            rp->visible = !rp->visible;
+                        }
+                        rm->visible = !rm->visible;
+                    }
+
+                    mw->GLA()->updateRasterSetVisibilities( );
+                    updatePerRasterItemVisibility();
+                }
+            case 1 :
+            case 2 :
+            case 3 :
+                if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
                 {
-                    foreach(RasterModel *rp, md->rasterList)
-                    {
-                        rp->visible = true;
-                    }
+                    mw->meshDoc()->setCurrentRaster(clickedId);
+                    if(mw->GLA()->isRaster())
+                        mw->GLA()->loadRaster(clickedId);
                 }
+                break;
 
-                if(QApplication::keyboardModifiers() == Qt::ShiftModifier)
-                {
-                    foreach(RasterModel *rp, md->rasterList)
-                    {
-                        rp->visible = !rp->visible;
-                    }
-                    rItem->r->visible = !rItem->r->visible;
-                }
-
-                mw->GLA()->updateRasterSetVisibilities( );
             }
-        case 1 :
-        case 2 :
-        case 3 :
-            if(mw->meshDoc()->rm()->id() != clickedId || mw->GLA()->isRaster() )
-            {
-                mw->meshDoc()->setCurrentRaster(clickedId);
-                if(mw->GLA()->isRaster())
-                    mw->GLA()->loadRaster(clickedId);
-            }
-            break;
-
+            updatePerRasterItemSelectionStatus();
+            mw->GLA()->update();
         }
-
-
-        //updateTable();
-        
-        
-        mw->GLA()->update();
     }
 }
 
@@ -286,11 +287,12 @@ void LayerDialog::showContextMenu(const QPoint& pos)
     {
         RasterTreeWidgetItem *rItem = dynamic_cast<RasterTreeWidgetItem *>(ui->rasterTreeWidget->itemAt(pos.x(),pos.y()));
 
-        if (rItem)
+        if ((rItem) && (mw != NULL) && (mw->meshDoc() != NULL))
         {
-            if (rItem->r)
+            RasterModel* rm = mw->meshDoc()->getRaster(rItem->_rasterid);
+            if (rm)
             {
-                mw->meshDoc()->setCurrentRaster(rItem->r->id());
+                mw->meshDoc()->setCurrentRaster(rm->id());
 
                 foreach (QWidget *widget, QApplication::topLevelWidgets())
                 {
@@ -415,8 +417,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		wid += ui->meshTreeWidget->columnWidth(i);
 	}
 	ui->meshTreeWidget->setMinimumWidth(wid);
-    updateGlobalProjectVisibility();
-	updateMeshItemSelectionStatus();
+    updatePerMeshItemVisibility();
+	updatePerMeshItemSelectionStatus();
 
     //for(QSet<int>::const_iterator tit = tabsrelatedtodeletedmeshes.begin();tit != tabsrelatedtodeletedmeshes.end();++tit)
     //{
@@ -435,8 +437,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 		ui->rasterTreeWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Ignored);
 	ui->rasterTreeWidget->clear();
 	ui->rasterTreeWidget->setColumnCount(4);
-	//ui->rasterTreeWidget->setColumnWidth(0,40);
-	//ui->rasterTreeWidget->setColumnWidth(1,20);
+	ui->rasterTreeWidget->setColumnWidth(0,40);
+	ui->rasterTreeWidget->setColumnWidth(1,20);
 	//TODO The fourth column is fake... solo per ora, E' per evitare che l'ultimacolonna si allunghi indefinitivamente
 	//mettere una lunghezza fissa e' inutile perche' non so quanto e' lungo il nome.
 	ui->rasterTreeWidget->header()->hide();
@@ -448,16 +450,10 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 			rmd->visible =mw->GLA()->rasterVisibilityMap.value(rmd->id());
 
 		RasterTreeWidgetItem *item = new RasterTreeWidgetItem(rmd);
-		if(rmd== mw->meshDoc()->rm()) {
-			item->setBackground(1,QBrush(Qt::yellow));
-			item->setForeground(1,QBrush(Qt::blue));
-			item->setBackground(2,QBrush(Qt::yellow));
-			item->setForeground(2,QBrush(Qt::blue));
-			item->setBackground(3,QBrush(Qt::yellow));
-			item->setForeground(3,QBrush(Qt::blue));
-		}
 		ui->rasterTreeWidget->addTopLevelItem(item);
-
+        updatePerRasterItemVisibility();
+        updatePerRasterItemSelectionStatus();
+        
 		//TODO scommenta quando inserisci tutta la lista dei planes
 		//item->setExpanded(expandedMap.value(qMakePair(mmd->id(),-1)));
 	}
@@ -655,7 +651,7 @@ void LayerDialog::updateDecoratorParsView()
     //ui->decParsTree->expandAll();
 }
 
-void LayerDialog::updateMeshItemSelectionStatus()
+void LayerDialog::updatePerMeshItemSelectionStatus()
 {
     MeshDocument* md = mw->meshDoc();
     if (md == NULL)
@@ -675,6 +671,40 @@ void LayerDialog::updateMeshItemSelectionStatus()
                 item->setBackground(3,QBrush(Qt::yellow));
                 item->setForeground(3,QBrush(Qt::blue));
                 ui->meshTreeWidget->setCurrentItem(item);
+            }
+            else
+            {
+                item->setBackground(1,QBrush());
+                item->setForeground(1,QBrush());
+                item->setBackground(2,QBrush());
+                item->setForeground(2,QBrush());
+                item->setBackground(3,QBrush());
+                item->setForeground(3,QBrush());
+            }
+        }
+    }
+}
+
+void LayerDialog::updatePerRasterItemSelectionStatus()
+{
+    MeshDocument* md = mw->meshDoc();
+    if (md == NULL)
+        return;
+    for(int ii = 0; ii < ui->rasterTreeWidget->topLevelItemCount();++ii)
+    {
+        RasterTreeWidgetItem* item = dynamic_cast<RasterTreeWidgetItem*>(ui->rasterTreeWidget->topLevelItem(ii));
+        RasterModel* rm = md->rm();
+        if ((item != NULL) && (rm != NULL))
+        {
+            if(item->_rasterid == rm->id()) 
+            {
+                item->setBackground(1,QBrush(Qt::yellow));
+                item->setForeground(1,QBrush(Qt::blue));
+                item->setBackground(2,QBrush(Qt::yellow));
+                item->setForeground(2,QBrush(Qt::blue));
+                item->setBackground(3,QBrush(Qt::yellow));
+                item->setForeground(3,QBrush(Qt::blue));
+                ui->rasterTreeWidget->setCurrentItem(item);
             }
             else
             {
@@ -734,7 +764,7 @@ void LayerDialog::updateProjectName( const QString& name )
     ui->meshTreeWidget->setItemWidget(_docitem,3,_globaldoctool);
 }
 
-void LayerDialog::updateGlobalProjectVisibility()
+void LayerDialog::updatePerMeshItemVisibility()
 {
     if (mw == NULL)
         return;
@@ -752,7 +782,7 @@ void LayerDialog::updateGlobalProjectVisibility()
             if (mm != NULL)
             {
                 allhidden = allhidden && !(mm->isVisible());
-                mitm->updateVisibility(mm->isVisible());
+                mitm->updateVisibilityIcon(mm->isVisible());
             }
         }
     }
@@ -761,6 +791,26 @@ void LayerDialog::updateGlobalProjectVisibility()
         _docitem->setIcon(0,QIcon(":/images/layer_eye_close.png"));
     else
         _docitem->setIcon(0,QIcon(":/images/layer_eye_open.png"));
+}
+
+void LayerDialog::updatePerRasterItemVisibility()
+{
+    if (mw == NULL)
+        return;
+    MeshDocument* md = mw->meshDoc();
+    if (md == NULL)
+        return;
+    for(int ii = 0;ii < ui->rasterTreeWidget->topLevelItemCount();++ii)
+    {
+        QTreeWidgetItem* qitm = ui->rasterTreeWidget->topLevelItem(ii);
+        RasterTreeWidgetItem* mitm = dynamic_cast<RasterTreeWidgetItem*>(qitm);
+        if (mitm != NULL)
+        {
+            RasterModel* mm = md->getRaster(mitm->_rasterid);
+            if (mm != NULL)
+                mitm->updateVisibilityIcon(mm->visible);
+        }
+    }
 }
 
 void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
@@ -797,7 +847,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
 {                                               
     if (meshmodel != NULL)
     {
-        updateVisibility(meshmodel->visible);
+        updateVisibilityIcon(meshmodel->visible);
         setText(1, QString::number(meshmodel->id()));
 
         QString meshName = meshmodel->label();
@@ -817,7 +867,7 @@ MeshTreeWidgetItem::~MeshTreeWidgetItem()
         delete addwid;*/
 }
 
-void MeshTreeWidgetItem::updateVisibility( bool isvisible )
+void MeshTreeWidgetItem::updateVisibilityIcon( bool isvisible )
 {
     if(isvisible)
         setIcon(0,QIcon(":/images/layer_eye_open.png"));
@@ -827,16 +877,26 @@ void MeshTreeWidgetItem::updateVisibility( bool isvisible )
 
 RasterTreeWidgetItem::RasterTreeWidgetItem(RasterModel *rasterModel)
 {
-    if(rasterModel->visible) setIcon(0,QIcon(":/images/ok.png"));
-    else setIcon(0,QIcon(":/images/stop.png"));
+    if (rasterModel != NULL)
+    {
+        updateVisibilityIcon(rasterModel->visible);
+        setText(1, QString::number(rasterModel->id()));
 
-    setText(1, QString::number(rasterModel->id()));
+        QString rasterName = rasterModel->label();
+        setText(2, rasterName);
 
-    QString rasterName = rasterModel->label();
-    setText(2, rasterName);
-
-    this->r=rasterModel;
+        _rasterid =rasterModel->id();
+    }
 }
+
+void RasterTreeWidgetItem::updateVisibilityIcon( bool isvisible )
+{
+    if(isvisible)
+        setIcon(0,QIcon(":/images/ok.png"));
+    else
+        setIcon(0,QIcon(":/images/stop.png"));
+}
+
 
 DecoratorParamsTreeWidget::DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent)
     :QFrame(parent),mainWin(mw),frame(NULL),savebut(NULL),resetbut(NULL),loadbut(NULL),dialoglayout(NULL)

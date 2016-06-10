@@ -2098,7 +2098,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
         mvc->resetAllTrackBall();
     qb->reset();
     saveRecentProjectList(fileName);
-    showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 1));
+    showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 0));
     return true;
 }
 
@@ -2319,6 +2319,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 
             //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
             updateMenus();
+            updateLayerDialog();
         }
         else
             return false;

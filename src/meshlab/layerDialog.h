@@ -57,7 +57,7 @@ class MeshTreeWidgetItem : public QTreeWidgetItem
 public:
     MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar);
     ~MeshTreeWidgetItem();
-    void updateVisibility(bool isvisible);
+    void updateVisibilityIcon(bool isvisible);
 
     MLRenderingToolbar* _rendertoolbar;
     int _meshid;
@@ -67,8 +67,9 @@ class RasterTreeWidgetItem : public QTreeWidgetItem
 {
 public:
     RasterTreeWidgetItem(RasterModel *);
-
-    RasterModel *r;
+    void updateVisibilityIcon( bool isvisible );
+    //RasterModel *r;
+    int _rasterid;
 };
 
 class DecoratorParamItem : public QTreeWidgetItem
@@ -141,10 +142,12 @@ private:
     void updateColumnNumber(const QTreeWidgetItem * item);
     //QVector<QTreeWidgetItem*> tobedeleted;
     void updateExpandedMap(int meshId, int tagId, bool expanded);
-    void updateMeshItemSelectionStatus();
-    
+    void updatePerMeshItemSelectionStatus();
+    void updatePerRasterItemSelectionStatus();
+    void updatePerMeshItemVisibility();
+    void updatePerRasterItemVisibility();
+
     void updateProjectName(const QString& name);
-    void updateGlobalProjectVisibility();
 
     QTreeWidgetItem* _docitem;
     MLRenderingSideToolbar* _globaldoctool;
