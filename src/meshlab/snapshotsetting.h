@@ -31,10 +31,10 @@ public:
 	QString basename;
 	int counter;
 	int resolution;
-  bool transparentBackground;
-  bool snapAllLayers;
-  bool tiledSave; // if true all the tiles are saved as separated files and not joined.
-  bool addToRasters;
+	int background;
+	bool snapAllLayers;
+	bool tiledSave; // if true all the tiles are saved as separated files and not joined.
+	bool addToRasters;
 		
 	SnapshotSetting()
 	{
@@ -42,10 +42,10 @@ public:
 		basename="snapshot";
 		counter=0;
 		resolution=1;
-    transparentBackground=true;
-    snapAllLayers=false;
-    tiledSave=false;
-    addToRasters=false;
+		background=0;
+		snapAllLayers=false;
+		tiledSave=false;
+		addToRasters=false;
 	};
 };
 

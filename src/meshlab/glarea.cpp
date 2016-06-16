@@ -193,7 +193,8 @@ void GLArea::pasteTile()
     QString outfile;
 	makeCurrent();
     glPushAttrib(GL_ENABLE_BIT);
-    QImage tileBuffer=grabFrameBuffer(false).mirrored(false,true);
+	bool useAlfa = ss.background==1;
+	QImage tileBuffer = grabFrameBuffer(useAlfa).mirrored(false, true);
     if(ss.tiledSave)
     {
         outfile=QString("%1/%2_%3-%4.png")
@@ -430,12 +431,14 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     }*/
 
     glClearColor(1.0,1.0,1.0,0.0);
+	if (takeSnapTile && (ss.background == 3))
+		glClearColor(0.0, 0.0, 0.0, 0.0);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     setView();  // Set Modelview and Projection matrix
-    if((!takeSnapTile) || (takeSnapTile && !ss.transparentBackground) )
+    if((!takeSnapTile) || (takeSnapTile && (ss.background==0)) )
         drawGradient();  // draws the background
 
     drawLight();

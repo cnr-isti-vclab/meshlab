@@ -109,7 +109,27 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>16</width>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="alllayersCheckBox">
+       <property name="text">
+        <string>Snap All Layers</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
          <height>20</height>
         </size>
        </property>
@@ -130,16 +150,6 @@
    <item>
     <layout class="QHBoxLayout">
      <item>
-      <widget class="QCheckBox" name="backgroundCheckBox">
-       <property name="text">
-        <string>Transparent Background</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -147,6 +157,50 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Background</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="backgroundComboBox">
+       <item>
+        <property name="text">
+         <string>MeshLab Gradient</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Alpha Transparent</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Solid White</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Solid Black</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
          <height>20</height>
         </size>
        </property>
@@ -180,26 +234,6 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="alllayersCheckBox">
-       <property name="text">
-        <string>Snap All Layers</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
          <height>20</height>
         </size>
        </property>

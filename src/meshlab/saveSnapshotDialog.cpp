@@ -49,10 +49,10 @@ SnapshotSetting SaveSnapshotDialog::getValues()
 	settings.outdir=ui->outDirLineEdit->text();
 	settings.counter=ui->counterSpinBox->value();
 	settings.resolution=ui->resolutionSpinBox->value();
-  settings.transparentBackground=ui->backgroundCheckBox->isChecked();
-  settings.snapAllLayers=ui->alllayersCheckBox->isChecked();
-  settings.tiledSave=ui->tiledSaveCheckBox->isChecked();
-  settings.addToRasters=ui->addToRastersCheckBox->isChecked();
+	settings.background = ui->backgroundComboBox->currentIndex();
+	settings.snapAllLayers=ui->alllayersCheckBox->isChecked();
+	settings.tiledSave=ui->tiledSaveCheckBox->isChecked();
+	settings.addToRasters=ui->addToRastersCheckBox->isChecked();
 	return settings;
 }
 
