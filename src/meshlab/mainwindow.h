@@ -401,8 +401,8 @@ private:
     //////////// Actions Menu File ///////////////////////
     QAction *newProjectAct;
     QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
-    QAction  *importMeshAct,   *exportMeshAct,  *exportMeshAsAct;
-    QAction  *importRasterAct;
+    QAction *importMeshAct, *exportMeshAct, *exportMeshAsAct;
+    QAction *importRasterAct;
     QAction *closeProjectAct;
     QAction *reloadMeshAct;
     QAction *reloadAllMeshAct;
@@ -460,6 +460,12 @@ private:
     QAction *viewRightAct;
     QAction *viewFrontAct;
     QAction *viewBackAct;
+	QAction *viewTopYAct;
+	QAction *viewBottomYAct;
+	QAction *viewLeftYAct;
+	QAction *viewRightYAct;
+	QAction *viewFrontYAct;
+	QAction *viewBackYAct;
     QAction *viewFromMeshAct;
     QAction *viewFromRasterAct;
     QAction *viewFromFileAct;

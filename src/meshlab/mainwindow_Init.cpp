@@ -340,14 +340,20 @@ connectRenderModeActionList(rendlist);*/
     linkViewersAct->setCheckable(true);
     connect(linkViewersAct, SIGNAL(triggered()), this, SLOT(linkViewers()));
 
-    viewFromGroupAct =  new QActionGroup(this);	viewFromGroupAct->setExclusive(true);
-
-    viewTopAct	    = new QAction(tr("Top"),viewFromGroupAct);
-    viewBottomAct	  = new QAction(tr("Bottom"),viewFromGroupAct);
-    viewLeftAct	    = new QAction(tr("Left"),viewFromGroupAct);
-    viewRightAct	  = new QAction(tr("Right"),viewFromGroupAct);
-    viewFrontAct	  = new QAction(tr("Front"),viewFromGroupAct);
-    viewBackAct	    = new QAction(tr("Back"),viewFromGroupAct);
+    viewFromGroupAct = new QActionGroup(this); viewFromGroupAct->setExclusive(true);
+    viewTopAct     = new QAction(tr("Top"),viewFromGroupAct);
+    viewBottomAct  = new QAction(tr("Bottom"),viewFromGroupAct);
+    viewLeftAct    = new QAction(tr("Left"),viewFromGroupAct);
+    viewRightAct   = new QAction(tr("Right"),viewFromGroupAct);
+    viewFrontAct   = new QAction(tr("Front"),viewFromGroupAct);
+	viewBackAct	   = new QAction(tr("Back"),viewFromGroupAct);
+	// scene uses "engineering" reference system, with Z as vertical axis
+	viewTopYAct    = new QAction(tr("Top (Z is up)"), viewFromGroupAct);
+	viewBottomYAct = new QAction(tr("Bottom (Z is up)"), viewFromGroupAct);
+	viewLeftYAct   = new QAction(tr("Left (Z is up)"), viewFromGroupAct);
+	viewRightYAct  = new QAction(tr("Right (Z is up)"), viewFromGroupAct);
+	viewFrontYAct  = new QAction(tr("Front (Z is up)"), viewFromGroupAct);
+	viewBackYAct   = new QAction(tr("Back (Z is up)"), viewFromGroupAct);
 
     // keyboard shortcuts for canonical viewdirections, blender style
     viewFrontAct->setShortcut(Qt::Key_End);
@@ -356,6 +362,13 @@ connectRenderModeActionList(rendlist);*/
     viewLeftAct->setShortcut(Qt::CTRL + Qt::Key_PageDown);
     viewTopAct->setShortcut(Qt::Key_Home);
     viewBottomAct->setShortcut(Qt::CTRL + Qt::Key_Home);
+	// scene uses "engineering" reference system, with Z as vertical axis
+	viewFrontYAct->setShortcut(Qt::SHIFT + Qt::Key_End);
+	viewBackYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_End);
+	viewRightYAct->setShortcut(Qt::SHIFT + Qt::Key_PageDown);
+	viewLeftYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_PageDown);
+	viewTopYAct->setShortcut(Qt::SHIFT + Qt::Key_Home);
+	viewBottomYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Home);
 
     connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 

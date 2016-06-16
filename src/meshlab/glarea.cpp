@@ -2092,6 +2092,19 @@ void GLArea::createOrthoView(QString dir)
         rot.SetRotateDeg(0,Point3m(0,1,0));
     else if(dir == tr("Back"))
         rot.SetRotateDeg(180,Point3m(0,1,0));
+	// scene uses "engineering" reference system, with Z as vertical axis
+	else if (dir == tr("Top (Z is up)"))
+		rot.SetRotateDeg(0, Point3m(1, 0, 0));
+	else if (dir == tr("Bottom (Z is up)"))
+		rot.SetRotateDeg(180, Point3m(1, 0, 0));
+	else if (dir == tr("Left (Z is up)"))
+		rot = Matrix44m().SetRotateDeg(90, Point3m(0, 1, 0)) * Matrix44m().SetRotateDeg(90, Point3m(-1, 0, 0));
+	else if (dir == tr("Right (Z is up)"))
+		rot = Matrix44m().SetRotateDeg(90, Point3m(0, -1, 0)) * Matrix44m().SetRotateDeg(90, Point3m(-1, 0, 0));
+	else if (dir == tr("Front (Z is up)"))
+		rot.SetRotateDeg(90, Point3m(-1, 0, 0));
+	else if (dir == tr("Back (Z is up)"))
+		rot = Matrix44m().SetRotateDeg(90, Point3m(1, 0, 0)) * Matrix44m().SetRotateDeg(180, Point3m(0, 1, 0));
 
     view.Extrinsics.SetRot(rot);
 
@@ -2108,6 +2121,8 @@ void GLArea::createOrthoView(QString dir)
 
     QPair<Shotm,float> shotAndScale = QPair<Shotm,float> (shot, trackball.track.sca);
     loadShot(shotAndScale);
+
+	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qPrintable(dir));
 }
 
 //MultiViewer_Container * GLArea::mvc()
