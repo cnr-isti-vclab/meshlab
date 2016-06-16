@@ -513,8 +513,10 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
   case   CP_COLOR_NON_TOPO_COHERENT:
   case   CP_VERTEX_SMOOTH:
   case   CP_FACE_TO_VERTEX:
-  case   CP_TEXTURE_TO_VERTEX:
     return MeshFilterInterface::VertexColoring;
+
+  case   CP_TEXTURE_TO_VERTEX:
+	  return FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Texture);
 
   case   CP_TRIANGLE_QUALITY:
     return FilterClass(Quality + FaceColoring);
