@@ -187,7 +187,7 @@ int RenderHelper::initializeMeshBuffers(MeshModel *mesh, vcg::CallBackPos *cb)
   return 0;
 }
 
-void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode, float camNear = 0, float camFar = 0)
+void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode, MLPluginGLContext* plugcontext, float camNear, float camFar)
 {
   int wt = view.Intrinsics.ViewportPx[0];
   int ht = view.Intrinsics.ViewportPx[1];
@@ -241,46 +241,44 @@ void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode,
 
   int program = programs[rendmode];
 
-  glDisable(GL_LIGHTING);
-  //bind indices
-  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, ibo);
+  MLRenderingData dt;
+  MLRenderingData::RendAtts atts;
+  MLPerViewGLOptions opts;
 
-  //bind vertices
-  glEnable(GL_COLOR_MATERIAL);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);
-  glEnableClientState(GL_VERTEX_ARRAY);                 // activate vertex coords array
-  glVertexPointer(3, GL_FLOAT, 0, 0);                   // last param is offset, not ptr
+  //glDisable(GL_LIGHTING);
 
-  err = glGetError();
+
+  ////bind indices
+  //glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, ibo);
+
+  ////bind vertices
+  //glEnable(GL_COLOR_MATERIAL);
+  //glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);
+  //glEnableClientState(GL_VERTEX_ARRAY);                 // activate vertex coords array
+  //glVertexPointer(3, GL_FLOAT, 0, 0);                   // last param is offset, not ptr
+
+  //err = glGetError();
 
   glUseProgram(program);
 
   err = glGetError();
-
-  if(use_colors)
-  {
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, cbo);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, 0);
-  }
-  if(use_normals)
-  {
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbo);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glNormalPointer(GL_FLOAT, 0, 0);
-  }
-
-  err = glGetError();
-
-
+  atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+  atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = use_normals;
+  atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = use_colors;
+  
   if (mesh->cm.fn > 0)
   {
-    glDrawElements(GL_TRIANGLES, mesh->cm.fn*3, GL_UNSIGNED_INT, (void *)0);
+    opts._persolid_noshading = true;
+    dt.set(MLRenderingData::PR_SOLID,atts);
   }
   else
   {
-    glDrawArrays(GL_POINTS, 0, mesh->cm.vn);
+    opts._perpoint_noshading = true;
+    dt.set(MLRenderingData::PR_POINTS,atts);
   }
+  dt.set(opts);
+  plugcontext->setRenderingData(mesh->id(),dt);
+  plugcontext->drawMeshModel(mesh->id());
 
   if(color != NULL)  delete []color;
   if(depth != NULL)  delete []depth;

@@ -56,6 +56,7 @@ class FilterCreate : public QObject, public MeshFilterInterface
   bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   QString filterScriptFunctionName(FilterIDType filterID);
   QString pluginName(void) const { return "FilterCreate"; }
+  FILTER_ARITY filterArity(QAction *) const {return NONE;}
 };
 
 #endif

@@ -39,6 +39,7 @@ public:
   FilterClass getClass(QAction *a);
   QString filterScriptFunctionName(FilterIDType filterID);
   void outputToFile(QTextStream &out, Shotf &s, Image &img, CameraParameters &cam);
+  FILTER_ARITY filterArity(QAction *) const {return NONE;}
 };
 
 #endif /* FILTER_PHOTOSYNTH_PLUGIN_H */

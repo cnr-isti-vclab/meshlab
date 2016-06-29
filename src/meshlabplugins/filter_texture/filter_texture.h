@@ -36,34 +36,34 @@
 
 class FilterTexturePlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum {
-		FP_VORONOI_ATLAS,
-		FP_UV_WEDGE_TO_VERTEX,
-    FP_UV_VERTEX_TO_WEDGE,
-		FP_BASIC_TRIANGLE_MAPPING,
-    FP_PLANAR_MAPPING,
-    FP_SET_TEXTURE,
-		FP_COLOR_TO_TEXTURE,
-		FP_TRANSFER_TO_TEXTURE,
-		FP_TEX_TO_VCOLOR_TRANSFER
-	};
+    enum {
+        FP_VORONOI_ATLAS,
+        FP_UV_WEDGE_TO_VERTEX,
+        FP_UV_VERTEX_TO_WEDGE,
+        FP_BASIC_TRIANGLE_MAPPING,
+        FP_PLANAR_MAPPING,
+        FP_SET_TEXTURE,
+        FP_COLOR_TO_TEXTURE,
+        FP_TRANSFER_TO_TEXTURE,
+        FP_TEX_TO_VCOLOR_TRANSFER
+    };
 
-	FilterTexturePlugin();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+    FilterTexturePlugin();
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
     virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-	virtual int getRequirements(QAction *);
-	virtual int getPreConditions(QAction *) const;
-	virtual int postCondition( QAction* ) const;
+    virtual int getRequirements(QAction *);
+    virtual int getPreConditions(QAction *) const;
+    virtual int postCondition( QAction* ) const;
     FilterClass getClass(QAction *a);
-
+    FILTER_ARITY filterArity(QAction * filter) const;
 };
 
 #endif

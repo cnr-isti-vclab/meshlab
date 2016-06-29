@@ -1363,4 +1363,30 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 
 }
 
+MeshFilterInterface::FILTER_ARITY FilterFunctionPlugin::filterArity( QAction* filter ) const
+{
+    switch(ID(filter)) 
+    {
+    case FF_VERT_SELECTION:     
+    case FF_FACE_SELECTION:     
+    case FF_GEOM_FUNC:          
+    case FF_FACE_COLOR:         
+    case FF_FACE_QUALITY:       
+    case FF_VERT_COLOR:         
+    case FF_VERT_QUALITY:       
+    case FF_VERT_TEXTURE_FUNC:  
+    case FF_WEDGE_TEXTURE_FUNC: 
+    case FF_VERT_NORMAL:        
+    case FF_DEF_VERT_ATTRIB:    
+    case FF_DEF_FACE_ATTRIB:    
+    case FF_REFINE:
+        return MeshFilterInterface::SINGLE_MESH;
+    case FF_GRID:                            
+    case FF_ISOSURFACE:         
+        return MeshFilterInterface::NONE;
+    }
+    return MeshFilterInterface::NONE;
+}
+
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterFunctionPlugin)

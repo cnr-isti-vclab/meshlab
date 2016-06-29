@@ -44,8 +44,8 @@ static GLuint vs, fs, shdrID;
 AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 {
     typeList
-    << FP_VERT_AMBIENT_OCCLUSION
-    << FP_FACE_AMBIENT_OCCLUSION;
+        << FP_VERT_AMBIENT_OCCLUSION
+        << FP_FACE_AMBIENT_OCCLUSION;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -71,7 +71,7 @@ QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
     {
     case FP_VERT_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Vertex");
     case FP_FACE_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Face");
-        default : assert(0);
+    default : assert(0);
     }
 
     return QString("");
@@ -83,7 +83,7 @@ QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
     {
     case FP_VERT_AMBIENT_OCCLUSION :
     case FP_FACE_AMBIENT_OCCLUSION :  return QString("Compute ambient occlusions values; it takes a number or well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This number is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
-        default : assert(0);
+    default : assert(0);
     }
 
     return QString("");
@@ -99,21 +99,21 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 {
     switch(ID(action))
     {
-        case FP_FACE_AMBIENT_OCCLUSION:
-        case FP_VERT_AMBIENT_OCCLUSION:
-            parlst.addParam(new RichFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
-                                            " - 0 means light came only uniformly from any direction<br>"
-                                            " - 1 means that all the light cames from the specified cone of directions <br>"
-                                            " - other values mix the two set of lighting directions "));
-            parlst.addParam(new RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-            parlst.addParam(new RichPoint3f("coneDir",Point3f(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-            parlst.addParam(new RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-            parlst.addParam(new RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
-            parlst.addParam(new RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
-            parlst.addParam(new RichInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance"));
-            break;
-  default: break; // do not add any parameter for the other filters
-  }
+    case FP_FACE_AMBIENT_OCCLUSION:
+    case FP_VERT_AMBIENT_OCCLUSION:
+        parlst.addParam(new RichFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
+            " - 0 means light came only uniformly from any direction<br>"
+            " - 1 means that all the light cames from the specified cone of directions <br>"
+            " - other values mix the two set of lighting directions "));
+        parlst.addParam(new RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
+        parlst.addParam(new RichPoint3f("coneDir",Point3f(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
+        parlst.addParam(new RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
+        parlst.addParam(new RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
+        //parlst.addParam(new RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
+        parlst.addParam(new RichInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance"));
+        break;
+    default: break; // do not add any parameter for the other filters
+    }
 }
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
@@ -122,7 +122,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
     else perFace = false;
 
     useGPU = par.getBool("useGPU");
-    useVBO = par.getBool("useVBO");
     depthTexSize = par.getInt("depthTexSize");
     depthTexArea = depthTexSize*depthTexSize;
     numViews = par.getInt("reqViews");
@@ -132,7 +131,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
     float coneAngle = par.getFloat("coneAngle");
 
     if(perFace)
-      m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
+        m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACECOLOR);
     else
         m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
 
@@ -205,11 +204,13 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
 
-    if (useVBO)
-    {
-        m.glw.SetHint(vcg::GLW::HNUseVBO);
-        m.glw.Update();
-    }
+    //if (useVBO)
+    //{
+    //    //m.glw.SetHint(vcg::GLW::HNUseVBO);
+    //    //m.glw.Update();
+    //}
+
+
 
     tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
 
@@ -243,7 +244,14 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
             glClear(GL_DEPTH_BUFFER_BIT);
 
             glColorMask(0, 0, 0, 0);
-            m.glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
+
+            MLRenderingData dt;
+            MLRenderingData::RendAtts atts;
+            atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+            dt.set(MLRenderingData::PR_SOLID,atts);
+            glContext->setRenderingData(m.id(),dt);
+            glContext->drawMeshModel(m.id());
+
             glColorMask(1, 1, 1, 1);
 
             glDisable(GL_POLYGON_OFFSET_FILL);
@@ -259,7 +267,14 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
             glClear(GL_DEPTH_BUFFER_BIT);
             // FIRST PASS - fill depth buffer
             glColorMask(0, 0, 0, 0);
-            m.glw.DrawFill<GLW::NMNone, GLW::CMNone, GLW::TMNone>();
+
+            MLRenderingData dt;
+            MLRenderingData::RendAtts atts;
+            atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+            dt.set(MLRenderingData::PR_SOLID,atts);
+            glContext->setRenderingData(m.id(),dt);
+            glContext->drawMeshModel(m.id());
+
             glColorMask(1, 1, 1, 1);
 
             glDisable(GL_POLYGON_OFFSET_FILL);
@@ -279,20 +294,20 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     }
 
     if(perFace)
+    {
+        tri::UpdateColor<CMeshO>::PerFaceQualityGray(m.cm);
+        CMeshO::FaceIterator fi;
+        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+            (*fi).Q()=(*fi).Q()/numViews;
+    } else {
+        tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm,0.0f,0.0f);
+        CMeshO::VertexIterator vi;
+        for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
         {
-            tri::UpdateColor<CMeshO>::PerFaceQualityGray(m.cm);
-            CMeshO::FaceIterator fi;
-      for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-                    (*fi).Q()=(*fi).Q()/numViews;
-        } else {
-            tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm,0.0f,0.0f);
-            CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-      {
-                    (*vi).Q()=(*vi).Q()/numViews;
-          BN[vi].Normalize();
-      }
+            (*vi).Q()=(*vi).Q()/numViews;
+            BN[vi].Normalize();
         }
+    }
 
     Log(0,"Successfully calculated A.O. after %3.2f sec, %3.2f of which is due to initialization", ((float)tAll.elapsed()/1000.0f), ((float)tInitElapsed/1000.0f) );
 
@@ -322,8 +337,9 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 
     glDeleteTextures(1, &depthBufferTex);
 
-    if (useVBO)
-    m.glw.ClearHint(vcg::GLW::HNUseVBO);
+    glContext->meshAttributesUpdated(m.id(),true,MLRenderingData::RendAtts());
+    /*if (useVBO)
+    m.glw.ClearHint(vcg::GLW::HNUseVBO);*/
 
     return true;
 }
@@ -432,9 +448,9 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         cb(30, "Initializing: Shaders and Textures");
 
         if (maxTexPages == 4)
-      set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion4",vs,fs,shdrID);
+            set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion4",vs,fs,shdrID);
         else
-      set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
+            set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
 
 
         maxTexSize = smartTexSize;
@@ -642,7 +658,7 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3m &meshBBox)
 {
     cameraDir.Import(camDir);
     GLfloat d = (meshBBox.Diag()/2.0) * 1.1,
-            k = 0.1f;
+        k = 0.1f;
     Point3f eye = Point3f::Construct(meshBBox.Center()) + camDir * (d+k);
 
     glViewport(0.0, 0.0, depthTexSize, depthTexSize);
@@ -654,8 +670,8 @@ void AmbientOcclusionPlugin::setCamera(Point3f camDir, Box3m &meshBBox)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(eye.X(), eye.Y(), eye.Z(),
-              meshBBox.Center().X(), meshBBox.Center().Y(), meshBBox.Center().Z(),
-              0.0, 1.0, 0.0);
+        meshBBox.Center().X(), meshBBox.Center().Y(), meshBBox.Center().Z(),
+        0.0, 1.0, 0.0);
 }
 
 
@@ -716,10 +732,10 @@ void AmbientOcclusionPlugin::generateOcclusionHW()
 
     // Screen-aligned Quad
     glBegin(GL_QUADS);
-        glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
-        glVertex3f( 1.0f, -1.0f, 0.0f); //L-R
-        glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
-        glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
+    glVertex3f(-1.0f, -1.0f, 0.0f); //L-L
+    glVertex3f( 1.0f, -1.0f, 0.0f); //L-R
+    glVertex3f( 1.0f,  1.0f, 0.0f); //U-R
+    glVertex3f(-1.0f,  1.0f, 0.0f); //U-L
     glEnd();
 
     glUseProgram(0);
@@ -740,22 +756,22 @@ void AmbientOcclusionPlugin::generateOcclusionSW(MeshModel &m)
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
-  CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+    CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
 
     for (int i=0; i<m.cm.vn; ++i)
     {
         Point3<CMeshO::ScalarType> &vp = m.cm.vert[i].P();
         gluProject(vp.X(), vp.Y(), vp.Z(),
-                   (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
-                   &resCoords[0], &resCoords[1], &resCoords[2] );
+            (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
+            &resCoords[0], &resCoords[1], &resCoords[2] );
 
         int x = floor(resCoords[0]);
         int y = floor(resCoords[1]);
 
         if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
         {
-             m.cm.vert[i].Q() += max(Point3f::Construct(m.cm.vert[i].cN()).dot(cameraDir), 0.0f);
-             BN[ m.cm.vert[i] ] += cameraDir;
+            m.cm.vert[i].Q() += max(Point3f::Construct(m.cm.vert[i].cN()).dot(cameraDir), 0.0f);
+            BN[ m.cm.vert[i] ] += cameraDir;
         }
     }
 
@@ -780,8 +796,8 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
     {
         Point3f &vp = faceCenterVec[i];
         gluProject(vp.X(), vp.Y(), vp.Z(),
-                             (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
-                             &resCoords[0], &resCoords[1], &resCoords[2] );
+            (const GLdouble *) mvMatrix_f, (const GLdouble *) prMatrix_f, (const GLint *) viewpSize,
+            &resCoords[0], &resCoords[1], &resCoords[2] );
 
         int x = floor(resCoords[0]);
         int y = floor(resCoords[1]);
@@ -792,7 +808,7 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
         }
     }
 
-delete [] dFloat;
+    delete [] dFloat;
 }
 
 void AmbientOcclusionPlugin::applyOcclusionHW(MeshModel &m)
@@ -833,7 +849,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 
     fileName = fileName.left(fileName.size()-1);
     fileName.append(".vert");
-  file.setFileName(fileName);
+    file.setFileName(fileName);
     if (file.open(QIODevice::ReadOnly))
     {
         QTextStream ts(&file);
@@ -850,7 +866,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
     fileName = fileName.left(fileName.size()-5);
     fileName.append(nMRT);
     fileName.append(".frag");
-  file.setFileName(fileName);
+    file.setFileName(fileName);
     if (file.open(QIODevice::ReadOnly))
     {
         QTextStream ts(&file);
@@ -871,6 +887,7 @@ void AmbientOcclusionPlugin::set_shaders(char *shaderName, GLuint &v, GLuint &f,
 
     glLinkProgram(pr);
 }
+
 void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, int elems)
 {
     unsigned char *cdata = new unsigned char[elems];

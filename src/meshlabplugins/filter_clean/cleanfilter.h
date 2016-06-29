@@ -29,51 +29,52 @@
 
 class CleanFilter : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+        MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+        Q_INTERFACES(MeshFilterInterface)
 
-		public:
-	/* naming convention :
-		 - FP -> Filter Plugin
-		 - name of the plugin separated by _
-	*/
-	enum { 
-    FP_BALL_PIVOTING, 
-    FP_REMOVE_ISOLATED_COMPLEXITY, 
-    FP_REMOVE_ISOLATED_DIAMETER, 
-    FP_REMOVE_WRT_Q,
-    FP_REMOVE_TVERTEX_FLIP,
-    FP_SNAP_MISMATCHED_BORDER,
-    FP_REMOVE_TVERTEX_COLLAPSE,
-    FP_REMOVE_FOLD_FACE,
-    FP_REMOVE_DUPLICATE_FACE,
-    FP_REMOVE_NON_MANIF_EDGE,
-    FP_REMOVE_NON_MANIF_VERT,
-		FP_MERGE_CLOSE_VERTEX,
-	FP_COMPACT_VERT,
-	FP_COMPACT_FACE
-  } ;
-	
-	/* default values for standard parameters' values of the plugin actions */
+public:
+    /* naming convention :
+    - FP -> Filter Plugin
+    - name of the plugin separated by _
+    */
+    enum { 
+        FP_BALL_PIVOTING, 
+        FP_REMOVE_ISOLATED_COMPLEXITY, 
+        FP_REMOVE_ISOLATED_DIAMETER, 
+        FP_REMOVE_WRT_Q,
+        FP_REMOVE_TVERTEX_FLIP,
+        FP_SNAP_MISMATCHED_BORDER,
+        FP_REMOVE_TVERTEX_COLLAPSE,
+        FP_REMOVE_FOLD_FACE,
+        FP_REMOVE_DUPLICATE_FACE,
+        FP_REMOVE_NON_MANIF_EDGE,
+        FP_REMOVE_NON_MANIF_VERT,
+        FP_MERGE_CLOSE_VERTEX,
+        FP_COMPACT_VERT,
+        FP_COMPACT_FACE
+    } ;
+
+    /* default values for standard parameters' values of the plugin actions */
     float maxDiag1;
     float maxDiag2;
     int minCC;
     float val1;
 
 
-	CleanFilter();
-	~CleanFilter();
+    CleanFilter();
+    ~CleanFilter();
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
 
-  virtual FilterClass getClass(QAction *);
-  virtual int getRequirements(QAction *);
+    virtual FilterClass getClass(QAction *);
+    virtual int getRequirements(QAction *);
 
-  virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-  virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+
 };
 
 

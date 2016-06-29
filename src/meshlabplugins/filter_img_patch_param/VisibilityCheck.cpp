@@ -271,6 +271,7 @@ void VisibilityCheck_ShadowMap::shadowProjMatrices()
 
 
     // Define the bias matrix that will enable to go from clipping space to texture space.
+    // from [-1,1] to [0,1]
     const float biasMatData[16] = { 0.5f, 0.0f, 0.0f, 0.0f,
                                     0.0f, 0.5f, 0.0f, 0.0f,
                                     0.0f, 0.0f, 0.5f, 0.0f,
@@ -316,11 +317,15 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     // Set up the OpenGL transformation matrices so as to place the viewpoint on the raster's camera.
     glMatrixMode( GL_PROJECTION );
     glPushMatrix();
-    vcg::glLoadMatrix( m_Proj.V() );
+
+    /*WARNING!!!!! patch added cause the vcg::glLoadMatrix assumes the matrix in row major order (it computes a transpose of the matrix)
+    // La Rue instead managed already them in column major order*/
+    
+    vcg::glLoadMatrix( m_Proj.transpose().V() );
 
     glMatrixMode( GL_MODELVIEW );
     glPushMatrix();
-    vcg::glLoadMatrix( m_Pose.V() );
+    vcg::glLoadMatrix( m_Pose.transpose().V() );
 
 
     // Perform an off-screen rendering pass so as to generate the a depth map of the model
@@ -337,7 +342,7 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
     glClear( GL_DEPTH_BUFFER_BIT );
     if( s_AreVBOSupported )
     {
-        glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
+        /*glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
         glEnableClientState( GL_VERTEX_ARRAY );
 
         m_Context.bindVertexBuffer( m_ShadowVBOVertices );
@@ -348,7 +353,16 @@ void VisibilityCheck_ShadowMap::updateShadowTexture()
         glDrawElements( GL_TRIANGLES, 3*m_Mesh->fn, GL_UNSIGNED_INT, 0 );
         m_Context.unbindIndexBuffer();
 
-        glPopClientAttrib();
+        glPopClientAttrib();*/
+        MLRenderingData dt;
+        MLRenderingData::RendAtts atts;
+        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+        dt.set(MLRenderingData::PR_SOLID,atts);
+        if (m_plugcontext != NULL)
+        {
+            m_plugcontext->setRenderingData(m_meshid,dt);
+            m_plugcontext->drawMeshModel(m_meshid);
+        }
     }
     else
     {
@@ -414,10 +428,10 @@ bool VisibilityCheck_ShadowMap::initShaders()
                 if( clipCoord.x>=0.0 && clipCoord.x<=1.0 &&
                     clipCoord.y>=0.0 && clipCoord.y<=1.0 &&
                     shadow2DProj( u_SadowMap, projVert ).r > 0.5 )
-                    gl_FragColor = vec4( V_VISIBLE );
+                    gl_FragColor = vec4(V_VISIBLE);
                 else
                     gl_FragColor = vec4( V_UNDEFINED );
-            }
+            } 
         }
     );
 
@@ -476,9 +490,10 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
 
 
     // Creates the VBO that will be used for the generation of the shadow map.
-    if( s_AreVBOSupported )
+    if( !s_AreVBOSupported )
     {
-        m_ShadowVBOVertices = glw::createBuffer( m_Context, m_Mesh->vn*sizeof(Point3m), mapData );
+        delete [] mapData;
+        /*m_ShadowVBOVertices = glw::createBuffer( m_Context, m_Mesh->vn*sizeof(Point3m), mapData );
         delete [] mapData;
 
         unsigned int *indices = new unsigned int [ 3*m_Mesh->fn ];
@@ -487,19 +502,19 @@ void VisibilityCheck_ShadowMap::initMeshTextures()
                 indices[n] = m_Mesh->face[f].V(v) - &m_Mesh->vert[0];
 
         m_ShadowVBOIndices = glw::createBuffer( m_Context, 3*m_Mesh->fn*sizeof(unsigned int), indices );
-        delete [] indices;
+        delete [] indices;*/
     }
-    else
-        delete [] mapData;
+    //else
+    //    delete [] mapData;
 }
 
 
-void VisibilityCheck_ShadowMap::setMesh( CMeshO *mesh )
+void VisibilityCheck_ShadowMap::setMesh(int meshid,CMeshO *mesh )
 {
     if( mesh && mesh!=m_Mesh )
     {
         m_Mesh = mesh;
-
+        m_meshid = meshid;
         initMeshTextures();
 
         // Create the framebuffer into which the result of the visibility computation will be stored.

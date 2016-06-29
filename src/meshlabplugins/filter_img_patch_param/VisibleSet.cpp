@@ -29,7 +29,7 @@
 
 
 
-VisibleSet::VisibleSet( glw::Context &ctx,
+VisibleSet::VisibleSet( glw::Context &ctx,MLPluginGLContext* plugctx,int meshid,
                         CMeshO &mesh,
                         QList<RasterModel*> &rasterList,
                         int weightMask ) :
@@ -38,7 +38,8 @@ VisibleSet::VisibleSet( glw::Context &ctx,
     m_WeightMask(weightMask)
 {
     VisibilityCheck &visibility = *VisibilityCheck::GetInstance( ctx );
-    visibility.setMesh( &mesh );
+    visibility.setMesh(meshid,&mesh );
+    visibility.m_plugcontext = plugctx;
 
 
     float depthMin =  std::numeric_limits<float>::max();

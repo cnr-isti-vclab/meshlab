@@ -39,30 +39,32 @@
 class GeometryAgingPlugin : public QObject, public MeshFilterInterface
 {
     Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshFilterInterface)
+        MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+        Q_INTERFACES(MeshFilterInterface)
 
-    public:
-        enum {FP_ERODE};
+public:
+    enum {FP_ERODE};
 
-        GeometryAgingPlugin();
-        virtual ~GeometryAgingPlugin();
+    GeometryAgingPlugin();
+    virtual ~GeometryAgingPlugin();
 
-        virtual QString filterInfo(FilterIDType filter) const;
-        virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual QString filterName(FilterIDType filter) const;
 
-        virtual int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);}
+    virtual int getRequirements(QAction *) {return (MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);}
     virtual void initParameterSet(QAction *action, MeshModel &m, RichParameterSet &params);
-        virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &params, vcg::CallBackPos *cb);
-        virtual FilterClass getClass(QAction *);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &params, vcg::CallBackPos *cb);
+    virtual FilterClass getClass(QAction *);
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 
 
-    protected:
-        void refineMesh(CMeshO &m, vcg::QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);
-        double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
-        bool faceIntersections(CMeshO &m, vcg::face::Pos<CMeshO::FaceType> p, vcg::GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
-        void smoothPeaks(CMeshO &m, bool selected, bool updateErosionAttr);
-        void computeMeanCurvature(CMeshO &m);
+
+protected:
+    void refineMesh(CMeshO &m, vcg::QualityEdgePred &ep, bool selection, vcg::CallBackPos *cb);
+    double generateNoiseValue(int Octaves, const CVertexO::CoordType &p);
+    bool faceIntersections(CMeshO &m, vcg::face::Pos<CMeshO::FaceType> p, vcg::GridStaticPtr<CFaceO, CMeshO::ScalarType> &gM);
+    void smoothPeaks(CMeshO &m, bool selected, bool updateErosionAttr);
+    void computeMeanCurvature(CMeshO &m);
 };
 
 

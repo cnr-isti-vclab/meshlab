@@ -47,19 +47,20 @@ protected:
 
     glw::Context                &m_Context;
     CMeshO                      *m_Mesh;
+    int                         m_meshid;
     RasterModel                 *m_Raster;
     std::vector<unsigned char>  m_VertFlag;
 
     static VisibilityCheck      *s_Instance;
 
-    inline                  VisibilityCheck( glw::Context &ctx ) : m_Context(ctx), m_Mesh(NULL), m_Raster(NULL) {}
+    inline                  VisibilityCheck( glw::Context &ctx ) : m_Context(ctx), m_Mesh(NULL), m_Raster(NULL),m_plugcontext(NULL) {}
     virtual                 ~VisibilityCheck()                                                                  {}
 
 public:
     static VisibilityCheck* GetInstance( glw::Context &ctx );
     static void             ReleaseInstance();
 
-    virtual void            setMesh( CMeshO *mesh )                                 = 0;
+    virtual void            setMesh(int meshid,CMeshO *mesh )                                 = 0;
     virtual void            setRaster( RasterModel *mesh )                          = 0;
     virtual void            checkVisibility()                                       = 0;
 
@@ -70,6 +71,8 @@ public:
     inline bool             isFaceVisible( const unsigned int n ) const             { return isFaceVisible( &m_Mesh->face[n] ); }
     inline bool             isFaceVisible( const CFaceO *f ) const                  { return isVertVisible(f->cV(0)) || isVertVisible(f->cV(1)) || isVertVisible(f->cV(2)); }
     inline bool             isFaceVisible( const CMeshO::FaceIterator &f ) const    { return isFaceVisible( &*f ); }
+    
+    MLPluginGLContext* m_plugcontext;
 };
 
 
@@ -95,7 +98,7 @@ private:
 public:
     static bool isSupported();
 
-    void        setMesh( CMeshO *mesh )                                             { m_Mesh = mesh; }
+    void        setMesh(int meshid,CMeshO *mesh )                                             { m_Mesh = mesh; m_meshid = meshid; }
     void        setRaster( RasterModel *rm )                                        { m_Raster = rm; }
     void        checkVisibility();
 };
@@ -137,7 +140,7 @@ private:
 public:
     static bool isSupported();
 
-    void        setMesh( CMeshO *mesh );
+    void        setMesh(int meshid,CMeshO *mesh );
     void        setRaster( RasterModel *rm );
     void        checkVisibility();
 };

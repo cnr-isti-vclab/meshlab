@@ -50,24 +50,24 @@ struct aux_info {
     float eps;                      //epsilon
     //Add segment c to border
     virtual bool AddToBorder( vcg::Segment3<CMeshO::ScalarType> c, std::pair<int, int> v  ) {
-		/****Insert new segment****/
+        /****Insert new segment****/
         //Search for segment S having S.P0() == c.P1 or S.P1 == c.P0()
-		if ( v.first == 4013 && v.second == 4015 )
-			int stop = 3;
-		if ( v.first == v.second ) return false;
+        if ( v.first == 4013 && v.second == 4015 )
+            int stop = 3;
+        if ( v.first == v.second ) return false;
         if ( c.Length() < eps ) {
-			c.P0() = c.P1();
-			v.first = v.second;
-			//if segment is too short (it's basically a point) check if it's one of the vertices
-			for ( size_t i = 0; i < trash.size(); i ++ ) {
-				for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
-					if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), c.P0() ) < eps ) return false;
-				}
-			}
-		}
+            c.P0() = c.P1();
+            v.first = v.second;
+            //if segment is too short (it's basically a point) check if it's one of the vertices
+            for ( size_t i = 0; i < trash.size(); i ++ ) {
+                for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) { //Only one trash component
+                    if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), c.P0() ) < eps ) return false;
+                }
+            }
+        }
 
-		if ( v.first == 4013 && v.second == 4013 )
-			int stop = 3;
+        if ( v.first == 4013 && v.second == 4013 )
+            int stop = 3;
         //check if c doesn't lie on existing edges
         //if it does, split edge
         for ( size_t i = 0; i < trash.size(); i ++ ) {
@@ -132,8 +132,8 @@ struct aux_info {
         for ( unsigned int j = 0; j < border.size(); j ++ ) {
             for ( size_t i = 0; i < border[j].verts.size() && !found; i ++ ) {
                 if ( border[j].verts[i].first == v.second ) { found = true; border[j].edges.insert( border[j].edges.begin() + i, c ); border[j].verts.insert( border[j].verts.begin() + i, v ); }           //insert before i-th element
-				else 
-				if ( border[j].verts[i].second == v.first ) { found = true; border[j].edges.insert( border[j].edges.begin() + i + 1, c ); border[j].verts.insert( border[j].verts.begin() + i + 1, v ); }   //insert after i-th element
+                else 
+                    if ( border[j].verts[i].second == v.first ) { found = true; border[j].edges.insert( border[j].edges.begin() + i + 1, c ); border[j].verts.insert( border[j].verts.begin() + i + 1, v ); }   //insert after i-th element
             }
         }
         if (!found) {   //Create a new polyline ad add it to the border list
@@ -147,11 +147,11 @@ struct aux_info {
                         border[j].verts.insert( border[j].verts.begin(), border[i].verts.begin(), border[i].verts.end() );
                         border.erase(border.begin() + i);
                     } 
-					else if ( border[j].verts.back().second == border[i].verts.front().first ) {
-							border[j].edges.insert( border[j].edges.end(), border[i].edges.begin(), border[i].edges.end() );
-							border[j].verts.insert( border[j].verts.end(), border[i].verts.begin(), border[i].verts.end() );
-							border.erase(border.begin() + i);
-						 }
+                    else if ( border[j].verts.back().second == border[i].verts.front().first ) {
+                        border[j].edges.insert( border[j].edges.end(), border[i].edges.begin(), border[i].edges.end() );
+                        border[j].verts.insert( border[j].verts.end(), border[i].verts.begin(), border[i].verts.end() );
+                        border.erase(border.begin() + i);
+                    }
                 }
         }//end if (!found)
 
@@ -162,10 +162,10 @@ struct aux_info {
                         trash[i].edges[j].P0() = border[k].edges.back().P1();
                         //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
                     } else 
-                    if ( trash[i].verts[j].first == border[k].verts.front().first ) {
-                        trash[i].edges[j].P0() = border[k].edges.front().P0();
-                        //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
-                    }
+                        if ( trash[i].verts[j].first == border[k].verts.front().first ) {
+                            trash[i].edges[j].P0() = border[k].edges.front().P0();
+                            //trash[i].edges.erase( trash[i].edges.begin() + j ); trash[i].verts.erase( trash[i].verts.begin() + j )
+                        }
                 }
             }
         }
@@ -190,11 +190,11 @@ struct aux_info {
     virtual void Init( CMeshO::FaceType f, int a, int b, int c ) {
         if (!trash.empty()) return;
         polyline tri;   tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(0), f.P(1)) );
-                        tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(1), f.P(2)) );
-                        tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(2), f.P(0)) );
-                        tri.verts.push_back( std::make_pair(a, b) );
-                        tri.verts.push_back( std::make_pair(b, c) );
-                        tri.verts.push_back( std::make_pair(c, a) );
+        tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(1), f.P(2)) );
+        tri.edges.push_back( vcg::Segment3<CMeshO::ScalarType>(f.P(2), f.P(0)) );
+        tri.verts.push_back( std::make_pair(a, b) );
+        tri.verts.push_back( std::make_pair(b, c) );
+        tri.verts.push_back( std::make_pair(c, a) );
         AddTComponent( tri );
     }
 
@@ -218,254 +218,254 @@ struct aux_info {
         return trash.size();
     }
 
-	// Add vertex in original triangle
-	virtual bool addVertex( CMeshO::VertexPointer v, int v_index ) {
-		int cnt = 0; int split = -1;
-    for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
+    // Add vertex in original triangle
+    virtual bool addVertex( CMeshO::VertexPointer v, int v_index ) {
+        int cnt = 0; int split = -1;
+        for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
 
-		for ( size_t j = 0; j < trash[i].verts.size(); j ++ ) {	//search for closest edge
-			if ( trash[i].verts[j].first == v_index ) return false;
-		}
+            for ( size_t j = 0; j < trash[i].verts.size(); j ++ ) {	//search for closest edge
+                if ( trash[i].verts[j].first == v_index ) return false;
+            }
 
-      for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
-				//if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
-				Scalarm dist;
-				Point3m clos;
-				vcg::SegmentPointSquaredDistance<Scalarm>(trash[i].edges[j], v->P(),clos,dist);
-				if (dist <= eps ) { 
-					 cnt++; split = j;
-				}	
-			}
-		}
-		if (!cnt) return false;
+            for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+                //if ( vcg::SquaredDistance<float>( trash[i].edges[j], v->P() ) <= eps ) { 
+                Scalarm dist;
+                Point3m clos;
+                vcg::SegmentPointSquaredDistance<Scalarm>(trash[i].edges[j], v->P(),clos,dist);
+                if (dist <= eps ) { 
+                    cnt++; split = j;
+                }	
+            }
+        }
+        if (!cnt) return false;
 
-		if ( cnt == 1 ) {		//one edge only -> split the edge
-			vcg::Segment3<CMeshO::ScalarType> splitting_edge = trash[0].edges[split];
-			std::pair<int, int>  splitting_edge_v = trash[0].verts[split];
+        if ( cnt == 1 ) {		//one edge only -> split the edge
+            vcg::Segment3<CMeshO::ScalarType> splitting_edge = trash[0].edges[split];
+            std::pair<int, int>  splitting_edge_v = trash[0].verts[split];
 
-			trash[0].edges.erase(trash[0].edges.begin()+split);		//remove edge
-			trash[0].verts.erase(trash[0].verts.begin()+split);
-			//replace edge using two new edges
-			trash[0].edges.insert(trash[0].edges.begin()+split, vcg::Segment3<CMeshO::ScalarType>( splitting_edge.P0(), v->P() ) );
-			trash[0].edges.insert(trash[0].edges.begin()+split+1, vcg::Segment3<CMeshO::ScalarType>( v->P(), splitting_edge.P1() ) );
-			trash[0].verts.insert(trash[0].verts.begin()+split, std::make_pair( splitting_edge_v.first, v_index ) );
-			trash[0].verts.insert(trash[0].verts.begin()+split+1, std::make_pair( v_index, splitting_edge_v.second ) );
-		}
+            trash[0].edges.erase(trash[0].edges.begin()+split);		//remove edge
+            trash[0].verts.erase(trash[0].verts.begin()+split);
+            //replace edge using two new edges
+            trash[0].edges.insert(trash[0].edges.begin()+split, vcg::Segment3<CMeshO::ScalarType>( splitting_edge.P0(), v->P() ) );
+            trash[0].edges.insert(trash[0].edges.begin()+split+1, vcg::Segment3<CMeshO::ScalarType>( v->P(), splitting_edge.P1() ) );
+            trash[0].verts.insert(trash[0].verts.begin()+split, std::make_pair( splitting_edge_v.first, v_index ) );
+            trash[0].verts.insert(trash[0].verts.begin()+split+1, std::make_pair( v_index, splitting_edge_v.second ) );
+        }
 
-		if ( cnt == 2 ) {	// search for closest vertex and copy vertex coords
-      for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
-        for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
-					if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
-						 v->P() = trash[i].edges[j].P0();
-					}	
-				}
-			}
-		}
+        if ( cnt == 2 ) {	// search for closest vertex and copy vertex coords
+            for ( size_t i = 0; i < trash.size(); i ++ ) {	//one component only
+                for ( size_t j = 0; j < trash[i].edges.size(); j ++ ) {	//search for closest edge
+                    if ( vcg::Distance<Scalarm>( trash[i].edges[j].P0(), v->P() ) <= eps ) { 
+                        v->P() = trash[i].edges[j].P0();
+                    }	
+                }
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
 };//end struct
 
 class compareFaceQuality {
-	public:
-		compareFaceQuality() { };
+public:
+    compareFaceQuality() { };
 
-		bool operator () (const std::pair<CMeshO::FacePointer,char> f1, const std::pair<CMeshO::FacePointer,char> f2) {
-			//quality f1 < quality f2 return true
-			return ( f1.first->Q() > f2.first->Q() );
-		}
+    bool operator () (const std::pair<CMeshO::FacePointer,char> f1, const std::pair<CMeshO::FacePointer,char> f2) {
+        //quality f1 < quality f2 return true
+        return ( f1.first->Q() > f2.first->Q() );
+    }
 };
 
 class FilterZippering : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
     typedef vcg::GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MeshFaceGrid;
     typedef vcg::GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MeshVertGrid;
 
 public:
-		//Different operations in different plugins
-        enum { FP_REDUNDANCY, 
-			   FP_ZIPPERING	};
+    //Different operations in different plugins
+    enum { FP_REDUNDANCY, 
+        FP_ZIPPERING	};
 
-        FilterZippering();
-	
-        virtual QString filterName(FilterIDType filter) const;
-        virtual QString filterInfo(FilterIDType filter) const;
-        virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-        int getRequirements(QAction *action);
-        virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-        FilterClass getClass(QAction *a);
-        virtual int postCondition( QAction */*a*/ ) const { return MeshModel::MM_FACEFACETOPO|MeshModel::MM_VERTNORMAL; }
+    FilterZippering();
 
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    int getRequirements(QAction *action);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FilterClass getClass(QAction *a);
+    virtual int postCondition( QAction */*a*/ ) const { return MeshModel::MM_FACEFACETOPO|MeshModel::MM_VERTNORMAL; }
+    FILTER_ARITY filterArity(QAction *) const {return FIXED;}
 
 
 private:
-	template <class ScalarType>
-	ScalarType SquaredDistance( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
-	
-	template <class ScalarType>
-	vcg::Point3<ScalarType> ClosestPoint( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
+    template <class ScalarType>
+    ScalarType SquaredDistance( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
 
-        bool checkRedundancy(   CMeshO::FacePointer f,   //face
-                                MeshModel *a,            //mesh A
-                                MeshFaceGrid &grid,      //grid A
-                                CMeshO::ScalarType max_dist );   //Max search distance
-		bool simpleCheckRedundancy( CMeshO::FacePointer f,   //face
-									MeshModel *a,            //mesh A
-									MeshFaceGrid &grid,      //grid A
-									CMeshO::ScalarType max_dist,//Max search distance
-									bool test );   
-        bool isBorderVert( CMeshO::FacePointer f, int i);
-        bool isOnBorder( CMeshO::CoordType point, CMeshO::FacePointer f );
-		bool isOnEdge( CMeshO::CoordType point, CMeshO::FacePointer f );
-        bool isAdjacent( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
-        int  sharesVertex( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
-        void handleBorder( aux_info &info,                                            //Auxiliar information for triangulatio
-                           vcg::Point3<CMeshO::ScalarType> N,                        //face normal (useful for proiection)
-                           std::vector<CMeshO::CoordType> &coords,          //output coords
-                           std::vector<int> &output ); //output v. pointers
-        polyline cutComponent(  polyline comp,                                   //Component to be cut
-                                polyline border,                                 //border
-                                vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //Rotation matrix
-        int searchComponent(	aux_info &info,								//Auxiliar info
-								vcg::Point3<CMeshO::ScalarType> P0,			//Start border point
-								vcg::Point3<CMeshO::ScalarType> P1,			//End border point
-								bool &conn );
-		bool findIntersection(  CMeshO::FacePointer currentF,				//face
-								vcg::Segment3<CMeshO::ScalarType> edge,				//edge
-								int last_split,							//last splitted edge
-								int &splitted_edge,						//currently splitted edge
-								vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
+    template <class ScalarType>
+    vcg::Point3<ScalarType> ClosestPoint( vcg::Segment3<ScalarType> &s, vcg::Point3<ScalarType> &p);
 
-
-
-		//init unsorted queue 
-		bool Init_q( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//the queue
-				     MeshModel* a,												//mesh A
-				     MeshModel* b,												//mesh B
-				     bool fullProcess );											//fullProcess flag
-		//init priority queue (overload)
-		bool Init_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
-				      MeshModel* a,												//mesh A
-				      MeshModel* b,												//mesh B
-				      bool fullProcess );	
-		//select redundant face (normal method, unsorted queue)
-		int selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
-							 MeshModel* a,													//mesh A
-							 MeshModel* b,													//mesh B
-							 float epsilon );												//max search distance
-		//select redundant face (normal method, priority queue)
-		int selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
-								MeshModel* a,													//mesh A
-							    MeshModel* b,													//mesh B
-							    float epsilon );												//max search distance
-		//refine border of a mesh, splitting faces having two border edges
-		int refineBorder( MeshModel* m );	
-		//project face of B on the surface of A
-		void projectFace( CMeshO::FacePointer f,								//pointer to the face that will be projected
-						  MeshModel* a,											//mesh A
-						  MeshFaceGrid grid_a,									//grid on A
-						  float max_dist,										//max dist search
-						  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-						  std::vector< CMeshO::FacePointer >& tbt_faces,		//vector to-be-triangulated faces
-						  std::vector< CMeshO::FacePointer >& tbr_faces, 		//vector to-be-removed faces
-						  std::vector< int >& verts );							//vector of indices
-		
-		//case 01: vertices of border edge project on the same face
-		void handleBorderEdgeSF ( std::pair< int, int >& current_edge,					//current border edge
-								  MeshModel* a,											//mesh A
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< int >& verts );							//vector of indices
-
-		//case 02: vertices of border edge project on adjacent faces
-		void handleBorderEdgeAF ( std::pair< int, int >& current_edge,					//current border edge
-								  MeshModel* a,											//mesh A
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< int >& verts );							//vector of indices
-
-		//case 03: vertices of border edge project on non-adjacent faces
-		void handleBorderEdgeNF ( std::pair< int, int >& current_edge,					//current border edge
-								  MeshModel* a,											//mesh A
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< int >& verts );							//vector of indices
-
-		//case 04: both vertices of current_edge project on another border edge
-		//return true if the whole current_edge project on border edge
-		bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
-								  MeshModel* a,											//mesh A
-								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
-								  float max_dist,										//max search dist (needed for sampling)
-								  vcg::Point3<CMeshO::ScalarType> closestStart,			    //closest point on startF
-								  vcg::Point3<CMeshO::ScalarType> closestEnd,				//closest point on endF
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< int >& verts );							//vector of indices
+    bool checkRedundancy(   CMeshO::FacePointer f,   //face
+        MeshModel *a,            //mesh A
+        MeshFaceGrid &grid,      //grid A
+        CMeshO::ScalarType max_dist );   //Max search distance
+    bool simpleCheckRedundancy( CMeshO::FacePointer f,   //face
+        MeshModel *a,            //mesh A
+        MeshFaceGrid &grid,      //grid A
+        CMeshO::ScalarType max_dist,//Max search distance
+        bool test );   
+    bool isBorderVert( CMeshO::FacePointer f, int i);
+    bool isOnBorder( CMeshO::CoordType point, CMeshO::FacePointer f );
+    bool isOnEdge( CMeshO::CoordType point, CMeshO::FacePointer f );
+    bool isAdjacent( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
+    int  sharesVertex( CMeshO::FacePointer f1, CMeshO::FacePointer f2 );
+    void handleBorder( aux_info &info,                                            //Auxiliar information for triangulatio
+        vcg::Point3<CMeshO::ScalarType> N,                        //face normal (useful for proiection)
+        std::vector<CMeshO::CoordType> &coords,          //output coords
+        std::vector<int> &output ); //output v. pointers
+    polyline cutComponent(  polyline comp,                                   //Component to be cut
+        polyline border,                                 //border
+        vcg::Matrix44<CMeshO::ScalarType> rot_mat );     //Rotation matrix
+    int searchComponent(	aux_info &info,								//Auxiliar info
+        vcg::Point3<CMeshO::ScalarType> P0,			//Start border point
+        vcg::Point3<CMeshO::ScalarType> P1,			//End border point
+        bool &conn );
+    bool findIntersection(  CMeshO::FacePointer currentF,				//face
+        vcg::Segment3<CMeshO::ScalarType> edge,				//edge
+        int last_split,							//last splitted edge
+        int &splitted_edge,						//currently splitted edge
+        vcg::Point3<CMeshO::ScalarType> &hit );	//approximate intersection point
 
 
-		//case 04: both vertices of current_edge project on another border edge
-		//return true if the whole current_edge project on border edge
-		bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
-								  MeshModel* a,											//mesh A
-								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
-								  float max_dist,										//max search dist (needed for sampling)
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< int >& verts );							//vector of indices
 
-		//case 05: one of the vertices doesn't project on the surface of the mesh
-		void handleBorderEdgeOB ( std::pair< int, int >& current_edge,					//current border edge
-								  int direction,										//splitting direction (1 from start to end, 0 from end to start)
-								  MeshModel* a,											//mesh A
-								  MeshFaceGrid grid_a,									//grid on A (needed for sampling)
-								  float max_dist,										//max search dist (needed for sampling)
-								  CMeshO::FacePointer startF,							//face where first vertex lies
-								  CMeshO::FacePointer endF,								//face where second vertex lies
-								  CMeshO::FacePointer splittingF,						//splitting face
-								  std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
-								  std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
-								  std::vector< CMeshO::FacePointer >& tbt_faces,		//stack containing pointers to face that wille be retriangulated
-								  std::vector< int >& verts );							//vector of indices
-		
-		int preProcess ( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
-						 MeshModel* a,
-						 MeshModel* b, 
-						 MeshFaceGrid grid_a,									//grid on A
-						 MeshFaceGrid grid_b,									//grid on A
-						 float max_dist );										//max dist search
+    //init unsorted queue 
+    bool Init_q( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//the queue
+        MeshModel* a,												//mesh A
+        MeshModel* b,												//mesh B
+        bool fullProcess );											//fullProcess flag
+    //init priority queue (overload)
+    bool Init_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+        MeshModel* a,												//mesh A
+        MeshModel* b,												//mesh B
+        bool fullProcess );	
+    //select redundant face (normal method, unsorted queue)
+    int selectRedundant( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+        MeshModel* a,													//mesh A
+        MeshModel* b,													//mesh B
+        float epsilon );												//max search distance
+    //select redundant face (normal method, priority queue)
+    int selectRedundant_pq( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+        MeshModel* a,													//mesh A
+        MeshModel* b,													//mesh B
+        float epsilon );												//max search distance
+    //refine border of a mesh, splitting faces having two border edges
+    int refineBorder( MeshModel* m );	
+    //project face of B on the surface of A
+    void projectFace( CMeshO::FacePointer f,								//pointer to the face that will be projected
+        MeshModel* a,											//mesh A
+        MeshFaceGrid grid_a,									//grid on A
+        float max_dist,										//max dist search
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector< CMeshO::FacePointer >& tbt_faces,		//vector to-be-triangulated faces
+        std::vector< CMeshO::FacePointer >& tbr_faces, 		//vector to-be-removed faces
+        std::vector< int >& verts );							//vector of indices
 
-		int preProcess_pq ( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
-							MeshModel* a,
-							MeshModel* b, 
-							MeshFaceGrid grid_a,									//grid on A
-							MeshFaceGrid grid_b,									//grid on A
-							float max_dist );										//max dist search
+    //case 01: vertices of border edge project on the same face
+    void handleBorderEdgeSF ( std::pair< int, int >& current_edge,					//current border edge
+        MeshModel* a,											//mesh A
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< int >& verts );							//vector of indices
+
+    //case 02: vertices of border edge project on adjacent faces
+    void handleBorderEdgeAF ( std::pair< int, int >& current_edge,					//current border edge
+        MeshModel* a,											//mesh A
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< int >& verts );							//vector of indices
+
+    //case 03: vertices of border edge project on non-adjacent faces
+    void handleBorderEdgeNF ( std::pair< int, int >& current_edge,					//current border edge
+        MeshModel* a,											//mesh A
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< int >& verts );							//vector of indices
+
+    //case 04: both vertices of current_edge project on another border edge
+    //return true if the whole current_edge project on border edge
+    bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
+        MeshModel* a,											//mesh A
+        MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+        float max_dist,										//max search dist (needed for sampling)
+        vcg::Point3<CMeshO::ScalarType> closestStart,			    //closest point on startF
+        vcg::Point3<CMeshO::ScalarType> closestEnd,				//closest point on endF
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< int >& verts );							//vector of indices
 
 
-        float eps;
+    //case 04: both vertices of current_edge project on another border edge
+    //return true if the whole current_edge project on border edge
+    bool handleBorderEdgeBB ( std::pair< int, int >& current_edge,					//current border edge
+        MeshModel* a,											//mesh A
+        MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+        float max_dist,										//max search dist (needed for sampling)
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< int >& verts );							//vector of indices
 
-		int dbg_cnt;
+    //case 05: one of the vertices doesn't project on the surface of the mesh
+    void handleBorderEdgeOB ( std::pair< int, int >& current_edge,					//current border edge
+        int direction,										//splitting direction (1 from start to end, 0 from end to start)
+        MeshModel* a,											//mesh A
+        MeshFaceGrid grid_a,									//grid on A (needed for sampling)
+        float max_dist,										//max search dist (needed for sampling)
+        CMeshO::FacePointer startF,							//face where first vertex lies
+        CMeshO::FacePointer endF,								//face where second vertex lies
+        CMeshO::FacePointer splittingF,						//splitting face
+        std::map< CMeshO::FacePointer, aux_info >& map_info,	//map with auxiliar information
+        std::vector < std::pair< int, int > >& stack,			//stack containing border edges 
+        std::vector< CMeshO::FacePointer >& tbt_faces,		//stack containing pointers to face that wille be retriangulated
+        std::vector< int >& verts );							//vector of indices
+
+    int preProcess ( std::vector< std::pair<CMeshO::FacePointer,char> >& queue,	//queue
+        MeshModel* a,
+        MeshModel* b, 
+        MeshFaceGrid grid_a,									//grid on A
+        MeshFaceGrid grid_b,									//grid on A
+        float max_dist );										//max dist search
+
+    int preProcess_pq ( std::priority_queue< std::pair<CMeshO::FacePointer,char>, std::vector< std::pair<CMeshO::FacePointer,char> >, compareFaceQuality >& queue,	//the queue
+        MeshModel* a,
+        MeshModel* b, 
+        MeshFaceGrid grid_a,									//grid on A
+        MeshFaceGrid grid_b,									//grid on A
+        float max_dist );										//max dist search
+
+
+    float eps;
+
+    int dbg_cnt;
 };
 
 #endif

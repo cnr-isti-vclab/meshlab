@@ -58,6 +58,7 @@ class FilterDocSampling : public QObject, public MeshFilterInterface
   int getRequirements(QAction *action);
   int postCondition( QAction* ) const;
   FilterClass getClass(QAction *);
+  FILTER_ARITY filterArity(QAction * filter) const;
 };
 
 #endif

@@ -35,83 +35,76 @@ class AmbientOcclusionPlugin : public QObject, public MeshFilterInterface
     MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
     Q_INTERFACES(MeshFilterInterface)
 
-// Attributes
+        // Attributes
 protected:
     std::vector<vcg::Point3f> viewDirVec;
     vcg::Point3f cameraDir;
     GLuint  fboDepth,
-            fboResult,
-            depthBufferTex,
-            vertexCoordTex,
-            vertexNormalsTex,
-           *resultBufferTex;
+        fboResult,
+        depthBufferTex,
+        vertexCoordTex,
+        vertexNormalsTex,
+        *resultBufferTex;
 
     GLenum *resultBufferMRT,
-            colorFormat,
-            dataTypeFP;
+        colorFormat,
+        dataTypeFP;
 
     unsigned int numViews,
-                 depthTexArea,
-                 numTexPages;
+        depthTexArea,
+        numTexPages;
 
     bool useGPU,
-         useVBO,
-           errInit;
+        errInit;
     bool perFace;
 public:
     unsigned int depthTexSize,
-                 maxTexSize;
+        maxTexSize;
 
-// Methods
+    // Methods
 public:
     enum { FP_VERT_AMBIENT_OCCLUSION,
-         FP_FACE_AMBIENT_OCCLUSION } ;
+        FP_FACE_AMBIENT_OCCLUSION } ;
 
     AmbientOcclusionPlugin();
     ~AmbientOcclusionPlugin();
 
-    virtual QString     filterName      (FilterIDType filter) const;
-    virtual QString			filterInfo(FilterIDType filterId) const;
+    QString filterName(FilterIDType filter) const;
+    QString	filterInfo(FilterIDType filterId) const;
 
-    virtual int         getRequirements (QAction *action);
+    FILTER_ARITY filterArity(QAction*) const
+    {
+        return SINGLE_MESH;
+    }
 
-    virtual FilterClass getClass(QAction *filter)
+    int getRequirements (QAction *action);
+
+    FilterClass getClass(QAction *filter)
     {
         if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION) return MeshFilterInterface::FaceColoring;
         else return MeshFilterInterface::VertexColoring;
     };
 
-    virtual       void        initParameterSet(QAction *,
-                                               MeshModel &/*m*/,
-                                               RichParameterSet & /*parent*/);
-    virtual       bool        applyFilter     (QAction *filter,
-                                               MeshDocument &md,
-                                               RichParameterSet & /*parent*/,
-                                               vcg::CallBackPos * cb) ;
-    void  initTextures          (void);
-    void  initGL                (vcg::CallBackPos *cb,
-                                 unsigned int numVertices);
-    bool  processGL             (MeshModel &m, std::vector<vcg::Point3f> &posVect);
-    bool  checkFramebuffer();
+    void initParameterSet(QAction *,MeshModel &/*m*/,RichParameterSet & /*parent*/);
+    bool applyFilter(QAction *filter,MeshDocument &md,RichParameterSet & /*parent*/,vcg::CallBackPos * cb) ;
+    void initTextures(void);
+    void initGL(vcg::CallBackPos *cb,unsigned int numVertices);
+    bool processGL(MeshModel &m, std::vector<vcg::Point3f> &posVect);
+    bool checkFramebuffer();
 
-    void  vertexCoordsToTexture (MeshModel &m);
+    void vertexCoordsToTexture(MeshModel &m);
 
-    void  setCamera             (vcg::Point3f camDir,
-                                 Box3m &meshBBox);
+    void setCamera(vcg::Point3f camDir,Box3m &meshBBox);
 
-    void  generateOcclusionHW   ();
-    void  generateOcclusionSW   (MeshModel &m);
-    void  generateFaceOcclusionSW(MeshModel &m, std::vector<vcg::Point3f> & faceCenterVec);
+    void generateOcclusionHW();
+    void generateOcclusionSW(MeshModel &m);
+    void generateFaceOcclusionSW(MeshModel &m, std::vector<vcg::Point3f> & faceCenterVec);
 
 
-    void  applyOcclusionHW      (MeshModel &m);
-    void  applyOcclusionSW      (MeshModel &m,
-                                 GLfloat *aoValues);
+    void applyOcclusionHW(MeshModel &m);
+    void applyOcclusionSW(MeshModel &m,GLfloat *aoValues);
 
-    void  set_shaders           (char *shaderName,
-                                 GLuint &vs,
-                                 GLuint &fs,
-                                 GLuint &pr);
+    void set_shaders(char *shaderName,GLuint &vs,GLuint &fs,GLuint &pr);
 
     void dumpFloatTexture(QString filename, float *texdata, int elems);
 private:

@@ -78,7 +78,7 @@ private:
     inline int          id( const CFaceO& f ) const                         { return &f - &m_Mesh.face[0]; }
 
 public:
-    VisibleSet( glw::Context &ctx,
+    VisibleSet( glw::Context &ctx,MLPluginGLContext* plugctx,int meshid,
                 CMeshO &mesh,
                 QList<RasterModel*> &rasterList,
                 int weightMask );

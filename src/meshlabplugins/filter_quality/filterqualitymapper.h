@@ -43,39 +43,40 @@ using namespace vcg;
 using namespace std;
 
 
-  class Frange
-  {
-  public:
+class Frange
+{
+public:
     Frange(){}
     Frange(std::pair<float,float> minmax):minV(minmax.first),maxV(minmax.second){}
     Frange(float _min,float _max):minV(_min),maxV(_max){}
 
     float minV;
     float maxV;
-  };
+};
 
 
 class QualityMapperFilter : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
 private:
-	Frange _meshMinMaxQuality;
+    Frange _meshMinMaxQuality;
 
 public:
-	enum { FP_QUALITY_MAPPER  } ;
+    enum { FP_QUALITY_MAPPER  } ;
 
-	QualityMapperFilter();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-	int getPreConditions(QAction *) const;
-	int postCondition( QAction* ) const;
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    QualityMapperFilter();
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    int getPreConditions(QAction *) const;
+    int postCondition( QAction* ) const;
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual FilterClass getClass(QAction *);
+    virtual FilterClass getClass(QAction *);
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

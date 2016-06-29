@@ -32,6 +32,8 @@ public:
       return MeshFilterInterface::VertexColoring;
     }
 
+    FILTER_ARITY filterArity(QAction *act) const;
+
     //Main plugin function
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 
@@ -101,7 +103,6 @@ public:
     FramebufferObject* mFboArray[3];  //Fbos and textures for depth peeling
     FloatTexture2D*    mDepthTextureArray[3];
     FloatTexture2D*    mColorTextureArray[3];
-    bool               mUseVBO;
     unsigned int       mPeelingTextureSize;
     float              mTolerance;
     float              mMinCos;
@@ -121,7 +122,6 @@ public:
 
     CMeshO::PerFaceAttributeHandle<vcg::Point3f>   mMaxQualityDirPerFace;
     CMeshO::PerVertexAttributeHandle<vcg::Point3f> mMaxQualityDirPerVertex;
-
 
 };
 

@@ -512,4 +512,30 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
     }
 }
 
+MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity( QAction *act ) const
+{
+    switch(ID(act))
+    {
+    case CP_FILLING :
+    case CP_COLOURISATION :
+    case CP_PERLIN_COLOR :
+    case CP_COLOR_NOISE :
+    case CP_THRESHOLDING :
+    case CP_BRIGHTNESS :
+    case CP_CONTRAST :
+    case CP_CONTR_BRIGHT :
+    case CP_GAMMA :
+    case CP_INVERT :
+    case CP_EQUALIZE :
+    case CP_DESATURATION :
+    case CP_WHITE_BAL :
+    case CP_LEVELS :
+        return MeshFilterInterface::SINGLE_MESH;
+    case CP_SCATTER_PER_MESH:
+        return MeshFilterInterface::VARIABLE;
+    }
+    return MeshFilterInterface::NONE;
+}
+
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProc)

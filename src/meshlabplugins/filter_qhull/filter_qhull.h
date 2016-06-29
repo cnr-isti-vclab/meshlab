@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 /****************************************************************************
-  History
+History
 
 ****************************************************************************/
 
@@ -33,34 +33,34 @@
 
 class QhullPlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
 
-	/* naming convention :
-		 - FP -> Filter Plugin
-		 - name of the plugin separated by _
-	*/
+    /* naming convention :
+    - FP -> Filter Plugin
+    - name of the plugin separated by _
+    */
 
-	enum { 
-		FP_QHULL_CONVEX_HULL,  
-		FP_QHULL_DELAUNAY_TRIANGULATION,
-		FP_QHULL_VORONOI_FILTERING,
-		FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
-		FP_QHULL_VISIBLE_POINTS
-	} ;
+    enum { 
+        FP_QHULL_CONVEX_HULL,  
+        FP_QHULL_DELAUNAY_TRIANGULATION,
+        FP_QHULL_VORONOI_FILTERING,
+        FP_QHULL_ALPHA_COMPLEX_AND_SHAPE,
+        FP_QHULL_VISIBLE_POINTS
+    } ;
 
-	QhullPlugin();
-	~QhullPlugin();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    QhullPlugin();
+    ~QhullPlugin();
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual FilterClass getClass(QAction *);	
-
+    virtual FilterClass getClass(QAction *);	
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

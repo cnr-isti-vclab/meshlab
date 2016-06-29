@@ -1297,4 +1297,27 @@ int FilterDocSampling::postCondition( QAction* a ) const
   return MeshModel::MM_UNKNOWN;
 }
 
+MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity( QAction * filter ) const
+{
+    switch(ID(filter))
+    {
+    case FP_VERTEX_RESAMPLING :
+    case FP_ELEMENT_SUBSAMPLING :
+    case FP_MONTECARLO_SAMPLING :
+    case FP_STRATIFIED_SAMPLING :
+    case FP_CLUSTERED_SAMPLING :
+    case FP_REGULAR_RECURSIVE_SAMPLING :
+    case FP_UNIFORM_MESH_RESAMPLING:
+    case FP_POINTCLOUD_SIMPLIFICATION :
+        return MeshFilterInterface::SINGLE_MESH;
+    case FP_DISTANCE_REFERENCE :
+    case FP_HAUSDORFF_DISTANCE :
+    case FP_POISSONDISK_SAMPLING :
+    case FP_DISK_COLORING :
+    case FP_VORONOI_COLORING :
+        return MeshFilterInterface::FIXED;
+    }
+    return MeshFilterInterface::NONE;
+}
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterDocSampling)

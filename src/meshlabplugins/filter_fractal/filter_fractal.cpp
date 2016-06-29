@@ -304,6 +304,21 @@ int FilterFractal::postCondition(QAction *filter) const
     default: assert(0);
     }
 }
+
+MeshFilterInterface::FILTER_ARITY FilterFractal::filterArity( QAction* act ) const
+{
+    switch(ID(act))
+    {
+    case FP_FRACTAL_MESH:
+        return MeshFilterInterface::SINGLE_MESH;
+    case CR_FRACTAL_TERRAIN:
+        return MeshFilterInterface::NONE;
+    case FP_CRATERS:
+        return MeshFilterInterface::VARIABLE;
+    }
+    return MeshFilterInterface::NONE;
+}
+
 // ----------------------------------------------------------------------
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterFractal)
 

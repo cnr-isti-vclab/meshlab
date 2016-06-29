@@ -86,12 +86,14 @@ class FilterImgPatchParamPlugin : public QObject, public MeshFilterInterface
 
     void                patchBasedTextureParameterization( RasterPatchMap &patches,
                                                            PatchVec &nullPatches,
+                                                           int meshid,
                                                            CMeshO &mesh,
                                                            QList<RasterModel*> &rasterList,
                                                            RichParameterSet &par );
 
     float               computeTotalPatchArea( RasterPatchMap &patches );
     int                 computePatchCount( RasterPatchMap &patches );
+
 
 public:
     FilterImgPatchParamPlugin();
@@ -113,6 +115,8 @@ public:
                                      MeshDocument &md,
                                      RichParameterSet &par,
                                      vcg::CallBackPos *cb );
+
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 
 

@@ -313,7 +313,7 @@ public:
     void GenRotMatrix()
     {
         vector<Point3x> NV;
-        GenNormal<ScalarType>::Uniform(sqrt(float(pp.MatrixNum)),NV);
+        GenNormal<ScalarType>::Fibonacci(sqrt(float(pp.MatrixNum)),NV);
 
         ScalarType AngleStep;
         int AngleNum;

@@ -529,4 +529,21 @@ int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
     return MeshModel::MM_UNKNOWN;
 }
 
+MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity( QAction* filter) const
+{
+    switch(ID(filter))
+    {
+    case ISOP_PARAM :	
+    case ISOP_REMESHING :
+    case ISOP_DIAMPARAM :
+    case ISOP_LOAD :	
+    case ISOP_SAVE :	
+        return MeshFilterInterface::SINGLE_MESH;
+    case ISOP_TRANSFER:	
+        return MeshFilterInterface::FIXED;
+    }
+    return MeshFilterInterface::NONE;
+}
+
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterIsoParametrization)

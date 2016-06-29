@@ -1049,4 +1049,24 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
     return true;
 }
 
+MeshFilterInterface::FILTER_ARITY FilterTexturePlugin::filterArity( QAction * filter ) const
+{
+    switch(ID(filter))
+    {
+    case FP_VORONOI_ATLAS : 
+    case FP_UV_WEDGE_TO_VERTEX : 
+    case FP_UV_VERTEX_TO_WEDGE : 
+    case FP_BASIC_TRIANGLE_MAPPING : 
+    case FP_PLANAR_MAPPING : 
+    case FP_SET_TEXTURE : 
+    case FP_COLOR_TO_TEXTURE : 
+        return MeshFilterInterface::SINGLE_MESH;
+    case FP_TRANSFER_TO_TEXTURE : 
+    case FP_TEX_TO_VCOLOR_TRANSFER : 
+        return MeshFilterInterface::FIXED;
+    }
+    return MeshFilterInterface::NONE;
+}
+
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterTexturePlugin)

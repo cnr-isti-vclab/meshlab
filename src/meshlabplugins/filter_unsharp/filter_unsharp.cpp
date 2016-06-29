@@ -671,5 +671,35 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
     return true;
 }
 
+MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity( QAction * filter ) const
+{
+    switch(ID(filter))
+    {
+    case FP_LAPLACIAN_SMOOTH :			
+    case FP_HC_LAPLACIAN_SMOOTH :		
+    case FP_SD_LAPLACIAN_SMOOTH :		
+    case FP_TWO_STEP_SMOOTH :	    	
+    case FP_TAUBIN_SMOOTH :				
+    case FP_DEPTH_SMOOTH :				
+    case FP_DIRECTIONAL_PRESERVATION :  
+    case FP_CREASE_CUT :				
+    case FP_FACE_NORMAL_NORMALIZE:		
+    case FP_VERTEX_NORMAL_NORMALIZE:	
+    case FP_FACE_NORMAL_SMOOTHING:	  
+    case FP_VERTEX_QUALITY_SMOOTHING:	
+    case FP_UNSHARP_NORMAL:				
+    case FP_UNSHARP_GEOMETRY:			
+    case FP_UNSHARP_QUALITY:			
+    case FP_UNSHARP_VERTEX_COLOR:	    
+    case FP_RECOMPUTE_VERTEX_NORMAL:	
+    case FP_RECOMPUTE_FACE_NORMAL:      
+    case FP_RECOMPUTE_QUADFACE_NORMAL:
+        return MeshFilterInterface::SINGLE_MESH;
+    case FP_LINEAR_MORPH :	
+        return MeshFilterInterface::FIXED;
+    }
+    return MeshFilterInterface::NONE;
+}
+
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterUnsharp)

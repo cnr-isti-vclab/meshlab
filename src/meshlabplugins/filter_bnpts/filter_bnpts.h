@@ -44,6 +44,7 @@ public:
 	virtual FilterClass getClass(QAction *);
 	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
 	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(QAction *) const {return VARIABLE;}
 };
 
 #endif

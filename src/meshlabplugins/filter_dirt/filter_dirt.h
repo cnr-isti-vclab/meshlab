@@ -69,8 +69,7 @@ public:
     virtual bool applyFilter(QAction * /*filter */, MeshModel &, RichParameterSet & /*parent*/, vcg::CallBackPos *) { assert(0); return false;} ;
     virtual int postCondition(QAction*) const;
     virtual FilterClass getClass(QAction *);
-
-
+    FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
 };
 
 

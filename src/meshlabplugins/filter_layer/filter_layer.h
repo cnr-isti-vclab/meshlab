@@ -30,20 +30,21 @@
 
 class FilterLayerPlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+        MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+        Q_INTERFACES(MeshFilterInterface)
 
 public:
-  enum { FP_FLATTEN, FP_SPLITSELECTEDFACES, FP_SPLITSELECTEDVERTICES, FP_SPLITCONNECTED, FP_DUPLICATE, FP_RENAME_MESH, FP_RENAME_RASTER, FP_DELETE_MESH, FP_DELETE_NON_VISIBLE_MESH,FP_DELETE_RASTER, FP_DELETE_NON_SELECTED_RASTER,FP_SELECTCURRENT };
+    enum { FP_FLATTEN, FP_SPLITSELECTEDFACES, FP_SPLITSELECTEDVERTICES, FP_SPLITCONNECTED, FP_DUPLICATE, FP_RENAME_MESH, FP_RENAME_RASTER, FP_DELETE_MESH, FP_DELETE_NON_VISIBLE_MESH,FP_DELETE_RASTER, FP_DELETE_NON_SELECTED_RASTER,FP_SELECTCURRENT };
 
-  FilterLayerPlugin();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    FilterLayerPlugin();
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual FilterClass getClass(QAction *);
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(QAction*) const;
 };
 
 #endif

@@ -182,12 +182,8 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
     case FP_SPLITSELECTEDVERTICES :
         {
             MeshModel* currentmesh = md.mm();
-            RenderMode rm;
-            rm.drawMode = GLW::DMPoints;
-            if (currentmesh->hasDataMask(MeshModel::MM_VERTCOLOR))
-                rm.colorMode = GLW::CMPerVert;
 
-            MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset",true,rm);
+            MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset",true);
             destmesh->updateDataMask(currentmesh);
             numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentmesh->cm);
             tri::Append<CMeshO,CMeshO>::Mesh(destmesh->cm, currentmesh->cm, true);
@@ -228,7 +224,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             // creating the new layer
             // that is the back one
             MeshModel *currentMesh  = md.mm();				// source = current
-            RenderMode rm;
+           /* RenderMode rm;
             if (currentMesh->hasDataMask(MeshModel::MM_VERTCOLOR))
                 rm.colorMode = GLW::CMPerVert;
             else if (currentMesh->hasDataMask(MeshModel::MM_FACECOLOR))
@@ -239,9 +235,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             if (currentMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
                 rm.textureMode = GLW::TMPerWedgeMulti;
             else if (currentMesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
-                    rm.textureMode = GLW::TMPerVert;
+                    rm.textureMode = GLW::TMPerVert;*/
             //vcg::GLW::TextureMode tex = rm.textureMode;
-            MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset",true,rm); // After Adding a mesh to a MeshDocument the new mesh is the current one
+            MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset",true); // After Adding a mesh to a MeshDocument the new mesh is the current one
             destMesh->updateDataMask(currentMesh);
 
             // select all points involved
@@ -330,14 +326,17 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                     tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
                     toBeDeletedList.push_back(mmp);
                     if(!alsoUnreferenced)
+                    {
                         vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
+                    }
                     destMesh->updateDataMask(mmp);
                     tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
                     tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
+                    
                 }
             }
             }
-
+            
             if( deleteLayer )	{
                 Log( "Deleted %d merged layers", toBeDeletedList.size());
                 foreach(MeshModel *mmp,toBeDeletedList) {
@@ -351,7 +350,6 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                 Log( "Removed %d duplicated vertices", delvert);
             }
             destMesh->UpdateBoxAndNormals();
-
             Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
         } break;
 
@@ -366,14 +364,15 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             {
                 tri::UpdateSelection<CMeshO>::FaceClear(cm);
                 connectedCompVec[i].second->SetS();
-                tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm);
+                tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm,true);
                 tri::UpdateSelection<CMeshO>::VertexClear(cm);
                 tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
 
                 MeshModel *destMesh= md.addNewMesh("",QString("CC %1").arg(i));
                 tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, cm, true);
                 destMesh->UpdateBoxAndNormals();
-                destMesh->cm.Tr = cm.Tr;								// copy transformation
+                destMesh->cm.Tr = cm.Tr; // copy transformation
+                destMesh->updateDataMask(md.mm());
             }
         } break;
     }
@@ -403,6 +402,29 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     default :  assert(0);
         return MeshFilterInterface::Generic;
     }
+}
+
+MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filter) const
+{
+    switch(ID(filter))
+    {
+    case FP_RENAME_MESH :
+    case FP_SPLITSELECTEDFACES :
+    case FP_SPLITSELECTEDVERTICES:
+    case FP_DUPLICATE :
+    case FP_SELECTCURRENT :
+    case FP_SPLITCONNECTED :
+    case FP_DELETE_MESH :
+        return MeshFilterInterface::SINGLE_MESH;
+    case FP_RENAME_RASTER :
+    case FP_DELETE_RASTER :
+    case FP_DELETE_NON_SELECTED_RASTER :
+        return MeshFilterInterface::NONE;
+    case FP_FLATTEN :
+    case FP_DELETE_NON_VISIBLE_MESH :
+        return MeshFilterInterface::VARIABLE;
+    }
+    return MeshFilterInterface::NONE;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterLayerPlugin)

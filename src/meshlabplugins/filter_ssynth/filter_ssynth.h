@@ -33,37 +33,37 @@
 
 class FilterSSynth : public QObject,public MeshIOInterface, public MeshFilterInterface{
     Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
     Q_INTERFACES(MeshFilterInterface)
-    public:
-            enum {CR_SSYNTH} ;
+public:
+    enum {CR_SSYNTH} ;
 
-            FilterSSynth();
-            ~FilterSSynth(){}
-            virtual QString filterName(FilterIDType filter) const;
-            virtual QString filterInfo(FilterIDType filter) const;
-            virtual int getRequirements(QAction *);
-            virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
-            virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-            virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
-            virtual FilterClass getClass(QAction* filter);
-            void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
-            static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
-            virtual int postCondition(QAction* filter) const;
-                        QList<Format> importFormats() const;
-                        QList<Format> exportFormats() const;
+    FilterSSynth();
+    ~FilterSSynth(){}
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual int getRequirements(QAction *);
+    virtual void initParameterSet(QAction* filter,MeshModel &,RichParameterSet &){};
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    virtual bool applyFilter(QAction*  filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
+    virtual FilterClass getClass(QAction* filter);
+    void setAttributes(CMeshO::VertexIterator &vi, CMeshO &m);
+    static void openX3D(const QString &fileName, MeshModel &m, int& mask, vcg::CallBackPos *cb, QWidget *parent=0);
+    virtual int postCondition(QAction* filter) const;
+    QList<Format> importFormats() const;
+    QList<Format> exportFormats() const;
 
-                        virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
-                    void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
-                        bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
-                        bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
-
+    virtual void GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const;
+    void initPreOpenParameter(const QString &formatName, const QString &filename, RichParameterSet &parlst);
+    bool open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & par, vcg::CallBackPos *cb=0, QWidget *parent=0);
+    bool save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent);
+    MeshFilterInterface::FILTER_ARITY filterArity(QAction *) const {return NONE;}
 private:
-         QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
-         QString GetTemplate(int sphereres);
-             void ParseGram(QString* grammar,int max,QString pattern);
-                int seed;
-               QString renderTemplate;
-               QString spheres[6];
-        };
+    QString ssynth(QString grammar,int maxdepth,int seed,vcg::CallBackPos *cb);
+    QString GetTemplate(int sphereres);
+    void ParseGram(QString* grammar,int max,QString pattern);
+    int seed;
+    QString renderTemplate;
+    QString spheres[6];
+};
 #endif // FILTER_SSYNTH_H

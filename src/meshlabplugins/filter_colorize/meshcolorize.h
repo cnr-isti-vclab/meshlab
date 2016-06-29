@@ -57,9 +57,9 @@ public:
 
     ExtraMeshColorizePlugin();
     ~ExtraMeshColorizePlugin(){}
-
- QString filterName(FilterIDType filter) const;
- QString filterInfo(FilterIDType filterId) const;
+    FILTER_ARITY filterArity(QAction* ) const;
+    QString filterName(FilterIDType filter) const;
+    QString filterInfo(FilterIDType filterId) const;
     int getPreConditions(QAction *) const;
     int postCondition( QAction* ) const;
     FilterClass getClass(QAction *);

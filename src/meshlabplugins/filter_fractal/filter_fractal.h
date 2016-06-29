@@ -52,7 +52,7 @@ public:
 
     int postCondition(QAction *action) const;
     FilterClass getClass(QAction *);
-
+    FILTER_ARITY filterArity(QAction* act) const;
 private:
     void initParameterSetForFractalDisplacement (QAction *, MeshDocument &, RichParameterSet &);
     void initParameterSetForCratersGeneration   (MeshDocument &md, RichParameterSet &par);

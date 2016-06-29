@@ -45,6 +45,7 @@ class FilterAutoalign : public QObject, public MeshFilterInterface
   virtual FilterClass getClass(QAction *);
   virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
   virtual bool applyFilter(QAction *filter, MeshDocument &m, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+  FILTER_ARITY filterArity(QAction *) const {return FIXED;}
 };
 
 #endif

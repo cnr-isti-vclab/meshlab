@@ -206,4 +206,14 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
    return true;
 }
 
+MeshFilterInterface::FILTER_ARITY PlyMCPlugin::filterArity( QAction * filter ) const
+{
+    switch(ID(filter)) 
+    {
+    case FP_PLYMC :  return MeshFilterInterface::VARIABLE;
+    case FP_MC_SIMPLIFY : return MeshFilterInterface::SINGLE_MESH;
+    }
+    return MeshFilterInterface::NONE;
+}
+
 MESHLAB_PLUGIN_NAME_EXPORTER(PlyMCPlugin)

@@ -110,7 +110,7 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
       MeshModel *movMesh= par.getMesh("movMesh");
       MeshModel *sampleMesh= 0;
       bool showSample = par.getBool("showSample");
-      if(showSample) sampleMesh = md.addOrGetMesh("sample","sample",false, RenderMode(vcg::GLW::DMPoints));
+      if(showSample) sampleMesh = md.addOrGetMesh("sample","sample",false);
       tri::UpdateNormal<CMeshO>::NormalizePerVertex(fixMesh->cm);
       tri::UpdateNormal<CMeshO>::NormalizePerVertex(movMesh->cm);
       tri::Clean<CMeshO>::RemoveUnreferencedVertex(fixMesh->cm);
@@ -180,7 +180,7 @@ bool FilterAutoalign::applyFilter(QAction *filter, MeshDocument &md, RichParamet
       sort(ResultVec.begin(),ResultVec.end());
       movMesh->cm.Tr.Import(ResultVec.back().m);
 
-      tri::Build(sample->cm,GG.movVertBase);
+      tri::BuildMeshFromCoordVector(sample->cm,GG.movVertBase);
       sample->cm.Tr.Import(ResultVec.back().m);
 
       qDebug("Result %i",ResultVec.back().score);

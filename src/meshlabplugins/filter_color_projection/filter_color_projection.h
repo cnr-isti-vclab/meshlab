@@ -29,27 +29,29 @@
 
 class FilterColorProjectionPlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
+    enum { FP_SINGLEIMAGEPROJ, FP_MULTIIMAGETRIVIALPROJ, FP_MULTIIMAGETRIVIALPROJTEXTURE };
 
-	FilterColorProjectionPlugin();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-	int postCondition( QAction* ) const;
+    FilterColorProjectionPlugin();
 
-	virtual FilterClass getClass(QAction *);
-	virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
-  virtual int getRequirements(QAction *);
-	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    int postCondition( QAction* ) const;
+
+    virtual FilterClass getClass(QAction *);
+    virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
+    virtual int getRequirements(QAction *);
+    virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 
 private:
 
-  int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
+    int calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near, std::vector<float> *far);
 
 };
 

@@ -36,9 +36,9 @@
 FilterImgPatchParamPlugin::FilterImgPatchParamPlugin() : m_Context(NULL)
 {
     typeList << FP_PATCH_PARAM_ONLY
-             << FP_PATCH_PARAM_AND_TEXTURING
-             << FP_RASTER_VERT_COVERAGE
-             << FP_RASTER_FACE_COVERAGE;
+        << FP_PATCH_PARAM_AND_TEXTURING
+        << FP_RASTER_VERT_COVERAGE
+        << FP_RASTER_FACE_COVERAGE;
 
     foreach( FilterIDType tt , types() )
         actionList << new QAction(filterName(tt), this);
@@ -56,11 +56,11 @@ QString FilterImgPatchParamPlugin::filterName( FilterIDType id ) const
 {
     switch( id )
     {
-        case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
-        case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
-        case FP_RASTER_VERT_COVERAGE:  return QString( "Quality from raster coverage (Vertex)" );
-        case FP_RASTER_FACE_COVERAGE:  return QString( "Quality from raster coverage (Face)" );
-        default: assert(0); return QString();
+    case FP_PATCH_PARAM_ONLY:  return QString( "Parameterization from registered rasters" );
+    case FP_PATCH_PARAM_AND_TEXTURING:  return QString( "Parameterization + texturing from registered rasters" );
+    case FP_RASTER_VERT_COVERAGE:  return QString( "Quality from raster coverage (Vertex)" );
+    case FP_RASTER_FACE_COVERAGE:  return QString( "Quality from raster coverage (Face)" );
+    default: assert(0); return QString();
     }
 }
 
@@ -69,11 +69,11 @@ QString FilterImgPatchParamPlugin::filterInfo( FilterIDType id ) const
 {
     switch( id )
     {
-        case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
-        case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
-        case FP_RASTER_VERT_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each vertex of the active mesh is visible." );
-        case FP_RASTER_FACE_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each face of the active mesh is visible." );
-        default: assert(0); return QString();
+    case FP_PATCH_PARAM_ONLY:  return QString( "The mesh is parameterized by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+    case FP_PATCH_PARAM_AND_TEXTURING:	return QString("The mesh is parameterized and textured by creating some patches that correspond to projection of portions of surfaces onto the set of registered rasters.");
+    case FP_RASTER_VERT_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each vertex of the active mesh is visible." );
+    case FP_RASTER_FACE_COVERAGE:  return QString( "Compute a quality value representing the number of images into which each face of the active mesh is visible." );
+    default: assert(0); return QString();
     }
 }
 
@@ -82,11 +82,11 @@ int FilterImgPatchParamPlugin::getRequirements( QAction *act )
 {
     switch( ID(act) )
     {
-        case FP_PATCH_PARAM_ONLY:
-        case FP_PATCH_PARAM_AND_TEXTURING:  return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFACETOPO;
-        case FP_RASTER_VERT_COVERAGE:  return MeshModel::MM_VERTQUALITY;
-        case FP_RASTER_FACE_COVERAGE:  return MeshModel::MM_FACEQUALITY;
-        default:  assert(0); return 0;
+    case FP_PATCH_PARAM_ONLY:
+    case FP_PATCH_PARAM_AND_TEXTURING:  return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTFACETOPO;
+    case FP_RASTER_VERT_COVERAGE:  return MeshModel::MM_VERTQUALITY;
+    case FP_RASTER_FACE_COVERAGE:  return MeshModel::MM_FACEQUALITY;
+    default:  assert(0); return 0;
     }
 }
 
@@ -95,11 +95,11 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
 {
     switch( ID(act) )
     {
-        case FP_PATCH_PARAM_ONLY:
-        case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
-        case FP_RASTER_VERT_COVERAGE:
-        case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
-        default:  assert(0); return MeshFilterInterface::Generic;
+    case FP_PATCH_PARAM_ONLY:
+    case FP_PATCH_PARAM_AND_TEXTURING:  return Texture;
+    case FP_RASTER_VERT_COVERAGE:
+    case FP_RASTER_FACE_COVERAGE:  return FilterClass(Quality + Camera + Texture);
+    default:  assert(0); return MeshFilterInterface::Generic;
     }
 }
 
@@ -120,65 +120,65 @@ MeshFilterInterface::FilterClass FilterImgPatchParamPlugin::getClass( QAction *a
 
 
 void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
-                                                  MeshDocument &/*md*/,
-                                                  RichParameterSet &par )
+    MeshDocument &/*md*/,
+    RichParameterSet &par )
 {
     switch( ID(act) )
     {
-        case FP_PATCH_PARAM_AND_TEXTURING:
+    case FP_PATCH_PARAM_AND_TEXTURING:
         {
             par.addParam( new RichInt( "textureSize",
-                                       1024,
-                                       "Texture size",
-                                       "Specifies the dimension of the generated texture" ) );
+                1024,
+                "Texture size",
+                "Specifies the dimension of the generated texture" ) );
             par.addParam( new RichString( "textureName",
-                                          "texture.png",
-                                          "Texture name",
-                                          "Specifies the name of the file into which the texture image will be saved" ) );
+                "texture.png",
+                "Texture name",
+                "Specifies the name of the file into which the texture image will be saved" ) );
             par.addParam( new RichBool( "colorCorrection",
-                                        true,
-                                        "Color correction",
-                                        "If true, the final texture is corrected so as to ensure seamless transitions" ) );
+                true,
+                "Color correction",
+                "If true, the final texture is corrected so as to ensure seamless transitions" ) );
             par.addParam( new RichInt( "colorCorrectionFilterSize",
-                                       1,
-                                       "Color correction filter",
-                                       "It is the radius (in pixel) of the kernel that is used to compute the difference between corresponding texels in different rasters. Default is 1 that generate a 3x3 kernel. Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
+                1,
+                "Color correction filter",
+                "It is the radius (in pixel) of the kernel that is used to compute the difference between corresponding texels in different rasters. Default is 1 that generate a 3x3 kernel. Highest values increase the robustness of the color correction process in the case of strong image-to-geometry misalignments" ) );
         }
-        case FP_PATCH_PARAM_ONLY:
+    case FP_PATCH_PARAM_ONLY:
         {
             par.addParam( new RichBool( "useDistanceWeight",
-                                        true,
-                                        "Use distance weight",
-                                        "Includes a weight accounting for the distance to the camera during the computation of reference images" ) );
+                true,
+                "Use distance weight",
+                "Includes a weight accounting for the distance to the camera during the computation of reference images" ) );
             par.addParam( new RichBool( "useImgBorderWeight",
-                                        true,
-                                        "Use image border weight",
-                                        "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
+                true,
+                "Use image border weight",
+                "Includes a weight accounting for the distance to the image border during the computation of reference images" ) );
             par.addParam( new RichBool( "useAlphaWeight",
-                                        false,
-                                        "Use image alpha weight",
-                                        "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
+                false,
+                "Use image alpha weight",
+                "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images" ) );
             par.addParam( new RichBool( "cleanIsolatedTriangles",
-                                        true,
-                                        "Clean isolated triangles",
-                                        "Remove all patches compound of a single triangle by aggregating them to adjacent patches" ) );
+                true,
+                "Clean isolated triangles",
+                "Remove all patches compound of a single triangle by aggregating them to adjacent patches" ) );
             par.addParam( new RichBool( "stretchingAllowed",
-                                        false,
-                                        "UV stretching",
-                                        "If true, texture coordinates are stretched so as to cover the full interval [0,1] for both directions" ) );
+                false,
+                "UV stretching",
+                "If true, texture coordinates are stretched so as to cover the full interval [0,1] for both directions" ) );
             par.addParam( new RichInt( "textureGutter",
-                                       4,
-                                       "Texture gutter",
-                                       "Extra boundary to add to each patch before packing in texture space (in pixels)" ) );
+                4,
+                "Texture gutter",
+                "Extra boundary to add to each patch before packing in texture space (in pixels)" ) );
             break;
         }
-        case FP_RASTER_VERT_COVERAGE:
-        case FP_RASTER_FACE_COVERAGE:
+    case FP_RASTER_VERT_COVERAGE:
+    case FP_RASTER_FACE_COVERAGE:
         {
             par.addParam( new RichBool( "normalizeQuality",
-                                        false,
-                                        "Normalize",
-                                        "Rescale quality values to the range [0,1]" ) );
+                false,
+                "Normalize",
+                "Rescale quality values to the range [0,1]" ) );
             break;
         }
     }
@@ -186,18 +186,18 @@ void FilterImgPatchParamPlugin::initParameterSet( QAction *act,
 
 
 bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
-                                             MeshDocument &md,
-                                             RichParameterSet &par,
-                                             vcg::CallBackPos * /*cb*/ )
+    MeshDocument &md,
+    RichParameterSet &par,
+    vcg::CallBackPos * /*cb*/ )
 {
 
-
+    
     glContext->makeCurrent();
     if( glewInit() != GLEW_OK )
     {
-         this->errorMessage="Failed GLEW intialization";
-         return false;
-       }
+        this->errorMessage="Failed GLEW intialization";
+        return false;
+    }
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -207,11 +207,10 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
     if( !VisibilityCheck::GetInstance(*m_Context) )
     {
-         this->errorMessage="VisibilityCheck failed";
-         return false;
-       }
+        this->errorMessage="VisibilityCheck failed";
+        return false;
+    }
     VisibilityCheck::ReleaseInstance();
-
 
 
     bool retValue = true;
@@ -225,21 +224,21 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
         initialShots.push_back( rm->shot );
         rm->shot.ApplyRigidTransformation( vcg::Inverse(mesh.Tr) );
         if( rm->visible )
-          activeRasters.push_back( rm );
+            activeRasters.push_back( rm );
     }
 
     if( activeRasters.empty() )    {
-      this->errorMessage="No active Raster";
-    {
-        glContext->doneCurrent();
-        errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
-        return false;
-    }
+        this->errorMessage="No active Raster";
+        {
+            glContext->doneCurrent();
+            errorMessage = "You need to have at least one valid raster layer in your project, to apply this filter"; // text
+            return false;
+        }
     }
 
     switch( ID(act) )
     {
-        case FP_PATCH_PARAM_ONLY:
+    case FP_PATCH_PARAM_ONLY:
         {
             if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
             {
@@ -251,17 +250,19 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
             vcg::tri::Allocator<CMeshO>::CompactVertexVector(md.mm()->cm);
             vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
             vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+            glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
             RasterPatchMap patches;
             PatchVec nullPatches;
             patchBasedTextureParameterization( patches,
-                                               nullPatches,
-                                               mesh,
-                                               activeRasters,
-                                               par );
+                nullPatches,
+                md.mm()->id(),
+                mesh,
+                activeRasters,
+                par );
 
             break;
         }
-        case FP_PATCH_PARAM_AND_TEXTURING:
+    case FP_PATCH_PARAM_AND_TEXTURING:
         {
             if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm)>0)
             {
@@ -272,6 +273,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
             vcg::tri::Allocator<CMeshO>::CompactEveryVector(md.mm()->cm);
             vcg::tri::UpdateTopology<CMeshO>::FaceFace(md.mm()->cm);
             vcg::tri::UpdateTopology<CMeshO>::VertexFace(md.mm()->cm);
+            glContext->meshAttributesUpdated(md.mm()->id(),true,MLRenderingData::RendAtts());
             QString texName = par.getString( "textureName" ).simplified();
             int pathEnd = std::max( texName.lastIndexOf('/'), texName.lastIndexOf('\\') );
             if( pathEnd != -1 )
@@ -282,10 +284,11 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
                 RasterPatchMap patches;
                 PatchVec nullPatches;
                 patchBasedTextureParameterization( patches,
-                                                   nullPatches,
-                                                   mesh,
-                                                   activeRasters,
-                                                   par );
+                    nullPatches,
+                    md.mm()->id(),
+                    mesh,
+                    activeRasters,
+                    par );
 
                 TexturePainter painter( *m_Context, par.getInt("textureSize") );
                 if( (retValue = painter.isInitialized()) )
@@ -307,11 +310,11 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
             break;
         }
-        case FP_RASTER_VERT_COVERAGE:
+    case FP_RASTER_VERT_COVERAGE:
         {
             VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-            visibility.setMesh( &mesh );
-
+            visibility.setMesh(md.mm()->id(),&mesh );
+            visibility.m_plugcontext = glContext;
             for( CMeshO::VertexIterator vi=mesh.vert.begin(); vi!=mesh.vert.end(); ++vi )
                 vi->Q() = 0.0f;
 
@@ -333,10 +336,11 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
             break;
         }
-        case FP_RASTER_FACE_COVERAGE:
+    case FP_RASTER_FACE_COVERAGE:
         {
             VisibilityCheck &visibility = *VisibilityCheck::GetInstance( *m_Context );
-            visibility.setMesh( &mesh );
+            visibility.setMesh(md.mm()->id(),&mesh );
+            visibility.m_plugcontext = glContext;
 
             for( CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end(); ++fi )
                 fi->Q() = 0.0f;
@@ -383,7 +387,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
 
 void FilterImgPatchParamPlugin::getNeighbors( CVertexO *v,
-                                              NeighbSet &neighb ) const
+    NeighbSet &neighb ) const
 {
     vcg::face::Pos<CFaceO> p( v->VFp(), v ), ori = p;
     do
@@ -396,7 +400,7 @@ void FilterImgPatchParamPlugin::getNeighbors( CVertexO *v,
 
 
 void FilterImgPatchParamPlugin::getFaceNeighbors( CFaceO *f,
-                                              NeighbSet &neighb ) const
+    NeighbSet &neighb ) const
 {
     getNeighbors( f->V(0), neighb );
     getNeighbors( f->V(1), neighb );
@@ -405,8 +409,8 @@ void FilterImgPatchParamPlugin::getFaceNeighbors( CFaceO *f,
 
 
 void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
-                                                      VisibleSet &faceVis,
-                                                      bool mostFrontFacing )
+    VisibleSet &faceVis,
+    bool mostFrontFacing )
 {
     std::set<CFaceO*> toOptim;
 
@@ -432,8 +436,8 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
                     for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
                         toOptim.insert( *n );
                 }
-            p.FlipV();
-            p.FlipE();
+                p.FlipV();
+                p.FlipE();
         }
         f->SetV();
     }
@@ -466,88 +470,88 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
             }
 
 
-        if( mostFrontFacing )
-        {
-            // Look for the one that appears the most, and that belongs to the list of visible rasters
-            // of the considered face.
-            std::vector<RasterModel*> appearsMost;
-            int nbMaxAppear = 0;
-
-            for( QMap<RasterModel*,int>::iterator n=neighbRefCount.begin(); n!=neighbRefCount.end(); ++n )
-                if( n.value()>=nbMaxAppear && faceVis[f].contains(n.key()) )
-                {
-                    if( n.value() > nbMaxAppear )
-                        appearsMost.clear();
-
-                    nbMaxAppear = n.value();
-                    appearsMost.push_back( n.key() );
-                }
-
-
-            // If multiple neighboring reference images have the same number of occurences, the one with the highest
-            // weight with respect to the current face is chosen.
-            RasterModel *candidate = faceVis[f].ref();
-
-            if( appearsMost.size() > 1 )
+            if( mostFrontFacing )
             {
-                float maxWeight = -std::numeric_limits<float>::max();
-                for( std::vector<RasterModel*>::iterator r=appearsMost.begin(); r!=appearsMost.end(); ++r )
-                {
-                    float weight = faceVis.getWeight( *r, *f );
-                    if( weight > maxWeight )
+                // Look for the one that appears the most, and that belongs to the list of visible rasters
+                // of the considered face.
+                std::vector<RasterModel*> appearsMost;
+                int nbMaxAppear = 0;
+
+                for( QMap<RasterModel*,int>::iterator n=neighbRefCount.begin(); n!=neighbRefCount.end(); ++n )
+                    if( n.value()>=nbMaxAppear && faceVis[f].contains(n.key()) )
                     {
-                        maxWeight = weight;
-                        candidate = *r;
+                        if( n.value() > nbMaxAppear )
+                            appearsMost.clear();
+
+                        nbMaxAppear = n.value();
+                        appearsMost.push_back( n.key() );
                     }
-                }
+
+
+                    // If multiple neighboring reference images have the same number of occurences, the one with the highest
+                    // weight with respect to the current face is chosen.
+                    RasterModel *candidate = faceVis[f].ref();
+
+                    if( appearsMost.size() > 1 )
+                    {
+                        float maxWeight = -std::numeric_limits<float>::max();
+                        for( std::vector<RasterModel*>::iterator r=appearsMost.begin(); r!=appearsMost.end(); ++r )
+                        {
+                            float weight = faceVis.getWeight( *r, *f );
+                            if( weight > maxWeight )
+                            {
+                                maxWeight = weight;
+                                candidate = *r;
+                            }
+                        }
+                    }
+                    else if( appearsMost.size() == 1 )
+                        candidate = appearsMost.front();
+
+
+                    // If the reference image of the current face is different from the candidate image, change it accordingly.
+                    // Triangles of its neighborhood are reintroduced in the queue only if their reference images is different
+                    // from the new one.
+                    if( candidate != faceVis[f].ref() )
+                    {
+                        faceVis[f].setRef( candidate );
+                        for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
+                            if( *n && *n!=f && faceVis[*n].ref()!=candidate )
+                                toOptim.insert( *n );
+                    }
             }
-            else if( appearsMost.size() == 1 )
-                candidate = appearsMost.front();
-
-
-            // If the reference image of the current face is different from the candidate image, change it accordingly.
-            // Triangles of its neighborhood are reintroduced in the queue only if their reference images is different
-            // from the new one.
-            if( candidate != faceVis[f].ref() )
+            else
             {
-                faceVis[f].setRef( candidate );
-                for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
-                    if( *n && *n!=f && faceVis[*n].ref()!=candidate )
-                        toOptim.insert( *n );
+                // Look for the one that appears the most, and that belongs to the list of visible rasters
+                // of the considered face.
+                RasterModel *appearsMost = faceVis[f].ref();
+                int nbMaxAppear = 0;
+
+                for( QMap<RasterModel*,int>::iterator n=neighbRefCount.begin(); n!=neighbRefCount.end(); ++n )
+                    if( n.value()>nbMaxAppear && faceVis[f].contains(n.key()) )
+                    {
+                        nbMaxAppear = n.value();
+                        appearsMost = n.key();
+                    }
+
+
+                    // If the reference image of the current face is different from the candidate image, change it accordingly.
+                    // Triangles of its neighborhood are reintroduced in the queue only if their reference images is different
+                    // from the new one.
+                    if( appearsMost != faceVis[f].ref() )
+                    {
+                        faceVis[f].setRef( appearsMost );
+                        for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
+                            if( *n && *n!=f && faceVis[*n].ref()!=appearsMost )
+                                toOptim.insert( *n );
+                    }
             }
-        }
-        else
-        {
-            // Look for the one that appears the most, and that belongs to the list of visible rasters
-            // of the considered face.
-            RasterModel *appearsMost = faceVis[f].ref();
-            int nbMaxAppear = 0;
-
-            for( QMap<RasterModel*,int>::iterator n=neighbRefCount.begin(); n!=neighbRefCount.end(); ++n )
-                if( n.value()>nbMaxAppear && faceVis[f].contains(n.key()) )
-                {
-                    nbMaxAppear = n.value();
-                    appearsMost = n.key();
-                }
-
-
-            // If the reference image of the current face is different from the candidate image, change it accordingly.
-            // Triangles of its neighborhood are reintroduced in the queue only if their reference images is different
-            // from the new one.
-            if( appearsMost != faceVis[f].ref() )
-            {
-                faceVis[f].setRef( appearsMost );
-                for( NeighbSet::iterator n=neighb.begin(); n!=neighb.end(); ++n )
-                    if( *n && *n!=f && faceVis[*n].ref()!=appearsMost )
-                        toOptim.insert( *n );
-            }
-        }
     }
 }
 
 
 int FilterImgPatchParamPlugin::cleanIsolatedTriangles( CMeshO &mesh,
-                                                       VisibleSet &faceVis )
+    VisibleSet &faceVis )
 {
     int nbTrianglesChanged = 0;
 
@@ -567,27 +571,27 @@ int FilterImgPatchParamPlugin::cleanIsolatedTriangles( CMeshO &mesh,
                     neighb[r] = 1;
             }
 
-        // If the reference image of T doesn't appear in its neighborhood, it seems that T is isolated.
-        // In that case, the reference image that appears the most in its neighborhood is chosen as
-        // the new reference image of T.
-        if( !neighb.contains(faceVis[f].ref()) )
-        {
-            RasterModel *appearsMost = NULL;
-            int nAppearanceMax = 0;
-
-            for( QMap<RasterModel*,int>::iterator n=neighb.begin(); n!=neighb.end(); ++n )
-                if( n.value() > nAppearanceMax )
-                {
-                    appearsMost = n.key();
-                    nAppearanceMax = n.value();
-                }
-
-            if( appearsMost )
+            // If the reference image of T doesn't appear in its neighborhood, it seems that T is isolated.
+            // In that case, the reference image that appears the most in its neighborhood is chosen as
+            // the new reference image of T.
+            if( !neighb.contains(faceVis[f].ref()) )
             {
-                faceVis[f].setRef( appearsMost );
-                nbTrianglesChanged ++;
+                RasterModel *appearsMost = NULL;
+                int nAppearanceMax = 0;
+
+                for( QMap<RasterModel*,int>::iterator n=neighb.begin(); n!=neighb.end(); ++n )
+                    if( n.value() > nAppearanceMax )
+                    {
+                        appearsMost = n.key();
+                        nAppearanceMax = n.value();
+                    }
+
+                    if( appearsMost )
+                    {
+                        faceVis[f].setRef( appearsMost );
+                        nbTrianglesChanged ++;
+                    }
             }
-        }
     }
 
 
@@ -596,10 +600,10 @@ int FilterImgPatchParamPlugin::cleanIsolatedTriangles( CMeshO &mesh,
 
 
 int FilterImgPatchParamPlugin::extractPatches( RasterPatchMap &patches,
-                                               PatchVec &nullPatches,
-                                               CMeshO &mesh,
-                                               VisibleSet &faceVis,
-                                               QList<RasterModel*> &rasterList )
+    PatchVec &nullPatches,
+    CMeshO &mesh,
+    VisibleSet &faceVis,
+    QList<RasterModel*> &rasterList )
 {
     int nbPatches = 0;
 
@@ -643,12 +647,12 @@ int FilterImgPatchParamPlugin::extractPatches( RasterPatchMap &patches,
                 nullPatches.push_back( patch );
         }
 
-    return nbPatches;
+        return nbPatches;
 }
 
 
 void FilterImgPatchParamPlugin::constructPatchBoundary( Patch &p,
-                                                        VisibleSet &faceVis )
+    VisibleSet &faceVis )
 {
     for( std::vector<CFaceO*>::iterator f=p.faces.begin(); f!=p.faces.end(); ++f )
     {
@@ -681,8 +685,8 @@ void FilterImgPatchParamPlugin::constructPatchBoundary( Patch &p,
 
 
 void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
-                                                RasterModel *rm,
-                                                PatchVec &patches )
+    RasterModel *rm,
+    PatchVec &patches )
 {
     // Recovers the view frustum of the current raster.
     CMeshO::ScalarType zNear, zFar;
@@ -736,22 +740,22 @@ void FilterImgPatchParamPlugin::computePatchUV( CMeshO &mesh,
                 p->bbox.Add( (*f)->WT(i).P() );
             }
 
-        // Computes UV coordinates for boundary patch faces, and update the bounding box accordingly.
-        for( std::vector<CFaceO*>::iterator f=p->boundary.begin(); f!=p->boundary.end(); ++f )
-        {
-            TriangleUV fuv;
-            for( int i=0; i<3; ++i )
+            // Computes UV coordinates for boundary patch faces, and update the bounding box accordingly.
+            for( std::vector<CFaceO*>::iterator f=p->boundary.begin(); f!=p->boundary.end(); ++f )
             {
-                Point3m &vp = (*f)->V(i)->P();
+                TriangleUV fuv;
+                for( int i=0; i<3; ++i )
+                {
+                    Point3m &vp = (*f)->V(i)->P();
 
-                fuv.v[i].U() = mesh2clip.GetRow3(0)*vp + mesh2clip[0][3];
-                fuv.v[i].V() = mesh2clip.GetRow3(1)*vp + mesh2clip[1][3];
-                fuv.v[i].P() *= 1.0f / (mesh2clip.GetRow3(3)*vp + mesh2clip[3][3]);
+                    fuv.v[i].U() = mesh2clip.GetRow3(0)*vp + mesh2clip[0][3];
+                    fuv.v[i].V() = mesh2clip.GetRow3(1)*vp + mesh2clip[1][3];
+                    fuv.v[i].P() *= 1.0f / (mesh2clip.GetRow3(3)*vp + mesh2clip[3][3]);
 
-                p->bbox.Add( fuv.v[i].P() );
+                    p->bbox.Add( fuv.v[i].P() );
+                }
+                p->boundaryUV.push_back( fuv );
             }
-            p->boundaryUV.push_back( fuv );
-        }
     }
 }
 
@@ -787,32 +791,32 @@ void FilterImgPatchParamPlugin::mergeOverlappingPatches( PatchVec &patches )
                     }
                 }
 
-            if( candidate != patches.end() )
+                if( candidate != patches.end() )
+                {
+                    p1->faces.insert( p1->faces.end(), candidate->faces.begin(), candidate->faces.end() );
+                    p1->boundary.insert( p1->boundary.end(), candidate->boundary.begin(), candidate->boundary.end() );
+                    p1->boundaryUV.insert( p1->boundaryUV.end(), candidate->boundaryUV.begin(), candidate->boundaryUV.end() );
+                    p1->bbox.Add( candidate->bbox );
+                    candidate->valid = false;
+                    globalGain += maxOccupancyGain;
+                }
+        }
+
+
+        for( PatchVec::iterator p=patches.begin(); p!=patches.end(); )
+            if( p->valid )
+                ++ p;
+            else
             {
-                p1->faces.insert( p1->faces.end(), candidate->faces.begin(), candidate->faces.end() );
-                p1->boundary.insert( p1->boundary.end(), candidate->boundary.begin(), candidate->boundary.end() );
-                p1->boundaryUV.insert( p1->boundaryUV.end(), candidate->boundaryUV.begin(), candidate->boundaryUV.end() );
-                p1->bbox.Add( candidate->bbox );
-                candidate->valid = false;
-                globalGain += maxOccupancyGain;
+                *p = patches.back();
+                patches.pop_back();
             }
-        }
-
-
-    for( PatchVec::iterator p=patches.begin(); p!=patches.end(); )
-        if( p->valid )
-            ++ p;
-        else
-        {
-            *p = patches.back();
-            patches.pop_back();
-        }
 }
 
 
 void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
-                                              int textureGutter,
-                                              bool allowUVStretching )
+    int textureGutter,
+    bool allowUVStretching )
 {
     std::vector<vcg::Box2f> patchRect;
     std::vector<vcg::Similarity2f> patchPackingTr;
@@ -829,69 +833,70 @@ void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
             totalArea += p->bbox.Area();
         }
 
-    if( patchRect.empty() )
-        return;
+        if( patchRect.empty() )
+            return;
 
-    float edgeLen = std::sqrt( totalArea );
-
-
-    // Performs the packing.
-    vcg::Point2f coveredArea;
-    vcg::RectPacker<float>::Pack( patchRect, vcg::Point2i(edgeLen,edgeLen), patchPackingTr, coveredArea );
+        float edgeLen = std::sqrt( totalArea );
 
 
-    // Applies to the UV coordinates the transformations computed by the packing algorithm, as well as a scaling
-    // so as to make them ranging the interval [0,1]x[0,1].
-    float scaleU, scaleV;
+        // Performs the packing.
+        vcg::Point2f coveredArea;
+        vcg::RectPacker<float>::Pack( patchRect, vcg::Point2i(edgeLen,edgeLen), patchPackingTr, coveredArea );
 
-    if( allowUVStretching )
-    {
-        scaleU = 1.0f / coveredArea.X();
-        scaleV = 1.0f / coveredArea.Y();
-    }
-    else
-        scaleU = scaleV = 1.0f / std::max( coveredArea.X(), coveredArea.Y() );
 
-    int n = 0;
-    for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
-        for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p, ++n )
+        // Applies to the UV coordinates the transformations computed by the packing algorithm, as well as a scaling
+        // so as to make them ranging the interval [0,1]x[0,1].
+        float scaleU, scaleV;
+
+        if( allowUVStretching )
         {
-            vcg::Similarity2f &tr = patchPackingTr[n];
-            float c = std::cos( tr.rotRad );
-            float s = std::sin( tr.rotRad );
-
-            p->img2tex.SetIdentity();
-            p->img2tex[0][0] =  c * tr.sca * scaleU;
-            p->img2tex[0][1] = -s * tr.sca * scaleU;
-            p->img2tex[0][3] =  tr.tra.X() * scaleU;
-            p->img2tex[1][0] =  s * tr.sca * scaleV;
-            p->img2tex[1][1] =  c * tr.sca * scaleV;
-            p->img2tex[1][3] =  tr.tra.Y() * scaleV;
-
-            for( std::vector<CFaceO*>::iterator f=p->faces.begin(); f!=p->faces.end(); ++f )
-                for( int i=0; i<3; ++i )
-                {
-                    (*f)->WT(i).P() = tr * (*f)->WT(i).P();
-                    (*f)->WT(i).U() *= scaleU;
-                    (*f)->WT(i).V() *= scaleV;
-                }
-
-            for( std::vector<TriangleUV>::iterator f=p->boundaryUV.begin(); f!=p->boundaryUV.end(); ++f )
-                for( int i=0; i<3; ++i )
-                {
-                    f->v[i].P() = tr * f->v[i].P();
-                    f->v[i].U() *= scaleU;
-                    f->v[i].V() *= scaleV;
-                }
+            scaleU = 1.0f / coveredArea.X();
+            scaleV = 1.0f / coveredArea.Y();
         }
+        else
+            scaleU = scaleV = 1.0f / std::max( coveredArea.X(), coveredArea.Y() );
+
+        int n = 0;
+        for( RasterPatchMap::iterator rp=patches.begin(); rp!=patches.end(); ++rp )
+            for( PatchVec::iterator p=rp->begin(); p!=rp->end(); ++p, ++n )
+            {
+                vcg::Similarity2f &tr = patchPackingTr[n];
+                float c = std::cos( tr.rotRad );
+                float s = std::sin( tr.rotRad );
+
+                p->img2tex.SetIdentity();
+                p->img2tex[0][0] =  c * tr.sca * scaleU;
+                p->img2tex[0][1] = -s * tr.sca * scaleU;
+                p->img2tex[0][3] =  tr.tra.X() * scaleU;
+                p->img2tex[1][0] =  s * tr.sca * scaleV;
+                p->img2tex[1][1] =  c * tr.sca * scaleV;
+                p->img2tex[1][3] =  tr.tra.Y() * scaleV;
+
+                for( std::vector<CFaceO*>::iterator f=p->faces.begin(); f!=p->faces.end(); ++f )
+                    for( int i=0; i<3; ++i )
+                    {
+                        (*f)->WT(i).P() = tr * (*f)->WT(i).P();
+                        (*f)->WT(i).U() *= scaleU;
+                        (*f)->WT(i).V() *= scaleV;
+                    }
+
+                    for( std::vector<TriangleUV>::iterator f=p->boundaryUV.begin(); f!=p->boundaryUV.end(); ++f )
+                        for( int i=0; i<3; ++i )
+                        {
+                            f->v[i].P() = tr * f->v[i].P();
+                            f->v[i].U() *= scaleU;
+                            f->v[i].V() *= scaleV;
+                        }
+            }
 }
 
 
 void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMap &patches,
-                                                                   PatchVec &nullPatches,
-                                                                   CMeshO &mesh,
-                                                                   QList<RasterModel*> &rasterList,
-                                                                   RichParameterSet &par )
+    PatchVec &nullPatches,
+    int meshid,
+    CMeshO &mesh,
+    QList<RasterModel*> &rasterList,
+    RichParameterSet &par )
 {
     // Computes the visibility set for all mesh faces. It contains the set of all images
     // into which the face is visible, as well as a reference image, namely the one whith
@@ -904,7 +909,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
         weightMask |= VisibleSet::W_IMG_BORDER;
     if( par.getBool("useAlphaWeight") )
         weightMask |= VisibleSet::W_IMG_ALPHA;
-    VisibleSet faceVis( *m_Context, mesh, rasterList, weightMask );
+    VisibleSet faceVis( *m_Context,glContext,meshid, mesh, rasterList, weightMask );
     Log( "VISIBILITY CHECK: %.3f sec.", 0.001f*t.elapsed() );
 
 
@@ -965,7 +970,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     // in the space of their patches' reference images but UV coordinates are all defined in a common texture
     // space, ranging from [0,0] to [1,1].
     t.start();
-        patchPacking( patches, par.getInt("textureGutter"), par.getBool("stretchingAllowed") );
+    patchPacking( patches, par.getInt("textureGutter"), par.getBool("stretchingAllowed") );
     Log( "PATCH TEXTURE PACKING: %.3f sec.", 0.001f*t.elapsed() );
 
 
@@ -976,7 +981,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
                 (*f)->WT(i).P() = vcg::Point2f(0.0f,0.0f);
 
     for(CMeshO::FaceIterator fi=mesh.face.begin(); fi!=mesh.face.end();++fi)
-      for(int i=0;i<3;++i) fi->WT(i).N()=0;
+        for(int i=0;i<3;++i) fi->WT(i).N()=0;
 }
 
 

@@ -81,6 +81,8 @@ public:
 	virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 	virtual int getRequirements(QAction *);
 	virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(QAction* filter) const;
+
 
 	void showParserError(const QString &s, mu::Parser::exception_type &e);
 	void setAttributes(CMeshO::VertexIterator &vi,CMeshO &m);
