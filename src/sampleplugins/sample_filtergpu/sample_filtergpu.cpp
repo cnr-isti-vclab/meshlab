@@ -128,33 +128,33 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			Context ctx;
 			ctx.acquire();
 
-			const GLsizeiptr psize = GLsizeiptr(GLsizei(mesh.vn) * pstride);
-			BufferHandle hPositionBuffer = createBuffer(ctx, psize, pbase);
+			/*const GLsizeiptr psize = GLsizeiptr(GLsizei(mesh.vn) * pstride);
+            BufferHandle hPositionBuffer = createBuffer(ctx, psize, pbase);
 
-			const GLsizeiptr nsize = GLsizeiptr(GLsizei(mesh.vn) * nstride);
-			BufferHandle hNormalBuffer = createBuffer(ctx, nsize, nbase);
+            const GLsizeiptr nsize = GLsizeiptr(GLsizei(mesh.vn) * nstride);
+            BufferHandle hNormalBuffer = createBuffer(ctx, nsize, nbase);
 
-			const GLsizeiptr isize = GLsizeiptr(mesh.fn * 3 * sizeof(GLuint));
-			BufferHandle hIndexBuffer = createBuffer(ctx, isize);
+            const GLsizeiptr isize = GLsizeiptr(mesh.fn * 3 * sizeof(GLuint));
+            BufferHandle hIndexBuffer = createBuffer(ctx, isize);
 
-			{
-				BoundIndexBufferHandle indexBuffer = ctx.bindIndexBuffer(hIndexBuffer);
+            {
+                BoundIndexBufferHandle indexBuffer = ctx.bindIndexBuffer(hIndexBuffer);
 
-				const CMeshO::VertexType * vbase   = &(mesh.vert[0]);
-				GLuint *                   indices = (GLuint *)indexBuffer->map(GL_WRITE_ONLY);
-				for (size_t i=0; i<mesh.face.size(); ++i)
-				{
-					const CMeshO::FaceType & f = mesh.face[i];
-					if (f.IsD()) continue;
-					for (int v=0; v<3; ++v)
-					{
-						*indices++ = GLuint(vcg::tri::Index(mesh,f.cV(v)));
-					}
-				}
-				indexBuffer->unmap();
+                const CMeshO::VertexType * vbase   = &(mesh.vert[0]);
+                GLuint *                   indices = (GLuint *)indexBuffer->map(GL_WRITE_ONLY);
+                for (size_t i=0; i<mesh.face.size(); ++i)
+                {
+                    const CMeshO::FaceType & f = mesh.face[i];
+                    if (f.IsD()) continue;
+                    for (int v=0; v<3; ++v)
+                    {
+                        *indices++ = GLuint(vcg::tri::Index(mesh,f.cV(v)));
+                    }
+                }
+                indexBuffer->unmap();
 
-				ctx.unbindIndexBuffer();
-			}
+                ctx.unbindIndexBuffer();
+            }*/
 
 			const GLsizei width  = GLsizei(par.getInt("ImageWidth" ));
 			const GLsizei height = GLsizei(par.getInt("ImageHeight"));
@@ -220,23 +220,17 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				BoundProgramHandle program = ctx.bindProgram(hProgram);
 					program->setUniform("uLightDirectionVS", lightDirectionVS[0], lightDirectionVS[1], lightDirectionVS[2]);
-
-					glEnableClientState(GL_VERTEX_ARRAY);
-					ctx.bindVertexBuffer(hPositionBuffer);
-					glVertexPointer(3, GL_FLOAT, pstride, 0);
-
-					glEnableClientState(GL_NORMAL_ARRAY);
-					ctx.bindVertexBuffer(hNormalBuffer);
-					glNormalPointer(GL_FLOAT, nstride, 0);
-
-					ctx.unbindVertexBuffer();
-
-					ctx.bindIndexBuffer(hIndexBuffer);
-					glDrawElements(GL_TRIANGLES, GLsizei(mesh.fn * 3), GL_UNSIGNED_INT, 0);
-					ctx.unbindIndexBuffer();
-
-					glDisableClientState(GL_VERTEX_ARRAY);
-					glDisableClientState(GL_NORMAL_ARRAY);
+                    MLRenderingData dt;
+                    MLRenderingData::RendAtts atts;
+                    atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+                    atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+                    dt.set(MLRenderingData::PR_POINTS,atts);
+                    dt.set(MLRenderingData::PR_WIREFRAME_TRIANGLES,atts);
+                    MLPerViewGLOptions opts;
+                    opts._perpoint_pointsize = 5.0;
+                    dt.set(opts);
+                    glContext->setRenderingData(md.mm()->id(),dt);
+                    glContext->drawMeshModel(md.mm()->id());
 				ctx.unbindProgram();
 
 				glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());

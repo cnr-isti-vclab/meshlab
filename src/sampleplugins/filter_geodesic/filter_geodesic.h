@@ -56,6 +56,7 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
   bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
   void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
   int postCondition(QAction * filter) const;
+  FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
 };
 
 

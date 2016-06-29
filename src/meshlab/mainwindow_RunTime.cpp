@@ -842,6 +842,36 @@ void MainWindow::runFilterScript()
                 QGLFormat defForm = QGLFormat::defaultFormat();
                 iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
                 created = iFilter->glContext->create(filterWidget->context());
+                shar->addView(iFilter->glContext);    
+                MLRenderingData dt;
+                MLRenderingData::RendAtts atts;
+                atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+                atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+                
+                if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+                {
+                    MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+                    if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+                    {
+                        dt.set(pm,atts);
+                        shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
+                    }
+                }
+                else
+                {
+                    for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+                    {
+                        MeshModel* mm = meshDoc()->meshList[ii];
+                        MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+                        if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+                        {
+                            dt.set(pm,atts);
+                            shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
+                        }
+                    }
+                }
+
             }
             if ((!created) || (!iFilter->glContext->isValid()))
                 throw MLException("A valid GLContext is required by the filter to work.\n");
@@ -850,6 +880,8 @@ void MainWindow::runFilterScript()
             /* to be changed */
             iFilter->applyFilter( action, *meshDoc(), old->pair.second, QCallBack );
             meshDoc()->setBusy(false);
+            if (shar != NULL)
+                shar->removeView(iFilter->glContext); 
             delete iFilter->glContext;
             classes = int(iFilter->getClass(action));
         }
@@ -902,6 +934,35 @@ void MainWindow::runFilterScript()
                         QGLFormat defForm = QGLFormat::defaultFormat();
                         cppfilt->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
                         created = cppfilt->glContext->create(filterWidget->context());
+                        
+                        MLRenderingData dt;
+                        MLRenderingData::RendAtts atts;
+                        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+                        atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+
+                        if (info->filterAttribute(filtnm,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity)
+                        {
+                            MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+                            if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+                            {
+                                dt.set(pm,atts);
+                                shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),cppfilt->glContext,dt);
+                            }
+                        }
+                        else
+                        {
+                            for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+                            {
+                                MeshModel* mm = meshDoc()->meshList[ii];
+                                MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+                                if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+                                {
+                                    dt.set(pm,atts);
+                                    shar->setRenderingDataPerMeshView(mm->id(),cppfilt->glContext,dt);
+                                }
+                            }
+                        }
                     }
                     if ((!created) || (!cppfilt->glContext->isValid()))
                         throw MLException("A valid GLContext is required by the filter to work.\n");
@@ -913,6 +974,8 @@ void MainWindow::runFilterScript()
                     cppfilt->applyFilter( filtnm, *meshDoc(), envwrap, QCallBack );
                     meshDoc()->setBusy(false);
                     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    if ((currentViewContainer() != NULL) && (currentViewContainer()->sharedDataContext() != NULL))
+                        currentViewContainer()->sharedDataContext()->removeView(cppfilt->glContext); 
                     delete cppfilt->glContext;
                     GLA()->completeUpdateRequested();
                     connect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
@@ -1024,6 +1087,7 @@ void MainWindow::startFilter()
             delete xmldialog;
             xmldialog = NULL;
         }
+
         // (2) Ask for filter parameters and eventally directly invoke the filter
         // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
         // if no dialog is created the filter must be executed immediately
@@ -1159,12 +1223,12 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                 if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                     postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
 
-                
+
                 MLRenderingData dttoberendered;
                 QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
                 if (existit != existingmeshesbeforefilterexecution.end())
                 {
-                    
+
                     shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),dttoberendered);
                     bool connectivitychanged = false;
                     int updatemask = MeshModel::MM_NONE;
@@ -1208,7 +1272,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         bool wasprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo((existit->_nvert > 0),(existit->_nface > 0),(existit->_nedge > 0),existit->_mask,pm);
                         bool isprimitivemodalitymeaningful = MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(mm,pm);
                         bool isworthtobevisualized = MLPoliciesStandAloneFunctions::isPrimitiveModalityWorthToBeActivated(pm,curr.isPrimitiveActive(pm),wasprimitivemodalitymeaningful,isprimitivemodalitymeaningful);
-               
+
 
                         MLRenderingData::RendAtts rd;
                         if (isworthtobevisualized)
@@ -1235,9 +1299,10 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                             shared->setRenderingDataPerMeshView(mm->id(),gla->context(),dttoberendered);
                     }
                 }
-               shared->manageBuffers(mm->id());
-               updateLayerDialog();
-               //addRenderingSystemLogInfo(mm->id());
+                vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+                shared->manageBuffers(mm->id());
+                updateLayerDialog();
+                //addRenderingSystemLogInfo(mm->id());
             }
         }
     }
@@ -1289,14 +1354,43 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     MergedEnvironment.join(currentGlobalParams);
 
     MLSceneGLSharedDataContext* shar = NULL;
+    QGLWidget* filterWidget = NULL;
     if (currentViewContainer() != NULL)
     {
         shar = currentViewContainer()->sharedDataContext();
         //GLA() is only the parent
-        QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+        filterWidget = new QGLWidget(NULL,shar);
         QGLFormat defForm = QGLFormat::defaultFormat();
         iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
         iFilter->glContext->create(filterWidget->context());
+
+        MLRenderingData dt;
+        MLRenderingData::RendAtts atts;
+        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+        atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+        if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+        {
+            MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+            if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+            {
+                dt.set(pm,atts);
+                iFilter->glContext->initPerViewRenderingData(meshDoc()->mm()->id(),dt);
+            }
+        }
+        else
+        {
+            for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
+            {
+                MeshModel* mm = meshDoc()->meshList[ii];
+                MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+                if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+                {
+                    dt.set(pm,atts);
+                    iFilter->glContext->initPerViewRenderingData(mm->id(),dt);
+                }
+            }
+        }
     }
     bool newmeshcreated = false;
     try
@@ -1308,6 +1402,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN(),(size_t) mm->cm.EN()));
         }
         ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+        if (shar != NULL)
+        {
+            shar->removeView(iFilter->glContext);
+            delete filterWidget;
+        }
         meshDoc()->setBusy(false);
 
         qApp->restoreOverrideCursor();
@@ -2385,18 +2484,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
 
     if(!meshDoc()->mm()->cm.textures.empty())
-    {
-
         updateTexture(meshDoc()->mm()->id());
-        if(tri::HasPerVertexTexCoord(meshDoc()->mm()->cm) )
-//WARNING!!!!!!!!
-/*GLA()->setTextureMode(rm,GLW::TMPerVert)*/;
-////////////////////////////////////////////
-        if(tri::HasPerWedgeTexCoord(meshDoc()->mm()->cm) )
-//WARNING!!!!!!!!
-/*GLA()->setTextureMode(rm,GLW::TMPerWedgeMulti)*/;
-////////////////////////////////////////////
-    }
 
     // In case of polygonal meshes the normal should be updated accordingly
     if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
@@ -2415,26 +2503,19 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         if(!( mask & vcg::tri::io::Mask::IOM_VERTNORMAL) )
             vcg::tri::UpdateNormal<CMeshO>::PerVertexAngleWeighted(mm->cm);
     }
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
-    if(mm->cm.fn==0 && mm->cm.en==0){
-        if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
-//WARNING!!!!!
-/*GLA()->setLight(false)*/;
-//////////////////////////
-        else
-            mm->updateDataMask(MeshModel::MM_VERTNORMAL);
-    }
-    if(mm->cm.fn==0 && mm->cm.en>0){
-        if(!(mask & vcg::tri::io::Mask::IOM_VERTNORMAL))
 
-//WARNING!!!!!
-/*GLA()->setLight(false)*/;
-//////////////////////////
-        else
+    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);					// updates bounding box
+    if(mm->cm.fn==0 && mm->cm.en==0)
+    {
+        if(mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
             mm->updateDataMask(MeshModel::MM_VERTNORMAL);
     }
-    else
-        mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+
+    if(mm->cm.fn==0 && mm->cm.en>0)
+    {
+        if (mask & vcg::tri::io::Mask::IOM_VERTNORMAL)
+            mm->updateDataMask(MeshModel::MM_VERTNORMAL);
+    }
 
     updateMenus();
     int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
@@ -2969,7 +3050,7 @@ void MainWindow::updateTexture(int meshid)
     foreach (MeshModel *mp, meshDoc()->meshList)
         totalTextureNum+=mp->cm.textures.size();
 
-    int singleMaxTextureSizeMpx = int(textmemMB/totalTextureNum);
+    int singleMaxTextureSizeMpx = int(textmemMB/((totalTextureNum != 0)? totalTextureNum : 1));
     bool sometextfailed = false;
     QString unexistingtext = "In mesh file <i>" + mymesh->fullName() + "</i> : Failure loading textures:<br>";
     for(size_t i =0; i< mymesh->cm.textures.size();++i)

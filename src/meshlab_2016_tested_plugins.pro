@@ -13,15 +13,18 @@ CONFIG       += ordered
 SUBDIRS       = common \
                 meshlab \                         # the GUI framework
 				meshlabplugins/io_base\				# a few basic file formats (ply, obj, off), without this you cannot open anything
-				meshlabplugins/filter_colorize\
+				meshlabplugins/filter_colorize \
+				meshlabplugins/filter_create \
 				meshlabplugins/filter_sampling \
 				meshlabplugins/edit_quality \
 				meshlabplugins/filter_meshing \
 				meshlabplugins/filter_voronoi \
 				meshlabplugins/filter_mutualinfoxml \
-#				meshlabplugins/filter_colorize\
-#				meshlabplugins/filter_meshing \
-#				meshlabplugins/filter_sampling \
+				meshlabplugins/filter_sdfgpu \
+				meshlabplugins/filter_ao \
+				meshlabplugins/filter_img_patch_param \
+				meshlabplugins/filter_color_projection \
+				sampleplugins/sample_filtergpu \
 #				meshlabplugins/edit_align \
 #				meshlabplugins/filter_mutualinfoxml \
 #				meshlabplugins/filter_meshing \

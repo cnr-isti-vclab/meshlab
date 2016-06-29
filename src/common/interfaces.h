@@ -330,6 +330,17 @@ public:
   */
   bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
 
+
+  enum FILTER_ARITY {NONE = 0,SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3};
+
+  /** \brief this function informs the MeshLab core on how many meshes the filter will work on.
+  Valid value:
+    - SINGLE_MESH: the filter works just on the current mesh
+    - FIXED: the number (and the names) of the meshes involved in the filter computation is determined by the parameters selected in the filter's parameters form
+    - VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
+  */
+  virtual FILTER_ARITY filterArity(QAction *act) const = 0;
+
     // This function is called to initialized the list of parameters.
   // it is always called. If a filter does not need parameter it leave it empty and the framework
   // will not create a dialog (unless for previewing)
@@ -337,7 +348,7 @@ public:
     virtual void initParameterSet(QAction *filter,MeshDocument &md, RichParameterSet &par)
     {initParameterSet(filter,*(md.mm()),par);}
 
-  /** \brief is invoked by the framework when the applyFilter fails to give some info to the user about the fiter failure
+  /** \brief is invoked by the framework when the applyFilter fails to give some info to the user about the filter failure
     * Filters \b must never use QMessageBox for reporting errors.
     * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
     */

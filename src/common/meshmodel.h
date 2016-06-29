@@ -40,6 +40,11 @@
 #include <vcg/complex/algorithms/update/selection.h>
 #include <vcg/complex/algorithms/update/topology.h>
 
+
+//#include <wrap/gl/trimesh.h>
+
+
+
 #include <wrap/callback.h>
 #include <wrap/io_trimesh/io_mask.h>
 #include <wrap/io_trimesh/additionalinfo.h>
@@ -122,6 +127,14 @@ public:
     MeshDocument *parent;
 
     CMeshO cm;
+
+
+
+
+    /*vcg::GlTrimesh<CMeshO> glw;*/
+    
+    
+    
     /*
     Bitmask denoting what fields are currently used in the mesh
     it is composed by MeshElement enums.

@@ -245,6 +245,7 @@ public:
     void requestInitPerMeshView(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt);
     void requestRemovePerMeshView(QThread* callingthread,QGLContext* cont);
     void requestSetPerMeshViewRenderingData(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void requestMeshAttributesUpdated(QThread* callingthread,int meshid,bool connectivitychanged,const MLRenderingData::RendAtts& dt );
     /***************************************/
 public slots:
     void meshDeallocated(int mmid);
@@ -258,17 +259,20 @@ public slots:
     void removeView(QGLContext* viewerid);
     void meshAttributesUpdated(int mmid,bool conntectivitychanged,const MLRenderingData::RendAtts& dt);
     void updateGPUMemInfo();
-    void updateRequested(int meshid,MLRenderingData::ATT_NAMES name);
+    //void updateRequested(int meshid,MLRenderingData::ATT_NAMES name);
 
 private slots:
     /*slots intended for the plugins living in another thread*/
     void initPerMeshViewRequested(int meshid,QGLContext* cont,const MLRenderingData& dt);
     void removePerMeshViewRequested(QGLContext* cont);
     void setPerMeshViewRenderingDataRequested(int meshid,QGLContext* cont,const MLRenderingData& dt);
+    void meshAttributesUpdatedRequested(int meshid,bool connectivitychanged,const MLRenderingData::RendAtts& dt);
     /***************************************/
 private:
     typedef vcg::QtThreadSafeGLMeshAttributesMultiViewerBOManager<CMeshO,QGLContext*,MLPerViewGLOptions> PerMeshMultiViewManager; 
     PerMeshMultiViewManager* meshAttributesMultiViewerManager(int mmid ) const;
+    QGLContext* makeCurrentGLContext();
+    void doneCurrentGLContext(QGLContext* oldone = NULL);
 
     MeshDocument& _md;	
     typedef QMap<int,PerMeshMultiViewManager*> MeshIDManMap;
@@ -282,16 +286,17 @@ signals:
     
     void currentAllocatedGPUMem(int all,int current);
 
-    /*signals intended for the plugins living in the same thread*/
-    void initPerMeshViewRequestST(int,QGLContext*,const MLRenderingData&);
-    void removePerMeshViewRequestST(QGLContext*);
-    void setPerMeshViewRenderingDataRequestST(int,QGLContext*,const MLRenderingData&);
-    /***************************************/
+    ///*signals intended for the plugins living in the same thread*/
+    //void initPerMeshViewRequestST(int,QGLContext*,const MLRenderingData&);
+    //void removePerMeshViewRequestST(QGLContext*);
+    //void setPerMeshViewRenderingDataRequestST(int,QGLContext*,const MLRenderingData&);
+    ///***************************************/
 
     /*signals intended for the plugins living in another thread*/
     void initPerMeshViewRequestMT(int,QGLContext*,const MLRenderingData&);
     void removePerMeshViewRequestMT(QGLContext*);
     void setPerMeshViewRenderingDataRequestMT(int,QGLContext*,const MLRenderingData&);
+    void meshAttributesUpdatedRequestMT(int,bool,const MLRenderingData::RendAtts&);
     /***************************************/
 }; 
 
@@ -305,6 +310,7 @@ public:
     void removePerViewRenderindData();
     void setRenderingData(int meshid,MLRenderingData& dt);
     void drawMeshModel( int meshid) const;
+    void meshAttributesUpdated(int meshid,bool conntectivitychanged,const MLRenderingData::RendAtts& dt);
 
     static void smoothModalitySuggestedRenderingData(MLRenderingData& dt);
     static void pointModalitySuggestedRenderingData(MLRenderingData& dt); 

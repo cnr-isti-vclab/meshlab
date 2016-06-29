@@ -78,7 +78,7 @@ void FilterThread::run()
                         }
                     }
                 }
-                
+
             }
             for (QMap<QString,QString>::const_iterator itp = _parexpval.constBegin();itp != _parexpval.constEnd();++itp)
                 env.insertExpressionBinding(itp.key(),itp.value());

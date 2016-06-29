@@ -55,7 +55,7 @@ public:
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
     FilterClass getClass(QAction *a);
-
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 
 

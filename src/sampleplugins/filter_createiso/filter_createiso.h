@@ -21,14 +21,14 @@
 *                                                                           *
 ****************************************************************************/
 /****************************************************************************
-  History
+History
 
- $Log: FilterCreateIso.h,v $
- Revision 1.1  2007/12/02 07:57:48  cignoni
- Added the new sample filter plugin that removes border faces
+$Log: FilterCreateIso.h,v $
+Revision 1.1  2007/12/02 07:57:48  cignoni
+Added the new sample filter plugin that removes border faces
 
 
- *****************************************************************************/
+*****************************************************************************/
 #ifndef FILTERCREATEISO_PLUGIN_H
 #define FILTERCREATEISO_PLUGIN_H
 
@@ -38,34 +38,33 @@
 
 class FilterCreateIso : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
-		public:
-	/* naming convention :
-		 - FP -> Filter Plugin
-		 - name of the plugin separated by _
-	*/
-	enum { 
-    FP_CREATEISO, 
-  } ;
-	
-	/* default values for standard parameters' values of the plugin actions */
-	FilterCreateIso();
-	~FilterCreateIso();
+public:
+    /* naming convention :
+    - FP -> Filter Plugin
+    - name of the plugin separated by _
+    */
+    enum { 
+        FP_CREATEISO, 
+    } ;
 
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
+    /* default values for standard parameters' values of the plugin actions */
+    FilterCreateIso();
+    ~FilterCreateIso();
 
-  virtual FilterClass getClass(QAction *);
-  virtual int getRequirements(QAction *);
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+
+    virtual FilterClass getClass(QAction *);
+    virtual int getRequirements(QAction *);
     virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
 
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+    FILTER_ARITY filterArity(QAction*) const {return NONE;}
 
-	protected:
-	
 };
 
 

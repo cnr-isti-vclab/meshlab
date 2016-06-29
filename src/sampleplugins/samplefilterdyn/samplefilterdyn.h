@@ -30,21 +30,22 @@
 
 class ExtraSampleDynPlugin : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_VERTEX_COLOR_NOISE  } ;
+    enum { FP_VERTEX_COLOR_NOISE  } ;
 
-	ExtraSampleDynPlugin();
-	
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-  virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOLOR;};
+    ExtraSampleDynPlugin();
+
+    virtual QString filterName(FilterIDType filter) const;
+    virtual QString filterInfo(FilterIDType filter) const;
+    virtual void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+    virtual int postCondition( QAction* ) const {return MeshModel::MM_VERTCOLOR;};
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	virtual FilterClass getClass(QAction *);	
+    virtual FilterClass getClass(QAction *);	
+    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
 };
 
 #endif

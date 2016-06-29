@@ -52,7 +52,7 @@ StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
 
 
 /* manages the setup of the standard parameter window, when the execution of a plugin filter is requested */
-bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindowInterface *mwi, QWidget *gla)
+bool MeshlabStdDialog::showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * mdp, QAction *action, MainWindow *mwi, QWidget *gla)
 {
     validcache = false;
     curAction=action;
@@ -271,6 +271,24 @@ StdParFrame::~StdParFrame()
 
 }
 
+
+static void updateRenderingData(MainWindow* curmwi,MeshModel* curmodel)
+{
+    if ((curmwi != NULL) && (curmodel != NULL))
+    {
+        MultiViewer_Container* mvcont = curmwi->currentViewContainer();
+        if (mvcont != NULL)
+        {
+            MLSceneGLSharedDataContext* shar = curmwi->currentViewContainer()->sharedDataContext();
+            if (shar != NULL)
+            {
+                shar->meshAttributesUpdated(curmodel->id(),true,MLRenderingData::RendAtts(true));
+                shar->manageBuffers(curmodel->id());
+            }
+        }
+    }
+}
+
 /* click event for the apply button of the standard plugin window */
 // If the filter has some dynamic parameters
 // - before applying the filter restore the original state of the mesh.
@@ -283,13 +301,19 @@ void MeshlabStdDialog::applyClick()
 
     // Note that curModel CAN BE NULL (for creation filters on empty docs...)
     if(curmask && curModel)
+    {
         meshState.apply(curModel);
+        updateRenderingData(curmwi,curModel);
+    }
 
     //PreView Caching: if the apply parameters are the same to those used in the preview mode
     //we don't need to reapply the filter to the mesh
     bool isEqual = (curParSet == prevParSet);
     if (curModel && (isEqual) && (validcache))
+    {
         meshCacheState.apply(curModel);
+        updateRenderingData(curmwi,curModel);
+    }
     else
         curmwi->executeFilter(q, curParSet, false);
 
@@ -328,13 +352,18 @@ void MeshlabStdDialog::togglePreview()
     {
         stdParFrame->readValues(curParSet);
         if (!prevParSet.isEmpty() && (validcache) && (curParSet == prevParSet))
+        {
             meshCacheState.apply(curModel);
+            updateRenderingData(curmwi,curModel);
+        }
         else
             applyDynamic();
     }
     else
+    {
         meshState.apply(curModel);
-
+        updateRenderingData(curmwi,curModel);
+    }
     curgla->update();
 }
 

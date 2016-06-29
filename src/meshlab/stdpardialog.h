@@ -741,25 +741,26 @@ private:
 class MainWindow;
 class MeshlabStdDialog : public QDockWidget
 {
-      Q_OBJECT
+    Q_OBJECT
 
 public:
-  MeshlabStdDialog(QWidget *p = NULL);
+    MeshlabStdDialog(QWidget *p = NULL);
     ~MeshlabStdDialog();
 
     void clearValues();
     void createFrame();
     void loadFrameContent(MeshDocument *mdPt=0);
 
-    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindowInterface *mwi, QWidget *gla=0);
+    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
     bool isPreviewable();
 
-    public slots:
-        void closeClick();
+public slots:
+    void closeClick();
+
 private slots:
     void applyClick();
-  void resetValues();
-  void toggleHelp();
+    void resetValues();
+    void toggleHelp();
     void togglePreview();
     void applyDynamic();
     void changeCurrentMesh(int meshInd);
@@ -778,7 +779,7 @@ public:
     MeshModel *curModel;
     MeshDocument * curMeshDoc;
     MeshFilterInterface *curmfi;
-    MainWindowInterface *curmwi;
+    MainWindow *curmwi;
     QWidget * curgla;
     RichParameterSet curParSet;
     RichParameterSet prevParSet;
