@@ -63,8 +63,7 @@ public:
 
     // Methods
 public:
-    enum { FP_VERT_AMBIENT_OCCLUSION,
-        FP_FACE_AMBIENT_OCCLUSION } ;
+    enum { FP_AMBIENT_OCCLUSION } ;
 
     AmbientOcclusionPlugin();
     ~AmbientOcclusionPlugin();
@@ -81,8 +80,7 @@ public:
 
     FilterClass getClass(QAction *filter)
     {
-        if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION) return MeshFilterInterface::FaceColoring;
-        else return MeshFilterInterface::VertexColoring;
+		return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
     };
 
     void initParameterSet(QAction *,MeshModel &/*m*/,RichParameterSet & /*parent*/);

@@ -44,8 +44,7 @@ static GLuint vs, fs, shdrID;
 AmbientOcclusionPlugin::AmbientOcclusionPlugin()
 {
     typeList
-        << FP_VERT_AMBIENT_OCCLUSION
-        << FP_FACE_AMBIENT_OCCLUSION;
+		<< FP_AMBIENT_OCCLUSION;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -69,8 +68,7 @@ QString AmbientOcclusionPlugin::filterName(FilterIDType filterId) const
 {
     switch(filterId)
     {
-    case FP_VERT_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Vertex");
-    case FP_FACE_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion - Per Face");
+    case FP_AMBIENT_OCCLUSION :  return QString("Ambient Occlusion");
     default : assert(0);
     }
 
@@ -81,8 +79,7 @@ QString AmbientOcclusionPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId)
     {
-    case FP_VERT_AMBIENT_OCCLUSION :
-    case FP_FACE_AMBIENT_OCCLUSION :  return QString("Compute ambient occlusions values; it takes a number or well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This number is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
+	case FP_AMBIENT_OCCLUSION:  return QString("Compute ambient occlusions values; it takes a number of well distributed view direction and for point of the surface it computes how many time it is visible from these directions. This value is saved into quality and automatically mapped into a gray shade. The average direction is saved into an attribute named 'BentNormal'");
     default : assert(0);
     }
 
@@ -99,8 +96,8 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 {
     switch(ID(action))
     {
-    case FP_FACE_AMBIENT_OCCLUSION:
-    case FP_VERT_AMBIENT_OCCLUSION:
+	case FP_AMBIENT_OCCLUSION:
+		parlst.addParam(new RichEnum("occMode", 0,	QStringList() << "per-Vertex" << "per-Face", tr("Occlusion mode:"), tr("Occlusion may be calculated per-vertex or per-face, color and quality will be saved in the chosen component.")));
         parlst.addParam(new RichFloat("dirBias",0,"Directional Bias [0..1]","The balance between a uniform and a directionally biased set of lighting direction<br>:"
             " - 0 means light came only uniformly from any direction<br>"
             " - 1 means that all the light cames from the specified cone of directions <br>"
@@ -108,7 +105,7 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
         parlst.addParam(new RichInt ("reqViews",AMBOCC_DEFAULT_NUM_VIEWS,"Requested views", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
         parlst.addParam(new RichPoint3f("coneDir",Point3f(0,1,0),"Lighting Direction", "Number of different views placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
         parlst.addParam(new RichFloat("coneAngle",30,"Cone amplitude", "Number of different views uniformly placed around the mesh. More views means better accuracy at the cost of increased calculation time"));
-        parlst.addParam(new RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
+        parlst.addParam(new RichBool("useGPU",AMBOCC_USEGPU_BY_DEFAULT,"Use GPU acceleration","Only works for per-vertex AO. In order to use GPU-Mode, your hardware must support FBOs, FP32 Textures and Shaders. Normally increases the performance by a factor of 4x-5x"));
         //parlst.addParam(new RichBool("useVBO",AMBOCC_USEVBO_BY_DEFAULT,"Use VBO if supported","By using VBO, Meshlab loads all the vertex structure in the VRam, greatly increasing rendering speed (for both CPU and GPU mode). Disable it if problem occurs"));
         parlst.addParam(new RichInt ("depthTexSize",AMBOCC_DEFAULT_TEXTURE_SIZE,"Depth texture size(should be 2^n)", "Defines the depth texture size used to compute occlusion from each point of view. Higher values means better accuracy usually with low impact on performance"));
         break;
@@ -118,10 +115,16 @@ void AmbientOcclusionPlugin::initParameterSet(QAction *action, MeshModel &m, Ric
 bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
-    if(ID(filter)==FP_FACE_AMBIENT_OCCLUSION ) perFace=true;
-    else perFace = false;
+
+	int occlusionMode = par.getEnum("occMode");
+	if (occlusionMode == 1)
+		perFace = true;
+    else 
+		perFace = false;
 
     useGPU = par.getBool("useGPU");
+	if (perFace) //GPU only works per-vertex
+		useGPU = false;
     depthTexSize = par.getInt("depthTexSize");
     depthTexArea = depthTexSize*depthTexSize;
     numViews = par.getInt("reqViews");
@@ -135,7 +138,6 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
     else
         m.updateDataMask(MeshModel::MM_VERTQUALITY | MeshModel::MM_VERTCOLOR);
 
-
     std::vector<Point3f> unifDirVec;
     GenNormal<float>::Fibonacci(numViews,unifDirVec);
 
@@ -148,13 +150,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
     int unifNum = floor(unifDirVec.size() * (1.0 - dirBias ));
     int coneNum = floor(coneDirVec.size() * (dirBias ));
 
-
     viewDirVec.clear();
     viewDirVec.insert(viewDirVec.end(),unifDirVec.begin(),unifDirVec.begin()+unifNum);
     viewDirVec.insert(viewDirVec.end(),coneDirVec.begin(),coneDirVec.begin()+coneNum);
-
     numViews = viewDirVec.size();
-
 
     this->glContext->makeCurrent();
     this->initGL(cb,m.cm.vn);
@@ -178,10 +177,10 @@ bool AmbientOcclusionPlugin::applyFilter(QAction *filter, MeshDocument &md, Rich
 
 bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 {
-    if (errInit)
-        return false;
+	if (errInit)
+		return false;
 
-    checkGLError::debugInfo("start");
+	checkGLError::debugInfo("start");
     int tInitElapsed = 0;
     QTime tInit, tAll;
     tInit.start();
@@ -193,11 +192,17 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m.cm);
 
-    CMeshO::PerVertexAttributeHandle<Point3f> BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+	CMeshO::PerVertexAttributeHandle<Point3f> BN;
+	CMeshO::PerFaceAttributeHandle<Point3f> FBN;
 
-    std::vector<std::string> AllVertexAttribName;
-    tri::Allocator<CMeshO>::GetAllPerVertexAttribute< Point3f >(m.cm,AllVertexAttribName);
-    qDebug("Now mesh has %i attrib",AllVertexAttribName.size());
+	if (perFace)
+	{
+		FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+	}
+	else
+	{
+		BN = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3f>(m.cm, "BentNormal");
+	}
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -210,9 +215,10 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     //    //m.glw.Update();
     //}
 
-
-
-    tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
+	if (perFace)
+		tri::UpdateQuality<CMeshO>::FaceConstant(m.cm, 0);
+	else
+		tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0);
 
     if(useGPU)
     {
@@ -222,10 +228,14 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     }
 
     tInitElapsed = tInit.elapsed();
-    vector<Point3f> faceCenterVec(m.cm.face.size());
-
-    for(int i=0;i<m.cm.fn;i++)
-        faceCenterVec[i].Import(Barycenter(m.cm.face[i]));
+	vector<Point3f> faceCenterVec;
+	
+	if (perFace)
+	{
+		faceCenterVec.resize(m.cm.face.size());
+		for (int i = 0; i<m.cm.fn; i++)
+			faceCenterVec[i].Import(Barycenter(m.cm.face[i]));
+	}
 
     for (vi = posVect.begin(); vi != posVect.end(); vi++)
     {
@@ -280,8 +290,10 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
             glDisable(GL_POLYGON_OFFSET_FILL);
 
             // SECOND PASS - use depth buffer to check occlusion
-            if(perFace) generateFaceOcclusionSW(m,faceCenterVec);
-            else generateOcclusionSW(m);
+            if(perFace) 
+				generateFaceOcclusionSW(m,faceCenterVec);
+            else 
+				generateOcclusionSW(m);
         }
         checkGLError::debugInfo("Debug");
     }
@@ -297,9 +309,14 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     {
         tri::UpdateColor<CMeshO>::PerFaceQualityGray(m.cm);
         CMeshO::FaceIterator fi;
-        for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-            (*fi).Q()=(*fi).Q()/numViews;
-    } else {
+		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+		{
+			(*fi).Q() = (*fi).Q() / numViews;
+			FBN[fi].Normalize();
+		}
+    } 
+	else 
+	{
         tri::UpdateColor<CMeshO>::PerVertexQualityGray(m.cm,0.0f,0.0f);
         CMeshO::VertexIterator vi;
         for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
@@ -360,7 +377,6 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
     maxTexSize = std::min(maxTexSize, (unsigned int)AMBOCC_MAX_TEXTURE_SIZE);
 
-
     if (depthTexSize < 16)
     {
         Log(0, "Texture size is too small, 16x16 used instead");
@@ -378,7 +394,6 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_TEXTURE_3D_EXT );
-
 
     //******* CHECK THAT EVERYTHING IS SUPPORTED **********/
     if (useGPU)
@@ -480,7 +495,6 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
         }
 
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
 
         fboResult = 0;
         glGenFramebuffersEXT(1, &fboResult);   // FBO for second pass (1 color attachment)
@@ -792,6 +806,8 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
     glReadPixels(0, 0, depthTexSize, depthTexSize, GL_DEPTH_COMPONENT, GL_FLOAT, dFloat);
 
     cameraDir.Normalize();
+	CMeshO::PerFaceAttributeHandle<Point3f> FBN = tri::Allocator<CMeshO>::GetPerFaceAttribute<Point3f>(m.cm, "BentNormal");
+
     for (uint i=0; i<faceCenterVec.size(); ++i)
     {
         Point3f &vp = faceCenterVec[i];
@@ -805,6 +821,7 @@ void AmbientOcclusionPlugin::generateFaceOcclusionSW(MeshModel &m, vector<Point3
         if (resCoords[2] <= (GLdouble)dFloat[depthTexSize*y+x])
         {
             m.cm.face[i].Q() += max(Point3f::Construct(m.cm.face[i].cN()).dot(cameraDir), 0.0f);
+			FBN[m.cm.face[i]] += cameraDir;
         }
     }
 
