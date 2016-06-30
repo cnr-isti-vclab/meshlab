@@ -557,7 +557,7 @@ public:
     static const QString Info();
 
   // Called when the user press the first time the button
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* cont){return true;}
+    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* /*cont*/){return true;}
     virtual bool StartEdit(MeshDocument &md, GLArea *parent,MLSceneGLSharedDataContext* cont)
     {
         //assert(NULL != md.mm());
@@ -566,7 +566,7 @@ public:
         else return false;
     }
     // Called when the user press the second time the button
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* cont){}
+    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* /*cont*/){}
 
 
     // There are two classes of editing tools, the one that works on a single layer at a time
