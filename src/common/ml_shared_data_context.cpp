@@ -538,10 +538,14 @@ void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModalit
         {
             return;
         }
+    case (MLRenderingData::PR_ARITY):
+        {
+            throw MLException("PR_ARITY passed as parameter!");
+        }
     }
 }
 
-void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
+void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY /*pm*/,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
 {
     MLRenderingData::RendAtts filteredupdated = updated;
     MLRenderingData::RendAtts tmp = current;
@@ -628,6 +632,10 @@ bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMeshInfo(bo
         {
             return validvert && validfaces;
         }
+    case (MLRenderingData::PR_ARITY):
+        {
+            throw MLException("PR_ARITY passed as parameter!");
+        }      
     }
     return false;
 }
@@ -691,6 +699,11 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
                     glopts._persolid_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && !permeshcolor;
                     break;
                 }
+            case (MLRenderingData::PR_ARITY):
+                {
+                    throw MLException("PR_ARITY passed as parameter!");
+                }
+              
             }
         }
     }

@@ -193,7 +193,7 @@ public:
     virtual void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt) = 0;
     virtual void setAssociatedMeshId(int meshid) = 0;
     virtual void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const = 0;
-    virtual void updateVisibility(MeshModel* mm) {}
+    virtual void updateVisibility(MeshModel* /*mm*/) {}
     static MLRenderingParametersFrame* factory(MLRenderingAction* act,int meshid,QWidget* parent);
     static void destroy(MLRenderingParametersFrame* pf);
 
@@ -327,7 +327,7 @@ public:
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
-    void updateVisibility(MeshModel* mm) {}
+    void updateVisibility(MeshModel* /*mm*/) {}
 
 private:
     void initGui();
