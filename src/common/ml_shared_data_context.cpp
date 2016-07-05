@@ -666,10 +666,8 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
     if (!dt.get(glopts))
         return;
     if (permeshcolor)
-    {
-        vcg::Color4b def = mm->cm.C();
-        glopts._permesh_color = def;
-    }
+        glopts._perpoint_mesh_color_enabled = true;
+
     for(MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0);pm < MLRenderingData::PR_ARITY;pm = MLRenderingData::next(pm))
     {
         MLRenderingData::RendAtts atts;
@@ -707,10 +705,11 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
             }
         }
     }
+    suggestedDefaultPerViewGLOptions(glopts);
     dt.set(glopts);
 }
 
-void MLPoliciesStandAloneFunctions::filterFauxUdpateAccordingToMeshMask( MeshModel* m,MLRenderingData::RendAtts& atts )
+void MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask( MeshModel* m,MLRenderingData::RendAtts& atts )
 {
     if (m == NULL)
         return;
@@ -738,6 +737,16 @@ MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitive
                     return MLRenderingData::PR_POINTS;
     }
     return MLRenderingData::PR_ARITY;
+}
+
+void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions( MLPerViewGLOptions& tmp )
+{
+    vcg::Color4b orange(255,85,0,255);
+    vcg::Color4b lightpurple(109,83,111,255);
+    tmp._perbbox_fixed_color = vcg::Color4b(vcg::Color4b::White);
+    tmp._perpoint_fixed_color = orange;
+    tmp._perwire_fixed_color = vcg::Color4b(vcg::Color4b::DarkGray);
+    tmp._persolid_fixed_color = lightpurple;
 }
 
 //void MLPoliciesStandAloneFunctions::bestPrimitiveModalityMaskAfterUpdate( MeshModel* meshmodel,int meshmodelmask,const MLRenderingData::PRIMITIVE_MODALITY_MASK& inputpm,MLRenderingData::PRIMITIVE_MODALITY_MASK& outputpm )

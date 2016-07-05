@@ -447,7 +447,6 @@ void MLRenderingPerMeshColorAction::updateRenderingData(MLRenderingData& rd)
     bool valid = rd.get(opts);
     if (valid)
     {
-        opts._permesh_color = _col;
         switch (_pm)
         {
         case (MLRenderingData::PR_POINTS):
@@ -794,7 +793,6 @@ void MLRenderingBBoxPerMeshColorAction::updateRenderingData( MLRenderingData& rd
     if (valid)
     {
         opts._perbbox_mesh_color_enabled = isChecked();
-        opts._permesh_color = _col;
         rd.set(opts);
     }
 }

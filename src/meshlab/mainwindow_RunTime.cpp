@@ -1223,7 +1223,6 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                 if ((mm->hasDataMask(MeshModel::MM_VERTQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                     postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
 
-
                 MLRenderingData dttoberendered;
                 QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
                 if (existit != existingmeshesbeforefilterexecution.end())
@@ -1259,13 +1258,13 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),curr);
 
                     //4) we add to the current rendering modality in the current GLArea just the minimum attributes having been updated
-                    //   WARNING!!!! There are priorities polici
+                    //   WARNING!!!! There are priority policies
                     //               ex1) suppose that the current rendering modality is PR_POINTS and ATT_VERTPOSITION, ATT_VERTNORMAL,ATT_VERTCOLOR
                     //               if i updated, for instance, just the ATT_FACECOLOR, we switch off in the active GLArea the per ATT_VERTCOLOR attribute
                     //               and turn on the ATT_FACECOLOR
                     //               ex2) suppose that the current rendering modality is PR_POINTS and ATT_VERTPOSITION, ATT_VERTNORMAL,ATT_VERTCOLOR
                     //               if i updated, for instance, both the ATT_FACECOLOR and the ATT_VERTCOLOR, we continue to render the updated value of the ATT_VERTCOLOR
-                    //               ex3) suppose that the current rendering modality is PR_POINTS and we run a surface reconstruction filter
+                    //               ex3) suppose that in all the GLAreas the current rendering modality is PR_POINTS and we run a surface reconstruction filter
                     //               in the current GLA() we switch from the PR_POINTS to PR_SOLID primitive rendering modality. In the other GLArea we maintain the per points visualization
                     for(MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0);pm < MLRenderingData::PR_ARITY;pm = MLRenderingData::next(pm))
                     {
@@ -1279,11 +1278,14 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         {
                             curr.get(pm,rd);
                             MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(pm,dttoupdate,rd,rd);
-                            MLPoliciesStandAloneFunctions::filterFauxUdpateAccordingToMeshMask(mm,rd);
+                            MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask(mm,rd);
                         }
                         curr.set(pm,rd);
                         MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     }
+                    MLPerViewGLOptions opts;
+                    curr.get(opts);
+ 
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
                 }

@@ -184,6 +184,8 @@ struct MLPoliciesStandAloneFunctions
 
     static void setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt );
 
+    static void suggestedDefaultPerViewGLOptions(MLPerViewGLOptions& tmp);
+
     static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
 
     static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm);
@@ -194,7 +196,7 @@ struct MLPoliciesStandAloneFunctions
     
     static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(MeshModel* m);
 
-    static void filterFauxUdpateAccordingToMeshMask(MeshModel* m,MLRenderingData::RendAtts& atts);   
+    static void filterUselessUdpateAccordingToMeshMask(MeshModel* m,MLRenderingData::RendAtts& atts);   
 };
 
 

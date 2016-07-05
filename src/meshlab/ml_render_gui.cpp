@@ -240,6 +240,9 @@ void MLRenderingSolidParametersFrame::initGui()
     _colortool->addRenderingAction(new MLRenderingPerFaceColorAction(_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
     MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_SOLID,_colortool);
+    MLPerViewGLOptions tmp;
+    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
+    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._persolid_fixed_color));
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -354,6 +357,9 @@ void MLRenderingWireParametersFrame::initGui()
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_WIREFRAME_TRIANGLES,_colortool);
+    MLPerViewGLOptions tmp;
+    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
+    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perwire_fixed_color));
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -470,6 +476,9 @@ void MLRenderingPointsParametersFrame::initGui()
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid,this));
     MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_POINTS,_colortool);
+    MLPerViewGLOptions tmp;
+    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
+    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perpoint_fixed_color));
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -554,6 +563,10 @@ void MLRenderingBBoxParametersFrame::initGui()
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingBBoxPerMeshColorAction(_meshid,this));
     MLRenderingBBoxColorPicker* colbut = new MLRenderingBBoxColorPicker(_meshid,_colortool);
+    MLPerViewGLOptions tmp; 
+    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
+    //tmp._perbbox_fixed_color = vcg::Color4b(255,85,0,255);
+    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perbbox_fixed_color));
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
@@ -831,9 +844,13 @@ void MLRenderingColorPicker::pickColor()
     if (_act == NULL)
         return;
     const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    _act->setColor(vcg::ColorConverter::ToColor4b(QColorDialog::getColor(cc,this)));
-    updateColorInfo();
-    emit userDefinedColorAction(_act->meshId(),_act);
+    QColor ret = QColorDialog::getColor(cc,this);
+    if (ret.isValid())
+    {
+        _act->setColor(vcg::ColorConverter::ToColor4b(ret));
+        updateColorInfo();
+        emit userDefinedColorAction(_act->meshId(),_act);
+    }
 }
 
 void MLRenderingColorPicker::initGui()
@@ -853,6 +870,12 @@ void MLRenderingColorPicker::initGui()
     setMenu(colmenu);
     updateColorInfo();
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
+}
+
+void MLRenderingColorPicker::setColor( QColor& def )
+{
+    _act->setColor(def);
+    updateColorInfo();
 }
 
 MLRenderingBBoxColorPicker::MLRenderingBBoxColorPicker(QWidget *p )
@@ -890,9 +913,13 @@ void MLRenderingBBoxColorPicker::pickColor()
     if (_act == NULL)
         return;
     const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    _act->setColor(vcg::ColorConverter::ToColor4b(QColorDialog::getColor(cc,this)));
-    updateColorInfo();
-    emit userDefinedColorAction(_act->meshId(),_act);
+    QColor ret = QColorDialog::getColor(cc,this);
+    if (ret.isValid())
+    {
+        _act->setColor(vcg::ColorConverter::ToColor4b(ret));
+        updateColorInfo();
+        emit userDefinedColorAction(_act->meshId(),_act);
+    }
 }
 
 void MLRenderingBBoxColorPicker::initGui()
@@ -912,6 +939,12 @@ void MLRenderingBBoxColorPicker::initGui()
     setMenu(colmenu);
     updateColorInfo();
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
+}
+
+void MLRenderingBBoxColorPicker::setColor( QColor& def )
+{
+    _act->setColor(def);
+    updateColorInfo();
 }
 
 //void MLRenderingColorPicker::paintEvent( QPaintEvent * )
