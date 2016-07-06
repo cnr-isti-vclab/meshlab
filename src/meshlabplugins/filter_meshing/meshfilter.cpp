@@ -71,6 +71,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_FREEZE_TRANSFORM
         << FP_RESET_TRANSFORM
 		<< FP_INVERT_TRANSFORM
+		<< FP_SET_TRANSFORM_PARAMS
         << FP_CYLINDER_UNWRAP
         << FP_REFINE_CATMULL
         << FP_REFINE_HALF_CATMULL
@@ -144,6 +145,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 
     case FP_FREEZE_TRANSFORM                 :
 	case FP_INVERT_TRANSFORM                 :
+	case FP_SET_TRANSFORM_PARAMS             :
     case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
     case FP_SLICE_WITH_A_PLANE               : return MeshFilterInterface::Measure;
 
@@ -195,6 +197,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_FREEZE_TRANSFORM                 :
     case FP_RESET_TRANSFORM                  :
 	case FP_INVERT_TRANSFORM                 :
+	case FP_SET_TRANSFORM_PARAMS             :
     case FP_NORMAL_EXTRAPOLATION             : return MeshModel::MM_NONE;
     }
     return MeshModel::MM_NONE;
@@ -226,6 +229,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
     case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
 	case FP_INVERT_TRANSFORM                 : return tr("Invert Current Matrix");
+	case FP_SET_TRANSFORM_PARAMS             : return tr("Set Matrix from translation/rotation/scale");
     case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
     case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
@@ -297,8 +301,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "In case of an open mesh or a point clouds the inerta tensor is computed assuming each vertex is a constant puntual mass.");
     case FP_FLIP_AND_SWAP                      : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
     case FP_RESET_TRANSFORM                    : return tr("Set the current transformation matrix to the Identity. ");
-    case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
-	case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. In other words, the current layer transformation becomes its opposite.");
+    case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coordinates of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coordinates.");
+	case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. The current transformation is reversed, becoming its opposite.");
+	case FP_SET_TRANSFORM_PARAMS               : return tr("Set the current transformation matrix starting from parameters: [XYZ] translation, [XYZ] Euler angles rotation and [XYZ] scaling.");
     case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
@@ -417,7 +422,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("swapXY",false,"Swap X-Y axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
         parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
         parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
-        parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+        parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
         break;
 
     case FP_RESET_TRANSFORM:
@@ -431,6 +436,21 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 	case FP_INVERT_TRANSFORM:
 		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible layers"));
 		break;
+
+	case FP_SET_TRANSFORM_PARAMS:
+	{
+		parlst.addParam(new RichFloat("translationX", 0, "X Translation", "Translation factor on X axis"));
+		parlst.addParam(new RichFloat("translationY", 0, "Y Translation", "Translation factor on Y axis"));
+		parlst.addParam(new RichFloat("translationZ", 0, "Z Translation", "Translation factor on Z axis"));
+		parlst.addParam(new RichFloat("rotationX", 0, "X Rotation", "Rotation angle on X axis"));
+		parlst.addParam(new RichFloat("rotationY", 0, "Y Rotation", "Rotation angle on Y axis"));
+		parlst.addParam(new RichFloat("rotationZ", 0, "Z Rotation", "Rotation angle on Z axis"));
+		parlst.addParam(new RichFloat("scaleX", 1, "X Scale", "Scaling factor on X axis"));
+		parlst.addParam(new RichFloat("scaleY", 1, "Y Scale", "Scaling factor on Y axis"));
+		parlst.addParam(new RichFloat("scaleZ", 1, "Z Scale", "Scaling factor on Z axis"));
+		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible layers"));
+	} break;
 
     case FP_INVERT_FACES:
         parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
@@ -451,7 +471,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		raxis.push_back("Z axis");
 		parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
 		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
-		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
 
@@ -473,13 +493,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
 	} break;
 
     case FP_PRINCIPAL_AXIS:
 		parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
         break;
 
@@ -490,7 +510,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Amount of translation along the Y axis (in model units)"));
 		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Amount of translation along the Z axis (in model units)"));
 		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
 	} break;
 
@@ -507,7 +527,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied and the vertex coords are actually changed"));
+		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool("ToAll", false, "Apply to all layers", "All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
 	} break;
 
@@ -800,6 +820,72 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			}
 		}break;
 
+	case FP_SET_TRANSFORM_PARAMS:
+		{
+			float tX = par.getFloat("translationX");
+			float tY = par.getFloat("translationY");
+			float tZ = par.getFloat("translationZ");
+			float rX = par.getFloat("rotationX");
+			float rY = par.getFloat("rotationY");
+			float rZ = par.getFloat("rotationZ");
+			float sX = par.getFloat("scaleX");
+			float sY = par.getFloat("scaleY");
+			float sZ = par.getFloat("scaleZ");
+
+			Matrix44m newTransform;
+			Matrix44m tt;
+			newTransform.SetIdentity();
+
+			if ((tX != 0.0) || (tY != 0.0) || (tZ != 0.0))
+			{
+				tt.SetTranslate(tX, tY, tZ);
+				newTransform = newTransform * tt;
+			}
+
+			if ((rX != 0.0) || (rY != 0.0) || (rZ != 0.0))
+			{
+				tt.FromEulerAngles(math::ToRad(rX), math::ToRad(rY), math::ToRad(rZ));
+				newTransform = newTransform * tt;
+			}
+
+			if ((sX != 0.0) || (sY != 0.0) || (sZ != 0.0))
+			{
+				tt.SetScale(sX, sY, sZ);
+				newTransform = newTransform * tt;
+			}
+
+			m.cm.Tr = newTransform;
+
+			if (par.getBool("Freeze"))
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+				m.cm.Tr.SetIdentity();
+			}
+
+			if (par.getBool("allLayers"))
+			{
+				for (int i = 0; i < md.meshList.size(); i++)
+				{
+					if (md.meshList[i] != &m)	// if is not the current one
+					{
+						md.meshList[i]->cm.Tr = newTransform;
+						if (par.getBool("Freeze"))
+						{
+							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+							md.meshList[i]->cm.shot.ApplyRigidTransformation(newTransform);
+							md.meshList[i]->cm.Tr.SetIdentity();
+						}
+					}
+				}
+				for (int i = 0; i < md.rasterList.size(); i++)
+					md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
+			}
+
+		}break;
+
     case FP_QUADRIC_SIMPLIFICATION:
         {
             m.updateDataMask( MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTMARK);
@@ -848,7 +934,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 return false;
             }
             if ( ! tri::Clean<CMeshO>::HasConsistentPerWedgeTexCoord(m.cm) ) {
-                errorMessage = "Mesh has some inconsistent tex coords (some faces without texture)"; // text
+                errorMessage = "Mesh has some inconsistent tex coordinates (some faces without texture)"; // text
                 return false; // can't continue, mesh can't be processed
             }
 
@@ -1677,16 +1763,17 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 {
     switch (ID(filter))
     {
-    case FP_ROTATE_FIT       :
-    case FP_PRINCIPAL_AXIS   :
-    case FP_FLIP_AND_SWAP    :
-    case FP_SCALE            :
-    case FP_CENTER           :
-    case FP_ROTATE           :
-	case FP_FREEZE_TRANSFORM : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
-	case FP_RESET_TRANSFORM  :
-	case FP_INVERT_TRANSFORM : return MeshModel::MM_TRANSFMATRIX;
-    case FP_SELECT_FACES_BY_EDGE: return MeshModel::MM_FACEFLAGSELECT;
+    case FP_ROTATE_FIT           :
+    case FP_PRINCIPAL_AXIS       :
+    case FP_FLIP_AND_SWAP        :
+    case FP_SCALE                :
+    case FP_CENTER               :
+    case FP_ROTATE               :
+	case FP_SET_TRANSFORM_PARAMS :
+	case FP_FREEZE_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
+	case FP_RESET_TRANSFORM      :
+	case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
+    case FP_SELECT_FACES_BY_EDGE : return MeshModel::MM_FACEFLAGSELECT;
 
     default                  : return MeshModel::MM_UNKNOWN;
     }
