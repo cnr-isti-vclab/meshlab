@@ -70,6 +70,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_CLOSE_HOLES
         << FP_FREEZE_TRANSFORM
         << FP_RESET_TRANSFORM
+		<< FP_INVERT_TRANSFORM
         << FP_CYLINDER_UNWRAP
         << FP_REFINE_CATMULL
         << FP_REFINE_HALF_CATMULL
@@ -106,7 +107,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     switch (ID(a))
     {
     case FP_REMOVE_UNREFERENCED_VERTEX       :
-    case FP_REMOVE_DUPLICATED_VERTEX         :return MeshFilterInterface::Cleaning;
+    case FP_REMOVE_DUPLICATED_VERTEX         : return MeshFilterInterface::Cleaning;
     case FP_SELECT_FACES_BY_AREA             :
     case FP_SELECT_FACES_BY_EDGE             : return FilterClass(Cleaning + Selection);
 
@@ -118,14 +119,14 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_CLUSTERING                       :
     case FP_CLOSE_HOLES                      :
     case FP_FAUX_CREASE                      :
-    case FP_FAUX_EXTRACT                      :
+    case FP_FAUX_EXTRACT                     :
     case FP_VATTR_SEAM                       :
-    case FP_REFINE_LS3_LOOP									 : return MeshFilterInterface::Remeshing;
+    case FP_REFINE_LS3_LOOP	                 : return MeshFilterInterface::Remeshing;
     case FP_REFINE_CATMULL                   :
-    case FP_REFINE_HALF_CATMULL    :
-    case FP_QUAD_DOMINANT :
-    case FP_MAKE_PURE_TRI :
-    case FP_QUAD_PAIRING                     :return FilterClass(Remeshing+Polygonal);
+    case FP_REFINE_HALF_CATMULL              :
+    case FP_QUAD_DOMINANT                    :
+    case FP_MAKE_PURE_TRI                    :
+    case FP_QUAD_PAIRING                     : return FilterClass(Remeshing+Polygonal);
 
     case FP_NORMAL_EXTRAPOLATION             : return FilterClass( Normal + PointSet );
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return FilterClass( Normal + PointSet );
@@ -142,8 +143,9 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_COMPUTE_PRINC_CURV_DIR           : return FilterClass( Normal + VertexColoring );
 
     case FP_FREEZE_TRANSFORM                 :
+	case FP_INVERT_TRANSFORM                 :
     case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
-    case FP_SLICE_WITH_A_PLANE                  : return  MeshFilterInterface::Measure;
+    case FP_SLICE_WITH_A_PLANE               : return MeshFilterInterface::Measure;
 
     case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Smoothing;
 
@@ -192,6 +194,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_FLIP_AND_SWAP                    :
     case FP_FREEZE_TRANSFORM                 :
     case FP_RESET_TRANSFORM                  :
+	case FP_INVERT_TRANSFORM                 :
     case FP_NORMAL_EXTRAPOLATION             : return MeshModel::MM_NONE;
     }
     return MeshModel::MM_NONE;
@@ -222,6 +225,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
     case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
     case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
+	case FP_INVERT_TRANSFORM                 : return tr("Invert Current Matrix");
     case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
     case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
@@ -294,6 +298,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_FLIP_AND_SWAP                      : return tr("Generate a matrix transformation that flips each one of the axis or swaps a couple of axis. The listed transformations are applied in that order. This kind of transformation cannot be applied to set of Raster!");
     case FP_RESET_TRANSFORM                    : return tr("Set the current transformation matrix to the Identity. ");
     case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coords of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coords.");
+	case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. In other words, the current layer transformation becomes its opposite.");
     case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
@@ -422,6 +427,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
     case FP_FREEZE_TRANSFORM:
         parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
         break;
+
+	case FP_INVERT_TRANSFORM:
+		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible layers"));
+		break;
 
     case FP_INVERT_FACES:
         parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
@@ -736,6 +745,21 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             m.clearDataMask(MeshModel::MM_FACEFACETOPO);
         } break;
 
+	case FP_RESET_TRANSFORM:
+		{
+			bool all = par.getBool("allLayers");
+			if (all)
+			{
+				foreach(MeshModel *mmp, md.meshList)
+				if (mmp->visible)
+					mmp->cm.Tr.SetIdentity();
+			}
+			else
+			{
+				m.cm.Tr.SetIdentity();
+			}
+		}break;
+
     case FP_FREEZE_TRANSFORM:
         {
             bool all=par.getBool("allLayers");
@@ -761,6 +785,20 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             }
         }break;
 
+	case FP_INVERT_TRANSFORM:
+		{
+			bool all = par.getBool("allLayers");
+			if (all)
+			{
+				foreach(MeshModel *mmp, md.meshList)
+					if (mmp->visible)
+						mmp->cm.Tr = Inverse(mmp->cm.Tr);
+			}
+			else
+			{
+				m.cm.Tr = Inverse(m.cm.Tr);
+			}
+		}break;
 
     case FP_QUADRIC_SIMPLIFICATION:
         {
@@ -832,21 +870,6 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
             m.UpdateBoxAndNormals();
         } break;
-
-    case FP_RESET_TRANSFORM :
-	{
-		bool all=par.getBool("allLayers");
-		if(all)
-		{
-			foreach(MeshModel *mmp, md.meshList)
-				if(mmp->visible)
-					mmp->cm.Tr.SetIdentity();
-		}
-		else
-		{
-                m.cm.Tr.SetIdentity();
-		}
-	}break;
 
 	case FP_ROTATE_FIT:
 	{
@@ -1659,8 +1682,10 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
     case FP_FLIP_AND_SWAP    :
     case FP_SCALE            :
     case FP_CENTER           :
-    case FP_ROTATE           : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
-    case FP_RESET_TRANSFORM  : return MeshModel::MM_TRANSFMATRIX ;
+    case FP_ROTATE           :
+	case FP_FREEZE_TRANSFORM : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
+	case FP_RESET_TRANSFORM  :
+	case FP_INVERT_TRANSFORM : return MeshModel::MM_TRANSFMATRIX;
     case FP_SELECT_FACES_BY_EDGE: return MeshModel::MM_FACEFLAGSELECT;
 
     default                  : return MeshModel::MM_UNKNOWN;
