@@ -426,15 +426,15 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
 
     case FP_RESET_TRANSFORM:
-        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
         break;
 
     case FP_FREEZE_TRANSFORM:
-        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible layers"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
         break;
 
 	case FP_INVERT_TRANSFORM:
-		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible layers"));
+		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible mesh layers"));
 		break;
 
 	case FP_SET_TRANSFORM_PARAMS:
@@ -449,13 +449,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichFloat("scaleY", 1, "Y Scale", "Scaling factor on Y axis"));
 		parlst.addParam(new RichFloat("scaleZ", 1, "Z Scale", "Scaling factor on Z axis"));
 		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible layers"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
-
-    case FP_INVERT_FACES:
-        parlst.addParam(new RichBool ("forceFlip",true,"Force Flip","If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
-        parlst.addParam(new RichBool ("onlySelected",false,"Flip only selected faces","If selected, only selected faces will be affected"));
-        break;
 
     case FP_ROTATE_FIT:
 	{
@@ -472,7 +467,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
 		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
 		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the transformation applied to this layer"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
 
     case FP_ROTATE:
@@ -494,13 +489,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
 
     case FP_PRINCIPAL_AXIS:
 		parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","The transformation is explicitly applied to all the mesh and raster layers in the project"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
         break;
 
     case FP_CENTER:
@@ -511,7 +506,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Amount of translation along the Z axis (in model units)"));
 		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("ToAll",false,"Apply to all layers","All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
 
     case FP_SCALE:
@@ -528,8 +523,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all layers", "All the other mesh and raster layers in the project will follow the same transformation applied to this layer"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
+
+	case FP_INVERT_FACES:
+		parlst.addParam(new RichBool("forceFlip", true, "Force Flip", "If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
+		parlst.addParam(new RichBool("onlySelected", false, "Flip only selected faces", "If selected, only selected faces will be affected"));
+		break;
 
     case FP_FAUX_CREASE:
 		parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease. If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
@@ -864,11 +864,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				m.cm.Tr.SetIdentity();
 			}
 
-			if (par.getBool("allLayers"))
+			if (par.getBool("ToAll"))
 			{
 				for (int i = 0; i < md.meshList.size(); i++)
 				{
-					if (md.meshList[i] != &m)	// if is not the current one
+					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
 					{
 						md.meshList[i]->cm.Tr = newTransform;
 						if (par.getBool("Freeze"))
@@ -881,7 +881,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					}
 				}
 				for (int i = 0; i < md.rasterList.size(); i++)
-					md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
+					if (md.rasterList[0]->visible)
+						md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
 			}
 
 		}break;
@@ -1064,7 +1065,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		{
 			for (int i = 0; i < md.meshList.size(); i++)
 			{
-				if (md.meshList[i] != &m)	// if is not the current one
+				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
 				{
 					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
 					if (par.getBool("Freeze"))
@@ -1077,7 +1078,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				}
 			}
 			for (int i = 0; i < md.rasterList.size(); i++)
-				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+				if (md.rasterList[0]->visible)
+					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
 		}
 	} break;
 
@@ -1124,7 +1126,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		{
 			for (int i = 0; i < md.meshList.size(); i++)
 			{
-				if (md.meshList[i] != &m)	// if is not the current one
+				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
 				{
 					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
 					if (par.getBool("Freeze"))
@@ -1137,20 +1139,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				}
 			}
 			for (int i = 0; i < md.rasterList.size(); i++)
-				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+				if (md.rasterList[0]->visible)
+					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
 		}
 	} break;
 
     case FP_PRINCIPAL_AXIS:
         {
-            if (par.getBool("ToAll"))
-            {
-                if (!par.getBool("Freeze"))
-                {
-                    errorMessage="Warning: the scaling is applied to all elements only when 'Freeze Matrix' checkbox is selected. Nothing done.";
-                    return false;
-                }
-            }
+			Matrix44m transfM; transfM.SetIdentity();
+
             if(par.getBool("pointsFlag"))
             {
                 Matrix33m cov;
@@ -1184,12 +1181,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                     qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
 
-                    Matrix44m trTran; trTran.SetIdentity();
                     for(int i=0;i<3;++i)
                         for(int j=0;j<3;++j)
-                            trTran[i][j] = eigenvecMatrix[i][j];
-                    trTran.transposeInPlace();
-                    m.cm.Tr=trTran;
+							transfM[i][j] = eigenvecMatrix[i][j];
+					transfM.transposeInPlace();
             }
             else
             {
@@ -1204,36 +1199,42 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
                 for(int i=0;i<4;i++)
                     qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
-                Matrix44m trTran; trTran.SetIdentity();
+
                 for(int i=0;i<3;++i)
                     for(int j=0;j<3;++j)
-                        trTran[i][j] = PCA[i][j];
-                m.cm.Tr=trTran;
+						transfM[i][j] = PCA[i][j];
             }
-            if (par.getBool("Freeze") && !par.getBool("ToAll"))
-            {
-                tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(m.cm);
-                m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-                m.cm.Tr.SetIdentity();
-            }
-            else if (par.getBool("ToAll"))
-            {
-                Matrix44m transf=m.cm.Tr;
-                for (int i=0; i<md.meshList.size(); i++)
-                {
-                    md.meshList[i]->cm.Tr=transf;
-                    tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr,true);
-                    tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-                    md.meshList[i]->cm.Tr.SetIdentity();
-                    md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
-                }
-                for (int i=0; i<md.rasterList.size(); i++)
-                {
-                    md.rasterList[i]->shot.ApplyRigidTransformation(transf);
-                }
 
-            }
+			m.cm.Tr = transfM;
+
+			if (par.getBool("Freeze"))
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+				m.cm.Tr.SetIdentity();
+			}
+
+			if (par.getBool("ToAll"))
+			{
+				for (int i = 0; i < md.meshList.size(); i++)
+				{
+					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
+					{
+						md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
+						if (par.getBool("Freeze"))
+						{
+							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+							md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
+							md.meshList[i]->cm.Tr.SetIdentity();
+						}
+					}
+				}
+				for (int i = 0; i < md.rasterList.size(); i++)
+				if (md.rasterList[0]->visible)
+					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+			}
 
         } break;
 
@@ -1265,7 +1266,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			{
 				for (int i = 0; i < md.meshList.size(); i++)
 				{
-					if (md.meshList[i] != &m)	// if is not the current one
+					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
 					{
 						md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
 						if (par.getBool("Freeze"))
@@ -1278,7 +1279,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					}
 				}
 				for (int i = 0; i < md.rasterList.size(); i++)
-					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+					if (md.rasterList[0]->visible)
+						md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
 			}
 
         } break;
@@ -1329,7 +1331,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		{
 			for (int i = 0; i < md.meshList.size(); i++)
 			{
-				if (md.meshList[i] != &m)	// if is not the current one
+				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
 				{
 					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
 					if (par.getBool("Freeze"))
@@ -1342,7 +1344,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				}
 			}
 			for (int i = 0; i < md.rasterList.size(); i++)
-				md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
+				if (md.rasterList[0]->visible)
+					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
 		}
 
 	} break;
