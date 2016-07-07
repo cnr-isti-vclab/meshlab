@@ -232,19 +232,20 @@ public:
         Remeshing        =0x00004, /*!<  Simplification, Refinement, Reconstruction and mesh optimization*/
         FaceColoring     =0x00008,
         VertexColoring   =0x00010,
-        MeshCreation     =0x00020,
-        Smoothing        =0x00040, /*!<  Stuff that does not change the topology, but just the vertex positions*/
-        Quality          =0x00080,
-        Layer            =0x00100, /*!<  Layers, attributes */
-        RasterLayer      =0x20000, /*!<  Raster Layers, attributes */
-        Normal           =0x00200, /*!<  Normal, Curvature, orientation (rotations and transformations fall here)*/
-        Sampling         =0x00400,
-        Texture          =0x00800,
-        RangeMap         =0x01000, /*!<  filters specific for range map processing*/
-        PointSet         =0x02000,
-        Measure          =0x04000,  /*!<  Filters that compute measures and information on meshes.*/
-        Polygonal        =0x08000,  /*!<  Filters that works on polygonal and quad meshes.*/
-        Camera           =0x10000  /*!<  Filters that works on shot of mesh and raster.*/
+        MeshColoring     =0x00020,
+        MeshCreation     =0x00040,
+        Smoothing        =0x00080, /*!<  Stuff that does not change the topology, but just the vertex positions*/
+        Quality          =0x00100,
+        Layer            =0x20000, /*!<  Layers, attributes */
+        RasterLayer      =0x00200, /*!<  Raster Layers, attributes */
+        Normal           =0x00400, /*!<  Normal, Curvature, orientation (rotations and transformations fall here)*/
+        Sampling         =0x00800,
+        Texture          =0x01000,
+        RangeMap         =0x02000, /*!<  filters specific for range map processing*/
+        PointSet         =0x04000,
+        Measure          =0x08000,  /*!<  Filters that compute measures and information on meshes.*/
+        Polygonal        =0x10000,   /*!<  Filters that works on polygonal and quad meshes.*/
+        Camera           =0x20000 /*!<  Filters that works on shot of mesh and raster.*/
     };
 
 

@@ -51,7 +51,6 @@
 #include "../common/filterscript.h"
 
 
-
 using namespace std;
 using namespace vcg;
 
@@ -1217,6 +1216,9 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                 if ((mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (fclasses & MeshFilterInterface::VertexColoring ))
                     postcondmask = postcondmask | MeshModel::MM_VERTCOLOR;
 
+                if ((mm->hasDataMask(MeshModel::MM_COLOR)) && (fclasses & MeshFilterInterface::MeshColoring ))
+                    postcondmask = postcondmask | MeshModel::MM_COLOR;
+
                 if ((mm->hasDataMask(MeshModel::MM_FACEQUALITY)) && (fclasses & MeshFilterInterface::Quality ))
                     postcondmask = postcondmask | MeshModel::MM_FACEQUALITY;
 
@@ -1352,8 +1354,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     QTime tt; tt.start();
     meshDoc()->setBusy(true);
-    RichParameterSet MergedEnvironment(params);
-    MergedEnvironment.join(currentGlobalParams);
+    RichParameterSet mergedenvironment(params);
+    mergedenvironment.join(currentGlobalParams);
 
     MLSceneGLSharedDataContext* shar = NULL;
     QGLWidget* filterWidget = NULL;
@@ -1403,7 +1405,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             int dt = mm->dataMask();
             existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN(),(size_t) mm->cm.EN()));
         }
-        ret=iFilter->applyFilter(action, *(meshDoc()), MergedEnvironment, QCallBack);
+        ret=iFilter->applyFilter(action, *(meshDoc()), mergedenvironment, QCallBack);
         if (shar != NULL)
         {
             shar->removeView(iFilter->glContext);
@@ -1436,35 +1438,68 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
         }
 
-
-        // at the end for filters that change the color, or selection set the appropriate rendering mode
-        if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) 
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
         
-        if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring )
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-        
-        if(iFilter->postCondition(action) & MeshModel::MM_COLOR)
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_COLOR);
-        
-
-
-        if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
-            meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
+        MeshFilterInterface::FILTER_ARITY arity = iFilter->filterArity(action);
+        QList<MeshModel*> tmp;
+        switch(arity)
+        {
+        case (MeshFilterInterface::SINGLE_MESH):
+            {
+                tmp.push_back(meshDoc()->mm());
+                break;
+            }
+        case (MeshFilterInterface::FIXED):
+            {
+                for(int ii = 0;ii < mergedenvironment.paramList.size();++ii)
+                {
+                    if (mergedenvironment.paramList[ii]->val->isMesh())
+                    {
+                        MeshModel* mm = mergedenvironment.paramList[ii]->val->getMesh();
+                        if (mm != NULL)
+                            tmp.push_back(mm);
+                    }
+                }
+                break;
+            }
+        case (MeshFilterInterface::VARIABLE):
+            {
+                for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
+                {
+                    if (mm->isVisible())
+                        tmp.push_back(mm);
+                }
+                break;
+            }
+        default:
+            break;
+        }
 
         if(iFilter->getClass(action) & MeshFilterInterface::MeshCreation )
             GLA()->resetTrackBall();
 
-        if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+        for(int jj = 0;jj < tmp.size();++jj)
         {
-            //WARNING!!!!! HERE IT SHOULD BE A CHECK IF THE FILTER IS FOR MESH OR FOR DOCUMENT (IN THIS CASE I SHOULD ACTIVATE ALL THE TEXTURE MODE FOR EVERYONE...)
-            //NOW WE HAVE JUST TEXTURE FILTERS WORKING ON SINGLE MESH
-            //QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->mm()->id());
-            //if (it != GLA()->rendermodemap.end())
-            //    it.value().setTextureMode(GLW::TMPerWedgeMulti);
-            updateTexture(meshDoc()->mm()->id());
+            MeshModel* mm = tmp[jj];
+            if (mm != NULL)
+            {
+                // at the end for filters that change the color, or selection set the appropriate rendering mode
+                if(iFilter->getClass(action) & MeshFilterInterface::FaceColoring ) 
+                    mm->updateDataMask(MeshModel::MM_FACECOLOR);
+
+                if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring )
+                    mm->updateDataMask(MeshModel::MM_VERTCOLOR);
+
+                if((iFilter->getClass(action) & MeshFilterInterface::MeshColoring ) || (iFilter->postCondition(action) & MeshModel::MM_COLOR))
+                    mm->updateDataMask(MeshModel::MM_COLOR);
+
+                if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
+                    mm->updateDataMask(MeshModel::MM_CAMERA);
+
+                if(iFilter->getClass(action) & MeshFilterInterface::Texture )
+                    updateTexture(mm->id());
+            }
         }
-      
+        
         int fclasses =	iFilter->getClass(action);
         //MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
         int postCondMask = iFilter->postCondition(action);

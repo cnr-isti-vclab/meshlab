@@ -729,6 +729,10 @@ void MainWindow::fillFilterMenu()
         {
             filterMenuColorize->addAction(filterAction);
         }
+        if( filterClass & MeshFilterInterface::MeshColoring )
+        {
+            filterMenuColorize->addAction(filterAction);
+        }
         if( filterClass & MeshFilterInterface::Selection )
         {
             filterMenuSelect->addAction(filterAction);

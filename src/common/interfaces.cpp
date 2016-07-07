@@ -212,6 +212,7 @@ void MeshLabFilterInterface::initConvertingCategoryMap( QMap<QString,MeshFilterI
     convertingMap["Remeshing"] = MeshFilterInterface::Remeshing;
     convertingMap["FaceColoring"] = MeshFilterInterface::FaceColoring;
     convertingMap["VertexColoring"] = MeshFilterInterface::VertexColoring;
+    convertingMap["MeshColoring"] = MeshFilterInterface::MeshColoring;
     convertingMap["MeshCreation"] = MeshFilterInterface::MeshCreation;
     convertingMap["Smoothing"] = MeshFilterInterface::Smoothing;
     convertingMap["Quality"] = MeshFilterInterface::Quality;
