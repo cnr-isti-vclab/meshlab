@@ -72,6 +72,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_RESET_TRANSFORM
 		<< FP_INVERT_TRANSFORM
 		<< FP_SET_TRANSFORM_PARAMS
+		<< FP_SET_TRANSFORM_MATRIX
         << FP_CYLINDER_UNWRAP
         << FP_REFINE_CATMULL
         << FP_REFINE_HALF_CATMULL
@@ -146,6 +147,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_FREEZE_TRANSFORM                 :
 	case FP_INVERT_TRANSFORM                 :
 	case FP_SET_TRANSFORM_PARAMS             :
+	case FP_SET_TRANSFORM_MATRIX             :
     case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
     case FP_SLICE_WITH_A_PLANE               : return MeshFilterInterface::Measure;
 
@@ -198,6 +200,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_RESET_TRANSFORM                  :
 	case FP_INVERT_TRANSFORM                 :
 	case FP_SET_TRANSFORM_PARAMS             :
+	case FP_SET_TRANSFORM_MATRIX             :
     case FP_NORMAL_EXTRAPOLATION             : return MeshModel::MM_NONE;
     }
     return MeshModel::MM_NONE;
@@ -230,6 +233,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
 	case FP_INVERT_TRANSFORM                 : return tr("Invert Current Matrix");
 	case FP_SET_TRANSFORM_PARAMS             : return tr("Set Matrix from translation/rotation/scale");
+	case FP_SET_TRANSFORM_MATRIX             : return tr("Set/Copy Transformation Matrix");
     case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
     case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
@@ -304,6 +308,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_FREEZE_TRANSFORM                   : return tr("Freeze the current transformation matrix into the coordinates of the vertices of the mesh (and set this matrix to the identity). In other words it applies in a definetive way the current matrix to the vertex coordinates.");
 	case FP_INVERT_TRANSFORM                   : return tr("Invert the current transformation matrix. The current transformation is reversed, becoming its opposite.");
 	case FP_SET_TRANSFORM_PARAMS               : return tr("Set the current transformation matrix starting from parameters: [XYZ] translation, [XYZ] Euler angles rotation and [XYZ] scaling.");
+	case FP_SET_TRANSFORM_MATRIX               : return tr("Set the current transformation matrix by filling it, or copying from another layer.");
     case FP_NORMAL_EXTRAPOLATION               : return tr("Compute the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_NORMAL_SMOOTH_POINTCLOUD           : return tr("Smooth the normals of the vertices of a mesh without exploiting the triangle connectivity, useful for dataset with no faces");
     case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
@@ -436,6 +441,14 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 	case FP_INVERT_TRANSFORM:
 		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible mesh layers"));
 		break;
+
+	case FP_SET_TRANSFORM_MATRIX:
+	{
+		Matrix44m mat; mat.SetIdentity();
+		parlst.addParam(new RichMatrix44f("TransformMatrix", mat, ""));
+		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+	}break;
 
 	case FP_SET_TRANSFORM_PARAMS:
 	{
@@ -883,6 +896,44 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 				for (int i = 0; i < md.rasterList.size(); i++)
 					if (md.rasterList[0]->visible)
 						md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
+			}
+
+		}break;
+
+	case FP_SET_TRANSFORM_MATRIX:
+		{
+			Matrix44m newTransform;
+			newTransform = par.getMatrix44m("TransformMatrix");
+
+			m.cm.Tr = newTransform;
+
+			if (par.getBool("Freeze"))
+			{
+				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
+				tri::UpdateBounding<CMeshO>::Box(m.cm);
+				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
+				m.cm.Tr.SetIdentity();
+			}
+
+			if (par.getBool("ToAll"))
+			{
+				for (int i = 0; i < md.meshList.size(); i++)
+				{
+					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
+					{
+						md.meshList[i]->cm.Tr = newTransform;
+						if (par.getBool("Freeze"))
+						{
+							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
+							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
+							md.meshList[i]->cm.shot.ApplyRigidTransformation(newTransform);
+							md.meshList[i]->cm.Tr.SetIdentity();
+						}
+					}
+				}
+				for (int i = 0; i < md.rasterList.size(); i++)
+				if (md.rasterList[0]->visible)
+					md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
 			}
 
 		}break;
@@ -1773,6 +1824,7 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
     case FP_CENTER               :
     case FP_ROTATE               :
 	case FP_SET_TRANSFORM_PARAMS :
+	case FP_SET_TRANSFORM_MATRIX :
 	case FP_FREEZE_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
 	case FP_RESET_TRANSFORM      :
 	case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
