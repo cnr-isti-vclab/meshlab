@@ -14,15 +14,16 @@ mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
 
-win32-msvc2005:  LIBS += ../../distrib/common.lib
-win32-msvc2008:  LIBS += ../../distrib/common.lib
-win32-msvc2010:  LIBS += ../../distrib/common.lib
-win32-msvc2012:  LIBS += ../../distrib/common.lib
-win32-msvc2013:  LIBS += ../../distrib/common.lib
-win32-g++:LIBS += -L../../distrib -lcommon
-linux-g++:LIBS += -L../../distrib -lcommon
-linux-g++-32:LIBS += -L../../distrib -lcommon
-linux-g++-64:LIBS += -L../../distrib -lcommon
+win32-msvc2005:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc2008:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc2010:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc2012:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc2013:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc2015:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
+linux-g++:LIBS += -L../../distrib -lcommon -lGL -lGLU
+linux-g++-32:LIBS += -L../../distrib -lcommon -lGL -lGLU
+linux-g++-64:LIBS += -L../../distrib -lcommon -lGL -lGLU
 
 #CONFIG(debug, debug|release) {
 #	win32-msvc2005:  LIBS += ../../common/debug/common.lib
@@ -35,6 +36,7 @@ win32-msvc2008:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2010:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2012:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
+win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
@@ -58,6 +60,7 @@ win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2010:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2012:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2013:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc2015:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release,debug | release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG
