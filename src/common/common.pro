@@ -8,6 +8,7 @@ win32-msvc2008:DESTDIR = ../distrib
 win32-msvc2010:DESTDIR = ../distrib
 win32-msvc2012:DESTDIR = ../distrib
 win32-msvc2013:DESTDIR = ../distrib
+win32-msvc2015:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
 
 # CONFIG(release,debug | release) {
@@ -68,6 +69,7 @@ win32-msvc2008:CONFIG += staticlib
 win32-msvc2010:CONFIG += staticlib
 win32-msvc2012:CONFIG += staticlib
 win32-msvc2013:CONFIG += staticlib
+win32-msvc2015:CONFIG += staticlib
 
 QT += opengl
 QT += xml
@@ -84,6 +86,7 @@ win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2010:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2012:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2013:DEFINES += _CRT_SECURE_NO_WARNINGS
+win32-msvc2015:DEFINES += _CRT_SECURE_NO_WARNINGS
 
 
 # Input
