@@ -850,7 +850,8 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
         updateVisibilityIcon(meshmodel->visible);
         setText(1, QString::number(meshmodel->id()));
 
-        QString meshName = meshmodel->label();
+        QFileInfo inf = meshmodel->label();
+        QString meshName = inf.completeBaseName();
         if (meshmodel->meshModified())
             meshName += " *";
         if (_rendertoolbar != NULL)

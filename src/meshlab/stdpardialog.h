@@ -289,8 +289,8 @@ class Matrix44fWidget : public MeshLabWidget
     Q_OBJECT
 
 public:
-  Matrix44fWidget(QWidget *p,  RichMatrix44f* rpf, QWidget *gla_curr);
-  ~Matrix44fWidget();
+    Matrix44fWidget(QWidget *p,  RichMatrix44f* rpf, QWidget *gla_curr);
+    ~Matrix44fWidget();
     QString paramName;
     vcg::Matrix44f getValue();
 
@@ -299,11 +299,11 @@ public:
     void resetWidgetValue();
     void setWidgetValue(const Value& nv);
 
-    public slots:
-    void  setValue(QString name, vcg::Matrix44f val);
+public slots:
+    void setValue(QString name, Matrix44m val);
     void getMatrix();
     void pasteMatrix();
-    signals:
+signals:
     void askMeshMatrix(QString);
 
 

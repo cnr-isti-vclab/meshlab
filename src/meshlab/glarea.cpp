@@ -777,7 +777,8 @@ void GLArea::displayInfo(QPainter *painter)
         else
         {
             QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-            col1Text += QString("Current Mesh: %1\n").arg(mm()->label());
+            QFileInfo inf = mm()->label();
+            col1Text += QString("Current Mesh: %1\n").arg(inf.completeBaseName());
             col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + "    (" + engLocale.toString(this->md()->vn()) + ") \n";
             col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + "    (" + engLocale.toString(this->md()->fn()) + ") \n";
         }

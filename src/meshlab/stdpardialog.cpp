@@ -696,7 +696,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 
     //gridLay->addLayout(vlay,row,1,Qt::AlignTop);
 
-    connect(gla_curr,SIGNAL(transmitMatrix(QString,vcg::Matrix44f)),this,SLOT(setValue(QString,vcg::Matrix44f)));
+    connect(gla_curr,SIGNAL(transmitMatrix(QString,Matrix44m)),this,SLOT(setValue(QString,Matrix44m)));
     connect(getMatrixButton,SIGNAL(clicked()),this,SLOT(getMatrix()));
     connect(pasteMatrixButton,SIGNAL(clicked()),this,SLOT(pasteMatrix()));
     connect(this,SIGNAL(askMeshMatrix(QString)),  gla_curr,SLOT(sendMeshMatrix(QString)));
@@ -706,7 +706,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
 
 Matrix44fWidget::~Matrix44fWidget() {}
 
-void Matrix44fWidget::setValue(QString name,Matrix44f newVal)
+void Matrix44fWidget::setValue(QString name,Matrix44m newVal)
 {
     if(name==paramName)
     {
@@ -724,16 +724,18 @@ vcg::Matrix44f Matrix44fWidget::getValue()
     return Matrix44f(val);
 }
 
-void Matrix44fWidget::getMatrix(){
-
+void Matrix44fWidget::getMatrix()
+{
     emit askMeshMatrix(QString("TransformMatrix"));
 }
 
-void Matrix44fWidget::pasteMatrix(){
+void Matrix44fWidget::pasteMatrix()
+{
     QClipboard *clipboard = QApplication::clipboard();
-    QString shotString = clipboard->text();
+    QString shotString = clipboard->text().trimmed();
     QStringList list1 = shotString.split(" ");
-    if(list1.size() != 16) return;
+    if(list1.size() != 16) 
+        return;
     int id = 0;
     for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
         bool ok = true;
