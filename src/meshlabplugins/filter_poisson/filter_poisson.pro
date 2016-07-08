@@ -2,6 +2,8 @@ include (../../shared.pri)
 
 HEADERS       += filter_poisson.h
 
+win32-msvc2015:DEFINES += _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
+
 QMAKE_CXXFLAGS += -fpermissive
 
 SOURCES += src/Factor.cpp \
