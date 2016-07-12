@@ -245,7 +245,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     {
       float minCC= par.getAbsPerc("MinComponentDiag");
       std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
-      Log("Removed %2 connected components out of %1", delInfo.second, delInfo.first);
+      Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
     }break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
       {
@@ -320,7 +320,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
   case FP_REMOVE_NON_MANIF_EDGE :
   {
       int total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
-      Log("Successfully removed %d folded faces", total);
+      Log("Successfully removed %d non-manifold faces", total);
   }
   break;
   case FP_REMOVE_NON_MANIF_VERT :
