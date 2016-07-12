@@ -65,7 +65,6 @@ QString ExtraMeshColorizePlugin::filterName(FilterIDType c) const{
     case CP_MAP_FQUALITY_INTO_COLOR:   return QString("Colorize by face Quality");
     case CP_DISCRETE_CURVATURE:        return QString("Discrete Curvatures");
     case CP_TRIANGLE_QUALITY:          return QString("Per Face Quality according to Triangle shape and aspect ratio");
-    case CP_COLOR_NON_TOPO_COHERENT:   return QString("Color edges topologically non coherent");
     case CP_VERTEX_SMOOTH:             return QString("Smooth: Laplacian Vertex Color");
     case CP_FACE_SMOOTH:               return QString("Smooth: Laplacian Face Color");
     case CP_VERTEX_TO_FACE:            return QString("Transfer Color: Vertex to Face");
@@ -98,7 +97,6 @@ QString ExtraMeshColorizePlugin::filterInfo(FilterIDType filterId) const {
     case CP_MESH_TO_FACE:           return QString("Mesh to Face color transfer");
     case CP_FACE_TO_VERTEX:           return QString("Face to Vertex color transfer");
     case CP_TEXTURE_TO_VERTEX:        return QString("Texture to Vertex color transfer");
-    case CP_COLOR_NON_TOPO_COHERENT : return QString("Color edges topologically non coherent.");
     case CP_RANDOM_FACE:              return QString("Colorize Faces randomly. If internal edges are present they are used. Useful for quads.");
     case CP_RANDOM_CONNECTED_COMPONENT:  return QString("Colorize each connected component randomly.");
     default: assert(0); return QString("");
@@ -485,7 +483,6 @@ MeshFilterInterface::FilterClass ExtraMeshColorizePlugin::getClass(QAction *a){
         return FilterClass(Normal + VertexColoring);
 
     case   CP_MAP_VQUALITY_INTO_COLOR:
-    case   CP_COLOR_NON_TOPO_COHERENT:
     case   CP_VERTEX_SMOOTH:
     case   CP_FACE_TO_VERTEX:
     case   CP_TEXTURE_TO_VERTEX:
@@ -515,7 +512,6 @@ int ExtraMeshColorizePlugin::getPreConditions(QAction *a) const
     case CP_RANDOM_FACE:
     case CP_RANDOM_CONNECTED_COMPONENT:
     case CP_DISCRETE_CURVATURE:
-    case CP_COLOR_NON_TOPO_COHERENT:
         return MeshModel::MM_FACENUMBER;
     case CP_SATURATE_QUALITY:
     case CP_CLAMP_QUALITY:
@@ -543,7 +539,6 @@ int ExtraMeshColorizePlugin::postCondition( QAction* a ) const{
         return MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY;
     case CP_RANDOM_FACE:
     case CP_RANDOM_CONNECTED_COMPONENT:
-    case CP_COLOR_NON_TOPO_COHERENT:
     case CP_FACE_SMOOTH:
     case CP_VERTEX_TO_FACE:
     case CP_MESH_TO_FACE:
