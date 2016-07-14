@@ -38,7 +38,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
         if (md.rasterList.size()==0)
         {
             Log(0, "You need a Raster Model to apply this filter!");
-            //return false;
+            return false;
         }
         else
             align.image=&md.rm()->currentPlane->image;

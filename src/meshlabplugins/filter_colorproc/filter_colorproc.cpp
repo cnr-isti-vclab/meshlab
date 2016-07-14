@@ -469,9 +469,10 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     case CP_DESATURATION :
     case CP_WHITE_BAL :
     case CP_LEVELS :
-    case CP_SCATTER_PER_MESH :
     case CP_PERLIN_COLOR :
     case CP_COLOR_NOISE : return MeshFilterInterface::VertexColoring;
+    case CP_SCATTER_PER_MESH : return MeshFilterInterface::MeshColoring;
+
     default: assert(0);
   }
 }
