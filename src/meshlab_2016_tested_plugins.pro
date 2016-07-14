@@ -58,12 +58,12 @@ SUBDIRS       = common \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
                 meshlabplugins/filter_zippering \
-				
 # Edit Plugins
                 meshlabplugins/edit_quality \
 # Sample Plugins
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \
-                sampleplugins/io_m\
+                sampleplugins/io_m \
                 sampleplugins/filter_geodesic \
                 sampleplugins/filter_createiso
+				
