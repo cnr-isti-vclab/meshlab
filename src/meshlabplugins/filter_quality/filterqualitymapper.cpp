@@ -111,7 +111,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 					tfList << TransferFunction::defaultTFs[(STARTUP_TF_TYPE + i)%NUMBER_OF_DEFAULT_TF];
 				
 				parlst.addParam(new RichEnum( "TFsList", 1, tfList, "Transfer Function type to apply to filter", "Choose the Transfer Function to apply to the filter" ));
-				parlst.addParam(new RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function." ));
+				parlst.addParam(new RichString("csvFileName", "", "Custom TF Filename", "Filename of the transfer function to be loaded, used only if you have chosen the Custom Transfer Function. Write the full path of the qmap file, or save the file in the same folder of the current mesh, and write only the name of the qmap file. Only the RGB mapping will be imported from the qmap file" ));
 			}
 			break;
    default: break; // do not add any parameter for the other filters
@@ -123,6 +123,7 @@ void QualityMapperFilter::initParameterSet(QAction *action,MeshModel &m, RichPar
 bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
     MeshModel &m=*(md.mm());
+	m.updateDataMask(MeshModel::MM_VERTCOLOR);
     Q_UNUSED(filter);
 	Q_UNUSED(cb);
 
@@ -146,10 +147,10 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		QString csvFileName = par.getString("csvFileName");
 		if ( csvFileName != "" &&  loadEqualizerInfo(csvFileName, &eqData) > 0 )
 		{
-				par.setValue("minQualityVal", FloatValue(eqData.minQualityVal) );
+				/*par.setValue("minQualityVal", FloatValue(eqData.minQualityVal) );
 				par.setValue("maxQualityVal", FloatValue(eqData.maxQualityVal) );
 				par.setValue("midHandlePos", FloatValue(_meshMinMaxQuality.minV + ((_meshMinMaxQuality.maxV-_meshMinMaxQuality.minV)/eqData.midQualityPercentage)));
-				par.setValue("brightness", FloatValue(eqData.brightness));
+				par.setValue("brightness", FloatValue(eqData.brightness));*/
 
 				//building new TF object from external file
 				transferFunction = new TransferFunction( par.getString("csvFileName") );
@@ -161,7 +162,7 @@ bool QualityMapperFilter::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			}
 	}
 	// Applying colors
-	applyColorByVertexQuality(m, transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), eqData.midQualityPercentage/100.0, par.getFloat("brightness"));
+	applyColorByVertexQuality(m, transferFunction, par.getFloat("minQualityVal"), par.getFloat("maxQualityVal"), par.getFloat("midHandlePos")/100.0, par.getFloat("brightness"));
 
 	//all done, deleting transfer function object
 	if ( transferFunction )
