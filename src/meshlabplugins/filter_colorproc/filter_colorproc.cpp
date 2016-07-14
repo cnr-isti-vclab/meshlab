@@ -104,7 +104,7 @@ FilterColorProc::~FilterColorProc()
     case CP_WHITE_BAL : return "The filter provides a standard white balance transformation. It is done correcting the RGB channels with a factor such that, the brighter color in the mesh, that is supposed to be white, becomes really white.";
     case CP_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to verteces depends on their position in the space; it means that near verteces will be painted with similar colors.";
     case CP_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel.";
-    case CP_SCATTER_PER_MESH : return "Assigns a random color to each visible mesh layer in the document. Colors change every time the filter is executed, but are always chosen so that they differs as much as possible.";
+    case CP_SCATTER_PER_MESH : return "Assigns a random color to each visible mesh layer in the document. Colors change every time the filter is executed, but are always chosen so that they differ as much as possible.";
     default: assert(0);
   }
   return QString("error!");
@@ -414,15 +414,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     case CP_SCATTER_PER_MESH:
     {
       int seed=par.getInt("seed");
-      if(seed==0) seed= time(NULL);
-      math::SubtractiveRingRNG myrnd(seed);
+      if(seed==0) seed = time(NULL);
       int numOfMeshes = md.meshList.size();
-      int id = myrnd.generate(numOfMeshes);
-	  if (seed != 0) id = seed%numOfMeshes;
+	  int id = seed % numOfMeshes;
       foreach(MeshModel *mm, md.meshList)
       {
 		if (mm->isVisible())
-          mm->cm.C()=Color4b::Scatter(numOfMeshes+1,id);
+          mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
         id=(id+1)%numOfMeshes;
       }
       return true;
