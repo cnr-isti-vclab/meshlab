@@ -68,7 +68,7 @@ QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
   switch(filterId) {
 	  case FF_VERT_SELECTION:     return QString("Conditional Vertex Selection");
 	  case FF_FACE_SELECTION:     return QString("Conditional Face Selection");
-	  case FF_GEOM_FUNC:          return QString("Geometric Function");
+	  case FF_GEOM_FUNC:          return QString("Per Vertex Geometric Function");
 	  case FF_FACE_COLOR:         return QString("Per Face Color Function");
 	  case FF_FACE_QUALITY:       return QString("Per Face Quality Function");
 	  case FF_VERT_COLOR:         return QString("Per Vertex Color Function");
@@ -264,14 +264,14 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 	  parlst.addParam(new RichString("x", "x", "func x = ", "insert function to generate new coord for x"));
 	  parlst.addParam(new RichString("y", "y", "func y = ", "insert function to generate new coord for y"));
 	  parlst.addParam(new RichString("z", "sin(x+y)", "func z = ", "insert function to generate new coord for z"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_NORMAL:
 	  parlst.addParam(new RichString("x", "-nx", "func x = ", "insert function to generate new x for the normal"));
 	  parlst.addParam(new RichString("y", "-ny", "func y = ", "insert function to generate new y for the normal"));
 	  parlst.addParam(new RichString("z", "-nz", "func z = ", "insert function to generate new z for the normal"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_COLOR:
@@ -279,20 +279,20 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 	  parlst.addParam(new RichString("y", "255", "func g = ", "function to generate Green component. Expected Range 0-255"));
 	  parlst.addParam(new RichString("z", "0", "func b = ", "function to generate Blue component. Expected Range 0-255"));
 	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_TEXTURE_FUNC:
 	  parlst.addParam(new RichString("u", "x", "func u = ", "function to generate u texture coord. Expected Range 0-1"));
 	  parlst.addParam(new RichString("v", "y", "func v = ", "function to generate v texture coord. Expected Range 0-1"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_VERT_QUALITY:
 	  parlst.addParam(new RichString("q", "vi", "func q = ", "function to generate new Quality for every vertex"));
 	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
 	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
   case FF_FACE_COLOR:
@@ -300,14 +300,14 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 	  parlst.addParam(new RichString("g", "0", "func g = ", "function to generate Green component. Expected Range 0-255"));
 	  parlst.addParam(new RichString("b", "255", "func b = ", "function to generate Blue component. Expected Range 0-255"));
 	  parlst.addParam(new RichString("a", "255", "func alpha = ", "function to generate Alpha component. Expected Range 0-255"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
 	  break;
 
   case FF_FACE_QUALITY:
 	  parlst.addParam(new RichString("q", "x0+y0+z0", "func q0 = ", "function to generate new Quality foreach face"));
 	  parlst.addParam(new RichBool("normalize", false, "normalize", "if checked normalize all quality values in range [0..1]"));
 	  parlst.addParam(new RichBool("map", false, "map into color", "if checked map quality generated values into per-vertex color"));
-	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
 	  break;
 
   case FF_WEDGE_TEXTURE_FUNC:
@@ -317,7 +317,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
     parlst.addParam(new RichString("v1","y1", "func v1 = ", "function to generate v texture coord. of wedge 1. Expected Range 0-1"));
     parlst.addParam(new RichString("u2","x2", "func u2 = ", "function to generate u texture coord. of wedge 2. Expected Range 0-1"));
     parlst.addParam(new RichString("v2","y2", "func v2 = ", "function to generate v texture coord. of wedge 2. Expected Range 0-1"));
-	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, affect only selected vertices"));
+	parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected faces"));
     break;
 
   case FF_DEF_VERT_ATTRIB:
@@ -327,7 +327,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 
   case FF_DEF_FACE_ATTRIB:
     parlst.addParam(new RichString("name","Radiosity","Name", "the name of new attribute. you can access attribute in other filters through this name"));
-    parlst.addParam(new RichString("expr","fi","Function =", "function to calculate custom attribute value for each vertex"));
+    parlst.addParam(new RichString("expr","fi","Function =", "function to calculate custom attribute value for each face"));
     break;
 
   case FF_GRID :
