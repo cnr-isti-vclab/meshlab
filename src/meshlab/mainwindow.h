@@ -142,6 +142,9 @@ public:
     void defaultPerViewRenderingData(MLRenderingData& dt) const;
     void getRenderingData(int mid,MLRenderingData& dt) const;
     void setRenderingData(int mid,const MLRenderingData& dt);
+
+    void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts);
+    void updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act);
 private slots:
     //////////// Slot Menu File //////////////////////
     void reload();

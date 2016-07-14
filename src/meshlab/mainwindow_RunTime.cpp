@@ -34,6 +34,7 @@
 #include <exception>
 #include "xmlgeneratorgui.h"
 #include "filterthread.h"
+#include "ml_default_decorators.h"
 
 #include <QToolBar>
 #include <QToolTip>
@@ -3365,4 +3366,43 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
             }
         }
     }
+}
+
+void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
+{
+    MLRenderingData olddt;
+    getRenderingData(meshid,olddt);
+    MLRenderingData dt(olddt);
+    foreach(MLRenderingAction* act,acts)
+    {
+        if (act != NULL)
+            act->updateRenderingData(dt);
+    }
+    setRenderingData(meshid,dt);
+    MeshModel* mm = meshDoc()->getMesh(meshid);
+    if (mm != NULL) 
+    {
+        MLDefaultMeshDecorators dec;
+        dec.updateMeshDecorationData(*mm,olddt,dt);
+    }
+    GLA()->update();
+}
+
+void MainWindow::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
+{
+    MLRenderingData olddt;
+    getRenderingData(meshid,olddt);
+    MLRenderingData dt(olddt);
+
+    if (act != NULL)
+        act->updateRenderingData(dt);
+
+    setRenderingData(meshid,dt);
+    MeshModel* mm = meshDoc()->getMesh(meshid);
+    if (mm != NULL)
+    {
+        MLDefaultMeshDecorators dec;
+        dec.updateMeshDecorationData(*mm,olddt,dt);
+    }
+    GLA()->update();
 }

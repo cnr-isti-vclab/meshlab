@@ -5,52 +5,65 @@
 # Compiling this minimal subset does not require any additional library (except obviously qt and vcg).
 #
 
+#config += debug_and_release
 TEMPLATE      = subdirs
-CONFIG       += ordered
-
-
-                           # the common framework, used by all the plugins,
+CONFIG += ordered
 SUBDIRS       = common \
-                meshlab \                         # the GUI framework
-				meshlabplugins/io_base\				# a few basic file formats (ply, obj, off), without this you cannot open anything
-				meshlabplugins/filter_colorize \
-				meshlabplugins/filter_create \
-				meshlabplugins/filter_sampling \
-				meshlabplugins/edit_quality \
-				meshlabplugins/filter_meshing \
-				meshlabplugins/filter_voronoi \
-				meshlabplugins/filter_mutualinfoxml \
-				meshlabplugins/filter_sdfgpu \
-				meshlabplugins/filter_ao \
-				meshlabplugins/filter_img_patch_param \
-				meshlabplugins/filter_color_projection \
-				sampleplugins/sample_filtergpu \
-#				meshlabplugins/edit_align \
-#				meshlabplugins/filter_mutualinfoxml \
-#				meshlabplugins/filter_meshing \
-#				meshlabplugins/decorate_base \
-#				meshlabplugins/edit_select \
-#				meshlabplugins/edit_align \
-#				plugins_experimental/filter_sketchfab
-#				meshlabplugins/filter_mutualinfoxml
-#				
-#
-# Next some other useful, but still easy to be compiled, plugins
-# Uncomment them if you succeed in compiling the above ones.
-#                meshlabplugins/decorate_background \
-#                meshlabplugins/decorate_base \
-#                meshlabplugins/edit_align \
-#                meshlabplugins/edit_manipulators \
-#                meshlabplugins/edit_select \
-#                meshlabplugins/filter_clean\
-#                meshlabplugins/filter_colorize\
-#                meshlabplugins/filter_create\
-#                meshlabplugins/filter_layer\
-#                meshlabplugins/filter_measure\
-#                meshlabplugins/filter_sampling\
-#                meshlabplugins/filter_select \
-#                meshlabplugins/filter_quality \
-#                meshlabplugins/filter_unsharp \
-#                meshlabplugins/io_collada \
-#                meshlabplugins/io_x3d \
-#                meshlabserver
+                meshlab \
+# IO plugins
+                meshlabplugins/io_base\
+                meshlabplugins/io_3ds\
+                meshlabplugins/io_collada \
+                meshlabplugins/io_ctm \
+                meshlabplugins/io_json \
+                meshlabplugins/io_u3d\
+                meshlabplugins/io_tri\
+                meshlabplugins/io_x3d \
+                meshlabplugins/io_gts \
+                meshlabplugins/io_expe \
+                meshlabplugins/io_pdb \
+                plugins_experimental/io_TXT \
+# Filter plugins
+                meshlabplugins/filter_aging \
+                meshlabplugins/filter_ao \
+                meshlabplugins/filter_autoalign \
+                meshlabplugins/filter_camera \
+                meshlabplugins/filter_bnpts \
+                meshlabplugins/filter_clean \
+                meshlabplugins/filter_colorize \
+                meshlabplugins/filter_colorproc \
+                meshlabplugins/filter_color_projection \
+                meshlabplugins/filter_create \
+                meshlabplugins/filter_csg \
+                meshlabplugins/filter_dirt \
+                meshlabplugins/filter_fractal \
+                meshlabplugins/filter_func \
+                meshlabplugins/filter_img_patch_param \
+                meshlabplugins/filter_isoparametrization \
+                meshlabplugins/filter_layer \
+                meshlabplugins/filter_measure \
+                meshlabplugins/filter_meshing \
+                meshlabplugins/filter_mutualinfoxml \
+                meshlabplugins/filter_mls \
+                meshlabplugins/filter_photosynth \
+                meshlabplugins/filter_plymc \
+				meshlabplugins/filter_poisson \
+                meshlabplugins/filter_qhull \
+                meshlabplugins/filter_quality \
+                meshlabplugins/filter_sampling \
+                meshlabplugins/filter_sdfgpu \
+                meshlabplugins/filter_select \
+                meshlabplugins/filter_ssynth \
+                meshlabplugins/filter_texture \
+                meshlabplugins/filter_trioptimize \
+                meshlabplugins/filter_unsharp \
+                meshlabplugins/filter_zippering \
+				
+# Edit Plugins
+                meshlabplugins/edit_quality \
+# Sample Plugins
+                sampleplugins/samplefilter \
+                sampleplugins/samplefilterdyn \
+                sampleplugins/io_m\
+                sampleplugins/filter_geodesic \
+                sampleplugins/filter_createiso

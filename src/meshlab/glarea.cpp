@@ -28,6 +28,7 @@
 #include "glarea.h"
 #include "mainwindow.h"
 #include "multiViewer_Container.h"
+#include "ml_default_decorators.h"
 
 #include <QFileDialog>
 #include <QClipboard>
@@ -414,12 +415,14 @@ int GLArea::RenderForSelection(int pickX, int pickY)
 
 void GLArea::paintEvent(QPaintEvent* /*event*/)
 {
-    if (mvc() == NULL) return;
+    if (mvc() == NULL) 
+        return;
     QPainter painter(this);
     painter.beginNativePainting();
     makeCurrent();
 
-    if(!isValid() ) return;
+    if(!isValid()) 
+        return;
 
     QTime time;
     time.start();
@@ -464,16 +467,23 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 shared->getRenderInfoPerMeshView(context(),dt);
         
                 iRenderer->Render(currentShader, *this->md(), dt, this);
+
+
+                MLDefaultMeshDecorators defdec;
+               
                 foreach(MeshModel * mp, this->md()->meshList)
                 {
-                    if (mp->visible)
+                    if ((mp != NULL) && (mp->visible))
                     {
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                         {
                             MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-                            decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,&painter,md()->Log);
+                            decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,this,&painter,md()->Log);
                         }
+                        MLRenderingData meshdt;
+                        shared->getRenderInfoPerMeshView(mp->id(),context(),meshdt);
+                        defdec.decorateMesh(*mp,meshdt,&painter,md()->Log);
                     }
                 }
             }
@@ -506,15 +516,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         throw MLException(QString("GLArea: invalid MLPerViewGLOptions"));
                     setLightingColors(opts);
                     
-                    //union of all the attributes requested at least by a modality rendering
-                    MLRenderingData::RendAtts unionatts;
-                    for(int pm = 0;pm < (int)MLRenderingData::PR_ARITY;++pm)
-                    {
-                        MLRenderingData::RendAtts tmp;
-                        if (curr.get(MLRenderingData::PRIMITIVE_MODALITY(pm),tmp) == false)
-                            throw MLException(QString("GLArea: invalid PRIMITIVE_MODALITY"));
-                        unionatts = MLRenderingData::RendAtts::unionSet(unionatts,tmp);
-                    }
                     
                     if(opts._back_face_cull)
                         glEnable(GL_CULL_FACE);
@@ -529,8 +530,12 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
                     {
                         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-                        decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet, &painter,md()->Log);
+                        decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,this,&painter,md()->Log);
                     }
+
+                    MLDefaultMeshDecorators defdec;
+                    datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
+                    defdec.decorateMesh(*mp,curr,&painter,md()->Log);
                 }
             }
         }
@@ -970,7 +975,11 @@ void GLArea::manageCurrentMeshChange()
 /// Note that it is rather inefficient. Such work should be done only once for each decorator.
 void GLArea::updateAllPerMeshDecorators()
 {
+    MeshDocument* mdoc = md();
+    if (mdoc == NULL)
+        return;
 	makeCurrent();
+    
     for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i )
     {
         
@@ -982,6 +991,23 @@ void GLArea::updateAllPerMeshDecorators()
             decorInterface->setLog(&md()->Log);
             decorInterface->startDecorate(p,*m, this->glas.currentGlobalParamSet,this);
         }
+    }
+
+    MultiViewer_Container* viewcont = mvc();
+    if (viewcont == NULL)
+        return;
+
+    MLSceneGLSharedDataContext* shared = viewcont->sharedDataContext();
+    if (shared == NULL)
+        return;
+
+    MLDefaultMeshDecorators defdec;
+    for(MeshModel* mm = mdoc->nextMesh();mm != NULL;mm = mdoc->nextMesh(mm))
+    {
+        MLRenderingData dt;
+        shared->getRenderInfoPerMeshView(mm->id(),context(),dt);
+        defdec.cleanMeshDecorationData(*mm,dt);
+        defdec.initMeshDecorationData(*mm,dt);
     }
 }
 

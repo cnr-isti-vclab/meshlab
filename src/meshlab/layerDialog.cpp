@@ -817,29 +817,14 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 {
     if (mw == NULL)
         return;
-    MLRenderingData dt;
-    mw->getRenderingData(meshid,dt);
-    foreach(MLRenderingAction* act,acts)
-    {
-        if (act != NULL)
-            act->updateRenderingData(dt);
-    }
-    mw->setRenderingData(meshid,dt);
-    mw->GLA()->update();
+    mw->updateRenderingDataAccordingToActions(meshid,acts);
 }
 
 void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
 {
     if (mw == NULL)
         return;
-    MLRenderingData dt;
-    mw->getRenderingData(meshid,dt);
-
-    if (act != NULL)
-        act->updateRenderingData(dt);
-
-    mw->setRenderingData(meshid,dt);
-    mw->GLA()->update();
+    mw->updateRenderingDataAccordingToAction(meshid,act);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)

@@ -44,7 +44,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     /*****************************/
 
     bool _peredge_extra_enabled;
-    bool _peredge_boundary_enabled;
+    bool _peredge_edgeboundary_enabled;
+    bool _peredge_faceboundary_enabled;
     bool _peredge_edgemanifold_enabled;
     bool _peredge_vertmanifold_enabled;
     bool _peredge_text_boundary_enabled;
@@ -71,9 +72,10 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
      {
         _visible = true;
         _peredge_extra_enabled = false;
-        _peredge_boundary_enabled = true;
-        _peredge_edgemanifold_enabled = true;
-        _peredge_vertmanifold_enabled  = true;
+        _peredge_edgeboundary_enabled = false;
+        _peredge_faceboundary_enabled = false;
+        _peredge_edgemanifold_enabled = false;
+        _peredge_vertmanifold_enabled  = false;
         _peredge_text_boundary_enabled = false;
         _back_face_cull = false;
         _double_side_lighting = false;
@@ -112,7 +114,8 @@ private:
     {
         _visible = opts._visible;
         _peredge_extra_enabled = opts._peredge_extra_enabled;
-        _peredge_boundary_enabled = opts._peredge_boundary_enabled;
+        _peredge_edgeboundary_enabled = opts._peredge_edgeboundary_enabled;
+        _peredge_faceboundary_enabled = opts._peredge_faceboundary_enabled;
         _peredge_edgemanifold_enabled = opts._peredge_edgemanifold_enabled;
         _peredge_vertmanifold_enabled = opts._peredge_vertmanifold_enabled;
         _peredge_text_boundary_enabled = opts._peredge_text_boundary_enabled;
@@ -184,6 +187,8 @@ struct MLPoliciesStandAloneFunctions
 
     static void setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt );
 
+    //static void setPerViewRenderingDataPriorities(MeshModel* mm,MLRenderingData& dt);
+
     static void suggestedDefaultPerViewGLOptions(MLPerViewGLOptions& tmp);
 
     static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
@@ -223,6 +228,8 @@ public:
     //Given a QGLContext the PerMeshRenderingDataMap contains the rendering data per each mesh contained in the MeshDocument (eg. flat/smooth shading? pervertex/perface/permesh color?) 
     //and the 'meaningful' gl parameters used by the rendering system
     typedef QMap<int,MLRenderingData> PerMeshRenderingDataMap; 
+
+    MeshDocument& meshDoc() {return _md;}
 
     void initializeGL();
     void deAllocateGPUSharedData();

@@ -900,35 +900,67 @@ bool MLRenderingEdgeDecoratorAction::isRenderingDataEnabled( const MLRenderingDa
     return false;
 }
 
-MLRenderingBoundaryAction::MLRenderingBoundaryAction( QObject* parent )
+MLRenderingEdgeBoundaryAction::MLRenderingEdgeBoundaryAction( QObject* parent )
     :MLRenderingAction(-1,parent)
 {
-     setText("Boundary");
+     setText("Edges Boundary");
 }
 
-MLRenderingBoundaryAction::MLRenderingBoundaryAction( int meshid,QObject* parent )
+MLRenderingEdgeBoundaryAction::MLRenderingEdgeBoundaryAction( int meshid,QObject* parent )
     :MLRenderingAction(meshid,parent)
 {
-     setText("Boundary");
+     setText("Edges Boundary");
 }
 
-void MLRenderingBoundaryAction::updateRenderingData( MLRenderingData& rd )
+void MLRenderingEdgeBoundaryAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
     bool valid = rd.get(opts);
     if (valid)
     {
-        opts._peredge_boundary_enabled = isChecked();
+        opts._peredge_edgeboundary_enabled = isChecked();
         rd.set(opts);
     }
 }
 
-bool MLRenderingBoundaryAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+bool MLRenderingEdgeBoundaryAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
     MLPerViewGLOptions opts;
     bool valid = rd.get(opts);
     if (valid)
-        return opts._peredge_boundary_enabled;
+        return opts._peredge_edgeboundary_enabled;
+    return false;
+}
+
+MLRenderingFaceBoundaryAction::MLRenderingFaceBoundaryAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
+    setText("Faces Boundary");
+}
+
+MLRenderingFaceBoundaryAction::MLRenderingFaceBoundaryAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+    setText("Faces Boundary");
+}
+
+void MLRenderingFaceBoundaryAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._peredge_faceboundary_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingFaceBoundaryAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._peredge_faceboundary_enabled;
     return false;
 }
 
@@ -1151,3 +1183,5 @@ MLRenderingFloatAction::MLRenderingFloatAction(int meshid, QObject* parent )
 
 
 }
+
+

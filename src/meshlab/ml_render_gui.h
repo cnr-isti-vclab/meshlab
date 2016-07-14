@@ -282,20 +282,21 @@ private:
     MLRenderingOnOffToolbar* _faceseltool;
 };
 
-class MLRenderingEdgeDecoratorParametersFrame : public MLRenderingParametersFrame
+class MLRenderingDefaultDecoratorParametersFrame : public MLRenderingParametersFrame
 {
     Q_OBJECT
 public:
-    MLRenderingEdgeDecoratorParametersFrame(QWidget* parent);
-    MLRenderingEdgeDecoratorParametersFrame(int meshid,QWidget* parent);    
-    ~MLRenderingEdgeDecoratorParametersFrame();
+    MLRenderingDefaultDecoratorParametersFrame(QWidget* parent);
+    MLRenderingDefaultDecoratorParametersFrame(int meshid,QWidget* parent);    
+    ~MLRenderingDefaultDecoratorParametersFrame();
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
 
 private:
     void initGui();
-    MLRenderingOnOffToolbar* _boundarytool;
+    MLRenderingOnOffToolbar* _boundearyedgetool;
+    MLRenderingOnOffToolbar* _boundearyfacetool;
     MLRenderingOnOffToolbar* _vertmanifoldtool;
     MLRenderingOnOffToolbar* _edgemanifoldtool;
     MLRenderingOnOffToolbar* _texturebordertool;

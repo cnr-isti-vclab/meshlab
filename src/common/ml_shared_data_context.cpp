@@ -657,6 +657,13 @@ void MLPoliciesStandAloneFunctions::setAttributePriorities(MLRenderingData::Rend
     atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= !(atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
 }
 
+//void MLPoliciesStandAloneFunctions::setPerViewRenderingDataPriorities( MeshModel* mm,MLRenderingData& dt )
+//{
+//    if (mm == NULL)
+//        return;
+//    
+//}
+
 void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt )
 {
     if (mm == NULL)

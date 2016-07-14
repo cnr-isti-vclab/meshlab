@@ -198,7 +198,7 @@ MLRenderingParametersFrame* MLRenderingParametersFrame::factory( MLRenderingActi
         return new MLRenderingBBoxParametersFrame(meshid,parent);
 
     if (qobject_cast<MLRenderingEdgeDecoratorAction*>(act) != NULL)
-        return new MLRenderingEdgeDecoratorParametersFrame(meshid,parent);
+        return new MLRenderingDefaultDecoratorParametersFrame(meshid,parent);
 
     return NULL;
 }
@@ -577,87 +577,99 @@ void MLRenderingBBoxParametersFrame::initGui()
     adjustSize();   
 }
 
-MLRenderingEdgeDecoratorParametersFrame::MLRenderingEdgeDecoratorParametersFrame( QWidget* parent )
+MLRenderingDefaultDecoratorParametersFrame::MLRenderingDefaultDecoratorParametersFrame( QWidget* parent )
     :MLRenderingParametersFrame(-1,parent)
 {
     initGui();
 }
 
-MLRenderingEdgeDecoratorParametersFrame::MLRenderingEdgeDecoratorParametersFrame( int meshid,QWidget* parent )
+MLRenderingDefaultDecoratorParametersFrame::MLRenderingDefaultDecoratorParametersFrame( int meshid,QWidget* parent )
     :MLRenderingParametersFrame(meshid,parent)
 {
     initGui();
 }
 
-MLRenderingEdgeDecoratorParametersFrame::~MLRenderingEdgeDecoratorParametersFrame()
+MLRenderingDefaultDecoratorParametersFrame::~MLRenderingDefaultDecoratorParametersFrame()
 {
-    delete _boundarytool;
+    delete _boundearyedgetool;
+    delete _boundearyfacetool;
     delete _edgemanifoldtool;
     delete _vertmanifoldtool;
     delete _texturebordertool;
 }
 
-void MLRenderingEdgeDecoratorParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRenderingData& dt ) const
+void MLRenderingDefaultDecoratorParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRenderingData& dt ) const
 {
-    _boundarytool->getRenderingDataAccordingToGUI(dt);
+    _boundearyedgetool->getRenderingDataAccordingToGUI(dt);
+    _boundearyfacetool->getRenderingDataAccordingToGUI(dt);
     _edgemanifoldtool->getRenderingDataAccordingToGUI(dt);
     _vertmanifoldtool->getRenderingDataAccordingToGUI(dt);
     _texturebordertool->getRenderingDataAccordingToGUI(dt);
 }
 
 
-void MLRenderingEdgeDecoratorParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
+void MLRenderingDefaultDecoratorParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
-    _boundarytool->setAccordingToRenderingData(dt);
+    _boundearyedgetool->setAccordingToRenderingData(dt);
+    _boundearyfacetool->setAccordingToRenderingData(dt);
     _edgemanifoldtool->setAccordingToRenderingData(dt);
     _vertmanifoldtool->setAccordingToRenderingData(dt);
     _texturebordertool->setAccordingToRenderingData(dt);
 }
 
-void MLRenderingEdgeDecoratorParametersFrame::setAssociatedMeshId( int meshid )
+void MLRenderingDefaultDecoratorParametersFrame::setAssociatedMeshId( int meshid )
 {
-    _boundarytool->setAssociatedMeshId(meshid);
+    _boundearyedgetool->setAssociatedMeshId(meshid);
+    _boundearyfacetool->setAssociatedMeshId(meshid);
     _edgemanifoldtool->setAssociatedMeshId(meshid);
     _vertmanifoldtool->setAssociatedMeshId(meshid);
     _texturebordertool->setAssociatedMeshId(meshid);
 }
 
-void MLRenderingEdgeDecoratorParametersFrame::initGui()
+void MLRenderingDefaultDecoratorParametersFrame::initGui()
 {
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
-    QLabel* boundarylab = new QLabel("Boundary",this);
+    QLabel* boundarylab = new QLabel("Boundary Edges",this);
     QFont boldfont;
     boldfont.setBold(true);
     boundarylab->setFont(boldfont);
     layout->addWidget(boundarylab,0,0,Qt::AlignLeft);
-    _boundarytool = new MLRenderingOnOffToolbar(_meshid,this);
-    _boundarytool->setRenderingAction(new MLRenderingBoundaryAction(_meshid,_boundarytool));
-    layout->addWidget(_boundarytool,0,1,Qt::AlignLeft);
-    connect(_boundarytool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+    _boundearyedgetool = new MLRenderingOnOffToolbar(_meshid,this);
+    _boundearyedgetool->setRenderingAction(new MLRenderingEdgeBoundaryAction(_meshid,_boundearyedgetool));
+    layout->addWidget(_boundearyedgetool,0,1,Qt::AlignLeft);
+    connect(_boundearyedgetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+
+    QLabel* boundaryfacelab = new QLabel("Boundary Faces",this);
+    boundaryfacelab->setFont(boldfont);
+    layout->addWidget(boundaryfacelab,1,0,Qt::AlignLeft);
+    _boundearyfacetool = new MLRenderingOnOffToolbar(_meshid,this);
+    _boundearyfacetool->setRenderingAction(new MLRenderingFaceBoundaryAction(_meshid,_boundearyfacetool));
+    layout->addWidget(_boundearyfacetool,1,1,Qt::AlignLeft);
+    connect(_boundearyfacetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     QLabel* vertmanifoldlab = new QLabel("No-Manif Verts",this);
     vertmanifoldlab->setFont(boldfont);
-    layout->addWidget(vertmanifoldlab,1,0,Qt::AlignLeft);
+    layout->addWidget(vertmanifoldlab,2,0,Qt::AlignLeft);
     _vertmanifoldtool = new MLRenderingOnOffToolbar(_meshid,this);
     _vertmanifoldtool->setRenderingAction(new MLRenderingVertManifoldAction(_meshid,_vertmanifoldtool));
-    layout->addWidget(_vertmanifoldtool,1,1,Qt::AlignLeft);
+    layout->addWidget(_vertmanifoldtool,2,1,Qt::AlignLeft);
     connect(_vertmanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     QLabel* edgemanifoldlab = new QLabel("No-Manif Edges",this);
     edgemanifoldlab->setFont(boldfont);
-    layout->addWidget(edgemanifoldlab,2,0,Qt::AlignLeft);
+    layout->addWidget(edgemanifoldlab,3,0,Qt::AlignLeft);
     _edgemanifoldtool = new MLRenderingOnOffToolbar(_meshid,this);
     _edgemanifoldtool->setRenderingAction(new MLRenderingEdgeManifoldAction(_meshid,_edgemanifoldtool));
-    layout->addWidget(_edgemanifoldtool,2,1,Qt::AlignLeft);
+    layout->addWidget(_edgemanifoldtool,3,1,Qt::AlignLeft);
     connect(_edgemanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     QLabel* textureborderlab = new QLabel("Texture Border",this);
     textureborderlab->setFont(boldfont);
-    layout->addWidget(textureborderlab,3,0,Qt::AlignLeft);
+    layout->addWidget(textureborderlab,4,0,Qt::AlignLeft);
     _texturebordertool = new MLRenderingOnOffToolbar(_meshid,this);
     _texturebordertool->setRenderingAction(new MLRenderingTexBorderAction(_meshid,_texturebordertool));
-    layout->addWidget(_texturebordertool,3,1,Qt::AlignLeft);
+    layout->addWidget(_texturebordertool,4,1,Qt::AlignLeft);
     connect(_texturebordertool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     setMinimumSize(layout->sizeHint());

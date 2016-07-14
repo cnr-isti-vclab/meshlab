@@ -495,7 +495,7 @@ public:
 
   virtual bool startDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) {return false;}
   virtual bool startDecorate(QAction *, MeshModel &, RichParameterSet *, GLArea *) {return false;}
-  virtual void decorateMesh(QAction *,  MeshModel &, RichParameterSet *,QPainter *, GLLogStream &) = 0;
+  virtual void decorateMesh(QAction *,  MeshModel &, RichParameterSet *,GLArea *, QPainter *, GLLogStream &) = 0;
   virtual void decorateDoc(QAction *,  MeshDocument &, RichParameterSet *, GLArea *, QPainter *, GLLogStream &) = 0;
   virtual void endDecorate(QAction *,   MeshModel &, RichParameterSet *, GLArea *){}
   virtual void endDecorate(QAction *,   MeshDocument &, RichParameterSet *, GLArea *){}

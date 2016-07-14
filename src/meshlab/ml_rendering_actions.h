@@ -367,12 +367,23 @@ public:
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
 
-class MLRenderingBoundaryAction : public MLRenderingAction
+class MLRenderingEdgeBoundaryAction : public MLRenderingAction
 {
     Q_OBJECT
 public:
-    MLRenderingBoundaryAction(QObject* parent);
-    MLRenderingBoundaryAction(int meshid,QObject* parent);
+    MLRenderingEdgeBoundaryAction(QObject* parent);
+    MLRenderingEdgeBoundaryAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
+class MLRenderingFaceBoundaryAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingFaceBoundaryAction(QObject* parent);
+    MLRenderingFaceBoundaryAction(int meshid,QObject* parent);
 
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
