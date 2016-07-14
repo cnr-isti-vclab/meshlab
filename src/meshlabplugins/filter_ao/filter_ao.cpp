@@ -461,11 +461,12 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 
         //******* LOAD SHADERS *******/
         cb(30, "Initializing: Shaders and Textures");
-
+		QString shad1(":/AmbientOcclusion/shaders/ambient_occlusion4");
+		QString shad2(":/AmbientOcclusion/shaders/ambient_occlusion8");
         if (maxTexPages == 4)
-            set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion4",vs,fs,shdrID);
+            set_shaders(shad1.toLatin1().data(),vs,fs,shdrID);
         else
-            set_shaders(":/AmbientOcclusion/shaders/ambient_occlusion8",vs,fs,shdrID);  //geforce 8+
+            set_shaders(shad2.toLatin1().data(),vs,fs,shdrID);  //geforce 8+
 
 
         maxTexSize = smartTexSize;
