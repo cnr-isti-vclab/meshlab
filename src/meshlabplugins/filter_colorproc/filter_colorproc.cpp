@@ -90,19 +90,19 @@ FilterColorProc::~FilterColorProc()
 {
   switch(filterId)
   {
-    case CP_FILLING : return "Fills the color of the vertexes of the mesh  with a color choosed by the user.";
-    case CP_THRESHOLDING : return "Reduces the color the vertexes of the mesh to two colors according to a threshold.";
-    case CP_BRIGHTNESS : return "Change the color the vertexes of the mesh adjusting the overall brightness.";
-    case CP_CONTRAST : return "Change the color the vertexes of the mesh adjusting the contrast.";
-    case CP_CONTR_BRIGHT : return "Change the color the vertexes of the mesh adjusting brightness, contrast and gamma.";
-    case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertexes of the mesh.";
-    case CP_INVERT : return "Inverts the colors of the vertexes of the mesh.";
+    case CP_FILLING : return "Fills the color of the vertices of the mesh  with a color choosed by the user.";
+    case CP_THRESHOLDING : return "Colors the vertices of the mesh using two colors according to a lightness threshold (on the original color).";
+    case CP_BRIGHTNESS : return "Change the color the vertices of the mesh adjusting the overall brightness.";
+    case CP_CONTRAST : return "Change the color the vertices of the mesh adjusting the contrast.";
+    case CP_CONTR_BRIGHT : return "Change the color the vertices of the mesh adjusting brightness, contrast and gamma.";
+    case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertices of the mesh.";
+    case CP_INVERT : return "Inverts the colors of the vertices of the mesh.";
     case CP_LEVELS : return "The filter allows adjustment of color levels. It is a custom way to map an interval of color into another one. The user can set the input minimum and maximum levels, gamma and the output minimum and maximum levels (many tools call them respectively input black point, white point, gray point, output black point and white point).";
     case CP_COLOURISATION : return "Allows the application of a color to the mesh. In spite of the Fill operation, the color is blended with the mesh according to a given intensity. .";
     case CP_DESATURATION : return "The filter desaturates the colors of the mesh. This provides a simple way to convert a mesh in gray tones. The user can choose the desaturation method to apply; they are based on Lightness, Luminosity and Average.";
     case CP_EQUALIZE : return "The filter equalizes the colors histogram. It is a kind of automatic regulation of contrast; the colors histogram is expanded to fit all the range of colors.";
     case CP_WHITE_BAL : return "The filter provides a standard white balance transformation. It is done correcting the RGB channels with a factor such that, the brighter color in the mesh, that is supposed to be white, becomes really white.";
-    case CP_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to verteces depends on their position in the space; it means that near verteces will be painted with similar colors.";
+    case CP_PERLIN_COLOR : return "Paints the mesh using PerlinColor function. The color assigned to vertices depends on their position in the space; it means that near vertices will be painted with similar colors.";
     case CP_COLOR_NOISE : return "Adds to the color the requested amount of bits of noise. Bits of noise are added independently for each RGB channel.";
     case CP_SCATTER_PER_MESH : return "Assigns a random color to each visible mesh layer in the document. Colors change every time the filter is executed, but are always chosen so that they differ as much as possible.";
     default: assert(0);
@@ -136,10 +136,10 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 		case CP_THRESHOLDING:
 		{
 			float threshold = 128.0f;
-			QColor color1 = QColor(0,0,0), color2 = QColor(255,255,255);
+			QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);;
 			par.addParam(new RichColor("color1", color1, "Color 1:", "Sets the color to apply below the threshold."));
 			par.addParam(new RichColor("color2", color2, "Color 2:", "Sets the color to apply above the threshold."));
-			par.addParam(new RichDynamicFloat("threshold", threshold, 0.0f, 255.0f,"Threshold:", "Colors above the threshold becomes Color 2, others Color 1."));
+			par.addParam(new RichDynamicFloat("threshold", threshold, 0.0f, 255.0f,"Threshold:", "Vertices with color above the lightness threshold becomes Color 2, the others Color 1."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
@@ -183,14 +183,14 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 		case CP_LEVELS:
 		{
 			float in_min = 0, in_max = 255, out_min = 0, out_max = 255, gamma = 1;
-			par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,  "Gamma:", ""));
-			par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,  "Min input level:", ""));
-			par.addParam(new RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,  "Max input level:", ""));
+			par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f,       "Gamma:", ""));
+			par.addParam(new RichDynamicFloat("in_min", in_min, 0.0f, 255.0f,   "Min input level:", ""));
+			par.addParam(new RichDynamicFloat("in_max", in_max, 0.0f, 255.0f,   "Max input level:", ""));
 			par.addParam(new RichDynamicFloat("out_min", out_min, 0.0f, 255.0f, "Min output level:", ""));
-			par.addParam(new RichDynamicFloat("out_max", out_max, 0.0f, 255.0f,"Max output level:", ""));
-			par.addParam(new RichBool("rCh", true, "Red Channel:", ""));
+			par.addParam(new RichDynamicFloat("out_max", out_max, 0.0f, 255.0f, "Max output level:", ""));
+			par.addParam(new RichBool("rCh", true, "Red Channel:",   ""));
 			par.addParam(new RichBool("gCh", true, "Green Channel:", ""));
-			par.addParam(new RichBool("bCh", true, "Blue Channel:", ""));
+			par.addParam(new RichBool("bCh", true, "Blue Channel:",  ""));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			par.addParam(new RichBool("apply_to_all", false, "All visible layers", "if true, apply to all visible layers"));
 			break;
@@ -203,7 +203,7 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 			par.addParam(new RichDynamicFloat("hue", (float)hue*360, 0.0f, 360.0f, "Hue:", "Changes the hue of the mesh."));
 			par.addParam(new RichDynamicFloat("saturation", (float)saturation*100, 0.0f, 100.0f, "Saturation:", "Changes the saturation of the mesh."));
 			par.addParam(new RichDynamicFloat("luminance", (float)luminance*100, 0.0f, 100.0f,"Luminance:", "Changes the luminance of the mesh."));
-			par.addParam(new RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Intensity:", "Sets the intensity with which the color it's blended to the mesh."));
+			par.addParam(new RichDynamicFloat("intensity", intensity*100, 0.0f, 100.0f, "Blending:", "Sets the blending factor used in adding the new color to the existing one."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
@@ -216,9 +216,9 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 		}
 		case CP_EQUALIZE:
 		{
-			par.addParam(new RichBool("rCh", true, "Red Channel:", "Select the red channel."));
+			par.addParam(new RichBool("rCh", true, "Red Channel:",   "Select the red channel."));
 			par.addParam(new RichBool("gCh", true, "Green Channel:", "Select the green channel."));
-			par.addParam(new RichBool("bCh", true, "Blue Channel:", "Select the blue channel.<br><br>If no channels are selected<br>filter works on Lightness."));
+			par.addParam(new RichBool("bCh", true, "Blue Channel:",  "Select the blue channel.<br><br>If no channel is selected<br>filter works on Lightness."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
@@ -230,7 +230,11 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 		}
 		case CP_PERLIN_COLOR:
 		{
-			par.addParam(new RichDynamicFloat("freq", 10.0f, 0.1f, 50.0f,"Frequency:","Frequency of the Perlin Noise function. High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
+			QColor color1 = QColor(0, 0, 0, 255), color2 = QColor(255, 255, 255, 255);
+			par.addParam(new RichColor("color1", color1, "Color 1:", "Sets the first color to mix with Perlin Noise function."));
+			par.addParam(new RichColor("color2", color2, "Color 2:", "Sets the second color to mix with Perlin Noise function."));
+			par.addParam(new RichDynamicFloat("freq", 10.0f, 0.1f, 100.0f,"Frequency:","Frequency of the Perlin Noise function, expressed as multiples of mesh bbox (frequency 10 means a noise period of bbox diagonal / 10). High frequencies produces many small splashes of colours, while low frequencies produces few big splashes."));
+			par.addParam(new RichPoint3f("offset", Point3f(0.0f, 0.0f, 0.0f), "Offset",	"This values is the XYZ frequency offset of the Noise function (offset 1 means 1 period shift)."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
@@ -273,9 +277,9 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       //reads threshold, and colors to pass as parameters to the filter...
       float threshold = math::Clamp<float>(par.getDynamicFloat("threshold"), 0.0f, 255.0f);
       QColor temp = par.getColor("color1");
-      Color4b c1 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
+      Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
       temp = par.getColor("color2");
-      Color4b c2 = Color4b(temp.red(), temp.green(),temp.blue(), 255);
+	  Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
 
 	  bool selected = par.getBool("onSelected");
 
@@ -428,12 +432,18 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     case CP_PERLIN_COLOR:
     {
         //read parameters
+		QColor temp = par.getColor("color1");
+		Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+		temp = par.getColor("color2");
+		Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+
         float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document
         float period = md.bbox().Diag() / freq;
 
+		Point3m offset = par.getPoint3m("offset");
 		bool selected = par.getBool("onSelected");
 
-		tri::UpdateColor<CMeshO>::PerVertexPerlinNoise(m->cm, Point3m(period, period, period), Point3m(Scalarm(0.0), Scalarm(0.0), Scalarm(0.0)), selected);
+		tri::UpdateColor<CMeshO>::PerVertexPerlinColoring(m->cm, period, offset, c1, c2, selected);
         return true;
     }
     case CP_COLOR_NOISE:
