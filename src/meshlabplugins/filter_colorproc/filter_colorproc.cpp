@@ -126,10 +126,8 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 	{
 		case CP_FILLING:
 		{
-			float r = 255.0f, g = 255.0f, b = 255.0f;
-			par.addParam(new RichDynamicFloat("r", r, 0.0f, 255.0f,"Red:", "Sets the red component of the color."));
-			par.addParam(new RichDynamicFloat("g", g, 0, 255,"Green:", "Sets the green component of the color."));
-			par.addParam(new RichDynamicFloat("b", b, 0, 255, "Blue:", "Sets the blue component of the color."));
+			QColor color1 = QColor(0, 0, 0, 255);
+			par.addParam(new RichColor("color1", color1, "Color:", "Sets the color to apply to vertices."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
@@ -261,16 +259,13 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
   {
     case CP_FILLING:
     {
-      //reads the color components and build the color
-      int r = math::Clamp((int)par.getDynamicFloat("r"), 0, 255);
-      int g = math::Clamp((int)par.getDynamicFloat("g"), 0, 255);
-      int b = math::Clamp((int)par.getDynamicFloat("b"), 0, 255);
-      Color4b new_col = Color4b(r,g,b,255);
+		QColor temp = par.getColor("color1");
+		Color4b new_col = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
 
-	  bool selected = par.getBool("onSelected");
+		bool selected = par.getBool("onSelected");
 
-      vcg::tri::UpdateColor<CMeshO>::PerVertexConstant(m->cm, new_col, selected);  //calls the function that does the real job
-      return true;
+		vcg::tri::UpdateColor<CMeshO>::PerVertexConstant(m->cm, new_col, selected);  //calls the function that does the real job
+		return true;
     }
     case CP_THRESHOLDING:
     {
