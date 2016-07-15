@@ -161,7 +161,8 @@ public:
     void Clear();
     void UpdateBoxAndNormals(); // This is the STANDARD method that you should call after changing coords.
     inline int id() const {return _id;}
-
+    
+    
     // Some notes about the files and naming.
     // Each mesh when shown in the layer dialog has a label.
     // By default the label is just the name of the file, but the
@@ -213,6 +214,7 @@ public:
     bool& meshModified();
     static int io2mm(int single_iobit);
 };// end class MeshModel
+
 
 /*
 Plane Class
@@ -625,6 +627,7 @@ signals:
 
 };// end class MeshDocument
 
+
 /*
 A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
 and then be able to restore them later.
@@ -652,6 +655,7 @@ public:
     void create(int _mask, MeshModel* _m);
     bool apply(MeshModel *_m);
     bool isValid(MeshModel *m);
+    int maskChangedAtts() const {return changeMask;}
 };
 
 

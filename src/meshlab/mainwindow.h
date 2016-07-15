@@ -145,6 +145,8 @@ public:
 
     void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts);
     void updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act);
+
+    void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
 private slots:
     //////////// Slot Menu File //////////////////////
     void reload();
@@ -250,7 +252,7 @@ private:
 
     void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
     void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
-    void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
+    
     QNetworkAccessManager *httpReq;
     QBuffer myLocalBuf;
     int idHost;

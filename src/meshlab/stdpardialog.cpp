@@ -37,7 +37,7 @@
 
 using namespace vcg;
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-:QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN)
+    :QDockWidget(QString("Plugin"), p),curmask(MeshModel::MM_UNKNOWN),previewCB(NULL)
 {
     qf = NULL;
     stdParFrame=NULL;
@@ -45,7 +45,7 @@ MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
 }
 
 StdParFrame::StdParFrame(QWidget *p, QWidget *curr_gla )
-:QFrame(p)
+    :QFrame(p)
 {
     gla=curr_gla;
 }
@@ -94,14 +94,17 @@ void MeshlabStdDialog::changeCurrentMesh(int meshInd)
 
 bool MeshlabStdDialog::isPreviewable()
 {
-  if( (curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE) )
-    return false;
+    if ((curAction == NULL) || (curmfi == NULL) || (curmfi->filterArity(curAction) != MeshFilterInterface::SINGLE_MESH))
+        return false;
 
-  if( (curmask & MeshModel::MM_VERTNUMBER ) ||
-      (curmask & MeshModel::MM_FACENUMBER ) )
-    return false;
+    if( (curmask == MeshModel::MM_UNKNOWN) || (curmask == MeshModel::MM_NONE) )
+        return false;
 
-  return true;
+    if( (curmask & MeshModel::MM_VERTNUMBER ) ||
+        (curmask & MeshModel::MM_FACENUMBER ) )
+        return false;
+
+    return true;
 }
 
 
@@ -373,7 +376,15 @@ void MeshlabStdDialog::closeClick()
 {
     //int mask = 0;//curParSet.getDynamicFloatMask();
     if(curmask != MeshModel::MM_UNKNOWN)
+    {
+
         meshState.apply(curModel);
+        if (isPreviewable() && (previewCB != NULL) && previewCB->isChecked())
+        {
+            updateRenderingData(curmwi,curModel);
+        }
+
+    }
     curmask = MeshModel::MM_UNKNOWN;
     // Perform the update only if there is Valid GLarea.
     if(this->curgla)
@@ -391,8 +402,7 @@ void MeshlabStdDialog::closeEvent(QCloseEvent * /*event*/)
 MeshlabStdDialog::~MeshlabStdDialog()
 {
     delete stdParFrame;
-    if(isPreviewable())
-        delete previewCB;
+    delete previewCB;
 }
 
 
@@ -943,7 +953,7 @@ void ComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 /******************************************/
 
 EnumWidget::EnumWidget(QWidget *p, RichEnum* rpar)
-:ComboWidget(p,rpar)
+    :ComboWidget(p,rpar)
 {
     //you MUST call it!!!!
     Init(p,rpar->val->getEnum(),reinterpret_cast<EnumDecoration*>(rpar->pd)->enumvalues);
@@ -978,7 +988,7 @@ void EnumWidget::setWidgetValue( const Value& nv )
 
 
 MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
-:ComboWidget(p,rpar)
+    :ComboWidget(p,rpar)
 {
     md=reinterpret_cast<MeshDecoration*>(rp->pd)->meshdoc;
 
@@ -992,8 +1002,8 @@ MeshWidget::MeshWidget(QWidget *p, RichMesh* rpar)
     {
         QString shortName = md->meshList.at(i)->label();
         meshNames.push_back(shortName);
-      /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh())
-            defaultMeshIndex = i;*/
+        /*  if(md->meshList.at(i) == rp->pd->defVal->getMesh())
+        defaultMeshIndex = i;*/
         if(md->meshList.at(i) == rp->val->getMesh())
         {
             currentmeshindex = i;
@@ -1200,13 +1210,13 @@ _fileName = newName;
 */
 
 GenericParamDialog::GenericParamDialog(QWidget *p, RichParameterSet *_curParSet, QString title, MeshDocument *_meshDocument)
-: QDialog(p) {
-    stdParFrame=NULL;
-    curParSet=_curParSet;
-    meshDocument = _meshDocument;
-    createFrame();
-    if(!title.isEmpty())
-        setWindowTitle(title);
+    : QDialog(p) {
+        stdParFrame=NULL;
+        curParSet=_curParSet;
+        meshDocument = _meshDocument;
+        createFrame();
+        if(!title.isEmpty())
+            setWindowTitle(title);
 }
 
 
@@ -1387,8 +1397,8 @@ void MeshLabWidget::resetValue()
 }
 
 MeshLabWidget::MeshLabWidget( QWidget* p,RichParameter* rpar )
-:QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
-//:rp(rpar)
+    :QWidget(p),rp(rpar) // this version of the line caused the very strange error of uncheckabe first bool widget
+    //:rp(rpar)
 {
     //setParent(p);
     if (rp!= NULL)
@@ -1433,7 +1443,7 @@ void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));
 BoolWidget::BoolWidget(QWidget* p, RichBool* rb )
-:MeshLabWidget(p,rb)
+    :MeshLabWidget(p,rb)
 {
     cb = new QCheckBox(rp->pd->fieldDesc,this);
     cb->setToolTip(rp->pd->tooltip);
@@ -1472,7 +1482,7 @@ void BoolWidget::addWidgetToGridLayout(QGridLayout* lay,const int r)
 
 //connect(qle,SIGNAL(editingFinished()),this,SIGNAL(parameterChanged()));
 LineEditWidget::LineEditWidget( QWidget* p,RichParameter* rpar )
-:MeshLabWidget(p,rpar)
+    :MeshLabWidget(p,rpar)
 {
     lab = new QLabel(rp->pd->fieldDesc,this);
     lned = new QLineEdit(this);
@@ -1513,7 +1523,7 @@ void LineEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 IntWidget::IntWidget( QWidget* p,RichInt* rpar )
-:LineEditWidget(p,rpar)
+    :LineEditWidget(p,rpar)
 {
     lned->setText(QString::number(rp->val->getInt()));
 }
@@ -1534,7 +1544,7 @@ void IntWidget::setWidgetValue( const Value& nv )
 }
 //
 FloatWidget::FloatWidget( QWidget* p,RichFloat* rpar )
-:LineEditWidget(p,rpar)
+    :LineEditWidget(p,rpar)
 {
     lned->setText(QString::number(rp->val->getFloat(),'g',3));
 }
@@ -1555,7 +1565,7 @@ void FloatWidget::setWidgetValue( const Value& nv )
 }
 
 StringWidget::StringWidget( QWidget* p,RichString* rpar )
-:LineEditWidget(p,rpar)
+    :LineEditWidget(p,rpar)
 {
     lned->setText(rp->val->getString());
 }
@@ -1582,7 +1592,7 @@ void StringWidget::setWidgetValue( const Value& nv )
 
 
 ColorWidget::ColorWidget(QWidget *p, RichColor* newColor)
-:MeshLabWidget(p,newColor),pickcol()
+    :MeshLabWidget(p,newColor),pickcol()
 {
     colorLabel = new QLabel(this);
     descLabel = new QLabel(rp->pd->fieldDesc,this);
@@ -1746,7 +1756,7 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 }
 
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
-:MeshLabWidget(p,rpar),fl()
+    :MeshLabWidget(p,rpar),fl()
 {
     filename = new QLineEdit(this);
     filename->setText(tr(""));
@@ -1810,7 +1820,7 @@ void IOFileWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 }
 
 OpenFileWidget::OpenFileWidget( QWidget *p, RichOpenFile* rdf )
-:IOFileWidget(p,rdf)
+    :IOFileWidget(p,rdf)
 {
 }
 
@@ -1831,7 +1841,7 @@ OpenFileWidget::~OpenFileWidget()
 
 
 SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
-:IOFileWidget(p,rpar)
+    :IOFileWidget(p,rpar)
 {
     filename->setText(rpar->val->getFileName());
 }

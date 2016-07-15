@@ -58,5 +58,5 @@ private:
 
     static void drawLineVector(std::vector<PointPC> &EV);
     static void drawTriVector(std::vector<PointPC> &TV);
-    static void drawDotVector(std::vector<PointPC> &TV, float baseSize);
+    static void drawDotVector(std::vector<PointPC> &TV, float baseSize=4.0f);
 };

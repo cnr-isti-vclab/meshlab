@@ -1286,8 +1286,6 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         curr.set(pm,rd);
                         MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     }
-                    /*MLPerViewGLOptions opts;
-                    curr.get(opts);*/
  
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
@@ -2758,6 +2756,8 @@ void MainWindow::reloadAllMesh()
     }
     qb->reset();
     update();
+    if (GLA() != NULL)
+        GLA()->update();
 }
 
 void MainWindow::reload()
@@ -2771,6 +2771,8 @@ void MainWindow::reload()
     loadMeshWithStandardParams(fileName,meshDoc()->mm());
     qb->reset();
     update();
+    if (GLA() != NULL)
+        GLA()->update();
 }
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)

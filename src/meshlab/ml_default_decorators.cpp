@@ -42,6 +42,13 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
         if ((!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled) || 
             (!currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled))
                 cleanBoundaryDecoratorData(mesh,!currentopts._peredge_edgeboundary_enabled,!currentopts._peredge_faceboundary_enabled);
+
+    if (currentopts._peredge_edgemanifold_enabled && !oldopts._peredge_edgemanifold_enabled)
+        initNonManifEdgeDecoratorData(mesh);
+    else
+        if (!currentopts._peredge_edgemanifold_enabled && oldopts._peredge_edgemanifold_enabled)
+            cleanNonManifEdgeDecoratorData(mesh);
+
 }
 
 bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRenderingData& dt )
@@ -53,6 +60,10 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
 
     if (opts._peredge_edgeboundary_enabled || opts._peredge_faceboundary_enabled)
         initBoundaryDecoratorData(m,opts._peredge_edgeboundary_enabled,opts._peredge_faceboundary_enabled);
+
+    if (opts._peredge_edgemanifold_enabled)
+        initNonManifEdgeDecoratorData(m);
+
     return true;
 }
 
@@ -97,6 +108,31 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
         }      
     }
 
+    if (opts._peredge_vertmanifold_enabled)
+    {
+          // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+          CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertVertVector");
+          CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertTriVector");
+          drawDotVector(vvH());
+          drawTriVector(tvH());
+
+          QString inf;
+          inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size()) + "</b> faces over non manifold edges";
+          log.RealTimeLog("Non Manifold Vertices",m.shortName(),inf);
+    }
+
+    if (opts._peredge_edgemanifold_enabled)
+    {
+        //Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeAttName());
+        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeFaceAttName());
+        drawLineVector(bvH());
+        drawTriVector(fvH());
+        QString inf;
+        inf += "<b>" + QString::number(bvH().size()/2) + " </b> non manifold edges<br><b>" + QString::number(fvH().size()/3) + "</b> faces over non manifold edges";
+        log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
+    }
+
 
 }
 
@@ -109,6 +145,9 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
 
     if (opts._peredge_edgeboundary_enabled || opts._peredge_faceboundary_enabled)
         cleanBoundaryDecoratorData(mesh,!opts._peredge_edgeboundary_enabled,!opts._peredge_faceboundary_enabled);
+
+    if (opts._peredge_edgemanifold_enabled)
+        cleanNonManifEdgeDecoratorData(mesh);
     return true;
 }
 
