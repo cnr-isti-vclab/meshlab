@@ -1286,8 +1286,8 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         curr.set(pm,rd);
                         MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     }
-                    MLPerViewGLOptions opts;
-                    curr.get(opts);
+                    /*MLPerViewGLOptions opts;
+                    curr.get(opts);*/
  
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
@@ -1306,9 +1306,10 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                 }
                 vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
                 shared->manageBuffers(mm->id());
-                updateLayerDialog();
+                
                 //addRenderingSystemLogInfo(mm->id());
             }
+            updateLayerDialog();
         }
     }
 }
