@@ -161,8 +161,8 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 // The Real Core Function doing the actual mesh processing.
 bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
 {
-	MeshModel & currM = *md.mm();
-	MeshModel* m;
+	MeshModel *currM = md.mm();
+	MeshModel *m;
 
 	switch(ID(filter))	 
 	{
@@ -203,13 +203,13 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		Box3m selBox; //boundingbox of the selected vertices
 		std::vector< Point3m > selected_pts; //copy of selected vertices, for plane fitting
 
-		if (&currM == NULL)
+		if (currM == NULL)
 		{
 			errorMessage = "No mesh layer selected"; 
 			return false;
 		}
 
-		if (currM.cm.svn == 0 && currM.cm.sfn == 0) // if no selection, fail
+		if (currM->cm.svn == 0 && currM->cm.sfn == 0) // if no selection, fail
 		{
 			errorMessage = "No selection";
 			return false;
@@ -217,14 +217,14 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 
 		m = md.addNewMesh("", "Fitted Plane");
 
-		if (currM.cm.svn == 0 || currM.cm.sfn != 0)
+		if (currM->cm.svn == 0 || currM->cm.sfn != 0)
 		{
-			tri::UpdateSelection<CMeshO>::VertexClear(currM.cm);
-			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currM.cm);
+			tri::UpdateSelection<CMeshO>::VertexClear(currM->cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currM->cm);
 		}
 
 		Point3m Naccum = Point3m(0.0, 0.0, 0.0);
-		for (CMeshO::VertexIterator vi = currM.cm.vert.begin(); vi != currM.cm.vert.end(); ++vi)
+		for (CMeshO::VertexIterator vi = currM->cm.vert.begin(); vi != currM->cm.vert.end(); ++vi)
 		if (!(*vi).IsD() && (*vi).IsS())
 		{
 			Point3m p = (*vi).P();
