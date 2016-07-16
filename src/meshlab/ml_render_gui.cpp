@@ -884,7 +884,7 @@ void MLRenderingColorPicker::initGui()
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
 
-void MLRenderingColorPicker::setColor( QColor& def )
+void MLRenderingColorPicker::setColor( QColor def )
 {
     _act->setColor(def);
     updateColorInfo();
@@ -953,7 +953,7 @@ void MLRenderingBBoxColorPicker::initGui()
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
 
-void MLRenderingBBoxColorPicker::setColor( QColor& def )
+void MLRenderingBBoxColorPicker::setColor( QColor def )
 {
     _act->setColor(def);
     updateColorInfo();

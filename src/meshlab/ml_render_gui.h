@@ -42,7 +42,7 @@ public:
     MLRenderingColorPicker(MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p);
     ~MLRenderingColorPicker();
 
-    void setColor(QColor& def);
+    void setColor(QColor def);
 //protected:
 //    void paintEvent( QPaintEvent * );
 protected:
@@ -66,7 +66,7 @@ public:
     MLRenderingBBoxColorPicker(int meshid,QWidget* parent);
     ~MLRenderingBBoxColorPicker();
 
-    void setColor(QColor& def);
+    void setColor(QColor def);
 protected:
     void initGui();
     void  updateColorInfo();
