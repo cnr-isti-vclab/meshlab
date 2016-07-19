@@ -1284,9 +1284,8 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                             MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask(mm,rd);
                         }
                         curr.set(pm,rd);
-                        MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     }
- 
+                    MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
                 }

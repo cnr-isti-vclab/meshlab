@@ -686,7 +686,7 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
                 {
                     glopts._perpoint_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
                     glopts._perpoint_mesh_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
-                    glopts._perpoint_fixed_color_enabled = !(glopts._perpoint_mesh_color_enabled);
+                    glopts._perpoint_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !permeshcolor;
                     break;
                 }
             case (MLRenderingData::PR_WIREFRAME_EDGES):
@@ -694,7 +694,7 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MeshModel* mm,
                 {
                     glopts._perwire_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
                     glopts._perwire_mesh_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && permeshcolor;
-                    glopts._perwire_fixed_color_enabled = !(glopts._perpoint_mesh_color_enabled);
+                    glopts._perwire_fixed_color_enabled =  !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] && !permeshcolor;
                     break;
                 }
             case (MLRenderingData::PR_SOLID):
