@@ -125,7 +125,6 @@ void MLRenderingToolbar::getCurrentRenderingDataAccordingToGUI( MLRenderingData&
     }
 }
 
-
 MLRenderingSideToolbar::MLRenderingSideToolbar(QWidget* parent /*= NULL*/ )
     :MLRenderingToolbar(parent)
 {

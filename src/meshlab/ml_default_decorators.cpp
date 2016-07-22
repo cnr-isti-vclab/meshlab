@@ -35,13 +35,12 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
     if ((!oldvalid) || (!currentvalid))
         return false;
 
-    if ((currentopts._peredge_edgeboundary_enabled && !oldopts._peredge_edgeboundary_enabled) || 
-        (currentopts._peredge_faceboundary_enabled && !oldopts._peredge_faceboundary_enabled))
-            initBoundaryDecoratorData(mesh,currentopts._peredge_edgeboundary_enabled,currentopts._peredge_faceboundary_enabled);
-    else 
-        if ((!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled) || 
-            (!currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled))
-                cleanBoundaryDecoratorData(mesh,!currentopts._peredge_edgeboundary_enabled,!currentopts._peredge_faceboundary_enabled);
+    /*the boolean conditions should make the following code lines mutually exclusive.....hopefully*/ 
+    initBoundaryDecoratorData(mesh,currentopts._peredge_edgeboundary_enabled && !oldopts._peredge_edgeboundary_enabled,
+                                   currentopts._peredge_faceboundary_enabled && !oldopts._peredge_faceboundary_enabled);
+    cleanBoundaryDecoratorData(mesh,!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled,
+                                    !currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled);
+
 
     if (currentopts._peredge_edgemanifold_enabled && !oldopts._peredge_edgemanifold_enabled)
         initNonManifEdgeDecoratorData(mesh);
@@ -58,8 +57,7 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
     if (!valid)
         return false;
 
-    if (opts._peredge_edgeboundary_enabled || opts._peredge_faceboundary_enabled)
-        initBoundaryDecoratorData(m,opts._peredge_edgeboundary_enabled,opts._peredge_faceboundary_enabled);
+    initBoundaryDecoratorData(m,opts._peredge_edgeboundary_enabled,opts._peredge_faceboundary_enabled);
 
     if (opts._peredge_edgemanifold_enabled)
         initNonManifEdgeDecoratorData(m);

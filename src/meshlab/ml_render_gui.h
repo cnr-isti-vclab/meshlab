@@ -129,6 +129,8 @@ protected slots:
     virtual void toggle(QAction* act);
     void extraUpdateRequired(int,MLRenderingAction*);
 
+//private:
+//    void initGui();
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>& acts);
@@ -181,7 +183,7 @@ signals:
     void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
 
 private slots:
-    void toggle(QAction* act);
+    void toggle(QAction*);
 };
 
 class MLRenderingParametersFrame : public QFrame
