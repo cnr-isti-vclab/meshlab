@@ -48,6 +48,11 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
         if (!currentopts._peredge_edgemanifold_enabled && oldopts._peredge_edgemanifold_enabled)
             cleanNonManifEdgeDecoratorData(mesh);
 
+    if (currentopts._peredge_text_boundary_enabled && !oldopts._peredge_text_boundary_enabled)
+        initBoundaryTextDecoratorData(mesh);
+    else
+        if (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled)
+            cleanBoundaryTextDecoratorData(mesh);
 }
 
 bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRenderingData& dt )
@@ -61,6 +66,9 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
 
     if (opts._peredge_edgemanifold_enabled)
         initNonManifEdgeDecoratorData(m);
+
+    if (opts._peredge_text_boundary_enabled)
+        initBoundaryTextDecoratorData(m);
 
     return true;
 }
@@ -131,7 +139,29 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
         log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
     }
 
-
+    if (opts._peredge_text_boundary_enabled)
+    {
+        CMeshO::PerMeshAttributeHandle< std::vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Point3m> >(m.cm,boundaryTextVertAttName());
+        std::vector<Point3m> *BTVp = &btvH();
+        if (BTVp->size() != 0)
+        {
+            glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_LIGHTING);
+            glDisable(GL_TEXTURE_2D);
+            glDepthFunc(GL_LEQUAL);
+            glEnable(GL_LINE_SMOOTH);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glLineWidth(1.f);
+            glColor(vcg::Color4b(vcg::Color4b::Magenta));
+            glDepthRange (0.0, 0.999);
+            glEnableClientState (GL_VERTEX_ARRAY);
+            glVertexPointer(3,vcg::GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
+            glDrawArrays(GL_LINES,0,BTVp->size());
+            glDisableClientState (GL_VERTEX_ARRAY);
+            glPopAttrib();
+        }
+    }
 }
 
 bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLRenderingData& dt )
@@ -146,6 +176,9 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
 
     if (opts._peredge_edgemanifold_enabled)
         cleanNonManifEdgeDecoratorData(mesh);
+
+    if (opts._peredge_text_boundary_enabled)
+        cleanBoundaryTextDecoratorData(mesh);
     return true;
 }
 
@@ -287,6 +320,45 @@ void MLDefaultMeshDecorators::cleanNonManifEdgeDecoratorData( MeshModel& m )
     vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,nonManifEdgeFaceAttName());
 }
 
+void MLDefaultMeshDecorators::initBoundaryTextDecoratorData( MeshModel& m)
+{
+    m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+    CMeshO::PerMeshAttributeHandle< std::vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<Point3m> >(m.cm,boundaryTextVertAttName());
+    std::vector<Point3m> *BTVp = &btvH();
+    BTVp->clear();
+    std::vector<std::pair<CMeshO::FacePointer,int> > SaveTopoVec;
+    CMeshO::FaceIterator fi;
+    for(fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+    {
+        for(int i=0;i<3;++i)
+            SaveTopoVec.push_back(std::make_pair((*fi).FFp(i),(*fi).FFi(i)));
+    }
+    vcg::tri::UpdateTopology<CMeshO>::FaceFaceFromTexCoord(m.cm);
+    for(fi = m.cm.face.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+    {
+        for(int i=0;i<3;++i)
+            if(vcg::face::IsBorder(*fi,i))
+            {
+                BTVp->push_back((*fi).V0(i)->P());
+                BTVp->push_back((*fi).V1(i)->P());
+            }
+    }
+    std::vector<std::pair<CMeshO::FacePointer,int> >::iterator iii;
+    for(fi = m.cm.face.begin(), iii=SaveTopoVec.begin(); fi!= m.cm.face.end();++fi) if(!(*fi).IsD())
+    {
+        for(int i=0;i<3;++i)
+        {
+            (*fi).FFp(i)= iii->first;
+            (*fi).FFi(i)= iii->second;
+        }
+    }
+}
+
+void MLDefaultMeshDecorators::cleanBoundaryTextDecoratorData( MeshModel& m)
+{
+    vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryTextVertAttName());
+}
+
 void MLDefaultMeshDecorators::drawLineVector(std::vector<PointPC> &EV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
@@ -361,6 +433,7 @@ void MLDefaultMeshDecorators::drawDotVector(std::vector<PointPC> &TV, float base
     }
     glPopAttrib();
 }
+
 
 
 

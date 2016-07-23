@@ -46,6 +46,9 @@ private:
     void initNonManifEdgeDecoratorData(MeshModel& mm);
     void cleanNonManifEdgeDecoratorData(MeshModel& mm);
 
+    void initBoundaryTextDecoratorData(MeshModel& mm);
+    void cleanBoundaryTextDecoratorData(MeshModel& mm);
+
     static const char* boundaryVertAttName() {return "BoundaryVertVector";}
     static const char* boundaryEdgeAttName() {return "BoundaryEdgeVector";}
     static const char* boundaryFaceAttName() {return "BoundaryFaceVector";}
@@ -55,6 +58,8 @@ private:
 
     static const char* nonManifVertAttName() {return "NonManifVertVector";}
     static const char* nonManifVertFaceAttName() {return "NonManifVertFaceVector";}
+
+    static const char* boundaryTextVertAttName() {return "BoundaryTexVector";}
 
     static void drawLineVector(std::vector<PointPC> &EV);
     static void drawTriVector(std::vector<PointPC> &TV);
