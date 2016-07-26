@@ -59,7 +59,8 @@ SUBDIRS       = common \
                 meshlabplugins/filter_unsharp \
                 meshlabplugins/filter_zippering \			
 # Decorator Plugins
-				meshlabplugins/decorate_background \	
+				meshlabplugins/decorate_background \
+				meshlabplugins/decorate_base \					
 # Edit Plugins
                 meshlabplugins/edit_quality \
 # Sample Plugins
