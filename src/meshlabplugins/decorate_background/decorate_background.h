@@ -90,7 +90,7 @@ DecorateBackgroundPlugin()
 
 
 private:
-  void DrawGriddedCube(MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
+  void DrawGriddedCube(MLSceneGLSharedDataContext* shared,QGLContext* cont,MeshModel &m, const Box3m &bb, Scalarm majorTick, Scalarm minorTick, bool backCullFlag, bool shadowFlag, vcg::Color4b frontColor, vcg::Color4b backColor);
   Shotm curShot;
 
 signals:
