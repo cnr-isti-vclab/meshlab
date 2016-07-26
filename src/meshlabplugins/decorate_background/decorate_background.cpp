@@ -140,6 +140,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
     case DP_SHOW_GRID :
         {
             emit this->askViewerShot("backGrid");
+
             float scaleBB = parset->getFloat(BoxRatioParam());
             float majorTick = fabs(parset->getFloat(GridMajorParam()));
             float minorTick = fabs(parset->getFloat(GridMinorParam()));
@@ -148,9 +149,25 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
             Color4b backColor = parset->getColor4b(GridColorBackParam());
             Color4b frontColor = parset->getColor4b(GridColorFrontParam());
             Box3m bb = m.bbox();
-            float scalefactor = std::max(0.2, (scaleBB - 1.0));
+            float scalefactor = std::max(0.1, (scaleBB - 1.0));
             bb.Offset((bb.max - bb.min)*(scalefactor/2.0));
-            
+
+			// minortick should never be more than majortick
+			if (minorTick > majorTick)
+				minorTick = majorTick;
+
+			// check if user asked for a grid that is too dense
+			// if more than 100-200k ticks, the rendering will slow down too much and crash on some drivers
+			int ticks = ((bb.Dim()[0] + bb.Dim()[1] + bb.Dim()[2]) / minorTick) + ((bb.Dim()[0] + bb.Dim()[1] + bb.Dim()[2]) / majorTick);
+			if (ticks > 200000)
+			{
+				if (log10(bb.Diag()) > 0.0)
+					majorTick = pow(10, floor(log10(bb.Diag()) -1));
+				else
+					majorTick = pow(10, floor(log10(bb.Diag()) + 1));
+				minorTick = majorTick / 2.0;
+			}
+
             MLSceneGLSharedDataContext* shared = NULL;
             QGLContext* cont = NULL;
             if ((gla != NULL) && (gla->mvc() != NULL))
