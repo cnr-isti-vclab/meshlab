@@ -45,11 +45,6 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_NORMALS,
     DP_SHOW_CURVATURE,
     DP_SHOW_VERT,
-    DP_SHOW_EDGE,
-    DP_SHOW_NON_FAUX_EDGE,
-    DP_SHOW_BOUNDARY,
-    DP_SHOW_NON_MANIF_EDGE,
-    DP_SHOW_NON_MANIF_VERT,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_AXIS,
     DP_SHOW_QUOTED_BOX,
@@ -58,10 +53,7 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_QUALITY_CONTOUR,
     DP_SHOW_CAMERA,
     DP_SHOW_TEXPARAM,
-    DP_SHOW_BOUNDARY_TEX,
-    DP_SHOW_SELECTED_MESH ,
-    DP_SHOW_SELECTED_FACE,
-    DP_SHOW_SELECTED_VERT
+    DP_SHOW_SELECTED_MESH
   };
 
 
@@ -84,11 +76,6 @@ public:
     typeList <<
                 DP_SHOW_AXIS <<
                 DP_SHOW_VERT <<
-                //DP_SHOW_EDGE <<
-                DP_SHOW_NON_FAUX_EDGE <<
-                DP_SHOW_BOUNDARY <<
-                DP_SHOW_NON_MANIF_EDGE <<
-                DP_SHOW_NON_MANIF_VERT <<
                 DP_SHOW_NORMALS <<
                 DP_SHOW_CURVATURE <<
                 DP_SHOW_QUALITY_HISTOGRAM <<
@@ -98,20 +85,14 @@ public:
                 DP_SHOW_LABEL <<
                 DP_SHOW_CAMERA <<
                 DP_SHOW_TEXPARAM <<
-                DP_SHOW_SELECTED_MESH <<
-                DP_SHOW_SELECTED_FACE <<
-                DP_SHOW_SELECTED_VERT <<
-                DP_SHOW_BOUNDARY_TEX;
+                DP_SHOW_SELECTED_MESH;
 
     FilterIDType tt;
     foreach(tt , types())
     {
       actionList << new QAction(decorationName(tt), this);
-      if(tt==DP_SHOW_SELECTED_VERT)        actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
-      if(tt==DP_SHOW_SELECTED_FACE)        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));
-      if(tt==DP_SHOW_BOUNDARY)             actionList.last()->setIcon(QIcon(":/images/show_boundary.png"));
-      if(tt==DP_SHOW_NON_MANIF_EDGE)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_edge.png"));
-      if(tt==DP_SHOW_NON_MANIF_VERT)       actionList.last()->setIcon(QIcon(":/images/show_nonmanifold_vertex.png"));
+      /*if(tt==DP_SHOW_SELECTED_VERT)        actionList.last()->setIcon(QIcon(":/images/selected_vert.png"));
+      if(tt==DP_SHOW_SELECTED_FACE)        actionList.last()->setIcon(QIcon(":/images/selected_face.png"));*/
       if(tt==DP_SHOW_AXIS)                 actionList.last()->setIcon(QIcon(":/images/show_axis.png"));
     }
 
@@ -133,8 +114,8 @@ public:
   void DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *painter, RichParameterSet *, QFont qf);
   void DrawLineVector(std::vector<PointPC> &EV);
-  void DrawTriVector(std::vector<PointPC> &EV);
-  void DrawDotVector(std::vector<PointPC> &EV, float basesize=4.0);
+  //void DrawTriVector(std::vector<PointPC> &EV);
+  //void DrawDotVector(std::vector<PointPC> &EV, float basesize=4.0);
 
 
 
@@ -194,6 +175,8 @@ public:
   inline QString NormalFaceFlag() const { return  "MeshLab::Decoration::NormalFaceFlag" ; }
 
   inline QString BBAbsParam() const { return  "MeshLab::Decoration::BBAbs" ; }
+
+  inline QString selectedMeshBlendingColor() const { return  "MeshLab::Decoration::MeshBlendingColor" ; }
 
 signals:
   void askViewerShot(QString);
