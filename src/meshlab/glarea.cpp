@@ -522,7 +522,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                     else
                         glDisable(GL_CULL_FACE);
 
-
                     datacont->setMeshTransformationMatrix(mp->id(),mp->cm.Tr);
 					datacont->draw(mp->id(),context());
 

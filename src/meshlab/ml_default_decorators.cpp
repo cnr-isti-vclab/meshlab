@@ -80,85 +80,119 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
     if (!valid)
         return;
 
-    if (!opts._peredge_extra_enabled)
-        return;
-
-    if (opts._peredge_edgeboundary_enabled || opts._peredge_faceboundary_enabled)
+    if (opts._peredge_extra_enabled)
     {
-        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryVertAttName());
-        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryEdgeAttName());
-        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryFaceAttName());
-        drawLineVector(beH());
-        if(opts._peredge_faceboundary_enabled) 
-            drawTriVector(bfH());
-        drawDotVector(bvH(),5);
-        
-        if (opts._peredge_edgeboundary_enabled)
+        if (opts._peredge_edgeboundary_enabled || opts._peredge_faceboundary_enabled)
         {
-            QString inf;
-            if(m.cm.fn==0) 
-                inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
-            else
-                inf += "<b>" + QString::number(beH().size()/2) + " </b> edges";
-            log.RealTimeLog("Boundary",m.shortName(),inf);
+            CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryVertAttName());
+            CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryEdgeAttName());
+            CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryFaceAttName());
+            drawLineVector(beH());
+            if(opts._peredge_faceboundary_enabled) 
+                drawTriVector(bfH());
+            drawDotVector(bvH(),5);
+        
+            if (opts._peredge_edgeboundary_enabled)
+            {
+                QString inf;
+                if(m.cm.fn==0) 
+                    inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
+                else
+                    inf += "<b>" + QString::number(beH().size()/2) + " </b> edges";
+                log.RealTimeLog("Boundary",m.shortName(),inf);
+            }
+
+            if (opts._peredge_faceboundary_enabled)
+            {
+                QString inf;
+                if(m.cm.fn==0) 
+                    inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
+                else
+                    inf += "<b>" + QString::number(bfH().size()/3) + " </b> faces";
+                log.RealTimeLog("Boundary Faces",m.shortName(),inf);
+            }      
         }
 
-        if (opts._peredge_faceboundary_enabled)
+        if (opts._peredge_vertmanifold_enabled)
         {
+              // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertVertVector");
+              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertTriVector");
+              drawDotVector(vvH());
+              drawTriVector(tvH());
+
+              QString inf;
+              inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size()) + "</b> faces over non manifold edges";
+              log.RealTimeLog("Non Manifold Vertices",m.shortName(),inf);
+        }
+
+        if (opts._peredge_edgemanifold_enabled)
+        {
+            //Note the standard way for adding extra per-mesh data using the per-mesh attributes.
+            CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeAttName());
+            CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeFaceAttName());
+            drawLineVector(bvH());
+            drawTriVector(fvH());
             QString inf;
-            if(m.cm.fn==0) 
-                inf += "<b>" + QString::number(bvH().size()) + " </b> vertex";
-            else
-                inf += "<b>" + QString::number(bfH().size()/3) + " </b> faces";
-            log.RealTimeLog("Boundary Faces",m.shortName(),inf);
-        }      
-    }
+            inf += "<b>" + QString::number(bvH().size()/2) + " </b> non manifold edges<br><b>" + QString::number(fvH().size()/3) + "</b> faces over non manifold edges";
+            log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
+        }
 
-    if (opts._peredge_vertmanifold_enabled)
-    {
-          // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-          CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertVertVector");
-          CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertTriVector");
-          drawDotVector(vvH());
-          drawTriVector(tvH());
-
-          QString inf;
-          inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size()) + "</b> faces over non manifold edges";
-          log.RealTimeLog("Non Manifold Vertices",m.shortName(),inf);
-    }
-
-    if (opts._peredge_edgemanifold_enabled)
-    {
-        //Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeAttName());
-        CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeFaceAttName());
-        drawLineVector(bvH());
-        drawTriVector(fvH());
-        QString inf;
-        inf += "<b>" + QString::number(bvH().size()/2) + " </b> non manifold edges<br><b>" + QString::number(fvH().size()/3) + "</b> faces over non manifold edges";
-        log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
-    }
-
-    if (opts._peredge_text_boundary_enabled)
-    {
-        CMeshO::PerMeshAttributeHandle< std::vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Point3m> >(m.cm,boundaryTextVertAttName());
-        std::vector<Point3m> *BTVp = &btvH();
-        if (BTVp->size() != 0)
+        if (opts._peredge_text_boundary_enabled)
         {
-            glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+            CMeshO::PerMeshAttributeHandle< std::vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<Point3m> >(m.cm,boundaryTextVertAttName());
+            std::vector<Point3m> *BTVp = &btvH();
+            if (BTVp->size() != 0)
+            {
+                glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+                glDisable(GL_LIGHTING);
+                glDisable(GL_TEXTURE_2D);
+                glDepthFunc(GL_LEQUAL);
+                glEnable(GL_LINE_SMOOTH);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                glLineWidth(1.f);
+                glColor(vcg::Color4b(vcg::Color4b::Magenta));
+                glDepthRange (0.0, 0.999);
+                glEnableClientState (GL_VERTEX_ARRAY);
+                glVertexPointer(3,vcg::GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
+                glDrawArrays(GL_LINES,0,BTVp->size());
+                glDisableClientState (GL_VERTEX_ARRAY);
+                glPopAttrib();
+            }
+        }
+    }
+
+    if (opts._sel_enabled)
+    {
+        if (opts._face_sel)
+        {
+            glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glEnable(GL_POLYGON_OFFSET_FILL);
             glDisable(GL_LIGHTING);
             glDisable(GL_TEXTURE_2D);
-            glDepthFunc(GL_LEQUAL);
-            glEnable(GL_LINE_SMOOTH);
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glLineWidth(1.f);
-            glColor(vcg::Color4b(vcg::Color4b::Magenta));
-            glDepthRange (0.0, 0.999);
-            glEnableClientState (GL_VERTEX_ARRAY);
-            glVertexPointer(3,vcg::GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(Point3m),&(BTVp->begin()[0]));
-            glDrawArrays(GL_LINES,0,BTVp->size());
-            glDisableClientState (GL_VERTEX_ARRAY);
+            glDepthMask(GL_FALSE);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
+            glColor4f(1.0f,0.0,0.0,.3f);
+            glPolygonOffset(-1.0, -1);
+            CMeshO::FaceIterator fi;
+            glPushMatrix();
+            glMultMatrix(m.cm.Tr);
+            glBegin(GL_TRIANGLES);
+            m.cm.sfn=0;
+            //for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
+            //{
+            //    if(!(*fi).IsD() && (*fi).IsS())
+            //    {
+            //        /*glVertex((*fi).cP(0));
+            //        glVertex((*fi).cP(1));
+            //        glVertex((*fi).cP(2));*/
+            //        ++m.cm.sfn;
+            //    }
+            //}
+            glEnd();
+            glPopMatrix();
             glPopAttrib();
         }
     }

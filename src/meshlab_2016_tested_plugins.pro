@@ -57,7 +57,9 @@ SUBDIRS       = common \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
-                meshlabplugins/filter_zippering \
+                meshlabplugins/filter_zippering \			
+# Decorator Plugins
+				meshlabplugins/decorator_background \	
 # Edit Plugins
                 meshlabplugins/edit_quality \
 # Sample Plugins
