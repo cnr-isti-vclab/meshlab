@@ -24,7 +24,8 @@
 #include "ml_default_decorators.h"
 #include <vector>
 #include <wrap/gl/gl_type_name.h>
-
+#include <wrap/gui/coordinateframe.h>
+#include <wrap/qt/gl_label.h>
 
 bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const MLRenderingData& previousdata,const MLRenderingData& currentdata )
 {
@@ -73,7 +74,7 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
     return true;
 }
 
-void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData& dt, QPainter* /*painter*/, GLLogStream& log )
+void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData& dt, QPainter* painter, GLLogStream& log )
 {
     MLPerViewGLOptions opts;
     bool valid = dt.get(opts);
@@ -194,6 +195,244 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             glEnd();
             glPopMatrix();
             glPopAttrib();
+        }
+    }
+
+    if (opts._perbbox_enabled)
+    {
+        if (opts._perbbox_quoted_info_enabled)
+        {
+            QFont qf;
+            drawQuotedBox(m,painter,qf);
+        }
+    }
+}
+
+void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf)
+{
+    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+
+    // Get gl state values
+    double mm[16],mp[16];
+    GLint vp[4];
+    glGetDoublev(GL_PROJECTION_MATRIX,mp);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mm);
+    glGetIntegerv(GL_VIEWPORT,vp);
+
+    // Mesh boundingBox
+    Box3m b(m.cm.bbox);
+
+    glLineWidth(1.f);
+    glPointSize(3.f);
+
+    vcg::Point3d p1,p2;
+
+    Point3m c = b.Center();
+
+    float s = 1.15f;
+    const float LabelSpacing = 30;
+    chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
+    glPushMatrix();
+    glScalef(1,s,s);
+    glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
+    drawQuotedLine(p1,p2,b.min[0],b.max[0],vcg::CoordinateFrame::calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
+    glPopMatrix();
+
+    chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
+    glPushMatrix();
+    glScalef(s,1,s);
+    glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
+    drawQuotedLine(p1,p2,b.min[1],b.max[1],vcg::CoordinateFrame::calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
+    glPopMatrix();
+
+    chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
+    glPushMatrix();
+    glScalef(s,s,1);
+    glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
+    drawQuotedLine(p1,p2,b.min[2],b.max[2],vcg::CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
+    glPopMatrix();
+
+    glPopAttrib();
+
+}
+
+void MLDefaultMeshDecorators::drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont& qf,float angle,bool rightAlign)
+{
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHT0);
+    glDisable(GL_NORMALIZE);
+    float labelMargin =tickScalarDistance /4.0;
+    float firstTick;
+    // fmod returns the floating-point remainder of numerator/denominator (with the sign of the dividend)
+    // fmod ( 104.5 , 10) returns 4.5     --> aVal - fmod(aval/tick) = 100
+    // fmod ( -104.5 , 10) returns -4.5
+    // So it holds that
+
+    if(aVal > 0 ) firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
+    if(aVal ==0 ) firstTick = tickScalarDistance;
+    if(aVal < 0 ) firstTick = aVal + fmod(fabs(aVal),tickScalarDistance);
+
+    // now we are sure that aVal < firstTick
+    // let also be sure that there is enough space
+    if ( (firstTick-aVal) < (labelMargin) )
+        firstTick +=tickScalarDistance;
+
+
+    float tickDistTen=tickScalarDistance /10.0f;
+    float firstTickTen;
+    if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
+    else firstTickTen = aVal - fmod(aVal,tickDistTen);
+
+    int neededZeros=0;
+
+    vcg::Point3d Zero = a-((b-a)/(bVal-aVal))*aVal; // 3D Position of Zero.
+    vcg::Point3d v(b-a);
+    //v.Normalize();
+    v = v*(1.0/(bVal-aVal));
+    vcg::glLabel::Mode md(qf,vcg::Color4b(vcg::Color4b::White),angle,rightAlign);
+    if(tickScalarDistance > 0)   // Draw lines only if the two endpoint are not coincident
+    {
+        neededZeros = std::ceil(std::max(0.0,-std::log10(double(tickScalarDistance))));
+        glPointSize(3);
+        float i;
+        glBegin(GL_POINTS);
+        for(i=firstTick;i<bVal;i+=tickScalarDistance)
+            glVertex(Zero+v*i);
+        glEnd();
+        for(i=firstTick; (i+labelMargin)<bVal;i+=tickScalarDistance)
+            vcg::glLabel::render(painter,Point3m::Construct(Zero+v*i),QString("%1   ").arg(i,4+neededZeros,'f',neededZeros),md);
+        glPointSize(1);
+        glBegin(GL_POINTS);
+        for(i=firstTickTen;i<bVal;i+=tickDistTen)
+            glVertex(Zero+v*i);
+        glEnd();
+    }
+
+    // Draws bigger ticks at 0 and at max size
+    glPointSize(6);
+
+    glBegin(GL_POINTS);
+    glVertex(a);
+    glVertex(b);
+    if(bVal*aVal<0) glVertex(Zero);
+    glEnd();
+
+
+    // bold font at beginning and at the end
+    md.qFont.setBold(true);
+    vcg::glLabel::render(painter,vcg::Point3f::Construct(a), QString("%1   ").arg(aVal,4+neededZeros,'f',neededZeros) ,md);
+    vcg::glLabel::render(painter,vcg::Point3f::Construct(b), QString("%1   ").arg(bVal,4+neededZeros,'f',neededZeros) ,md);
+
+    glPopAttrib();
+}
+
+void MLDefaultMeshDecorators::chooseX(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &x1,vcg::Point3d &x2)
+{
+    float d = -std::numeric_limits<float>::max();
+    vcg::Point3d c;
+    // Project the bbox center
+    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+    c[2] = 0;
+
+    vcg::Point3d out1,out2;
+    Point3m in1,in2;
+
+    for (int i=0;i<8;i+=2)
+    {
+        // find the furthest axis
+        in1 = box.P(i);
+        in2 = box.P(i+1);
+
+        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+        out1[2] = out2[2] = 0;
+
+        float currDist = Distance(c,(out1+out2)*.5f);
+
+        if(currDist > d)
+        {
+            d = currDist;
+            x1.Import(in1);
+            x2.Import(in2);
+        }
+    }
+}
+
+
+void MLDefaultMeshDecorators::chooseY(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &y1,vcg::Point3d &y2)
+{
+    float d = -std::numeric_limits<float>::max();
+    vcg::Point3d c;
+    // Project the bbox center
+    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+    c[2] = 0;
+
+    vcg::Point3d out1,out2;
+    Point3m in1,in2;
+
+    for (int i=0;i<6;++i)
+    {
+        if(i==2) i = 4;	// skip
+        // find the furthest axis
+        in1 = box.P(i);
+        in2 = box.P(i+2);
+
+        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+        out1[2] = out2[2] = 0;
+
+        float currDist = Distance(c,(out1+out2)*.5f);
+
+        if(currDist > d)
+        {
+            d = currDist;
+            y1.Import(in1);
+            y2.Import(in2);
+        }
+    }
+}
+
+void MLDefaultMeshDecorators::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &z1,vcg::Point3d &z2)
+{
+    float d = -std::numeric_limits<float>::max();
+    vcg::Point3d c;
+    // Project the bbox center
+    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
+    c[2] = 0;
+
+    vcg::Point3d out1,out2;
+    Point3m in1,in2;
+
+    vcg::Point3d m;
+
+    for (int i=0;i<4;++i)
+    {
+        // find the furthest axis
+        in1 = box.P(i);
+        in2 = box.P(i+4);
+
+
+        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
+        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
+        out1[2] = out2[2] = 0;
+
+        float currDist = Distance(c,(out1+out2)*.5f);
+
+        if(currDist > d)
+        {
+            d = currDist;
+            z1.Import(in1);
+            z2.Import(in2);
         }
     }
 }

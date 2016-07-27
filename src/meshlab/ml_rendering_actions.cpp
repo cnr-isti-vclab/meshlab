@@ -1184,4 +1184,34 @@ MLRenderingFloatAction::MLRenderingFloatAction(int meshid, QObject* parent )
 
 }
 
+MLRenderingBBoxQuotedInfoAction::MLRenderingBBoxQuotedInfoAction( QObject* parent )
+    :MLRenderingAction(-1,parent)
+{
 
+}
+
+MLRenderingBBoxQuotedInfoAction::MLRenderingBBoxQuotedInfoAction( int meshid,QObject* parent )
+    :MLRenderingAction(meshid,parent)
+{
+
+}
+
+void MLRenderingBBoxQuotedInfoAction::updateRenderingData( MLRenderingData& rd )
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+    {
+        opts._perbbox_quoted_info_enabled = isChecked();
+        rd.set(opts);
+    }
+}
+
+bool MLRenderingBBoxQuotedInfoAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
+{
+    MLPerViewGLOptions opts;
+    bool valid = rd.get(opts);
+    if (valid)
+        return opts._perbbox_quoted_info_enabled;
+    return false;
+}

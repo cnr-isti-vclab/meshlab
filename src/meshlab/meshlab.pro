@@ -59,6 +59,7 @@ SOURCES = main.cpp \
 	ml_default_decorators.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
+	$$VCGDIR/wrap/gui/coordinateframe.cpp \
 	#$$GLEWDIR/src/glew.c \
     glarea_setting.cpp \
 	filterthread.cpp 

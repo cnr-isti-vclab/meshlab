@@ -64,4 +64,9 @@ private:
     static void drawLineVector(std::vector<PointPC> &EV);
     static void drawTriVector(std::vector<PointPC> &TV);
     static void drawDotVector(std::vector<PointPC> &TV, float baseSize=4.0f);
+    static void drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf);
+    static void drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b, float aVal, float bVal, float tickScalarDistance, QPainter *painter, QFont& qf,float angle = 0,bool rightAlign = false);
+    static void chooseX(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &x1,vcg::Point3d &x2);
+    static void chooseY(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &y1,vcg::Point3d &y2);
+    static void chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &z1,vcg::Point3d &z2);
 };

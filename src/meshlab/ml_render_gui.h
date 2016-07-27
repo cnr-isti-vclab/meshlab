@@ -336,6 +336,7 @@ private:
     void initGui();
     MLRenderingToolbar* _colortool;
     MLRenderingColorPicker* _userdef;
+    MLRenderingOnOffToolbar* _quotedinfotool;
 };
 
 class MLRenderingParametersTab : public QTabWidget

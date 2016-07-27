@@ -445,4 +445,15 @@ public:
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
 
+class MLRenderingBBoxQuotedInfoAction : public MLRenderingAction
+{
+    Q_OBJECT
+public:
+    MLRenderingBBoxQuotedInfoAction(QObject* parent);
+    MLRenderingBBoxQuotedInfoAction(int meshid,QObject* parent);
+
+    void updateRenderingData(MLRenderingData& rd);
+    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
 #endif

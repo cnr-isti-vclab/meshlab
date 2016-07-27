@@ -531,23 +531,27 @@ MLRenderingBBoxParametersFrame::MLRenderingBBoxParametersFrame( int meshid,QWidg
 MLRenderingBBoxParametersFrame::~MLRenderingBBoxParametersFrame()
 {
     delete _colortool;
+    delete _quotedinfotool;
 }
 
 void MLRenderingBBoxParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRenderingData& dt ) const
 {
     _colortool->getCurrentRenderingDataAccordingToGUI(dt);
+    _quotedinfotool->getRenderingDataAccordingToGUI(dt);
 }
 
 
 void MLRenderingBBoxParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
     _colortool->setAccordingToRenderingData(dt);
+    _quotedinfotool->setAccordingToRenderingData(dt);
 }
 
 void MLRenderingBBoxParametersFrame::setAssociatedMeshId( int meshid )
 {
     _meshid = meshid;
     _colortool->setAssociatedMeshId(meshid);
+    _quotedinfotool->setAssociatedMeshId(meshid);
 }
 
 void MLRenderingBBoxParametersFrame::initGui()
@@ -569,6 +573,14 @@ void MLRenderingBBoxParametersFrame::initGui()
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+
+    QLabel* quotedinfolab = new QLabel("Measure Info",this);
+    quotedinfolab->setFont(boldfont);
+    layout->addWidget(quotedinfolab,1,0,Qt::AlignLeft);
+    _quotedinfotool = new MLRenderingOnOffToolbar(_meshid,this);
+    _quotedinfotool->setRenderingAction(new MLRenderingBBoxQuotedInfoAction(_meshid,this));
+    layout->addWidget(_quotedinfotool,1,1,Qt::AlignLeft);
+    connect(_quotedinfotool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
