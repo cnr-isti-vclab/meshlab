@@ -43,6 +43,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     bool _visible;
     /*****************************/
 
+    bool _perbbox_quoted_info_enabled;
+
     bool _peredge_extra_enabled;
     bool _peredge_edgeboundary_enabled;
     bool _peredge_faceboundary_enabled;
@@ -71,6 +73,7 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
          :vcg::RenderingModalityGLOptions()
      {
         _visible = true;
+        _perbbox_quoted_info_enabled = false;
         _peredge_extra_enabled = false;
         _peredge_edgeboundary_enabled = false;
         _peredge_faceboundary_enabled = false;
@@ -113,6 +116,7 @@ private:
     void copyData(const  MLPerViewGLOptions& opts)
     {
         _visible = opts._visible;
+        _perbbox_quoted_info_enabled = opts._perbbox_quoted_info_enabled;
         _peredge_extra_enabled = opts._peredge_extra_enabled;
         _peredge_edgeboundary_enabled = opts._peredge_edgeboundary_enabled;
         _peredge_faceboundary_enabled = opts._peredge_faceboundary_enabled;
