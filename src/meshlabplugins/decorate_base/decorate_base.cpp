@@ -43,7 +43,6 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     case DP_SHOW_BOX_CORNERS:       return tr("Draw object's bounding box corners");
     case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals");
     case DP_SHOW_CURVATURE:         return tr("Draw per vertex/face principal curvature directions");
-    case DP_SHOW_QUOTED_BOX:        return tr("Draw quoted box");
     case DP_SHOW_LABEL:             return tr("Draw on all the vertex/edge/face a label with their index<br> Useful for debugging<br>(WARNING: do not use it on large meshes)");
     case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
     case DP_SHOW_QUALITY_CONTOUR:   return tr("Draw quality contours, e.g. the isolines of the quality field defined over the surface ");
@@ -63,7 +62,6 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_CURVATURE:         return QString("Show Curvature");
     case DP_SHOW_BOX_CORNERS:       return QString("Show Box Corners");
     case DP_SHOW_AXIS:              return QString("Show Axis");
-    case DP_SHOW_QUOTED_BOX:        return QString("Show Quoted Box");
     case DP_SHOW_LABEL:             return QString("Show Label");
     case DP_SHOW_CAMERA:            return QString("Show Camera");
     case DP_SHOW_TEXPARAM:          return QString("Show UV Tex Param");
@@ -212,7 +210,6 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
                 "</table>", m.cm.bbox.min[0], m.cm.bbox.min[1], m.cm.bbox.min[2], m.cm.bbox.max[0], m.cm.bbox.max[1], m.cm.bbox.max[2]);
         }
         break;
-    case DP_SHOW_QUOTED_BOX:		DrawQuotedBox(m,painter,qf);break;
     case DP_SHOW_LABEL:
         {
             if(rm->getBool(LabelVertFlag())) DrawVertLabel(m,painter);
@@ -301,162 +298,6 @@ void DecorateBasePlugin::DrawLineVector(std::vector<PointPC> &EV)
     glPopAttrib();
 }
 
-void DecorateBasePlugin::DrawQuotedBox(MeshModel &m,QPainter *gla,QFont qf)
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POINT_SMOOTH);
-
-    // Get gl state values
-    double mm[16],mp[16];
-    GLint vp[4];
-    glGetDoublev(GL_PROJECTION_MATRIX,mp);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mm);
-    glGetIntegerv(GL_VIEWPORT,vp);
-
-    // Mesh boundingBox
-    Box3m b(m.cm.bbox);
-    glColor(vcg::Color4b(Color4b::LightGray));
-    glBoxWire(b);
-
-    glLineWidth(1.f);
-    glPointSize(3.f);
-
-    Point3d p1,p2;
-
-    Point3m c = b.Center();
-
-    float s = 1.15f;
-    const float LabelSpacing = 30;
-    chooseX(b,mm,mp,vp,p1,p2);					// Selects x axis candidate
-    glPushMatrix();
-    glScalef(1,s,s);
-    glTranslatef(0,c[1]/s-c[1],c[2]/s-c[2]);
-    drawQuotedLine(p1,p2,b.min[0],b.max[0],CoordinateFrame::calcSlope(p1,p2,b.DimX(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws x axis
-    glPopMatrix();
-
-    chooseY(b,mm,mp,vp,p1,p2);					// Selects y axis candidate
-    glPushMatrix();
-    glScalef(s,1,s);
-    glTranslatef(c[0]/s-c[0],0,c[2]/s-c[2]);
-    drawQuotedLine(p1,p2,b.min[1],b.max[1],CoordinateFrame::calcSlope(p1,p2,b.DimY(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws y axis
-    glPopMatrix();
-
-    chooseZ(b,mm,mp,vp,p1,p2);					// Selects z axis candidate
-    glPushMatrix();
-    glScalef(s,s,1);
-    glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
-    drawQuotedLine(p1,p2,b.min[2],b.max[2],CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
-    glPopMatrix();
-
-    glPopAttrib();
-
-}
-
-void DecorateBasePlugin::chooseX(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &x1,Point3d &x2)
-{
-    float d = -std::numeric_limits<float>::max();
-    Point3d c;
-    // Project the bbox center
-    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
-    c[2] = 0;
-
-    Point3d out1,out2;
-    Point3m in1,in2;
-
-    for (int i=0;i<8;i+=2)
-    {
-        // find the furthest axis
-        in1 = box.P(i);
-        in2 = box.P(i+1);
-
-        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
-        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
-        out1[2] = out2[2] = 0;
-
-        float currDist = Distance(c,(out1+out2)*.5f);
-
-        if(currDist > d)
-        {
-            d = currDist;
-            x1.Import(in1);
-            x2.Import(in2);
-        }
-    }
-}
-
-
-void DecorateBasePlugin::chooseY(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &y1,Point3d &y2)
-{
-    float d = -std::numeric_limits<float>::max();
-    Point3d c;
-    // Project the bbox center
-    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
-    c[2] = 0;
-
-    Point3d out1,out2;
-    Point3m in1,in2;
-
-    for (int i=0;i<6;++i)
-    {
-        if(i==2) i = 4;	// skip
-        // find the furthest axis
-        in1 = box.P(i);
-        in2 = box.P(i+2);
-
-        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
-        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
-        out1[2] = out2[2] = 0;
-
-        float currDist = Distance(c,(out1+out2)*.5f);
-
-        if(currDist > d)
-        {
-            d = currDist;
-            y1.Import(in1);
-            y2.Import(in2);
-        }
-    }
-}
-
-void DecorateBasePlugin::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,Point3d &z1,Point3d &z2)
-{
-    float d = -std::numeric_limits<float>::max();
-    Point3d c;
-    // Project the bbox center
-    gluProject(box.Center()[0],box.Center()[1],box.Center()[2],mm,mp,vp,&c[0],&c[1],&c[2]);
-    c[2] = 0;
-
-    Point3d out1,out2;
-    Point3m in1,in2;
-
-    Point3d m;
-
-    for (int i=0;i<4;++i)
-    {
-        // find the furthest axis
-        in1 = box.P(i);
-        in2 = box.P(i+4);
-
-
-        gluProject((double)in1[0],(double)in1[1],(double)in1[2],mm,mp,vp,&out1[0],&out1[1],&out1[2]);
-        gluProject((double)in2[0],(double)in2[1],(double)in2[2],mm,mp,vp,&out2[0],&out2[1],&out2[2]);
-        out1[2] = out2[2] = 0;
-
-        float currDist = Distance(c,(out1+out2)*.5f);
-
-        if(currDist > d)
-        {
-            d = currDist;
-            z1.Import(in1);
-            z2.Import(in2);
-        }
-    }
-}
 /**
 Draw a line with labeled ticks.
 \param a,b the two endpoints of the line (in 3D)
@@ -620,7 +461,6 @@ int DecorateBasePlugin::getDecorationClass(QAction *action) const
     case DP_SHOW_QUALITY_HISTOGRAM :
     case DP_SHOW_QUALITY_CONTOUR :
     case DP_SHOW_BOX_CORNERS :
-    case DP_SHOW_QUOTED_BOX :
     case DP_SHOW_LABEL :
     case DP_SHOW_TEXPARAM : return DecorateBasePlugin::PerMesh;
     case DP_SHOW_AXIS : return DecorateBasePlugin::PerDocument;
@@ -635,10 +475,11 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
 {
     if( ID(action) == DP_SHOW_LABEL )
     {
-        if(m.cm.vn <1000 && m.cm.fn<2000) return true;
+        if(m.cm.vn <1000 && m.cm.fn<2000) 
+            return true;
         else 
         {
-            ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW <br> Do you REALLY want this? ");
+            ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW");
             return false;
         }
     }

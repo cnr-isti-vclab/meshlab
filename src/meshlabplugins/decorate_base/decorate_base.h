@@ -46,7 +46,6 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
     DP_SHOW_CURVATURE,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_AXIS,
-    DP_SHOW_QUOTED_BOX,
     DP_SHOW_LABEL,
     DP_SHOW_QUALITY_HISTOGRAM,
     DP_SHOW_QUALITY_CONTOUR,
@@ -61,10 +60,6 @@ private:
     float niceRound(float value);
 
   void	drawQuotedLine(const vcg::Point3d &a,const vcg::Point3d &b,float aVal, float bVal,float tickDist,QPainter *painter, QFont qf,float angle =0,bool rightAlign=false);
-
-    void	chooseX(Box3m &box, double *modelview, double *projection, GLint *viewport, vcg::Point3d &x1, vcg::Point3d &x2);
-    void	chooseY(Box3m &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &y1,vcg::Point3d &y2);
-    void	chooseZ(Box3m &box,double *modelview,double *projection,GLint *viewport,vcg::Point3d &z1,vcg::Point3d &z2);
   void drawHistogram(QGLWidget *gla, CHist &ch);
 
   vcg::Color4b textColor;
@@ -79,7 +74,6 @@ public:
                 DP_SHOW_QUALITY_HISTOGRAM <<
                 DP_SHOW_QUALITY_CONTOUR <<
                 DP_SHOW_BOX_CORNERS <<
-                DP_SHOW_QUOTED_BOX <<
                 DP_SHOW_LABEL <<
                 DP_SHOW_CAMERA <<
                 DP_SHOW_TEXPARAM <<
@@ -102,7 +96,6 @@ public:
 }
 
   void DrawBBoxCorner(MeshModel &m, bool absBBoxFlag=true);
-  void DrawQuotedBox(MeshModel &m,QPainter *gla, QFont qf);
   void DrawVertLabel(MeshModel &m, QPainter *gla);
   void DrawEdgeLabel(MeshModel &m, QPainter *gla);
   void DrawFaceLabel(MeshModel &m, QPainter *gla);
