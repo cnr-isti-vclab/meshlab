@@ -365,7 +365,13 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* share
             {
                 DrawGridPlane(ii,jj,minP,maxP,minG,maxG,majorTick,minorTick,front?frontColor:backColor);
                 if(shadowFlag) 
+                {
+                    glPushAttrib(GL_COLOR_BUFFER_BIT);
+                    glBlendColor(1.0f,1.0f,1.0f,0.4f);
+                    glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
                     DrawFlatMesh(shared,cont,m,ii,jj,minG,maxG);
+                    glPopAttrib();
+                }
             }
         }
 

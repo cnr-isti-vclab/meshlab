@@ -44,7 +44,6 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
   enum {
     DP_SHOW_NORMALS,
     DP_SHOW_CURVATURE,
-    DP_SHOW_VERT,
     DP_SHOW_BOX_CORNERS,
     DP_SHOW_AXIS,
     DP_SHOW_QUOTED_BOX,
@@ -75,7 +74,6 @@ public:
   {
     typeList <<
                 DP_SHOW_AXIS <<
-                DP_SHOW_VERT <<
                 DP_SHOW_NORMALS <<
                 DP_SHOW_CURVATURE <<
                 DP_SHOW_QUALITY_HISTOGRAM <<

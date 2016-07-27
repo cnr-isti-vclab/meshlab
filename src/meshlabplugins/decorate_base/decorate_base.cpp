@@ -41,7 +41,6 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     {
     case DP_SHOW_AXIS:              return tr("Draw XYZ axes in world coordinates");
     case DP_SHOW_BOX_CORNERS:       return tr("Draw object's bounding box corners");
-    case DP_SHOW_VERT:              return tr("Draw the vertices of the mesh as small white dots");
     case DP_SHOW_NORMALS:           return tr("Draw per vertex/face normals");
     case DP_SHOW_CURVATURE:         return tr("Draw per vertex/face principal curvature directions");
     case DP_SHOW_QUOTED_BOX:        return tr("Draw quoted box");
@@ -60,7 +59,6 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
 {
     switch(filter)
     {
-    case DP_SHOW_VERT:              return QString("Show Vertex Dots");
     case DP_SHOW_NORMALS:           return QString("Show Normal");
     case DP_SHOW_CURVATURE:         return QString("Show Curvature");
     case DP_SHOW_BOX_CORNERS:       return QString("Show Box Corners");
@@ -617,7 +615,6 @@ int DecorateBasePlugin::getDecorationClass(QAction *action) const
 {
     switch(ID(action))
     {
-    case DP_SHOW_VERT :
     case DP_SHOW_NORMALS :
     case DP_SHOW_CURVATURE :
     case DP_SHOW_QUALITY_HISTOGRAM :
@@ -625,7 +622,7 @@ int DecorateBasePlugin::getDecorationClass(QAction *action) const
     case DP_SHOW_BOX_CORNERS :
     case DP_SHOW_QUOTED_BOX :
     case DP_SHOW_LABEL :
-    case DP_SHOW_TEXPARAM :
+    case DP_SHOW_TEXPARAM : return DecorateBasePlugin::PerMesh;
     case DP_SHOW_AXIS : return DecorateBasePlugin::PerDocument;
     case DP_SHOW_CAMERA : return DecorateBasePlugin::PerDocument;
     case DP_SHOW_SELECTED_MESH : return DecorateBasePlugin::PerDocument;
@@ -664,9 +661,9 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichPar
         {
             return (glewInit() == GLEW_OK);
         }
-
+    
     }
-    return false;
+    return true;
 }
 
 
@@ -797,7 +794,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
         {
             connect(gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setValue(QString,vcg::Shotf)));
             connect(this,SIGNAL(askViewerShot(QString)),gla,SLOT(sendViewerShot(QString)));
-        }
+        } break;
     }
     return true;
 }
@@ -1163,10 +1160,6 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
             parset.addParam(new RichBool(LabelEdgeFlag(),true,"Per Edge",""));
             parset.addParam(new RichBool(LabelFaceFlag(),true,"Per Face",""));
         } break;
-    case DP_SHOW_VERT : {
-        assert(!parset.hasParameter(VertDotSizeParam()));
-        parset.addParam(new RichDynamicFloat(VertDotSizeParam(), 4,2,8,"Dot Size","if true the parametrization is drawn in a textured wireframe style"));
-                        } break;
     case DP_SHOW_NORMALS : {
         parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
