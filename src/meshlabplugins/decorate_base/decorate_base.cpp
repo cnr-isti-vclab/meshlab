@@ -46,9 +46,9 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     case DP_SHOW_LABEL:             return tr("Draw on all the vertex/edge/face a label with their index<br> Useful for debugging<br>(WARNING: do not use it on large meshes)");
     case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
     case DP_SHOW_QUALITY_CONTOUR:   return tr("Draw quality contours, e.g. the isolines of the quality field defined over the surface ");
-    case DP_SHOW_CAMERA:            return tr("Draw the position of the camera, if present in the current mesh");
+    case DP_SHOW_CAMERA:            return tr("Draw the position of the mesh camera and raster cameras");
     case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
-    case DP_SHOW_SELECTED_MESH:     return tr("Enlighten the current mesh");
+    case DP_SHOW_SELECTED_MESH:     return tr("Highlight the current mesh");
     }
     assert(0);
     return QString();
@@ -62,7 +62,7 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
     case DP_SHOW_CURVATURE:         return QString("Show Curvature");
     case DP_SHOW_BOX_CORNERS:       return QString("Show Box Corners");
     case DP_SHOW_AXIS:              return QString("Show Axis");
-    case DP_SHOW_LABEL:             return QString("Show Label");
+    case DP_SHOW_LABEL:             return QString("Show Labels");
     case DP_SHOW_CAMERA:            return QString("Show Camera");
     case DP_SHOW_TEXPARAM:          return QString("Show UV Tex Param");
     case DP_SHOW_QUALITY_HISTOGRAM: return QString("Show Quality Histogram");
@@ -202,12 +202,21 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
         } break;
     case DP_SHOW_BOX_CORNERS:
         {
-            bool untrasformed = rm->getBool(this->BBAbsParam());
+			bool untrasformed = rm->getBool(this->BBAbsParam());
             DrawBBoxCorner(m, untrasformed);
-            this->RealTimeLog("Bounding Box", m.shortName(), "<table>"
+
+			Point3m bmin, bmax;
+			bmin = m.cm.bbox.min;
+			bmax = m.cm.bbox.max;
+
+            this->RealTimeLog("Bounding Box", m.label(), "<table>"
                 "<tr><td>Min: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
                 "<tr><td>Max: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
-                "</table>", m.cm.bbox.min[0], m.cm.bbox.min[1], m.cm.bbox.min[2], m.cm.bbox.max[0], m.cm.bbox.max[1], m.cm.bbox.max[2]);
+				"<tr><td>Size: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+				"<tr><td>Center: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
+				"</table>""Warning: values do not consider transformation", bmin[0], bmin[1], bmin[2], bmax[0], bmax[1], bmax[2], 
+				math::Abs(bmax[0] - bmin[0]), math::Abs(bmax[1] - bmin[1]), math::Abs(bmax[2] - bmin[2]), 
+				(bmax[0] + bmin[0]) / 2.0, (bmax[1] + bmin[1]) / 2.0, (bmax[2] + bmin[2]) / 2.0);
         }
         break;
     case DP_SHOW_LABEL:
@@ -237,7 +246,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             QGLShaderProgram *glp=this->contourShaderProgramMap[&m];
 
             CMeshO::PerMeshAttributeHandle< pair<float,float> > mmqH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<pair<float,float> >(m.cm,"minmaxQ");
-            this->RealTimeLog("Quality Contour",m.shortName(),
+			this->RealTimeLog("Quality Contour", m.label(),
                 "min Q %f -- max Q %f",mmqH().first,mmqH().second);
 
             float stripe_num = rm->getFloat(this->ShowContourFreq());
@@ -412,7 +421,7 @@ void DecorateBasePlugin::DrawBBoxCorner(MeshModel &m, bool absBBoxFlag)
 
     glPushMatrix();
     if (absBBoxFlag)
-        glMultMatrix(Inverse(m.cm.Tr));
+		glMultMatrix(Inverse(m.cm.Tr));
 
     glBegin(GL_LINES);
     glVertex3f(mi[0],mi[1],mi[2]); glVertex3f(mi[0]+d3[0],mi[1]+zz[1],mi[2]+zz[2]);
@@ -479,14 +488,31 @@ bool DecorateBasePlugin::isDecorationApplicable(QAction *action, const MeshModel
             return true;
         else 
         {
-            ErrorMessage=QString("Warning: the mesh contains many faces and vertices.<br>Printing on the screen thousand of numbers is useless and VERY SLOW");
+            ErrorMessage=QString("<br>CANNOT START DECORATOR: the layer contains too many faces and vertices.<br>Printing on the screen thousand of numbers would be useless and VERY SLOW");
             return false;
         }
     }
-    if(ID(action) == DP_SHOW_QUALITY_HISTOGRAM ||
-        ID(action) == DP_SHOW_QUALITY_CONTOUR ) return m.hasDataMask(MeshModel::MM_FACEQUALITY) || m.hasDataMask(MeshModel::MM_VERTQUALITY);
+	if (ID(action) == DP_SHOW_QUALITY_HISTOGRAM || ID(action) == DP_SHOW_QUALITY_CONTOUR)
+	{
+		if (m.hasDataMask(MeshModel::MM_FACEQUALITY) || m.hasDataMask(MeshModel::MM_VERTQUALITY))
+			return true;
+		else
+		{
+			ErrorMessage = QString("<br>CANNOT START DECORATOR: the layer contains neither vertex nor face quality");
+			return false;
+		}
+	}
 
-    if( ID(action) == DP_SHOW_CURVATURE ) return m.hasDataMask(MeshModel::MM_VERTCURVDIR) || m.hasDataMask(MeshModel::MM_FACECURVDIR);
+	if (ID(action) == DP_SHOW_CURVATURE)
+	{
+		if (m.hasDataMask(MeshModel::MM_VERTCURVDIR) || m.hasDataMask(MeshModel::MM_FACECURVDIR))
+			return true;
+		else
+		{
+			ErrorMessage = QString("<br>CANNOT START DECORATOR: the layer contains neither vertex nor face curvature attribute");
+			return false;
+		}
+	}
 
     return true;
 }
@@ -695,11 +721,11 @@ void DecorateBasePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourc
     if(!ls.IsValid())
     {
         if(cameraSourceId == 1 )
-            this->RealTimeLog("Show Camera",m->shortName(),"Current Mesh Has an invalid Camera");
+			this->RealTimeLog("Show Camera", m->label(), "Current Mesh Has an invalid Camera");
         else if(cameraSourceId == 2 )
-            this->RealTimeLog("Show Camera",m->shortName(),"Current Raster Has an invalid Camera");
+			this->RealTimeLog("Show Camera", m->label(), "Current Raster Has an invalid Camera");
         else
-            this->RealTimeLog("Show Camera",m->shortName(),"Current TrackBall Has an invalid Camera");
+			this->RealTimeLog("Show Camera", m->label(), "Current TrackBall Has an invalid Camera");
         return;
     }
 
@@ -721,7 +747,7 @@ void DecorateBasePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourc
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 
 
-    this->RealTimeLog("Camera Info", m->shortName(),
+	this->RealTimeLog("Camera Info", m->label(),
         "<table>"
         "<tr><td>Viewpoint: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
         "<tr><td>axis 0:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"

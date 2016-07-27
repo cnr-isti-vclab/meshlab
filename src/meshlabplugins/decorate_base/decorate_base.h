@@ -42,16 +42,16 @@ class DecorateBasePlugin : public QObject, public MeshDecorateInterface
   QString decorationInfo(FilterIDType filter) const;
 
   enum {
-    DP_SHOW_NORMALS,
-    DP_SHOW_CURVATURE,
-    DP_SHOW_BOX_CORNERS,
-    DP_SHOW_AXIS,
-    DP_SHOW_LABEL,
-    DP_SHOW_QUALITY_HISTOGRAM,
-    DP_SHOW_QUALITY_CONTOUR,
-    DP_SHOW_CAMERA,
-    DP_SHOW_TEXPARAM,
-    DP_SHOW_SELECTED_MESH
+	DP_SHOW_AXIS,
+	DP_SHOW_BOX_CORNERS,
+	DP_SHOW_SELECTED_MESH,
+	DP_SHOW_CAMERA,
+	DP_SHOW_NORMALS,
+	DP_SHOW_TEXPARAM,
+	DP_SHOW_QUALITY_HISTOGRAM,
+	DP_SHOW_QUALITY_CONTOUR,
+	DP_SHOW_CURVATURE,
+	DP_SHOW_LABEL,
   };
 
 
@@ -67,17 +67,17 @@ public:
 
   DecorateBasePlugin()
   {
-    typeList <<
-                DP_SHOW_AXIS <<
-                DP_SHOW_NORMALS <<
-                DP_SHOW_CURVATURE <<
-                DP_SHOW_QUALITY_HISTOGRAM <<
-                DP_SHOW_QUALITY_CONTOUR <<
-                DP_SHOW_BOX_CORNERS <<
-                DP_SHOW_LABEL <<
-                DP_SHOW_CAMERA <<
-                DP_SHOW_TEXPARAM <<
-                DP_SHOW_SELECTED_MESH;
+	  typeList <<
+		DP_SHOW_AXIS <<
+		DP_SHOW_BOX_CORNERS <<
+		DP_SHOW_SELECTED_MESH <<
+		DP_SHOW_CAMERA << 
+		DP_SHOW_NORMALS <<
+		DP_SHOW_TEXPARAM << 
+		DP_SHOW_QUALITY_HISTOGRAM <<
+		DP_SHOW_QUALITY_CONTOUR <<
+		DP_SHOW_CURVATURE <<
+		DP_SHOW_LABEL;
 
     FilterIDType tt;
     foreach(tt , types())
