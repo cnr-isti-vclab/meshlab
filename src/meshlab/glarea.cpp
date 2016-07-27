@@ -1328,7 +1328,8 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
         else{
             if(toggle || stateToSet==true){
                 QString errorMessage;
-                if (iDecorateTemp->isDecorationApplicable(action,currentMeshModel,errorMessage)) {
+                if (iDecorateTemp->isDecorationApplicable(action,currentMeshModel,errorMessage)) 
+                {
                     iDecorateTemp->setLog(&md()->Log);
                     bool ret = iDecorateTemp->startDecorate(action,currentMeshModel, glas.currentGlobalParamSet, this);
                     if(ret) {
@@ -1337,7 +1338,7 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
                     }
                     else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
                 } else
-                    this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s",qPrintable(action->text()));
+                    this->Logf(GLLogStream::SYSTEM,"Error in Decorate mode %s: %s",qPrintable(action->text()),qPrintable(errorMessage));
 
             }
         }
