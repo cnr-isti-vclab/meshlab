@@ -75,80 +75,85 @@ QString DecorateBasePlugin::decorationName(FilterIDType filter) const
 
 void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &/*_log*/)
 {
-    QFont qf;
+ QFont qf;
 
-    switch (ID(a))
-    {
+ switch (ID(a))
+ {
 
     case DP_SHOW_CAMERA:
-        {
-            // draw all mesh cameras
-            bool showCameraDetails = rm->getBool(ShowCameraDetails());
-            if(rm->getBool(ShowMeshCameras()))
-            {
-                foreach(MeshModel *meshm,  md.meshList)
-                {
-                    if(meshm != md.mm() || (!showCameraDetails) )   // non-selected meshes
-                        DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter,qf);
-                    else                          // selected mesh, draw & display data
-                    {
-                        DrawCamera(meshm, meshm->cm.shot, Color4b::Magenta, md.mm()->cm.Tr, rm, painter,qf);
-                        DisplayCamera(meshm, meshm->cm.shot, 1);
-                    }
-                }
-            }
+	{
+		bool showCameraDetails = rm->getBool(ShowCameraDetails());
 
-            // draw all visible raster cameras
-            // current camera also.
-            if(rm->getBool(ShowRasterCameras()))
-            {
-                foreach(RasterModel *raster, md.rasterList)
-                    if(raster->visible)
-                    {
-                        if(raster != md.rm() || !showCameraDetails )   // non-selected raster
-                        {
-                            if(raster->visible) DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
-                        }
-                        else
-                        {
-                            DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter,qf);
-                            DisplayCamera(md.mm(), raster->shot, 2);
-                        }
-                    }
-            }
-        }
-        break;
-    case DP_SHOW_SELECTED_MESH:
-        {
-            if ((gla == NULL) || (gla->mvc() == NULL))
-                return;
+		// draw all visible mesh cameras
+		if(rm->getBool(ShowMeshCameras()))
+		{
+			foreach(MeshModel *meshm,  md.meshList)
+			{
+				if (meshm != md.mm() || (!showCameraDetails))   // non-selected meshes, only draw 
+				{
+					if (meshm->visible) DrawCamera(meshm, meshm->cm.shot, Color4b::DarkRed, md.mm()->cm.Tr, rm, painter, qf);
+				}
+				else                          // selected mesh, draw & display data
+				{
+					DrawCamera(meshm, meshm->cm.shot, Color4b::Magenta, md.mm()->cm.Tr, rm, painter, qf);
+					DisplayCamera(meshm->label(), meshm->cm.shot, 1);
+				}
+			}
 
-            glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_LIGHTING);
-            glEnable(GL_BLEND);
-            vcg::Color4b q = rm->getColor4b(selectedMeshBlendingColor());
-            glBlendColor(q.X() / 255.0f, q.Y() / 255.0f, q.Z() / 255.0f, q.W() / 255.0f);
-            glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
-            glDepthRange (0.0, 0.9999);
-            glDepthFunc(GL_LEQUAL);
-            glPointSize(3);
+			if (md.meshList.size() == 0)
+				this->RealTimeLog("Show Mesh Camera", md.mm()->label(), "There are no Mesh Layers");
+		}
 
-            //glColor4f(1.0f, 1.0f, 1.0f, 0.1f);
-            
-            MLSceneGLSharedDataContext* sharedcont = gla->mvc()->sharedDataContext();
-            if ((sharedcont != NULL) && (md.mm() != NULL))
-            {
-                sharedcont->draw(md.mm()->id(),gla->context());
-            }
-            glPopAttrib();
-        } break;
+		// draw all visible raster cameras
+		if(rm->getBool(ShowRasterCameras()))
+		{
+			foreach(RasterModel *raster, md.rasterList)
+			{
+				if(raster != md.rm() || !showCameraDetails )   // non-selected raster, only draw
+				{
+					if(raster->visible) DrawCamera(NULL, raster->shot, Color4b::DarkBlue, md.mm()->cm.Tr, rm, painter,qf);
+				}
+				else                          // selected raster, draw & display data
+				{
+					DrawCamera(NULL, raster->shot, Color4b::Cyan, md.mm()->cm.Tr, rm, painter, qf);
+					DisplayCamera(raster->label(), raster->shot, 2);
+				}
+			}
 
-    case DP_SHOW_AXIS:
-        {
-            CoordinateFrame(md.bbox().Diag()/2.0).Render(gla,painter);
-        }
-        break;
-    } // end switch
+			if (md.rasterList.size() == 0)
+				this->RealTimeLog("Show Raster Camera", md.mm()->label(), "There are no Rasters");
+		}
+	} break;
+
+	case DP_SHOW_SELECTED_MESH:
+	{
+		if ((gla == NULL) || (gla->mvc() == NULL))
+		return;
+
+		glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_BLEND);
+		vcg::Color4b q = rm->getColor4b(selectedMeshBlendingColor());
+		glBlendColor(q.X() / 255.0f, q.Y() / 255.0f, q.Z() / 255.0f, q.W() / 255.0f);
+		glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
+		glDepthRange (0.0, 0.9999);
+		glDepthFunc(GL_LEQUAL);
+		glPointSize(3);
+	
+		MLSceneGLSharedDataContext* sharedcont = gla->mvc()->sharedDataContext();
+		if ((sharedcont != NULL) && (md.mm() != NULL))
+		{
+			sharedcont->draw(md.mm()->id(),gla->context());
+		}
+		glPopAttrib();
+	} break;
+
+	case DP_SHOW_AXIS:
+	{
+		CoordinateFrame(md.bbox().Diag()/2.0).Render(gla,painter);
+	} break;
+
+ } // end switch
 }
 
 void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet *rm, GLArea *gla, QPainter *painter,GLLogStream &_log)
@@ -716,16 +721,16 @@ void DecorateBasePlugin::setValue(QString /*name*/,Shotf newVal)
 }
 
 
-void DecorateBasePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourceId)
+void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceId)
 {
     if(!ls.IsValid())
     {
         if(cameraSourceId == 1 )
-			this->RealTimeLog("Show Camera", m->label(), "Current Mesh Has an invalid Camera");
+			this->RealTimeLog("Show Mesh Camera", who, "Current Mesh Has an invalid Camera");
         else if(cameraSourceId == 2 )
-			this->RealTimeLog("Show Camera", m->label(), "Current Raster Has an invalid Camera");
+			this->RealTimeLog("Show Raster Camera", who, "Current Raster Has an invalid Camera");
         else
-			this->RealTimeLog("Show Camera", m->label(), "Current TrackBall Has an invalid Camera");
+			this->RealTimeLog("Show Camera", who, "Current TrackBall Has an invalid Camera");
         return;
     }
 
@@ -747,7 +752,7 @@ void DecorateBasePlugin::DisplayCamera(MeshModel * m, Shotm &ls, int cameraSourc
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 
 
-	this->RealTimeLog("Camera Info", m->label(),
+	this->RealTimeLog("Camera Info", who,
         "<table>"
         "<tr><td>Viewpoint: </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
         "<tr><td>axis 0:    </td><td width=70 align=right>%7.4f</td><td width=70 align=right> %7.4f</td><td width=70 align=right> %7.4f</td></tr>"
@@ -771,15 +776,10 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
     if(!ls.IsValid())  // no drawing if camera not valid
         return;
 
-    if((m!=NULL) && (!m->visible))  // no drawing if mesh invisible
-        return;
-
     Point3m vp = ls.GetViewPoint();
     Point3m ax0 = ls.Axis(0);
     Point3m ax1 = ls.Axis(1);
     Point3m ax2 = ls.Axis(2);
-    //  float fov = ls.GetFovFromFocal();
-    //  float focal = ls.Intrinsics.FocalMm;
 
     glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT );
     glDepthFunc(GL_ALWAYS);
@@ -793,14 +793,9 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         {
             drawscale = rm->getFloat(FixedScaleParam());
         }
-        if(rm->getEnum(CameraScaleParam()) == 2)  // adaptive
-        {}  //[TODO]
 
         // arbitrary size to draw axis
         float len;
-        //if(m!=NULL)
-        //  len = m->cm.bbox.Diag()/20.0;
-        //else
         len = ls.Intrinsics.FocalMm * drawscale;
 
         glPushMatrix();
@@ -814,10 +809,8 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         glVertex3f(vp[0],vp[1],vp[2]-(len/2.0)); 	glVertex3f(vp[0],vp[1],vp[2]+(len/2.0));
         glEnd();
 
-
         if(m!=NULL) //if mesh camera, apply mesh transform
             glMultMatrix(m->cm.Tr);
-
 
         // RGB axis, aligned with camera axis
         glBegin(GL_LINES);
@@ -826,12 +819,10 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         glColor3f(0,0,1.0); glVertex(vp); 	glVertex(vp+ax2*len);
         glEnd();
 
-
         // Now draw the frustum
         Point3m viewportCenter = vp - (ax2*ls.Intrinsics.FocalMm * drawscale);
         Point3m viewportHorizontal = ax0* float(ls.Intrinsics.ViewportPx[0]*ls.Intrinsics.PixelSizeMm[0]/2.0f * drawscale);
         Point3m viewportVertical   = ax1* float(ls.Intrinsics.ViewportPx[1]*ls.Intrinsics.PixelSizeMm[1]/2.0f * drawscale);
-
 
         glBegin(GL_LINES);
         glColor(camcolor);
@@ -861,7 +852,6 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         glVertex(viewportCenter+viewportHorizontal+viewportVertical);
         glEnd();
         glDisable(GL_BLEND);
-
 
         // remove mesh transform
         glPopMatrix();
@@ -1054,8 +1044,8 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
     case DP_SHOW_CAMERA :
         {
             QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
-            QStringList scale; scale << "No Scale" << "Fixed Factor" << "Adaptive";
-            parset.addParam(new RichEnum(this->CameraScaleParam(), 1, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
+            QStringList scale; scale << "No Scale" << "Fixed Factor";
+            parset.addParam(new RichEnum(this->CameraScaleParam(), 0, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
             parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
             parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
             parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
