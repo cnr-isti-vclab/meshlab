@@ -169,7 +169,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
     {
         if (opts._face_sel)
         {
-			const size_t maxchunksize = 1000;
+			const size_t maxchunksize = 100000;
 			const size_t facechunksize = std::min(size_t(m.cm.FN()), maxchunksize);
 
 			std::vector<vcg::Point3f> rpv; //position vector
