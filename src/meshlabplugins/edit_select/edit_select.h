@@ -27,43 +27,43 @@
 
 class EditSelectPlugin : public QObject, public MeshEditInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshEditInterface)
+	Q_OBJECT
+		Q_INTERFACES(MeshEditInterface)
 
 
 public:
-  enum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE } ;
+	enum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE };
 
-  EditSelectPlugin(int _ConnectedMode);
+	EditSelectPlugin(int _ConnectedMode);
 
-    virtual ~EditSelectPlugin() {}
+	virtual ~EditSelectPlugin() {}
 
-    static QString Info();
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/){};
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-        virtual void keyReleaseEvent  (QKeyEvent *, MeshModel &/*m*/, GLArea *);
-        virtual void keyPressEvent    (QKeyEvent *, MeshModel &/*m*/, GLArea *);
+	static QString Info();
+	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
+	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
+	void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
 
-    vcg::Point2f start;
-    vcg::Point2f cur;
-    vcg::Point2f prev;
-    bool isDragging;
-    int selectionMode;
-    std::vector<CMeshO::FacePointer> LastSelFace;
-    std::vector<CMeshO::VertexPointer> LastSelVert;
+	vcg::Point2f start;
+	vcg::Point2f cur;
+	vcg::Point2f prev;
+	bool isDragging;
+	int selectionMode;
+	std::vector<CMeshO::FacePointer> LastSelFace;
+	std::vector<CMeshO::VertexPointer> LastSelVert;
 
 signals:
-    void setDecorator(QString,bool);
+	void setDecorator(QString, bool);
 
 private:
-  typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode; // How the selection are composed
-  ComposingSelMode composingSelMode;
-    bool selectFrontFlag;
-  void DrawXORRect(GLArea * gla, bool doubleDraw);
+	typedef enum { SMAdd, SMClear, SMSub } ComposingSelMode; // How the selection are composed
+	ComposingSelMode composingSelMode;
+	bool selectFrontFlag;
+	void DrawXORRect(GLArea * gla, bool doubleDraw);
 };
 
 #endif
