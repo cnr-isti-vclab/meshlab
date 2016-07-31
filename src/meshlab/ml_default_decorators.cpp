@@ -291,9 +291,15 @@ void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf
     // Get gl state values
     double mm[16],mp[16];
     GLint vp[4];
-    glGetDoublev(GL_PROJECTION_MATRIX,mp);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mm);
+	glGetDoublev(GL_PROJECTION_MATRIX,mp);
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(m.cm.Tr);
+
+	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
     glGetIntegerv(GL_VIEWPORT,vp);
+	glMatrixMode(GL_MODELVIEW);
 
     // Mesh boundingBox
     Box3m b(m.cm.bbox);
@@ -327,7 +333,7 @@ void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf
     glTranslatef(c[0]/s-c[0],c[1]/s-c[1],0);
     drawQuotedLine(p1,p2,b.min[2],b.max[2],vcg::CoordinateFrame::calcSlope(p1,p2,b.DimZ(),LabelSpacing,mm,mp,vp),gla,qf);	// Draws z axis
     glPopMatrix();
-
+	glPopMatrix();
     glPopAttrib();
 
 }
