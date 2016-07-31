@@ -209,6 +209,13 @@ void MLSceneGLSharedDataContext::draw( int mmid,QGLContext* viewid ) const
         man->draw(viewid);
 }
 
+void MLSceneGLSharedDataContext::drawAllocatedAttributesSubset(int mmid, QGLContext * viewid, const MLRenderingData & dt)
+{
+	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+	if (man != NULL)
+		man->drawAllocatedAttributesSubset(viewid,dt);
+}
+
 void MLSceneGLSharedDataContext::removeView( QGLContext* viewerid )
 {
     QGLContext* ctx = makeCurrentGLContext();

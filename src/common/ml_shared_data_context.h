@@ -239,6 +239,7 @@ public:
     void deAllocateGPUSharedData();
 
     void draw(int mmid,QGLContext* viewid) const;
+	void drawAllocatedAttributesSubset(int mmid, QGLContext* viewid, const MLRenderingData& dt);
     void setSceneTransformationMatrix(const Matrix44m& m);
     void setMeshTransformationMatrix(int mmid,const Matrix44m& m);
     

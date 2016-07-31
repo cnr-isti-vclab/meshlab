@@ -63,6 +63,7 @@ SUBDIRS       = common \
 				meshlabplugins/decorate_base \					
 # Edit Plugins
                 meshlabplugins/edit_quality \
+				meshlabplugins/edit_select \
 # Sample Plugins
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \

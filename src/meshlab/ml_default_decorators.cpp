@@ -54,6 +54,7 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
     else
         if (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled)
             cleanBoundaryTextDecoratorData(mesh);
+	return true;
 }
 
 bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRenderingData& dt )
@@ -168,6 +169,12 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
     {
         if (opts._face_sel)
         {
+			const size_t maxchunksize = 1000;
+			const size_t facechunksize = std::min(size_t(m.cm.FN()), maxchunksize);
+
+			std::vector<vcg::Point3f> rpv; //position vector
+			rpv.resize(facechunksize * 3);
+
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_POLYGON_OFFSET_FILL);
             glDisable(GL_LIGHTING);
@@ -177,24 +184,35 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
             glColor4f(1.0f,0.0,0.0,.3f);
             glPolygonOffset(-1.0, -1);
-            CMeshO::FaceIterator fi;
             glPushMatrix();
             glMultMatrix(m.cm.Tr);
-            glBegin(GL_TRIANGLES);
             m.cm.sfn=0;
-            //for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-            //{
-            //    if(!(*fi).IsD() && (*fi).IsS())
-            //    {
-            //        /*glVertex((*fi).cP(0));
-            //        glVertex((*fi).cP(1));
-            //        glVertex((*fi).cP(2));*/
-            //        ++m.cm.sfn;
-            //    }
-            //}
-            glEnd();
+			size_t selectedperchunk = 0;
+			for(size_t faceind=0; faceind < m.cm.FN();++faceind)
+            {
+				CFaceO& ff = m.cm.face[faceind];
+				size_t chunkindex = m.cm.sfn % facechunksize;				
+				if (!ff.IsD() && ff.IsS())
+				{
+					rpv[chunkindex * 3 + 0].Import(ff.V(0)->P());
+					rpv[chunkindex * 3 + 1].Import(ff.V(1)->P());
+					rpv[chunkindex * 3 + 2].Import(ff.V(2)->P());
+					++m.cm.sfn;
+					++selectedperchunk;
+				}
+
+				if (((faceind == m.cm.FN() - 1) || (chunkindex == facechunksize - 1)) && (selectedperchunk >0))
+				{
+					glEnableClientState(GL_VERTEX_ARRAY);
+					glVertexPointer(3, GL_FLOAT, sizeof(vcg::Point3f), &(rpv[0]));
+					glDrawArrays(GL_TRIANGLES, 0, selectedperchunk * 3);
+					glDisableClientState(GL_VERTEX_ARRAY);
+					selectedperchunk = 0;
+				}
+            }
             glPopMatrix();
             glPopAttrib();
+			rpv.clear();
         }
     }
 
