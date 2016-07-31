@@ -595,6 +595,8 @@ void MLDefaultMeshDecorators::cleanNonManifEdgeDecoratorData( MeshModel& m )
 
 void MLDefaultMeshDecorators::initBoundaryTextDecoratorData( MeshModel& m)
 {
+	if (!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) && !m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
+		return;
     m.updateDataMask(MeshModel::MM_FACEFACETOPO);
     CMeshO::PerMeshAttributeHandle< std::vector<Point3m> > btvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<Point3m> >(m.cm,boundaryTextVertAttName());
     std::vector<Point3m> *BTVp = &btvH();
