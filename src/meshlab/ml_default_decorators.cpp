@@ -167,25 +167,28 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 
     if (opts._sel_enabled)
     {
+		const size_t maxchunksize = 100000;
+
         if (opts._face_sel)
         {
-			const size_t maxchunksize = 100000;
+			
 			const size_t facechunksize = std::min(size_t(m.cm.FN()), maxchunksize);
 
 			std::vector<vcg::Point3f> rpv; //position vector
 			rpv.resize(facechunksize * 3);
+           
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_TEXTURE_2D);
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(1.0f, 0.0, 0.0, .3f);
+			glPolygonOffset(-1.0, -1);
+			glPushMatrix();
+			glMultMatrix(m.cm.Tr);
 
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glDisable(GL_LIGHTING);
-            glDisable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            glDepthMask(GL_FALSE);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-            glColor4f(1.0f,0.0,0.0,.3f);
-            glPolygonOffset(-1.0, -1);
-            glPushMatrix();
-            glMultMatrix(m.cm.Tr);
             m.cm.sfn=0;
 			size_t selectedperchunk = 0;
 			for(size_t faceind=0; faceind < m.cm.FN();++faceind)
@@ -210,10 +213,59 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 					selectedperchunk = 0;
 				}
             }
-            glPopMatrix();
-            glPopAttrib();
+			glPopMatrix();
+			glPopAttrib();
+
 			rpv.clear();
+
         }
+
+		if (opts._vertex_sel)
+		{
+			const size_t vertchunksize = std::min(size_t(m.cm.VN()), maxchunksize);
+
+			std::vector<vcg::Point3f> pv; //position vector
+			pv.resize(vertchunksize);
+
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_TEXTURE_2D);
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(1.0f, 0.0, 0.0, .3f);
+			glDepthRange(0.00, 0.999);
+			glPointSize(3.0);
+			glPushMatrix();
+			glMultMatrix(m.cm.Tr);
+
+			m.cm.svn = 0;
+			size_t selectedperchunk = 0;
+			for (size_t vertind = 0; vertind  < m.cm.VN(); ++vertind)
+			{
+				CVertexO& vv = m.cm.vert[vertind];
+				size_t chunkindex = m.cm.svn % vertchunksize;
+				if (!vv.IsD() && vv.IsS())
+				{
+					pv[chunkindex].Import(vv.cP());
+					++m.cm.svn;
+					++selectedperchunk;
+				}
+
+				if (((vertind == m.cm.VN() - 1) || (chunkindex == vertchunksize - 1)) && (selectedperchunk >0))
+				{
+					glEnableClientState(GL_VERTEX_ARRAY);
+					glVertexPointer(3, GL_FLOAT, sizeof(vcg::Point3f), &(pv[0]));
+					glDrawArrays(GL_POINTS, 0, selectedperchunk);
+					glDisableClientState(GL_VERTEX_ARRAY);
+					selectedperchunk = 0;
+				}
+			}
+
+			glPopMatrix();
+			glPopAttrib();
+			pv.clear();
+		}
     }
 
     if (opts._perbbox_enabled)
