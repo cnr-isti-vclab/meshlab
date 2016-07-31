@@ -739,8 +739,9 @@ void GLArea::displayInfo(QPainter *painter)
 	makeCurrent();
     if ((mvc() == NULL) || (md() == NULL))
         return;
-    painter->endNativePainting();
+	painter->endNativePainting();
     painter->save();
+
     painter->setRenderHint(QPainter::HighQualityAntialiasing);
     QPen textPen(QColor(255,255,255,200));
     textPen.setWidthF(0.2f);
@@ -752,9 +753,8 @@ void GLArea::displayInfo(QPainter *painter)
     painter->setFont(qFont);
     QFontMetrics metrics = QFontMetrics(qFont);
     int border = qMax(4, metrics.leading()) / 2;
-    int numLines = 4;
-    if ((this->md()->size()>0) && ((mm()->cm.sfn + mm()->cm.svn) > 0))
-      numLines = 5;
+    int numLines = 5;
+
     float barHeight = ((metrics.height() + metrics.leading())*numLines) + 2 * border;
 
     QRect Column_0(width()/10, this->height()-barHeight+border, width()/2, this->height()-border);
@@ -787,11 +787,18 @@ void GLArea::displayInfo(QPainter *painter)
             col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + "    (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
         
-        if (mm()->cm.sfn > 0 || mm()->cm.svn > 0)
-        {
-            QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-            col1Text += "Selection: v: " + engLocale.toString(mm()->cm.svn) + " f: " + engLocale.toString(mm()->cm.sfn) + " \n";
-        }
+        
+		int svn = 0;
+		int sfn = 0;
+
+		if (mm() != NULL)
+		{
+			svn = mm()->cm.svn;
+			sfn = mm()->cm.sfn;
+		}
+
+        QLocale engLocale(QLocale::English, QLocale::UnitedStates);
+        col1Text += "Selection: v: " + engLocale.toString(svn) + " f: " + engLocale.toString(sfn) + " \n";
                 
         col1Text += GetMeshInfoString();
 
