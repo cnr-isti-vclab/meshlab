@@ -755,12 +755,10 @@ MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitive
 
 void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions( MLPerViewGLOptions& tmp )
 {
-    vcg::Color4b orange(255,85,0,255);
-    vcg::Color4b lightpurple(109,83,111,255);
     tmp._perbbox_fixed_color = vcg::Color4b(vcg::Color4b::White);
-    tmp._perpoint_fixed_color = orange;
+    tmp._perpoint_fixed_color = vcg::Color4b(vcg::Color4b::Yellow);;
     tmp._perwire_fixed_color = vcg::Color4b(vcg::Color4b::DarkGray);
-    tmp._persolid_fixed_color = lightpurple;
+    tmp._persolid_fixed_color = vcg::Color4b(vcg::Color4b::LightGray);;
 	tmp._sel_enabled = true;
 }
 
