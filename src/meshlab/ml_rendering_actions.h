@@ -12,6 +12,7 @@ public:
     MLRenderingAction(QObject* parent);
     MLRenderingAction(int meshid,QObject* parent);
 
+	virtual void createSisterAction(MLRenderingAction*& sisteract,QObject* par) = 0;
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
     virtual bool isCheckableConditionValid(MeshModel*) const {return true;}
@@ -28,6 +29,8 @@ class MLRenderingBBoxAction : public MLRenderingAction
 public:
     MLRenderingBBoxAction(QObject* parent);
     MLRenderingBBoxAction(int meshid,QObject* parent);
+
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     bool isOnOffOption(MLRenderingAction* onact = 0,MLRenderingAction* offact = 0);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -40,6 +43,7 @@ public:
     MLRenderingPointsAction(QObject* parent);
     MLRenderingPointsAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -51,6 +55,7 @@ public:
     MLRenderingWireAction(QObject* parent);
     MLRenderingWireAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -62,6 +67,7 @@ public:
     MLRenderingSolidAction(QObject* parent);
     MLRenderingSolidAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -73,6 +79,7 @@ public:
     MLRenderingFauxEdgeWireAction(QObject* parent);
     MLRenderingFauxEdgeWireAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     bool isCheckableConditionValid(MeshModel*) const;
@@ -85,6 +92,7 @@ public:
     MLRenderingPerFaceNormalAction(QObject* parent);
     MLRenderingPerFaceNormalAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -96,6 +104,7 @@ public:
     MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
@@ -109,6 +118,7 @@ public:
     MLRenderingPointsDotAction(QObject* parent);
     MLRenderingPointsDotAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -121,6 +131,7 @@ public:
     MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     bool isCheckableConditionValid(MeshModel*) const;
@@ -135,6 +146,7 @@ public:
     MLRenderingPerWedgeTextCoordAction(QObject* parent);
     MLRenderingPerWedgeTextCoordAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     bool isCheckableConditionValid(MeshModel*) const;
@@ -147,6 +159,7 @@ public:
     MLRenderingDoubleLightingAction(QObject* parent);
     MLRenderingDoubleLightingAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -158,6 +171,7 @@ public:
     MLRenderingFancyLightingAction(QObject* parent);
     MLRenderingFancyLightingAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -169,6 +183,7 @@ public:
     MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
@@ -182,6 +197,7 @@ public:
     MLRenderingFaceCullAction(QObject* parent);
     MLRenderingFaceCullAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -193,6 +209,7 @@ public:
     MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     void setColor(const QColor& col);
@@ -211,6 +228,7 @@ public:
     MLRenderingBBoxPerMeshColorAction(QObject* parent);
     MLRenderingBBoxPerMeshColorAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     void setColor(const QColor& col);
@@ -228,6 +246,7 @@ public:
     MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 private:
@@ -241,6 +260,7 @@ public:
     MLRenderingPerFaceColorAction(QObject* parent);
     MLRenderingPerFaceColorAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     bool isCheckableConditionValid(MeshModel*) const;
@@ -253,6 +273,7 @@ public:
     MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     void setColor(const vcg::Color4b& col);
@@ -271,6 +292,7 @@ public:
     MLRenderingBBoxUserDefinedColorAction(QObject* parent);
     MLRenderingBBoxUserDefinedColorAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     void setColor(const QColor& col);
@@ -292,6 +314,7 @@ public:
     void setValue(float value) {_value = value;}
     float getValue() {return _value;}
 
+	virtual void createSisterAction(MLRenderingAction*& sisteract, QObject* par) = 0;
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
     virtual float getValueFromRenderingData(const MLRenderingData& rd) const = 0;
@@ -306,6 +329,7 @@ public:
     MLRenderingPointsSizeAction(QObject* parent);
     MLRenderingPointsSizeAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     float getValueFromRenderingData(const MLRenderingData& rd) const;
@@ -318,6 +342,7 @@ public:
     MLRenderingWireWidthAction(QObject* parent);
     MLRenderingWireWidthAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
     float getValueFromRenderingData(const MLRenderingData& rd) const;
@@ -330,6 +355,7 @@ public:
     MLRenderingSelectionAction(QObject* parent);
     MLRenderingSelectionAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -341,6 +367,7 @@ public:
     MLRenderingVertSelectionAction(QObject* parent);
     MLRenderingVertSelectionAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -352,6 +379,7 @@ public:
     MLRenderingFaceSelectionAction(QObject* parent);
     MLRenderingFaceSelectionAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -363,6 +391,7 @@ public:
     MLRenderingEdgeDecoratorAction(QObject* parent);
     MLRenderingEdgeDecoratorAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -374,6 +403,7 @@ public:
     MLRenderingEdgeBoundaryAction(QObject* parent);
     MLRenderingEdgeBoundaryAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -385,6 +415,7 @@ public:
     MLRenderingFaceBoundaryAction(QObject* parent);
     MLRenderingFaceBoundaryAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -396,6 +427,7 @@ public:
     MLRenderingEdgeManifoldAction(QObject* parent);
     MLRenderingEdgeManifoldAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -407,6 +439,7 @@ public:
     MLRenderingVertManifoldAction(QObject* parent);
     MLRenderingVertManifoldAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -419,6 +452,7 @@ public:
     MLRenderingTexBorderAction(QObject* parent);
     MLRenderingTexBorderAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -441,6 +475,7 @@ public:
     MLRenderingDotAction(QObject* parent);
     MLRenderingDotAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
@@ -452,6 +487,7 @@ public:
     MLRenderingBBoxQuotedInfoAction(QObject* parent);
     MLRenderingBBoxQuotedInfoAction(int meshid,QObject* parent);
 
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };

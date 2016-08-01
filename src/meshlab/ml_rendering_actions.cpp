@@ -53,6 +53,11 @@ MLRenderingBBoxAction::MLRenderingBBoxAction( int meshid,QObject* parent)
     setText(QString("Bounding Box"));
 }
 
+void MLRenderingBBoxAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingBBoxAction(meshId(), par);
+}
+
 void MLRenderingBBoxAction::updateRenderingData(MLRenderingData& rd)
 {
     MLPerViewGLOptions opts;
@@ -85,6 +90,11 @@ MLRenderingPointsAction::MLRenderingPointsAction( int meshid,QObject* parent)
     setText(QString("Points"));
 }
 
+void MLRenderingPointsAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPointsAction(meshId(), par);
+}
+
 void MLRenderingPointsAction::updateRenderingData(MLRenderingData& rd )
 {
     rd.set(MLRenderingData::PR_POINTS,isChecked());
@@ -107,6 +117,11 @@ MLRenderingWireAction::MLRenderingWireAction( int meshid,QObject* parent)
 {
     setIcon(QIcon(":/images/wire.png"));
     setText(QString("Wireframe"));
+}
+
+void MLRenderingWireAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingWireAction(meshId(), par);
 }
 
 void MLRenderingWireAction::updateRenderingData(MLRenderingData& rd )
@@ -133,6 +148,11 @@ MLRenderingSolidAction::MLRenderingSolidAction( int meshid,QObject* parent )
     setText(QString("Fill"));
 }
 
+void MLRenderingSolidAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingSolidAction(meshId(), par);
+}
+
 void MLRenderingSolidAction::updateRenderingData( MLRenderingData& rd )
 {
     rd.set(MLRenderingData::PR_SOLID,isChecked());
@@ -153,6 +173,11 @@ MLRenderingFauxEdgeWireAction::MLRenderingFauxEdgeWireAction( int meshid,QObject
     :MLRenderingAction(meshid,parent)
 {
     setText(QString("Edges Wireframe"));
+}
+
+void MLRenderingFauxEdgeWireAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingFauxEdgeWireAction(meshId(), par);
 }
 
 void MLRenderingFauxEdgeWireAction::updateRenderingData( MLRenderingData& rd )
@@ -182,6 +207,11 @@ MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( int meshid,QObje
     setText(QString("Face"));
 }
 
+void MLRenderingPerFaceNormalAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerFaceNormalAction(meshId(), par);
+}
+
 void MLRenderingPerFaceNormalAction::updateRenderingData(MLRenderingData& rd )
 {
     rd.set(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACENORMAL,isChecked()); 
@@ -204,6 +234,11 @@ MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingDa
     setText(QString("Vert"));
 }
 
+void MLRenderingPerVertexNormalAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerVertexNormalAction(_pm, meshId(), par);
+}
+
 void MLRenderingPerVertexNormalAction::updateRenderingData(MLRenderingData& rd )
 {
     rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_VERTNORMAL,isChecked()); 
@@ -224,6 +259,11 @@ MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(MLRendering
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Enabled"));
+}
+
+void MLRenderingPerVertTextCoordAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerVertTextCoordAction(_pm,meshId(), par);
 }
 
 void MLRenderingPerVertTextCoordAction::updateRenderingData(MLRenderingData& rd )
@@ -249,6 +289,11 @@ MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(QObject* 
 MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
+}
+
+void MLRenderingPerWedgeTextCoordAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerWedgeTextCoordAction(meshId(), par);
 }
 
 void MLRenderingPerWedgeTextCoordAction::updateRenderingData(MLRenderingData& rd )
@@ -279,6 +324,11 @@ MLRenderingDoubleLightingAction::MLRenderingDoubleLightingAction( int meshid,QOb
     setText(QString("Enabled"));
 }
 
+void MLRenderingDoubleLightingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingDoubleLightingAction(meshId(), par);
+}
+
 void MLRenderingDoubleLightingAction::updateRenderingData(MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -307,6 +357,11 @@ MLRenderingFancyLightingAction::MLRenderingFancyLightingAction( int meshid,QObje
     :MLRenderingAction(meshid,parent)
 {
     setText(QString("Fancy Lighting"));
+}
+
+void MLRenderingFancyLightingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingFancyLightingAction(meshId(), par);
 }
 
 void MLRenderingFancyLightingAction::updateRenderingData(MLRenderingData& rd )
@@ -341,6 +396,11 @@ MLRenderingNoShadingAction::MLRenderingNoShadingAction(MLRenderingData::PRIMITIV
     //setIcon(QIcon(":/images/lighton.png"));
     setText(QString("None")); 
     setToolTip(QString("Light on/off"));
+}
+
+void MLRenderingNoShadingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingNoShadingAction(_pm,meshId(), par);
 }
 
 void MLRenderingNoShadingAction::updateRenderingData(MLRenderingData& rd )
@@ -411,6 +471,11 @@ MLRenderingFaceCullAction::MLRenderingFaceCullAction( int meshid,QObject* parent
     setText(QString("BackFace Culling"));
 }
 
+void MLRenderingFaceCullAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingFaceCullAction(meshId(), par);
+}
+
 void MLRenderingFaceCullAction::updateRenderingData(MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -439,6 +504,11 @@ MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(MLRenderingData::PR
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Mesh"));
+}
+
+void MLRenderingPerMeshColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerMeshColorAction(_pm,meshId(), par);
 }
 
 void MLRenderingPerMeshColorAction::updateRenderingData(MLRenderingData& rd)
@@ -525,6 +595,11 @@ MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData
     setText(QString("Vert"));
 }
 
+void MLRenderingPerVertexColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerVertexColorAction(_pm, meshId(), par);
+}
+
 void MLRenderingPerVertexColorAction::updateRenderingData(MLRenderingData& rd )
 {
     rd.set(_pm,MLRenderingData::ATT_NAMES::ATT_VERTCOLOR,isChecked());
@@ -545,6 +620,11 @@ MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(int meshid,QObject*
     :MLRenderingAction(meshid,parent)
 {
     setText(QString("Face"));
+}
+
+void MLRenderingPerFaceColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPerFaceColorAction(meshId(), par);
 }
 
 void MLRenderingPerFaceColorAction::updateRenderingData(MLRenderingData& rd )
@@ -572,6 +652,11 @@ MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderin
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("User-Def"));
+}
+
+void MLRenderingUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingUserDefinedColorAction(_pm,meshId(), par);
 }
 
 void MLRenderingUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
@@ -664,6 +749,11 @@ MLRenderingSelectionAction::MLRenderingSelectionAction( int meshid,QObject* pare
     setText(QString("Selection"));
 }
 
+void MLRenderingSelectionAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingSelectionAction(meshId(), par);
+}
+
 void MLRenderingSelectionAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -692,6 +782,11 @@ MLRenderingPointsDotAction::MLRenderingPointsDotAction( int meshid,QObject* pare
     :MLRenderingAction(meshid,parent)
 {
     setText("Dot");
+}
+
+void MLRenderingPointsDotAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPointsDotAction(meshId(), par);
 }
 
 void MLRenderingPointsDotAction::updateRenderingData( MLRenderingData& rd )
@@ -725,6 +820,11 @@ MLRenderingVertSelectionAction::MLRenderingVertSelectionAction( int meshid,QObje
     setText("Vert Selection");
 }
 
+void MLRenderingVertSelectionAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingVertSelectionAction(meshId(), par);
+}
+
 void MLRenderingVertSelectionAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -756,6 +856,11 @@ MLRenderingFaceSelectionAction::MLRenderingFaceSelectionAction( int meshid,QObje
     setText("Face Selection");
 }
 
+void MLRenderingFaceSelectionAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingFaceSelectionAction(meshId(), par);
+}
+
 void MLRenderingFaceSelectionAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -784,6 +889,11 @@ MLRenderingBBoxPerMeshColorAction::MLRenderingBBoxPerMeshColorAction( int meshid
     :MLRenderingAction(meshid,parent)
 {
     setText("Mesh");
+}
+
+void MLRenderingBBoxPerMeshColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingBBoxPerMeshColorAction(meshId(), par);
 }
 
 void MLRenderingBBoxPerMeshColorAction::updateRenderingData( MLRenderingData& rd )
@@ -826,6 +936,11 @@ MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( in
     :MLRenderingAction(meshid,parent)
 {
     setText("User-Def");
+}
+
+void MLRenderingBBoxUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingBBoxUserDefinedColorAction(meshId(), par);
 }
 
 void MLRenderingBBoxUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
@@ -880,6 +995,11 @@ MLRenderingEdgeDecoratorAction::MLRenderingEdgeDecoratorAction( int meshid,QObje
 }
 
 
+void MLRenderingEdgeDecoratorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingEdgeDecoratorAction(meshId(), par);
+}
+
 void MLRenderingEdgeDecoratorAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -910,6 +1030,11 @@ MLRenderingEdgeBoundaryAction::MLRenderingEdgeBoundaryAction( int meshid,QObject
     :MLRenderingAction(meshid,parent)
 {
      setText("Edges Boundary");
+}
+
+void MLRenderingEdgeBoundaryAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingEdgeBoundaryAction(meshId(), par);
 }
 
 void MLRenderingEdgeBoundaryAction::updateRenderingData( MLRenderingData& rd )
@@ -944,6 +1069,11 @@ MLRenderingFaceBoundaryAction::MLRenderingFaceBoundaryAction( int meshid,QObject
     setText("Faces Boundary");
 }
 
+void MLRenderingFaceBoundaryAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingFaceBoundaryAction(meshId(), par);
+}
+
 void MLRenderingFaceBoundaryAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -974,6 +1104,11 @@ MLRenderingEdgeManifoldAction::MLRenderingEdgeManifoldAction( int meshid,QObject
     :MLRenderingAction(meshid,parent)
 {
     setText("No 2-Manifold Edges Decorator");
+}
+
+void MLRenderingEdgeManifoldAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingEdgeManifoldAction(meshId(), par);
 }
 
 void MLRenderingEdgeManifoldAction::updateRenderingData( MLRenderingData& rd )
@@ -1008,6 +1143,11 @@ MLRenderingVertManifoldAction::MLRenderingVertManifoldAction( int meshid,QObject
     setText("No 2-Manifold Vertices Decorator");
 }
 
+void MLRenderingVertManifoldAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingVertManifoldAction(meshId(), par);
+}
+
 void MLRenderingVertManifoldAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -1038,6 +1178,11 @@ MLRenderingTexBorderAction::MLRenderingTexBorderAction( int meshid,QObject* pare
     :MLRenderingAction(meshid,parent)
 {
     setText("Texture Borders Decorator");
+}
+
+void MLRenderingTexBorderAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingTexBorderAction(meshId(), par);
 }
 
 void MLRenderingTexBorderAction::updateRenderingData( MLRenderingData& rd )
@@ -1072,6 +1217,11 @@ MLRenderingDotAction::MLRenderingDotAction( int meshid,QObject* parent )
     setText("Dot Decorator");
 }
 
+void MLRenderingDotAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingDotAction(meshId(), par);
+}
+
 void MLRenderingDotAction::updateRenderingData( MLRenderingData& rd )
 {
     MLPerViewGLOptions opts;
@@ -1102,6 +1252,11 @@ MLRenderingPointsSizeAction::MLRenderingPointsSizeAction( int meshid,QObject* pa
     :MLRenderingFloatAction(meshid,parent)
 {
     setText("Point Size");
+}
+
+void MLRenderingPointsSizeAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingPointsSizeAction(meshId(), par);
 }
 
 void MLRenderingPointsSizeAction::updateRenderingData( MLRenderingData& rd )
@@ -1141,6 +1296,11 @@ MLRenderingWireWidthAction::MLRenderingWireWidthAction( int meshid,QObject* pare
     :MLRenderingFloatAction(meshid,parent)
 {
     setText("Edge Width");
+}
+
+void MLRenderingWireWidthAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingWireWidthAction(meshId(), par);
 }
 
 void MLRenderingWireWidthAction::updateRenderingData( MLRenderingData& rd )
@@ -1194,6 +1354,11 @@ MLRenderingBBoxQuotedInfoAction::MLRenderingBBoxQuotedInfoAction( int meshid,QOb
     :MLRenderingAction(meshid,parent)
 {
 
+}
+
+void MLRenderingBBoxQuotedInfoAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingBBoxQuotedInfoAction(meshId(), par);
 }
 
 void MLRenderingBBoxQuotedInfoAction::updateRenderingData( MLRenderingData& rd )

@@ -351,6 +351,8 @@ public:
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     int associatedMeshId() const {return _meshid;}
     void updateVisibility(MeshModel* mm);
+	void updatePerMeshRenderingAction(QList<MLRenderingAction*>& acts);
+
 private:
     void initGui(const QList<MLRenderingAction*>& tab);
 
@@ -358,6 +360,7 @@ private:
 public slots:
     void switchTab(int meshid,const QString& tabname);
     void setAssociatedMeshId(int meshid);
+	void activateRenderingMode(int index);
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
@@ -365,6 +368,7 @@ signals:
 
 private:
     QMap<QString,MLRenderingParametersFrame*> _parframe;
+	QVector<MLRenderingAction*> _paract;
 };
 
 #endif

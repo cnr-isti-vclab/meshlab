@@ -57,8 +57,7 @@ LayerDialog::LayerDialog(QWidget *parent )
     _globaldoctool->setVisible(false);
     ///////////////////////////////////
 
-    MLRenderingParametersTab* tabw = createRenderingParametersTab();
-    if (tabw != NULL)
+    if (createRenderingParametersTab() != NULL)
     {
         tabw->setVisible(true);
         ui->renderingLayout->addWidget(tabw);
@@ -671,6 +670,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
                 item->setBackground(3,QBrush(Qt::yellow));
                 item->setForeground(3,QBrush(Qt::blue));
                 ui->meshTreeWidget->setCurrentItem(item);
+				tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
             }
             else
             {

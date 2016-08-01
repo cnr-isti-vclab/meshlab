@@ -769,6 +769,18 @@ void MLRenderingParametersTab::setAssociatedMeshId( int meshid )
         (*itt)->setAssociatedMeshId(meshid);
 }
 
+void MLRenderingParametersTab::activateRenderingMode(int index)
+{
+	if ((index >= 0) && (index < _paract.size()))
+	{
+		MLRenderingAction* act = _paract[index];
+		if (act != NULL)
+		{
+			act->setChecked(!act->isChecked());
+			emit updateRenderingDataAccordingToAction(_meshid, act);
+		}
+	}
+}
 
 void MLRenderingParametersTab::switchTab(int meshid,const QString& tabname)
 {
@@ -786,6 +798,8 @@ void MLRenderingParametersTab::updateGUIAccordingToRenderingData(const MLRenderi
 
 void MLRenderingParametersTab::initGui(const QList<MLRenderingAction*>& tab)
 {
+	_paract.resize(tab.size());
+	int ii = 0;
     foreach(MLRenderingAction* ract,tab)
     {
         if (ract != NULL)
@@ -794,18 +808,31 @@ void MLRenderingParametersTab::initGui(const QList<MLRenderingAction*>& tab)
             if (fr != NULL)
             {
                 _parframe[ract->text()] = fr;
+				MLRenderingAction* sister = NULL;
+				ract->createSisterAction(sister, this);
+				if (sister != NULL)
+					_paract[ii] = sister;
                 addTab(fr,ract->icon(),"");
                 connect(fr,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
                 connect(fr,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
             }
         }
+		++ii;
     }
+	connect(this, SIGNAL(tabBarDoubleClicked(int)), this, SLOT(activateRenderingMode(int)));
 }
 
 void MLRenderingParametersTab::updateVisibility(MeshModel* mm)
 {
     for(QMap<QString,MLRenderingParametersFrame*>::iterator itt = _parframe.begin();itt != _parframe.end();++itt)
         itt.value()->updateVisibility(mm);
+}
+
+void MLRenderingParametersTab::updatePerMeshRenderingAction(QList<MLRenderingAction*>& acts)
+{
+	_paract.clear();
+	for(int ii = 0;ii < acts.size();++ii)
+		_paract.push_back(acts[ii]);
 }
 
 MLRenderingParametersTab::~MLRenderingParametersTab()
