@@ -128,6 +128,7 @@ private:
         _fancy_lighting = opts._fancy_lighting;
         _sel_enabled = opts._sel_enabled;
         _face_sel = opts._face_sel;
+		_vertex_sel = opts._vertex_sel;
 
         _base_light_ambient_color = opts._base_light_ambient_color;
         _base_light_diffuse_color = opts._base_light_diffuse_color;
