@@ -43,11 +43,16 @@ private:
     void initBoundaryDecoratorData(MeshModel& mm,bool edgeboundary,bool faceboundary);
     void cleanBoundaryDecoratorData(MeshModel& mm,bool edgeboundary,bool faceboundary);
 
+	void initSelectionDecoratorData(MeshModel& mm,bool vertsel,bool facesel);
+	void cleanSelectionDecoratorData(MeshModel& mm, bool vertsel, bool facesel);
+
     void initNonManifEdgeDecoratorData(MeshModel& mm);
     void cleanNonManifEdgeDecoratorData(MeshModel& mm);
 
     void initBoundaryTextDecoratorData(MeshModel& mm);
     void cleanBoundaryTextDecoratorData(MeshModel& mm);
+
+	static const char* selectionAttName() { return "SelectionBuffers"; }
 
     static const char* boundaryVertAttName() {return "BoundaryVertVector";}
     static const char* boundaryEdgeAttName() {return "BoundaryEdgeVector";}

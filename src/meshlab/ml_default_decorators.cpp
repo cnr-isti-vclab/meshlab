@@ -27,6 +27,8 @@
 #include <wrap/gui/coordinateframe.h>
 #include <wrap/qt/gl_label.h>
 
+#include "ml_selection_buffers.h"
+
 bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const MLRenderingData& previousdata,const MLRenderingData& currentdata )
 {
     MLPerViewGLOptions oldopts;
@@ -54,6 +56,11 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
     else
         if (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled)
             cleanBoundaryTextDecoratorData(mesh);
+
+	
+	initSelectionDecoratorData(mesh, currentopts._vertex_sel && !oldopts._vertex_sel, currentopts._face_sel && !oldopts._face_sel);
+	cleanSelectionDecoratorData(mesh,!currentopts._vertex_sel && oldopts._vertex_sel, !currentopts._face_sel && oldopts._face_sel);
+
 	return true;
 }
 
@@ -71,6 +78,8 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
 
     if (opts._peredge_text_boundary_enabled)
         initBoundaryTextDecoratorData(m);
+
+	initSelectionDecoratorData(m,opts._vertex_sel,opts._face_sel);
 
     return true;
 }
@@ -167,104 +176,18 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 
     if (opts._sel_enabled)
     {
-		const size_t maxchunksize = 100000;
-
         if (opts._face_sel)
         {
-			
-			const size_t facechunksize = std::min(size_t(m.cm.FN()), maxchunksize);
-
-			std::vector<vcg::Point3f> rpv; //position vector
-			rpv.resize(facechunksize * 3);
-           
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			glEnable(GL_POLYGON_OFFSET_FILL);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColor4f(1.0f, 0.0, 0.0, .3f);
-			glPolygonOffset(-1.0, -1);
-			glPushMatrix();
-			glMultMatrix(m.cm.Tr);
-
-            m.cm.sfn=0;
-			size_t selectedperchunk = 0;
-			for(size_t faceind=0; faceind < m.cm.FN();++faceind)
-            {
-				CFaceO& ff = m.cm.face[faceind];
-				size_t chunkindex = m.cm.sfn % facechunksize;				
-				if (!ff.IsD() && ff.IsS())
-				{
-					rpv[chunkindex * 3 + 0].Import(ff.V(0)->P());
-					rpv[chunkindex * 3 + 1].Import(ff.V(1)->P());
-					rpv[chunkindex * 3 + 2].Import(ff.V(2)->P());
-					++m.cm.sfn;
-					++selectedperchunk;
-				}
-
-				if (((faceind == m.cm.FN() - 1) || (chunkindex == facechunksize - 1)) && (selectedperchunk >0))
-				{
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glVertexPointer(3, GL_FLOAT, sizeof(vcg::Point3f), &(rpv[0]));
-					glDrawArrays(GL_TRIANGLES, 0, selectedperchunk * 3);
-					glDisableClientState(GL_VERTEX_ARRAY);
-					selectedperchunk = 0;
-				}
-            }
-			glPopMatrix();
-			glPopAttrib();
-
-			rpv.clear();
-
+			CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(m.cm, selectionAttName());
+			if (selbufhand() != NULL)
+				selbufhand()->drawSelection(MLSelectionBuffers::ML_PERFACE_SEL);
         }
 
 		if (opts._vertex_sel)
 		{
-			const size_t vertchunksize = std::min(size_t(m.cm.VN()), maxchunksize);
-
-			std::vector<vcg::Point3f> pv; //position vector
-			pv.resize(vertchunksize);
-
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColor4f(1.0f, 0.0, 0.0, .3f);
-			glDepthRange(0.00, 0.999);
-			glPointSize(3.0);
-			glPushMatrix();
-			glMultMatrix(m.cm.Tr);
-
-			m.cm.svn = 0;
-			size_t selectedperchunk = 0;
-			for (size_t vertind = 0; vertind  < m.cm.VN(); ++vertind)
-			{
-				CVertexO& vv = m.cm.vert[vertind];
-				size_t chunkindex = m.cm.svn % vertchunksize;
-				if (!vv.IsD() && vv.IsS())
-				{
-					pv[chunkindex].Import(vv.cP());
-					++m.cm.svn;
-					++selectedperchunk;
-				}
-
-				if (((vertind == m.cm.VN() - 1) || (chunkindex == vertchunksize - 1)) && (selectedperchunk >0))
-				{
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glVertexPointer(3, GL_FLOAT, sizeof(vcg::Point3f), &(pv[0]));
-					glDrawArrays(GL_POINTS, 0, selectedperchunk);
-					glDisableClientState(GL_VERTEX_ARRAY);
-					selectedperchunk = 0;
-				}
-			}
-
-			glPopMatrix();
-			glPopAttrib();
-			pv.clear();
+			CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(m.cm, selectionAttName());
+			if (selbufhand() != NULL)
+				selbufhand()->drawSelection(MLSelectionBuffers::ML_PERVERT_SEL);
 		}
     }
 
@@ -276,6 +199,8 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             drawQuotedBox(m,painter,qf);
         }
     }
+
+	glFinish();
 }
 
 void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf)
@@ -620,7 +545,36 @@ void MLDefaultMeshDecorators::cleanBoundaryDecoratorData( MeshModel& m,bool edge
         vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryFaceAttName());
 }
 
-void MLDefaultMeshDecorators::initNonManifEdgeDecoratorData( MeshModel& m )
+void MLDefaultMeshDecorators::initSelectionDecoratorData(MeshModel & mm, bool vertsel, bool facesel)
+{
+	CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand;
+	selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< MLSelectionBuffers* >(mm.cm, selectionAttName());
+	if (selbufhand() == NULL)
+		selbufhand() = new MLSelectionBuffers(mm, 100000);
+	if (vertsel)
+		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
+	if (facesel)
+		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
+}
+
+void MLDefaultMeshDecorators::cleanSelectionDecoratorData(MeshModel& mm, bool vertsel, bool facesel)
+{
+	CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers*>(mm.cm, selectionAttName());	
+	MLSelectionBuffers* tmp = selbufhand();
+	if (vertsel && (tmp != NULL))
+		tmp->deallocateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
+
+	if (facesel && (tmp != NULL))
+		tmp->deallocateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
+
+	if (facesel && vertsel)
+	{
+		delete tmp;
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<MLSelectionBuffers*>(mm.cm, selbufhand);
+	}
+}
+
+void MLDefaultMeshDecorators::initNonManifEdgeDecoratorData(MeshModel& m)
 {
     CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm,nonManifEdgeAttName());
     CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm,nonManifEdgeFaceAttName());

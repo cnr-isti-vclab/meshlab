@@ -119,7 +119,8 @@ class CMeshO    : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<CVertexO>, v
 public :
     int sfn;    //The number of selected faces.
     int svn;    //The number of selected vertices.
-    Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
+
+	Matrix44m Tr; // Usually it is the identity. It is applied in rendering and filters can or cannot use it. (most of the filter will ignore this)
 
     const Box3m &trBB()
     {

@@ -538,10 +538,11 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 }
             }
         }
-        if(iEdit) {
-            iEdit->setLog(&md()->Log);
-            iEdit->Decorate(*mm(),this,&painter);
+		if (iEdit) {
+			iEdit->setLog(&md()->Log);
+			iEdit->Decorate(*mm(), this, &painter);
 		}
+
         glPopAttrib();
     } ///end if busy
 

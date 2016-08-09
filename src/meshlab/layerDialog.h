@@ -87,11 +87,11 @@ public:
     DecoratorParamsTreeWidget(QAction* act,MainWindow *mw,QWidget* parent);
     ~DecoratorParamsTreeWidget();
 
-    public slots:
-        void save();
-        void reset();
-        void apply();
-        void load();
+public slots:
+    void save();
+    void reset();
+    void apply();
+    void load();
 
 private:
     float osDependentButtonHeightScaleFactor();

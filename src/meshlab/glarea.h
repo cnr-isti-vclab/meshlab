@@ -40,6 +40,7 @@
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
+#include "ml_selection_buffers.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -72,6 +73,24 @@ public:
     {
         return parentmultiview;
     }
+
+	void updateSelection(int meshid, bool vertsel, bool facesel)
+	{
+		makeCurrent();
+		if (md() != NULL)
+		{
+			MeshModel* mm = md()->getMesh(meshid);
+			if (mm != NULL)
+			{
+				CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(mm->cm, "SelectionBuffers");
+				if ((selbufhand() != NULL) && (facesel))
+					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
+
+				if ((selbufhand() != NULL) && (vertsel))
+					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
+			}
+		}
+	}
 
     void requestForRenderingAttsUpdate( int meshid,MLRenderingData::ATT_NAMES attname )
     {

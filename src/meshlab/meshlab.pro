@@ -34,6 +34,7 @@ HEADERS = ../common/interfaces.h \
 	ml_render_gui.h \
 	ml_rendering_actions.h \
 	ml_default_decorators.h \
+	ml_selection_buffers.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
 	$$VCGDIR/wrap/gl/trimesh.h \
@@ -57,6 +58,7 @@ SOURCES = main.cpp \
 	ml_render_gui.cpp \
 	ml_rendering_actions.cpp \
 	ml_default_decorators.cpp \
+	ml_selection_buffers.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
 	$$VCGDIR/wrap/gui/coordinateframe.cpp \
