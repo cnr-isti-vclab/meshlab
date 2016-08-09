@@ -47,9 +47,6 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 	{
 		glDeleteBuffers(_selmap[selbuf].size(), &(_selmap[selbuf][0]));
 		_selmap[selbuf].clear();
-		QString stdbg;
-		stdbg += "Reset size - _selmap: " + QString::number(_selmap[selbuf].size());
-		qDebug(qPrintable(stdbg));
 	}
 	
 
