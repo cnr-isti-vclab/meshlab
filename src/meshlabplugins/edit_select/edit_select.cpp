@@ -93,7 +93,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 	return;
 }
 
-void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
+void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel & m, GLArea * gla)
 {
 	prev = cur;
 	cur = QTLogicalToOpenGL(gla, event->pos());
@@ -178,6 +178,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 		glMultMatrix(m.cm.Tr);
 		if (selectionMode == SELECT_VERT_MODE)
 		{
+			//m.cm.selvert.clear();
 			vector<CMeshO::VertexPointer> NewSelVert;
 			vector<CMeshO::VertexPointer>::iterator vpi;
 
@@ -201,9 +202,20 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 					(*vpi)->SetS();
 				break;
 			}
+			//for (unsigned int ii = 0; ii < m.cm.VN(); ++ii)
+			//{
+			//	CVertexO& vv = m.cm.vert[ii];
+			//	if (!vv.IsD() && vv.IsS())
+			//	{
+			//		m.cm.selvert.push_back(Point3m::Construct(vv.cP()));
+			//		++m.cm.svn;
+			//	}
+			//}
+			gla->updateSelection(m.id(), true,false);
 		}
 		else
 		{
+			//m.cm.selface.clear();
 			if (selectFrontFlag)	GLPickTri<CMeshO>::PickVisibleFace(mid[0], mid[1], m.cm, NewSelFace, wid[0], wid[1]);
 			else                GLPickTri<CMeshO>::PickFace(mid[0], mid[1], m.cm, NewSelFace, wid[0], wid[1]);
 
@@ -239,14 +251,20 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 					tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
 				break;
 			}
+			gla->updateSelection(m.id(), false, true);
 			isDragging = false;
 		}
+
 	}
 }
 
 bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
 	if (gla == NULL)
+		return false;
+	GLenum err = glewInit();
+
+	if (err != GLEW_OK)
 		return false;
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 
@@ -255,7 +273,7 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 	//setDecorator("Show Selected Faces", true);
 	//setDecorator("Show Selected Vertices", true);
 
-	if (selectionMode)
+	if (selectionMode == SELECT_CONN_MODE)
 		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	return true;
 }
