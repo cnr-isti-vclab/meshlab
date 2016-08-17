@@ -365,6 +365,7 @@ public slots:
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
     void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
+	void updateLayerTableRequested();
 
 private:
     QMap<QString,MLRenderingParametersFrame*> _parframe;

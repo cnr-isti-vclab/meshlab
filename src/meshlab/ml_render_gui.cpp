@@ -778,6 +778,9 @@ void MLRenderingParametersTab::activateRenderingMode(int index)
 		{
 			act->setChecked(!act->isChecked());
 			emit updateRenderingDataAccordingToAction(_meshid, act);
+
+			/*WARNING!!! ADDED just to avoid usual mac strange behavior*/
+			emit updateLayerTableRequested();
 		}
 	}
 }

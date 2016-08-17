@@ -127,6 +127,10 @@ public slots:
     void updateRenderingDataAccordingToAction(int meshid,MLRenderingAction*);
     void actionActivated(MLRenderingAction* ract);
 
+private slots:
+	/*WARNING!!! ADDED just to avoid usual mac strange behavior. Please, avoid to use it if it's not absolutely necessary*/
+	void updateTable();
+
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;

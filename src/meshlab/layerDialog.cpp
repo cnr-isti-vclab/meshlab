@@ -339,6 +339,19 @@ void LayerDialog::updateLog(GLLogStream &log)
     ui->logPlainTextEdit->appendHtml(logText);
 }
 
+void LayerDialog::updateTable()
+{
+	if (mw == NULL)
+		return;
+	MLSceneGLSharedDataContext* shared = mw->currentViewContainer()->sharedDataContext();
+	if (shared != NULL)
+	{
+		MLSceneGLSharedDataContext::PerMeshRenderingDataMap dtf;
+		if (mw->GLA() != NULL)
+			shared->getRenderInfoPerMeshView(mw->GLA()->context(), dtf);
+	}
+}
+
 void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& dtf)
 {
    //TODO:Check if the current viewer is a GLArea
@@ -745,7 +758,8 @@ MLRenderingParametersTab* LayerDialog::createRenderingParametersTab()
         tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
         connect(tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
         connect(tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
-        tabw->setVisible(false);
+		connect(tabw, SIGNAL(updateLayerTableRequested()), this, SLOT(updateTable()));
+		tabw->setVisible(false);
         return tabw;
     }
     return NULL;
