@@ -38,6 +38,21 @@ QString EditSelectPlugin::Info()
 {
 	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
 }
+
+void EditSelectPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)
+{
+	MLPerViewGLOptions opts;
+	dt.get(opts);
+	opts._sel_enabled = true;
+
+	if ((selectionMode == SELECT_FACE_MODE) || (selectionMode == SELECT_CONN_MODE))
+		opts._face_sel = true;
+
+	if (selectionMode == SELECT_VERT_MODE)
+		opts._vertex_sel = true;
+	dt.set(opts);
+}
+
 void EditSelectPlugin::keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *gla)
 {
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
@@ -115,7 +130,11 @@ void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel & m, GLArea
 
 void EditSelectPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
-	gla->update();
+	//gla->update();
+	if (gla == NULL)
+		return;
+
+	gla->updateAllSiblingsGLAreas();
 	prev = cur;
 	cur = QTLogicalToOpenGL(gla, event->pos());
 	isDragging = false;
