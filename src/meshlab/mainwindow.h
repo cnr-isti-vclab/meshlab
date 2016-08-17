@@ -122,6 +122,7 @@ public slots:
     bool openProject(QString fileName=QString());
     bool appendProject(QString fileName=QString());
     void updateCustomSettings();
+	void updateLayerDialog();
 
 private slots:
 
@@ -145,6 +146,8 @@ public:
 
     void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts);
     void updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act);
+
+	unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
 
     void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
 private slots:
@@ -188,7 +191,6 @@ private slots:
     void updateStdDialog();
     void updateXMLStdDialog();
     void enableDocumentSensibleActionsContainer(const bool enable);
-    void updateLayerDialog();
     //void updatePerViewApplicationStatus();
     void setSplit(QAction *qa);
     void setUnsplit();

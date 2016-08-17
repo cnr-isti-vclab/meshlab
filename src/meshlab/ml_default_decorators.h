@@ -21,14 +21,20 @@
 *                                                                           *
 ****************************************************************************/
 
+#ifndef ML_DEFAULT_DECORATORS_H
+#define ML_DEFAULT_DECORATORS_H
 
 #include <common/ml_shared_data_context.h>
 #include <common/meshmodel.h>
 #include <common/GLLogStream.h>
 
+class MainWindow;
+
 class MLDefaultMeshDecorators
 {
 public:
+	MLDefaultMeshDecorators(MainWindow* mw);
+
     typedef std::pair<Point3m,vcg::Color4b> PointPC; // this type is used to have a simple coord+color pair to rapidly draw non manifold faces
 
     //the initMeshDecorationData is called when a mesh has been updated by a filter execution
@@ -38,7 +44,21 @@ public:
 
     //The updateMeshDecorationData is called when a decoration button is clicked on/off
     bool updateMeshDecorationData(MeshModel& mesh,const MLRenderingData& previousdata,const MLRenderingData& currentdata);
-    
+
+	static const char* selectionAttName() { return "SelectionBuffers"; }
+
+	static const char* boundaryVertAttName() { return "BoundaryVertVector"; }
+	static const char* boundaryEdgeAttName() { return "BoundaryEdgeVector"; }
+	static const char* boundaryFaceAttName() { return "BoundaryFaceVector"; }
+
+	static const char* nonManifEdgeAttName() { return "NonManifEdgeVector"; }
+	static const char* nonManifEdgeFaceAttName() { return "NonManifEdgeFaceVector"; }
+
+	static const char* nonManifVertAttName() { return "NonManifVertVector"; }
+	static const char* nonManifVertFaceAttName() { return "NonManifVertFaceVector"; }
+
+	static const char* boundaryTextVertAttName() { return "BoundaryTexVector"; }
+
 private:
     void initBoundaryDecoratorData(MeshModel& mm,bool edgeboundary,bool faceboundary);
     void cleanBoundaryDecoratorData(MeshModel& mm,bool edgeboundary,bool faceboundary);
@@ -49,22 +69,13 @@ private:
     void initNonManifEdgeDecoratorData(MeshModel& mm);
     void cleanNonManifEdgeDecoratorData(MeshModel& mm);
 
+	void initNonManifVertDecoratorData(MeshModel& mm);
+	void cleanNonManifVertDecoratorData(MeshModel& mm);
+
     void initBoundaryTextDecoratorData(MeshModel& mm);
     void cleanBoundaryTextDecoratorData(MeshModel& mm);
 
-	static const char* selectionAttName() { return "SelectionBuffers"; }
 
-    static const char* boundaryVertAttName() {return "BoundaryVertVector";}
-    static const char* boundaryEdgeAttName() {return "BoundaryEdgeVector";}
-    static const char* boundaryFaceAttName() {return "BoundaryFaceVector";}
-
-    static const char* nonManifEdgeAttName() {return "NonManifEdgeVector";}
-    static const char* nonManifEdgeFaceAttName() {return "NonManifEdgeFaceVector";}
-
-    static const char* nonManifVertAttName() {return "NonManifVertVector";}
-    static const char* nonManifVertFaceAttName() {return "NonManifVertFaceVector";}
-
-    static const char* boundaryTextVertAttName() {return "BoundaryTexVector";}
 
     static void drawLineVector(std::vector<PointPC> &EV);
     static void drawTriVector(std::vector<PointPC> &TV);
@@ -74,4 +85,8 @@ private:
     static void chooseX(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &x1,vcg::Point3d &x2);
     static void chooseY(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &y1,vcg::Point3d &y2);
     static void chooseZ(Box3m &box,double *mm,double *mp,GLint *vp,vcg::Point3d &z1,vcg::Point3d &z2);
+
+	MainWindow* _mw;
 };
+
+#endif

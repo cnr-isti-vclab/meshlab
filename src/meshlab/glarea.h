@@ -41,6 +41,7 @@
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
 #include "ml_selection_buffers.h"
+#include "ml_default_decorators.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
 
@@ -82,13 +83,26 @@ public:
 			MeshModel* mm = md()->getMesh(meshid);
 			if (mm != NULL)
 			{
-				CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(mm->cm, "SelectionBuffers");
+				CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(mm->cm, MLDefaultMeshDecorators::selectionAttName());
 				if ((selbufhand() != NULL) && (facesel))
 					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
 
 				if ((selbufhand() != NULL) && (vertsel))
 					selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
 			}
+		}
+	}
+
+	/*WARNING!!!!! HORRIBLE THING!!!!! Added just to avoid to include the multiViewer_container.cpp file in a MeshLab plugins project in case it needs to update all the GLArea and not just the one passed as parameter*/
+
+	void updateAllSiblingsGLAreas()
+	{
+		if (mvc() == NULL)
+			return;
+		foreach(GLArea* viewer, mvc()->viewerList)
+		{
+			if (viewer != NULL)
+				viewer->update();
 		}
 	}
 

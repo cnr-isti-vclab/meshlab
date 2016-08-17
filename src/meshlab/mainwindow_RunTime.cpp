@@ -3384,7 +3384,7 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<ML
     MeshModel* mm = meshDoc()->getMesh(meshid);
     if (mm != NULL) 
     {
-        MLDefaultMeshDecorators dec;
+        MLDefaultMeshDecorators dec(this);
         dec.updateMeshDecorationData(*mm,olddt,dt);
     }
     GLA()->update();
@@ -3403,8 +3403,29 @@ void MainWindow::updateRenderingDataAccordingToAction( int meshid,MLRenderingAct
     MeshModel* mm = meshDoc()->getMesh(meshid);
     if (mm != NULL)
     {
-        MLDefaultMeshDecorators dec;
+        MLDefaultMeshDecorators dec(this);
         dec.updateMeshDecorationData(*mm,olddt,dt);
     }
     GLA()->update();
+}
+
+unsigned int MainWindow::viewsRequiringRenderingActions(int meshid, MLRenderingAction* act)
+{
+	unsigned int res = 0;
+	MultiViewer_Container* cont = currentViewContainer();
+	if (cont != NULL)
+	{
+		MLSceneGLSharedDataContext* share = cont->sharedDataContext();
+		if (share != NULL)
+		{
+			foreach(GLArea* area,cont->viewerList)
+			{
+				MLRenderingData dt;
+				share->getRenderInfoPerMeshView(meshid, area->context(), dt);
+				if (act->isRenderingDataEnabled(dt))
+					++res;
+			}
+		}
+	}
+	return res;
 }

@@ -27,7 +27,14 @@
 #include <wrap/gui/coordinateframe.h>
 #include <wrap/qt/gl_label.h>
 
+#include "mainwindow.h"
 #include "ml_selection_buffers.h"
+
+MLDefaultMeshDecorators::MLDefaultMeshDecorators(MainWindow* mw)
+	:_mw(mw)
+{
+
+}
 
 bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const MLRenderingData& previousdata,const MLRenderingData& currentdata )
 {
@@ -38,25 +45,51 @@ bool MLDefaultMeshDecorators::updateMeshDecorationData( MeshModel& mesh,const ML
     if ((!oldvalid) || (!currentvalid))
         return false;
 
-    /*the boolean conditions should make the following code lines mutually exclusive.....hopefully*/ 
-    initBoundaryDecoratorData(mesh,currentopts._peredge_edgeboundary_enabled && !oldopts._peredge_edgeboundary_enabled,
-                                   currentopts._peredge_faceboundary_enabled && !oldopts._peredge_faceboundary_enabled);
-    cleanBoundaryDecoratorData(mesh,!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled,
-                                    !currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled);
+	/*bool extraswitchon = currentopts._peredge_extra_enabled && !oldopts._peredge_extra_enabled;
+	bool extraswitchoff = !currentopts._peredge_extra_enabled && oldopts._peredge_extra_enabled;
+
+    //the boolean conditions should make the following code lines mutually exclusive.....hopefully
+    initBoundaryDecoratorData(mesh,(extraswitchon || (currentopts._peredge_edgeboundary_enabled && !oldopts._peredge_edgeboundary_enabled)),
+								   (extraswitchon || (currentopts._peredge_faceboundary_enabled && !oldopts._peredge_faceboundary_enabled)));
+    cleanBoundaryDecoratorData(mesh,(extraswitchoff || (!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled)),
+									(extraswitchoff || (!currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled)));
 
 
-    if (currentopts._peredge_edgemanifold_enabled && !oldopts._peredge_edgemanifold_enabled)
+    if (extraswitchon || (currentopts._peredge_edgemanifold_enabled && !oldopts._peredge_edgemanifold_enabled))
         initNonManifEdgeDecoratorData(mesh);
     else
-        if (!currentopts._peredge_edgemanifold_enabled && oldopts._peredge_edgemanifold_enabled)
+        if (extraswitchoff || (!currentopts._peredge_edgemanifold_enabled && oldopts._peredge_edgemanifold_enabled))
             cleanNonManifEdgeDecoratorData(mesh);
 
-    if (currentopts._peredge_text_boundary_enabled && !oldopts._peredge_text_boundary_enabled)
+    if (extraswitchon || (currentopts._peredge_text_boundary_enabled && !oldopts._peredge_text_boundary_enabled))
         initBoundaryTextDecoratorData(mesh);
     else
-        if (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled)
-            cleanBoundaryTextDecoratorData(mesh);
+        if (extraswitchoff || (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled))
+            cleanBoundaryTextDecoratorData(mesh);*/
 
+	initBoundaryDecoratorData(mesh,currentopts._peredge_edgeboundary_enabled && !oldopts._peredge_edgeboundary_enabled,
+								   currentopts._peredge_faceboundary_enabled && !oldopts._peredge_faceboundary_enabled);
+	cleanBoundaryDecoratorData(mesh,!currentopts._peredge_edgeboundary_enabled && oldopts._peredge_edgeboundary_enabled,
+									!currentopts._peredge_faceboundary_enabled && oldopts._peredge_faceboundary_enabled);
+
+
+	if (currentopts._peredge_edgemanifold_enabled && !oldopts._peredge_edgemanifold_enabled)
+		initNonManifEdgeDecoratorData(mesh);
+	else
+		if (!currentopts._peredge_edgemanifold_enabled && oldopts._peredge_edgemanifold_enabled)
+			cleanNonManifEdgeDecoratorData(mesh);
+
+	if (currentopts._peredge_vertmanifold_enabled && !oldopts._peredge_vertmanifold_enabled)
+		initNonManifVertDecoratorData(mesh);
+	else
+		if (!currentopts._peredge_vertmanifold_enabled && oldopts._peredge_vertmanifold_enabled)
+			cleanNonManifVertDecoratorData(mesh);
+
+	if (currentopts._peredge_text_boundary_enabled && !oldopts._peredge_text_boundary_enabled)
+		initBoundaryTextDecoratorData(mesh);
+	else
+		if (!currentopts._peredge_text_boundary_enabled && oldopts._peredge_text_boundary_enabled)
+			cleanBoundaryTextDecoratorData(mesh); 
 	
 	initSelectionDecoratorData(mesh, currentopts._vertex_sel && !oldopts._vertex_sel, currentopts._face_sel && !oldopts._face_sel);
 	cleanSelectionDecoratorData(mesh,!currentopts._vertex_sel && oldopts._vertex_sel, !currentopts._face_sel && oldopts._face_sel);
@@ -71,15 +104,19 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
     if (!valid)
         return false;
 
-    initBoundaryDecoratorData(m,opts._peredge_edgeboundary_enabled,opts._peredge_faceboundary_enabled);
+	//if (opts._peredge_extra_enabled)
+	//{
+	initBoundaryDecoratorData(m, opts._peredge_edgeboundary_enabled, opts._peredge_faceboundary_enabled);
 
-    if (opts._peredge_edgemanifold_enabled)
-        initNonManifEdgeDecoratorData(m);
+	if (opts._peredge_edgemanifold_enabled)
+		initNonManifEdgeDecoratorData(m);
 
-    if (opts._peredge_text_boundary_enabled)
-        initBoundaryTextDecoratorData(m);
-
-	initSelectionDecoratorData(m,opts._vertex_sel,opts._face_sel);
+	if (opts._peredge_text_boundary_enabled)
+		initBoundaryTextDecoratorData(m);
+	//}
+	
+	initSelectionDecoratorData(m, opts._vertex_sel, opts._face_sel);
+	
 
     return true;
 }
@@ -98,7 +135,8 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryVertAttName());
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryEdgeAttName());
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryFaceAttName());
-            drawLineVector(beH());
+			if (opts._peredge_edgeboundary_enabled)
+				drawLineVector(beH());
             if(opts._peredge_faceboundary_enabled) 
                 drawTriVector(bfH());
             drawDotVector(bvH(),5);
@@ -127,13 +165,13 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
         if (opts._peredge_vertmanifold_enabled)
         {
               // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
-              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertVertVector");
-              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,"NonManifVertTriVector");
+              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifVertAttName());
+              CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifVertFaceAttName());
               drawDotVector(vvH());
               drawTriVector(tvH());
 
               QString inf;
-              inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size()) + "</b> faces over non manifold edges";
+              inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size() / 3) + "</b> faces over non manifold edges";
               log.RealTimeLog("Non Manifold Vertices",m.shortName(),inf);
         }
 
@@ -199,7 +237,6 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             drawQuotedBox(m,painter,qf);
         }
     }
-
 	glFinish();
 }
 
@@ -453,6 +490,9 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
 
     if (opts._peredge_text_boundary_enabled)
         cleanBoundaryTextDecoratorData(mesh);
+
+	if (opts._vertex_sel || opts._face_sel)
+		cleanSelectionDecoratorData(mesh, !opts._vertex_sel, !opts._face_sel);
     return true;
 }
 
@@ -463,12 +503,18 @@ void MLDefaultMeshDecorators::initBoundaryDecoratorData( MeshModel& m,bool edgeb
 
     CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH;
     bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm,boundaryVertAttName());
+
     CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
-    if (edgeboundary)
-        beH= vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm,boundaryEdgeAttName());
+	if (edgeboundary)
+	{
+		beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryEdgeAttName());
+	}
+
     CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bfH;
-    if (faceboundary)
-        bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm,boundaryFaceAttName());
+	if (faceboundary)
+	{
+		bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryFaceAttName());
+	}
 
     std::vector<PointPC> *BVp = &bvH();
     std::vector<PointPC> *BEp = NULL;
@@ -537,12 +583,45 @@ void MLDefaultMeshDecorators::initBoundaryDecoratorData( MeshModel& m,bool edgeb
 
 void MLDefaultMeshDecorators::cleanBoundaryDecoratorData( MeshModel& m,bool edgeboundary,bool faceboundary)
 {
-    if (edgeboundary && faceboundary)
-        vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryVertAttName());
-    if (edgeboundary)
-        vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryEdgeAttName());
+	if (_mw == NULL)
+		return;
+
+	MLRenderingEdgeBoundaryAction eact(m.id(), NULL);
+	unsigned int edgerequview = _mw->viewsRequiringRenderingActions(m.id(), &eact);
+	if (edgeboundary)
+	{		
+		if (edgerequview == 0)
+		{
+			CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+			beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryEdgeAttName());
+			if (beH._handle != NULL)
+				beH().clear();
+			vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+		}
+	}
+
+	MLRenderingFaceBoundaryAction fact(m.id(), NULL);
+	unsigned int facerequview = _mw->viewsRequiringRenderingActions(m.id(), &fact);
     if (faceboundary)
-        vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryFaceAttName());
+	{
+		if (facerequview == 0)
+		{
+			CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+			beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryFaceAttName());
+			if (beH._handle != NULL)
+				beH().clear();
+			vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+		}
+	}
+        
+	if ((facerequview == 0) && (edgerequview == 0))
+	{
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+		beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryVertAttName());
+		if (beH._handle != NULL)
+			beH().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+	}
 }
 
 void MLDefaultMeshDecorators::initSelectionDecoratorData(MeshModel & mm, bool vertsel, bool facesel)
@@ -554,20 +633,28 @@ void MLDefaultMeshDecorators::initSelectionDecoratorData(MeshModel & mm, bool ve
 	if (vertsel)
 		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
 	if (facesel)
-		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
+	selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
 }
 
 void MLDefaultMeshDecorators::cleanSelectionDecoratorData(MeshModel& mm, bool vertsel, bool facesel)
 {
-	CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers*>(mm.cm, selectionAttName());	
-	MLSelectionBuffers* tmp = selbufhand();
-	if (vertsel && (tmp != NULL))
-		tmp->deallocateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
+	if (_mw == NULL)
+		return;
 
-	if (facesel && (tmp != NULL))
+	CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers*>(mm.cm, selectionAttName());
+	MLSelectionBuffers* tmp = selbufhand();
+
+	MLRenderingVertSelectionAction vact(mm.id(), NULL);
+	unsigned int vertselreqview = _mw->viewsRequiringRenderingActions(mm.id(), &vact);
+	if (vertsel && (tmp != NULL) && (vertselreqview == 0))
+		tmp->deallocateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
+	
+	MLRenderingFaceSelectionAction fact(mm.id(), NULL);
+	unsigned int faceselreqview = _mw->viewsRequiringRenderingActions(mm.id(), &fact);
+	if (facesel && (tmp != NULL) && (faceselreqview == 0))
 		tmp->deallocateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
 
-	if (facesel && vertsel)
+	if ((faceselreqview == 0) && (vertselreqview == 0))
 	{
 		delete tmp;
 		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<MLSelectionBuffers*>(mm.cm, selbufhand);
@@ -619,8 +706,94 @@ void MLDefaultMeshDecorators::initNonManifEdgeDecoratorData(MeshModel& m)
 
 void MLDefaultMeshDecorators::cleanNonManifEdgeDecoratorData( MeshModel& m )
 {
-    vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,nonManifEdgeAttName());
-    vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,nonManifEdgeFaceAttName());
+	if (_mw == NULL)
+		return;
+
+	MLRenderingEdgeManifoldAction eact(m.id(), NULL);
+	unsigned int manifreqviews = _mw->viewsRequiringRenderingActions(m.id(), &eact);
+
+	if (manifreqviews == 0)
+	{
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+		beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, nonManifEdgeAttName());
+		if (beH._handle != NULL)
+			beH().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bef;
+		bef = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, nonManifEdgeFaceAttName());
+		if (bef._handle != NULL)
+			bef().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, bef);
+
+	}
+}
+
+void MLDefaultMeshDecorators::initNonManifVertDecoratorData(MeshModel& mm)
+{
+	CMeshO::PerMeshAttributeHandle<std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(mm.cm, nonManifVertAttName());
+	CMeshO::PerMeshAttributeHandle<std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(mm.cm, nonManifVertFaceAttName());
+	std::vector<PointPC> *BVp = &bvH();
+	std::vector<PointPC> *FVp = &fvH();
+	BVp->clear();
+	FVp->clear();
+	mm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	vcg::tri::SelectionStack<CMeshO> ss(mm.cm);
+	ss.push();
+	vcg::tri::UpdateSelection<CMeshO>::VertexClear(mm.cm);
+	int res = vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm.cm, true);
+	vcg::Color4b bCol(255, 0, 255, 0);
+	vcg::Color4b vCol(255, 0, 255, 64);
+	vcg::tri::UpdateFlags<CMeshO>::VertexClearV(mm.cm);
+	for (CMeshO::FaceIterator fi = mm.cm.face.begin(); fi != mm.cm.face.end(); ++fi)
+	{
+		if (!(*fi).IsD())
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				if ((*fi).V(i)->IsS())
+				{
+					if (!(*fi).V0(i)->IsV())
+					{
+						BVp->push_back(std::make_pair((*fi).V0(i)->P(), vcg::Color4b(vcg::Color4b::Magenta)));
+						(*fi).V0(i)->SetV();
+					}
+
+					Point3m P1 = ((*fi).V0(i)->P() + (*fi).V1(i)->P()) / 2.0f;
+					Point3m P2 = ((*fi).V0(i)->P() + (*fi).V2(i)->P()) / 2.0f;
+					FVp->push_back(std::make_pair((*fi).V0(i)->P(), vCol));
+					FVp->push_back(std::make_pair(P1, bCol));
+					FVp->push_back(std::make_pair(P2, bCol));
+				}
+			}
+		}
+	}
+	ss.pop();
+}
+
+void MLDefaultMeshDecorators::cleanNonManifVertDecoratorData(MeshModel& m)
+{
+	if (_mw == NULL)
+		return;
+
+	MLRenderingVertManifoldAction eact(m.id(), NULL);
+	unsigned int manifreqviews = _mw->viewsRequiringRenderingActions(m.id(), &eact);
+
+	if (manifreqviews == 0)
+	{
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+		beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, nonManifVertAttName());
+		if (beH._handle != NULL)
+			beH().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bef;
+		bef = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, nonManifVertFaceAttName());
+		if (bef._handle != NULL)
+			bef().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, bef);
+
+	}
 }
 
 void MLDefaultMeshDecorators::initBoundaryTextDecoratorData( MeshModel& m)
@@ -661,7 +834,17 @@ void MLDefaultMeshDecorators::initBoundaryTextDecoratorData( MeshModel& m)
 
 void MLDefaultMeshDecorators::cleanBoundaryTextDecoratorData( MeshModel& m)
 {
-    vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute(m.cm,boundaryTextVertAttName());
+	MLRenderingTexBorderAction eact(m.id(), NULL);
+	unsigned int manifreqviews = _mw->viewsRequiringRenderingActions(m.id(), &eact);
+
+	if (manifreqviews == 0)
+	{
+		CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH;
+		beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute< std::vector<PointPC> >(m.cm, boundaryTextVertAttName());
+		if (beH._handle != NULL)
+			beH().clear();
+		vcg::tri::Allocator<CMeshO>::DeletePerMeshAttribute<std::vector<PointPC>>(m.cm, beH);
+	}
 }
 
 void MLDefaultMeshDecorators::drawLineVector(std::vector<PointPC> &EV)

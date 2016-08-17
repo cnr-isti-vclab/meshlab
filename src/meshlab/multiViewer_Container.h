@@ -23,13 +23,15 @@
 #ifndef __MULTIVIEWER_CONTAINER_H__
 #define __MULTIVIEWER_CONTAINER_H__
 
+#include <GL/glew.h>
+
 #include <QWidget>
+#include <QGLWidget>
 #include <QVector>
 #include <QSplitter>
 #include <QSplitterHandle>
 
 #include "../common/meshmodel.h"
-#include <GL/glew.h>
 #include "../common/ml_shared_data_context.h"
 
 // Class list
@@ -82,7 +84,8 @@ public:
     int getNextViewerId();
     int viewerCounter();
 
-    void updateAllViewer();
+	void updateAllViewer();
+
     void resetAllTrackBall();
     void update(int id);
 

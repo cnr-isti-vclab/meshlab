@@ -843,6 +843,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,ML
             tree->setItemWidget(this,3,_rendertoolbar);
 
         setText(2, meshName);
+		setToolTip(2, inf.absoluteFilePath());
         _meshid = meshmodel->id();
     }
 }

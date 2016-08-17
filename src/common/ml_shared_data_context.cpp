@@ -760,6 +760,7 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions( MLPerViewG
     tmp._perwire_fixed_color = vcg::Color4b(vcg::Color4b::DarkGray);
     tmp._persolid_fixed_color = vcg::Color4b(vcg::Color4b::LightGray);
 	tmp._sel_enabled = true;
+	tmp._peredge_extra_enabled = true;
 }
 
 //void MLPoliciesStandAloneFunctions::bestPrimitiveModalityMaskAfterUpdate( MeshModel* meshmodel,int meshmodelmask,const MLRenderingData::PRIMITIVE_MODALITY_MASK& inputpm,MLRenderingData::PRIMITIVE_MODALITY_MASK& outputpm )

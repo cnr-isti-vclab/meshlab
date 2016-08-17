@@ -557,6 +557,8 @@ public:
     //should return a sentence describing what the editing tool does
     static const QString Info();
 
+	virtual void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/) {}
+
   // Called when the user press the first time the button
     virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/,MLSceneGLSharedDataContext* /*cont*/){return true;}
     virtual bool StartEdit(MeshDocument &md, GLArea *parent,MLSceneGLSharedDataContext* cont)

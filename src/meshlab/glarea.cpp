@@ -469,7 +469,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 iRenderer->Render(currentShader, *this->md(), dt, this);
 
 
-                MLDefaultMeshDecorators defdec;
+                MLDefaultMeshDecorators defdec(mw());
                
                 foreach(MeshModel * mp, this->md()->meshList)
                 {
@@ -532,7 +532,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                         decorInterface->decorateMesh(*it,*mp,this->glas.currentGlobalParamSet,this,&painter,md()->Log);
                     }
 
-                    MLDefaultMeshDecorators defdec;
+                    MLDefaultMeshDecorators defdec(mw());
                     datacont->getRenderInfoPerMeshView(mp->id(),context(),curr);
                     defdec.decorateMesh(*mp,curr,&painter,md()->Log);
                 }
@@ -613,8 +613,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if (takeSnapTile) pasteTile();
 
     // Finally display HELP if requested
-    if (isHelpVisible()) displayHelp();
-    glFinish();
+    if (isHelpVisible()) 
+		displayHelp();
 
     // Draw the log area background
     // on the bottom of the glArea
@@ -644,6 +644,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     painter.endNativePainting();
     //glFinish();
     //doneCurrent();
+	glFlush();
+	glFinish();
 }
 
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
@@ -1008,7 +1010,7 @@ void GLArea::updateAllPerMeshDecorators()
     if (shared == NULL)
         return;
 
-    MLDefaultMeshDecorators defdec;
+    MLDefaultMeshDecorators defdec(mw());
     for(MeshModel* mm = mdoc->nextMesh();mm != NULL;mm = mdoc->nextMesh(mm))
     {
         MLRenderingData dt;
@@ -1021,13 +1023,43 @@ void GLArea::updateAllPerMeshDecorators()
 
 void GLArea::setCurrentEditAction(QAction *editAction)
 {
+	if ((parentmultiview == NULL) || (parentmultiview->sharedDataContext() == NULL))
+		return;
+
 	makeCurrent();
     assert(editAction);
     currentEditor = editAction;
 
     iEdit = actionToMeshEditMap.value(currentEditor);
-    assert(iEdit);
+	if (iEdit == NULL)
+		return;
+
     lastModelEdited = this->md()->mm();
+
+	MLRenderingData dt;
+	if (iEdit->isSingleMeshEdit())
+	{
+		if (md()->mm() != NULL)
+		{
+			parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(md()->mm()->id(), context(), dt);
+			iEdit->suggestedRenderingData(*(md()->mm()), dt);
+			parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(md()->mm()->id(), context(), dt);
+		}
+	}
+	else
+	{
+		foreach(MeshModel* mm, md()->meshList)
+		{
+			if (mm != NULL)
+			{
+				parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(mm->id(), context(), dt);
+				iEdit->suggestedRenderingData(*(mm), dt);
+				parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(mm->id(), context(), dt);
+			}
+		}
+	}
+	if (mw() != NULL)
+		mw()->updateLayerTable();
     if (!iEdit->StartEdit(*this->md(), this,parentmultiview->sharedDataContext()))
     {
         //iEdit->EndEdit(*(this->md()->mm()), this);
@@ -1036,7 +1068,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
     else
     {
         Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
-        if(mm()!=NULL)
+		if(mm()!=NULL)
             mm()->meshModified() = true;
         else assert(!iEdit->isSingleMeshEdit());
     }
