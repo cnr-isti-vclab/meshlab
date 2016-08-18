@@ -616,17 +616,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if (isHelpVisible()) 
 		displayHelp();
 
-    // Draw the log area background
-    // on the bottom of the glArea
-    if(infoAreaVisible)
-    {
-        glPushAttrib(GL_ENABLE_BIT);
-        glDisable(GL_DEPTH_TEST);
-        displayInfo(&painter);
-        displayRealTimeLog(&painter);
-        updateFps(time.elapsed());
-        glPopAttrib();
-    }
 
     //Draw highlight if it is the current viewer
     if(mvc()->currentId==id)
@@ -640,6 +629,18 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
     if(window && window->linkViewersAct->isChecked() && mvc()->currentId==id)
         mvc()->updateTrackballInViewers();
+
+	// Draw the log area background
+		// on the bottom of the glArea
+	if (infoAreaVisible)
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glDisable(GL_DEPTH_TEST);
+		displayInfo(&painter);
+		displayRealTimeLog(&painter);
+		updateFps(time.elapsed());
+		glPopAttrib();
+	}
 	//doneCurrent();
     painter.endNativePainting();
     //glFinish();
@@ -1557,13 +1558,13 @@ void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdoubl
 
 void GLArea::updateFps(float deltaTime)
 {
-    const int avgSize =50;
+    const int avgSize =10;
     static float fpsVector[avgSize];
     static int j=0;
     float averageFps=0;
     if (deltaTime>0) {
         fpsVector[j]=deltaTime;
-        j=(j+1) % 10;
+        j=(j+1) % avgSize;
     }
     for (int i=0;i<avgSize;i++) averageFps+=fpsVector[i];
     cfps=1000.0f/(averageFps/avgSize);
