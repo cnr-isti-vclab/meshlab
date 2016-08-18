@@ -13,6 +13,12 @@ CONFIG += c++11
 
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
+macx:CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O2 -s -DNDEBUG
+macx:CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
+
+
+
+
 MACLIBDIR = ../../external/lib/macx64
 
 # the following line is needed to avoid mismatch between
