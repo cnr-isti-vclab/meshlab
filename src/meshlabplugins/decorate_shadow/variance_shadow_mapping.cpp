@@ -67,10 +67,17 @@ bool VarianceShadowMapping::init()
     return true;
 }
 
-void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
+void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
+{
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
-    if (gla == NULL) return;
+    
+    MLSceneGLSharedDataContext* ctx = NULL;
+    if ((gla == NULL) || (gla->mvc()  == NULL)) 
+        return;
+    ctx = gla->mvc()->sharedDataContext();
+    if (ctx == NULL)
+        return;
 
     this->renderingFromLightSetup(md, gla);
 
@@ -88,11 +95,20 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     this->bind();
 
     glUseProgram(this->_depthShaderProgram);
-    foreach(MeshModel *m, md.meshList)
-    if(m->visible)
-      {
-        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-      }
+	MLRenderingData dt;
+	MLRenderingData::RendAtts atts;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+	dt.set(MLRenderingData::PR_SOLID, atts);
+
+	foreach(MeshModel *m, md.meshList)
+	{
+		if ((m != NULL) && (m->visible))
+		{
+			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+		}
+	}
 
     glDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -127,11 +143,13 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    foreach(MeshModel *m, md.meshList)
-    if(m->visible)
-      {
-        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-      }
+	foreach(MeshModel *m, md.meshList)
+	{
+		if ((m != NULL) && (m->visible))
+		{
+			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+		}
+	}
 
     glDisable(GL_BLEND);
     glDepthFunc((GLenum)depthFuncOld);

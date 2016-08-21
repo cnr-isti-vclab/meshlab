@@ -76,9 +76,10 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
     }
 }		
 		
-bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/){
+bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/)
+{
     bool result;
-
+        
     switch(ID(action)){
         case DP_SHOW_SHADOW :
             if(!parset->hasParameter(DecorateShadowMethod())){
@@ -87,22 +88,82 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, R
             }
             switch (parset->getEnum(DecorateShadowMethod()))
             {
-            case SH_MAP: this->_decoratorSH = smShader; break;
-            case SH_MAP_VSM: this->_decoratorSH = vsmShader; break;
-            case SH_MAP_VSM_BLUR: this->_decoratorSH = vsmbShader; break;
+            case SH_MAP: 
+            {
+                smShader= new ShadowMapping(0.1f);
+                this->_decoratorSH = smShader; break;
+            }
+            case SH_MAP_VSM: 
+            {
+                vsmShader= new VarianceShadowMapping(0.1f);
+                this->_decoratorSH = vsmShader; break;
+            }
+            case SH_MAP_VSM_BLUR: 
+            {
+                vsmbShader= new VarianceShadowMappingBlur(0.1f);
+                this->_decoratorSH = vsmbShader; break;
+            }
             }
             this->_decoratorSH->setShadowIntensity(parset->getDynamicFloat(this->DecorateShadowIntensity()));
             result = this->_decoratorSH->init();
             return result;
 
         case DP_SHOW_SSAO:
+            _decoratorSSAO = new SSAO(0.1f);
             this->_decoratorSSAO->setRadius(parset->getFloat(DecorateShadowSSAORadius()));
             result = this->_decoratorSSAO->init();
             return result;
 
         default: assert(0);
     }
+    return false;
 }
+
+void DecorateShadowPlugin::endDecorate( QAction * action, MeshDocument & md, RichParameterSet * parset, GLArea * gla)
+{
+    switch(ID(action))
+    {
+    case DP_SHOW_SHADOW :
+        {
+            if(!parset->hasParameter(DecorateShadowMethod()))
+            {
+                qDebug("Unable to find Shadow mapping method");
+                assert(0);
+            }
+            switch (parset->getEnum(DecorateShadowMethod()))
+            {
+            case SH_MAP: 
+                {
+                    delete smShader;
+                    smShader = NULL;
+                    break;
+                }
+            case SH_MAP_VSM: 
+                {
+                    delete vsmShader;
+                    vsmShader = NULL;
+                    break;
+                }
+            case SH_MAP_VSM_BLUR: 
+                {
+                    delete vsmbShader;
+                    vsmbShader = NULL;
+                    break;
+                }
+            }
+            _decoratorSH = NULL;
+            break;
+        }
+    case DP_SHOW_SSAO:
+        {
+            delete _decoratorSSAO;
+            _decoratorSSAO = NULL;
+            break;
+        }
+    default: assert(0);
+    }
+}
+
 
 void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla,QPainter *,GLLogStream &)
 {
@@ -118,5 +179,6 @@ void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichPa
             default: assert(0);
         }
 }
+
 
 MESHLAB_PLUGIN_NAME_EXPORTER(DecorateShadowPlugin)

@@ -30,115 +30,118 @@
 
 
 
-void DecorateRasterProjPlugin::MeshDrawer::drawShadow( glw::Context &context )
+void DecorateRasterProjPlugin::MeshDrawer::drawShadow(QGLContext* glctx,MLSceneGLSharedDataContext* ctx)
 {
-    if( !m_Mesh->visible )
+    if ((m_Mesh == NULL) || ( !m_Mesh->visible ) || (ctx == NULL))
         return;
 
-    if( m_VBOVertices.isNull() )
-        m_Mesh->render( vcg::GLW::DMFlat, vcg::GLW::CMNone, vcg::GLW::TMNone );
-    else
-    {
-        glPushAttrib( GL_TRANSFORM_BIT );
-        glMatrixMode( GL_MODELVIEW );
-        glPushMatrix();
-        glMultMatrix(m_Mesh->cm.Tr);
-        glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-        glEnableClientState( GL_VERTEX_ARRAY );
+    glPushAttrib( GL_TRANSFORM_BIT );
+    glMatrixMode( GL_MODELVIEW );
+    glPushMatrix();
+    glMultMatrix(m_Mesh->cm.Tr);
 
-        context.bindVertexBuffer( m_VBOVertices );
-        glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
+	MLRenderingData currdt;
+	ctx->getRenderInfoPerMeshView(m_Mesh->id(), glctx, currdt);
 
-        context.bindIndexBuffer( m_VBOIndices );
-        glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
+	MLRenderingData dt;
+	MLRenderingData::RendAtts sl_atts;
+	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-        context.unbindIndexBuffer();
-        context.unbindVertexBuffer();
+	for (MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0); pm < MLRenderingData::PR_ARITY; pm = MLRenderingData::next(pm))
+	{
+		if (currdt.isPrimitiveActive(pm))
+		{
+			if (pm == MLRenderingData::PR_SOLID)
+				sl_atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+			dt.set(pm, sl_atts);
+		}
+	}
 
-        glPopClientAttrib();
-        glPopMatrix();
-        glPopAttrib();
-    }
+	ctx->drawAllocatedAttributesSubset(m_Mesh->id(), glctx, dt);
+
+    glPopMatrix();
+    glPopAttrib();
+
 }
 
 
-void DecorateRasterProjPlugin::MeshDrawer::draw( glw::Context &context )
+void DecorateRasterProjPlugin::MeshDrawer::draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
-    if( !m_Mesh->visible )
-        return;
+	if ((glctx == NULL) || (ctx == NULL) || (m_Mesh == NULL) || (!m_Mesh->visible))
+		return;
 
-    if( m_VBOVertices.isNull() )
-        m_Mesh->render( vcg::GLW::DMSmooth, vcg::GLW::CMNone, vcg::GLW::TMNone );
-    else
-    {
-        glPushAttrib( GL_TRANSFORM_BIT );
-        glMatrixMode( GL_MODELVIEW );
-        glPushMatrix();
-        glMultMatrix(m_Mesh->cm.Tr);
-        glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
-        glEnableClientState( GL_VERTEX_ARRAY );
-        glEnableClientState( GL_NORMAL_ARRAY );
+    glPushAttrib( GL_TRANSFORM_BIT );
+    glMatrixMode( GL_MODELVIEW );
+    glPushMatrix();
+    glMultMatrix(m_Mesh->cm.Tr);
 
-        context.bindVertexBuffer( m_VBOVertices );
-        glVertexPointer( 3, GL_FLOAT, 2*sizeof(vcg::Point3f), 0 );
-        glNormalPointer(    GL_FLOAT, 2*sizeof(vcg::Point3f), (GLvoid*)sizeof(vcg::Point3f) );
+	MLRenderingData currdt;
+	ctx->getRenderInfoPerMeshView(m_Mesh->id(), glctx, currdt);
 
-        context.bindIndexBuffer( m_VBOIndices );
-        glDrawElements( GL_TRIANGLES, 3*m_Mesh->cm.fn, GL_UNSIGNED_INT, 0 );
+	MLRenderingData dt;
+	MLRenderingData::RendAtts sl_atts;
+	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	sl_atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
 
-        context.unbindIndexBuffer();
-        context.unbindVertexBuffer();
+	for(MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0); pm < MLRenderingData::PR_ARITY; pm = MLRenderingData::next(pm))
+	{
+		if (currdt.isPrimitiveActive(pm))
+		{
+			if (pm == MLRenderingData::PR_SOLID)
+				sl_atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+			dt.set(pm, sl_atts);
+		}
+	}
 
-        glPopClientAttrib();
-        glPopMatrix();
-        glPopAttrib();
-    }
+	ctx->drawAllocatedAttributesSubset(m_Mesh->id(), glctx, dt);
+
+    glPopMatrix();
+    glPopAttrib();
 }
 
 
-void DecorateRasterProjPlugin::MeshDrawer::update( glw::Context &context, bool useVBO )
-{
-    // Initialize the VBO if required.
-    if( useVBO && m_Mesh->visible )
-    {
-        if( m_VBOVertices.isNull() )
-        {
-            // Transfer of vertex positions on GPU.
-            CMeshO &meshData = m_Mesh->cm;
-            vcg::Point3f *vertBuffer = new vcg::Point3f [ 2*meshData.vn ];
-            for( int i=0, n=0; i<meshData.vn; ++i )
-            {
-                vertBuffer[n++].Import(meshData.vert[i].P());
-                vertBuffer[n++].Import(meshData.vert[i].N());
-            }
+//void DecorateRasterProjPlugin::MeshDrawer::update( glw::Context &context, bool useVBO )
+//{
+    //// Initialize the VBO if required.
+    //if( useVBO && m_Mesh->visible )
+    //{
+    //    if( m_VBOVertices.isNull() )
+    //    {
+    //        // Transfer of vertex positions on GPU.
+    //        CMeshO &meshData = m_Mesh->cm;
+    //        vcg::Point3f *vertBuffer = new vcg::Point3f [ 2*meshData.vn ];
+    //        for( int i=0, n=0; i<meshData.vn; ++i )
+    //        {
+    //            vertBuffer[n++].Import(meshData.vert[i].P());
+    //            vertBuffer[n++].Import(meshData.vert[i].N());
+    //        }
 
-            m_VBOVertices = glw::createBuffer( context, 2*meshData.vn*sizeof(vcg::Point3f), vertBuffer );
-            delete [] vertBuffer;
+    //        m_VBOVertices = glw::createBuffer( context, 2*meshData.vn*sizeof(vcg::Point3f), vertBuffer );
+    //        delete [] vertBuffer;
 
-            // Transfer of face indices on GPU.
-            unsigned int *indexBuffer = new unsigned int [ 3*meshData.fn ];
-            for( int i=0, n=0; i<meshData.fn; ++i )
-            {
-                indexBuffer[n++] = meshData.face[i].V(0) - &meshData.vert[0];
-                indexBuffer[n++] = meshData.face[i].V(1) - &meshData.vert[0];
-                indexBuffer[n++] = meshData.face[i].V(2) - &meshData.vert[0];
-            }
+    //        // Transfer of face indices on GPU.
+    //        unsigned int *indexBuffer = new unsigned int [ 3*meshData.fn ];
+    //        for( int i=0, n=0; i<meshData.fn; ++i )
+    //        {
+    //            indexBuffer[n++] = meshData.face[i].V(0) - &meshData.vert[0];
+    //            indexBuffer[n++] = meshData.face[i].V(1) - &meshData.vert[0];
+    //            indexBuffer[n++] = meshData.face[i].V(2) - &meshData.vert[0];
+    //        }
 
-            m_VBOIndices = glw::createBuffer( context, 3*meshData.fn*sizeof(unsigned int), indexBuffer );
-            delete [] indexBuffer;
-        }
-    }
-    else
-    {
-        m_VBOIndices.setNull();
-        m_VBOVertices.setNull();
-    }
-}
-
-
+    //        m_VBOIndices = glw::createBuffer( context, 3*meshData.fn*sizeof(unsigned int), indexBuffer );
+    //        delete [] indexBuffer;
+    //    }
+    //}
+    //else
+    //{
+    //    m_VBOIndices.setNull();
+    //    m_VBOVertices.setNull();
+    //}
+//}
 
 
-bool DecorateRasterProjPlugin::s_AreVBOSupported;
+//bool DecorateRasterProjPlugin::s_AreVBOSupported;
 
 
 DecorateRasterProjPlugin::DecorateRasterProjPlugin() :
@@ -208,11 +211,6 @@ void DecorateRasterProjPlugin::initGlobalParameterSet( QAction *act, RichParamet
                                         "Apply lighting",
                                         "Apply lighting" ) );
 
-            par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterUseVBO",
-                                        false,
-                                        "Use VBO",
-                                        "Use VBO" ) );
-
             par.addParam( new RichBool( "MeshLab::Decoration::ProjRasterOnAllMeshes",
                                         false,
                                         "Project on all meshes",
@@ -258,20 +256,17 @@ void DecorateRasterProjPlugin::updateCurrentMesh( MeshDocument &m,
         m_CurrentMesh = &( m_Scene[m.mm()->id()] = MeshDrawer(m.mm()) );
     }
 
-
-    bool areVBORequired = par.getBool( "MeshLab::Decoration::ProjRasterUseVBO" );
-    if( areVBORequired && !s_AreVBOSupported )
+    /*if( !s_AreVBOSupported )
     {
         par.setValue( "MeshLab::Decoration::ProjRasterUseVBO", BoolValue(false) );
-        areVBORequired = false;
-    }
+    }*/
 
     m_SceneBox.SetNull();
 
     for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
     {
         m_SceneBox.Add( m->mm()->cm.Tr, m->mm()->cm.bbox);
-        m->update( m_Context, areVBORequired );
+        /*m->update( m_Context, areVBORequired );*/
     }
 }
 
@@ -361,7 +356,7 @@ void DecorateRasterProjPlugin::updateColorTexture()
 }
 
 
-void DecorateRasterProjPlugin::updateDepthTexture()
+void DecorateRasterProjPlugin::updateDepthTexture(QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
     glPushAttrib( GL_TEXTURE_BIT   |
                   GL_ENABLE_BIT    |
@@ -409,7 +404,7 @@ void DecorateRasterProjPlugin::updateDepthTexture()
 
     glClear( GL_DEPTH_BUFFER_BIT );
     for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-        m->drawShadow( m_Context );
+        m->drawShadow( glctx,ctx );
 
     m_Context.unbindReadDrawFramebuffer();
 
@@ -423,7 +418,7 @@ void DecorateRasterProjPlugin::updateDepthTexture()
 }
 
 
-void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m )
+void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx)
 {
     // Update the stored raster with the one provided by the mesh document.
     // If both are identical, the update is simply skiped.
@@ -434,7 +429,7 @@ void DecorateRasterProjPlugin::updateCurrentRaster( MeshDocument &m )
 
     updateColorTexture();
     updateShadowProjectionMatrix();
-    updateDepthTexture();
+	updateDepthTexture(glctx, ctx);
 }
 
 
@@ -556,7 +551,7 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
                 return false;
             }
 
-            s_AreVBOSupported = glewIsSupported( "GL_ARB_vertex_buffer_object" );
+            //s_AreVBOSupported = glewIsSupported( "GL_ARB_vertex_buffer_object" );
 
             m_Scene.clear();
             m_CurrentMesh = NULL;
@@ -643,18 +638,21 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
     {
         case DP_PROJECT_RASTER:
         {
-            if ((gla == NULL) || (gla->getCurrentRenderMode() == NULL))
-                return;
+			MLSceneGLSharedDataContext* ctx = NULL;
+			if ((gla == NULL) || (gla->mvc() == NULL))
+				return;
+			ctx = gla->mvc()->sharedDataContext();
+			if (ctx == NULL)
+				return;
 
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
             updateCurrentMesh( m, *par );
-            updateCurrentRaster( m );
+            updateCurrentRaster( m,gla->context(),ctx );
 
             glEnable( GL_DEPTH_TEST );
 
-            RenderMode rm = *gla->getCurrentRenderMode();
-            bool notDrawn = false;
+           /* bool notDrawn = false;
             switch( rm.drawMode )
             {
                 case vcg::GLW::DMPoints:
@@ -679,46 +677,50 @@ void DecorateRasterProjPlugin::decorateDoc( QAction           *act,
                     break;
                 }
                 default: notDrawn = true;
-            }
+            }*/
+			glEnable(GL_POLYGON_OFFSET_POINT);
+			glEnable(GL_POLYGON_OFFSET_LINE);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+            glPolygonOffset( -2.0f, 1.0f );
+            glEnable( GL_COLOR_MATERIAL );
+            glColor3ub( 255, 255, 255 );
 
-            if( !notDrawn )
+            glEnable( GL_PROGRAM_POINT_SIZE );
+            glw::BoundProgramHandle shader = m_Context.bindProgram( m_ShadowMapShader );
+            m_Context.bindTexture2D( m_ColorTexture, 0 );
+            m_Context.bindTexture2D( m_DepthTexture, 1 );
+            shader->setUniform( "u_ColorMap", 0 );
+            shader->setUniform( "u_DepthMap", 1 );
+            vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
+
+            shader->setUniform4x4( "u_ProjMat", tmp_shadowproj.V(), false );
+            vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
+            shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
+            vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
+            shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
+            shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
+            shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
+			shader->setUniform("u_IsLightActivated", par->getBool("MeshLab::Decoration::ProjRasterLighting"));
+            shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
+            for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
             {
-                glEnable( GL_BLEND );
-                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-                glPolygonOffset( -2.0f, 1.0f );
-                glEnable( GL_COLOR_MATERIAL );
-                glColor3ub( 255, 255, 255 );
-
-                glEnable( GL_PROGRAM_POINT_SIZE );
-                glw::BoundProgramHandle shader = m_Context.bindProgram( m_ShadowMapShader );
-                m_Context.bindTexture2D( m_ColorTexture, 0 );
-                m_Context.bindTexture2D( m_DepthTexture, 1 );
-                shader->setUniform( "u_ColorMap", 0 );
-                shader->setUniform( "u_DepthMap", 1 );
-                vcg::Matrix44f tmp_shadowproj = vcg::Matrix44f::Construct(m_ShadowProj);
-
-                shader->setUniform4x4( "u_ProjMat", tmp_shadowproj.V(), false );
-                vcg::Point3f tmp_viewpoint = vcg::Point3f::Construct(m_CurrentRaster->shot.GetViewPoint());
-                shader->setUniform3( "u_Viewpoint", tmp_viewpoint.V() );
-                vcg::Matrix44f lightToObj = (gla->trackball.InverseMatrix() * gla->trackball_light.Matrix() ).transpose();
-                shader->setUniform4x4( "u_LightToObj", lightToObj.V(), false );
-                shader->setUniform( "u_IsLightActivated", rm.lighting && par->getBool("MeshLab::Decoration::ProjRasterLighting") );
-                shader->setUniform( "u_AlphaValue", par->getFloat("MeshLab::Decoration::ProjRasterAlpha") );
-                shader->setUniform( "u_UseOriginalAlpha", par->getBool("MeshLab::Decoration::EnableAlpha") );
-                shader->setUniform( "u_ShowAlpha", par->getBool("MeshLab::Decoration::ShowAlpha") );
-                for( QMap<int,MeshDrawer>::iterator m=m_Scene.begin(); m!=m_Scene.end(); ++m )
-                {
-                    if( rm.drawMode == vcg::GLW::DMPoints )
-                        setPointParameters( m.value(), par );
-					vcg::Matrix44f tmpmat = vcg::Matrix44f::Construct(m->mm()->cm.Tr);
-                    shader->setUniform4x4( "u_ModelXf", tmpmat.transpose().V(), false );
-                    m->draw( m_Context );
-                }
-
-                m_Context.unbindProgram();
-                m_Context.unbindTexture2D( 0 );
-                m_Context.unbindTexture2D( 1 );
+				MLRenderingData dt;
+				ctx->getRenderInfoPerMeshView(m.key(), gla->context(), dt);
+				if (dt.isPrimitiveActive(MLRenderingData::PR_POINTS))
+                    setPointParameters( m.value(), par );
+				MLPerViewGLOptions opts;
+				dt.get(opts);
+				vcg::Matrix44f tmpmat = vcg::Matrix44f::Construct(m->mm()->cm.Tr);
+				shader->setUniform4x4( "u_ModelXf", tmpmat.transpose().V(), false );
+                m->draw(gla->context(),ctx);
             }
+
+            m_Context.unbindProgram();
+            m_Context.unbindTexture2D( 0 );
+            m_Context.unbindTexture2D( 1 );
+
 
             glPopAttrib();
             break;

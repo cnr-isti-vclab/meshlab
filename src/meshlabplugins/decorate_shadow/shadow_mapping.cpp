@@ -55,10 +55,10 @@ bool ShadowMapping::init()
         return false;
 
     return compileAndLink(
-            this->_shadowMappingProgram,
-            this->_shadowMappingVert,
-            this->_shadowMappingFrag,
-            PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/sm/object")));
+        this->_shadowMappingProgram,
+        this->_shadowMappingVert,
+        this->_shadowMappingFrag,
+        PluginManager::getBaseDirPath().append(QString("/shaders/decorate_shadow/sm/object")));
 }
 
 void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
@@ -76,31 +76,31 @@ void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
 
     glPushMatrix();
 
-        glLoadIdentity();
-        glOrtho(-(diag/2),
-                 diag/2,
-                 -(diag/2),
-                 diag/2,
-                 -(diag/2),
-                 diag/2);
+    glLoadIdentity();
+    glOrtho(-(diag/2),
+        diag/2,
+        -(diag/2),
+        diag/2,
+        -(diag/2),
+        diag/2);
 
     glMatrixMode(GL_MODELVIEW);
 
     glPushMatrix();
-        vcg::Point3f u, v;
-        //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
-        vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
-        glLoadIdentity();
-        gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
+    vcg::Point3f u, v;
+    //mi seleziona automaticamente un upvector che mi eviti casi degeneri...nel caso vada bene 010 sceglie quello
+    vcg::GetUV(light, u, v, vcg::Point3f(0,-1,0));
+    glLoadIdentity();
+    gluLookAt(0, 0, 0, light[0], light[1], light[2], v[0], v[1], v[2]);
 
-        //get the rotation matrix from the trackball
-        vcg::Matrix44f rotation;
-        vcg::Similarityf track = gla->trackball.track;
-        track.rot.ToMatrix(rotation);
-        glMultMatrixf(rotation.transpose().V());
+    //get the rotation matrix from the trackball
+    vcg::Matrix44f rotation;
+    vcg::Similarityf track = gla->trackball.track;
+    track.rot.ToMatrix(rotation);
+    glMultMatrixf(rotation.transpose().V());
 
-        //traslate the model in the center
-        glTranslatef(-center[0],-center[1],-center[2]);
+    //traslate the model in the center
+    glTranslatef(-center[0],-center[1],-center[2]);
 }
 
 
@@ -114,13 +114,19 @@ void ShadowMapping::renderingFromLightUnsetup(){
 void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
-    if (gla == NULL) return;
+
+    MLSceneGLSharedDataContext* ctx = NULL;
+    if ((gla == NULL) || (gla->mvc() == NULL)) 
+        return;
+    ctx = gla->mvc()->sharedDataContext();
+    if (ctx == NULL)
+        return;
 
     this->renderingFromLightSetup(md, gla);
     glMatrixMode(GL_PROJECTION);
-        glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
+    glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
     glMatrixMode(GL_MODELVIEW);
-        glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
+    glGetFloatv(GL_MODELVIEW_MATRIX, g_mModelView);
 
     /***********************************************************/
     //SHADOW MAP Generation
@@ -132,14 +138,21 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
     //binding the FBO
     this->bind();
+	MLRenderingData dt;
+	MLRenderingData::RendAtts atts;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+	dt.set(MLRenderingData::PR_SOLID, atts);
 
-    foreach(MeshModel *m, md.meshList)
-      if(m->visible)
-      {
-        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-      }
-    glDisable(GL_POLYGON_OFFSET_FILL);
-
+	foreach(MeshModel *m, md.meshList)
+	{
+		if ((m != NULL) && (m->visible))
+		{
+			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(), dt);
+		}
+	}
+	glDisable(GL_POLYGON_OFFSET_FILL);
     //unbinding the FBO
     this->unbind();
 
@@ -169,12 +182,13 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
     glUniform1i(loc, 0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    foreach(MeshModel *m, md.meshList)
-    if(m->visible)
-      {
-      m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-//        m->render(rm.drawMode, rm.colorMode, vcg::GLW::TMNone);
-      }
+	foreach(MeshModel *m, md.meshList)
+	{
+		if ((m != NULL) && (m->visible))
+		{
+			ctx->drawAllocatedAttributesSubset(m->id(), gla->context(),dt);
+		}
+	}
     glDisable(GL_BLEND);
     glDepthFunc((GLenum)depthFuncOld);
     glUseProgram(0);
@@ -182,28 +196,28 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
 bool ShadowMapping::setup()
 {
-        if (!GLEW_EXT_framebuffer_object) {
-                qWarning("FBO not supported!");
-                return false;
-        }
+    if (!GLEW_EXT_framebuffer_object) {
+        qWarning("FBO not supported!");
+        return false;
+    }
 
-        if (_initOk)
-                return true;
+    if (_initOk)
+        return true;
 
-        glGenFramebuffersEXT(1, &_fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    glGenFramebuffersEXT(1, &_fbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
 
-        this->genDepthMapTexture24(this->_shadowMap, true);
+    this->genDepthMapTexture24(this->_shadowMap, true);
 
-        //we don't need a color attachment
-        GLenum drawBuffers[] = {GL_NONE};
-        glDrawBuffersARB(1, drawBuffers);
+    //we don't need a color attachment
+    GLenum drawBuffers[] = {GL_NONE};
+    glDrawBuffersARB(1, drawBuffers);
 
-        glReadBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
 
-        //checks for fbo creation errors
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-        return _initOk;
+    //checks for fbo creation errors
+    int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    return _initOk;
 }

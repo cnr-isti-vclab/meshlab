@@ -28,6 +28,7 @@
 
 #include <QObject>
 #include <common/interfaces.h>
+#include <common/ml_shared_data_context.h>
 #include <wrap/glw/glw.h>
 
 
@@ -36,7 +37,7 @@
 class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
 {
     Q_OBJECT
-        MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
+    MESHLAB_PLUGIN_IID_EXPORTER(MESH_DECORATE_INTERFACE_IID)
     Q_INTERFACES( MeshDecorateInterface )
 
 
@@ -45,25 +46,23 @@ class DecorateRasterProjPlugin : public QObject, public MeshDecorateInterface
 
     class MeshDrawer
     {
-        glw::BufferHandle   m_VBOVertices;
-        glw::BufferHandle   m_VBOIndices;
         MeshModel           *m_Mesh;
 
     public:
         inline              MeshDrawer() : m_Mesh(NULL)                 {}
         inline              MeshDrawer( MeshModel *mm ) : m_Mesh(mm)    {}
 
-        void                update( glw::Context &context, bool useVBO );
-        void                drawShadow( glw::Context &context );
-        void                draw( glw::Context &context );
+        //void                update(MLSceneGLSharedDataContext* ctx);
+        void                drawShadow(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
+        void                draw(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
         inline MeshModel*   mm()                                        { return m_Mesh; }
     };
 
 
     // Class variables.
-    static bool             s_AreVBOSupported;
-
+    //static bool             s_AreVBOSupported;
+	
 
     // Member variables.
     glw::Context            m_Context;
@@ -94,7 +93,7 @@ public:
 private:
     void                    updateCurrentMesh( MeshDocument &m,
                                                RichParameterSet &par );
-    void                    updateCurrentRaster( MeshDocument &m );
+    void                    updateCurrentRaster( MeshDocument &m, QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
     void                    setPointParameters( MeshDrawer &md,
                                                 RichParameterSet *par );
@@ -102,7 +101,7 @@ private:
     void                    drawSceneShadow();
     void                    updateShadowProjectionMatrix();
     void                    updateColorTexture();
-    void                    updateDepthTexture();
+    void                    updateDepthTexture(QGLContext* glctx, MLSceneGLSharedDataContext* ctx);
 
     bool                    initShaders(std::string &logs);
 

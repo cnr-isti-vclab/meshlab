@@ -76,7 +76,13 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     GLfloat g_mModelView[16];
     GLfloat g_mProjection[16];
 
-    if (gla == NULL) return;
+    MLSceneGLSharedDataContext* ctx = NULL;
+    if ((gla == NULL) || (gla->mvc()  == NULL)) 
+            return;
+    ctx = gla->mvc()->sharedDataContext();
+    if (ctx == NULL)
+        return;
+
     this->renderingFromLightSetup(md, gla);
     glMatrixMode(GL_PROJECTION);
         glGetFloatv(GL_PROJECTION_MATRIX, g_mProjection);
@@ -93,10 +99,12 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     foreach(MeshModel *m, md.meshList)
-    if(m->visible)
-      {
-        m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-      }
+    {
+        if ((m != NULL) && (m->visible))
+        {
+            ctx->draw(m->id(),gla->context());
+        }
+    }
     glDisable(GL_POLYGON_OFFSET_FILL);
 
     this->renderingFromLightUnsetup();
@@ -173,10 +181,12 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     glPushAttrib(GL_COLOR_BUFFER_BIT);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_FALSE); // to avoid the fact that when saving a snapshot we get semitransparent shadowed areas.
     foreach(MeshModel *m, md.meshList)
-        if(m->visible)
-          {
-            m->render(vcg::GLW::DMFlat, vcg::GLW::CMNone,vcg::GLW::TMNone);
-          }
+    {
+        if ((m != NULL) && (m->visible))
+        {
+            ctx->draw(m->id(),gla->context());
+        }
+    }
     glPopAttrib();
     glUseProgram(0);
 
