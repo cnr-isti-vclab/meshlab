@@ -364,7 +364,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
             {
                 tri::UpdateSelection<CMeshO>::FaceClear(cm);
                 connectedCompVec[i].second->SetS();
-                tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm,true);
+                tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm/*,true*/);
                 tri::UpdateSelection<CMeshO>::VertexClear(cm);
                 tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
 
