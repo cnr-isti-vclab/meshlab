@@ -60,7 +60,9 @@ SUBDIRS       = common \
                 meshlabplugins/filter_zippering \			
 # Decorator Plugins
 				meshlabplugins/decorate_background \
-				meshlabplugins/decorate_base \					
+				meshlabplugins/decorate_base \			
+				meshlabplugins/decorate_shadow \
+				meshlabplugins/decorate_raster_proj \
 # Edit Plugins
                 meshlabplugins/edit_quality \
 				meshlabplugins/edit_select \
