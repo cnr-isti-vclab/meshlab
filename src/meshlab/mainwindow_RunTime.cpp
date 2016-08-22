@@ -340,6 +340,10 @@ void MainWindow::updateLayerDialog()
     {
         MLSceneGLSharedDataContext::PerMeshRenderingDataMap dtf;
         shared->getRenderInfoPerMeshView(GLA()->context(),dtf);
+		/*Add to the table the info for the per view global rendering of the Project*/
+		MLRenderingData projdt;
+		//GLA()->getPerDocGlobalRenderingData(projdt);
+		dtf[-1] = projdt;
         layerDialog->updateTable(dtf);
         layerDialog->updateLog(meshDoc()->Log);
         layerDialog->updateDecoratorParsView();
@@ -1951,27 +1955,21 @@ void MainWindow::applyRenderMode()
     // Make the call to the plugin core
     MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
     bool initsupport = false;
-    MultiViewer_Container* mw = this->currentViewContainer();
-    if ((iRenderTemp != NULL) && (mw != NULL))
+    //MultiViewer_Container* mw = this->currentViewContainer();
+    if (iRenderTemp != NULL)
     {
-        MLSceneGLSharedDataContext* shared = mw->sharedDataContext();
-        if (shared != NULL)
+        iRenderTemp->Init(action,*(meshDoc()),GLA());
+        initsupport = iRenderTemp->isSupported();
+        if (initsupport)
+            GLA()->setRenderer(iRenderTemp,action);
+        else
         {
-            MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
-            shared->getRenderInfoPerMeshView(GLA()->context(),dt);
-            iRenderTemp->Init(action,*(meshDoc()),dt,GLA());
-            initsupport = iRenderTemp->isSupported();
-            if (initsupport)
-                GLA()->setRenderer(iRenderTemp,action);
-            else
+            if (!initsupport)
             {
-                if (!initsupport)
-                {
-                    QString msg = "The selected shader is not supported by your graphic hardware!";
-                    GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
-                }
-                iRenderTemp->Finalize(action,meshDoc(),GLA());
+                QString msg = "The selected shader is not supported by your graphic hardware!";
+                GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
             }
+            iRenderTemp->Finalize(action,meshDoc(),GLA());
         }
     }
 
@@ -3323,28 +3321,44 @@ void MainWindow::meshRemoved(int mid)
 
 void MainWindow::getRenderingData( int mid,MLRenderingData& dt) const
 {
-    MultiViewer_Container* cont = currentViewContainer();
-    if (cont != NULL)
-    {
-        MLSceneGLSharedDataContext* share = cont->sharedDataContext();
-        if ((share != NULL) && (GLA() != NULL))
-            share->getRenderInfoPerMeshView(mid,GLA()->context(),dt);
-    }
+	if (mid == -1)
+	{
+		//if (GLA() != NULL)
+			//GLA()->getPerDocGlobalRenderingData(dt);
+	}
+	else
+	{
+		MultiViewer_Container* cont = currentViewContainer();
+		if (cont != NULL)
+		{
+			MLSceneGLSharedDataContext* share = cont->sharedDataContext();
+			if ((share != NULL) && (GLA() != NULL))
+				share->getRenderInfoPerMeshView(mid, GLA()->context(), dt);
+		}
+	}
 }
 
 void MainWindow::setRenderingData(int mid,const MLRenderingData& dt)
 {
-    MultiViewer_Container* cont = currentViewContainer();
-    if (cont != NULL)
-    {
-        MLSceneGLSharedDataContext* share = cont->sharedDataContext();
-        if ((share != NULL) && (GLA() != NULL))
-        {
-            share->setRenderingDataPerMeshView(mid,GLA()->context(),dt);
-            share->manageBuffers(mid);
-            //addRenderingSystemLogInfo(mid);
-        }
-    }
+	if (mid == -1)
+	{
+		/*if (GLA() != NULL)
+			GLA()->setPerDocGlobalRenderingData(dt);*/
+	}
+	else
+	{
+		MultiViewer_Container* cont = currentViewContainer();
+		if (cont != NULL)
+		{
+			MLSceneGLSharedDataContext* share = cont->sharedDataContext();
+			if ((share != NULL) && (GLA() != NULL))
+			{
+				share->setRenderingDataPerMeshView(mid, GLA()->context(), dt);
+				share->manageBuffers(mid);
+				//addRenderingSystemLogInfo(mid);
+			}
+		}
+	}
 }
 
 
@@ -3372,21 +3386,39 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
 
 void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
 {
-    MLRenderingData olddt;
-    getRenderingData(meshid,olddt);
-    MLRenderingData dt(olddt);
-    foreach(MLRenderingAction* act,acts)
-    {
-        if (act != NULL)
-            act->updateRenderingData(dt);
-    }
-    setRenderingData(meshid,dt);
-    MeshModel* mm = meshDoc()->getMesh(meshid);
-    if (mm != NULL) 
-    {
-        MLDefaultMeshDecorators dec(this);
-        dec.updateMeshDecorationData(*mm,olddt,dt);
-    }
+	if (meshDoc() == NULL)
+		return;
+
+	MLRenderingData olddt;
+	getRenderingData(meshid, olddt);
+	MLRenderingData dt(olddt);
+	foreach(MLRenderingAction* act, acts)
+	{
+		if (act != NULL)
+			act->updateRenderingData(dt);
+	}
+	setRenderingData(meshid, dt);
+
+	if (meshid == -1)
+	{
+		foreach(MeshModel* mm,meshDoc()->meshList)
+		{
+			if (mm != NULL)
+			{
+				MLDefaultMeshDecorators dec(this);
+				dec.updateMeshDecorationData(*mm, olddt, dt);
+			}
+		}
+	}
+	else
+	{
+		MeshModel* mm = meshDoc()->getMesh(meshid);
+		if (mm != NULL)
+		{
+			MLDefaultMeshDecorators dec(this);
+			dec.updateMeshDecorationData(*mm, olddt, dt);
+		}
+	}
     GLA()->update();
 }
 

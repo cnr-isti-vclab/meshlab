@@ -466,8 +466,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
                 shared->getRenderInfoPerMeshView(context(),dt);
         
-                iRenderer->Render(currentShader, *this->md(), dt, this);
-
+                iRenderer->Render(currentShader, *this->md(),this);
 
                 MLDefaultMeshDecorators defdec(mw());
                
@@ -1718,6 +1717,16 @@ void GLArea::addRasterSetVisibility(int rasterId, bool visibility)
 {
     rasterVisibilityMap.insert(rasterId,visibility);
 }
+
+//void GLArea::getPerDocGlobalRenderingData(MLRenderingData& dt) const
+//{
+//	dt = _perdocglobaldt;
+//}
+//
+//void GLArea::setPerDocGlobalRenderingData(const MLRenderingData& dt)
+//{
+//	_perdocglobaldt = dt;
+//}
 
 // --------------- Raster view -------------------------------------
 void GLArea::setIsRaster(bool viewMode){

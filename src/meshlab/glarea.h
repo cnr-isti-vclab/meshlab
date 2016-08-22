@@ -388,6 +388,9 @@ public:
     // Add an entry in the raster visibility map
     void addRasterSetVisibility(int rasterId, bool visibility);
 
+	//void getPerDocGlobalRenderingData(MLRenderingData& dt) const;
+	//void setPerDocGlobalRenderingData(const MLRenderingData& dt);
+
 public slots:
     void updateMeshSetVisibilities();
     void updateRasterSetVisibilities();
@@ -409,6 +412,7 @@ private:
     int  currSnapLayer;            // snapshot: total number of layers and current layer rendered
     void setCursorTrack(vcg::TrackMode *tm);
 
+	/*MLRenderingData _perdocglobaldt;*/
     //-----------Raster support----------------------------
 private:
     bool _isRaster; // true if the viewer is a RasterViewer, false if is a MeshViewer; default value is false.
