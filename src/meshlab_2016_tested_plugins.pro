@@ -66,6 +66,8 @@ SUBDIRS       = common \
 # Edit Plugins
                 meshlabplugins/edit_quality \
 				meshlabplugins/edit_select \
+# Render Plugins
+				meshlabplugins/render_radiance_scaling \
 # Sample Plugins
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \
