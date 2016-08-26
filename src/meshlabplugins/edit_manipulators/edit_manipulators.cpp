@@ -333,7 +333,7 @@ void EditManipulatorsPlugin::DrawMeshBox(MeshModel &model)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(1.0);
-    glColor(Color4b::Cyan);
+    glColor(vcg::Color4b(Color4b::Cyan));
 
     glPushMatrix();
     glMultMatrix(original_Transform);
