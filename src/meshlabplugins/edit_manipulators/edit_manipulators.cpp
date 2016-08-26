@@ -1413,7 +1413,7 @@ bool EditManipulatorsPlugin::MyPick(const int &x, const int &y, Point3m &pp, flo
     return true;
 }
 
-bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
+bool EditManipulatorsPlugin::StartEdit(MeshModel & model, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
   gla->setCursor(QCursor(QPixmap(":/images/cur_manipulators.png"),15,15));	
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
@@ -1439,7 +1439,7 @@ bool EditManipulatorsPlugin::StartEdit(MeshModel &model, GLArea *gla )
 	return true;
 }
 
-void EditManipulatorsPlugin::EndEdit(MeshModel &model, GLArea *gla)
+void EditManipulatorsPlugin::EndEdit(MeshModel & model, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
   cancelMotion(model, gla);     // something interrupted the filter... canceling 
 }
