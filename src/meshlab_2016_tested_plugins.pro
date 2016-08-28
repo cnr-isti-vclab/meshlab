@@ -67,6 +67,7 @@ SUBDIRS       = common \
                 meshlabplugins/edit_quality \
 				meshlabplugins/edit_select \
 				meshlabplugins/edit_manipulators \
+				meshlabplugins/edit_arc3D \
 # Render Plugins
 				meshlabplugins/render_radiance_scaling \
 # Sample Plugins
