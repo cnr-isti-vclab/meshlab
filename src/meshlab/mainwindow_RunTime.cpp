@@ -516,6 +516,7 @@ void MainWindow::setSplit(QAction *qa)
     if(mvc)
     {
         GLArea *glwClone=new GLArea(this, mvc, &currentGlobalParams);
+		//connect(glwClone, SIGNAL(insertRenderingDataForNewlyGeneratedMesh(int)), this, SLOT(addRenderingDataIfNewlyGeneratedMesh(int)));
         if(qa->text() == tr("&Horizontally"))
             mvc->addView(glwClone,Qt::Vertical);
         else if(qa->text() == tr("&Vertically"))
@@ -769,13 +770,29 @@ void MainWindow::dropEvent ( QDropEvent * event )
 
 void MainWindow::endEdit()
 {
+	MultiViewer_Container* mvc = currentViewContainer();
+	if ((meshDoc() == NULL) || (GLA() == NULL) || (mvc == NULL))
+		return;
+
+
+	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	{
+		MeshModel* mm = meshDoc()->meshList[ii];
+		if (mm != NULL)
+			addRenderingDataIfNewlyGeneratedMesh(mm->id());
+	}
+	meshDoc()->meshDocStateData().clear();
+
     GLA()->endEdit();
+	updateLayerDialog();
 }
+
 void MainWindow::applyLastFilter()
 {
     if(GLA()==0) return;
     GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
 }
+
 void MainWindow::showFilterScript()
 {
     if (meshDoc()->filterHistory != NULL)
@@ -1050,7 +1067,7 @@ void MainWindow::startFilter()
 
     // In order to avoid that a filter changes something assumed by the current editing tool,
     // before actually starting the filter we close the current editing tool (if any).
-    if(GLA()) GLA()->endEdit();
+	endEdit();
     updateMenus();
 
     QStringList missingPreconditions;
@@ -1202,7 +1219,7 @@ void MainWindow::startFilter()
 void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated)
 {
     MultiViewer_Container* mvc = currentViewContainer();
-    if (mvc != NULL)
+    if ((meshDoc() != NULL) && (mvc != NULL))
     {
         if (GLA() == NULL)
             return;
@@ -1231,8 +1248,8 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     postcondmask = postcondmask | MeshModel::MM_VERTQUALITY;
 
                 MLRenderingData dttoberendered;
-                QMap<int,MeshModelTmpData>::Iterator existit = existingmeshesbeforefilterexecution.find(mm->id());
-                if (existit != existingmeshesbeforefilterexecution.end())
+                QMap<int,MeshModelStateData>::Iterator existit = meshDoc()->meshDocStateData().find(mm->id());
+                if (existit != meshDoc()->meshDocStateData().end())
                 {
 
                     shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),dttoberendered);
@@ -1402,12 +1419,8 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     bool newmeshcreated = false;
     try
     {
-        existingmeshesbeforefilterexecution.clear();
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
-        {
-            int dt = mm->dataMask();
-            existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN(),(size_t) mm->cm.EN()));
-        }
+        meshDoc()->meshDocStateData().clear();
+		meshDoc()->meshDocStateData().create(*meshDoc());
         ret=iFilter->applyFilter(action, *(meshDoc()), mergedenvironment, QCallBack);
         if (shar != NULL)
         {
@@ -1507,7 +1520,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         //MLSceneGLSharedDataContext* sharedcont = GLA()->getSceneGLSharedContext();
         int postCondMask = iFilter->postCondition(action);
         updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
-        existingmeshesbeforefilterexecution.clear();
+        meshDoc()->meshDocStateData().clear();
     }
     catch (std::bad_alloc& bdall)
     {
@@ -1716,11 +1729,11 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
                 funcall = funcall + ",";
         }
         funcall = funcall + ");";
-        if (meshDoc() != NULL)
-            meshDoc()->xmlhistory << funcall;
-        existingmeshesbeforefilterexecution.clear();
-        for(MeshModel* mm = meshDoc()->nextMesh();mm != NULL;mm=meshDoc()->nextMesh(mm))
-            existingmeshesbeforefilterexecution.insert(mm->id(),MeshModelTmpData(mm->dataMask(),(size_t) mm->cm.VN(),(size_t) mm->cm.FN(),(size_t) mm->cm.EN()));
+        
+        meshDoc()->xmlhistory << funcall;
+		meshDoc()->meshDocStateData().clear();
+		meshDoc()->meshDocStateData().create(*meshDoc());
+
         if (filtercpp)
         {
             enableDocumentSensibleActionsContainer(false);
@@ -1791,7 +1804,7 @@ void MainWindow::postFilterExecution()
         if(mvc)
             mvc->updateAllViewer();
     }
-    existingmeshesbeforefilterexecution.clear();
+    meshDoc()->meshDocStateData().clear();
     meshDoc()->setBusy(false);
 
 
@@ -1924,7 +1937,7 @@ void MainWindow::applyEditMode()
                 suspendEditMode();
                 return;
             }
-            GLA()->endEdit();
+			endEdit();
             updateMenus();
             return;
         }
@@ -1939,6 +1952,7 @@ void MainWindow::applyEditMode()
         MeshEditInterface *iEdit = iEditFactory->getMeshEditInterface(action);
         GLA()->addMeshEditor(action, iEdit);
     }
+	meshDoc()->meshDocStateData().create(*meshDoc());
     GLA()->setCurrentEditAction(action);
     updateMenus();
     GLA()->update();
@@ -2326,6 +2340,7 @@ void MainWindow::newProject(const QString& projName)
     MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mdiarea);
     connect(&mvcont->meshDoc,SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
     connect(&mvcont->meshDoc,SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
+	connect(&mvcont->meshDoc, SIGNAL(documentUpdated()), this, SLOT(documentUpdateRequested()));
     mdiarea->addSubWindow(mvcont);
     connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
     connect(mvcont,SIGNAL(updateDocumentViewer()),this,SLOT(updateLayerDialog()));
@@ -2333,6 +2348,7 @@ void MainWindow::newProject(const QString& projName)
     if (!filterMenu->actions().isEmpty())
         updateSubFiltersMenu(true,false);
     GLArea *gla=new GLArea(this, mvcont, &currentGlobalParams);
+	//connect(gla, SIGNAL(insertRenderingDataForNewlyGeneratedMesh(int)), this, SLOT(addRenderingDataIfNewlyGeneratedMesh(int)));
     mvcont->addView(gla, Qt::Horizontal);
     
     if (projName.isEmpty())
@@ -2348,6 +2364,26 @@ void MainWindow::newProject(const QString& projName)
     updateLayerDialog();
     mvcont->showMaximized();
     connect(mvcont->sharedDataContext(),SIGNAL(currentAllocatedGPUMem(int,int)),this,SLOT(updateGPUMemBar(int,int)));
+}
+
+void MainWindow::documentUpdateRequested()
+{
+	if (meshDoc() == NULL)
+		return;
+	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	{
+		MeshModel* mm = meshDoc()->meshList[ii];
+		if (mm != NULL)
+		{
+			addRenderingDataIfNewlyGeneratedMesh(mm->id());
+			updateLayerDialog();
+			if (currentViewContainer() != NULL)
+			{
+				currentViewContainer()->resetAllTrackBall();
+				currentViewContainer()->updateAllViewer();
+			}
+		}
+	}
 }
 
 void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
@@ -3301,10 +3337,12 @@ void MainWindow::meshAdded(int mid)
                     }
                     shared->manageBuffers(mid);
                 }
+				layerDialog->setVisible(meshDoc()->meshList.size() > 0);
+				updateLayerDialog();
             }
         }
+
     }
-    updateLayerDialog();
 }
 
 void MainWindow::meshRemoved(int mid)
@@ -3439,6 +3477,31 @@ void MainWindow::updateRenderingDataAccordingToAction( int meshid,MLRenderingAct
         dec.updateMeshDecorationData(*mm,olddt,dt);
     }
     GLA()->update();
+}
+
+bool MainWindow::addRenderingDataIfNewlyGeneratedMesh(int meshid)
+{
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc == NULL)
+		return false;
+	MLSceneGLSharedDataContext* shared = mvc->sharedDataContext();
+	if (shared != NULL)
+	{
+		MeshModel* mm = meshDoc()->getMesh(meshid);
+		if ((meshDoc()->meshDocStateData().find(meshid) == meshDoc()->meshDocStateData().end()) && (mm != NULL))
+		{
+			MLRenderingData dttoberendered;
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, dttoberendered);
+			foreach(GLArea* gla, mvc->viewerList)
+			{
+				if (gla != NULL)
+					shared->setRenderingDataPerMeshView(meshid, gla->context(), dttoberendered);
+			}
+			shared->manageBuffers(meshid);
+			return true;
+		}
+	}
+	return false;
 }
 
 unsigned int MainWindow::viewsRequiringRenderingActions(int meshid, MLRenderingAction* act)

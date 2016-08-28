@@ -132,7 +132,7 @@ MLRenderingSideToolbar::MLRenderingSideToolbar(QWidget* parent /*= NULL*/ )
 }
 
 MLRenderingSideToolbar::MLRenderingSideToolbar(int meshid,QWidget* parent /*= NULL*/ )
-        :MLRenderingToolbar(meshid,parent)
+    :MLRenderingToolbar(meshid,parent)
 {
     initGui();
 }
@@ -166,6 +166,57 @@ void MLRenderingSideToolbar::toggle( QAction* clickedact )
         }
     }
     MLRenderingToolbar::toggle(clickedact);
+}
+
+MLRenderingThreeStateSideToolbar::MLRenderingThreeStateSideToolbar(QWidget* parent /*= NULL*/)
+	:MLRenderingToolbar(parent)
+{
+	initGui();
+}
+
+MLRenderingThreeStateSideToolbar::MLRenderingThreeStateSideToolbar(int meshid, QWidget* parent /*= NULL*/)
+	: MLRenderingToolbar(meshid, parent)
+{
+	initGui();
+}
+
+void MLRenderingThreeStateSideToolbar::initGui()
+{
+	MLRenderingThreeStateButton* bboxbut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingBBoxAction* bboxact =  new MLRenderingBBoxAction(_meshid, this);
+	_acts.push_back(bboxact);
+	bboxbut->setRenderingAction(bboxact);
+	addWidget(bboxbut);
+
+	MLRenderingThreeStateButton* pointbut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(_meshid, this);
+	_acts.push_back(pointact);
+	pointbut->setRenderingAction(pointact);
+	addWidget(pointbut);
+
+	MLRenderingThreeStateButton* wirebut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingWireAction* wireact = new MLRenderingWireAction(_meshid, this);
+	_acts.push_back(wireact);
+	wirebut->setRenderingAction(wireact);
+	addWidget(wirebut);
+
+	MLRenderingThreeStateButton* solidbut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingSolidAction* solidact =  new MLRenderingSolidAction(_meshid, this);
+	_acts.push_back(solidact);
+	solidbut->setRenderingAction(solidact);
+	addWidget(solidbut);
+
+	MLRenderingThreeStateButton* selbut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingSelectionAction* selact = new MLRenderingSelectionAction(_meshid, this);
+	_acts.push_back(selact);
+	selbut->setRenderingAction(selact);
+	addWidget(selbut);
+
+	MLRenderingThreeStateButton* edgebut = new MLRenderingThreeStateButton(_meshid, this);
+	MLRenderingEdgeDecoratorAction* edgeact = new MLRenderingEdgeDecoratorAction(_meshid, this);
+	_acts.push_back(edgeact);
+	edgebut->setRenderingAction(edgeact);
+	addWidget(edgebut);
 }
 
 MLRenderingParametersFrame::MLRenderingParametersFrame( int meshid,QWidget* parent )
@@ -1083,6 +1134,47 @@ void MLRenderingOnOffToolbar::updateVisibility( MeshModel* mm )
     }
 }
 
+MLRenderingThreeStateButton::MLRenderingThreeStateButton(int meshid, QWidget* parent /*= NULL*/)
+	:QWidget(parent),_meshid(meshid)
+{
+	_onofftool = new MLRenderingOnOffToolbar(_meshid, parent);
+	initGui();
+}
+
+MLRenderingThreeStateButton::~MLRenderingThreeStateButton()
+{
+}
+
+void MLRenderingThreeStateButton::setRenderingAction(MLRenderingAction* act)
+{
+	if (act == NULL)
+		return;
+	_onofftool->setRenderingAction(act);
+	_onofftool->setMaximumSize(QSize(40, 15));
+	QFont ff;
+	ff.setPointSize(4);
+	_onofftool->setFont(ff);
+	if (_layout != NULL)
+	{
+		QLabel* iconlabel = new QLabel();
+		iconlabel->setPixmap(act->icon().pixmap(QSize(12, 12)));
+		_layout->addWidget(iconlabel, 0, 0,1,1,Qt::AlignCenter);
+	}
+	setMaximumSize(QSize(55, 50));
+}
+
+void MLRenderingThreeStateButton::initGui()
+{
+	_layout = new QGridLayout();
+	if (_onofftool != NULL)
+		_layout->addWidget(_onofftool, 1, 0, 1, 1);
+	setLayout(_layout);
+	//connect(this, SIGNAL(actionTriggered(QAction*)), _onofftool, SLOT(toggle(QAction*)));
+}
+
+
+
+
 MLRenderingFloatSlider::MLRenderingFloatSlider( int meshid,QWidget *p )
     :MLFloatSlider(p),_meshid(meshid),_act(NULL)
 {
@@ -1136,4 +1228,3 @@ void MLRenderingFloatSlider::getRenderingDataAccordingToGUI( MLRenderingData& dt
     if (_act != NULL)
         _act->updateRenderingData(dt);
 }
-

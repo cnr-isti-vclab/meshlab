@@ -51,7 +51,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-:mwsettings(),xmlfiltertimer(),wama(),gpumeminfo(NULL),existingmeshesbeforefilterexecution()
+:mwsettings(),xmlfiltertimer(),wama(),gpumeminfo(NULL)
 {
     //xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
     //Subsequently restart function will be invoked.

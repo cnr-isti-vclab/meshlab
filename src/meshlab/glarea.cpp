@@ -1036,6 +1036,9 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 
     lastModelEdited = this->md()->mm();
 
+	_oldvalues.clear();
+	parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(context(), _oldvalues);
+
 	MLRenderingData dt;
 	if (iEdit->isSingleMeshEdit())
 	{
@@ -1044,6 +1047,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 			parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(md()->mm()->id(), context(), dt);
 			iEdit->suggestedRenderingData(*(md()->mm()), dt);
 			parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(md()->mm()->id(), context(), dt);
+			parentmultiview->sharedDataContext()->manageBuffers(md()->mm()->id());
 		}
 	}
 	else
@@ -1055,6 +1059,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 				parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(mm->id(), context(), dt);
 				iEdit->suggestedRenderingData(*(mm), dt);
 				parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(mm->id(), context(), dt);
+				parentmultiview->sharedDataContext()->manageBuffers(mm->id());
 			}
 		}
 	}
@@ -1071,6 +1076,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 		if(mm()!=NULL)
             mm()->meshModified() = true;
         else assert(!iEdit->isSingleMeshEdit());
+		update();
     }
 }
 
@@ -1079,7 +1085,11 @@ bool GLArea::readyToClose()
 {
 	makeCurrent();
     // Now do the actual closing of the glArea
-    if(getCurrentEditAction()) endEdit();
+	if (getCurrentEditAction())
+	{
+		endEdit();
+		md()->meshDocStateData().clear();
+	}
     if (iRenderer)
         iRenderer->Finalize(currentShader, this->md(), this);
 

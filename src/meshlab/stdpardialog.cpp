@@ -282,7 +282,7 @@ static void updateRenderingData(MainWindow* curmwi,MeshModel* curmodel)
         MultiViewer_Container* mvcont = curmwi->currentViewContainer();
         if (mvcont != NULL)
         {
-            MLSceneGLSharedDataContext* shar = curmwi->currentViewContainer()->sharedDataContext();
+            MLSceneGLSharedDataContext* shar = mvcont->sharedDataContext();
             if (shar != NULL)
             {
                 shar->meshAttributesUpdated(curmodel->id(),true,MLRenderingData::RendAtts(true));

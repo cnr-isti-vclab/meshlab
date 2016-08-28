@@ -154,7 +154,7 @@ private:
     void updateProjectName(const QString& name);
 
     QTreeWidgetItem* _docitem;
-    MLRenderingSideToolbar* _globaldoctool;
+	MLRenderingSideToolbar* _globaldoctool;
     int _previd;
 
     MLRenderingParametersTab* tabw;

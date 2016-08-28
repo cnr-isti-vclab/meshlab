@@ -123,9 +123,10 @@ public slots:
     bool appendProject(QString fileName=QString());
     void updateCustomSettings();
 	void updateLayerDialog();
+	bool addRenderingDataIfNewlyGeneratedMesh(int meshid);
 
 private slots:
-
+	void documentUpdateRequested();
     bool importMesh(QString fileName=QString());
     void endEdit();
     void updateDocumentScriptBindings();
@@ -150,6 +151,7 @@ public:
 	unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
 
     void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
+
 private slots:
     //////////// Slot Menu File //////////////////////
     void reload();
@@ -314,19 +316,19 @@ public:
     }
 
     MultiViewer_Container* currentViewContainer() const {
-        MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+        MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
         if(mvc) return mvc;
         if(mvc==0 && mdiarea->currentSubWindow()!=0 ){
-            mvc = qobject_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
+            mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
             if(mvc) return mvc;
         }
         QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
         foreach(QMdiSubWindow *subwinPtr,subwinList)
         {
-            MultiViewer_Container *mvc = qobject_cast<MultiViewer_Container *>(subwinPtr);
+            MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr);
             if(mvc) return mvc;
             if(mvc==0 && subwinPtr!=0){
-                mvc = qobject_cast<MultiViewer_Container *>(subwinPtr->widget());
+                mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr->widget());
                 if(mvc) return mvc;
             }
         }
@@ -494,18 +496,6 @@ private:
     QAction *onscreenHelpAct;
     QAction *checkUpdatesAct;
     ////////////////////////////////////////////////////
-    struct MeshModelTmpData
-    {
-        int _mask;
-        size_t _nvert;
-        size_t _nface;
-        size_t _nedge;
-
-        MeshModelTmpData(int mask,size_t nvert,size_t nface,size_t nedge)
-            :_mask(mask),_nvert(nvert),_nface(nface),_nedge(nedge)
-        {}
-    };
-    QMap<int,MeshModelTmpData> existingmeshesbeforefilterexecution;
     static QString getDecoratedFileName(const QString& name);
 };
 

@@ -572,7 +572,7 @@ public:
 	}
 	// Called when the user press the second time the button
 	virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
-
+	virtual void EndEdit(MeshDocument &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {}
 
 	// There are two classes of editing tools, the one that works on a single layer at a time
 	// and the ones that works on all layers and have to manage in a correct way the action of changing the current layer.

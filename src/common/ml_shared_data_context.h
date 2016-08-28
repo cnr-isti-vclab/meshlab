@@ -251,10 +251,11 @@ public:
     void getRenderInfoPerMeshView(int mmid,QGLContext* ctx,MLRenderingData& dt);
     void meshInserted(int mmid);
     void meshRemoved(int mmid);
-    void manageBuffers(int mmid);
+    bool manageBuffers(int mmid);
     void setDebugMode(int mmid,bool activatedebugmodality);
     void getLog(int mmid,MLRenderingData::DebugInfo& debug);
     bool isBORenderingAvailable(int mmid);
+
 
     /*functions intended for the plugins (they emit different signals according if the calling thread is different from the one where the MLSceneGLSharedDataContext object lives)*/
     void requestInitPerMeshView(QThread* callingthread,int meshid,QGLContext* cont,const MLRenderingData& dt);
@@ -265,6 +266,7 @@ public:
 public slots:
     void meshDeallocated(int mmid);
     void setRenderingDataPerMeshView(int mmid,QGLContext* viewerid,const MLRenderingData& perviewdata);
+	void setRenderingDataPerAllMeshViews(int mmid, const MLRenderingData& perviewdata);
     void setGLOptions(int mmid,QGLContext* viewid,const MLPerViewGLOptions& opts);
 
     void addView(QGLContext* viewerid);

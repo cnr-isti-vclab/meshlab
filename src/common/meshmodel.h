@@ -431,6 +431,36 @@ public:
 //class FilterScript;
 
 
+struct MeshModelStateData
+{
+	int _mask;
+	size_t _nvert;
+	size_t _nface;
+	size_t _nedge;
+
+	MeshModelStateData(int mask, size_t nvert, size_t nface, size_t nedge)
+		:_mask(mask), _nvert(nvert), _nface(nface), _nedge(nedge)
+	{}
+};
+
+class MeshDocumentStateData
+{
+public:
+	MeshDocumentStateData();
+	~MeshDocumentStateData();
+
+	void create(MeshDocument& md);
+	QMap<int, MeshModelStateData>::iterator insert(const int key, const MeshModelStateData & value);
+	QMap<int, MeshModelStateData>::iterator find(const int key);
+	QMap<int, MeshModelStateData>::iterator begin();
+	QMap<int, MeshModelStateData>::iterator end();
+	void clear();
+
+private:
+	mutable QReadWriteLock _lock;
+	QMap<int, MeshModelStateData> _existingmeshesbeforeoperation;
+};
+
 class MeshDocument : public QObject
 {
     Q_OBJECT
@@ -537,8 +567,11 @@ private:
 
     //it is the label of the document. it should only be something like Project_n (a temporary name for a new empty document) or the fullPathFilename.
     QString documentLabel;
+
+	MeshDocumentStateData mdstate;
 public:
 
+	inline MeshDocumentStateData& meshDocStateData() { return mdstate; }
     void setDocLabel(const QString& docLb) {documentLabel = docLb;}
     QString docLabel() const {return documentLabel;}
     QString pathName() const {QFileInfo fi(fullPathFilename); return fi.absolutePath();}
@@ -603,7 +636,7 @@ public:
 private:
     MeshModel *currentMesh;
     //the current raster model
-    RasterModel* currentRaster;
+	RasterModel* currentRaster;
 
 signals:
     ///whenever the current mesh is changed (e.g. the user click on a different mesh)
@@ -626,7 +659,6 @@ signals:
     void documentUpdated();
 
 };// end class MeshDocument
-
 
 /*
 A class designed to save partial aspects of the state of a mesh, such as vertex colors, current selections, vertex positions
@@ -657,6 +689,7 @@ public:
     bool isValid(MeshModel *m);
     int maskChangedAtts() const {return changeMask;}
 };
+
 
 
 #endif

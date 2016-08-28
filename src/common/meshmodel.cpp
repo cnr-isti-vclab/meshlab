@@ -179,12 +179,12 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
 
     MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
     meshList.push_back(newMesh);
-    emit meshSetChanged();
-	emit meshAdded(newMesh->id());
     
 	if(setAsCurrent)
         this->setCurrentMesh(newMesh->id());
 
+	emit meshSetChanged();
+	emit meshAdded(newMesh->id());
     return newMesh;
 }
 
@@ -755,37 +755,55 @@ int MeshModel::dataMask() const
     return currentDataMask;
 }
 
-//RenderMode RenderMode::computeARenderModeSetCompatibleWithMesh(const CMeshO& mesh,const RenderMode& rm)
-//{
-//    RenderMode result(rm);
-//    if (mesh.VN() == 0)
-//    {
-//        result.atts.reset();
-//        return rm;
-//    }
-//    bool validfaces = (mesh.FN() > 0);
-//
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= vcg::tri::HasPerVertexNormal(mesh);
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= vcg::tri::HasPerFaceNormal(mesh) && validfaces;
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &=  vcg::tri::HasPerVertexColor(mesh);
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &=  vcg::tri::HasPerFaceColor(mesh) && validfaces;
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = result.atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR];
-//
-//    //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-//    //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-//    //The enum-value depends from the enabled attributes of input mesh.
-//    bool wedgetexture = vcg::tri::HasPerWedgeTexCoord(mesh) && validfaces;
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= (vcg::tri::HasPerVertexTexCoord(mesh) && (!wedgetexture));
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= wedgetexture;
-//    return result;
-//}
+MeshDocumentStateData::MeshDocumentStateData()
+	:_existingmeshesbeforeoperation(),_lock(QReadWriteLock::Recursive)
+{
 
-//RenderMode RenderMode::defaultRenderingAtts()
-//{
-//    RenderMode result;
-//    result.pmmask = (unsigned int) MLRenderingData::PR_SOLID;
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-//    result.atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-//    return result;
-//}
+}
+
+MeshDocumentStateData::~MeshDocumentStateData()
+{
+	QWriteLocker locker(&_lock);
+	_existingmeshesbeforeoperation.clear();
+}
+
+void MeshDocumentStateData::create(MeshDocument& md)
+{
+	QWriteLocker locker(&_lock);
+	for (int ii = 0; ii < md.meshList.size(); ++ii)
+	{
+		MeshModel* mm = md.meshList[ii];
+		if (mm != NULL)
+			insert(mm->id(), MeshModelStateData(mm->dataMask(), mm->cm.VN(), mm->cm.FN(), mm->cm.EN()));
+	}
+}
+
+QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::insert(const int key, const MeshModelStateData & value)
+{
+	QWriteLocker locker(&_lock);
+	return _existingmeshesbeforeoperation.insert(key,value);
+}
+
+QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::find(const int key)
+{
+	QReadLocker locker(&_lock);
+	return _existingmeshesbeforeoperation.find(key);
+}
+
+QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::begin()
+{
+	QReadLocker locker(&_lock);
+	return _existingmeshesbeforeoperation.begin();
+}
+
+QMap<int, MeshModelStateData>::iterator MeshDocumentStateData::end()
+{
+	QReadLocker locker(&_lock);
+	return _existingmeshesbeforeoperation.end();
+}
+
+void MeshDocumentStateData::clear()
+{
+	QWriteLocker locker(&_lock);
+	_existingmeshesbeforeoperation.clear();
+}

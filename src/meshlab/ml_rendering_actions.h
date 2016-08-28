@@ -39,8 +39,11 @@ public:
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
     virtual bool isCheckableConditionValid(MeshModel*) const {return true;}
-    int meshId() const;
+	
+	int meshId() const;
     void setMeshId(int meshid);
+	bool isSameType(const MLRenderingAction& act) const;
+
 
 protected:
     bool isRenderingDataEnabled(MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,const MLRenderingData& rd) const;
@@ -54,7 +57,7 @@ public:
     MLRenderingBBoxAction(int meshid,QObject* parent);
 
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
-    bool isOnOffOption(MLRenderingAction* onact = 0,MLRenderingAction* offact = 0);
+    //bool isOnOffOption(MLRenderingAction* onact = 0,MLRenderingAction* offact = 0);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };

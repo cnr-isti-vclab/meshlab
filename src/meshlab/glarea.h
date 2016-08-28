@@ -37,6 +37,7 @@
 #include <QTime>
 
 #include <common/interfaces.h>
+#include <common/ml_shared_data_context.h>
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
@@ -64,6 +65,7 @@ public:
 private:
     int id;  //the very important unique id of each subwindow.
     MultiViewer_Container* parentmultiview;
+	MLSceneGLSharedDataContext::PerMeshRenderingDataMap  _oldvalues;
 
 public:
     int getId() {return id;}
@@ -208,12 +210,31 @@ public slots:
     void setTextureMode(RenderMode& rm,vcg::GLW::TextureMode mode);*/
     void updateCustomSettingValues(RichParameterSet& rps);
 
-    void endEdit(){
+    void endEdit()
+	{
         if(iEdit && currentEditor)
         {
-            if (mm() != NULL)
-                iEdit->EndEdit(*mm(),this,parentmultiview->sharedDataContext());
+			if (md() != NULL)
+				iEdit->EndEdit(*md(), this, parentmultiview->sharedDataContext());
+
+			if (mm() != NULL)
+				iEdit->EndEdit(*mm(), this, parentmultiview->sharedDataContext());
         }
+		
+		MLSceneGLSharedDataContext* shared;
+		if ((parentmultiview != NULL) && (parentmultiview->sharedDataContext() != NULL))
+			shared = parentmultiview->sharedDataContext();
+
+		if (shared != NULL)
+		{
+			for (MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = _oldvalues.begin(); it != _oldvalues.end(); ++it)
+			{
+				shared->setRenderingDataPerMeshView(it.key(), context(), it.value());
+				shared->manageBuffers(it.key());
+			}
+		}
+		_oldvalues.clear();
+
         iEdit= 0;
         currentEditor=0;
         setCursorTrack(0);
@@ -223,7 +244,8 @@ public slots:
 
     void suspendEditToggle()
     {
-        if(currentEditor==0) return;
+        if(currentEditor==0) 
+			return;
         static QCursor qc;
         if(suspendedEditor) {
             suspendedEditor=false;
@@ -238,7 +260,7 @@ public slots:
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
     void glareaClosed();					//someone has closed the glarea
-
+	void insertRenderingDataForNewlyGeneratedMesh(int);
     void currentViewerChanged(int currentId);
 
 public slots:
@@ -273,7 +295,6 @@ public:
     bool showInterruptButton() const;
     void showInterruptButton(const bool& show);
 
-
     // the following pairs of slot/signal implements a very simple message passing mechanism.
     // a widget that has a pointer to the glarea call the sendViewDir() slot and
     // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
@@ -288,6 +309,7 @@ signals :
     void transmitShot(QString name, Shotm);
     void transmitMatrix(QString name, Matrix44m);
     void updateLayerTable();
+
 
 public slots:
     void sendViewPos(QString name);

@@ -66,6 +66,16 @@ void MLSceneGLSharedDataContext::setRenderingDataPerMeshView( int mmid,QGLContex
         man->setPerViewInfo(viewerid,perviewdata);
 }
 
+void MLSceneGLSharedDataContext::setRenderingDataPerAllMeshViews(int mmid, const MLRenderingData& perviewdata)
+{
+	MeshModel* mm = _md.getMesh(mmid);
+	if (mm == NULL)
+		return;
+	MLSceneGLSharedDataContext::PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+	if (man != NULL)
+		man->setPerAllViewsInfo(perviewdata);
+}
+
 //void MLSceneGLSharedDataContext::setRequestedAttributesPerMeshViews( int mmid,const QList<QGLContext*>& viewerid,const MLRenderingData& perviewdata )
 //{
 //    MeshModel* mm = _md.getMesh(mmid);
@@ -307,19 +317,23 @@ void MLSceneGLSharedDataContext::getRenderInfoPerMeshView( QGLContext* ctx,PerMe
     }
 }
 
-void MLSceneGLSharedDataContext::manageBuffers( int mmid )
+bool MLSceneGLSharedDataContext::manageBuffers( int mmid )
 {
-    MeshModel* mm = _md.getMesh(mmid);
-    if (mm == NULL)
-        return;
+	bool didsomething = false;
+	MeshModel* mm = _md.getMesh(mmid);
+  
+	if (mm == NULL)
+        return didsomething;
 
     PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(mmid);
+	
     if (man != NULL)
     {
         QGLContext* ctx = makeCurrentGLContext();
         man->manageBuffers();
         doneCurrentGLContext(ctx);
     }
+	return didsomething;
 }
 
 void MLSceneGLSharedDataContext::setDebugMode(int mmid,bool activatedebugmodality )

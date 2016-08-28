@@ -55,6 +55,11 @@ void MLRenderingAction::setMeshId(int meshid)
     setData(QVariant(meshid));
 }
 
+bool MLRenderingAction::isSameType(const MLRenderingAction& act) const
+{
+	return (metaObject()->className() == act.metaObject()->className());
+}
+
 bool MLRenderingAction::isRenderingDataEnabled( MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,const MLRenderingData& rd ) const
 {
     MLRenderingData::RendAtts atts;

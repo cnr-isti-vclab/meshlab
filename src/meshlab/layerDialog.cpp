@@ -52,7 +52,7 @@ LayerDialog::LayerDialog(QWidget *parent )
     /*Horrible trick*/
     _docitem = new QTreeWidgetItem();
     _docitem->setHidden(true);
-    _globaldoctool = new MLRenderingSideToolbar();
+	_globaldoctool = new MLRenderingSideToolbar();
     _globaldoctool->setIconSize(QSize(16,16));
     _globaldoctool->setVisible(false);
     ///////////////////////////////////
@@ -383,6 +383,12 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
     _docitem->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
     _globaldoctool = new MLRenderingSideToolbar(this);
     _globaldoctool->setIconSize(QSize(16,16));
+	MLRenderingData projdt;
+	MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator projit = dtf.find(-1);
+	if (projit != dtf.end())
+		_globaldoctool->setAccordingToRenderingData(projit.value());
+	connect(_globaldoctool, SIGNAL(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)), this, SLOT(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)));
+	connect(_globaldoctool, SIGNAL(activatedAction(MLRenderingAction*)), this, SLOT(actionActivated(MLRenderingAction*)));
 
    updateProjectName(md->docLabel());
     

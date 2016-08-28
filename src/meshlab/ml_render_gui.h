@@ -29,6 +29,7 @@
 #include <QFrame>
 #include <QToolButton>
 #include <QTabWidget>
+#include <QGridLayout>
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_rendering_actions.h"
 #include "additionalgui.h"
@@ -103,6 +104,50 @@ signals:
     void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
 };
 
+class MLRenderingOnOffToolbar : public QToolBar
+{
+	Q_OBJECT
+public:
+	MLRenderingOnOffToolbar(int meshid, QWidget* parent = NULL);
+	//MLRenderingOnOffToolbar(MLRenderingAction* act,QWidget* parent = NULL);
+	//MLRenderingOnOffToolbar(MLRenderingAction* act,int meshid,QWidget* parent = NULL);
+	~MLRenderingOnOffToolbar();
+
+	void setRenderingAction(MLRenderingAction* act);
+	void setAssociatedMeshId(int meshid);
+	void setAccordingToRenderingData(const MLRenderingData& dt);
+	void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
+	void updateVisibility(MeshModel* mm);
+protected:
+	void initGui();
+	int _meshid;
+	MLRenderingAction* _act;
+	QAction* _onact;
+	QAction* _offact;
+
+signals:
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
+
+	private slots:
+	void toggle(QAction*);
+};
+
+class MLRenderingThreeStateButton : public QWidget
+{
+	Q_OBJECT
+public:
+	MLRenderingThreeStateButton(int meshid, QWidget* parent = NULL);
+	~MLRenderingThreeStateButton();
+
+	void setRenderingAction(MLRenderingAction* act);
+private:
+	void initGui();
+
+	int _meshid;
+	QGridLayout* _layout;
+	MLRenderingOnOffToolbar* _onofftool;
+};
+
 class MLRenderingToolbar : public QToolBar
 {
     Q_OBJECT
@@ -158,33 +203,22 @@ private:
     void initGui();
 };
 
-class MLRenderingOnOffToolbar : public QToolBar
+class MLRenderingThreeStateSideToolbar : public MLRenderingToolbar
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    MLRenderingOnOffToolbar(int meshid,QWidget* parent = NULL);
-    MLRenderingOnOffToolbar(MLRenderingAction* act,QWidget* parent = NULL);
-    MLRenderingOnOffToolbar(MLRenderingAction* act,int meshid,QWidget* parent = NULL);
-    ~MLRenderingOnOffToolbar();
+	MLRenderingThreeStateSideToolbar(QWidget* parent = NULL);
+	MLRenderingThreeStateSideToolbar(int meshid, QWidget* parent = NULL);
 
-    void setRenderingAction(MLRenderingAction* act);
-    void setAssociatedMeshId(int meshid);
-    void setAccordingToRenderingData(const MLRenderingData& dt);
-    void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
-    void updateVisibility(MeshModel* mm);
-private:
-    void initGui();
-    int _meshid;
-    MLRenderingAction* _act;
-    QAction* _onact;
-    QAction* _offact;
-
-signals:
-    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
-
+	~MLRenderingThreeStateSideToolbar() {}
 private slots:
-    void toggle(QAction*);
+	//void toggle(QAction* act);
+
+private:
+	void initGui();
 };
+
+
 
 class MLRenderingParametersFrame : public QFrame
 {

@@ -113,7 +113,8 @@ signals:
 public slots:
 
         // Called when we change viewer, set the current viewer
-    void updateCurrent(int current);
+	void updateCurrent(int current);
+
 private:
     void patchForCorrectResize(QSplitter* split); 
 public:

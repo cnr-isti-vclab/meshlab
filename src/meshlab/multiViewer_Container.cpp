@@ -318,7 +318,7 @@ void MultiViewer_Container::update(int id){
 
 void MultiViewer_Container::updateTrackballInViewers()
 {
-	GLArea* glArea = qobject_cast<GLArea*>(currentView());
+	GLArea* glArea = currentView();
 	if(glArea)
 	{
 		QPair<Shotm,float> shotAndScale = glArea->shotFromTrackball();
