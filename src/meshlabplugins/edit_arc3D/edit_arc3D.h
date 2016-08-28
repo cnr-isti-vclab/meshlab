@@ -49,8 +49,8 @@ public:
 
 	static const QString Info();
 
-	bool StartEdit(MeshDocument &/*m*/, GLArea * /*parent*/);
-	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	bool StartEdit(MeshDocument &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
+	void EndEdit(MeshDocument &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/);
 	void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
 	void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) ;
 	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
@@ -77,7 +77,7 @@ public:
 	void GenerateGradientSmoothingMask(int subsampleFactor, QImage &OriginalTexture, CharImage &mask);
 
 	// this callback MUST be redefined because we are able to manage internally the layer change.
-	void LayerChanged(MeshDocument & /*md*/, MeshModel & /*oldMeshModel*/, GLArea * /*parent*/)
+	void LayerChanged(MeshDocument &, MeshModel &, GLArea *, MLSceneGLSharedDataContext* )
 	{ 
 		// add code here to manage the external layer switching
 	}
@@ -89,7 +89,7 @@ public slots:
 
 signals:
 	void suspendEditToggle();
-	void resetTrackBall();
+	void documentUpdated();
 
 };
 

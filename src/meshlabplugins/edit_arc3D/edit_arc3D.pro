@@ -32,6 +32,8 @@ win32-msvc2005:LIBS	   += ../../external/lib/win32-msvc2005/bz2.lib
 win32-msvc2008:LIBS	   += ../../external/lib/win32-msvc2008/bz2.lib
 win32-msvc2010:LIBS	   += ../../external/lib/win32-msvc2010/bz2.lib
 win32-msvc2012:LIBS	   += ../../external/lib/win32-msvc2012/bz2.lib
+win32-msvc2013:LIBS	   += ../../external/lib/win32-msvc2013/bz2.lib
+win32-msvc2015:LIBS	   += ../../external/lib/win32-msvc2015/bz2.lib
 win32-g++:LIBS	+= ../../external/lib/win32-gcc/libbz2.a
 linux-g++:LIBS	+= ../../external/lib/linux-g++/libbz2.a
 linux-g++-32:LIBS	+= ../../external/lib/linux-g++-32/libbz2.a
@@ -42,6 +44,8 @@ win32-msvc2005:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-msvc2008:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-msvc2010:INCLUDEPATH += ../../external/bzip2-1.0.5
 win32-msvc2012:INCLUDEPATH += ../../external/bzip2-1.0.5
+win32-msvc2013:INCLUDEPATH += ../../external/bzip2-1.0.5
+win32-msvc2015:INCLUDEPATH += ../../external/bzip2-1.0.5
 
 win32-g++:INCLUDEPATH  += ../../external/bzip2-1.0.5
 linux-g++:INCLUDEPATH	+= ../../external/bzip2-1.0.5

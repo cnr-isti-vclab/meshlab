@@ -54,6 +54,7 @@ EditArc3DPlugin::EditArc3DPlugin() {
     qFont.setPixelSize(10);
 
 
+
 }
 
 const QString EditArc3DPlugin::Info()
@@ -61,12 +62,16 @@ const QString EditArc3DPlugin::Info()
     return tr("This edit can be used to extract 3D models from Arc3D results");
 }
 
-bool EditArc3DPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
+bool EditArc3DPlugin::StartEdit(MeshDocument & _md, GLArea * _gla, MLSceneGLSharedDataContext* /*cont*/)
 {
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+		return false;
     er.modelList.clear();
     this->md=&_md;
     gla=_gla;
-    ///////
+	connect(this, SIGNAL(documentUpdated()), md, SIGNAL(documentUpdated()));
+	///////
     delete arc3DDialog;
     arc3DDialog=new v3dImportDialog(gla->window(),this);
     QString fileName=arc3DDialog->fileName;
@@ -125,13 +130,11 @@ bool EditArc3DPlugin::StartEdit(MeshDocument &_md, GLArea *_gla )
     return true;
 }
 
-void EditArc3DPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/)
+void EditArc3DPlugin::EndEdit(MeshDocument &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
-    gla->update();
-    assert(arc3DDialog);
     delete arc3DDialog;
     arc3DDialog=0;
-
+	gla->update();
 }
 /*
 This is the main function, which generates the final mesh (and the rasters) based on the selection provided by the user
@@ -207,6 +210,7 @@ void EditArc3DPlugin::ExportPly()
         m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK);
         tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m->cm,m->cm.bbox.Diag()*maxCCDiagVal/100.0);
     }
+	vcg::tri::UpdateSelection<CMeshO>::FaceClear(m->cm);
 
     int t2=clock();
     this->Log(GLLogStream::SYSTEM,"Topology and removed CC in %i\n",t2-t1);
@@ -242,14 +246,11 @@ void EditArc3DPlugin::ExportPly()
     tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
 
     // Final operations
-
+	
     md->mm()->visible=true;
     md->setBusy(false);
-    if (gla->getCurrentRenderMode() != NULL)
-        gla->getCurrentRenderMode()->colorMode=GLW::CMPerVert;
-    emit this->resetTrackBall();
-    gla->update();
-
+	emit documentUpdated();
+	//emit resetTrackBall();
 }
 
 void EditArc3DPlugin::mousePressEvent(QMouseEvent * /*e*/, MeshModel &, GLArea * )
