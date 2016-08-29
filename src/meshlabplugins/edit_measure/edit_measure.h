@@ -56,8 +56,8 @@ public:
   EditMeasurePlugin();
   virtual ~EditMeasurePlugin() {}
   static const QString Info();
-  virtual bool StartEdit(MeshModel &, GLArea *);
-  virtual void EndEdit(MeshModel &, GLArea *);
+  virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+  virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
   virtual void Decorate(MeshModel &, GLArea *,QPainter*);
   virtual void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
   virtual void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );

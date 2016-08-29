@@ -170,7 +170,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 	}
 }
 
-bool EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
+bool EditMeasurePlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
   gla->setCursor(QCursor(QPixmap(":/images/cur_measure.png"),15,15));
   connect(this, SIGNAL(suspendEditToggle()),gla,SLOT(suspendEditToggle()) );
@@ -182,7 +182,7 @@ bool EditMeasurePlugin::StartEdit(MeshModel &, GLArea *gla )
   return true;
 }
 
-void EditMeasurePlugin::EndEdit(MeshModel &, GLArea *)
+void EditMeasurePlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
   rubberband.Reset();
 }
