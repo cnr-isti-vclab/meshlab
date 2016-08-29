@@ -127,7 +127,6 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 
 	if (e->key() == Qt::Key_P) // print
 	{
-
 		this->Log(GLLogStream::FILTER, "------- Distances -------");
 		this->Log(GLLogStream::FILTER, "ID: Dist [pointA][pointB]");
 		for (int mind = 0; mind<measures.size(); mind++)
@@ -136,7 +135,6 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 				measures[mind].startP[0], measures[mind].startP[1], measures[mind].startP[2], measures[mind].endP[0], measures[mind].endP[1], measures[mind].endP[2]);
 		}
 		this->Log(GLLogStream::FILTER, "-------------------------");
-
 	}
 
 	if (e->key() == Qt::Key_S) // save
