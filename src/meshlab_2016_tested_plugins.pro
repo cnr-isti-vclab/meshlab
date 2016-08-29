@@ -71,6 +71,7 @@ SUBDIRS       = common \
 				meshlabplugins/edit_pickpoints \
 				meshlabplugins/edit_point \
 				meshlabplugins/edit_select \
+				plugins_experimental/edit_referencing \
 # Render Plugins
 				meshlabplugins/render_radiance_scaling \
 # Sample Plugins
