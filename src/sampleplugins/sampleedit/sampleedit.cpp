@@ -137,7 +137,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		glDepthMask(GL_FALSE);
 
 		glDisable(GL_LIGHTING);
-		glColor(Color4b::DarkRed);
+		glColor(vcg::Color4b(vcg::Color4b::DarkRed));
 		glBegin(GL_LINE_LOOP);
 		glVertex(curFacePtr->P(0));
 		glVertex(curFacePtr->P(1));
@@ -147,7 +147,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		glColor(Color4b::Red);
+		glColor(vcg::Color4b(vcg::Color4b::Red));
 		glBegin(GL_LINE_LOOP);
 		glVertex(curFacePtr->P(0));
 		glVertex(curFacePtr->P(1));
@@ -171,7 +171,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		glDepthMask(GL_FALSE);
 
 		glDisable(GL_LIGHTING);
-		glColor(Color4b::DarkBlue);
+		glColor(vcg::Color4b(vcg::Color4b::DarkBlue));
 		glBegin(GL_POINTS);
 		glVertex(curVertPtr->P());
 		glEnd();
@@ -179,7 +179,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		glColor(Color4b::Blue);
+		glColor(vcg::Color4b(vcg::Color4b::Blue));
 		glBegin(GL_POINTS);
 		glVertex(curVertPtr->P());
 		glEnd();
@@ -298,7 +298,7 @@ void SampleEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 	}
 }
 
-bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea *gla )
+bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
 	gla->setCursor(QCursor(QPixmap(":/images/cur_info.png"),1,1));	
 	connect(this, SIGNAL(suspendEditToggle()), gla, SLOT(suspendEditToggle()));
