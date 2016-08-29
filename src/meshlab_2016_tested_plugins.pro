@@ -74,6 +74,7 @@ SUBDIRS       = common \
 # Render Plugins
 				meshlabplugins/render_radiance_scaling \
 # Sample Plugins
+				sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \
                 sampleplugins/io_m \
