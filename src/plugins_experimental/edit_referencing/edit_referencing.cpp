@@ -302,7 +302,7 @@ void EditReferencingPlugin::DecorateScale(MeshModel &m, GLArea * /*gla*/, QPaint
 	}
 }
 
-bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
+bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -358,10 +358,9 @@ bool EditReferencingPlugin::StartEdit(MeshModel &m, GLArea *gla)
     return true;
 }
 
-void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/)
+void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
-    assert(referencingDialog);
     delete(referencingDialog);
     referencingDialog = NULL;
 
