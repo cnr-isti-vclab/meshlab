@@ -227,6 +227,8 @@ private slots:
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
     void updateGPUMemBar(int,int);
+
+	void updateLog();
 private:
     void addRenderingSystemLogInfo(unsigned mmid);
     int longestActionWidthInMenu(QMenu* m,const int longestwidth);

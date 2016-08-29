@@ -2344,6 +2344,7 @@ void MainWindow::newProject(const QString& projName)
     mdiarea->addSubWindow(mvcont);
     connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
     connect(mvcont,SIGNAL(updateDocumentViewer()),this,SLOT(updateLayerDialog()));
+	connect(&mvcont->meshDoc.Log, SIGNAL(logUpdated()), this, SLOT(updateLog()));
     filterMenu->setEnabled(!filterMenu->actions().isEmpty());
     if (!filterMenu->actions().isEmpty())
         updateSubFiltersMenu(true,false);
@@ -3523,4 +3524,11 @@ unsigned int MainWindow::viewsRequiringRenderingActions(int meshid, MLRenderingA
 		}
 	}
 	return res;
+}
+
+void MainWindow::updateLog()
+{
+	GLLogStream* senderlog = qobject_cast<GLLogStream*>(sender());
+	if ((senderlog != NULL) && (layerDialog != NULL))
+		layerDialog->updateLog(*senderlog);
 }
