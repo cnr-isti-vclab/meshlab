@@ -129,7 +129,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
   drawPickedPoints(pickPointsDialog->getPickedPointTreeWidgetItemVector(), mm.cm.bbox, painter);
 }
 
-bool EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
+bool EditPickPointsPlugin::StartEdit(MeshModel & mm, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     //qDebug() << "StartEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
@@ -172,16 +172,14 @@ bool EditPickPointsPlugin::StartEdit(MeshModel &mm, GLArea *gla )
     return true;
 }
 
-void EditPickPointsPlugin::EndEdit(MeshModel &mm, GLArea * /*gla*/)
+void EditPickPointsPlugin::EndEdit(MeshModel & mm, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     //qDebug() << "EndEdit Pick Points: " << mm.fileName.c_str() << " ..." << mm.cm.fn;
 
     // some cleaning at the end.
 
-    if(mm.cm.fn > 0)
+    if ((mm.cm.fn > 0) && (pickPointsDialog != NULL))
     {
-        assert(pickPointsDialog);
-
         //now that were are ending tell the dialog to save any points it has to metadata
         pickPointsDialog->savePointsToMetaData();
 
@@ -301,13 +299,13 @@ void EditPickPointsPlugin::drawPickedPoints(
         //if the point has been set (it may not be if a template has been loaded)
         if(item->isActive()){
             Point3m point = item->getPoint();
-            glColor(Color4b::Blue);
+            glColor(vcg::Color4b(vcg::Color4b::Blue));
       glLabel::render(painter,point, QString(item->getName()));
 
             //draw the dot if we arnt showing the normal or showing the normal as a line
             if(!showNormal || !showPin)
             {
-                if(item->isSelected() ) glColor(Color4b::Green);
+                if(item->isSelected() ) glColor(vcg::Color4b(Color4b::Green));
 
                 glBegin(GL_POINTS);
                     glVertex(point);
@@ -410,7 +408,7 @@ void EditPickPointsPlugin::drawPickedPoints(
                     glPopMatrix();
                 } else
                 {
-                    glColor(Color4b::Green);
+                    glColor(vcg::Color4b(vcg::Color4b::Green));
 
                     glBegin(GL_LINES);
                         glVertex(point);
@@ -418,7 +416,7 @@ void EditPickPointsPlugin::drawPickedPoints(
                     glEnd();
                 }
             }
-            glColor(Color4b::Red);
+            glColor(vcg::Color4b(vcg::Color4b::Red));
             //glArea->renderText(point[0], point[1], point[2], QString(item->getName()) );
         }
     }
