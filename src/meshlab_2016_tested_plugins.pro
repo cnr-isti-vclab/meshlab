@@ -64,10 +64,11 @@ SUBDIRS       = common \
 				meshlabplugins/decorate_shadow \
 				meshlabplugins/decorate_raster_proj \
 # Edit Plugins
-                meshlabplugins/edit_quality \
-				meshlabplugins/edit_select \
-				meshlabplugins/edit_manipulators \
 				meshlabplugins/edit_arc3D \
+                meshlabplugins/edit_manipulators \
+				meshlabplugins/edit_measure \
+				meshlabplugins/edit_quality \
+				meshlabplugins/edit_select \				
 # Render Plugins
 				meshlabplugins/render_radiance_scaling \
 # Sample Plugins
