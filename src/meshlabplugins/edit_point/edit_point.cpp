@@ -166,7 +166,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
     }
 }
 
-bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
+bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
     // Needed by MeshLab to colorize the selected points (for istance when we exit the plugin)
     connect(this, SIGNAL(setSelectionRendering(bool)), gla, SLOT(setSelectVertRendering(bool)));
     setSelectionRendering(true);
@@ -191,12 +191,20 @@ bool EditPointPlugin::StartEdit(MeshModel &m, GLArea *gla) {
     return true;
 }
 
-void EditPointPlugin::EndEdit(MeshModel &m, GLArea *gla) {
+void EditPointPlugin::EndEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/) {
     //delete the circle if present.
     fittingCircle.Clear();
     tri::ComponentFinder<CMeshO>::DeletePerVertexAttribute(m.cm);
 }
 
+void EditPointPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)
+{
+	MLPerViewGLOptions opts;
+	dt.get(opts);
+	opts._sel_enabled = true;
+	opts._vertex_sel = true;
+	dt.set(opts);
+}
 
 void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
 

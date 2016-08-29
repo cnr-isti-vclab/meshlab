@@ -40,8 +40,9 @@ public:
 
     static const QString Info();
 
-    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+	void suggestedRenderingData(MeshModel & m, MLRenderingData& dt);
+    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
     void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
     void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * );
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * );
