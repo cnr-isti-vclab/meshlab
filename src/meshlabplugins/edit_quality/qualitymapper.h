@@ -51,12 +51,12 @@ public:
     ~QualityMapperPlugin(void){};
 
 	static const QString Info();
-    virtual bool StartEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
-    virtual void EndEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
+	bool StartEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
+    void EndEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
     //virtual void Decorate(MeshModel&, GLArea*);
-    virtual void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
-    virtual void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};
-    virtual void mouseReleaseEvent(QMouseEvent *, MeshModel&, GLArea*){};
+    void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
+    void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};
+    void mouseReleaseEvent(QMouseEvent *, MeshModel&, GLArea*){};
 
 	QPoint cur;
 	bool haveToPick;

@@ -47,6 +47,9 @@ const QString QualityMapperPlugin::Info()
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
 { 
+	GLenum err = glewInit();
+	if (err != GLEW_NO_ERROR)
+		return false;
 	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
 	{
 			QMessageBox::warning(gla, tr("Quality Mapper"), tr("The model has no vertex quality"), QMessageBox::Ok); 

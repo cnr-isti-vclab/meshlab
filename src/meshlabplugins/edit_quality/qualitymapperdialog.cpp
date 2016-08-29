@@ -52,7 +52,6 @@ QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *
 	this->setGeometry(p.x()+(parent->width()-width()),p.y()+40,width(),height() );
 
 	this->gla = gla;
-    connect(this,SIGNAL(updateRequested(int,MLRenderingData::ATT_NAMES)),_cont,SLOT(updateRequested(int,MLRenderingData::ATT_NAMES)));
 	_histogram_info = 0;
 	_equalizer_histogram = 0;
 	for (int i=0; i<NUMBER_OF_EQHANDLES; i++)
@@ -1094,9 +1093,6 @@ void QualityMapperDialog::on_TfHandle_doubleClicked(TFHandle *sender)
 		on_applyButton_clicked();
 }
 
-
-
-
 void QualityMapperDialog::on_applyButton_clicked()
 {
 	float minQuality = ui.minSpinBox->value();	
@@ -1105,13 +1101,14 @@ void QualityMapperDialog::on_applyButton_clicked()
 	// brightness value between 0 and 2
 	float brightness = (1.0f - (float)(ui.brightnessSlider->value())/(float)(ui.brightnessSlider->maximum()) )*2.0;
 
-	applyColorByVertexQuality((MeshModel&)mesh, _transferFunction, minQuality, maxQuality, (float)_equalizerMidHandlePercentilePosition, brightness);
+	applyColorByVertexQuality(mesh, _transferFunction, minQuality, maxQuality, (float)_equalizerMidHandlePercentilePosition, brightness);
 
     MLRenderingData::RendAtts atts;
     atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
-	emit updateRequested(mesh.id(),MLRenderingData::ATT_NAMES::ATT_VERTCOLOR);
-    gla->update();
-    
+	//emit updateRequested(mesh.id(),MLRenderingData::ATT_NAMES::ATT_VERTCOLOR);
+	_cont->meshAttributesUpdated(mesh.id(), false, atts);
+	_cont->manageBuffers(mesh.id());
+	gla->updateAllSiblingsGLAreas();
 }
 
 /* 
