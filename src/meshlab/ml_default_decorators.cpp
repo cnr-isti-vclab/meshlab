@@ -633,7 +633,7 @@ void MLDefaultMeshDecorators::initSelectionDecoratorData(MeshModel & mm, bool ve
 	if (vertsel)
 		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERVERT_SEL);
 	if (facesel)
-	selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
+		selbufhand()->updateBuffer(MLSelectionBuffers::ML_PERFACE_SEL);
 }
 
 void MLDefaultMeshDecorators::cleanSelectionDecoratorData(MeshModel& mm, bool vertsel, bool facesel)

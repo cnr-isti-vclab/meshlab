@@ -150,7 +150,7 @@ void MLSelectionBuffers::drawSelection(ML_SELECTION_TYPE selbuf) const
 
 			unsigned int todraw = privchunksize;
 			if (ii == (_selmap[ML_PERVERT_SEL].size() - 1))
-				todraw = _m.cm.svn % privchunksize;
+				todraw = _m.cm.svn -  (privchunksize * ii); 
 
 			//glGetBufferSubData(GL_ARRAY_BUFFER, 0, rp.size() * sizeof(vcg::Point3f), &(rp[0]));
 			glDrawArrays(GL_POINTS, 0, todraw);
@@ -191,7 +191,7 @@ void MLSelectionBuffers::drawSelection(ML_SELECTION_TYPE selbuf) const
 
 			unsigned int todraw = privchunksize;
 			if (ii == _selmap[ML_PERFACE_SEL].size() - 1)
-				todraw = _m.cm.sfn % privchunksize;
+				todraw = _m.cm.sfn - (privchunksize * ii);
 			glDrawArrays(GL_TRIANGLES, 0, 3 * todraw);
 			glBindBuffer(GL_ARRAY_BUFFER, _selmap[ML_PERFACE_SEL][ii]);
 			glDisableClientState(GL_VERTEX_ARRAY);
