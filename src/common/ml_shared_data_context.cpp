@@ -628,6 +628,20 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
 }
 
 
+void MLPoliciesStandAloneFunctions::disableRedundatRenderingDataAccordingToPriorities(MeshModel* meshmodel, MLRenderingData& dt)
+{
+	for (MLRenderingData::PRIMITIVE_MODALITY pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
+	{
+		MLRenderingData::RendAtts atts;
+		dt.get(pr, atts);
+		MLPoliciesStandAloneFunctions::setAttributePriorities(atts);
+		dt.set(pr, atts);
+	}
+
+	setPerViewGLOptionsPriorities(meshmodel, dt);
+}
+
+
 bool MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm)
 {
     bool validvert = (m->cm.VN() > 0);

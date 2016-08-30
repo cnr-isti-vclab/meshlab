@@ -198,6 +198,8 @@ struct MLPoliciesStandAloneFunctions
 
     static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
 
+	static void disableRedundatRenderingDataAccordingToPriorities(MeshModel* meshmodel,MLRenderingData& dt);
+
     static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm);
 
     static bool isPrimitiveModalityCompatibleWithMeshInfo(bool validvert,bool validfaces,bool validedges,int meshmask,const MLRenderingData::PRIMITIVE_MODALITY pm);
