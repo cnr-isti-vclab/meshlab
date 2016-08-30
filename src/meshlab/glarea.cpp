@@ -1036,8 +1036,8 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 
     lastModelEdited = this->md()->mm();
 
-	_oldvalues.clear();
-	parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(context(), _oldvalues);
+	/*_oldvalues.clear();
+	parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(context(), _oldvalues);*/
 
 	MLRenderingData dt;
 	if (iEdit->isSingleMeshEdit())
@@ -1046,6 +1046,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 		{
 			parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(md()->mm()->id(), context(), dt);
 			iEdit->suggestedRenderingData(*(md()->mm()), dt);
+			MLPoliciesStandAloneFunctions::disableRedundatRenderingDataAccordingToPriorities(md()->mm(), dt);
 			parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(md()->mm()->id(), context(), dt);
 			parentmultiview->sharedDataContext()->manageBuffers(md()->mm()->id());
 		}
@@ -1058,13 +1059,14 @@ void GLArea::setCurrentEditAction(QAction *editAction)
 			{
 				parentmultiview->sharedDataContext()->getRenderInfoPerMeshView(mm->id(), context(), dt);
 				iEdit->suggestedRenderingData(*(mm), dt);
+				MLPoliciesStandAloneFunctions::disableRedundatRenderingDataAccordingToPriorities(mm, dt);
 				parentmultiview->sharedDataContext()->setRenderingDataPerMeshView(mm->id(), context(), dt);
 				parentmultiview->sharedDataContext()->manageBuffers(mm->id());
 			}
 		}
 	}
 	if (mw() != NULL)
-		mw()->updateLayerTable();
+		mw()->updateLayerDialog();
     if (!iEdit->StartEdit(*this->md(), this,parentmultiview->sharedDataContext()))
     {
         //iEdit->EndEdit(*(this->md()->mm()), this);

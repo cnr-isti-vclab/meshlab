@@ -65,7 +65,7 @@ public:
 private:
     int id;  //the very important unique id of each subwindow.
     MultiViewer_Container* parentmultiview;
-	MLSceneGLSharedDataContext::PerMeshRenderingDataMap  _oldvalues;
+	//MLSceneGLSharedDataContext::PerMeshRenderingDataMap  _oldvalues;
 
 public:
     int getId() {return id;}
@@ -221,19 +221,19 @@ public slots:
 				iEdit->EndEdit(*mm(), this, parentmultiview->sharedDataContext());
         }
 		
-		MLSceneGLSharedDataContext* shared;
-		if ((parentmultiview != NULL) && (parentmultiview->sharedDataContext() != NULL))
-			shared = parentmultiview->sharedDataContext();
+		//MLSceneGLSharedDataContext* shared;
+		//if ((parentmultiview != NULL) && (parentmultiview->sharedDataContext() != NULL))
+		//	shared = parentmultiview->sharedDataContext();
 
-		if (shared != NULL)
-		{
-			for (MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = _oldvalues.begin(); it != _oldvalues.end(); ++it)
-			{
-				shared->setRenderingDataPerMeshView(it.key(), context(), it.value());
-				shared->manageBuffers(it.key());
-			}
-		}
-		_oldvalues.clear();
+		//if (shared != NULL)
+		//{
+		//	for (MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = _oldvalues.begin(); it != _oldvalues.end(); ++it)
+		//	{
+		//		shared->setRenderingDataPerMeshView(it.key(), context(), it.value());
+		//		shared->manageBuffers(it.key());
+		//	}
+		//}
+		//_oldvalues.clear();
 
         iEdit= 0;
         currentEditor=0;
