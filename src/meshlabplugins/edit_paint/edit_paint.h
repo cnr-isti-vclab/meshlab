@@ -34,15 +34,15 @@
 
 #include "paintbox.h"
 
-/**
- * These options are chosen by each tool in the method setToolType(TolType t)
- */
+ /**
+  * These options are chosen by each tool in the method setToolType(TolType t)
+  */
 enum PaintOptions {
-    EPP_NONE 			= 0x00000,
-    EPP_PICK_FACES		= 0x00001, //On press, pick faces
-    EPP_PICK_VERTICES 	= 0x00003, //On press, find the vertices (implies face picking too)
-    EPP_AVG_NORMAL		= 0x00007, //During vertex picking, find the average normal of all vertices (implies vertex picking)
-    EPP_DRAW_CURSOR		= 0x00008  //On mouse move display a shape representing the given cursor
+	EPP_NONE = 0x00000,
+	EPP_PICK_FACES = 0x00001, //On press, pick faces
+	EPP_PICK_VERTICES = 0x00003, //On press, find the vertices (implies face picking too)
+	EPP_AVG_NORMAL = 0x00007, //During vertex picking, find the average normal of all vertices (implies vertex picking)
+	EPP_DRAW_CURSOR = 0x00008  //On mouse move display a shape representing the given cursor
 };
 
 
@@ -50,141 +50,144 @@ enum PaintOptions {
  * EditPaint plugin main class (MeshEditing plugin)
  */
 class EditPaintPlugin : public QObject, public MeshEditInterface {
-    Q_OBJECT
-    Q_INTERFACES(MeshEditInterface)
+	Q_OBJECT
+		Q_INTERFACES(MeshEditInterface)
 
 public:
-    EditPaintPlugin();
-    virtual ~EditPaintPlugin();
+	EditPaintPlugin();
+	virtual ~EditPaintPlugin();
 
-    static const QString Info();
+	static const QString Info();
 
-    virtual bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
-    virtual void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-    virtual void tabletEvent(QTabletEvent *, MeshModel & , GLArea *);
+	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
+	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void tabletEvent(QTabletEvent *, MeshModel &, GLArea *);
 
 
 signals:
-    void setSelectionRendering(bool);
+	void setSelectionRendering(bool);
 
 public slots:
-    void update();
-    void setToolType(ToolType t);
-    void setBrushSettings(int size, int opacity, int hardness);
+	void update();
+	void setToolType(ToolType t);
+	void setBrushSettings(int size, int opacity, int hardness);
 
 private:
-    struct PickingData { QPoint position; QPointF rel_position; float distance;};
+	struct PickingData { QPoint position; QPointF rel_position; float distance; };
 
-    void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, PickingData> > * vertex_result = NULL);
+	void updateSelection(MeshModel &m, std::vector< std::pair<CVertexO *, PickingData> > * vertex_result = NULL);
+	void updateColorBuffer(MeshModel& m,MLSceneGLSharedDataContext* shared);
+	void updateGeometryBuffers(MeshModel& m,MLSceneGLSharedDataContext* shared);
 
-    double modelview_matrix[16]; //modelview
-    double projection_matrix[16]; //projection
-    GLint viewport[4];
+	double modelview_matrix[16]; //modelview
+	double projection_matrix[16]; //projection
+	GLint viewport[4];
 
-    GLArea * glarea;
-    GLfloat* zbuffer; /*< last known zbuffer, always kept up-to-date */
+	GLArea * glarea;
+	GLfloat* zbuffer; /*< last known zbuffer, always kept up-to-date */
 
-    QDockWidget* dock;
-    Paintbox* paintbox; /*< The current Paintbox*/
+	QDockWidget* dock;
+	Paintbox* paintbox; /*< The current Paintbox*/
 
-    std::vector<CMeshO::FacePointer> * selection; //currently selected faces
-    std::vector< std::pair<CVertexO *, PickingData> > vertices; //touched vertices during last updateSelection
-    Point3m normal; //average normal of all vertices in "vertices"
+	std::vector<CMeshO::FacePointer> * selection; //currently selected faces
+	std::vector< std::pair<CVertexO *, PickingData> > vertices; //touched vertices during last updateSelection
+	Point3m normal; //average normal of all vertices in "vertices"
 
-    std::vector<QPointF> circle;
-    std::vector<QPointF> dense_circle;
-    std::vector<QPointF> square;
-    std::vector<QPointF> dense_square;
+	std::vector<QPointF> circle;
+	std::vector<QPointF> dense_circle;
+	std::vector<QPointF> square;
+	std::vector<QPointF> dense_square;
 
-    //New code under this line---
+	//New code under this line---
 
-    //Memoization of type and type-settings
-    ToolType 		current_type;
-    int			 	current_options;
+	//Memoization of type and type-settings
+	ToolType 		current_type;
+	int			 	current_options;
 
-    //Input Events Handling:
-    struct InputEvent {
-        Qt::MouseButton 		button;
-        QEvent::Type 			type;
-        QPoint					position;
-        QPoint					gl_position;
-        Qt::KeyboardModifiers	modifiers;
-        qreal					pressure;
-        bool					processed;
-        bool					valid;
-    };
+	//Input Events Handling:
+	struct InputEvent {
+		Qt::MouseButton 		button;
+		QEvent::Type 			type;
+		QPoint					position;
+		QPoint					gl_position;
+		Qt::KeyboardModifiers	modifiers;
+		qreal					pressure;
+		bool					processed;
+		bool					valid;
+	};
 
-    InputEvent 		latest_event;
-    InputEvent		previous_event;
+	InputEvent 		latest_event;
+	InputEvent		previous_event;
 
-    inline void pushInputEvent(QEvent::Type t, QPoint p,
-            Qt::KeyboardModifiers k, qreal pres, Qt::MouseButton b, GLArea * gla)
-    {
-        if (latest_event.processed) previous_event = latest_event;
+	inline void pushInputEvent(QEvent::Type t, QPoint p,
+		Qt::KeyboardModifiers k, qreal pres, Qt::MouseButton b, GLArea * gla)
+	{
+		if (latest_event.processed) previous_event = latest_event;
 
-        latest_event.type = t;
-        latest_event.position = p;
-        latest_event.gl_position = QPoint(p.x(), gla->height() - p.y());
-        latest_event.modifiers = k;
-        latest_event.button = b;
-        latest_event.pressure = pres;
-        latest_event.processed = false;
-        latest_event.valid = true;
-    }
+		latest_event.type = t;
+		latest_event.position = p;
+		latest_event.gl_position = QPoint(p.x(), gla->height() - p.y());
+		latest_event.modifiers = k;
+		latest_event.button = b;
+		latest_event.pressure = pres;
+		latest_event.processed = false;
+		latest_event.valid = true;
+	}
 
-    //Brush frequently accessed setting memoization
-    struct Brush{
-        int 	size;
-        int 	opacity;
-        int 	hardness;
-        float	radius;
-        bool	size_map;
-        bool	opacity_map;
-        bool	hardness_map;
-    };
+	//Brush frequently accessed setting memoization
+	struct Brush {
+		int 	size;
+		int 	opacity;
+		int 	hardness;
+		float	radius;
+		bool	size_map;
+		bool	opacity_map;
+		bool	hardness_map;
+	};
 
-    Brush current_brush;
+	Brush current_brush;
 
-    /****** Painting, Cloning and Noise Tools ******/
-    void paint(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
-    void capture();
-    bool accessCloneBuffer(int, int, vcg::Color4b &);
-    void computeNoiseColor(CVertexO * , vcg::Color4b &);
-    QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
+	/****** Painting, Cloning and Noise Tools ******/
+	void paint(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	void capture();
+	bool accessCloneBuffer(int, int, vcg::Color4b &);
+	void computeNoiseColor(CVertexO *, vcg::Color4b &);
+	QHash<CVertexO *, std::pair<vcg::Color4b, int> >	painted_vertices; /*<active vertices during painting */
 
-    vcg::Color4b	color;
+	vcg::Color4b	color;
 
-    GLubyte* 		color_buffer; /*< buffer used as color source in cloning*/
-    GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
-    QPoint 			clone_delta;
-    QPoint			source_delta;
-    QPoint			apply_start;
-    int				buffer_width;
-    int				buffer_height;
+	GLubyte* 		color_buffer; /*< buffer used as color source in cloning*/
+	GLfloat* 		clone_zbuffer; /*<buffer to determine if the source is legal or not */
+	QPoint 			clone_delta;
+	QPoint			source_delta;
+	QPoint			apply_start;
+	int				buffer_width;
+	int				buffer_height;
 
-    float			noise_scale;
-    /****** Pull and Push Tools ******/
-    void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	float			noise_scale;
+	/****** Pull and Push Tools ******/
+	void sculpt(MeshModel &, std::vector< std::pair<CVertexO *, PickingData> > * vertices);
 
-    QHash<CVertexO *, std::pair<vcg::Point3f, float> > displaced_vertices; /*<active vertices during sculpting */
-
-
-    /****** Gradient Tool ******/
-    void gradient(MeshModel & m,GLArea * gla);
-
-    QPoint gradient_start;
+	QHash<CVertexO *, std::pair<vcg::Point3f, float> > displaced_vertices; /*<active vertices during sculpting */
 
 
-    /****** Color and Position Smoothing ******/
-    void smooth(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
-    QHash<CVertexO *, CVertexO *> smoothed_vertices;
+	/****** Gradient Tool ******/
+	void gradient(MeshModel & m, GLArea * gla);
 
-    /****** Color Fill ******/
-    void fill(MeshModel & m,CFaceO * face);
+	QPoint gradient_start;
+
+
+	/****** Color and Position Smoothing ******/
+	void smooth(std::vector< std::pair<CVertexO *, PickingData> > * vertices);
+	QHash<CVertexO *, CVertexO *> smoothed_vertices;
+
+	/****** Color Fill ******/
+	void fill(MeshModel & m, CFaceO * face);
 };
 
 /**
@@ -197,17 +200,23 @@ class SingleColorUndo : public QUndoCommand
 {
 
 public:
-    SingleColorUndo(CVertexO * v, vcg::Color4b c, QUndoCommand * parent = 0) : QUndoCommand(parent){
-        vertex = v; original = c; // setText("Single Vertex Color Change");
-    }
+	SingleColorUndo(CVertexO * v, vcg::Color4b c,QUndoCommand * parent = 0) : QUndoCommand(parent) {
+		vertex = v; 
+		original = c; // setText("Single Vertex Color Change");
+	}
 
-    virtual void undo() {vcg::Color4b temp = vertex->C(); vertex->C() = original; original = temp;}
-    virtual void redo() {undo();}
-    virtual int id() {return COLOR_PAINT;}
+	virtual void undo()
+	{ 
+		vcg::Color4b temp = vertex->C(); 
+		vertex->C() = original; 
+		original = temp; 
+	}
+	virtual void redo() { undo(); }
+	virtual int id() { return COLOR_PAINT; }
 
 private:
-    CVertexO* vertex;
-    vcg::Color4b original;
+	CVertexO* vertex;
+	vcg::Color4b original;
 };
 
 //TODO Create MultipleColorUndo
@@ -216,19 +225,21 @@ class SinglePositionUndo : public QUndoCommand
 {
 
 public:
-    SinglePositionUndo(CVertexO * v, Point3m p, Point3m n, QUndoCommand * parent = 0) : QUndoCommand(parent){
-        vertex = v; original = p; normal = n;
-    }
+	SinglePositionUndo(CVertexO * v, Point3m p, Point3m n, QUndoCommand * parent = 0) : QUndoCommand(parent) {
+		vertex = v; original = p; normal = n;
+	}
 
-    virtual void undo() {Point3m temp = vertex->P(); vertex->P()= original; original = temp;
-                         temp = vertex->N(); vertex->N() = normal; normal = temp;}
-    virtual void redo() {undo();}
-    virtual int id() {return MESH_PULL;}
+	virtual void undo() {
+		Point3m temp = vertex->P(); vertex->P() = original; original = temp;
+		temp = vertex->N(); vertex->N() = normal; normal = temp;
+	}
+	virtual void redo() { undo(); }
+	virtual int id() { return MESH_PULL; }
 
 private:
-    CVertexO* vertex;
-    Point3m original;
-    Point3m normal;
+	CVertexO* vertex;
+	Point3m original;
+	Point3m normal;
 };
 
 
@@ -240,16 +251,16 @@ private:
 class SelectionUndo : public QUndoCommand
 {
 public:
-    SelectionUndo(CFaceO * f, bool sel, QUndoCommand * parent = 0) : QUndoCommand(parent){
-        face = f; original = sel; // setText("Single Vertex Color Change");
-    }
+	SelectionUndo(CFaceO * f, bool sel, QUndoCommand * parent = 0) : QUndoCommand(parent) {
+		face = f; original = sel; // setText("Single Vertex Color Change");
+	}
 
-    virtual void undo() {bool temp = face->IsS(); original? face->SetS() : face->ClearS(); original = temp;}
-    virtual void redo() {undo();}
-    virtual int id() {return MESH_SELECT;}
-private :
-    CFaceO * face;
-    bool original;
+	virtual void undo() { bool temp = face->IsS(); original ? face->SetS() : face->ClearS(); original = temp; }
+	virtual void redo() { undo(); }
+	virtual int id() { return MESH_SELECT; }
+private:
+	CFaceO * face;
+	bool original;
 };
 
 /*********Generic Utility Routines************/
@@ -264,14 +275,14 @@ private :
  */
 inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
 {
-    vcg::Color4b orig =  vertex->C();
+	vcg::Color4b orig = vertex->C();
 
-    opac *= ((float)newcol[3]/255.0);
+	opac *= ((float)newcol[3] / 255.0);
 
-    for (int i = 0; i < 3; i ++)
-    orig[i] = std::min(255, ( (newcol[i]-orig[i]) * opac + orig[i] * 100 ) / 100);
+	for (int i = 0; i < 3; i++)
+		orig[i] = std::min(255, ((newcol[i] - orig[i]) * opac + orig[i] * 100) / 100);
 
-    vertex->C() = orig;
+	vertex->C() = orig;
 }
 
 /**
@@ -279,10 +290,10 @@ inline void applyColor(CVertexO * vertex, const vcg::Color4b& newcol, int opac)
  *
  * O(1) complexity
  */
-inline void mergeColors(double percent,const vcg::Color4b& c1,const vcg::Color4b& c2, vcg::Color4b* dest)
+inline void mergeColors(double percent, const vcg::Color4b& c1, const vcg::Color4b& c2, vcg::Color4b* dest)
 {
-    for (int i = 0; i < 4; i ++)
-    (*dest)[i] = (char)std::min(255.0,((c1[i]-c2[i])*percent+c2[i]));
+	for (int i = 0; i < 4; i++)
+		(*dest)[i] = (char)std::min(255.0, ((c1[i] - c2[i])*percent + c2[i]));
 }
 
 /**
@@ -292,10 +303,10 @@ inline void mergeColors(double percent,const vcg::Color4b& c1,const vcg::Color4b
  *
  * Can actually merge any 3d array, not just positions
  */
-inline void mergePositions(double percent,const float c1[3],const float c2[3], float dest[3])
+inline void mergePositions(double percent, const float c1[3], const float c2[3], float dest[3])
 {
-    for (int i = 0; i < 3; i ++)
-        dest[i] = c1[i]*percent+c2[i]*(1.0-percent);
+	for (int i = 0; i < 3; i++)
+		dest[i] = c1[i] * percent + c2[i] * (1.0 - percent);
 }
 
 /*********Geometric Utility Routines************/
@@ -307,11 +318,11 @@ inline void mergePositions(double percent,const float c1[3],const float c2[3], f
  *
  * Original Code by Gfrei Andreas
  */
-inline void fastMultiply(float x,float y,float z,double matrix[],double *xr,double *yr,double *zr)
+inline void fastMultiply(float x, float y, float z, double matrix[], double *xr, double *yr, double *zr)
 {
-    *xr = x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12];
-    *yr = x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13];
-    *zr = x * matrix[2] + y * matrix[6] + z * matrix[10] + matrix[14];
+	*xr = x * matrix[0] + y * matrix[4] + z * matrix[8] + matrix[12];
+	*yr = x * matrix[1] + y * matrix[5] + z * matrix[9] + matrix[13];
+	*zr = x * matrix[2] + y * matrix[6] + z * matrix[10] + matrix[14];
 }
 
 /**
@@ -321,23 +332,23 @@ inline void fastMultiply(float x,float y,float z,double matrix[],double *xr,doub
  */
 inline int getNearest(QPointF center, QPointF *points, int num)
 {
-    int index = 0;
+	int index = 0;
 
-    float dist = fabsf(center.x()-points[0].x())*fabsf(center.x()-points[0].x())+fabsf(center.y()-points[0].y())*fabsf(center.y()-points[0].y());
+	float dist = fabsf(center.x() - points[0].x())*fabsf(center.x() - points[0].x()) + fabsf(center.y() - points[0].y())*fabsf(center.y() - points[0].y());
 
-    float temp = 0;
+	float temp = 0;
 
-    for (int i=1; i < num; i++)
-    {
-        temp = fabsf(center.x()-points[i].x())*fabsf(center.x()-points[i].x())+
-            fabsf(center.y()-points[i].y())*fabsf(center.y()-points[i].y());
+	for (int i = 1; i < num; i++)
+	{
+		temp = fabsf(center.x() - points[i].x())*fabsf(center.x() - points[i].x()) +
+			fabsf(center.y() - points[i].y())*fabsf(center.y() - points[i].y());
 
-        if (temp < dist) {
-            index = i;
-            dist = temp;
-        }
-    }
-    return index;
+		if (temp < dist) {
+			index = i;
+			dist = temp;
+		}
+	}
+	return index;
 }
 
 /**
@@ -366,114 +377,114 @@ inline int getNearest(QPointF center, QPointF *points, int num)
  * than radius, then (x, y) lays inside the rectangle
  *
  */
-inline bool isIn(const QPointF &p0,const QPointF &p1, float x,float y,float radius, float *dist, QPointF &pos)
+inline bool isIn(const QPointF &p0, const QPointF &p1, float x, float y, float radius, float *dist, QPointF &pos)
 {
-    float radius_sq = radius * radius;
+	float radius_sq = radius * radius;
 
-    if (p0 != p1) //otherwise condition (a) needs not to be tested: rectangle is null
-    {
-        float v_x = (p1.x()-p0.x());
-        float v_y = (p1.y()-p0.y());
+	if (p0 != p1) //otherwise condition (a) needs not to be tested: rectangle is null
+	{
+		float v_x = (p1.x() - p0.x());
+		float v_y = (p1.y() - p0.y());
 
-        float v_length_squared = v_x * v_x + v_y * v_y;
+		float v_length_squared = v_x * v_x + v_y * v_y;
 
-        float w_x = x - p0.x();
-        float w_y = y - p0.y();
+		float w_x = x - p0.x();
+		float w_y = y - p0.y();
 
-        float v_dot_w = w_x * v_x + w_y * v_y; //scalar product of v and w
+		float v_dot_w = w_x * v_x + w_y * v_y; //scalar product of v and w
 
-        float r = v_dot_w / v_length_squared;
+		float r = v_dot_w / v_length_squared;
 
-        float pf_x = p0.x() + r * v_x;
-        float pf_y = p0.y() + r * v_y;
+		float pf_x = p0.x() + r * v_x;
+		float pf_y = p0.y() + r * v_y;
 
-        float delta_x = x - pf_x;
-        float delta_y = y - pf_y;
+		float delta_x = x - pf_x;
+		float delta_y = y - pf_y;
 
-        if (r >= 0 && r <= 1 && (delta_x * delta_x + delta_y * delta_y < radius_sq))
-        {
-            float delta_len = sqrt(delta_x * delta_x + delta_y * delta_y);
+		if (r >= 0 && r <= 1 && (delta_x * delta_x + delta_y * delta_y < radius_sq))
+		{
+			float delta_len = sqrt(delta_x * delta_x + delta_y * delta_y);
 
-            *dist = delta_len / radius;
-            pos.setY(delta_y / radius);
-            pos.setX(delta_x / radius);
-            return true;
-        }
-    }
+			*dist = delta_len / radius;
+			pos.setY(delta_y / radius);
+			pos.setX(delta_x / radius);
+			return true;
+		}
+	}
 
-    // there could be some problem when point is nearer p0 or p1 and viceversa
-    // so i have to check both. is only needed with smooth_borders
-    bool found = false;
-    float dx=(x-p1.x());
-    float dy=(y-p1.y());
-    float delta_len_sq =dx*dx+dy*dy;
+	// there could be some problem when point is nearer p0 or p1 and viceversa
+	// so i have to check both. is only needed with smooth_borders
+	bool found = false;
+	float dx = (x - p1.x());
+	float dy = (y - p1.y());
+	float delta_len_sq = dx*dx + dy*dy;
 
-    if (delta_len_sq < radius_sq)
-    {
-        float delta_len = sqrt(delta_len_sq);
-        *dist = delta_len;
-        pos.setY(dy / radius);
-        pos.setX(dx / radius);
-        found = true;
-    }
+	if (delta_len_sq < radius_sq)
+	{
+		float delta_len = sqrt(delta_len_sq);
+		*dist = delta_len;
+		pos.setY(dy / radius);
+		pos.setX(dx / radius);
+		found = true;
+	}
 
-    if (p0 == p1){
-        *dist /= radius;
-        return found;
-    }
+	if (p0 == p1) {
+		*dist /= radius;
+		return found;
+	}
 
-    dx=(x-p0.x());
-    dy=(y-p0.y());
-    delta_len_sq =dx*dx+dy*dy;
+	dx = (x - p0.x());
+	dy = (y - p0.y());
+	delta_len_sq = dx*dx + dy*dy;
 
-    if (delta_len_sq < radius_sq)
-    {
-        float delta_len = sqrt(delta_len_sq);
-        if ( (found && delta_len < *dist ) || !found)
-        {
-            *dist = delta_len;
-        //	pos.setY(x / delta_len );
-            pos.setY(dy / radius);
-            pos.setX(dx / radius);
-        }
-        found = true;
-    }
+	if (delta_len_sq < radius_sq)
+	{
+		float delta_len = sqrt(delta_len_sq);
+		if ((found && delta_len < *dist) || !found)
+		{
+			*dist = delta_len;
+			//	pos.setY(x / delta_len );
+			pos.setY(dy / radius);
+			pos.setX(dx / radius);
+		}
+		found = true;
+	}
 
-    *dist /= radius;
+	*dist /= radius;
 
-    return found;
+	return found;
 }
 
-inline bool pointInTriangle(const float p_x,const float p_y,const float a_x,const float a_y,
-        const float b_x,const float b_y,const float c_x,const float c_y)
+inline bool pointInTriangle(const float p_x, const float p_y, const float a_x, const float a_y,
+	const float b_x, const float b_y, const float c_x, const float c_y)
 {
-    float fab=(p_y-a_y)*(b_x-a_x) - (p_x-a_x)*(b_y-a_y);
-    float fbc=(p_y-c_y)*(a_x-c_x) - (p_x-c_x)*(a_y-c_y);
-    float fca=(p_y-b_y)*(c_x-b_x) - (p_x-b_x)*(c_y-b_y);
-    if (fab*fbc>0 && fbc*fca>0) return true;
-    return false;
+	float fab = (p_y - a_y)*(b_x - a_x) - (p_x - a_x)*(b_y - a_y);
+	float fbc = (p_y - c_y)*(a_x - c_x) - (p_x - c_x)*(a_y - c_y);
+	float fca = (p_y - b_y)*(c_x - b_x) - (p_x - b_x)*(c_y - b_y);
+	if (fab*fbc > 0 && fbc*fca > 0) return true;
+	return false;
 }
 
 /**
  * checks if a point is in a triangle (2D)
  */
-inline bool pointInTriangle(const QPointF &p,const QPointF &a,const QPointF &b,const QPointF &c)
+inline bool pointInTriangle(const QPointF &p, const QPointF &a, const QPointF &b, const QPointF &c)
 {
-    return pointInTriangle(p.x(), p.y(), a.x(), a.y(), b.x(), b.y(), c.x(), c.y());
+	return pointInTriangle(p.x(), p.y(), a.x(), a.y(), b.x(), b.y(), c.x(), c.y());
 }
 
 /**
  * checks if a triangle is front or backfaced
  */
 inline bool isFront(const float a_x, const float a_y, const float b_x, const float b_y, const float c_x, const float c_y) {
-    return (b_x-a_x)*(c_y-a_y)-(b_y-a_y)*(c_x-a_x)>0;
+	return (b_x - a_x)*(c_y - a_y) - (b_y - a_y)*(c_x - a_x) > 0;
 }
 
 /**
  * checks if a triangle is front or backfaced
  */
-inline bool isFront(const QPointF &a,const QPointF &b,const QPointF &c) {
-    return isFront(a.x(), a.y(), b.x(), b.y(), c.x(), c.y());
+inline bool isFront(const QPointF &a, const QPointF &b, const QPointF &c) {
+	return isFront(a.x(), a.y(), b.x(), b.y(), c.x(), c.y());
 }
 
 
@@ -503,35 +514,36 @@ inline bool isFront(const QPointF &a,const QPointF &b,const QPointF &c) {
  *
  * if d < 0 there are no intersection, if d = 0 there is one, if d > 0 there are two.
  */
-inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCenter, float radius)
+inline bool lineHitsCircle(QPointF& LineStart, QPointF& LineEnd, QPointF& CircleCenter, float radius)
 {
-    const float radius_sq = radius * radius;
-    QPointF Delta = LineStart - CircleCenter;
+	const float radius_sq = radius * radius;
+	QPointF Delta = LineStart - CircleCenter;
 
-    float delta_length_sq = Delta.x()*Delta.x()+Delta.y()*Delta.y();
+	float delta_length_sq = Delta.x()*Delta.x() + Delta.y()*Delta.y();
 
-    if(delta_length_sq <= radius_sq) return true;
+	if (delta_length_sq <= radius_sq) return true;
 
-    QPointF Direction = LineEnd - LineStart;
+	QPointF Direction = LineEnd - LineStart;
 
-    const float direction_dot_delta = Direction.x()*Delta.x()+Direction.y()*Delta.y();
+	const float direction_dot_delta = Direction.x()*Delta.x() + Direction.y()*Delta.y();
 
-    const float direction_length_sq = Direction.x()*Direction.x()+Direction.y()*Direction.y();
+	const float direction_length_sq = Direction.x()*Direction.x() + Direction.y()*Direction.y();
 
-    const float d = (direction_dot_delta * direction_dot_delta) - direction_length_sq * (delta_length_sq - radius_sq);
+	const float d = (direction_dot_delta * direction_dot_delta) - direction_length_sq * (delta_length_sq - radius_sq);
 
-    if(d < 0.0f) return false; //no intersection
-    else if(d < 0.0001f) //one intersection
-    {
-        const float s = - direction_dot_delta / direction_length_sq;
-        if(s < 0.0f || s > 1.0f) return false;
-        else return true;
-    }else //two intersections
-    {
-        const float s = (- direction_dot_delta - sqrtf(d)) / direction_length_sq; //only one intersection is chosen
-        if(s < 0.0f || s > 1.0f) return false;
-        else return true;
-    }
+	if (d < 0.0f) return false; //no intersection
+	else if (d < 0.0001f) //one intersection
+	{
+		const float s = -direction_dot_delta / direction_length_sq;
+		if (s < 0.0f || s > 1.0f) return false;
+		else return true;
+	}
+	else //two intersections
+	{
+		const float s = (-direction_dot_delta - sqrtf(d)) / direction_length_sq; //only one intersection is chosen
+		if (s < 0.0f || s > 1.0f) return false;
+		else return true;
+	}
 }
 
 /*********CMeshO Utility Routines************/
@@ -544,7 +556,7 @@ inline bool lineHitsCircle(QPointF& LineStart,QPointF& LineEnd,QPointF& CircleCe
  */
 inline void displaceAlongVector(CVertexO* vp, Point3m vector, float displacement)
 {
-    (*vp).P() += vector * displacement;
+	(*vp).P() += vector * displacement;
 }
 
 /**
@@ -554,92 +566,94 @@ inline void displaceAlongVector(CVertexO* vp, Point3m vector, float displacement
  *
  * Same complexity as GLPickTri<CMeshO>::PickNearestFace(..)
  */
-inline bool getVertexAtMouse(MeshModel &m,CMeshO::VertexPointer& value, QPoint& cursor,
-        double* modelview_matrix, double* projection_matrix, GLint* viewport)
+inline bool getVertexAtMouse(MeshModel &m, CMeshO::VertexPointer& value, QPoint& cursor,
+	double* modelview_matrix, double* projection_matrix, GLint* viewport)
 {
-    CFaceO * fp = NULL;
 
-    double tx, ty, tz;
+	double tx, ty, tz;
 
-    //TODO e se i vertici sono stati cancellati? (IsD())
+	//TODO e se i vertici sono stati cancellati? (IsD())
+	std::vector<CFaceO*> res;
+	int nface = vcg::GLPickTri<CMeshO>::PickVisibleFace(cursor.x(), cursor.y(), m.cm, res, 2, 2);
+	//if (GLPickTri<CMeshO>::PickClosestFace(latest_event.gl_position.x(), latest_event.gl_position.y(), m.cm, face, 2, 2))
+	if ((nface > 0) && (res[0] != NULL) && !(res[0]->IsD()))
+	//if (vcg::GLPickTri<CMeshO>::PickClosestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2))
+	{
+		CFaceO * fp = res[0];
+		QPointF point[3];
 
-    if (vcg::GLPickTri<CMeshO>::PickClosestFace(cursor.x(), cursor.y(), m.cm, fp, 2, 2))
-    {
+		for (int i = 0; i < 3; i++)
+		{
+			gluProject(fp->V(i)->P()[0], fp->V(i)->P()[1], fp->V(i)->P()[2],
+				modelview_matrix,
+				projection_matrix,
+				viewport,
+				&tx, &ty, &tz);
 
-        QPointF point[3];
+			point[i] = QPointF(tx, ty);
+		}
 
-        for (int i = 0; i < 3; i++)
-        {
-            gluProject(fp->V(i)->P()[0], fp->V(i)->P()[1], fp->V(i)->P()[2],
-                    modelview_matrix,
-                    projection_matrix,
-                    viewport,
-                    &tx, &ty, &tz);
+		value = fp->V(getNearest(cursor, point, 3));
 
-            point[i] = QPointF(tx,ty);
-        }
-
-        value = fp->V(getNearest(cursor, point, 3));
-
-        return true;
-    }
-    return false;
+		return true;
+	}
+	return false;
 }
 
 
 /**
  * calcs the surrounding faces of a vertex with VF topology
  */
-inline void getSurroundingFacesVF(CFaceO * fac,int vert_pos, std::vector<CFaceO *> *surround) {
-    CVertexO * vert=fac->V(vert_pos);
-    int pos=vert->VFi();
-    CFaceO * first_fac=vert->VFp();
-    CFaceO * curr_f=first_fac;
-    do {
-        CFaceO * temp=curr_f->VFp(pos);
-        if (curr_f!=0 && !curr_f->IsD()) {
-            surround->push_back(curr_f);
-            pos=curr_f->VFi(pos);
-        }
-        curr_f=temp;
-    } while (curr_f!=first_fac && curr_f!=0);
+inline void getSurroundingFacesVF(CFaceO * fac, int vert_pos, std::vector<CFaceO *> *surround) {
+	CVertexO * vert = fac->V(vert_pos);
+	int pos = vert->VFi();
+	CFaceO * first_fac = vert->VFp();
+	CFaceO * curr_f = first_fac;
+	do {
+		CFaceO * temp = curr_f->VFp(pos);
+		if (curr_f != 0 && !curr_f->IsD()) {
+			surround->push_back(curr_f);
+			pos = curr_f->VFi(pos);
+		}
+		curr_f = temp;
+	} while (curr_f != first_fac && curr_f != 0);
 }
 
 inline bool hasSelected(MeshModel &m) {
-    CMeshO::FaceIterator fi;
-    for(fi=m.cm.face.begin();fi!=m.cm.face.end();fi++) {
-        if (!(*fi).IsD() && (*fi).IsS()) return true;
-    }
-    return false;
+	CMeshO::FaceIterator fi;
+	for (fi = m.cm.face.begin(); fi != m.cm.face.end(); fi++) {
+		if (!(*fi).IsD() && (*fi).IsS()) return true;
+	}
+	return false;
 }
 
 inline void updateNormal(CVertexO * v)
 {
-    CFaceO * f = v->VFp();
-    CFaceO * one_face = f;
-    int pos = v->VFi();
-    v->N()[0]=0;v->N()[1]=0;v->N()[2]=0;
-    do {
-        CFaceO * temp=one_face->VFp(pos);
-        if (one_face!=0 && !one_face->IsD())
-        {
-            one_face->N()=TriangleNormal(*one_face).Normalize();
-            v->N() += one_face->N();
-            pos=one_face->VFi(pos);
-        }
-        one_face=temp;
-    } while (one_face!=f && one_face!=0);
-    v->N().Normalize();
+	CFaceO * f = v->VFp();
+	CFaceO * one_face = f;
+	int pos = v->VFi();
+	v->N()[0] = 0; v->N()[1] = 0; v->N()[2] = 0;
+	do {
+		CFaceO * temp = one_face->VFp(pos);
+		if (one_face != 0 && !one_face->IsD())
+		{
+			one_face->N() = TriangleNormal(*one_face).Normalize();
+			v->N() += one_face->N();
+			pos = one_face->VFi(pos);
+		}
+		one_face = temp;
+	} while (one_face != f && one_face != 0);
+	v->N().Normalize();
 }
 
 /*********OpenGL Drawing Routines************/
 
 
-void drawNormalPercentualCircle(GLArea *, QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float );
-void drawVertex(CVertexO* );
+void drawNormalPercentualCircle(GLArea *, QPoint &, MeshModel &, GLfloat*, double*, double*, GLint*, float);
+void drawVertex(CVertexO*);
 void drawLine(GLArea *, QPoint &, QPoint &);
 void drawSimplePolyLine(GLArea * gla, QPoint & gl_cur, float scale, std::vector<QPointF> * points);
-void drawPercentualPolyLine(GLArea * , QPoint &, MeshModel &, GLfloat* , double* , double* , GLint* , float , std::vector<QPointF> * );
+void drawPercentualPolyLine(GLArea *, QPoint &, MeshModel &, GLfloat*, double*, double*, GLint*, float, std::vector<QPointF> *);
 
 void generateCircle(std::vector<QPointF> &, int segments = 18);
 void generateSquare(std::vector<QPointF> &, int segments = 1);

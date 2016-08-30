@@ -37,7 +37,7 @@ Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, fl
 	QIcon redo = redo_button->icon();
 	redo_button->setDefaultAction(stacks->createRedoAction(redo_button));
 	redo_button->defaultAction()->setIcon(redo);
-	
+
 	setUndoStack(parent);	
 	
 	active = COLOR_PAINT;
