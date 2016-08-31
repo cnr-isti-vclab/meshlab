@@ -40,12 +40,12 @@ class ShaderDialog : public QDockWidget
     Q_OBJECT
 
 public:
-    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QMap<int,RenderMode>&rm, QWidget *parent = 0);
+    ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent = 0);
     ~ShaderDialog();
 
 private:
 		QGLWidget* glarea;
-		QMap<int,RenderMode>& rendMode;
+		bool usevertexcolor;
 		ShaderInfo * shaderInfo;
 		QSignalMapper *colorSignalMapper;
 		QSignalMapper *valueSignalMapper;

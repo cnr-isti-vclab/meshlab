@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -27,40 +27,41 @@
 #include "meshrender.h"
 #include <QGLWidget>
 #include <QTextStream>
+#include "../../meshlab/glarea.h"
 
 using namespace std;
 using namespace vcg;
 
 void MeshShaderRenderPlugin::initActionList() {
 
-	/*QAction * qaNone = new QAction("None", this); 
+	/*QAction * qaNone = new QAction("None", this);
 	qaNone->setCheckable(false);
 	actionList << qaNone;*/
 
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins"  )
+	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins")
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
-//	if (shadersDir.dirName() == "MacOS") {
-		for(int i=0;i<6;++i){
-			if(shadersDir.exists("shaders")) break;
-			shadersDir.cdUp();
-		}
-//	}
+	//	if (shadersDir.dirName() == "MacOS") {
+	for (int i = 0; i < 6; ++i) {
+		if (shadersDir.exists("shaders")) break;
+		shadersDir.cdUp();
+	}
+	//	}
 #endif
-	bool ret=shadersDir.cd("shaders");
-  if(!ret) 
-		{
-			QMessageBox::information(0, "MeshLab",
-															 "Unable to find the shaders directory.\n"
-															 "No shaders will be loaded.");
-		}
-	qDebug("Shader directory found '%s', and it contains %i gdp files",qPrintable(shadersDir.path()),shadersDir.entryList(QStringList("*.gdp")).size());
+	bool ret = shadersDir.cd("shaders");
+	if (!ret)
+	{
+		QMessageBox::information(0, "MeshLab",
+			"Unable to find the shaders directory.\n"
+			"No shaders will be loaded.");
+	}
+	qDebug("Shader directory found '%s', and it contains %i gdp files", qPrintable(shadersDir.path()), shadersDir.entryList(QStringList("*.gdp")).size());
 
 
 	QDomDocument doc;
-	foreach (QString fileName, shadersDir.entryList(QDir::Files)) {
+	foreach(QString fileName, shadersDir.entryList(QDir::Files)) {
 		if (fileName.endsWith(".gdp")) {
 			QFile file(shadersDir.absoluteFilePath(fileName));
 			if (file.open(QIODevice::ReadOnly)) {
@@ -82,7 +83,7 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (!child.isNull()) {
 								//first child of "Filenames" is "Filename0"
 								child = child.firstChild();
-								si.vpFile =	shadersDir.absoluteFilePath((child.toElement()).attribute("VertexProgram", ""));
+								si.vpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("VertexProgram", ""));
 							}
 						}
 
@@ -94,16 +95,16 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (!child.isNull()) {
 								//first child of "Filenames" is "Filename0"
 								child = child.firstChild();
-								si.fpFile =	shadersDir.absoluteFilePath((child.toElement()).attribute("FragmentProgram", ""));
+								si.fpFile = shadersDir.absoluteFilePath((child.toElement()).attribute("FragmentProgram", ""));
 							}
-						}	
+						}
 
 						//Uniform Variables
 						elem = root.firstChildElement("UniformVariables");
 						if (!elem.isNull()) {
 
 							QDomNode unif = elem.firstChild();
-							while( !unif.isNull() ) {
+							while (!unif.isNull()) {
 
 								UniformVariable uv;
 
@@ -120,38 +121,38 @@ void MeshShaderRenderPlugin::initActionList() {
 
 								if (!unifElemValue.isNull()) {
 
-									switch (uv.type) 
+									switch (uv.type)
 									{
-									case SINGLE_INT: 
-										{
-											uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
-										} break;
-									case SINGLE_FLOAT: 
-										{ 
-											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
-										} break; 
-									case ARRAY_2_FLOAT: 
-										{ 
-											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();	
-										} break; 
-									case ARRAY_3_FLOAT: 
-										{ 
-											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-											uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();		
-										} break; 
-									case ARRAY_4_FLOAT: 
-										{ 
-											uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();			
-											uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();			
-											uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
-											uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();		
-										} break; 
-									default: 
-										{ 
+									case SINGLE_INT:
+									{
+										uv.ival[0] = unifElemValue.toElement().attribute("Value0", 0).toInt();
+									} break;
+									case SINGLE_FLOAT:
+									{
+										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+									} break;
+									case ARRAY_2_FLOAT:
+									{
+										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+									} break;
+									case ARRAY_3_FLOAT:
+									{
+										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+										uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+									} break;
+									case ARRAY_4_FLOAT:
+									{
+										uv.fval[0] = unifElemValue.toElement().attribute("Value0", 0).toFloat();
+										uv.fval[1] = unifElemValue.toElement().attribute("Value1", 0).toFloat();
+										uv.fval[2] = unifElemValue.toElement().attribute("Value2", 0).toFloat();
+										uv.fval[3] = unifElemValue.toElement().attribute("Value3", 0).toFloat();
+									} break;
+									default:
+									{
 
-										} break; 
+									} break;
 									}
 
 									si.uniformVars[unifVarName] = uv;
@@ -159,7 +160,7 @@ void MeshShaderRenderPlugin::initActionList() {
 
 								unif = unif.nextSibling();
 							}
-						}					
+						}
 
 
 						//OpenGL Status
@@ -183,27 +184,27 @@ void MeshShaderRenderPlugin::initActionList() {
 							if (elem.hasAttribute("ClearColorA"))		si.glStatus[CLEAR_COLOR_A] = elem.attribute("ClearColorA", "0");
 						}
 
-						
+
 						//Textures
-						
-            QDir textureDir(shadersDir);
-            textureDir.cdUp();
-            textureDir.cd("textures");
+
+						QDir textureDir(shadersDir);
+						textureDir.cdUp();
+						textureDir.cd("textures");
 						elem = root.firstChildElement("TexturedUsed");
 						if (!elem.isNull()) {
 							QDomNode unif = elem.firstChild();
-							while( !unif.isNull() ) {
+							while (!unif.isNull()) {
 								QDomElement unifElem = unif.toElement();
 								TextureInfo tInfo;
 
-								tInfo.path = shadersDir.absoluteFilePath((unifElem.attribute("Filename", "")));								
+								tInfo.path = shadersDir.absoluteFilePath((unifElem.attribute("Filename", "")));
 								tInfo.MinFilter = (unifElem.attribute("MinFilter", 0)).toInt();
 								tInfo.MagFilter = (unifElem.attribute("MagFilter", 0)).toInt();
 								tInfo.Target = (unifElem.attribute("Target", 0)).toInt();
 								tInfo.WrapS = (unifElem.attribute("WrapS", 0)).toInt();
 								tInfo.WrapT = (unifElem.attribute("WrapT", 0)).toInt();
 								tInfo.WrapR = (unifElem.attribute("WrapR", 0)).toInt();
-							
+
 								si.textureInfo.push_back(tInfo);
 								unif = unif.nextSibling();
 							}
@@ -213,34 +214,35 @@ void MeshShaderRenderPlugin::initActionList() {
 
 						shaders[fileName] = si;
 
-						QAction * qa = new QAction(fileName, this); 
+						QAction * qa = new QAction(fileName, this);
 						qa->setCheckable(false);
 						actionList << qa;
 					}
-          else qDebug("Failed root.nodeName() == GLSLang) (for %s)",qPrintable(fileName));
-        } else {
-          qDebug("Failed doc.setContent(%s)",qPrintable(fileName));
+					else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qPrintable(fileName));
+				}
+				else {
+					qDebug("Failed doc.setContent(%s)", qPrintable(fileName));
 					file.close();
 				}
 			}
-      else  qDebug("Failed file.open(%s)",qPrintable(shadersDir.absoluteFilePath(fileName)));
+			else  qDebug("Failed file.open(%s)", qPrintable(shadersDir.absoluteFilePath(fileName)));
 		}
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,RenderMode>&rm, QGLWidget *gla)
+void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
 {
 	if (sDialog) {
 		sDialog->close();
 		delete sDialog;
-		sDialog=0;
+		sDialog = 0;
 	}
 
-  gla->makeCurrent();
+	gla->makeCurrent();
 	GLenum err = glewInit();
 	if (GLEW_OK == err) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
-			supported = true;			
+			supported = true;
 			if (shaders.find(a->text()) != shaders.end()) {
 
 				v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
@@ -268,8 +270,8 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 
 				if (statusF && statusV) { //successful compile
 					shaders[a->text()].shaderProg = glCreateProgramObjectARB();
-					glAttachObjectARB(shaders[a->text()].shaderProg,v);
-					glAttachObjectARB(shaders[a->text()].shaderProg,f);
+					glAttachObjectARB(shaders[a->text()].shaderProg, v);
+					glAttachObjectARB(shaders[a->text()].shaderProg, f);
 					glLinkProgramARB(shaders[a->text()].shaderProg);
 
 					GLint linkStatus;
@@ -283,7 +285,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 						}
 
 					}
-					else 
+					else
 					{
 						QFile file("shaders.log");
 						if (file.open(QFile::Append))
@@ -311,10 +313,10 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 					}
 
 					//Textures
-				
+
 
 					std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
-					while (tIter != shaders[a->text()].textureInfo.end()) 
+					while (tIter != shaders[a->text()].textureInfo.end())
 					{
 						glEnable(tIter->Target);
 						QImage img, imgScaled, imgGL;
@@ -325,32 +327,32 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 							return;
 						}
 						// image has to be scaled to a 2^n size. We choose the first 2^N <= picture size.
-						int bestW=pow(2.0,floor(::log(double(img.width() ))/::log(2.0)));
-						int bestH=pow(2.0,floor(::log(double(img.height()))/::log(2.0)));
-						imgScaled=img.scaled(bestW,bestH,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-						imgGL=QGLWidget::convertToGLFormat(imgScaled);
+						int bestW = pow(2.0, floor(::log(double(img.width())) / ::log(2.0)));
+						int bestH = pow(2.0, floor(::log(double(img.height())) / ::log(2.0)));
+						imgScaled = img.scaled(bestW, bestH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+						imgGL = QGLWidget::convertToGLFormat(imgScaled);
 
-						glGenTextures( 1, &(tIter->tId) );
-						glBindTexture( tIter->Target, tIter->tId );
-						glTexImage2D( tIter->Target, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits() );
-						glTexParameteri( tIter->Target, GL_TEXTURE_MIN_FILTER, tIter->MinFilter );
-						glTexParameteri( tIter->Target, GL_TEXTURE_MAG_FILTER, tIter->MagFilter ); 
-						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_S, tIter->WrapS ); 
-						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_T, tIter->WrapT ); 
-						glTexParameteri( tIter->Target, GL_TEXTURE_WRAP_R, tIter->WrapR ); 
+						glGenTextures(1, &(tIter->tId));
+						glBindTexture(tIter->Target, tIter->tId);
+						glTexImage2D(tIter->Target, 0, 3, imgGL.width(), imgGL.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imgGL.bits());
+						glTexParameteri(tIter->Target, GL_TEXTURE_MIN_FILTER, tIter->MinFilter);
+						glTexParameteri(tIter->Target, GL_TEXTURE_MAG_FILTER, tIter->MagFilter);
+						glTexParameteri(tIter->Target, GL_TEXTURE_WRAP_S, tIter->WrapS);
+						glTexParameteri(tIter->Target, GL_TEXTURE_WRAP_T, tIter->WrapT);
+						glTexParameteri(tIter->Target, GL_TEXTURE_WRAP_R, tIter->WrapR);
 
 
 						++tIter;
 					}
 
 
-					sDialog = new ShaderDialog(&shaders[a->text()], gla, rm,gla);
-					sDialog->move(10,100);
+					sDialog = new ShaderDialog(&shaders[a->text()], gla,gla);
+					sDialog->move(10, 100);
 					sDialog->show();
 
-				} 
-				else 
-				{	
+				}
+				else
+				{
 					QFile file("shaders.log");
 					if (file.open(QFile::WriteOnly))
 					{
@@ -373,7 +375,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 
 					QMessageBox::critical(0, "Meshlab",
 						QString("An error occurred during shader's compiling.\n"
-						"See shaders.log for further details about this error."));
+							"See shaders.log for further details about this error."));
 				}
 			}
 		}
@@ -384,9 +386,9 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, QMap<int,Ren
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, QMap<int,RenderMode>&rm, QGLWidget * /* gla */) 
+void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
 {
-//  MeshModel &mm
+	//  MeshModel &mm
 	if (shaders.find(a->text()) != shaders.end()) {
 		ShaderInfo si = shaders[a->text()];
 
@@ -394,23 +396,23 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, QMap<int,Rende
 
 		map<QString, UniformVariable>::iterator i = si.uniformVars.begin();
 		while (i != si.uniformVars.end()) {
-			switch(i->second.type) {
-				case SINGLE_INT: {
-					glUniform1iARB(i->second.location, i->second.ival[0]);
-												 } break;
-				case SINGLE_FLOAT: {
-					glUniform1fARB(i->second.location, i->second.fval[0]);
-													 } break;
-				case ARRAY_2_FLOAT: {
-					glUniform2fARB(i->second.location, i->second.fval[0], i->second.fval[1]);
-														} break;
-				case ARRAY_3_FLOAT: {
-					glUniform3fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2]);
-														} break;
-				case ARRAY_4_FLOAT: {
-					glUniform4fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2], i->second.fval[3]);
-														} break;
-				default: {} break;
+			switch (i->second.type) {
+			case SINGLE_INT: {
+				glUniform1iARB(i->second.location, i->second.ival[0]);
+			} break;
+			case SINGLE_FLOAT: {
+				glUniform1fARB(i->second.location, i->second.fval[0]);
+			} break;
+			case ARRAY_2_FLOAT: {
+				glUniform2fARB(i->second.location, i->second.fval[0], i->second.fval[1]);
+			} break;
+			case ARRAY_3_FLOAT: {
+				glUniform3fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2]);
+			} break;
+			case ARRAY_4_FLOAT: {
+				glUniform4fARB(i->second.location, i->second.fval[0], i->second.fval[1], i->second.fval[2], i->second.fval[3]);
+			} break;
+			default: {} break;
 			}
 			++i;
 		}
@@ -418,58 +420,60 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, QMap<int,Rende
 		std::map<int, QString>::iterator j = si.glStatus.begin();
 		while (j != si.glStatus.end()) {
 			switch (j->first) {
-				case SHADE: glShadeModel(j->second.toInt()); break;
-				case ALPHA_TEST: if (j->second == "True") glEnable(GL_ALPHA_TEST); else glDisable(GL_ALPHA_TEST); break;
-				case ALPHA_FUNC: glAlphaFunc(j->second.toInt(), (si.glStatus[ALPHA_CLAMP]).toFloat()); break;
-					//case ALPHA_CLAMP: used in ALPHA_FUNC
-				case BLENDING: if (j->second == "True") glEnable(GL_BLEND); else glDisable(GL_BLEND); break;
-				case BLEND_FUNC_SRC: glBlendFunc(j->second.toInt(), (si.glStatus[BLEND_FUNC_DST]).toInt()); break;
-					//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
-				case BLEND_EQUATION: glBlendEquation(j->second.toInt()); break;
-				case DEPTH_TEST: if (j->second == "True") glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST); break;
-				case DEPTH_FUNC: glDepthFunc(j->second.toInt()); break;
-					//case CLAMP_NEAR:
-					//case CLAMP_FAR:
-				case CLEAR_COLOR_R: glClearColor(j->second.toFloat(), 
-															(si.glStatus[CLEAR_COLOR_G]).toFloat(),
-															(si.glStatus[CLEAR_COLOR_B]).toFloat(),
-															(si.glStatus[CLEAR_COLOR_A]).toFloat()); break;
-					//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
-					//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
-					//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
+			case SHADE: glShadeModel(j->second.toInt()); break;
+			case ALPHA_TEST: if (j->second == "True") glEnable(GL_ALPHA_TEST); else glDisable(GL_ALPHA_TEST); break;
+			case ALPHA_FUNC: glAlphaFunc(j->second.toInt(), (si.glStatus[ALPHA_CLAMP]).toFloat()); break;
+				//case ALPHA_CLAMP: used in ALPHA_FUNC
+			case BLENDING: if (j->second == "True") glEnable(GL_BLEND); else glDisable(GL_BLEND); break;
+			case BLEND_FUNC_SRC: glBlendFunc(j->second.toInt(), (si.glStatus[BLEND_FUNC_DST]).toInt()); break;
+				//case BLEND_FUNC_DST: used in BLEND_FUNC_SRC
+			case BLEND_EQUATION: glBlendEquation(j->second.toInt()); break;
+			case DEPTH_TEST: if (j->second == "True") glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST); break;
+			case DEPTH_FUNC: glDepthFunc(j->second.toInt()); break;
+				//case CLAMP_NEAR:
+				//case CLAMP_FAR:
+			case CLEAR_COLOR_R: glClearColor(j->second.toFloat(),
+				(si.glStatus[CLEAR_COLOR_G]).toFloat(),
+				(si.glStatus[CLEAR_COLOR_B]).toFloat(),
+				(si.glStatus[CLEAR_COLOR_A]).toFloat()); break;
+				//case CLEAR_COLOR_G: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_B: used in CLEAR_COLOR_R
+				//case CLEAR_COLOR_A: used in CLEAR_COLOR_R
 			}
 			++j;
 		}
-	
+
 		int n = GL_TEXTURE0_ARB;
 		std::vector<TextureInfo>::iterator tIter = shaders[a->text()].textureInfo.begin();
 		while (tIter != shaders[a->text()].textureInfo.end()) {
 			glActiveTexture(n);
 			glEnable(tIter->Target);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);	
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-			glBindTexture( tIter->Target, tIter->tId );
-			for(QMap<int,RenderMode>::iterator it = rm.begin();it != rm.end();++it)
-				it.value().textureMode = GLW::TMPerWedge;
-			
+			glBindTexture(tIter->Target, tIter->tId);
+			/*for (QMap<int, RenderMode>::iterator it = rm.begin(); it != rm.end(); ++it)
+				it.value().textureMode = GLW::TMPerWedge;*/
+
 			++tIter;
 			++n;
 		}
 
-		
+
 	}
 	// * clear the errors, if any
 	glGetError();
-	foreach(MeshModel * mp, md.meshList)
-				{
-					QMap<int,RenderMode>::const_iterator it = rm.find(mp->id());
-					if ((mp->visible) && (it != rm.end())) 
-						mp->render(it.value().drawMode,it.value().colorMode,it.value().textureMode);
-				}
+	if ((gla != NULL) && (gla->mvc() != NULL))
+	{
+		MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
+		foreach(MeshModel * mp, md.meshList)
+		{
+			shared->draw(mp->id(),gla->context());
+		}
+	}
 	glUseProgramObjectARB(0);
 }
 
-void MeshShaderRenderPlugin::Finalize( QAction*, MeshDocument*, GLArea* )
+void MeshShaderRenderPlugin::Finalize(QAction*, MeshDocument*, GLArea*)
 {
 	delete sDialog;
 	sDialog = 0;

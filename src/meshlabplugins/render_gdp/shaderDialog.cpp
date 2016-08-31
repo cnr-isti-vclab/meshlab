@@ -30,13 +30,14 @@
 #include <QColorDialog>
 #include <QGLWidget>
 #include <QCheckBox>
+#include <QPushButton>
 
 #define DECFACTOR 100000.0f
 
 using namespace vcg;
 
-ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla,QMap<int,RenderMode>& rm, QWidget *parent)
-: QDockWidget(parent),rendMode(rm)
+ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla, QWidget *parent)
+: QDockWidget(parent),usevertexcolor(false)
 {
 	ui.setupUi(this);
   this->setWidget(ui.frame);
@@ -55,17 +56,15 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla,QMap<int,RenderMode
 	qgrid->setColumnMinimumWidth(2, 40);
 	qgrid->setColumnMinimumWidth(3, 40);
 
-	QLabel *perVertexColorLabel = new QLabel(this);
+	/*QLabel *perVertexColorLabel = new QLabel(this);
 	perVertexColorLabel->setText("Use PerVertex Color");
 	QCheckBox *perVertexColorCBox = new QCheckBox(this);
-	for(QMap<int,RenderMode>::iterator it = rendMode.begin();it != rendMode.end();++it)
-		it.value().colorMode =  GLW::CMNone;
 	connect(perVertexColorCBox, SIGNAL(stateChanged(int)), this, SLOT(setColorMode(int)));
 
 	qgrid->addWidget(perVertexColorLabel, 0, 0);
-	qgrid->addWidget(perVertexColorCBox, 0, 1);
+	qgrid->addWidget(perVertexColorCBox, 0, 1);*/
 
-	int row=1;
+	int row=0;
 	std::map<QString, UniformVariable>::iterator i;
 	for (i = shaderInfo->uniformVars.begin(); i != shaderInfo->uniformVars.end(); ++i) {
 
@@ -239,14 +238,6 @@ ShaderDialog::ShaderDialog(ShaderInfo *sInfo, QGLWidget* gla,QMap<int,RenderMode
 	qf.close();
 
 	//End of Vertex and Fragment Program Tabs Section
-
-
-//	this->setWindowFlags(Qt::WindowStaysOnTopHint);
-	connect(ui.okButton, SIGNAL(clicked()), this, SLOT(accept()));
-
-
-
-
 }
 
 ShaderDialog::~ShaderDialog()
@@ -312,17 +303,10 @@ void ShaderDialog::valuesChanged(const QString &varNameAndIndex) {
 }
 
 
-void ShaderDialog::setColorMode(int state) {
-	for(QMap<int,RenderMode>::iterator it = rendMode.begin();it != rendMode.end();++it)
-	{
-		if (state == Qt::Checked) 
-		{
-			it.value().colorMode = GLW::CMPerVert;
-		} else {
-			it.value().colorMode = GLW::CMNone;
-		}
-	}
-  glarea->update();
+void ShaderDialog::setColorMode(int state) 
+{	
+	usevertexcolor = (state == Qt::Checked);	
+	glarea->update();
 }
 
 void ShaderDialog::changeTexturePath(int i) {
