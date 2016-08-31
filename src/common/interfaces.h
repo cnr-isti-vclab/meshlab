@@ -436,8 +436,8 @@ public:
 	MeshRenderInterface() :MeshCommonInterface() {}
 	virtual ~MeshRenderInterface() {}
 
-	virtual void Init(QAction *, MeshDocument &, GLArea *) {}
-	virtual void Render(QAction *, MeshDocument &, GLArea *) = 0;
+	virtual void Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) {}
+	virtual void Render(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *) = 0;
 	virtual void Finalize(QAction *, MeshDocument *, GLArea *) {}
 	virtual bool isSupported() = 0;
 	virtual QList<QAction *> actions() = 0;
