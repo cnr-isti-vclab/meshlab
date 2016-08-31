@@ -53,7 +53,7 @@ RadianceScalingRendererPlugin::RadianceScalingRendererPlugin()
 
 }
 
-void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, GLArea *gla) {
+void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla) {
 	if (_sDialog) {
 		_sDialog->close();
 		delete _sDialog;
@@ -93,7 +93,7 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, GLArea *gla)
 	GL_TEST_ERR
 }
 
-void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, GLArea *gla)
+void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	if (gla == NULL)
 		return;
