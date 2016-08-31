@@ -75,6 +75,7 @@ SUBDIRS       = common \
 				plugins_experimental/edit_referencing \
 # Render Plugins
 				meshlabplugins/render_radiance_scaling \
+				meshlabplugins/render_gdp \
 # Sample Plugins
 				sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
