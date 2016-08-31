@@ -638,7 +638,6 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
         unSplitMenu->addAction(unsplitRightAct);
         unSplitMenu->addAction(unsplitLeftAct);
     }
-
     handleMenu->popup(point);
 }
 
@@ -1067,7 +1066,8 @@ void MainWindow::startFilter()
 
     // In order to avoid that a filter changes something assumed by the current editing tool,
     // before actually starting the filter we close the current editing tool (if any).
-	endEdit();
+	if (GLA()->getCurrentEditAction() != NULL)
+		endEdit();
     updateMenus();
 
     QStringList missingPreconditions;
@@ -1306,7 +1306,28 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         }
                         curr.set(pm,rd);
                     }
-                    MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(mm,curr);
+					MLPerViewGLOptions opts;
+					curr.get(opts);
+					if (fclasses & MeshFilterInterface::MeshColoring)
+					{
+						bool hasmeshcolor = mm->hasDataMask(MeshModel::MM_COLOR);
+						opts._perpoint_mesh_color_enabled = hasmeshcolor;
+						opts._perwire_mesh_color_enabled = hasmeshcolor;
+						opts._persolid_mesh_color_enabled = hasmeshcolor;
+
+						for (MLRenderingData::PRIMITIVE_MODALITY pm = MLRenderingData::PRIMITIVE_MODALITY(0); pm < MLRenderingData::PR_ARITY; pm = MLRenderingData::next(pm))
+						{
+							MLRenderingData::RendAtts atts;
+							curr.get(pm, atts);
+							atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = false;
+							atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
+							curr.set(pm, atts);
+						}
+					}
+					curr.set(opts);
+					
+
+                    MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(curr);
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
                 }

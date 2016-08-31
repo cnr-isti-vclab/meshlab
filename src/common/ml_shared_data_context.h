@@ -190,7 +190,7 @@ struct MLPoliciesStandAloneFunctions
 
     static void setAttributePriorities(MLRenderingData::RendAtts& atts);
 
-    static void setPerViewGLOptionsPriorities(MeshModel* mm,MLRenderingData& dt );
+    static void setPerViewGLOptionsPriorities(MLRenderingData& dt );
 
     //static void setPerViewRenderingDataPriorities(MeshModel* mm,MLRenderingData& dt);
 
@@ -198,7 +198,7 @@ struct MLPoliciesStandAloneFunctions
 
     static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dt);
 
-	static void disableRedundatRenderingDataAccordingToPriorities(MeshModel* meshmodel,MLRenderingData& dt);
+	static void disableRedundatRenderingDataAccordingToPriorities(MLRenderingData& dt);
 
     static bool isPrimitiveModalityCompatibleWithMesh(MeshModel* m,const MLRenderingData::PRIMITIVE_MODALITY pm);
 
