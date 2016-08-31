@@ -1990,10 +1990,17 @@ void MainWindow::applyRenderMode()
     // Make the call to the plugin core
     MeshRenderInterface *iRenderTemp = qobject_cast<MeshRenderInterface *>(action->parent());
     bool initsupport = false;
-    //MultiViewer_Container* mw = this->currentViewContainer();
-    if (iRenderTemp != NULL)
+
+	if (currentViewContainer() == NULL)
+		return;
+
+	MLSceneGLSharedDataContext* shared = currentViewContainer()->sharedDataContext();
+
+    if ((shared != NULL) && (iRenderTemp != NULL))
     {
-        iRenderTemp->Init(action,*(meshDoc()),GLA());
+		MLSceneGLSharedDataContext::PerMeshRenderingDataMap rdmap;
+		shared->getRenderInfoPerMeshView(GLA()->context(), rdmap);
+        iRenderTemp->Init(action,*(meshDoc()),rdmap, GLA());
         initsupport = iRenderTemp->isSupported();
         if (initsupport)
             GLA()->setRenderer(iRenderTemp,action);

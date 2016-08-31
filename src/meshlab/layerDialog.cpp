@@ -81,7 +81,8 @@ LayerDialog::LayerDialog(QWidget *parent )
 }
 
 void LayerDialog::keyPressEvent ( QKeyEvent * event )
-{   MeshDocument *md = mw->meshDoc();
+{   
+	MeshDocument *md = mw->meshDoc();
     if((md != NULL) && (event->key() == Qt::Key_Space ))
     {
       RasterModel *rm= md->nextRaster(md->rm());

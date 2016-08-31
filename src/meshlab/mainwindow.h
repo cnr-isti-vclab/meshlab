@@ -300,8 +300,9 @@ public:
     PluginManager PM;
 
     MeshDocument *meshDoc() {
-        assert(currentViewContainer());
-        return &currentViewContainer()->meshDoc;
+        if (currentViewContainer() != NULL)
+			return &currentViewContainer()->meshDoc;
+		return NULL;
     }
 
     inline vcg::QtThreadSafeMemoryInfo* memoryInfoManager() const {return gpumeminfo;} 

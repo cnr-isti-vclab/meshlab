@@ -466,7 +466,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
                 shared->getRenderInfoPerMeshView(context(),dt);
         
-                iRenderer->Render(currentShader, *this->md(),this);
+                iRenderer->Render(currentShader, *this->md(),dt,this);
 
                 MLDefaultMeshDecorators defdec(mw());
                
