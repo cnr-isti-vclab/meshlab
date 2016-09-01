@@ -39,7 +39,7 @@
 #include <wrap/ply/plystuff.h>
 
 #include <vcg/complex/algorithms/create/marching_cubes.h>
-#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
+//#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
 //#include "trivial_walker.h"
 // local optimization
 #include <vcg/complex/algorithms/local_optimization.h>
