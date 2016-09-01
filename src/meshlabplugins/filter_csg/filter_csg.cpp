@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_csg.h"
-#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
+//#include <vcg/complex/algorithms/create/extended_marching_cubes.h>
 #include <vcg/complex/algorithms/create/marching_cubes.h>
 
 #include <fstream>
@@ -99,10 +99,10 @@ void FilterCSG::initParameterSet(QAction *action, MeshDocument & md, RichParamet
                                          "Intersection takes the volume shared between the two meshes; "
                                          "Union takes the volume included in at least one of the two meshes; "
                                          "Difference takes the volume included in the first mesh but not in the second one"));
-            parlst.addParam(new RichBool("Extended", false, "Extended Marching Cubes",
-                                         "Use extended marching cubes for surface reconstruction. "
-                                         "It tries to improve the quality of the mesh by reconstructing the sharp features "
-                                         "using the information in vertex normals"));
+//            parlst.addParam(new RichBool("Extended", false, "Extended Marching Cubes",
+//                                         "Use extended marching cubes for surface reconstruction. "
+//                                         "It tries to improve the quality of the mesh by reconstructing the sharp features "
+//                                         "using the information in vertex normals"));
         }
         break;
 
@@ -164,18 +164,10 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
 
             Log(0, "Building mesh...");
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
+            typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
             MyWalker walker;
-            if (par.getBool("Extended")) {
-                mesh->updateDataMask(MeshModel::MM_FACEFACETOPO);
-                typedef vcg::tri::ExtendedMarchingCubes<CMeshO, MyWalker> MyExtendedMarchingCubes;
-                MyExtendedMarchingCubes mc(mesh->cm, walker);
-                walker.BuildMesh<MyExtendedMarchingCubes>(mesh->cm, v, mc, cb);
-            } else {
-                typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
-                MyWalker walker;
-                MyMarchingCubes mc(mesh->cm, walker);
-                walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc, cb);
-            }
+            MyMarchingCubes mc(mesh->cm, walker);
+            walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc, cb);
             Log(0, "Done");
 
             vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);

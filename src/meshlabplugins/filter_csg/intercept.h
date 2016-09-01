@@ -3,13 +3,8 @@
 
 #include <algorithm>
 #include <vector>
-#ifdef _MSC_VER
-    #include <unordered_map>
-    #include <unordered_set>
-#else
-    #include <tr1/unordered_map>
-    #include <tr1/unordered_set>
-#endif
+#include <unordered_map>
+#include <unordered_set>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/clean.h>
@@ -29,23 +24,15 @@ namespace std
 //MSVC++ 7.0  _MSC_VER = 1300
 //MSVC++ 6.0  _MSC_VER = 1200
 //MSVC++ 5.0  _MSC_VER = 1100
-#if defined(_MSC_VER) && (_MSC_VER > 1500)
-#else
-	 namespace tr1 {
-#endif
         template <>
         struct hash<vcg::Point3i> : public std::unary_function<vcg::Point3i, std::size_t>
         {
             std::size_t operator()(const vcg::Point3i &x) const
             {
-                std::tr1::hash<int> h;
+                std::hash<int> h;
                 return ((x[0]) * 131 + h(x[1])) * 131 + h(x[2]);
             }
         };
-#if defined(_MSC_VER) && (_MSC_VER > 1500)
-#else
-	 }
-#endif       
 }
 
 /*
@@ -117,9 +104,9 @@ namespace vcg {
 
             inline const Point3x& norm() const { return _norm; }
 
-            friend std::ostream& operator<<(std::ostream &out, const Intercept &x) {
-                return out << "Intercept[" << x._dist << "[" << x._sort_norm << "], (" << p3print(x._norm) << "), " << x._quality << "]";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const Intercept &x) {
+//                return out << "Intercept[" << x._dist << "[" << x._sort_norm << "], (" << p3print(x._norm) << "), " << x._quality << "]";
+//            }
         };
 
         /** Class InterceptRay
@@ -154,7 +141,7 @@ namespace vcg {
                 typename ContainerType::const_iterator next = curr+1;
                 while (next != v.end()) {
                     if (*next < *curr) {
-                        std::cerr << "Not sorted! (" << *curr << " > " << *next << ")" << std::endl;
+//                        std::cerr << "Not sorted! (" << *curr << " > " << *next << ")" << std::endl;
                         return false;
                     }
                     curr = next;
@@ -292,14 +279,14 @@ namespace vcg {
                 return InterceptRay(newv);
             }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptRay &x) {
-                typename ContainerType::const_iterator i, end = x.v.end();
-                out << "InterceptRay[";
-                for (i = x.v.begin(); i != end; ++i)
-                    out << *i;
-                assert (x.isValid());
-                return out << "]";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptRay &x) {
+//                typename ContainerType::const_iterator i, end = x.v.end();
+//                out << "InterceptRay[";
+//                for (i = x.v.begin(); i != end; ++i)
+//                    out << *i;
+//                assert (x.isValid());
+//                return out << "]";
+//            }
 
         private:
             ContainerType v;
@@ -383,16 +370,16 @@ namespace vcg {
                 return *this;
             }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptBeam &x) {
-                out << "InterceptBeam[" << p2print(x.bbox.min) << " - " << p2print(x.bbox.max) << "][" << std::endl;
-                for(int i = x.bbox.min.X(); i <= x.bbox.max.X(); ++i) {
-                    for(int j = x.bbox.min.Y(); j <= x.bbox.max.Y(); ++j) {
-                        vcg::Point2i p(i,j);
-                        out << p2print(p) << ": " << x.GetInterceptRay(p) << std::endl;
-                    }
-                }
-                return out << "]";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptBeam &x) {
+//                out << "InterceptBeam[" << p2print(x.bbox.min) << " - " << p2print(x.bbox.max) << "][" << std::endl;
+//                for(int i = x.bbox.min.X(); i <= x.bbox.max.X(); ++i) {
+//                    for(int j = x.bbox.min.Y(); j <= x.bbox.max.Y(); ++j) {
+//                        vcg::Point2i p(i,j);
+//                        out << p2print(p) << ": " << x.GetInterceptRay(p) << std::endl;
+//                    }
+//                }
+//                return out << "]";
+//            }
 
         private:
             vcg::Box2i bbox;
@@ -483,52 +470,52 @@ namespace vcg {
                 /* If the rasterization algorithm generates consistent volumes, this should never happen */
                 std::cerr << "Inconsistency: " << p3print(p) << p3print(delta) << std::endl;
                 for (int i = 0; i < 3; ++i) {
-                    std::cerr << beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
-                    std::cerr << ": " << beam[i].GetInterceptRay(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3))) << std::endl;
+//                    std::cerr << beam[i].IsIn(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3)), p.V(i));
+//                    std::cerr << ": " << beam[i].GetInterceptRay(vcg::Point2i(p.V((i+1)%3), p.V((i+2)%3))) << std::endl;
                 }
 
                 return 0;
             }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptVolume &x) {
-                out << "InterceptVolume[" << p3print(x.delta) << "][" << std::endl;
-                int coord = 0;
-                for(typename ContainerType::const_iterator iter = x.beam.begin(); iter != x.beam.end(); ++iter) {
-                    out << *iter << std::endl;
-                    out << "Beam " << coord << std::endl;
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptVolume &x) {
+//                out << "InterceptVolume[" << p3print(x.delta) << "][" << std::endl;
+//                int coord = 0;
+//                for(typename ContainerType::const_iterator iter = x.beam.begin(); iter != x.beam.end(); ++iter) {
+//                    out << *iter << std::endl;
+//                    out << "Beam " << coord << std::endl;
 
-                    for (int i=x.bbox.min[coord]; i<=x.bbox.max[coord]; i+=1) {
-                        out << i << std::endl;
+//                    for (int i=x.bbox.min[coord]; i<=x.bbox.max[coord]; i+=1) {
+//                        out << i << std::endl;
 
-                        for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]+2; k+=1)
-                            out << '+';
-                        out << std::endl;
+//                        for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]+2; k+=1)
+//                            out << '+';
+//                        out << std::endl;
 
-                        for (int j=x.bbox.min[(coord+1)%3]; j<=x.bbox.max[(coord+1)%3]; j+=1) {
-                            out << '+';
-                            for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]; k+=1) {
-                                vcg::Point3i p(i,j,k);
-                                int in = iter->IsInExt(vcg::Point2i(j, k), i);
-                                char c = '?';
-                                if (in < 0)
-                                    c = ' ';
-                                else if (in > 0)
-                                    c = '#';
-                                out << c;
-                            }
-                            out << '+' << std::endl;
-                        }
+//                        for (int j=x.bbox.min[(coord+1)%3]; j<=x.bbox.max[(coord+1)%3]; j+=1) {
+//                            out << '+';
+//                            for (int k=x.bbox.min[(coord+2)%3]; k<=x.bbox.max[(coord+2)%3]; k+=1) {
+//                                vcg::Point3i p(i,j,k);
+//                                int in = iter->IsInExt(vcg::Point2i(j, k), i);
+//                                char c = '?';
+//                                if (in < 0)
+//                                    c = ' ';
+//                                else if (in > 0)
+//                                    c = '#';
+//                                out << c;
+//                            }
+//                            out << '+' << std::endl;
+//                        }
 
-                        for (int k=x.bbox.min[(coord+2)%3]; k<x.bbox.max[(coord+2)%3]+2; k+=1)
-                            out << '+';
-                        out << std::endl;
-                    }
-                    coord++;
-                }
-                out << "]";
+//                        for (int k=x.bbox.min[(coord+2)%3]; k<x.bbox.max[(coord+2)%3]+2; k+=1)
+//                            out << '+';
+//                        out << std::endl;
+//                    }
+//                    coord++;
+//                }
+//                out << "]";
 
-                return out;
-            }
+//                return out;
+//            }
 
             const Point3x delta;
             vcg::Box3i bbox;
@@ -551,13 +538,13 @@ namespace vcg {
 
             inline void AddIntercept(const InterceptType &x) { v.push_back(x); }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptSet &x) {
-                typename ContainerType::const_iterator i, end = x.v.end();
-                out << "InterceptSet[";
-                for (i = x.v.begin(); i != end; ++i)
-                    out << *i << std::endl;
-                return out << "]";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptSet &x) {
+//                typename ContainerType::const_iterator i, end = x.v.end();
+//                out << "InterceptSet[";
+//                for (i = x.v.begin(); i != end; ++i)
+//                    out << *i << std::endl;
+//                return out << "]";
+//            }
 
         private:
             ContainerType v;
@@ -582,13 +569,13 @@ namespace vcg {
                 set[i].AddIntercept(x);
             }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptSet1 &x) {
-                typename ContainerType::const_iterator i, end = x.set.end();
-                out << "InterceptSet1[";
-                for (i = x.set.begin(); i != end; ++i)
-                    out << *i << std::endl;
-                return out << "]InterceptSet1";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptSet1 &x) {
+//                typename ContainerType::const_iterator i, end = x.set.end();
+//                out << "InterceptSet1[";
+//                for (i = x.set.begin(); i != end; ++i)
+//                    out << *i << std::endl;
+//                return out << "]InterceptSet1";
+//            }
 
         private:
             ContainerType set;
@@ -621,13 +608,13 @@ namespace vcg {
                 set[c.X()].AddIntercept(c.Y(), x);
             }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptSet2 &x) {
-                typename ContainerType::const_iterator i, end = x.set.end();
-                out << "InterceptSet2[";
-                for (i = x.set.begin(); i != end; ++i)
-                    out << *i << std::endl;
-                return out << "]InterceptSet2";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptSet2 &x) {
+//                typename ContainerType::const_iterator i, end = x.set.end();
+//                out << "InterceptSet2[";
+//                for (i = x.set.begin(); i != end; ++i)
+//                    out << *i << std::endl;
+//                return out << "]InterceptSet2";
+//            }
 
         private:
             Box2i bbox;
@@ -804,13 +791,13 @@ namespace vcg {
 
             inline operator SortedType() const { return SortedType(bbox, delta, typename SortedType::ContainerType(set.begin(), set.end())); }
 
-            friend std::ostream& operator<<(std::ostream &out, const InterceptSet3<InterceptType> &x) {
-                typename ContainerType::const_iterator i, end = x.set.end();
-                out << "InterceptSet3[";
-                for (i = x.set.begin(); i != end; ++i)
-                    out << *i << std::endl;
-                return out << "]InterceptSet3";
-            }
+//            friend std::ostream& operator<<(std::ostream &out, const InterceptSet3<InterceptType> &x) {
+//                typename ContainerType::const_iterator i, end = x.set.end();
+//                out << "InterceptSet3[";
+//                for (i = x.set.begin(); i != end; ++i)
+//                    out << *i << std::endl;
+//                return out << "]InterceptSet3";
+//            }
 
             const Point3x delta;
             const Box3i bbox;
@@ -823,9 +810,9 @@ namespace vcg {
         {
             typedef typename MeshType::VertexPointer VertexPointer;
             typedef typename MeshType::CoordType CoordType;
-            typedef typename std::tr1::unordered_map<const InterceptType*,size_t> VertexTable;
-            typedef typename std::tr1::unordered_map<vcg::Point3i,float> SamplesTable;
-            typedef typename std::tr1::unordered_set<vcg::Point3i> CellsSet;
+            typedef typename std::unordered_map<const InterceptType*,size_t> VertexTable;
+            typedef typename std::unordered_map<vcg::Point3i,float> SamplesTable;
+            typedef typename std::unordered_set<vcg::Point3i> CellsSet;
 
             void clear() {
                 _vertices.clear();
