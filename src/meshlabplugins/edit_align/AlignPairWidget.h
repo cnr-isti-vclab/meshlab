@@ -30,15 +30,20 @@
 #include <QGLWidget>
 #include <vcg/space/point2.h>
 #include <wrap/gui/trackball.h>
+
+#include <common/ml_shared_data_context.h>
+
 class MeshTree;
 class MeshNode;
+
+class GLArea;
 
 class AlignPairWidget: public QGLWidget
 {
     Q_OBJECT
 public:
-    AlignPairWidget (QWidget * parent = 0);
-    public slots:
+    AlignPairWidget (GLArea* ar, QWidget * parent);
+public slots:
         /// widget-based user interaction slots
 signals:
         /// signal for setting the statusbar message
@@ -67,6 +72,8 @@ private:
     vcg::Trackball trackLeft,trackRight;
     vcg::Trackball* tt[2];
     vcg::Trackball* currentTrack;
+	MLSceneGLSharedDataContext* shared;
+	GLArea* gla;
 public:
     std::vector<vcg::Point3f> freePickedPointVec;
     std::vector<vcg::Point3f> gluedPickedPointVec;
@@ -78,6 +85,8 @@ public:
 
     // use mesh vertex colors
     bool isUsingVertexColor;
+
+	bool allowscaling;
 
     // force point rendering
     bool usePointRendering;

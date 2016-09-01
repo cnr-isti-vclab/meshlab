@@ -387,8 +387,6 @@ bool AlignPair::Align(
         else
           beyondCntVec[i] = maxBeyondCnt + 1;
       }
-
-      }
     } // End for each pmov
     int tts1 = clock();
     //printf("Found %d pairs\n",(int)Pfix.size());

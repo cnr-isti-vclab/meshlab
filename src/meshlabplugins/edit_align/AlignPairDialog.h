@@ -35,7 +35,11 @@ class AlignPairDialog: public QDialog
     Q_OBJECT
 public:
     AlignPairWidget *aa;
-    QCheckBox * allowScalingCB;
-    AlignPairDialog (QWidget * parent = 0);
+
+    AlignPairDialog (GLArea* gla, QWidget * parent = 0);
+private slots:
+	void setScalingFlag(bool);
+	void setPointRenderingFlag(bool);
+	void setFakeColorFlag(bool);
 };
 #endif

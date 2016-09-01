@@ -28,22 +28,41 @@
 #include <QDialogButtonBox>
 #include <QDesktopWidget>
 
-AlignPairDialog::AlignPairDialog (QWidget * parent) : QDialog(parent)
+AlignPairDialog::AlignPairDialog (GLArea* gla,QWidget * parent) : QDialog(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout();
 
-    aa=new AlignPairWidget(this);
+    aa=new AlignPairWidget(gla,this);
     aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
-    allowScalingCB = new QCheckBox("Allow Scaling");
-    allowScalingCB->setChecked(false);
+	QHBoxLayout* checklayout = new QHBoxLayout();
+	
+	QCheckBox* fakecolor = new QCheckBox("use False Color",this);
+	fakecolor->setChecked(true);
+	checklayout->addWidget(fakecolor);
+	setFakeColorFlag(fakecolor->isChecked());
+	connect(fakecolor, SIGNAL(clicked(bool)), this, SLOT(setFakeColorFlag(bool)));
+
+
+	QCheckBox* pointrend = new QCheckBox("use Point Rendering", this);
+    pointrend->setChecked(false);
+	checklayout->addWidget(pointrend);
+	setPointRenderingFlag(pointrend->isChecked());
+	connect(pointrend, SIGNAL(clicked(bool)), this, SLOT(setPointRenderingFlag(bool)));
+
+	QCheckBox* allowScalingCB = new QCheckBox("Allow Scaling", this);
+	allowScalingCB->setChecked(false);
+	checklayout->addWidget(allowScalingCB);
+	setScalingFlag(allowScalingCB->isChecked());
+	connect(allowScalingCB, SIGNAL(clicked(bool)), this, SLOT(setScalingFlag(bool)));
 
     QLabel *helpLabel = new QLabel("Choose at least 4 matching pair of points on the two meshes. <br>Double Click over each mesh to add new points. Choose points in consistent order");
     helpLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     layout->addWidget(helpLabel);
     layout->addWidget(aa);
-    layout->addWidget(allowScalingCB);
-    layout->addWidget(buttonBox);
+	layout->addLayout(checklayout);
+	layout->addWidget(buttonBox);
+
 
     setLayout(layout);
     adjustSize();
@@ -53,4 +72,21 @@ AlignPairDialog::AlignPairDialog (QWidget * parent) : QDialog(parent)
     setMinimumSize(rr.width()*0.8,rr.width()*0.5);
 }
 
+void AlignPairDialog::setScalingFlag(bool checked)
+{
+	aa->allowscaling = checked;
+	aa->update();
+}
+
+void AlignPairDialog::setPointRenderingFlag(bool checked)
+{
+	aa->usePointRendering = checked;
+	aa->update();
+}
+
+void AlignPairDialog::setFakeColorFlag(bool checked)
+{
+	aa->isUsingVertexColor = !checked;
+	aa->update();
+}
 
