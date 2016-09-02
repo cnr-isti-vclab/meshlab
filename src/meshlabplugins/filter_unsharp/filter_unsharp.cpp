@@ -226,10 +226,11 @@ int FilterUnsharp::postCondition(QAction *a) const
             case FP_FACE_NORMAL_SMOOTHING:
             case FP_RECOMPUTE_FACE_NORMAL :
             case FP_RECOMPUTE_QUADFACE_NORMAL :
+			case FP_FACE_NORMAL_NORMALIZE:
+					return MeshModel::MM_FACENORMAL;
             case FP_RECOMPUTE_VERTEX_NORMAL :
-            case FP_FACE_NORMAL_NORMALIZE:
             case FP_VERTEX_NORMAL_NORMALIZE:
-                    return MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL;
+                    return MeshModel::MM_VERTNORMAL;
             case FP_UNSHARP_VERTEX_COLOR:
                     return MeshModel::MM_VERTCOLOR;
 
