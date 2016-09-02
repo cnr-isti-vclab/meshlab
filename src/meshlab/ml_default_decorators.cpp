@@ -136,10 +136,10 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > beH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryEdgeAttName());
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bfH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,boundaryFaceAttName());
 			if (opts._peredge_edgeboundary_enabled)
-				drawLineVector(beH());
+				drawLineVector(m.cm.Tr, beH());
             if(opts._peredge_faceboundary_enabled) 
-                drawTriVector(bfH());
-            drawDotVector(bvH(),5);
+                drawTriVector(m.cm.Tr, bfH());
+            drawDotVector(m.cm.Tr, bvH(),5);
         
             if (opts._peredge_edgeboundary_enabled)
             {
@@ -167,8 +167,8 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
               // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
               CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > vvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifVertAttName());
               CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > tvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifVertFaceAttName());
-              drawDotVector(vvH());
-              drawTriVector(tvH());
+              drawDotVector(m.cm.Tr, vvH());
+              drawTriVector(m.cm.Tr, tvH());
 
               QString inf;
               inf += "<b>" + QString::number(vvH().size()) + " </b> non manifold vertices<br><b>" + QString::number(tvH().size() / 3) + "</b> faces over non manifold edges";
@@ -180,8 +180,8 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
             //Note the standard way for adding extra per-mesh data using the per-mesh attributes.
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeAttName());
             CMeshO::PerMeshAttributeHandle< std::vector<PointPC> > fvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<std::vector<PointPC> >(m.cm,nonManifEdgeFaceAttName());
-            drawLineVector(bvH());
-            drawTriVector(fvH());
+            drawLineVector(m.cm.Tr, bvH());
+            drawTriVector(m.cm.Tr, fvH());
             QString inf;
             inf += "<b>" + QString::number(bvH().size()/2) + " </b> non manifold edges<br><b>" + QString::number(fvH().size()/3) + "</b> faces over non manifold edges";
             log.RealTimeLog("Non Manifold Edges",m.shortName(),inf);
@@ -242,7 +242,7 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 
 void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf)
 {
-    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT );
+    glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_POINT_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT );
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -255,14 +255,12 @@ void MLDefaultMeshDecorators::drawQuotedBox(MeshModel &m,QPainter *gla,QFont& qf
     GLint vp[4];
 	glGetDoublev(GL_PROJECTION_MATRIX,mp);
 	
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glMultMatrix(m.cm.Tr);
 
 	glGetDoublev(GL_MODELVIEW_MATRIX,mm);
     glGetIntegerv(GL_VIEWPORT,vp);
 	glMatrixMode(GL_MODELVIEW);
-
+	glPushMatrix();
+	glMultMatrix(m.cm.Tr);
     // Mesh boundingBox
     Box3m b(m.cm.bbox);
 
@@ -847,7 +845,7 @@ void MLDefaultMeshDecorators::cleanBoundaryTextDecoratorData( MeshModel& m)
 	}
 }
 
-void MLDefaultMeshDecorators::drawLineVector(std::vector<PointPC> &EV)
+void MLDefaultMeshDecorators::drawLineVector(const vcg::Matrix44f& tr, std::vector<PointPC> &EV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -857,6 +855,9 @@ void MLDefaultMeshDecorators::drawLineVector(std::vector<PointPC> &EV)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(1.f);
     glDepthRange (0.0, 0.999);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(tr);
     if (EV.size() > 0)
     {
         glEnableClientState (GL_VERTEX_ARRAY);
@@ -868,10 +869,11 @@ void MLDefaultMeshDecorators::drawLineVector(std::vector<PointPC> &EV)
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_VERTEX_ARRAY);
     }
+	glPopMatrix();
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawTriVector(std::vector<PointPC> &TV)
+void MLDefaultMeshDecorators::drawTriVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -881,6 +883,9 @@ void MLDefaultMeshDecorators::drawTriVector(std::vector<PointPC> &TV)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(1.f);
     glDepthRange (0.0, 0.999);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(tr);
     if (TV.size() > 0)
     {
         glEnableClientState (GL_VERTEX_ARRAY);
@@ -891,10 +896,11 @@ void MLDefaultMeshDecorators::drawTriVector(std::vector<PointPC> &TV)
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_VERTEX_ARRAY);
     }
+	glPopMatrix();
     glPopAttrib();
 }
 
-void MLDefaultMeshDecorators::drawDotVector(std::vector<PointPC> &TV, float baseSize)
+void MLDefaultMeshDecorators::drawDotVector(const vcg::Matrix44f& tr,std::vector<PointPC> &TV, float baseSize)
 {
     glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT| GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_LIGHTING);
@@ -904,6 +910,9 @@ void MLDefaultMeshDecorators::drawDotVector(std::vector<PointPC> &TV, float base
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(1.f);
     glDepthRange (0.0, 0.999);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMultMatrix(tr);
     if (TV.size() > 0)
     {
         glEnableClientState (GL_VERTEX_ARRAY);
@@ -919,6 +928,7 @@ void MLDefaultMeshDecorators::drawDotVector(std::vector<PointPC> &TV, float base
         glDrawArrays(GL_POINTS,0,TV.size());
         glDisableClientState (GL_VERTEX_ARRAY);
     }
+	glPopMatrix();
     glPopAttrib();
 }
 
