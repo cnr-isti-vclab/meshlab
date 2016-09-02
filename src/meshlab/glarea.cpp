@@ -1021,6 +1021,22 @@ void GLArea::updateAllPerMeshDecorators()
 }
 
 
+void GLArea::updateAllDecorators()
+{
+	updateAllPerMeshDecorators();
+	if (md() == NULL)
+		return;
+	foreach(QAction * p, iPerDocDecoratorlist)
+	{
+		MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+		decorInterface->endDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
+		decorInterface->setLog(&md()->Log);
+		decorInterface->startDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
+	}
+	if (mvc() != NULL)
+		mvc()->updateAllViewer();
+}
+
 void GLArea::setCurrentEditAction(QAction *editAction)
 {
 	if ((parentmultiview == NULL) || (parentmultiview->sharedDataContext() == NULL))

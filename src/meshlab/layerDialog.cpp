@@ -1009,8 +1009,8 @@ void DecoratorParamsTreeWidget::apply()
         current.setValue(r->name,*(r->val));
     }
     mainWin->updateCustomSettings();
-    if(mainWin->GLA())
-        mainWin->GLA()->updateAllPerMeshDecorators();
+	if (mainWin->GLA())
+		mainWin->GLA()->updateAllDecorators();
 }
 
 void DecoratorParamsTreeWidget::load()

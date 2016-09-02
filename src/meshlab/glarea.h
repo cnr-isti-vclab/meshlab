@@ -269,6 +269,7 @@ public slots:
     void manageCurrentMeshChange();
     // Called when we modify the document
     void updateAllPerMeshDecorators();
+	void updateAllDecorators();
 
 public:
     void focusInEvent ( QFocusEvent * event );
