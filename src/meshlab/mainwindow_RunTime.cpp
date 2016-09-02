@@ -324,6 +324,7 @@ void MainWindow::switchOffDecorator(QAction* decorator)
         if (res == 0)
             GLA()->iPerDocDecoratorlist.removeAll(decorator);
         updateMenus();
+		layerDialog->updateDecoratorParsView();
         GLA()->update();
     }
 }
