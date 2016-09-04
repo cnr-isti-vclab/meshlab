@@ -171,17 +171,14 @@ void MLRenderingSideToolbar::toggle( QAction* clickedact )
 MLRenderingThreeStateSideToolbar::MLRenderingThreeStateSideToolbar(QWidget* parent /*= NULL*/)
 	:MLRenderingToolbar(parent)
 {
-	initGui();
-}
 
-MLRenderingThreeStateSideToolbar::MLRenderingThreeStateSideToolbar(int meshid, QWidget* parent /*= NULL*/)
-	: MLRenderingToolbar(meshid, parent)
-{
 	initGui();
 }
 
 void MLRenderingThreeStateSideToolbar::initGui()
 {
+	setStyleSheet("QToolBar{spacing:0px;padding:0px;} QToolButton{padding:0px;}");
+
 	MLRenderingThreeStateButton* bboxbut = new MLRenderingThreeStateButton(_meshid, this);
 	MLRenderingBBoxAction* bboxact =  new MLRenderingBBoxAction(_meshid, this);
 	_acts.push_back(bboxact);
@@ -1150,17 +1147,16 @@ void MLRenderingThreeStateButton::setRenderingAction(MLRenderingAction* act)
 	if (act == NULL)
 		return;
 	_onofftool->setRenderingAction(act);
-	_onofftool->setMaximumSize(QSize(40, 15));
+	//_onofftool->setMaximumSize(QSize(40, 15));
 	QFont ff;
 	ff.setPointSize(4);
 	_onofftool->setFont(ff);
 	if (_layout != NULL)
 	{
 		QLabel* iconlabel = new QLabel();
-		iconlabel->setPixmap(act->icon().pixmap(QSize(12, 12)));
+		iconlabel->setPixmap(act->icon().pixmap(QSize(20, 20)));
 		_layout->addWidget(iconlabel, 0, 0,1,1,Qt::AlignCenter);
 	}
-	setMaximumSize(QSize(55, 50));
 }
 
 void MLRenderingThreeStateButton::initGui()
@@ -1227,4 +1223,85 @@ void MLRenderingFloatSlider::getRenderingDataAccordingToGUI( MLRenderingData& dt
 {
     if (_act != NULL)
         _act->updateRenderingData(dt);
+}
+
+MLRenderingGlobalToolbar::MLRenderingGlobalToolbar(QWidget* parent /*= NULL*/)
+	:QToolBar(parent)
+{
+	initGui();
+}
+
+void MLRenderingGlobalToolbar::initGui()
+{
+	QList<MLRenderingAction*> actslist;
+	MyToolButton* bboxbut = new MyToolButton(0, this);
+	MLRenderingBBoxAction* bboxact = new MLRenderingBBoxAction(this);
+	actslist.push_back(bboxact);
+	bboxbut->setDefaultAction(bboxact);
+	MLRenderingOnOffToolbar* bboxonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(bboxbut,bboxonoff);
+	addWidget(bboxbut);
+
+	MyToolButton* pointbut = new MyToolButton(0, this);
+	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(this);
+	actslist.push_back(pointact);
+	pointbut->setDefaultAction(pointact);
+	MLRenderingOnOffToolbar* pointonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(pointbut, pointonoff);
+	addWidget(pointbut);
+
+	MyToolButton* wirebut = new MyToolButton(0, this);
+	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
+	actslist.push_back(wireact);
+	wirebut->setDefaultAction(wireact);
+	MLRenderingOnOffToolbar* wireonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(wirebut,wireonoff);
+	addWidget(wirebut);
+
+	MyToolButton* solidbut = new MyToolButton(0, this);
+	MLRenderingSolidAction* solidact = new MLRenderingSolidAction(this);
+	actslist.push_back(solidact);
+	solidbut->setDefaultAction(solidact);
+	MLRenderingOnOffToolbar* solidonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(solidbut, solidonoff);
+	addWidget(solidbut);
+
+	MyToolButton* selbut = new MyToolButton(0, this);
+	MLRenderingSelectionAction* selact = new MLRenderingSelectionAction(this);
+	actslist.push_back(selact);
+	selbut->setDefaultAction(selact);
+	MLRenderingOnOffToolbar* selonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(selbut, selonoff);
+	addWidget(selbut);
+
+	MyToolButton* edgebut = new MyToolButton(0, this);
+	MLRenderingEdgeDecoratorAction* edgeact = new MLRenderingEdgeDecoratorAction(this);
+	actslist.push_back(edgeact);
+	edgebut->setDefaultAction(edgeact);
+	MLRenderingOnOffToolbar* edgeonoff = new MLRenderingOnOffToolbar(-1, this);
+	initToolButtonOnOffSubMenu(edgebut,edgeonoff);
+	addWidget(edgebut);
+
+	MyToolButton* optsbut = new MyToolButton(0, this);
+	QAction* optsact = new QAction(this);
+	optsact->setIcon(QIcon(":/images/options.png"));
+	optsact->setText("Options");
+	optsbut->setDefaultAction(optsact);
+	MLRenderingParametersTab* globalopts = new MLRenderingParametersTab(-1, actslist, this);
+	initToolButtonOnOffSubMenu(optsbut, globalopts);
+	addWidget(optsbut);
+}
+
+void MLRenderingGlobalToolbar::initToolButtonOnOffSubMenu(MyToolButton* button, QWidget* wid)
+{
+	if (button == NULL)
+		return;
+	QWidgetAction* bboxwidact = new QWidgetAction(this);
+	bboxwidact->setDefaultWidget(wid);
+	if (button->menu() == NULL)
+	{
+		QMenu* mn = new QMenu(this);
+		mn->addAction(bboxwidact);
+		button->setMenu(mn);
+	}
 }

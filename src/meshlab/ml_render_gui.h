@@ -153,7 +153,7 @@ class MLRenderingToolbar : public QToolBar
     Q_OBJECT
 public:
     MLRenderingToolbar(QWidget* parent = NULL);
-    MLRenderingToolbar(int meshid,QWidget* parent = NULL);
+	MLRenderingToolbar(int meshid, QWidget* parent /*= NULL*/);
 
     ~MLRenderingToolbar();
 
@@ -208,7 +208,6 @@ class MLRenderingThreeStateSideToolbar : public MLRenderingToolbar
 	Q_OBJECT
 public:
 	MLRenderingThreeStateSideToolbar(QWidget* parent = NULL);
-	MLRenderingThreeStateSideToolbar(int meshid, QWidget* parent = NULL);
 
 	~MLRenderingThreeStateSideToolbar() {}
 private slots:
@@ -216,6 +215,21 @@ private slots:
 
 private:
 	void initGui();
+};
+
+class MLRenderingGlobalToolbar : public QToolBar
+{
+	Q_OBJECT
+public:
+	MLRenderingGlobalToolbar(QWidget* parent = NULL);
+
+	~MLRenderingGlobalToolbar() {}
+	private slots:
+	//void toggle(QAction* act);
+
+private:
+	void initGui();
+	void initToolButtonOnOffSubMenu(MyToolButton* button,QWidget* wid);
 };
 
 

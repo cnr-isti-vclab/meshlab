@@ -362,7 +362,7 @@ private:
     QToolBar *editToolBar;
     QToolBar *filterToolBar;
     QToolBar *searchToolBar;
-
+	MLRenderingGlobalToolbar* globrendtoolbar;
     ///////// Menus ///////////////
     QMenu *fileMenu;
     QMenu *filterMenu;

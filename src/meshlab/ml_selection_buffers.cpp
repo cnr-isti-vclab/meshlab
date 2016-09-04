@@ -135,8 +135,8 @@ void MLSelectionBuffers::drawSelection(ML_SELECTION_TYPE selbuf) const
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(1.0f, 0.0, 0.0, .3f);
+		glBlendColor(1.0f, 0.0, 0.0, .3f);
+		glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
 		glDepthRange(0.00, 0.999);
 		glPointSize(3.0);
 		glPushMatrix();
@@ -175,8 +175,8 @@ void MLSelectionBuffers::drawSelection(ML_SELECTION_TYPE selbuf) const
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glDepthMask(GL_FALSE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(1.0f, 0.0, 0.0, .3f);
+		glBlendColor(1.0f, 0.0, 0.0, .3f);
+		glBlendFunc(GL_CONSTANT_COLOR, GL_ONE);
 		glPolygonOffset(-1.0, -1);
 		glPushMatrix();
 		glMultMatrix(_m.cm.Tr);
