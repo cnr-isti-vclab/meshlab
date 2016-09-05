@@ -81,6 +81,32 @@ QList<MLRenderingAction*>& MLRenderingToolbar::getRenderingActions()
     return _acts;
 }
 
+QList<QAction*> MLRenderingToolbar::getTopLevelActions()
+{
+	QList<QAction*> act;
+	for (int ii = 0; ii < _acts.size(); ++ii)
+	{
+		if (_acts[ii] != NULL)
+		{
+			MLRenderingUserDefinedColorAction* udcact = qobject_cast<MLRenderingUserDefinedColorAction*>(_acts[ii]);
+			MLRenderingBBoxUserDefinedColorAction* bbcact = qobject_cast<MLRenderingBBoxUserDefinedColorAction*>(_acts[ii]);
+			if ((udcact == NULL) && (bbcact == NULL))
+				act.push_back(_acts[ii]);
+			else
+			{
+				QList<QAction*> curracts = actions();
+				if (curracts.size() == _acts.size())
+				{
+					QWidget* tmp = widgetForAction(curracts[ii]);
+					if ((tmp != NULL) && (tmp->actions().size() > 0))
+						act.push_back(tmp->actions()[0]);
+				}
+			}
+		}
+	}
+	return act;
+}
+
 void MLRenderingToolbar::addColorPicker( MLRenderingColorPicker* pick )
 {
     MLRenderingUserDefinedColorAction* colact = qobject_cast<MLRenderingUserDefinedColorAction*>(pick->defaultAction());
@@ -345,6 +371,20 @@ void MLRenderingSolidParametersFrame::updateVisibility( MeshModel* mm )
     _texttool->updateVisibility(mm);
 }
 
+void MLRenderingSolidParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_shadingtool->getRenderingActions());
+	actions.append(_colortool->getRenderingActions());
+	actions.append(_texttool->getRenderingAction());
+}
+
+void MLRenderingSolidParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_shadingtool->getTopLevelActions());
+	tplevelactions.append(_colortool->getTopLevelActions());
+	tplevelactions.append(_texttool->actions());
+}
+
 MLRenderingWireParametersFrame::MLRenderingWireParametersFrame( QWidget* parent )
     :MLRenderingParametersFrame(-1,parent)
 {
@@ -452,6 +492,22 @@ void MLRenderingWireParametersFrame::updateVisibility( MeshModel* mm )
     _edgetool->updateVisibility(mm);
 }
 
+
+void MLRenderingWireParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_shadingtool->getRenderingActions());
+	actions.append(_colortool->getRenderingActions());
+	actions.append(_edgetool->getRenderingAction());
+	actions.append(_dimension->getRenderingAction());
+}
+
+void MLRenderingWireParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_shadingtool->getTopLevelActions());
+	tplevelactions.append(_colortool->getTopLevelActions());
+	tplevelactions.append(_edgetool->actions());
+	tplevelactions.append(_dimension->actions());
+}
 
 MLRenderingPointsParametersFrame::MLRenderingPointsParametersFrame( QWidget* parent )
     :MLRenderingParametersFrame(-1,parent)
@@ -564,6 +620,22 @@ void MLRenderingPointsParametersFrame::updateVisibility( MeshModel* mm )
     _texttool->updateVisibility(mm);
 }
 
+void MLRenderingPointsParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_shadingtool->getRenderingActions());
+	actions.append(_colortool->getRenderingActions());
+	actions.append(_texttool->getRenderingAction());
+	actions.append(_dimension->getRenderingAction());
+}
+
+void MLRenderingPointsParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_shadingtool->getTopLevelActions());
+	tplevelactions.append(_colortool->getTopLevelActions());
+	tplevelactions.append(_texttool->actions());
+	tplevelactions.append(_dimension->actions());
+}
+
 MLRenderingBBoxParametersFrame::MLRenderingBBoxParametersFrame(QWidget* parent )
     :MLRenderingParametersFrame(-1,parent)
 {
@@ -588,6 +660,18 @@ void MLRenderingBBoxParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRe
     _quotedinfotool->getRenderingDataAccordingToGUI(dt);
 }
 
+
+void MLRenderingBBoxParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_colortool->getRenderingActions());
+	actions.append(_quotedinfotool->getRenderingAction());
+}
+
+void MLRenderingBBoxParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_colortool->getTopLevelActions());
+	tplevelactions.append(_quotedinfotool->actions());
+}
 
 void MLRenderingBBoxParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
@@ -666,6 +750,24 @@ void MLRenderingDefaultDecoratorParametersFrame::getCurrentRenderingDataAccordin
     _texturebordertool->getRenderingDataAccordingToGUI(dt);
 }
 
+
+void MLRenderingDefaultDecoratorParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_boundearyfacetool->getRenderingAction());
+	actions.append(_edgemanifoldtool->getRenderingAction());
+	actions.append(_boundearyedgetool->getRenderingAction());
+	actions.append(_texturebordertool->getRenderingAction());
+	actions.append(_vertmanifoldtool->getRenderingAction());
+}
+
+void MLRenderingDefaultDecoratorParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_boundearyfacetool->actions());
+	tplevelactions.append(_edgemanifoldtool->actions());
+	tplevelactions.append(_boundearyedgetool->actions());
+	tplevelactions.append(_texturebordertool->actions());
+	tplevelactions.append(_vertmanifoldtool->actions());
+}
 
 void MLRenderingDefaultDecoratorParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
@@ -761,6 +863,18 @@ void MLRenderingSelectionParametersFrame::getCurrentRenderingDataAccordingToGUI(
     _faceseltool->getRenderingDataAccordingToGUI(dt);
 }
 
+
+void MLRenderingSelectionParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
+{
+	actions.append(_faceseltool->getRenderingAction());
+	actions.append(_vertexseltool->getRenderingAction());
+}
+
+void MLRenderingSelectionParametersFrame::allTopLevelGuiActions(QList<QAction*>& tplevelactions)
+{
+	tplevelactions.append(_faceseltool->actions());
+	tplevelactions.append(_vertexseltool->actions());
+}
 
 void MLRenderingSelectionParametersFrame::setPrimitiveButtonStatesAccordingToRenderingData( const MLRenderingData& dt )
 {
@@ -886,6 +1000,15 @@ void MLRenderingParametersTab::updatePerMeshRenderingAction(QList<MLRenderingAct
 		_paract.push_back(acts[ii]);
 }
 
+void MLRenderingParametersTab::actionsList(QList<MLRenderingAction*>& actions)
+{
+	for (QMap<QString, MLRenderingParametersFrame*>::iterator it = _parframe.begin(); it != _parframe.end(); ++it)
+	{
+		if (it.value() != NULL)
+			it.value()->actionsList(actions);
+	}
+}
+
 MLRenderingParametersTab::~MLRenderingParametersTab()
 {
     for(QMap<QString,MLRenderingParametersFrame*>::iterator it = _parframe.begin();it != _parframe.end();++it)
@@ -999,6 +1122,7 @@ MLRenderingBBoxColorPicker::~MLRenderingBBoxColorPicker()
     delete _cbutton;
     delete _act;
 }
+
 //
 void MLRenderingBBoxColorPicker::updateColorInfo()
 {
@@ -1116,6 +1240,11 @@ void MLRenderingOnOffToolbar::setRenderingAction( MLRenderingAction* act )
     _act->setCheckable(true);
 }
 
+MLRenderingAction* MLRenderingOnOffToolbar::getRenderingAction()
+{
+	return _act;
+}
+
 void MLRenderingOnOffToolbar::getRenderingDataAccordingToGUI( MLRenderingData& dt ) const
 {
     if (_act != NULL)
@@ -1188,6 +1317,11 @@ MLRenderingFloatSlider::~MLRenderingFloatSlider()
 
 }
 
+MLRenderingAction* MLRenderingFloatSlider::getRenderingAction()
+{
+	return _act;
+}
+
 void MLRenderingFloatSlider::setRenderingFloatAction( MLRenderingFloatAction* act )
 {
     _act = act;
@@ -1233,75 +1367,105 @@ MLRenderingGlobalToolbar::MLRenderingGlobalToolbar(QWidget* parent /*= NULL*/)
 
 void MLRenderingGlobalToolbar::initGui()
 {
-	QList<MLRenderingAction*> actslist;
 	MyToolButton* bboxbut = new MyToolButton(0, this);
 	MLRenderingBBoxAction* bboxact = new MLRenderingBBoxAction(this);
-	actslist.push_back(bboxact);
-	bboxbut->setDefaultAction(bboxact);
+	//bboxbut->setDefaultAction(bboxact);
 	MLRenderingOnOffToolbar* bboxonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(bboxbut,bboxonoff);
+	bboxonoff->setRenderingAction(bboxact);
+	MLRenderingBBoxParametersFrame* bboxframe = new MLRenderingBBoxParametersFrame(-1, NULL);
+	initToolButtonSubMenu(bboxbut,bboxonoff,bboxframe);
 	addWidget(bboxbut);
 
 	MyToolButton* pointbut = new MyToolButton(0, this);
 	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(this);
-	actslist.push_back(pointact);
-	pointbut->setDefaultAction(pointact);
+	//pointbut->setDefaultAction(pointact);
 	MLRenderingOnOffToolbar* pointonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(pointbut, pointonoff);
+	pointonoff->setRenderingAction(pointact);
+	MLRenderingPointsParametersFrame* pointframe = new MLRenderingPointsParametersFrame(-1, this);
+	initToolButtonSubMenu(pointbut, pointonoff,pointframe);
 	addWidget(pointbut);
 
 	MyToolButton* wirebut = new MyToolButton(0, this);
 	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
-	actslist.push_back(wireact);
-	wirebut->setDefaultAction(wireact);
+	//wirebut->setDefaultAction(wireact);
 	MLRenderingOnOffToolbar* wireonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(wirebut,wireonoff);
+	wireonoff->setRenderingAction(wireact);
+	MLRenderingWireParametersFrame* wirepar = new MLRenderingWireParametersFrame(-1, this);
+	initToolButtonSubMenu(wirebut,wireonoff,wirepar);
 	addWidget(wirebut);
 
 	MyToolButton* solidbut = new MyToolButton(0, this);
 	MLRenderingSolidAction* solidact = new MLRenderingSolidAction(this);
-	actslist.push_back(solidact);
-	solidbut->setDefaultAction(solidact);
+	//solidbut->setDefaultAction(solidact);
 	MLRenderingOnOffToolbar* solidonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(solidbut, solidonoff);
+	solidonoff->setRenderingAction(solidact);
+	MLRenderingSolidParametersFrame* solidframe = new MLRenderingSolidParametersFrame(-1, NULL);
+	initToolButtonSubMenu(solidbut, solidonoff,solidframe);
 	addWidget(solidbut);
 
 	MyToolButton* selbut = new MyToolButton(0, this);
 	MLRenderingSelectionAction* selact = new MLRenderingSelectionAction(this);
-	actslist.push_back(selact);
-	selbut->setDefaultAction(selact);
+	//selbut->setDefaultAction(selact);
 	MLRenderingOnOffToolbar* selonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(selbut, selonoff);
+	selonoff->setRenderingAction(selact);
+	MLRenderingSelectionParametersFrame* selframe = new MLRenderingSelectionParametersFrame(-1, this);
+	initToolButtonSubMenu(selbut, selonoff,selframe);
 	addWidget(selbut);
 
 	MyToolButton* edgebut = new MyToolButton(0, this);
 	MLRenderingEdgeDecoratorAction* edgeact = new MLRenderingEdgeDecoratorAction(this);
-	actslist.push_back(edgeact);
-	edgebut->setDefaultAction(edgeact);
+	//edgebut->setDefaultAction(edgeact);
 	MLRenderingOnOffToolbar* edgeonoff = new MLRenderingOnOffToolbar(-1, this);
-	initToolButtonOnOffSubMenu(edgebut,edgeonoff);
+	edgeonoff->setRenderingAction(edgeact);
+	MLRenderingDefaultDecoratorParametersFrame* defdecframe = new MLRenderingDefaultDecoratorParametersFrame(-1, this);
+	initToolButtonSubMenu(edgebut,edgeonoff, defdecframe);
 	addWidget(edgebut);
-
-	MyToolButton* optsbut = new MyToolButton(0, this);
-	QAction* optsact = new QAction(this);
-	optsact->setIcon(QIcon(":/images/options.png"));
-	optsact->setText("Options");
-	optsbut->setDefaultAction(optsact);
-	MLRenderingParametersTab* globalopts = new MLRenderingParametersTab(-1, actslist, this);
-	initToolButtonOnOffSubMenu(optsbut, globalopts);
-	addWidget(optsbut);
 }
 
-void MLRenderingGlobalToolbar::initToolButtonOnOffSubMenu(MyToolButton* button, QWidget* wid)
+void MLRenderingGlobalToolbar::initToolButtonSubMenu(MyToolButton* button, MLRenderingOnOffToolbar* onoff,MLRenderingParametersFrame* frame)
 {
-	if (button == NULL)
+	if ((button == NULL) || (onoff == NULL) || (frame == NULL))
 		return;
+
+	QAction* defact = new QAction(this);
+	if (onoff->getRenderingAction() != NULL)
+		defact->setIcon(onoff->getRenderingAction()->icon());
+	button->setDefaultAction(defact);
+
+	foreach(QAction* rendact, onoff->actions())
+	{
+		rendact->setCheckable(false);
+		connect(rendact, SIGNAL(triggered()), this, SLOT(renderingActionOnOffClicked()));
+	}
+	QList<QAction*> toplevelactions;
+	frame->allTopLevelGuiActions(toplevelactions);
+
+	foreach(QAction* tpl, toplevelactions)
+		tpl->setCheckable(false);
+
 	QWidgetAction* bboxwidact = new QWidgetAction(this);
-	bboxwidact->setDefaultWidget(wid);
+	bboxwidact->setDefaultWidget(onoff);
+	QWidgetAction* paramwidact = new QWidgetAction(this);
+	paramwidact->setDefaultWidget(frame);
 	if (button->menu() == NULL)
 	{
 		QMenu* mn = new QMenu(this);
 		mn->addAction(bboxwidact);
+		mn->addAction(paramwidact);
 		button->setMenu(mn);
 	}
+	button->setCheckable(true);
+}
+
+void MLRenderingGlobalToolbar::renderingActionOnOffClicked()
+{
+	QAction* rendact = qobject_cast<QAction*>(sender());
+	rendact->setChecked(true);
+	bool test = (rendact->isChecked());
+
+}
+
+void MLRenderingGlobalToolbar::renderingActionFrameParameterClicked()
+{
+
 }

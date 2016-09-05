@@ -49,7 +49,8 @@ public:
 protected:
     void initGui();
     void  updateColorInfo();
-    QPushButton* _cbutton;
+	QPushButton* _cbutton;
+
 public:
     MLRenderingUserDefinedColorAction* _act;
 
@@ -66,7 +67,6 @@ public:
     MLRenderingBBoxColorPicker(QWidget* parent);
     MLRenderingBBoxColorPicker(int meshid,QWidget* parent);
     ~MLRenderingBBoxColorPicker();
-
     void setColor(QColor def);
 protected:
     void initGui();
@@ -88,7 +88,8 @@ public:
     MLRenderingFloatSlider(int meshid,QWidget *p);
     MLRenderingFloatSlider(QWidget *p);
     ~MLRenderingFloatSlider();
-
+	
+	MLRenderingAction* getRenderingAction();
     void setRenderingFloatAction(MLRenderingFloatAction* act);
     void setAccordingToRenderingData(const MLRenderingData& dt);
     void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
@@ -114,10 +115,12 @@ public:
 	~MLRenderingOnOffToolbar();
 
 	void setRenderingAction(MLRenderingAction* act);
+	MLRenderingAction* getRenderingAction();
 	void setAssociatedMeshId(int meshid);
 	void setAccordingToRenderingData(const MLRenderingData& dt);
 	void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
 	void updateVisibility(MeshModel* mm);
+
 protected:
 	void initGui();
 	int _meshid;
@@ -163,6 +166,7 @@ public:
     void setAccordingToRenderingData(const MLRenderingData& dt);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     QList<MLRenderingAction*>& getRenderingActions();
+	QList<QAction*> getTopLevelActions();
     void setAssociatedMeshId(int meshid);
     void updateVisibility(MeshModel* mm);
 
@@ -217,6 +221,29 @@ private:
 	void initGui();
 };
 
+class MLRenderingParametersFrame : public QFrame
+{
+	Q_OBJECT
+public:
+	MLRenderingParametersFrame(int meshid, QWidget* parent);
+	virtual ~MLRenderingParametersFrame();
+	virtual void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt) = 0;
+	virtual void setAssociatedMeshId(int meshid) = 0;
+	virtual void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const = 0;
+	virtual void actionsList(QList<MLRenderingAction*>& actions) = 0;
+	virtual void allTopLevelGuiActions(QList<QAction*>& tplevelactions) = 0;
+	virtual void updateVisibility(MeshModel*) {}
+	static MLRenderingParametersFrame* factory(MLRenderingAction* act, int meshid, QWidget* parent);
+	static void destroy(MLRenderingParametersFrame* pf);
+
+protected:
+	int _meshid;
+
+signals:
+	void updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
+};
+
 class MLRenderingGlobalToolbar : public QToolBar
 {
 	Q_OBJECT
@@ -224,36 +251,18 @@ public:
 	MLRenderingGlobalToolbar(QWidget* parent = NULL);
 
 	~MLRenderingGlobalToolbar() {}
-	private slots:
+private slots:
 	//void toggle(QAction* act);
 
 private:
 	void initGui();
-	void initToolButtonOnOffSubMenu(MyToolButton* button,QWidget* wid);
+	void initToolButtonSubMenu(MyToolButton* button, MLRenderingOnOffToolbar* onoff, MLRenderingParametersFrame* frame);
+private slots:
+	void renderingActionOnOffClicked();
+	void renderingActionFrameParameterClicked();
 };
 
 
-
-class MLRenderingParametersFrame : public QFrame
-{
-    Q_OBJECT
-public:
-    MLRenderingParametersFrame(int meshid,QWidget* parent);
-    virtual ~MLRenderingParametersFrame(); 
-    virtual void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt) = 0;
-    virtual void setAssociatedMeshId(int meshid) = 0;
-    virtual void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const = 0;
-    virtual void updateVisibility(MeshModel*) {}
-    static MLRenderingParametersFrame* factory(MLRenderingAction* act,int meshid,QWidget* parent);
-    static void destroy(MLRenderingParametersFrame* pf);
-
-protected:
-    int _meshid;
-
-signals:
-    void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
-    void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
-};
 
 class MLRenderingSolidParametersFrame : public MLRenderingParametersFrame
 {
@@ -266,6 +275,8 @@ public:
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     void updateVisibility(MeshModel* mm);
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 
 private:
     void initGui();
@@ -285,6 +296,8 @@ public:
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     void updateVisibility(MeshModel* mm);
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 
 private:
     void initGui();
@@ -306,7 +319,8 @@ public:
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     void updateVisibility(MeshModel* mm);
-
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
     MLRenderingToolbar* _shadingtool;
@@ -325,7 +339,8 @@ public:
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
-
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
     MLRenderingOnOffToolbar* _vertexseltool;
@@ -342,7 +357,8 @@ public:
     void setPrimitiveButtonStatesAccordingToRenderingData(const MLRenderingData& dt);
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
-
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
     MLRenderingOnOffToolbar* _boundearyedgetool;
@@ -379,7 +395,8 @@ public:
     void setAssociatedMeshId(int meshid);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     void updateVisibility(MeshModel*) {}
-
+	void actionsList(QList<MLRenderingAction*>& actions);
+	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
     MLRenderingToolbar* _colortool;
@@ -400,6 +417,8 @@ public:
     int associatedMeshId() const {return _meshid;}
     void updateVisibility(MeshModel* mm);
 	void updatePerMeshRenderingAction(QList<MLRenderingAction*>& acts);
+	void actionsList(QList<MLRenderingAction*>& actions);
+
 
 private:
     void initGui(const QList<MLRenderingAction*>& tab);
