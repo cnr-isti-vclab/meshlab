@@ -964,8 +964,14 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    bool faceColor = rm->getBool(this->TextureFaceColorParam());
+	bool faceColor = rm->getBool(this->TextureFaceColorParam());
+	if (faceColor && !m.hasDataMask(MeshModel::MM_FACECOLOR))
+	{
+		this->RealTimeLog("Show UV Tex Param","The model has no face color", "The model has no Face Color");
+		faceColor = false;
+	}
 
+	
     /*if(!m.glw.TMId.empty())
     {
     glEnable(GL_TEXTURE_2D);
