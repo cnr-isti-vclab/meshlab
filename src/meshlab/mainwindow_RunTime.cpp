@@ -3452,7 +3452,7 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
     }
 }
 
-void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
+void MainWindow::updateRenderingDataAccordingToActionsCommonCode(int meshid, const QList<MLRenderingAction*>& acts)
 {
 	if (meshDoc() == NULL)
 		return;
@@ -3465,11 +3465,14 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<ML
 		if (act != NULL)
 			act->updateRenderingData(dt);
 	}
+	MeshModel* mm = meshDoc()->getMesh(meshid);
+	if (mm != NULL)
+		MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm, dt, dt);
 	setRenderingData(meshid, dt);
 
-	if (meshid == -1)
+	/*if (meshid == -1)
 	{
-		foreach(MeshModel* mm,meshDoc()->meshList)
+		foreach(MeshModel* mm, meshDoc()->meshList)
 		{
 			if (mm != NULL)
 			{
@@ -3479,34 +3482,109 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<ML
 		}
 	}
 	else
+	{*/
+		if (mm != NULL)
+		{
+			MLDefaultMeshDecorators dec(this);
+			dec.updateMeshDecorationData(*mm, olddt, dt);
+		}
+	/*}*/
+}
+
+
+void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts)
+{
+	updateRenderingDataAccordingToActionsCommonCode(meshid, acts);
+	if (GLA() != NULL)
+		GLA()->update();
+
+	if (meshid == -1)
+		updateLayerDialog();
+}
+
+void MainWindow::updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts)
+{
+	if ((meshDoc() == NULL) || (act == NULL))
+		return;
+
+	if (meshid != -1)
+		updateRenderingDataAccordingToActionsCommonCode(meshid, acts);
+	else
 	{
+		QList<MLRenderingAction*> tmpacts;
+		for (int ii = 0; ii < acts.size(); ++ii)
+		{
+			if (acts[ii] != NULL)
+			{
+				MLRenderingAction* sisteract = NULL;
+				acts[ii]->createSisterAction(sisteract, NULL);
+				sisteract->setChecked(acts[ii] == act);
+				tmpacts.push_back(sisteract);
+			}
+		}
+
+		for (int hh = 0; hh < meshDoc()->meshList.size(); ++hh)
+		{
+			if (meshDoc()->meshList[hh] != NULL)
+				updateRenderingDataAccordingToActionsCommonCode(meshDoc()->meshList[hh]->id(), tmpacts);
+		}
+
+		for (int ii = 0; ii < tmpacts.size(); ++ii)
+			delete tmpacts[ii];
+		tmpacts.clear();
+	}
+	if (GLA() != NULL)
+		GLA()->update();
+
+	if (meshid == -1)
+		updateLayerDialog();
+}
+
+
+void MainWindow::updateRenderingDataAccordingToActionCommonCode(int meshid, MLRenderingAction* act)
+{
+	if ((meshDoc() == NULL) || (act == NULL))
+		return;
+
+	if (meshid != -1)
+	{
+		MLRenderingData olddt;
+		getRenderingData(meshid, olddt);
+		MLRenderingData dt(olddt);
+		act->updateRenderingData(dt);
 		MeshModel* mm = meshDoc()->getMesh(meshid);
+		if (mm != NULL)
+			MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm, dt, dt);
+		setRenderingData(meshid, dt);
 		if (mm != NULL)
 		{
 			MLDefaultMeshDecorators dec(this);
 			dec.updateMeshDecorationData(*mm, olddt, dt);
 		}
 	}
-    GLA()->update();
 }
 
 void MainWindow::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
 {
-    MLRenderingData olddt;
-    getRenderingData(meshid,olddt);
-    MLRenderingData dt(olddt);
+	updateRenderingDataAccordingToActionCommonCode(meshid, act);
+	if (GLA() != NULL)
+		GLA()->update();
+}
 
-    if (act != NULL)
-        act->updateRenderingData(dt);
-
-    setRenderingData(meshid,dt);
-    MeshModel* mm = meshDoc()->getMesh(meshid);
-    if (mm != NULL)
-    {
-        MLDefaultMeshDecorators dec(this);
-        dec.updateMeshDecorationData(*mm,olddt,dt);
-    }
-    GLA()->update();
+void MainWindow::updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act, bool check)
+{
+	MLRenderingAction* sisteract = NULL;
+	act->createSisterAction(sisteract, NULL);
+	sisteract->setChecked(check);
+	foreach(MeshModel* mm, meshDoc()->meshList)
+	{
+		if (mm != NULL)
+			updateRenderingDataAccordingToActionCommonCode(mm->id(), sisteract);
+	}
+	delete sisteract;
+	if (GLA() != NULL)
+		GLA()->update();
+	updateLayerDialog();
 }
 
 bool MainWindow::addRenderingDataIfNewlyGeneratedMesh(int meshid)

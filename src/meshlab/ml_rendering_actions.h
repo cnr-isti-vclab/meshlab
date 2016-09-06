@@ -298,6 +298,7 @@ class MLRenderingUserDefinedColorAction : public MLRenderingAction
 public:
     MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
+	MLRenderingUserDefinedColorAction(MLRenderingUserDefinedColorAction* origin, QObject * par);
 
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
@@ -317,6 +318,7 @@ class MLRenderingBBoxUserDefinedColorAction : public MLRenderingAction
 public:
     MLRenderingBBoxUserDefinedColorAction(QObject* parent);
     MLRenderingBBoxUserDefinedColorAction(int meshid,QObject* parent);
+	MLRenderingBBoxUserDefinedColorAction(MLRenderingBBoxUserDefinedColorAction* origin, QObject * par);
 
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
@@ -354,6 +356,7 @@ class MLRenderingPointsSizeAction : public MLRenderingFloatAction
 public:
     MLRenderingPointsSizeAction(QObject* parent);
     MLRenderingPointsSizeAction(int meshid,QObject* parent);
+	MLRenderingPointsSizeAction(MLRenderingPointsSizeAction* origin,QObject* parent);
 
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
@@ -367,6 +370,7 @@ class MLRenderingWireWidthAction : public MLRenderingFloatAction
 public:
     MLRenderingWireWidthAction(QObject* parent);
     MLRenderingWireWidthAction(int meshid,QObject* parent);
+	MLRenderingWireWidthAction(MLRenderingWireWidthAction* origin, QObject* parent);
 
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);

@@ -58,8 +58,9 @@ void MLRenderingToolbar::toggle( QAction* act)
     if (ract != NULL)
     {
         emit updateRenderingDataAccordingToActions(_meshid,_acts);
-        if (ract->isChecked())
-            emit activatedAction(ract);
+		emit updateRenderingDataAccordingToActions(_meshid, ract, _acts);
+		if (ract->isChecked())
+			emit activatedAction(ract);
     }
 }
 
@@ -303,7 +304,7 @@ void MLRenderingSolidParametersFrame::initGui()
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-    
+	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int,MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
     QLabel* colorlab = new QLabel("Color",this);
     colorlab->setFont(boldfont);
@@ -319,14 +320,16 @@ void MLRenderingSolidParametersFrame::initGui()
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-
-    QLabel* textlab = new QLabel("Texture Coord",this);
+	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
+    
+	QLabel* textlab = new QLabel("Texture Coord",this);
     textlab->setFont(boldfont);
     layout->addWidget(textlab,2,0,Qt::AlignLeft);
     _texttool = new MLRenderingOnOffToolbar(_meshid,this);
     _texttool->setRenderingAction(new MLRenderingPerWedgeTextCoordAction(_meshid,_texttool));
     layout->addWidget(_texttool,2,1,Qt::AlignLeft);
     connect(_texttool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_texttool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
@@ -436,6 +439,7 @@ void MLRenderingWireParametersFrame::initGui()
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
     QLabel* colorlab = new QLabel("Color",this);
     colorlab->setFont(boldfont);
@@ -450,7 +454,8 @@ void MLRenderingWireParametersFrame::initGui()
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-    
+	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
+
     QLabel* dimelab = new QLabel("Edge Width",this);
     dimelab->setFont(boldfont);
     layout->addWidget(dimelab,2,0,Qt::AlignLeft);
@@ -461,6 +466,7 @@ void MLRenderingWireParametersFrame::initGui()
     _dimension->setMaximum(5);
     layout->addWidget(_dimension,2,1,Qt::AlignCenter);
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* wirelab = new QLabel("Wire Modality",this);
     wirelab->setFont(boldfont);
@@ -469,6 +475,7 @@ void MLRenderingWireParametersFrame::initGui()
     _edgetool->setRenderingAction(new MLRenderingFauxEdgeWireAction(_meshid,this));
     layout->addWidget(_edgetool,3,1,Qt::AlignLeft);
     connect(_edgetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_edgetool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
@@ -571,6 +578,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
     QLabel* colorlab = new QLabel("Color",this);
     colorlab->setFont(boldfont);
@@ -585,6 +593,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
 
     QLabel* textlab = new QLabel("Texture Coord",this);
@@ -594,6 +603,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _texttool->setRenderingAction(new MLRenderingPerVertTextCoordAction(MLRenderingData::PR_POINTS,_meshid,_texttool));
     layout->addWidget(_texttool,2,1,Qt::AlignLeft);
     connect(_texttool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_texttool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* dimelab = new QLabel("Point Size",this);
     dimelab->setFont(boldfont);
@@ -604,6 +614,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _dimension->setMinimum(1);
     _dimension->setMaximum(5);
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
     /*_dimension->setDecimals(1);
     _dimension->setAlignment(Qt::AlignRight);*/
     layout->addWidget(_dimension,3,1,Qt::AlignCenter);
@@ -705,6 +716,7 @@ void MLRenderingBBoxParametersFrame::initGui()
     _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
     QLabel* quotedinfolab = new QLabel("Measure Info",this);
     quotedinfolab->setFont(boldfont);
@@ -713,6 +725,7 @@ void MLRenderingBBoxParametersFrame::initGui()
     _quotedinfotool->setRenderingAction(new MLRenderingBBoxQuotedInfoAction(_meshid,this));
     layout->addWidget(_quotedinfotool,1,1,Qt::AlignLeft);
     connect(_quotedinfotool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_quotedinfotool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
@@ -800,6 +813,7 @@ void MLRenderingDefaultDecoratorParametersFrame::initGui()
     _boundearyedgetool->setRenderingAction(new MLRenderingEdgeBoundaryAction(_meshid,_boundearyedgetool));
     layout->addWidget(_boundearyedgetool,0,1,Qt::AlignLeft);
     connect(_boundearyedgetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_boundearyedgetool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* boundaryfacelab = new QLabel("Boundary Faces",this);
     boundaryfacelab->setFont(boldfont);
@@ -808,6 +822,7 @@ void MLRenderingDefaultDecoratorParametersFrame::initGui()
     _boundearyfacetool->setRenderingAction(new MLRenderingFaceBoundaryAction(_meshid,_boundearyfacetool));
     layout->addWidget(_boundearyfacetool,1,1,Qt::AlignLeft);
     connect(_boundearyfacetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_boundearyfacetool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* vertmanifoldlab = new QLabel("No-Manif Verts",this);
     vertmanifoldlab->setFont(boldfont);
@@ -816,6 +831,7 @@ void MLRenderingDefaultDecoratorParametersFrame::initGui()
     _vertmanifoldtool->setRenderingAction(new MLRenderingVertManifoldAction(_meshid,_vertmanifoldtool));
     layout->addWidget(_vertmanifoldtool,2,1,Qt::AlignLeft);
     connect(_vertmanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_vertmanifoldtool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* edgemanifoldlab = new QLabel("No-Manif Edges",this);
     edgemanifoldlab->setFont(boldfont);
@@ -824,6 +840,7 @@ void MLRenderingDefaultDecoratorParametersFrame::initGui()
     _edgemanifoldtool->setRenderingAction(new MLRenderingEdgeManifoldAction(_meshid,_edgemanifoldtool));
     layout->addWidget(_edgemanifoldtool,3,1,Qt::AlignLeft);
     connect(_edgemanifoldtool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_edgemanifoldtool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* textureborderlab = new QLabel("Texture Border",this);
     textureborderlab->setFont(boldfont);
@@ -832,6 +849,7 @@ void MLRenderingDefaultDecoratorParametersFrame::initGui()
     _texturebordertool->setRenderingAction(new MLRenderingTexBorderAction(_meshid,_texturebordertool));
     layout->addWidget(_texturebordertool,4,1,Qt::AlignLeft);
     connect(_texturebordertool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_texturebordertool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
@@ -901,6 +919,7 @@ void MLRenderingSelectionParametersFrame::initGui()
     _vertexseltool->setRenderingAction(new MLRenderingVertSelectionAction(_meshid,_vertexseltool));
     layout->addWidget(_vertexseltool,0,1,Qt::AlignLeft);
     connect(_vertexseltool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_vertexseltool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     QLabel* facelab = new QLabel("Selected Face",this);
     facelab->setFont(boldfont);
@@ -909,6 +928,7 @@ void MLRenderingSelectionParametersFrame::initGui()
     _faceseltool->setRenderingAction(new MLRenderingFaceSelectionAction(_meshid,_faceseltool));
     layout->addWidget(_faceseltool,1,1,Qt::AlignLeft);
     connect(_faceseltool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_faceseltool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
@@ -1214,9 +1234,16 @@ void MLRenderingOnOffToolbar::toggle(QAction* clickedact)
 {
     if ((_act != NULL) && (clickedact != NULL))
     {
-        //clickedact->setChecked(true);
-        _act->setChecked(_onact->isChecked());
-        emit updateRenderingDataAccordingToAction(_meshid,_act);
+		if (_meshid != -1)
+		{
+			_act->setChecked(_onact->isChecked());
+			emit updateRenderingDataAccordingToAction(_meshid,_act);
+		}
+		else
+		{
+			_act->setChecked(clickedact->text() == QString("On"));
+			emit updateRenderingDataAccordingToAction(_meshid, _act, (clickedact->text() == QString("On")));
+		}
     }
 }
 
@@ -1343,6 +1370,7 @@ void MLRenderingFloatSlider::valueChanged( float val)
     {
         _act->setValue(val);
         emit updateRenderingDataAccordingToAction(_meshid,_act);
+		emit updateRenderingDataAccordingToAction(_meshid, _act,true);
     }
 }
 
@@ -1435,14 +1463,23 @@ void MLRenderingGlobalToolbar::initToolButtonSubMenu(MyToolButton* button, MLRen
 	foreach(QAction* rendact, onoff->actions())
 	{
 		rendact->setCheckable(false);
-		connect(rendact, SIGNAL(triggered()), this, SLOT(renderingActionOnOffClicked()));
 	}
+	connect(onoff, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
+
+
+	connect(frame, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
+	connect(frame, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
+
+
+	/*STATELESS INTERFACE....WARNING!!! BE CAREFUL NOT ALL THE TOP LEVEL ACTIONS ARE MLRENDERINGACTION (for instance on/off actions...)*/
 	QList<QAction*> toplevelactions;
 	frame->allTopLevelGuiActions(toplevelactions);
-
 	foreach(QAction* tpl, toplevelactions)
 		tpl->setCheckable(false);
 
+	QList<MLRenderingAction*> renderingactions; 
+	frame->actionsList(renderingactions);
+	
 	QWidgetAction* bboxwidact = new QWidgetAction(this);
 	bboxwidact->setDefaultWidget(onoff);
 	QWidgetAction* paramwidact = new QWidgetAction(this);
@@ -1455,17 +1492,4 @@ void MLRenderingGlobalToolbar::initToolButtonSubMenu(MyToolButton* button, MLRen
 		button->setMenu(mn);
 	}
 	button->setCheckable(true);
-}
-
-void MLRenderingGlobalToolbar::renderingActionOnOffClicked()
-{
-	QAction* rendact = qobject_cast<QAction*>(sender());
-	rendact->setChecked(true);
-	bool test = (rendact->isChecked());
-
-}
-
-void MLRenderingGlobalToolbar::renderingActionFrameParameterClicked()
-{
-
 }

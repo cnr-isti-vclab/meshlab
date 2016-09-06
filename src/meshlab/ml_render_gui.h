@@ -87,6 +87,7 @@ class MLRenderingFloatSlider : public MLFloatSlider
 public:
     MLRenderingFloatSlider(int meshid,QWidget *p);
     MLRenderingFloatSlider(QWidget *p);
+
     ~MLRenderingFloatSlider();
 	
 	MLRenderingAction* getRenderingAction();
@@ -103,6 +104,7 @@ private slots:
     void valueChanged(float);
 signals:
     void updateRenderingDataAccordingToAction(int,MLRenderingAction*);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 };
 
 class MLRenderingOnOffToolbar : public QToolBar
@@ -130,8 +132,9 @@ protected:
 
 signals:
 	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 
-	private slots:
+private slots:
 	void toggle(QAction*);
 };
 
@@ -182,7 +185,8 @@ protected slots:
 //    void initGui();
 
 signals:
-    void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>& acts);
+    void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
+	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
     void activatedAction(MLRenderingAction*);
     
 
@@ -241,7 +245,9 @@ protected:
 
 signals:
 	void updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&);
+	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
 	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 };
 
 class MLRenderingGlobalToolbar : public QToolBar
@@ -257,9 +263,9 @@ private slots:
 private:
 	void initGui();
 	void initToolButtonSubMenu(MyToolButton* button, MLRenderingOnOffToolbar* onoff, MLRenderingParametersFrame* frame);
-private slots:
-	void renderingActionOnOffClicked();
-	void renderingActionFrameParameterClicked();
+signals:
+	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 };
 
 

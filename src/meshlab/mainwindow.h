@@ -125,6 +125,15 @@ public slots:
 	void updateLayerDialog();
 	bool addRenderingDataIfNewlyGeneratedMesh(int meshid);
 
+	void updateRenderingDataAccordingToActions(int meshid, const QList<MLRenderingAction*>& acts);
+	void updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts);
+	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act);
+	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act,bool);
+
+private:
+	void updateRenderingDataAccordingToActionsCommonCode(int meshid, const QList<MLRenderingAction*>& acts);
+	void updateRenderingDataAccordingToActionCommonCode(int meshid, MLRenderingAction* act);
+
 private slots:
 	void documentUpdateRequested();
     bool importMesh(QString fileName=QString());
@@ -144,9 +153,6 @@ public:
     void defaultPerViewRenderingData(MLRenderingData& dt) const;
     void getRenderingData(int mid,MLRenderingData& dt) const;
     void setRenderingData(int mid,const MLRenderingData& dt);
-
-    void updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts);
-    void updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act);
 
 	unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
 

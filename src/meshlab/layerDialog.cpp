@@ -386,10 +386,6 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
     _globaldoctool->setIconSize(QSize(16,16));
 	MLRenderingData projdt;
 	MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator projit = dtf.find(-1);
-	if (projit != dtf.end())
-		_globaldoctool->setAccordingToRenderingData(projit.value());
-	connect(_globaldoctool, SIGNAL(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)), this, SLOT(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)));
-	connect(_globaldoctool, SIGNAL(activatedAction(MLRenderingAction*)), this, SLOT(actionActivated(MLRenderingAction*)));
 
    updateProjectName(md->docLabel());
     
@@ -781,8 +777,8 @@ void LayerDialog::updateProjectName( const QString& name )
     fnt.setBold(true);
     _docitem->setFont(2,fnt);
     _docitem->setText(2,fi.baseName());
-    ui->meshTreeWidget->addTopLevelItem(_docitem);
-    ui->meshTreeWidget->setItemWidget(_docitem,3,_globaldoctool);
+    //ui->meshTreeWidget->addTopLevelItem(_docitem);
+    //ui->meshTreeWidget->setItemWidget(_docitem,3,_globaldoctool);
 }
 
 void LayerDialog::updatePerMeshItemVisibility()

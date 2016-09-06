@@ -681,9 +681,17 @@ MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderin
     setText(QString("User-Def"));
 }
 
+MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction(MLRenderingUserDefinedColorAction* origin, QObject * par)
+	: MLRenderingAction(origin->meshId(),par)
+{
+	setText(origin->text());
+	setColor(origin->getColor());
+	_pm = origin->_pm;
+}
+
 void MLRenderingUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
-	sisteract = new MLRenderingUserDefinedColorAction(_pm,meshId(), par);
+	sisteract = new MLRenderingUserDefinedColorAction(this,par);
 }
 
 void MLRenderingUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
@@ -965,9 +973,16 @@ MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( in
     setText("User-Def");
 }
 
+MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction(MLRenderingBBoxUserDefinedColorAction* origin, QObject * par)
+	: MLRenderingAction(origin->meshId(), par)
+{
+	setText(origin->text());
+	_col = origin->_col;
+}
+
 void MLRenderingBBoxUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
-	sisteract = new MLRenderingBBoxUserDefinedColorAction(meshId(), par);
+	sisteract = new MLRenderingBBoxUserDefinedColorAction(this, par);
 }
 
 void MLRenderingBBoxUserDefinedColorAction::updateRenderingData( MLRenderingData& rd )
@@ -1281,9 +1296,16 @@ MLRenderingPointsSizeAction::MLRenderingPointsSizeAction( int meshid,QObject* pa
     setText("Point Size");
 }
 
+MLRenderingPointsSizeAction::MLRenderingPointsSizeAction(MLRenderingPointsSizeAction* origin, QObject* parent)
+	:MLRenderingFloatAction(origin->meshId(),parent)
+{
+	setText(origin->text());
+	_value = origin->_value;
+}
+
 void MLRenderingPointsSizeAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
-	sisteract = new MLRenderingPointsSizeAction(meshId(), par);
+	sisteract = new MLRenderingPointsSizeAction(this, par);
 }
 
 void MLRenderingPointsSizeAction::updateRenderingData( MLRenderingData& rd )
@@ -1325,9 +1347,16 @@ MLRenderingWireWidthAction::MLRenderingWireWidthAction( int meshid,QObject* pare
     setText("Edge Width");
 }
 
+MLRenderingWireWidthAction::MLRenderingWireWidthAction(MLRenderingWireWidthAction* origin, QObject* parent)
+:MLRenderingFloatAction(origin->meshId(), parent)
+{
+	setText(origin->text());
+	_value = origin->_value;
+}
+
 void MLRenderingWireWidthAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
-	sisteract = new MLRenderingWireWidthAction(meshId(), par);
+	sisteract = new MLRenderingWireWidthAction(this, par);
 }
 
 void MLRenderingWireWidthAction::updateRenderingData( MLRenderingData& rd )
