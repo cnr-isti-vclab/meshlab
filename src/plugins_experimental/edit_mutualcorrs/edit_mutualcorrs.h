@@ -44,8 +44,8 @@ public:
 
     static const QString Info();
 
-    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/);
+    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
 
     void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
     void Decorate (MeshModel &/*m*/, GLArea * ){};

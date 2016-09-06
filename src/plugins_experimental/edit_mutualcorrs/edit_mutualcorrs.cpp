@@ -68,9 +68,9 @@ void EditMutualCorrsPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*
     cur=event->pos();
 }
   
-void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p)
+void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 {
-	if (glArea->md()->rasterList.size() == 0 || !glArea->isRaster())
+	if (gla->md()->rasterList.size() == 0 || !gla->isRaster())
 	{
 		return;
 	}
@@ -195,7 +195,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea * /*gla*/, QPainter *p
 
 }
 
-bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
+bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: StartEdit: setup all");
 
@@ -243,7 +243,7 @@ bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla)
     return true;
 }
 
-void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/)
+void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneGLSharedDataContext* /*cont*/)
 {
     qDebug("EDIT_REFERENCING: EndEdit: cleaning all");
     assert(mutualcorrsDialog);
