@@ -2036,6 +2036,7 @@ void MainWindow::applyDecorateMode()
 
     GLA()->toggleDecorator(iDecorateTemp->decorationName(action));
 
+	updateMenus();
     layerDialog->updateDecoratorParsView();
     layerDialog->updateLog(meshDoc()->Log);
     layerDialog->update();
