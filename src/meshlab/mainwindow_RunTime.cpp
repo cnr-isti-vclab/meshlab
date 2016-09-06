@@ -3467,7 +3467,7 @@ void MainWindow::updateRenderingDataAccordingToActionsCommonCode(int meshid, con
 	}
 	MeshModel* mm = meshDoc()->getMesh(meshid);
 	if (mm != NULL)
-		MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm, dt, dt);
+		MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(mm, dt, dt);
 	setRenderingData(meshid, dt);
 
 	/*if (meshid == -1)
@@ -3507,37 +3507,32 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid, MLRenderingAc
 	if ((meshDoc() == NULL) || (act == NULL))
 		return;
 
-	if (meshid != -1)
-		updateRenderingDataAccordingToActionsCommonCode(meshid, acts);
-	else
+	QList<MLRenderingAction*> tmpacts;
+	for (int ii = 0; ii < acts.size(); ++ii)
 	{
-		QList<MLRenderingAction*> tmpacts;
-		for (int ii = 0; ii < acts.size(); ++ii)
+		if (acts[ii] != NULL)
 		{
-			if (acts[ii] != NULL)
-			{
-				MLRenderingAction* sisteract = NULL;
-				acts[ii]->createSisterAction(sisteract, NULL);
-				sisteract->setChecked(acts[ii] == act);
-				tmpacts.push_back(sisteract);
-			}
+			MLRenderingAction* sisteract = NULL;
+			acts[ii]->createSisterAction(sisteract, NULL);
+			sisteract->setChecked(acts[ii] == act);
+			tmpacts.push_back(sisteract);
 		}
-
-		for (int hh = 0; hh < meshDoc()->meshList.size(); ++hh)
-		{
-			if (meshDoc()->meshList[hh] != NULL)
-				updateRenderingDataAccordingToActionsCommonCode(meshDoc()->meshList[hh]->id(), tmpacts);
-		}
-
-		for (int ii = 0; ii < tmpacts.size(); ++ii)
-			delete tmpacts[ii];
-		tmpacts.clear();
 	}
+
+	for (int hh = 0; hh < meshDoc()->meshList.size(); ++hh)
+	{
+		if (meshDoc()->meshList[hh] != NULL)
+			updateRenderingDataAccordingToActionsCommonCode(meshDoc()->meshList[hh]->id(), tmpacts);
+	}
+
+	for (int ii = 0; ii < tmpacts.size(); ++ii)
+		delete tmpacts[ii];
+	tmpacts.clear();
+
 	if (GLA() != NULL)
 		GLA()->update();
 
-	if (meshid == -1)
-		updateLayerDialog();
+	updateLayerDialog();
 }
 
 
@@ -3554,7 +3549,7 @@ void MainWindow::updateRenderingDataAccordingToActionCommonCode(int meshid, MLRe
 		act->updateRenderingData(dt);
 		MeshModel* mm = meshDoc()->getMesh(meshid);
 		if (mm != NULL)
-			MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(mm, dt, dt);
+			MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(mm, dt, dt);
 		setRenderingData(meshid, dt);
 		if (mm != NULL)
 		{

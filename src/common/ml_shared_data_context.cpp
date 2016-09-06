@@ -475,7 +475,51 @@ void MLSceneGLSharedDataContext::doneCurrentGLContext( QGLContext* oldone /*= NU
         oldone->makeCurrent();
 }
 
+void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(MeshModel* meshmodel, const MLRenderingData& inputdt, MLRenderingData& outputdt)
+{
+	if (meshmodel == NULL)
+		return;
+	CMeshO& mesh = meshmodel->cm;
+	if (mesh.VN() == 0)
+	{
+		outputdt.reset(false);
+		return;
+	}
+	bool validfaces = (mesh.FN() > 0);
 
+	MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
+	for (size_t pmind = 0; pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
+	{
+		MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);
+
+
+		MLRenderingData::RendAtts tmpoutputatts;
+		if (inputdt.get(MLRenderingData::PRIMITIVE_MODALITY(pmind), tmpoutputatts))
+		{
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
+
+			//horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
+			//Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
+			//The enum-value depends from the enabled attributes of input mesh.
+			bool wedgetexture = meshmodel->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
+			tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= validfaces && wedgetexture;
+			if (MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(meshmodel, pmc))
+				outputdt.set(pmc, tmpoutputatts);
+		}
+		else
+			throw MLException(QString("MLPoliciesStandAloneFunctions: trying to access to a non defined PRIMITIVE_MODALITY!"));
+
+
+	}
+	MLPerViewGLOptions opts;
+	inputdt.get(opts);
+	outputdt.set(opts);
+}
 
 void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)                                                                                    
 {

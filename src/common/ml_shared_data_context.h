@@ -180,7 +180,10 @@ public:
 
 struct MLPoliciesStandAloneFunctions
 {
-    static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
+	/*WARNING!!!!! TEMPORARY!!! TO BE DELETED*/
+	static void computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(MeshModel * meshmodel, const MLRenderingData & inputdt, MLRenderingData & outputdt);
+	
+	static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
 
     static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,MLRenderingData::RendAtts& atts);
 
