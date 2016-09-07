@@ -652,6 +652,7 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
             tmpatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = true;
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = true;
             dt.set(MLRenderingData::PR_SOLID,tmpatts);
         }
         else
@@ -664,7 +665,6 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
                 tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
                 tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
                 dt.set(MLRenderingData::PR_WIREFRAME_EDGES,tmpatts);
-                return;
             }
         }
     }

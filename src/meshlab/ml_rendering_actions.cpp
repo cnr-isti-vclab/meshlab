@@ -155,11 +155,12 @@ void MLRenderingWireAction::createSisterAction(MLRenderingAction *& sisteract, Q
 void MLRenderingWireAction::updateRenderingData(MLRenderingData& rd )
 {
     rd.set(MLRenderingData::PR_WIREFRAME_TRIANGLES,isChecked());
+	//rd.set(MLRenderingData::PR_WIREFRAME_EDGES, isChecked());
 }
 
 bool MLRenderingWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES);
+    return (rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES) /*|| rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES)*/);
 }
 
 MLRenderingSolidAction::MLRenderingSolidAction( QObject* parent )

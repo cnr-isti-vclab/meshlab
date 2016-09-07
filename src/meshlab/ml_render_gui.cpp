@@ -66,8 +66,10 @@ void MLRenderingToolbar::toggle( QAction* act)
 
 void MLRenderingToolbar::setAccordingToRenderingData(const MLRenderingData& dt)
 {
-    foreach(MLRenderingAction* rendact,_acts)
-        rendact->setChecked(rendact->isRenderingDataEnabled(dt));
+	foreach(MLRenderingAction* rendact, _acts)
+	{
+		rendact->setChecked(rendact->isRenderingDataEnabled(dt));
+	}
 }
 
 void MLRenderingToolbar::setAssociatedMeshId( int meshid )
@@ -388,6 +390,23 @@ void MLRenderingSolidParametersFrame::allTopLevelGuiActions(QList<QAction*>& tpl
 	tplevelactions.append(_texttool->actions());
 }
 
+void MLRenderingSolidParametersFrame::setTextureAction(MLRenderingData::ATT_NAMES textattname)
+{
+	if (textattname == MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE)
+	{
+		MLRenderingPerWedgeTextCoordAction* wedact = new MLRenderingPerWedgeTextCoordAction(_meshid, this);
+		_texttool->setRenderingAction(wedact);
+	}
+	else
+	{
+		if (textattname == MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE)
+		{
+			MLRenderingPerVertTextCoordAction* vertact = new MLRenderingPerVertTextCoordAction(MLRenderingData::PR_SOLID, this);
+			_texttool->setRenderingAction(vertact);
+		}
+	}	
+}
+
 MLRenderingWireParametersFrame::MLRenderingWireParametersFrame( QWidget* parent )
     :MLRenderingParametersFrame(-1,parent)
 {
@@ -468,7 +487,7 @@ void MLRenderingWireParametersFrame::initGui()
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
-    QLabel* wirelab = new QLabel("Wire Modality",this);
+    QLabel* wirelab = new QLabel("Polygonal Modality",this);
     wirelab->setFont(boldfont);
     layout->addWidget(wirelab,3,0,Qt::AlignLeft);
     _edgetool = new MLRenderingOnOffToolbar(_meshid,this);
@@ -1026,6 +1045,15 @@ void MLRenderingParametersTab::actionsList(QList<MLRenderingAction*>& actions)
 	{
 		if (it.value() != NULL)
 			it.value()->actionsList(actions);
+	}
+}
+
+void MLRenderingParametersTab::setTextureAction(MLRenderingData::ATT_NAMES textattname)
+{
+	for (QMap<QString, MLRenderingParametersFrame*>::iterator it = _parframe.begin(); it != _parframe.end(); ++it)
+	{
+		if (it.value() != NULL)
+			it.value()->setTextureAction(textattname);
 	}
 }
 

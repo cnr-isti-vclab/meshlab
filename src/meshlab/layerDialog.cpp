@@ -747,8 +747,19 @@ void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData&
     if (tabw != NULL)
     {
         tabw->setAssociatedMeshId(meshid);
-        if ((mw != NULL) && (mw->meshDoc() != NULL))
-            tabw->updateVisibility(mw->meshDoc()->getMesh(meshid));    
+		MeshModel* mm;
+		if ((mw != NULL) && (mw->meshDoc() != NULL))
+		{
+			mm = mw->meshDoc()->getMesh(meshid);
+			if (mm != NULL)
+			{
+				if (mm->hasDataMask(MeshModel::MM_VERTTEXCOORD) && !(mm->hasDataMask(MeshModel::MM_WEDGTEXCOORD)))
+					tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE);
+				else
+					tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE);
+				tabw->updateVisibility(mm);
+			}
+		}
         tabw->updateGUIAccordingToRenderingData(dt);
     }
 }

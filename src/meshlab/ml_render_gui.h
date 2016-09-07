@@ -236,6 +236,7 @@ public:
 	virtual void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const = 0;
 	virtual void actionsList(QList<MLRenderingAction*>& actions) = 0;
 	virtual void allTopLevelGuiActions(QList<QAction*>& tplevelactions) = 0;
+	virtual void setTextureAction(MLRenderingData::ATT_NAMES textattname) {}
 	virtual void updateVisibility(MeshModel*) {}
 	static MLRenderingParametersFrame* factory(MLRenderingAction* act, int meshid, QWidget* parent);
 	static void destroy(MLRenderingParametersFrame* pf);
@@ -283,6 +284,7 @@ public:
     void updateVisibility(MeshModel* mm);
 	void actionsList(QList<MLRenderingAction*>& actions);
 	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
+	void setTextureAction(MLRenderingData::ATT_NAMES textattname);
 
 private:
     void initGui();
@@ -425,6 +427,7 @@ public:
 	void updatePerMeshRenderingAction(QList<MLRenderingAction*>& acts);
 	void actionsList(QList<MLRenderingAction*>& actions);
 
+	void setTextureAction(MLRenderingData::ATT_NAMES textattname);
 
 private:
     void initGui(const QList<MLRenderingAction*>& tab);
