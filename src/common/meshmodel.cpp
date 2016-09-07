@@ -756,7 +756,7 @@ int MeshModel::dataMask() const
 }
 
 MeshDocumentStateData::MeshDocumentStateData()
-	:_existingmeshesbeforeoperation(),_lock(QReadWriteLock::Recursive)
+	:_lock(QReadWriteLock::Recursive),_existingmeshesbeforeoperation()
 {
 
 }

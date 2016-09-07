@@ -200,7 +200,7 @@ void MLSceneGLSharedDataContext::setMeshTransformationMatrix( int mmid,const Mat
         man->setTrMatrix(m);
 }
 
-void MLSceneGLSharedDataContext::setSceneTransformationMatrix( const Matrix44m& m )
+void MLSceneGLSharedDataContext::setSceneTransformationMatrix( const Matrix44m& /*m*/ )
 {
 
 }
@@ -276,7 +276,7 @@ void MLSceneGLSharedDataContext::deAllocateGPUSharedData()
     {
         PerMeshMultiViewManager* man = it.value();
         deAllocateTexturesPerMesh(it.key());
-        it.value()->removeAllViewsAndDeallocateBO();
+        man->removeAllViewsAndDeallocateBO();
     }
     doneCurrentGLContext(ctx);
 }
@@ -291,7 +291,7 @@ void MLSceneGLSharedDataContext::meshAttributesUpdated(int mmid,bool conntectivi
         man->meshAttributesUpdated(conntectivitychanged,atts);
 }
 
-void MLSceneGLSharedDataContext::meshDeallocated( int mmid )
+void MLSceneGLSharedDataContext::meshDeallocated( int /*mmid*/ )
 {
 
 }
@@ -487,7 +487,6 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 	}
 	bool validfaces = (mesh.FN() > 0);
 
-	MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
 	for (size_t pmind = 0; pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
 	{
 		MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);
