@@ -61,12 +61,20 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *gl
 void EditSelectPlugin::keyPressEvent(QKeyEvent */*event*/, MeshModel &/*m*/, GLArea *gla)
 {
 	Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
-	if (mod == Qt::AltModifier)
+	if (mod == Qt::AltModifier && selectionMode != SELECT_VERT_MODE)
 		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
 	if (mod == (Qt::AltModifier + Qt::ControlModifier))
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+	{
+		if (selectionMode != SELECT_VERT_MODE)
+			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+	}
 	if (mod == (Qt::AltModifier + Qt::ShiftModifier))
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+	{
+		if (selectionMode != SELECT_VERT_MODE)
+			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+	}
 	if (mod == Qt::ControlModifier)
 		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
 	if (mod == Qt::ShiftModifier)
