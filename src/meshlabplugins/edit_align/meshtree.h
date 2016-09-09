@@ -91,9 +91,7 @@ public:
     for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
       if((li->MovName==id1 && li->FixName==id2) ||
          (li->MovName==id2 && li->FixName==id1) ) return &*li;
-
-    assert("You are trying to find an unexistent result"==0);
-  return 0;
+    return 0;
   }
 
   void deleteResult(MeshNode *mp)

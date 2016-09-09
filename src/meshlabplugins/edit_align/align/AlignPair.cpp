@@ -339,7 +339,7 @@ bool AlignPair::Align(
       if (beyondCntVec[i] < maxBeyondCnt)
       {
       
-        if (!fixbox.IsIn(movvert[i]))
+        if (fixbox.IsIn(movvert[i]))
         {
           double error = StartMinDist;
           Point3d closestPoint, closestNormal;

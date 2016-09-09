@@ -37,8 +37,5 @@ INCLUDEPATH += ../../external
 
 FORMS 	  += alignDialog.ui
 TARGET       = edit_align
-
 RESOURCES     = edit_align.qrc
-release {DEFINES += NDEBUG}
-macx:QMAKE_CXX=g++
 
