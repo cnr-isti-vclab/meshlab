@@ -107,7 +107,7 @@ public:
     int currentId;
 
     GLLogStream *LogPtr() {return &meshDoc.Log;}
-
+	GLArea* currentgla;
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
     void updateDocumentViewer();

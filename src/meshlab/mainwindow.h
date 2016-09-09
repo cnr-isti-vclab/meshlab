@@ -320,8 +320,7 @@ public:
         //	  if(mdiarea->currentSubWindow()==0) return 0;
         MultiViewer_Container *mvc = currentViewContainer();
         if(!mvc) return 0;
-        GLArea *glw =  qobject_cast<GLArea*>(mvc->currentView());
-        return glw;
+        return  mvc->currentgla;
     }
 
     MultiViewer_Container* currentViewContainer() const {

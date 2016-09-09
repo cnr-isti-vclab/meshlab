@@ -69,6 +69,7 @@ MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminf
 	scenecontext->setHidden(true);
 	scenecontext->initializeGL();
 	currentId=-1;
+	currentgla = NULL;
 }
 
 MultiViewer_Container::~MultiViewer_Container()
@@ -270,6 +271,7 @@ void MultiViewer_Container::updateCurrent(int current)
 {
 	int previousCurrentId = currentId;
 	currentId=current;
+	currentgla = getViewer(currentId);
 	if(getViewer(previousCurrentId))
 		update(previousCurrentId);
     emit updateMainWindowMenus();
