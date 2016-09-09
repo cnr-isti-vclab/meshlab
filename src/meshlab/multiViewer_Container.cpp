@@ -38,7 +38,7 @@ QSplitterHandle *Splitter::createHandle()
 
 MultiViewer_Container *Splitter::getRootContainer()
 {
-	Splitter * parentSplitter = qobject_cast<Splitter *>(this);
+	Splitter * parentSplitter = this;
 	MultiViewer_Container* mvc = qobject_cast<MultiViewer_Container *>(parentSplitter);
 	while(!mvc)
 	{

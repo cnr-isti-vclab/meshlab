@@ -49,6 +49,7 @@ public:
 	Splitter(Qt::Orientation orientation, QWidget *parent = 0);
     ~Splitter() {}
 
+	virtual bool isMultiViewerContainer() const { return false; }
 	MultiViewer_Container *getRootContainer();
 
 protected:
@@ -77,6 +78,7 @@ public:
     MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo,bool highprec,size_t perbatchprimitives,QWidget *parent);
     ~MultiViewer_Container();
 
+	bool isMultiViewerContainer() const { return true; }
     void addView(GLArea *viewer, Qt::Orientation);
     void removeView(int);
 

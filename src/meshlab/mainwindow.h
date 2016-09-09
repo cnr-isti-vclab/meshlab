@@ -325,13 +325,15 @@ public:
     }
 
     MultiViewer_Container* currentViewContainer() const {
-        MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
-        if(mvc) return mvc;
-        if(mvc==0 && mdiarea->currentSubWindow()!=0 ){
-            mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow()->widget());
-            if(mvc) return mvc;
+       /* MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+        if(mvc) return mvc;*/
+        if(mdiarea->currentSubWindow()!=0 )
+		{
+            Splitter* split = reinterpret_cast<Splitter*>(mdiarea->currentSubWindow()->widget());
+			if (split->isMultiViewerContainer())
+				return reinterpret_cast<MultiViewer_Container*>(split);
         }
-        QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
+        /*QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
         foreach(QMdiSubWindow *subwinPtr,subwinList)
         {
             MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr);
@@ -340,7 +342,7 @@ public:
                 mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr->widget());
                 if(mvc) return mvc;
             }
-        }
+        }*/
 
         return 0;
     }
