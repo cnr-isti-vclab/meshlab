@@ -477,6 +477,21 @@ void MLSceneGLSharedDataContext::doneCurrentGLContext( QGLContext* oldone /*= NU
 
 void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(MeshModel* meshmodel, const MLRenderingData& inputdt, MLRenderingData& outputdt)
 {
+	MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshCommonCode(meshmodel, inputdt, outputdt);
+	MLPerViewGLOptions opts;
+	inputdt.get(opts);
+	outputdt.set(opts);	
+}
+
+void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)                                                                                    
+{
+	MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshCommonCode(meshmodel, inputdt, outputdt);
+	MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(meshmodel, outputdt);
+	MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(outputdt);
+}
+
+void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshCommonCode(MeshModel* meshmodel, const MLRenderingData& inputdt, MLRenderingData& outputdt)
+{
 	if (meshmodel == NULL)
 		return;
 	CMeshO& mesh = meshmodel->cm;
@@ -486,7 +501,8 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 		return;
 	}
 	bool validfaces = (mesh.FN() > 0);
-
+	
+	MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
 	for (size_t pmind = 0; pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
 	{
 		MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);
@@ -512,56 +528,7 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 		}
 		else
 			throw MLException(QString("MLPoliciesStandAloneFunctions: trying to access to a non defined PRIMITIVE_MODALITY!"));
-
-
 	}
-	MLPerViewGLOptions opts;
-	inputdt.get(opts);
-	outputdt.set(opts);
-}
-
-void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt)                                                                                    
-{
-    if (meshmodel == NULL)
-        return;
-    CMeshO& mesh = meshmodel->cm;
-    if (mesh.VN() == 0)
-    {
-        outputdt.reset(false);
-        return;
-    }
-    bool validfaces = (mesh.FN() > 0);
-
-    MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
-    for(size_t pmind = 0;pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
-    {
-        MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);
-
-            
-        MLRenderingData::RendAtts tmpoutputatts;
-        if (inputdt.get(MLRenderingData::PRIMITIVE_MODALITY(pmind),tmpoutputatts))
-        {
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOORD);
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] &= meshmodel->hasDataMask(MeshModel::MM_VERTNORMAL);
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACENORMAL);
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] &= meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR);
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] &= validfaces && meshmodel->hasDataMask(MeshModel::MM_FACECOLOR);
-
-            //horrible trick caused by MeshLab GUI. In MeshLab exists just a button turning on/off the texture visualization.
-            //Unfortunately the RenderMode::textureMode member field is not just a boolean value but and enum one.
-            //The enum-value depends from the enabled attributes of input mesh.
-            bool wedgetexture = meshmodel->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= (meshmodel->hasDataMask(MeshModel::MM_VERTTEXCOORD) && (!wedgetexture));
-            tmpoutputatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= validfaces && wedgetexture;
-            if (MLPoliciesStandAloneFunctions::isPrimitiveModalityCompatibleWithMesh(meshmodel,pmc))
-                outputdt.set(pmc,tmpoutputatts);
-        }
-        else
-            throw MLException(QString("MLPoliciesStandAloneFunctions: trying to access to a non defined PRIMITIVE_MODALITY!"));  
-
-        
-    }
-    MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(outputdt);
 }
 
 void MLPoliciesStandAloneFunctions::fromMeshModelMaskToMLRenderingAtts( int meshmodelmask,MLRenderingData::RendAtts& atts)
@@ -609,16 +576,23 @@ void MLPoliciesStandAloneFunctions::maskMeaninglessAttributesPerPrimitiveModalit
     }
 }
 
-void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY /*pm*/,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
+void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result)
 {
     MLRenderingData::RendAtts filteredupdated = updated;
     MLRenderingData::RendAtts tmp = current;
     tmp[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
     tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
     tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
-    tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
-    tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
-    //tmp[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+	if ((pm == MLRenderingData::PR_WIREFRAME_TRIANGLES) || (pm == MLRenderingData::PR_WIREFRAME_EDGES))
+	{
+		tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = false;
+		tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
+	}
+	else
+	{
+		tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
+		tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+	}
     tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
     tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
     result = tmp;
@@ -663,10 +637,16 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
                 tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
                 tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
                 tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
-                dt.set(MLRenderingData::PR_WIREFRAME_EDGES,tmpatts);
+				MLPerViewGLOptions opts;
+				dt.get(opts);
+				opts._peredge_wire_enabled = true;
+				opts._peredge_fauxwire_enabled = true;
+				dt.set(opts);
+				dt.set(MLRenderingData::PR_SOLID, false);
             }
         }
     }
+	MLPoliciesStandAloneFunctions::setBestWireModality(meshmodel, dt);
     MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(meshmodel,dt,dtout);
 }
 
@@ -765,6 +745,7 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MLRenderingDat
                     glopts._perpoint_noshading = !atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
                     glopts._perpoint_mesh_color_enabled &= !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
                     glopts._perpoint_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !glopts._perpoint_mesh_color_enabled;
+
                     break;
                 }
             case (MLRenderingData::PR_WIREFRAME_EDGES):
@@ -806,6 +787,52 @@ void MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask( Mesh
     //atts[MLRenderingData::ATT_NAMES::ATT_FIXEDCOLOR]
     atts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] &= m->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
     atts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] &= m->hasDataMask(MeshModel::MM_VERTTEXCOORD);
+}
+
+void MLPoliciesStandAloneFunctions::setBestWireModality(MeshModel* mm, MLRenderingData& dt)
+{
+	if (mm == NULL)
+		return;
+	MLPerViewGLOptions opts;
+	dt.get(opts);
+	
+	if ((mm->cm.VN() > 0) && (mm->cm.FN() == 0) && (mm->cm.EN() > 0))
+	{
+		dt.set(MLRenderingData::PR_WIREFRAME_EDGES,true && opts._peredge_wire_enabled);
+		dt.set(MLRenderingData::PR_WIREFRAME_TRIANGLES, false);
+		return;
+	}
+
+	if (opts._peredge_wire_enabled)
+	{
+		if (opts._peredge_fauxwire_enabled)
+		{
+			dt.set(MLRenderingData::PR_WIREFRAME_EDGES, true);
+			dt.set(MLRenderingData::PR_WIREFRAME_TRIANGLES, false);
+		}
+		else
+		{
+			dt.set(MLRenderingData::PR_WIREFRAME_TRIANGLES, true);
+			dt.set(MLRenderingData::PR_WIREFRAME_EDGES, false);
+		}
+	}
+	else
+	{
+		dt.set(MLRenderingData::PR_WIREFRAME_TRIANGLES, false);
+		dt.set(MLRenderingData::PR_WIREFRAME_EDGES, false);
+	}
+}
+
+
+void MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(MeshModel* mm, MLRenderingData& dt)
+{
+	if (mm == NULL)
+		return;
+	MLPerViewGLOptions glopts;
+	dt.get(glopts);
+	glopts._peredge_fauxwire_enabled = dt.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES);
+	glopts._peredge_wire_enabled = (dt.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES) || dt.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES) || (glopts._peredge_wire_enabled && (mm->cm.VN() > 0) && (mm->cm.FN() > 0)));
+	dt.set(glopts);
 }
 
 MLRenderingData::PRIMITIVE_MODALITY MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh( MeshModel* m )

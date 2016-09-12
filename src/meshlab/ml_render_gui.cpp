@@ -29,15 +29,22 @@ MLRenderingToolbar::~MLRenderingToolbar()
 {
 }
 
-void MLRenderingToolbar::updateVisibility(MeshModel* mm)
+bool MLRenderingToolbar::updateVisibility(MeshModel* mm)
 {
+	bool isvis = false;
     foreach(MLRenderingAction* ract,_acts)
     {
-        ract->setCheckable(ract->isCheckableConditionValid(mm));
+		bool actvis = ract->isVisibleConditionValid(mm);
+		isvis = isvis || actvis;
+        ract->setVisible(actvis);
+		ract->setCheckable(actvis);
         QWidget* wid = widgetForAction(ract);
-        if (wid != NULL)
-            wid->setVisible(ract->isCheckable());
+		if (wid != NULL)
+		{
+			wid->setVisible(actvis);
+		}	
     }
+	return isvis;
 }
 
 void MLRenderingToolbar::addRenderingAction( MLRenderingAction* act )
@@ -171,7 +178,7 @@ void MLRenderingSideToolbar::initGui()
     _actgroup->setExclusive(false);
     addRenderingAction(new MLRenderingBBoxAction(_meshid,this));
     addRenderingAction(new MLRenderingPointsAction(_meshid,this));
-    addRenderingAction(new MLRenderingWireAction(_meshid,this));
+	addRenderingAction(new MLRenderingWireAction(_meshid, this));
     addRenderingAction(new MLRenderingSolidAction(_meshid,this));
     addRenderingAction(new MLRenderingSelectionAction(_meshid,this));
     addRenderingAction(new MLRenderingEdgeDecoratorAction(_meshid,this));
@@ -296,11 +303,11 @@ void MLRenderingSolidParametersFrame::initGui()
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
     _shadingtool = new MLRenderingToolbar(_meshid,this);
-    QLabel* shadelab = new QLabel("Shading",this);
+    _shadelab = new QLabel("Shading",this);
     QFont boldfont;
     boldfont.setBold(true);
-    shadelab->setFont(boldfont);
-    layout->addWidget(shadelab,0,0,Qt::AlignLeft);
+    _shadelab->setFont(boldfont);
+    layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
     _shadingtool->addRenderingAction(new MLRenderingPerFaceNormalAction(_meshid,_shadingtool));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
@@ -308,9 +315,9 @@ void MLRenderingSolidParametersFrame::initGui()
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int,MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
-    QLabel* colorlab = new QLabel("Color",this);
-    colorlab->setFont(boldfont);
-    layout->addWidget(colorlab,1,0,Qt::AlignLeft);
+    _colorlab = new QLabel("Color",this);
+    _colorlab->setFont(boldfont);
+    layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerFaceColorAction(_meshid,_colortool));
@@ -324,9 +331,9 @@ void MLRenderingSolidParametersFrame::initGui()
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
     
-	QLabel* textlab = new QLabel("Texture Coord",this);
-    textlab->setFont(boldfont);
-    layout->addWidget(textlab,2,0,Qt::AlignLeft);
+	_textlab = new QLabel("Texture Coord",this);
+    _textlab->setFont(boldfont);
+    layout->addWidget(_textlab,2,0,Qt::AlignLeft);
     _texttool = new MLRenderingOnOffToolbar(_meshid,this);
     _texttool->setRenderingAction(new MLRenderingPerWedgeTextCoordAction(_meshid,_texttool));
     layout->addWidget(_texttool,2,1,Qt::AlignLeft);
@@ -371,9 +378,9 @@ void MLRenderingSolidParametersFrame::getCurrentRenderingDataAccordingToGUI( MLR
 
 void MLRenderingSolidParametersFrame::updateVisibility( MeshModel* mm )
 {
-    _shadingtool->updateVisibility(mm);
-    _colortool->updateVisibility(mm);
-    _texttool->updateVisibility(mm);
+	_shadelab->setVisible(_shadingtool->updateVisibility(mm));
+    _colorlab->setVisible(_colortool->updateVisibility(mm));
+    _textlab->setVisible(_texttool->updateVisibility(mm));
 }
 
 void MLRenderingSolidParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
@@ -449,20 +456,20 @@ void MLRenderingWireParametersFrame::initGui()
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
     _shadingtool = new MLRenderingToolbar(_meshid,this);
-    QLabel* shadelab = new QLabel("Shading",this);
+    _shadelab = new QLabel("Shading",this);
     QFont boldfont;
     boldfont.setBold(true);
-    shadelab->setFont(boldfont);
-    layout->addWidget(shadelab,0,0,Qt::AlignLeft);
+    _shadelab->setFont(boldfont);
+    layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
-    QLabel* colorlab = new QLabel("Color",this);
-    colorlab->setFont(boldfont);
-    layout->addWidget(colorlab,1,0,Qt::AlignLeft);
+    _colorlab = new QLabel("Color",this);
+    _colorlab->setFont(boldfont);
+    layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
@@ -487,9 +494,9 @@ void MLRenderingWireParametersFrame::initGui()
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
-    QLabel* wirelab = new QLabel("Polygonal Modality",this);
-    wirelab->setFont(boldfont);
-    layout->addWidget(wirelab,3,0,Qt::AlignLeft);
+    _wirelab = new QLabel("Polygonal Modality",this);
+    _wirelab->setFont(boldfont);
+    layout->addWidget(_wirelab,3,0,Qt::AlignLeft);
     _edgetool = new MLRenderingOnOffToolbar(_meshid,this);
     _edgetool->setRenderingAction(new MLRenderingFauxEdgeWireAction(_meshid,this));
     layout->addWidget(_edgetool,3,1,Qt::AlignLeft);
@@ -513,9 +520,9 @@ void MLRenderingWireParametersFrame::getCurrentRenderingDataAccordingToGUI( MLRe
 
 void MLRenderingWireParametersFrame::updateVisibility( MeshModel* mm )
 {
-    _shadingtool->updateVisibility(mm);
-    _colortool->updateVisibility(mm);
-    _edgetool->updateVisibility(mm);
+    _shadelab->setVisible(_shadingtool->updateVisibility(mm));
+    _colorlab->setVisible(_colortool->updateVisibility(mm));
+    _wirelab->setVisible(_edgetool->updateVisibility(mm));
 }
 
 
@@ -587,11 +594,11 @@ void MLRenderingPointsParametersFrame::initGui()
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
     _shadingtool = new MLRenderingToolbar(_meshid,this);
-    QLabel* shadelab = new QLabel("Shading",this);
+    _shadelab = new QLabel("Shading",this);
     QFont boldfont;
     boldfont.setBold(true);
-    shadelab->setFont(boldfont);
-    layout->addWidget(shadelab,0,0,Qt::AlignLeft);
+    _shadelab->setFont(boldfont);
+    layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS,_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingDotAction(_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid,this));
@@ -599,9 +606,9 @@ void MLRenderingPointsParametersFrame::initGui()
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
-    QLabel* colorlab = new QLabel("Color",this);
-    colorlab->setFont(boldfont);
-    layout->addWidget(colorlab,1,0,Qt::AlignLeft);
+    _colorlab = new QLabel("Color",this);
+    _colorlab->setFont(boldfont);
+    layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid,this));
@@ -615,9 +622,9 @@ void MLRenderingPointsParametersFrame::initGui()
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
 
-    QLabel* textlab = new QLabel("Texture Coord",this);
-    textlab->setFont(boldfont);
-    layout->addWidget(textlab,2,0,Qt::AlignLeft);
+    _textlab = new QLabel("Texture Coord",this);
+    _textlab->setFont(boldfont);
+    layout->addWidget(_textlab,2,0,Qt::AlignLeft);
     _texttool = new MLRenderingOnOffToolbar(_meshid,this);
     _texttool->setRenderingAction(new MLRenderingPerVertTextCoordAction(MLRenderingData::PR_POINTS,_meshid,_texttool));
     layout->addWidget(_texttool,2,1,Qt::AlignLeft);
@@ -645,9 +652,9 @@ void MLRenderingPointsParametersFrame::initGui()
 
 void MLRenderingPointsParametersFrame::updateVisibility( MeshModel* mm )
 {
-    _shadingtool->updateVisibility(mm);
-    _colortool->updateVisibility(mm);
-    _texttool->updateVisibility(mm);
+    _shadelab->setVisible(_shadingtool->updateVisibility(mm));
+    _colorlab->setVisible(_colortool->updateVisibility(mm));
+    _textlab->setVisible(_texttool->updateVisibility(mm));
 }
 
 void MLRenderingPointsParametersFrame::actionsList(QList<MLRenderingAction*>& actions)
@@ -720,11 +727,11 @@ void MLRenderingBBoxParametersFrame::initGui()
 {
     setAutoFillBackground(true);
     QGridLayout* layout = new QGridLayout();
-    QLabel* colorlab = new QLabel("Color",this);
+    _colorlab = new QLabel("Color",this);
     QFont boldfont;
     boldfont.setBold(true);
-    colorlab->setFont(boldfont);
-    layout->addWidget(colorlab,0,0,Qt::AlignLeft);
+    _colorlab->setFont(boldfont);
+    layout->addWidget(_colorlab,0,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
     _colortool->addRenderingAction(new MLRenderingBBoxPerMeshColorAction(_meshid,this));
     MLRenderingBBoxColorPicker* colbut = new MLRenderingBBoxColorPicker(_meshid,_colortool);
@@ -737,9 +744,9 @@ void MLRenderingBBoxParametersFrame::initGui()
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
-    QLabel* quotedinfolab = new QLabel("Measure Info",this);
-    quotedinfolab->setFont(boldfont);
-    layout->addWidget(quotedinfolab,1,0,Qt::AlignLeft);
+    _quotedinfolab = new QLabel("Measure Info",this);
+    _quotedinfolab->setFont(boldfont);
+    layout->addWidget(_quotedinfolab,1,0,Qt::AlignLeft);
     _quotedinfotool = new MLRenderingOnOffToolbar(_meshid,this);
     _quotedinfotool->setRenderingAction(new MLRenderingBBoxQuotedInfoAction(_meshid,this));
     layout->addWidget(_quotedinfotool,1,1,Qt::AlignLeft);
@@ -1306,13 +1313,18 @@ void MLRenderingOnOffToolbar::getRenderingDataAccordingToGUI( MLRenderingData& d
         _act->updateRenderingData(dt);
 }
 
-void MLRenderingOnOffToolbar::updateVisibility( MeshModel* mm )
+bool MLRenderingOnOffToolbar::updateVisibility( MeshModel* mm )
 {
     if (_act != NULL)    
     {
-        _offact->setCheckable(_act->isCheckableConditionValid(mm));
-        _onact->setCheckable(_act->isCheckableConditionValid(mm));
+		bool isvis = _act->isVisibleConditionValid(mm);
+        _offact->setVisible(isvis);
+		_offact->setCheckable(isvis);
+		_onact->setVisible(isvis);
+		_onact->setCheckable(isvis);
+		return isvis;
     }
+	return false;
 }
 
 MLRenderingThreeStateButton::MLRenderingThreeStateButton(int meshid, QWidget* parent /*= NULL*/)
@@ -1351,9 +1363,6 @@ void MLRenderingThreeStateButton::initGui()
 	setLayout(_layout);
 	//connect(this, SIGNAL(actionTriggered(QAction*)), _onofftool, SLOT(toggle(QAction*)));
 }
-
-
-
 
 MLRenderingFloatSlider::MLRenderingFloatSlider( int meshid,QWidget *p )
     :MLFloatSlider(p),_meshid(meshid),_act(NULL)
@@ -1442,7 +1451,7 @@ void MLRenderingGlobalToolbar::initGui()
 	addWidget(pointbut);
 
 	MyToolButton* wirebut = new MyToolButton(0, this);
-	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
+	MLRenderingWireAction* wireact = new MLRenderingWireAction(false,this);
 	//wirebut->setDefaultAction(wireact);
 	MLRenderingOnOffToolbar* wireonoff = new MLRenderingOnOffToolbar(-1, this);
 	wireonoff->setRenderingAction(wireact);

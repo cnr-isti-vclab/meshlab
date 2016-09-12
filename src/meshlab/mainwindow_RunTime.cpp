@@ -1325,9 +1325,12 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 							curr.set(pm, atts);
 						}
 					}
+					opts._peredge_fauxwire_enabled = curr.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES);
+					opts._peredge_wire_enabled = opts._peredge_fauxwire_enabled || curr.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES);
+
 					curr.set(opts);
 					
-
+					MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm, curr);
                     MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(curr);
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
@@ -2527,7 +2530,7 @@ bool MainWindow::importRaster(const QString& fileImg)
     return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr)
+bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr, bool isareload)
 {
     if ((GLA() == NULL) || (mm == NULL))
         return false;
@@ -2626,28 +2629,49 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
     mm->cm.Tr = mtr;
 
-    MultiViewer_Container* mv = currentViewContainer();
-    if (mv != NULL)
-    {
-        MLSceneGLSharedDataContext* shared = mv->sharedDataContext();
-        if (shared != NULL)
-        {
-            MLRenderingData defdt;
-            MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm,defdt);
-            for(int glarid = 0;glarid < mv->viewerCounter();++glarid)
-            {
-                GLArea* ar = mv->getViewer(glarid);
-                if (ar != NULL)
-                    shared->setRenderingDataPerMeshView(mm->id(),ar->context(),defdt);
-            }
-            shared->manageBuffers(mm->id());
-            updateLayerDialog();
-        }
-    }
+	computeRenderingDataOnLoading(mm,isareload);
+	updateLayerDialog();
+
 
     meshDoc()->setBusy(false);
 
     return true;
+}
+
+void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
+{
+	MultiViewer_Container* mv = currentViewContainer();
+	if (mv != NULL)
+	{
+		MLSceneGLSharedDataContext* shared = mv->sharedDataContext();
+		if ((shared != NULL) && (mm != NULL))
+		{
+			MLRenderingData defdt;
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt);
+			bool newcreated = false;
+			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
+			{
+				GLArea* ar = mv->getViewer(glarid);
+				if (ar != NULL)
+				{
+					
+					if (isareload)
+					{
+						MLRenderingData currentdt;
+						shared->getRenderInfoPerMeshView(mm->id(), ar->context(), currentdt);
+						MLRenderingData newdt;
+						MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(mm, currentdt, newdt);
+						MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm,newdt);
+						MLPoliciesStandAloneFunctions::setBestWireModality(mm, newdt);
+						shared->setRenderingDataPerMeshView(mm->id(), ar->context(), newdt);
+					}
+					else
+						shared->setRenderingDataPerMeshView(mm->id(), ar->context(), defdt);
+				}
+			}
+			shared->manageBuffers(mm->id());
+		}
+	}
 }
 
 bool MainWindow::importMeshWithLayerManagement(QString fileName)
@@ -2658,14 +2682,14 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
         layervisible = layerDialog->isVisible();
         showLayerDlg(false);
     }
-    bool res = importMesh(fileName);
+    bool res = importMesh(fileName,false);
     if (layerDialog != NULL)
         showLayerDlg(layervisible || meshDoc()->meshList.size());
     return res;
 }
 
 // Opening files in a transparent form (IO plugins contribution is hidden to user)
-bool MainWindow::importMesh(QString fileName)
+bool MainWindow::importMesh(QString fileName,bool isareload)
 {
     if (!GLA())
     {
@@ -2724,7 +2748,9 @@ bool MainWindow::importMesh(QString fileName)
         MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),info.fileName());
         qb->show();
         QTime t;t.start();
-        bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar);
+		Matrix44m mtr;
+		mtr.SetIdentity();
+        bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,isareload);
         if(open)
         {
             GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
@@ -2776,7 +2802,7 @@ void MainWindow::openRecentProj()
     if (action)	openProject(action->data().toString());
 }
 
-bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr)
+bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr,bool isreload)
 {
     if ((meshDoc() == NULL) || (mm == NULL))
         return false;
@@ -2791,7 +2817,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
         int mask = 0;
         QTime t;t.start();
-        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr);
+        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload);
         if(open)
         {
             GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
@@ -2816,7 +2842,9 @@ void MainWindow::reloadAllMesh()
     foreach(MeshModel *mmm,meshDoc()->meshList)
     {
         QString fileName = mmm->fullName();
-        loadMeshWithStandardParams(fileName,mmm);
+		Matrix44m mat;
+		mat.SetIdentity();
+        loadMeshWithStandardParams(fileName,mmm,mat,true);
     }
     qb->reset();
     update();
@@ -2832,7 +2860,9 @@ void MainWindow::reload()
     // save current file name
     qb->show();
     QString fileName = meshDoc()->mm()->fullName();
-    loadMeshWithStandardParams(fileName,meshDoc()->mm());
+	Matrix44m mat;
+	mat.SetIdentity();
+    loadMeshWithStandardParams(fileName,meshDoc()->mm(),mat,true);
     qb->reset();
     update();
     if (GLA() != NULL)
@@ -3468,7 +3498,10 @@ void MainWindow::updateRenderingDataAccordingToActionsCommonCode(int meshid, con
 	}
 	MeshModel* mm = meshDoc()->getMesh(meshid);
 	if (mm != NULL)
+	{
+		MLPoliciesStandAloneFunctions::setBestWireModality(mm, dt);
 		MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(mm, dt, dt);
+	}
 	setRenderingData(meshid, dt);
 
 	/*if (meshid == -1)
@@ -3550,7 +3583,10 @@ void MainWindow::updateRenderingDataAccordingToActionCommonCode(int meshid, MLRe
 		act->updateRenderingData(dt);
 		MeshModel* mm = meshDoc()->getMesh(meshid);
 		if (mm != NULL)
+		{
+			MLPoliciesStandAloneFunctions::setBestWireModality(mm, dt);
 			MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshSameGLOpts(mm, dt, dt);
+		}
 		setRenderingData(meshid, dt);
 		if (mm != NULL)
 		{

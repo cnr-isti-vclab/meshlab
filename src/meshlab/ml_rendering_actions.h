@@ -38,7 +38,7 @@ public:
 	virtual void createSisterAction(MLRenderingAction*& sisteract,QObject* par) = 0;
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
-    virtual bool isCheckableConditionValid(MeshModel*) const {return true;}
+    virtual bool isVisibleConditionValid(MeshModel*) const {return true;}
 	
 	int meshId() const;
     void setMeshId(int meshid);
@@ -108,7 +108,7 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    bool isCheckableConditionValid(MeshModel*) const;
+    bool isVisibleConditionValid(MeshModel*) const;
 };
 
 class MLRenderingPerFaceNormalAction : public MLRenderingAction
@@ -160,7 +160,7 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    bool isCheckableConditionValid(MeshModel*) const;
+    bool isVisibleConditionValid(MeshModel*) const;
 private:
     MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
@@ -175,7 +175,7 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    bool isCheckableConditionValid(MeshModel*) const;
+    bool isVisibleConditionValid(MeshModel*) const;
 };
 
 class MLRenderingDoubleLightingAction : public MLRenderingAction
@@ -289,7 +289,7 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    bool isCheckableConditionValid(MeshModel*) const;
+    bool isVisibleConditionValid(MeshModel*) const;
 };
 
 class MLRenderingUserDefinedColorAction : public MLRenderingAction

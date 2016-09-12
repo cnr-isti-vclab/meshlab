@@ -136,7 +136,7 @@ private:
 
 private slots:
 	void documentUpdateRequested();
-    bool importMesh(QString fileName=QString());
+    bool importMesh(QString fileName=QString(), bool isareload = false);
     void endEdit();
     void updateDocumentScriptBindings();
     void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
@@ -147,8 +147,11 @@ private slots:
 public:
 
     bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-    bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar, const Matrix44m &mtr=Matrix44m::Identity());
-    bool loadMeshWithStandardParams(QString& fullPath,MeshModel* mm, const Matrix44m &mtr=Matrix44m::Identity());
+    bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false);
+
+	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload);
+
+	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(),bool isareload = false);
     
     void defaultPerViewRenderingData(MLRenderingData& dt) const;
     void getRenderingData(int mid,MLRenderingData& dt) const;

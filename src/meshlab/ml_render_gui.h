@@ -121,7 +121,7 @@ public:
 	void setAssociatedMeshId(int meshid);
 	void setAccordingToRenderingData(const MLRenderingData& dt);
 	void getRenderingDataAccordingToGUI(MLRenderingData& dt) const;
-	void updateVisibility(MeshModel* mm);
+	bool updateVisibility(MeshModel* mm);
 
 protected:
 	void initGui();
@@ -171,7 +171,7 @@ public:
     QList<MLRenderingAction*>& getRenderingActions();
 	QList<QAction*> getTopLevelActions();
     void setAssociatedMeshId(int meshid);
-    void updateVisibility(MeshModel* mm);
+    bool updateVisibility(MeshModel* mm);
 
 protected:
     QList<MLRenderingAction*> _acts;
@@ -288,9 +288,13 @@ public:
 
 private:
     void initGui();
-    MLRenderingToolbar* _shadingtool;
-    MLRenderingToolbar* _colortool;
+	QLabel* _shadelab;
+	MLRenderingToolbar* _shadingtool;
+	QLabel* _colorlab;
+	MLRenderingToolbar* _colortool;
+	QLabel* _textlab;
     MLRenderingOnOffToolbar* _texttool;
+	
 };
 
 class MLRenderingWireParametersFrame : public MLRenderingParametersFrame
@@ -309,9 +313,11 @@ public:
 
 private:
     void initGui();
-    
+	QLabel* _shadelab;
     MLRenderingToolbar* _shadingtool;
+	QLabel* _colorlab;
     MLRenderingToolbar* _colortool;
+	QLabel* _wirelab;
     MLRenderingOnOffToolbar* _edgetool;
     MLRenderingFloatSlider* _dimension;
 };
@@ -331,8 +337,11 @@ public:
 	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
+	QLabel* _shadelab;
     MLRenderingToolbar* _shadingtool;
+	QLabel* _colorlab;
     MLRenderingToolbar* _colortool;
+	QLabel* _textlab;
     MLRenderingOnOffToolbar* _texttool;
     MLRenderingFloatSlider* _dimension;
 };
@@ -407,8 +416,10 @@ public:
 	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 private:
     void initGui();
+	QLabel* _colorlab;
     MLRenderingToolbar* _colortool;
     MLRenderingColorPicker* _userdef;
+	QLabel* _quotedinfolab;
     MLRenderingOnOffToolbar* _quotedinfotool;
 };
 

@@ -133,14 +133,14 @@ bool MLRenderingPointsAction::isRenderingDataEnabled( const MLRenderingData& rd 
     return rd.isPrimitiveActive(MLRenderingData::PR_POINTS);
 }
 
-MLRenderingWireAction::MLRenderingWireAction( QObject* parent)
+MLRenderingWireAction::MLRenderingWireAction(QObject* parent)
     :MLRenderingAction(parent)
 {
     setIcon(QIcon(":/images/wire.png"));
     setText(QString("Wireframe"));
 }
 
-MLRenderingWireAction::MLRenderingWireAction( int meshid,QObject* parent)
+MLRenderingWireAction::MLRenderingWireAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
     setIcon(QIcon(":/images/wire.png"));
@@ -154,13 +154,20 @@ void MLRenderingWireAction::createSisterAction(MLRenderingAction *& sisteract, Q
 
 void MLRenderingWireAction::updateRenderingData(MLRenderingData& rd )
 {
-    rd.set(MLRenderingData::PR_WIREFRAME_TRIANGLES,isChecked());
-	//rd.set(MLRenderingData::PR_WIREFRAME_EDGES, isChecked());
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	if (valid)
+	{
+		opts._peredge_wire_enabled = isChecked();
+		rd.set(opts);
+	}
 }
 
 bool MLRenderingWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return (rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES) /*|| rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES)*/);
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	return (valid && opts._peredge_wire_enabled);
 }
 
 MLRenderingSolidAction::MLRenderingSolidAction( QObject* parent )
@@ -211,15 +218,23 @@ void MLRenderingFauxEdgeWireAction::createSisterAction(MLRenderingAction *& sist
 
 void MLRenderingFauxEdgeWireAction::updateRenderingData( MLRenderingData& rd )
 {
-    rd.set(MLRenderingData::PR_WIREFRAME_EDGES,isChecked());
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	if (valid)
+	{
+		opts._peredge_fauxwire_enabled = isChecked();
+		rd.set(opts);
+	}
 }
 
 bool MLRenderingFauxEdgeWireAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
-    return rd.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES);
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	return (valid && opts._peredge_fauxwire_enabled);
 }
 
-bool MLRenderingFauxEdgeWireAction::isCheckableConditionValid( MeshModel* mm) const
+bool MLRenderingFauxEdgeWireAction::isVisibleConditionValid( MeshModel* mm) const
 {
     return mm->hasDataMask(MeshModel::MM_POLYGONAL);
 }
@@ -305,7 +320,7 @@ bool MLRenderingPerVertTextCoordAction::isRenderingDataEnabled( const MLRenderin
     return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE,rd);
 }
 
-bool MLRenderingPerVertTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
+bool MLRenderingPerVertTextCoordAction::isVisibleConditionValid( MeshModel* mm) const
 {
     return mm->hasDataMask(MeshModel::MM_VERTTEXCOORD);
 }
@@ -335,7 +350,7 @@ bool MLRenderingPerWedgeTextCoordAction::isRenderingDataEnabled( const MLRenderi
     return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE,rd);
 }
 
-bool MLRenderingPerWedgeTextCoordAction::isCheckableConditionValid( MeshModel* mm) const
+bool MLRenderingPerWedgeTextCoordAction::isVisibleConditionValid( MeshModel* mm) const
 {
     return mm->hasDataMask(MeshModel::MM_WEDGTEXCOORD);
 }
@@ -665,7 +680,7 @@ bool MLRenderingPerFaceColorAction::isRenderingDataEnabled( const MLRenderingDat
     return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACECOLOR,rd);
 }
 
-bool MLRenderingPerFaceColorAction::isCheckableConditionValid( MeshModel* mm) const
+bool MLRenderingPerFaceColorAction::isVisibleConditionValid( MeshModel* mm) const
 {
     return mm->hasDataMask(MeshModel::MM_FACECOLOR);
 }

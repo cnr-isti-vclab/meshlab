@@ -52,6 +52,11 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     bool _peredge_vertmanifold_enabled;
     bool _peredge_text_boundary_enabled;
 
+	/*DIRTY THING IN ORDER TO AVOID GUI PROBLEMS WiTH FAUX EDGES RENDERING*/
+	bool _peredge_wire_enabled;
+	bool _peredge_fauxwire_enabled;
+	
+
     bool _back_face_cull;
     bool _double_side_lighting;
     bool _fancy_lighting;
@@ -80,6 +85,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
         _peredge_edgemanifold_enabled = false;
         _peredge_vertmanifold_enabled  = false;
         _peredge_text_boundary_enabled = false;
+		_peredge_fauxwire_enabled = false;
+		_peredge_wire_enabled = false;
         _back_face_cull = false;
         _double_side_lighting = false;
         _fancy_lighting = false;
@@ -123,6 +130,8 @@ private:
         _peredge_edgemanifold_enabled = opts._peredge_edgemanifold_enabled;
         _peredge_vertmanifold_enabled = opts._peredge_vertmanifold_enabled;
         _peredge_text_boundary_enabled = opts._peredge_text_boundary_enabled;
+		_peredge_fauxwire_enabled = opts._peredge_fauxwire_enabled;
+		_peredge_wire_enabled = opts._peredge_wire_enabled;
         _back_face_cull = opts._back_face_cull;
         _double_side_lighting = opts._double_side_lighting;
         _fancy_lighting = opts._fancy_lighting;
@@ -185,7 +194,9 @@ struct MLPoliciesStandAloneFunctions
 	
 	static void computeRequestedRenderingDataCompatibleWithMesh( MeshModel* meshmodel,const MLRenderingData& inputdt,MLRenderingData& outputdt);
 
-    static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,MLRenderingData::RendAtts& atts);
+	static void computeRequestedRenderingDataCompatibleWithMeshCommonCode(MeshModel * meshmodel, const MLRenderingData & inputdt, MLRenderingData & outputdt);
+
+	static void fromMeshModelMaskToMLRenderingAtts(int meshmodelmask,MLRenderingData::RendAtts& atts);
 
     static void updatedRendAttsAccordingToPriorities(const MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& updated,const MLRenderingData::RendAtts& current,MLRenderingData::RendAtts& result); 
 
@@ -212,6 +223,10 @@ struct MLPoliciesStandAloneFunctions
     static MLRenderingData::PRIMITIVE_MODALITY bestPrimitiveModalityAccordingToMesh(MeshModel* m);
 
     static void filterUselessUdpateAccordingToMeshMask(MeshModel* m,MLRenderingData::RendAtts& atts);   
+
+	static void setBestWireModality(MeshModel* mm,MLRenderingData& dt);
+
+	static void setPerViewGLOptionsAccordindToWireModality(MeshModel* mm, MLRenderingData& dt);
 };
 
 
