@@ -2664,6 +2664,7 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
 						MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm,newdt);
 						MLPoliciesStandAloneFunctions::setBestWireModality(mm, newdt);
 						shared->setRenderingDataPerMeshView(mm->id(), ar->context(), newdt);
+						shared->meshAttributesUpdated(mm->id(), true, MLRenderingData::RendAtts(true));
 					}
 					else
 						shared->setRenderingDataPerMeshView(mm->id(), ar->context(), defdt);
