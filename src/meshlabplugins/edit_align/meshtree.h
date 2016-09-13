@@ -45,6 +45,7 @@ public:
   MeshModel *m;
   Matrix44m &tr() {return m->cm.Tr;}
   const Box3m &bbox() const {return m->cm.bbox;}
+  const Box3m &trBbox() const { return m->cm.trBB(); }
   int Id() {return m->id();}
 };
 

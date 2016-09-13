@@ -250,7 +250,6 @@ void EditAlignPlugin::glueByPicking()
     }
 
     //Matrix44f oldTr = md->mm()->cm.Tr;
-    _md->mm()->cm.Tr.SetIdentity();
     AlignPairDialog *dd=new AlignPairDialog(_gla,this->alignDialog);
     dd->aa->initMesh(currentNode(), &meshTree);
     dd->exec();
@@ -275,7 +274,7 @@ void EditAlignPlugin::glueByPicking()
         ComputeRigidMatchMatrix(gluedPnt,freePnt,res);
 
     //md->mm()->cm.Tr=res;
-    currentNode()->tr().Import(res);
+	currentNode()->tr() = currentNode()->tr() * res;
     QString buf;
     // for(size_t i=0;i<freePnt.size();++i)
     //		meshTree.cb(0,qPrintable(buf.sprintf("%f %f %f -- %f %f %f \n",freePnt[i][0],freePnt[i][1],freePnt[i][2],gluedPnt[i][0],gluedPnt[i][1],gluedPnt[i][2])));

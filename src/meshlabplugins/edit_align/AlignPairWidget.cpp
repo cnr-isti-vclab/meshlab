@@ -119,7 +119,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		tt[i]->Apply();
 		vcg::Box3f bb;
 		if (i == 0)
-			bb.Import(freeMesh->bbox());
+			bb.Add(freeMesh->tr(), freeMesh->bbox()); //bb.Import(freeMesh->bbox());
 		else
 			bb.Import(gluedTree->gluedBBox());
 
