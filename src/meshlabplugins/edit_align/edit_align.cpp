@@ -507,25 +507,39 @@ void EditAlignPlugin::toggleButtons()
     {
     case	ALIGN_MOVE:
         alignDialog->ui.manualAlignButton->setEnabled(true);
-        alignDialog->ui.recalcButton->setEnabled(false);
-        alignDialog->ui.icpButton->setEnabled(false);
-        alignDialog->ui.icpParamButton->setEnabled(false);
+		alignDialog->ui.glueHereButton->setEnabled(false);
+		alignDialog->ui.glueHereAllButton->setEnabled(false);
+		alignDialog->ui.pointBasedAlignButton->setEnabled(false);
+		alignDialog->ui.baseMeshButton->setEnabled(false);
+		alignDialog->ui.hideRevealButton->setEnabled(false);
+		alignDialog->ui.icpButton->setEnabled(false);
+		alignDialog->ui.icpParamButton->setEnabled(false);
 		alignDialog->ui.icpParamDefMMButton->setEnabled(false);
 		alignDialog->ui.icpParamDefMButton->setEnabled(false);
+		alignDialog->ui.meshTreeParamButton->setEnabled(false);
+		alignDialog->ui.badArcButton->setEnabled(false);
+		alignDialog->ui.icpParamCurrentButton->setEnabled(false);
+		alignDialog->ui.recalcButton->setEnabled(false);
         alignDialog->ui.alignTreeWidget->setEnabled(false);
-        alignDialog->ui.baseMeshButton->setEnabled(false);
-
 
         break;
     case	ALIGN_IDLE:
         alignDialog->ui.manualAlignButton->setEnabled(true);
-        alignDialog->ui.recalcButton->setEnabled(true);
-        alignDialog->ui.icpButton->setEnabled(true);
-        alignDialog->ui.icpParamButton->setEnabled(true);
+		alignDialog->ui.glueHereButton->setEnabled(true);
+		alignDialog->ui.glueHereAllButton->setEnabled(true);
+		alignDialog->ui.pointBasedAlignButton->setEnabled(true);
+		alignDialog->ui.baseMeshButton->setEnabled(true);
+		alignDialog->ui.hideRevealButton->setEnabled(true);
+		alignDialog->ui.icpButton->setEnabled(true);
+		alignDialog->ui.icpParamButton->setEnabled(true);
 		alignDialog->ui.icpParamDefMMButton->setEnabled(true);
 		alignDialog->ui.icpParamDefMButton->setEnabled(true);
-        alignDialog->ui.alignTreeWidget->setEnabled(true);
-        alignDialog->ui.baseMeshButton->setEnabled(true);
+		alignDialog->ui.meshTreeParamButton->setEnabled(true);
+		alignDialog->ui.badArcButton->setEnabled(true);
+		alignDialog->ui.icpParamCurrentButton->setEnabled(true);
+		alignDialog->ui.recalcButton->setEnabled(true);
+		alignDialog->ui.alignTreeWidget->setEnabled(true);
+		alignDialog->updateButtons();
         break;
     }
 }
