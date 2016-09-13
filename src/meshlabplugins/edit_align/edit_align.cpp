@@ -325,8 +325,10 @@ void EditAlignPlugin::glueManual()
 			tmp.Import(mm->cm.Tr);
 			mm->cm.Tr.Import((tran)* trackball.track.Matrix()*(mtran)* tmp);
 			mm->visible = true;
-			currentNode()->glued = true;
 			alignDialog->ui.manualAlignButton->setText(oldLabelButton);
+			currentNode()->glued = true;
+			alignDialog->rebuildTree();
+			_gla->update();
 			break;
 		}
 		default : assert("entered in the GlueManual slot in the wrong state"==0);
