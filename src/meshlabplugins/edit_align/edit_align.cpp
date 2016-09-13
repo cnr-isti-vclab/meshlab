@@ -245,7 +245,7 @@ void EditAlignPlugin::glueByPicking()
 {
     if(meshTree.gluedNum()<1)
     {
-        QMessageBox::warning(0,"Align tool", "Point based aligning requires at least one glued  mesh");
+        QMessageBox::warning(0,"Align tool", "Point-based aligning requires at least one glued  mesh");
         return;
     }
 
@@ -263,7 +263,7 @@ void EditAlignPlugin::glueByPicking()
     std::vector<vcg::Point3f>gluedPnt= dd->aa->gluedPickedPointVec;
 
     if( (freePnt.size() != gluedPnt.size())	|| (freePnt.size()==0) )	{
-        QMessageBox::warning(0,"Align tool", "require the same number of chosen points");
+        QMessageBox::warning(0,"Align tool", "ERROR: alignment requires the same number of chosen points");
         return;
     }
 
@@ -305,13 +305,13 @@ void EditAlignPlugin::glueManual()
 		{
 			emit suspendEditToggle();
 			mode = ALIGN_MOVE;
-			_md->mm()->visible = false;
+			mm->visible = false;
 			trackball.Reset();
 			trackball.center.Import(mm->cm.trBB().Center());
 			trackball.radius = mm->cm.trBB().Diag() / 2.0;
 			toggleButtons();
 			oldLabelButton = alignDialog->ui.manualAlignButton->text();
-			alignDialog->ui.manualAlignButton->setText("Store transformation");
+			alignDialog->ui.manualAlignButton->setText("Accept Transformation");
 			break;
 		}
 
@@ -328,7 +328,6 @@ void EditAlignPlugin::glueManual()
 			alignDialog->ui.manualAlignButton->setText(oldLabelButton);
 			currentNode()->glued = true;
 			alignDialog->rebuildTree();
-			_gla->update();
 			break;
 		}
 		default : assert("entered in the GlueManual slot in the wrong state"==0);
@@ -445,7 +444,7 @@ void EditAlignPlugin::process()
 {
     if(meshTree.gluedNum()<2)
     {
-        QMessageBox::warning(0,"Align tool", "Process can work only when more than two meshes have been glued");
+        QMessageBox::warning(0,"Align tool", "ICP Process can only work when at least two layers have been glued");
         return;
     }
     alignDialog->setEnabled(false);
