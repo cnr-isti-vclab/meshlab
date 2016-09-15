@@ -932,6 +932,8 @@ void DecorateBasePlugin::PlaceTexParam(int /*TexInd*/, int /*TexNum*/)
 
 void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *painter,  RichParameterSet *rm, QFont qf)
 {
+	if ((gla == NULL) && (gla->getSceneGLSharedContext() == NULL))
+		return;
     if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -945,8 +947,10 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
     glScalef(0.9f,0.9f,0.9f);
 
     QString textureName("-- no texture --");
-    /*if(!m.glw.TMId.empty())
-    textureName = qPrintable(QString(m.cm.textures[0].c_str()))+QString("  ");*/
+
+	if (!m.cm.textures.empty())
+		textureName = qPrintable(QString(m.cm.textures[0].c_str())) + QString("  ");
+
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
     checkGLError::debugInfo("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
@@ -971,12 +975,15 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 		faceColor = false;
 	}
 
+
 	
-    /*if(!m.glw.TMId.empty())
+    if(!m.cm.textures.empty())
     {
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture( GL_TEXTURE_2D, m.glw.TMId.back() );
-    }*/
+		MLSceneGLSharedDataContext* ctx = gla->getSceneGLSharedContext();
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, ctx->getTextureId(m.id(),0));
+		
+    }
 
     glBegin(GL_TRIANGLES);
     for(size_t i=0;i<m.cm.face.size();++i)
