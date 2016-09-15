@@ -47,6 +47,7 @@ bool MLRenderingToolbar::updateVisibility(MeshModel* mm)
 	return isvis;
 }
 
+
 void MLRenderingToolbar::addRenderingAction( MLRenderingAction* act )
 {
     if (act == NULL)
@@ -502,7 +503,7 @@ void MLRenderingWireParametersFrame::initGui()
     layout->addWidget(_edgetool,3,1,Qt::AlignLeft);
     connect(_edgetool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_edgetool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
-
+	connect(_edgetool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*)), this, SLOT(switchWireModality(int, MLRenderingAction*)));
     setMinimumSize(layout->sizeHint());
     setLayout(layout);
     showNormal();
@@ -540,6 +541,27 @@ void MLRenderingWireParametersFrame::allTopLevelGuiActions(QList<QAction*>& tple
 	tplevelactions.append(_colortool->getTopLevelActions());
 	tplevelactions.append(_edgetool->actions());
 	tplevelactions.append(_dimension->actions());
+}
+
+void MLRenderingWireParametersFrame::switchWireModality(int meshid,MLRenderingAction* act)
+{
+	MLRenderingFauxEdgeWireAction* fauxact = qobject_cast<MLRenderingFauxEdgeWireAction*>(act);
+	if (fauxact == NULL)
+		return;
+	MLRenderingData::PRIMITIVE_MODALITY pm;
+	if (fauxact->isChecked())
+		pm = MLRenderingData::PR_WIREFRAME_EDGES;
+	else
+		pm = MLRenderingData::PR_WIREFRAME_TRIANGLES;
+
+	foreach(MLRenderingAction* shact, _shadingtool->getRenderingActions())
+		shact->switchPrimitive(pm);
+	
+	foreach(MLRenderingAction* colact, _colortool->getRenderingActions())
+		colact->switchPrimitive(pm);
+
+	emit updateRenderingDataAccordingToActions(meshid, _shadingtool->getRenderingActions());
+	emit updateRenderingDataAccordingToActions(meshid, _colortool->getRenderingActions());
 }
 
 MLRenderingPointsParametersFrame::MLRenderingPointsParametersFrame( QWidget* parent )

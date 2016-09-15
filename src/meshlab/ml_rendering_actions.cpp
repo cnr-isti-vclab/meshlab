@@ -278,6 +278,11 @@ MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingDa
     setText(QString("Vert"));
 }
 
+void MLRenderingPerVertexNormalAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
+}
+
 void MLRenderingPerVertexNormalAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
 	sisteract = new MLRenderingPerVertexNormalAction(_pm, meshId(), par);
@@ -303,6 +308,11 @@ MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(MLRendering
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Enabled"));
+}
+
+void MLRenderingPerVertTextCoordAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
 }
 
 void MLRenderingPerVertTextCoordAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -441,6 +451,11 @@ MLRenderingNoShadingAction::MLRenderingNoShadingAction(MLRenderingData::PRIMITIV
     setToolTip(QString("Light on/off"));
 }
 
+void MLRenderingNoShadingAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
+}
+
 void MLRenderingNoShadingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
 	sisteract = new MLRenderingNoShadingAction(_pm,meshId(), par);
@@ -549,6 +564,11 @@ MLRenderingPerMeshColorAction::MLRenderingPerMeshColorAction(MLRenderingData::PR
     setText(QString("Mesh"));
 }
 
+void MLRenderingPerMeshColorAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
+}
+
 void MLRenderingPerMeshColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
 	sisteract = new MLRenderingPerMeshColorAction(_pm,meshId(), par);
@@ -638,6 +658,11 @@ MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData
     setText(QString("Vert"));
 }
 
+void MLRenderingPerVertexColorAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
+}
+
 void MLRenderingPerVertexColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
 {
 	sisteract = new MLRenderingPerVertexColorAction(_pm, meshId(), par);
@@ -703,6 +728,11 @@ MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction(MLRendering
 	setText(origin->text());
 	setColor(origin->getColor());
 	_pm = origin->_pm;
+}
+
+void MLRenderingUserDefinedColorAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
+{
+	_pm = pr;
 }
 
 void MLRenderingUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)

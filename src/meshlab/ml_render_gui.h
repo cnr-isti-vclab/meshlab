@@ -311,6 +311,9 @@ public:
 	void actionsList(QList<MLRenderingAction*>& actions);
 	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 
+private slots:
+	void switchWireModality(int,MLRenderingAction*);
+
 private:
     void initGui();
 	QLabel* _shadelab;

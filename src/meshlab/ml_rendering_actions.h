@@ -39,6 +39,7 @@ public:
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
     virtual bool isVisibleConditionValid(MeshModel*) const {return true;}
+	virtual void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr) {}
 	
 	int meshId() const;
     void setMeshId(int meshid);
@@ -130,6 +131,7 @@ public:
     MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -157,6 +159,7 @@ public:
     MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -209,6 +212,7 @@ public:
     MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingNoShadingAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -235,6 +239,7 @@ public:
     MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerMeshColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -272,6 +277,7 @@ public:
     MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent);
     MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
@@ -300,6 +306,7 @@ public:
     MLRenderingUserDefinedColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent);
 	MLRenderingUserDefinedColorAction(MLRenderingUserDefinedColorAction* origin, QObject * par);
 
+	void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr);
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
