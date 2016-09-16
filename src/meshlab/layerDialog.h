@@ -156,8 +156,8 @@ private:
     QTreeWidgetItem* _docitem;
 	MLRenderingSideToolbar* _globaldoctool;
     int _previd;
-
-    MLRenderingParametersTab* tabw;
+public:
+	MLRenderingParametersTab* _tabw;
 signals:
     void removeDecoratorRequested(QAction* );
     void toBeShow();

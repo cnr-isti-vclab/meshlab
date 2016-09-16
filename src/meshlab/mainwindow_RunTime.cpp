@@ -349,11 +349,11 @@ void MainWindow::updateLayerDialog()
         layerDialog->updateLog(meshDoc()->Log);
         layerDialog->updateDecoratorParsView();
         MLRenderingData dt;
-        MeshModel* mm = meshDoc()->mm();
         if ((meshDoc()!=NULL) && (meshDoc()->mm() != NULL))
-        {
-            MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = dtf.find(meshDoc()->mm()->id());
-            layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
+		{  
+			MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = dtf.find(meshDoc()->mm()->id());
+			if (it != dtf.end())
+				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
         }
     }
 }
@@ -1299,12 +1299,10 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 
 
                         MLRenderingData::RendAtts rd;
-                        if (isworthtobevisualized)
-                        {
-                            curr.get(pm,rd);
-                            MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(pm,dttoupdate,rd,rd);
-                            MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask(mm,rd);
-                        }
+						curr.get(pm, rd);
+						MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(pm, dttoupdate, rd, rd);
+						rd[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = isworthtobevisualized;
+                        MLPoliciesStandAloneFunctions::filterUselessUdpateAccordingToMeshMask(mm,rd);
                         curr.set(pm,rd);
                     }
 					MLPerViewGLOptions opts;
@@ -1325,13 +1323,20 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 							curr.set(pm, atts);
 						}
 					}
-					opts._peredge_fauxwire_enabled = curr.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES);
-					opts._peredge_wire_enabled = opts._peredge_fauxwire_enabled || curr.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_TRIANGLES);
-
-					curr.set(opts);
-					
 					MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm, curr);
                     MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(curr);
+
+					if (mm == meshDoc()->mm())
+					{
+						/*HORRIBLE TRICK IN ORDER TO HAVE VALID ACTIONS ASSOCIATED WITH THE CURRENT WIRE RENDERING MODALITY*/
+						MLRenderingFauxEdgeWireAction* fauxaction = new MLRenderingFauxEdgeWireAction(meshDoc()->mm()->id(), NULL);
+						fauxaction->setChecked(curr.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES));
+						layerDialog->_tabw->switchWireModality(fauxaction);
+						delete fauxaction;
+						/****************************************************************************************************/
+					}
+
+
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
                     currentmeshnewlycreated = false;
                 }
@@ -1341,18 +1346,27 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     newmeshcreated = true;
                     currentmeshnewlycreated = true;
                     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm,dttoberendered);
-                    foreach(GLArea* gla,mvc->viewerList)
+					if (mm == meshDoc()->mm())
+					{
+						/*HORRIBLE TRICK IN ORDER TO HAVE VALID ACTIONS ASSOCIATED WITH THE CURRENT WIRE RENDERING MODALITY*/
+						MLRenderingFauxEdgeWireAction* fauxaction = new MLRenderingFauxEdgeWireAction(meshDoc()->mm()->id(), NULL);
+						fauxaction->setChecked(dttoberendered.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES));
+						layerDialog->_tabw->switchWireModality(fauxaction);
+						delete fauxaction;
+						/****************************************************************************************************/
+					}
+					foreach(GLArea* gla,mvc->viewerList)
                     {
                         if (gla != NULL)
                             shared->setRenderingDataPerMeshView(mm->id(),gla->context(),dttoberendered);
                     }
                 }
-                vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-                shared->manageBuffers(mm->id());
-                
-                //addRenderingSystemLogInfo(mm->id());
+
+				vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+				shared->manageBuffers(mm->id());
             }
-            updateLayerDialog();
+
+			updateLayerDialog();
         }
     }
 }
@@ -3532,9 +3546,6 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<ML
 	updateRenderingDataAccordingToActionsCommonCode(meshid, acts);
 	if (GLA() != NULL)
 		GLA()->update();
-
-	if (meshid == -1)
-		updateLayerDialog();
 }
 
 void MainWindow::updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts)

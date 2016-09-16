@@ -163,6 +163,7 @@ public:
     typedef vcg::GLMeshAttributesInfo::RendAtts RendAtts;
     typedef vcg::GLMeshAttributesInfo::ATT_NAMES ATT_NAMES; 
     typedef vcg::GLMeshAttributesInfo::PRIMITIVE_MODALITY PRIMITIVE_MODALITY;
+	typedef vcg::QtThreadSafeTextureNamesContainer MLTextureID;
 };
 /*{
     MLRenderingData::PRIMITIVE_MODALITY_MASK _mask;
@@ -266,6 +267,8 @@ public:
     
     GLuint allocateTexturePerMesh(int mmid,const QImage& img,size_t maxdimtextmb);
     void deAllocateTexturesPerMesh(int mmid);
+	GLuint getTextureId(int meshid,size_t position) const;
+
 
     void getRenderInfoPerMeshView(QGLContext* ctx,PerMeshRenderingDataMap& map);
     void getRenderInfoPerMeshView(int mmid,QGLContext* ctx,MLRenderingData& dt);

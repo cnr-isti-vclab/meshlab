@@ -311,7 +311,7 @@ public:
 	void actionsList(QList<MLRenderingAction*>& actions);
 	void allTopLevelGuiActions(QList<QAction*>& tplevelactions);
 
-private slots:
+public slots:
 	void switchWireModality(int,MLRenderingAction*);
 
 private:
@@ -440,8 +440,8 @@ public:
     void updateVisibility(MeshModel* mm);
 	void updatePerMeshRenderingAction(QList<MLRenderingAction*>& acts);
 	void actionsList(QList<MLRenderingAction*>& actions);
-
 	void setTextureAction(MLRenderingData::ATT_NAMES textattname);
+	void switchWireModality(MLRenderingFauxEdgeWireAction* act);
 
 private:
     void initGui(const QList<MLRenderingAction*>& tab);

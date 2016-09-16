@@ -1086,6 +1086,16 @@ void MLRenderingParametersTab::setTextureAction(MLRenderingData::ATT_NAMES texta
 	}
 }
 
+void MLRenderingParametersTab::switchWireModality(MLRenderingFauxEdgeWireAction* act)
+{
+	for (QMap<QString, MLRenderingParametersFrame*>::iterator it = _parframe.begin(); it != _parframe.end(); ++it)
+	{
+		MLRenderingWireParametersFrame* wpm = qobject_cast<MLRenderingWireParametersFrame*>(it.value());
+		if (wpm != NULL)
+			wpm->switchWireModality(act->meshId(), act);
+	}
+}
+
 MLRenderingParametersTab::~MLRenderingParametersTab()
 {
     for(QMap<QString,MLRenderingParametersFrame*>::iterator it = _parframe.begin();it != _parframe.end();++it)

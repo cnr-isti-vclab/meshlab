@@ -111,6 +111,16 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
     }
 }
 
+GLuint MLSceneGLSharedDataContext::getTextureId(int meshid, size_t position) const
+{
+	PerMeshMultiViewManager* man = meshAttributesMultiViewerManager(meshid);
+	if ((man != NULL) && (position < man->textureIDContainer().size()))
+	{
+		return man->textureIDContainer()[position];
+	}
+	return 0;
+}
+
 int roundUpToTheNextHighestPowerOf2(unsigned int v)
 {
     v--;
@@ -581,18 +591,19 @@ void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const M
     MLRenderingData::RendAtts filteredupdated = updated;
     MLRenderingData::RendAtts tmp = current;
     tmp[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION];
-    tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
-    tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
 	if ((pm == MLRenderingData::PR_WIREFRAME_TRIANGLES) || (pm == MLRenderingData::PR_WIREFRAME_EDGES))
 	{
-		tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = false;
-		tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
+		tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = false;
+		tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = false;
 	}
 	else
 	{
-		tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
-		tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
+		tmp[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL];
+		tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACENORMAL]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
 	}
+ 
+	tmp[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR];
+	tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (tmp[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_FACECOLOR]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR]);
     tmp[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] |= filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE];
     tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = (tmp[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] || filteredupdated[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE]) && !(filteredupdated[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE]);
     result = tmp;

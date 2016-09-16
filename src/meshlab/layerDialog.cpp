@@ -59,8 +59,8 @@ LayerDialog::LayerDialog(QWidget *parent )
 
     if (createRenderingParametersTab() != NULL)
     {
-        tabw->setVisible(true);
-        ui->renderingLayout->addWidget(tabw);
+        _tabw->setVisible(true);
+        ui->renderingLayout->addWidget(_tabw);
     }
     // The following connection is used to associate the click with the change of the current mesh.
     connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
@@ -597,7 +597,7 @@ void LayerDialog::updateExpandedMap(int meshId, int tagId, bool expanded)
 void LayerDialog::actionActivated(MLRenderingAction* ract)
 {
     if (ract != NULL)
-        tabw->switchTab(ract->meshId(),ract->text());
+        _tabw->switchTab(ract->meshId(),ract->text());
 }
 
 LayerDialog::~LayerDialog()
@@ -686,7 +686,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
                 item->setBackground(3,QBrush(Qt::yellow));
                 item->setForeground(3,QBrush(Qt::blue));
                 ui->meshTreeWidget->setCurrentItem(item);
-				tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
+				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
             }
             else
             {
@@ -744,9 +744,9 @@ void LayerDialog::reset()
 
 void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData& dt )
 {
-    if (tabw != NULL)
+    if (_tabw != NULL)
     {
-        tabw->setAssociatedMeshId(meshid);
+        _tabw->setAssociatedMeshId(meshid);
 		MeshModel* mm;
 		if ((mw != NULL) && (mw->meshDoc() != NULL))
 		{
@@ -754,15 +754,17 @@ void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData&
 			if (mm != NULL)
 			{
 				if (mm->hasDataMask(MeshModel::MM_VERTTEXCOORD) && !(mm->hasDataMask(MeshModel::MM_WEDGTEXCOORD)))
-					tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE);
+					_tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE);
 				else
-					tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE);
-				tabw->updateVisibility(mm);
+					_tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE);
+				_tabw->updateVisibility(mm);
+
 			}
 		}
-        tabw->updateGUIAccordingToRenderingData(dt);
+
+        _tabw->updateGUIAccordingToRenderingData(dt);
 		QRect tmpsize = geometry();
-		tmpsize.setWidth(tabw->width() + 10);
+		tmpsize.setWidth(_tabw->width() + 10);
 		setGeometry(tmpsize);
     }
 }
@@ -771,13 +773,13 @@ MLRenderingParametersTab* LayerDialog::createRenderingParametersTab()
 {
     if (_globaldoctool != NULL)
     {
-        tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions());
-        tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
-        connect(tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-        connect(tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
-		connect(tabw, SIGNAL(updateLayerTableRequested()), this, SLOT(updateTable()));
-		tabw->setVisible(false);
-        return tabw;
+        _tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions());
+        _tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
+        connect(_tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+        connect(_tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+		connect(_tabw, SIGNAL(updateLayerTableRequested()), this, SLOT(updateTable()));
+		_tabw->setVisible(false);
+        return _tabw;
     }
     return NULL;
 }
