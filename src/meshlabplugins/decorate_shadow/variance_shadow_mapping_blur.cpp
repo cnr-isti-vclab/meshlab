@@ -98,11 +98,19 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     glUseProgram(this->_depthShaderProgram);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	MLRenderingData dt;
+	MLRenderingData::RendAtts atts;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+	dt.set(MLRenderingData::PR_SOLID, atts);
+
     foreach(MeshModel *m, md.meshList)
     {
         if ((m != NULL) && (m->visible))
         {
-            ctx->draw(m->id(),gla->context());
+			ctx->drawAllocatedAttributesSubset(m->id(),gla->context(),dt);
         }
     }
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -184,7 +192,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     {
         if ((m != NULL) && (m->visible))
         {
-            ctx->draw(m->id(),gla->context());
+			ctx->drawAllocatedAttributesSubset(m->id(),gla->context(),dt);
         }
     }
     glPopAttrib();
