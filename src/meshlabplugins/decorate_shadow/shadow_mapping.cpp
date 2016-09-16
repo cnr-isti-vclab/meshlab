@@ -46,7 +46,7 @@ ShadowMapping::~ShadowMapping(){
 
     glDeleteTextures(1, &(this->_shadowMap));
 
-    glDeleteFramebuffersEXT(1, &_fbo);
+    glDeleteFramebuffers(1, &_fbo);
 }
 
 bool ShadowMapping::init()
@@ -204,8 +204,8 @@ bool ShadowMapping::setup()
     if (_initOk)
         return true;
 
-    glGenFramebuffersEXT(1, &_fbo);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     this->genDepthMapTexture24(this->_shadowMap, true);
 
@@ -216,8 +216,8 @@ bool ShadowMapping::setup()
     glReadBuffer(GL_NONE);
 
     //checks for fbo creation errors
-    int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return _initOk;
 }

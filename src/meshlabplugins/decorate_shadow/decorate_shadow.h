@@ -81,7 +81,7 @@ public:
         _decoratorSSAO = new SSAO(0.1f);*/
 
         smShader = NULL;
-        vsmbShader = NULL;
+        vsmShader = NULL;
         vsmbShader = NULL;
         _decoratorSSAO = NULL;
     }

@@ -52,7 +52,7 @@ public:
         this->_texH = 1024;
       }
 
-    //virtual ~DecorateShader();
+	virtual ~DecorateShader() {}
 
     /**
       * Performs init commands.
@@ -89,7 +89,7 @@ protected:
     {
         assert(_initOk);
         glClearDepth(1.0);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
         glPushAttrib(GL_VIEWPORT_BIT);
         glViewport(0, 0, this->_texW, this->_texH);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -125,7 +125,7 @@ protected:
             return;
 
         glPopAttrib();
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     /**
@@ -310,7 +310,6 @@ protected:
       * @param attachement the FBO attachment target.
       */
     void genColorTextureEXT(GLuint& tex, GLenum attachment){
-
         glGenTextures(1, &tex);
         glBindTexture(GL_TEXTURE_2D, tex);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -320,7 +319,7 @@ protected:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  this->_texW, this->_texH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_2D, tex, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, tex, 0);
 
 
     }
@@ -332,10 +331,10 @@ protected:
       */
     void genDepthRenderBufferEXT(GLuint& tex){
 
-        glGenRenderbuffersEXT(1, &tex);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, tex);
-        glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, this->_texW, this->_texH);
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, tex);
+        glGenRenderbuffers(1, &tex);
+        glBindRenderbuffer(GL_RENDERBUFFER, tex);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->_texW, this->_texH);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, tex);
 
     }
     
@@ -361,7 +360,7 @@ protected:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,  this->_texW, this->_texH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex, 0);
         return;
     }
     
@@ -382,13 +381,13 @@ protected:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         if(isShMap){
             glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-            glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE_ARB, GL_LUMINANCE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE_ARB);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
+            glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,  this->_texW, this->_texH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, tex, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex, 0);
         return;
     }
 };

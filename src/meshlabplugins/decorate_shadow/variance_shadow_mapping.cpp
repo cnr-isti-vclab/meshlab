@@ -37,6 +37,7 @@ VarianceShadowMapping::VarianceShadowMapping(float intensity):ShadowMapping(inte
 }
 
 VarianceShadowMapping::~VarianceShadowMapping(){
+
     glDetachShader(this->_depthShaderProgram, this->_depthVert);
     glDetachShader(this->_depthShaderProgram, this->_depthFrag);
 
@@ -44,7 +45,7 @@ VarianceShadowMapping::~VarianceShadowMapping(){
     glDeleteShader(this->_depthFrag);
     glDeleteProgram(this->_depthShaderProgram);
 
-    glDeleteFramebuffersEXT(1, &(this->_depth));
+    glDeleteRenderbuffers(1, &(this->_depth));
 }
 
 bool VarianceShadowMapping::init()
@@ -167,18 +168,18 @@ bool VarianceShadowMapping::setup()
                 return true;
 
         //genero il frame buffer object
-        glGenFramebuffersEXT(1, &_fbo);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+        glGenFramebuffers(1, &_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
         //Generates texture color for variance shadow map
-        this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0_EXT);
+        this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0);
 
         //Generates render buffer for depth attachment
         this->genDepthRenderBufferEXT(this->_depth);
 
         //checks for errors
-        int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return _initOk;
 }

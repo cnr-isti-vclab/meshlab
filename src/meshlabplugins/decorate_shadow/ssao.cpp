@@ -73,15 +73,15 @@ SSAO::~SSAO(){
     glDeleteShader(this->_blurFrag);
     glDeleteProgram(this->_blurShaderProgram);
 
-    glDeleteTexturesEXT(1, &(this->_color1));
-    glDeleteTexturesEXT(1, &(this->_depthMap));
+    glDeleteTextures(1, &(this->_color1));
+    glDeleteTextures(1, &(this->_depthMap));
 
-    glDeleteFramebuffersEXT(1, &(this->_depth));
-    glDeleteTexturesEXT(1, &(this->_color2));
-    glDeleteTexturesEXT(1, &(this->_color2));
+    glDeleteFramebuffers(1, &(this->_depth));
+    glDeleteTextures(1, &(this->_color2));
+    glDeleteTextures(1, &(this->_color2));
 
-    glDeleteFramebuffersEXT(1, &_fbo);
-    glDeleteFramebuffersEXT(1, &_fbo2);
+    glDeleteFramebuffers(1, &_fbo);
+    glDeleteFramebuffers(1, &_fbo2);
 }
 
 bool SSAO::init()
@@ -132,7 +132,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     mProj.transposeInPlace();
     mInverseProj = vcg::Inverse(mProj);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	MLRenderingData dt;
 	MLRenderingData::RendAtts atts;
@@ -153,7 +153,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     /***********************************************************/
     //SSAO PASS
     /***********************************************************/
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
     glUseProgram(this->_ssaoShaderProgram);
 
     glEnable(GL_TEXTURE_2D);
@@ -182,7 +182,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     GLuint invMatrixLoc = glGetUniformLocation(this->_ssaoShaderProgram, "invProj");
     glUniformMatrix4fv(invMatrixLoc, 1, 0, mInverseProj.transpose().V());
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBegin(GL_TRIANGLE_STRIP);
     glVertex3f(-1.0f, -1.0f, 0.0f);
@@ -195,7 +195,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     /***********************************************************/
     //BLURRING horizontal
     /***********************************************************/
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glUseProgram(this->_blurShaderProgram);
 
     float blur_coef(0.8f);
@@ -209,7 +209,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
     loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
     glUniform1i(loc, 0);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBegin(GL_TRIANGLE_STRIP);
     glVertex3f(-1.0f, -1.0f, 0.0f);
@@ -254,14 +254,14 @@ bool SSAO::setup()
         return true;
 
     //genero i 2 framebuffer object che mi servono.
-    glGenFramebuffersEXT(1, &_fbo);
-    glGenFramebuffersEXT(1, &_fbo2);
+    glGenFramebuffers(1, &_fbo);
+    glGenFramebuffers(1, &_fbo2);
 
     //attacco il primo...adesso le modifiche andranno a modificare solo _fbo
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     //Generates first color texture
-    this->genColorTextureEXT(this->_color1, GL_COLOR_ATTACHMENT0_EXT);
+    this->genColorTextureEXT(this->_color1, GL_COLOR_ATTACHMENT0);
 
     this->genDepthMapTexture24(this->_depthMap, false);
 
@@ -269,17 +269,17 @@ bool SSAO::setup()
 
     glDrawBuffersARB(0, drawBuffers);
 
-    int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+    int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
 
     if(!this->_initOk)
         return this->_initOk;
 
     //attacco il secondo fbo...adesso le modifiche andranno a modificare solo _fbo2
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo2);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
 
     //Generates first color texture
-    this->genColorTextureEXT(this->_color2, GL_COLOR_ATTACHMENT0_EXT);
+    this->genColorTextureEXT(this->_color2, GL_COLOR_ATTACHMENT0);
 
     //Generates render buffer for depth attachment
     this->genDepthRenderBufferEXT(this->_depth);
@@ -290,10 +290,10 @@ bool SSAO::setup()
 
     this->loadNoiseTxt();
 
-    err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
+    err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
 
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return _initOk;
 }
 

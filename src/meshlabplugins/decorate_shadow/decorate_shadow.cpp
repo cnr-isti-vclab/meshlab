@@ -27,157 +27,159 @@ using namespace vcg;
 
 QString DecorateShadowPlugin::decorationInfo(FilterIDType id) const
 {
-    switch(id){
-        case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");
-        case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
-    default:     assert(0); return QString();
-    }  
+	switch (id) {
+	case DP_SHOW_SHADOW:           return tr("Enable shadow mapping");
+	case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
+	default:     assert(0); return QString();
+	}
 }
 
 QString DecorateShadowPlugin::decorationName(FilterIDType id) const
 {
-    switch(id){
-        case DP_SHOW_SHADOW :           return tr("Enable shadow mapping");
-        case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
-    default:     assert(0); return QString();
-    }
+	switch (id) {
+	case DP_SHOW_SHADOW:           return tr("Enable shadow mapping");
+	case DP_SHOW_SSAO:              return tr("Enable Screen Space Ambient Occlusion");
+	default:     assert(0); return QString();
+	}
 }
 
 void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
-    switch(ID(action)){
-        case DP_SHOW_SHADOW : {
-            assert(!(parset.hasParameter(this->DecorateShadowMethod())));
-            int method = SH_MAP_VSM_BLUR;
-            parset.addParam(
-                    new RichEnum(
-                        this->DecorateShadowMethod(),
-                        method,
-                        getSHMethods(),
-                        "Shader used to perform shadow mapping decoration",
-                        "Shadow mapping method")
-                    );
-            parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(),0.3f,0.0f,1.0f,"Shadow Intensity","Shadow Intensity"));
-            break;
-        }
+	switch (ID(action)) {
+	case DP_SHOW_SHADOW: {
+		assert(!(parset.hasParameter(this->DecorateShadowMethod())));
+		int method = SH_MAP_VSM_BLUR;
+		parset.addParam(
+			new RichEnum(
+				this->DecorateShadowMethod(),
+				method,
+				getSHMethods(),
+				"Shader used to perform shadow mapping decoration",
+				"Shadow mapping method")
+		);
+		parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Shadow Intensity", "Shadow Intensity"));
+		break;
+	}
 
-        case DP_SHOW_SSAO : {
-            assert(!(parset.hasParameter(this->DecorateShadowSSAORadius())));
-            float radius = 0.25f;
-            parset.addParam(
-                    new RichFloat(this->DecorateShadowSSAORadius(),
-                    radius,
-                    "Uniform parameter for SSAO shader",
-                    "SSAO radius"));
-            break;
-        }
+	case DP_SHOW_SSAO: {
+		assert(!(parset.hasParameter(this->DecorateShadowSSAORadius())));
+		float radius = 0.25f;
+		parset.addParam(
+			new RichFloat(this->DecorateShadowSSAORadius(),
+				radius,
+				"Uniform parameter for SSAO shader",
+				"SSAO radius"));
+		break;
+	}
 
-        default: assert(0);
-    }
-}		
-		
+	default: assert(0);
+	}
+}
+
 bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, RichParameterSet* parset, GLArea* /*gla*/)
 {
-    bool result;
-        
-    switch(ID(action)){
-        case DP_SHOW_SHADOW :
-            if(!parset->hasParameter(DecorateShadowMethod())){
-                qDebug("Unable to find Shadow mapping method");
-                assert(0);
-            }
-            switch (parset->getEnum(DecorateShadowMethod()))
-            {
-            case SH_MAP: 
-            {
-                smShader= new ShadowMapping(0.1f);
-                this->_decoratorSH = smShader; break;
-            }
-            case SH_MAP_VSM: 
-            {
-                vsmShader= new VarianceShadowMapping(0.1f);
-                this->_decoratorSH = vsmShader; break;
-            }
-            case SH_MAP_VSM_BLUR: 
-            {
-                vsmbShader= new VarianceShadowMappingBlur(0.1f);
-                this->_decoratorSH = vsmbShader; break;
-            }
-            }
-            this->_decoratorSH->setShadowIntensity(parset->getDynamicFloat(this->DecorateShadowIntensity()));
-            result = this->_decoratorSH->init();
-            return result;
+	bool result;
 
-        case DP_SHOW_SSAO:
-            _decoratorSSAO = new SSAO(0.1f);
-            this->_decoratorSSAO->setRadius(parset->getFloat(DecorateShadowSSAORadius()));
-            result = this->_decoratorSSAO->init();
-            return result;
+	switch (ID(action))
+	{
+	case DP_SHOW_SHADOW:
+		if (!parset->hasParameter(DecorateShadowMethod())) {
+			qDebug("Unable to find Shadow mapping method");
+			assert(0);
+		}
+		switch (parset->getEnum(DecorateShadowMethod()))
+		{
+		case SH_MAP:
+		{
+			smShader = new ShadowMapping(0.1f);
+			this->_decoratorSH = smShader; break;
+		}
+		case SH_MAP_VSM:
+		{
+			vsmShader = new VarianceShadowMapping(0.1f);
+			this->_decoratorSH = vsmShader; break;
+		}
+		case SH_MAP_VSM_BLUR:
+		{
+			vsmbShader = new VarianceShadowMappingBlur(0.1f);
+			this->_decoratorSH = vsmbShader; break;
+		}
+		}
+		this->_decoratorSH->setShadowIntensity(parset->getDynamicFloat(this->DecorateShadowIntensity()));
+		result = this->_decoratorSH->init();
+		return result;
 
-        default: assert(0);
-    }
-    return false;
+	case DP_SHOW_SSAO:
+		_decoratorSSAO = new SSAO(0.1f);
+		this->_decoratorSSAO->setRadius(parset->getFloat(DecorateShadowSSAORadius()));
+		result = this->_decoratorSSAO->init();
+		return result;
+
+	default: assert(0);
+	}
+	return false;
 }
 
-void DecorateShadowPlugin::endDecorate( QAction * action, MeshDocument & md, RichParameterSet * parset, GLArea * gla)
+void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & md, RichParameterSet * parset, GLArea * gla)
 {
-    switch(ID(action))
-    {
-    case DP_SHOW_SHADOW :
-        {
-            if(!parset->hasParameter(DecorateShadowMethod()))
-            {
-                qDebug("Unable to find Shadow mapping method");
-                assert(0);
-            }
-            switch (parset->getEnum(DecorateShadowMethod()))
-            {
-            case SH_MAP: 
-                {
-                    delete smShader;
-                    smShader = NULL;
-                    break;
-                }
-            case SH_MAP_VSM: 
-                {
-                    delete vsmShader;
-                    vsmShader = NULL;
-                    break;
-                }
-            case SH_MAP_VSM_BLUR: 
-                {
-                    delete vsmbShader;
-                    vsmbShader = NULL;
-                    break;
-                }
-            }
-            _decoratorSH = NULL;
-            break;
-        }
-    case DP_SHOW_SSAO:
-        {
-            delete _decoratorSSAO;
-            _decoratorSSAO = NULL;
-            break;
-        }
-    default: assert(0);
-    }
+	switch (ID(action))
+	{
+		case DP_SHOW_SHADOW:
+		{
+			if (!parset->hasParameter(DecorateShadowMethod()))
+			{
+				qDebug("Unable to find Shadow mapping method");
+				assert(0);
+			}
+			switch (parset->getEnum(DecorateShadowMethod()))
+			{
+				case SH_MAP:
+				{
+					delete smShader;
+					smShader = NULL;
+					break;
+				}
+				case SH_MAP_VSM:
+				{
+					delete vsmShader;
+					vsmShader = NULL;
+					break;
+				}
+				case SH_MAP_VSM_BLUR:
+				{
+					delete vsmbShader;
+					vsmbShader = NULL;
+					break;
+				}
+			}
+			_decoratorSH = NULL;
+			break;
+		}
+		case DP_SHOW_SSAO:
+		{
+			delete _decoratorSSAO;
+			_decoratorSSAO = NULL;
+			break;
+		}
+		default: 
+			break;
+	}
 }
 
 
-void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla,QPainter *,GLLogStream &)
+void DecorateShadowPlugin::decorateDoc(QAction *action, MeshDocument &md, RichParameterSet *, GLArea *gla, QPainter *, GLLogStream &)
 {
-   switch(ID(action)){
-            case DP_SHOW_SHADOW :
-                this->_decoratorSH->runShader(md, gla);
-                break;
+	switch (ID(action)) {
+	case DP_SHOW_SHADOW:
+		this->_decoratorSH->runShader(md, gla);
+		break;
 
-            case DP_SHOW_SSAO:
-                this->_decoratorSSAO->runShader(md, gla);
-                break;
+	case DP_SHOW_SSAO:
+		this->_decoratorSSAO->runShader(md, gla);
+		break;
 
-            default: assert(0);
-        }
+	default: assert(0);
+	}
 }
 
 

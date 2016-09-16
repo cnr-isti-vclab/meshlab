@@ -30,7 +30,7 @@ class ShadowMapping : public DecorateShader
 public:
 
     ShadowMapping(float);
-    ~ShadowMapping();
+    virtual ~ShadowMapping();
 
     /**
       * Performs init commands.

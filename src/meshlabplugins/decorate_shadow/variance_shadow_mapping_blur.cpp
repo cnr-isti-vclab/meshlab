@@ -43,8 +43,8 @@ VarianceShadowMappingBlur::~VarianceShadowMappingBlur(){
     glDeleteShader(this->_blurFrag);
     glDeleteProgram(this->_blurShaderProgram);
 
-    glDeleteTexturesEXT(1, &(this->_blurH));
-    glDeleteTexturesEXT(1, &(this->_blurV));
+    glDeleteTextures(1, &(this->_blurH));
+    glDeleteTextures(1, &(this->_blurV));
 }
 
 bool VarianceShadowMappingBlur::init()
@@ -96,7 +96,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
 
     this->bind();
     glUseProgram(this->_depthShaderProgram);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     foreach(MeshModel *m, md.meshList)
     {
@@ -123,7 +123,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     GLuint loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
     glUniform1i(loc, 0);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBegin(GL_TRIANGLE_STRIP);
@@ -144,7 +144,7 @@ void VarianceShadowMappingBlur::runShader(MeshDocument& md, GLArea* gla){
     loc = glGetUniformLocation(this->_blurShaderProgram, "scene");
     glUniform1i(loc, 0);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT2_EXT);
+    glDrawBuffer(GL_COLOR_ATTACHMENT2);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBegin(GL_TRIANGLE_STRIP);
@@ -206,17 +206,17 @@ bool VarianceShadowMappingBlur::setup()
             return true;
 
     //genero il frame buffer object
-    glGenFramebuffersEXT(1, &_fbo);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     //Generates texture color for variance shadow map
-    this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0_EXT);
+    this->genColorTextureEXT(this->_shadowMap, GL_COLOR_ATTACHMENT0);
 
     //Generates texture color for horizontal blur
-    this->genColorTextureEXT(this->_blurH, GL_COLOR_ATTACHMENT1_EXT);
+    this->genColorTextureEXT(this->_blurH, GL_COLOR_ATTACHMENT1);
 
     //Generates texture color for vertical blur
-    this->genColorTextureEXT(this->_blurV, GL_COLOR_ATTACHMENT2_EXT);
+    this->genColorTextureEXT(this->_blurV, GL_COLOR_ATTACHMENT2);
 
     //Generates render buffer for depth attachment
     this->genDepthRenderBufferEXT(this->_depth);
@@ -226,8 +226,8 @@ bool VarianceShadowMappingBlur::setup()
     glDrawBuffersARB(3, drawBuffers);
 
     //checks for errors
-    int err = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    _initOk = (err == GL_FRAMEBUFFER_COMPLETE_EXT);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    int err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    _initOk = (err == GL_FRAMEBUFFER_COMPLETE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return _initOk;
 }
