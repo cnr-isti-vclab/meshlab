@@ -54,10 +54,9 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 				this->DecorateShadowMethod(),
 				method,
 				getSHMethods(),
-				"Shader used to perform shadow mapping decoration",
-				"Shadow mapping method")
+				"Shader", "Shader used to perform shadow mapping decoration")
 		);
-		parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Shadow Intensity", "Shadow Intensity"));
+		parset.addParam(new RichDynamicFloat(this->DecorateShadowIntensity(), 0.3f, 0.0f, 1.0f, "Intensity", "Shadow Intensity"));
 		break;
 	}
 
@@ -66,9 +65,8 @@ void DecorateShadowPlugin::initGlobalParameterSet(QAction *action, RichParameter
 		float radius = 0.25f;
 		parset.addParam(
 			new RichFloat(this->DecorateShadowSSAORadius(),
-				radius,
-				"Uniform parameter for SSAO shader",
-				"SSAO radius"));
+				radius,"SSAO radius",
+				"Uniform parameter for SSAO shader"));
 		break;
 	}
 
