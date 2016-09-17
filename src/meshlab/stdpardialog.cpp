@@ -234,6 +234,7 @@ void StdParFrame::loadFrameContent(RichParameterSet &curParSet,MeshDocument * /*
     } // end for each parameter
     setLayout(glay);
     this->setMinimumSize(glay->sizeHint());
+	glay->setSizeConstraint(QLayout::SetMinimumSize);
     this->showNormal();
     this->adjustSize();
 }
@@ -1437,8 +1438,10 @@ MeshLabWidget::~MeshLabWidget()
 
 void MeshLabWidget::addWidgetToGridLayout( QGridLayout* lay, const int r)
 {
-    if (lay != NULL)
-        lay->addWidget(helpLab,r,2,1,1);
+	if (lay != NULL)
+	{
+		lay->addWidget(helpLab, r, 2, 1, 1, Qt::AlignLeft);
+	}
 }
 
 //connect(qcb,SIGNAL(stateChanged(int)),this,SIGNAL(parameterChanged()));

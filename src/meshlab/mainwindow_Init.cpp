@@ -64,7 +64,6 @@ MainWindow::MainWindow()
 	layerDialog = new LayerDialog(this);
 	connect(layerDialog, SIGNAL(toBeShow()), this, SLOT(updateLayerDialog()));
 	layerDialog->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
 
 

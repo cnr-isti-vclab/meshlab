@@ -763,9 +763,9 @@ void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData&
 		}
 
         _tabw->updateGUIAccordingToRenderingData(dt);
-		QRect tmpsize = geometry();
-		tmpsize.setWidth(_tabw->width() + 10);
-		setGeometry(tmpsize);
+		//QRect tmpsize = geometry();
+		//tmpsize.setWidth(_tabw->width() + 10);
+		//setGeometry(tmpsize);
     }
 }
 
