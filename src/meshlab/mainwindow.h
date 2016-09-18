@@ -126,8 +126,10 @@ public slots:
 	bool addRenderingDataIfNewlyGeneratedMesh(int meshid);
 
 	void updateRenderingDataAccordingToActions(int meshid, const QList<MLRenderingAction*>& acts);
+	void updateRenderingDataAccordingToActionsToAllVisibleLayers(const QList<MLRenderingAction*>& acts);
 	void updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts);
 	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act);
+	void updateRenderingDataAccordingToActionToAllVisibleLayers(MLRenderingAction* act);
 	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act,bool);
 
 private:

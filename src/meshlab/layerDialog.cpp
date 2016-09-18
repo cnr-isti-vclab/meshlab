@@ -863,14 +863,20 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 {
     if (mw == NULL)
         return;
-    mw->updateRenderingDataAccordingToActions(meshid,acts);
+	if (!_applytovis->isChecked())
+		mw->updateRenderingDataAccordingToActions(meshid,acts);
+	else
+		mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
 }
 
 void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
 {
     if (mw == NULL)
         return;
-    mw->updateRenderingDataAccordingToAction(meshid,act);
+	if (!_applytovis->isChecked())
+		mw->updateRenderingDataAccordingToAction(meshid, act);
+	else
+		mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)

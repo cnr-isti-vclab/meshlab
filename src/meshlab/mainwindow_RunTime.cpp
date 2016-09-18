@@ -3550,6 +3550,23 @@ void MainWindow::updateRenderingDataAccordingToActions(int meshid,const QList<ML
 		GLA()->update();
 }
 
+void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const QList<MLRenderingAction*>& acts)
+{
+	if (meshDoc() == NULL)
+		return;
+	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	{
+		MeshModel* mm = meshDoc()->meshList[ii];
+		if (mm != NULL)
+		{
+			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
+		}
+	}
+	updateLayerDialog();
+	if (GLA() != NULL)
+		GLA()->update();
+}
+
 void MainWindow::updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts)
 {
 	if ((meshDoc() == NULL) || (act == NULL))
@@ -3616,6 +3633,24 @@ void MainWindow::updateRenderingDataAccordingToAction( int meshid,MLRenderingAct
 	if (GLA() != NULL)
 		GLA()->update();
 }
+
+void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRenderingAction* act)
+{
+	if (meshDoc() == NULL)
+		return;
+	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	{
+		MeshModel* mm = meshDoc()->meshList[ii];
+		if (mm != NULL)
+		{
+			updateRenderingDataAccordingToActionCommonCode(mm->id(), act);
+		}
+	}
+	updateLayerDialog();
+	if (GLA() != NULL)
+		GLA()->update();
+}
+
 
 void MainWindow::updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act, bool check)
 {
