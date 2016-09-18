@@ -57,11 +57,21 @@ LayerDialog::LayerDialog(QWidget *parent )
     _globaldoctool->setVisible(false);
     ///////////////////////////////////
 
+	_renderingtabcontainer = new QGroupBox(this);
+	QVBoxLayout* groupboxlay = new QVBoxLayout();
     if (createRenderingParametersTab() != NULL)
     {
+
         _tabw->setVisible(true);
-        ui->renderingLayout->addWidget(_tabw);
+        groupboxlay->addWidget(_tabw);
     }
+	_applytovis = new QCheckBox(QString("apply to all visible layers"),this);
+	_applytovis->setLayoutDirection(Qt::RightToLeft);
+	_applytovis->setChecked(false);
+	groupboxlay->addWidget(_applytovis);
+	_renderingtabcontainer->setLayout(groupboxlay);
+	ui->renderingLayout->addWidget(_renderingtabcontainer);
+
     // The following connection is used to associate the click with the change of the current mesh.
     connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 
@@ -687,6 +697,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
                 item->setForeground(3,QBrush(Qt::blue));
                 ui->meshTreeWidget->setCurrentItem(item);
 				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
+				_renderingtabcontainer->setTitle(mm->shortName());
             }
             else
             {
@@ -699,6 +710,8 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
             }
         }
     }
+	if (md->meshList.size() == 0)
+		_renderingtabcontainer->setTitle(QString());
 }
 
 void LayerDialog::updatePerRasterItemSelectionStatus()
@@ -758,11 +771,11 @@ void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData&
 				else
 					_tabw->setTextureAction(MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE);
 				_tabw->updateVisibility(mm);
-
 			}
 		}
 
         _tabw->updateGUIAccordingToRenderingData(dt);
+		
 		//QRect tmpsize = geometry();
 		//tmpsize.setWidth(_tabw->width() + 10);
 		//setGeometry(tmpsize);

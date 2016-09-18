@@ -363,7 +363,7 @@ private:
     bool helpVisible;				// Help on screen
     bool trackBallVisible;		// Draws the trackball ?
     bool activeDefaultTrackball; // keep track on active trackball
-    bool hasToUpdateTexture;			// has to reload textures at the next redraw
+    //bool hasToUpdateTexture;			// has to reload textures at the next redraw
     bool hasToPick;							// has to pick during the next redraw.
     bool hasToGetPickPos;							// if we are waiting for a double click for getting a surface position that has to be sent back using signal/slots (for parameters)
 	bool hasToGetPickCoords;							// if we are waiting for a double click for getting a position on the GLArea that has to be sent back using signal/slots (for parameters)
@@ -455,7 +455,7 @@ public:
 
 private:
     void drawTarget();
-
+	int lastloadedraster;
     //-----------Shot support----------------------------
 public:
     QPair<Shotm, float > shotFromTrackball();

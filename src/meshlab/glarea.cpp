@@ -65,7 +65,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     hasToPick=false;
     hasToSelectMesh=false;
     hasToGetPickPos=false;
-    hasToUpdateTexture=false;
+    //hasToUpdateTexture=false;
     helpVisible=false;
     takeSnapTile=false;
     activeDefaultTrackball=true;
@@ -116,7 +116,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     }else{
         qDebug("The parent of the GLArea parent is not a pointer to the meshlab MainWindow.");
     }
-
+	lastloadedraster = -1;
 }
 
 GLArea::~GLArea()
@@ -592,9 +592,12 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     glPopMatrix(); // We restore the state to immediately before the trackball
     //If it is a raster viewer draw the image as a texture
-    if(isRaster())
-        drawTarget();
-
+	if (isRaster())
+	{
+		if ((md()->rm() != NULL) && (lastloadedraster != md()->rm()->id()))
+			loadRaster(md()->rm()->id());
+		drawTarget();
+	}
     // Double click move picked point to center
     // It has to be done in the before trackball space (we MOVE the trackball itself...)
     if(hasToPick && !hasToGetPickPos)
@@ -1785,6 +1788,7 @@ void GLArea::showRaster(bool resetViewFlag)
 
 void GLArea::loadRaster(int id)
 {
+	lastloadedraster = id;
     foreach(RasterModel *rm, this->md()->rasterList)
         if(rm->id()==id)
         {

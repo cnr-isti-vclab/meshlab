@@ -28,9 +28,12 @@
 #include <QTreeWidgetItem>
 #include <QDockWidget>
 #include <QTabWidget>
+#include <QGroupBox>
+#include <QCheckBox>
 #include <common/filterparameter.h>
 #include <common/ml_shared_data_context.h>
 #include "ml_render_gui.h"
+
 
 
 class MainWindow;
@@ -156,6 +159,8 @@ private:
     QTreeWidgetItem* _docitem;
 	MLRenderingSideToolbar* _globaldoctool;
     int _previd;
+	QGroupBox* _renderingtabcontainer;
+	QCheckBox* _applytovis;
 public:
 	MLRenderingParametersTab* _tabw;
 signals:
