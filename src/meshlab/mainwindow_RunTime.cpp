@@ -3557,7 +3557,7 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
 	{
 		MeshModel* mm = meshDoc()->meshList[ii];
-		if (mm != NULL)
+		if ((mm != NULL) && (mm->isVisible()))
 		{
 			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
 		}
@@ -3641,7 +3641,7 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
 	{
 		MeshModel* mm = meshDoc()->meshList[ii];
-		if (mm != NULL)
+		if ((mm != NULL) && (mm->isVisible()))
 		{
 			updateRenderingDataAccordingToActionCommonCode(mm->id(), act);
 		}

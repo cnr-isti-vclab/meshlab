@@ -420,6 +420,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
             rendertb->setIconSize(QSize(16,16));
             rendertb->setAccordingToRenderingData((*rdit));
             connect(rendertb,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+			connect(rendertb, SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)), this, SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 		    connect(rendertb,SIGNAL(activatedAction(MLRenderingAction*)),this,SLOT(actionActivated(MLRenderingAction*)));
             
             MeshTreeWidgetItem* item = new MeshTreeWidgetItem(mmd,ui->meshTreeWidget,rendertb);
@@ -866,7 +867,12 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 	if (!_applytovis->isChecked())
 		mw->updateRenderingDataAccordingToActions(meshid,acts);
 	else
-		mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
+	{
+		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
+		/*a MLRenderingSideToolBar is not mutual exclusive. in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
+		if (sidetool == NULL)
+			mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
+	}
 }
 
 void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
@@ -874,7 +880,12 @@ void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAc
     if (mw == NULL)
         return;
 	if (!_applytovis->isChecked())
-		mw->updateRenderingDataAccordingToAction(meshid, act);
+	{
+		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
+		/*in the normal case a MLRenderingSideToolBar should be managed by the updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts) function*/
+		if (sidetool == NULL)
+			mw->updateRenderingDataAccordingToAction(meshid, act);
+	}
 	else
 		mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
 }

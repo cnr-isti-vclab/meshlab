@@ -187,6 +187,7 @@ protected slots:
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
 	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
+	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
     void activatedAction(MLRenderingAction*);
     
 

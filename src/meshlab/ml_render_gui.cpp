@@ -67,6 +67,7 @@ void MLRenderingToolbar::toggle( QAction* act)
     {
         emit updateRenderingDataAccordingToActions(_meshid,_acts);
 		emit updateRenderingDataAccordingToActions(_meshid, ract, _acts);
+		emit updateRenderingDataAccordingToAction(_meshid, ract);
 		if (ract->isChecked())
 			emit activatedAction(ract);
     }
