@@ -144,14 +144,15 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 
   case CR_FITPLANE:
 	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "Howe large is the plane, with respect to the size of the selction: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
-	  parlst.addParam(new RichInt("subdiv", 5, "Plane XY subivisions", "Subdivision steps of plane borders"));
+	  parlst.addParam(new RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
 	  parlst.addParam(new RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
-	  parlst.addParam(new RichEnum("orientation", 1,
-		  QStringList() << "quasi-Straight Fit" << "Best Fit",
+	  parlst.addParam(new RichEnum("orientation", 0,
+		  QStringList() << "quasi-Straight Fit" << "Best Fit" << "XZ Parallel" << "YZ Parallel" << "YX Parallel",
 		  tr("Plane orientation"),
 		  tr("Orientation:"
-		  "<b>quasi-Straight Fit</b>: The fitting plane wil be placed (as much as possible) straight with the axis. Works better if the selected area is already almost straight<br>"
-		  "<b>Best Fit</b>: The fitting plane wil be placed and sized trying to best fit to the selected area.<br>"
+		  "<b>quasi-Straight Fit</b>: The fitting plane will be oriented (as much as possible) straight with the axeses.<br>"
+		  "<b>Best Fit</b>: The fitting plane will be oriented and sized trying to best fit to the selected area.<br>"
+		  "<b>-- Parallel</b>: The fitting plane will be oriented with a side parallel with the chosen plane. WARNING: do not use if the selection is exactly parallel to a plane.<br>"
 		  )));
 	  break;
   default : return;
@@ -266,7 +267,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		if (orientation == 0)
 		{
 			if ((plane.Direction().X() <= plane.Direction().Y()) && (plane.Direction().X() <= plane.Direction().Z()))
-			dirH = Point3m(1.0, 0.0, 0.0) ^ plane.Direction();
+				dirH = Point3m(1.0, 0.0, 0.0) ^ plane.Direction();
 			else if ((plane.Direction().Y() <= plane.Direction().X()) && (plane.Direction().Y() <= plane.Direction().Z()))
 				dirH = Point3m(0.0, 1.0, 0.0) ^ plane.Direction();
 			else
@@ -276,7 +277,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			dirV = dirH ^ plane.Direction();
 			dirV.Normalize();
 		}
-		else
+		else if (orientation == 1)
 		{
 			Matrix33m cov;
 			vector<Point3m> PtVec;
@@ -307,6 +308,49 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			dirV.Normalize();
 			dirH = plane.Direction() ^ dirV;
 			dirH.Normalize();
+		}
+		else if (orientation == 2)
+		{
+				dirH = Point3m(0.0, 1.0, 0.0) ^ plane.Direction();
+				dirH.Normalize();
+				dirV = dirH ^ plane.Direction();
+				dirV.Normalize();
+
+		}
+		else if (orientation == 3)
+		{
+				dirH = Point3m(1.0, 0.0, 0.0) ^ plane.Direction();
+				dirH.Normalize();
+				dirV = dirH ^ plane.Direction();
+				dirV.Normalize();
+		}
+		else if (orientation == 4)
+		{
+
+				dirH = Point3m(0.0, 0.0, 1.0) ^ plane.Direction();
+				dirH.Normalize();
+				dirV = dirH ^ plane.Direction();
+				dirV.Normalize();
+		}
+
+		// hotfix for unlikely case where the fitting is perfecrly parallel to a plane
+		if (orientation >= 2 )
+		{
+			if (Point3m(0.0, 1.0, 0.0) * plane.Direction() == 1.0)
+			{
+				dirH = Point3m(1.0, 0.0, 0.0);
+				dirV = Point3m(0.0, 0.0, 1.0);
+			}
+			if (Point3m(0.0, 0.0, 1.0) * plane.Direction() == 1.0)
+			{
+				dirH = Point3m(1.0, 0.0, 0.0);
+				dirV = Point3m(0.0, 1.0, 0.0);
+			}
+			if (Point3m(1.0, 0.0, 0.0) * plane.Direction() == 1.0)
+			{
+				dirH = Point3m(0.0, 1.0, 0.0);
+				dirV = Point3m(0.0, 0.0, 1.0);
+			}
 		}
 
 		Log("H [%f, %f, %f]", dirH.X(), dirH.Y(), dirH.Z());
