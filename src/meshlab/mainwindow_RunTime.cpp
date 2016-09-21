@@ -331,6 +331,8 @@ void MainWindow::switchOffDecorator(QAction* decorator)
 
 void MainWindow::updateLayerDialog()
 {
+	if (meshDoc() == NULL)
+		return;
     MultiViewer_Container* mvc = currentViewContainer();
     if (mvc == NULL)
         return;
@@ -349,19 +351,21 @@ void MainWindow::updateLayerDialog()
         layerDialog->updateLog(meshDoc()->Log);
         layerDialog->updateDecoratorParsView();
         MLRenderingData dt;
-        if ((meshDoc()!=NULL) && (meshDoc()->mm() != NULL))
+        if (meshDoc()->mm() != NULL)
 		{  
 			MLSceneGLSharedDataContext::PerMeshRenderingDataMap::iterator it = dtf.find(meshDoc()->mm()->id());
 			if (it != dtf.end())
 				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
         }
 		layerDialog->setMinimumSize(layerDialog->_tabw->size().width() + 10,layerDialog->minimumSize().height());
-		layerDialog->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
     }
 }
 
 void MainWindow::updateMenus()
 {
+	if (meshDoc() == NULL)
+		return;
+
     bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
     bool notEmptyActiveDoc = activeDoc && !meshDoc()->meshList.empty();
     importMeshAct->setEnabled(activeDoc);
@@ -3719,4 +3723,25 @@ void MainWindow::updateLog()
 	GLLogStream* senderlog = qobject_cast<GLLogStream*>(sender());
 	if ((senderlog != NULL) && (layerDialog != NULL))
 		layerDialog->updateLog(*senderlog);
+}
+
+void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
+{
+	if (subwin == NULL)
+		return;
+	if (mdiarea->currentSubWindow() != 0)
+	{
+		MultiViewer_Container* split = qobject_cast<MultiViewer_Container*>(mdiarea->currentSubWindow()->widget());
+		if (split != NULL)
+			_currviewcontainer = split;
+	}
+	if (_currviewcontainer != NULL)
+	{
+		updateLayerDialog();
+		updateMenus();
+		updateWindowMenu();
+		updateStdDialog();
+		updateXMLStdDialog();
+		updateDocumentScriptBindings();
+	}
 }

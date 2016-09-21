@@ -235,6 +235,7 @@ private slots:
     void sendHistory();
     ///////////Solt Wrapper for QMdiArea //////////////////
     void wrapSetActiveSubWindow(QWidget* window);
+	void switchCurrentContainer(QMdiSubWindow *);
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
     void updateGPUMemBar(int,int);
@@ -329,26 +330,26 @@ public:
     }
 
     MultiViewer_Container* currentViewContainer() const {
-       /* MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
-        if(mvc) return mvc;*/
-        if(mdiarea->currentSubWindow()!=0 )
-		{
-            Splitter* split = reinterpret_cast<Splitter*>(mdiarea->currentSubWindow()->widget());
-			if (split->isMultiViewerContainer())
-				return reinterpret_cast<MultiViewer_Container*>(split);
-        }
-        /*QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
-        foreach(QMdiSubWindow *subwinPtr,subwinList)
-        {
-            MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr);
-            if(mvc) return mvc;
-            if(mvc==0 && subwinPtr!=0){
-                mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr->widget());
-                if(mvc) return mvc;
-            }
-        }*/
+  //     /* MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(mdiarea->currentSubWindow());
+  //      if(mvc) return mvc;*/
+  //      if(mdiarea->currentSubWindow()!=0 )
+		//{
+  //          Splitter* split = reinterpret_cast<Splitter*>(mdiarea->currentSubWindow()->widget());
+		//	if (split->isMultiViewerContainer())
+		//		return reinterpret_cast<MultiViewer_Container*>(split);
+  //      }
+  //      /*QList<QMdiSubWindow *> subwinList=mdiarea->subWindowList();
+  //      foreach(QMdiSubWindow *subwinPtr,subwinList)
+  //      {
+  //          MultiViewer_Container *mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr);
+  //          if(mvc) return mvc;
+  //          if(mvc==0 && subwinPtr!=0){
+  //              mvc = dynamic_cast<MultiViewer_Container *>(subwinPtr->widget());
+  //              if(mvc) return mvc;
+  //          }
+  //      }*/
 
-        return 0;
+        return _currviewcontainer;
     }
     
     const PluginManager& pluginManager() const { return PM; }
@@ -512,6 +513,8 @@ private:
     QAction *checkUpdatesAct;
     ////////////////////////////////////////////////////
     static QString getDecoratedFileName(const QString& name);
+
+	MultiViewer_Container* _currviewcontainer;
 };
 
 /// Event filter that is installed to intercept the open events sent directly by the Operative System

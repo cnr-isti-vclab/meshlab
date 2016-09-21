@@ -53,6 +53,7 @@ QProgressBar *MainWindow::qb;
 MainWindow::MainWindow()
 	:mwsettings(), xmlfiltertimer(), wama(), gpumeminfo(NULL)
 {
+	_currviewcontainer = NULL;
 	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
 	//Subsequently restart function will be invoked.
 	setContextMenuPolicy(Qt::NoContextMenu);
@@ -64,6 +65,7 @@ MainWindow::MainWindow()
 	layerDialog = new LayerDialog(this);
 	connect(layerDialog, SIGNAL(toBeShow()), this, SLOT(updateLayerDialog()));
 	layerDialog->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	layerDialog->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
 	addDockWidget(Qt::RightDockWidgetArea, layerDialog);
 
 
@@ -73,6 +75,7 @@ MainWindow::MainWindow()
 	// Permette di passare da una finestra all'altra e tenere aggiornato il workspace
 	connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
+	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(switchCurrentContainer(QMdiSubWindow *)));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateLayerDialog()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateMenus()));
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateWindowMenu()));
