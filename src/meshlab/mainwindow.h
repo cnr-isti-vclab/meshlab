@@ -164,6 +164,7 @@ public:
     void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
 
 private slots:
+	void closeCurrentDocument();
     //////////// Slot Menu File //////////////////////
     void reload();
     void reloadAllMesh();

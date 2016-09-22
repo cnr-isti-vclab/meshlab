@@ -76,12 +76,6 @@ MainWindow::MainWindow()
 	connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(wrapSetActiveSubWindow(QWidget *)));
 	// Quando si passa da una finestra all'altra aggiorna lo stato delle toolbar e dei menu
 	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(switchCurrentContainer(QMdiSubWindow *)));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateLayerDialog()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateMenus()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateWindowMenu()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateStdDialog()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateXMLStdDialog()));
-	connect(mdiarea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(updateDocumentScriptBindings()));
 	httpReq = new QNetworkAccessManager(this);
 	connect(httpReq, SIGNAL(finished(QNetworkReply*)), this, SLOT(connectionDone(QNetworkReply*)));
 

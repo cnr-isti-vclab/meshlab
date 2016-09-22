@@ -495,12 +495,12 @@ while(ii < meshDoc()->meshList.size())
             a->setEnabled(false);
 
     }
-
-    if(GLA())
+	GLArea* tmp = GLA();
+    if(tmp != NULL)
     {
         showLayerDlgAct->setChecked(layerDialog->isVisible());
         showRasterAct->setEnabled(meshDoc()->rm() != 0);
-        showRasterAct->setChecked(GLA()->isRaster());
+        showRasterAct->setChecked(tmp->isRaster());
     }
     else
     {
@@ -2394,6 +2394,7 @@ void MainWindow::newProject(const QString& projName)
     connect(&mvcont->meshDoc,SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
     connect(&mvcont->meshDoc,SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 	connect(&mvcont->meshDoc, SIGNAL(documentUpdated()), this, SLOT(documentUpdateRequested()));
+	connect(mvcont, SIGNAL(closingMultiViewerContainer()), this, SLOT(closeCurrentDocument()));
     mdiarea->addSubWindow(mvcont);
     connect(mvcont,SIGNAL(updateMainWindowMenus()),this,SLOT(updateMenus()));
     connect(mvcont,SIGNAL(updateDocumentViewer()),this,SLOT(updateLayerDialog()));
@@ -3744,4 +3745,12 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 		updateXMLStdDialog();
 		updateDocumentScriptBindings();
 	}
+}
+
+void MainWindow::closeCurrentDocument()
+{
+	_currviewcontainer = NULL;
+	layerDialog->setVisible(false);
+	if (mdiarea != NULL)
+		mdiarea->closeActiveSubWindow();
 }

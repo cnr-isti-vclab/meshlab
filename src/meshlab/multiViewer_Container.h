@@ -111,6 +111,7 @@ public:
 signals:
     void updateMainWindowMenus(); //updates the menus of the meshlab MainWindow
     void updateDocumentViewer();
+	void closingMultiViewerContainer();
 
 public slots:
 

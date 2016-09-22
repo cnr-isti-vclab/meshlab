@@ -356,7 +356,10 @@ void MultiViewer_Container::closeEvent( QCloseEvent *event )
 	}
 
 	if (close)
+	{
+		emit closingMultiViewerContainer();
 		event->accept();
+	}
 	else
 		event->ignore();
 }
