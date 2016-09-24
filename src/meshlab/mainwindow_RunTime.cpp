@@ -3567,7 +3567,7 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 			updateRenderingDataAccordingToActionsCommonCode(mm->id(), acts);
 		}
 	}
-	updateLayerDialog();
+	//updateLayerDialog();
 	if (GLA() != NULL)
 		GLA()->update();
 }
