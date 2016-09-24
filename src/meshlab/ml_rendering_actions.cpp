@@ -678,6 +678,11 @@ bool MLRenderingPerVertexColorAction::isRenderingDataEnabled( const MLRenderingD
     return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTCOLOR,rd);
 }
 
+bool MLRenderingPerVertexColorAction::isVisibleConditionValid(MeshModel* mm) const
+{
+	return mm->hasDataMask(MeshModel::MM_VERTCOLOR);
+}
+
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(QObject* parent)
     :MLRenderingAction(parent)
 {
