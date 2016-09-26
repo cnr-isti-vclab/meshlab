@@ -259,13 +259,13 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 {
                     if (md.meshList[i] != NULL)
                     {
-                        md.meshList[i]->cm.Tr=transf;
+                        md.meshList[i]->cm.Tr=transf * md.meshList[i]->cm.Tr;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
                         tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-                        md.meshList[i]->cm.Tr.SetIdentity();
                         md.meshList[i]->cm.shot.ApplyRigidTransformation(transf);
+						md.meshList[i]->cm.Tr.SetIdentity();
                     }
 
                 }
@@ -360,8 +360,8 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     {
                         md.meshList[i]->cm.Tr=trTran*trScale*trTranInv;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
                         tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
                         md.meshList[i]->cm.Tr.SetIdentity();
                         md.meshList[i]->cm.shot.ApplyRigidTransformation(trTran);
@@ -460,8 +460,8 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     {
                         md.meshList[i]->cm.Tr=trTran;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerVertexMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
                         tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
                         md.meshList[i]->cm.Tr.SetIdentity();
                         md.meshList[i]->cm.shot.ApplyRigidTransformation(trTran);
@@ -537,7 +537,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                     {
                         md.meshList[i]->cm.Tr = mat;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
-                        tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
+                        //tri::UpdateNormal<CMeshO>::PerFaceMatrix(md.meshList[i]->cm,md.meshList[i]->cm.Tr);
                         tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
                         md.meshList[i]->cm.Tr.SetIdentity();
                         md.meshList[i]->cm.shot.ApplySimilarity(mat);
@@ -694,7 +694,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     case FP_CAMERA_TRANSLATE   :
     case FP_CAMERA_TRANSFORM:
     case FP_CAMERA_SCALE                  :
-        return MeshModel::MM_CAMERA;
+        return MeshModel::MM_CAMERA + MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + RasterModel::RM_ALL;
     case FP_QUALITY_FROM_CAMERA           :
         return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
