@@ -419,6 +419,10 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         return;
     QPainter painter(this);
     painter.beginNativePainting();
+#ifdef Q_OS_MAC
+    glGetError();  // This seems required because on osx painter.beginNativePainting() trashes the err state of opengl
+#endif    
+    
     makeCurrent();
 
     if(!isValid()) 
