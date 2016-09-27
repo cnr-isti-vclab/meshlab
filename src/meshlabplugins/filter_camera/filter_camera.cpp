@@ -41,7 +41,6 @@ FilterCameraPlugin::FilterCameraPlugin()
         FP_CAMERA_SCALE<<
         FP_CAMERA_TRANSLATE<<
         FP_CAMERA_TRANSFORM <<
-        FP_CAMERA_EDIT <<
         FP_ORIENT_NORMALS_WITH_CAMERAS;
 
     foreach(FilterIDType tt , types())
@@ -59,7 +58,6 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
     case FP_CAMERA_SCALE :              return QString("Transform: Scale Camera or set of cameras");
     case FP_CAMERA_TRANSLATE :          return QString("Transform: Translate Camera or set of cameras");
     case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project.");
-    case FP_CAMERA_EDIT :               return QString("Edit Raster Camera");
     case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras");
     default : assert(0);
     }
@@ -76,7 +74,6 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
     case FP_CAMERA_SCALE :        return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
     case FP_CAMERA_TRANSLATE :    return QString("Translate the camera, or all the cameras of the project.");
     case FP_CAMERA_TRANSFORM :    return QString("Transform the camera extrinsics, or all the cameras of the project.");
-    case FP_CAMERA_EDIT :         return QString("Allow to edit the current raster camera allowing to tweak intrinsics.");
     case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras. For this  filter to work the mesh needs to have the attribute 'correspondences' which is only created when loading Bundler files (.out projects)");
     default : assert(0);
     }
@@ -88,9 +85,6 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
     Shotf defShot;
     switch(ID(action))
     {
-    case FP_CAMERA_EDIT :
-        parlst.addParam(new RichDynamicFloat("fov_scale", 0, -3,3,"Scaling exp", "Exponent of the scaling factor. 0 means no scaling, 1 means 10 times larger, -1 means 1/10."));
-        break;
     case FP_CAMERA_ROTATE :
         {
             QStringList shotType;
@@ -708,7 +702,6 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
     case FP_CAMERA_ROTATE :
     case FP_CAMERA_SCALE :
     case FP_CAMERA_TRANSLATE :
-    case FP_CAMERA_EDIT :
     case FP_CAMERA_TRANSFORM:
     case FP_SET_MESH_CAMERA :
     case FP_QUALITY_FROM_CAMERA :
@@ -728,7 +721,6 @@ int FilterCameraPlugin::getPreConditions( QAction * a) const
     case FP_CAMERA_ROTATE :
     case FP_CAMERA_SCALE :
     case FP_CAMERA_TRANSLATE :
-    case FP_CAMERA_EDIT :
     case FP_CAMERA_TRANSFORM:
     case FP_QUALITY_FROM_CAMERA :
     case FP_SET_RASTER_CAMERA :
@@ -747,7 +739,6 @@ MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity( QAction* act 
     case FP_CAMERA_ROTATE :
     case FP_CAMERA_SCALE :
     case FP_CAMERA_TRANSLATE :
-    case FP_CAMERA_EDIT :
     case FP_CAMERA_TRANSFORM:
     case FP_QUALITY_FROM_CAMERA :
     case FP_SET_RASTER_CAMERA :
