@@ -27,6 +27,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <vcg/space/colorspace.h>
+
 #include "filter_color_projection.h"
 
 #include "floatbuffer.cpp"
@@ -36,6 +38,7 @@
 #include "pushpull.h"
 #include "rastering.h"
 #include <vcg/complex/algorithms/update/texture.h>
+
 
 using namespace std;
 using namespace vcg;
@@ -116,9 +119,10 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
                 "threshold value for depth buffer projection (shadow buffer)"));
             parlst.addParam(new RichBool ("onselection",
                 false,
-                "Only on selecton",
+                "Only on selection",
                 "If true, projection is only done for selected vertices"));
-            parlst.addParam(new RichColor("blankColor", QColor(0, 0, 0, 0), "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
+			QColor color1 = QColor(0, 0, 0, 255);
+            parlst.addParam(new RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
@@ -152,7 +156,8 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
                 false,
                 "use image alpha weight",
                 "If true, alpha channel of the image is used as additional weight. In this way it is possible to mask-out parts of the images that should not be projected on the mesh. Please note this is not a transparency effect, but just influences the weigthing between different images"));
-            parlst.addParam(new RichColor("blankColor", QColor(0, 0, 0, 0), "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
+			QColor color1 = QColor(0, 0, 0, 255);
+			parlst.addParam(new RichColor("blankColor", color1, "Color for unprojected areas", "Areas that cannot be projected willb e filled using this color. If R=0 G=0 B=0 A=0 old color is preserved"));
         }
         break;
 
@@ -178,7 +183,7 @@ void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument
                 "threshold value for depth buffer projection (shadow buffer)"));
             parlst.addParam(new RichBool ("onselection",
                 false,
-                "Only on selecton",
+                "Only on selection",
                 "If true, projection is only done for selected vertices"));
             parlst.addParam(new RichBool ("useangle",
                 true,
