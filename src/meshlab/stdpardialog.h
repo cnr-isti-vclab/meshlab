@@ -268,8 +268,8 @@ public:
 
     public slots:
     void  getPoint();
-    void  setValue(QString name, vcg::Point3f val);
-  void  setShotValue(QString name, vcg::Shotf val);
+    void  setValue(QString name, Point3m val);
+  void  setShotValue(QString name, Shotm val);
     signals:
     void askViewDir(QString);
     void askViewPos(QString);
@@ -336,7 +336,7 @@ public:
 
   public slots:
   void  getShot();
-  void  setShotValue(QString name, vcg::Shotf val);
+  void  setShotValue(QString name, Shotm val);
   signals:
   void askRasterShot(QString);
   void askMeshShot(QString);

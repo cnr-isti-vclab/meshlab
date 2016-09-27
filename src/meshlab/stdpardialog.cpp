@@ -581,9 +581,9 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
 
         connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
         connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
-        connect(gla_curr,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+        connect(gla_curr,SIGNAL(transmitViewDir(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
         connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
-        connect(gla_curr,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setValue(QString,vcg::Point3f)));
+        connect(gla_curr,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
         connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
         connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
         connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
@@ -611,7 +611,7 @@ Point3fWidget::~Point3fWidget() {
     this->disconnect();
 }
 
-void Point3fWidget::setValue(QString name,Point3f newVal)
+void Point3fWidget::setValue(QString name,Point3m newVal)
 {
     //qDebug("setValue parametername: %s ",qPrintable(name));
     if(name==paramName)
@@ -821,7 +821,7 @@ ShotfWidget::ShotfWidget(QWidget *p, RichShotf* rpf, QWidget *gla_curr): MeshLab
         hlay->addWidget(getShotCombo);
         connect(getShotCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(getShot()));
         connect(getShotButton,SIGNAL(clicked()),this,SLOT(getShot()));
-        connect(gla_curr,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShotValue(QString,vcg::Shotf)));
+        connect(gla_curr,SIGNAL(transmitShot(QString, Shotm)),this,SLOT(setShotValue(QString,Shotm)));
         connect(this,SIGNAL(askViewerShot(QString)),gla_curr,SLOT(sendViewerShot(QString)));
         connect(this,SIGNAL(askMeshShot(QString)),  gla_curr,SLOT(sendMeshShot(QString)));
         connect(this,SIGNAL(askRasterShot(QString)),gla_curr,SLOT(sendRasterShot(QString)));
@@ -867,7 +867,7 @@ void ShotfWidget::getShot()
 
 ShotfWidget::~ShotfWidget() {}
 
-void ShotfWidget::setShotValue(QString name,Shotf newVal)
+void ShotfWidget::setShotValue(QString name,Shotm newVal)
 {
     if(name==paramName)
     {

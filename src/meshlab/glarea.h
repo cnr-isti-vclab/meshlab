@@ -302,11 +302,11 @@ public:
     // This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
     // See the Point3fWidget code.
 signals :
-    void transmitViewDir(QString name, vcg::Point3f dir);
-    void transmitViewPos(QString name, vcg::Point3f dir);
-    void transmitSurfacePos(QString name,vcg::Point3f dir);
-	void transmitPickedPos(QString name, vcg::Point2f dir);
-    void transmitCameraPos(QString name,vcg::Point3f dir);
+    void transmitViewDir(QString name, Point3m dir);
+    void transmitViewPos(QString name, Point3m dir);
+    void transmitSurfacePos(QString name, Point3m dir);
+	void transmitPickedPos(QString name, Point2m dir);
+    void transmitCameraPos(QString name, Point3m dir);
     void transmitShot(QString name, Shotm);
     void transmitMatrix(QString name, Matrix44m);
     void updateLayerTable();
