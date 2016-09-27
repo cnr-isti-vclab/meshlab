@@ -61,7 +61,6 @@ LayerDialog::LayerDialog(QWidget *parent )
 	QVBoxLayout* groupboxlay = new QVBoxLayout();
     if (createRenderingParametersTab() != NULL)
     {
-
         _tabw->setVisible(true);
         groupboxlay->addWidget(_tabw);
     }
@@ -88,6 +87,7 @@ LayerDialog::LayerDialog(QWidget *parent )
     connect(ui->meshTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
     connect(ui->rasterTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
     connect(ui->decParsTree, SIGNAL(customContextMenuRequested(const QPoint&)),this, SLOT(showContextMenu(const QPoint&)));
+	setMinimumSize(_tabw->size().width() + 10, minimumSize().height());
 }
 
 void LayerDialog::keyPressEvent ( QKeyEvent * event )

@@ -357,7 +357,6 @@ void MainWindow::updateLayerDialog()
 			if (it != dtf.end())
 				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
         }
-		layerDialog->setMinimumSize(layerDialog->_tabw->size().width() + 10,layerDialog->minimumSize().height());
     }
 }
 
