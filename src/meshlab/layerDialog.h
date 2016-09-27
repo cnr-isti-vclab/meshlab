@@ -157,7 +157,6 @@ private:
     void updateProjectName(const QString& name);
 
     QTreeWidgetItem* _docitem;
-	MLRenderingSideToolbar* _globaldoctool;
     int _previd;
 	QGroupBox* _renderingtabcontainer;
 	QCheckBox* _applytovis;

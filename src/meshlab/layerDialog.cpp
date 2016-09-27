@@ -52,10 +52,6 @@ LayerDialog::LayerDialog(QWidget *parent )
     /*Horrible trick*/
     _docitem = new QTreeWidgetItem();
     _docitem->setHidden(true);
-	_globaldoctool = new MLRenderingSideToolbar();
-    _globaldoctool->setIconSize(QSize(16,16));
-    _globaldoctool->setVisible(false);
-    ///////////////////////////////////
 
 	_renderingtabcontainer = new QGroupBox(this);
 	QVBoxLayout* groupboxlay = new QVBoxLayout();
@@ -392,8 +388,6 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 
     _docitem = new QTreeWidgetItem();
     _docitem->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-    _globaldoctool = new MLRenderingSideToolbar(this);
-    _globaldoctool->setIconSize(QSize(16,16));
 	MLRenderingData projdt;
 	MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator projit = dtf.find(-1);
 
@@ -785,17 +779,17 @@ void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData&
 
 MLRenderingParametersTab* LayerDialog::createRenderingParametersTab()
 {
-    if (_globaldoctool != NULL)
-    {
-        _tabw = new MLRenderingParametersTab(-1,_globaldoctool->getRenderingActions());
-        _tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
-        connect(_tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
-        connect(_tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
-		connect(_tabw, SIGNAL(updateLayerTableRequested()), this, SLOT(updateTable()));
-		_tabw->setVisible(false);
-        return _tabw;
-    }
-    return NULL;
+   
+	MLRenderingSideToolbar* tmptool = new MLRenderingSideToolbar();
+	tmptool->setVisible(false);
+    _tabw = new MLRenderingParametersTab(-1, tmptool->getRenderingActions());
+    _tabw->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Expanding);
+    connect(_tabw,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SLOT(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+    connect(_tabw,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SLOT(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
+	connect(_tabw, SIGNAL(updateLayerTableRequested()), this, SLOT(updateTable()));
+	_tabw->setVisible(false);
+	delete tmptool;
+    return _tabw;
 }
 
 void LayerDialog::updateProjectName( const QString& name )
