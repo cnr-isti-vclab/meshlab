@@ -1367,8 +1367,6 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                             shared->setRenderingDataPerMeshView(mm->id(),gla->context(),dttoberendered);
                     }
                 }
-
-				vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
 				shared->manageBuffers(mm->id());
             }
 
@@ -1467,11 +1465,15 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         meshDoc()->meshDocStateData().clear();
 		meshDoc()->meshDocStateData().create(*meshDoc());
         ret=iFilter->applyFilter(action, *(meshDoc()), mergedenvironment, QCallBack);
-        if (shar != NULL)
-        {
-            shar->removeView(iFilter->glContext);
-            delete filterWidget;
-        }
+		for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
+			vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+
+		if (shar != NULL)
+		{
+			shar->removeView(iFilter->glContext);
+			delete filterWidget;
+		}
+
         meshDoc()->setBusy(false);
 
         qApp->restoreOverrideCursor();
@@ -1818,6 +1820,8 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 
 void MainWindow::postFilterExecution()
 {
+	for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
+		vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
     emit filterExecuted();
     //meshDoc()->renderState().clearState();
     qApp->restoreOverrideCursor();
