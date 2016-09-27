@@ -1820,8 +1820,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 
 void MainWindow::postFilterExecution()
 {
-	for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
-		vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
     emit filterExecuted();
     //meshDoc()->renderState().clearState();
     qApp->restoreOverrideCursor();

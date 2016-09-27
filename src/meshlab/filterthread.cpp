@@ -85,9 +85,14 @@ void FilterThread::run()
             EnvWrap envwrap(env);
             _cur = this;
             _success = it->filterInterface->applyFilter(_fname, _md, envwrap, &localCallBack);
+			for (MeshModel* mm = _md.nextMesh(); mm != NULL; mm = _md.nextMesh(mm))
+				vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
             _cur = NULL;
-            it->filterInterface->glContext->removePerViewRenderindData();
-            delete it->filterInterface->glContext;
+			if (it->filterInterface->glContext != NULL)
+			{
+				it->filterInterface->glContext->removePerViewRenderindData();
+				delete it->filterInterface->glContext;
+			}
         }
         else
             throw MLException("There is not yet support for not-C++ filters.");
