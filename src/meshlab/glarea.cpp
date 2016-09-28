@@ -1284,16 +1284,23 @@ void GLArea::wheelEvent(QWheelEvent*e)
             }
         case Qt::AltModifier:
             { 
-                glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f,150.0f);
+                glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f, MLPerViewGLOptions::maxPointSize());
                 MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
                 if (cont != NULL)
                 {
-                    MLPerViewGLOptions opt;
-                    opt._perpoint_pointsize = glas.pointSize;
-                    opt._perpoint_pointsmooth_enabled = glas.pointSmooth;
-                    opt._perpoint_pointattenuation_enabled = glas.pointDistanceAttenuation;
-                    foreach(MeshModel * mp, this->md()->meshList)
-                        cont->setGLOptions(mp->id(),context(),opt);
+					foreach(MeshModel * mp, this->md()->meshList)
+					{
+						MLRenderingData dt;
+						cont->getRenderInfoPerMeshView(mp->id(), context(), dt);
+						MLPerViewGLOptions opt;
+						dt.get(opt);
+						opt._perpoint_pointsize = glas.pointSize;
+						opt._perpoint_pointsmooth_enabled = glas.pointSmooth;
+						opt._perpoint_pointattenuation_enabled = glas.pointDistanceAttenuation;
+						cont->setGLOptions(mp->id(), context(), opt);
+					}
+					if (mw() != NULL)
+						mw()->updateLayerDialog();
                 }
                 break;
             }

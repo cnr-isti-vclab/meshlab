@@ -863,7 +863,7 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 	else
 	{
 		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
-		/*a MLRenderingSideToolBar is not mutual exclusive. in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
+		/*a MLRenderingSideToolBar is not mutual exclusive (except if the control modifier is pressed). in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
 		if ((sidetool == NULL) || ((sidetool != NULL) && (QApplication::keyboardModifiers() == Qt::ControlModifier)))
 			mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
 	}

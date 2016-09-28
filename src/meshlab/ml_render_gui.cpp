@@ -491,7 +491,7 @@ void MLRenderingWireParametersFrame::initGui()
     _dimension->setRenderingFloatAction(new MLRenderingWireWidthAction(_meshid,this));
     _dimension->setOrientation(Qt::Horizontal);
     _dimension->setMinimum(1);
-    _dimension->setMaximum(5);
+    _dimension->setMaximum(int(MLPerViewGLOptions::maxLineWidth()));
     layout->addWidget(_dimension,2,1,Qt::AlignCenter);
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
@@ -661,7 +661,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _dimension->setRenderingFloatAction(new MLRenderingPointsSizeAction(_meshid,this));
     _dimension->setOrientation(Qt::Horizontal);
     _dimension->setMinimum(1);
-    _dimension->setMaximum(5);
+    _dimension->setMaximum(int(MLPerViewGLOptions::maxPointSize()));
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
     /*_dimension->setDecimals(1);
