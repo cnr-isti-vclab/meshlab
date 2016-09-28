@@ -864,7 +864,7 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 	{
 		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
 		/*a MLRenderingSideToolBar is not mutual exclusive. in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
-		if (sidetool == NULL)
+		if ((sidetool == NULL) || ((sidetool != NULL) && (QApplication::keyboardModifiers() == Qt::ControlModifier)))
 			mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
 	}
 }
@@ -881,7 +881,7 @@ void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAc
 			mw->updateRenderingDataAccordingToAction(meshid, act);
 	}
 	else
-		mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
+			mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)

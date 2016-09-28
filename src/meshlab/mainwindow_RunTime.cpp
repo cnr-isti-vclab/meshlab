@@ -3644,6 +3644,7 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 {
 	if (meshDoc() == NULL)
 		return;
+
 	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
 	{
 		MeshModel* mm = meshDoc()->meshList[ii];
