@@ -61,6 +61,8 @@ LayerDialog::LayerDialog(QWidget *parent )
         groupboxlay->addWidget(_tabw);
     }
 	_applytovis = new QCheckBox(QString("apply to all visible layers"),this);
+	QString tooltip("When the option is activated all the following rendering actions (e.g. activating/deactivating rendering modalities, changing rendering parameters etc.) taken on a single mesh are propagated to all the other visible meshes \(e.g. the ones having the \"open eye\" icon on the layer dialog\). <br><br> <b>SHORTCUT</b>: SHIFT");
+	_applytovis->setToolTip(tooltip);
 	_applytovis->setLayoutDirection(Qt::RightToLeft);
 	_applytovis->setChecked(false);
 	groupboxlay->addWidget(_applytovis);
