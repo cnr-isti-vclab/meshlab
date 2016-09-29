@@ -94,6 +94,32 @@ void LayerDialog::keyPressEvent ( QKeyEvent * event )
       RasterModel *rm= md->nextRaster(md->rm());
         if(rm!=0) md->setCurrentRaster(rm->id());
     }
+
+	if (event->key() == Qt::Key_Shift)
+	{
+		if (_applytovis != NULL)
+			_applytovis->setCheckState(Qt::Checked);
+	}
+}
+
+void LayerDialog::keyReleaseEvent(QKeyEvent * event)
+{
+	if (event->key() == Qt::Key_Shift)
+	{
+		if (_applytovis != NULL)
+			_applytovis->setCheckState(Qt::Unchecked);
+	}
+}
+
+void LayerDialog::enterEvent(QEvent* event)
+{
+	setFocus(Qt::MouseFocusReason);
+}
+
+void LayerDialog::leaveEvent(QEvent* event)
+{
+	if (mw != NULL)
+		mw->setFocus(Qt::MouseFocusReason);
 }
 
 void LayerDialog::meshItemClicked (QTreeWidgetItem * item , int col)

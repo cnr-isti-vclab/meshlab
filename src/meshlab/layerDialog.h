@@ -118,9 +118,14 @@ public:
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
     MLRenderingParametersTab* createRenderingParametersTab();
-public slots:
+protected:
     void keyPressEvent ( QKeyEvent * event );
-    void updateTable(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& dtf);
+	void keyReleaseEvent(QKeyEvent * event);
+	void enterEvent(QEvent* event);
+	void leaveEvent(QEvent* event);
+
+public slots:
+	void updateTable(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& dtf);
     void rasterItemClicked(QTreeWidgetItem * , int );
     void meshItemClicked(QTreeWidgetItem * , int );
     void showEvent ( QShowEvent * event );
@@ -133,7 +138,6 @@ public slots:
 private slots:
 	/*WARNING!!! ADDED just to avoid usual mac strange behavior. Please, avoid to use it if it's not absolutely necessary*/
 	void updateTable();
-
 private:
     Ui::layerDialog* ui;
     MainWindow *mw;
