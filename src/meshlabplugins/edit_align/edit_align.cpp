@@ -184,7 +184,7 @@ void EditAlignPlugin::Decorate(MeshModel & mm, GLArea * gla)
 		opts._perbbox_enabled = true;
 		tmp.set(opts);
 		_shared->drawAllocatedAttributesSubset(mm.id(), _gla->context(), tmp);
-		if (alignDialog->currentArc != 0)
+		if ((alignDialog != NULL) && (alignDialog->currentArc != 0))
 			DrawArc(alignDialog->currentArc);
 	}
 
