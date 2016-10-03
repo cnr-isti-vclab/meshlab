@@ -243,12 +243,14 @@ MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( QObject* parent)
     :MLRenderingAction(parent)
 {
     setText(QString("Face"));
+	setIcon(QIcon(":/images/flat.png"));
 }
 
 MLRenderingPerFaceNormalAction::MLRenderingPerFaceNormalAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid, parent)
 {
     setText(QString("Face"));
+	setIcon(QIcon(":/images/flat.png"));
 }
 
 void MLRenderingPerFaceNormalAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -270,12 +272,14 @@ MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingDa
     :MLRenderingAction(parent),_pm(pm)
 {
     setText(QString("Vert"));
+	setIcon(QIcon(":/images/smooth.png"));
 }
 
 MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Vert"));
+	setIcon(QIcon(":/images/smooth.png"));
 }
 
 void MLRenderingPerVertexNormalAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
@@ -338,11 +342,15 @@ bool MLRenderingPerVertTextCoordAction::isVisibleConditionValid( MeshModel* mm) 
 MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(QObject* parent)
     :MLRenderingAction(parent)
 {
+	setText(QString("Wedge Text"));
+	setIcon(QIcon(":/images/text_color.png"));
 }
 
 MLRenderingPerWedgeTextCoordAction::MLRenderingPerWedgeTextCoordAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
+	setText(QString("Wedge Text"));
+	setIcon(QIcon(":/images/text_color.png"));
 }
 
 void MLRenderingPerWedgeTextCoordAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -650,12 +658,14 @@ MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData
     :MLRenderingAction(-1,parent),_pm(pm)
 {
     setText(QString("Vert"));
+	setIcon(QIcon(":/images/vert_color.png"));
 }
 
 MLRenderingPerVertexColorAction::MLRenderingPerVertexColorAction(MLRenderingData::PRIMITIVE_MODALITY pm,int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent),_pm(pm)
 {
     setText(QString("Vert"));
+	setIcon(QIcon(":/images/vert_color.png"));
 }
 
 void MLRenderingPerVertexColorAction::switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr)
@@ -687,12 +697,14 @@ MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(QObject* parent)
     :MLRenderingAction(parent)
 {
     setText(QString("Face"));
+	setIcon(QIcon(":/images/face_color.png"));
 }
 
 MLRenderingPerFaceColorAction::MLRenderingPerFaceColorAction(int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
     setText(QString("Face"));
+	setIcon(QIcon(":/images/face_color.png"));
 }
 
 void MLRenderingPerFaceColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -1487,3 +1499,30 @@ bool MLRenderingBBoxQuotedInfoAction::isRenderingDataEnabled( const MLRenderingD
         return opts._perbbox_quoted_info_enabled;
     return false;
 }
+
+MLRenderingGlobalAction::MLRenderingGlobalAction(const QString& text, const QIcon& icon, QObject* par)
+	:QAction(QIcon(icon),text,par)
+{
+
+}
+
+void MLRenderingGlobalAction::addMainAction(MLRenderingAction* act)
+{
+	_mainactions.push_back(act);
+}
+
+void MLRenderingGlobalAction::addRelatedAction(MLRenderingAction* act)
+{
+	_relatedactions.push_back(act);
+}
+
+QList<MLRenderingAction*>& MLRenderingGlobalAction::mainActions()
+{
+	return _mainactions;
+}
+
+QList<MLRenderingAction*>& MLRenderingGlobalAction::relatedActions()
+{
+	return _relatedactions;
+}
+

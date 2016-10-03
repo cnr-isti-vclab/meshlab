@@ -1463,103 +1463,176 @@ MLRenderingGlobalToolbar::MLRenderingGlobalToolbar(QWidget* parent /*= NULL*/)
 	initGui();
 }
 
-void MLRenderingGlobalToolbar::initGui()
+void MLRenderingGlobalToolbar::toggle(QAction* act)
 {
-	MyToolButton* bboxbut = new MyToolButton(0, this);
-	MLRenderingBBoxAction* bboxact = new MLRenderingBBoxAction(this);
-	//bboxbut->setDefaultAction(bboxact);
-	MLRenderingOnOffToolbar* bboxonoff = new MLRenderingOnOffToolbar(-1, this);
-	bboxonoff->setRenderingAction(bboxact);
-	MLRenderingBBoxParametersFrame* bboxframe = new MLRenderingBBoxParametersFrame(-1, NULL);
-	initToolButtonSubMenu(bboxbut,bboxonoff,bboxframe);
-	addWidget(bboxbut);
+	MLRenderingGlobalAction* ract = qobject_cast<MLRenderingGlobalAction*>(act);
+	if (ract == NULL)
+		return;
+	
+	foreach(MLRenderingAction* rendact, ract->mainActions())
+		rendact->setChecked(ract->isChecked());
 
-	MyToolButton* pointbut = new MyToolButton(0, this);
-	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(this);
-	//pointbut->setDefaultAction(pointact);
-	MLRenderingOnOffToolbar* pointonoff = new MLRenderingOnOffToolbar(-1, this);
-	pointonoff->setRenderingAction(pointact);
-	MLRenderingPointsParametersFrame* pointframe = new MLRenderingPointsParametersFrame(-1, this);
-	initToolButtonSubMenu(pointbut, pointonoff,pointframe);
-	addWidget(pointbut);
-
-	MyToolButton* wirebut = new MyToolButton(0, this);
-	MLRenderingWireAction* wireact = new MLRenderingWireAction(false,this);
-	//wirebut->setDefaultAction(wireact);
-	MLRenderingOnOffToolbar* wireonoff = new MLRenderingOnOffToolbar(-1, this);
-	wireonoff->setRenderingAction(wireact);
-	MLRenderingWireParametersFrame* wirepar = new MLRenderingWireParametersFrame(-1, this);
-	initToolButtonSubMenu(wirebut,wireonoff,wirepar);
-	addWidget(wirebut);
-
-	MyToolButton* solidbut = new MyToolButton(0, this);
-	MLRenderingSolidAction* solidact = new MLRenderingSolidAction(this);
-	//solidbut->setDefaultAction(solidact);
-	MLRenderingOnOffToolbar* solidonoff = new MLRenderingOnOffToolbar(-1, this);
-	solidonoff->setRenderingAction(solidact);
-	MLRenderingSolidParametersFrame* solidframe = new MLRenderingSolidParametersFrame(-1, NULL);
-	initToolButtonSubMenu(solidbut, solidonoff,solidframe);
-	addWidget(solidbut);
-
-	MyToolButton* selbut = new MyToolButton(0, this);
-	MLRenderingSelectionAction* selact = new MLRenderingSelectionAction(this);
-	//selbut->setDefaultAction(selact);
-	MLRenderingOnOffToolbar* selonoff = new MLRenderingOnOffToolbar(-1, this);
-	selonoff->setRenderingAction(selact);
-	MLRenderingSelectionParametersFrame* selframe = new MLRenderingSelectionParametersFrame(-1, this);
-	initToolButtonSubMenu(selbut, selonoff,selframe);
-	addWidget(selbut);
-
-	MyToolButton* edgebut = new MyToolButton(0, this);
-	MLRenderingEdgeDecoratorAction* edgeact = new MLRenderingEdgeDecoratorAction(this);
-	//edgebut->setDefaultAction(edgeact);
-	MLRenderingOnOffToolbar* edgeonoff = new MLRenderingOnOffToolbar(-1, this);
-	edgeonoff->setRenderingAction(edgeact);
-	MLRenderingDefaultDecoratorParametersFrame* defdecframe = new MLRenderingDefaultDecoratorParametersFrame(-1, this);
-	initToolButtonSubMenu(edgebut,edgeonoff, defdecframe);
-	addWidget(edgebut);
+	emit updateRenderingDataAccordingToAction(ract);
 }
 
-void MLRenderingGlobalToolbar::initToolButtonSubMenu(MyToolButton* button, MLRenderingOnOffToolbar* onoff,MLRenderingParametersFrame* frame)
+void MLRenderingGlobalToolbar::initGui()
 {
-	if ((button == NULL) || (onoff == NULL) || (frame == NULL))
+	MLRenderingBBoxAction* bboxact = new MLRenderingBBoxAction(this);
+	bboxact->setChecked(false);
+	_bboxglobact = new MLRenderingGlobalAction(bboxact->text(), bboxact->icon(), this);
+	_bboxglobact->addMainAction(bboxact);
+	_bboxglobact->setCheckable(true);
+	addAction(_bboxglobact);
+
+	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(this);
+	pointact->setChecked(false);
+	MLRenderingPerVertexNormalAction* pointnorm = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS, this);
+	pointnorm->setChecked(true);
+	MLRenderingNoShadingAction* pointnoshad = new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS, this);
+	pointnoshad->setChecked(false);
+	_pointglobact = new MLRenderingGlobalAction(pointact->text(), pointact->icon(), this);
+	_pointglobact->addMainAction(pointact);
+	_pointglobact->addMainAction(pointnorm);
+	_pointglobact->addRelatedAction(pointnoshad);
+	_pointglobact->setCheckable(true);
+	addAction(_pointglobact);
+
+	MLRenderingPerVertexColorAction* pointvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS, this);
+	pointvertcol->setChecked(false);
+	MLRenderingPerMeshColorAction* pointmeshcol = new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS, this);
+	pointmeshcol->setChecked(false);
+	MLRenderingUserDefinedColorAction* pointusercol = new MLRenderingUserDefinedColorAction(MLRenderingData::PR_POINTS, this);
+	pointusercol->setChecked(false);
+
+	_pointcolglobact = new MLRenderingGlobalAction(pointvertcol->text(), pointvertcol->icon(), this);
+	_pointcolglobact->setEnabled(false);
+	_pointcolglobact->addMainAction(pointvertcol);
+	_pointcolglobact->addRelatedAction(pointmeshcol);
+	_pointcolglobact->addRelatedAction(pointusercol);
+
+	_pointscolgroup = new QActionGroup(this);
+	_pointscolgroup->addAction(_pointcolglobact);
+	//addActions(_pointscolgroup->actions());
+
+	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
+	wireact->setChecked(false);
+	MLRenderingNoShadingAction* wirenoshad = new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES, this);
+	wirenoshad->setChecked(false);
+	MLRenderingPerVertexNormalAction* wirenorm = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES, this);
+	wirenorm->setChecked(false);
+
+
+	_wireglobact = new MLRenderingGlobalAction(wireact->text(), wireact->icon(), this);
+	_wireglobact->addMainAction(wireact);
+	_wireglobact->addMainAction(wirenoshad);
+	_wireglobact->addRelatedAction(wirenorm);
+	_wireglobact->setCheckable(true);
+	addAction(_wireglobact);
+
+	_solidactgroup = new MLRenderingZeroOrOneActionGroup(this);
+
+	MLRenderingSolidAction* solidact = new MLRenderingSolidAction(this);
+	solidact->setChecked(false);
+	MLRenderingPerVertexNormalAction* smoothvertact = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID,this);
+	smoothvertact->setChecked(false);
+	MLRenderingPerFaceNormalAction* smoothfaceact = new MLRenderingPerFaceNormalAction(MLRenderingData::PR_SOLID, this);
+	smoothfaceact->setChecked(false);
+	MLRenderingNoShadingAction* solidnoshad = new MLRenderingNoShadingAction(MLRenderingData::PR_SOLID, this);
+	solidnoshad->setChecked(false);
+
+	_smoothglobact = new MLRenderingGlobalAction(smoothvertact->text(), smoothvertact->icon(), this);
+	_smoothglobact->addMainAction(solidact);
+	_smoothglobact->addMainAction(smoothvertact);
+	_smoothglobact->addRelatedAction(smoothfaceact);
+	_smoothglobact->addRelatedAction(solidnoshad);
+	_smoothglobact->setCheckable(true);
+	_solidactgroup->addAction(_smoothglobact);
+
+	MLRenderingPerVertexNormalAction* flatvertact = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID, this);
+	flatvertact->setChecked(false);
+	MLRenderingPerFaceNormalAction* flatfaceact = new MLRenderingPerFaceNormalAction(MLRenderingData::PR_SOLID, this);
+	flatfaceact->setChecked(false);
+
+
+	_flatglobact = new MLRenderingGlobalAction(flatfaceact->text(), flatfaceact->icon(), this);
+	_flatglobact->addMainAction(solidact);
+	_flatglobact->addMainAction(flatfaceact);
+	_flatglobact->addRelatedAction(flatvertact);
+	_flatglobact->addRelatedAction(solidnoshad);
+	_flatglobact->setCheckable(true);
+	_solidactgroup->addAction(_flatglobact);
+
+	addActions(_solidactgroup->actions());
+
+	MLRenderingPerVertexColorAction* solidvertvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID, this);
+	solidvertvertcol->setChecked(true);
+	MLRenderingPerFaceColorAction* solidfacevertcol = new MLRenderingPerFaceColorAction(this);
+	solidvertvertcol->setChecked(false);
+	MLRenderingPerWedgeTextCoordAction* solidtextvertcol = new MLRenderingPerWedgeTextCoordAction(this);
+	solidtextvertcol->setChecked(false);
+	MLRenderingPerMeshColorAction* solidmeshcol = new MLRenderingPerMeshColorAction(MLRenderingData::PR_SOLID, this);
+	pointmeshcol->setChecked(false);
+	MLRenderingUserDefinedColorAction* solidusercol = new MLRenderingUserDefinedColorAction(MLRenderingData::PR_SOLID, this);
+	pointusercol->setChecked(false);
+
+	_solidvertcolglobact = new MLRenderingGlobalAction(solidvertvertcol->text(), solidvertvertcol->icon(), this);
+	_solidvertcolglobact->setEnabled(false);
+	_solidvertcolglobact->addMainAction(solidvertvertcol);
+	_solidvertcolglobact->addRelatedAction(solidfacevertcol);
+	_solidvertcolglobact->addRelatedAction(solidtextvertcol);
+	_solidvertcolglobact->addRelatedAction(solidmeshcol);
+	_solidvertcolglobact->addRelatedAction(solidusercol);
+
+	MLRenderingPerVertexColorAction* solidvertfacecol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID, this);
+	solidvertfacecol->setChecked(false);
+	MLRenderingPerFaceColorAction* solidfacefacecol = new MLRenderingPerFaceColorAction(this);
+	solidfacefacecol->setChecked(true);
+	MLRenderingPerWedgeTextCoordAction* solidtextfacecol = new MLRenderingPerWedgeTextCoordAction(this);
+	solidtextfacecol->setChecked(false);
+
+	_solidfacecolglobact = new MLRenderingGlobalAction(solidfacefacecol->text(), solidfacefacecol->icon(), this);
+	_solidfacecolglobact->setEnabled(false);
+	_solidfacecolglobact->addMainAction(solidfacefacecol);
+	_solidfacecolglobact->addRelatedAction(solidvertfacecol);
+	_solidfacecolglobact->addRelatedAction(solidtextfacecol);
+	_solidfacecolglobact->addRelatedAction(solidmeshcol);
+	_solidfacecolglobact->addRelatedAction(solidusercol);
+
+
+
+	_solidcolgroup = new QActionGroup(this);
+	_solidcolgroup->addAction(_solidvertcolglobact);
+	_solidcolgroup->addAction(_solidfacecolglobact);
+	//addActions(_solidcolgroup->actions());
+	connect(this, SIGNAL(actionTriggered(QAction*)), this, SLOT(toggle(QAction*)));
+}
+
+MLRenderingZeroOrOneActionGroup::MLRenderingZeroOrOneActionGroup(QObject* parent /*= NULL*/)
+	:QActionGroup(parent)
+{
+	setExclusive(false);
+	_lastclicked = NULL;
+	connect(this, SIGNAL(triggered(QAction*)), this, SLOT(toggle(QAction*)));
+}
+
+void MLRenderingZeroOrOneActionGroup::toggle(QAction* act)
+{
+	if (act == NULL)
 		return;
-
-	QAction* defact = new QAction(this);
-	if (onoff->getRenderingAction() != NULL)
-		defact->setIcon(onoff->getRenderingAction()->icon());
-	button->setDefaultAction(defact);
-
-	foreach(QAction* rendact, onoff->actions())
+	MLRenderingGlobalAction* ract = qobject_cast<MLRenderingGlobalAction*>(act);
+	if (ract == NULL)
+		return;
+	foreach(QAction* curract, actions())
 	{
-		rendact->setCheckable(false);
+		MLRenderingGlobalAction* rendcurract = qobject_cast<MLRenderingGlobalAction*>(curract);
+		if (rendcurract != NULL)
+		{
+			rendcurract->setChecked((ract == rendcurract) && (_lastclicked != ract));
+			if (rendcurract->isChecked())
+				_lastclicked = rendcurract;
+			else
+				if ((ract == rendcurract) && (_lastclicked == ract))
+					_lastclicked = NULL;
+		}
 	}
-	connect(onoff, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
-
-
-	connect(frame, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
-	connect(frame, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));
-
-
-	/*STATELESS INTERFACE....WARNING!!! BE CAREFUL NOT ALL THE TOP LEVEL ACTIONS ARE MLRENDERINGACTION (for instance on/off actions...)*/
-	QList<QAction*> toplevelactions;
-	frame->allTopLevelGuiActions(toplevelactions);
-	foreach(QAction* tpl, toplevelactions)
-		tpl->setCheckable(false);
-
-	QList<MLRenderingAction*> renderingactions; 
-	frame->actionsList(renderingactions);
-	
-	QWidgetAction* bboxwidact = new QWidgetAction(this);
-	bboxwidact->setDefaultWidget(onoff);
-	QWidgetAction* paramwidact = new QWidgetAction(this);
-	paramwidact->setDefaultWidget(frame);
-	if (button->menu() == NULL)
-	{
-		QMenu* mn = new QMenu(this);
-		mn->addAction(bboxwidact);
-		mn->addAction(paramwidact);
-		button->setMenu(mn);
-	}
-	button->setCheckable(true);
 }

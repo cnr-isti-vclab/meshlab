@@ -3658,6 +3658,27 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 		GLA()->update();
 }
 
+void  MainWindow::updateRenderingDataAccordingToAction(MLRenderingGlobalAction* act)
+{
+	if ((meshDoc() == NULL) || (act == NULL))
+		return;
+
+	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
+	{
+		MeshModel* mm = meshDoc()->meshList[ii];
+		if (mm != NULL)
+		{
+			foreach(MLRenderingAction* ract,act->mainActions())
+				updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
+
+			foreach(MLRenderingAction* ract, act->relatedActions())
+				updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
+		}
+	}
+	updateLayerDialog();
+	if (GLA() != NULL)
+		GLA()->update();
+}
 
 void MainWindow::updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act, bool check)
 {

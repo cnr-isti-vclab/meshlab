@@ -324,5 +324,4 @@ public slots:
     void notifyValueChanged(int value);
 };
 
-
 #endif

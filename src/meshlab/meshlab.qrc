@@ -45,6 +45,9 @@
         <file>images/cursors/plain_pick.png</file>
         <file>images/view_raster.png</file>
 		<file>images/options.png</file>
+		<file>images/vert_color.png</file>
+		<file>images/face_color.png</file>
+		<file>images/text_color.png</file>
     <file>images/ok.png</file>
     <file>images/stop.png</file>
     <file>images/search.png</file>

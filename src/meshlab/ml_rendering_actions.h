@@ -50,6 +50,23 @@ protected:
     bool isRenderingDataEnabled(MLRenderingData::PRIMITIVE_MODALITY pm,MLRenderingData::ATT_NAMES att,const MLRenderingData& rd) const;
 };
 
+class MLRenderingGlobalAction : public QAction
+{
+	Q_OBJECT
+public:
+	MLRenderingGlobalAction(const QString& text,const QIcon& icon,QObject* par);
+
+	void addMainAction(MLRenderingAction* act);
+	void addRelatedAction(MLRenderingAction* act);
+
+	QList<MLRenderingAction*>& mainActions();
+	QList<MLRenderingAction*>& relatedActions();
+
+private:
+	QList<MLRenderingAction*> _mainactions;
+	QList<MLRenderingAction*> _relatedactions;
+};
+
 class MLRenderingBBoxAction : public MLRenderingAction
 {
     Q_OBJECT

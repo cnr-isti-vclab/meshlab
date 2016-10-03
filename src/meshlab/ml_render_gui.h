@@ -34,6 +34,23 @@
 #include "ml_rendering_actions.h"
 #include "additionalgui.h"
 
+class MLRenderingZeroOrOneActionGroup : public QActionGroup
+{
+	Q_OBJECT
+public:
+	MLRenderingZeroOrOneActionGroup(QObject* parent = NULL);
+	~MLRenderingZeroOrOneActionGroup() {}
+
+public:
+	bool isEsclusive() { return true; }
+private slots :
+	void setExclusive(bool) {}
+	void toggle(QAction* act);
+
+private:
+	MLRenderingGlobalAction* _lastclicked;
+};
+
 class MLRenderingColorPicker : public QToolButton
 {
     Q_OBJECT
@@ -260,14 +277,30 @@ public:
 
 	~MLRenderingGlobalToolbar() {}
 private slots:
-	//void toggle(QAction* act);
+	void toggle(QAction* act);
 
 private:
 	void initGui();
-	void initToolButtonSubMenu(MyToolButton* button, MLRenderingOnOffToolbar* onoff, MLRenderingParametersFrame* frame);
+
+	MLRenderingGlobalAction* _bboxglobact;
+	MLRenderingGlobalAction* _pointglobact;
+	MLRenderingGlobalAction* _wireglobact;
+
+	MLRenderingZeroOrOneActionGroup* _solidactgroup;
+	MLRenderingGlobalAction* _smoothglobact;
+	MLRenderingGlobalAction* _flatglobact;
+
+	QActionGroup* _pointscolgroup;
+	MLRenderingGlobalAction* _pointcolglobact;
+
+	QActionGroup* _solidcolgroup;
+	MLRenderingGlobalAction* _solidvertcolglobact;
+	MLRenderingGlobalAction* _solidfacecolglobact;
+	MLRenderingGlobalAction* _solidtextcolglobact;
+
 signals:
-	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
-	void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
+	void updateRenderingDataAccordingToAction(MLRenderingGlobalAction*);
+	//void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 };
 
 
