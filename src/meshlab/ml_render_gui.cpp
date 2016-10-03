@@ -310,6 +310,7 @@ void MLRenderingSolidParametersFrame::initGui()
     boldfont.setBold(true);
     _shadelab->setFont(boldfont);
     layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
+	_shadingtool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
     _shadingtool->addRenderingAction(new MLRenderingPerFaceNormalAction(_meshid,_shadingtool));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_SOLID,_meshid,_shadingtool));
@@ -321,6 +322,7 @@ void MLRenderingSolidParametersFrame::initGui()
     _colorlab->setFont(boldfont);
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
+	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerFaceColorAction(_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
@@ -463,6 +465,7 @@ void MLRenderingWireParametersFrame::initGui()
     boldfont.setBold(true);
     _shadelab->setFont(boldfont);
     layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
+	_shadingtool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
@@ -473,6 +476,7 @@ void MLRenderingWireParametersFrame::initGui()
     _colorlab->setFont(boldfont);
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
+	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
     MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_WIREFRAME_TRIANGLES,_colortool);
@@ -622,6 +626,7 @@ void MLRenderingPointsParametersFrame::initGui()
     boldfont.setBold(true);
     _shadelab->setFont(boldfont);
     layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
+	_shadingtool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS,_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingDotAction(_meshid,this));
     _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid,this));
@@ -633,6 +638,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _colorlab->setFont(boldfont);
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
+	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid,this));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid,this));
     MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_POINTS,_colortool);
