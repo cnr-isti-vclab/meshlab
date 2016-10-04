@@ -412,8 +412,11 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/
 void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
 {
     if(format.toUpper() == tr("STL"))
-        if(par.findParameter("Unify")->val->getBool())
-            tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+		if (par.findParameter("Unify")->val->getBool())
+		{
+			tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+			tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
+		}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(BaseMeshIOPlugin)
