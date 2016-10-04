@@ -276,6 +276,10 @@ public:
 	MLRenderingGlobalToolbar(QWidget* parent = NULL);
 
 	~MLRenderingGlobalToolbar() {}
+
+	void reset();
+public slots:
+	void statusConsistencyCheck(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp);
 private slots:
 	void toggle(QAction* act);
 

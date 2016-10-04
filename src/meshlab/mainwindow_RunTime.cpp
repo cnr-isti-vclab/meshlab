@@ -357,6 +357,11 @@ void MainWindow::updateLayerDialog()
 			if (it != dtf.end())
 				layerDialog->updateRenderingParametersTab(meshDoc()->mm()->id(),*it);         
         }
+		if (globrendtoolbar != NULL)
+		{
+			shared->getRenderInfoPerMeshView(GLA()->context(), dtf);
+			globrendtoolbar->statusConsistencyCheck(dtf);
+		}
     }
 }
 
@@ -3478,6 +3483,12 @@ void MainWindow::setRenderingData(int mid,const MLRenderingData& dt)
 				share->setRenderingDataPerMeshView(mid, GLA()->context(), dt);
 				share->manageBuffers(mid);
 				//addRenderingSystemLogInfo(mid);
+				if (globrendtoolbar != NULL)
+				{
+					MLSceneGLSharedDataContext::PerMeshRenderingDataMap mp;
+					share->getRenderInfoPerMeshView(GLA()->context(), mp);
+					globrendtoolbar->statusConsistencyCheck(mp);
+				}
 			}
 		}
 	}
@@ -3546,6 +3557,7 @@ void MainWindow::updateRenderingDataAccordingToActionsCommonCode(int meshid, con
 			dec.updateMeshDecorationData(*mm, olddt, dt);
 		}
 	/*}*/
+
 }
 
 
@@ -3752,7 +3764,11 @@ void MainWindow::updateLog()
 void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 {
 	if (subwin == NULL)
+	{
+		if (globrendtoolbar != NULL)
+			globrendtoolbar->reset();
 		return;
+	}
 	if (mdiarea->currentSubWindow() != 0)
 	{
 		MultiViewer_Container* split = qobject_cast<MultiViewer_Container*>(mdiarea->currentSubWindow()->widget());

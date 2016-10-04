@@ -1469,6 +1469,33 @@ MLRenderingGlobalToolbar::MLRenderingGlobalToolbar(QWidget* parent /*= NULL*/)
 	initGui();
 }
 
+void MLRenderingGlobalToolbar::reset()
+{
+	foreach(QAction* act, actions())
+	{
+		if (act != NULL)
+			act->setChecked(false);
+	}
+}
+
+void MLRenderingGlobalToolbar::statusConsistencyCheck(const MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp)
+{
+	foreach(QAction* act, actions())
+	{
+		MLRenderingGlobalAction* rgact = qobject_cast<MLRenderingGlobalAction*>(act);
+		if (rgact != NULL)
+		{
+			bool isvalidforall = (mp.size() != 0);
+			for (MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator it = mp.begin(); it != mp.end(); ++it)
+			{
+				foreach(MLRenderingAction* rendact, rgact->mainActions())
+					isvalidforall &= rendact->isRenderingDataEnabled(it.value());
+			}
+			rgact->setChecked(isvalidforall);
+		}
+	}
+}
+
 void MLRenderingGlobalToolbar::toggle(QAction* act)
 {
 	MLRenderingGlobalAction* ract = qobject_cast<MLRenderingGlobalAction*>(act);
