@@ -1492,6 +1492,15 @@ void MLRenderingGlobalToolbar::statusConsistencyCheck(const MLSceneGLSharedDataC
 					isvalidforall &= rendact->isRenderingDataEnabled(it.value());
 			}
 			rgact->setChecked(isvalidforall);
+			MLRenderingZeroOrOneActionGroup* actgroup = qobject_cast<MLRenderingZeroOrOneActionGroup*>(rgact->actionGroup());
+			if (actgroup != NULL)
+			{
+				if (rgact->isChecked())
+					actgroup->setLastClicked(rgact);
+				else
+					if (actgroup->checkedAction() == NULL)
+						actgroup->setLastClicked(NULL);
+			}
 		}
 	}
 }
@@ -1648,6 +1657,11 @@ MLRenderingZeroOrOneActionGroup::MLRenderingZeroOrOneActionGroup(QObject* parent
 	connect(this, SIGNAL(triggered(QAction*)), this, SLOT(toggle(QAction*)));
 }
 
+void MLRenderingZeroOrOneActionGroup::setLastClicked(MLRenderingGlobalAction* ga)
+{
+	_lastclicked = ga;
+}
+
 void MLRenderingZeroOrOneActionGroup::toggle(QAction* act)
 {
 	if (act == NULL)
@@ -1655,6 +1669,7 @@ void MLRenderingZeroOrOneActionGroup::toggle(QAction* act)
 	MLRenderingGlobalAction* ract = qobject_cast<MLRenderingGlobalAction*>(act);
 	if (ract == NULL)
 		return;
+
 	foreach(QAction* curract, actions())
 	{
 		MLRenderingGlobalAction* rendcurract = qobject_cast<MLRenderingGlobalAction*>(curract);
@@ -1666,6 +1681,7 @@ void MLRenderingZeroOrOneActionGroup::toggle(QAction* act)
 			else
 				if ((ract == rendcurract) && (_lastclicked == ract))
 					_lastclicked = NULL;
+			
 		}
 	}
 }

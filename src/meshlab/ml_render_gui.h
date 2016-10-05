@@ -43,6 +43,7 @@ public:
 
 public:
 	bool isEsclusive() { return true; }
+	void setLastClicked(MLRenderingGlobalAction* ga);
 private slots :
 	void setExclusive(bool) {}
 	void toggle(QAction* act);
@@ -301,7 +302,6 @@ private:
 	MLRenderingGlobalAction* _solidvertcolglobact;
 	MLRenderingGlobalAction* _solidfacecolglobact;
 	MLRenderingGlobalAction* _solidtextcolglobact;
-
 signals:
 	void updateRenderingDataAccordingToAction(MLRenderingGlobalAction*);
 	//void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);

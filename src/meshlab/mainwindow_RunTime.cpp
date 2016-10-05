@@ -2613,7 +2613,6 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
     saveRecentFileList(fileName);
 
-
     if(!meshDoc()->mm()->cm.textures.empty())
         updateTexture(meshDoc()->mm()->id());
 
