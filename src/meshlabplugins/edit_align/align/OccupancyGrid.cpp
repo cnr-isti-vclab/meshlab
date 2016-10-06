@@ -45,7 +45,6 @@ bool OccupancyGrid::Init(int _mn, Box3d bb, int size)
   MC.Clear();
   G.Create(bb,size,MC);
   VM.clear();
-  VM.resize(mn);
   return true;
 }
 
@@ -82,16 +81,20 @@ void OccupancyGrid::AddMeshes(std::vector<string> &names, std::vector<Matrix44d>
 }
 
 
+// This function is called after we have <added> all the mesh to the OG
+// to collect the information about the interferences between the various meshes.
 void OccupancyGrid::Compute()
 {
   // Analisi della griglia
   // Si deve trovare l'insieme degli archi piu'plausibili
   // un arco ha "senso" in una cella se entrambe le mesh compaiono in quell'arco
   // Si considera tutti gli archi possibili e si conta in quante celle ha senso un arco
-  VA.clear();
+  std::vector<int> VA; // virtual arcs
   VA.resize(mn*mn,0);
+  std::map< std::pair<int,int>, int > VAMap;
 
-  // scan the grid and update possible arc count
+  // First Loop:
+  // Scan the grid and update possible arc count
   for(int i=0;i<G.siz[0];++i)
     for(int j=0;j<G.siz[1];++j)
       for(int k=0;k<G.siz[2];++k)
@@ -100,27 +103,41 @@ void OccupancyGrid::Compute()
         G.Grid(i,j,k).Pack(vv);
         size_t meshInCell = vv.size();
         for( size_t ii=0; ii< vv.size(); ++ii)
-        {
-          int meshId = vv[ii];
-          ++VM[meshId].area; // compute mesh area
-          if(meshInCell>VM[meshId].unicityDistribution.size())
-            VM[meshId].unicityDistribution.resize(meshInCell);
-          ++(VM[meshId].unicityDistribution[meshInCell-1]);
+        { 
+          OGMeshInfo & omi_ii = VM[vv[ii]];
+          ++omi_ii.area; // compute mesh area
+          if(meshInCell>omi_ii.densityDistribution.size())
+            omi_ii.densityDistribution.resize(meshInCell);
+          ++(omi_ii.densityDistribution[meshInCell-1]);
         }
 
         for(size_t ii=0;ii<vv.size();++ii)
           for(size_t jj=ii+1;jj<vv.size();++jj)
-              ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
+//              ++VA[vv[ii]+vv[jj]*mn]; // count intersections of all mesh pairs
+            ++VAMap[std::make_pair(vv[ii],vv[jj])]; // count intersections of all mesh pairs
       }
 
-  // Find all the arcs
+  // Find all the arcs, e.g. all the pair of meshes 
   SVA.clear();
-  for(int i=0;i<mn-1;++i)
-    if(VM[i].used)
-      for(int j=i+1;j<mn;++j)
-        if(VM[j].used && VA[i+j*mn]>0)
-          SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) ));
+  for(auto vi=VAMap.begin();vi!=VAMap.end();++vi)
+  {
+    if(vi->second > 0) 
+    {
+      int m_s = vi->first.first;
+      int m_t = vi->first.second;
+      int area = vi->second;
+        SVA.push_back( OGArcInfo (m_s,m_t,area,float(area)/float(min(VM[m_s].area,VM[m_t].area)) ));
+    }     
+  }
+  
+//  SVA.clear();
+//  for(int i=0;i<mn-1;++i)
+//    if(VM[i].used)
+//      for(int j=i+1;j<mn;++j)
+//        if(VM[j].used && VA[i+j*mn]>0)
+//          SVA.push_back( OGArcInfo(i,j, VA[i+j*mn], VA[i+j*mn]/float( min(VM[i].area,VM[j].area)) ));
 
+    
   // Compute Mesh Coverage
   for(size_t i=0;i<SVA.size();++i)
   {
@@ -164,7 +181,7 @@ void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
     vector<int> UpdArea(mn);
     vector<int> UpdCovg(mn);
 
-    Use.clear();
+//    Use.clear();
     int i,j,m,mcnt=0;
     for(m=0;m<mn;++m) {
             if(VM[m].used && VM[m].area>0) {
@@ -183,9 +200,7 @@ void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
     int CumArea=0;
     for(m=0;m<mn-1;++m)
         {
-
             int best = max_element(UpdArea.begin(),UpdArea.end())-UpdArea.begin();
-            //int best = max_element(UpdCovg.begin(),UpdCovg.end())-UpdCovg.begin();
             CumArea+=UpdArea[best];
             if(UpdCovg[best]<0) break;
             if(VM[best].area==0) continue; // se era una mesh fuori del working group si salta tutto.
@@ -193,7 +208,6 @@ void OccupancyGrid::ComputeUsefulMesh(FILE *elfp)
             if(elfp) fprintf(elfp,"%3i %3i %7i (%7i) %7i %5.2f %7i(%7i)\n",
                 m, best, UpdArea[best],VM[best].area, TotalArea-CumArea, 100.0-100*float(CumArea)/TotalArea, UpdCovg[best],VM[best].coverage);
 
-            Use.push_back(OGUseInfo(best,UpdArea[best]));
             UpdArea[best]=-1;
             UpdCovg[best]=-1;
 
@@ -224,9 +238,9 @@ void OccupancyGrid::Dump(FILE *fp)
         {
             if(VM[i].used)
             {
-                    fprintf(fp,"mesh %3lu area %6i covg %7i (%5.2f%%) Uniq:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
-                    for(size_t j=0;j<std::min(size_t(8),VM[i].unicityDistribution.size());++j)
-                        fprintf(fp," %3i ", VM[i].unicityDistribution[j]);
+                    fprintf(fp,"mesh %3lu area %6i covg %7i (%5.2f%%) DensDistr:",i,VM[i].area,VM[i].coverage,float(VM[i].coverage)/float(VM[i].area));
+                    for(size_t j=0;j<std::min(size_t(8),VM[i].densityDistribution.size());++j)
+                        fprintf(fp," %3i ", VM[i].densityDistribution[j]);
                     fprintf(fp,"\n");
             }
             else
@@ -239,42 +253,42 @@ void OccupancyGrid::Dump(FILE *fp)
     fprintf(fp,"End OG Dump\n");
 }
 
-// sceglie gli archi da fare che abbiano una sovrapposizione di almeno <normarea>
-// e restituisce la lista di nodi isolati;
-void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vector<int> &adjcnt, float normarea)
-{
-    AV.clear();
-    BNV.clear();
-    size_t i=0;
-    adjcnt.clear();
-    adjcnt.resize(mn,0);
+//// sceglie gli archi da fare che abbiano una sovrapposizione di almeno <normarea>
+//// e restituisce la lista di nodi isolati;
+//void OccupancyGrid::ChooseArcs(vector<pair<int,int> > &AV, vector<int> &BNV, vector<int> &adjcnt, float normarea)
+//{
+//    AV.clear();
+//    BNV.clear();
+//    size_t i=0;
+//    adjcnt.clear();
+//    adjcnt.resize(mn,0);
 
-    while(SVA[i].norm_area>normarea && i<SVA.size())
-    {
-            AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
+//    while(SVA[i].norm_area>normarea && i<SVA.size())
+//    {
+//            AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
 
-            ++adjcnt[SVA[i].s];
-            ++adjcnt[SVA[i].t];
-            ++i;
-    }
+//            ++adjcnt[SVA[i].s];
+//            ++adjcnt[SVA[i].t];
+//            ++i;
+//    }
 
-  // Second loop to add some more constraints we add also all the arc with area > normarea/3
-    // and that connects meshes poorly connected (e.g. with zero or one adjacent)
-  normarea/=3.0;
-    while(SVA[i].norm_area>normarea && i<SVA.size())
-    {
-          if(adjcnt[SVA[i].s]<=1 || adjcnt[SVA[i].t]<=1 )
-            {
-                AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
+//  // Second loop to add some more constraints we add also all the arc with area > normarea/3
+//    // and that connects meshes poorly connected (e.g. with zero or one adjacent)
+//  normarea/=3.0;
+//    while(SVA[i].norm_area>normarea && i<SVA.size())
+//    {
+//          if(adjcnt[SVA[i].s]<=1 || adjcnt[SVA[i].t]<=1 )
+//            {
+//                AV.push_back(make_pair( SVA[i].s, SVA[i].t) );
 
-                ++adjcnt[SVA[i].s];
-                ++adjcnt[SVA[i].t];
-            }
-            ++i;
-    }
+//                ++adjcnt[SVA[i].s];
+//                ++adjcnt[SVA[i].t];
+//            }
+//            ++i;
+//    }
 
-    for(i=0;i<mn;++i) if(VM[i].used && adjcnt[i]==0) BNV.push_back(i);
-}
+//    for(i=0;i<mn;++i) if(VM[i].used && adjcnt[i]==0) BNV.push_back(i);
+//}
 
 void OccupancyGrid::RemoveMesh(int id)
 {

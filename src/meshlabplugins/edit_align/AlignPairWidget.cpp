@@ -156,10 +156,14 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		}
 		else 
 		{
-			foreach(MeshNode *mn, gluedTree->nodeList)
-				if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible) 
-					shared->drawAllocatedAttributesSubset(mn->m->id(), context(), dt);
-			drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
+//			foreach(MeshNode *mn, gluedTree->nodeList)
+          for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
+          {
+            MeshNode *mn=ni->second;
+            if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible) 
+              shared->drawAllocatedAttributesSubset(mn->m->id(), context(), dt);
+          }
+          drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
 		}
 
 		int pickSide = (pointToPick[0] < QTLogicalToDevice(this, (width() / 2))) ? 0 : 1;

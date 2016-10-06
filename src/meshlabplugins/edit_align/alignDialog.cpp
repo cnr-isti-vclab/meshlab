@@ -212,17 +212,21 @@ void AlignDialog::rebuildTree()
 {
 	currentArc = 0;
 	gla = edit->_gla;
-	QList<MeshNode*> &meshList = meshTree->nodeList;
 	ui.alignTreeWidget->clear();
 	M2T.clear();
 	A2Tf.clear();
 	A2Tb.clear();
-	for (int i = 0; i < meshList.size(); ++i)
-	{
-		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(meshList.value(i));
-		// if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
-		M2T[meshList.value(i)] = item;
-		ui.alignTreeWidget->insertTopLevelItem(i, item);
+    //  QList<MeshNode*> &meshList = meshTree->nodeList;
+    //	for (int i = 0; i < meshList.size(); ++i)
+    for(auto ni=meshTree->nodeMap.begin();ni!=meshTree->nodeMap.end();++ni)
+      { 
+        MeshNode *mn=ni->second;
+//		MeshTreeWidgetItem *item = new MeshTreeWidgetItem(meshList.value(i));
+        MeshTreeWidgetItem *item = new MeshTreeWidgetItem(mn);
+//		 if(meshList.value(i)==currentNode) item->setBackground(0,QBrush(QColor(Qt::lightGray)));
+//        M2T[meshList.value(i)] = item;
+        M2T[mn] = item;
+		ui.alignTreeWidget->addTopLevelItem(item);
 	}
 
 	// Second part add the arcs to the tree
@@ -233,11 +237,13 @@ void AlignDialog::rebuildTree()
 	{
 		A = &(meshTree->resultList[i]);
 		// Forward arc
-		parent = M2T[meshList.at((*A).FixName)];
+//		parent = M2T[meshList.at((*A).FixName)];
+        parent = M2T[meshTree->nodeMap[(*A).FixName] ];
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
 		A2Tf[A] = item;
 		// Backward arc
-		parent = M2T[meshList.at((*A).MovName)];
+//		parent = M2T[meshList.at((*A).MovName)];
+        parent = M2T[meshTree->nodeMap [(*A).MovName] ];
 		item = new MeshTreeWidgetItem(meshTree, A, parent);
 		A2Tb[A] = item;
 	}

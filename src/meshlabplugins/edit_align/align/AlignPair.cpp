@@ -180,7 +180,7 @@ bool AlignPair::ChoosePoints(vector<Point3d> &Ps,		// vertici corrispondenti su 
   Ns.resize(fnd);
   Pt.resize(fnd);
   OPt.resize(fnd);
-  printf("Scelte %i coppie tra le %i iniziali, scartate quelle con dist > %f\n", fnd, sz, newmaxd);
+//  printf("Scelte %i coppie tra le %i iniziali, scartate quelle con dist > %f\n", fnd, sz, newmaxd);
 
   if ((int)Ps.size() < ap.MinPointNum)		{
     printf("Troppi pochi punti!\n");

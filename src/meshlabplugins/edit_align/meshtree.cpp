@@ -37,21 +37,13 @@ MeshTree::MeshTree()
 int MeshTree::gluedNum()
 {
 	int cnt=0;
-	 foreach(MeshNode *mn, nodeList)
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni) { 
+      MeshNode *mn=ni->second;
+//	 foreach(MeshNode *mn, nodeList)
 		if(mn->glued) ++cnt;
+    }
 	 return cnt;
 }
-
-//// Assign to each mesh (glued and not glued) an unique id
-//void MeshTree::resetID()
-//{
-//	int cnt=0;
-//	 foreach(MeshNode *mn, nodeList)
-//		{
-//			mn->id= cnt;
-//			cnt++;
-//		}
-//}
 
 void MeshTree::ProcessArc(int fixId, int movId, vcg::AlignPair::Result &result, vcg::AlignPair::Param ap)
 {
@@ -118,15 +110,17 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 {
   QString buf;
-  cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeList.size())));
+  cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeMap.size())));
 
   /******* Occupancy Grid Computation *************/
   cb(0,qPrintable(buf.sprintf("Computing Overlaps %i glued meshes...\n",gluedNum() )));
-  OG.Init(nodeList.size(), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
-  foreach(MeshNode *mn, nodeList)
+  OG.Init(nodeMap.size(), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
+  for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni) { 
+    MeshNode *mn=ni->second;
+//	foreach(MeshNode *mn, nodeList)
     if(mn->glued)
       OG.AddMesh<CMeshO>(mn->m->cm, vcg::Matrix44d::Construct(mn->tr()), mn->Id());
-
+  }
   OG.Compute();
   OG.Dump(stdout);
   // Note: the s and t of the OG translate into fix and mov, respectively.
@@ -212,8 +206,8 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 	/************** Preparing Matrices for global alignment *************/
 //	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
 
-	vcg::Matrix44d Zero44; Zero44.SetZero();
-	std::vector<vcg::Matrix44d> PaddedTrVec(nodeList.size(),Zero44);
+//	vcg::Matrix44d Zero44; Zero44.SetZero();
+//	std::vector<vcg::Matrix44d> PaddedTrVec(nodeMap.size(),Zero44);
 	// matrix trv[i] is relative to mesh with id IdVec[i]
 	// if all the mesh are glued GluedIdVec=={1,2,3,4...}
 	std::vector<int> GluedIdVec;
@@ -221,13 +215,15 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 
 	std::map<int,std::string> names;
 
-	foreach(MeshNode *mn, nodeList)
-	{
+//    foreach(MeshNode *mn, nodeList)
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni)
+    { 
+      MeshNode *mn=ni->second;
 		if(mn->glued)
 		{
 			GluedIdVec.push_back(mn->Id());
 			GluedTrVec.push_back(vcg::Matrix44d::Construct(mn->tr()));
-			PaddedTrVec[mn->Id()]=GluedTrVec.back();
+//			PaddedTrVec[mn->Id()]=GluedTrVec.back();
 			names[mn->Id()]=qPrintable(mn->m->label());
 		}
 	}

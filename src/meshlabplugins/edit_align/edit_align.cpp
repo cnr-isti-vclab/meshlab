@@ -127,7 +127,8 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
 			else
 				mm->cm.C() = Color4b::Scatter(51, mm->id() % 50, .2f, .7f);
 			mm->updateDataMask(MeshModel::MM_COLOR);
-			meshTree.nodeList.push_back(new MeshNode(mm));
+//			meshTree.nodeList.push_back(new MeshNode(mm));
+            meshTree.nodeMap[mm->id()]=new MeshNode(mm);
 		}
     }
 
@@ -218,9 +219,12 @@ void EditAlignPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSh
 
 void EditAlignPlugin::hideRevealGluedMesh()
 {
-    foreach(MeshNode *mn, meshTree.nodeList)
+  //    foreach(MeshNode *mn, meshTree.nodeList)
+  for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
+  { 
+    MeshNode *mn=ni->second;
         if(!mn->glued) mn->m->visible=!(mn->m->visible);
-
+  }
     alignDialog->rebuildTree();
     _gla->update();
     alignDialog->updateMeshVisibilities();
@@ -232,9 +236,13 @@ void EditAlignPlugin::setBaseMesh()
     Matrix44d inv = Inverse(oldTr);
     _md->mm()->cm.Tr.SetIdentity();
 
-    foreach(MeshNode *mn, meshTree.nodeList)
-        if(mn->glued && (mn->m != _md->mm()) )
+    //foreach(MeshNode *mn, meshTree.nodeList)
+    for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
+    { 
+      MeshNode *mn=ni->second;
+      if(mn->glued && (mn->m != _md->mm()) )
             mn->m->cm.Tr.Import(inv*Matrix44d::Construct(mn->m->cm.Tr));
+    }
 
     alignDialog->rebuildTree();
     _gla->update();
@@ -417,8 +425,9 @@ void EditAlignPlugin::glueHere()
 
 void EditAlignPlugin::glueHereVisible()
 {
-    foreach(MeshNode *mn, meshTree.nodeList)
-      if(mn->m->visible) mn->glued=true;
+  for(auto ni=meshTree.nodeMap.begin();ni!=meshTree.nodeMap.end();++ni)
+//    foreach(MeshNode *mn, meshTree.nodeList)
+      if(ni->second->m->visible) ni->second->glued=true;
 
     alignDialog->rebuildTree();
 }

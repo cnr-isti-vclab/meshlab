@@ -68,7 +68,7 @@ public:
     }
   };
 
-  QList<MeshNode *> nodeList;
+  std::map<int,MeshNode *> nodeMap;
   QList<vcg::AlignPair::Result> resultList;
 
   vcg::OccupancyGrid OG;
@@ -76,13 +76,16 @@ public:
 //  std::vector<vcg::AlignPair::Result *> ResVecPtr;
   vcg::CallBackPos * cb;
 
-  MeshModel *MM(unsigned int i) {return nodeList.value(i)->m;}
+  MeshModel *MM(unsigned int i) {return nodeMap[i]->m;}
 
   void clear()
   {
-    foreach(MeshNode *mp, nodeList)
-      delete mp;
-    nodeList.clear();
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni)
+      delete ni->second;
+    nodeMap.clear();
+//    foreach(MeshNode *mp, nodeList)
+//      delete mp;
+//    nodeList.clear();
     resultList.clear();
 //    ResVecPtr.clear();
   }
@@ -108,16 +111,20 @@ public:
 
   MeshNode *find(int id)
   {
-    foreach(MeshNode *mp, nodeList)
-      if(mp->Id()==id) return mp;
-    assert("You are trying to find an unexistent mesh"==0);
-    return 0;
+    MeshNode *mp = nodeMap[id];
+    
+    if(mp==0 || mp->Id()!=id)
+      assert("You are trying to find an unexistent mesh"==0);
+    return mp;
   }
 
   MeshNode *find(MeshModel *m)
   {
-    foreach(MeshNode *mp, nodeList)
-      if(mp->m==m) return mp;
+//    foreach(MeshNode *mp, nodeList)
+//      if(mp->m==m) return mp;
+    
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni)
+      if(ni->second->m==m) return ni->second;
     assert("You are trying to find an unexistent mesh"==0);
     return 0;
   }
@@ -131,16 +138,18 @@ public:
 
   inline Box3m bbox() {
     Box3m FullBBox;
-    foreach(MeshNode *mp, nodeList)
-      FullBBox.Add(Matrix44m::Construct(mp->tr()),mp->bbox());
+//    foreach(MeshNode *mp, nodeList)
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni)
+      FullBBox.Add(Matrix44m::Construct(ni->second->tr()),ni->second->bbox());
     return FullBBox;
   }
 
   inline Box3m gluedBBox() {
     Box3m FullBBox;
-    foreach(MeshNode *mp, nodeList)
-      if(mp->glued)
-        FullBBox.Add(Matrix44m::Construct(mp->tr()),mp->bbox());
+    for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni)
+//    foreach(MeshNode *mp, nodeList)
+      if(ni->second->glued)
+        FullBBox.Add(Matrix44m::Construct(ni->second->tr()),ni->second->bbox());
     return FullBBox;
   }
 };
