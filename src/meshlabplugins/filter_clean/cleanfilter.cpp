@@ -189,9 +189,11 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
           break;
     case FP_REMOVE_ISOLATED_DIAMETER:
           parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
+		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
           parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
+		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_WRT_Q:
           qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
@@ -243,16 +245,26 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     } break;
     case FP_REMOVE_ISOLATED_DIAMETER:
     {
-      float minCC= par.getAbsPerc("MinComponentDiag");
-      std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
-      Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
+		float minCC= par.getAbsPerc("MinComponentDiag");
+		std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
+		Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
+		if (par.getBool("removeUnref"))
+		{
+			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			Log("Removed %d unreferenced vertices", delvert);
+		}
     }break;
-    case FP_REMOVE_ISOLATED_COMPLEXITY:
-      {
-      float minCC= par.getInt("MinComponentSize");
-      std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
-            Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
-      }break;
+	case FP_REMOVE_ISOLATED_COMPLEXITY:
+	{
+		float minCC= par.getInt("MinComponentSize");
+		std::pair<int,int> delInfo=tri::Clean<CMeshO>::RemoveSmallConnectedComponentsSize(m.cm,minCC);
+		Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
+		if (par.getBool("removeUnref"))
+		{
+			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+			Log("Removed %d unreferenced vertices", delvert);
+		}
+	}break;
     case FP_REMOVE_WRT_Q:
       {
             int deletedFN=0;
