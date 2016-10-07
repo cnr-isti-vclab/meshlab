@@ -128,7 +128,7 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
                                           "Obscurance is inversely proportional to the number of ray casted from the point "
                                           "that hit an occluder and proportional to the distance a ray travels before hitting the occluder. "
                                           "You can control how much the distance factor influences the final result with the obscurance exponenent (see help below). "
-                                          "Obscurance is a value in the range [0,1]. \nFor further details see the reference paper:<br>"
+                                          "Obscurance is a value in the range [0,1]. For further details see the reference paper:<br>"
                                           "<b>Iones Krupkin Sbert Zhukov <br> "
                                           "Fast, Realistic Lighting for Video Games <br>"
                                           "IEEECG&A 2003</b> ");
