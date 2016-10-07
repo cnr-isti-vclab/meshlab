@@ -1623,7 +1623,8 @@ void GLArea::resetTrackBall()
     trackball.track.sca = newScale;
     trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
-    fov=fovDefault();
+	if (!isRaster())
+		fov=fovDefault();
     update();
 }
 
