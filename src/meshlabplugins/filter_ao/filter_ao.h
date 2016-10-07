@@ -70,18 +70,9 @@ public:
 
     QString filterName(FilterIDType filter) const;
     QString	filterInfo(FilterIDType filterId) const;
-
-    FILTER_ARITY filterArity(QAction*) const
-    {
-        return SINGLE_MESH;
-    }
-
+	FILTER_ARITY filterArity(QAction*) const;
     int getRequirements (QAction *action);
-
-    FilterClass getClass(QAction *filter)
-    {
-		return MeshFilterInterface::FilterClass(MeshFilterInterface::FaceColoring | MeshFilterInterface::VertexColoring);
-    };
+	FilterClass getClass(QAction *filter);
 
     void initParameterSet(QAction *,MeshModel &/*m*/,RichParameterSet & /*parent*/);
     bool applyFilter(QAction *filter,MeshDocument &md,RichParameterSet & /*parent*/,vcg::CallBackPos * cb) ;
