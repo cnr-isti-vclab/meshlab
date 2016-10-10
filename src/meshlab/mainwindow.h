@@ -131,7 +131,7 @@ public slots:
 	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act);
 	void updateRenderingDataAccordingToActionToAllVisibleLayers(MLRenderingAction* act);
 	void updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act,bool);
-	void updateRenderingDataAccordingToAction(MLRenderingGlobalAction*);
+	void updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*> actlist);
 
 private:
 	void updateRenderingDataAccordingToActionsCommonCode(int meshid, const QList<MLRenderingAction*>& acts);

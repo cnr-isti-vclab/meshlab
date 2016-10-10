@@ -303,7 +303,7 @@ private:
 	MLRenderingGlobalAction* _solidfacecolglobact;
 	MLRenderingGlobalAction* _solidtextcolglobact;
 signals:
-	void updateRenderingDataAccordingToAction(MLRenderingGlobalAction*);
+	void updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*>);
 	//void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);
 };
 

@@ -466,7 +466,7 @@ void MainWindow::createToolBars()
 
 	mainToolBar->addSeparator();
 	globrendtoolbar = new MLRenderingGlobalToolbar(this);
-	connect(globrendtoolbar, SIGNAL(updateRenderingDataAccordingToAction(MLRenderingGlobalAction*)), this, SLOT(updateRenderingDataAccordingToAction(MLRenderingGlobalAction*)));
+	connect(globrendtoolbar, SIGNAL(updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*>)), this, SLOT(updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*>)));
 
 	mainToolBar->addWidget(globrendtoolbar);
 

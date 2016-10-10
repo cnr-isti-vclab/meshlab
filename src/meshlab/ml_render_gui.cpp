@@ -10,6 +10,7 @@
 #include <QStylePainter>
 #include <QApplication>
 #include <wrap/qt/col_qt_convert.h>
+#include <QDebug>
 
 MLRenderingToolbar::MLRenderingToolbar(QWidget* parent )
     :QToolBar(parent),_meshid(-1),_previoussel(NULL),_actgroup(NULL)
@@ -190,15 +191,15 @@ void MLRenderingSideToolbar::toggle( QAction* clickedact )
 {
     if ((clickedact != NULL) && (_actgroup != NULL))
     {
-        Qt::KeyboardModifiers mod = QApplication::keyboardModifiers();
+        Qt::KeyboardModifiers mod = qApp->queryKeyboardModifiers();
         if (_actgroup != NULL)
         {
-            if (mod == Qt::ControlModifier)
+			if (mod & Qt::ControlModifier)
             {
                 foreach(MLRenderingAction* act,_acts)
                 {
-                    if (act != NULL)
-                        act->setChecked(clickedact == act);
+                    if ((act != NULL) && (clickedact != act))
+                        act->setChecked(false);
                 }
             }
         }
@@ -1510,11 +1511,56 @@ void MLRenderingGlobalToolbar::toggle(QAction* act)
 	MLRenderingGlobalAction* ract = qobject_cast<MLRenderingGlobalAction*>(act);
 	if (ract == NULL)
 		return;
-	
-	foreach(MLRenderingAction* rendact, ract->mainActions())
-		rendact->setChecked(ract->isChecked());
 
-	emit updateRenderingDataAccordingToAction(ract);
+	QList<MLRenderingGlobalAction*> globact;
+	
+	if (qApp->queryKeyboardModifiers() == Qt::ControlModifier)
+	{
+		foreach(QAction* rendact, actions())
+		{
+			MLRenderingGlobalAction* globtoolact = qobject_cast<MLRenderingGlobalAction*>(rendact);
+			if (globtoolact != NULL) 
+			{
+				bool isclickedact = (globtoolact == ract);
+				globtoolact->setChecked(isclickedact);
+				foreach(MLRenderingAction* rendinnact, globtoolact->mainActions())
+					rendinnact->setChecked(isclickedact);
+
+				//if the action is not part of an action group  
+				if (globtoolact->actionGroup() == NULL) 
+					globact.push_back(globtoolact);
+				else
+				{
+						//if the action IS part of an action group but not action in the action group is selected 
+						//	- to be sure to remove from the visualization all the attributes derived by the mutual exclusive selection group
+					if ((globtoolact->actionGroup()->checkedAction() == NULL) || 
+						//if the action IS part of an action group and the globtoolact is the current selected action in the action group  
+						//	- to be sure to add just the one that is currently selected in the action group.
+						//		WHY? because if we have for instance smooth rendering and flat rendering in the action group 
+						//		smoothrendering -> solid=ifsmoothselected, vertnormal=ifsmoothselected, facenormal=false, solidnoshading=false
+						//		facerendering	-> solid=ifflatselected, vertnormal=false, facenormal=ifflatselected, solidnoshading=false
+						//		being smoothrendering and facerendering mutual exclusive at most one among smoothrendering and facerendering can be selected
+						//		so it means that or ifsmoothselected == true or ifflatselected == true but not both (the case no one is selected is covered by the previous condition of the current if)
+						//		supposing that smoothrendering is selected we have
+						//		smoothrendering -> solid=true, vertnormal=true, facenormal=false, solidnoshading=false
+						//		facerendering	-> solid=false, vertnormal=false, facenormal=false, solidnoshading=false
+						//		if i put both action inside the QList of the action that are going to be evaluated we will get at the end that the solid modality enabling 
+						//		(being true in smoothrendering and false in facerendering) will depend on which action will be evaluated before
+						(globtoolact->actionGroup()->checkedAction() == globtoolact))
+							globact.push_back(globtoolact);
+				}
+			}
+		}
+	}
+	else
+	{
+		foreach(MLRenderingAction* rendact, ract->mainActions())
+			rendact->setChecked(ract->isChecked());
+
+		globact.push_back(ract);
+	}
+
+	emit updateRenderingDataAccordingToActions(globact);
 }
 
 void MLRenderingGlobalToolbar::initGui()
@@ -1539,7 +1585,7 @@ void MLRenderingGlobalToolbar::initGui()
 	_pointglobact->setCheckable(true);
 	addAction(_pointglobact);
 
-	MLRenderingPerVertexColorAction* pointvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS, this);
+	/*MLRenderingPerVertexColorAction* pointvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS, this);
 	pointvertcol->setChecked(false);
 	MLRenderingPerMeshColorAction* pointmeshcol = new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS, this);
 	pointmeshcol->setChecked(false);
@@ -1553,7 +1599,7 @@ void MLRenderingGlobalToolbar::initGui()
 	_pointcolglobact->addRelatedAction(pointusercol);
 
 	_pointscolgroup = new QActionGroup(this);
-	_pointscolgroup->addAction(_pointcolglobact);
+	_pointscolgroup->addAction(_pointcolglobact);*/
 	//addActions(_pointscolgroup->actions());
 
 	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
@@ -1573,8 +1619,8 @@ void MLRenderingGlobalToolbar::initGui()
 
 	_solidactgroup = new MLRenderingZeroOrOneActionGroup(this);
 
-	MLRenderingSolidAction* solidact = new MLRenderingSolidAction(this);
-	solidact->setChecked(false);
+	MLRenderingSolidAction* smoothsolidact = new MLRenderingSolidAction(this);
+	smoothsolidact->setChecked(false);
 	MLRenderingPerVertexNormalAction* smoothvertact = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID,this);
 	smoothvertact->setChecked(false);
 	MLRenderingPerFaceNormalAction* smoothfaceact = new MLRenderingPerFaceNormalAction(MLRenderingData::PR_SOLID, this);
@@ -1583,30 +1629,30 @@ void MLRenderingGlobalToolbar::initGui()
 	solidnoshad->setChecked(false);
 
 	_smoothglobact = new MLRenderingGlobalAction(smoothvertact->text(), smoothvertact->icon(), this);
-	_smoothglobact->addMainAction(solidact);
+	_smoothglobact->addMainAction(smoothsolidact);
 	_smoothglobact->addMainAction(smoothvertact);
 	_smoothglobact->addRelatedAction(smoothfaceact);
 	_smoothglobact->addRelatedAction(solidnoshad);
 	_smoothglobact->setCheckable(true);
 	_solidactgroup->addAction(_smoothglobact);
 
+	MLRenderingSolidAction* flatsolidact = new MLRenderingSolidAction(this);
+	flatsolidact->setChecked(false);
 	MLRenderingPerVertexNormalAction* flatvertact = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_SOLID, this);
 	flatvertact->setChecked(false);
 	MLRenderingPerFaceNormalAction* flatfaceact = new MLRenderingPerFaceNormalAction(MLRenderingData::PR_SOLID, this);
 	flatfaceact->setChecked(false);
 
-
 	_flatglobact = new MLRenderingGlobalAction(flatfaceact->text(), flatfaceact->icon(), this);
-	_flatglobact->addMainAction(solidact);
+	_flatglobact->addMainAction(flatsolidact);
 	_flatglobact->addMainAction(flatfaceact);
 	_flatglobact->addRelatedAction(flatvertact);
 	_flatglobact->addRelatedAction(solidnoshad);
 	_flatglobact->setCheckable(true);
 	_solidactgroup->addAction(_flatglobact);
-
 	addActions(_solidactgroup->actions());
 
-	MLRenderingPerVertexColorAction* solidvertvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID, this);
+	/*MLRenderingPerVertexColorAction* solidvertvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID, this);
 	solidvertvertcol->setChecked(true);
 	MLRenderingPerFaceColorAction* solidfacevertcol = new MLRenderingPerFaceColorAction(this);
 	solidvertvertcol->setChecked(false);
@@ -1644,7 +1690,7 @@ void MLRenderingGlobalToolbar::initGui()
 
 	_solidcolgroup = new QActionGroup(this);
 	_solidcolgroup->addAction(_solidvertcolglobact);
-	_solidcolgroup->addAction(_solidfacecolglobact);
+	_solidcolgroup->addAction(_solidfacecolglobact);*/
 	//addActions(_solidcolgroup->actions());
 	connect(this, SIGNAL(actionTriggered(QAction*)), this, SLOT(toggle(QAction*)));
 }
@@ -1670,18 +1716,23 @@ void MLRenderingZeroOrOneActionGroup::toggle(QAction* act)
 	if (ract == NULL)
 		return;
 
-	foreach(QAction* curract, actions())
+	if (qApp->queryKeyboardModifiers() != Qt::ControlModifier)
 	{
-		MLRenderingGlobalAction* rendcurract = qobject_cast<MLRenderingGlobalAction*>(curract);
-		if (rendcurract != NULL)
+		foreach(QAction* curract, actions())
 		{
-			rendcurract->setChecked((ract == rendcurract) && (_lastclicked != ract));
-			if (rendcurract->isChecked())
-				_lastclicked = rendcurract;
-			else
-				if ((ract == rendcurract) && (_lastclicked == ract))
-					_lastclicked = NULL;
-			
+			MLRenderingGlobalAction* rendcurract = qobject_cast<MLRenderingGlobalAction*>(curract);
+			if (rendcurract != NULL)
+			{
+				bool checked = ((ract == rendcurract) && (_lastclicked != ract));
+				rendcurract->setChecked(checked);
+				if (rendcurract->isChecked())
+					_lastclicked = rendcurract;
+				else
+				{
+					if ((ract == rendcurract) && (_lastclicked == ract))
+						_lastclicked = NULL;
+				}
+			}
 		}
 	}
 }

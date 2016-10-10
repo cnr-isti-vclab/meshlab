@@ -3669,9 +3669,9 @@ void MainWindow::updateRenderingDataAccordingToActionToAllVisibleLayers(MLRender
 		GLA()->update();
 }
 
-void  MainWindow::updateRenderingDataAccordingToAction(MLRenderingGlobalAction* act)
+void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*> actlist)
 {
-	if ((meshDoc() == NULL) || (act == NULL))
+	if (meshDoc() == NULL) 
 		return;
 
 	for (int ii = 0; ii < meshDoc()->meshList.size(); ++ii)
@@ -3679,11 +3679,14 @@ void  MainWindow::updateRenderingDataAccordingToAction(MLRenderingGlobalAction* 
 		MeshModel* mm = meshDoc()->meshList[ii];
 		if (mm != NULL)
 		{
-			foreach(MLRenderingAction* ract,act->mainActions())
-				updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
+			foreach(MLRenderingGlobalAction* act, actlist)
+			{
+				foreach(MLRenderingAction* ract, act->mainActions())
+					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
 
-			foreach(MLRenderingAction* ract, act->relatedActions())
-				updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
+				foreach(MLRenderingAction* ract, act->relatedActions())
+					updateRenderingDataAccordingToActionCommonCode(mm->id(), ract);
+			}
 		}
 	}
 	updateLayerDialog();
