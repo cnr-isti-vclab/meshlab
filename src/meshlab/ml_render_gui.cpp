@@ -196,13 +196,14 @@ void MLRenderingSideToolbar::toggle( QAction* clickedact )
         {
 			if (mod & Qt::ControlModifier)
             {
-                foreach(MLRenderingAction* act,_acts)
+				foreach(MLRenderingAction* act,_acts)
                 {
-                    if ((act != NULL) && (clickedact != act))
-                        act->setChecked(false);
+                    if (act != NULL)
+						act->setChecked(clickedact == act);
                 }
             }
         }
+
     }
     MLRenderingToolbar::toggle(clickedact);
 }
