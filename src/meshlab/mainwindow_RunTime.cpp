@@ -1332,6 +1332,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 							atts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = false;
 							curr.set(pm, atts);
 						}
+						curr.set(opts);
 					}
 					MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(mm, curr);
                     MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(curr);
