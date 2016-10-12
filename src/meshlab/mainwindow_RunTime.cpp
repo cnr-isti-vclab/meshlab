@@ -1260,12 +1260,12 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 
                 MLRenderingData dttoberendered;
                 QMap<int,MeshModelStateData>::Iterator existit = meshDoc()->meshDocStateData().find(mm->id());
-                if (existit != meshDoc()->meshDocStateData().end())
+				if (existit != meshDoc()->meshDocStateData().end())
                 {
 
                     shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),dttoberendered);
-                    bool connectivitychanged = false;
                     int updatemask = MeshModel::MM_NONE;
+					bool connectivitychanged = false;
                     if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) ||
                         bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) || 
                         bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
@@ -1371,10 +1371,9 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         if (gla != NULL)
                             shared->setRenderingDataPerMeshView(mm->id(),gla->context(),dttoberendered);
                     }
-                }
+				}
 				shared->manageBuffers(mm->id());
             }
-
 			updateLayerDialog();
         }
     }

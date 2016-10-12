@@ -111,6 +111,9 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
 	if (opts._peredge_edgemanifold_enabled)
 		initNonManifEdgeDecoratorData(m);
 
+	if (opts._peredge_vertmanifold_enabled)
+		initNonManifVertDecoratorData(m);
+
 	if (opts._peredge_text_boundary_enabled)
 		initBoundaryTextDecoratorData(m);
 	//}
@@ -485,6 +488,9 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
 
     if (opts._peredge_edgemanifold_enabled)
         cleanNonManifEdgeDecoratorData(mesh);
+
+	if (opts._peredge_vertmanifold_enabled)
+		cleanNonManifVertDecoratorData(mesh);
 
     if (opts._peredge_text_boundary_enabled)
         cleanBoundaryTextDecoratorData(mesh);
