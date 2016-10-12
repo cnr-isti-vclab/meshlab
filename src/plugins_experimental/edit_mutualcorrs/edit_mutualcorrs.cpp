@@ -97,8 +97,8 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
     if(true)
     {
         int pindex;
-        vcg::Point3d currpoint;
-		vcg::Point2i currim;
+        Point3m currpoint;
+		Point2m currim;
         QString buf;
         float lineLen = m.cm.bbox.Diag() / 50.0;
 
@@ -140,7 +140,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 				glColor3ub(75, 75, 0);
 
 			currim = imagePoints[pindex];
-			vcg::Point2d onGL = fromImageToGL(currim);
+			Point2m onGL = fromImageToGL(currim);
 
 
 			QImage &curImg = glArea->md()->rm()->currentPlane->image;
@@ -226,8 +226,8 @@ bool EditMutualCorrsPlugin::StartEdit(MeshModel & /*m*/, GLArea *gla, MLSceneGLS
     mutualcorrsDialog->show();
 
     // signals for asking clicked point
-    connect(gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(receivedSurfacePoint(QString,vcg::Point3f)));
-	connect(gla, SIGNAL(transmitPickedPos(QString, vcg::Point2f)), this, SLOT(receivedImagePoint(QString, vcg::Point2f)));
+    connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
+	connect(gla, SIGNAL(transmitPickedPos(QString, Point2m)), this, SLOT(receivedImagePoint(QString, Point2m)));
 	connect(gla, SIGNAL(transmitShot(QString, Shotm)), this, SLOT(receivedShot(QString, Shotm)));
     connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
 	connect(this, SIGNAL(askPickedPos(QString)), gla, SLOT(sendPickedPos(QString)));
@@ -295,8 +295,8 @@ void EditMutualCorrsPlugin::addNewPoint()
 
     usePoint.push_back(new bool(true));
     pointID.push_back(newname);
-    modelPoints.push_back(Point3d(0.0, 0.0, 0.0));
-    imagePoints.push_back(Point2i(0.0, 0.0));
+    modelPoints.push_back(Point3m(0.0, 0.0, 0.0));
+    imagePoints.push_back(Point2m(0.0, 0.0));
     pointError.push_back(0.0);
 
     // update dialog
@@ -361,13 +361,13 @@ void EditMutualCorrsPlugin::pickCurrentRefPoint()
     glArea->update();
 }
 
-void EditMutualCorrsPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoint)
+void EditMutualCorrsPlugin::receivedSurfacePoint(QString name, Point3m pPoint)
 {
     status_error = "";
     int pindex = mutualcorrsDialog->ui->tableWidget->currentRow();
 
     if(name=="current_3D")
-        modelPoints[pindex] = Point3d(pPoint[0], pPoint[1], pPoint[2]);
+        modelPoints[pindex] = Point3m(pPoint[0], pPoint[1], pPoint[2]);
 	
     status_line2 = "";
 
@@ -377,16 +377,16 @@ void EditMutualCorrsPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoin
 	mutualcorrsDialog->ui->tableWidget->selectRow(pindex);
 }
 
-void EditMutualCorrsPlugin::receivedImagePoint(QString name, vcg::Point2f pPoint)
+void EditMutualCorrsPlugin::receivedImagePoint(QString name, Point2m pPoint)
 {
 	status_error = "";
 	int pindex = mutualcorrsDialog->ui->tableWidget->currentRow();
 
 	if (name == "current_2D")
 	{
-		vcg::Point3f iPoint = fromPickedToImage(pPoint);
+		Point3m iPoint = fromPickedToImage(pPoint);
 		if (iPoint[0] >= 0 && iPoint[1] >= 0)
-			imagePoints[pindex] = Point2i(iPoint[0], iPoint[1]);
+			imagePoints[pindex] = Point2m(iPoint[0], iPoint[1]);
 	}
 
 	status_line2 = "";
@@ -434,8 +434,8 @@ void EditMutualCorrsPlugin::loadFromFile()  //import reference list
                 if(tokenizedLine.size()==7 )
                 {
                     pointID.push_back(tokenizedLine.at(1));
-					modelPoints.push_back(vcg::Point3d(tokenizedLine.at(2).toDouble(), tokenizedLine.at(3).toDouble(), tokenizedLine.at(4).toDouble()));
-					imagePoints.push_back(vcg::Point2i(tokenizedLine.at(5).toInt(), tokenizedLine.at(6).toInt()));
+					modelPoints.push_back(Point3m(tokenizedLine.at(2).toDouble(), tokenizedLine.at(3).toDouble(), tokenizedLine.at(4).toDouble()));
+					imagePoints.push_back(Point2m(tokenizedLine.at(5).toInt(), tokenizedLine.at(6).toInt()));
 					usePoint.push_back(new bool(true));
 					pointError.push_back(0.0);
                 }
@@ -666,7 +666,7 @@ void EditMutualCorrsPlugin::applyMutual()
 	align.correspList.clear();
 }
 
-vcg::Point3f EditMutualCorrsPlugin::fromPickedToImage(vcg::Point2f picked)
+Point3m EditMutualCorrsPlugin::fromPickedToImage(Point2m picked)
 {
 	int glWidth= glArea->size().width();
 	int glHeight = glArea->size().height();
@@ -676,11 +676,11 @@ vcg::Point3f EditMutualCorrsPlugin::fromPickedToImage(vcg::Point2f picked)
 	int wGLC = (int)(glWidth / 2.0) - picked[0];
 	int imWPick = (int)(imWidth / 2.0) - (int)(wGLC*ratio);
 	int imHPick = (int)(picked[1] * ratio);
-	vcg::Point3f imPick(imWPick, imHPick, 0);
+	Point3m imPick(imWPick, imHPick, 0);
 	return imPick;
 }
 
-vcg::Point2d EditMutualCorrsPlugin::fromImageToGL(vcg::Point2i picked)
+Point2m EditMutualCorrsPlugin::fromImageToGL(Point2m picked)
 {
 	int glWidth = glArea->size().width();
 	int glHeight = glArea->size().height();
@@ -694,7 +694,7 @@ vcg::Point2d EditMutualCorrsPlugin::fromImageToGL(vcg::Point2i picked)
 	double glY = ((picked[1] * ratio) - (glHeight / 2.0)) / (glHeight / 2.0);
 
 
-	vcg::Point2d imPick(glX, glY);
+	Point2m imPick(glX, glY);
 	return imPick;
 }
 

@@ -65,8 +65,8 @@ public:
     //referencing data
     std::vector<bool>            usePoint;
     std::vector<QString>         pointID;
-    std::vector<vcg::Point3d>    modelPoints;
-    std::vector<vcg::Point2i>    imagePoints;
+    std::vector<Point3m>    modelPoints;
+    std::vector<Point2m>    imagePoints;
     std::vector<double>          pointError;
 
     int lastname;
@@ -87,10 +87,10 @@ public slots:
 
     void pickCurrentPoint();
     void pickCurrentRefPoint();
-	vcg::Point3f fromPickedToImage(vcg::Point2f picked);
-	vcg::Point2d fromImageToGL(vcg::Point2i picked);
-    void receivedSurfacePoint(QString name,vcg::Point3f pPoint);
-	void receivedImagePoint(QString name, vcg::Point2f pPoint);
+	Point3m fromPickedToImage(Point2m picked);
+	Point2m fromImageToGL(Point2m picked);
+    void receivedSurfacePoint(QString name,Point3m pPoint);
+	void receivedImagePoint(QString name, Point2m pPoint);
 	void receivedShot(QString name, Shotm shot);
 	bool initGL();
 
