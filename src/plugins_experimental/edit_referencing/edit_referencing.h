@@ -114,7 +114,7 @@ public:
 
 public slots:
 
-    void receivedSurfacePoint(QString name,vcg::Point3f pPoint);
+    void receivedSurfacePoint(QString name, Point3m pPoint);
 
     void addNewPoint();
     void deleteCurrentPoint();

@@ -323,7 +323,7 @@ bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
         connect(referencingDialog->ui->exportToFile,SIGNAL(clicked()),this,SLOT(saveToFile()));
 
         connect(referencingDialog->ui->addDistance,SIGNAL(clicked()),this,SLOT(addNewDistance()));
-        connect(referencingDialog->ui->delDistance,SIGNAL(clicked()),this,SLOT(delCurrentDistance()));
+        connect(referencingDialog->ui->delDistance,SIGNAL(clicked()),this,SLOT(deleteCurrentDistance()));
         connect(referencingDialog->ui->bttPickPointA,SIGNAL(clicked()),this,SLOT(pickCurrDistPA()));
         connect(referencingDialog->ui->bttPickPointB,SIGNAL(clicked()),this,SLOT(pickCurrDistPB()));
 		connect(referencingDialog->ui->bttApplyScale, SIGNAL(clicked()), this, SLOT(applyScale()));
@@ -335,7 +335,7 @@ bool EditReferencingPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLShar
     referencingDialog->show();
 
     // signals for asking clicked point
-    connect(gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(receivedSurfacePoint(QString,vcg::Point3f)));
+    connect(gla,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(receivedSurfacePoint(QString,Point3m)));
     connect(this,SIGNAL(askSurfacePos(QString)),gla,SLOT(sendSurfacePos(QString)));
 
     status_line1 = "";
@@ -380,7 +380,7 @@ void EditReferencingPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSce
     distError.clear();
 }
 
-void EditReferencingPlugin::receivedSurfacePoint(QString name,vcg::Point3f pPoint)
+void EditReferencingPlugin::receivedSurfacePoint(QString name,Point3m pPoint)
 {
     status_error = "";
 
