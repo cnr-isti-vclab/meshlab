@@ -115,7 +115,8 @@ void LayerDialog::keyReleaseEvent(QKeyEvent * event)
 
 void LayerDialog::enterEvent(QEvent* event)
 {
-	setFocus(Qt::MouseFocusReason);
+    activateWindow();
+	setFocus();
 }
 
 void LayerDialog::leaveEvent(QEvent* event)
