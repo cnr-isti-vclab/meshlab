@@ -330,9 +330,10 @@ private:
 	MLRenderingToolbar* _shadingtool;
 	QLabel* _colorlab;
 	MLRenderingToolbar* _colortool;
+	QLabel* _backfacelab;
+	MLRenderingToolbar* _backfacetool;
 	QLabel* _textlab;
-    MLRenderingOnOffToolbar* _texttool;
-	
+	MLRenderingOnOffToolbar* _texttool;
 };
 
 class MLRenderingWireParametersFrame : public MLRenderingParametersFrame

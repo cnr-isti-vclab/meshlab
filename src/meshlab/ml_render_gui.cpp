@@ -337,12 +337,25 @@ void MLRenderingSolidParametersFrame::initGui()
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
     
+	_backfacelab = new QLabel("Back-Face", this);
+	_backfacelab->setFont(boldfont);
+	layout->addWidget(_backfacelab, 2, 0, Qt::AlignLeft);
+	_backfacetool = new MLRenderingToolbar(_meshid, this);
+	_backfacetool->setToolButtonStyle(Qt::ToolButtonTextOnly);
+	_backfacetool->addRenderingAction(new MLRenderingSingleLightingAction(_meshid, _backfacetool));
+	_backfacetool->addRenderingAction(new MLRenderingDoubleLightingAction(_meshid, _backfacetool));
+	_backfacetool->addRenderingAction(new MLRenderingFancyLightingAction(_meshid, _backfacetool));
+	_backfacetool->addRenderingAction(new MLRenderingFaceCullAction(_meshid, _backfacetool));
+	layout->addWidget(_backfacetool, 2, 1, Qt::AlignLeft);
+	connect(_backfacetool, SIGNAL(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, const QList<MLRenderingAction*>&)));
+	connect(_backfacetool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
+
 	_textlab = new QLabel("Texture Coord",this);
     _textlab->setFont(boldfont);
-    layout->addWidget(_textlab,2,0,Qt::AlignLeft);
+    layout->addWidget(_textlab,3,0,Qt::AlignLeft);
     _texttool = new MLRenderingOnOffToolbar(_meshid,this);
     _texttool->setRenderingAction(new MLRenderingPerWedgeTextCoordAction(_meshid,_texttool));
-    layout->addWidget(_texttool,2,1,Qt::AlignLeft);
+    layout->addWidget(_texttool,3,1,Qt::AlignLeft);
     connect(_texttool,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_texttool, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*, bool)));
 
@@ -356,6 +369,7 @@ void MLRenderingSolidParametersFrame::setPrimitiveButtonStatesAccordingToRenderi
 {
     _shadingtool->setAccordingToRenderingData(dt);
     _colortool->setAccordingToRenderingData(dt);
+	_backfacetool->setAccordingToRenderingData(dt);
     _texttool->setAccordingToRenderingData(dt);
 }
 
@@ -364,6 +378,7 @@ void MLRenderingSolidParametersFrame::setAssociatedMeshId( int meshid )
     _meshid = meshid;
     _shadingtool->setAssociatedMeshId(meshid);
     _colortool->setAssociatedMeshId(meshid);
+	_backfacetool->setAssociatedMeshId(meshid);
     _texttool->setAssociatedMeshId(meshid);
 }
 
@@ -371,6 +386,7 @@ MLRenderingSolidParametersFrame::~MLRenderingSolidParametersFrame()
 {
     delete _shadingtool;
     delete _colortool;
+	delete _backfacetool;
     delete _texttool;
 }
 
@@ -379,6 +395,7 @@ void MLRenderingSolidParametersFrame::getCurrentRenderingDataAccordingToGUI( MLR
 {
     _shadingtool->getCurrentRenderingDataAccordingToGUI(dt);
     _colortool->getCurrentRenderingDataAccordingToGUI(dt);
+	_backfacetool->getCurrentRenderingDataAccordingToGUI(dt);
     _texttool->getRenderingDataAccordingToGUI(dt);
 }
 
@@ -386,6 +403,7 @@ void MLRenderingSolidParametersFrame::updateVisibility( MeshModel* mm )
 {
 	_shadelab->setVisible(_shadingtool->updateVisibility(mm));
     _colorlab->setVisible(_colortool->updateVisibility(mm));
+	_backfacelab->setVisible(_backfacetool->updateVisibility(mm));
     _textlab->setVisible(_texttool->updateVisibility(mm));
 }
 
@@ -393,6 +411,7 @@ void MLRenderingSolidParametersFrame::actionsList(QList<MLRenderingAction*>& act
 {
 	actions.append(_shadingtool->getRenderingActions());
 	actions.append(_colortool->getRenderingActions());
+	actions.append(_backfacetool->getRenderingActions());
 	actions.append(_texttool->getRenderingAction());
 }
 
@@ -400,6 +419,7 @@ void MLRenderingSolidParametersFrame::allTopLevelGuiActions(QList<QAction*>& tpl
 {
 	tplevelactions.append(_shadingtool->getTopLevelActions());
 	tplevelactions.append(_colortool->getTopLevelActions());
+	tplevelactions.append(_backfacetool->getTopLevelActions());
 	tplevelactions.append(_texttool->actions());
 }
 

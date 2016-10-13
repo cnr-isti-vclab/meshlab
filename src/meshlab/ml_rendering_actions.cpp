@@ -376,13 +376,13 @@ bool MLRenderingPerWedgeTextCoordAction::isVisibleConditionValid( MeshModel* mm)
 MLRenderingDoubleLightingAction::MLRenderingDoubleLightingAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Enabled"));
+    setText(QString("Double"));
 }
 
 MLRenderingDoubleLightingAction::MLRenderingDoubleLightingAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Enabled"));
+    setText(QString("Double"));
 }
 
 void MLRenderingDoubleLightingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -408,16 +408,51 @@ bool MLRenderingDoubleLightingAction::isRenderingDataEnabled( const MLRenderingD
     return (valid && opts._double_side_lighting);
 }
 
+MLRenderingSingleLightingAction::MLRenderingSingleLightingAction(QObject* parent)
+	:MLRenderingAction(parent)
+{
+	setText(QString("Single"));
+}
+
+MLRenderingSingleLightingAction::MLRenderingSingleLightingAction(int meshid, QObject* parent)
+	: MLRenderingAction(meshid, parent)
+{
+	setText(QString("Single"));
+}
+
+void MLRenderingSingleLightingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
+{
+	sisteract = new MLRenderingSingleLightingAction(meshId(), par);
+}
+
+void MLRenderingSingleLightingAction::updateRenderingData(MLRenderingData& rd)
+{
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	if (valid)
+	{
+		opts._single_side_lighting = isChecked();
+		rd.set(opts);
+	}
+}
+
+bool MLRenderingSingleLightingAction::isRenderingDataEnabled(const MLRenderingData& rd) const
+{
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	return (valid && opts._single_side_lighting);
+}
+
 MLRenderingFancyLightingAction::MLRenderingFancyLightingAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Fancy Lighting"));
+    setText(QString("Fancy"));
 }
 
 MLRenderingFancyLightingAction::MLRenderingFancyLightingAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Fancy Lighting"));
+    setText(QString("Fancy"));
 }
 
 void MLRenderingFancyLightingAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -528,13 +563,13 @@ bool MLRenderingNoShadingAction::isRenderingDataEnabled( const MLRenderingData& 
 MLRenderingFaceCullAction::MLRenderingFaceCullAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("BackFace Culling"));
+    setText(QString("Clip"));
 }
 
 MLRenderingFaceCullAction::MLRenderingFaceCullAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("BackFace Culling"));
+    setText(QString("Clip"));
 }
 
 void MLRenderingFaceCullAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -1525,4 +1560,3 @@ QList<MLRenderingAction*>& MLRenderingGlobalAction::relatedActions()
 {
 	return _relatedactions;
 }
-

@@ -198,6 +198,18 @@ public:
     bool isVisibleConditionValid(MeshModel*) const;
 };
 
+class MLRenderingSingleLightingAction : public MLRenderingAction
+{
+	Q_OBJECT
+public:
+	MLRenderingSingleLightingAction(QObject* parent);
+	MLRenderingSingleLightingAction(int meshid, QObject* parent);
+
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
+	void updateRenderingData(MLRenderingData& rd);
+	bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
 class MLRenderingDoubleLightingAction : public MLRenderingAction
 {
     Q_OBJECT
@@ -222,6 +234,18 @@ public:
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
 };
 
+class MLRenderingFaceCullAction : public MLRenderingAction
+{
+	Q_OBJECT
+public:
+	MLRenderingFaceCullAction(QObject* parent);
+	MLRenderingFaceCullAction(int meshid, QObject* parent);
+
+	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
+	void updateRenderingData(MLRenderingData& rd);
+	bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+};
+
 class MLRenderingNoShadingAction : public MLRenderingAction
 {
     Q_OBJECT
@@ -237,17 +261,7 @@ private:
     MLRenderingData::PRIMITIVE_MODALITY _pm;
 };
 
-class MLRenderingFaceCullAction : public MLRenderingAction
-{
-    Q_OBJECT
-public:
-    MLRenderingFaceCullAction(QObject* parent);
-    MLRenderingFaceCullAction(int meshid,QObject* parent);
 
-	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
-    void updateRenderingData(MLRenderingData& rd);
-    bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-};
 
 class MLRenderingPerMeshColorAction : public MLRenderingAction
 {
