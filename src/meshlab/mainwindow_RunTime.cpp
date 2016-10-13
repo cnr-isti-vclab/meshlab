@@ -2596,7 +2596,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         meshDoc()->setBusy(false);
         return false;
     }
-    // After opening the mesh lets ask to the io plugin if this format
+	// After opening the mesh lets ask to the io plugin if this format
     // requires some optional, or userdriven post-opening processing.
     // and in that case ask for the required parameters and then
     // ask to the plugin to perform that processing

@@ -67,10 +67,10 @@ public:
 protected:
     void initGui();
     void  updateColorInfo();
-	QPushButton* _cbutton;
 
 public:
     MLRenderingUserDefinedColorAction* _act;
+	QPushButton* _cbutton;
 
 signals:
     void userDefinedColorAction(int,MLRenderingAction*);
@@ -89,8 +89,9 @@ public:
 protected:
     void initGui();
     void  updateColorInfo();
-    QPushButton* _cbutton;
-    MLRenderingBBoxUserDefinedColorAction* _act;
+public:
+	MLRenderingBBoxUserDefinedColorAction* _act;
+	QPushButton* _cbutton;
 
 signals:
     void userDefinedColorAction(int,MLRenderingAction*);
@@ -199,8 +200,8 @@ protected slots:
     virtual void toggle(QAction* act);
     void extraUpdateRequired(int,MLRenderingAction*);
 
-//private:
-//    void initGui();
+private:
+    void initGui();
 
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);

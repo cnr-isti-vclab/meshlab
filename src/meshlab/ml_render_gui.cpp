@@ -48,7 +48,6 @@ bool MLRenderingToolbar::updateVisibility(MeshModel* mm)
 	return isvis;
 }
 
-
 void MLRenderingToolbar::addRenderingAction( MLRenderingAction* act )
 {
     if (act == NULL)
@@ -122,30 +121,24 @@ QList<QAction*> MLRenderingToolbar::getTopLevelActions()
 
 void MLRenderingToolbar::addColorPicker( MLRenderingColorPicker* pick )
 {
-    MLRenderingUserDefinedColorAction* colact = qobject_cast<MLRenderingUserDefinedColorAction*>(pick->defaultAction());
-    if (colact != NULL)
-    {
-        _actgroup->addAction(colact);
-        _acts.push_back(colact);
-        colact->setCheckable(true);
-        colact->setVisible(true);
-    }
-    addWidget(pick);
+	if (pick == NULL)
+		return;
+	MLRenderingUserDefinedColorAction* colact = qobject_cast<MLRenderingUserDefinedColorAction*>(pick->_act);
+	addRenderingAction(colact);
+	pick->_cbutton->setFixedSize(widgetForAction(colact)->height() / 2, widgetForAction(colact)->height() /2);
+	addWidget(pick);
     connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
     connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
 }
 
 void MLRenderingToolbar::addColorPicker( MLRenderingBBoxColorPicker* pick )
 {
-    MLRenderingBBoxUserDefinedColorAction* colact = qobject_cast<MLRenderingBBoxUserDefinedColorAction*>(pick->defaultAction());
-    if (colact != NULL)
-    {
-        _actgroup->addAction(colact);
-        _acts.push_back(colact);
-        colact->setCheckable(true);
-        colact->setVisible(true);
-    }
-    addWidget(pick);
+	if (pick == NULL)
+		return;
+    MLRenderingBBoxUserDefinedColorAction* colact = qobject_cast<MLRenderingBBoxUserDefinedColorAction*>(pick->_act);
+	addRenderingAction(colact);
+	pick->_cbutton->setFixedSize(widgetForAction(colact)->height() / 2, widgetForAction(colact)->height() / 2);
+	addWidget(pick);
     connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
     connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
 }
@@ -332,9 +325,9 @@ void MLRenderingSolidParametersFrame::initGui()
     MLPerViewGLOptions tmp;
     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
     colbut->setColor(vcg::ColorConverter::ToQColor(tmp._persolid_fixed_color));
-    _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
-    connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
+	_colortool->addColorPicker(colbut);
+	connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
     
 	_backfacelab = new QLabel("Back-Face", this);
@@ -790,8 +783,8 @@ void MLRenderingBBoxParametersFrame::initGui()
     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
     //tmp._perbbox_fixed_color = vcg::Color4b(255,85,0,255);
     colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perbbox_fixed_color));
-    _colortool->addColorPicker(colbut);
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
+	_colortool->addColorPicker(colbut);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
@@ -1197,17 +1190,26 @@ void MLRenderingColorPicker::initGui()
 {
     if (_act == NULL)
         return;
-    setDefaultAction(_act);
-    //setText(_act->text());
-    QMenu* colmenu = new QMenu();
-    QWidgetAction* wa = new QWidgetAction(colmenu);
-    _cbutton = new QPushButton(colmenu);
-    _cbutton->setAutoFillBackground(true);
-    _cbutton->setFlat(true);
-    _cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    wa->setDefaultWidget(_cbutton);
-    colmenu->addAction(wa);
-    setMenu(colmenu);
+    //setDefaultAction(_act);
+    ////setText(_act->text());
+    //QMenu* colmenu = new QMenu();
+    //QWidgetAction* wa = new QWidgetAction(colmenu);
+    //_cbutton = new QPushButton(colmenu);
+    //_cbutton->setAutoFillBackground(true);
+    //_cbutton->setFlat(true);
+    //_cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    //wa->setDefaultWidget(_cbutton);
+    //colmenu->addAction(wa);
+    //setMenu(colmenu);
+	QVBoxLayout* lay = new QVBoxLayout();
+	_cbutton = new QPushButton(this);
+	_cbutton->setAutoFillBackground(true);
+	_cbutton->setFlat(true);
+	_cbutton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	lay->addWidget(_cbutton);
+	lay->setMargin(2);
+	lay->setSizeConstraint(QLayout::SetFixedSize);
+	setLayout(lay);
     updateColorInfo();
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
@@ -1267,17 +1269,26 @@ void MLRenderingBBoxColorPicker::initGui()
 {
     if (_act == NULL)
         return;
-    setDefaultAction(_act);
+    //setDefaultAction(_act);
     //setText(_act->text());
-    QMenu* colmenu = new QMenu();
-    QWidgetAction* wa = new QWidgetAction(colmenu);
-    _cbutton = new QPushButton(colmenu);
-    _cbutton->setAutoFillBackground(true);
-    _cbutton->setFlat(true);
-    _cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    wa->setDefaultWidget(_cbutton);
-    colmenu->addAction(wa);
-    setMenu(colmenu);
+	/*QMenu* colmenu = new QMenu();
+	QWidgetAction* wa = new QWidgetAction(colmenu);
+	_cbutton = new QPushButton(colmenu);
+	_cbutton->setAutoFillBackground(true);
+	_cbutton->setFlat(true);
+	_cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+	wa->setDefaultWidget(_cbutton);
+	colmenu->addAction(wa);
+	setMenu(colmenu);*/
+	QVBoxLayout* lay = new QVBoxLayout();
+	_cbutton = new QPushButton(this);
+	_cbutton->setAutoFillBackground(true);
+	_cbutton->setFlat(true);
+	_cbutton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	lay->addWidget(_cbutton);
+	lay->setMargin(2);
+	lay->setSizeConstraint(QLayout::SetFixedSize);
+	setLayout(lay);
     updateColorInfo();
     connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
