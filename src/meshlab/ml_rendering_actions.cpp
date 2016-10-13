@@ -563,13 +563,13 @@ bool MLRenderingNoShadingAction::isRenderingDataEnabled( const MLRenderingData& 
 MLRenderingFaceCullAction::MLRenderingFaceCullAction( QObject* parent)
     :MLRenderingAction(parent)
 {
-    setText(QString("Clip"));
+    setText(QString("Cull"));
 }
 
 MLRenderingFaceCullAction::MLRenderingFaceCullAction( int meshid,QObject* parent)
     :MLRenderingAction(meshid,parent)
 {
-    setText(QString("Clip"));
+    setText(QString("Cull"));
 }
 
 void MLRenderingFaceCullAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
