@@ -777,6 +777,8 @@ void LayerDialog::reset()
     ui->meshTreeWidget->clear();
     ui->decParsTree->clear();
     ui->rasterTreeWidget->clear();
+	if (_applytovis != NULL)
+		_applytovis->setChecked(false);
 }
 
 void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData& dt )

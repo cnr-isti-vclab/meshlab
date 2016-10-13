@@ -2186,6 +2186,7 @@ bool MainWindow::openProject(QString fileName)
 {
     bool visiblelayer = layerDialog->isVisible();
     showLayerDlg(false);
+	globrendtoolbar->setEnabled(false);
     if (fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out *.nvm);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)");
 
@@ -2304,6 +2305,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
         mvc->resetAllTrackBall();
     qb->reset();
     saveRecentProjectList(fileName);
+	globrendtoolbar->setEnabled(true);
     showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 0));
     return true;
 }
@@ -2311,7 +2313,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
 bool MainWindow::appendProject(QString fileName)
 {
     QStringList fileNameList;
-
+	globrendtoolbar->setEnabled(false);
     if (fileName.isEmpty())
         fileNameList = QFileDialog::getOpenFileNames(this,tr("Append Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
     else
@@ -2384,6 +2386,7 @@ bool MainWindow::appendProject(QString fileName)
         }
     }
 
+	globrendtoolbar->setEnabled(true);
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
     this->currentViewContainer()->resetAllTrackBall();
@@ -2421,7 +2424,9 @@ void MainWindow::newProject(const QString& projName)
     else
         mvcont->meshDoc.setDocLabel(projName);
     mvcont->setWindowTitle(mvcont->meshDoc.docLabel());
-    //if(mdiarea->isVisible())
+	if (layerDialog != NULL)
+		layerDialog->reset();
+	//if(mdiarea->isVisible())
     updateLayerDialog();
     mvcont->showMaximized();
     connect(mvcont->sharedDataContext(),SIGNAL(currentAllocatedGPUMem(int,int)),this,SLOT(updateGPUMemBar(int,int)));
@@ -2709,7 +2714,9 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
         layervisible = layerDialog->isVisible();
         showLayerDlg(false);
     }
+	globrendtoolbar->setEnabled(false);
     bool res = importMesh(fileName,false);
+	globrendtoolbar->setEnabled(true);
     if (layerDialog != NULL)
         showLayerDlg(layervisible || meshDoc()->meshList.size());
     return res;
