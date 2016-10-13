@@ -117,6 +117,7 @@ public:
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
+	void setCurrentTab(const MLRenderingData& dt);
     MLRenderingParametersTab* createRenderingParametersTab();
 protected:
     void keyPressEvent ( QKeyEvent * event );

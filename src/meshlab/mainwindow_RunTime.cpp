@@ -2717,8 +2717,17 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
 	globrendtoolbar->setEnabled(false);
     bool res = importMesh(fileName,false);
 	globrendtoolbar->setEnabled(true);
-    if (layerDialog != NULL)
-        showLayerDlg(layervisible || meshDoc()->meshList.size());
+	if (layerDialog != NULL)
+	{
+		showLayerDlg(layervisible || meshDoc()->meshList.size());
+		MLSceneGLSharedDataContext* cont = currentViewContainer()->sharedDataContext();
+		if ((cont != NULL) && (GLA() != NULL) && (meshDoc() != NULL) && (meshDoc()->mm() != NULL))
+		{
+			MLRenderingData dt;
+			cont->getRenderInfoPerMeshView(meshDoc()->mm()->id(), GLA()->context(), dt);
+			layerDialog->setCurrentTab(dt);
+		}
+	}
     return res;
 }
 

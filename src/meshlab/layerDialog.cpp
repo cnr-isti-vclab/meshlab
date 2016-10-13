@@ -781,6 +781,34 @@ void LayerDialog::reset()
 		_applytovis->setChecked(false);
 }
 
+void LayerDialog::setCurrentTab(const MLRenderingData& dt)
+{
+	if ((mw == NULL) || (mw->meshDoc() == NULL) || (mw->meshDoc()->mm() == NULL))
+		return;
+	MLRenderingAction* act = NULL;
+	int id = mw->meshDoc()->mm()->id();
+	if (dt.isPrimitiveActive(MLRenderingData::PR_SOLID))
+	{
+		act = new MLRenderingSolidAction(id, NULL);
+	}
+	else
+	{
+		if (dt.isPrimitiveActive(MLRenderingData::PR_WIREFRAME_EDGES))
+		{
+			act = new MLRenderingWireAction(id, NULL);
+		}
+		else
+		{
+			if (dt.isPrimitiveActive(MLRenderingData::PR_POINTS))
+			{
+				act = new MLRenderingPointsAction(id, NULL);
+			}
+		}
+	}
+	actionActivated(act);
+	delete act;
+}
+
 void LayerDialog::updateRenderingParametersTab(int meshid,const MLRenderingData& dt )
 {
     if (_tabw != NULL)
