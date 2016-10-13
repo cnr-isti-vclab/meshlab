@@ -1508,11 +1508,12 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 void GLArea::setLightingColors(const MLPerViewGLOptions& opts)
 {
     makeCurrent();
-    if (opts._double_side_lighting)
+    if (opts._double_side_lighting || opts._fancy_lighting)
         glEnable(GL_LIGHT1);
     else
         glDisable(GL_LIGHT1);
 
+	//WARNING!!!!! ALL THIS DATA SHOULD BE MOVED INSIDE THE OPTS....IN THE NEXT MESHLAB RELEASE....MAYBE.....
     glLightfv(GL_LIGHT0, GL_AMBIENT, Color4f::Construct(glas.baseLightAmbientColor).V());
     glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.baseLightDiffuseColor).V());
     glLightfv(GL_LIGHT0, GL_SPECULAR,Color4f::Construct(glas.baseLightSpecularColor).V());
@@ -1525,6 +1526,7 @@ void GLArea::setLightingColors(const MLPerViewGLOptions& opts)
         glLightfv(GL_LIGHT0, GL_DIFFUSE, Color4f::Construct(glas.fancyFLightDiffuseColor).V());
         glLightfv(GL_LIGHT1, GL_DIFFUSE, Color4f::Construct(glas.fancyBLightDiffuseColor).V());
     }
+	//*********************************************************************************************************
 }
 
 void GLArea::setView()
