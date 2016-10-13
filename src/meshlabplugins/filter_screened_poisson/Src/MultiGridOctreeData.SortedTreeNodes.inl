@@ -31,89 +31,76 @@ DAMAGE.
 /////////////////////
 SortedTreeNodes::SortedTreeNodes( void )
 {
-	nodeCount = NULL;
-	treeNodes = NullPointer< TreeOctNode* >();
-	maxDepth = 0;
-	sliceOffsets = NullPointer< Pointer( int ) >();
+	_sliceStart = NullPointer( Pointer( int ) );
+	treeNodes = NullPointer( TreeOctNode* );
+	_levels = 0;
 }
 SortedTreeNodes::~SortedTreeNodes( void )
 {
-	if( nodeCount ) delete[] nodeCount , nodeCount = NULL;
-	if( treeNodes ) DeletePointer( treeNodes );
-	if( sliceOffsets )
-	{
-		for( int d=0 ; d<maxDepth ; d++ ) FreePointer( sliceOffsets[d] );
-		FreePointer( sliceOffsets );
-	}
+	if( _sliceStart ) for( int d=0 ; d<_levels ; d++ ) FreePointer( _sliceStart[d] );
+	FreePointer( _sliceStart );
+	DeletePointer( treeNodes );
 }
 void SortedTreeNodes::set( TreeOctNode& root , std::vector< int >* map )
 {
-	if( nodeCount ) delete[] nodeCount;
-	if( treeNodes ) DeletePointer( treeNodes );
-	if( sliceOffsets )
-	{
-		for( int d=0 ; d<maxDepth ; d++ ) FreePointer( sliceOffsets[d] );
-		FreePointer( sliceOffsets );
-	}
-	maxDepth = root.maxDepth()+1;
-	nodeCount = new int[ maxDepth+1 ];
-	treeNodes = NewPointer< TreeOctNode* >( root.nodes() );
+	set( root );
 
-	int startDepth = 0;
-	nodeCount[0] = 0 , nodeCount[1] = 1;
-	treeNodes[0] = &root;
-	for( int d=startDepth+1 ; d<maxDepth ; d++ )
-	{
-		nodeCount[d+1] = nodeCount[d];
-		for( int i=nodeCount[d-1] ; i<nodeCount[d] ; i++ )
-		{
-			TreeOctNode* temp = treeNodes[i];
-			if( temp->children ) for( int c=0 ; c<8 ; c++ ) treeNodes[ nodeCount[d+1]++ ] = temp->children + c;
-		}
-	}
-	_sortByZCoordinate();
 	if( map )
 	{
-		map->resize( nodeCount[maxDepth] );
-		for( int i=0 ; i<nodeCount[maxDepth] ; i++ ) (*map)[i] = treeNodes[i]->nodeData.nodeIndex;
+		map->resize( _sliceStart[_levels-1][(size_t)1<<(_levels-1)] );
+		for( int i=0 ; i<_sliceStart[_levels-1][(size_t)1<<(_levels-1)] ; i++ ) (*map)[i] = treeNodes[i]->nodeData.nodeIndex;
 	}
-	for( int i=0 ; i<nodeCount[maxDepth] ; i++ ) treeNodes[i]->nodeData.nodeIndex = i;
+	for( int i=0 ; i<_sliceStart[_levels-1][(size_t)1<<(_levels-1)] ; i++ ) treeNodes[i]->nodeData.nodeIndex = i;
 }
-int SortedTreeNodes::Slices( int depth ){ return 1<<depth; }
-std::pair< int , int > SortedTreeNodes::sliceSpan( int depth , int off , int d ) const
+void SortedTreeNodes::set( TreeOctNode& root )
 {
-	int dd = d-depth;
-	return std::pair< int , int >( nodeCount[d] + sliceOffsets[d][off<<dd] , nodeCount[d] + sliceOffsets[d][(off+1)<<dd] );
-}
-void SortedTreeNodes::_sortByZCoordinate( void )
-{
-	sliceOffsets = AllocPointer< Pointer( int ) >( maxDepth );
-	for( int d=0 ; d<maxDepth ;  d++ )
+	_levels = root.maxDepth()+1;
+
+	if( _sliceStart ) for( int d=0 ; d<_levels ; d++ ) FreePointer( _sliceStart[d] );
+	FreePointer( _sliceStart );
+	DeletePointer( treeNodes );
+
+	_sliceStart = AllocPointer< Pointer( int ) >( _levels );
+	for( int l=0 ; l<_levels ; l++ )
 	{
-		int slices = Slices( d );
-		sliceOffsets[d] = AllocPointer< int >( slices+1 );
-		memset( sliceOffsets[d] , 0 , sizeof(int)*(slices+1) );
-		for( int i=nodeCount[d] ; i<nodeCount[d+1] ; i++ )
-		{
-			int _d , _off[3];
-			treeNodes[i]->depthAndOffset( _d , _off );
-			sliceOffsets[d][ _off[2] ]++;
-		}
-		for( int i=1 ; i<slices ; i++ ) sliceOffsets[d][i] += sliceOffsets[d][i-1];
-		for( int i=slices ; i>=1 ; i-- ) sliceOffsets[d][i] = sliceOffsets[d][i-1];
-		sliceOffsets[d][0] = 0;
+		_sliceStart[l] = AllocPointer< int >( ((size_t)1<<l)+1 );
+		memset( _sliceStart[l] , 0 , sizeof(int)*( ((size_t)1<<l)+1 ) );
 	}
-	for( TreeOctNode* node=treeNodes[0]->nextNode() ; node ; node=treeNodes[0]->nextNode( node ) )
+
+	// Count the number of nodes in each slice
+	for( TreeOctNode* node = root.nextNode() ; node ; node = root.nextNode( node ) ) if( !GetGhostFlag( node ) )
 	{
 		int d , off[3];
 		node->depthAndOffset( d , off );
-		treeNodes[ nodeCount[d] + sliceOffsets[d][ off[2] ] ] = node;
-		sliceOffsets[d][ off[2] ]++;
+		_sliceStart[d][ off[2]+1 ]++;
 	}
-	for( int d=0 ; d<maxDepth ; d++ )
+
+	// Get the start index for each slice
 	{
-		for( int i=Slices(d) ; i>=1 ; i-- ) sliceOffsets[d][i] = sliceOffsets[d][i-1];
-		sliceOffsets[d][0] = 0;
+		int levelOffset = 0;
+		for( int l=0 ; l<_levels ; l++ )
+		{
+			_sliceStart[l][0] = levelOffset;
+			for( int s=0 ; s<((size_t)1<<l); s++ ) _sliceStart[l][s+1] += _sliceStart[l][s];
+			levelOffset = _sliceStart[l][(size_t)1<<l];
+		}
+	}
+	// Allocate memory for the tree nodes
+	treeNodes = NewPointer< TreeOctNode* >( _sliceStart[_levels-1][(size_t)1<<(_levels-1)] );
+
+	// Add the tree nodes
+	for( TreeOctNode* node=root.nextNode() ; node ; node=root.nextNode( node ) ) if( !GetGhostFlag( node ) )
+	{
+		int d , off[3];
+		node->depthAndOffset( d , off );
+		treeNodes[ _sliceStart[d][ off[2] ]++ ] = node;
+	}
+
+	// Shift the slice offsets up since we incremented as we added
+	for( int l=0 ; l<_levels ; l++ )
+	{
+		for( int s=(1<<l) ; s>0 ; s-- ) _sliceStart[l][s] = _sliceStart[l][s-1];
+		_sliceStart[l][0] = l>0 ? _sliceStart[l-1][(size_t)1<<(l-1)] : 0;
 	}
 }
 SortedTreeNodes::SquareCornerIndices& SortedTreeNodes::SliceTableData::cornerIndices( const TreeOctNode* node ) { return cTable[ node->nodeData.nodeIndex - nodeOffset ]; }
@@ -137,27 +124,39 @@ SortedTreeNodes::SquareEdgeIndices& SortedTreeNodes::XSliceTableData::faceIndice
 const SortedTreeNodes::SquareEdgeIndices& SortedTreeNodes::XSliceTableData::faceIndices( const TreeOctNode* node ) const { return fTable[ node->nodeData.nodeIndex - nodeOffset ]; }
 const SortedTreeNodes::SquareEdgeIndices& SortedTreeNodes::XSliceTableData::faceIndices( int idx ) const { return fTable[ idx - nodeOffset ]; }
 
-
 void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int offset , int threads ) const
 {
-	if( offset<0 || offset>(1<<depth) ) return;
+	// [NOTE] This is structure is purely for determining adjacency and is independent of the FEM degree
+	typedef OctNode< TreeNodeData >::template ConstNeighborKey< 1 , 1 > ConstAdjacenctNodeKey;
+	if( offset<0 || offset>((size_t)1<<depth) ) return;
 	if( threads<=0 ) threads = 1;
 	// The vector of per-depth node spans
-	std::pair< int , int > span( nodeCount[depth] + sliceOffsets[depth][ std::max<int>(0,offset-1) ] , nodeCount[depth] + sliceOffsets[depth][ std::min<int>(1<<depth,offset+1) ] );
+	std::pair< int , int > span( _sliceStart[depth][ std::max< int >( 0 , offset-1 ) ] , _sliceStart[depth][ std::min< int >( (size_t)1<<depth , offset+1 ) ] );
 	sData.nodeOffset = span.first;
 	sData.nodeCount = span.second - span.first;
 
-	sData._cMap.clear() , sData._eMap.clear() , sData._fMap.clear();
-	sData._cMap.resize( sData.nodeCount * Square::CORNERS , 0 ) , sData._eMap.resize( sData.nodeCount * Square::EDGES , 0 ) , sData._fMap.resize( sData.nodeCount * Square::FACES , 0 );
-	sData.cTable.resize( sData.nodeCount ) , sData.eTable.resize( sData.nodeCount ) , sData.fTable.resize( sData.nodeCount );
-	std::vector< TreeOctNode::ConstNeighborKey3 > neighborKeys( std::max< int >( 1 , threads ) );
-	for( int i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
+	DeletePointer( sData._cMap ) ; DeletePointer( sData._eMap ) ; DeletePointer( sData._fMap );
+	DeletePointer( sData.cTable ) ; DeletePointer( sData.eTable ) ; DeletePointer( sData.fTable );
+	if( sData.nodeCount )
+	{
+		sData._cMap = NewPointer< int >( sData.nodeCount * Square::CORNERS );
+		sData._eMap = NewPointer< int >( sData.nodeCount * Square::EDGES );
+		sData._fMap = NewPointer< int >( sData.nodeCount * Square::FACES );
+		sData.cTable = NewPointer< typename SortedTreeNodes::SquareCornerIndices >( sData.nodeCount );
+		sData.eTable = NewPointer< typename SortedTreeNodes::SquareCornerIndices >( sData.nodeCount );
+		sData.fTable = NewPointer< typename SortedTreeNodes::SquareFaceIndices >( sData.nodeCount );
+		memset( sData._cMap , 0 , sizeof(int) * sData.nodeCount * Square::CORNERS );
+		memset( sData._eMap , 0 , sizeof(int) * sData.nodeCount * Square::EDGES );
+		memset( sData._fMap , 0 , sizeof(int) * sData.nodeCount * Square::FACES );
+	}
+	std::vector< ConstAdjacenctNodeKey > neighborKeys( std::max< int >( 1 , threads ) );
+	for( size_t i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
 #pragma omp parallel for num_threads( threads )
 	for( int i=span.first ; i<span.second ; i++ )
 	{
-		TreeOctNode::ConstNeighborKey3& neighborKey = neighborKeys[ omp_get_thread_num() ];
+		ConstAdjacenctNodeKey& neighborKey = neighborKeys[ omp_get_thread_num() ];
 		TreeOctNode* node = treeNodes[i];
-		const TreeOctNode::ConstNeighbors3& neighbors = neighborKey.getNeighbors( node );
+		const TreeOctNode::ConstNeighbors< 3 >& neighbors = neighborKey.getNeighbors( node );
 		int d , off[3];
 		node->depthAndOffset( d , off );
 		int z;
@@ -176,7 +175,7 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 				int xx , yy , zz;
 				Cube::FactorCornerIndex( cc , xx , yy , zz );
 				xx += x , yy += y , zz += z;
-				if( neighbors.neighbors[xx][yy][zz] && cc<ac ){ cornerOwner = false ; break; }
+				if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) && cc<ac ){ cornerOwner = false ; break; }
 			}
 			if( cornerOwner )
 			{
@@ -188,7 +187,7 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 					Cube::FactorCornerIndex( cc , xx , yy , zz );
 					int ac = Square::CornerIndex( 1-xx , 1-yy );
 					xx += x , yy += y , zz += z;
-					if( neighbors.neighbors[xx][yy][zz] ) sData.cornerIndices( neighbors.neighbors[xx][yy][zz] )[ac] = myCount;
+					if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) ) sData.cornerIndices( neighbors.neighbors[xx][yy][zz] )[ac] = myCount;
 				}
 			}
 		}
@@ -209,7 +208,7 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 				case 0: yy = ii , zz = jj , xx = 1 ; break;
 				case 1: xx = ii , zz = jj , yy = 1 ; break;
 				}
-				if( neighbors.neighbors[xx][yy][zz] && cc<ac ){ edgeOwner = false ; break; }
+				if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) && cc<ac ){ edgeOwner = false ; break; }
 			}
 			if( edgeOwner )
 			{
@@ -227,28 +226,28 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 					case 0: yy = ii , zz = jj , xx = 1 ; break;
 					case 1: xx = ii , zz = jj , yy = 1 ; break;
 					}
-					if( neighbors.neighbors[xx][yy][zz] ) sData.edgeIndices( neighbors.neighbors[xx][yy][zz] )[ Square::EdgeIndex( o , aii ) ] = myCount;
+					if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) ) sData.edgeIndices( neighbors.neighbors[xx][yy][zz] )[ Square::EdgeIndex( o , aii ) ] = myCount;
 				}
 			}
 		}
 		// Process the Faces
 		{
-			bool faceOwner = !( neighbors.neighbors[1][1][2*z] && !z );
+			bool faceOwner = !( IsActiveNode( neighbors.neighbors[1][1][2*z] ) && !z );
 			if( faceOwner )
 			{
 				int myCount = ( i - sData.nodeOffset ) * Square::FACES;
 				sData._fMap[ myCount ] = 1;
 				// Set the face indices
 				sData.faceIndices( node )[0] = myCount;
-				if( neighbors.neighbors[1][1][2*z] ) sData.faceIndices( neighbors.neighbors[1][1][2*z] )[0] = myCount;
+				if( IsActiveNode( neighbors.neighbors[1][1][2*z] ) ) sData.faceIndices( neighbors.neighbors[1][1][2*z] )[0] = myCount;
 			}
 		}
 	}
 	int cCount = 0 , eCount = 0 , fCount = 0;
 
-	for( int i=0 ; i<sData._cMap.size() ; i++ ) if( sData._cMap[i] ) sData._cMap[i] = cCount++;
-	for( int i=0 ; i<sData._eMap.size() ; i++ ) if( sData._eMap[i] ) sData._eMap[i] = eCount++;
-	for( int i=0 ; i<sData._fMap.size() ; i++ ) if( sData._fMap[i] ) sData._fMap[i] = fCount++;
+	for( size_t i=0 ; i<sData.nodeCount * Square::CORNERS ; i++ ) if( sData._cMap[i] ) sData._cMap[i] = cCount++;
+	for( size_t i=0 ; i<sData.nodeCount * Square::EDGES   ; i++ ) if( sData._eMap[i] ) sData._eMap[i] = eCount++;
+	for( size_t i=0 ; i<sData.nodeCount * Square::FACES   ; i++ ) if( sData._fMap[i] ) sData._fMap[i] = fCount++;
 #pragma omp parallel for num_threads( threads )
 	for( int i=0 ; i<sData.nodeCount ; i++ )
 	{
@@ -261,24 +260,34 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 }
 void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , int offset , int threads ) const
 {
-	if( offset<0 || offset>=(1<<depth) ) return;
+	typedef OctNode< TreeNodeData >::template ConstNeighborKey< 1 , 1 > ConstAdjacenctNodeKey;
+	if( offset<0 || offset>=((size_t)1<<depth) ) return;
 	if( threads<=0 ) threads = 1;
 	// The vector of per-depth node spans
-	std::pair< int , int > span( nodeCount[depth] + sliceOffsets[depth][offset] , nodeCount[depth] + sliceOffsets[depth][offset+1] );
+	std::pair< int , int > span( _sliceStart[depth][offset] , _sliceStart[depth][offset+1] );
 	sData.nodeOffset = span.first;
 	sData.nodeCount = span.second - span.first;
 
-	sData._eMap.clear() , sData._fMap.clear();
-	sData._eMap.resize( sData.nodeCount * Square::CORNERS , 0 ) , sData._fMap.resize( sData.nodeCount * Square::EDGES , 0 );
-	sData.eTable.resize( sData.nodeCount ) , sData.fTable.resize( sData.nodeCount );
-	std::vector< TreeOctNode::ConstNeighborKey3 > neighborKeys( std::max< int >( 1 , threads ) );
-	for( int i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
+	DeletePointer( sData._eMap ) ; DeletePointer( sData._fMap );
+	DeletePointer( sData.eTable ) ; DeletePointer( sData.fTable );
+	if( sData.nodeCount )
+	{
+		sData._eMap = NewPointer< int >( sData.nodeCount * Square::CORNERS );
+		sData._fMap = NewPointer< int >( sData.nodeCount * Square::EDGES );
+		sData.eTable = NewPointer< typename SortedTreeNodes::SquareCornerIndices >( sData.nodeCount );
+		sData.fTable = NewPointer< typename SortedTreeNodes::SquareEdgeIndices >( sData.nodeCount );
+		memset( sData._eMap , 0 , sizeof(int) * sData.nodeCount * Square::CORNERS );
+		memset( sData._fMap , 0 , sizeof(int) * sData.nodeCount * Square::EDGES );
+	}
+
+	std::vector< ConstAdjacenctNodeKey > neighborKeys( std::max< int >( 1 , threads ) );
+	for( size_t i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( depth );
 #pragma omp parallel for num_threads( threads )
 	for( int i=span.first ; i<span.second ; i++ )
 	{
-		TreeOctNode::ConstNeighborKey3& neighborKey = neighborKeys[ omp_get_thread_num() ];
+		ConstAdjacenctNodeKey& neighborKey = neighborKeys[ omp_get_thread_num() ];
 		TreeOctNode* node = treeNodes[i];
-		const TreeOctNode::ConstNeighbors3& neighbors = neighborKey.getNeighbors( node );
+		const TreeOctNode::ConstNeighbors<3>& neighbors = neighborKey.getNeighbors( node );
 		int d , off[3];
 		node->depthAndOffset( d , off );
 		// Process the edges
@@ -295,7 +304,7 @@ void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , i
 				Square::FactorCornerIndex( cc , ii , jj );
 				ii += x , jj += y;
 				xx = ii , yy = jj , zz = 1;
-				if( neighbors.neighbors[xx][yy][zz] && cc<ac ){ edgeOwner = false ; break; }
+				if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) && cc<ac ){ edgeOwner = false ; break; }
 			}
 			if( edgeOwner )
 			{
@@ -310,7 +319,7 @@ void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , i
 					Square::FactorCornerIndex( Square::AntipodalCornerIndex( cc ) , aii , ajj );
 					ii += x , jj += y;
 					xx = ii , yy = jj , zz = 1;
-					if( neighbors.neighbors[xx][yy][zz] ) sData.edgeIndices( neighbors.neighbors[xx][yy][zz] )[ Square::CornerIndex( aii , ajj ) ] = myCount;
+					if( IsActiveNode( neighbors.neighbors[xx][yy][zz] ) ) sData.edgeIndices( neighbors.neighbors[xx][yy][zz] )[ Square::CornerIndex( aii , ajj ) ] = myCount;
 				}
 			}
 		}
@@ -318,8 +327,8 @@ void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , i
 		for( int o=0 ; o<2 ; o++ ) for( int y=0 ; y<2 ; y++ )
 		{
 			bool faceOwner;
-			if( o==0 ) faceOwner = !( neighbors.neighbors[1][2*y][1] && !y );
-			else       faceOwner = !( neighbors.neighbors[2*y][1][1] && !y );
+			if( o==0 ) faceOwner = !( IsActiveNode( neighbors.neighbors[1][2*y][1] ) && !y );
+			else       faceOwner = !( IsActiveNode( neighbors.neighbors[2*y][1][1] ) && !y );
 			if( faceOwner )
 			{
 				int fe = Square::EdgeIndex( o , y );
@@ -328,15 +337,15 @@ void SortedTreeNodes::setXSliceTableData( XSliceTableData& sData , int depth , i
 				sData._fMap[ myCount ] = 1;
 				// Set the face indices
 				sData.faceIndices( node )[fe] = myCount;
-				if( o==0 && neighbors.neighbors[1][2*y][1] ) sData.faceIndices( neighbors.neighbors[1][2*y][1] )[ae] = myCount;
-				if( o==1 && neighbors.neighbors[2*y][1][1] ) sData.faceIndices( neighbors.neighbors[2*y][1][1] )[ae] = myCount;
+				if( o==0 && IsActiveNode( neighbors.neighbors[1][2*y][1] ) ) sData.faceIndices( neighbors.neighbors[1][2*y][1] )[ae] = myCount;
+				if( o==1 && IsActiveNode( neighbors.neighbors[2*y][1][1] ) ) sData.faceIndices( neighbors.neighbors[2*y][1][1] )[ae] = myCount;
 			}
 		}
 	}
 	int eCount = 0 , fCount = 0;
 
-	for( int i=0 ; i<sData._eMap.size() ; i++ ) if( sData._eMap[i] ) sData._eMap[i] = eCount++;
-	for( int i=0 ; i<sData._fMap.size() ; i++ ) if( sData._fMap[i] ) sData._fMap[i] = fCount++;
+	for( size_t i=0 ; i<sData.nodeCount * Square::CORNERS ; i++ ) if( sData._eMap[i] ) sData._eMap[i] = eCount++;
+	for( size_t i=0 ; i<sData.nodeCount * Square::EDGES   ; i++ ) if( sData._fMap[i] ) sData._fMap[i] = fCount++;
 #pragma omp parallel for num_threads( threads )
 	for( int i=0 ; i<sData.nodeCount ; i++ )
 	{

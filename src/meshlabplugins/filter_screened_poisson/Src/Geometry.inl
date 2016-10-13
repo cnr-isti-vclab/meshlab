@@ -323,8 +323,9 @@ double Triangulation<Real>::area(void){
 	return a;
 }
 template<class Real>
-int Triangulation<Real>::addTriangle(int p1,int p2,int p3){
-	hash_map<long long,int>::iterator iter;
+int Triangulation<Real>::addTriangle(int p1,int p2,int p3)
+{
+	std::unordered_map<long long, int>::iterator iter;
 	int tIdx,eIdx,p[3];
 	p[0]=p1;
 	p[1]=p2;
@@ -436,21 +437,6 @@ int CoredVectorMeshData< Vertex >::addOutOfCorePoint( const Vertex& p )
 	return int(oocPoints.size())-1;
 }
 template< class Vertex >
-int CoredVectorMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex >& vertices )
-{
-	std::vector< int > polygon( vertices.size() );
-	for( int i=0 ; i<(int)vertices.size() ; i++ ) 
-		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
-		else                     polygon[i] = -vertices[i].idx-1;
-	return addPolygon( polygon );
-}
-template< class Vertex >
-int CoredVectorMeshData< Vertex >::addPolygon( const std::vector< int >& vertices )
-{
-	polygons.push_back( vertices );
-	return (int)polygons.size()-1;
-}
-template< class Vertex >
 int CoredVectorMeshData< Vertex >::addOutOfCorePoint_s( const Vertex& p )
 {
 	size_t sz;
@@ -539,24 +525,6 @@ int CoredFileMeshData< Vertex >::addOutOfCorePoint( const Vertex& p )
 	oocPointFile->write( &p , sizeof( Vertex ) );
 	oocPoints++;
 	return oocPoints-1;
-}
-template< class Vertex >
-int CoredFileMeshData< Vertex >::addPolygon( const std::vector< int >& vertices )
-{
-	int vSize = (int)vertices.size();
-	polygonFile->write( &vSize , sizeof(int) );
-	polygonFile->write( &vertices[0] , sizeof(int)*vSize );
-	polygons++;
-	return polygons-1;
-}
-template< class Vertex >
-int CoredFileMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex >& vertices )
-{
-	std::vector< int > polygon( vertices.size() );
-	for( int i=0 ; i<(int)vertices.size() ; i++ ) 
-		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
-		else                     polygon[i] = -vertices[i].idx-1;
-	return addPolygon( polygon );
 }
 template< class Vertex >
 int CoredFileMeshData< Vertex >::addOutOfCorePoint_s( const Vertex& p )

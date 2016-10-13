@@ -136,13 +136,17 @@ void MinimalAreaTriangulation<Real>::GetTriangulation(const size_t& i,const size
 {
 	TriangleIndex tIndex;
 	size_t eCount=vertices.size();
+#ifdef BRUNO_LEVY_FIX
+	int ii=(int)i;
+	if( i<j ) ii += (int)eCount;
+#else // !BRUNO_LEVY_FIX
 	size_t ii=i;
-	if(i<j)
-		ii+=eCount;
-	if(j+1>=ii)
+	if( i<j ) ii += eCount;
+#endif // BRUNO_LEVY_FIX
+	if( j+1>=ii )
 		return;
 	ii=midPoint[i*eCount+j];
-	if(ii>=0)
+	if( ii>=0 )
 	{
 		tIndex.idx[0] = int( i );
 		tIndex.idx[1] = int( j );

@@ -28,11 +28,13 @@ DAMAGE.
 
 #ifndef ALLOCATOR_INCLUDED
 #define ALLOCATOR_INCLUDED
+
 #include <vector>
 
-class AllocatorState{
+class AllocatorState
+{
 public:
-	int index,remains;
+	int index , remains;
 };
 /** This templated class assists in memory allocation and is well suited for instances
   * when it is known that the sequence of memory allocations is performed in a stack-based
@@ -56,16 +58,16 @@ public:
 	  * it has allocated. */
 	void reset( void )
 	{
-		for(size_t i=0;i<memory.size();i++){delete[] memory[i];}
+		for( size_t i=0 ; i<memory.size() ; i++ ) delete[] memory[i];
 		memory.clear();
-		blockSize=index=remains=0;
+		blockSize = index = remains = 0;
 	}
 	/** This method returns the memory state of the allocator. */
 	AllocatorState getState( void ) const
 	{
 		AllocatorState s;
-		s.index=index;
-		s.remains=remains;
+		s.index = index;
+		s.remains = remains;
 		return s;
 	}
 
@@ -126,7 +128,7 @@ public:
 
 	/** This method initiallizes the constructor and the blockSize variable specifies the
 	  * the number of objects that should be pre-allocated at a time. */
-	void set( int blockSize)
+	void set( int blockSize )
 	{
 		reset();
 		this->blockSize = blockSize;
@@ -153,7 +155,7 @@ public:
 				memory.push_back( mem );
 			}
 			index++;
-			remains=blockSize;
+			remains = blockSize;
 		}
 		mem = &(memory[index][blockSize-remains]);
 		remains -= elements;

@@ -29,6 +29,7 @@ DAMAGE.
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
+#include <functional>
 
 /////////////
 // OctNode //
@@ -54,58 +55,115 @@ void OctNode< NodeData >::SetAllocator(int blockSize)
 	}
 	else{UseAlloc=0;}
 }
-template< class NodeData >
-int OctNode< NodeData >::UseAllocator(void){return UseAlloc;}
+template< class NodeData > int OctNode< NodeData >::UseAllocator( void ){ return UseAlloc; }
 
 template< class NodeData >
-OctNode< NodeData >::OctNode(void){
-	parent=children=NULL;
+OctNode< NodeData >::OctNode( void (*Initializer)( OctNode& ) )
+{
+	parent = children = NULL;
 	_depthAndOffset = 0;
+	if( Initializer ) Initializer( *this );
+}
+template< class NodeData >
+OctNode< NodeData >::~OctNode( void )
+{
+	if( !UseAlloc && children ) delete[] children;
+	parent = children = NULL;
 }
 
 template< class NodeData >
-OctNode< NodeData >::~OctNode(void){
-	if(!UseAlloc){if(children){delete[] children;}}
-	parent=children=NULL;
+OctNode< NodeData >* OctNode< NodeData >::NewBrood( void (*Initializer)( OctNode& ) )
+{
+	OctNode< NodeData >* brood;
+	if( UseAlloc ) brood = NodeAllocator.newElements( Cube::CORNERS );
+	else brood = new OctNode[Cube::CORNERS];
+	for( int i=0 ; i<2 ; i++ ) for( int j=0 ; j<2 ; j++ ) for( int k=0 ; k<2 ; k++ )
+	{
+		int off[] = { i , j , k };
+		int idx = Cube::CornerIndex( i , j , k );
+		if( Initializer ) Initializer( brood[idx] );
+		brood[idx]._depthAndOffset = Index( 0 , off );
+	}
+	return brood;
 }
 template< class NodeData >
-void OctNode< NodeData >::setFullDepth( int maxDepth )
+void OctNode< NodeData >::ResetDepthAndOffset( OctNode* root , int d , int off[3] )
+{
+	// Recursive lambda requires an explicit declaration
+#define PARENT_DEPTH_AND_OFFSET( d , off ) ( d-- , off[0]>>=1 , off[1]>>=1 , off[2]>>=1 )
+#define  CHILD_DEPTH_AND_OFFSET( d , off ) ( d++ , off[0]<<=1 , off[1]<<=1 , off[2]<<=1 )
+	std::function< OctNode* ( OctNode* , int& , int[] ) > _nextBranch = [&]( OctNode* current , int& d , int off[3] )
+	{
+		if( current==root ) return (OctNode*)NULL;
+		else
+		{
+			int c = (int)( current - current->parent->children );
+
+			if( c==Cube::CORNERS-1 )
+			{
+				PARENT_DEPTH_AND_OFFSET( d , off );
+				return _nextBranch( current->parent , d , off );
+			}
+			else
+			{
+				int x , y , z;
+				Cube::FactorCornerIndex( c+1 , x , y , z );
+				PARENT_DEPTH_AND_OFFSET( d , off ) ; CHILD_DEPTH_AND_OFFSET( d , off );
+				off[0] |= x , off[1] |= y , off[2] |= z;
+				return current+1;
+			}
+		}
+	};
+	auto _nextNode = [&]( OctNode* current , int& d , int off[3] )
+	{
+		if( !current ) return root;
+		else if( current->children )
+		{
+			CHILD_DEPTH_AND_OFFSET( d , off );
+			return current->children;
+		}
+		else return _nextBranch( current , d , off );
+	};
+#undef PARENT_DEPTH_AND_OFFSET
+#undef  CHILD_DEPTH_AND_OFFSET
+	for( OctNode* node=_nextNode( NULL , d , off ) ; node ; node = _nextNode( node , d , off ) ) node->_depthAndOffset = Index( d , off );
+}
+
+template< class NodeData >
+void OctNode< NodeData >::setFullDepth( int maxDepth , void (*Initializer)( OctNode& ) )
 {
 	if( maxDepth )
 	{
-		if( !children ) initChildren();
-		for( int i=0 ; i<8 ; i++ ) children[i].setFullDepth( maxDepth-1 );
+		if( !children ) initChildren( Initializer );
+		for( int i=0 ; i<8 ; i++ ) children[i].setFullDepth( maxDepth-1 , Initializer );
 	}
 }
 
 template< class NodeData >
-int OctNode< NodeData >::initChildren( void )
+int OctNode< NodeData >::initChildren( void (*Initializer)( OctNode& ) )
 {
-	if( UseAlloc ) children=NodeAllocator.newElements(8);
-	else
 	{
-		if( children ) delete[] children;
-		children = NULL;
-		children = new OctNode[Cube::CORNERS];
-	}
-	if( !children )
-	{
-		fprintf(stderr,"Failed to initialize children in OctNode::initChildren\n");
-		exit(0);
-		return 0;
-	}
-	int d , off[3];
-	depthAndOffset( d , off );
-	for( int i=0 ; i<2 ; i++ ) for( int j=0 ; j<2 ; j++ ) for( int k=0 ; k<2 ; k++ )
-	{
-		int idx=Cube::CornerIndex(i,j,k);
-		children[idx].parent = this;
-		children[idx].children = NULL;
-		int off2[3];
-		off2[0] = (off[0]<<1)+i;
-		off2[1] = (off[1]<<1)+j;
-		off2[2] = (off[2]<<1)+k;
-		children[idx]._depthAndOffset = Index( d+1 , off2 );
+		if( UseAlloc ) children = NodeAllocator.newElements( Cube::CORNERS );
+		else
+		{
+			if( children ) delete[] children;
+			children = new OctNode[Cube::CORNERS];
+		}
+		if( !children ) fprintf( stderr , "[ERROR] OctNode::initChildren: Failed to initialize children in OctNode::initChildren\n" ) , exit(0);
+		int d , off[3];
+		depthAndOffset( d , off );
+		for( int i=0 ; i<2 ; i++ ) for( int j=0 ; j<2 ; j++ ) for( int k=0 ; k<2 ; k++ )
+		{
+			int idx=Cube::CornerIndex(i,j,k);
+			children[idx].parent = this;
+			children[idx].children = NULL;
+			if( Initializer ) Initializer( children[idx] );
+			int off2[3];
+			off2[0] = (off[0]<<1)+i;
+			off2[1] = (off[1]<<1)+j;
+			off2[2] = (off[2]<<1)+k;
+			children[idx]._depthAndOffset = Index( d+1 , off2 );
+		}
 	}
 	return 1;
 }
@@ -164,6 +222,15 @@ void OctNode< NodeData >::centerAndWidth( Point3D<Real>& center , Real& width ) 
 }
 template< class NodeData >
 template< class Real >
+void OctNode< NodeData >::startAndWidth( Point3D<Real>& start , Real& width ) const
+{
+	int depth , offset[3];
+	depthAndOffset( depth , offset );
+	width = Real( 1.0 / (1<<depth) );
+	for( int dim=0 ; dim<DIMENSION ; dim++ ) start.coords[dim] = Real( offset[dim] ) * width;
+}
+template< class NodeData >
+template< class Real >
 bool OctNode< NodeData >::isInside( Point3D< Real > p ) const
 {
 	Point3D< Real > c;
@@ -182,6 +249,18 @@ inline void OctNode< NodeData >::CenterAndWidth(const long long& index,Point3D<R
 	offset[2]=(int((index>>OffsetShift3)&OffsetMask)+1)&(~(1<<depth));
 	width=Real(1.0/(1<<depth));
 	for(int dim=0;dim<DIMENSION;dim++){center.coords[dim]=Real(0.5+offset[dim])*width;}
+}
+template< class NodeData >
+template< class Real >
+inline void OctNode< NodeData >::StartAndWidth( const long long& index , Point3D< Real >& start , Real& width )
+{
+	int depth,offset[3];
+	depth = index&DepthMask;
+	offset[0] = (int((index>>OffsetShift1)&OffsetMask)+1)&(~(1<<depth));
+	offset[1] = (int((index>>OffsetShift2)&OffsetMask)+1)&(~(1<<depth));
+	offset[2] = (int((index>>OffsetShift3)&OffsetMask)+1)&(~(1<<depth));
+	width = Real(1.0/(1<<depth));
+	for( int dim=0 ; dim<DIMENSION ; dim++ ) start.coords[dim] = Real(offset[dim])*width;
 }
 
 template< class NodeData >
@@ -242,7 +321,7 @@ template< class NodeData >
 const OctNode< NodeData >* OctNode< NodeData >::nextBranch( const OctNode* current ) const
 {
 	if( !current->parent || current==this ) return NULL;
-	if(current-current->parent->children==Cube::CORNERS-1) return nextBranch( current->parent );
+	if( current-current->parent->children==Cube::CORNERS-1 ) return nextBranch( current->parent );
 	else return current+1;
 }
 template< class NodeData >
@@ -267,19 +346,22 @@ OctNode< NodeData >* OctNode< NodeData >::prevBranch( OctNode* current )
 }
 template< class NodeData >
 const OctNode< NodeData >* OctNode< NodeData >::nextLeaf(const OctNode* current) const{
-	if(!current){
+	if( !current )
+	{
 		const OctNode< NodeData >* temp=this;
-		while(temp->children){temp=&temp->children[0];}
+		while( temp->children ) temp=&temp->children[0];
 		return temp;
 	}
-	if(current->children){return current->nextLeaf();}
-	const OctNode* temp=nextBranch(current);
-	if(!temp){return NULL;}
-	else{return temp->nextLeaf();}
+	if( current->children ) return current->nextLeaf();
+	const OctNode* temp = nextBranch(current);
+	if( !temp ) return NULL;
+	else return temp->nextLeaf();
 }
 template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::nextLeaf(OctNode* current){
-	if(!current){
+OctNode< NodeData >* OctNode< NodeData >::nextLeaf( OctNode* current )
+{
+	if( !current )
+	{
 		OctNode< NodeData >* temp=this;
 		while(temp->children){temp=&temp->children[0];}
 		return temp;
@@ -319,486 +401,6 @@ void OctNode< NodeData >::printRange(void) const
 }
 
 template< class NodeData >
-void OctNode< NodeData >::AdjacencyCountFunction::Function(const OctNode< NodeData >* node1,const OctNode< NodeData >* node2){count++;}
-
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::processNodeNodes(OctNode* node,NodeAdjacencyFunction* F,int processCurrent){
-	if(processCurrent){F->Function(this,node);}
-	if(children){__processNodeNodes(node,F);}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::processNodeFaces(OctNode* node,NodeAdjacencyFunction* F,int fIndex,int processCurrent){
-	if(processCurrent){F->Function(this,node);}
-	if(children){
-		int c1,c2,c3,c4;
-		Cube::FaceCorners(fIndex,c1,c2,c3,c4);
-		__processNodeFaces(node,F,c1,c2,c3,c4);
-	}
-}
-template< class NodeData >
-template< class NodeAdjacencyFunction >
-void OctNode< NodeData >::processNodeFaces( const OctNode* node , NodeAdjacencyFunction* F , int fIndex , int processCurrent ) const
-{
-	if( processCurrent ) F->Function( this , node );
-	if(children)
-	{
-		int c1 , c2 , c3 , c4;
-		Cube::FaceCorners( fIndex , c1 , c2 , c3 , c4 );
-		__processNodeFaces( node , F , c1 , c2 , c3 , c4 );
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::processNodeEdges(OctNode* node,NodeAdjacencyFunction* F,int eIndex,int processCurrent){
-	if(processCurrent){F->Function(this,node);}
-	if(children){
-		int c1,c2;
-		Cube::EdgeCorners(eIndex,c1,c2);
-		__processNodeEdges(node,F,c1,c2);
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::processNodeCorners(OctNode* node,NodeAdjacencyFunction* F,int cIndex,int processCurrent){
-	if(processCurrent){F->Function(this,node);}
-	OctNode< NodeData >* temp=this;
-	while(temp->children){
-		temp=&temp->children[cIndex];
-		F->Function(temp,node);
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__processNodeNodes(OctNode* node,NodeAdjacencyFunction* F){
-	F->Function(&children[0],node);
-	F->Function(&children[1],node);
-	F->Function(&children[2],node);
-	F->Function(&children[3],node);
-	F->Function(&children[4],node);
-	F->Function(&children[5],node);
-	F->Function(&children[6],node);
-	F->Function(&children[7],node);
-	if(children[0].children){children[0].__processNodeNodes(node,F);}
-	if(children[1].children){children[1].__processNodeNodes(node,F);}
-	if(children[2].children){children[2].__processNodeNodes(node,F);}
-	if(children[3].children){children[3].__processNodeNodes(node,F);}
-	if(children[4].children){children[4].__processNodeNodes(node,F);}
-	if(children[5].children){children[5].__processNodeNodes(node,F);}
-	if(children[6].children){children[6].__processNodeNodes(node,F);}
-	if(children[7].children){children[7].__processNodeNodes(node,F);}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__processNodeEdges(OctNode* node,NodeAdjacencyFunction* F,int cIndex1,int cIndex2){
-	F->Function(&children[cIndex1],node);
-	F->Function(&children[cIndex2],node);
-	if(children[cIndex1].children){children[cIndex1].__processNodeEdges(node,F,cIndex1,cIndex2);}
-	if(children[cIndex2].children){children[cIndex2].__processNodeEdges(node,F,cIndex1,cIndex2);}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__processNodeFaces(OctNode* node,NodeAdjacencyFunction* F,int cIndex1,int cIndex2,int cIndex3,int cIndex4){
-	F->Function(&children[cIndex1],node);
-	F->Function(&children[cIndex2],node);
-	F->Function(&children[cIndex3],node);
-	F->Function(&children[cIndex4],node);
-	if(children[cIndex1].children){children[cIndex1].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
-	if(children[cIndex2].children){children[cIndex2].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
-	if(children[cIndex3].children){children[cIndex3].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
-	if(children[cIndex4].children){children[cIndex4].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
-}
-template< class NodeData >
-template< class NodeAdjacencyFunction >
-void OctNode< NodeData >::__processNodeFaces( const OctNode* node , NodeAdjacencyFunction* F , int cIndex1 , int cIndex2 , int cIndex3 , int cIndex4 ) const
-{
-	F->Function( &children[cIndex1] , node );
-	F->Function( &children[cIndex2] , node );
-	F->Function( &children[cIndex3] , node );
-	F->Function( &children[cIndex4] , node );
-	if( children[cIndex1].children ) children[cIndex1].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
-	if( children[cIndex2].children ) children[cIndex2].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
-	if( children[cIndex3].children ) children[cIndex3].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
-	if( children[cIndex4].children ) children[cIndex4].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessNodeAdjacentNodes(int maxDepth,OctNode* node1,int width1,OctNode* node2,int width2,NodeAdjacencyFunction* F,int processCurrent){
-	int c1[3],c2[3],w1,w2;
-	node1->centerIndex(maxDepth+1,c1);
-	node2->centerIndex(maxDepth+1,c2);
-	w1=node1->width(maxDepth+1);
-	w2=node2->width(maxDepth+1);
-
-	ProcessNodeAdjacentNodes(c1[0]-c2[0],c1[1]-c2[1],c1[2]-c2[2],node1,(width1*w1)>>1,node2,(width2*w2)>>1,w2,F,processCurrent);
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessNodeAdjacentNodes(int dx,int dy,int dz,
-													  OctNode< NodeData >* node1,int radius1,
-													  OctNode< NodeData >* node2,int radius2,int width2,
-													  NodeAdjacencyFunction* F,int processCurrent){
-	if(!Overlap(dx,dy,dz,radius1+radius2)){return;}
-	if(processCurrent){F->Function(node2,node1);}
-	if(!node2->children){return;}
-	__ProcessNodeAdjacentNodes(-dx,-dy,-dz,node1,radius1,node2,radius2,width2/2,F);
-}
-template< class NodeData >
-template<class TerminatingNodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessTerminatingNodeAdjacentNodes(int maxDepth,OctNode* node1,int width1,OctNode* node2,int width2,TerminatingNodeAdjacencyFunction* F,int processCurrent){
-	int c1[3],c2[3],w1,w2;
-	node1->centerIndex(maxDepth+1,c1);
-	node2->centerIndex(maxDepth+1,c2);
-	w1=node1->width(maxDepth+1);
-	w2=node2->width(maxDepth+1);
-
-	ProcessTerminatingNodeAdjacentNodes(c1[0]-c2[0],c1[1]-c2[1],c1[2]-c2[2],node1,(width1*w1)>>1,node2,(width2*w2)>>1,w2,F,processCurrent);
-}
-template< class NodeData >
-template<class TerminatingNodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessTerminatingNodeAdjacentNodes(int dx,int dy,int dz,
-																 OctNode< NodeData >* node1,int radius1,
-																 OctNode< NodeData >* node2,int radius2,int width2,
-																 TerminatingNodeAdjacencyFunction* F,int processCurrent)
-{
-	if(!Overlap(dx,dy,dz,radius1+radius2)){return;}
-	if(processCurrent){F->Function(node2,node1);}
-	if(!node2->children){return;}
-	__ProcessTerminatingNodeAdjacentNodes(-dx,-dy,-dz,node1,radius1,node2,radius2,width2/2,F);
-}
-template< class NodeData >
-template<class PointAdjacencyFunction>
-void OctNode< NodeData >::ProcessPointAdjacentNodes( int maxDepth , const int c1[3] , OctNode* node2 , int width2 , PointAdjacencyFunction* F , int processCurrent )
-{
-	int c2[3] , w2;
-	node2->centerIndex( maxDepth+1 , c2 );
-	w2 = node2->width( maxDepth+1 );
-	ProcessPointAdjacentNodes( c1[0]-c2[0] , c1[1]-c2[1] , c1[2]-c2[2] , node2 , (width2*w2)>>1 , w2 , F , processCurrent );
-}
-template< class NodeData >
-template<class PointAdjacencyFunction>
-void OctNode< NodeData >::ProcessPointAdjacentNodes(int dx,int dy,int dz,
-													   OctNode< NodeData >* node2,int radius2,int width2,
-													   PointAdjacencyFunction* F,int processCurrent)
-{
-	if( !Overlap(dx,dy,dz,radius2) ) return;
-	if( processCurrent ) F->Function(node2);
-	if( !node2->children ) return;
-	__ProcessPointAdjacentNodes( -dx , -dy , -dz , node2 , radius2 , width2>>1 , F );
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessFixedDepthNodeAdjacentNodes(int maxDepth,
-																OctNode< NodeData >* node1,int width1,
-																OctNode< NodeData >* node2,int width2,
-																int depth,NodeAdjacencyFunction* F,int processCurrent)
-{
-	int c1[3],c2[3],w1,w2;
-	node1->centerIndex(maxDepth+1,c1);
-	node2->centerIndex(maxDepth+1,c2);
-	w1=node1->width(maxDepth+1);
-	w2=node2->width(maxDepth+1);
-
-	ProcessFixedDepthNodeAdjacentNodes(c1[0]-c2[0],c1[1]-c2[1],c1[2]-c2[2],node1,(width1*w1)>>1,node2,(width2*w2)>>1,w2,depth,F,processCurrent);
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessFixedDepthNodeAdjacentNodes(int dx,int dy,int dz,
-																OctNode< NodeData >* node1,int radius1,
-																OctNode< NodeData >* node2,int radius2,int width2,
-																int depth,NodeAdjacencyFunction* F,int processCurrent)
-{
-	int d=node2->depth();
-	if(d>depth){return;}
-	if(!Overlap(dx,dy,dz,radius1+radius2)){return;}
-	if(d==depth){if(processCurrent){F->Function(node2,node1);}}
-	else{
-		if(!node2->children){return;}
-		__ProcessFixedDepthNodeAdjacentNodes(-dx,-dy,-dz,node1,radius1,node2,radius2,width2/2,depth-1,F);
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessMaxDepthNodeAdjacentNodes(int maxDepth,
-															  OctNode< NodeData >* node1,int width1,
-															  OctNode< NodeData >* node2,int width2,
-															  int depth,NodeAdjacencyFunction* F,int processCurrent)
-{
-	int c1[3],c2[3],w1,w2;
-	node1->centerIndex(maxDepth+1,c1);
-	node2->centerIndex(maxDepth+1,c2);
-	w1=node1->width(maxDepth+1);
-	w2=node2->width(maxDepth+1);
-	ProcessMaxDepthNodeAdjacentNodes(c1[0]-c2[0],c1[1]-c2[1],c1[2]-c2[2],node1,(width1*w1)>>1,node2,(width2*w2)>>1,w2,depth,F,processCurrent);
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::ProcessMaxDepthNodeAdjacentNodes(int dx,int dy,int dz,
-															  OctNode< NodeData >* node1,int radius1,
-															  OctNode< NodeData >* node2,int radius2,int width2,
-															  int depth,NodeAdjacencyFunction* F,int processCurrent)
-{
-	int d=node2->depth();
-	if(d>depth){return;}
-	if(!Overlap(dx,dy,dz,radius1+radius2)){return;}
-	if(processCurrent){F->Function(node2,node1);}
-	if(d<depth && node2->children){__ProcessMaxDepthNodeAdjacentNodes(-dx,-dy,-dz,node1,radius1,node2,radius2,width2>>1,depth-1,F);}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__ProcessNodeAdjacentNodes(int dx,int dy,int dz,
-														OctNode* node1,int radius1,
-														OctNode* node2,int radius2,int cWidth2,
-														NodeAdjacencyFunction* F)
-{
-	int cWidth=cWidth2>>1;
-	int radius=radius2>>1;
-	int o=ChildOverlap(dx,dy,dz,radius1+radius,cWidth);
-	if(o){
-		int dx1=dx-cWidth;
-		int dx2=dx+cWidth;
-		int dy1=dy-cWidth;
-		int dy2=dy+cWidth;
-		int dz1=dz-cWidth;
-		int dz2=dz+cWidth;
-		if(o&  1){F->Function(&node2->children[0],node1);if(node2->children[0].children){__ProcessNodeAdjacentNodes(dx1,dy1,dz1,node1,radius1,&node2->children[0],radius,cWidth,F);}}
-		if(o&  2){F->Function(&node2->children[1],node1);if(node2->children[1].children){__ProcessNodeAdjacentNodes(dx2,dy1,dz1,node1,radius1,&node2->children[1],radius,cWidth,F);}}
-		if(o&  4){F->Function(&node2->children[2],node1);if(node2->children[2].children){__ProcessNodeAdjacentNodes(dx1,dy2,dz1,node1,radius1,&node2->children[2],radius,cWidth,F);}}
-		if(o&  8){F->Function(&node2->children[3],node1);if(node2->children[3].children){__ProcessNodeAdjacentNodes(dx2,dy2,dz1,node1,radius1,&node2->children[3],radius,cWidth,F);}}
-		if(o& 16){F->Function(&node2->children[4],node1);if(node2->children[4].children){__ProcessNodeAdjacentNodes(dx1,dy1,dz2,node1,radius1,&node2->children[4],radius,cWidth,F);}}
-		if(o& 32){F->Function(&node2->children[5],node1);if(node2->children[5].children){__ProcessNodeAdjacentNodes(dx2,dy1,dz2,node1,radius1,&node2->children[5],radius,cWidth,F);}}
-		if(o& 64){F->Function(&node2->children[6],node1);if(node2->children[6].children){__ProcessNodeAdjacentNodes(dx1,dy2,dz2,node1,radius1,&node2->children[6],radius,cWidth,F);}}
-		if(o&128){F->Function(&node2->children[7],node1);if(node2->children[7].children){__ProcessNodeAdjacentNodes(dx2,dy2,dz2,node1,radius1,&node2->children[7],radius,cWidth,F);}}
-	}
-}
-template< class NodeData >
-template<class TerminatingNodeAdjacencyFunction>
-void OctNode< NodeData >::__ProcessTerminatingNodeAdjacentNodes(int dx,int dy,int dz,
-																   OctNode* node1,int radius1,
-																   OctNode* node2,int radius2,int cWidth2,
-																   TerminatingNodeAdjacencyFunction* F)
-{
-	int cWidth=cWidth2>>1;
-	int radius=radius2>>1;
-	int o=ChildOverlap(dx,dy,dz,radius1+radius,cWidth);
-	if(o){
-		int dx1=dx-cWidth;
-		int dx2=dx+cWidth;
-		int dy1=dy-cWidth;
-		int dy2=dy+cWidth;
-		int dz1=dz-cWidth;
-		int dz2=dz+cWidth;
-		if(o&  1){if(F->Function(&node2->children[0],node1) && node2->children[0].children){__ProcessTerminatingNodeAdjacentNodes(dx1,dy1,dz1,node1,radius1,&node2->children[0],radius,cWidth,F);}}
-		if(o&  2){if(F->Function(&node2->children[1],node1) && node2->children[1].children){__ProcessTerminatingNodeAdjacentNodes(dx2,dy1,dz1,node1,radius1,&node2->children[1],radius,cWidth,F);}}
-		if(o&  4){if(F->Function(&node2->children[2],node1) && node2->children[2].children){__ProcessTerminatingNodeAdjacentNodes(dx1,dy2,dz1,node1,radius1,&node2->children[2],radius,cWidth,F);}}
-		if(o&  8){if(F->Function(&node2->children[3],node1) && node2->children[3].children){__ProcessTerminatingNodeAdjacentNodes(dx2,dy2,dz1,node1,radius1,&node2->children[3],radius,cWidth,F);}}
-		if(o& 16){if(F->Function(&node2->children[4],node1) && node2->children[4].children){__ProcessTerminatingNodeAdjacentNodes(dx1,dy1,dz2,node1,radius1,&node2->children[4],radius,cWidth,F);}}
-		if(o& 32){if(F->Function(&node2->children[5],node1) && node2->children[5].children){__ProcessTerminatingNodeAdjacentNodes(dx2,dy1,dz2,node1,radius1,&node2->children[5],radius,cWidth,F);}}
-		if(o& 64){if(F->Function(&node2->children[6],node1) && node2->children[6].children){__ProcessTerminatingNodeAdjacentNodes(dx1,dy2,dz2,node1,radius1,&node2->children[6],radius,cWidth,F);}}
-		if(o&128){if(F->Function(&node2->children[7],node1) && node2->children[7].children){__ProcessTerminatingNodeAdjacentNodes(dx2,dy2,dz2,node1,radius1,&node2->children[7],radius,cWidth,F);}}
-	}
-}
-template< class NodeData >
-template<class PointAdjacencyFunction>
-void OctNode< NodeData >::__ProcessPointAdjacentNodes(int dx,int dy,int dz,
-														 OctNode* node2,int radius2,int cWidth2,
-														 PointAdjacencyFunction* F)
-{
-	int cWidth=cWidth2>>1;
-	int radius=radius2>>1;
-	int o=ChildOverlap(dx,dy,dz,radius,cWidth);
-	if( o )
-	{
-		int dx1=dx-cWidth;
-		int dx2=dx+cWidth;
-		int dy1=dy-cWidth;
-		int dy2=dy+cWidth;
-		int dz1=dz-cWidth;
-		int dz2=dz+cWidth;
-		if(o&  1){F->Function(&node2->children[0]);if(node2->children[0].children){__ProcessPointAdjacentNodes(dx1,dy1,dz1,&node2->children[0],radius,cWidth,F);}}
-		if(o&  2){F->Function(&node2->children[1]);if(node2->children[1].children){__ProcessPointAdjacentNodes(dx2,dy1,dz1,&node2->children[1],radius,cWidth,F);}}
-		if(o&  4){F->Function(&node2->children[2]);if(node2->children[2].children){__ProcessPointAdjacentNodes(dx1,dy2,dz1,&node2->children[2],radius,cWidth,F);}}
-		if(o&  8){F->Function(&node2->children[3]);if(node2->children[3].children){__ProcessPointAdjacentNodes(dx2,dy2,dz1,&node2->children[3],radius,cWidth,F);}}
-		if(o& 16){F->Function(&node2->children[4]);if(node2->children[4].children){__ProcessPointAdjacentNodes(dx1,dy1,dz2,&node2->children[4],radius,cWidth,F);}}
-		if(o& 32){F->Function(&node2->children[5]);if(node2->children[5].children){__ProcessPointAdjacentNodes(dx2,dy1,dz2,&node2->children[5],radius,cWidth,F);}}
-		if(o& 64){F->Function(&node2->children[6]);if(node2->children[6].children){__ProcessPointAdjacentNodes(dx1,dy2,dz2,&node2->children[6],radius,cWidth,F);}}
-		if(o&128){F->Function(&node2->children[7]);if(node2->children[7].children){__ProcessPointAdjacentNodes(dx2,dy2,dz2,&node2->children[7],radius,cWidth,F);}}
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__ProcessFixedDepthNodeAdjacentNodes(int dx,int dy,int dz,
-																  OctNode* node1,int radius1,
-																  OctNode* node2,int radius2,int cWidth2,
-																  int depth,NodeAdjacencyFunction* F)
-{
-	int cWidth=cWidth2>>1;
-	int radius=radius2>>1;
-	int o=ChildOverlap(dx,dy,dz,radius1+radius,cWidth);
-	if(o){
-		int dx1=dx-cWidth;
-		int dx2=dx+cWidth;
-		int dy1=dy-cWidth;
-		int dy2=dy+cWidth;
-		int dz1=dz-cWidth;
-		int dz2=dz+cWidth;
-		if(node2->depth()==depth){
-			if(o&  1){F->Function(&node2->children[0],node1);}
-			if(o&  2){F->Function(&node2->children[1],node1);}
-			if(o&  4){F->Function(&node2->children[2],node1);}
-			if(o&  8){F->Function(&node2->children[3],node1);}
-			if(o& 16){F->Function(&node2->children[4],node1);}
-			if(o& 32){F->Function(&node2->children[5],node1);}
-			if(o& 64){F->Function(&node2->children[6],node1);}
-			if(o&128){F->Function(&node2->children[7],node1);}
-		}
-		else{
-			if(o&  1){if(node2->children[0].children){__ProcessFixedDepthNodeAdjacentNodes(dx1,dy1,dz1,node1,radius1,&node2->children[0],radius,cWidth,depth,F);}}
-			if(o&  2){if(node2->children[1].children){__ProcessFixedDepthNodeAdjacentNodes(dx2,dy1,dz1,node1,radius1,&node2->children[1],radius,cWidth,depth,F);}}
-			if(o&  4){if(node2->children[2].children){__ProcessFixedDepthNodeAdjacentNodes(dx1,dy2,dz1,node1,radius1,&node2->children[2],radius,cWidth,depth,F);}}
-			if(o&  8){if(node2->children[3].children){__ProcessFixedDepthNodeAdjacentNodes(dx2,dy2,dz1,node1,radius1,&node2->children[3],radius,cWidth,depth,F);}}
-			if(o& 16){if(node2->children[4].children){__ProcessFixedDepthNodeAdjacentNodes(dx1,dy1,dz2,node1,radius1,&node2->children[4],radius,cWidth,depth,F);}}
-			if(o& 32){if(node2->children[5].children){__ProcessFixedDepthNodeAdjacentNodes(dx2,dy1,dz2,node1,radius1,&node2->children[5],radius,cWidth,depth,F);}}
-			if(o& 64){if(node2->children[6].children){__ProcessFixedDepthNodeAdjacentNodes(dx1,dy2,dz2,node1,radius1,&node2->children[6],radius,cWidth,depth,F);}}
-			if(o&128){if(node2->children[7].children){__ProcessFixedDepthNodeAdjacentNodes(dx2,dy2,dz2,node1,radius1,&node2->children[7],radius,cWidth,depth,F);}}
-		}
-	}
-}
-template< class NodeData >
-template<class NodeAdjacencyFunction>
-void OctNode< NodeData >::__ProcessMaxDepthNodeAdjacentNodes(int dx,int dy,int dz,
-																OctNode* node1,int radius1,
-																OctNode* node2,int radius2,int cWidth2,
-																int depth,NodeAdjacencyFunction* F)
-{
-	int cWidth=cWidth2>>1;
-	int radius=radius2>>1;
-	int o=ChildOverlap(dx,dy,dz,radius1+radius,cWidth);
-	if(o){
-		int dx1=dx-cWidth;
-		int dx2=dx+cWidth;
-		int dy1=dy-cWidth;
-		int dy2=dy+cWidth;
-		int dz1=dz-cWidth;
-		int dz2=dz+cWidth;
-		if(node2->depth()<=depth){
-			if(o&  1){F->Function(&node2->children[0],node1);}
-			if(o&  2){F->Function(&node2->children[1],node1);}
-			if(o&  4){F->Function(&node2->children[2],node1);}
-			if(o&  8){F->Function(&node2->children[3],node1);}
-			if(o& 16){F->Function(&node2->children[4],node1);}
-			if(o& 32){F->Function(&node2->children[5],node1);}
-			if(o& 64){F->Function(&node2->children[6],node1);}
-			if(o&128){F->Function(&node2->children[7],node1);}
-		}
-		if(node2->depth()<depth){
-			if(o&  1){if(node2->children[0].children){__ProcessMaxDepthNodeAdjacentNodes(dx1,dy1,dz1,node1,radius1,&node2->children[0],radius,cWidth,depth,F);}}
-			if(o&  2){if(node2->children[1].children){__ProcessMaxDepthNodeAdjacentNodes(dx2,dy1,dz1,node1,radius1,&node2->children[1],radius,cWidth,depth,F);}}
-			if(o&  4){if(node2->children[2].children){__ProcessMaxDepthNodeAdjacentNodes(dx1,dy2,dz1,node1,radius1,&node2->children[2],radius,cWidth,depth,F);}}
-			if(o&  8){if(node2->children[3].children){__ProcessMaxDepthNodeAdjacentNodes(dx2,dy2,dz1,node1,radius1,&node2->children[3],radius,cWidth,depth,F);}}
-			if(o& 16){if(node2->children[4].children){__ProcessMaxDepthNodeAdjacentNodes(dx1,dy1,dz2,node1,radius1,&node2->children[4],radius,cWidth,depth,F);}}
-			if(o& 32){if(node2->children[5].children){__ProcessMaxDepthNodeAdjacentNodes(dx2,dy1,dz2,node1,radius1,&node2->children[5],radius,cWidth,depth,F);}}
-			if(o& 64){if(node2->children[6].children){__ProcessMaxDepthNodeAdjacentNodes(dx1,dy2,dz2,node1,radius1,&node2->children[6],radius,cWidth,depth,F);}}
-			if(o&128){if(node2->children[7].children){__ProcessMaxDepthNodeAdjacentNodes(dx2,dy2,dz2,node1,radius1,&node2->children[7],radius,cWidth,depth,F);}}
-		}
-	}
-}
-template< class NodeData >
-inline int OctNode< NodeData >::ChildOverlap(int dx,int dy,int dz,int d,int cRadius2)
-{
-	int w1=d-cRadius2;
-	int w2=d+cRadius2;
-	int overlap=0;
-
-	int test=0,test1=0;
-	if(dx<w2 && dx>-w1){test =1;}
-	if(dx<w1 && dx>-w2){test|=2;}
-
-	if(!test){return 0;}
-	if(dz<w2 && dz>-w1){test1 =test;}
-	if(dz<w1 && dz>-w2){test1|=test<<4;}
-
-	if(!test1){return 0;}
-	if(dy<w2 && dy>-w1){overlap =test1;}
-	if(dy<w1 && dy>-w2){overlap|=test1<<2;}
-	return overlap;
-}
-
-template< class NodeData >
-template< class Real >
-OctNode< NodeData >* OctNode< NodeData >::getNearestLeaf(const Point3D<Real>& p){
-	Point3D<Real> center;
-	Real width;
-	OctNode< NodeData >* temp;
-	int cIndex;
-	if(!children){return this;}
-	centerAndWidth(center,width);
-	temp=this;
-	while(temp->children){
-		cIndex=CornerIndex(center,p);
-		temp=&temp->children[cIndex];
-		width/=2;
-		if(cIndex&1){center.coords[0]+=width/2;}
-		else		{center.coords[0]-=width/2;}
-		if(cIndex&2){center.coords[1]+=width/2;}
-		else		{center.coords[1]-=width/2;}
-		if(cIndex&4){center.coords[2]+=width/2;}
-		else		{center.coords[2]-=width/2;}
-	}
-	return temp;
-}
-template< class NodeData >
-template< class Real >
-const OctNode< NodeData >* OctNode< NodeData >::getNearestLeaf(const Point3D<Real>& p) const{
-	int nearest;
-	Real temp,dist2;
-	if(!children){return this;}
-	for(int i=0;i<Cube::CORNERS;i++){
-		temp=SquareDistance(children[i].center,p);
-		if(!i || temp<dist2){
-			dist2=temp;
-			nearest=i;
-		}
-	}
-	return children[nearest].getNearestLeaf(p);
-}
-
-template< class NodeData >
-int OctNode< NodeData >::CommonEdge(const OctNode< NodeData >* node1,int eIndex1,const OctNode< NodeData >* node2,int eIndex2){
-	int o1,o2,i1,i2,j1,j2;
-
-	Cube::FactorEdgeIndex(eIndex1,o1,i1,j1);
-	Cube::FactorEdgeIndex(eIndex2,o2,i2,j2);
-	if(o1!=o2){return 0;}
-
-	int dir[2];
-	int idx1[2];
-	int idx2[2];
-	switch(o1){
-		case 0:	dir[0]=1;	dir[1]=2;	break;
-		case 1:	dir[0]=0;	dir[1]=2;	break;
-		case 2:	dir[0]=0;	dir[1]=1;	break;
-	};
-	int d1,d2,off1[3],off2[3];
-	node1->depthAndOffset(d1,off1);
-	node2->depthAndOffset(d2,off2);
-	idx1[0]=off1[dir[0]]+(1<<d1)+i1;
-	idx1[1]=off1[dir[1]]+(1<<d1)+j1;
-	idx2[0]=off2[dir[0]]+(1<<d2)+i2;
-	idx2[1]=off2[dir[1]]+(1<<d2)+j2;
-	if(d1>d2){
-		idx2[0]<<=(d1-d2);
-		idx2[1]<<=(d1-d2);
-	}
-	else{
-		idx1[0]<<=(d2-d1);
-		idx1[1]<<=(d2-d1);
-	}
-	if(idx1[0]==idx2[0] && idx1[1]==idx2[1]){return 1;}
-	else									{return 0;}
-}
-template< class NodeData >
 template< class Real >
 int OctNode< NodeData >::CornerIndex(const Point3D<Real>& center,const Point3D<Real>& p){
 	int cIndex=0;
@@ -807,117 +409,25 @@ int OctNode< NodeData >::CornerIndex(const Point3D<Real>& center,const Point3D<R
 	if(p.coords[2]>center.coords[2]){cIndex|=4;}
 	return cIndex;
 }
-template< class NodeData >
-template< class NodeData2 >
-OctNode< NodeData >& OctNode< NodeData >::operator = ( const OctNode< NodeData2 >& node )
-{
-	int i;
-	if(children){delete[] children;}
-	children=NULL;
-
-	this->depth = node.depth;
-	for(i=0;i<DIMENSION;i++){this->offset[i] = node.offset[i];}
-	if(node.children){
-		initChildren();
-		for(i=0;i<Cube::CORNERS;i++){children[i] = node.children[i];}
-	}
-	return *this;
-}
-template< class NodeData >
-int OctNode< NodeData >::CompareForwardDepths(const void* v1,const void* v2){
-	return ((const OctNode< NodeData >*)v1)->depth-((const OctNode< NodeData >*)v2)->depth;
-}
-template< class NodeData >
-int OctNode< NodeData >::CompareByDepthAndXYZ( const void* v1 , const void* v2 )
-{
-	const OctNode< NodeData > *n1 = (*(const OctNode< NodeData >**)v1);
-	const OctNode< NodeData > *n2 = (*(const OctNode< NodeData >**)v2);
-	if( n1->d!=n2->d ) return int(n1->d)-int(n2->d);
-	else if( n1->off[0]!=n2->off[0] ) return int(n1->off[0]) - int(n2->off[0]);
-	else if( n1->off[1]!=n2->off[1] ) return int(n1->off[1]) - int(n2->off[1]);
-	else if( n1->off[2]!=n2->off[2] ) return int(n1->off[2]) - int(n2->off[2]);
-	return 0;
-}
-
-long long _InterleaveBits( int p[3] )
-{
-	long long key = 0;
-	for( int i=0 ; i<32 ; i++ ) key |= ( ( p[0] & (1<<i) )<<(2*i) ) | ( ( p[1] & (1<<i) )<<(2*i+1) ) | ( ( p[2] & (1<<i) )<<(2*i+2) );
-	return key;
-}
-template< class NodeData >
-int OctNode< NodeData >::CompareByDepthAndZIndex( const void* v1 , const void* v2 )
-{
-	const OctNode< NodeData >* n1 = (*(const OctNode< NodeData >**)v1);
-	const OctNode< NodeData >* n2 = (*(const OctNode< NodeData >**)v2);
-	int d1 , off1[3] , d2 , off2[3];
-	n1->depthAndOffset( d1 , off1 ) , n2->depthAndOffset( d2 , off2 );
-	if     ( d1>d2 ) return  1;
-	else if( d1<d2 ) return -1;
-	long long k1 = _InterleaveBits( off1 ) , k2 = _InterleaveBits( off2 );
-	if     ( k1>k2 ) return  1;
-	else if( k1<k2 ) return -1;
-	else             return  0;
-}
 
 template< class NodeData >
-int OctNode< NodeData >::CompareForwardPointerDepths( const void* v1 , const void* v2 )
-{
-	const OctNode< NodeData >* n1 = (*(const OctNode< NodeData >**)v1);
-	const OctNode< NodeData >* n2 = (*(const OctNode< NodeData >**)v2);
-	if(n1->d!=n2->d){return int(n1->d)-int(n2->d);}
-	while( n1->parent!=n2->parent )
-	{
-		n1=n1->parent;
-		n2=n2->parent;
-	}
-	if(n1->off[0]!=n2->off[0]){return int(n1->off[0])-int(n2->off[0]);}
-	if(n1->off[1]!=n2->off[1]){return int(n1->off[1])-int(n2->off[1]);}
-	return int(n1->off[2])-int(n2->off[2]);
-	return 0;
-}
-template< class NodeData >
-int OctNode< NodeData >::CompareBackwardDepths(const void* v1,const void* v2){
-	return ((const OctNode< NodeData >*)v2)->depth-((const OctNode< NodeData >*)v1)->depth;
-}
-template< class NodeData >
-int OctNode< NodeData >::CompareBackwardPointerDepths(const void* v1,const void* v2){
-	return (*(const OctNode< NodeData >**)v2)->depth()-(*(const OctNode< NodeData >**)v1)->depth();
-}
-template< class NodeData >
-template< class Real >
-inline int OctNode< NodeData >::Overlap2(const int &depth1,const int offSet1[DIMENSION],const Real& multiplier1,const int &depth2,const int offSet2[DIMENSION],const Real& multiplier2){
-	int d=depth2-depth1;
-	Real w=multiplier2+multiplier1*(1<<d);
-	Real w2=Real((1<<(d-1))-0.5);
-	if(
-		fabs(Real(offSet2[0]-(offSet1[0]<<d))-w2)>=w ||
-		fabs(Real(offSet2[1]-(offSet1[1]<<d))-w2)>=w ||
-		fabs(Real(offSet2[2]-(offSet1[2]<<d))-w2)>=w
-		){return 0;}
-	return 1;
-}
-template< class NodeData >
-inline int OctNode< NodeData >::Overlap(int c1,int c2,int c3,int dWidth){
-	if(c1>=dWidth || c1<=-dWidth || c2>=dWidth || c2<=-dWidth || c3>=dWidth || c3<=-dWidth){return 0;}
-	else{return 1;}
-}
-template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::faceNeighbor(int faceIndex,int forceChildren){return __faceNeighbor(faceIndex>>1,faceIndex&1,forceChildren);}
+OctNode< NodeData >* OctNode< NodeData >::faceNeighbor( int faceIndex , int forceChildren , void (*Initializer)( OctNode& ) ){return __faceNeighbor( faceIndex>>1 , faceIndex&1 , forceChildren , Initializer ); }
 template< class NodeData >
 const OctNode< NodeData >* OctNode< NodeData >::faceNeighbor(int faceIndex) const {return __faceNeighbor(faceIndex>>1,faceIndex&1);}
 template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::__faceNeighbor(int dir,int off,int forceChildren){
+OctNode< NodeData >* OctNode< NodeData >::__faceNeighbor( int dir , int off , int forceChildren , void (*Initializer)( OctNode& ) )
+{
 	if(!parent){return NULL;}
 	int pIndex=int(this-parent->children);
 	pIndex^=(1<<dir);
 	if((pIndex & (1<<dir))==(off<<dir)){return &parent->children[pIndex];}
 	else{
 		OctNode* temp=parent->__faceNeighbor(dir,off,forceChildren);
-		if(!temp){return NULL;}
-		if(!temp->children){
-			if(forceChildren){temp->initChildren();}
-			else{return temp;}
+		if( !temp ) return NULL;
+		if( !temp->children )
+		{
+			if( forceChildren ) temp->initChildren( Initializer );
+			else return temp;
 		}
 		return &temp->children[pIndex];
 	}
@@ -936,15 +446,16 @@ const OctNode< NodeData >* OctNode< NodeData >::__faceNeighbor(int dir,int off) 
 }
 
 template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::edgeNeighbor(int edgeIndex,int forceChildren){
+OctNode< NodeData >* OctNode< NodeData >::edgeNeighbor( int edgeIndex , int forceChildren , void (*Initializer)( OctNode& ) )
+{
 	int idx[2],o,i[2];
-	Cube::FactorEdgeIndex(edgeIndex,o,i[0],i[1]);
+	Cube::FactorEdgeIndex( edgeIndex , o , i[0] , i[1] );
 	switch(o){
 		case 0:	idx[0]=1;	idx[1]=2;	break;
 		case 1:	idx[0]=0;	idx[1]=2;	break;
 		case 2:	idx[0]=0;	idx[1]=1;	break;
 	};
-	return __edgeNeighbor(o,i,idx,forceChildren);
+	return __edgeNeighbor( o , i , idx , forceChildren , Initializer );
 }
 template< class NodeData >
 const OctNode< NodeData >* OctNode< NodeData >::edgeNeighbor(int edgeIndex) const {
@@ -987,7 +498,8 @@ const OctNode< NodeData >* OctNode< NodeData >::__edgeNeighbor(int o,const int i
 	else{return NULL;}
 }
 template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::__edgeNeighbor(int o,const int i[2],const int idx[2],int forceChildren){
+OctNode< NodeData >* OctNode< NodeData >::__edgeNeighbor( int o , const int i[2] , const int idx[2] , int forceChildren , void (*Initializer)( OctNode& ) )
+{
 	if(!parent){return NULL;}
 	int pIndex=int(this-parent->children);
 	int aIndex,x[DIMENSION];
@@ -1010,10 +522,11 @@ OctNode< NodeData >* OctNode< NodeData >::__edgeNeighbor(int o,const int i[2],co
 	}
 	else if(aIndex==3)	{	// I can get the neighbor from the parent's edge adjacent neighbor
 		OctNode* temp=parent->__edgeNeighbor(o,i,idx,forceChildren);
-		if(!temp){return NULL;}
-		if(!temp->children){
-			if(forceChildren){temp->initChildren();}
-			else{return temp;}
+		if( !temp ) return NULL;
+		if( !temp->children )
+		{
+			if( forceChildren ) temp->initChildren( Initializer );
+			else return temp;
 		}
 		return &temp->children[pIndex];
 	}
@@ -1069,7 +582,8 @@ const OctNode< NodeData >* OctNode< NodeData >::cornerNeighbor(int cornerIndex) 
 	else{return NULL;}
 }
 template< class NodeData >
-OctNode< NodeData >* OctNode< NodeData >::cornerNeighbor(int cornerIndex,int forceChildren){
+OctNode< NodeData >* OctNode< NodeData >::cornerNeighbor( int cornerIndex , int forceChildren , void (*Initializer)( OctNode& ) )
+{
 	int pIndex,aIndex=0;
 	if(!parent){return NULL;}
 
@@ -1080,11 +594,12 @@ OctNode< NodeData >* OctNode< NodeData >::cornerNeighbor(int cornerIndex,int for
 		return &parent->children[pIndex];
 	}
 	else if(aIndex==0){				// Agree on all bits
-		OctNode* temp=((OctNode*)parent)->cornerNeighbor(cornerIndex,forceChildren);
-		if(!temp){return NULL;}
-		if(!temp->children){
-			if(forceChildren){temp->initChildren();}
-			else{return temp;}
+		OctNode* temp=((OctNode*)parent)->cornerNeighbor( cornerIndex , forceChildren , Initializer );
+		if( !temp ) return NULL;
+		if( !temp->children )
+		{
+			if(forceChildren) temp->initChildren( Initializer );
+			else return temp;
 		}
 		return &temp->children[pIndex];
 	}
@@ -1120,1184 +635,455 @@ OctNode< NodeData >* OctNode< NodeData >::cornerNeighbor(int cornerIndex,int for
 	}
 	else{return NULL;}
 }
+
 ////////////////////////
-// OctNodeNeighborKey //
+// OctNode::Neighbors //
 ////////////////////////
 template< class NodeData >
-OctNode< NodeData >::Neighbors3::Neighbors3(void){clear();}
+template< unsigned int Width >
+OctNode< NodeData >::Neighbors< Width >::Neighbors( void ){ clear(); }
 template< class NodeData >
-void OctNode< NodeData >::Neighbors3::clear(void){
-	for(int i=0;i<3;i++){for(int j=0;j<3;j++){for(int k=0;k<3;k++){neighbors[i][j][k]=NULL;}}}
-}
+template< unsigned int Width >
+void OctNode< NodeData >::Neighbors< Width >::clear( void ){ for( int i=0 ; i<Width ; i++ ) for( int j=0 ; j<Width ; j++ ) for( int k=0 ; k<Width ; k++ ) neighbors[i][j][k]=NULL; }
+
+/////////////////////////////
+// OctNode::ConstNeighbors //
+/////////////////////////////
 template< class NodeData >
-OctNode< NodeData >::NeighborKey3::NeighborKey3( void ){ _depth=-1 , neighbors=NULL; }
+template< unsigned int Width >
+OctNode< NodeData >::ConstNeighbors< Width >::ConstNeighbors( void ){ clear(); }
 template< class NodeData >
-OctNode< NodeData >::NeighborKey3::NeighborKey3( const NeighborKey3& nKey3 )
+template< unsigned int Width >
+void OctNode< NodeData >::ConstNeighbors< Width >::clear( void ){ for( int i=0 ; i<Width ; i++ ) for( int j=0 ; j<Width ; j++ ) for( int k=0 ; k<Width ; k++ ) neighbors[i][j][k]=NULL; }
+
+//////////////////////////
+// OctNode::NeighborKey //
+//////////////////////////
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::NeighborKey( void ){ _depth=-1 , neighbors=NULL; }
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::NeighborKey( const NeighborKey& nKey )
 {
 	_depth = 0 , neighbors = NULL;
-	set( nKey3._depth );
-	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &nKey3.neighbors[d] , sizeof(Neighbors3) );
+	set( nKey._depth );
+	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &nKey.neighbors[d] , sizeof( Neighbors< Width > ) );
 }
 template< class NodeData >
-OctNode< NodeData >::NeighborKey3::~NeighborKey3(void)
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::~NeighborKey( void )
 {
 	if( neighbors ) delete[] neighbors;
 	neighbors = NULL;
 }
 
 template< class NodeData >
-void OctNode< NodeData >::NeighborKey3::set( int d )
+template< unsigned int LeftRadius , unsigned int RightRadius >
+void OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::set( int d )
 {
 	if( neighbors ) delete[] neighbors;
 	neighbors = NULL;
 	_depth = d;
 	if( d<0 ) return;
-	neighbors = new Neighbors3[d+1];
+	neighbors = new Neighbors< Width >[d+1];
 }
 template< class NodeData >
-template< class Real >
-bool OctNode< NodeData >::NeighborKey3::setChildNeighbors( Point3D< Real > p , int d , typename OctNode< NodeData >::Neighbors3& childNeighbors ) const
+template< unsigned int LeftRadius , unsigned int RightRadius >
+template< bool CreateNodes >
+bool OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getChildNeighbors( int cIdx , int d , Neighbors< Width >& cNeighbors , void (*Initializer)( OctNode& ) ) const
 {
-	if( !neighbors[d].neighbors[1][1][1] ) return false;
-	int i , j , k , x1 , y1 , z1 , x2 , y2 , z2;
-	Point3D< Real > c;
-	Real w;
-	neighbors[d].neighbors[1][1][1]->centerAndWidth( c , w );
-	int idx = CornerIndex( c , p );
-	Cube::FactorCornerIndex(   idx    , x1 , y1 , z1 );
-	Cube::FactorCornerIndex( (~idx)&7 , x2 , y2 , z2 );
+	Neighbors< Width >& pNeighbors = neighbors[d];
+	// Check that we actuall have a center node
+	if( !pNeighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] ) return false;
+	
+	// Get the indices of the child node that would contain the point (and its antipode)
+	int cx , cy , cz;
+	Cube::FactorCornerIndex( cIdx , cx , cy , cz );
 
-	if( !neighbors[d].neighbors[1][1][1]->children ) neighbors[d].neighbors[1][1][1]->initChildren();
-	for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-		childNeighbors.neighbors[x2+i][y2+j][z2+k] = &neighbors[d].neighbors[1][1][1]->children[Cube::CornerIndex(i,j,k)];
 
-	// Set the neighbors from across the faces
-	i=x1<<1;
-	if( neighbors[d].neighbors[i][1][1] )
+	// Iterate over the finer neighbors and set them (if you can)
+	// Here:
+	// (x,y,z) give the position of the finer nodes relative to the center,
+	// (_x,_y,_z) give a positive global position, up to an even offset, and
+	// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+	for( int z=-(int)LeftRadius ; z<=(int)RightRadius ; z++ )
 	{
-		if( !neighbors[d].neighbors[i][1][1]->children ) neighbors[d].neighbors[i][1][1]->initChildren();
-		for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][y2+j][z2+k] = &neighbors[d].neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-	}
-	j=y1<<1;
-	if( neighbors[d].neighbors[1][j][1] )
-	{
-		if( !neighbors[d].neighbors[1][j][1]->children ) neighbors[d].neighbors[1][j][1]->initChildren();
-		for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[x2+i][j][z2+k] = &neighbors[d].neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];
-	}
-	k=z1<<1;
-	if( neighbors[d].neighbors[1][1][k] )
-	{
-		if( !neighbors[d].neighbors[1][1][k]->children ) neighbors[d].neighbors[1][1][k]->initChildren();
-		for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[x2+i][y2+j][k] = &neighbors[d].neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];
-	}
-
-	// Set the neighbors from across the edges
-	i=x1<<1 , j=y1<<1;
-	if( neighbors[d].neighbors[i][j][1] )
-	{
-		if( !neighbors[d].neighbors[i][j][1]->children ) neighbors[d].neighbors[i][j][1]->initChildren();
-		for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][j][z2+k] = &neighbors[d].neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];
-	}
-	i=x1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[i][1][k] )
-	{
-		if( !neighbors[d].neighbors[i][1][k]->children ) neighbors[d].neighbors[i][1][k]->initChildren();
-		for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[i][y2+j][k] = &neighbors[d].neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];
-	}
-	j=y1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[1][j][k] )
-	{
-		if( !neighbors[d].neighbors[1][j][k]->children ) neighbors[d].neighbors[1][j][k]->initChildren();
-		for( i=0 ; i<2 ; i++ ) childNeighbors.neighbors[x2+i][j][k] = &neighbors[d].neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];
-	}
-
-	// Set the neighbor from across the corner
-	i=x1<<1 , j=y1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[i][j][k] )
-	{
-		if( !neighbors[d].neighbors[i][j][k]->children ) neighbors[d].neighbors[i][j][k]->initChildren();
-		childNeighbors.neighbors[i][j][k] = &neighbors[d].neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-	}
-	return true;
-}
-template< class NodeData >
-template< class Real >
-bool OctNode< NodeData >::NeighborKey3::getChildNeighbors( Point3D< Real > p , int d , typename OctNode< NodeData >::Neighbors3& childNeighbors ) const
-{
-	if( !neighbors[d].neighbors[1][1][1] ) return false;
-	int i , j , k , x1 , y1 , z1 , x2 , y2 , z2;
-	Point3D< Real > c;
-	Real w;
-	neighbors[d].neighbors[1][1][1]->centerAndWidth( c , w );
-	int idx = CornerIndex( c , p );
-	Cube::FactorCornerIndex(   idx    , x1 , y1 , z1 );
-	Cube::FactorCornerIndex( (~idx)&7 , x2 , y2 , z2 );
-
-	// Set the neighbors of the center cell
-	if( neighbors[d].neighbors[1][1][1] && neighbors[d].neighbors[1][1][1]->children )
-		for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-			childNeighbors.neighbors[x2+i][y2+j][z2+k] = &neighbors[d].neighbors[1][1][1]->children[Cube::CornerIndex(i,j,k)];
-
-	// Set the neighbors from across the faces
-	i=x1<<1;
-	if( neighbors[d].neighbors[i][1][1] && neighbors[d].neighbors[i][1][1]->children )
-		for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][y2+j][z2+k] = &neighbors[d].neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-	else 
-		for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][y2+j][z2+k] = NULL;
-	j=y1<<1;
-	if( neighbors[d].neighbors[1][j][1] && neighbors[d].neighbors[1][j][1]->children )
-		for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[x2+i][j][z2+k] = &neighbors[d].neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];
-	else
-		for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[x2+i][j][z2+k] = NULL;
-	k=z1<<1;
-	if( neighbors[d].neighbors[1][1][k] && neighbors[d].neighbors[1][1][k]->children )
-		for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[x2+i][y2+j][k] = &neighbors[d].neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];
-	else
-		for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[x2+i][y2+j][k] = NULL;
-
-	// Set the neighbors from across the edges
-	i=x1<<1 , j=y1<<1;
-	if( neighbors[d].neighbors[i][j][1] && neighbors[d].neighbors[i][j][1]->children )
-		for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][j][z2+k] = &neighbors[d].neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];
-	else
-		for( k=0 ; k<2 ; k++ ) childNeighbors.neighbors[i][j][z2+k] = NULL;
-	i=x1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[i][1][k] && neighbors[d].neighbors[i][1][k]->children )
-		for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[i][y2+j][k] = &neighbors[d].neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];
-	else
-		for( j=0 ; j<2 ; j++ ) childNeighbors.neighbors[i][y2+j][k] = NULL;
-	j=y1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[1][j][k] && neighbors[d].neighbors[1][j][k]->children )
-		for( i=0 ; i<2 ; i++ ) childNeighbors.neighbors[x2+i][j][k] = &neighbors[d].neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];
-	else
-		for( i=0 ; i<2 ; i++ ) childNeighbors.neighbors[x2+i][j][k] = NULL;
-
-	// Set the neighbor from across the corner
-	i=x1<<1 , j=y1<<1 , k=z1<<1;
-	if( neighbors[d].neighbors[i][j][k] && neighbors[d].neighbors[i][j][k]->children )
-		childNeighbors.neighbors[i][j][k] = &neighbors[d].neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-	else
-		childNeighbors.neighbors[i][j][k] = NULL;
-
-	return true;
-}
-template< class NodeData >
-template< class Real >
-typename OctNode< NodeData >::Neighbors3& OctNode< NodeData >::NeighborKey3::setNeighbors( OctNode< NodeData >* root , Point3D< Real > p , int d )
-{
-	if( !neighbors[d].neighbors[1][1][1] || !neighbors[d].neighbors[1][1][1]->isInside( p ) )
-	{
-		neighbors[d].clear();
-
-		if( !d ) neighbors[d].neighbors[1][1][1] = root;
-		else
+		int _z = (z+cz) + (LeftRadius<<1) , pz = ( _z>>1 ) , zz = z+LeftRadius;
+		for( int y=-(int)LeftRadius ; y<=(int)RightRadius ; y++ )
 		{
-			Neighbors3& temp = setNeighbors( root , p , d-1 );
+			int _y = (y+cy) + (LeftRadius<<1) , py = ( _y>>1 ) , yy = y+LeftRadius;
 
-			int i , j , k , x1 , y1 , z1 , x2 , y2 , z2;
-			Point3D< Real > c;
-			Real w;
-			temp.neighbors[1][1][1]->centerAndWidth( c , w );
-			int idx = CornerIndex( c , p );
-			Cube::FactorCornerIndex(   idx    , x1 , y1 , z1 );
-			Cube::FactorCornerIndex( (~idx)&7 , x2 , y2 , z2 );
-
-			if( !temp.neighbors[1][1][1]->children ) temp.neighbors[1][1][1]->initChildren();
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				neighbors[d].neighbors[x2+i][y2+j][z2+k] = &temp.neighbors[1][1][1]->children[Cube::CornerIndex(i,j,k)];
-
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if( temp.neighbors[i][1][1] )
+			int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+			for( int x=-(int)LeftRadius ; x<=(int)RightRadius ; x++ )
 			{
-				if( !temp.neighbors[i][1][1]->children ) temp.neighbors[i][1][1]->initChildren();
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = &temp.neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-			}
-			j=y1<<1;
-			if( temp.neighbors[1][j][1] )
-			{
-				if( !temp.neighbors[1][j][1]->children ) temp.neighbors[1][j][1]->initChildren();
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = &temp.neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];
-			}
-			k=z1<<1;
-			if( temp.neighbors[1][1][k] )
-			{
-				if( !temp.neighbors[1][1][k]->children ) temp.neighbors[1][1][k]->initChildren();
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[x2+i][y2+j][k] = &temp.neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];
-			}
+				int _x = (x+cx) + (LeftRadius<<1) , px = ( _x>>1 ) , xx = x+LeftRadius;
 
-			// Set the neighbors from across the edges
-			i=x1<<1 , j=y1<<1;
-			if( temp.neighbors[i][j][1] )
-			{
-				if( !temp.neighbors[i][j][1]->children ) temp.neighbors[i][j][1]->initChildren();
-				for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = &temp.neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];
-			}
-			i=x1<<1 , k=z1<<1;
-			if( temp.neighbors[i][1][k] )
-			{
-				if( !temp.neighbors[i][1][k]->children ) temp.neighbors[i][1][k]->initChildren();
-				for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = &temp.neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];
-			}
-			j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[1][j][k] )
-			{
-				if( !temp.neighbors[1][j][k]->children ) temp.neighbors[1][j][k]->initChildren();
-				for( i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = &temp.neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];
-			}
-
-			// Set the neighbor from across the corner
-			i=x1<<1 , j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[i][j][k] )
-			{
-				if( !temp.neighbors[i][j][k]->children ) temp.neighbors[i][j][k]->initChildren();
-				neighbors[d].neighbors[i][j][k] = &temp.neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-			}
-		}
-	}
-	return neighbors[d];
-}
-template< class NodeData >
-template< class Real >
-typename OctNode< NodeData >::Neighbors3& OctNode< NodeData >::NeighborKey3::getNeighbors( OctNode< NodeData >* root , Point3D< Real > p , int d )
-{
-	if( !neighbors[d].neighbors[1][1][1] || !neighbors[d].neighbors[1][1][1]->isInside( p ) )
-	{
-		neighbors[d].clear();
-
-		if( !d ) neighbors[d].neighbors[1][1][1] = root;
-		else
-		{
-			Neighbors3& temp = getNeighbors( root , p , d-1 );
-
-			int i , j , k , x1 , y1 , z1 , x2 , y2 , z2;
-			Point3D< Real > c;
-			Real w;
-			temp.neighbors[1][1][1]->centerAndWidth( c , w );
-			int idx = CornerIndex( c , p );
-			Cube::FactorCornerIndex(   idx    , x1 , y1 , z1 );
-			Cube::FactorCornerIndex( (~idx)&7 , x2 , y2 , z2 );
-
-			if( !temp.neighbors[1][1][1] || !temp.neighbors[1][1][1]->children )
-			{
-				fprintf( stderr , "[ERROR] Couldn't find node at appropriate depth\n" );
-				exit( 0 );
-			}
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				neighbors[d].neighbors[x2+i][y2+j][z2+k] = &temp.neighbors[1][1][1]->children[Cube::CornerIndex(i,j,k)];
-
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if( temp.neighbors[i][1][1] && temp.neighbors[i][1][1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = &temp.neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-			j=y1<<1;
-			if( temp.neighbors[1][j][1] && temp.neighbors[1][j][1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = &temp.neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];
-			k=z1<<1;
-			if( temp.neighbors[1][1][k] && temp.neighbors[1][1][k]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[x2+i][y2+j][k] = &temp.neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];
-
-			// Set the neighbors from across the edges
-			i=x1<<1 , j=y1<<1;
-			if( temp.neighbors[i][j][1] && temp.neighbors[i][j][1]->children )
-				for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = &temp.neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];
-			i=x1<<1 , k=z1<<1;
-			if( temp.neighbors[i][1][k] && temp.neighbors[i][1][k]->children )
-				for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = &temp.neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];
-			j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[1][j][k] && temp.neighbors[1][j][k]->children )
-				for( i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = &temp.neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];
-
-			// Set the neighbor from across the corner
-			i=x1<<1 , j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[i][j][k] && temp.neighbors[i][j][k]->children )
-				neighbors[d].neighbors[i][j][k] = &temp.neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-		}
-	}
-	return neighbors[d];
-}
-
-template< class NodeData >
-typename OctNode< NodeData >::Neighbors3& OctNode< NodeData >::NeighborKey3::setNeighbors( OctNode< NodeData >* node )
-{
-	int d = node->depth();
-	if( node==neighbors[d].neighbors[1][1][1] )
-	{
-		bool reset = false;
-		for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ ) if( !neighbors[d].neighbors[i][j][k] ) reset = true;
-		if( reset ) neighbors[d].neighbors[1][1][1] = NULL;
-	}
-	if( node!=neighbors[d].neighbors[1][1][1] )
-	{
-		neighbors[d].clear();
-
-		if( !node->parent ) neighbors[d].neighbors[1][1][1] = node;
-		else
-		{
-			int i,j,k,x1,y1,z1,x2,y2,z2;
-			int idx=int(node-node->parent->children);
-			Cube::FactorCornerIndex(  idx   ,x1,y1,z1);
-			Cube::FactorCornerIndex((~idx)&7,x2,y2,z2);
-			for(i=0;i<2;i++){
-				for(j=0;j<2;j++){
-					for(k=0;k<2;k++){
-						neighbors[d].neighbors[x2+i][y2+j][z2+k]=&node->parent->children[Cube::CornerIndex(i,j,k)];
-					}
-				}
-			}
-			Neighbors3& temp=setNeighbors(node->parent);
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if(temp.neighbors[i][1][1]){
-				if(!temp.neighbors[i][1][1]->children) temp.neighbors[i][1][1]->initChildren();
-				for(j=0;j<2;j++) for(k=0;k<2;k++) neighbors[d].neighbors[i][y2+j][z2+k]=&temp.neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-			}
-			j=y1<<1;
-			if(temp.neighbors[1][j][1]){
-				if(!temp.neighbors[1][j][1]->children){temp.neighbors[1][j][1]->initChildren();}
-				for(i=0;i<2;i++){for(k=0;k<2;k++){neighbors[d].neighbors[x2+i][j][z2+k]=&temp.neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];}}
-			}
-			k=z1<<1;
-			if(temp.neighbors[1][1][k]){
-				if(!temp.neighbors[1][1][k]->children){temp.neighbors[1][1][k]->initChildren();}
-				for(i=0;i<2;i++){for(j=0;j<2;j++){neighbors[d].neighbors[x2+i][y2+j][k]=&temp.neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];}}
-			}
-
-			// Set the neighbors from across the edges
-			i=x1<<1;	j=y1<<1;
-			if(temp.neighbors[i][j][1]){
-				if(!temp.neighbors[i][j][1]->children){temp.neighbors[i][j][1]->initChildren();}
-				for(k=0;k<2;k++){neighbors[d].neighbors[i][j][z2+k]=&temp.neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];}
-			}
-			i=x1<<1;	k=z1<<1;
-			if(temp.neighbors[i][1][k]){
-				if(!temp.neighbors[i][1][k]->children){temp.neighbors[i][1][k]->initChildren();}
-				for(j=0;j<2;j++){neighbors[d].neighbors[i][y2+j][k]=&temp.neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];}
-			}
-			j=y1<<1;	k=z1<<1;
-			if(temp.neighbors[1][j][k]){
-				if(!temp.neighbors[1][j][k]->children){temp.neighbors[1][j][k]->initChildren();}
-				for(i=0;i<2;i++){neighbors[d].neighbors[x2+i][j][k]=&temp.neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];}
-			}
-
-			// Set the neighbor from across the corner
-			i=x1<<1;	j=y1<<1;	k=z1<<1;
-			if(temp.neighbors[i][j][k]){
-				if(!temp.neighbors[i][j][k]->children){temp.neighbors[i][j][k]->initChildren();}
-				neighbors[d].neighbors[i][j][k]=&temp.neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-			}
-		}
-	}
-	return neighbors[d];
-}
-// Note the assumption is that if you enable an edge, you also enable adjacent faces.
-// And, if you enable a corner, you enable adjacent edges and faces.
-template< class NodeData >
-typename OctNode< NodeData >::Neighbors3& OctNode< NodeData >::NeighborKey3::setNeighbors( OctNode< NodeData >* node , bool flags[3][3][3] )
-{
-	int d = node->depth();
-	if( node==neighbors[d].neighbors[1][1][1] )
-	{
-		bool reset = false;
-		for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ ) if( flags[i][j][k] && !neighbors[d].neighbors[i][j][k] ) reset = true;
-		if( reset ) neighbors[d].neighbors[1][1][1] = NULL;
-	}
-	if( node!=neighbors[d].neighbors[1][1][1] )
-	{
-		neighbors[d].clear();
-
-		if( !node->parent ) neighbors[d].neighbors[1][1][1] = node;
-		else
-		{
-			int x1,y1,z1,x2,y2,z2;
-			int idx=int(node-node->parent->children);
-			Cube::FactorCornerIndex(  idx   ,x1,y1,z1);
-			Cube::FactorCornerIndex((~idx)&7,x2,y2,z2);
-			for( int i=0 ; i<2 ; i++ )
-				for( int j=0 ; j<2 ; j++ )
-					for( int k=0 ; k<2 ; k++ )
-						neighbors[d].neighbors[x2+i][y2+j][z2+k]=&node->parent->children[Cube::CornerIndex(i,j,k)];
-
-			Neighbors3& temp=setNeighbors( node->parent , flags );
-
-			// Set the neighbors from across the faces
-			{
-				int i=x1<<1;
-				if( temp.neighbors[i][1][1] )
+				if( CreateNodes )
 				{
-					if( flags[i][1][1] && !temp.neighbors[i][1][1]->children ) temp.neighbors[i][1][1]->initChildren();
-					if( temp.neighbors[i][1][1]->children ) for( int j=0 ; j<2 ; j++ ) for( int k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = &temp.neighbors[i][1][1]->children[Cube::CornerIndex(x2,j,k)];
-				}
-			}
-			{
-				int j = y1<<1;
-				if( temp.neighbors[1][j][1] )
-				{
-					if( flags[1][j][1] && !temp.neighbors[1][j][1]->children ) temp.neighbors[1][j][1]->initChildren();
-					if( temp.neighbors[1][j][1]->children ) for( int i=0 ; i<2 ; i++ ) for( int k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = &temp.neighbors[1][j][1]->children[Cube::CornerIndex(i,y2,k)];
-				}
-			}
-			{
-				int k = z1<<1;
-				if( temp.neighbors[1][1][k] )
-				{
-					if( flags[1][1][k] && !temp.neighbors[1][1][k]->children ) temp.neighbors[1][1][k]->initChildren();
-					if( temp.neighbors[1][1][k]->children ) for( int i=0 ; i<2 ; i++ ) for( int j=0 ; j<2 ; j++ ) neighbors[d].neighbors[x2+i][y2+j][k] = &temp.neighbors[1][1][k]->children[Cube::CornerIndex(i,j,z2)];
-				}
-			}
-
-			// Set the neighbors from across the edges
-			{
-				int i=x1<<1 , j=y1<<1;
-				if( temp.neighbors[i][j][1] )
-				{
-					if( flags[i][j][1] && !temp.neighbors[i][j][1]->children ) temp.neighbors[i][j][1]->initChildren();
-					if( temp.neighbors[i][j][1]->children ) for( int k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = &temp.neighbors[i][j][1]->children[Cube::CornerIndex(x2,y2,k)];
-				}
-			}
-			{
-				int i=x1<<1 , k=z1<<1;
-				if( temp.neighbors[i][1][k] )
-				{
-					if( flags[i][1][k] && !temp.neighbors[i][1][k]->children ) temp.neighbors[i][1][k]->initChildren();
-					if( temp.neighbors[i][1][k]->children ) for( int j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = &temp.neighbors[i][1][k]->children[Cube::CornerIndex(x2,j,z2)];
-				}
-			}
-			{
-				int j=y1<<1 , k=z1<<1;
-				if( temp.neighbors[1][j][k] )
-				{
-					if( flags[1][j][k] && !temp.neighbors[1][j][k]->children ) temp.neighbors[1][j][k]->initChildren();
-					if( temp.neighbors[1][j][k]->children ) for( int i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = &temp.neighbors[1][j][k]->children[Cube::CornerIndex(i,y2,z2)];
-				}
-			}
-
-			// Set the neighbor from across the corner
-			{
-				int i=x1<<1 , j=y1<<1 , k=z1<<1;
-				if( temp.neighbors[i][j][k] )
-				{
-					if( flags[i][j][k] && !temp.neighbors[i][j][k]->children ) temp.neighbors[i][j][k]->initChildren();
-					if( temp.neighbors[i][j][k]->children ) neighbors[d].neighbors[i][j][k] = &temp.neighbors[i][j][k]->children[Cube::CornerIndex(x2,y2,z2)];
-				}
-			}
-		}
-	}
-	return neighbors[d];
-}
-
-template< class NodeData >
-typename OctNode< NodeData >::Neighbors3& OctNode< NodeData >::NeighborKey3::getNeighbors( OctNode< NodeData >* node )
-{
-	int d=node->depth();
-	if(node!=neighbors[d].neighbors[1][1][1])
-	{
-		neighbors[d].clear();
-
-		if( !node->parent ) neighbors[d].neighbors[1][1][1] = node;
-		else
-		{
-			int i,j,k,x1,y1,z1,x2,y2,z2;
-			int idx=int(node-node->parent->children);
-			Cube::FactorCornerIndex(  idx   ,x1,y1,z1);
-			Cube::FactorCornerIndex((~idx)&7,x2,y2,z2);
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				neighbors[d].neighbors[x2+i][y2+j][z2+k] = node->parent->children + Cube::CornerIndex(i,j,k);
-
-			Neighbors3& temp=getNeighbors(node->parent);
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if( temp.neighbors[i][1][1] && temp.neighbors[i][1][1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = temp.neighbors[i][1][1]->children + Cube::CornerIndex(x2,j,k);
-			j=y1<<1;
-			if( temp.neighbors[1][j][1] && temp.neighbors[1][j][1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = temp.neighbors[1][j][1]->children + Cube::CornerIndex(i,y2,k);
-			k=z1<<1;
-			if( temp.neighbors[1][1][k] && temp.neighbors[1][1][k]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++) neighbors[d].neighbors[x2+i][y2+j][k] = temp.neighbors[1][1][k]->children + Cube::CornerIndex(i,j,z2);
-
-			// Set the neighbors from across the edges
-			i=x1<<1;	j=y1<<1;
-			if( temp.neighbors[i][j][1] && temp.neighbors[i][j][1]->children )
-				for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = temp.neighbors[i][j][1]->children + Cube::CornerIndex(x2,y2,k);
-			i=x1<<1;	k=z1<<1;
-			if( temp.neighbors[i][1][k] && temp.neighbors[i][1][k]->children )
-				for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = temp.neighbors[i][1][k]->children + Cube::CornerIndex(x2,j,z2);
-			j=y1<<1;	k=z1<<1;
-			if( temp.neighbors[1][j][k] && temp.neighbors[1][j][k]->children )
-				for( i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = temp.neighbors[1][j][k]->children + Cube::CornerIndex(i,y2,z2);
-
-			// Set the neighbor from across the corner
-			i=x1<<1;	j=y1<<1;	k=z1<<1;
-			if( temp.neighbors[i][j][k] && temp.neighbors[i][j][k]->children )
-				neighbors[d].neighbors[i][j][k] = temp.neighbors[i][j][k]->children + Cube::CornerIndex(x2,y2,z2);
-		}
-	}
-	return neighbors[node->depth()];
-}
-template< class NodeData >
-void OctNode< NodeData >::NeighborKey3::setNeighbors( OctNode< NodeData >* node , typename OctNode< NodeData >::Neighbors5& neighbors )
-{
-	neighbors.clear();
-	if( !node ) return;
-	if( !node->parent ) neighbors.neighbors[2][2][2] = node;
-	else
-	{
-		int c = int( node - node->parent->children );
-		const OctNode< NodeData >::Neighbors3& _neighbors = setNeighbors( node->parent );
-		switch( c )
-		{
-		case 0:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 1:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 2:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj-1][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 3:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj-1][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 4:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 5:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 6:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj-1][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		case 7:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] )
-				{
-					if( !_neighbors.neighbors[i][j][k]->children ) _neighbors.neighbors[i][j][k]->initChildren();
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj-1][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-				}
-			break;
-		}
-	}
-}
-template< class NodeData >
-void OctNode< NodeData >::NeighborKey3::getNeighbors( OctNode< NodeData >* node , typename OctNode< NodeData >::Neighbors5& neighbors )
-{
-	neighbors.clear();
-	if( !node ) return;
-	if( !node->parent ) neighbors.neighbors[2][2][2] = node;
-	else
-	{
-		int c = int( node - node->parent->children );
-		const OctNode< NodeData >::Neighbors3& _neighbors = getNeighbors( node->parent );
-		OctNode< NodeData >* const * _nodes = &_neighbors.neighbors[0][0][0];
-		const OctNode< NodeData >* const * _node;
-		const OctNode< NodeData >* __node;
-		int iS , iE , jS , jE , kS , kE;
-#define _S( i ) ( (i==0) ? 1 : 0 )
-#define _E( i ) ( (i==2) ? 1 : 2 )
-		switch( c )
-		{
-		case 0:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iE=_E(i) ; for( int j=0 ; j<3 ; j++ ){ jE=_E(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kE=_E(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=0 , iii=2*i ; ii<iE ; ii++ , iii++ ) for( int jj=0 , jjj=2*j ; jj<jE ; jj++ , jjj++ ) for( int kk=0 , kkk=2*k ; kk<kE ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 1:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iS=_S(i) ; for( int j=0 ; j<3 ; j++ ){ jE=_E(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kE=_E(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=iS , iii=2*i+iS-1 ; ii<2 ; ii++ , iii++ ) for( int jj=0 , jjj=2*j ; jj<jE ; jj++ , jjj++ ) for( int kk=0 , kkk=2*k ; kk<kE ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 2:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iE=_E(i) ; for( int j=0 ; j<3 ; j++ ){ jS=_S(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kE=_E(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=0 , iii=2*i ; ii<iE ; ii++ , iii++ ) for( int jj=jS , jjj=2*j+jS-1 ; jj<2 ; jj++ , jjj++ ) for( int kk=0 , kkk=2*k ; kk<kE; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 3:
-			_node = _nodes;
-			for( int i=0  ; i<3 ; i++ ){ iS=_S(i) ; for( int j=0 ; j<3 ; j++ ){ jS=_S(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kE=_E(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=iS , iii=2*i+iS-1 ; ii<2 ; ii++ , iii++ ) for( int jj=jS , jjj=2*j+jS-1 ; jj<2 ; jj++ , jjj++ ) for( int kk=0 , kkk=2*k ; kk<kE ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 4:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iE=_E(i) ; for( int j=0 ; j<3 ; j++ ){ jE=_E(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kS=_S(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=0 , iii=2*i ; ii<iE ; ii++ , iii++ ) for( int jj=0 , jjj=2*j ; jj<jE ; jj++ , jjj++ ) for( int kk=kS , kkk=2*k+kS-1 ; kk<2 ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 5:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iS=_S(i) ; for( int j=0 ; j<3 ; j++ ){ jE=_E(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kS=_S(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=iS , iii=2*i+iS-1 ; ii<2 ; ii++ , iii++ ) for( int jj=0 , jjj=2*j ; jj<jE ; jj++ , jjj++ ) for( int kk=kS , kkk=2*k+kS-1 ; kk<2 ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 6:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iE=_E(i) ; for( int j=0 ; j<3 ; j++ ){ jS=_S(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kS=_S(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=0 , iii=2*i ; ii<iE ; ii++ , iii++ ) for( int jj=jS , jjj=2*j+jS-1 ; jj<2 ; jj++ , jjj++ ) for( int kk=kS , kkk=2*k+kS-1 ; kk<2 ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		case 7:
-			_node = _nodes;
-			for( int i=0 ; i<3 ; i++ ){ iS=_S(i) ; for( int j=0 ; j<3 ; j++ ){ jS=_S(j) ; for( int k=0 ; k<3 ; k++ , _node++ ){ kS=_S(k) , __node = *_node;
-			if( __node && __node->children ) for( int ii=iS , iii=2*i+iS-1 ; ii<2 ; ii++ , iii++ ) for( int jj=jS , jjj=2*j+jS-1 ; jj<2 ; jj++ , jjj++ ) for( int kk=kS , kkk=2*k+kS-1 ; kk<2 ; kk++ , kkk++ )
-				neighbors.neighbors[iii][jjj][kkk] = __node->children + Cube::CornerIndex( ii , jj , kk );
-			} } }
-			break;
-		}
-#undef _S
-#undef _E
-	}
-}
-template< class NodeData >
-void OctNode< NodeData >::ConstNeighborKey3::getNeighbors( const OctNode< NodeData >* node , typename OctNode< NodeData >::ConstNeighbors5& neighbors )
-{
-	neighbors.clear();
-	if( !node ) return;
-	if( !node->parent ) neighbors.neighbors[2][2][2] = node;
-	else
-	{
-		int c = int( node - node->parent->children );
-		const OctNode< NodeData >::ConstNeighbors3& _neighbors = getNeighbors( node->parent );
-		switch( c )
-		{
-		case 0:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 1:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 2:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj-1][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 3:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=0 ; kk<( (k==2) ? 1 : 2 ) ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj-1][2*k+kk] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 4:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 5:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=0 ; jj<( (j==2) ? 1 : 2 ) ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 6:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=0 ; ii<( (i==2) ? 1 : 2 ) ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii][2*j+jj-1][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		case 7:
-			for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) for( int k=0 ; k<3 ; k++ )
-				if( _neighbors.neighbors[i][j][k] && _neighbors.neighbors[i][j][k]->children )
-					for( int ii=( (i==0) ? 1 : 0 ) ; ii<2 ; ii++ )
-						for( int jj=( (j==0) ? 1 : 0 ) ; jj<2 ; jj++ )
-							for( int kk=( (k==0) ? 1 : 0 ) ; kk<2 ; kk++ )
-								neighbors.neighbors[2*i+ii-1][2*j+jj-1][2*k+kk-1] = _neighbors.neighbors[i][j][k]->children + Cube::CornerIndex( ii , jj , kk );
-			break;
-		}
-	}
-}
-
-///////////////////////
-// ConstNeighborKey3 //
-///////////////////////
-template< class NodeData >
-OctNode< NodeData >::ConstNeighbors3::ConstNeighbors3(void){clear();}
-template< class NodeData >
-void OctNode< NodeData >::ConstNeighbors3::clear(void){
-	for(int i=0;i<3;i++){for(int j=0;j<3;j++){for(int k=0;k<3;k++){neighbors[i][j][k]=NULL;}}}
-}
-template< class NodeData >
-OctNode< NodeData >::ConstNeighborKey3::ConstNeighborKey3( void ){ _depth=-1 , neighbors=NULL; }
-template< class NodeData >
-OctNode< NodeData >::ConstNeighborKey3::ConstNeighborKey3( const ConstNeighborKey3& key3 )
-{
-	_depth = 0 , neighbors = NULL;
-	set( key3._depth );
-	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &key3.neighbors[d] , sizeof(ConstNeighbors3) );
-}
-template< class NodeData >
-OctNode< NodeData >::ConstNeighborKey3::~ConstNeighborKey3(void){
-	if( neighbors ) delete[] neighbors;
-	neighbors=NULL;
-}
-
-template< class NodeData >
-void OctNode< NodeData >::ConstNeighborKey3::set( int d )
-{
-	if( neighbors ) delete[] neighbors;
-	neighbors = NULL;
-	_depth = d;
-	if( d<0 ) return;
-	neighbors = new ConstNeighbors3[d+1];
-}
-template< class NodeData >
-typename OctNode< NodeData >::ConstNeighbors3& OctNode< NodeData >::ConstNeighborKey3::getNeighbors(const OctNode< NodeData >* node)
-{
-	int d=node->depth();
-	if( node!=neighbors[d].neighbors[1][1][1] )
-	{
-		neighbors[d].clear();
-
-		if(!node->parent) neighbors[d].neighbors[1][1][1]=node;
-		else
-		{
-			int i,j,k,x1,y1,z1,x2,y2,z2;
-			int idx=int(node-node->parent->children);
-			Cube::FactorCornerIndex(  idx   ,x1,y1,z1);
-			Cube::FactorCornerIndex((~idx)&7,x2,y2,z2);
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				neighbors[d].neighbors[x2+i][y2+j][z2+k] = node->parent->children + Cube::CornerIndex(i,j,k);
-
-			ConstNeighbors3& temp=getNeighbors(node->parent);
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if( temp.neighbors[i][1][1] && temp.neighbors[i][1][1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = temp.neighbors[i][1][1]->children + Cube::CornerIndex(x2,j,k);
-			j=y1<<1;
-			if( temp.neighbors[1][j][1] && temp.neighbors[1][j][1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = temp.neighbors[1][j][1]->children + Cube::CornerIndex(i,y2,k);
-			k=z1<<1;
-			if( temp.neighbors[1][1][k] && temp.neighbors[1][1][k]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[x2+i][y2+j][k] = temp.neighbors[1][1][k]->children + Cube::CornerIndex(i,j,z2);
-
-			// Set the neighbors from across the edges
-			i=x1<<1;	j=y1<<1;
-			if( temp.neighbors[i][j][1] && temp.neighbors[i][j][1]->children )
-				for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = temp.neighbors[i][j][1]->children + Cube::CornerIndex(x2,y2,k);
-			i=x1<<1;	k=z1<<1;
-			if( temp.neighbors[i][1][k] && temp.neighbors[i][1][k]->children )
-				for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = temp.neighbors[i][1][k]->children + Cube::CornerIndex(x2,j,z2);
-			j=y1<<1;	k=z1<<1;
-			if( temp.neighbors[1][j][k] && temp.neighbors[1][j][k]->children )
-				for( i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = temp.neighbors[1][j][k]->children + Cube::CornerIndex(i,y2,z2);
-
-			// Set the neighbor from across the corner
-			i=x1<<1;	j=y1<<1;	k=z1<<1;
-			if( temp.neighbors[i][j][k] && temp.neighbors[i][j][k]->children )
-				neighbors[d].neighbors[i][j][k] = temp.neighbors[i][j][k]->children + Cube::CornerIndex(x2,y2,z2);
-		}
-	}
-	return neighbors[node->depth()];
-}
-template< class NodeData >
-typename OctNode< NodeData >::ConstNeighbors3& OctNode< NodeData >::ConstNeighborKey3::getNeighbors( const OctNode< NodeData >* node , int minDepth )
-{
-	int d=node->depth();
-	if( d<minDepth ) fprintf( stderr , "[ERROR] Node depth lower than min-depth: %d < %d\n" , d , minDepth ) , exit( 0 );
-	if( node!=neighbors[d].neighbors[1][1][1] )
-	{
-		neighbors[d].clear();
-
-		if( d==minDepth ) neighbors[d].neighbors[1][1][1]=node;
-		else
-		{
-			int i,j,k,x1,y1,z1,x2,y2,z2;
-			int idx = int(node-node->parent->children);
-			Cube::FactorCornerIndex(  idx   ,x1,y1,z1);
-			Cube::FactorCornerIndex((~idx)&7,x2,y2,z2);
-
-			ConstNeighbors3& temp=getNeighbors( node->parent , minDepth );
-
-			//  Set the syblings
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				neighbors[d].neighbors[x2+i][y2+j][z2+k] = node->parent->children + Cube::CornerIndex(i,j,k);
-
-			// Set the neighbors from across the faces
-			i=x1<<1;
-			if( temp.neighbors[i][1][1] && temp.neighbors[i][1][1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][y2+j][z2+k] = temp.neighbors[i][1][1]->children + Cube::CornerIndex(x2,j,k);
-
-			j=y1<<1;
-			if( temp.neighbors[1][j][1] && temp.neighbors[1][j][1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[x2+i][j][z2+k] = temp.neighbors[1][j][1]->children + Cube::CornerIndex(i,y2,k);
-
-			k=z1<<1;
-			if( temp.neighbors[1][1][k] && temp.neighbors[1][1][k]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[x2+i][y2+j][k] = temp.neighbors[1][1][k]->children + Cube::CornerIndex(i,j,z2);
-
-			// Set the neighbors from across the edges
-			i=x1<<1 , j=y1<<1;
-			if( temp.neighbors[i][j][1] && temp.neighbors[i][j][1]->children )
-				for( k=0 ; k<2 ; k++ ) neighbors[d].neighbors[i][j][z2+k] = temp.neighbors[i][j][1]->children + Cube::CornerIndex(x2,y2,k);
-
-			i=x1<<1 , k=z1<<1;
-			if( temp.neighbors[i][1][k] && temp.neighbors[i][1][k]->children )
-				for( j=0 ; j<2 ; j++ ) neighbors[d].neighbors[i][y2+j][k] = temp.neighbors[i][1][k]->children + Cube::CornerIndex(x2,j,z2);
-
-			j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[1][j][k] && temp.neighbors[1][j][k]->children )
-				for( i=0 ; i<2 ; i++ ) neighbors[d].neighbors[x2+i][j][k] = temp.neighbors[1][j][k]->children + Cube::CornerIndex(i,y2,z2);
-
-			// Set the neighbor from across the corner
-			i=x1<<1 , j=y1<<1 , k=z1<<1;
-			if( temp.neighbors[i][j][k] && temp.neighbors[i][j][k]->children )
-				neighbors[d].neighbors[i][j][k] = temp.neighbors[i][j][k]->children + Cube::CornerIndex(x2,y2,z2);
-		}
-	}
-	return neighbors[node->depth()];
-}
-
-template< class NodeData > OctNode< NodeData >::Neighbors5::Neighbors5( void ){ clear(); }
-template< class NodeData > OctNode< NodeData >::ConstNeighbors5::ConstNeighbors5( void ){ clear(); }
-template< class NodeData >
-void OctNode< NodeData >::Neighbors5::clear( void )
-{
-	for( int i=0 ; i<5 ; i++ ) for( int j=0 ; j<5 ; j++ ) for( int k=0 ; k<5 ; k++ ) neighbors[i][j][k] = NULL;
-}
-template< class NodeData >
-void OctNode< NodeData >::ConstNeighbors5::clear( void )
-{
-	for( int i=0 ; i<5 ; i++ ) for( int j=0 ; j<5 ; j++ ) for( int k=0 ; k<5 ; k++ ) neighbors[i][j][k] = NULL;
-}
-template< class NodeData >
-OctNode< NodeData >::NeighborKey5::NeighborKey5( void )
-{
-	_depth = -1;
-	neighbors = NULL;
-}
-template< class NodeData >
-OctNode< NodeData >::ConstNeighborKey5::ConstNeighborKey5( void )
-{
-	_depth = -1;
-	neighbors = NULL;
-}
-template< class NodeData >
-OctNode< NodeData >::NeighborKey5::~NeighborKey5( void )
-{
-	if( neighbors ) delete[] neighbors;
-	neighbors = NULL;
-}
-template< class NodeData >
-OctNode< NodeData >::ConstNeighborKey5::~ConstNeighborKey5( void )
-{
-	if( neighbors ) delete[] neighbors;
-	neighbors = NULL;
-}
-template< class NodeData >
-void OctNode< NodeData >::NeighborKey5::set( int d )
-{
-	if( neighbors ) delete[] neighbors;
-	neighbors = NULL;
-	if(d<0) return;
-	_depth = d;
-	neighbors=new Neighbors5[d+1];
-}
-template< class NodeData >
-void OctNode< NodeData >::ConstNeighborKey5::set( int d )
-{
-	if( neighbors ) delete[] neighbors;
-	neighbors = NULL;
-	if(d<0) return;
-	_depth = d;
-	neighbors=new ConstNeighbors5[d+1];
-}
-template< class NodeData >
-typename OctNode< NodeData >::Neighbors5& OctNode< NodeData >::NeighborKey5::getNeighbors( OctNode* node )
-{
-	int d=node->depth();
-	if( node!=neighbors[d].neighbors[2][2][2] )
-	{
-		neighbors[d].clear();
-
-		if( !node->parent ) neighbors[d].neighbors[2][2][2]=node;
-		else
-		{
-			getNeighbors( node->parent );
-			Neighbors5& temp = neighbors[d-1];
-			int x1 , y1 , z1 , x2 , y2 , z2;
-			int idx = int( node - node->parent->children );
-			Cube::FactorCornerIndex( idx , x1 , y1 , z1 );
-
-			Neighbors5& n = neighbors[d];
-			Cube::FactorCornerIndex( (~idx)&7 , x2 , y2 , z2 );
-			int i , j , k;
-			int fx0 = x2+1 , fy0 = y2+1 , fz0 = z2+1;	// Indices of the bottom left corner of the parent within the 5x5x5
-			int cx1 = x1*2+1 , cy1 = y1*2+1 , cz1 = z1*2+1;
-			int cx2 = x2*2+1 , cy2 = y2*2+1 , cz2 = z2*2+1;
-			int fx1 = x1*3 , fy1 = y1*3 , fz1 = z1*3;
-			int fx2 = x2*4 , fy2 = y2*4 , fz2 = z2*4;
-
-			//  Set the syblings
-			for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-				n.neighbors[fx0+i][fy0+j][fz0+k] = node->parent->children + Cube::CornerIndex( i , j , k );
-
-			// Set the neighbors from across the faces
-			if( temp.neighbors[cx1][2][2] && temp.neighbors[cx1][2][2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy0+j][fz0+k] = temp.neighbors[cx1][2][2]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[2][cy1][2] && temp.neighbors[2][cy1][2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx0+i][fy1+j][fz0+k] = temp.neighbors[2][cy1][2]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[2][2][cz1] && temp.neighbors[2][2][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx0+i][fy0+j][fz1+k] = temp.neighbors[2][2][cz1]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[cx2][2][2] && temp.neighbors[cx2][2][2]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy0+j][fz0+k] = temp.neighbors[cx2][2][2]->children + Cube::CornerIndex( x1 , j , k );
-			if( temp.neighbors[2][cy2][2] && temp.neighbors[2][cy2][2]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx0+i][fy2  ][fz0+k] = temp.neighbors[2][cy2][2]->children + Cube::CornerIndex( i , y1 , k );
-			if( temp.neighbors[2][2][cz2] && temp.neighbors[2][2][cz2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx0+i][fy0+j][fz2  ] = temp.neighbors[2][2][cz2]->children + Cube::CornerIndex( i , j , z1 );
-
-			// Set the neighbors from across the edges
-			if( temp.neighbors[cx1][cy1][2] && temp.neighbors[cx1][cy1][2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy1+j][fz0+k] = temp.neighbors[cx1][cy1][2]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[cx1][2][cz1] && temp.neighbors[cx1][2][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy0+j][fz1+k] = temp.neighbors[cx1][2][cz1]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[2][cy1][cz1] && temp.neighbors[2][cy1][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx0+i][fy1+j][fz1+k] = temp.neighbors[2][cy1][cz1]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[cx1][cy2][2] && temp.neighbors[cx1][cy2][2]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy2  ][fz0+k] = temp.neighbors[cx1][cy2][2]->children + Cube::CornerIndex( i , y1 , k );
-			if( temp.neighbors[cx1][2][cz2] && temp.neighbors[cx1][2][cz2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx1+i][fy0+j][fz2  ] = temp.neighbors[cx1][2][cz2]->children + Cube::CornerIndex( i , j , z1 );
-			if( temp.neighbors[cx2][cy1][2] && temp.neighbors[cx2][cy1][2]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy1+j][fz0+k] = temp.neighbors[cx2][cy1][2]->children + Cube::CornerIndex( x1 , j , k );
-			if( temp.neighbors[2][cy1][cz2] && temp.neighbors[2][cy1][cz2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx0+i][fy1+j][fz2  ] = temp.neighbors[2][cy1][cz2]->children + Cube::CornerIndex( i , j , z1 );
-			if( temp.neighbors[cx2][2][cz1] && temp.neighbors[cx2][2][cz1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy0+j][fz1+k] = temp.neighbors[cx2][2][cz1]->children + Cube::CornerIndex( x1 , j , k );
-			if( temp.neighbors[2][cy2][cz1] && temp.neighbors[2][cy2][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx0+i][fy2  ][fz1+k] = temp.neighbors[2][cy2][cz1]->children + Cube::CornerIndex( i , y1 , k );
-			if( temp.neighbors[cx2][cy2][2] && temp.neighbors[cx2][cy2][2]->children )
-				for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy2  ][fz0+k] = temp.neighbors[cx2][cy2][2]->children + Cube::CornerIndex( x1 , y1 , k );
-			if( temp.neighbors[cx2][2][cz2] && temp.neighbors[cx2][2][cz2]->children )
-				for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx2  ][fy0+j][fz2  ] = temp.neighbors[cx2][2][cz2]->children + Cube::CornerIndex( x1 , j , z1 );
-			if( temp.neighbors[2][cy2][cz2] && temp.neighbors[2][cy2][cz2]->children )
-				for( i=0 ; i<2 ; i++ )
-					n.neighbors[fx0+i][fy2  ][fz2  ] = temp.neighbors[2][cy2][cz2]->children + Cube::CornerIndex( i , y1 , z1 );
-
-			// Set the neighbor from across the corners
-			if( temp.neighbors[cx1][cy1][cz1] && temp.neighbors[cx1][cy1][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy1+j][fz1+k] = temp.neighbors[cx1][cy1][cz1]->children + Cube::CornerIndex( i , j , k );
-			if( temp.neighbors[cx1][cy1][cz2] && temp.neighbors[cx1][cy1][cz2]->children )
-				for( i=0 ; i<2 ; i++ ) for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx1+i][fy1+j][fz2  ] = temp.neighbors[cx1][cy1][cz2]->children + Cube::CornerIndex( i , j , z1 );
-			if( temp.neighbors[cx1][cy2][cz1] && temp.neighbors[cx1][cy2][cz1]->children )
-				for( i=0 ; i<2 ; i++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx1+i][fy2  ][fz1+k] = temp.neighbors[cx1][cy2][cz1]->children + Cube::CornerIndex( i , y1 , k );
-			if( temp.neighbors[cx2][cy1][cz1] && temp.neighbors[cx2][cy1][cz1]->children )
-				for( j=0 ; j<2 ; j++ ) for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy1+j][fz1+k] = temp.neighbors[cx2][cy1][cz1]->children + Cube::CornerIndex( x1 , j , k );
-			if( temp.neighbors[cx1][cy2][cz2] && temp.neighbors[cx1][cy2][cz2]->children )
-				for( i=0 ; i<2 ; i++ )
-					n.neighbors[fx1+i][fy2  ][fz2  ] = temp.neighbors[cx1][cy2][cz2]->children + Cube::CornerIndex( i , y1 , z1 );
-			if( temp.neighbors[cx2][cy1][cz2] && temp.neighbors[cx2][cy1][cz2]->children )
-				for( j=0 ; j<2 ; j++ )
-					n.neighbors[fx2  ][fy1+j][fz2  ] = temp.neighbors[cx2][cy1][cz2]->children + Cube::CornerIndex( x1 , j , z1 );
-			if( temp.neighbors[cx2][cy2][cz1] && temp.neighbors[cx2][cy2][cz1]->children )
-				for( k=0 ; k<2 ; k++ )
-					n.neighbors[fx2  ][fy2  ][fz1+k] = temp.neighbors[cx2][cy2][cz1]->children + Cube::CornerIndex( x1 , y1 , k );
-			if( temp.neighbors[cx2][cy2][cz2] && temp.neighbors[cx2][cy2][cz2]->children )
-				n.neighbors[fx2  ][fy2  ][fz2  ] = temp.neighbors[cx2][cy2][cz2]->children + Cube::CornerIndex( x1 , y1 , z1 );
-		}
-	}
-	return neighbors[d];
-}
-template< class NodeData >
-typename OctNode< NodeData >::Neighbors5& OctNode< NodeData >::NeighborKey5::setNeighbors( OctNode* node , int xStart , int xEnd , int yStart , int yEnd , int zStart , int zEnd )
-{
-	int d=node->depth();
-	if( node!=neighbors[d].neighbors[2][2][2] )
-	{
-		neighbors[d].clear();
-
-		if( !node->parent ) neighbors[d].neighbors[2][2][2] = node;
-		else
-		{
-			setNeighbors( node->parent , xStart , xEnd , yStart , yEnd , zStart , zEnd );
-			Neighbors5& temp = neighbors[d-1];
-			int x1 , y1 , z1 , x2 , y2 , z2 , ii , jj , kk;
-			int idx = int( node-node->parent->children );
-			Cube::FactorCornerIndex( idx , x1 , y1 , z1 );
-
-			for( int i=xStart ; i<xEnd ; i++ )
-			{
-				x2 = i+x1;
-				ii = x2&1;
-				x2 = 1+(x2>>1);
-				for( int j=yStart ; j<yEnd ; j++ )
-				{
-					y2 = j+y1;
-					jj = y2&1;
-					y2 = 1+(y2>>1);
-					for( int k=zStart ; k<zEnd ; k++ )
+					if( pNeighbors.neighbors[px][py][pz] )
 					{
-						z2 = k+z1;
-						kk = z2&1;
-						z2 = 1+(z2>>1);
-						if(temp.neighbors[x2][y2][z2] )
+						if( !pNeighbors.neighbors[px][py][pz]->children ) pNeighbors.neighbors[px][py][pz]->initChildren( Initializer );
+						cNeighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+					}
+					else cNeighbors.neighbors[xx][yy][zz] = NULL;
+				}
+				else
+				{
+					if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+						cNeighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+					else cNeighbors.neighbors[xx][yy][zz] = NULL;
+				}
+			}
+		}
+	}
+	return true;
+}
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+template< bool CreateNodes , class Real >
+bool OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getChildNeighbors( Point3D< Real > p , int d , Neighbors< Width >& cNeighbors , void (*Initializer)( OctNode& ) ) const
+{
+	Neighbors< Width >& pNeighbors = neighbors[d];
+	// Check that we actuall have a center node
+	if( !pNeighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] ) return false;
+	Point3D< Real > c;
+	Real w;
+	pNeighbors.neighbors[LeftRadius][LeftRadius][LeftRadius]->centerAndWidth( c , w );
+	return getChildNeighbors< CreateNodes >( CornerIndex( c , p ) , d , cNeighbors , Initializer );
+}
+
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+template< bool CreateNodes >
+typename OctNode< NodeData >::template Neighbors< LeftRadius+RightRadius+1 >& OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getNeighbors( OctNode< NodeData >* node , void (*Initializer)( OctNode& ) )
+{
+	Neighbors< Width >& neighbors = this->neighbors[ node->depth() ];
+	if( node==neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] )
+	{
+		bool reset = false;
+		for( int i=0 ; i<Width ; i++ ) for( int j=0 ; j<Width ; j++ ) for( int k=0 ; k<Width ; k++ ) if( !neighbors.neighbors[i][j][k] ) reset = true;
+		if( reset ) neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] = NULL;
+	}
+	if( node!=neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] )
+	{
+		neighbors.clear();
+
+		if( !node->parent ) neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] = node;
+		else
+		{
+			Neighbors< Width >& pNeighbors = getNeighbors< CreateNodes >( node->parent , Initializer );
+
+			// Get the indices of the child node that would contain the point (and its antipode)
+			int cx , cy , cz;
+			Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
+
+
+			// Iterate over the finer neighbors and set them (if you can)
+			// Here:
+			// (x,y,z) give the position of the finer nodes relative to the center,
+			// (_x,_y,_z) give a positive global position, up to an even offset, and
+			// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+			for( int z=-(int)LeftRadius ; z<=(int)RightRadius ; z++ )
+			{
+				int _z = (z+cz) + (LeftRadius<<1) , pz = ( _z>>1 ) , zz = z+LeftRadius;
+				for( int y=-(int)LeftRadius ; y<=(int)RightRadius ; y++ )
+				{
+					int _y = (y+cy) + (LeftRadius<<1) , py = ( _y>>1 ) , yy = y+LeftRadius;
+
+					int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+					for( int x=-(int)LeftRadius ; x<=(int)RightRadius ; x++ )
+					{
+						int _x = (x+cx) + (LeftRadius<<1) , px = ( _x>>1 ) , xx = x+LeftRadius;
+						if( CreateNodes )
 						{
-							if( !temp.neighbors[x2][y2][z2]->children ) temp.neighbors[x2][y2][z2]->initChildren();
-							neighbors[d].neighbors[i][j][k] = temp.neighbors[x2][y2][z2]->children + Cube::CornerIndex(ii,jj,kk);
+							if( pNeighbors.neighbors[px][py][pz] )
+							{
+								if( !pNeighbors.neighbors[px][py][pz]->children ) pNeighbors.neighbors[px][py][pz]->initChildren( Initializer );
+								neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+							}
+							else neighbors.neighbors[xx][yy][zz] = NULL;
+						}
+						else
+						{
+							if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+								neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+							else neighbors.neighbors[xx][yy][zz] = NULL;
 						}
 					}
 				}
 			}
 		}
 	}
-	return neighbors[d];
+	return neighbors;
 }
 template< class NodeData >
-typename OctNode< NodeData >::ConstNeighbors5& OctNode< NodeData >::ConstNeighborKey5::getNeighbors( const OctNode* node )
+template< unsigned int LeftRadius , unsigned int RightRadius >
+template< bool CreateNodes , unsigned int _LeftRadius , unsigned int _RightRadius >
+void OctNode< NodeData >::NeighborKey< LeftRadius , RightRadius >::getNeighbors( OctNode< NodeData >* node , Neighbors< _LeftRadius + _RightRadius + 1 >& neighbors , void (*Initializer)( OctNode& ) )
 {
-	int d=node->depth();
-	if( node!=neighbors[d].neighbors[2][2][2] )
+	neighbors.clear();
+	if( !node ) return;
+
+	// [WARNING] This estimate of the required radius is somewhat conservative if the radius is odd (depending on where the node is relative to its parent)
+	const unsigned int _PLeftRadius = (_LeftRadius+1)/2 , _PRightRadius = (_RightRadius+1)/2;
+	// If we are at the root of the tree, we are done
+	if( !node->parent ) neighbors.neighbors[_LeftRadius][_LeftRadius][_LeftRadius] = node;
+	// If we can get the data from the the key for the parent node, do that
+	else if( _PLeftRadius<=LeftRadius && _PRightRadius<=RightRadius )
 	{
-		neighbors[d].clear();
+		getNeighbors< CreateNodes >( node->parent , Initializer );
+		const Neighbors< LeftRadius + RightRadius + 1 >& pNeighbors = this->neighbors[ node->depth()-1 ];
+		// Get the indices of the child node that would contain the point (and its antipode)
+		int cx , cy , cz;
+		Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
 
-		if(!node->parent) neighbors[d].neighbors[2][2][2]=node;
-		else
+
+		// Iterate over the finer neighbors
+		// Here:
+		// (x,y,z) give the position of the finer nodes relative to the center,
+		// (_x,_y,_z) give a positive global position, up to an even offset, and
+		// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+		for( int z=-(int)_LeftRadius ; z<=(int)_RightRadius ; z++ )
 		{
-			getNeighbors( node->parent );
-			ConstNeighbors5& temp = neighbors[d-1];
-			int x1,y1,z1,x2,y2,z2,ii,jj,kk;
-			int idx=int(node-node->parent->children);
-			Cube::FactorCornerIndex(idx,x1,y1,z1);
-
-			for(int i=0;i<5;i++)
+			int _z = (z+cz) + (_LeftRadius<<1) , pz = ( _z>>1 ) - _LeftRadius + LeftRadius , zz = z + _LeftRadius;
+			for( int y=-(int)_LeftRadius ; y<=(int)_RightRadius ; y++ )
 			{
-				x2=i+x1;
-				ii=x2&1;
-				x2=1+(x2>>1);
-				for(int j=0;j<5;j++)
+				int _y = (y+cy) + (_LeftRadius<<1) , py = ( _y>>1 ) - _LeftRadius + LeftRadius , yy = y + _LeftRadius;
+
+				int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+				for( int x=-(int)_LeftRadius ; x<=(int)_RightRadius ; x++ )
 				{
-					y2=j+y1;
-					jj=y2&1;
-					y2=1+(y2>>1);
-					for(int k=0;k<5;k++)
+					int _x = (x+cx) + (_LeftRadius<<1) , px = ( _x>>1 ) - _LeftRadius + LeftRadius , xx = x + _LeftRadius;
+					if( CreateNodes )
 					{
-						z2=k+z1;
-						kk=z2&1;
-						z2=1+(z2>>1);
-						if(temp.neighbors[x2][y2][z2] && temp.neighbors[x2][y2][z2]->children)
-							neighbors[d].neighbors[i][j][k] = temp.neighbors[x2][y2][z2]->children + Cube::CornerIndex(ii,jj,kk);
+						if( pNeighbors.neighbors[px][py][pz] )
+						{
+							if( !pNeighbors.neighbors[px][py][pz]->children ) pNeighbors.neighbors[px][py][pz]->initChildren( Initializer );
+							neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+						}
+						else neighbors.neighbors[xx][yy][zz] = NULL;
+					}
+					else
+					{
+						if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+							neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+						else neighbors.neighbors[xx][yy][zz] = NULL;
 					}
 				}
 			}
 		}
 	}
-	return neighbors[d];
+	// Otherwise recurse
+	else
+	{
+		Neighbors< _PLeftRadius + _PRightRadius + 1 > pNeighbors;
+		getNeighbors< CreateNodes , _PLeftRadius , _PRightRadius >( node->parent , pNeighbors , Initializer );
+
+		// Get the indices of the child node that would contain the point (and its antipode)
+		int cx , cy , cz;
+		Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
+
+
+		// Iterate over the finer neighbors
+		// Here:
+		// (x,y,z) give the position of the finer nodes relative to the center,
+		// (_x,_y,_z) give a positive global position, up to an even offset, and
+		// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+		for( int z=-(int)_LeftRadius ; z<=(int)_RightRadius ; z++ )
+		{
+			int _z = (z+cz) + (_LeftRadius<<1) , pz = ( _z>>1 ) - _LeftRadius + _PLeftRadius , zz = z + _LeftRadius;
+			for( int y=-(int)_LeftRadius ; y<=(int)_RightRadius ; y++ )
+			{
+				int _y = (y+cy) + (_LeftRadius<<1) , py = ( _y>>1 ) - _LeftRadius + _PLeftRadius , yy = y + _LeftRadius;
+
+				int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+				for( int x=-(int)_LeftRadius ; x<=(int)_RightRadius ; x++ )
+				{
+					int _x = (x+cx) + (_LeftRadius<<1) , px = ( _x>>1 ) - _LeftRadius + _PLeftRadius , xx = x + _LeftRadius;
+					if( CreateNodes )
+					{
+						if( pNeighbors.neighbors[px][py][pz] )
+						{
+							if( !pNeighbors.neighbors[px][py][pz]->children ) pNeighbors.neighbors[px][py][pz]->initChildren( Initializer );
+							neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+						}
+						else neighbors.neighbors[xx][yy][zz] = NULL;
+					}
+					else
+					{
+						if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+							neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+						else neighbors.neighbors[xx][yy][zz] = NULL;
+					}
+				}
+			}
+		}
+	}
 }
 
+///////////////////////////////
+// OctNode::ConstNeighborKey //
+///////////////////////////////
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::ConstNeighborKey( void ){ _depth=-1 , neighbors=NULL; }
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::ConstNeighborKey( const ConstNeighborKey& key )
+{
+	_depth = 0 , neighbors = NULL;
+	set( key._depth );
+	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &key.neighbors[d] , sizeof( ConstNeighbors< Width > ) );
+}
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::~ConstNeighborKey( void )
+{
+	if( neighbors ) delete[] neighbors;
+	neighbors=NULL;
+}
+
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+void OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::set( int d )
+{
+	if( neighbors ) delete[] neighbors;
+	neighbors = NULL;
+	_depth = d;
+	if( d<0 ) return;
+	neighbors = new ConstNeighbors< Width >[d+1];
+}
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+typename OctNode< NodeData >::template ConstNeighbors< LeftRadius+RightRadius+1 >& OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::getNeighbors( const OctNode< NodeData >* node )
+{
+	ConstNeighbors< Width >& neighbors = this->neighbors[ node->depth() ];
+	if( node!=neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius])
+	{
+		neighbors.clear();
+
+		if( !node->parent ) neighbors.neighbors[LeftRadius][LeftRadius][LeftRadius] = node;
+		else
+		{
+			ConstNeighbors< Width >& pNeighbors = getNeighbors( node->parent );
+
+			// Get the indices of the child node that would contain the point (and its antipode)
+			int cx , cy , cz;
+			Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
+
+
+			// Iterate over the finer neighbors and set them (if you can)
+			// Here:
+			// (x,y,z) give the position of the finer nodes relative to the center,
+			// (_x,_y,_z) give a positive global position, up to an even offset, and
+			// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+			for( int z=-(int)LeftRadius ; z<=(int)RightRadius ; z++ )
+			{
+				int _z = (z+cz) + (LeftRadius<<1) , pz = ( _z>>1 ) , zz = z+LeftRadius;
+				for( int y=-(int)LeftRadius ; y<=(int)RightRadius ; y++ )
+				{
+					int _y = (y+cy) + (LeftRadius<<1) , py = ( _y>>1 ) , yy = y+LeftRadius;
+
+					int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+					for( int x=-(int)LeftRadius ; x<=(int)RightRadius ; x++ )
+					{
+						int _x = (x+cx) + (LeftRadius<<1) , px = ( _x>>1 ) , xx = x+LeftRadius;
+						if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+							neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+						else
+							neighbors.neighbors[xx][yy][zz] = NULL;
+					}
+				}
+			}
+		}
+	}
+	return neighbors;
+}
+template< class NodeData >
+template< unsigned int LeftRadius , unsigned int RightRadius >
+template< unsigned int _LeftRadius , unsigned int _RightRadius >
+void OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::getNeighbors( const OctNode< NodeData >* node , ConstNeighbors< _LeftRadius+_RightRadius+1 >& neighbors )
+{
+	neighbors.clear();
+	if( !node ) return;
+
+	// [WARNING] This estimate of the required radius is somewhat conservative if the readius is odd (depending on where the node is relative to its parent)
+	const unsigned int _PLeftRadius = (_LeftRadius+1)/2 , _PRightRadius = (_RightRadius+1)/2;
+	// If we are at the root of the tree, we are done
+	if( !node->parent ) neighbors.neighbors[_LeftRadius][_LeftRadius][_LeftRadius] = node;
+	// If we can get the data from the the key for the parent node, do that
+	else if( _PLeftRadius<=LeftRadius && _PRightRadius<=RightRadius )
+	{
+		getNeighbors( node->parent );
+		const ConstNeighbors< LeftRadius + RightRadius + 1 >& pNeighbors = this->neighbors[ node->depth()-1 ];
+		// Get the indices of the child node that would contain the point (and its antipode)
+		int cx , cy , cz;
+		Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
+
+
+		// Iterate over the finer neighbors
+		// Here:
+		// (x,y,z) give the position of the finer nodes relative to the center,
+		// (_x,_y,_z) give a positive global position, up to an even offset, and
+		// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+		for( int z=-(int)_LeftRadius ; z<=(int)_RightRadius ; z++ )
+		{
+			int _z = (z+cz) + (_LeftRadius<<1) , pz = ( _z>>1 ) - _LeftRadius + LeftRadius , zz = z + _LeftRadius;
+			for( int y=-(int)_LeftRadius ; y<=(int)_RightRadius ; y++ )
+			{
+				int _y = (y+cy) + (_LeftRadius<<1) , py = ( _y>>1 ) - _LeftRadius + LeftRadius , yy = y + _LeftRadius;
+
+				int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+				for( int x=-(int)_LeftRadius ; x<=(int)_RightRadius ; x++ )
+				{
+					int _x = (x+cx) + (_LeftRadius<<1) , px = ( _x>>1 ) - _LeftRadius + LeftRadius , xx = x + _LeftRadius;
+					if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children ) 
+						neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+					else
+						neighbors.neighbors[xx][yy][zz] = NULL;
+				}
+			}
+		}
+	}
+	// Otherwise recurse
+	else
+	{
+		ConstNeighbors< _PLeftRadius + _PRightRadius + 1 > pNeighbors;
+		getNeighbors< _PLeftRadius , _PRightRadius >( node->parent , pNeighbors );
+
+		// Get the indices of the child node that would contain the point (and its antipode)
+		int cx , cy , cz;
+		Cube::FactorCornerIndex( (int)( node - node->parent->children ) , cx , cy , cz );
+
+
+		// Iterate over the finer neighbors
+		// Here:
+		// (x,y,z) give the position of the finer nodes relative to the center,
+		// (_x,_y,_z) give a positive global position, up to an even offset, and
+		// (px-LeftRadius,py-LeftRadius,pz-LeftRadius) give the positions of their parents relative to the parent of the center
+		for( int z=-(int)_LeftRadius ; z<=(int)_RightRadius ; z++ )
+		{
+			int _z = (z+cz) + (_LeftRadius<<1) , pz = ( _z>>1 ) - _LeftRadius + _PLeftRadius , zz = z + _LeftRadius;
+			for( int y=-(int)_LeftRadius ; y<=(int)_RightRadius ; y++ )
+			{
+				int _y = (y+cy) + (_LeftRadius<<1) , py = ( _y>>1 ) - _LeftRadius + _PLeftRadius , yy = y + _LeftRadius;
+
+				int cornerIndex = ( (_z&1)<<2 ) | ( (_y&1)<<1 );
+				for( int x=-(int)_LeftRadius ; x<=(int)_RightRadius ; x++ )
+				{
+					int _x = (x+cx) + (_LeftRadius<<1) , px = ( _x>>1 ) - _LeftRadius + _PLeftRadius , xx = x + _LeftRadius;
+
+					if( pNeighbors.neighbors[px][py][pz] && pNeighbors.neighbors[px][py][pz]->children )
+						neighbors.neighbors[xx][yy][zz] = pNeighbors.neighbors[px][py][pz]->children + ( cornerIndex | (_x&1) );
+					else
+						neighbors.neighbors[xx][yy][zz] = NULL;
+				}
+			}
+		}
+	}
+	return;
+}
 
 template< class NodeData >
 int OctNode< NodeData >::write(const char* fileName) const{
@@ -2314,24 +1100,24 @@ int OctNode< NodeData >::write(FILE* fp) const{
 	return 1;
 }
 template< class NodeData >
-int OctNode< NodeData >::read(const char* fileName){
-	FILE* fp=fopen(fileName,"rb");
-	if(!fp){return 0;}
-	int ret=read(fp);
-	fclose(fp);
+int OctNode< NodeData >::read( const char* fileName , void (*Initializer)( OctNode& ) )
+{
+	FILE* fp = fopen( fileName , "rb" );
+	if( !fp ) return 0;
+	int ret = read( fp , Initializer );
+	fclose( fp );
 	return ret;
 }
 template< class NodeData >
-int OctNode< NodeData >::read(FILE* fp){
-	fread(this,sizeof(OctNode< NodeData >),1,fp);
-	parent=NULL;
-	if(children){
+int OctNode< NodeData >::read( FILE* fp , void (*Initializer)( OctNode& ) )
+{
+	fread( this , sizeof( OctNode< NodeData > ) , 1 , fp );
+	parent = NULL;
+	if( children )
+	{
 		children=NULL;
-		initChildren();
-		for(int i=0;i<Cube::CORNERS;i++){
-			children[i].read(fp);
-			children[i].parent=this;
-		}
+		initChildren( Initializer );
+		for( int i=0 ; i<Cube::CORNERS ; i++ ) children[i].read(fp) , children[i].parent=this;
 	}
 	return 1;
 }

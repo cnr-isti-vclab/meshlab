@@ -29,55 +29,20 @@ DAMAGE.
 #ifndef MEMORY_USAGE_INCLUDED
 #define MEMORY_USAGE_INCLUDED
 
-#ifdef WIN32
+#if defined( _WIN32 ) || defined( _WIN64 )
 
 #include <Windows.h>
-class MemoryInfo
+struct MemoryInfo
 {
-public:
-	size_t TotalPhysicalMemory;
-	size_t FreePhysicalMemory;
-	size_t TotalSwapSpace;
-	size_t FreeSwapSpace;
-	size_t TotalVirtualAddressSpace;
-	size_t FreeVirtualAddressSpace;
-	size_t PageSize;
-
-	void set(void){
-		MEMORYSTATUSEX Mem;
-		SYSTEM_INFO Info;
-		ZeroMemory( &Mem, sizeof(Mem));
-		ZeroMemory( &Info, sizeof(Info)); 
-		Mem.dwLength = sizeof(Mem);
-		::GlobalMemoryStatusEx( &Mem );
-		::GetSystemInfo( &Info );
-
-		TotalPhysicalMemory = (size_t)Mem.ullTotalPhys;
-		FreePhysicalMemory = (size_t)Mem.ullAvailPhys;
-		TotalSwapSpace = (size_t)Mem.ullTotalPageFile;
-		FreeSwapSpace = (size_t)Mem.ullAvailPageFile;
-		TotalVirtualAddressSpace = (size_t)Mem.ullTotalVirtual;
-		FreeVirtualAddressSpace = (size_t)Mem.ullAvailVirtual;
-		PageSize = (size_t)Info.dwPageSize;
+	static size_t Usage( void )
+	{
+		HANDLE h = GetCurrentProcess();
+		PROCESS_MEMORY_COUNTERS pmc;
+		return GetProcessMemoryInfo( h , &pmc , sizeof(pmc) ) ? pmc.WorkingSetSize : 0;
 	}
-	size_t usage(void) const {return TotalVirtualAddressSpace-FreeVirtualAddressSpace;}
-
-	static size_t Usage(void){
-		MEMORY_BASIC_INFORMATION mbi; 
-		size_t      dwMemUsed = 0; 
-		PVOID      pvAddress = 0; 
-
-
-		memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION)); 
-		while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION)){ 
-			if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE){dwMemUsed += mbi.RegionSize;}
-			pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize; 
-		} 
-		return dwMemUsed; 
-	} 
 };
 
-#else // !WIN32
+#else // !_WIN32 && !_WIN64
 
 #ifndef __APPLE__               // Linux variants
 
@@ -195,6 +160,6 @@ class MemoryInfo
 
 #endif // !__APPLE__  
 
-#endif // WIN32
+#endif // _WIN32 || _WIN64
 
 #endif // MEMORY_USAGE_INCLUDE

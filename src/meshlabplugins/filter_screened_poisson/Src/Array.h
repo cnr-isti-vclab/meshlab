@@ -31,7 +31,6 @@ DAMAGE.
 
 #include <vector>
 
-#define ARRAY_DEBUG 0
 #ifdef _WIN64
 #define ASSERT( x ) { if( !( x ) ) __debugbreak(); }
 #else // !_WIN64
@@ -57,22 +56,21 @@ void* aligned_malloc( size_t size , size_t align )
 }
 void aligned_free( void* mem ) { free( ( ( void** )mem )[-1] ); }
 
-#if ARRAY_DEBUG
+#ifdef ARRAY_DEBUG
 #pragma message ( "[WARNING] Array debugging is enabled" )
 #include "Array.inl"
 #define      Pointer( ... )      Array< __VA_ARGS__ >
 #define ConstPointer( ... ) ConstArray< __VA_ARGS__ >
+#define  NullPointer( ... )      Array< __VA_ARGS__ >()
 template< class C > void        FreePointer( Array< C >& a ){ a.Free( ); }
 template< class C > void AlignedFreePointer( Array< C >& a ){ a.Free( ); }
 template< class C > void       VFreePointer( Array< C >& a ){ a.Free( ); }
 template< class C > void      DeletePointer( Array< C >& a ){ a.Delete( ); }
 
-template< class C > Array< C >          NewPointer(                  size_t size ,                 const char* name=NULL ){ return Array< C >::New         (     size ,                     name ); }
-template< class C > Array< C >        AllocPointer(                  size_t size ,                 const char* name=NULL ){ return Array< C >::Alloc       (     size ,             false , name ); }
+template< class C > Array< C >          NewPointer(                  size_t size ,                    const char* name=NULL ){ return Array< C >::New         (     size ,                     name ); }
+template< class C > Array< C >        AllocPointer(                  size_t size ,                    const char* name=NULL ){ return Array< C >::Alloc       (     size ,             false , name ); }
 template< class C > Array< C > AlignedAllocPointer(                  size_t size , size_t alignment , const char* name=NULL ){ return Array< C >::AlignedAlloc(     size , alignment , false , name ); }
-template< class C > Array< C >      ReAllocPointer( Array< C >&  a , size_t size ,                 const char* name=NULL ){ return Array< C >::ReAlloc     ( a , size ,             false , name ); }
-
-template< class C > Array< C > NullPointer( void ){ return Array< C >( ); }
+template< class C > Array< C >      ReAllocPointer( Array< C >&  a , size_t size ,                    const char* name=NULL ){ return Array< C >::ReAlloc     ( a , size ,             false , name ); }
 
 template< class C >       C* PointerAddress(      Array< C >& a ) { return a.pointer(); }
 template< class C > const C* PointerAddress( ConstArray< C >& a ) { return a.pointer(); }
@@ -81,9 +79,13 @@ template< class C > ConstArray< C > GetPointer( const C& c ) { return ConstArray
 template< class C >      Array< C > GetPointer(       std::vector< C >& v ){ return      Array< C >::FromPointer( &v[0] , v.size() ); }
 template< class C > ConstArray< C > GetPointer( const std::vector< C >& v ){ return ConstArray< C >::FromPointer( &v[0] , v.size() ); }
 
+template< class C >      Array< C > GetPointer(       C* c , int sz ) { return      Array< C >::FromPointer( c , sz ); }
+template< class C > ConstArray< C > GetPointer( const C* c , int sz ) { return ConstArray< C >::FromPointer( c , sz ); }
+
 #else // !ARRAY_DEBUG
 #define      Pointer( ... )       __VA_ARGS__*
 #define ConstPointer( ... ) const __VA_ARGS__*
+#define  NullPointer( ... ) NULL
 
 #define        FreePointer( ... ) { if( __VA_ARGS__ )         free( __VA_ARGS__ ) ,                   __VA_ARGS__ = NULL; }
 #define AlignedFreePointer( ... ) { if( __VA_ARGS__ ) aligned_free( __VA_ARGS__ ) ,                   __VA_ARGS__ = NULL; }
@@ -94,7 +96,7 @@ template< class C > C*        AllocPointer(        size_t size ,                
 template< class C > C* AlignedAllocPointer(        size_t size , size_t alignment , const char* name=NULL ){ return (C*)aligned_malloc(        sizeof(C) * size , alignment ); }
 template< class C > C*      ReAllocPointer( C* c , size_t size ,                    const char* name=NULL ){ return (C*)       realloc( c    , sizeof(C) * size             ); }
 
-template< class C > C* NullPointer( void ){ return NULL; }
+//template< class C > C* NullPointer( void ){ return NULL; }
 
 template< class C >       C* PointerAddress(       C* c ){ return c; }
 template< class C > const C* PointerAddress( const C* c ){ return c; }
@@ -102,5 +104,9 @@ template< class C >       C* GetPointer(       C& c ){ return &c; }
 template< class C > const C* GetPointer( const C& c ){ return &c; }
 template< class C >       C* GetPointer(       std::vector< C >& v ){ return &v[0]; }
 template< class C > const C* GetPointer( const std::vector< C >& v ){ return &v[0]; }
+
+template< class C >       C* GetPointer(       C* c , int sz ) { return c; }
+template< class C > const C* GetPointer( const C* c , int sz ) { return c; }
+
 #endif // ARRAY_DEBUG
 #endif // ARRAY_INCLUDED

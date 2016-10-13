@@ -41,10 +41,11 @@ StartingPolynomial<Degree+Degree2> StartingPolynomial<Degree>::operator * (const
 	return sp;
 }
 template<int Degree>
-StartingPolynomial<Degree> StartingPolynomial<Degree>::scale(double s) const{
+StartingPolynomial<Degree> StartingPolynomial<Degree>::scale( double s ) const
+{
 	StartingPolynomial q;
-	q.start=start*s;
-	q.p=p.scale(s);
+	q.start = start*s;
+	q.p = p.scale(s);
 	return q;
 }
 template<int Degree>
@@ -64,68 +65,92 @@ int StartingPolynomial<Degree>::operator < (const StartingPolynomial<Degree>& sp
 template<int Degree>
 int StartingPolynomial<Degree>::Compare(const void* v1,const void* v2){
 	double d=((StartingPolynomial*)(v1))->start-((StartingPolynomial*)(v2))->start;
-	if		(d<0)	{return -1;}
-	else if	(d>0)	{return  1;}
-	else			{return  0;}
+	if     ( d<0 ) return -1;
+	else if( d>0 ) return  1;
+	else           return  0;
 }
 
 /////////////////
 // PPolynomial //
 /////////////////
-template<int Degree>
-PPolynomial<Degree>::PPolynomial(void){
-	polyCount=0;
-	polys=NULL;
+template< int Degree >
+PPolynomial< Degree >::PPolynomial( void )
+{
+	polyCount = 0;
+	polys = NullPointer( StartingPolynomial< Degree > );
 }
-template<int Degree>
-PPolynomial<Degree>::PPolynomial(const PPolynomial<Degree>& p){
-	polyCount=0;
-	polys=NULL;
-	set(p.polyCount);
-	memcpy(polys,p.polys,sizeof(StartingPolynomial<Degree>)*p.polyCount);
+template< int Degree >
+PPolynomial<Degree>::PPolynomial( const PPolynomial<Degree>& p )
+{
+	polyCount = 0;
+	polys = NullPointer( StartingPolynomial< Degree > );
+	set( p.polyCount );
+	memcpy( polys , p.polys , sizeof( StartingPolynomial<Degree> ) * p.polyCount );
 }
 
-template<int Degree>
-PPolynomial<Degree>::~PPolynomial(void){
-	if(polyCount){free(polys);}
-	polyCount=0;
-	polys=NULL;
+template< int Degree >
+PPolynomial< Degree >::~PPolynomial( void )
+{
+	FreePointer( polys );
+	polyCount = 0;
 }
-template<int Degree>
-void PPolynomial<Degree>::set(StartingPolynomial<Degree>* sps,int count){
-	int i,c=0;
-	set(count);
-	qsort(sps,count,sizeof(StartingPolynomial<Degree>),StartingPolynomial<Degree>::Compare);
-	for( i=0 ; i<count ; i++ )
+template< int Degree >
+void PPolynomial< Degree >::set( Pointer( StartingPolynomial< Degree > ) sps , int count )
+{
+	int c=0;
+	set( count );
+	qsort( sps , count , sizeof( StartingPolynomial< Degree > ) , StartingPolynomial< Degree >::Compare );
+	for( int i=0 ; i<count ; i++ )
 	{
 		if( !c || sps[i].start!=polys[c-1].start ) polys[c++] = sps[i];
 		else{polys[c-1].p+=sps[i].p;}
 	}
 	reset( c );
 }
-template <int Degree>
-int PPolynomial<Degree>::size(void) const{return int(sizeof(StartingPolynomial<Degree>)*polyCount);}
+template< int Degree > int PPolynomial< Degree >::size( void ) const{ return int(sizeof(StartingPolynomial<Degree>)*polyCount); }
 
-template<int Degree>
+template< int Degree >
 void PPolynomial<Degree>::set( size_t size )
 {
-	if(polyCount){free(polys);}
-	polyCount=0;
-	polys=NULL;
-	polyCount=size;
-	if(size){
-		polys=(StartingPolynomial<Degree>*)malloc(sizeof(StartingPolynomial<Degree>)*size);
-		memset(polys,0,sizeof(StartingPolynomial<Degree>)*size);
+	FreePointer( polys );
+	polyCount = size;
+	if( size )
+	{
+		polys = AllocPointer< StartingPolynomial< Degree > >( size );
+		memset( polys , 0 , sizeof( StartingPolynomial< Degree > )*size );
 	}
 }
-template<int Degree>
+template< int Degree >
 void PPolynomial<Degree>::reset( size_t newSize )
 {
-	polyCount=newSize;
-	polys=(StartingPolynomial<Degree>*)realloc(polys,sizeof(StartingPolynomial<Degree>)*newSize);
+	polyCount = newSize;
+	polys = ReAllocPointer< StartingPolynomial< Degree > >( polys , newSize );
+}
+template< int Degree >
+PPolynomial< Degree >& PPolynomial< Degree >::compress( double delta )
+{
+	int _polyCount = (int)polyCount;
+	Pointer( StartingPolynomial< Degree > ) _polys = polys;
+
+	polyCount = 1 , polys = NullPointer( StartingPolynomial< Degree > );
+	for( int i=1 ; i<_polyCount ; i++ ) if( _polys[i].start-_polys[i-1].start>delta ) polyCount++;
+	if( polyCount==_polyCount ) polys = _polys;
+	else
+	{
+		polys = AllocPointer< StartingPolynomial< Degree > >( polyCount );
+		polys[0] = _polys[0] , polyCount = 0;
+		for( int i=1 ; i<_polyCount ; i++ )
+		{
+			if( _polys[i].start-_polys[i-1].start>delta ) polys[ ++polyCount ] = _polys[i];
+			else polys[ polyCount ].p += _polys[i].p;
+		}
+		polyCount++;
+		FreePointer( _polys );
+	}
+	return *this;
 }
 
-template<int Degree>
+template< int Degree >
 PPolynomial<Degree>& PPolynomial<Degree>::operator = (const PPolynomial<Degree>& p){
 	set(p.polyCount);
 	memcpy(polys,p.polys,sizeof(StartingPolynomial<Degree>)*p.polyCount);
@@ -147,7 +172,7 @@ template<int Degree>
 double PPolynomial<Degree>::operator ()( double t ) const
 {
 	double v=0;
-	for( int i=0 ; i<int(polyCount) && t>polys[i].start ; i++ ) v+=polys[i].p(t);
+	for( int i=0 ; i<int(polyCount) && t>polys[i].start ; i++ ) v += polys[i].p(t);
 	return v;
 }
 
@@ -260,8 +285,22 @@ template<int Degree>
 PPolynomial<Degree> PPolynomial<Degree>::scale( double s ) const
 {
 	PPolynomial q;
-	q.set(polyCount);
-	for(size_t i=0;i<polyCount;i++){q.polys[i]=polys[i].scale(s);}
+	q.set( polyCount );
+	for( size_t i=0 ; i<polyCount ; i++ ) q.polys[i] = polys[i].scale(s);
+	if( s<0 ) qsort( q.polys , polyCount , sizeof( StartingPolynomial< Degree > ) , StartingPolynomial< Degree >::Compare );
+	return q;
+}
+template< int Degree >
+PPolynomial< Degree > PPolynomial< Degree >::reflect( double r ) const
+{
+	PPolynomial q;
+	q.set( polyCount );
+	for( size_t i=0 ; i<polyCount ; i++ )
+	{
+		q.polys[i].scale(-1.);
+		if( r ) q.polys[i].shift( 2.*r );
+	}
+	qsort( q.polys , polyCount , sizeof( StartingPolynomial< Degree > ) , StartingPolynomial< Degree >::Compare );
 	return q;
 }
 template<int Degree>
@@ -386,9 +425,9 @@ PPolynomial<Degree+1> PPolynomial<Degree>::MovingAverage( double radius ) const
 {
 	PPolynomial<Degree+1> A;
 	Polynomial<Degree+1> p;
-	StartingPolynomial<Degree+1>* sps;
+	Pointer( StartingPolynomial< Degree+1 > ) sps;
+	sps = AllocPointer< StartingPolynomial< Degree+1 > >( polyCount*2 );
 
-	sps=(StartingPolynomial<Degree+1>*)malloc(sizeof(StartingPolynomial<Degree+1>)*polyCount*2);
 
 	for(int i=0;i<int(polyCount);i++){
 		sps[2*i  ].start=polys[i].start-radius;
@@ -397,8 +436,8 @@ PPolynomial<Degree+1> PPolynomial<Degree>::MovingAverage( double radius ) const
 		sps[2*i  ].p=p.shift(-radius);
 		sps[2*i+1].p=p.shift( radius)*-1;
 	}
-	A.set(sps,int(polyCount*2));
-	free(sps);
+	A.set( sps , int(polyCount*2) );
+	FreePointer( sps );
 	return A*1.0/(2*radius);
 }
 template<int Degree>

@@ -28,58 +28,179 @@ DAMAGE.
 
 #ifndef POINT_STREAM_INCLUDED
 #define POINT_STREAM_INCLUDED
+#include "Ply.h"
+#include "Geometry.h"
+
 
 template< class Real >
-class PointStream
+class OrientedPointStream
 {
 public:
-	virtual ~PointStream( void ){}
+	virtual ~OrientedPointStream( void ){}
 	virtual void reset( void ) = 0;
-	virtual bool nextPoint( Point3D< Real >& p , Point3D< Real >& n ) = 0;
+	virtual bool nextPoint( OrientedPoint3D< Real >& p ) = 0;
+	virtual int nextPoints( OrientedPoint3D< Real >* p , int count )
+	{
+		int c=0;
+		for( int i=0 ; i<count ; i++ , c++ ) if( !nextPoint( p[i] ) ) break;
+		return c;
+	}
+	void boundingBox( Point3D< Real >& min , Point3D< Real >& max )
+	{
+		bool first = true;
+		OrientedPoint3D< Real > p;
+		while( nextPoint( p ) )
+		{
+			for( int i=0 ; i<3 ; i++ )
+			{
+				if( first || p.p[i]<min[i] ) min[i] = p.p[i];
+				if( first || p.p[i]>max[i] ) max[i] = p.p[i];
+			}
+			first = false;
+		}
+		reset();
+	}
+};
+
+template< class Real , class Data >
+class OrientedPointStreamWithData : public OrientedPointStream< Real >
+{
+public:
+	virtual ~OrientedPointStreamWithData( void ){}
+	virtual void reset( void ) = 0;
+	virtual bool nextPoint( OrientedPoint3D< Real >& p , Data& d ) = 0;
+
+	virtual bool nextPoint( OrientedPoint3D< Real >& p ){ Data d ; return nextPoint( p , d ); }
+	virtual int nextPoints( OrientedPoint3D< Real >* p , Data* d , int count )
+	{
+		int c=0;
+		for( int i=0 ; i<count ; i++ , c++ ) if( !nextPoint( p[i] , d[i] ) ) break;
+		return c;
+	}
+	virtual int nextPoints( OrientedPoint3D< Real >* p , int count ){ return OrientedPointStream< Real >::nextPoints( p , count ); }
 };
 
 template< class Real >
-class ASCIIPointStream : public PointStream< Real >
+class TransformedOrientedPointStream : public OrientedPointStream< Real >
+{
+	XForm4x4< Real > _xForm;
+	XForm3x3< Real > _normalXForm;
+	OrientedPointStream< Real >& _stream;
+public:
+	TransformedOrientedPointStream( XForm4x4< Real > xForm , OrientedPointStream< Real >& stream ) : _xForm(xForm) , _stream(stream)
+	{
+		for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) _normalXForm(i,j) = _xForm(i,j);
+		_normalXForm = _normalXForm.transpose().inverse();
+	};
+	virtual void reset( void ){ _stream.reset(); }
+	virtual bool nextPoint( OrientedPoint3D< Real >& p )
+	{
+		bool ret = _stream.nextPoint( p );
+		p.p = _xForm * p.p , p.n = _normalXForm * p.n;
+		return ret;
+	}
+};
+
+template< class Real , class Data >
+class TransformedOrientedPointStreamWithData : public OrientedPointStreamWithData< Real , Data >
+{
+	XForm4x4< Real > _xForm;
+	XForm3x3< Real > _normalXForm;
+	OrientedPointStreamWithData< Real , Data >& _stream;
+public:
+	TransformedOrientedPointStreamWithData( XForm4x4< Real > xForm , OrientedPointStreamWithData< Real , Data >& stream ) : _xForm(xForm) , _stream(stream)
+	{
+		for( int i=0 ; i<3 ; i++ ) for( int j=0 ; j<3 ; j++ ) _normalXForm(i,j) = _xForm(i,j);
+		_normalXForm = _normalXForm.transpose().inverse();
+	};
+	virtual void reset( void ){ _stream.reset(); }
+	virtual bool nextPoint( OrientedPoint3D< Real >& p , Data& d )
+	{
+		bool ret = _stream.nextPoint( p , d );
+		p.p = _xForm * p.p , p.n = _normalXForm * p.n;
+		return ret;
+	}
+};
+
+template< class Real >
+class MemoryOrientedPointStream : public OrientedPointStream< Real >
+{
+	const OrientedPoint3D< Real >* _points;
+	size_t _pointCount;
+	size_t _current;
+public:
+	MemoryOrientedPointStream( size_t pointCount , const OrientedPoint3D< Real >* points );
+	~MemoryOrientedPointStream( void );
+	void reset( void );
+	bool nextPoint( OrientedPoint3D< Real >& p );
+};
+
+template< class Real , class Data >
+class MemoryOrientedPointStreamWithData : public OrientedPointStreamWithData< Real , Data >
+{
+	const std::pair< OrientedPoint3D< Real > , Data >* _points;
+	size_t _pointCount;
+	size_t _current;
+public:
+	MemoryOrientedPointStreamWithData( size_t pointCount , const std::pair< OrientedPoint3D< Real > , Data >* points );
+	~MemoryOrientedPointStreamWithData( void );
+	void reset( void );
+	bool nextPoint( OrientedPoint3D< Real >& p , Data& d );
+};
+
+template< class Real >
+class ASCIIOrientedPointStream : public OrientedPointStream< Real >
 {
 	FILE* _fp;
 public:
-	ASCIIPointStream( const char* fileName );
-	~ASCIIPointStream( void );
+	ASCIIOrientedPointStream( const char* fileName );
+	~ASCIIOrientedPointStream( void );
 	void reset( void );
-	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+	bool nextPoint( OrientedPoint3D< Real >& p );
 };
 
-template< class Real >
-class BinaryPointStream : public PointStream< Real >
+template< class Real , class Data >
+class ASCIIOrientedPointStreamWithData : public OrientedPointStreamWithData< Real , Data >
+{
+	FILE* _fp;
+	Data (*_readData)( FILE* );
+public:
+	ASCIIOrientedPointStreamWithData( const char* fileName , Data (*readData)( FILE* ) );
+	~ASCIIOrientedPointStreamWithData( void );
+	void reset( void );
+	bool nextPoint( OrientedPoint3D< Real >& p , Data& d );
+};
+
+template< class Real , class RealOnDisk=Real >
+class BinaryOrientedPointStream : public OrientedPointStream< Real >
 {
 	FILE* _fp;
 	static const int POINT_BUFFER_SIZE=1024;
-	Real _pointBuffer[ POINT_BUFFER_SIZE * 2 * 3 ];
+	OrientedPoint3D< RealOnDisk > _pointBuffer[ POINT_BUFFER_SIZE ];
 	int _pointsInBuffer , _currentPointIndex;
 public:
-	BinaryPointStream( const char* filename );
-	~BinaryPointStream( void );
+	BinaryOrientedPointStream( const char* filename );
+	~BinaryOrientedPointStream( void );
 	void reset( void );
-	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+	bool nextPoint( OrientedPoint3D< Real >& p );
 };
 
-template< class Real >
-class MemoryPointStream : public PointStream< Real >
+template< class Real , class Data , class RealOnDisk=Real , class DataOnDisk=Data >
+class BinaryOrientedPointStreamWithData : public OrientedPointStreamWithData< Real , Data >
 {
-     char* _pVec, *_nVec;
-    size_t _pStride, _nStride;
-    size_t _curPos;
-    size_t  _pointNum;
+	FILE* _fp;
+	static const int POINT_BUFFER_SIZE=1024;
+	std::pair< OrientedPoint3D< RealOnDisk > , DataOnDisk > _pointBuffer[ POINT_BUFFER_SIZE ];
+	int _pointsInBuffer , _currentPointIndex;
 public:
-    MemoryPointStream(  void*pVec, size_t stride_p,  void *nVec, size_t stride_n, size_t pointNum);
-    ~MemoryPointStream( void );
-    void reset( void );
-    bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+	BinaryOrientedPointStreamWithData( const char* filename );
+	~BinaryOrientedPointStreamWithData( void );
+	void reset( void );
+	bool nextPoint( OrientedPoint3D< Real >& p , Data& d );
 };
 
-
 template< class Real >
-class PLYPointStream : public PointStream< Real >
+class PLYOrientedPointStream : public OrientedPointStream< Real >
 {
 	char* _fileName;
 	PlyFile* _ply;
@@ -89,10 +210,32 @@ class PLYPointStream : public PointStream< Real >
 	int _pCount , _pIdx;
 	void _free( void );
 public:
-	PLYPointStream( const char* fileName );
-	~PLYPointStream( void );
+	PLYOrientedPointStream( const char* fileName );
+	~PLYOrientedPointStream( void );
 	void reset( void );
-	bool nextPoint( Point3D< Real >& p , Point3D< Real >& n );
+	bool nextPoint( OrientedPoint3D< Real >& p );
 };
+
+template< class Real , class Data >
+class PLYOrientedPointStreamWithData : public OrientedPointStreamWithData< Real , Data >
+{
+	struct _PlyOrientedVertexWithData : public PlyOrientedVertex< Real > { Data data; };
+	char* _fileName;
+	PlyFile* _ply;
+	int _nr_elems;
+	char **_elist;
+	PlyProperty* _dataProperties;
+	int _dataPropertiesCount;
+	bool (*_validationFunction)( const bool* );
+
+	int _pCount , _pIdx;
+	void _free( void );
+public:
+	PLYOrientedPointStreamWithData( const char* fileName , const PlyProperty* dataProperties , int dataPropertiesCount , bool (*validationFunction)( const bool* )=NULL );
+	~PLYOrientedPointStreamWithData( void );
+	void reset( void );
+	bool nextPoint( OrientedPoint3D< Real >& p , Data& d );
+};
+
 #include "PointStream.inl"
 #endif // POINT_STREAM_INCLUDED
