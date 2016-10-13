@@ -31,3 +31,5 @@ win32-g++:LIBS += -L../../external -llevmar
 linux-g++:LIBS += -L../../external -llevmar
 linux-g++-32:LIBS += -L../../external -llevmar
 linux-g++-64:LIBS += -L../../external -llevmar
+macx:LIBS            += $$MACLIBDIR/liblevmar.a
+
