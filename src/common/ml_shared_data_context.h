@@ -56,8 +56,8 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 	bool _peredge_wire_enabled;
 	bool _peredge_fauxwire_enabled;
 
-
 	bool _back_face_cull;
+	bool _single_side_lighting;
 	bool _double_side_lighting;
 	bool _fancy_lighting;
 
@@ -88,6 +88,7 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 		_peredge_fauxwire_enabled = false;
 		_peredge_wire_enabled = false;
 		_back_face_cull = false;
+		_single_side_lighting = true;
 		_double_side_lighting = false;
 		_fancy_lighting = false;
 		_sel_enabled = false;
@@ -144,6 +145,7 @@ private:
 		_peredge_fauxwire_enabled = opts._peredge_fauxwire_enabled;
 		_peredge_wire_enabled = opts._peredge_wire_enabled;
 		_back_face_cull = opts._back_face_cull;
+		_single_side_lighting = opts._single_side_lighting;
 		_double_side_lighting = opts._double_side_lighting;
 		_fancy_lighting = opts._fancy_lighting;
 		_sel_enabled = opts._sel_enabled;
