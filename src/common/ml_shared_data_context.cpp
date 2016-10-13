@@ -635,6 +635,8 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+			if (meshmodel != NULL)
+				tmpatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (meshmodel->hasDataMask(MeshModel::MM_FACECOLOR) && !meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR));
             tmpatts[MLRenderingData::ATT_NAMES::ATT_WEDGETEXTURE] = true;
 			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = true;
             dt.set(MLRenderingData::PR_SOLID,tmpatts);
