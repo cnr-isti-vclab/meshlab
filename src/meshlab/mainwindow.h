@@ -272,7 +272,9 @@ private:
 
     void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
     void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
-    
+	void setCurrentMeshBestTab();
+
+
     QNetworkAccessManager *httpReq;
     QBuffer myLocalBuf;
     int idHost;

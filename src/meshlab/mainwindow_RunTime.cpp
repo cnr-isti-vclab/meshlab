@@ -2301,8 +2301,9 @@ GLA()->setDrawMode(GLW::DMPoints);*/
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
     MultiViewer_Container* mvc = currentViewContainer();
-    if (mvc != NULL)
-        mvc->resetAllTrackBall();
+	if (mvc != NULL)
+		mvc->resetAllTrackBall();
+	setCurrentMeshBestTab();
     qb->reset();
     saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
@@ -2389,10 +2390,32 @@ bool MainWindow::appendProject(QString fileName)
 	globrendtoolbar->setEnabled(true);
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
-    this->currentViewContainer()->resetAllTrackBall();
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc != NULL)
+		mvc->resetAllTrackBall();
+
+	setCurrentMeshBestTab();
     qb->reset();
     saveRecentProjectList(fileName);
     return true;
+}
+
+void MainWindow::setCurrentMeshBestTab()
+{
+	if (layerDialog == NULL)
+		return;
+
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc != NULL)
+	{
+		MLSceneGLSharedDataContext* cont = mvc->sharedDataContext();
+		if ((GLA() != NULL) && (meshDoc() != NULL) && (meshDoc()->mm() != NULL))
+		{
+			MLRenderingData dt;
+			cont->getRenderInfoPerMeshView(meshDoc()->mm()->id(), GLA()->context(), dt);
+			layerDialog->setCurrentTab(dt);
+		}
+	}
 }
 
 void MainWindow::newProject(const QString& projName)
@@ -2717,16 +2740,8 @@ bool MainWindow::importMeshWithLayerManagement(QString fileName)
     bool res = importMesh(fileName,false);
 	globrendtoolbar->setEnabled(true);
 	if (layerDialog != NULL)
-	{
 		showLayerDlg(layervisible || meshDoc()->meshList.size());
-		MLSceneGLSharedDataContext* cont = currentViewContainer()->sharedDataContext();
-		if ((cont != NULL) && (GLA() != NULL) && (meshDoc() != NULL) && (meshDoc()->mm() != NULL))
-		{
-			MLRenderingData dt;
-			cont->getRenderInfoPerMeshView(meshDoc()->mm()->id(), GLA()->context(), dt);
-			layerDialog->setCurrentTab(dt);
-		}
-	}
+	setCurrentMeshBestTab();
     return res;
 }
 
