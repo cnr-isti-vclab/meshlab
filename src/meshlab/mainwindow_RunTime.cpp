@@ -2679,7 +2679,6 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
 		{
 			MLRenderingData defdt;
 			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt);
-			bool newcreated = false;
 			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
 			{
 				GLArea* ar = mv->getViewer(glarid);

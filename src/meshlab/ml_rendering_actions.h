@@ -139,6 +139,8 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+	bool isVisibleConditionValid(MeshModel*) const;
+
 };
 
 class MLRenderingPerVertexNormalAction : public MLRenderingAction
@@ -152,6 +154,7 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
+	bool isVisibleConditionValid(MeshModel*) const;
 private:
     MLRenderingData::PRIMITIVE_MODALITY _pm;
 };

@@ -268,6 +268,13 @@ bool MLRenderingPerFaceNormalAction::isRenderingDataEnabled( const MLRenderingDa
     return MLRenderingAction::isRenderingDataEnabled(MLRenderingData::PR_SOLID,MLRenderingData::ATT_NAMES::ATT_FACENORMAL,rd);
 }
 
+bool MLRenderingPerFaceNormalAction::isVisibleConditionValid(MeshModel* mm) const
+{
+	if (mm == NULL)
+		return false;
+	return mm->hasDataMask(MeshModel::MM_FACENORMAL);
+}
+
 MLRenderingPerVertexNormalAction::MLRenderingPerVertexNormalAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
     :MLRenderingAction(parent),_pm(pm)
 {
@@ -300,6 +307,13 @@ void MLRenderingPerVertexNormalAction::updateRenderingData(MLRenderingData& rd )
 bool MLRenderingPerVertexNormalAction::isRenderingDataEnabled( const MLRenderingData& rd ) const
 {
     return MLRenderingAction::isRenderingDataEnabled(_pm,MLRenderingData::ATT_NAMES::ATT_VERTNORMAL,rd);
+}
+
+bool MLRenderingPerVertexNormalAction::isVisibleConditionValid(MeshModel* mm) const
+{
+	if (mm == NULL)
+		return false;
+	return mm->hasDataMask(MeshModel::MM_VERTNORMAL);
 }
 
 MLRenderingPerVertTextCoordAction::MLRenderingPerVertTextCoordAction(MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent)
@@ -725,6 +739,8 @@ bool MLRenderingPerVertexColorAction::isRenderingDataEnabled( const MLRenderingD
 
 bool MLRenderingPerVertexColorAction::isVisibleConditionValid(MeshModel* mm) const
 {
+	if (mm == NULL)
+		return false;
 	return mm->hasDataMask(MeshModel::MM_VERTCOLOR);
 }
 
@@ -759,6 +775,8 @@ bool MLRenderingPerFaceColorAction::isRenderingDataEnabled( const MLRenderingDat
 
 bool MLRenderingPerFaceColorAction::isVisibleConditionValid( MeshModel* mm) const
 {
+	if (mm == NULL)
+		return false;
     return mm->hasDataMask(MeshModel::MM_FACECOLOR);
 }
 
