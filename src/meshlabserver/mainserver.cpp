@@ -551,7 +551,7 @@ namespace commandline
 {
     const char inproject('p');
     const char outproject('w');
-    const char overwrite('v');
+    const char overwrite('x');
     const char inputmeshes('i');
     const char outputmesh('o');
     const char mask('m');
@@ -594,7 +594,7 @@ namespace commandline
     {
         QString logstring("(" + optionValueExpression(log) + "\\s+" +  optionValueExpression(dump) + "|" + optionValueExpression(dump) + "\\s+" +  optionValueExpression(log) + "|" +  optionValueExpression(dump) + "|" + optionValueExpression(log) + ")");
         //QString remainstring("(" + optionValueExpression(inproject) + "|" + optionValueExpression(inputmeshes,true) + ")" + "(\\s+" + optionValueExpression(inproject) + "|\\s+" + optionValueExpression(inputmeshes,true) + ")*(\\s+" + optionValueExpression(outproject) + "|\\s+" + optionValueExpression(script) + "|\\s+" + outputmeshExpression() + ")*");
-        QString arg("(" + optionValueExpression(inproject) + "|" + optionValueExpression(inputmeshes) + "|" + optionValueExpression(outproject) + "(\\s+-v)?" + "|" + optionValueExpression(script) + "|" + outputmeshExpression() + ")");
+        QString arg("(" + optionValueExpression(inproject) + "|" + optionValueExpression(inputmeshes) + "|" + optionValueExpression(outproject) + "(\\s+-" + overwrite + ")?" + "|" + optionValueExpression(script) + "|" + outputmeshExpression() + ")");
         QString args("(" + arg + ")(\\s+" + arg + ")*");
         QString completecommandline("(" + logstring + "|" + logstring + "\\s+" + args + "|" + args + ")");
         QRegExp completecommandlineexp(completecommandline);
@@ -720,7 +720,9 @@ int main(int argc, char *argv[])
                         pr.filename += ".mlp";
                     }
                     ++i;
-                    if (((i + 1) < argc) && (QString(argv[i+1]) == QString("-" + commandline::overwrite)))
+					QString overtmp('-'); 
+					overtmp += commandline::overwrite;
+                    if (((i + 1) < argc) && (QString(argv[i+1]) == overtmp))
                     {
                         pr.overwrite = true;
                         ++i;

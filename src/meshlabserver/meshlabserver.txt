@@ -5,8 +5,8 @@ meshlabserver [logargs] [args]
     -l filename             log of the filters is ouput on a file
   where args can be:
     -p filename             meshlab project (.mlp) to be loaded
-    -w filename [-v]        output meshlab project (.mlp) to be saved.
-                            If -v flag is specified a 3D model meshfile.ext
+    -w filename [-x]        output meshlab project (.mlp) to be saved.
+                            If -x flag is specified a 3D model meshfile.ext
                             contained in the input project will be overwritten,
                             otherwise it will be saved in the same directory of
                             input mesh as a new file called meshfile_out.ext.
@@ -35,7 +35,7 @@ meshlabserver [logargs] [args]
            per-vertex-color, the per-face-quality and the per-wedge-texture
            attributes will be saved into the output.ply file
 
-    'meshlabserver -i input0.obj -i input1.ply -o outproj.mlp -v -s meshclean.mlx'
+    'meshlabserver -i input0.obj -i input1.ply -w outproj.mlp -x -s meshclean.mlx'
            the script file meshclean.mlx will be applied to the document
            composed by input0.obj and input1.ply meshes.
            The mesh input1.ply will become the current mesh of the document
