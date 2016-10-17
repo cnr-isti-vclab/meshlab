@@ -627,7 +627,7 @@ int main(int argc, char *argv[])
     if(argc == 1)
     {
         commandline::usage();
-		system("pause");
+		//system("pause");
         exit(-1);
     }
     QStringList scriptfiles;
@@ -642,7 +642,7 @@ int main(int argc, char *argv[])
     {
         printf("CommandLine Syntax Error: please refer to the following documentation for a complete list of the MeshLabServer parameters.\n");
         commandline::usage();
-		system("pause");
+		//system("pause");
         exit(-1);
     }
 
@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
 	if (err != GLEW_NO_ERROR)
 	{
 		printf("GLEW Init: failed!\n");
-		system("pause");
+		//system("pause");
 		exit(-1);
 	}
 	shared.doneCurrent();
@@ -683,14 +683,14 @@ int main(int argc, char *argv[])
                     if (finfo.completeSuffix().toLower() != "mlp")
                     {
                         fprintf(logfp,"Project %s is not a valid \'mlp\' file format. MeshLabServer application will exit.\n",qPrintable(inputproject));
-						system("pause");
+						//system("pause");
                         exit(-1);
                     }
                     bool opened = server.openProject(meshDocument,inputproject);
                     if (!opened)
                     {
                         fprintf(logfp,"MeshLab Project %s has not been correctly opened. MeshLabServer application will exit.\n",qPrintable(inputproject));
-						system("pause");
+						//system("pause");
                         exit(-1);
                     }
                     else
@@ -700,7 +700,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     fprintf(logfp,"Missing project name. MeshLabServer application will exit.\n");
-					system("pause");
+					//system("pause");
                     exit(-1);
                 }
                 ++i;
@@ -742,14 +742,14 @@ int main(int argc, char *argv[])
                     if (mmod == NULL)
                     {
                         fprintf(logfp,"It was not possible to add new mesh %s to MeshLabServer. The program will exit\n",qPrintable(info.absoluteFilePath()));
-						system("pause");
+						//system("pause");
                         exit(-1);
                     }
                     bool opened = server.importMesh(*mmod, info.absoluteFilePath(),logfp);
                     if (!opened)
                     {
                         fprintf(logfp,"It was not possible to import mesh %s into MeshLabServer. The program will exit\n ",qPrintable(info.absoluteFilePath()));
-						system("pause");
+						//system("pause");
                         exit(-1);
                     }
                     fprintf(logfp,"Mesh %s loaded has %i vn %i fn\n", qPrintable(info.absoluteFilePath()), mmod->cm.vn, mmod->cm.fn);
@@ -859,7 +859,7 @@ int main(int argc, char *argv[])
         default:
             {
                 printf("Something bad happened parsing the document. String %s\n",qPrintable(argv[i]));
-				system("pause");
+				//system("pause");
                 exit(-1);
             }
         }
@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
         if(!returnValue)
         {
             fprintf(logfp,"Failed to apply script file %s\n",qPrintable(scriptfiles[ii]));
-			system("pause");
+			//system("pause");
             exit(-1);
         }
     }
@@ -892,7 +892,7 @@ int main(int argc, char *argv[])
         else
         {
             fprintf(logfp,"Project %s has not been correctly saved in. MeshLabServer Application will exit.\n",qPrintable(outprojectfiles[ii].filename));
-			system("pause");
+			//system("pause");
             exit(-1);
         }
     }
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
         fclose(logfp);
 
 	shared.deAllocateGPUSharedData();
-	system("pause");
+	//system("pause");
     return 0;
 }
 
