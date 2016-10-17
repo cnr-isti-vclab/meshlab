@@ -21,14 +21,18 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <GL/glew.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
 #include <common/interfaces.h>
 #include <common/pluginmanager.h>
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
+#include <common/mlexception.h>
+#include <wrap/qt/qt_thread_safe_memory_info.h>
 
 #include <QFileInfo>
+
 
 class FilterData
 {
@@ -43,9 +47,14 @@ public:
 class MeshLabServer
 {
 public:
-    MeshLabServer() {}
+    MeshLabServer(MLSceneGLSharedDataContext* shar) 
+		:shared(shar)
+	{
+	}
 
-    ~MeshLabServer() {}
+    ~MeshLabServer() 
+	{
+	}
 
     static bool filterCallBack(const int pos, const char * str)
     {
@@ -58,7 +67,7 @@ public:
 
     // Here we need a better way to find the plugins directory.
     // To be implemented:
-    // use the QSettings togheter with MeshLab.
+    // use the QSettings togeter with MeshLab.
     // When meshlab starts if he find the plugins write the absolute path of that directory in a persistent qsetting place.
     // Here we use that QSetting. If it is not set we remember to run meshlab first once.
     // in this way it works safely on mac too and allows the user to put the small meshlabserver binary wherever they desire (/usr/local/bin).
@@ -181,6 +190,9 @@ public:
         }
         else
             mm.updateDataMask(MeshModel::MM_VERTNORMAL);
+
+		if (shared != NULL)
+			shared->meshInserted(mm.id());
         //vcg::tri::UpdateBounding<CMeshO>::Box(mm.cm);
         QDir::setCurrent(curDir.absolutePath());
         return true;
@@ -370,18 +382,53 @@ public:
                         delete parameter;
                     }
                 }
-                QGLWidget wid;
-                iFilter->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-                bool created = iFilter->glContext->create();
-                if ((!created) || (!iFilter->glContext->isValid())) 
-                {
-                    fprintf(fp,"A valid GLContext is required by the filter to work.\n");
-                    return false;
-                }
+
+				QGLWidget* wid = NULL;
+				if (shared != NULL)
+				{
+					wid = new QGLWidget(NULL,shared);
+					iFilter->glContext = new MLPluginGLContext(QGLFormat::defaultFormat(), wid->context()->device(),*shared);
+					bool created = iFilter->glContext->create(wid->context());
+					if ((!created) || (!iFilter->glContext->isValid()))
+					{
+						fprintf(fp, "A valid GLContext is required by the filter to work.\n");
+						return false;
+					}
+					MLRenderingData dt;
+					MLRenderingData::RendAtts atts;
+					atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+					atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+					if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+					{
+						MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDocument.mm());
+						if ((pm != MLRenderingData::PR_ARITY) && (meshDocument.mm() != NULL))
+						{
+							dt.set(pm, atts);
+							iFilter->glContext->initPerViewRenderingData(meshDocument.mm()->id(), dt);
+						}
+					}
+					else
+					{
+						for (int ii = 0; ii < meshDocument.meshList.size(); ++ii)
+						{
+							MeshModel* mm = meshDocument.meshList[ii];
+							MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+							if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+							{
+								dt.set(pm, atts);
+								iFilter->glContext->initPerViewRenderingData(mm->id(), dt);
+							}
+						}
+					}
+				}
                 meshDocument.setBusy(true);
                 ret = iFilter->applyFilter( action, meshDocument, pairold->pair.second, filterCallBack);
                 meshDocument.setBusy(false);
-                delete iFilter->glContext;
+				if (shared != NULL)
+					delete iFilter->glContext;
+				delete wid;
+				
             }
             else
             {
@@ -422,14 +469,46 @@ public:
                                 }
                             }
                         }
-                        QGLWidget wid;
-                        cppfilt->glContext = new QGLContext(QGLFormat::defaultFormat(),wid.context()->device());
-                        bool created = cppfilt->glContext->create();
-                        if ((!created) || (!cppfilt->glContext->isValid()))
-                        {
-                            fprintf(fp,"A valid GLContext is required by the filter to work.\n");
-                            return false;
-                        }
+						QGLWidget* wid = NULL;
+						if (shared != NULL)
+						{
+							wid = new QGLWidget(NULL, shared);
+							cppfilt->glContext = new MLPluginGLContext(QGLFormat::defaultFormat(), wid->context()->device(), *shared);
+							bool created = cppfilt->glContext->create(wid->context());
+							if ((!created) || (!cppfilt->glContext->isValid()))
+							{
+								fprintf(fp, "A valid GLContext is required by the filter to work.\n");
+								return false;
+							}
+
+							MLRenderingData dt;
+							MLRenderingData::RendAtts atts;
+							atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+							atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+							if (info->filterAttribute(fname, MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity)
+							{
+								MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDocument.mm());
+								if ((pm != MLRenderingData::PR_ARITY) && (meshDocument.mm() != NULL))
+								{
+									dt.set(pm, atts);
+									cppfilt->glContext->initPerViewRenderingData(meshDocument.mm()->id(), dt);
+								}
+							}
+							else
+							{
+								for (int ii = 0; ii < meshDocument.meshList.size(); ++ii)
+								{
+									MeshModel* mm = meshDocument.meshList[ii];
+									MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+									if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
+									{
+										dt.set(pm, atts);
+										cppfilt->glContext->initPerViewRenderingData(mm->id(), dt);
+									}
+								}
+							}
+						}
 
                         //WARNING!!!!!!!!!!!!
                         /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
@@ -437,12 +516,14 @@ public:
                         ret = cppfilt->applyFilter( fname, meshDocument, envwrap, filterCallBack );
                         meshDocument.setBusy(false);
                         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        delete cppfilt->glContext;
+                        if (shared != NULL)
+							delete cppfilt->glContext;
+						delete wid;
                     }
                     else
-                        throw MeshLabException("WARNING! The MeshLab Script System is able to manage just the C++ XML filters.");
+                        throw MLException("WARNING! The MeshLab Script System is able to manage just the C++ XML filters.");
                 }
-                catch (MeshLabException& e)
+                catch (MLException& e)
                 {
                     meshDocument.Log.Log(GLLogStream::WARNING,e.what());
                 }
@@ -463,7 +544,7 @@ public:
 private:
     PluginManager PM;
     RichParameterSet defaultGlobal;
-
+	MLSceneGLSharedDataContext* shared;
 };
 
 namespace commandline
@@ -543,11 +624,10 @@ int main(int argc, char *argv[])
     FILE* logfp = stdout;
     FILE* dumpfp = NULL;
     MeshLabApplication app(argc, argv);
-    MeshLabServer server;
     if(argc == 1)
     {
         commandline::usage();
-        system("pause");
+		system("pause");
         exit(-1);
     }
     QStringList scriptfiles;
@@ -562,14 +642,32 @@ int main(int argc, char *argv[])
     {
         printf("CommandLine Syntax Error: please refer to the following documentation for a complete list of the MeshLabServer parameters.\n");
         commandline::usage();
-        system("pause");
+		system("pause");
         exit(-1);
     }
 
+	QSettings st;
+	QVariant mbvar = st.value("MeshLab::System::maxGPUMemDedicatedToGeometry");
+	std::ptrdiff_t maxgpumem = (std::ptrdiff_t)mbvar.toInt() * (float)(1024 * 1024);
+	vcg::QtThreadSafeMemoryInfo gpumeminfo(maxgpumem);
+
+	MeshDocument meshDocument;
+
+	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000);
+	shared.makeCurrent();
+	GLenum err = glewInit();
+	if (err != GLEW_NO_ERROR)
+	{
+		printf("GLEW Init: failed!\n");
+		system("pause");
+		exit(-1);
+	}
+	shared.doneCurrent();
     printf("Loading Plugins:\n");
+	MeshLabServer server(&shared);
     server.loadPlugins();
 
-    MeshDocument meshDocument;
+    
     int i = 1;
     while(i < argc)
     {
@@ -585,12 +683,14 @@ int main(int argc, char *argv[])
                     if (finfo.completeSuffix().toLower() != "mlp")
                     {
                         fprintf(logfp,"Project %s is not a valid \'mlp\' file format. MeshLabServer application will exit.\n",qPrintable(inputproject));
+						system("pause");
                         exit(-1);
                     }
                     bool opened = server.openProject(meshDocument,inputproject);
                     if (!opened)
                     {
                         fprintf(logfp,"MeshLab Project %s has not been correctly opened. MeshLabServer application will exit.\n",qPrintable(inputproject));
+						system("pause");
                         exit(-1);
                     }
                     else
@@ -600,6 +700,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     fprintf(logfp,"Missing project name. MeshLabServer application will exit.\n");
+					system("pause");
                     exit(-1);
                 }
                 ++i;
@@ -639,12 +740,14 @@ int main(int argc, char *argv[])
                     if (mmod == NULL)
                     {
                         fprintf(logfp,"It was not possible to add new mesh %s to MeshLabServer. The program will exit\n",qPrintable(info.absoluteFilePath()));
+						system("pause");
                         exit(-1);
                     }
                     bool opened = server.importMesh(*mmod, info.absoluteFilePath(),logfp);
                     if (!opened)
                     {
                         fprintf(logfp,"It was not possible to import mesh %s into MeshLabServer. The program will exit\n ",qPrintable(info.absoluteFilePath()));
+						system("pause");
                         exit(-1);
                     }
                     fprintf(logfp,"Mesh %s loaded has %i vn %i fn\n", qPrintable(info.absoluteFilePath()), mmod->cm.vn, mmod->cm.fn);
@@ -754,7 +857,7 @@ int main(int argc, char *argv[])
         default:
             {
                 printf("Something bad happened parsing the document. String %s\n",qPrintable(argv[i]));
-                system("pause");
+				system("pause");
                 exit(-1);
             }
         }
@@ -767,6 +870,7 @@ int main(int argc, char *argv[])
         if(!returnValue)
         {
             fprintf(logfp,"Failed to apply script file %s\n",qPrintable(scriptfiles[ii]));
+			system("pause");
             exit(-1);
         }
     }
@@ -786,6 +890,7 @@ int main(int argc, char *argv[])
         else
         {
             fprintf(logfp,"Project %s has not been correctly saved in. MeshLabServer Application will exit.\n",qPrintable(outprojectfiles[ii].filename));
+			system("pause");
             exit(-1);
         }
     }
@@ -806,6 +911,9 @@ int main(int argc, char *argv[])
 
     if((logfp != NULL) && (logfp != stdout))
         fclose(logfp);
+
+	shared.deAllocateGPUSharedData();
+	system("pause");
     return 0;
 }
 

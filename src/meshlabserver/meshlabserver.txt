@@ -29,10 +29,10 @@ meshlabserver [logargs] [args]
 
    Examples:
 
-    'meshlabserver -i input.obj -o output.ply -m vc fq wn -s meshclean.mlx'
+    'meshlabserver -i input.obj -o output.ply -m vc fq wt -s meshclean.mlx'
            the script contained in file 'meshclean.mlx' will be applied to the
            mesh contained into 'input.obj'. The vertex coordinates and the
-           per-vertex-color, the per-face-quality and the per-wedge-normal
+           per-vertex-color, the per-face-quality and the per-wedge-texture
            attributes will be saved into the output.ply file
 
     'meshlabserver -i input0.obj -i input1.ply -o outproj.mlp -v -s meshclean.mlx'
