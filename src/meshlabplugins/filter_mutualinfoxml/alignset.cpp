@@ -291,8 +291,8 @@ void AlignSet::readRender(int component) {
     case 2: glReadPixels( 0, 0, width(), height(), GL_BLUE, GL_UNSIGNED_BYTE, render); break;
     case 3: glReadPixels( 0, 0, width(), height(), GL_ALPHA, GL_UNSIGNED_BYTE, render); break;
     }
-    QImage l=fbo.toImage();
-    l.save("puppo.jpg");
+    //QImage l=fbo.toImage();
+    //l.save("puppo.jpg");
     fbo.release();
 }
 

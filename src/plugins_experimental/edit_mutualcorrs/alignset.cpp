@@ -265,8 +265,8 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
     case 4: break;
   }
 
-  QImage l = fbo.toImage();
-  l.save("rendering.jpg");
+  //QImage l = fbo.toImage();
+  //l.save("rendering.jpg");
 
   //err = glGetError();
 
@@ -316,8 +316,8 @@ void AlignSet::readRender(int component) {
   case 2: glReadPixels( 0, 0, width(), height(), GL_BLUE, GL_UNSIGNED_BYTE, render); break;
   case 3: glReadPixels( 0, 0, width(), height(), GL_ALPHA, GL_UNSIGNED_BYTE, render); break;
   }
-  QImage l=fbo.toImage();
-  l.save("puppo.jpg");
+  //QImage l=fbo.toImage();
+  //l.save("puppo.jpg");
   fbo.release();
 }
 
