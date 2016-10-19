@@ -1149,7 +1149,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		switch(par.getEnum("rotCenter"))
 		{
 			case 0: tranVec=Point3m(0,0,0); break;
-			case 1: tranVec=m.cm.trBB().Center(); break;
+			case 1: tranVec= m.cm.Tr * m.cm.bbox.Center(); break;
 			case 2: tranVec=par.getPoint3m("customCenter");break;
 		}
 
@@ -1360,7 +1360,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		switch (par.getEnum("scaleCenter"))
 		{
 			case 0: tranVec = Point3m(0, 0, 0); break;
-			case 1: tranVec = m.cm.trBB().Center(); break;
+			case 1: tranVec = m.cm.Tr * m.cm.bbox.Center(); break;
 			case 2: tranVec = par.getPoint3m("customCenter"); break;
 		}
 		trTran.SetTranslate(tranVec);
