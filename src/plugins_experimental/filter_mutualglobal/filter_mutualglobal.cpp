@@ -70,7 +70,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
  QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_IMAGE_GLOBALIGN :  return QString("Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009"); 
+		case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!"); 
 		default : assert(0); 
 	}
 	return QString("Unknown Filter");
@@ -1101,4 +1101,4 @@ bool FilterMutualInfoPlugin::UpdateGraph(MeshDocument &md, SubGraph graph, int n
 
 }
 
-Q_EXPORT_PLUGIN(FilterMutualInfoPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterMutualInfoPlugin)

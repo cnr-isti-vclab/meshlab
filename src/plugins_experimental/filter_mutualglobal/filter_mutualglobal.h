@@ -46,6 +46,7 @@ class QScriptEngine;
 class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
@@ -72,7 +73,7 @@ public:
 	bool allActive(SubGraph graph);
 	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
-
+	FILTER_ARITY filterArity(QAction *) const { return SINGLE_MESH; }
 
 
 
