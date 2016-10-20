@@ -551,14 +551,15 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 	QHash <CVertexO *, pair<Point3f, Color4b> > originals;
 
 	Color4b newcol, destCol;
-	int opac = paintbox->getOpacity();
-	int decrease_pos = paintbox->getSmoothPercentual();
+	int strength = paintbox->getSmoothPercentual();
+	int decrease_pos = paintbox->getHardness();
+
 	int c_r, c_g, c_b;
 	float p_x, p_y, p_z;
 	float newpos[3];
 
 	if (paintbox->getPressureDisplacement())
-		decrease_pos *= latest_event.pressure;
+		strength *= latest_event.pressure;
 
 	for (unsigned int k = 0; k < vertices->size(); k++) //forach selected vertices
 	{
@@ -634,7 +635,7 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 				newcol[1] = c_g / count_me;
 				newcol[2] = c_b / count_me;
 
-				mergeColors((float)(op*opac) / 100.0, newcol, v->C(), &destCol);
+				mergeColors((float)(op*strength) / 100.0, newcol, v->C(), &destCol);
 
 				v->C()[0] = destCol[0];
 				v->C()[1] = destCol[1];
@@ -646,7 +647,7 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 				newpos[1] = p_y / (float)count_me;
 				newpos[2] = p_z / (float)count_me;
 				float po[3]; for (int lauf = 0; lauf < 3; lauf++) po[lauf] = v->P()[lauf];
-				mergePositions((float)(op*opac) / 100.0, newpos, po, newpos);
+				mergePositions((float)(op*strength) / 100.0, newpos, po, newpos);
 
 				for (int lauf = 0; lauf < 3; lauf++) v->P()[lauf] = newpos[lauf];
 			}
@@ -664,7 +665,7 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 {
 	//	int opac = 1.0;
 	float decrease_pos = paintbox->getHardness() / 100.0;
-	float strength = m.cm.bbox.Diag() * paintbox->getDisplacement() / 1000.0;
+	float strength = paintbox->getDisplacement() / 100.0;
 
 	if (paintbox->getPressureDisplacement())
 		strength *= latest_event.pressure;
@@ -704,7 +705,6 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			data.first->P()[0] = temp[0]; data.first->P()[1] = temp[1]; data.first->P()[2] = temp[2];
 			displaceAlongVector(data.first, normal, gauss);
 			updateNormal(data.first);
-
 		}
 
 		delete zbuffer; zbuffer = NULL;

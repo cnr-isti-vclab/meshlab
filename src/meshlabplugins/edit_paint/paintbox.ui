@@ -431,7 +431,16 @@
       </size>
      </property>
      <layout class="QGridLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item row="0" column="0">
@@ -745,7 +754,16 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
           <number>9</number>
          </property>
          <property name="spacing">
@@ -833,7 +851,16 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
           <number>9</number>
          </property>
          <property name="spacing">
@@ -864,7 +891,7 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="0">
           <widget class="QLabel" name="label_percentual">
            <property name="text">
-            <string>Percentual</string>
+            <string>Strenght %</string>
            </property>
           </widget>
          </item>
@@ -902,27 +929,26 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>Displacement</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QSlider" name="mesh_displacement_slider">
-           <property name="sliderPosition">
-            <number>4</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <string>Displacement %</string>
            </property>
           </widget>
          </item>
          <item row="0" column="2">
           <widget class="QDoubleSpinBox" name="displacement_spin_box">
            <property name="decimals">
-            <number>3</number>
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>1.000000000000000</double>
            </property>
            <property name="value">
-            <double>4.000000000000000</double>
+            <double>50.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -937,14 +963,39 @@ p, li { white-space: pre-wrap; }
           <widget class="QComboBox" name="mesh_displacement_direction">
            <item>
             <property name="text">
-             <string>Averaged Normals</string>
+             <string>Per Vertex Normals</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Per Vertex Normals</string>
+             <string>Averaged Normals</string>
             </property>
            </item>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSlider" name="mesh_displacement_slider">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+           <property name="sliderPosition">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
           </widget>
          </item>
         </layout>
@@ -1118,7 +1169,7 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <property name="text">
-             <string>percentual of bounding box</string>
+             <string>percentage of bounding box</string>
             </property>
            </item>
           </widget>
@@ -1195,7 +1246,16 @@ p, li { white-space: pre-wrap; }
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
           <number>9</number>
          </property>
          <property name="spacing">
@@ -1246,7 +1306,16 @@ p, li { white-space: pre-wrap; }
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
           <number>9</number>
          </property>
          <property name="spacing">
