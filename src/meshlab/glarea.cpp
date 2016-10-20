@@ -476,7 +476,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                
                 foreach(MeshModel * mp, this->md()->meshList)
                 {
-                    if ((mp != NULL) && (mp->visible))
+                    if ((mp != NULL) && (meshVisibilityMap[mp->id()]))
                     {
                         QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
                         for( QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end();++it)
@@ -531,16 +531,19 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             }
 			foreach(MeshModel * mp, this->md()->meshList)
 			{
-				MLRenderingData curr;
-				MLDefaultMeshDecorators defdec(mw());
-				datacont->getRenderInfoPerMeshView(mp->id(), context(), curr);
-				defdec.decorateMesh(*mp, curr, &painter, md()->Log);
-
-				QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
-				for (QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end(); ++it)
+				if (meshVisibilityMap[mp->id()])
 				{
-					MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
-					decorInterface->decorateMesh(*it, *mp, this->glas.currentGlobalParamSet, this, &painter, md()->Log);
+					MLRenderingData curr;
+					MLDefaultMeshDecorators defdec(mw());
+					datacont->getRenderInfoPerMeshView(mp->id(), context(), curr);
+					defdec.decorateMesh(*mp, curr, &painter, md()->Log);
+
+					QList<QAction *>& tmpset = iPerMeshDecoratorsListMap[mp->id()];
+					for (QList<QAction *>::iterator it = tmpset.begin(); it != tmpset.end(); ++it)
+					{
+						MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>((*it)->parent());
+						decorInterface->decorateMesh(*it, *mp, this->glas.currentGlobalParamSet, this, &painter, md()->Log);
+					}
 				}
 			}
         }

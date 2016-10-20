@@ -161,13 +161,10 @@ void MainWindow::createActions()
 	appendProjectAct = new QAction(tr("Append project to current..."), this);
 	connect(appendProjectAct, SIGNAL(triggered()), this, SLOT(appendProject()));
 
-	saveProjectAct = new QAction(QIcon(":/images/save.png"), tr("&Save Project"), this);
+	saveProjectAct = new QAction(QIcon(":/images/save.png"), tr("&Save Project As..."), this);
 	saveProjectAct->setShortcutContext(Qt::ApplicationShortcut);
 	saveProjectAct->setShortcut(Qt::CTRL + Qt::Key_S);
 	connect(saveProjectAct, SIGNAL(triggered()), this, SLOT(saveProject()));
-
-	saveProjectAsAct = new QAction(QIcon(":/images/save.png"), tr("Save Project As..."), this);
-	connect(saveProjectAsAct, SIGNAL(triggered()), this, SLOT(saveProject()));
 
 	closeProjectAct = new QAction(tr("Close Project"), this);
 	//closeProjectAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -1058,30 +1055,27 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 
 	settings.setValue("totalKV", settings.value("totalKV", 0).toInt() + (GLA()->mm()->cm.vn) / 1000);
 	settings.setValue("loadedMeshCounter", settings.value("loadedMeshCounter", 0).toInt() + 1);
+}
 
-	int loadedMeshCounter = settings.value("loadedMeshCounter", 20).toInt();
-	int connectionInterval = settings.value("connectionInterval", 20).toInt();
-	int lastComunicatedValue = settings.value("lastComunicatedValue", 0).toInt();
+void MainWindow::sendUsAMail()
+{
+	QSettings settings;
+	int loadedMeshCounter = settings.value("loadedMeshCounter").toInt();
+	//int connectionInterval = settings.value("connectionInterval", 20).toInt();
+	//int lastComunicatedValue = settings.value("lastComunicatedValue", 0).toInt();
 
-	if (loadedMeshCounter - lastComunicatedValue > connectionInterval && !myLocalBuf.isOpen())
+	int congratsMeshCounter = settings.value("congratsMeshCounter", 50).toInt();
+	if (loadedMeshCounter > congratsMeshCounter)
 	{
-#if !defined(__DISABLE_AUTO_STATS__)
-		checkForUpdates(false);
-#endif
-		int congratsMeshCounter = settings.value("congratsMeshCounter", 50).toInt();
-		if (loadedMeshCounter > congratsMeshCounter * 2)
-		{
-			// This preference values store when you did the last request for a mail
-			settings.setValue("congratsMeshCounter", loadedMeshCounter);
-
-			QDialog *congratsDialog = new QDialog();
-			Ui::CongratsDialog temp;
-			temp.setupUi(congratsDialog);
-			temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
-			congratsDialog->exec();
-			if (congratsDialog->result() == QDialog::Accepted)
-				QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
-		}
+		QDialog *congratsDialog = new QDialog();
+		Ui::CongratsDialog temp;
+		temp.setupUi(congratsDialog);
+		temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+		congratsDialog->exec();
+		if (congratsDialog->result() == QDialog::Accepted)
+			QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
+		// This preference values store when you did the last request for a mail
+		settings.setValue("congratsMeshCounter", congratsMeshCounter * 2);
 	}
 }
 
@@ -1112,8 +1106,6 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	VerboseCheckingFlag = verboseFlag;
 	QSettings settings;
 	int totalKV = settings.value("totalKV", 0).toInt();
-	int connectionInterval = settings.value("connectionInterval", 20).toInt();
-	settings.setValue("connectionInterval", connectionInterval);
 	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
 	int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
 	QString UID = settings.value("UID", QString("")).toString();

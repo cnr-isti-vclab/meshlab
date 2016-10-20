@@ -380,7 +380,6 @@ void MainWindow::updateMenus()
     reloadAllMeshAct->setEnabled(notEmptyActiveDoc);
     importRasterAct->setEnabled(activeDoc);
 
-    saveProjectAsAct->setEnabled(activeDoc);
     saveProjectAct->setEnabled(activeDoc);
     closeProjectAct->setEnabled(activeDoc);
 
@@ -3424,6 +3423,13 @@ void MainWindow::sendHistory()
 //    }
 //}
 
+
+void MainWindow::showEvent(QShowEvent * event)
+{
+	QWidget::showEvent(event);
+	checkForUpdates();
+	sendUsAMail();
+}
 
 void MainWindow::meshAdded(int mid)
 {

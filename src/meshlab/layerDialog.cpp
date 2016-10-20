@@ -722,6 +722,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
                 ui->meshTreeWidget->setCurrentItem(item);
 				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
 				_renderingtabcontainer->setTitle(mm->shortName());
+				updateDecoratorParsView();
             }
             else
             {

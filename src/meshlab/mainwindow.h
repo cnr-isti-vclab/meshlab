@@ -108,6 +108,9 @@ signals:
     void filterExecuted();
     void updateLayerTable();
 
+protected:
+	void showEvent(QShowEvent *event);
+
 private slots:
     void newProject(const QString& projName = QString());
     void saveProject();
@@ -228,7 +231,8 @@ private slots:
     void helpOnline();
     void helpOnscreen();
     void submitBug();
-    void checkForUpdates(bool verboseFlag=true);
+	void sendUsAMail();
+	void checkForUpdates(bool verboseFlag=true);
     //void updatePerViewApplicationStatus();
 
     void dropEvent ( QDropEvent * event );
@@ -276,7 +280,7 @@ private:
 
 
     QNetworkAccessManager *httpReq;
-    QBuffer myLocalBuf;
+    /*QBuffer myLocalBuf;*/
     int idHost;
     int idGet;
     bool VerboseCheckingFlag;
@@ -429,7 +433,7 @@ private:
 
     //////////// Actions Menu File ///////////////////////
     QAction *newProjectAct;
-    QAction *openProjectAct, *appendProjectAct, *saveProjectAct, *saveProjectAsAct;
+    QAction *openProjectAct, *appendProjectAct, *saveProjectAct;
     QAction *importMeshAct, *exportMeshAct, *exportMeshAsAct;
     QAction *importRasterAct;
     QAction *closeProjectAct;
