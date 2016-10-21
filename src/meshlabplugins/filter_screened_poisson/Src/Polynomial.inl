@@ -306,6 +306,7 @@ int Polynomial<Degree>::getSolutions( double c , double* roots , double EPS ) co
 	for( int i=0 ; i<_rCount ; i++ ) if( fabs(_roots[i][1])<=EPS ) roots[rCount++] = _roots[i][0];
 	return rCount;
 }
+// The 0-th order B-spline
 template< >
 Polynomial< 0 > Polynomial< 0 >::BSplineComponent( int i )
 {
@@ -313,20 +314,56 @@ Polynomial< 0 > Polynomial< 0 >::BSplineComponent( int i )
 	p.coefficients[0] = 1.;
 	return p;
 }
+
+// The Degree-th order B-spline
 template< int Degree >
 Polynomial< Degree > Polynomial< Degree >::BSplineComponent( int i )
 {
+	// B_d^i(x) = \int_x^1 B_{d-1}^{i}(y) dy + \int_0^x B_{d-1}^{i-1} y dy
+	//          = \int_0^1 B_{d-1}^{i}(y) dy - \int_0^x B_{d-1}^{i}(y) dy + \int_0^x B_{d-1}^{i-1} y dy
 	Polynomial p;
-	if( i>0 )
-	{
-		Polynomial< Degree > _p = Polynomial< Degree-1 >::BSplineComponent( i-1 ).integral();
-		p -= _p;
-		p.coefficients[0] += _p(1);
-	}
 	if( i<Degree )
 	{
 		Polynomial< Degree > _p = Polynomial< Degree-1 >::BSplineComponent( i ).integral();
+		p -= _p;
+		p.coefficients[0] += _p(1);
+	}
+	if( i>0 )
+	{
+		Polynomial< Degree > _p = Polynomial< Degree-1 >::BSplineComponent( i-1 ).integral();
 		p += _p;
 	}
 	return p;
+}
+
+
+// The 0-th order B-spline values
+template< > void Polynomial< 0 >::BSplineComponentValues( double x , double* values ){ values[0] = 1.; }
+// The Degree-th order B-spline
+template< int Degree > void Polynomial< Degree >::BSplineComponentValues( double x , double* values )
+{
+	const double Scale = 1./Degree;
+	Polynomial< Degree-1 >::BSplineComponentValues( x , values+1 );
+	values[0] = values[1] * (1.-x) * Scale;
+	for( int i=1 ; i<Degree ; i++ )
+	{
+		double x1 = (x-i+Degree) , x2 = (-x+i+1);
+		values[i] = ( values[i]*x1 + values[i+1]*x2 ) * Scale;
+	}
+	values[Degree] *= x * Scale;
+}
+
+// Using the recurrence formulation for Pascal's triangle
+template< > void Polynomial< 0 >::BinomialCoefficients( int bCoefficients[1] ){ bCoefficients[0] = 1; }
+template< int Degree > void Polynomial< Degree >::BinomialCoefficients( int bCoefficients[Degree+1] )
+{
+	Polynomial< Degree-1 >::BinomialCoefficients( bCoefficients );
+	int leftValue = 0;
+	for( int i=0 ; i<Degree ; i++ )
+	{
+		int temp = bCoefficients[i];
+		bCoefficients[i] += leftValue;
+		leftValue = temp;
+	}
+	bCoefficients[Degree] = 1;
 }

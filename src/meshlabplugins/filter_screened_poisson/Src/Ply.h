@@ -33,6 +33,8 @@
 #ifndef __PLY_H__
 #define __PLY_H__
 
+#define USE_PLY_WRAPPER 1
+
 #ifndef WIN32
 #define _strdup strdup
 #endif
@@ -239,12 +241,22 @@ static PlyProperty face_props[] =
 	{ _strdup( "vertex_indices" ) , PLY_INT , PLY_INT , offsetof( PlyFace , vertices ) , 1 , PLY_UCHAR, PLY_UCHAR , offsetof(PlyFace,nr_vertices) },
 };
 
+
+///////////////////
+// PlyVertexType //
+///////////////////
+
+// The "Wrapper" class indicates the class to cast to/from in order to support linear operations.
 template< class Real >
 class PlyVertex
 {
 public:
-	const static int Components=3;
-	static PlyProperty Properties[];
+	typedef PlyVertex Wrapper;
+
+	const static int ReadComponents=3;
+	const static int WriteComponents=3;
+	static PlyProperty ReadProperties[];
+	static PlyProperty WriteProperties[];
 
 	Point3D< Real > point;
 
@@ -260,7 +272,13 @@ public:
 	template< class _Real > PlyVertex& operator /= ( _Real s ) { point /= s ; return *this; }
 };
 template< class Real , class _Real > PlyVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyVertex< Real > v ) { return PlyVertex< Real >( xForm * v.point ); }
-template< class Real > PlyProperty PlyVertex< Real >::Properties[]=
+template< class Real > PlyProperty PlyVertex< Real >::ReadProperties[]=
+{
+	{ _strdup( "x" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "y" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "z" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 }
+};
+template< class Real > PlyProperty PlyVertex< Real >::WriteProperties[]=
 {
 	{ _strdup( "x" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
 	{ _strdup( "y" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
@@ -270,8 +288,12 @@ template< class Real >
 class PlyValueVertex
 {
 public:
-	const static int Components=4;
-	static PlyProperty Properties[];
+	typedef PlyValueVertex Wrapper;
+
+	const static int ReadComponents=4;
+	const static int WriteComponents=4;
+	static PlyProperty ReadProperties[];
+	static PlyProperty WriteProperties[];
 
 	Point3D<Real> point;
 	Real value;
@@ -288,8 +310,14 @@ public:
 	template< class _Real > PlyValueVertex& operator /= ( _Real s ) { point /= s , value /= Real(s) ; return *this; }
 };
 template< class Real , class _Real > PlyValueVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyValueVertex< Real > v ) { return PlyValueVertex< Real >( xForm * v.point , v.value ); }
-template< class Real >
-PlyProperty PlyValueVertex< Real >::Properties[]=
+template< class Real > PlyProperty PlyValueVertex< Real >::ReadProperties[]=
+{
+	{ _strdup( "x"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "y"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "z"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "value" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , value           ) ) , 0 , 0 , 0 , 0 }
+};
+template< class Real > PlyProperty PlyValueVertex< Real >::WriteProperties[]=
 {
 	{ _strdup( "x"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
 	{ _strdup( "y"     ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
@@ -300,8 +328,12 @@ template< class Real >
 class PlyOrientedVertex
 {
 public:
-	const static int Components=6;
-	static PlyProperty Properties[];
+	typedef PlyOrientedVertex Wrapper;
+
+	const static int ReadComponents=6;
+	const static int WriteComponents=6;
+	static PlyProperty ReadProperties[];
+	static PlyProperty WriteProperties[];
 
 	Point3D<Real> point , normal;
 
@@ -317,8 +349,16 @@ public:
 	template< class _Real > PlyOrientedVertex& operator /= ( _Real s ) { point /= s , normal /= s ; return *this; }
 };
 template< class Real , class _Real > PlyOrientedVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyOrientedVertex< Real > v ) { return PlyOrientedVertex< Real >( xForm * v.point , xForm.inverse().transpose() * v.normal ); }
-template< class Real >
-PlyProperty PlyOrientedVertex< Real >::Properties[]=
+template< class Real > PlyProperty PlyOrientedVertex< Real >::ReadProperties[]=
+{
+	{ _strdup( "x"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "y"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "z"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "nx" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "ny" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "nz" ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex , normal.coords[2] ) ) , 0 , 0 , 0 , 0 }
+};
+template< class Real > PlyProperty PlyOrientedVertex< Real >::WriteProperties[]=
 {
 	{ _strdup( "x"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[0] ) ) , 0 , 0 , 0 , 0 },
 	{ _strdup( "y"  ) , PLYType< Real >() , PLYType< Real >() , int( offsetof( PlyOrientedVertex ,  point.coords[1] ) ) , 0 , 0 , 0 , 0 },
@@ -331,19 +371,61 @@ template< class Real >
 class PlyColorVertex
 {
 public:
-	const static int Components=6;
-	static PlyProperty Properties[];
+	struct _PlyColorVertex
+	{
+		Point3D< Real > point , color;
+		_PlyColorVertex( void ) { ; }
+		_PlyColorVertex( Point3D< Real > p , Point3D< Real > c ) : point(p) , color(c) { ; }
+		_PlyColorVertex( PlyColorVertex< Real > p ){ point = p.point ; for( int c=0 ; c<3 ; c++ ) color[c] = (Real) p.color[c]; }
+		operator PlyColorVertex< Real > ()
+		{
+			PlyColorVertex< Real > p;
+			p.point = point;
+			for( int c=0 ; c<3 ; c++ ) p.color[c] = (unsigned char)std::max< int >( 0 , std::min< int >( 255 , (int)( color[c]+0.5 ) ) );
+			return p;
+		}
 
-	Point3D<Real> point;
+	  	_PlyColorVertex operator + ( _PlyColorVertex p ) const { return _PlyColorVertex( point+p.point , color+p.color ); }
+		_PlyColorVertex operator - ( _PlyColorVertex p ) const { return _PlyColorVertex( point-p.value , color-p.color ); }
+		template< class _Real > _PlyColorVertex operator * ( _Real s ) const { return _PlyColorVertex( point*s , color*s ); }
+		template< class _Real > _PlyColorVertex operator / ( _Real s ) const { return _PlyColorVertex( point/s , color/s ); }
+		_PlyColorVertex& operator += ( _PlyColorVertex p ) { point += p.point , color += p.color ; return *this; }
+		_PlyColorVertex& operator -= ( _PlyColorVertex p ) { point -= p.point , color -= p.color ; return *this; }
+		template< class _Real > _PlyColorVertex& operator *= ( _Real s ) { point *= s , color *= s ; return *this; }
+		template< class _Real > _PlyColorVertex& operator /= ( _Real s ) { point /= s , color /= s ; return *this; }
+	};
+
+	typedef _PlyColorVertex Wrapper;
+
+	const static int ReadComponents=9;
+	const static int WriteComponents=6;
+	static PlyProperty ReadProperties[];
+	static PlyProperty WriteProperties[];
+
+	Point3D< Real > point;
 	unsigned char color[3];
 
-	operator Point3D<Real>& ()					{return point;}
-	operator const Point3D<Real>& () const		{return point;}
-	PlyColorVertex(void)						{point.coords[0]=point.coords[1]=point.coords[2]=0,color[0]=color[1]=color[2]=0;}
-	PlyColorVertex(const Point3D<Real>& p)	{point=p;}
+	operator Point3D< Real >& (){ return point; }
+	operator const Point3D< Real >& () const { return point; }
+	PlyColorVertex( void ) { point.coords[0] = point.coords[1] = point.coords[2] = 0 , color[0] = color[1] = color[2] = 0; }
+	PlyColorVertex( const Point3D<Real>& p ) { point=p; }
+	PlyColorVertex( const Point3D< Real >& p , const unsigned char c[3] ) { point = p , color[0] = c[0] , color[1] = c[1] , color[2] = c[2]; }
 };
-template< class Real >
-PlyProperty PlyColorVertex< Real >::Properties[]=
+template< class Real , class _Real > PlyColorVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyColorVertex< Real > v ) { return PlyColorVertex< Real >( xForm * v.point , v.color ); }
+
+template< class Real > PlyProperty PlyColorVertex< Real >::ReadProperties[]=
+{
+	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "r"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "g"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
+	{ _strdup( "b"     ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+};
+template< class Real > PlyProperty PlyColorVertex< Real >::WriteProperties[]=
 {
 	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 },
 	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >(), int( offsetof( PlyColorVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 },
@@ -352,12 +434,171 @@ PlyProperty PlyColorVertex< Real >::Properties[]=
 	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 },
 	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >(), int( offsetof( PlyColorVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
 };
+template< class Real >
+class PlyColorAndValueVertex
+{
+public:
+	struct _PlyColorAndValueVertex
+	{
+		Point3D< Real > point , color;
+		Real value;
+		_PlyColorAndValueVertex( void ) : value(0) { ; }
+		_PlyColorAndValueVertex( Point3D< Real > p , Point3D< Real > c , Real v ) : point(p) , color(c) , value(v) { ; }
+		_PlyColorAndValueVertex( PlyColorAndValueVertex< Real > p ){ point = p.point ; for( int c=0 ; c<3 ; c++ ) color[c] = (Real) p.color[c] ; value = p.value; }
+		operator PlyColorAndValueVertex< Real > ()
+		{
+			PlyColorAndValueVertex< Real > p;
+			p.point = point;
+			for( int c=0 ; c<3 ; c++ ) p.color[c] = (unsigned char)std::max< int >( 0 , std::min< int >( 255 , (int)( color[c]+0.5 ) ) );
+			p.value = value;
+			return p;
+		}
+
+	  	_PlyColorAndValueVertex operator + ( _PlyColorAndValueVertex p ) const { return _PlyColorAndValueVertex( point+p.point , color+p.color , value+p.value ); }
+		_PlyColorAndValueVertex operator - ( _PlyColorAndValueVertex p ) const { return _PlyColorAndValueVertex( point-p.value , color-p.color , value+p.value ); }
+		template< class _Real > _PlyColorAndValueVertex operator * ( _Real s ) const { return _PlyColorAndValueVertex( point*s , color*s , value*s ); }
+		template< class _Real > _PlyColorAndValueVertex operator / ( _Real s ) const { return _PlyColorAndValueVertex( point/s , color/s , value/s ); }
+		_PlyColorAndValueVertex& operator += ( _PlyColorAndValueVertex p ) { point += p.point , color += p.color , value += p.value ; return *this; }
+		_PlyColorAndValueVertex& operator -= ( _PlyColorAndValueVertex p ) { point -= p.point , color -= p.color , value -= p.value ; return *this; }
+		template< class _Real > _PlyColorAndValueVertex& operator *= ( _Real s ) { point *= s , color *= s , value *= (Real)s ; return *this; }
+		template< class _Real > _PlyColorAndValueVertex& operator /= ( _Real s ) { point /= s , color /= s , value /= (Real)s ; return *this; }
+	};
+
+	typedef _PlyColorAndValueVertex Wrapper;
+
+	const static int ReadComponents=10;
+	const static int WriteComponents=7;
+	static PlyProperty ReadProperties[];
+	static PlyProperty WriteProperties[];
+
+	Point3D< Real > point;
+	unsigned char color[3];
+	Real value;
+
+	operator Point3D< Real >& (){ return point; }
+	operator const Point3D< Real >& () const { return point; }
+	PlyColorAndValueVertex( void ) { point.coords[0] = point.coords[1] = point.coords[2] = (Real)0 , color[0] = color[1] = color[2] = 0 , value = (Real)0; }
+	PlyColorAndValueVertex( const Point3D< Real >& p ) { point=p; }
+	PlyColorAndValueVertex( const Point3D< Real >& p , const unsigned char c[3] , Real v) { point = p , color[0] = c[0] , color[1] = c[1] , color[2] = c[2] , value = v; }
+};
+template< class Real , class _Real > PlyColorAndValueVertex< Real > operator * ( XForm4x4< _Real > xForm , PlyColorAndValueVertex< Real > v ) { return PlyColorAndValueVertex< Real >( xForm * v.point , v.color , v.value ); }
+template< class Real > PlyProperty PlyColorAndValueVertex< Real >::ReadProperties[]=
+{
+	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "value" ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "r"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "g"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "b"     ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+};
+template< class Real > PlyProperty PlyColorAndValueVertex< Real >::WriteProperties[]=
+{
+	{ _strdup( "x"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "y"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "z"     ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex , point.coords[2] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "value" ) , PLYType<          Real >() , PLYType<          Real >() , int( offsetof( PlyColorAndValueVertex ,        value    ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "red"   ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[0] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "green" ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[1] ) ) , 0 , 0 , 0 , 0 } ,
+	{ _strdup( "blue"  ) , PLYType< unsigned char >() , PLYType< unsigned char >() , int( offsetof( PlyColorAndValueVertex ,        color[2] ) ) , 0 , 0 , 0 , 0 }
+};
 
 template< class Vertex , class Real >
 int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >*  mesh , int file_type , const Point3D< float >& translate , float scale , char** comments=NULL , int commentNum=0 , XForm4x4< Real > xForm=XForm4x4< Real >::Identity() );
 
 template< class Vertex , class Real >
 int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >*  mesh , int file_type , char** comments=NULL , int commentNum=0 , XForm4x4< Real > xForm=XForm4x4< Real >::Identity() );
+
+inline bool PlyReadHeader( char* fileName , PlyProperty* properties , int propertyNum , bool* readFlags , int& file_type )
+{
+	int nr_elems;
+	char **elist;
+	float version;
+	PlyFile* ply;
+	char* elem_name;
+	int num_elems;
+	int nr_props;
+	PlyProperty** plist;
+
+	ply = ply_open_for_reading( fileName , &nr_elems , &elist , &file_type , &version );
+	if( !ply ) return false;
+
+	for( int i=0 ; i<nr_elems ; i++ )
+	{
+		elem_name = elist[i];
+		plist = ply_get_element_description( ply , elem_name , &num_elems , &nr_props );
+		if( !plist )
+		{
+			for( int i=0 ; i<nr_elems ; i++ )
+			{
+				free( ply->elems[i]->name );
+				free( ply->elems[i]->store_prop );
+				for( int j=0 ; j<ply->elems[i]->nprops ; j++ )
+				{
+					free( ply->elems[i]->props[j]->name );
+					free( ply->elems[i]->props[j] );
+				}
+				free( ply->elems[i]->props );
+			}
+			for( int i=0 ; i<nr_elems ; i++ ) free( ply->elems[i] );
+			free( ply->elems );
+			for( int i=0 ; i<ply->num_comments ; i++ ) free( ply->comments[i] );
+			free( ply->comments );
+			for( int i=0 ; i<ply->num_obj_info ; i++ ) free( ply->obj_info[i] );
+			free( ply->obj_info );
+			ply_free_other_elements( ply->other_elems );
+			
+			for( int i=0 ; i<nr_elems ; i++ ) free( elist[i] );
+			free( elist );
+			ply_close( ply );
+			return 0;
+		}		
+		if( equal_strings( "vertex" , elem_name ) )
+			for( int i=0 ; i<propertyNum ; i++ )
+				if( readFlags ) readFlags[i] = ply_get_property( ply , elem_name , &properties[i] )!=0;
+
+		for( int j=0 ; j<nr_props ; j++ )
+		{
+			free( plist[j]->name );
+			free( plist[j] );
+		}
+		free( plist );
+	}  // for each type of element
+	
+	for( int i=0 ; i<nr_elems ; i++ )
+	{
+		free( ply->elems[i]->name );
+		free( ply->elems[i]->store_prop );
+		for( int j=0 ; j<ply->elems[i]->nprops ; j++ )
+		{
+			free( ply->elems[i]->props[j]->name );
+			free( ply->elems[i]->props[j] );
+		}
+		if( ply->elems[i]->props && ply->elems[i]->nprops ) free(ply->elems[i]->props);
+	}
+	for( int i=0 ; i<nr_elems ; i++ ) free(ply->elems[i]);
+	free( ply->elems) ;
+	for( int i=0 ; i<ply->num_comments ; i++ ) free( ply->comments[i] );
+	free( ply->comments );
+	for( int i=0 ; i<ply->num_obj_info ; i++ ) free( ply->obj_info[i] );
+	free( ply->obj_info );
+	ply_free_other_elements(ply->other_elems);
+	
+	
+	for( int i=0 ; i<nr_elems ; i++ ) free( elist[i] );
+	free( elist );
+	ply_close( ply );
+	return true;
+}
+inline bool PlyReadHeader( char* fileName , PlyProperty* properties , int propertyNum , bool* readFlags )
+{
+	int file_type;
+	return PlyReadHeader( fileName , properties , propertyNum , readFlags , file_type );
+}
+
 
 template<class Vertex>
 int PlyReadPolygons(char* fileName,
@@ -626,7 +867,7 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
 	// describe vertex and face properties
 	//
 	ply_element_count( ply , "vertex" , nr_vertices );
-	for( int i=0 ; i<Vertex::Components ; i++ ) ply_describe_property( ply , "vertex" , &Vertex::Properties[i] );
+	for( int i=0 ; i<Vertex::WriteComponents ; i++ ) ply_describe_property( ply , "vertex" , &Vertex::WriteProperties[i] );
 	
 	ply_element_count( ply , "face" , nr_faces );
 	ply_describe_property( ply , "face" , &face_props[0] );

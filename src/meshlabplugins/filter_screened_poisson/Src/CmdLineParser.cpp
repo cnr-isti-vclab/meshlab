@@ -166,7 +166,6 @@ char* GetFileExtension(char* fileName){
 	char* fileNameCopy;
 	char* ext=NULL;
 	char* temp;
-    if(fileName==NULL) return NULL;
 
 	fileNameCopy=new char[strlen(fileName)+1];
 	assert(fileNameCopy);

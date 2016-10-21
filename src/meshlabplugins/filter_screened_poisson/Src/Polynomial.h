@@ -29,10 +29,13 @@ DAMAGE.
 #ifndef POLYNOMIAL_INCLUDED
 #define POLYNOMIAL_INCLUDED
 
+#define NEW_POLYNOMIAL_CODE 1
+
 #include <vector>
 
 template< int Degree >
-class Polynomial{
+class Polynomial
+{
 public:
 	double coefficients[Degree+1];
 
@@ -86,7 +89,11 @@ public:
 	void getSolutions(double c,std::vector<double>& roots,double EPS) const;
 	int getSolutions( double c , double* roots , double EPS ) const;
 
+	// [NOTE] Both of these methods define the indexing according to DeBoor's algorithm, so that
+	// Polynomial< Degree >BSplineComponent( 0 )( 1.0 )=0 for all Degree>0.
 	static Polynomial BSplineComponent( int i );
+	static void BSplineComponentValues( double x , double* values );
+	static void BinomialCoefficients( int bCoefficients[Degree+1] );
 };
 
 #include "Polynomial.inl"

@@ -29,10 +29,10 @@ DAMAGE.
 #ifndef __SPARSEMATRIX_HPP
 #define __SPARSEMATRIX_HPP
 
+#define NEW_SPARSE_MATRIX 1
 #define ZERO_TESTING_JACOBI 1
 
 
-#include "Vector.h"
 #include "Array.h"
 
 template <class T>
@@ -76,43 +76,26 @@ public:
 	SparseMatrix<T> operator * (const T& V) const;
 	SparseMatrix<T>& operator *= (const T& V);
 
-
-	template<class T2>
-	Vector<T2> operator * (const Vector<T2>& V) const;
-	template<class T2>
-	Vector<T2> Multiply( const Vector<T2>& V ) const;
-	template<class T2>
-	void Multiply( const Vector<T2>& In , Vector<T2>& Out , int threads=1 ) const;
-
-	static int Solve			(const SparseMatrix<T>& M,const Vector<T>& b, int iters,Vector<T>& solution,const T eps=1e-8);
-
-	template<class T2>
-	static int SolveSymmetric( const SparseMatrix<T>& M , const Vector<T2>& b , int iters , Vector<T2>& solution , const T2 eps=1e-8 , int reset=1 , int threads=1 );
+	template< class T2 > void Multiply( ConstPointer( T2 ) in , Pointer( T2 ) out , int threads=1 ) const;
+	template< class T2 > void MultiplyAndAddAverage( ConstPointer( T2 ) in , Pointer( T2 ) out , int threads=1 ) const;
 
 	bool write( FILE* fp ) const;
 	bool write( const char* fileName ) const;
 	bool read( FILE* fp );
 	bool read( const char* fileName );
 
-	template< class T2 >
-	static int SolveJacobi( const SparseMatrix<T>& M , const Vector<T2>& diagonal , const Vector<T2>& b , Vector<T2>& x , Vector<T2>& Mx , T2 sor , int threads=1 , int offset=0 );
-	template< class T2 >
-	static int SolveGS( const SparseMatrix<T>& M , const Vector<T2>& diagonal , const Vector<T2>& b , Vector<T2>& x , bool forward , int offset=0 );
-	template< class T2 >
-	static int SolveGS( const std::vector< std::vector< int > >& mcIndices , const SparseMatrix<T>& M , const Vector<T2>& diagonal , const Vector<T2>& b , Vector<T2>& x , bool forward , int threads=1 , int offset=0 );
-
-	template< class T2 >
-	static int SolveJacobi( const SparseMatrix<T>& M , const Vector<T2>& b , Vector<T2>& x , Vector<T2>& Mx , T2 sor , int threads=1 , int offset=0 );
-	template< class T2 >
-	static int SolveGS( const SparseMatrix<T>& M , const Vector<T2>& b , Vector<T2>& x , bool forward , int offset=0 );
-	template< class T2 >
-	static int SolveGS( const std::vector< std::vector< int > >& mcIndices , const SparseMatrix<T>& M , const Vector<T2>& b , Vector<T2>& x , bool forward , int threads=1 , int offset=0 );
-
-	template< class T2 >
-	void getDiagonal( Vector< T2 >& diagonal , int threads=1 , int offset=0 ) const;
+	template< class T2 > void getDiagonal( Pointer( T2 ) diagonal , int threads=1 ) const;
+	template< class T2 > static int SolveJacobi( const SparseMatrix<T>& M , ConstPointer( T2 ) b , Pointer( T2 ) x , Pointer( T2 ) Mx , T2 sor , int threads=1 );
+	template< class T2 > static int SolveJacobi( const SparseMatrix<T>& M , ConstPointer( T2 ) diagonal , ConstPointer( T2 ) b , Pointer( T2 ) x , Pointer( T2 ) Mx , T2 sor , int threads=1 );
+	template< class T2 > static int SolveGS( const SparseMatrix<T>& M , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward );
+	template< class T2 > static int SolveGS( const SparseMatrix<T>& M , ConstPointer( T2 ) diagonal , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward );
+	template< class T2 > static int SolveGS( const std::vector< std::vector< int > >& mcIndices , const SparseMatrix<T>& M , ConstPointer( T2 ) diagonal , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward , int threads=1 );
+	template< class T2 > static int SolveGS( const std::vector< std::vector< int > >& mcIndices , const SparseMatrix<T>& M , ConstPointer( T2 ) b , Pointer( T2 ) x , bool forward , int threads=1 );
+	template< class T2 > static int SolveCG( const SparseMatrix<T>& M , ConstPointer( T2 ) b , int iters , Pointer( T2 ) x , T2 eps=1e-8 , int reset=1 , bool addDCTerm=false , bool solveNormal=false , int threads=1 );
 };
 
 
+#if !NEW_SPARSE_MATRIX
 template< class T2 >
 struct MapReduceVector
 {
@@ -203,6 +186,7 @@ public:
 	template< class T2 >
 	void getDiagonal( Vector< T2 >& diagonal , int threads=1 ) const;
 };
+#endif // !NEW_SPARSE_MATRIX
 
 #include "SparseMatrix.inl"
 

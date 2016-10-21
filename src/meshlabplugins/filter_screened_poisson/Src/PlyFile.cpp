@@ -259,6 +259,7 @@ PlyFile *ply_open_for_writing(
 	/* open the file for writing */
 	
 	fp = fopen (name, "wb");
+	free(name);
 	if (fp == NULL) {
 		return (NULL);
 	}
@@ -878,6 +879,7 @@ Open a polygon file for reading.
 	  /* open the file for reading */
 	  
 	  fp = fopen (name, "rb");
+	  free(name);
 	  if (fp == NULL)
 		  return (NULL);
 	  
@@ -892,7 +894,6 @@ Open a polygon file for reading.
 	  
 	  /* return a pointer to the file's information */
 	  
-	  free(name);
 	  return (plyfile);
   }
   
@@ -1873,6 +1874,7 @@ Read an element from a binary file.
 	  /* read in a line */
 	  result = fgets (str, BIG_STRING, fp);
 	  if (result == NULL) {
+	     free(words);
 		  *nwords = 0;
 		  *orig_line = NULL;
 		  return (NULL);
