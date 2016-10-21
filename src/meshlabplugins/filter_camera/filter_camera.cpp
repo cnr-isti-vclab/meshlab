@@ -105,8 +105,8 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
             parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
             parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
+            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_SCALE :
@@ -122,8 +122,8 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
             parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
             parlst.addParam(new RichFloat("scale", 1.0, "Scale factor", "The scale factor that has to be applied to the camera"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
+            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
     case FP_CAMERA_TRANSLATE :
@@ -136,8 +136,8 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             parlst.addParam(new RichDynamicFloat("axisY",0,-1000,1000,"Y Axis","Absolute translation amount along the Y axis"));
             parlst.addParam(new RichDynamicFloat("axisZ",0,-1000,1000,"Z Axis","Absolute translation amount along the Z axis"));
             parlst.addParam(new RichBool("centerFlag",false,"translate viewpoint position to the origin","If selected, the camera viewpoint is translated to the origin"));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
+            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
         }
         break;
 
@@ -154,8 +154,8 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             parlst.addParam(new RichMatrix44f("TransformMatrix",mat,""));
             parlst.addParam(new RichEnum("camera", 0, shotType, tr("Camera type"), tr("Choose the camera to scale")));
             parlst.addParam(new RichEnum("behaviour", 0, behaviour, tr("Matrix semantic"), tr("What the matrix is used for")));
-            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all Raster layers", "Apply the same scaling to all the Raster layers: it is taken into account only if 'Raster Camera' is selected"));
-            parlst.addParam(new RichBool ("toall", false, "Apply to all Raster and Mesh layers", "Apply the same scaling to all the layers, including any 3D layer"));
+            parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));
+            parlst.addParam(new RichBool ("toall", false, "Apply to all active Raster and visible Mesh layers", "Apply the same scaling to all the layers, including any visible 3D layer"));
 
         }
         break;  case FP_SET_RASTER_CAMERA :
@@ -251,7 +251,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.meshList.size(); i++)
                 {
-                    if (md.meshList[i] != NULL)
+                    if (md.meshList[i]->visible)
                     {
                         md.meshList[i]->cm.Tr=transf * md.meshList[i]->cm.Tr;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
@@ -265,7 +265,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplyRigidTransformation(transf);
                 }
             }
@@ -273,7 +273,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplyRigidTransformation(transf);
                 }
             }
@@ -301,6 +301,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
             }
         }
+		md.documentUpdated();
         break;
     case FP_CAMERA_SCALE :
         {
@@ -350,7 +351,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.meshList.size(); i++)
                 {
-                    if (md.meshList[i] != NULL)
+                    if (md.meshList[i]->visible)
                     {
                         md.meshList[i]->cm.Tr=trTran*trScale*trTranInv;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
@@ -366,7 +367,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                     {
                         md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
                         md.rasterList[i]->shot.RescalingWorld(trScale[0][0], false);
@@ -378,7 +379,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                     {
                         md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
                         md.rasterList[i]->shot.RescalingWorld(trScale[0][0], false);
@@ -414,6 +415,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
             }
         }
+		md.documentUpdated();
         break;
     case FP_CAMERA_TRANSLATE :
         {
@@ -450,7 +452,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.meshList.size(); i++)
                 {
-                    if (md.meshList[i] != NULL)
+                    if (md.meshList[i]->visible)
                     {
                         md.meshList[i]->cm.Tr=trTran;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
@@ -463,7 +465,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
 
                 }
@@ -472,7 +474,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplyRigidTransformation(trTran);
                 }
             }
@@ -500,6 +502,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
             }
         }
+		md.documentUpdated();
         break;
     case FP_CAMERA_TRANSFORM :
         {
@@ -527,7 +530,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.meshList.size(); i++)
                 {
-                    if (md.meshList[i] != NULL)
+                    if (md.meshList[i]->visible)
                     {
                         md.meshList[i]->cm.Tr = mat;
                         tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr);
@@ -539,7 +542,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplySimilarity(mat);
 
                 }
@@ -548,7 +551,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
             {
                 for (int i=0; i<md.rasterList.size(); i++)
                 {
-                    if (md.rasterList[i] != NULL)
+                    if (md.rasterList[i]->visible)
                         md.rasterList[i]->shot.ApplySimilarity(mat);
                 }
             }
@@ -576,7 +579,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
             }
         }
-
+		md.documentUpdated();
         break;
 
     case FP_SET_RASTER_CAMERA :
@@ -674,6 +677,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
                 }
             }
         }
+		md.documentUpdated();
         break;
     }
     return true;
@@ -688,7 +692,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     case FP_CAMERA_TRANSLATE   :
     case FP_CAMERA_TRANSFORM:
     case FP_CAMERA_SCALE                  :
-        return MeshModel::MM_CAMERA + MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + RasterModel::RM_ALL;
+        return MeshModel::MM_ALL + RasterModel::RM_ALL;
     case FP_QUALITY_FROM_CAMERA           :
         return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
     default                  : return MeshModel::MM_UNKNOWN;
@@ -705,7 +709,7 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
     case FP_CAMERA_TRANSFORM:
     case FP_SET_MESH_CAMERA :
     case FP_QUALITY_FROM_CAMERA :
-        return MeshFilterInterface::Camera;
+		return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer + MeshFilterInterface::Normal);
     case FP_SET_RASTER_CAMERA :
         return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
     case FP_ORIENT_NORMALS_WITH_CAMERAS:
