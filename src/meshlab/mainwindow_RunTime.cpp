@@ -3441,8 +3441,8 @@ void MainWindow::showEvent(QShowEvent * event)
 	}
 	else
 	{
-		settings.setValue(versioncheckeddatestring, today);
 		checkForUpdates();
+		settings.setValue(versioncheckeddatestring, today);
 	}
 	sendUsAMail();
 }
