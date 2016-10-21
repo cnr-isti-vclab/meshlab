@@ -3427,7 +3427,23 @@ void MainWindow::sendHistory()
 void MainWindow::showEvent(QShowEvent * event)
 {
 	QWidget::showEvent(event);
-	checkForUpdates();
+	QSettings settings;
+	QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
+	QDate today = QDate::currentDate();
+	if (settings.contains(versioncheckeddatestring))
+	{
+		QDate lasttimechecked = settings.value("lastTimeMeshLabVersionCheckedOnStart").toDate();
+		if (lasttimechecked < today)
+		{
+			checkForUpdates();
+			settings.setValue(versioncheckeddatestring, today);
+		}
+	}
+	else
+	{
+		settings.setValue(versioncheckeddatestring, today);
+		checkForUpdates();
+	}
 	sendUsAMail();
 }
 
