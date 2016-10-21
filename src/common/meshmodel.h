@@ -123,8 +123,9 @@ public:
     };
 
     MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
-
-    MeshDocument *parent;
+	MeshModel(MeshModel* cp);
+	
+	MeshDocument *parent;
 
     CMeshO cm;
 

@@ -370,6 +370,21 @@ MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelN
     if(!labelName.isEmpty())     this->_label=labelName;
 }
 
+MeshModel::MeshModel(MeshModel* cp)
+{
+	if (cp == NULL)
+		return;
+	parent = cp->parent;
+	if (parent != NULL)
+		_id = parent->newMeshId();
+	cm.Tr = cp->cm.Tr;
+	cm.sfn = cp->cm.sfn;
+	cm.svn = cp->cm.svn;
+	visible = cp->visible;
+	updateDataMask(cp->currentDataMask);
+	vcg::tri::Append<CMeshO, CMeshO>::MeshCopy(cm, cp->cm);
+}
+
 QString MeshModel::relativePathName() const
 {
     QDir documentDir (documentPathName());
