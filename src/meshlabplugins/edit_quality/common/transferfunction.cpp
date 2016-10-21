@@ -214,6 +214,15 @@ bool TfChannel::isTail(TF_KEY *key)
     return ( key->x == 1.0f );
 }
 
+void TfChannel::flip()
+{
+	for (KEY_LISTiterator it = KEYS.begin(); it != KEYS.end(); it++)
+		(*it)->x = 1.0 - (*it)->x;
+
+	this->updateKeysOrder();
+}
+
+
 //this method is called by TFHandle and is used to update the TfHandle position from graphics to logical level.
 //When the key value is updated, the keys list must be checked to restore the sorting and the right alternation of LEFT\RIGHT JUNCTION SIDE keys
 void TfChannel::updateKeysOrder()
@@ -539,6 +548,15 @@ Color4b TransferFunction::getColorByQuality (float absoluteQuality, float minQua
                 currentColor[i] = relative2AbsoluteVali(1.0f-pow(1.0f-absolute2RelativeValf(currentColor[i],255.0f),2-brightness), 255.0f);
     }
     return currentColor;
+}
+
+void TransferFunction::flipRamp()
+{
+	//for each channel...
+	for (size_t i = 0; i<NUMBER_OF_CHANNELS; i++)
+	{
+		_channels[i].flip();
+	}
 }
 
 //saves the current color band onto an external file

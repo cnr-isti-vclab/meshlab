@@ -775,6 +775,23 @@ void QualityMapperDialog::drawTransferFunctionBG ()
 	}
 }
 
+//callback for flip button click
+void QualityMapperDialog::on_flipButton_clicked()
+{
+	// flip values in ramp
+	_transferFunction->flipRamp();
+
+	//preparing TF to work
+	this->initTF();
+
+	//drawing new TF
+	this->drawTransferFunction();
+
+	//applying preview if necessary
+	if (ui.previewButton->isChecked())
+		on_applyButton_clicked();
+}
+
 //callback for save button click
 void QualityMapperDialog::on_savePresetButton_clicked()
 {

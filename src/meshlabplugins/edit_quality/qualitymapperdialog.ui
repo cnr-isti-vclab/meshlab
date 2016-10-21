@@ -234,34 +234,6 @@
                  </item>
                 </layout>
                </item>
-               <item>
-                <layout class="QHBoxLayout">
-                 <item>
-                  <widget class="QLabel" name="xQualityLabel">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>x-quality</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="invisibleQualityLabel">
-                   <property name="font">
-                    <font>
-                     <pointsize>10</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>quality</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
               </layout>
              </widget>
             </item>
@@ -274,51 +246,81 @@
                </sizepolicy>
               </property>
               <property name="title">
-               <string>Load Preset</string>
+               <string>Preset Ramps</string>
               </property>
-              <layout class="QHBoxLayout">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
-                <widget class="QComboBox" name="presetComboBox">
-                 <property name="toolTip">
-                  <string>Transfer Functions list</string>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <property name="topMargin">
+                  <number>0</number>
                  </property>
-                 <property name="editable">
-                  <bool>true</bool>
-                 </property>
-                </widget>
+                 <item>
+                  <widget class="QComboBox" name="presetComboBox">
+                   <property name="toolTip">
+                    <string>Transfer Functions list</string>
+                   </property>
+                   <property name="editable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item>
-                <widget class="QPushButton" name="loadPresetButton">
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>16777215</height>
-                  </size>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <property name="topMargin">
+                  <number>5</number>
                  </property>
-                 <property name="toolTip">
-                  <string>click to load a Transfer Function file</string>
-                 </property>
-                 <property name="icon">
-                  <iconset resource="qualitymapper.qrc">
-                   <normaloff>:/images/opentf.png</normaloff>:/images/opentf.png</iconset>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="savePresetButton">
-                 <property name="maximumSize">
-                  <size>
-                   <width>30</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="toolTip">
-                  <string>Add/Save preset</string>
-                 </property>
-                 <property name="text">
-                  <string>+</string>
-                 </property>
-                </widget>
+                 <item>
+                  <widget class="QPushButton" name="flipButton">
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Flip Current Ramp Direction</string>
+                   </property>
+                   <property name="text">
+                    <string>Flip</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="loadPresetButton">
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>click to load a Transfer Function file</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="qualitymapper.qrc">
+                     <normaloff>:/images/opentf.png</normaloff>:/images/opentf.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="savePresetButton">
+                   <property name="maximumSize">
+                    <size>
+                     <width>30</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Add/Save preset</string>
+                   </property>
+                   <property name="text">
+                    <string>+</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </widget>

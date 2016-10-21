@@ -131,6 +131,7 @@ public:
 	TF_KEY		*addKey(TF_KEY *newKey);
 	void		removeKey(int index);
 	void		removeKey(TF_KEY *key);
+	void		flip();
 
 	float	getChannelValuef(float x_position);
 	UINT8	getChannelValueb(float x_position);
@@ -212,6 +213,7 @@ public:
 	TfChannel&	operator [](int i)				{ return _channels[_channels_order[i]];	}
 	size_t size();
 	QColor* buildColorBand(void);
+	void flipRamp();
 	QString saveColorBand(QString fileName, EQUALIZER_INFO& equalizerInfo);
 	vcg::Color4b getColorByQuality(float percentageQuality);
 	vcg::Color4b getColorByQuality(float absoluteQuality, float minQuality, float maxQuality, float midRelativeQuality, float brightness);

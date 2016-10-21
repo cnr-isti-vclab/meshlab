@@ -215,6 +215,7 @@ private slots:
 	void on_redButton_toggled(bool checked);
 
 	void on_presetComboBox_currentTextChanged(const QString &);
+	void on_flipButton_clicked();
 	void on_loadPresetButton_clicked();
 	void on_savePresetButton_clicked();
 
