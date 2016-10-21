@@ -24,7 +24,8 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-
+#include "Src/MyTime.h"
+#include "Src/MemoryUsage.h"
 #include "Src/MarchingCubes.h"
 #include "Src/Octree.h"
 #include "Src/SparseMatrix.h"
@@ -37,7 +38,6 @@ void DumpOutput2( char* str , const char* format , ... );
 #include "Src/PointStream.h"
 
 #include "Src/MultiGridOctreeData.h"
-
 #include "filter_screened_poisson.h"
 #include <QtScript>
 
@@ -54,7 +54,7 @@ void DumpOutput( const char* format , ... )
 
   qDebug(buf);
  }
-void DumpOutput2( char* str , const char* format , ... )
+void DumpOutput2(std::vector< char* >& comments  , const char* format , ... )
 {
   char buf[4096];
   va_list marker;
@@ -64,6 +64,51 @@ void DumpOutput2( char* str , const char* format , ... )
   va_end( marker );
   qDebug(buf);
 }
+
+template< class Real >
+struct OctreeProfiler
+{
+	Octree< Real >& tree;
+	double t;
+
+	OctreeProfiler( Octree< Real >& t ) : tree(t) { ; }
+	void start( void ){ t = Time() , tree.resetLocalMemoryUsage(); }
+	void print( const char* header ) const
+	{
+		tree.memoryUsage();
+#if defined( _WIN32 ) || defined( _WIN64 )
+		if( header ) printf( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+		else         printf(    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+#else // !_WIN32 && !_WIN64
+		if( header ) printf( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+		else         printf(    "%9.1f (s), %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+#endif // _WIN32 || _WIN64
+	}
+	void dumpOutput( const char* header ) const
+	{
+		tree.memoryUsage();
+#if defined( _WIN32 ) || defined( _WIN64 )
+		if( header ) DumpOutput( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+		else         DumpOutput(    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+#else // !_WIN32 && !_WIN64
+		if( header ) DumpOutput( "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+		else         DumpOutput(    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+#endif // _WIN32 || _WIN64
+	}
+	void dumpOutput2( std::vector< char* >& comments , const char* header ) const
+	{
+		tree.memoryUsage();
+#if defined( _WIN32 ) || defined( _WIN64 )
+		if( header ) DumpOutput2( comments , "%s %9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+		else         DumpOutput2( comments ,    "%9.1f (s), %9.1f (MB) / %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() , PeakMemoryUsageMB() );
+#else // !_WIN32 && !_WIN64
+		if( header ) DumpOutput2( comments , "%s %9.1f (s), %9.1f (MB) / %9.1f (MB)\n" , header , Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+		else         DumpOutput2( comments ,    "%9.1f (s), %9.1f (MB) / %9.1f (MB)\n" ,          Time()-t , tree.localMemoryUsage() , tree.maxMemoryUsage() );
+#endif // _WIN32 || _WIN64
+	}
+};
+
+
 
 // Constructor usually performs only two simple tasks of filling the two lists
 //  - typeList: with all the possible id of the filtering actions
@@ -90,12 +135,18 @@ public:
   int AdaptiveExponentVal;
   int BoundaryTypeVal;
   bool CompleteFlag;
-bool NonManifoldFlag;
+  bool NonManifoldFlag;
   bool ShowResidualFlag;
   int CGDepthVal;
   int ItersVal;
   Real CSSolverAccuracyVal;
-
+  
+  bool VerboseFlag;
+  int ThreadsVal;
+  bool LinearFitFlag;
+  float LowResIterMultiplierVal;
+  float ColorVal;
+  
   PoissonParam()
   {
     MaxDepthVal=8;
@@ -117,12 +168,32 @@ bool NonManifoldFlag;
     CGDepthVal=0;
     ItersVal=8;
     CSSolverAccuracyVal=1e-3f;
+    
+    VerboseFlag=true;
+    ThreadsVal=omp_get_num_procs();
+    LinearFitFlag = false;
+    LowResIterMultiplierVal=1.f;
+    ColorVal=16.0f;
   }
 };
 
-template< class Real >
-class MeshModelPointStream : public PointStream< Real >
+
+template< class Real>
+XForm4x4<Real> GetPointStreamScale(vcg::Box3<Real> &bb)
 {
+  qDebug("bbox %f %f %f - %f %f %f ",bb.min[0],bb.min[1],bb.min[2],bb.max[0],bb.max[1],bb.max[2]);
+  Real scale = bb.Dim()[bb.MaxDim()]; 
+  Point3m center = bb.Center();
+  for( int i=0 ; i<3 ; i++ ) center[i] -= scale/2;
+  XForm4x4< Real > tXForm = XForm4x4< Real >::Identity() , sXForm = XForm4x4< Real >::Identity();
+  for( int i=0 ; i<3 ; i++ ) sXForm(i,i) = (Real)(1./scale ) , tXForm(3,i) = -center[i];
+  return sXForm * tXForm;
+}
+
+
+template< class Real >
+class MeshModelPointStream : public OrientedPointStreamWithData< Real, Point3m >
+{   
   CMeshO &_m;
   size_t _curPos;
 public:
@@ -132,24 +203,30 @@ public:
   }
   ~MeshModelPointStream( void ){}
   void reset( void ) { _curPos =0;}
-  bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+  bool nextPoint( OrientedPoint3D< Real >& pt, Point3m &d)
   {
     if(_curPos>=_m.vn)
       return false;
-
-    p[0] = _m.vert[_curPos].P()[0];
-    p[1] = _m.vert[_curPos].P()[1];
-    p[2] = _m.vert[_curPos].P()[2];
-    n[0] = _m.vert[_curPos].N()[0];
-    n[1] = _m.vert[_curPos].N()[1];
-    n[2] = _m.vert[_curPos].N()[2];
+    
+    pt.p[0] = _m.vert[_curPos].P()[0];
+    pt.p[1] = _m.vert[_curPos].P()[1];
+    pt.p[2] = _m.vert[_curPos].P()[2];
+    pt.n[0] = _m.vert[_curPos].N()[0];
+    pt.n[1] = _m.vert[_curPos].N()[1];
+    pt.n[2] = _m.vert[_curPos].N()[2];
+    
+    d[0]=Real(_m.vert[_curPos].C()[0]/255.0);
+    d[1]=Real(_m.vert[_curPos].C()[1]/255.0);
+    d[2]=Real(_m.vert[_curPos].C()[2]/255.0);
+    
     ++_curPos;
     return true;
   }
+
 };
 
 template< class Real >
-class MeshDocumentPointStream : public PointStream< Real >
+class MeshDocumentPointStream : public OrientedPointStreamWithData< Real, Point3m >
 {
   MeshDocument &_md;
   MeshModel *_curMesh;
@@ -173,7 +250,7 @@ public:
   }
   ~MeshDocumentPointStream( void ){}
   void reset( void ) { _curPos =0; _curMesh=0;}
-  bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+  bool nextPoint( OrientedPoint3D< Real >& pt, Point3m &d )
   {
     Point3m nn(0,0,0);
 //    do
@@ -193,146 +270,251 @@ public:
         Point4m np = _curMesh->cm.Tr *  Point4m(nn[0],nn[1],nn[2],0);
 //        Point3m tp = _curMesh->cm.vert[_curPos].P();
 //        Point3m np = nn;
-        p[0] = tp[0];
-        p[1] = tp[1];
-        p[2] = tp[2];
-        n[0] = np[0];
-        n[1] = np[1];
-        n[2] = np[2];
+        pt.p[0] = tp[0];
+        pt.p[1] = tp[1];
+        pt.p[2] = tp[2];
+        pt.n[0] = np[0];
+        pt.n[1] = np[1];
+        pt.n[2] = np[2];
+        d[0]=Real(_curMesh->cm.vert[_curPos].C()[0]/255.0);
+        d[1]=Real(_curMesh->cm.vert[_curPos].C()[1]/255.0);
+        d[2]=Real(_curMesh->cm.vert[_curPos].C()[2]/255.0);
+        
         ++_curPos;
       }
     }
     assert(nn!=Point3m(0,0,0));
     return true;
   }
+
 };
 
 
-template< class Real>
-bool Execute(PointStream< Real > *ps, CMeshO &pm, PoissonParam<Real> &pp, vcg::CallBackPos* cb)
+
+
+template< class Real , int Degree , BoundaryType BType , class Vertex >
+int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, PoissonParam<Real> &pp, vcg::CallBackPos* cb)
 {
-  Reset< Real >();
-  XForm4x4< Real > xForm=XForm4x4< Real >::Identity();
+	typedef typename Octree< Real >::template InterpolationInfo< false > InterpolationInfo;
+	typedef OrientedPointStreamWithData< Real , Point3D< Real > > PointStreamWithData;
+	typedef TransformedOrientedPointStreamWithData< Real , Point3D< Real > > XPointStreamWithData;
+	Reset< Real >();
+	std::vector< char* > comments;
 
-  cb(1,"Running Screened Poisson Reconstruction\n" );
+    XForm4x4< Real > xForm = GetPointStreamScale(bb);
+    XForm4x4< Real > iXForm = xForm.inverse();
+	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.0)\n" );
+	double startTime = Time();
 
-  double t;
-  double tt=Time();
-  Real isoValue = 0;
-
-  Octree< Real > tree;
-  tree.threads = 1;
-  if( pp.MaxSolveDepthVal<0 ) pp.MaxSolveDepthVal = pp.MaxDepthVal;
-
-  //    OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
-  OctNode< TreeNodeData >::SetAllocator( 0 );
-
-  //    int kernelDepth = KernelDepth.set ?  KernelDepth.value : Depth.value-2;
-  if(pp.KernelDepthVal<0) pp.KernelDepthVal =pp.MaxDepthVal-2;
-  if( pp.KernelDepthVal>pp.MaxDepthVal )
-    return false;
-
-  cb(10,"Creating Tree");
-  double maxMemoryUsage;
-  t=Time();
-  //     tree.maxMemoryUsage=0;
-  typename Octree< Real >::PointInfo* pointInfo = new typename Octree< Real >::PointInfo();
-  typename Octree< Real >::NormalInfo* normalInfo = new typename Octree< Real >::NormalInfo();
-  std::vector< Real >* kernelDensityWeights = new std::vector< Real >();
-  std::vector< Real >* centerWeights = new std::vector< Real >();
-  //    int SetTree( char* fileName , int minDepth , int maxDepth , int fullDepth , int splatDepth , Real samplesPerNode ,
-  //		Real scaleFactor , bool useConfidence , bool useNormalWeight , Real constraintWeight , int adaptiveExponent ,
-  //		PointInfo& pointInfo , NormalInfo& normalInfo , std::vector< Real >& kernelDensityWeights , std::vector< Real >& centerWeights ,
-  //		int boundaryType=BSplineElements< Degree >::NONE , XForm4x4< Real > xForm=XForm4x4< Real >::Identity , bool makeComplete=false );
-
-  TreeNodeData::NodeCount=0;
-  int pointCount = tree.template SetTree< Scalarm >(  0, pp.MinDepthVal , pp.MaxDepthVal , pp.FullDepthVal , pp.KernelDepthVal , pp.SamplesPerNodeVal ,
-                                                      pp.ScaleVal , pp.ConfidenceFlag , pp.NormalWeightsFlag , pp.PointWeightVal , pp.AdaptiveExponentVal ,
-                                                      *pointInfo , *normalInfo , *kernelDensityWeights , *centerWeights ,
-                                                      ps, pp.BoundaryTypeVal , xForm , pp.CompleteFlag );
-
-  DumpOutput("#             Tree set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-  DumpOutput( "Input Points: %d\n" , pointCount );
-  DumpOutput( "Leaves/Nodes: %d/%d\n" , tree.tree.leaves() , tree.tree.nodes() );
-  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
-
-  maxMemoryUsage = tree.maxMemoryUsage;
-  cb(20,"Settng Constraints");
-  t=Time() , tree.maxMemoryUsage=0;
-  Pointer( Real ) constraints = tree.SetLaplacianConstraints( *normalInfo );
-  delete normalInfo;
-  DumpOutput("#      Constraints set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
-  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-
-  cb(70,"Solving Linear system");
-  t=Time() , tree.maxMemoryUsage=0;
-  Pointer( Real ) solution = tree.SolveSystem( *pointInfo , constraints , pp.ShowResidualFlag , pp.ItersVal , pp.MaxSolveDepthVal , pp.CGDepthVal , pp.CSSolverAccuracyVal );
-  delete pointInfo;
-  FreePointer( constraints );
-  DumpOutput( "# Linear system solved in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-  DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
-  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-
-  CoredFileMeshData< PlyValueVertex< float > > mesh;
-
-  tree.maxMemoryUsage=0;
-  t=Time();
-  isoValue = tree.GetIsoValue( solution , *centerWeights );
-  delete centerWeights;
-  DumpOutput( "Got average in: %f\n" , Time()-t );
-  DumpOutput( "Iso-Value: %e\n" , isoValue );
-
-  cb(80,"Building Isosurface");
-  t = Time() , tree.maxMemoryUsage = 0;
-  assert(kernelDensityWeights);
-  tree.GetMCIsoSurface(  GetPointer( *kernelDensityWeights ) , solution , isoValue , mesh , true , !pp.NonManifoldFlag , false /*PolygonMesh.set*/ );
-  DumpOutput("#        Got triangles in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
-  maxMemoryUsage = std::max< double >( maxMemoryUsage , tree.maxMemoryUsage );
-  DumpOutput( "#             Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-tt , maxMemoryUsage );
-
-  DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
-  FreePointer( solution );
-
-  cb(90,"Creating Mesh");
-  mesh.resetIterator();
-  int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
-
-  vcg::tri::Allocator<CMeshO>::AddVertices(pm,vm);
-
-
-  int i;
-  for (i=0; i < int(mesh.inCorePoints.size()); i++){
-    pm.vert[i].P()[0] = mesh.inCorePoints[i].point[0];
-    pm.vert[i].P()[1] = mesh.inCorePoints[i].point[1];
-    pm.vert[i].P()[2] = mesh.inCorePoints[i].point[2];
-    pm.vert[i].Q() = mesh.inCorePoints[i].value;
-  }
-  for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
-    PlyValueVertex< float > p;
-    mesh.nextOutOfCorePoint(p);
-    pm.vert[ii+i].P()[0] = p.point[0];
-    pm.vert[ii+i].P()[1] = p.point[1];
-    pm.vert[ii+i].P()[2] = p.point[2];
-    pm.vert[ii+i].Q() = p.value;
-  }
-
-  std::vector< CoredVertexIndex > polygon;
-
-  while(mesh.nextPolygon( polygon ))
-  {
-    assert(polygon.size()==3);
-    int indV[3];
-    for( int i=0 ; i<int(polygon.size()) ; i++ )
+	Octree< Real > tree;
+	OctreeProfiler< Real > profiler( tree );
+	tree.threads = pp.ThreadsVal;
+    if( pp.MaxSolveDepthVal<0 ) pp.MaxSolveDepthVal = pp.MaxDepthVal;
+    	
+	OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
+    
+    qDebug("Using %i threads\n",pp.ThreadsVal);
+//	int kernelDepth = KernelDepth.set ? KernelDepth.value : Depth.value-2;
+    if(pp.KernelDepthVal<0) pp.KernelDepthVal =pp.MaxDepthVal-2;
+    if( pp.KernelDepthVal>pp.MaxDepthVal )
     {
-      if( polygon[i].inCore ) indV[i] = polygon[i].idx;
-      else                    indV[i]= polygon[i].idx + int( mesh.inCorePoints.size() );
+      printf("kernelDepth cannot be greateer Depth.value\n");
+      return false;
     }
-    vcg::tri::Allocator<CMeshO>::AddFace(pm, &pm.vert[indV[0]], &pm.vert[indV[1]], &pm.vert[indV[2]]);
-  }
-  cb(100,"Done");
-  return 1;
+    
+	int pointCount;
+
+	Real pointWeightSum;
+	std::vector< typename Octree< Real >::PointSample >* samples = new std::vector< typename Octree< Real >::PointSample >();
+	std::vector< ProjectiveData< Point3D< Real > , Real > >* sampleData = NULL;
+	SparseNodeData< Real , WEIGHT_DEGREE >* density;
+	SparseNodeData< Point3D< Real > , NORMAL_DEGREE >* normalInfo;
+	Real targetValue = (Real)0.5;
+    
+	// Read in the samples (and color data)
+	{
+		profiler.start();
+//		PointStream* pointStream;
+        
+//		char* ext = GetFileExtension( In.value );
+//		if( Color.set && Color.value>0 )
+//		{
+//			sampleData = new std::vector< ProjectiveData< Point3D< Real > , Real > >();
+//			if     ( !strcasecmp( ext , "bnpts" ) ) pointStream = new BinaryOrientedPointStreamWithData< Real , Point3D< Real > , float , Point3D< unsigned char > >( In.value );
+//			else if( !strcasecmp( ext , "ply"   ) ) pointStream = new    PLYOrientedPointStreamWithData< Real , Point3D< Real > >( In.value , ColorInfo< Real >::PlyProperties , 6 , ColorInfo< Real >::ValidPlyProperties );
+//			else                                    pointStream = new  ASCIIOrientedPointStreamWithData< Real , Point3D< Real > >( In.value , ColorInfo< Real >::ReadASCII );
+//		}
+//		else
+//		{
+//			if     ( !strcasecmp( ext , "bnpts" ) ) pointStream = new BinaryOrientedPointStream< Real , float >( In.value );
+//			else if( !strcasecmp( ext , "ply"   ) ) pointStream = new    PLYOrientedPointStream< Real >( In.value );
+//			else                                    pointStream = new  ASCIIOrientedPointStream< Real >( In.value );
+//		}
+//		delete[] ext;
+        XPointStreamWithData _pointStream( xForm , ( PointStreamWithData& )*pointStream );
+        pointCount = tree.template init< Point3D< Real > >( _pointStream , pp.MaxDepthVal , pp.ConfidenceFlag , *samples , sampleData );
+        
+#pragma omp parallel for num_threads( pp.ThreadsVal )
+		for( int i=0 ; i<(int)samples->size() ; i++ ) (*samples)[i].sample.data.n *= (Real)-1;
+
+		DumpOutput( "Input Points / Samples: %d / %d\n" , pointCount , samples->size() );
+		profiler.dumpOutput2( comments , "# Read input into tree:" );
+	}
+    
+	DenseNodeData< Real , Degree > solution;
+
+	{
+		DenseNodeData< Real , Degree > constraints;
+		InterpolationInfo* iInfo = NULL;
+		int solveDepth = pp.MaxSolveDepthVal;
+
+		tree.resetNodeIndices();
+
+		// Get the kernel density estimator [If discarding, compute anew. Otherwise, compute once.]
+		{
+			profiler.start();
+			density = new SparseNodeData< Real , WEIGHT_DEGREE >();
+			*density = tree.template setDensityEstimator< WEIGHT_DEGREE >( *samples , pp.KernelDepthVal , pp.SamplesPerNodeVal );
+			profiler.dumpOutput2( comments , "#   Got kernel density:" );
+		}
+
+		// Transform the Hermite samples into a vector field [If discarding, compute anew. Otherwise, compute once.]
+		{
+			profiler.start();
+			normalInfo = new SparseNodeData< Point3D< Real > , NORMAL_DEGREE >();
+			*normalInfo = tree.template setNormalField< NORMAL_DEGREE >( *samples , *density , pointWeightSum , BType==BOUNDARY_NEUMANN );
+			profiler.dumpOutput2( comments , "#     Got normal field:" );
+		}
+
+		if( !pp.DensityFlag ) delete density , density = NULL;
+
+		// Trim the tree and prepare for multigrid
+		{
+			profiler.start();
+			std::vector< int > indexMap;
+
+			constexpr int MAX_DEGREE = NORMAL_DEGREE > Degree ? NORMAL_DEGREE : Degree;
+			tree.template inalizeForBroodedMultigrid< MAX_DEGREE , Degree , BType >( pp.FullDepthVal , typename Octree< Real >::template HasNormalDataFunctor< NORMAL_DEGREE >( *normalInfo ) , &indexMap );
+
+			if( normalInfo ) normalInfo->remapIndices( indexMap );
+			if( density ) density->remapIndices( indexMap );
+			profiler.dumpOutput2( comments , "#       Finalized tree:" );
+		}
+
+		// Add the FEM constraints
+		{
+			profiler.start();
+			constraints = tree.template initDenseNodeData< Degree >( );
+			tree.template addFEMConstraints< Degree , BType , NORMAL_DEGREE , BType >( FEMVFConstraintFunctor< NORMAL_DEGREE , BType , Degree , BType >( 1. , 0. ) , *normalInfo , constraints , solveDepth );
+			profiler.dumpOutput2( comments , "#  Set FEM constraints:" );
+		}
+
+		// Free up the normal info [If we don't need it for subseequent iterations.]
+		delete normalInfo , normalInfo = NULL;
+
+		// Add the interpolation constraints
+		if( pp.PointWeightVal>0 )
+		{
+			profiler.start();
+			iInfo = new InterpolationInfo( tree , *samples , targetValue , pp.AdaptiveExponentVal , (Real)pp.PointWeightVal * pointWeightSum , (Real)0 );
+			tree.template addInterpolationConstraints< Degree , BType >( *iInfo , constraints , solveDepth );
+			profiler.dumpOutput2( comments , "#Set point constraints:" );
+		}
+
+		DumpOutput( "Leaf Nodes / Active Nodes / Ghost Nodes: %d / %d / %d\n" , (int)tree.leaves() , (int)tree.nodes() , (int)tree.ghostNodes() );
+		DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
+
+		// Solve the linear system
+		{
+			profiler.start();
+			typename Octree< Real >::SolverInfo solverInfo;
+			solverInfo.cgDepth = pp.CGDepthVal , solverInfo.iters = pp.ItersVal , solverInfo.cgAccuracy = pp.CSSolverAccuracyVal , solverInfo.verbose = pp.VerboseFlag , solverInfo.showResidual = pp.ShowResidualFlag , solverInfo.lowResIterMultiplier = std::max< double >( 1. , pp.LowResIterMultiplierVal );
+			solution = tree.template solveSystem< Degree , BType >( FEMSystemFunctor< Degree , BType >( 0 , 1. , 0 ) , iInfo , constraints , solveDepth , solverInfo );
+			profiler.dumpOutput2( comments , "# Linear system solved:" );
+			if( iInfo ) delete iInfo , iInfo = NULL;
+		}
+	}
+
+	CoredFileMeshData< Vertex > mesh;
+
+	{
+		profiler.start();
+		double valueSum = 0 , weightSum = 0;
+		typename Octree< Real >::template MultiThreadedEvaluator< Degree , BType > evaluator( &tree , solution , pp.ThreadsVal );
+#pragma omp parallel for num_threads( pp.ThreadsVal ) reduction( + : valueSum , weightSum )
+		for( int j=0 ; j<samples->size() ; j++ )
+		{
+			ProjectiveData< OrientedPoint3D< Real > , Real >& sample = (*samples)[j].sample;
+			Real w = sample.weight;
+			if( w>0 ) weightSum += w , valueSum += evaluator.value( sample.data.p / sample.weight , omp_get_thread_num() , (*samples)[j].node ) * w;
+		}
+		Real isoValue = (Real)( valueSum / weightSum );
+//		if( samples ) delete samples , samples = NULL;
+		profiler.dumpOutput( "Got average:" );
+		DumpOutput( "Iso-Value: %e\n" , isoValue );
+
+		profiler.start();
+		SparseNodeData< ProjectiveData< Point3D< Real > , Real > , DATA_DEGREE >* colorData = NULL;
+		if( sampleData )
+		{
+			colorData = new SparseNodeData< ProjectiveData< Point3D< Real > , Real > , DATA_DEGREE >();
+			*colorData = tree.template setDataField< DATA_DEGREE , false >( *samples , *sampleData , (SparseNodeData< Real , WEIGHT_DEGREE >*)NULL );
+			delete sampleData , sampleData = NULL;
+			for( const OctNode< TreeNodeData >* n = tree.tree().nextNode() ; n ; n=tree.tree().nextNode( n ) )
+			{
+				ProjectiveData< Point3D< Real > , Real >* clr = (*colorData)( n );
+				if( clr ) (*clr) *= (Real)pow( pp.ColorVal , tree.depth( n ) );
+			}
+		}
+		tree.template getMCIsoSurface< Degree , BType , WEIGHT_DEGREE , DATA_DEGREE >( density , colorData , solution , isoValue , mesh , !pp.LinearFitFlag , !pp.NonManifoldFlag , false /*PolygonMesh.set*/ );
+		DumpOutput( "Vertices / Polygons: %d / %d\n" , mesh.outOfCorePointCount()+mesh.inCorePoints.size() , mesh.polygonCount() );
+		profiler.dumpOutput2( comments , "#        Got triangles:" );
+    }
+
+//        FreePointer( solution );
+      
+        cb(90,"Creating Mesh");
+        mesh.resetIterator();
+        int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
+        for(auto pt=mesh.inCorePoints.begin();pt!=mesh.inCorePoints.end();++pt)
+        {
+          Point3D<Real> pp = iXForm*pt->point;          
+           vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
+           pm.vert.back().Q() = pt->value;
+        }
+        for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
+          Vertex pt; 
+          mesh.nextOutOfCorePoint(pt);
+          Point3D<Real> pp = iXForm*pt.point;
+          vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
+          pm.vert.back().Q() = pt.value;
+        }
+      
+        std::vector< CoredVertexIndex > polygon;      
+        while(mesh.nextPolygon( polygon ))
+        {
+          assert(polygon.size()==3);
+          int indV[3];
+          for( int i=0 ; i<int(polygon.size()) ; i++ )
+          {
+            if( polygon[i].inCore ) indV[i] = polygon[i].idx;
+            else                    indV[i]= polygon[i].idx + int( mesh.inCorePoints.size() );
+          }
+          vcg::tri::Allocator<CMeshO>::AddFace(pm, &pm.vert[indV[0]], &pm.vert[indV[1]], &pm.vert[indV[2]]);
+        }
+        cb(100,"Done");
+        
+//		if( colorData ) delete colorData , colorData = NULL;
+
+
+    if( density ) delete density , density = NULL;
+	DumpOutput2( comments , "#          Total Solve: %9.1f (s), %9.1f (MB)\n" , Time()-startTime , tree.maxMemoryUsage() );
+
+	return 1;
 }
+
+
+
 template <class MeshType>
 void PoissonClean(MeshType &m, bool scaleNormal)
 {
@@ -375,15 +557,15 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     if(env.evalBool("visibleLayer"))
     {
       MeshModel *m=0;
-      while(m=md.nextVisibleMesh(m))
+      while((m=md.nextVisibleMesh(m)))
         PoissonClean(m->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
-
-      Execute<Scalarm>(&documentStream,pm->cm,pp,cb);
+      Box3m bb = md.bbox();
+      _Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&documentStream,bb,pm->cm,pp,cb);
     }
     else
     {
       PoissonClean(mm->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
-      Execute<Scalarm>(&meshStream,pm->cm,pp,cb);
+      _Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,mm->cm.bbox,pm->cm,pp,cb);
     }
     pm->UpdateBoxAndNormals();
     md.setVisible(pm->id(),true);
