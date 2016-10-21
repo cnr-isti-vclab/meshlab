@@ -214,8 +214,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_BUTTERFLY_SS                     : return tr("Subdivision Surfaces: Butterfly Subdivision");
     case FP_MIDPOINT                         : return tr("Subdivision Surfaces: Midpoint");
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
-    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertex");
-    case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicated Vertex");
+    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertices");
+    case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicate Vertices");
     case FP_SELECT_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
     case FP_SELECT_FACES_BY_EDGE             : return tr("Select Faces with edges longer than...");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
