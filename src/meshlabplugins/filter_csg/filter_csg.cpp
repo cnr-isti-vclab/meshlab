@@ -118,6 +118,8 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
         {
             MeshModel *firstMesh = par.getMesh("FirstMesh");
             MeshModel *secondMesh = par.getMesh("SecondMesh");
+			if ((firstMesh == NULL) || (secondMesh == NULL))
+				return false;
 
             firstMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
             secondMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
@@ -127,15 +129,28 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             firstMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
+			MeshModel tmpfirstmesh(firstMesh);
+			for (size_t ii = 0; ii < tmpfirstmesh.cm.VN(); ++ii)
+				tmpfirstmesh.cm.vert[ii].P() = tmpfirstmesh.cm.Tr * tmpfirstmesh.cm.vert[ii].P();
+			vcg::tri::UpdateBounding<CMeshO>::Box(tmpfirstmesh.cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(tmpfirstmesh.cm);
+
+			MeshModel tmpsecondmesh(secondMesh);
+			for (size_t ii = 0; ii < tmpsecondmesh.cm.VN(); ++ii)
+				tmpsecondmesh.cm.vert[ii].P() = tmpsecondmesh.cm.Tr * tmpsecondmesh.cm.vert[ii].P();
+			vcg::tri::UpdateBounding<CMeshO>::Box(tmpsecondmesh.cm);
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(tmpfirstmesh.cm);
+
+
 //            typedef CMeshO::ScalarType scalar;
             typedef Intercept<mpq_class,Scalarm> intercept;
             const Scalarm d = par.getFloat("Delta");
             const Point3m delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
             Log(0, "Rasterizing first volume...");
-            InterceptVolume<intercept> v = InterceptSet3<intercept>(firstMesh->cm, delta, subFreq, cb);
+            InterceptVolume<intercept> v = InterceptSet3<intercept>(tmpfirstmesh.cm, delta, subFreq, cb);
             Log(0, "Rasterizing second volume...");
-            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(secondMesh->cm, delta, subFreq, cb);
+            InterceptVolume<intercept> tmp = InterceptSet3<intercept>(tmpsecondmesh.cm, delta, subFreq, cb);
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
