@@ -149,14 +149,14 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
         minmax = tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(m.cm);
         par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)"));
         par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)"));
-        par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+        par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set a value P to <i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
         par.addParam(new RichBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)"));
         break;
     case CP_MAP_FQUALITY_INTO_COLOR:
         minmax = tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m.cm);
         par.addParam(new RichFloat("minVal",minmax.first,"Min","The value that will be mapped with the lower end of the scale (blue)"));
         par.addParam(new RichFloat("maxVal",minmax.second,"Max","The value that will be mapped with the upper end of the scale (red)"));
-        par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to <i>P</i> the value <i>V</i> for which <i>P</i>% of the vertices have a quality <b>lower</b>(greater) than <i>V</i> is used as min (max) value.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
+        par.addParam(new RichDynamicFloat("perc",0,0,100,"Percentile Crop [0..100]","If not zero this value will be used for a percentile cropping of the quality values.<br> If this parameter is set to a value<i>P</i> then the two values <i>V_min,V_max</i> for which <i>P</i>% of the vertices have a quality <b>lower or greater than <i>V_min,V_max</i> are used as min/max values for clamping.<br><br> The automated percentile cropping is very useful for automatically discarding outliers."));
         par.addParam(new RichBool("zeroSym",false,"Zero Simmetric","If true the min max range will be enlarged to be symmertic (so that green is always Zero)"));
         break;
     }
