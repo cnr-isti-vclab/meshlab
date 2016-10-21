@@ -634,9 +634,8 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 				newcol[0] = c_r / count_me;
 				newcol[1] = c_g / count_me;
 				newcol[2] = c_b / count_me;
-
 				mergeColors((float)(op*strength) / 100.0, newcol, v->C(), &destCol);
-
+				
 				v->C()[0] = destCol[0];
 				v->C()[1] = destCol[1];
 				v->C()[2] = destCol[2];
@@ -685,6 +684,8 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 		//TODO Precalculate this monster!
 		float gauss = (strength * exp(-(op - 1.0)*(op - 1.0) * 8.0));
 
+		bool useAverageNormals = paintbox->getDirection() == 0; //0 is average normal, 1 is per-vertex normal
+
 		if (!displaced_vertices.contains(data.first))
 		{
 			displaced_vertices.insert(data.first, pair<Point3f, float>(
@@ -692,9 +693,13 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 				gauss));
 
 			paintbox->getUndoStack()->push(new SinglePositionUndo(data.first, data.first->P(), data.first->N()));
-			displaceAlongVector(data.first, normal, gauss);
-			updateNormal(data.first);
+			
+			if (useAverageNormals)
+				displaceAlongVector(data.first, normal, gauss);
+			else
+				displaceAlongVector(data.first, data.first->N(), gauss);
 
+			updateNormal(data.first);
 		}
 		else if ((latest_event.button == Qt::RightButton)
 			? displaced_vertices[data.first].second > gauss
@@ -703,7 +708,10 @@ inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, Pick
 			displaced_vertices[data.first].second = gauss;
 			Point3f temp = displaced_vertices[data.first].first;
 			data.first->P()[0] = temp[0]; data.first->P()[1] = temp[1]; data.first->P()[2] = temp[2];
-			displaceAlongVector(data.first, normal, gauss);
+			if (useAverageNormals)
+				displaceAlongVector(data.first, normal, gauss);
+			else
+				displaceAlongVector(data.first, data.first->N(), gauss);
 			updateNormal(data.first);
 		}
 

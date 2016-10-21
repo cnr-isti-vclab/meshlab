@@ -963,12 +963,12 @@ p, li { white-space: pre-wrap; }
           <widget class="QComboBox" name="mesh_displacement_direction">
            <item>
             <property name="text">
-             <string>Per Vertex Normals</string>
+             <string>Averaged Normals</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Averaged Normals</string>
+             <string>Per Vertex Normals</string>
             </property>
            </item>
           </widget>
