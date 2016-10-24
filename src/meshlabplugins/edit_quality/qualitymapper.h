@@ -40,19 +40,20 @@ FIRST RELEASE
 //This class defines the plugin interface
 class QualityMapperPlugin : public QObject, public MeshEditInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(MeshEditInterface)
+	Q_OBJECT
+		Q_INTERFACES(MeshEditInterface)
 
 private:
 	QualityMapperDialog *_qualityMapperDialog;
 
 public:
-    QualityMapperPlugin(void);
-    ~QualityMapperPlugin(void){};
+	QualityMapperPlugin(void);
+	~QualityMapperPlugin(void) {};
 
 	static const QString Info();
-	bool StartEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
-    void EndEdit(MeshModel&, GLArea*,MLSceneGLSharedDataContext* cont);
+	bool StartEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	void EndEdit(MeshModel&, GLArea*, MLSceneGLSharedDataContext* cont);
+	void suggestedRenderingData(MeshModel &/*m*/, MLRenderingData& /*dt*/);
     //virtual void Decorate(MeshModel&, GLArea*);
     void mousePressEvent(QMouseEvent*, MeshModel&, GLArea*) {};
     void mouseMoveEvent(QMouseEvent*, MeshModel&, GLArea*) {};

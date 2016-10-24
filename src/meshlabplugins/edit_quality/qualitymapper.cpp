@@ -63,22 +63,26 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDat
     gla->update();
 }
 */
-	if(_qualityMapperDialog==0)
-		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla,cont);
-
-	//drawing histogram
-	//bool ret = _qualityMapperDialog->initEqualizerHistogram();
-	if ( !_qualityMapperDialog->initEqualizerHistogram() )
+	if (_qualityMapperDialog == 0)
 	{
-		//EndEdit(m, gla);
-		return false;
+		_qualityMapperDialog = new QualityMapperDialog(gla->window(), m, gla, cont);
+
+		//drawing histogram
+		//bool ret = _qualityMapperDialog->initEqualizerHistogram();
+		if (!_qualityMapperDialog->initEqualizerHistogram())
+		{
+			//EndEdit(m, gla);
+			return false;
+		}
+
+		//drawing transferFunction
+		_qualityMapperDialog->drawTransferFunction();
+
+		//dialog ready to be displayed. Show it now!
+		_qualityMapperDialog->show();
+		//_qualityMapperDialog->on_applyButton_clicked();
 	}
 
-	//drawing transferFunction
-	_qualityMapperDialog->drawTransferFunction();
-
-	//dialog ready to be displayed. Show it now!
-	_qualityMapperDialog->show();
 	connect(_qualityMapperDialog, SIGNAL(closingDialog()),gla,SLOT(endEdit()) );
 	return true;
 }
@@ -94,6 +98,13 @@ void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea *,MLSceneGLSharedDataCon
 		delete _qualityMapperDialog;
 		_qualityMapperDialog = 0;
 	}
+}
+
+void QualityMapperPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
+{
+	for (MLRenderingData::PRIMITIVE_MODALITY pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
+		dt.set(pr, MLRenderingData::ATT_NAMES::ATT_VERTCOLOR, true);
+	m.updateDataMask(MeshModel::MM_VERTCOLOR);
 }
 
 //void QualityMapperPlugin::Decorate(MeshModel&, GLArea*)
