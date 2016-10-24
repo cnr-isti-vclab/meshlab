@@ -68,10 +68,10 @@ FilterColorProc::~FilterColorProc()
   {
     case CP_FILLING : return "Vertex Color Filling";
     case CP_THRESHOLDING : return "Vertex Color Thresholding";
-    case CP_BRIGHTNESS : return "Vertex Color Brightness";
-    case CP_CONTRAST : return "Vertex Color Contrast";
+    //case CP_BRIGHTNESS : return "Vertex Color Brightness";
+    //case CP_CONTRAST : return "Vertex Color Contrast";
     case CP_CONTR_BRIGHT : return "Vertex Color Brightness Contrast Gamma";
-    case CP_GAMMA : return "Vertex Color Gamma Correction";
+    //case CP_GAMMA : return "Vertex Color Gamma Correction";
     case CP_INVERT : return "Vertex Color Invert";
     case CP_LEVELS : return "Vertex Color Levels Adjustement";
     case CP_COLOURISATION : return "Vertex Color Colourisation";
@@ -92,10 +92,10 @@ FilterColorProc::~FilterColorProc()
   {
     case CP_FILLING : return "Fills the color of the vertices of the mesh  with a color choosed by the user.";
     case CP_THRESHOLDING : return "Colors the vertices of the mesh using two colors according to a lightness threshold (on the original color).";
-    case CP_BRIGHTNESS : return "Change the color the vertices of the mesh adjusting the overall brightness.";
-    case CP_CONTRAST : return "Change the color the vertices of the mesh adjusting the contrast.";
+    //case CP_BRIGHTNESS : return "Change the color the vertices of the mesh adjusting the overall brightness.";
+    //case CP_CONTRAST : return "Change the color the vertices of the mesh adjusting the contrast.";
     case CP_CONTR_BRIGHT : return "Change the color the vertices of the mesh adjusting brightness, contrast and gamma.";
-    case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertices of the mesh.";
+    //case CP_GAMMA : return "Provides standard gamma correction for adjusting the color the vertices of the mesh.";
     case CP_INVERT : return "Inverts the colors of the vertices of the mesh.";
     case CP_LEVELS : return "The filter allows adjustment of color levels. It is a custom way to map an interval of color into another one. The user can set the input minimum and maximum levels, gamma and the output minimum and maximum levels (many tools call them respectively input black point, white point, gray point, output black point and white point).";
     case CP_COLOURISATION : return "Allows the application of a color to the mesh. In spite of the Fill operation, the color is blended with the mesh according to a given intensity. .";
@@ -141,20 +141,20 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
-		case CP_BRIGHTNESS:
+		/*case CP_BRIGHTNESS:
 		{
 			float brightness = 0.0f;
 			par.addParam(new RichDynamicFloat("brightness", brightness, -255.0f, 255.0f,"Brightness:","Sets the amount of brightness that will be added/subtracted to the colors.<br>Brightness = 255  ->  all white;<br>Brightness = -255  ->  all black;"));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
-		}
-		case CP_CONTRAST:
+		}*/
+		/*case CP_CONTRAST:
 		{
 			float factor = 1.0f;
 			par.addParam(new RichDynamicFloat("factor", factor, 0.2f, 5.0f, "Contrast factor:", "Sets the amount of contrast of the mesh."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
-		}
+		}*/
 		case CP_CONTR_BRIGHT:
 		{
 			float brightness = 0.0f;
@@ -166,13 +166,13 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& /*md*/, RichPar
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
 		}
-		case CP_GAMMA :
+		/*case CP_GAMMA :
 		{
 			float gamma = 1.0f;
 			par.addParam(new RichDynamicFloat("gamma", gamma, 0.1f, 5.0f, "Gamma:", "Sets the values of the exponent gamma."));
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
 			break;
-		}
+		}*/
 		case CP_INVERT:
 		{
 			par.addParam(new RichBool("onSelected", false, "Only on selection", "If checked, only affects selected vertices"));
@@ -281,7 +281,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       vcg::tri::UpdateColor<CMeshO>::PerVertexThresholding(m->cm, threshold, c1, c2, selected); //calls the function that does the real job
       return true;
     }
-    case CP_BRIGHTNESS:
+   /* case CP_BRIGHTNESS:
     {
       float brightness = math::Clamp<float>(par.getDynamicFloat("brightness"), -255.0f, 255.0f);
 
@@ -289,8 +289,8 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 
       vcg::tri::UpdateColor<CMeshO>::PerVertexBrightness(m->cm, brightness, selected);
       return true;
-    }
-    case CP_CONTRAST:
+    }*/
+    /*case CP_CONTRAST:
     {
       float factor = math::Clamp<float>(par.getDynamicFloat("factor"), 0.2f, 5.0f);
 
@@ -298,7 +298,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 
       vcg::tri::UpdateColor<CMeshO>::PerVertexContrast(m->cm, factor, selected);
       return true;
-    }
+    }*/
     case CP_CONTR_BRIGHT:
     {
       float brightness = par.getDynamicFloat("brightness");
@@ -311,7 +311,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
       vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0f,contrast/256.0f , selected);
       return true;
     }
-    case CP_GAMMA :
+   /* case CP_GAMMA :
     {
       float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
 
@@ -319,7 +319,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 
       vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
       return true;
-    }
+    }*/
     case CP_INVERT :
     {
 	  bool selected = par.getBool("onSelected");
@@ -462,10 +462,10 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
   {
     case CP_FILLING :
     case CP_THRESHOLDING :
-    case CP_BRIGHTNESS :
-    case CP_CONTRAST :
+    //case CP_BRIGHTNESS :
+    //case CP_CONTRAST :
     case CP_CONTR_BRIGHT :
-    case CP_GAMMA :
+    //case CP_GAMMA :
     case CP_INVERT :
     case CP_COLOURISATION :
     case CP_EQUALIZE :
@@ -501,10 +501,10 @@ int FilterColorProc::getPreConditions( QAction * filter ) const
       return MeshModel::MM_NONE;
 
     case CP_THRESHOLDING :
-        case CP_BRIGHTNESS :
-        case CP_CONTRAST :
+        //case CP_BRIGHTNESS :
+        //case CP_CONTRAST :
         case CP_CONTR_BRIGHT :
-        case CP_GAMMA :
+        //case CP_GAMMA :
         case CP_INVERT :
         case CP_EQUALIZE :
         case CP_DESATURATION :
@@ -525,10 +525,10 @@ MeshFilterInterface::FILTER_ARITY FilterColorProc::filterArity( QAction *act ) c
     case CP_PERLIN_COLOR :
     case CP_COLOR_NOISE :
     case CP_THRESHOLDING :
-    case CP_BRIGHTNESS :
-    case CP_CONTRAST :
+    //case CP_BRIGHTNESS :
+    //case CP_CONTRAST :
     case CP_CONTR_BRIGHT :
-    case CP_GAMMA :
+    //case CP_GAMMA :
     case CP_INVERT :
     case CP_EQUALIZE :
     case CP_DESATURATION :
