@@ -2916,6 +2916,11 @@ void MainWindow::reload()
     // save current file name
     qb->show();
     QString fileName = meshDoc()->mm()->fullName();
+	if (fileName.isEmpty())
+	{
+		QMessageBox::warning(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
+		return;
+	}
 	Matrix44m mat;
 	mat.SetIdentity();
     loadMeshWithStandardParams(fileName,meshDoc()->mm(),mat,true);
