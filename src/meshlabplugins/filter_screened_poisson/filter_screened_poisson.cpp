@@ -65,6 +65,26 @@ void DumpOutput2(std::vector< char* >& comments  , const char* format , ... )
   qDebug(buf);
 }
 
+
+#if defined( _WIN32 ) || defined( _WIN64 )
+double PeakMemoryUsageMB( void )
+{
+	HANDLE h = GetCurrentProcess();
+	PROCESS_MEMORY_COUNTERS pmc;
+	return GetProcessMemoryInfo( h , &pmc , sizeof(pmc) ) ? ( (double)pmc.PeakWorkingSetSize )/(1<<20) : 0;
+}
+#endif // _WIN32 || _WIN64
+
+#if defined( _WIN32 ) || defined( _WIN64 )
+inline double to_seconds( const FILETIME& ft )
+{
+	const double low_to_sec=100e-9; // 100 nanoseconds
+	const double high_to_sec=low_to_sec*4294967296.0;
+	return ft.dwLowDateTime*low_to_sec+ft.dwHighDateTime*high_to_sec;
+}
+#endif // _WIN32 || _WIN64
+
+
 template< class Real >
 struct OctreeProfiler
 {

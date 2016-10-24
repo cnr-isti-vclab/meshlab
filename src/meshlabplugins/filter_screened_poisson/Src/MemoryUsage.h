@@ -32,6 +32,7 @@ DAMAGE.
 #if defined( _WIN32 ) || defined( _WIN64 )
 
 #include <Windows.h>
+#include <Psapi.h>
 struct MemoryInfo
 {
 	static size_t Usage( void )
