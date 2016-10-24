@@ -1099,7 +1099,7 @@ void MainWindow::startFilter()
         if (!iFilter->isFilterApplicable(action,(*meshDoc()->mm()),missingPreconditions))
         {
             QString enstr = missingPreconditions.join(",");
-            QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
+            QMessageBox::warning(this, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + iFilter->filterName(action) + "'</font> has not been applied.<br>"
                 "Current mesh does not have <i>" + enstr + "</i>."));
             return;
         }
@@ -1153,7 +1153,7 @@ void MainWindow::startFilter()
                 if (!MeshLabFilterInterface::arePreCondsValid(preCondMask,(*meshDoc()->mm()),missingPreconditions))
                 {
                     QString enstr = missingPreconditions.join(",");
-                    QMessageBox::warning(0, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + fname + "'</font> has not been applied.<br>"
+                    QMessageBox::warning(this, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + fname + "'</font> has not been applied.<br>"
                         "Current mesh does not have <i>" + enstr + "</i>."));
                     return;
                 }
@@ -2918,7 +2918,7 @@ void MainWindow::reload()
     QString fileName = meshDoc()->mm()->fullName();
 	if (fileName.isEmpty())
 	{
-		QMessageBox::warning(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
+		QMessageBox::critical(this, "Reload Error", "Impossible to reload an unsaved mesh model!!");
 		return;
 	}
 	Matrix44m mat;
@@ -2982,7 +2982,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 
     if(!fileName.isEmpty() && fs.size() < 2)
     {
-        QMessageBox::warning(new QWidget(),"Save Error","You must specify file extension!!");
+        QMessageBox::warning(this,"Save Error","You must specify file extension!!");
         return ret;
     }
 
