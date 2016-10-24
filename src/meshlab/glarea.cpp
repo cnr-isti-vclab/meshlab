@@ -2264,6 +2264,27 @@ void GLArea::toggleOrtho()
 	update();
 }
 
+void GLArea::trackballStep(QString dir)
+{
+	float stepAngle = M_PI / 6.0;
+
+	if (dir == tr("Horizontal +"))
+		trackball.track.rot = Quaternionf(-stepAngle, Point3f(0.0, 1.0, 0.0)) * trackball.track.rot;
+	else if (dir == tr("Horizontal -"))
+		trackball.track.rot = Quaternionf( stepAngle, Point3f(0.0, 1.0, 0.0)) * trackball.track.rot;
+	else if (dir == tr("Vertical +"))
+		trackball.track.rot = Quaternionf(-stepAngle, Point3f(1.0, 0.0, 0.0)) * trackball.track.rot;
+	else if (dir == tr("Vertical -"))
+		trackball.track.rot = Quaternionf( stepAngle, Point3f(1.0, 0.0, 0.0)) * trackball.track.rot;
+	else if (dir == tr("Axial +"))
+		trackball.track.rot = Quaternionf(-stepAngle, Point3f(0.0, 0.0, 1.0)) * trackball.track.rot;
+	else if (dir == tr("Axial -"))
+		trackball.track.rot = Quaternionf( stepAngle, Point3f(0.0, 0.0, 1.0)) * trackball.track.rot;
+
+	update();
+}
+
+
 //MultiViewer_Container * GLArea::mvc()
 //{
 //	QObject * curParent = this->parent();

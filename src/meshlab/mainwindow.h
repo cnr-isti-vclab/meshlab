@@ -214,13 +214,13 @@ private slots:
     void setUnsplit();
     void linkViewers();
     void viewFrom(QAction *qa);
+	void toggleOrtho();
+	void trackballStep(QAction *qa);
     void readViewFromFile();
     void viewFromCurrentMeshShot();
     void viewFromCurrentRasterShot();
     void copyViewToClipBoard();
     void pasteViewFromClipboard();
-	///
-	void toggleOrtho();
     ///////////Slot PopUp Menu Handles /////////////////////
     void splitFromHandle(QAction * qa);
     void unsplitFromHandle(QAction * qa);
@@ -424,6 +424,7 @@ private:
     QMenu *helpMenu;
     QMenu *splitModeMenu;
     QMenu *viewFromMenu;
+	QMenu *trackballStepMenu;
     //////////// Split/Unsplit Menu from handle///////////
     QMenu *handleMenu;
     QMenu *splitMenu;
@@ -506,6 +507,15 @@ private:
     QAction *viewFromFileAct;
 
 	QAction *toggleOrthoAct;
+
+	QActionGroup *trackballStepGroupAct;
+	QAction *trackballStepHP;
+	QAction *trackballStepHM;
+	QAction *trackballStepVP;
+	QAction *trackballStepVM;
+	QAction *trackballStepSP;
+	QAction *trackballStepSM;
+
 
     ///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////
 public:

@@ -200,6 +200,11 @@ void MainWindow::updateWindowMenu()
         foreach(QAction *ac, viewFromGroupAct->actions())
             viewFromMenu->addAction(ac);
 
+		// Trackball Step SUBmenu
+		trackballStepMenu = windowsMenu->addMenu(tr("Trackball step"));
+		foreach(QAction *ac, trackballStepGroupAct->actions())
+			trackballStepMenu->addAction(ac);
+
         // View From File act
         windowsMenu->addAction(viewFromFileAct);
         windowsMenu->addAction(viewFromMeshAct);
@@ -712,6 +717,11 @@ void MainWindow::toggleOrtho()
 void MainWindow::viewFrom(QAction *qa)
 {
     if(GLA()) GLA()->createOrthoView(qa->text());
+}
+
+void MainWindow::trackballStep(QAction *qa)
+{
+	if (GLA()) GLA()->trackballStep(qa->text());
 }
 
 void MainWindow::readViewFromFile()

@@ -463,6 +463,7 @@ public:
     bool viewFromFile();
     void createOrthoView(QString);
 	void toggleOrtho();
+	void trackballStep(QString);
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();

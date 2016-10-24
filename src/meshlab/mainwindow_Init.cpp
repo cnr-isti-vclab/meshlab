@@ -371,6 +371,21 @@ connectRenderModeActionList(rendlist);*/
 	toggleOrthoAct->setShortcut(Qt::KeypadModifier + Qt::Key_5);
 	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
 
+	trackballStepGroupAct = new QActionGroup(this); trackballStepGroupAct->setExclusive(true);
+	trackballStepHP = new QAction(tr("Horizontal +"), trackballStepGroupAct);
+	trackballStepHM = new QAction(tr("Horizontal -"), trackballStepGroupAct);
+	trackballStepVP = new QAction(tr("Vertical +"), trackballStepGroupAct);
+	trackballStepVM = new QAction(tr("Vertical -"), trackballStepGroupAct);
+	trackballStepSP = new QAction(tr("Axial +"), trackballStepGroupAct);
+	trackballStepSM = new QAction(tr("Axial -"), trackballStepGroupAct);
+	trackballStepHP->setShortcut(Qt::KeypadModifier + Qt::Key_4);
+	trackballStepHM->setShortcut(Qt::KeypadModifier + Qt::Key_6);
+	trackballStepVP->setShortcut(Qt::KeypadModifier + Qt::Key_8);
+	trackballStepVM->setShortcut(Qt::KeypadModifier + Qt::Key_2);
+	trackballStepSP->setShortcut(Qt::KeypadModifier + Qt::Key_9);
+	trackballStepSM->setShortcut(Qt::CTRL +  Qt::KeypadModifier + Qt::Key_9);
+	connect(trackballStepGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(trackballStep(QAction *)));
+
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
