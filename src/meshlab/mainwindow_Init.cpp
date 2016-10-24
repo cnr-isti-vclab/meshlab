@@ -349,21 +349,27 @@ connectRenderModeActionList(rendlist);*/
 	viewBackYAct = new QAction(tr("Back (Z is up)"), viewFromGroupAct);
 
 	// keyboard shortcuts for canonical viewdirections, blender style
-	viewFrontAct->setShortcut(Qt::Key_End);
-	viewBackAct->setShortcut(Qt::CTRL + Qt::Key_End);
-	viewRightAct->setShortcut(Qt::Key_PageDown);
-	viewLeftAct->setShortcut(Qt::CTRL + Qt::Key_PageDown);
-	viewTopAct->setShortcut(Qt::Key_Home);
-	viewBottomAct->setShortcut(Qt::CTRL + Qt::Key_Home);
+	viewFrontAct->setShortcut(Qt::KeypadModifier + Qt::Key_1);
+	viewBackAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_1);
+	viewRightAct->setShortcut(Qt::KeypadModifier + Qt::Key_3);
+	viewLeftAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_3);
+	viewTopAct->setShortcut(Qt::KeypadModifier + Qt::Key_7);
+	viewBottomAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_7);
 	// scene uses "engineering" reference system, with Z as vertical axis
-	viewFrontYAct->setShortcut(Qt::SHIFT + Qt::Key_End);
-	viewBackYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_End);
-	viewRightYAct->setShortcut(Qt::SHIFT + Qt::Key_PageDown);
-	viewLeftYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_PageDown);
-	viewTopYAct->setShortcut(Qt::SHIFT + Qt::Key_Home);
-	viewBottomYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_Home);
+	viewFrontYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_1);
+	viewBackYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_1);
+	viewRightYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_3);
+	viewLeftYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_3);
+	viewTopYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_7);
+	viewBottomYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_7);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
+
+	// other view-changing acts
+	toggleOrthoAct = new QAction(tr("Toggle Orthographic Camera"), this);
+	toggleOrthoAct->setShortcutContext(Qt::ApplicationShortcut);
+	toggleOrthoAct->setShortcut(Qt::KeypadModifier + Qt::Key_5);
+	connect(toggleOrthoAct, SIGNAL(triggered()), this, SLOT(toggleOrtho()));
 
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
@@ -585,6 +591,8 @@ void MainWindow::createMenus()
 	viewMenu->addSeparator();
 	viewMenu->addAction(showTrackBallAct);
 	viewMenu->addAction(resetTrackBallAct);
+	viewMenu->addSeparator();
+	viewMenu->addAction(toggleOrthoAct);
 	viewMenu->addSeparator();
 	viewMenu->addAction(showInfoPaneAct);
 	viewMenu->addSeparator();

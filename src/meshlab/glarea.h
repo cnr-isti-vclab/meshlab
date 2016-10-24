@@ -462,6 +462,7 @@ public:
     void viewFromCurrentShot(QString kind);
     bool viewFromFile();
     void createOrthoView(QString);
+	void toggleOrtho();
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();

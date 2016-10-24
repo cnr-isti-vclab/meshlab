@@ -219,6 +219,8 @@ private slots:
     void viewFromCurrentRasterShot();
     void copyViewToClipBoard();
     void pasteViewFromClipboard();
+	///
+	void toggleOrtho();
     ///////////Slot PopUp Menu Handles /////////////////////
     void splitFromHandle(QAction * qa);
     void unsplitFromHandle(QAction * qa);
@@ -502,6 +504,8 @@ private:
     QAction *viewFromMeshAct;
     QAction *viewFromRasterAct;
     QAction *viewFromFileAct;
+
+	QAction *toggleOrthoAct;
 
     ///////////Actions Menu Windows -> Link/Copy/Paste View ////////////////////////
 public:

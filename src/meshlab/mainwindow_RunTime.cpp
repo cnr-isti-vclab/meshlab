@@ -704,6 +704,11 @@ void MainWindow::linkViewers()
     mvc->updateTrackballInViewers();
 }
 
+void MainWindow::toggleOrtho()
+{
+	if (GLA()) GLA()->toggleOrtho();
+}
+
 void MainWindow::viewFrom(QAction *qa)
 {
     if(GLA()) GLA()->createOrthoView(qa->text());
@@ -714,7 +719,6 @@ void MainWindow::readViewFromFile()
     if(GLA()) GLA()->viewFromFile();
     updateMenus();
 }
-
 
 void MainWindow::viewFromCurrentMeshShot()
 {

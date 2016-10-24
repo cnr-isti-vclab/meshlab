@@ -2254,6 +2254,16 @@ void GLArea::createOrthoView(QString dir)
 	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qPrintable(dir));
 }
 
+void GLArea::toggleOrtho()
+{
+	if (fov == 5.0)
+		fov = 35.0;
+	else
+		fov = 5.0;
+
+	update();
+}
+
 //MultiViewer_Container * GLArea::mvc()
 //{
 //	QObject * curParent = this->parent();
