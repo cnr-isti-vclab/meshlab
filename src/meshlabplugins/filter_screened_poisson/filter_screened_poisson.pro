@@ -19,6 +19,6 @@ DEFINES += BRUNO_LEVY_FIX
 DEFINES += FOR_RELEASE
 
 
-#PRE_TARGETDEPS += ./filter_screened_poisson.xml
+PRE_TARGETDEPS += ./filter_screened_poisson.xml
 macx:QMAKE_POST_LINK = "rsync -u "$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml; rsync -u ../../distrib/plugins/"$$TARGET".xml "$$TARGET".xml"
 
