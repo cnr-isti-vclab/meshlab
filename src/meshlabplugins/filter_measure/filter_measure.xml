@@ -55,16 +55,22 @@
   </FILTER>
   
   <FILTER filterName="Per Face Quality Histogram" filterFunction="computeFaceQualityHistogram" filterClass="Measure" filterPre="MM_FACEQUALITY" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
-  <FILTER_HELP><![CDATA[Compute an histogram of the values of the per-vertex quality.]]></FILTER_HELP>
+  <FILTER_HELP><![CDATA[Compute an histogram of the values of the per-face quality.]]></FILTER_HELP>
   <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
   <PARAM parType="Real" parName="HistMin" parDefault="meshDoc.current().computeMinFQ()" parIsImportant="true">
-    <PARAM_HELP><![CDATA[The vertex are displaced of a vector whose norm is bounded by this value]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[The faces are displaced of a vector whose norm is bounded by this value]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Hist Min" />
   </PARAM>
   <PARAM parType="Real" parName="HistMax" parDefault="meshDoc.current().computeMaxFQ()" parIsImportant="true">
-    <PARAM_HELP><![CDATA[The vertex are displaced of a vector whose norm is bounded by this value]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[The faces are displaced of a vector whose norm is bounded by this value]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Hist Max" />
   </PARAM>
+  <PARAM parName="areaWeighted" parIsImportant="true" parType="Boolean" parDefault="false">
+     <PARAM_HELP><![CDATA[If false, the histogram will report the number of faces with quality values
+     falling in each bin of the histogram. If true each bin of the histogram will report the approximate area
+     of the mesh with that range of values.]]></PARAM_HELP>
+     <CHECKBOX_GUI guiLabel="Area Weighted"/>
+    </PARAM>
   <PARAM parType="Int" parName="binNum" parDefault="20" parIsImportant="true">
     <PARAM_HELP><![CDATA[The number of bins of the histogram. E.g. the number of intervals in which the min..max range is subdivided into.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Bin number" />

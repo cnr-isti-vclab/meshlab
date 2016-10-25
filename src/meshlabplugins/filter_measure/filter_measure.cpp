@@ -394,6 +394,37 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 				Log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
 			Log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
 		}
+		if (filterName == "Per Vertex Quality Histogram")
+		{
+			vector<Scalarm> aVec(m.vn, 1.0);
+			if (areaFlag)
+				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
+
+			for (size_t i = 0; i<m.vn; ++i)
+				H.Add(m.vert[i].Q(), aVec[i]);
+		}
+		else{
+			vector<Scalarm> aVec(m.fn, 1.0);
+			if (areaFlag)
+				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
+
+			for (size_t i = 0; i<m.fn; ++i)
+				H.Add(m.face[i].Q(), aVec[i]);
+		}
+		if (areaFlag)
+		{
+			Log("(         -inf..%15.7f) : %15.7f", RangeMin, H.BinCountInd(0));
+			for (int i = 1; i <= binNum; ++i)
+				Log("[%15.7f..%15.7f) : %15.7f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+			Log("[%15.7f..             +inf) : %15.7f", RangeMax, H.BinCountInd(binNum + 1));
+		}
+		else
+		{
+			Log("(         -inf..%15.7f) : %4.0f", RangeMin, H.BinCountInd(0));
+			for (int i = 1; i <= binNum; ++i)
+				Log("[%15.7f..%15.7f) : %4.0f", H.BinLowerBound(i), H.BinUpperBound(i), H.BinCountInd(i));
+			Log("[%15.7f..             +inf) : %4.0f", RangeMax, H.BinCountInd(binNum + 1));
+		}
 		return true;
 	}
 
