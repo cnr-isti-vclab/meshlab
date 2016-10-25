@@ -258,6 +258,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             float stripe_width = rm->getFloat(this->ShowContourWidth());
             float stripe_alpha = rm->getFloat(this->ShowContourAlpha());
             bool stripe_ramp = rm->getBool(this->ShowContourRamp());
+            float colormap = rm->getEnum(this->ShowContourColorMap());
             glp->bind();
             glp->setUniformValue("quality_min",mmqH().first);
             glp->setUniformValue("quality_max",mmqH().second);
@@ -265,6 +266,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             glp->setUniformValue("stripe_width",stripe_width);
             glp->setUniformValue("stripe_alpha",stripe_alpha);
             glp->setUniformValue("stripe_ramp",stripe_ramp);
+            glp->setUniformValue("colormap",colormap);
 
 
             int vert_quality = glp->attributeLocation("vert_quality");
@@ -1066,10 +1068,13 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
         } break;
     case DP_SHOW_QUALITY_CONTOUR :
         {
+            QStringList ColorMapList; ColorMapList << "None" << "ColorJet"<<"Parula";
             parset.addParam(new RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
             parset.addParam(new RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
             parset.addParam(new RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
             parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
+            parset.addParam(new RichEnum(this->ShowContourColorMap(), 0, ColorMapList,"ColorMap","Choose a colormap for the contours"));
+            
         } break;
     case DP_SHOW_SELECTED_MESH :
         {

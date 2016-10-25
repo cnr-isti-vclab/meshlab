@@ -156,6 +156,7 @@ public:
   inline QString ShowContourAlpha() const { return  "MeshLab::Decoration::ShowContourAlpha" ; }
   inline QString ShowContourWidth() const { return  "MeshLab::Decoration::ShowContourWidth" ; }
   inline QString ShowContourRamp() const { return  "MeshLab::Decoration::ShowContourRamp" ; }
+  inline QString ShowContourColorMap() const { return  "MeshLab::Decoration::ShowContourColorMap" ; }
 
   inline QString LabelVertFlag() const { return  "MeshLab::Decoration::LabelVertFlag" ; }
   inline QString LabelEdgeFlag() const { return  "MeshLab::Decoration::LabelEdgeFlag" ; }
