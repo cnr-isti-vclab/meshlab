@@ -3447,11 +3447,11 @@ void MainWindow::showEvent(QShowEvent * event)
 {
 	QWidget::showEvent(event);
 	QSettings settings;
-	QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
+	const QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
 	QDate today = QDate::currentDate();
 	if (settings.contains(versioncheckeddatestring))
 	{
-		QDate lasttimechecked = settings.value("lastTimeMeshLabVersionCheckedOnStart").toDate();
+		QDate lasttimechecked = settings.value(versioncheckeddatestring).toDate();
 		if (lasttimechecked < today)
 		{
 			checkForUpdates();
