@@ -352,6 +352,11 @@ void MeshlabStdDialog::applyDynamic()
 
 void MeshlabStdDialog::togglePreview()
 {
+	if (previewCB == NULL)
+		return;
+
+	GLArea* glarea = qobject_cast<GLArea*>(curgla);
+
     if(previewCB->isChecked())
     {
         stdParFrame->readValues(curParSet);
@@ -359,14 +364,22 @@ void MeshlabStdDialog::togglePreview()
         {
             meshCacheState.apply(curModel);
             updateRenderingData(curmwi,curModel);
+			if (glarea != NULL)
+				glarea->updateAllDecorators();
         }
-        else
-            applyDynamic();
+		else
+		{
+			applyDynamic();
+			if (glarea != NULL)
+				glarea->updateAllDecorators();
+		}
     }
     else
     {
         meshState.apply(curModel);
         updateRenderingData(curmwi,curModel);
+		if (glarea != NULL)
+			glarea->updateAllDecorators();
     }
     curgla->update();
 }
@@ -388,9 +401,13 @@ void MeshlabStdDialog::closeClick()
     }
     curmask = MeshModel::MM_UNKNOWN;
     // Perform the update only if there is Valid GLarea.
-    if(this->curgla)
-        this->curgla->update();
-    close();
+	if (this->curgla)
+	{	
+		if ((previewCB != NULL) && (previewCB->isChecked()) && (curmwi != NULL) && (curmwi->GLA() != NULL))
+			curmwi->GLA()->updateAllDecorators();
+		this->curgla->update();
+	}
+	close();
 }
 
 
