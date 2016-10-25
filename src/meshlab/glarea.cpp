@@ -1820,7 +1820,7 @@ void GLArea::loadRaster(int id)
 
             if (rm->shot.IsValid())
             {
-                fov = rm->shot.GetFovFromFocal();
+				fov = (rm->shot.Intrinsics.cameraType == 0) ? rm->shot.GetFovFromFocal() : 5.0;
 
                 float cameraDist = getCameraDistance();
                 Matrix44f rotFrom;
@@ -2006,7 +2006,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     // The shot loaded from TextAlign doesn't have a scale. Trackball needs it.
     // The scale factor is computed as the ratio between cameraDistance and the z coordinate of the translation
     // introduced by the shot.
-    fov = shot.GetFovFromFocal();
+	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
 
     float cameraDist = getCameraDistance();
 
@@ -2045,10 +2045,9 @@ void GLArea::loadViewFromViewStateFile(const QDomDocument &doc)
             trackball.track.sca = attr.namedItem("TrackScale").nodeValue().section(' ',0,0).toFloat();
             nearPlane = attr.namedItem("NearPlane").nodeValue().section(' ',0,0).toFloat();
             farPlane = attr.namedItem("FarPlane").nodeValue().section(' ',0,0).toFloat();
-            fov = shot.GetFovFromFocal();
+			fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
             clipRatioNear = nearPlane/getCameraDistance();
             clipRatioFar = farPlane/getCameraDistance();
-
         }
         /*else if (QString::compare(node.nodeName(),"Render")==0)
         {
@@ -2120,6 +2119,12 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
     double viewportYMm=shot.Intrinsics.PixelSizeMm[1]*shot.Intrinsics.ViewportPx[1];
     shot.Intrinsics.FocalMm = viewportYMm/(2*tanf(vcg::math::ToRad(fov/2)));
 
+	// in MeshLab, fov < 5.0 means orthographic camera
+	if (fov > 5.0)
+		shot.Intrinsics.cameraType = 0; //perspective
+	else
+		shot.Intrinsics.cameraType = 1; //orthographic
+
     float cameraDist = getCameraDistance();
 
     //add the translation introduced by gluLookAt() (0,0,cameraDist), in order to have te same view---------------
@@ -2152,7 +2157,7 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
 
     Shotm shot = shotAndScale.first;
 
-    fov = shot.GetFovFromFocal();
+	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
 
     float cameraDist = getCameraDistance();
 
