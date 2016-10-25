@@ -77,6 +77,9 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
   {
     CMeshO::VertexIterator  vi;
     for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
-      if(!(*vi).IsD()) (*vi).SetW();
+	{
+      if (!(*vi).IsD()) (*vi).SetW();
+	  if ((*vi).IsS()) (*vi).ClearS();
+	}
   }
 }

@@ -79,8 +79,11 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::
 	if(Selected) // Clear Writable flags 
   {
     CMeshO::VertexIterator  vi;
-    for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
-      if(!(*vi).IsD()) (*vi).SetW();
+	for (vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	{
+		if (!(*vi).IsD()) (*vi).SetW();
+		if ((*vi).IsS()) (*vi).ClearS();
+	}
   }
 	
 
