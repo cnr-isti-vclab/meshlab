@@ -102,9 +102,12 @@ void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea *,MLSceneGLSharedDataCon
 
 void QualityMapperPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
 {
-	for (MLRenderingData::PRIMITIVE_MODALITY pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
-		dt.set(pr, MLRenderingData::ATT_NAMES::ATT_VERTCOLOR, true);
-	m.updateDataMask(MeshModel::MM_VERTCOLOR);
+	if (m.hasDataMask(MeshModel::MM_VERTQUALITY))
+	{
+		for (MLRenderingData::PRIMITIVE_MODALITY pr = MLRenderingData::PRIMITIVE_MODALITY(0); pr < MLRenderingData::PR_ARITY; pr = MLRenderingData::next(pr))
+			dt.set(pr, MLRenderingData::ATT_NAMES::ATT_VERTCOLOR, true);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+	}
 }
 
 //void QualityMapperPlugin::Decorate(MeshModel&, GLArea*)
