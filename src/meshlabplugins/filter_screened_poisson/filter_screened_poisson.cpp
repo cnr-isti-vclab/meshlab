@@ -174,7 +174,7 @@ public:
     KernelDepthVal=-1;
     MinDepthVal=0;
     FullDepthVal=5;
-    SamplesPerNodeVal =1.0f;
+    SamplesPerNodeVal =1.5f;
     ScaleVal=1.1f;
     ConfidenceFlag=false;
     NormalWeightsFlag=false;
@@ -199,10 +199,10 @@ public:
 
 
 template< class Real>
-XForm4x4<Real> GetPointStreamScale(vcg::Box3<Real> &bb)
+XForm4x4<Real> GetPointStreamScale(vcg::Box3<Real> &bb, float expFact)
 {
   qDebug("bbox %f %f %f - %f %f %f ",bb.min[0],bb.min[1],bb.min[2],bb.max[0],bb.max[1],bb.max[2]);
-  Real scale = bb.Dim()[bb.MaxDim()]; 
+  Real scale = bb.Dim()[bb.MaxDim()] * expFact; 
   Point3m center = bb.Center();
   for( int i=0 ; i<3 ; i++ ) center[i] -= scale/2;
   XForm4x4< Real > tXForm = XForm4x4< Real >::Identity() , sXForm = XForm4x4< Real >::Identity();
@@ -235,9 +235,9 @@ public:
     pt.n[1] = _m.vert[_curPos].N()[1];
     pt.n[2] = _m.vert[_curPos].N()[2];
     
-    d[0]=Real(_m.vert[_curPos].C()[0]/255.0);
-    d[1]=Real(_m.vert[_curPos].C()[1]/255.0);
-    d[2]=Real(_m.vert[_curPos].C()[2]/255.0);
+    d[0]=Real(_m.vert[_curPos].C()[0]);
+    d[1]=Real(_m.vert[_curPos].C()[1]);
+    d[2]=Real(_m.vert[_curPos].C()[2]);
     
     ++_curPos;
     return true;
@@ -296,9 +296,9 @@ public:
         pt.n[0] = np[0];
         pt.n[1] = np[1];
         pt.n[2] = np[2];
-        d[0]=Real(_curMesh->cm.vert[_curPos].C()[0]/255.0);
-        d[1]=Real(_curMesh->cm.vert[_curPos].C()[1]/255.0);
-        d[2]=Real(_curMesh->cm.vert[_curPos].C()[2]/255.0);
+        d[0]=Real(_curMesh->cm.vert[_curPos].C()[0]);
+        d[1]=Real(_curMesh->cm.vert[_curPos].C()[1]);
+        d[2]=Real(_curMesh->cm.vert[_curPos].C()[2]);
         
         ++_curPos;
       }
@@ -321,7 +321,7 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 	Reset< Real >();
 	std::vector< char* > comments;
 
-    XForm4x4< Real > xForm = GetPointStreamScale(bb);
+    XForm4x4< Real > xForm = GetPointStreamScale(bb,pp.ScaleVal);
     XForm4x4< Real > iXForm = xForm.inverse();
 	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.0)\n" );
 	double startTime = Time();
@@ -372,6 +372,7 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 //			else                                    pointStream = new  ASCIIOrientedPointStream< Real >( In.value );
 //		}
 //		delete[] ext;
+        sampleData = new std::vector< ProjectiveData< Point3D< Real > , Real > >();        
         XPointStreamWithData _pointStream( xForm , ( PointStreamWithData& )*pointStream );
         pointCount = tree.template init< Point3D< Real > >( _pointStream , pp.MaxDepthVal , pp.ConfidenceFlag , *samples , sampleData );
         
@@ -484,7 +485,8 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 			for( const OctNode< TreeNodeData >* n = tree.tree().nextNode() ; n ; n=tree.tree().nextNode( n ) )
 			{
 				ProjectiveData< Point3D< Real > , Real >* clr = (*colorData)( n );
-				if( clr ) (*clr) *= (Real)pow( pp.ColorVal , tree.depth( n ) );
+				if( clr ) 
+                  (*clr) *= (Real)pow( pp.ColorVal , tree.depth( n ) );
 			}
 		}
 		tree.template getMCIsoSurface< Degree , BType , WEIGHT_DEGREE , DATA_DEGREE >( density , colorData , solution , isoValue , mesh , !pp.LinearFitFlag , !pp.NonManifoldFlag , false /*PolygonMesh.set*/ );
@@ -502,6 +504,9 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
           Point3D<Real> pp = iXForm*pt->point;          
            vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
            pm.vert.back().Q() = pt->value;
+           pm.vert.back().C()[0] = pt->color[0]*255.0;
+           pm.vert.back().C()[1] = pt->color[1]*255.0;
+           pm.vert.back().C()[2] = pt->color[2]*255.0;
         }
         for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
           Vertex pt; 
@@ -509,6 +514,9 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
           Point3D<Real> pp = iXForm*pt.point;
           vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
           pm.vert.back().Q() = pt.value;
+          pm.vert.back().C()[0] = pt.color[0]*1.0;
+          pm.vert.back().C()[1] = pt.color[1]*1.0;
+          pm.vert.back().C()[2] = pt.color[2]*1.0;
         }
       
         std::vector< CoredVertexIndex > polygon;      
@@ -551,17 +559,46 @@ void PoissonClean(MeshType &m, bool scaleNormal)
   }
 }
 
+bool HasGoodNormal(CMeshO &m)
+{
+  for(auto vi=m.vert.begin();vi!=m.vert.end();++vi)
+    if(vcg::SquaredNorm(vi->N()) < std::numeric_limits<float>::min()) 
+      return false; 
+  
+  return true;
+}
+
 bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
   if (filterName == "Screened Poisson Surface Reconstruction")
   {
     MeshModel *mm =md.mm();
+    PoissonParam<Scalarm> pp;
+    bool goodNormal=true, goodColor=true;
+    if(env.evalBool("visibleLayer") == false) {
+      goodNormal=HasGoodNormal(md.mm()->cm);
+      goodColor = md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR);
+    } else{
+      MeshModel *_mm=0;
+      while(_mm=md.nextVisibleMesh(_mm)) {
+        goodNormal &= HasGoodNormal(_mm->cm);
+        goodColor  &= _mm->hasDataMask(MeshModel::MM_VERTCOLOR);
+        
+      }
+    }
+    
+    if(!goodNormal)
+    {
+      this->errorMessage = "Filter requires correct per vertex normals\n that your point could has a proper, not-null, normal for each sample";
+      return false;
+    }
+    
     MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
     md.setVisible(pm->id(),false);
-
-    pm->updateDataMask(MeshModel::MM_VERTQUALITY);
-    PoissonParam<Scalarm> pp;
-
+    pm->updateDataMask(MeshModel::MM_VERTQUALITY);    
+    if(goodColor) pm->updateDataMask(MeshModel::MM_VERTCOLOR);
+    
+    
     MeshModelPointStream<Scalarm> meshStream(mm->cm);
     MeshDocumentPointStream<Scalarm> documentStream(md);
 
