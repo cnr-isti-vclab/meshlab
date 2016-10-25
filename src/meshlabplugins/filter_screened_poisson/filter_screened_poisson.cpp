@@ -326,12 +326,13 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.0)\n" );
 	double startTime = Time();
 
+	OctNode< TreeNodeData >::SetAllocator(MEMORY_ALLOCATOR_BLOCK_SIZE);
 	Octree< Real > tree;
 	OctreeProfiler< Real > profiler( tree );
 	tree.threads = pp.ThreadsVal;
     if( pp.MaxSolveDepthVal<0 ) pp.MaxSolveDepthVal = pp.MaxDepthVal;
     	
-	OctNode< TreeNodeData >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
+	
     
     qDebug("Using %i threads\n",pp.ThreadsVal);
 //	int kernelDepth = KernelDepth.set ? KernelDepth.value : Depth.value-2;
