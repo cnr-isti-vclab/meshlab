@@ -6,9 +6,8 @@
 #include "mainwindow.h"
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
-    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false)
+    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false),previewCB(NULL)
 {
-
     curmask = 0;
     qf = NULL;
     stdParFrame=NULL;
