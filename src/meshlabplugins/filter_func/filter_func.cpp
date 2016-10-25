@@ -268,9 +268,9 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
 	  break;
 
   case FF_VERT_NORMAL:
-	  parlst.addParam(new RichString("x", "-nx", "func x = ", "insert function to generate new x for the normal"));
-	  parlst.addParam(new RichString("y", "-ny", "func y = ", "insert function to generate new y for the normal"));
-	  parlst.addParam(new RichString("z", "-nz", "func z = ", "insert function to generate new z for the normal"));
+	  parlst.addParam(new RichString("x", "-nx", "func nx = ", "insert function to generate new x for the normal"));
+	  parlst.addParam(new RichString("y", "-ny", "func ny = ", "insert function to generate new y for the normal"));
+	  parlst.addParam(new RichString("z", "-nz", "func nz = ", "insert function to generate new z for the normal"));
 	  parlst.addParam(new RichBool("onselected", false, "only on selection", "if checked, only affects selected vertices"));
 	  break;
 
@@ -351,7 +351,7 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
     break;
 
   case FF_REFINE :
-    parlst.addParam(new RichString("condSelect","(q0 >= 0 and q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge"));
+    parlst.addParam(new RichString("condSelect","(q0 >= 0 && q1 >= 0)","boolean function","type a boolean function that will be evaluated on every edge"));
     parlst.addParam(new RichString("x","(x0+x1)/2","x =","function to generate x coord of new vertex in [x0,x1].<br>For example (x0+x1)/2"));
     parlst.addParam(new RichString("y","(y0+y1)/2","y =","function to generate x coord of new vertex in [y0,y1].<br>For example (y0+y1)/2"));
     parlst.addParam(new RichString("z","(z0+z1)/2","z =","function to generate x coord of new vertex in [z0,z1].<br>For example (z0+z1)/2"));
