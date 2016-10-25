@@ -149,7 +149,7 @@ public:
   Real SamplesPerNodeVal;
   Real ScaleVal;
   bool ConfidenceFlag;
-  bool NormalWeightsFlag;
+  bool CleanFlag;
   bool DensityFlag;
   Real PointWeightVal;
   int AdaptiveExponentVal;
@@ -177,7 +177,7 @@ public:
     SamplesPerNodeVal =1.5f;
     ScaleVal=1.1f;
     ConfidenceFlag=false;
-    NormalWeightsFlag=false;
+    CleanFlag=false;
     DensityFlag=false;
     PointWeightVal = 4.0f;
     AdaptiveExponentVal=1;
@@ -504,9 +504,9 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
           Point3D<Real> pp = iXForm*pt->point;          
            vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
            pm.vert.back().Q() = pt->value;
-           pm.vert.back().C()[0] = pt->color[0]*255.0;
-           pm.vert.back().C()[1] = pt->color[1]*255.0;
-           pm.vert.back().C()[2] = pt->color[2]*255.0;
+           pm.vert.back().C()[0] = pt->color[0];
+           pm.vert.back().C()[1] = pt->color[1];
+           pm.vert.back().C()[2] = pt->color[2];
         }
         for (int ii=0; ii < mesh.outOfCorePointCount(); ii++){
           Vertex pt; 
@@ -514,9 +514,9 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
           Point3D<Real> pp = iXForm*pt.point;
           vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
           pm.vert.back().Q() = pt.value;
-          pm.vert.back().C()[0] = pt.color[0]*1.0;
-          pm.vert.back().C()[1] = pt.color[1]*1.0;
-          pm.vert.back().C()[2] = pt.color[2]*1.0;
+          pm.vert.back().C()[0] = pt.color[0];
+          pm.vert.back().C()[1] = pt.color[1];
+          pm.vert.back().C()[2] = pt.color[2];
         }
       
         std::vector< CoredVertexIndex > polygon;      
@@ -545,16 +545,17 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 
 
 template <class MeshType>
-void PoissonClean(MeshType &m, bool scaleNormal)
+void PoissonClean(MeshType &m, bool scaleNormal, bool cleanFlag)
 {
-
-  if(m.face.size()>0)
-    vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+  if(cleanFlag) {
+    if(m.face.size()>0)
+      vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
+  }
   vcg::tri::Allocator<MeshType>::CompactEveryVector(m);
   vcg::tri::UpdateNormal<MeshType>::NormalizePerVertex(m);
   if(scaleNormal)
   {
-    for(typename MeshType::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
+    for(auto vi=m.vert.begin();vi!=m.vert.end();++vi)
       vi->N() *= vi->Q();
   }
 }
@@ -562,7 +563,7 @@ void PoissonClean(MeshType &m, bool scaleNormal)
 bool HasGoodNormal(CMeshO &m)
 {
   for(auto vi=m.vert.begin();vi!=m.vert.end();++vi)
-    if(vcg::SquaredNorm(vi->N()) < std::numeric_limits<float>::min()) 
+    if(vcg::SquaredNorm(vi->N()) < std::numeric_limits<float>::min()*10.0) 
       return false; 
   
   return true;
@@ -572,36 +573,7 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
 {
   if (filterName == "Screened Poisson Surface Reconstruction")
   {
-    MeshModel *mm =md.mm();
     PoissonParam<Scalarm> pp;
-    bool goodNormal=true, goodColor=true;
-    if(env.evalBool("visibleLayer") == false) {
-      goodNormal=HasGoodNormal(md.mm()->cm);
-      goodColor = md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR);
-    } else{
-      MeshModel *_mm=0;
-      while(_mm=md.nextVisibleMesh(_mm)) {
-        goodNormal &= HasGoodNormal(_mm->cm);
-        goodColor  &= _mm->hasDataMask(MeshModel::MM_VERTCOLOR);
-        
-      }
-    }
-    
-    if(!goodNormal)
-    {
-      this->errorMessage = "Filter requires correct per vertex normals\n that your point could has a proper, not-null, normal for each sample";
-      return false;
-    }
-    
-    MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
-    md.setVisible(pm->id(),false);
-    pm->updateDataMask(MeshModel::MM_VERTQUALITY);    
-    if(goodColor) pm->updateDataMask(MeshModel::MM_VERTCOLOR);
-    
-    
-    MeshModelPointStream<Scalarm> meshStream(mm->cm);
-    MeshDocumentPointStream<Scalarm> documentStream(md);
-
     pp.MaxDepthVal = env.evalInt("depth");
     pp.FullDepthVal = env.evalInt("fullDepth");
     pp.CGDepthVal= env.evalInt("cgDepth");
@@ -610,20 +582,55 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     pp.PointWeightVal = env.evalFloat("pointWeight");
     pp.ItersVal = env.evalInt("iters");
     pp.ConfidenceFlag = env.evalBool("confidence");
-    pp.NormalWeightsFlag = env.evalBool("nWeights");
     pp.DensityFlag = true;
+    pp.CleanFlag = env.evalBool("preClean");
+    
+    bool goodNormal=true, goodColor=true;
+    if(env.evalBool("visibleLayer") == false) 
+    {
+      PoissonClean(md.mm()->cm, pp.ConfidenceFlag, pp.CleanFlag);
+      goodNormal=HasGoodNormal(md.mm()->cm);
+      goodColor = md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR);
+    } 
+    else
+    {
+      MeshModel *_mm=0;
+      while(_mm=md.nextVisibleMesh(_mm)) {        
+        PoissonClean(_mm->cm,  pp.ConfidenceFlag, pp.CleanFlag);        
+        goodNormal &= HasGoodNormal(_mm->cm);
+        goodColor  &= _mm->hasDataMask(MeshModel::MM_VERTCOLOR);        
+      }
+    }
+    
+    if(!goodNormal)
+    {
+      this->errorMessage = "Filter requires correct per vertex normals.<br>"
+                           "E.g. it is necessary that your <b>ALL</b> the input vertices have a proper, not-null normal.<br> "
+                           "If you enconuter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> "
+                           "filter (usually unreferenced vertices on surfaces have null normals).<br>"
+                           "Enabling the Cleaning option also works.";
+      return false;
+    }
+    
+    MeshModel *pm =md.addNewMesh("","Poisson mesh",false);
+    md.setVisible(pm->id(),false);
+    pm->updateDataMask(MeshModel::MM_VERTQUALITY);    
+    if(goodColor) pm->updateDataMask(MeshModel::MM_VERTCOLOR);
+    
     if(env.evalBool("visibleLayer"))
     {
-      MeshModel *m=0;
-      while((m=md.nextVisibleMesh(m)))
-        PoissonClean(m->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
-      Box3m bb = md.bbox();
+      Box3m bb;
+      MeshModel *_mm=0;
+      while(_mm=md.nextVisibleMesh(_mm)) 
+        bb.Add(_mm->cm.Tr,_mm->cm.bbox);
+
+      MeshDocumentPointStream<Scalarm> documentStream(md);      
       _Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&documentStream,bb,pm->cm,pp,cb);
     }
     else
     {
-      PoissonClean(mm->cm, (pp.ConfidenceFlag || pp.NormalWeightsFlag));
-      _Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,mm->cm.bbox,pm->cm,pp,cb);
+      MeshModelPointStream<Scalarm> meshStream(md.mm()->cm);      
+      _Execute<Scalarm,2,BOUNDARY_NEUMANN,PlyColorAndValueVertex<Scalarm> >(&meshStream,md.mm()->cm.bbox,pm->cm,pp,cb);
     }
     pm->UpdateBoxAndNormals();
     md.setVisible(pm->id(),true);
