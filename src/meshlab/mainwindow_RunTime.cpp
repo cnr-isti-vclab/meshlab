@@ -1890,7 +1890,7 @@ void MainWindow::postFilterExecution()
     else // filter has failed. show the message error.
     {
         MeshLabFilterInterface         *iFilter = mfc->filterInterface;
-        QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'\n\n").arg(fname)+iFilter->errorMsg()); // text
+        QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'<br><br>").arg(fname)+iFilter->errorMsg()); // text
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
     }
@@ -3447,21 +3447,23 @@ void MainWindow::showEvent(QShowEvent * event)
 {
 	QWidget::showEvent(event);
 	QSettings settings;
+    QSettings::setDefaultFormat(QSettings::NativeFormat);
 	const QString versioncheckeddatestring("lastTimeMeshLabVersionCheckedOnStart");
 	QDate today = QDate::currentDate();
+    QString todayStr = today.toString();
 	if (settings.contains(versioncheckeddatestring))
 	{
-		QDate lasttimechecked = settings.value(versioncheckeddatestring).toDate();
+		QDate lasttimechecked = QDate::fromString(settings.value(versioncheckeddatestring).toString());
 		if (lasttimechecked < today)
 		{
 			checkForUpdates();
-			settings.setValue(versioncheckeddatestring, today);
+			settings.setValue(versioncheckeddatestring, todayStr);
 		}
 	}
 	else
 	{
 		checkForUpdates();
-		settings.setValue(versioncheckeddatestring, today);
+		settings.setValue(versioncheckeddatestring, todayStr);
 	}
 	sendUsAMail();
 }
