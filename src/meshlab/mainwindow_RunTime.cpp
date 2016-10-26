@@ -2691,7 +2691,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     updateMenus();
     int delVertNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateVertex(mm->cm);
     int delFaceNum = vcg::tri::Clean<CMeshO>::RemoveDegenerateFace(mm->cm);
-
+    tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
     if(delVertNum>0 || delFaceNum>0 )
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
     mm->cm.Tr = mtr;
