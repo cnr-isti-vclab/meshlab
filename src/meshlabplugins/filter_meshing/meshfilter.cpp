@@ -497,10 +497,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		rotCenter.push_back("custom point");
 		parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
 		parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
-		parlst.addParam(new RichBool("snapFlag",false,"Snap angle","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
 		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle."));
+		parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle (i.e. if the snapping value is 30, 227 becomes 210)."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
 	} break;
@@ -1156,7 +1156,10 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		float angleDeg= par.getDynamicFloat("angle");
 		float snapAngle = par.getFloat("snapAngle");
 		if(par.getBool("snapFlag"))
+		{ 
 			angleDeg = floor(angleDeg / snapAngle)*snapAngle;
+			par.setValue("angle", DynamicFloatValue(angleDeg));
+		}
 
 		trRot.SetRotateDeg(angleDeg,axis);
 		trTran.SetTranslate(tranVec);
