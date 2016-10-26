@@ -20,7 +20,6 @@ SUBDIRS       = common \
 # Filter plugins
                 meshlabplugins/filter_aging \
                 meshlabplugins/filter_ao \
-                meshlabplugins/filter_autoalign \
                 meshlabplugins/filter_camera \
                 meshlabplugins/filter_bnpts \
                 meshlabplugins/filter_clean \
@@ -28,15 +27,19 @@ SUBDIRS       = common \
                 meshlabplugins/filter_colorproc \
                 meshlabplugins/filter_color_projection \
                 meshlabplugins/filter_create \
+				sampleplugins/filter_createiso \
                 meshlabplugins/filter_csg \
                 meshlabplugins/filter_dirt \
                 meshlabplugins/filter_fractal \
                 meshlabplugins/filter_func \
+				sampleplugins/filter_geodesic \
+				plugins_experimental/filter_harmonic \
                 meshlabplugins/filter_img_patch_param \
                 meshlabplugins/filter_isoparametrization \
                 meshlabplugins/filter_layer \
                 meshlabplugins/filter_measure \
                 meshlabplugins/filter_meshing \
+				plugins_experimental/filter_mutualglobal \
                 meshlabplugins/filter_mutualinfoxml \
                 meshlabplugins/filter_mls \
                 meshlabplugins/filter_photosynth \
@@ -47,16 +50,15 @@ SUBDIRS       = common \
                 meshlabplugins/filter_sampling \
                 meshlabplugins/filter_sdfgpu \
                 meshlabplugins/filter_select \
+				plugins_experimental/filter_sketchfab \
                 meshlabplugins/filter_ssynth \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
                 meshlabplugins/filter_zippering \
 # Rendering and Decoration Plugins
-                meshlabplugins/render_splatting \
                 meshlabplugins/render_gdp \
                 meshlabplugins/render_radiance_scaling \
-                meshlabplugins/render_rfx \
                 meshlabplugins/decorate_base \
                 meshlabplugins/decorate_background \
                 meshlabplugins/decorate_shadow \
@@ -64,20 +66,17 @@ SUBDIRS       = common \
 # Edit Plugins
                 meshlabplugins/edit_align \
                 meshlabplugins/edit_arc3D \
-                meshlabplugins/edit_hole \
                 meshlabplugins/edit_manipulators \
                 meshlabplugins/edit_measure \
+				plugins_experimental/edit_mutualcorrs \
                 meshlabplugins/edit_paint\
                 meshlabplugins/edit_pickpoints \
                 meshlabplugins/edit_point\
                 plugins_experimental/edit_referencing \
                 meshlabplugins/edit_quality \
                 meshlabplugins/edit_select \
-                meshlabplugins/edit_texture \
 # Sample Plugins
                 sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
                 sampleplugins/samplefilterdyn \
-                sampleplugins/io_m\
-                sampleplugins/filter_geodesic \
-                sampleplugins/filter_createiso
+                ## sampleplugins/io_m          
