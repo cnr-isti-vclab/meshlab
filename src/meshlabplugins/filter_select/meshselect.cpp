@@ -119,7 +119,6 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   case FP_SELECT_BORDER:                 return QString("Select Border");
   case FP_SELECT_BY_VERT_QUALITY :		       return QString("Select by Vertex Quality");
   case FP_SELECT_BY_FACE_QUALITY :		       return QString("Select by Face Quality");
-  case FP_SELECT_BY_RANGE:						 return QString("Select Faces by Coord Range");
   case FP_SELECT_BY_COLOR:						 return QString("Select Faces by Color");
   case CP_SELFINTERSECT_SELECT:      return QString("Select Self Intersecting Faces");
   case CP_SELECT_TEXBORDER:            return QString("Select Vertex Texture Seams");
@@ -305,7 +304,7 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
     for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
       if(!(*fi).IsD())
       {
-        viewray = viewpoint - Barycenter(*fi);
+        viewray = Barycenter(*fi) - viewpoint;
         viewray.Normalize();
 
         if((viewray.dot((*fi).N().Normalize())) < limit)
@@ -498,7 +497,6 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
       case FP_SELECT_BORDER:
       case FP_SELECT_BY_VERT_QUALITY:
       case FP_SELECT_BY_FACE_QUALITY:
-      case FP_SELECT_BY_RANGE:
       case FP_SELECT_BY_COLOR:
       case CP_SELFINTERSECT_SELECT:
       case CP_SELECT_TEXBORDER:

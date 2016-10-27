@@ -210,7 +210,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
         break;
     case FP_COLOR_TO_TEXTURE : {
             QString fileName = extractFilenameWOExt(md.mm());
-            fileName = fileName.append("_tex");
+            fileName = fileName.append("_tex.png");
             parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
             parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
             parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
@@ -221,7 +221,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
         break;
     case FP_TRANSFER_TO_TEXTURE : {
             QString fileName = extractFilenameWOExt(md.mm());
-            fileName = fileName.append("_tex");
+            fileName = fileName.append("_tex.png");
             parlst.addParam(new RichMesh ("sourceMesh",md.mm(),&md, "Source Mesh",
                                           "The mesh that contains the source data that we want to transfer"));
             parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
@@ -713,6 +713,32 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
 		}
 
+		if (m.cm.textures.empty())
+		{
+			// Creates path to texture file
+			QString fileName(m.fullName());
+			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
+
+			QFile textFile(fileName);
+			if (!textFile.exists())
+			{
+				// Create dummy checkers texture image
+				QImage img(textW, textH, QImage::Format_RGB32);
+				img.fill(qRgb(255, 255, 255)); // white
+				
+				// Save texture
+				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
+				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				assert(textFile.exists());
+			}
+
+			//Assign texture
+			m.cm.textures.clear();
+			m.cm.textures.push_back(textName.toStdString());
+
+
+		}
+
 		QString filePath(m.fullName());
 		filePath = filePath.left(std::max<int>(filePath.lastIndexOf('\\'),filePath.lastIndexOf('/'))+1);
 		QString baseName(textName);
@@ -791,7 +817,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		{
 			m.cm.textures.clear();
 			for (texInd = 0; texInd < texNum; texInd++)
-			m.cm.textures.push_back(texFileNames[texInd].toStdString());
+			m.cm.textures.push_back(textName.toStdString());
 		}
 
 		cb(100, "Done");
@@ -848,6 +874,32 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		{
 			CheckError(textName.length() == 0, "Texture file not specified");
 			CheckError(std::max<int>(textName.lastIndexOf("\\"), textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
+		}
+
+		if (m.cm.textures.empty())
+		{
+			// Creates path to texture file
+			QString fileName(m.fullName());
+			fileName = fileName.left(std::max<int>(fileName.lastIndexOf('\\'), fileName.lastIndexOf('/')) + 1).append(textName);
+
+			QFile textFile(fileName);
+			if (!textFile.exists())
+			{
+				// Create dummy checkers texture image
+				QImage img(textW, textH, QImage::Format_RGB32);
+				img.fill(qRgb(255, 255, 255)); // white
+
+											   // Save texture
+				CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
+				Log("Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
+				assert(textFile.exists());
+			}
+
+			//Assign texture
+			m.cm.textures.clear();
+			m.cm.textures.push_back(textName.toStdString());
+
+
 		}
 
 		// Source images (for texture to texture transfer)

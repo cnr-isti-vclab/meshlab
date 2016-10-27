@@ -506,7 +506,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 	} break;
 
     case FP_PRINCIPAL_AXIS:
-		parlst.addParam(new RichBool("pointsFlag",m.cm.fn==0,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
+		parlst.addParam(new RichBool("pointsFlag",true,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
         break;
@@ -968,11 +968,15 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
                 if(delvert) Log( "PostSimplification Cleaning: Removed %d unreferenced vertices",delvert);
                 m.clearDataMask(MeshModel::MM_FACEFACETOPO );
-                tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+				tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
                 tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
             }
 
-            m.UpdateBoxAndNormals();
+			m.UpdateBoxAndNormals();
+			tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
+			tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
+			
         } break;
 
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
@@ -1007,6 +1011,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
             QuadricTexSimplification(m.cm,TargetFaceNum,lastq_Selected, pp, cb);
             m.UpdateBoxAndNormals();
+			tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
+			tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
+			tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
         } break;
 
 	case FP_ROTATE_FIT:

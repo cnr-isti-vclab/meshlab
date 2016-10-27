@@ -591,7 +591,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 		parlst.addParam(new RichMesh("RefMesh", vertexMesh, &md, "Reference Mesh/PointCloud",
 			"The Mesh/Pointcloud that is used as a reference, to measure distance from."));
 
-		parlst.addParam(new RichBool("SignedDist", true, "Cumpute Signed Distance",
+		parlst.addParam(new RichBool("SignedDist", true, "Compute Signed Distance",
 			"If TRUE, the distance is signed; if FALSE, it will compute the distance absolute value."));
   } break;
 

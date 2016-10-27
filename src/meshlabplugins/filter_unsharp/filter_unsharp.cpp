@@ -87,9 +87,9 @@ QString FilterUnsharp::filterName(FilterIDType filter) const
   case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry");
   case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality");
   case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color");
-  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Compute Vertex Normals");
-  case FP_RECOMPUTE_FACE_NORMAL:            return QString("Compute Face Normals");
-  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Compute Per-Polygon Face Normals");
+  case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Re-Compute Vertex Normals");
+  case FP_RECOMPUTE_FACE_NORMAL:            return QString("Re-Compute Face Normals");
+  case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Re-Compute Per-Polygon Face Normals");
   case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
 
 
@@ -321,7 +321,7 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
             break;
         case FP_DEPTH_SMOOTH:
             parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-            parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+            parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
             parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
             break;
         case FP_DIRECTIONAL_PRESERVATION:
@@ -410,9 +410,9 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
             int stepSmoothNum = par.getInt("stepSmoothNum");
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
             //float delta = par.getAbsPerc("delta");
-            Point3m viewPoint(0,0,0);
+			Point3m viewpoint = par.getPoint3m("viewPoint");
             float alpha = 1;
-            tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewPoint,alpha,stepSmoothNum,true);
+            tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewpoint,alpha,stepSmoothNum,true);
             Log( "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
@@ -421,7 +421,7 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
       {
             const std::string AttribName("SavedVertPosition");
             int stepNum = par.getEnum("step");
-            Point3m viewpoint(0,0,0);
+			Point3m viewpoint = par.getPoint3m("viewPoint");
             float alpha = 1;
 
             switch (stepNum) {
