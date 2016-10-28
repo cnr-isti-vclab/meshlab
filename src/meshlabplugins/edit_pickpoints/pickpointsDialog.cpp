@@ -31,13 +31,14 @@
 
 #include <common/meshmodel.h>
 #include <meshlab/stdpardialog.h>
-#include <meshlab/glarea.h>
 
 #include "editpickpoints.h"
 #include "pickpointsDialog.h"
 
 #include <vcg/space/index/grid_static_ptr.h>
 #include <vcg/complex/algorithms/closest.h>
+
+#include <QGLWidget>
 
 using namespace vcg;
 
@@ -514,7 +515,7 @@ PickPointsDialog::Mode PickPointsDialog::getMode(){
 	return currentMode;
 }
 
-void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, GLArea *gla){
+void PickPointsDialog::setCurrentMeshModel(MeshModel *newMeshModel, QGLWidget *gla){
 	meshModel = newMeshModel;
 	assert(meshModel);
 	_glArea = gla;

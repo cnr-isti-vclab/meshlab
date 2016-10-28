@@ -31,12 +31,14 @@
 
 #include <QDockWidget>
 
+
 #include <common/meshmodel.h>
-#include <meshlab/glarea.h>
 
 #include "pickedPoints.h"
 #include "ui_pickpointsDialog.h"
 #include "pickPointsTemplate.h"
+
+class QGLWidget;
 
 class EditPickPointsPlugin;
 
@@ -118,7 +120,7 @@ public:
 	PickPointsDialog::Mode getMode();
 	
 	//sets the currentMesh we are working with
-	void setCurrentMeshModel(MeshModel *, GLArea *gla);
+	void setCurrentMeshModel(MeshModel *, QGLWidget *gla);
 	
 	//allows the ability to save to metaData only even if the ui says save to a file
 	void savePointsToMetaData();
@@ -191,7 +193,7 @@ private:
 	MeshModel *meshModel;
 	
 	//the glarea to update
-	GLArea *_glArea;
+	QGLWidget*_glArea;
 	
 	GetClosestFace *getClosestFace;
 	
