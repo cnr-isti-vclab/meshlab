@@ -36,7 +36,7 @@
 
 #include "glarea.h"
 #include "layerDialog.h"
-#include "stdpardialog.h"
+#include "ml_std_par_dialog.h"
 #include "xmlstdpardialog.h"
 #include "xmlgeneratorgui.h"
 #include "multiViewer_Container.h"
