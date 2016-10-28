@@ -27,6 +27,7 @@ HEADERS = ../common/interfaces.h \
     changetexturename.h \
     layerDialog.h \
     stdpardialog.h \
+	ml_std_par_dialog.h \
 	xmlstdpardialog.h \
 	additionalgui.h \
 	xmlgeneratorgui.h \
@@ -52,6 +53,7 @@ SOURCES = main.cpp \
     savemaskexporter.cpp \
     changetexturename.cpp \
     stdpardialog.cpp \
+	ml_std_par_dialog.cpp \
     xmlstdpardialog.cpp \
 	additionalgui.cpp \
 	xmlgeneratorgui.cpp \

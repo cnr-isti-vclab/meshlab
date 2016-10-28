@@ -733,60 +733,6 @@ private:
 
 };
 
-
-// This is the dialog used to ask parameters for the MeshLab filters.
-// This dialog is automatically configurated starting from the parameter asked by a given filter.
-// It can handle dynamic parameters that modify only partially a given mesh.
-
-class MainWindow;
-class MeshlabStdDialog : public QDockWidget
-{
-    Q_OBJECT
-
-public:
-    MeshlabStdDialog(QWidget *p = NULL);
-    ~MeshlabStdDialog();
-
-    void clearValues();
-    void createFrame();
-    void loadFrameContent(MeshDocument *mdPt=0);
-
-    bool showAutoDialog(MeshFilterInterface *mfi, MeshModel *mm, MeshDocument * md, QAction *q, MainWindow *mwi, QWidget *gla=0);
-    bool isPreviewable();
-
-public slots:
-    void closeClick();
-
-private slots:
-    void applyClick();
-    void resetValues();
-    void toggleHelp();
-    void togglePreview();
-    void applyDynamic();
-    void changeCurrentMesh(int meshInd);
-
-public:
-    QFrame *qf;
-    StdParFrame *stdParFrame;
-    QAction *curAction;
-    MeshModelState meshState;
-    MeshModelState meshCacheState;
-    QCheckBox *previewCB;
-
-    void closeEvent ( QCloseEvent * event );
-
-    uint curmask;
-    MeshModel *curModel;
-    MeshDocument * curMeshDoc;
-    MeshFilterInterface *curmfi;
-    MainWindow *curmwi;
-    QWidget * curgla;
-    RichParameterSet curParSet;
-    RichParameterSet prevParSet;
-    bool validcache;
-
-};
-
 //QWidget* parent parameter says to the class who will destroy the MeshLabWidget object that it had created
 //RichWidgetConstructor shouldn't destroy anything
 

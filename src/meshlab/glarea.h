@@ -268,7 +268,46 @@ public slots:
     // Called when we change layer, notifies the edit tool if one is open
     void manageCurrentMeshChange();
     // Called when we modify the document
-    void updateAllPerMeshDecorators();
+		/// Execute a end/start pair for all the PerMesh decorator that are active in this glarea.
+		/// It is used when the document is changed or when some parameter changes
+		/// Note that it is rather inefficient. Such work should be done only once for each decorator.
+	void updateAllPerMeshDecorators()
+	{
+		MeshDocument* mdoc = md();
+		if (mdoc == NULL)
+			return;
+		makeCurrent();
+
+		for (QMap<int, QList<QAction *> >::iterator i = iPerMeshDecoratorsListMap.begin(); i != iPerMeshDecoratorsListMap.end(); ++i)
+		{
+
+			MeshModel *m = md()->getMesh(i.key());
+			foreach(QAction *p, i.value())
+			{
+				MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
+				decorInterface->endDecorate(p, *m, this->glas.currentGlobalParamSet, this);
+				decorInterface->setLog(&md()->Log);
+				decorInterface->startDecorate(p, *m, this->glas.currentGlobalParamSet, this);
+			}
+		}
+
+		MultiViewer_Container* viewcont = mvc();
+		if (viewcont == NULL)
+			return;
+
+		MLSceneGLSharedDataContext* shared = viewcont->sharedDataContext();
+		if (shared == NULL)
+			return;
+
+		MLDefaultMeshDecorators defdec(mw());
+		for (MeshModel* mm = mdoc->nextMesh(); mm != NULL; mm = mdoc->nextMesh(mm))
+		{
+			MLRenderingData dt;
+			shared->getRenderInfoPerMeshView(mm->id(), context(), dt);
+			defdec.cleanMeshDecorationData(*mm, dt);
+			defdec.initMeshDecorationData(*mm, dt);
+		}
+	}
 	void updateAllDecorators();
 
 public:
