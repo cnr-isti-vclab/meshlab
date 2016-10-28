@@ -118,7 +118,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, MLSceneG
 
 	foreach(MeshModel *mp, md.meshList)
 	{
-		if (mp != NULL)
+		if ((mp != NULL) && (gla->meshVisibilityMap[mp->id()]))
 			shared->draw(mp->id(), gla->context());
 	}
 	_buffPass->disable();
