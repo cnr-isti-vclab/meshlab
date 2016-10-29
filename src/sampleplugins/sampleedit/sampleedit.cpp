@@ -73,7 +73,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		if (pickmode == 0)
 		{
 			NewFaceSel.clear();
-			GLPickTri<CMeshO>::PickFace(cur.x(), gla->height() - cur.y(), m.cm, NewFaceSel);
+			GLPickTri<CMeshO>::PickVisibleFace(cur.x(), gla->height() - cur.y(), m.cm, NewFaceSel);
 			if (NewFaceSel.size() > 0)
 			{
 				curFacePtr = NewFaceSel[pIndex];
