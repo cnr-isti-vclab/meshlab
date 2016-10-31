@@ -1505,7 +1505,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
             MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
             if(GLA())
             {
-                GLA()->setWindowModified(true);
                 GLA()->setLastAppliedFilter(action);
             }
             lastFilterAct->setText(QString("Apply filter ") + action->text());
@@ -1882,7 +1881,6 @@ void MainWindow::postFilterExecution()
         if(GLA())
         {
             GLA()->setLastAppliedFilter(mfc->act);
-            GLA()->setWindowModified(true);
         }
         lastFilterAct->setText(QString("Apply filter ") + fname);
         lastFilterAct->setEnabled(true);
@@ -3059,7 +3057,6 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         QSettings settings;
         int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
         settings.setValue("savedMeshCounter",savedMeshCounter+1);
-        GLA()->setWindowModified(false);
 
     }
     return ret;
