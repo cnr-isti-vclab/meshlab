@@ -51,6 +51,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     CP_SELECT_TEXBORDER <<
     CP_SELECT_NON_MANIFOLD_FACE <<
     CP_SELECT_NON_MANIFOLD_VERTEX <<
+    FP_SELECT_FACES_BY_EDGE <<            
     FP_SELECT_BY_COLOR;
 
   FilterIDType tt;
@@ -124,6 +125,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
   case CP_SELECT_TEXBORDER:            return QString("Select Vertex Texture Seams");
   case CP_SELECT_NON_MANIFOLD_FACE:    return QString("Select non Manifold Edges ");
   case CP_SELECT_NON_MANIFOLD_VERTEX:  return QString("Select non Manifold Vertices");
+  case FP_SELECT_FACES_BY_EDGE             : return tr("Select Faces with edges longer than...");  
   }
   return QString("Unknown filter");
 }
@@ -139,6 +141,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
    case CP_SELFINTERSECT_SELECT:    return tr("Select only self intersecting faces.");
    case FP_SELECT_FACE_FROM_VERT :            return QString("Select faces from selected vertices");
    case FP_SELECT_VERT_FROM_FACE :            return QString("Select vertices from selected faces");
+   case FP_SELECT_FACES_BY_EDGE               : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");     
    case FP_SELECT_ERODE  : return tr("Erode (reduce) the current set of selected faces");
    case FP_SELECT_INVERT : return tr("Invert the current set of selected faces");
    case FP_SELECT_NONE   : return tr("Clear the current set of selected faces");
@@ -161,6 +164,13 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 {
         switch(ID(action))
         {
+        case FP_SELECT_FACES_BY_EDGE:
+        {
+            float maxVal = m.cm.bbox.Diag()/2.0f;
+            parlst.addParam(new RichDynamicFloat("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
+            break;
+        }
+        
     case FP_SELECT_BORDER:
       //parlst.addParam(new RichInt("Iteration", true, "Inclusive Sel.", "If true only the faces with <b>all</b> selected vertices are selected. Otherwise any face with at least one selected vertex will be selected."));
       break;
@@ -443,7 +453,14 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
         (*fpi)->SetS();
     break;
     }
+    case FP_SELECT_FACES_BY_EDGE:
+        {
+            float threshold = par.getDynamicFloat("Threshold");
+            int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
+            Log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
+        } break;
 
+  
   default:  assert(0);
   }
   return true;
@@ -502,6 +519,7 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
       case CP_SELECT_TEXBORDER:
       case CP_SELECT_NON_MANIFOLD_FACE:
       case CP_SELECT_NON_MANIFOLD_VERTEX:
+      case FP_SELECT_FACES_BY_EDGE :    
     return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
   }
   return MeshModel::MM_UNKNOWN;
@@ -514,6 +532,7 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
   case   CP_SELECT_NON_MANIFOLD_VERTEX:
   case   CP_SELECT_NON_MANIFOLD_FACE:
   case   CP_SELFINTERSECT_SELECT:
+  case   FP_SELECT_FACES_BY_EDGE:    
   case   FP_SELECT_BORDER:           return MeshModel::MM_FACENUMBER;
   case   FP_SELECT_BY_COLOR:         return MeshModel::MM_VERTCOLOR;
   case   FP_SELECT_BY_VERT_QUALITY:	 return MeshModel::MM_VERTQUALITY;

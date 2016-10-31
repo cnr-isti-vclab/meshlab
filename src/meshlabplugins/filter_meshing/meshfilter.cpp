@@ -50,8 +50,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_BUTTERFLY_SS
         << FP_REMOVE_UNREFERENCED_VERTEX
         << FP_REMOVE_DUPLICATED_VERTEX
-        << FP_SELECT_FACES_BY_AREA
-        << FP_SELECT_FACES_BY_EDGE
         << FP_CLUSTERING
         << FP_QUADRIC_SIMPLIFICATION
         << FP_QUADRIC_TEXCOORD_SIMPLIFICATION
@@ -84,6 +82,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_VATTR_SEAM
         << FP_REFINE_LS3_LOOP
         << FP_SLICE_WITH_A_PLANE
+        << FP_REMOVE_FACE_ZERO_AREA
         ;
 
     FilterIDType tt;
@@ -108,11 +107,9 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 {
     switch (ID(a))
     {
+    case FP_REMOVE_FACE_ZERO_AREA            :
     case FP_REMOVE_UNREFERENCED_VERTEX       :
     case FP_REMOVE_DUPLICATED_VERTEX         : return MeshFilterInterface::Cleaning;
-    case FP_SELECT_FACES_BY_AREA             :
-    case FP_SELECT_FACES_BY_EDGE             : return FilterClass(Cleaning + Selection);
-
     case FP_BUTTERFLY_SS                     :
     case FP_LOOP_SS                          :
     case FP_MIDPOINT                         :
@@ -170,8 +167,6 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_REFINE_CATMULL                   :
     case FP_REMOVE_UNREFERENCED_VERTEX       :
     case FP_REMOVE_DUPLICATED_VERTEX         :
-    case FP_SELECT_FACES_BY_AREA             :
-    case FP_SELECT_FACES_BY_EDGE             :
     case FP_QUADRIC_SIMPLIFICATION           :
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
     case FP_REORIENT                         :
@@ -186,6 +181,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_FAUX_EXTRACT                      :
     case FP_VATTR_SEAM                       :
     case FP_SLICE_WITH_A_PLANE               :
+    case FP_REMOVE_FACE_ZERO_AREA               :
     case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
 
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
@@ -216,8 +212,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
     case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertices");
     case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicate Vertices");
-    case FP_SELECT_FACES_BY_AREA             : return tr("Remove Zero Area Faces");
-    case FP_SELECT_FACES_BY_EDGE             : return tr("Select Faces with edges longer than...");
+    case FP_REMOVE_FACE_ZERO_AREA             : return tr("Remove Zero Area Faces");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
     case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
@@ -282,8 +277,6 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
     case FP_REMOVE_UNREFERENCED_VERTEX         : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
     case FP_REMOVE_DUPLICATED_VERTEX           : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged");
-    case FP_SELECT_FACES_BY_AREA               : return tr("Remove null faces (the one with area equal to zero)");
-    case FP_SELECT_FACES_BY_EDGE               : return tr("Select all triangles having an edge with lenght greater or equal than a given threshold");
     case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
     case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
@@ -325,6 +318,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
     case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
     case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
+    case FP_REMOVE_FACE_ZERO_AREA               : return tr("Remove null faces (the one with area equal to zero)");
 
     default                                  : assert(0);
     }
@@ -353,7 +347,6 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichEnum("Method", 3, methods, tr("Method:"), tr("Choose a method")));
         parlst.addParam(new RichEnum("CurvatureType", 0, QStringList()<<"Mean Curvature"<<"Gaussian Curvature"<<"None", tr("Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
         parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
-
         break;
 
     case FP_QUADRIC_SIMPLIFICATION:
@@ -403,10 +396,6 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
         break;
 
-    case FP_SELECT_FACES_BY_EDGE:
-        maxVal = m.cm.bbox.Diag()/2.0f;
-        parlst.addParam(new RichDynamicFloat("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the faces with an edge <b>longer</b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps."));
-        break;
 
     case FP_CLUSTERING:
         maxVal = m.cm.bbox.Diag();
@@ -428,6 +417,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
         parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
         parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
         break;
 
     case FP_RESET_TRANSFORM:
@@ -447,7 +437,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		Matrix44m mat; mat.SetIdentity();
 		parlst.addParam(new RichMatrix44f("TransformMatrix", mat, ""));
 		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	}break;
 
 	case FP_SET_TRANSFORM_PARAMS:
@@ -462,7 +452,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichFloat("scaleY", 1, "Y Scale", "Scaling factor on Y axis"));
 		parlst.addParam(new RichFloat("scaleZ", 1, "Z Scale", "Scaling factor on Z axis"));
 		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
 
     case FP_ROTATE_FIT:
@@ -480,7 +470,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
 		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
 		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
 
     case FP_ROTATE:
@@ -502,13 +492,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
 		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle (i.e. if the snapping value is 30, 227 becomes 210)."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
 
     case FP_PRINCIPAL_AXIS:
 		parlst.addParam(new RichBool("pointsFlag",true,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
         break;
 
     case FP_CENTER:
@@ -519,7 +509,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Amount of translation along the Z axis (in model units)"));
 		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
 
     case FP_SCALE:
@@ -536,7 +526,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
 		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("ToAll", false, "Apply to all visible layers", "All the other visible mesh and raster layers in the project will follow the transformation applied to this layer"));
+        parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
 
 	case FP_INVERT_FACES:
@@ -563,41 +553,13 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
     case FP_VATTR_SEAM:
         {
-#if 0
-            {
-                QStringList positionMethod;
-                /* if (true) */ positionMethod.push_back(tr("None"));
-                /* if (true) */ positionMethod.push_back(tr("Vertex"));
-                /* if (!positionMethod.empty()) */ parlst.addParam(new RichEnum("PositionMode", 0, positionMethod, tr("Position Source:"), tr("Choose a method")));
-            }
-#endif
-
-            {
-                QStringList normalMethod;
-                /* if (true)                                    */ normalMethod.push_back(tr("None"));
-                /* if (m.hasDataMask(MeshModel::MM_VERTNORMAL)) */ normalMethod.push_back(tr("Vertex"));
-                /* if (m.hasDataMask(MeshModel::MM_WEDGNORMAL)) */ normalMethod.push_back(tr("Wedge"));
-                /* if (m.hasDataMask(MeshModel::MM_FACENORMAL)) */ normalMethod.push_back(tr("Face"));
-                /* if (!normalMethod.empty()) */ parlst.addParam(new RichEnum("NormalMode", 0, normalMethod, tr("Normal Source:"), tr("Choose a method")));
-            }
-
-            {
-                QStringList colorMethod;
-                /* if (true)                                   */ colorMethod.push_back(tr("None"));
-                /* if (m.hasDataMask(MeshModel::MM_VERTCOLOR)) */ colorMethod.push_back(tr("Vertex"));
-                /* if (m.hasDataMask(MeshModel::MM_WEDGCOLOR)) */ colorMethod.push_back(tr("Wedge"));
-                /* if (m.hasDataMask(MeshModel::MM_FACECOLOR)) */ colorMethod.push_back(tr("Face"));
-                /* if (!colorMethod.empty()) */ parlst.addParam(new RichEnum("ColorMode", 0, colorMethod, tr("Color Source:"), tr("Choose a method")));
-            }
-
-            {
-                QStringList texcoordMethod;
-                /* if (true)                                      */ texcoordMethod.push_back(tr("None"));
-                /* if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD)) */ texcoordMethod.push_back(tr("Vertex"));
-                /* if (m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) */ texcoordMethod.push_back(tr("Wedge"));
-                /* if (!texcoordMethod.empty()) */ parlst.addParam(new RichEnum("TexcoordMode", 0, texcoordMethod, tr("Texcoord Source:"), tr("Choose a method")));
-            }
-        }
+      QStringList normalMethod; normalMethod << "None" << "Vertex" << "Wedge" << "Face";
+      parlst.addParam(new RichEnum("NormalMode", 0, normalMethod, tr("Normal Source:"), tr("Choose a method")));
+      QStringList colorMethod; colorMethod << "None" << "Vertex" << "Wedge" << "Face";
+      parlst.addParam(new RichEnum("ColorMode", 0, colorMethod, tr("Color Source:"), tr("Choose a method")));
+      QStringList texcoordMethod;texcoordMethod << "None" << "Vertex" << "Wedge";
+      parlst.addParam(new RichEnum("TexcoordMode", 0, texcoordMethod, tr("Texcoord Source:"), tr("Choose a method")));
+    }
         break;
 
 	case FP_SLICE_WITH_A_PLANE:
@@ -620,6 +582,44 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
     }
 }
+
+
+void Freeze(MeshModel *m)
+{
+  tri::UpdatePosition<CMeshO>::Matrix(m->cm, m->cm.Tr,true);
+  tri::UpdateBounding<CMeshO>::Box(m->cm);
+  m->cm.shot.ApplyRigidTransformation(m->cm.Tr);
+  m->cm.Tr.SetIdentity();
+}
+
+void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool freeze, 
+                    bool invertFlag=false, bool composeFlage=true)
+{
+  if(toAllFlag)
+  {
+    MeshModel   *m=NULL;    
+    while (m=md.nextVisibleMesh(m))
+    {
+      if(invertFlag) m->cm.Tr = Inverse(m->cm.Tr);
+      if(composeFlage) m->cm.Tr = tr * m->cm.Tr;
+      else m->cm.Tr=tr;
+      if(freeze) Freeze(m);
+    }
+
+    for (int i = 0; i < md.rasterList.size(); i++)
+        if (md.rasterList[0]->visible)
+            md.rasterList[i]->shot.ApplyRigidTransformation(tr);  
+  }      
+  else
+  {
+    MeshModel   *m=md.mm();
+    if(invertFlag) m->cm.Tr = Inverse(m->cm.Tr);
+    if(composeFlage) m->cm.Tr = tr * m->cm.Tr;
+    else m->cm.Tr=tr;
+    if(freeze) Freeze(md.mm());
+  }       
+}
+
 
 bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
@@ -707,14 +707,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
     m.UpdateBoxAndNormals();
   } break;
 
-    case FP_SELECT_FACES_BY_EDGE:
-        {
-            float threshold = par.getDynamicFloat("Threshold");
-            int selFaceNum = tri::UpdateSelection<CMeshO>::FaceOutOfRangeEdge(m.cm,0,threshold );
-            Log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
-        } break;
-
-    case FP_SELECT_FACES_BY_AREA:
+    case FP_REMOVE_FACE_ZERO_AREA:
         {
             int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
             Log( "Removed %d null faces", nullFaces);
@@ -778,165 +771,43 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             m.clearDataMask(MeshModel::MM_FACEFACETOPO);
         } break;
 
-	case FP_RESET_TRANSFORM:
-		{
-			bool all = par.getBool("allLayers");
-			if (all)
-			{
-				foreach(MeshModel *mmp, md.meshList)
-				if (mmp->visible)
-					mmp->cm.Tr.SetIdentity();
-			}
-			else
-			{
-				m.cm.Tr.SetIdentity();
-			}
-		}break;
+  case FP_RESET_TRANSFORM:  ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),false,false,false);  break;
+  case FP_FREEZE_TRANSFORM: ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),true,false,true);  break;
+  case FP_INVERT_TRANSFORM: ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),false,true,false);  break;
+  case FP_SET_TRANSFORM_MATRIX: ApplyTransform(md, par.getMatrix44m("TransformMatrix"), par.getBool("allLayers"), par.getBool("Freeze"));  break;
+    
+  case FP_SET_TRANSFORM_PARAMS:
+  {
+    float tX = par.getFloat("translationX");
+    float tY = par.getFloat("translationY");
+    float tZ = par.getFloat("translationZ");
+    float rX = par.getFloat("rotationX");
+    float rY = par.getFloat("rotationY");
+    float rZ = par.getFloat("rotationZ");
+    float sX = par.getFloat("scaleX");
+    float sY = par.getFloat("scaleY");
+    float sZ = par.getFloat("scaleZ");
+    
+    Matrix44m newTransform = Matrix44m::Identity();
+    Matrix44m tt;
+    tt.SetTranslate(tX, tY, tZ);
+    newTransform = newTransform * tt;
+    
+    if ((rX != 0.0) || (rY != 0.0) || (rZ != 0.0))
+    {
+      tt.FromEulerAngles(math::ToRad(rX), math::ToRad(rY), math::ToRad(rZ));
+      newTransform = newTransform * tt;
+    }
+    
+    if ((sX != 0.0) || (sY != 0.0) || (sZ != 0.0))
+    {
+      tt.SetScale(sX, sY, sZ);
+      newTransform = newTransform * tt;
+    }
+    ApplyTransform(md,newTransform,par.getBool("allLayers"),par.getBool("Freeze"));  
+  }break;
+    
 
-    case FP_FREEZE_TRANSFORM:
-        {
-            bool all=par.getBool("allLayers");
-            if(all)
-            {
-                foreach(MeshModel *mmp, md.meshList)
-                {
-                    if(mmp->visible)
-                    {
-                        tri::UpdatePosition<CMeshO>::Matrix(mmp->cm, mmp->cm.Tr,true);
-						tri::UpdateBounding<CMeshO>::Box(mmp->cm);
-						mmp->cm.shot.ApplyRigidTransformation(mmp->cm.Tr);
-                        mmp->cm.Tr.SetIdentity();
-                    }
-                }
-            }
-            else
-            {
-                tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-                m.cm.Tr.SetIdentity();
-            }
-        }break;
-
-	case FP_INVERT_TRANSFORM:
-		{
-			bool all = par.getBool("allLayers");
-			if (all)
-			{
-				foreach(MeshModel *mmp, md.meshList)
-					if (mmp->visible)
-						mmp->cm.Tr = Inverse(mmp->cm.Tr);
-			}
-			else
-			{
-				m.cm.Tr = Inverse(m.cm.Tr);
-			}
-		}break;
-
-	case FP_SET_TRANSFORM_PARAMS:
-		{
-			float tX = par.getFloat("translationX");
-			float tY = par.getFloat("translationY");
-			float tZ = par.getFloat("translationZ");
-			float rX = par.getFloat("rotationX");
-			float rY = par.getFloat("rotationY");
-			float rZ = par.getFloat("rotationZ");
-			float sX = par.getFloat("scaleX");
-			float sY = par.getFloat("scaleY");
-			float sZ = par.getFloat("scaleZ");
-
-			Matrix44m newTransform;
-			Matrix44m tt;
-			newTransform.SetIdentity();
-
-			if ((tX != 0.0) || (tY != 0.0) || (tZ != 0.0))
-			{
-				tt.SetTranslate(tX, tY, tZ);
-				newTransform = newTransform * tt;
-			}
-
-			if ((rX != 0.0) || (rY != 0.0) || (rZ != 0.0))
-			{
-				tt.FromEulerAngles(math::ToRad(rX), math::ToRad(rY), math::ToRad(rZ));
-				newTransform = newTransform * tt;
-			}
-
-			if ((sX != 0.0) || (sY != 0.0) || (sZ != 0.0))
-			{
-				tt.SetScale(sX, sY, sZ);
-				newTransform = newTransform * tt;
-			}
-
-			m.cm.Tr = newTransform;
-
-			if (par.getBool("Freeze"))
-			{
-				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-				tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-				m.cm.Tr.SetIdentity();
-			}
-
-			if (par.getBool("ToAll"))
-			{
-				for (int i = 0; i < md.meshList.size(); i++)
-				{
-					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-					{
-						md.meshList[i]->cm.Tr = newTransform;
-						if (par.getBool("Freeze"))
-						{
-							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-							md.meshList[i]->cm.shot.ApplyRigidTransformation(newTransform);
-							md.meshList[i]->cm.Tr.SetIdentity();
-						}
-					}
-				}
-				for (int i = 0; i < md.rasterList.size(); i++)
-					if (md.rasterList[0]->visible)
-						md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
-			}
-
-		}break;
-
-	case FP_SET_TRANSFORM_MATRIX:
-		{
-			Matrix44m newTransform;
-			newTransform = par.getMatrix44m("TransformMatrix");
-
-			m.cm.Tr = newTransform;
-
-			if (par.getBool("Freeze"))
-			{
-				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-				tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-				m.cm.Tr.SetIdentity();
-			}
-
-			if (par.getBool("ToAll"))
-			{
-				for (int i = 0; i < md.meshList.size(); i++)
-				{
-					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-					{
-						md.meshList[i]->cm.Tr = newTransform;
-						if (par.getBool("Freeze"))
-						{
-							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-							md.meshList[i]->cm.shot.ApplyRigidTransformation(newTransform);
-							md.meshList[i]->cm.Tr.SetIdentity();
-						}
-					}
-				}
-				for (int i = 0; i < md.rasterList.size(); i++)
-				if (md.rasterList[0]->visible)
-					md.rasterList[i]->shot.ApplyRigidTransformation(newTransform);
-			}
-
-		}break;
 
     case FP_QUADRIC_SIMPLIFICATION:
         {
@@ -1109,36 +980,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		else
 			transfM = rt;
 
-		m.cm.Tr = transfM;
-
-		if (par.getBool("Freeze"))
-		{
-			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-			tri::UpdateBounding<CMeshO>::Box(m.cm);
-			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-			m.cm.Tr.SetIdentity();
-		}
-
-		if (par.getBool("ToAll"))
-		{
-			for (int i = 0; i < md.meshList.size(); i++)
-			{
-				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-				{
-					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
-					if (par.getBool("Freeze"))
-					{
-						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-						md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
-						md.meshList[i]->cm.Tr.SetIdentity();
-					}
-				}
-			}
-			for (int i = 0; i < md.rasterList.size(); i++)
-				if (md.rasterList[0]->visible)
-					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
-		}
+        ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
 	} break;
 
 	case FP_ROTATE :
@@ -1173,36 +1015,8 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		trTranInv.SetTranslate(-tranVec);
 		transfM = trTran*trRot*trTranInv;
 
-		m.cm.Tr = transfM * m.cm.Tr;
+        ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
 
-		if (par.getBool("Freeze"))
-		{
-			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-			tri::UpdateBounding<CMeshO>::Box(m.cm);
-			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-			m.cm.Tr.SetIdentity();
-		}
-
-		if (par.getBool("ToAll"))
-		{
-			for (int i = 0; i < md.meshList.size(); i++)
-			{
-				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-				{
-					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
-					if (par.getBool("Freeze"))
-					{
-						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-						md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
-						md.meshList[i]->cm.Tr.SetIdentity();
-					}
-				}
-			}
-			for (int i = 0; i < md.rasterList.size(); i++)
-				if (md.rasterList[0]->visible)
-					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
-		}
 	} break;
 
     case FP_PRINCIPAL_AXIS:
@@ -1266,36 +1080,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 						transfM[i][j] = PCA[i][j];
             }
 
-			m.cm.Tr = transfM;
-
-			if (par.getBool("Freeze"))
-			{
-				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-				tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-				m.cm.Tr.SetIdentity();
-			}
-
-			if (par.getBool("ToAll"))
-			{
-				for (int i = 0; i < md.meshList.size(); i++)
-				{
-					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-					{
-						md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
-						if (par.getBool("Freeze"))
-						{
-							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-							md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
-							md.meshList[i]->cm.Tr.SetIdentity();
-						}
-					}
-				}
-				for (int i = 0; i < md.rasterList.size(); i++)
-				if (md.rasterList[0]->visible)
-					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
-			}
+            ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
 
         } break;
 
@@ -1308,42 +1093,16 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			translation.Y() = par.getDynamicFloat("axisY");
 			translation.Z() = par.getDynamicFloat("axisZ");
 
-			if (par.getBool("centerFlag"))
-				translation = -m.cm.trBB().Center();
-
-			transfM.SetTranslate(translation.X(), translation.Y(), translation.Z());
-
-			m.cm.Tr = transfM * m.cm.Tr;
-
-			if (par.getBool("Freeze"))
-			{
-				tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-				tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-				m.cm.Tr.SetIdentity();
-			}
-
-			if (par.getBool("ToAll"))
-			{
-				for (int i = 0; i < md.meshList.size(); i++)
-				{
-					if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-					{
-						md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
-						if (par.getBool("Freeze"))
-						{
-							tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-							tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-							md.meshList[i]->cm.shot.ApplyRigidTransformation(md.meshList[i]->cm.Tr);
-							md.meshList[i]->cm.Tr.SetIdentity();
-						}
-					}
-				}
-				for (int i = 0; i < md.rasterList.size(); i++)
-					if (md.rasterList[0]->visible)
-						md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
-			}
-
+            if (par.getBool("centerFlag"))
+            {
+              if (par.getBool("allLayers"))
+                translation = -md.bbox().Center();
+              else
+                translation = -m.cm.trBB().Center();
+            }
+            transfM.SetTranslate(translation);
+            
+            ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
         } break;
 
 	case FP_SCALE:
@@ -1351,6 +1110,11 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 		Matrix44m transfM, scaleTran, trTran, trTranInv;
 		Point3m tranVec;
+        Box3m  scalebb;
+        if(par.getBool("allLayers")) 
+          scalebb = md.bbox();
+        else 
+          scalebb=md.mm()->cm.trBB();
 		
 		float xScale = par.getFloat("axisX");
 		float yScale = par.getFloat("axisY");
@@ -1363,14 +1127,14 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 		if (par.getBool("unitFlag"))
 		{
-			float maxSide = max(m.cm.bbox.DimX(), max(m.cm.bbox.DimY(), m.cm.bbox.DimZ()));
+			float maxSide = max(scalebb.DimX(), max(scalebb.DimY(), scalebb.DimZ()));
 			scaleTran.SetScale(1.0 / maxSide, 1.0 / maxSide, 1.0 / maxSide);
 		}
 
 		switch (par.getEnum("scaleCenter"))
 		{
 			case 0: tranVec = Point3m(0, 0, 0); break;
-			case 1: tranVec = m.cm.Tr * m.cm.bbox.Center(); break;
+			case 1: tranVec = m.cm.Tr * scalebb.Center(); break;
 			case 2: tranVec = par.getPoint3m("customCenter"); break;
 		}
 		trTran.SetTranslate(tranVec);
@@ -1378,37 +1142,7 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 
 		transfM = trTran*scaleTran*trTranInv;
 
-		m.cm.Tr = transfM * m.cm.Tr;
-
-		if (par.getBool("Freeze"))
-		{
-			tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr, true);
-			tri::UpdateBounding<CMeshO>::Box(m.cm);
-			m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-			m.cm.Tr.SetIdentity();
-		}
-
-		if (par.getBool("ToAll"))
-		{
-			for (int i = 0; i < md.meshList.size(); i++)
-			{
-				if ((md.meshList[i] != &m) && (md.meshList[i]->visible))	// if is not the current one AND is visible
-				{
-					md.meshList[i]->cm.Tr = transfM * md.meshList[i]->cm.Tr;
-					if (par.getBool("Freeze"))
-					{
-						tri::UpdatePosition<CMeshO>::Matrix(md.meshList[i]->cm, md.meshList[i]->cm.Tr, true);
-						tri::UpdateBounding<CMeshO>::Box(md.meshList[i]->cm);
-						md.meshList[i]->cm.shot.ApplyRigidTransformation(transfM);
-						md.meshList[i]->cm.Tr.SetIdentity();
-					}
-				}
-			}
-			for (int i = 0; i < md.rasterList.size(); i++)
-				if (md.rasterList[0]->visible)
-					md.rasterList[i]->shot.ApplyRigidTransformation(transfM);
-		}
-
+        ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
 	} break;
 
     case FP_FLIP_AND_SWAP:
@@ -1430,14 +1164,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
             swapM[1][1]=0.0f; swapM[1][2]=1.0f;
             swapM[2][1]=1.0f; swapM[2][2]=0.0f;
             tr *= swapM; }
-            m.cm.Tr=tr;
-
-            if(par.getBool("Freeze")){
-                tri::UpdatePosition<CMeshO>::Matrix(m.cm, m.cm.Tr,true);
-                tri::UpdateBounding<CMeshO>::Box(m.cm);
-				m.cm.shot.ApplyRigidTransformation(m.cm.Tr);
-                m.cm.Tr.SetIdentity();
-            }
+            
+            ApplyTransform(md,tr,par.getBool("allLayers"),par.getBool("Freeze"));  
+            
         } break;
 
     case FP_NORMAL_EXTRAPOLATION :
@@ -1838,7 +1567,6 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 	case FP_FREEZE_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
 	case FP_RESET_TRANSFORM      :
 	case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
-    case FP_SELECT_FACES_BY_EDGE : return MeshModel::MM_FACEFLAGSELECT;
 	case FP_NORMAL_EXTRAPOLATION :   
     case FP_NORMAL_SMOOTH_POINTCLOUD : MeshModel::MM_VERTNORMAL;
     default                  : return MeshModel::MM_UNKNOWN;
