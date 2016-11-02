@@ -195,4 +195,13 @@ QString FilterHarmonicPlugin::filterScriptFunctionName( FilterIDType filterID )
 	return QString();
 }
 
+MeshFilterInterface::FILTER_ARITY FilterHarmonicPlugin::filterArity(QAction *act) const
+{
+	switch (ID(act))
+	{
+	case FP_SCALAR_HARMONIC_FIELD: return MeshFilterInterface::SINGLE_MESH;
+	}
+	return MeshFilterInterface::NONE;
+}
+
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterHarmonicPlugin)

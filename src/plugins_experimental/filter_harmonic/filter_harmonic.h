@@ -41,7 +41,7 @@ public:
 
 	FilterHarmonicPlugin();
 
-	virtual QString pluginName(void) const { return "FilterHarmonicPlugin"; }
+	QString pluginName(void) const { return "FilterHarmonicPlugin"; }
 	int getPreConditions(QAction *) const { return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENUMBER; }
 	int getRequirements(QAction *) { return MeshModel::MM_FACEFACETOPO; }
 	QString filterName(FilterIDType filter) const;
@@ -55,6 +55,7 @@ public:
 		     | MeshModel::MM_VERTFLAG
 		     | MeshModel::MM_FACEVERT;
 	}
+	MeshFilterInterface::FILTER_ARITY filterArity(QAction *act) const;
 	FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
 };
