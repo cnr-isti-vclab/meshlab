@@ -32,7 +32,7 @@ FilterHarmonicPlugin::FilterHarmonicPlugin()
 {
 	typeList << FP_SCALAR_HARMONIC_FIELD;
 
-	foreach(FilterIDType tt , types())
+	foreach(FilterIDType tt, types())
 		actionList << new QAction(filterName(tt), this);
 }
 
@@ -40,9 +40,9 @@ FilterHarmonicPlugin::FilterHarmonicPlugin()
 // (this string is used also to define the menu entry)
 QString FilterHarmonicPlugin::filterName(FilterIDType filterId) const
 {
-	switch(filterId) {
-	case FP_SCALAR_HARMONIC_FIELD : return QString("Generate Scalar Harmonic Field");
-	default : assert(0);
+	switch (filterId) {
+	case FP_SCALAR_HARMONIC_FIELD: return QString("Generate Scalar Harmonic Field");
+	default: assert(0);
 	}
 	return QString();
 }
@@ -51,10 +51,10 @@ QString FilterHarmonicPlugin::filterName(FilterIDType filterId) const
 // (this string is used in the About plugin dialog)
 QString FilterHarmonicPlugin::filterInfo(FilterIDType filterId) const
 {
-	switch(filterId)
+	switch (filterId)
 	{
-	case FP_SCALAR_HARMONIC_FIELD : return QString("Generates a scalar harmonic field over the mesh. Scalar values must be assigned to at least two vertices as Dirichlet boundary conditions. Applying the filter, a discrete Laplace operator generates the harmonic field values for all the mesh vertices. Note that the field values is stored in the quality per vertex attribute of the mesh\n\nFor more details see:\n Kai Xua, Hao Zhang, Daniel Cohen-Or, Yueshan Xionga,'Dynamic Harmonic Fields for Surface Processing'.\nin Computers & Graphics, 2009");
-	default : assert(0);
+	case FP_SCALAR_HARMONIC_FIELD: return QString("Generates a scalar harmonic field over the mesh. Scalar values must be assigned to at least two vertices as Dirichlet boundary conditions. Applying the filter, a discrete Laplace operator generates the harmonic field values for all the mesh vertices. Note that the field values is stored in the quality per vertex attribute of the mesh\n\nFor more details see:\n Kai Xua, Hao Zhang, Daniel Cohen-Or, Yueshan Xionga,'Dynamic Harmonic Fields for Surface Processing'.\nin Computers & Graphics, 2009");
+	default: assert(0);
 	}
 	return QString("Unknown Filter");
 }
@@ -65,10 +65,10 @@ QString FilterHarmonicPlugin::filterInfo(FilterIDType filterId) const
 // More than a single class can be choosen.
 FilterHarmonicPlugin::FilterClass FilterHarmonicPlugin::getClass(QAction * a)
 {
-	switch(ID(a))
+	switch (ID(a))
 	{
-	case FP_SCALAR_HARMONIC_FIELD : return MeshFilterInterface::Remeshing;
-	default : assert(0);
+	case FP_SCALAR_HARMONIC_FIELD: return MeshFilterInterface::Remeshing;
+	default: assert(0);
 	}
 	return MeshFilterInterface::Generic;
 }
@@ -83,92 +83,111 @@ FilterHarmonicPlugin::FilterClass FilterHarmonicPlugin::getClass(QAction * a)
 
 void FilterHarmonicPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst)
 {
-	switch(ID(action))
+	switch (ID(action))
 	{
-	case FP_SCALAR_HARMONIC_FIELD :
-		parlst.addParam(new RichPoint3f("point1", m.cm.bbox.min,"Point 1","A vertex on the mesh that represent one harmonic field boundary condition."));
-		parlst.addParam(new RichPoint3f("point2", m.cm.bbox.max,"Point 2","A vertex on the mesh that represent one harmonic field boundary condition."));
-		parlst.addParam(new RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f,"value for the 1st point","Harmonic field value for the vertex."));
-		parlst.addParam(new RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f,"value for the 2nd point","Harmonic field value for the vertex."));
+	case FP_SCALAR_HARMONIC_FIELD:
+		parlst.addParam(new RichPoint3f("point1", m.cm.bbox.min, "Point 1", "A vertex on the mesh that represent one harmonic field boundary condition."));
+		parlst.addParam(new RichPoint3f("point2", m.cm.bbox.max, "Point 2", "A vertex on the mesh that represent one harmonic field boundary condition."));
+		parlst.addParam(new RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f, "value for the 1st point", "Harmonic field value for the vertex."));
+		parlst.addParam(new RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f, "value for the 2nd point", "Harmonic field value for the vertex."));
 		parlst.addParam(new RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
 		break;
-	default : assert(0);
+	default: assert(0);
 	}
 }
 
 // The Real Core Function doing the actual mesh processing.
 bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-	switch(ID(action))
+	switch (ID(action))
 	{
-    case FP_SCALAR_HARMONIC_FIELD :
-    {
-      
-      typedef double                           FieldScalar;
-      // double is fine
-            
-      cb(1, "Computing harmonic field...");
-      
-      CMeshO & m = md.mm()->cm;
-      vcg::tri::Allocator<CMeshO>::CompactEveryVector(m);
-      
-      md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
-      // Get the two vertices with value set
-      vcg::GridStaticPtr<CVertexO, Scalarm> vg;
-      vg.Set(m.vert.begin(), m.vert.end());
-      
-      vcg::vertex::PointDistanceFunctor<Scalarm> pd;
-      vcg::tri::Tmark<CMeshO, CVertexO> mv;
-      mv.SetMesh(&m);
-      mv.UnMarkAll();
-      Point3m  closestP;
-      Scalarm minDist = 0;
-      CVertexO * vp0 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point1"), m.bbox.Diag(), minDist, closestP);
-      CVertexO * vp1 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point2"), m.bbox.Diag(), minDist, closestP);
-      if (vp0 == NULL || vp1 == NULL || vp0 == vp1)
-      {
-        this->errorMessage = "Error occurred for selected points.";
-        return false;
-      }
-      
-      vcg::tri::Harmonic<CMeshO, FieldScalar>::ConstraintVec constraints;
-      constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp0, FieldScalar(par.getFloat("value1"))));
-      constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp1, FieldScalar(par.getFloat("value2"))));
-      
-      CMeshO::PerVertexAttributeHandle<FieldScalar> handle = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<FieldScalar>(m, "harmonic");
-      
-      bool ok = vcg::tri::Harmonic<CMeshO, FieldScalar>::ComputeScalarField(m, constraints, handle);
-      
-      if (!ok)
-      {
-        this->errorMessage += "An error occurred.";
-        return false;
-      }
-      md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
-      for(auto vi=m.vert.begin();vi!=m.vert.end();++vi)
-        vi->Q() = handle[vi];
-      
-      if (par.getBool("colorize"))
-      {
-        md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
-        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m);        
-      }
-      
-      cb(100, "Done.");
-      
-      return true;
-    }
-    default : assert(0);
-    }
-    return false;
+	case FP_SCALAR_HARMONIC_FIELD:
+	{
+
+		typedef double FieldScalar;
+		// double is fine
+
+		cb(1, "Computing harmonic field...");
+
+		CMeshO & m = md.mm()->cm;
+		vcg::tri::Allocator<CMeshO>::CompactEveryVector(m);
+
+		int numCC = vcg::tri::Clean<CMeshO>::CountConnectedComponents(m);
+		if (numCC > 1)
+		{
+			this->errorMessage = "A mesh composed by a single connected component is required by the filter to properly work.";
+			return false;
+		}
+
+		if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm) > 0)
+		{
+			errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness";
+			return false;
+		}
+
+		if (vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(md.mm()->cm) > 0)
+		{
+			errorMessage = "Mesh has some not 2-manifold vertices, this filter requires manifoldness";
+			return false;
+		}
+
+		md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
+		// Get the two vertices with value set
+		vcg::GridStaticPtr<CVertexO, Scalarm> vg;
+		vg.Set(m.vert.begin(), m.vert.end());
+
+		vcg::vertex::PointDistanceFunctor<Scalarm> pd;
+		vcg::tri::Tmark<CMeshO, CVertexO> mv;
+		mv.SetMesh(&m);
+		mv.UnMarkAll();
+		Point3m  closestP;
+		Scalarm minDist = 0;
+		CVertexO * vp0 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point1"), m.bbox.Diag(), minDist, closestP);
+		CVertexO * vp1 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point2"), m.bbox.Diag(), minDist, closestP);
+		if (vp0 == NULL || vp1 == NULL || vp0 == vp1)
+		{
+			this->errorMessage = "Error occurred for selected points.";
+			return false;
+		}
+
+		vcg::tri::Harmonic<CMeshO, FieldScalar>::ConstraintVec constraints;
+		constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp0, FieldScalar(par.getFloat("value1"))));
+		constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp1, FieldScalar(par.getFloat("value2"))));
+
+		CMeshO::PerVertexAttributeHandle<FieldScalar> handle = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<FieldScalar>(m, "harmonic");
+
+		bool ok = vcg::tri::Harmonic<CMeshO, FieldScalar>::ComputeScalarField(m, constraints, handle);
+
+		if (!ok)
+		{
+			this->errorMessage += "An error occurred.";
+			return false;
+		}
+		md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
+		for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+			vi->Q() = handle[vi];
+
+		if (par.getBool("colorize"))
+		{
+			md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+			vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m);
+		}
+
+		cb(100, "Done.");
+
+		return true;
+	}
+	default: assert(0);
+	}
+	return false;
 }
 
-QString FilterHarmonicPlugin::filterScriptFunctionName( FilterIDType filterID )
+QString FilterHarmonicPlugin::filterScriptFunctionName(FilterIDType filterID)
 {
-	switch(filterID)
+	switch (filterID)
 	{
-	case FP_SCALAR_HARMONIC_FIELD : return QString("scalarHarmonicField");
-	default : assert(0);
+	case FP_SCALAR_HARMONIC_FIELD: return QString("scalarHarmonicField");
+	default: assert(0);
 	}
 	return QString();
 }
