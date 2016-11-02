@@ -219,7 +219,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
     case FP_INVERT_FACES                     : return tr("Invert Faces Orientation");
     case FP_SCALE                            : return tr("Transform: Scale, Normalize");
-    case FP_CENTER                           : return tr("Transform: Translate, Center");
+    case FP_CENTER                           : return tr("Transform: Translate, Center, set Origin");
     case FP_ROTATE                           : return tr("Transform: Rotate");
     case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
     case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
@@ -503,11 +503,16 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 
     case FP_CENTER:
 	{
+		QStringList traslMethod;
+		traslMethod.push_back("XYZ translation");
+		traslMethod.push_back("Center on BBox");
+		traslMethod.push_back("Set new Origin");
+		parlst.addParam(new RichEnum("traslMethod", 0, traslMethod, tr("Transformation:"), tr("[XYZ translation] adds X,Y and Z offset to Layer transformation, [Center on BBox] moves Layer Origin to the Bounding Box center, [Set new Origin] moves Layer Origin to a specific point")));
 		Box3m &bb=m.cm.bbox;
-		parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","Amount of translation along the X axis (in model units)"));
-		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","Amount of translation along the Y axis (in model units)"));
-		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","Amount of translation along the Z axis (in model units)"));
-		parlst.addParam(new RichBool("centerFlag",false,"translate center of bbox to the origin","If selected, the center of the object boundingbox is moved to the origin (and the X,Y and Z parameters above are ignored)"));
+		parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","when using [XYZ translation], amount of translation along the X axis (in model units)"));
+		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","when using [XYZ translation], amount of translation along the Y axis (in model units)"));
+		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","when using [XYZ translation], amount of translation along the Z axis (in model units)"));
+		parlst.addParam(new RichPoint3f("newOrigin", Point3f(0, 0, 0), "New Origin:", "when using [Set new Origin], this is the location of the new Origin."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
         parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
@@ -1093,13 +1098,13 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 			translation.Y() = par.getDynamicFloat("axisY");
 			translation.Z() = par.getDynamicFloat("axisZ");
 
-            if (par.getBool("centerFlag"))
-            {
-              if (par.getBool("allLayers"))
-                translation = -md.bbox().Center();
-              else
-                translation = -m.cm.trBB().Center();
-            }
+			switch (par.getEnum("traslMethod"))
+			{
+				case 0: break; //we already got it from interface
+				case 1: translation = -(m.cm.Tr * md.bbox().Center()); break; // we consider current transformation when finding bbox center
+				case 2: translation = -par.getPoint3m("newOrigin"); break;
+			}
+
             transfM.SetTranslate(translation);
             
             ApplyTransform(md,transfM,par.getBool("allLayers"),par.getBool("Freeze"));  
