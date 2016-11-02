@@ -58,7 +58,7 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
     case FP_CAMERA_SCALE :              return QString("Transform: Scale Camera or set of cameras");
     case FP_CAMERA_TRANSLATE :          return QString("Transform: Translate Camera or set of cameras");
     case FP_CAMERA_TRANSFORM :          return QString("Transform the camera extrinsics, or all the cameras of the project.");
-    case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras");
+    case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Re-Orient vertex normals using cameras");
     default : assert(0);
     }
 }
@@ -707,13 +707,14 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
     case FP_CAMERA_SCALE :
     case FP_CAMERA_TRANSLATE :
     case FP_CAMERA_TRANSFORM:
-    case FP_SET_MESH_CAMERA :
-    case FP_QUALITY_FROM_CAMERA :
-		return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer + MeshFilterInterface::Normal);
     case FP_SET_RASTER_CAMERA :
         return FilterClass (MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer) ;
+	case FP_QUALITY_FROM_CAMERA:
+		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer + MeshFilterInterface::Quality);
     case FP_ORIENT_NORMALS_WITH_CAMERAS:
-        return MeshFilterInterface::Camera;
+		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Normal);
+	case FP_SET_MESH_CAMERA:
+		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Layer);
     }
     assert(0);
 }
