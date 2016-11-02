@@ -87,7 +87,7 @@ void FilterHarmonicPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 	{
 	case FP_SCALAR_HARMONIC_FIELD :
 		parlst.addParam(new RichPoint3f("point1", m.cm.bbox.min,"Point 1","A vertex on the mesh that represent one harmonic field boundary condition."));
-		parlst.addParam(new RichPoint3f("point2", m.cm.bbox.min,"Point 2","A vertex on the mesh that represent one harmonic field boundary condition."));
+		parlst.addParam(new RichPoint3f("point2", m.cm.bbox.max,"Point 2","A vertex on the mesh that represent one harmonic field boundary condition."));
 		parlst.addParam(new RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f,"value for the 1st point","Harmonic field value for the vertex."));
 		parlst.addParam(new RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f,"value for the 2nd point","Harmonic field value for the vertex."));
 		parlst.addParam(new RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
@@ -120,7 +120,7 @@ bool FilterHarmonicPlugin::applyFilter(QAction * action, MeshDocument & md, Rich
 		vcg::tri::Allocator<CMeshO>::CompactFaceVector(m);
 		vcg::tri::Allocator<CMeshO>::CompactVertexVector(m);
 
-		md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEFLAG);
+		md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
 		vcg::tri::UpdateBounding<CMeshO>::Box(m);
 
 		int n  = m.VN();
