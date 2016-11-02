@@ -212,7 +212,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
     case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertices");
     case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicate Vertices");
-    case FP_REMOVE_FACE_ZERO_AREA             : return tr("Remove Zero Area Faces");
+    case FP_REMOVE_FACE_ZERO_AREA            : return tr("Remove Zero Area Faces");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
     case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
@@ -224,11 +224,11 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_ROTATE_FIT                       : return tr("Transform: Rotate to Fit to a plane");
     case FP_PRINCIPAL_AXIS                   : return tr("Transform: Align to Principal Axis");
     case FP_FLIP_AND_SWAP                    : return tr("Transform: Flip and/or swap axis");
-    case FP_FREEZE_TRANSFORM                 : return tr("Freeze Current Matrix");
-    case FP_RESET_TRANSFORM                  : return tr("Reset Current Matrix");
-	case FP_INVERT_TRANSFORM                 : return tr("Invert Current Matrix");
-	case FP_SET_TRANSFORM_PARAMS             : return tr("Set Matrix from translation/rotation/scale");
-	case FP_SET_TRANSFORM_MATRIX             : return tr("Set/Copy Transformation Matrix");
+	case FP_FREEZE_TRANSFORM                 : return tr("Matrix: Freeze Current Matrix");
+    case FP_RESET_TRANSFORM                  : return tr("Matrix: Reset Current Matrix");
+	case FP_INVERT_TRANSFORM                 : return tr("Matrix: Invert Current Matrix");
+	case FP_SET_TRANSFORM_PARAMS             : return tr("Matrix: Set from translation/rotation/scale");
+	case FP_SET_TRANSFORM_MATRIX             : return tr("Matrix: Set/Copy Transformation");
     case FP_NORMAL_EXTRAPOLATION             : return tr("Compute normals for point sets");
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return tr("Smooths normals on a point sets");
     case FP_COMPUTE_PRINC_CURV_DIR           : return tr("Compute curvature principal directions");
