@@ -231,6 +231,7 @@ signals:
         void askViewPos(QString);
         void askSurfacePos(QString);
         void askCameraPos(QString);
+		void askTrackballPos(QString);
         void setExp(const QString& name,const QString& exp );
 protected:
     QLineEdit * coordSB[3];

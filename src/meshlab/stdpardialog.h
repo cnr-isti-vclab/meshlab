@@ -275,6 +275,7 @@ public:
     void askViewPos(QString);
     void askSurfacePos(QString);
     void askCameraPos(QString);
+	void askTrackballPos(QString);
 
 protected:
     QLineEdit * coordSB[3];

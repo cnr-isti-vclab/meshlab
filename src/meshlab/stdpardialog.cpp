@@ -277,10 +277,11 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
         //this->addWidget(getPoint3Button,0,Qt::AlignHCenter);
         vlay->addWidget(getPoint3Button);
         QStringList names;
-        names << "View Dir";
-        names << "View Pos";
-        names << "Surf. Pos";
-        names << "Camera Pos";
+        names << "View Dir.";
+        names << "View Pos.";
+        names << "Surf. Pos.";
+        names << "Raster Camera Pos.";
+		names << "Trackball Center";
 
         getPoint3Combo = new QComboBox(this);
         getPoint3Combo->addItems(names);
@@ -293,10 +294,13 @@ Point3fWidget::Point3fWidget(QWidget *p, RichPoint3f* rpf, QWidget *gla_curr): M
         connect(gla_curr,SIGNAL(transmitViewDir(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
         connect(gla_curr,SIGNAL(transmitShot(QString,Shotm)),this,SLOT(setShotValue(QString,Shotm)));
         connect(gla_curr,SIGNAL(transmitSurfacePos(QString,Point3m)),this,SLOT(setValue(QString,Point3m)));
+		connect(gla_curr,SIGNAL(transmitCameraPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
+		connect(gla_curr,SIGNAL(transmitTrackballPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
         connect(this,SIGNAL(askViewDir(QString)),gla_curr,SLOT(sendViewDir(QString)));
-        connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendMeshShot(QString)));
+        connect(this,SIGNAL(askViewPos(QString)),gla_curr,SLOT(sendViewerShot(QString)));
         connect(this,SIGNAL(askSurfacePos(QString)),gla_curr,SLOT(sendSurfacePos(QString)));
-        connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendCameraPos(QString)));
+        connect(this,SIGNAL(askCameraPos(QString)),gla_curr,SLOT(sendRasterShot(QString)));
+		connect(this,SIGNAL(askTrackballPos(QString)),gla_curr,SLOT(sendTrackballPos(QString)));
     }
     //gridLay->addLayout(lay,row,1,Qt::AlignTop);
 }
@@ -307,11 +311,12 @@ void Point3fWidget::getPoint()
     //qDebug("Got signal %i",index);
     switch(index)
     {
-    case 0 : emit askViewDir(paramName);		 break;
-    case 1 : emit askViewPos(paramName);		 break;
-    case 2 : emit askSurfacePos(paramName); break;
-    case 3 : emit askCameraPos(paramName); break;
-    default : assert(0);
+		case 0: emit askViewDir(paramName);       break;
+		case 1: emit askViewPos(paramName);       break;
+		case 2: emit askSurfacePos(paramName);    break;
+		case 3: emit askCameraPos(paramName);     break;
+		case 4: emit askTrackballPos(paramName);  break;
+		default : assert(0);
     }
 }
 

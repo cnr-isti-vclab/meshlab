@@ -1695,8 +1695,14 @@ void GLArea::sendRasterShot(QString name)
 
 void GLArea::sendCameraPos( QString name )
 {
-    Point3f dir= trackball.camera.ViewPoint();
-    emit transmitCameraPos(name,dir);
+	Point3f pos = trackball.camera.ViewPoint();
+	emit transmitCameraPos(name, pos);
+}
+
+void GLArea::sendTrackballPos(QString name)
+{
+	Point3f pos = -trackball.track.tra;
+	emit transmitTrackballPos(name, pos);
 }
 
 Point3f GLArea::getViewDir()
@@ -2271,7 +2277,7 @@ void GLArea::toggleOrtho()
 
 void GLArea::trackballStep(QString dir)
 {
-	float stepAngle = M_PI / 6.0;
+	float stepAngle = M_PI / 12.0;
 
 	if (dir == tr("Horizontal +"))
 		trackball.track.rot = Quaternionf(-stepAngle, Point3f(0.0, 1.0, 0.0)) * trackball.track.rot;

@@ -876,10 +876,11 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 
             hlay->addWidget(getPoint3Button);
             QStringList names;
-            names << "View Dir";
-            names << "View Pos";
-            names << "Surf. Pos";
-            names << "Camera Pos";
+			names << "View Dir.";
+			names << "View Pos.";
+			names << "Surf. Pos.";
+			names << "Raster Camera Pos.";
+			names << "Trackball Center";
 
             getPoint3Combo = new QComboBox(this);
             getPoint3Combo->addItems(names);
@@ -892,10 +893,13 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
             connect(curr_gla,SIGNAL(transmitViewDir(QString,vcg::Point3f)),this,SLOT(setPoint(QString,vcg::Point3f)));
             connect(curr_gla,SIGNAL(transmitShot(QString,vcg::Shotf)),this,SLOT(setShot(QString,vcg::Shotf)));
             connect(curr_gla,SIGNAL(transmitSurfacePos(QString,vcg::Point3f)),this,SLOT(setPoint(QString,vcg::Point3f)));
+			connect(curr_gla,SIGNAL(transmitCameraPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
+			connect(curr_gla,SIGNAL(transmitTrackballPos(QString, Point3m)),this,SLOT(setValue(QString, Point3m)));
             connect(this,SIGNAL(askViewDir(QString)),curr_gla,SLOT(sendViewDir(QString)));
-            connect(this,SIGNAL(askViewPos(QString)),curr_gla,SLOT(sendMeshShot(QString)));
+            connect(this,SIGNAL(askViewPos(QString)),curr_gla,SLOT(sendViewerShot(QString)));
             connect(this,SIGNAL(askSurfacePos(QString)),curr_gla,SLOT(sendSurfacePos(QString)));
-            connect(this,SIGNAL(askCameraPos(QString)),curr_gla,SLOT(sendCameraPos(QString)));
+            connect(this,SIGNAL(askCameraPos(QString)),curr_gla,SLOT(sendRasterShot(QString)));
+			connect(this,SIGNAL(askTrackballPos(QString)),curr_gla,SLOT(sendTrackballPos(QString)));
         }
         //gridLay->addLayout(hlay,row,1,Qt::AlignTop);
     }
@@ -935,11 +939,12 @@ void XMLVec3Widget::getPoint()
     qDebug("Got signal %i",index);
     switch(index)
     {
-    case 0 : emit askViewDir(paramName);		 break;
-    case 1 : emit askViewPos(paramName);		 break;
-    case 2 : emit askSurfacePos(paramName); break;
-    case 3 : emit askCameraPos(paramName); break;
-    default : assert(0);
+		case 0 : emit askViewDir(paramName);       break;
+		case 1 : emit askViewPos(paramName);       break;
+		case 2 : emit askSurfacePos(paramName);    break;
+		case 3 : emit askCameraPos(paramName);     break;
+		case 4 : emit askTrackballPos(paramName);  break;
+		default : assert(0);
     }
 }
 
