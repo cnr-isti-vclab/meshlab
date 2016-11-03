@@ -51,7 +51,7 @@
 QProgressBar *MainWindow::qb;
 
 MainWindow::MainWindow()
-	:mwsettings(), xmlfiltertimer(), wama(), gpumeminfo(NULL)
+	:mwsettings(), gpumeminfo(NULL), xmlfiltertimer(), wama()
 {
 	_currviewcontainer = NULL;
 	//xmlfiltertimer will be called repeatedly, so like Qt documentation suggests, the first time start function should be called.
@@ -1138,11 +1138,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 		settings.setValue("UID", UID);
 	}
 
-#ifdef _DEBUG_PHP
-	QString BaseCommand("/~cignoni/meshlab_tmp_d.php");
-#else
-	QString BaseCommand("/~cignoni/meshlab_tmp.php");
-#endif
+	QString BaseCommand("/~cignoni/meshlab_beta.php");
 
 #ifdef Q_OS_WIN
 	QString OS = "Win";
@@ -1159,17 +1155,22 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
-	QString answer = reply->readAll();
-	if (answer.left(3) == QString("NEW"))
-		QMessageBox::information(this, "MeshLab Version Checking", answer.remove(0, 3));
-	else if (VerboseCheckingFlag)
-		QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
-
-	reply->deleteLater();
-
-	QSettings settings;
-	int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
-	settings.setValue("lastComunicatedValue", loadedMeshCounter);
+  QString answer = reply->readAll();
+  if (answer.left(3) == QString("NEW"))
+    QMessageBox::information(this, "MeshLab Version Checking", answer.remove(0, 3));
+  else 
+    if (VerboseCheckingFlag)
+    {
+      if(answer.left(2) == QString("ok"))
+        QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
+      else 
+        QMessageBox::warning(this, "Warning. Update Checking server did not answer correctly",answer);
+    }
+  reply->deleteLater();
+  
+  QSettings settings;
+  int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
+  settings.setValue("lastComunicatedValue", loadedMeshCounter);
 }
 
 
