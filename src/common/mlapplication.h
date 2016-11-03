@@ -40,6 +40,7 @@ public:
     static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
     static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
     static const QString appVer() {return tr("2016"); }
+	static const QString shortName() { return appName() + " " + appVer(); }
     static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
     static const QString organization(){return tr("VCG");}
     static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}
