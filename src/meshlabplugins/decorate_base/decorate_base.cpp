@@ -659,6 +659,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
                 ret &= gsp->addShaderFromSourceFile(QGLShader::Fragment,":/decorate/contour.frag");
                 //      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
                 ret &= gsp->link();
+				QString rs = gsp->log();
                 //      qDebug("Linked shader. Log is %s", qPrintable(contourShaderProgram->log()));
                 if(!ret) return false;
             }
