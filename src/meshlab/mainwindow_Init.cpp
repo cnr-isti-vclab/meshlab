@@ -105,7 +105,7 @@ MainWindow::MainWindow()
 	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
-	setWindowTitle(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
+	setWindowTitle(MeshLabApplication::shortName());
 	setStatusBar(new QStatusBar(this));
 	globalStatusBar() = statusBar();
 	qb = new QProgressBar(this);
@@ -1139,9 +1139,9 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 	}
 
 #ifdef _DEBUG_PHP
-	QString BaseCommand("/~cignoni/meshlab_d.php");
+	QString BaseCommand("/~cignoni/meshlab_tmp_d.php");
 #else
-	QString BaseCommand("/~cignoni/meshlab.php");
+	QString BaseCommand("/~cignoni/meshlab_tmp.php");
 #endif
 
 #ifdef Q_OS_WIN
