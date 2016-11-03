@@ -4,4 +4,4 @@ HEADERS += filter_harmonic.h
 
 SOURCES += filter_harmonic.cpp
 
-TARGET   = filter_harmonics
+TARGET   = filter_harmonic
