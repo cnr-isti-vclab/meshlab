@@ -745,7 +745,7 @@ void MLDefaultMeshDecorators::initNonManifVertDecoratorData(MeshModel& mm)
 	vcg::tri::SelectionStack<CMeshO> ss(mm.cm);
 	ss.push();
 	vcg::tri::UpdateSelection<CMeshO>::VertexClear(mm.cm);
-	int res = vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm.cm, true);
+	vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(mm.cm, true);
 	vcg::Color4b bCol(255, 0, 255, 0);
 	vcg::Color4b vCol(255, 0, 255, 64);
 	vcg::tri::UpdateFlags<CMeshO>::VertexClearV(mm.cm);

@@ -39,7 +39,7 @@ public:
     virtual void updateRenderingData(MLRenderingData& rd) = 0;
     virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
     virtual bool isVisibleConditionValid(MeshModel*) const {return true;}
-	virtual void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY pr) {}
+	virtual void switchPrimitive(MLRenderingData::PRIMITIVE_MODALITY /*pr*/) {}
 	
 	int meshId() const;
     void setMeshId(int meshid);
