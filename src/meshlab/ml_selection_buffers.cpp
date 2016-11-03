@@ -1,7 +1,7 @@
 #include "ml_selection_buffers.h"
 
 MLSelectionBuffers::MLSelectionBuffers(MeshModel& m,unsigned int primitivebatch)
-	:_m(m),_primitivebatch(primitivebatch),_selmap(2),_lock()
+	:_lock(),_m(m),_primitivebatch(primitivebatch),_selmap(2)
 {
 
 }
@@ -25,8 +25,7 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 {
 	QWriteLocker locker(&_lock);
 
-	size_t privchunksize;
-	size_t toalloc = 0;
+	size_t privchunksize=0;
 	if (selbuf == ML_PERVERT_SEL)
 	{
 		_m.cm.svn = 0;
@@ -103,8 +102,6 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 				++_m.cm.svn;
 				++selectedperchunk;
 			}
-			size_t pp = sizeof(vcg::Point3f);
-
 			if (((vertind == _m.cm.VN() - 1) && (selectedperchunk > 0)) || ((chunkindex == privchunksize - 1) && (selectedperchunk == privchunksize)))
 			{
 				_selmap[ML_PERVERT_SEL].push_back(0);

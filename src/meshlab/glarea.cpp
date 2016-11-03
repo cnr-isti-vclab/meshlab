@@ -1571,7 +1571,7 @@ void GLArea::setView()
     gluLookAt(0, 0, cameraDist,0, 0, 0, 0, 1, 0);
 }
 
-void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float cameraDist)
+void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float /*cameraDist*/)
 {
 	makeCurrent();
     if(fovY<=5)
@@ -2342,12 +2342,12 @@ void GLArea::completeUpdateRequested()
 //	return NULL;
 //}
 
-void GLArea::meshAdded( int index)
+void GLArea::meshAdded( int /*index*/)
 {
     emit updateLayerTable();
 }
 
-void GLArea::meshRemoved( int index )
+void GLArea::meshRemoved( int /*index*/ )
 {
     emit updateLayerTable();
 }

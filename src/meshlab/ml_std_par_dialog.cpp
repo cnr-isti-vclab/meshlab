@@ -19,7 +19,7 @@ static void updateRenderingData(MainWindow* curmwi, MeshModel* curmodel)
 }
 
 MeshlabStdDialog::MeshlabStdDialog(QWidget *p)
-	:QDockWidget(QString("Plugin"), p), curmask(MeshModel::MM_UNKNOWN), previewCB(NULL)
+	:QDockWidget(QString("Plugin"), p), previewCB(NULL), curmask(MeshModel::MM_UNKNOWN)
 {
 	qf = NULL;
 	stdParFrame = NULL;
