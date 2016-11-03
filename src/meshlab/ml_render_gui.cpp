@@ -1037,7 +1037,7 @@ void MLRenderingParametersTab::activateRenderingMode(int index)
 	}
 }
 
-void MLRenderingParametersTab::switchTab(int meshid,const QString& tabname)
+void MLRenderingParametersTab::switchTab(int /*meshid*/,const QString& tabname)
 {
     QMap<QString,MLRenderingParametersFrame*>::iterator itt = _parframe.find(tabname);
     if (itt != _parframe.end())
@@ -1437,13 +1437,13 @@ void MLRenderingThreeStateButton::initGui()
 }
 
 MLRenderingFloatSlider::MLRenderingFloatSlider( int meshid,QWidget *p )
-    :MLFloatSlider(p),_meshid(meshid),_act(NULL)
+    :MLFloatSlider(p),_act(NULL),_meshid(meshid)
 {
     connect(this,SIGNAL(floatValueChanged(float)),this,SLOT(valueChanged(float)));
 }
 
 MLRenderingFloatSlider::MLRenderingFloatSlider(QWidget *p )
-    :MLFloatSlider(p),_meshid(-1),_act(NULL)
+    :MLFloatSlider(p),_act(NULL),_meshid(-1)
 {
     connect(this,SIGNAL(floatValueChanged(float)),this,SLOT(valueChanged(float)));
 }

@@ -1602,7 +1602,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
 }
 
-void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
+void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* /*mfc*/)
 {
     /* if (env.isNull())
     throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
@@ -1658,7 +1658,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc)
     //}
 }
 
-void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc)
+void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* /*mfc*/)
 {
     //if (meshDoc() == NULL)
     //    return;
@@ -3654,7 +3654,7 @@ void MainWindow::updateRenderingDataAccordingToActionsToAllVisibleLayers(const Q
 		GLA()->update();
 }
 
-void MainWindow::updateRenderingDataAccordingToActions(int meshid, MLRenderingAction* act, QList<MLRenderingAction*>& acts)
+void MainWindow::updateRenderingDataAccordingToActions(int /*meshid*/, MLRenderingAction* act, QList<MLRenderingAction*>& acts)
 {
 	if ((meshDoc() == NULL) || (act == NULL))
 		return;
@@ -3764,7 +3764,7 @@ void  MainWindow::updateRenderingDataAccordingToActions(QList<MLRenderingGlobalA
 		GLA()->update();
 }
 
-void MainWindow::updateRenderingDataAccordingToAction(int meshid, MLRenderingAction* act, bool check)
+void MainWindow::updateRenderingDataAccordingToAction(int /*meshid*/, MLRenderingAction* act, bool check)
 {
 	MLRenderingAction* sisteract = NULL;
 	act->createSisterAction(sisteract, NULL);

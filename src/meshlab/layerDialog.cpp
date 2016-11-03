@@ -61,7 +61,7 @@ LayerDialog::LayerDialog(QWidget *parent )
         groupboxlay->addWidget(_tabw);
     }
 	_applytovis = new QCheckBox(QString("apply to all visible layers"),this);
-	QString tooltip("When the option is activated all the following rendering actions (e.g. activating/deactivating rendering primitives, changing rendering parameters etc.) taken on a single mesh are propagated to all the other visible meshes \(e.g. the ones having the \"open eye\" icon on the layer dialog\). <br><br> <b>SHORTCUT</b>: SHIFT");
+	QString tooltip("When the option is activated all the following rendering actions (e.g. activating/deactivating rendering primitives, changing rendering parameters etc.) taken on a single mesh are propagated to all the other visible meshes (e.g. the ones having the \"open eye\" icon on the layer dialog). <br><br> <b>SHORTCUT</b>: SHIFT");
 	_applytovis->setToolTip(tooltip);
 	_applytovis->setLayoutDirection(Qt::RightToLeft);
 	_applytovis->setChecked(false);
@@ -113,13 +113,13 @@ void LayerDialog::keyReleaseEvent(QKeyEvent * event)
 	}
 }
 
-void LayerDialog::enterEvent(QEvent* event)
+void LayerDialog::enterEvent(QEvent* /*event*/)
 {
     activateWindow();
 	setFocus();
 }
 
-void LayerDialog::leaveEvent(QEvent* event)
+void LayerDialog::leaveEvent(QEvent* /*event*/)
 {
 	if (mw != NULL)
 		mw->setFocus(Qt::MouseFocusReason);
@@ -422,9 +422,7 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
 
    updateProjectName(md->docLabel());
     
-	int maxwidth = 0;
     QList<QTreeWidgetItem*> itms;
-	MeshTreeWidgetItem *selitem = NULL;
 	foreach(MeshModel* mmd, md->meshList)
 	{
 		//Restore mesh visibility according to the current visibility map
