@@ -82,6 +82,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_VATTR_SEAM
         << FP_REFINE_LS3_LOOP
         << FP_SLICE_WITH_A_PLANE
+		<< FP_PERIMETER_POLYLINE
         << FP_REMOVE_FACE_ZERO_AREA
         ;
 
@@ -146,6 +147,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	case FP_SET_TRANSFORM_PARAMS             :
 	case FP_SET_TRANSFORM_MATRIX             :
     case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
+	case FP_PERIMETER_POLYLINE               :
     case FP_SLICE_WITH_A_PLANE               : return MeshFilterInterface::Measure;
 
     case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Smoothing;
@@ -178,12 +180,12 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_QUAD_DOMINANT					 :
     case FP_QUAD_PAIRING                     :
     case FP_FAUX_CREASE                      :
-    case FP_FAUX_EXTRACT                      :
+    case FP_FAUX_EXTRACT                     :
     case FP_VATTR_SEAM                       :
     case FP_SLICE_WITH_A_PLANE               :
-    case FP_REMOVE_FACE_ZERO_AREA               :
+	case FP_PERIMETER_POLYLINE               :
+    case FP_REMOVE_FACE_ZERO_AREA            :
     case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
-
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
     case FP_CLUSTERING                       :
     case FP_SCALE                            :
@@ -243,6 +245,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
     case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
     case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
+	case FP_PERIMETER_POLYLINE               : return tr("Create Selection Perimeter Polyline");
 
     default                                  : assert(0);
     }
@@ -317,8 +320,9 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "vertices are duplicated whenever two or more selected wedge or face attributes do not match.<br/>"
                                                            "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
     case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
+	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
     case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
-    case FP_REMOVE_FACE_ZERO_AREA               : return tr("Remove null faces (the one with area equal to zero)");
+    case FP_REMOVE_FACE_ZERO_AREA              : return tr("Remove null faces (the one with area equal to zero)");
 
     default                                  : assert(0);
     }
@@ -557,15 +561,19 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		break;
 
     case FP_VATTR_SEAM:
-        {
+	{
       QStringList normalMethod; normalMethod << "None" << "Vertex" << "Wedge" << "Face";
       parlst.addParam(new RichEnum("NormalMode", 0, normalMethod, tr("Normal Source:"), tr("Choose a method")));
       QStringList colorMethod; colorMethod << "None" << "Vertex" << "Wedge" << "Face";
       parlst.addParam(new RichEnum("ColorMode", 0, colorMethod, tr("Color Source:"), tr("Choose a method")));
       QStringList texcoordMethod;texcoordMethod << "None" << "Vertex" << "Wedge";
       parlst.addParam(new RichEnum("TexcoordMode", 0, texcoordMethod, tr("Texcoord Source:"), tr("Choose a method")));
-    }
-        break;
+    } break;
+
+	case FP_PERIMETER_POLYLINE:
+	{
+
+	} break;
 
 	case FP_SLICE_WITH_A_PLANE:
 	{
@@ -1482,8 +1490,53 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
                 return r;
             }
         } break;
-    case FP_SLICE_WITH_A_PLANE:
-        {
+	case FP_PERIMETER_POLYLINE:
+	{
+		if (m.cm.sfn == 0) // no face selected, fail
+		{
+			Log("ERROR: There is no face selection!");
+			return false;
+		}
+
+		Log("Selection is %i triangles", m.cm.sfn);
+
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+
+		// new layer
+		QString newLayerName = QFileInfo(m.shortName()).baseName() + "_perimeter";
+		MeshModel* perimeter = md.addNewMesh("", newLayerName, true);
+		perimeter->Clear();
+
+		for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+		if (!(*fi).IsD())
+		if ((*fi).IsS())
+		{
+			for (int ei = 0; ei < 3; ei++)
+			{
+				CMeshO::FacePointer adjf = (*fi).FFp(ei);
+				if (adjf == &(*fi) || !(adjf->IsS())) 
+				{
+					CMeshO::VertexIterator nvi;
+					vcg::tri::Allocator<CMeshO>::AddEdges(perimeter->cm, 1);
+					nvi = vcg::tri::Allocator<CMeshO>::AddVertices(perimeter->cm, 2);
+					(*nvi).P() = (*fi).V(ei)->P();
+					(*nvi).N() = (*fi).V(ei)->N();
+					perimeter->cm.edge.back().V(0) = &(*nvi);
+					nvi++;
+					(*nvi).P() = (*fi).V((ei + 1) % 3)->P();
+					(*nvi).N() = (*fi).V((ei + 1) % 3)->N();
+					perimeter->cm.edge.back().V(1) = &(*nvi);
+				}
+			}
+		}
+
+		// finishing up the new layer
+		tri::Clean<CMeshO>::RemoveDuplicateVertex(perimeter->cm);
+		tri::UpdateBounding<CMeshO>::Box(perimeter->cm);
+	}break;
+
+	case FP_SLICE_WITH_A_PLANE:
+	{
             Point3m planeAxis(0,0,0);
             int ind = par.getEnum("planeAxis");
             if(ind>=0 && ind<3)
