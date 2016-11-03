@@ -254,7 +254,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 {
     switch (filterID)
     {
-	case FP_REFINE_LS3_LOOP                    : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This subdivision method take normals into account. "
+	case FP_REFINE_LS3_LOOP                    : return tr("Apply LS3 Subdivision Surface algorithm using Loop's weights. This refinement method take normals into account. "
                                                            "<br>See:"
                                                            "<i>Boye', S. Guennebaud, G. & Schlick, C.</i> <br>"
                                                            "<b>Least squares subdivision surfaces</b><br>"
@@ -264,8 +264,8 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "<b>Subdivision scheme tuning around extraordinary vertices</b><br>"
                                                            "Computer Aided Geometric Design, 2004, 21, 561-583.<br/>"
                                                            "The current implementation of these schemes don't handle vertices of valence > 12");
-    case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant subdivision method and it works for every triangle and has rules for extraordinary vertices.<br>");
-    case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
+    case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant refinement method and it works for every triangle and has rules for extraordinary vertices.<br>");
+    case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated refinement method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
     case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
     case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
     case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
@@ -276,7 +276,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "<br> <i>Luiz Velho, Denis Zorin </i>"
                                                            "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
     case FP_REMOVE_UNREFERENCED_VERTEX         : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
-    case FP_REMOVE_DUPLICATED_VERTEX           : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged");
+    case FP_REMOVE_DUPLICATED_VERTEX           : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged into a single one.");
     case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
     case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");

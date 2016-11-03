@@ -47,7 +47,7 @@ FilterCreate::FilterCreate()
 QString FilterCreate::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-  case CR_BOX : return QString("Box");
+  case CR_BOX : return QString("Box/Cube");
   case CR_ANNULUS : return QString("Annulus");
   case CR_SPHERE: return QString("Sphere");
   case CR_SPHERE_CAP: return QString("Sphere Cap");
@@ -68,10 +68,10 @@ QString FilterCreate::filterName(FilterIDType filterId) const
 QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-  case CR_BOX : return QString("Create a Box");
-  case CR_ANNULUS : return QString("Create an Annulus, e.g. a flat region bounded by two concentric circles");
-  case CR_SPHERE: return QString("Create a Sphere");
-  case CR_SPHERE_CAP: return QString("Create a Sphere Cap subtended by a cone of given angle");
+  case CR_BOX : return QString("Create a Box, Cube, an hexahedron. You can specify the side lenght");
+  case CR_ANNULUS : return QString("Create an Annulus e.g. a flat region bounded by two concentric circles, or a holed disk.");
+  case CR_SPHERE: return QString("Create a Sphere, whose topology is obtained as regular subdivision of an icosahedron.");
+  case CR_SPHERE_CAP: return QString("Create a Sphere Cap, or spherical dome, subtended by a cone of given angle");
   case CR_RANDOM_SPHERE: return QString("Create a spherical point cloud, it can be random or regularly distributed.");
   case CR_ICOSAHEDRON: return QString("Create an Icosahedron");
   case CR_DODECAHEDRON: return QString("Create an Dodecahedron");
