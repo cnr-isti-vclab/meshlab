@@ -151,8 +151,8 @@ void SegmentationPlugin::initParameterSet(QAction * action, MeshModel & m, RichP
                                         seg_generateDecomp, 
                                         "Generate Decomposition", 
                                         "If true a new layer is generated for each segment, otherwise the original mesh is colored according to segmentation and cluster id is written into face quality."));
-        parlst.addParam(new RichFloat ( "LocalNeighbDist", 
-                                        seg_localNeighbDist, 
+        parlst.addParam(new RichAbsPerc("LocalNeighbDist", 
+                                        m.cm.bbox.Diag()/50.0, 0,m.cm.bbox.Diag(),
                                         "Distance in units for the local neighborhood", 
                                         "This is used only when the Local Neighborhood Aware metric is enabled."));
         break;
