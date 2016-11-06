@@ -18,7 +18,6 @@ template <class MeshType>
 typename MeshType::ScalarType MinimumAspectRatio(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=1.f;
         typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
@@ -37,7 +36,6 @@ template <class MeshType>
 typename MeshType::ScalarType MinimumArea(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=10000.f;
         typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
@@ -56,7 +54,6 @@ template <class MeshType>
 typename MeshType::ScalarType MaximumArea(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=0.f;
         typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
@@ -116,7 +113,6 @@ template <class MeshType>
 typename MeshType::ScalarType MinAngle(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=360.0;
         typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
@@ -133,7 +129,6 @@ template <class MeshType>
 typename MeshType::ScalarType MaxAngle(const MeshType &mesh)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	ScalarType res=0;
         typename MeshType::ConstFaceIterator Fi;
 	for (Fi=mesh.face.begin();Fi!=mesh.face.end();Fi++)
@@ -151,7 +146,6 @@ void MaxMinEdge(const MeshType &mesh,typename MeshType::ScalarType &min,
 				typename MeshType::ScalarType &max)
 {
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::CoordType CoordType;
 	min=10000.0;
 	max=0.0;
         typename MeshType::ConstFaceIterator Fi;
@@ -256,7 +250,6 @@ void StatAngle(MeshType &mesh,
 {
 
 	typedef typename MeshType::ScalarType ScalarType;
-	typedef typename MeshType::VertexType VertexType;
 
 	vcg::Histogram<ScalarType> HAngle;
 	

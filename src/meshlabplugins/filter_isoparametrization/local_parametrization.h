@@ -18,8 +18,6 @@
 template <class MeshType>
 void ParametrizeExternal(MeshType &to_parametrize)
 {
-    typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
 
@@ -378,8 +376,6 @@ void MeanVal(const std::vector<vcg::Point2<typename MeshType::ScalarType> > &Poi
              std::vector<typename MeshType::ScalarType> &Lamda,
              typename MeshType::CoordType &p)
 {
-    typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::ScalarType ScalarType;
         typedef typename MeshType::CoordType CoordType;
 
@@ -685,10 +681,8 @@ template <class MeshType>
 void ForceInParam(vcg::Point2<typename MeshType::ScalarType> &UV,MeshType &domain)
 {
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
-
+    
     ScalarType minDist=(ScalarType)1000.0;
     vcg::Point2<ScalarType> closest;
     vcg::Point2<ScalarType> center=vcg::Point2<ScalarType>(0,0);
@@ -816,8 +810,6 @@ bool testParametrization(MeshType &domain,
              MeshType &Hlev)
 {
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     bool is_good=true;
     int num_del=0;
@@ -895,9 +887,7 @@ bool NonFolded(MeshType &parametrized)
 {
     //const ScalarType epsilon=0.00001;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
     ///assert parametrization
     for (unsigned int i=0;i<parametrized.face.size();i++)
     {
@@ -921,10 +911,8 @@ bool NonFolded(MeshType &parametrized,std::vector<typename MeshType::FaceType*> 
 {
 
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
-
+    
     const ScalarType epsilon=(ScalarType)0.00001;
     folded.resize(0);
     ///assert parametrization
@@ -950,8 +938,6 @@ template <class MeshType>
 void ParametrizeStarEquilateral(MeshType &parametrized,
                                 const typename MeshType::ScalarType &radius=1)
 {
-    typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
 
@@ -1061,7 +1047,6 @@ void ParametrizeDiamondEquilateral(MeshType &parametrized,
 {
 
     typedef typename MeshType::FaceType FaceType;
-    typedef typename FaceType::CoordType CoordType;
     typedef typename FaceType::ScalarType ScalarType;
     typedef typename FaceType::VertexType VertexType;
 
@@ -1109,10 +1094,8 @@ void ParametrizeFaceEquilateral(MeshType &parametrized,
                                    const typename MeshType::ScalarType &edge_len=1)
 {
     typedef typename MeshType::FaceType FaceType;
-    typedef typename FaceType::CoordType CoordType;
     typedef typename FaceType::ScalarType ScalarType;
-    typedef typename FaceType::VertexType VertexType;
-
+    
     ScalarType h=(sqrt(3.0)/2.0)*edge_len;
 
     FaceType *f_param=&(parametrized.face[0]);
@@ -1132,8 +1115,6 @@ void ParametrizeLocally(MeshType &parametrized,
                         std::vector<typename MeshType::VertexType*> &orderedVertex)
 {
     typedef typename MeshType::FaceType FaceType;
-    typedef typename FaceType::CoordType CoordType;
-    typedef typename FaceType::ScalarType ScalarType;
     typedef typename FaceType::VertexType VertexType;
 
     orderedFaces.clear();
@@ -1228,9 +1209,7 @@ bool GetBaryFaceFromUV(std::vector<FaceType*> faces,
                        typename FaceType::CoordType &bary,
                        int &index)
 {
-    typedef typename FaceType::CoordType CoordType;
     typedef typename FaceType::ScalarType ScalarType;
-    typedef typename FaceType::VertexType VertexType;
     typedef typename FaceType::ScalarType ScalarType;
     const ScalarType _EPSILON = ScalarType(0.0000001);
     /*assert ((U>=-1)&&(U<=1));

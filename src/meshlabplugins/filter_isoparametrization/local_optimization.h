@@ -325,7 +325,6 @@ bool SmartOptimizeStar(typename MeshType::VertexType *center,MeshType &base_doma
 {
 	typedef typename MeshType::VertexType VertexType;
 	typedef typename MeshType::FaceType FaceType;
-	typedef typename MeshType::CoordType CoordType;
 	typedef typename MeshType::ScalarType ScalarType;
 	std::vector<FaceType*> faces;
 	std::vector<VertexType*> centers;

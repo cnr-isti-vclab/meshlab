@@ -895,7 +895,6 @@ bool IsTexCoordFoldFree(MESH_TYPE &m){
   
   assert(HasPerVertexTexCoord(m));
   
-  typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType::ScalarType ScalarType;
   
   ScalarType lastsign=0;
@@ -917,7 +916,6 @@ int MarkTexCoordFolds(MESH_TYPE &m){
   assert(HasPerVertexTexCoord(m));
   assert(m.HasPerFaceQuality());
   
-  typedef typename MESH_TYPE::VertexType::TexCoordType::PointType PointType;
   typedef typename MESH_TYPE::VertexType::TexCoordType::PointType::ScalarType ScalarType;
   
   SimpleTempData<typename MESH_TYPE::FaceContainer, short> sign(m.face);

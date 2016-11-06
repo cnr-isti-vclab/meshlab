@@ -118,7 +118,6 @@ template <class FaceType>
         to_split[1]=false;
         to_split[2]=false;
 
-        typedef typename FaceType::VertexType VertexType;
 //        typedef typename FaceType::ScalarType FScalarType;
 
         /*ParamMesh *to_param=isoParam->ParaMesh();*/
@@ -347,7 +346,6 @@ template <class FaceType>
 
         ///copy paramesh
 
-        typedef ParamMesh::VertexType VertexType;
         typedef ParamMesh::FaceType FaceType;
         SplitMidPoint<ParamMesh> splMd(*to_param);
         EdgePredicate<ParamMesh> eP;
@@ -389,7 +387,6 @@ template <class FaceType>
 
     void SetWedgeCoords(const PScalarType &border)
     {
-        typedef ParamMesh::VertexType VertexType;
         typedef ParamMesh::FaceType FaceType;
 
         ParamMesh *to_param=isoParam->ParaMesh();
@@ -531,9 +528,6 @@ public:
         std::vector<vcg::Color4b > colorDiam;
 
         //ParamMesh *to_param=isoParam->ParaMesh();
-
-        typedef ParamMesh::FaceType FaceType;
-        typedef ParamMesh::VertexType VertexType;
 
         bool done=true;
         /*int n0=to_param->fn;*/

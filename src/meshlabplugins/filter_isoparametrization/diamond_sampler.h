@@ -51,9 +51,9 @@ class DiamSampler{
         CoordType pos=CoordType(0,0,0);
         for (unsigned int i=0;i<faces.size();i++)
         {
-            pos+=(faces[i]->V(0)->P()*barys[i].X()+
-                faces[i]->V(1)->P()*barys[i].Y()+
-                faces[i]->V(2)->P()*barys[i].Z());
+            pos+=(faces[i]->P(0)*barys[i].X()+
+                faces[i]->P(1)*barys[i].Y()+
+                faces[i]->P(2)*barys[i].Z());
         }
         pos/=(PScalarType)faces.size();
         return pos;
@@ -76,7 +76,6 @@ public:
     void GetMesh(OutputMesh &SaveMesh)
     {
 
-        typedef typename OutputMesh::FaceType MyFace;
         typedef typename OutputMesh::VertexType MyVertex;
 
         SaveMesh.Clear();
@@ -107,35 +106,24 @@ public:
             for (unsigned int j=0;j<sampleSize;j++)
                 for (unsigned int k=0;k<sampleSize;k++)
                 {
-
-                    SaveMesh.vert.push_back(MyVertex());
-                    SaveMesh.vert.back().P().Import(SampledPos[i][j][k]);
-                    vertMatrix[j][k]=&SaveMesh.vert.back();
-                    SaveMesh.vn++;
+                  vcg::tri::Allocator<OutputMesh>::AddVertex(SaveMesh,SampledPos[i][j][k]);
+                  vertMatrix[j][k]=&SaveMesh.vert.back();
                 }
                 /*printf("samppling %d\n",i);*/
                 ///add faces
                 for (unsigned int j=0;j<sampleSize-1;j++)
                     for (unsigned int k=0;k<sampleSize-1;k++)
                     {
-
-
                         MyVertex *v0=vertMatrix[j][k];
                         MyVertex *v1=vertMatrix[j+1][k];
                         MyVertex *v2=vertMatrix[j+1][k+1];
                         MyVertex *v3=vertMatrix[j][k+1];
-
-                        SaveMesh.face.push_back(MyFace());
-                        SaveMesh.face.back().V(0)=v0;
-                        SaveMesh.face.back().V(1)=v1;
-                        SaveMesh.face.back().V(2)=v3;
-
-                        SaveMesh.face.push_back(MyFace());
-                        SaveMesh.face.back().V(0)=v1;
-                        SaveMesh.face.back().V(1)=v2;
-                        SaveMesh.face.back().V(2)=v3;
-
-                        SaveMesh.fn+=2;
+                        assert(vcg::tri::IsValidPointer(SaveMesh,v0));
+                        assert(vcg::tri::IsValidPointer(SaveMesh,v1));
+                        assert(vcg::tri::IsValidPointer(SaveMesh,v2));
+                        assert(vcg::tri::IsValidPointer(SaveMesh,v3));
+                        vcg::tri::Allocator<OutputMesh>::AddFace(SaveMesh,v0,v1,v3);
+                        vcg::tri::Allocator<OutputMesh>::AddFace(SaveMesh,v1,v2,v3);
                     }
 
         }

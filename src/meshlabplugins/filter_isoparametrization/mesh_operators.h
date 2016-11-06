@@ -180,9 +180,6 @@ void FindSortedBorderVertices(const MeshType &/*mesh*/,
                                                             typename MeshType::VertexType *Start,
                                                             std::vector<typename MeshType::VertexType*> &vertices)
 {
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
 
     ///find first half edge border
@@ -211,8 +208,6 @@ void CopyMeshFromFaces(const std::vector<typename MeshType::FaceType*> &faces,
                                              std::vector<typename MeshType::VertexType*> &orderedVertex,
                                              MeshType & new_mesh)
 {
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
 
@@ -291,7 +286,6 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
                                              MeshType &Domain,MeshType &hlevMesh)
 {
     typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
 
@@ -352,10 +346,8 @@ inline bool getSharedFace(typename MeshType::VertexType *v0,
                                                     std::vector<typename MeshType::FaceType*> &in_v0,
                                                     std::vector<typename MeshType::FaceType*> &in_v1)
 {
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
-
+    
     result.clear();
     result.reserve(2);
     vcg::face::VFIterator<FaceType> vfi0(v0); //initialize the iterator to the first vertex
@@ -398,8 +390,7 @@ inline void getSharedFace(std::vector<typename MeshType::VertexType*> &vertices,
 {
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
-
+    \
     typename std::vector<VertexType*>::const_iterator vi;
     faces.clear();
     for (vi=vertices.begin();vi!=vertices.end();vi++)
@@ -431,8 +422,6 @@ void CopyMeshFromVertices(std::vector<typename MeshType::VertexType*> &vertices,
                                                     std::vector<typename MeshType::FaceType*> &OrderedFaces,
                                                     MeshType & new_mesh)
 {
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
 
@@ -549,8 +538,7 @@ inline void getSharedVertex(const std::vector<typename MeshType::FaceType*> &fac
 {
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
-
+    
     typename std::vector<FaceType*>::const_iterator fi;
     for (fi=faces.begin();fi!=faces.end();fi++)
     {
@@ -597,10 +585,8 @@ template <class MeshType>
 inline void getVertexStar(typename MeshType::VertexType *v,
                                                     std::vector<typename MeshType::VertexType*> &star)
 {
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
-
+    
     assert(!v->IsB());
     vcg::face::VFIterator<FaceType> vfi(v);
     ///get a face and an edge
@@ -626,8 +612,6 @@ inline void getSharedVertexStar(typename MeshType::VertexType *v0,
                                                                 std::vector<typename MeshType::VertexType*> &shared)
 {
     typedef typename MeshType::VertexType VertexType;
-    typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename std::vector<VertexType*>::iterator iteVert;
     std::vector<VertexType*> star0;
     std::vector<VertexType*> star1;
@@ -644,9 +628,7 @@ inline void getSharedVertexStar(typename MeshType::VertexType *v0,
 template <class MeshType>
 inline typename MeshType::ScalarType StarAspectRatio(const std::vector<typename MeshType::VertexType*> &starCenters)
 {
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
 
     std::vector<typename MeshType::FaceType*> orderedFaces;
@@ -664,9 +646,7 @@ inline typename MeshType::ScalarType StarAspectRatio(const std::vector<typename 
 template <class MeshType>
 inline typename MeshType::ScalarType StarDispersion(const std::vector<typename MeshType::VertexType*> &starCenters)
 {
-    typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
-    typedef typename MeshType::CoordType CoordType;
     typedef typename MeshType::ScalarType ScalarType;
 
     std::vector<typename MeshType::FaceType*> orderedFaces;
@@ -720,7 +700,6 @@ inline void getAroundFaceVertices(typename MeshType::VertexType *v0,
                                                                     std::vector<typename MeshType::FaceType*> &in_v1)
 {
     typedef typename MeshType::VertexType VertexType;
-    typedef typename MeshType::FaceType FaceType;
     typedef typename MeshType::CoordType CoordType;
 
     getSharedFace(v0,v1,on_edge,in_v0,in_v1);
@@ -760,7 +739,6 @@ inline void CopyHlevMesh(std::vector<typename MeshType::FaceType*> &faces,
 {
     typedef typename MeshType::FaceType FaceType;
     typedef typename MeshType::VertexType VertexType;
-    typedef typename MeshType::CoordType CoordType;
     std::vector<VertexType*> vertices;
 
     ///collect vertices to create the sub mesh

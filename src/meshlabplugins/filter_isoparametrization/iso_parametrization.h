@@ -7,6 +7,7 @@
 //#include <vcg/complex/complex.h>
 #include "local_parametrization.h"
 #include "uv_grid.h"
+#include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/stat.h>
 #include "param_mesh.h"
 
@@ -121,8 +122,6 @@ void CopyMeshFromFacesAbs(const std::vector<typename MeshType::FaceType*> &faces
                           std::vector<typename MeshType::VertexType*> &orderedVertex,
                           MeshType & new_mesh)
 {
-    typedef typename MeshType::CoordType CoordType;
-    typedef typename MeshType::ScalarType ScalarType;
     typedef typename MeshType::VertexType VertexType;
     typedef typename MeshType::FaceType FaceType;
 
@@ -190,8 +189,6 @@ void CopyMeshFromVerticesAbs(std::vector<typename MeshType::VertexType*> &vertic
                           std::vector<typename MeshType::FaceType*> &OrderedFaces,
                           MeshType & new_mesh)
 {
-        typedef typename MeshType::CoordType CoordType;
-        typedef typename MeshType::ScalarType ScalarType;
         typedef typename MeshType::VertexType VertexType;
         typedef typename MeshType::FaceType FaceType;
 
@@ -638,7 +635,7 @@ private:
 
     void getFaceIndexFromPointer(AbstractFace * f,int &index)
     {
-        index=f-&(*abstract_mesh->face.begin());
+      index = vcg::tri::Index(*abstract_mesh,f);
     }
 
     void getStarFromPointer(AbstractVertex * center,int &index)
@@ -845,6 +842,7 @@ private:
     if (UV.X()>1-eps) UV.X()=1;
     if (UV.Y() < eps) UV.Y()=0;
     if (UV.Y()>1-eps) UV.Y()=1;
+    if (UV.X()+UV.Y() > 1.) UV.X()=1.-UV.Y();
     }
 
 
@@ -1668,24 +1666,10 @@ public:
     {
         UpdateTopologies(abstract_mesh);
         UpdateTopologies(param_mesh);
-        float fix_num=sqrt((PScalarType)3.0)/(PScalarType)4.0;
-
-        int edge_count=0;
-        ///cont number of edges
-        for (unsigned int i=0;i<abstract_mesh->face.size();i++)
-        {
-            if (!(abstract_mesh->face[i].IsD()))
-            {
-                AbstractFace *f0=&abstract_mesh->face[i];
-                //for each edge
-                for (int j=0;j<3;j++)
-                {
-                    AbstractFace * f1=f0->FFp(j);
-                    if (f1>f0)
-                        edge_count++;
-                }
-            }
-        }
+        int nonmanif = vcg::tri::Clean<AbstractMesh>::CountNonManifoldEdgeFF(*abstract_mesh);
+        if(nonmanif>0) 
+          return false;
+        int edge_count = abstract_mesh->FN()*3 / 2;
 
         ///test param mesh
         for (unsigned int i=0;i<param_mesh->vert.size();i++)
@@ -1704,6 +1688,8 @@ public:
             }
         }
         Area3d=vcg::tri::Stat<ParamMesh>::ComputeMeshArea(*param_mesh);
+        
+        float fix_num=sqrt((PScalarType)3.0)/(PScalarType)4.0;
         AbstractArea=(PScalarType)abstract_mesh->fn*fix_num;
 
         face_to_vert.clear();
@@ -1757,7 +1743,7 @@ public:
         return index;
     }
 
-    void SaveBaseDomain(char *pathname)
+    void SaveBaseDomain(const char *pathname)
     {
         /*vcg::tri::io::ExporterPLY<AbstractMesh>::Save(*AbsMesh(),pathname);*/
         /*Warp(0);*/
@@ -1820,7 +1806,7 @@ public:
     }
 
     template <class MeshType>
-    bool LoadBaseDomain(char *pathname,
+    bool LoadBaseDomain(const char *pathname,
                         MeshType	*_input_mesh,
                         ParamMesh	 * _param_mesh,
                         AbstractMesh *_absMesh,
@@ -1852,33 +1838,20 @@ public:
         FILE *f=NULL;
         f=fopen(pathname,"r");
         if (f==NULL)
-            return -1;
+            return false;
 
-        ///read vertices
-        fscanf(f,"%d,%d \n",&abstract_mesh->fn,&abstract_mesh->vn);
-        abstract_mesh->vert.resize(abstract_mesh->vn);
-        abstract_mesh->face.resize(abstract_mesh->fn);
+        int fileVn,fileFn; 
+        fscanf(f,"%d,%d \n",&fileVn,&fileFn);
 
-        for (unsigned int i=0;i<abstract_mesh->vert.size();i++)
-        {
-            AbstractVertex* vert=&abstract_mesh->vert[i];
-            CoordType pos;
-            fscanf(f,"%f,%f,%f;\n",&pos.X(),&pos.Y(),&pos.Z());
-            vert->P()=pos;
+        for (int i=0;i<fileVn;i++) {
+          float _x,_y,_z;
+          fscanf(f,"%f,%f,%f;\n",&_x,&_y,&_z);
+          vcg::tri::Allocator<AbstractMesh>::AddVertex(*abstract_mesh,CoordType(_x,_y,_z));
         }
-
-        ///add faces
-        for (unsigned int i=0;i<abstract_mesh->face.size();i++)
-        {
-            AbstractFace* face=&abstract_mesh->face[i];
-            if (!face->IsD())
-            {
-                int index0,index1,index2;
-                fscanf(f,"%d,%d,%d \n",&index0,&index1,&index2);
-                abstract_mesh->face[i].V(0)=&abstract_mesh->vert[index0];
-                abstract_mesh->face[i].V(1)=&abstract_mesh->vert[index1];
-                abstract_mesh->face[i].V(2)=&abstract_mesh->vert[index2];
-            }
+        for (int i=0;i<fileFn;i++) {
+          int index0,index1,index2;
+          fscanf(f,"%d,%d,%d \n",&index0,&index1,&index2);
+          vcg::tri::Allocator<AbstractMesh>::AddFace(*abstract_mesh,index0,index1,index2);
         }
         UpdateTopologies<AbstractMesh>(AbsMesh());
         fclose(f);

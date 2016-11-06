@@ -361,8 +361,8 @@ public:
 		}
 
 		center->RPos=Minf.to_optimize->RPos;
-		delete(x);
-		delete(p);
+		delete[] x;
+		delete[] p;
 	}
 
   struct Elem

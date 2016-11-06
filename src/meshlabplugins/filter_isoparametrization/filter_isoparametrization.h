@@ -24,8 +24,6 @@
 #ifndef FILTERISOPARAMPLUGIN_H
 #define FILTERISOPARAMPLUGIN_H
 
-#include <QObject>
-#include <cassert>
 #include <parametrizator.h>
 #include <iso_parametrization.h>
 #include <diamond_sampler.h>
@@ -35,33 +33,31 @@
 
 class FilterIsoParametrization : public QObject, public MeshFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
-
-	public:
-		enum {ISOP_PARAM,
-          ISOP_REMESHING,
-					ISOP_DIAMPARAM,
-					ISOP_LOAD,
-					ISOP_SAVE,
-					ISOP_TRANSFER
-       };
-
-	FilterIsoParametrization();
-	~FilterIsoParametrization();
-
-    virtual FilterClass getClass(QAction *);
-	virtual QString filterName(FilterIDType filter) const;
-	virtual QString filterInfo(FilterIDType filter) const;
-
-	virtual int getRequirements(QAction *);
-
-    virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
-    virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
-    int postCondition(QAction* filter) const;
-	void PrintStats(CMeshO *mesh);
-    FILTER_ARITY filterArity(QAction*) const;
-
+  Q_OBJECT
+  MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+  Q_INTERFACES(MeshFilterInterface)
+  
+  public:
+    enum {ISOP_PARAM,
+        ISOP_REMESHING,
+        ISOP_DIAMPARAM,
+        ISOP_TRANSFER
+         };
+  
+  FilterIsoParametrization();
+  ~FilterIsoParametrization();
+  
+  virtual FilterClass getClass(QAction *);
+  virtual QString filterName(FilterIDType filter) const;
+  virtual QString filterInfo(FilterIDType filter) const;
+  
+  virtual int getRequirements(QAction *);
+  
+  virtual void initParameterSet(QAction *,MeshDocument&, RichParameterSet & /*parent*/);
+  virtual bool applyFilter(QAction *filter, MeshDocument&, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
+  int postCondition(QAction* filter) const;
+  void PrintStats(CMeshO *mesh);
+  FILTER_ARITY filterArity(QAction*) const;
+  
 };
 #endif
