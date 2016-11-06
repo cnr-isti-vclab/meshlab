@@ -390,6 +390,7 @@ XForm4x4< Real > GetPointXForm( OrientedPointStream< Real >& stream , Real scale
 template< class Real , int Degree , BoundaryType BType , class Vertex >
 int _Execute( int argc , char* argv[] )
 {
+	typedef typename Octree< Real >::template DensityEstimator< WEIGHT_DEGREE > DensityEstimator;
 	typedef typename Octree< Real >::template InterpolationInfo< false > InterpolationInfo;
 	typedef OrientedPointStream< Real > PointStream;
 	typedef OrientedPointStreamWithData< Real , Point3D< Real > > PointStreamWithData;
@@ -423,7 +424,7 @@ int _Execute( int argc , char* argv[] )
 	}
 	else xForm = XForm4x4< Real >::Identity();
 
-	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.0)\n" );
+	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.01)\n" );
 	char str[1024];
 	for( int i=0 ; i<paramNum ; i++ )
 		if( params[i]->set )
@@ -460,8 +461,8 @@ int _Execute( int argc , char* argv[] )
 	Real pointWeightSum;
 	std::vector< typename Octree< Real >::PointSample >* samples = new std::vector< typename Octree< Real >::PointSample >();
 	std::vector< ProjectiveData< Point3D< Real > , Real > >* sampleData = NULL;
-	SparseNodeData< Real , WEIGHT_DEGREE >* density;
-	SparseNodeData< Point3D< Real > , NORMAL_DEGREE >* normalInfo;
+	DensityEstimator* density = NULL;
+	SparseNodeData< Point3D< Real > , NORMAL_DEGREE >* normalInfo = NULL;
 	Real targetValue = (Real)0.5;
 	// Read in the samples (and color data)
 	{
@@ -514,8 +515,7 @@ int _Execute( int argc , char* argv[] )
 		// Get the kernel density estimator [If discarding, compute anew. Otherwise, compute once.]
 		{
 			profiler.start();
-			density = new SparseNodeData< Real , WEIGHT_DEGREE >();
-			*density = tree.template setDensityEstimator< WEIGHT_DEGREE >( *samples , kernelDepth , SamplesPerNode.value );
+			density = tree.template setDensityEstimator< WEIGHT_DEGREE >( *samples , kernelDepth , SamplesPerNode.value );
 			profiler.dumpOutput2( comments , "#   Got kernel density:" );
 		}
 
@@ -626,7 +626,7 @@ int _Execute( int argc , char* argv[] )
 		if( sampleData )
 		{
 			colorData = new SparseNodeData< ProjectiveData< Point3D< Real > , Real > , DATA_DEGREE >();
-			*colorData = tree.template setDataField< DATA_DEGREE , false >( *samples , *sampleData , (SparseNodeData< Real , WEIGHT_DEGREE >*)NULL );
+			*colorData = tree.template setDataField< DATA_DEGREE , false >( *samples , *sampleData , (DensityEstimator*)NULL );
 			delete sampleData , sampleData = NULL;
 			for( const OctNode< TreeNodeData >* n = tree.tree().nextNode() ; n ; n=tree.tree().nextNode( n ) )
 			{

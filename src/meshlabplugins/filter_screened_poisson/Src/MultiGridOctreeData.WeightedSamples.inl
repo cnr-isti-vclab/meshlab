@@ -37,7 +37,7 @@ template< int Degree > double GetScaleValue( void )
 }
 template< class Real >
 template< int WeightDegree >
-void Octree< Real >::_addWeightContribution( SparseNodeData< Real , WeightDegree >& densityWeights , TreeOctNode* node , Point3D< Real > position , PointSupportKey< WeightDegree >& weightKey , Real weight )
+void Octree< Real >::_addWeightContribution( DensityEstimator< WeightDegree >& densityWeights , TreeOctNode* node , Point3D< Real > position , PointSupportKey< WeightDegree >& weightKey , Real weight )
 {
 	static const double ScaleValue = GetScaleValue< WeightDegree >();
 	double dx[ DIMENSION ][ PointSupportKey< WeightDegree >::Size ];
@@ -60,7 +60,7 @@ void Octree< Real >::_addWeightContribution( SparseNodeData< Real , WeightDegree
 
 template< class Real >
 template< int WeightDegree , class PointSupportKey >
-Real Octree< Real >::_getSamplesPerNode( const SparseNodeData< Real , WeightDegree >& densityWeights , const TreeOctNode* node , Point3D< Real > position , PointSupportKey& weightKey ) const
+Real Octree< Real >::_getSamplesPerNode( const DensityEstimator< WeightDegree >& densityWeights , const TreeOctNode* node , Point3D< Real > position , PointSupportKey& weightKey ) const
 {
 	Real weight = 0;
 	double dx[ DIMENSION ][ PointSupportKey::Size ];
@@ -85,9 +85,10 @@ Real Octree< Real >::_getSamplesPerNode( const SparseNodeData< Real , WeightDegr
 }
 template< class Real >
 template< int WeightDegree , class PointSupportKey >
-void Octree< Real >::_getSampleDepthAndWeight( const SparseNodeData< Real , WeightDegree >& densityWeights , const TreeOctNode* node , Point3D< Real > position , PointSupportKey& weightKey , Real& depth , Real& weight ) const
+void Octree< Real >::_getSampleDepthAndWeight( const DensityEstimator< WeightDegree >& densityWeights , const TreeOctNode* node , Point3D< Real > position , PointSupportKey& weightKey , Real& depth , Real& weight ) const
 {
 	const TreeOctNode* temp = node;
+	while( _localDepth( temp )>densityWeights.kernelDepth() ) temp = temp->parent;
 	weight = _getSamplesPerNode( densityWeights , temp , position , weightKey );
 	if( weight>=(Real)1. ) depth = Real( _localDepth( temp ) + log( weight ) / log(double(1<<(DIMENSION-1))) );
 	else
@@ -100,19 +101,13 @@ void Octree< Real >::_getSampleDepthAndWeight( const SparseNodeData< Real , Weig
 			oldWeight = newWeight;
 			newWeight = _getSamplesPerNode( densityWeights , temp , position , weightKey );
 		}
-		if( newWeight<=0 || oldWeight<=0 )
-		{
-			fprintf( stderr , "[WARNING] Octree::_getSampleDepthAndWeight: Weights should be positive: %g %g\n" , oldWeight , newWeight );
-			depth = weight = 0;
-			return;
-		}
-		else depth = Real( _localDepth( temp ) + log( newWeight ) / log( newWeight / oldWeight ) );
+		depth = Real( _localDepth( temp ) + log( newWeight ) / log( newWeight / oldWeight ) );
 	}
 	weight = Real( pow( double(1<<(DIMENSION-1)) , -double(depth) ) );
 }
 template< class Real >
 template< int WeightDegree , class PointSupportKey >
-void Octree< Real >::_getSampleDepthAndWeight( const SparseNodeData< Real , WeightDegree >& densityWeights , Point3D< Real > position , PointSupportKey& weightKey , Real& depth , Real& weight ) const
+void Octree< Real >::_getSampleDepthAndWeight( const DensityEstimator< WeightDegree >& densityWeights , Point3D< Real > position , PointSupportKey& weightKey , Real& depth , Real& weight ) const
 {
 	TreeOctNode* temp;
 	Point3D< Real > myCenter( (Real)0.5 , (Real)0.5 , (Real)0.5 );
@@ -120,12 +115,11 @@ void Octree< Real >::_getSampleDepthAndWeight( const SparseNodeData< Real , Weig
 
 	// Get the finest node with depth less than or equal to the splat depth that contains the point
 	temp = _spaceRoot;
-	while( true )
+	while( _localDepth( temp )<densityWeights.kernelDepth() )
 	{
 		if( !IsActiveNode( temp->children ) ) break;// fprintf( stderr , "[ERROR] Octree::GetSampleDepthAndWeight\n" ) , exit( 0 );
 		int cIndex = TreeOctNode::CornerIndex( myCenter , position );
-		if( densityWeights( temp->children + cIndex ) ) temp = temp->children + cIndex;
-		else break;
+		temp = temp->children + cIndex;
 		myWidth /= 2;
 		if( cIndex&1 ) myCenter[0] += myWidth/2;
 		else		   myCenter[0] -= myWidth/2;
@@ -164,7 +158,7 @@ void Octree< Real >::_splatPointData( TreeOctNode* node , Point3D< Real > positi
 }
 template< class Real >
 template< bool CreateNodes , int WeightDegree , int DataDegree , class V >
-Real Octree< Real >::_splatPointData( const SparseNodeData< Real , WeightDegree >& densityWeights , Point3D< Real > position , V v , SparseNodeData< V , DataDegree >& dataInfo , PointSupportKey< WeightDegree >& weightKey , PointSupportKey< DataDegree >& dataKey , LocalDepth minDepth , LocalDepth maxDepth , int dim )
+Real Octree< Real >::_splatPointData( const DensityEstimator< WeightDegree >& densityWeights , Point3D< Real > position , V v , SparseNodeData< V , DataDegree >& dataInfo , PointSupportKey< WeightDegree >& weightKey , PointSupportKey< DataDegree >& dataKey , LocalDepth minDepth , LocalDepth maxDepth , int dim )
 {
 	double dx;
 	V _v;
@@ -175,12 +169,11 @@ Real Octree< Real >::_splatPointData( const SparseNodeData< Real , WeightDegree 
 	Real myWidth = (Real)1.;
 
 	temp = _spaceRoot;
-	while( true )
+	while( _localDepth( temp )<densityWeights.kernelDepth() )
 	{
 		if( !IsActiveNode( temp->children ) ) break;
 		int cIndex = TreeOctNode::CornerIndex( myCenter , position );
-		if( densityWeights( temp->children + cIndex ) ) temp = temp->children + cIndex;
-		else break;
+		temp = temp->children + cIndex;
 		myWidth /= 2;
 		if( cIndex&1 ) myCenter[0] += myWidth/2;
 		else		   myCenter[0] -= myWidth/2;
@@ -230,7 +223,7 @@ Real Octree< Real >::_splatPointData( const SparseNodeData< Real , WeightDegree 
 }
 template< class Real >
 template< bool CreateNodes , int WeightDegree , int DataDegree , class V >
-Real Octree< Real >::_multiSplatPointData( const SparseNodeData< Real , WeightDegree >* densityWeights , TreeOctNode* node , Point3D< Real > position , V v , SparseNodeData< V , DataDegree >& dataInfo , PointSupportKey< WeightDegree >& weightKey , PointSupportKey< DataDegree >& dataKey , int dim )
+Real Octree< Real >::_multiSplatPointData( const DensityEstimator< WeightDegree >* densityWeights , TreeOctNode* node , Point3D< Real > position , V v , SparseNodeData< V , DataDegree >& dataInfo , PointSupportKey< WeightDegree >& weightKey , PointSupportKey< DataDegree >& dataKey , int dim )
 {
 	Real _depth , weight;
 	if( densityWeights ) _getSampleDepthAndWeight( *densityWeights , position , weightKey , _depth , weight );

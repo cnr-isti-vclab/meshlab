@@ -315,12 +315,13 @@ public:
 template< class Real , int Degree , BoundaryType BType , class Vertex >
 int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, PoissonParam<Real> &pp, vcg::CallBackPos* cb)
 {
-	typedef typename Octree< Real >::template InterpolationInfo< false > InterpolationInfo;
-	typedef OrientedPointStreamWithData< Real , Point3D< Real > > PointStreamWithData;
-	typedef TransformedOrientedPointStreamWithData< Real , Point3D< Real > > XPointStreamWithData;
-	Reset< Real >();
-	std::vector< char* > comments;
-
+  typedef typename Octree< Real >::template DensityEstimator< WEIGHT_DEGREE > DensityEstimator;
+  typedef typename Octree< Real >::template InterpolationInfo< false > InterpolationInfo;
+  typedef OrientedPointStreamWithData< Real , Point3D< Real > > PointStreamWithData;
+  typedef TransformedOrientedPointStreamWithData< Real , Point3D< Real > > XPointStreamWithData;
+  Reset< Real >();
+  std::vector< char* > comments;
+  
     XForm4x4< Real > xForm = GetPointStreamScale(bb,pp.ScaleVal);
     XForm4x4< Real > iXForm = xForm.inverse();
 	DumpOutput2( comments , "Running Screened Poisson Reconstruction (Version 9.0)\n" );
@@ -348,9 +349,9 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 	Real pointWeightSum;
 	std::vector< typename Octree< Real >::PointSample >* samples = new std::vector< typename Octree< Real >::PointSample >();
 	std::vector< ProjectiveData< Point3D< Real > , Real > >* sampleData = NULL;
-	SparseNodeData< Real , WEIGHT_DEGREE >* density;
-	SparseNodeData< Point3D< Real > , NORMAL_DEGREE >* normalInfo;
-	Real targetValue = (Real)0.5;
+    DensityEstimator* density = NULL;
+    SparseNodeData< Point3D< Real > , NORMAL_DEGREE >* normalInfo = NULL;
+    Real targetValue = (Real)0.5;
     
 	// Read in the samples (and color data)
 	{
@@ -395,8 +396,7 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 		// Get the kernel density estimator [If discarding, compute anew. Otherwise, compute once.]
 		{
 			profiler.start();
-			density = new SparseNodeData< Real , WEIGHT_DEGREE >();
-			*density = tree.template setDensityEstimator< WEIGHT_DEGREE >( *samples , pp.KernelDepthVal , pp.SamplesPerNodeVal );
+			density = tree.template setDensityEstimator< WEIGHT_DEGREE >( *samples , pp.KernelDepthVal , pp.SamplesPerNodeVal );
 			profiler.dumpOutput2( comments , "#   Got kernel density:" );
 		}
 
@@ -480,7 +480,7 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 		if( sampleData )
 		{
 			colorData = new SparseNodeData< ProjectiveData< Point3D< Real > , Real > , DATA_DEGREE >();
-			*colorData = tree.template setDataField< DATA_DEGREE , false >( *samples , *sampleData , (SparseNodeData< Real , WEIGHT_DEGREE >*)NULL );
+			*colorData = tree.template setDataField< DATA_DEGREE , false >( *samples , *sampleData , (DensityEstimator*)NULL );
 			delete sampleData , sampleData = NULL;
 			for( const OctNode< TreeNodeData >* n = tree.tree().nextNode() ; n ; n=tree.tree().nextNode( n ) )
 			{
