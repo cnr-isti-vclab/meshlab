@@ -414,8 +414,9 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
     {
       int seed=par.getInt("seed");
       if(seed==0) seed = time(NULL);
+      math::MarsenneTwisterRNG myrnd(seed);
       int numOfMeshes = md.meshList.size();
-	  int id = seed % numOfMeshes;
+	  int id = myrnd.generate(numOfMeshes);
       foreach(MeshModel *mm, md.meshList)
       {
 		if (mm->isVisible())
