@@ -1507,6 +1507,9 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 		MeshModel* perimeter = md.addNewMesh("", newLayerName, true);
 		perimeter->Clear();
 
+		Matrix44m rotM = m.cm.Tr;
+		rotM.SetColumn(3, Point3m(0.0, 0.0, 0.0));
+
 		for (CMeshO::FaceIterator fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
 		if (!(*fi).IsD())
 		if ((*fi).IsS())
@@ -1519,12 +1522,12 @@ bool ExtraMeshFilterPlugin::applyFilter(QAction * filter, MeshDocument & md, Ric
 					CMeshO::VertexIterator nvi;
 					vcg::tri::Allocator<CMeshO>::AddEdges(perimeter->cm, 1);
 					nvi = vcg::tri::Allocator<CMeshO>::AddVertices(perimeter->cm, 2);
-					(*nvi).P() = (*fi).V(ei)->P();
-					(*nvi).N() = (*fi).V(ei)->N();
+					(*nvi).P() = m.cm.Tr * (*fi).V(ei)->P();
+					(*nvi).N() = rotM * (*fi).V(ei)->N();
 					perimeter->cm.edge.back().V(0) = &(*nvi);
 					nvi++;
-					(*nvi).P() = (*fi).V((ei + 1) % 3)->P();
-					(*nvi).N() = (*fi).V((ei + 1) % 3)->N();
+					(*nvi).P() = m.cm.Tr * (*fi).V((ei + 1) % 3)->P();
+					(*nvi).N() = rotM * (*fi).V((ei + 1) % 3)->N();
 					perimeter->cm.edge.back().V(1) = &(*nvi);
 				}
 			}
