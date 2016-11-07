@@ -182,6 +182,13 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		bool watertight = false;
 		bool pointcloud = false;
 
+		// the mesh has to be correctly transformed
+		if (m.Tr != Matrix44m::Identity())
+		{
+			Log("BEWARE: Measures are calculated considering the current transformation matrix");
+			tri::UpdatePosition<CMeshO>::Matrix(m, m.Tr, true);
+		}
+
 		// bounding box
 		Log("Mesh Bounding Box Size %f  %f  %f", m.bbox.DimX(), m.bbox.DimY(), m.bbox.DimZ());
 		Log("Mesh Bounding Box Diag %f ", m.bbox.Diag());
@@ -285,6 +292,11 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			}
 
 		}
+
+		// the mesh has to return to its original position
+		if (m.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(m, Inverse(m.Tr), true);
+
 		return true;
 	}
 
@@ -437,7 +449,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 	return false;
 }
 
-// function to calculate prioncipal axis for pointclouds or non-watertight meshes
+// function to calculate principal axis for pointclouds or non-watertight meshes
 Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO & m)
 {
 	Matrix33m cov;
