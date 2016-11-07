@@ -299,13 +299,18 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		}
 
 		Log("Selection is %i triangles", m.sfn);
+		if (m.Tr != Matrix44m::Identity())
+			Log("BEWARE: Area and Perimeter are calculated considering the current transformation matrix");
 
+		double fArea = 0.0;
 		double sArea=0;
 		for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi)
 		if (!(*fi).IsD())
 		if ((*fi).IsS())
 		{
-			sArea += DoubleArea(*fi) / 2.0;
+			// this line calculates the doublearea, I took the code from Triangle3.h (DoubleArea) and modified to use transformation
+			fArea = (((m.Tr * (*fi).cP(1)) - (m.Tr * (*fi).cP(0))) ^ ((m.Tr * (*fi).cP(2)) - (m.Tr * (*fi).cP(0)))).Norm();
+			sArea += fArea / 2.0;
 		}
 		Log("Selection Surface Area is %f", sArea);
 
@@ -323,7 +328,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 				if (adjf == &(*fi) || !(adjf->IsS()))
 				{
 					ePerimeter += 1;
-					sPerimeter += ((*fi).V(ei)->P() - (*fi).V((ei+1)%3)->P()).Norm();
+					sPerimeter += ((m.Tr * (*fi).V(ei)->P()) - (m.Tr * (*fi).V((ei + 1) % 3)->P())).Norm();
 				}
 			}
 		}
