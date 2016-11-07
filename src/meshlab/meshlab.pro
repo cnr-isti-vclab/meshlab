@@ -133,9 +133,7 @@ win32-msvc2015:DEFINES += _CRT_SECURE_NO_DEPRECATE
 
 CONFIG += stl
 
-macx:LIBS		+= -L../external/lib/macx -ljhead ../common/libcommon.dylib
-macx32:LIBS		+= -L../external/lib/macx32 -ljhead ../common/libcommon.dylib
-macx64:LIBS		+= -L../external/lib/macx64 -ljhead ../common/libcommon.dylib
+macx:LIBS		+= -L../external/lib/macx64 -ljhead ../common/libcommon.dylib
 macx:QMAKE_POST_LINK ="cp -P ../common/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlab"
 
 win32-msvc2005:LIBS		+= -L../external/lib/win32-msvc2005 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
