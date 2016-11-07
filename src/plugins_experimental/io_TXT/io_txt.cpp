@@ -31,7 +31,7 @@
 
 using namespace vcg;
 
-bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode);
+bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError);
 
 void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*fileName*/, RichParameterSet & parlst)
 {
@@ -52,11 +52,13 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
                                                      << "X Y Z Nx Ny Nz R G B Reflectance"
                                                      << "X Y Z Nx Ny Nz Reflectance R G B");
             QStringList rgbmode = (QStringList() << "[0-255]" << "[0.0-1.0]");
+			QStringList onerror = (QStringList() << "skip" << "stop");
 
             parlst.addParam(new RichInt("rowToSkip", 0, "Header Row to be skipped", "The number of lines that must be skipped at the beginning of the file. Generally, these files have one or more 'header' lines, before the point list"));
             parlst.addParam(new RichEnum("strformat", 0, strformat,"Point format","Which values are specified for each point, and in which order."));
             parlst.addParam(new RichEnum("separator", 0, separator,"Separator","The separator between individual values in the point(s) description."));
             parlst.addParam(new RichEnum("rgbmode", 0, rgbmode,"Color format","Colors may be specified in the [0-255] or [0.0-1.0] interval."));
+			parlst.addParam(new RichEnum("onerror", 0, onerror, "On Parsing Error", "When a line is not properly parsed, it is possible to 'skip' it and continue with the following lines, or 'stop' importing at that point"));
     }
 }
 
@@ -70,6 +72,7 @@ bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
             int dataSeparator = parlst.getEnum("separator");
             int dataFormat = parlst.getEnum("strformat");
             int rgbMode = parlst.getEnum("rgbmode");
+			int onError = parlst.getEnum("onerror");
 
             if(!(dataFormat==0) && !(dataFormat==6) && !(dataFormat==10))
                 mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;
@@ -80,7 +83,7 @@ bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 
             m.Enable(mask);
 
-            return parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode);
+            return parseTXT(fileName, m.cm, rowToSkip, dataSeparator, dataFormat, rgbMode, onError);
 		}
 
 	return result;
@@ -123,7 +126,7 @@ void TxtIOPlugin::GetExportMaskCapability(QString &format, int &capability, int 
 }
  
 
-bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode)
+bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int dataFormat, int rgbMode, int onError)
 {
     QFile impFile(filename);
     int ii;
@@ -170,20 +173,23 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                 case 0: // X Y Z
                     {
                         // number of token mismatch
-                        if(tokenizedLine.size()<3)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        if(parseOK[0] && parseOK[1] && parseOK[2])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                        }
+						if (tokenizedLine.size()<3)
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							if (parseOK[0] && parseOK[1] && parseOK[2])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -191,21 +197,24 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<4)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -213,29 +222,32 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<7)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        RR = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        GG = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        BB = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							RR = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							GG = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							BB = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -243,26 +255,29 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<7)
-                        {
-                            impFile.close();
-                            return false;
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							NX = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							NY = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							NZ = tokenizedLine.at(6).toFloat(&(parseOK[6]));
 
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        NX = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        NY = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        NZ = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -270,34 +285,37 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        RR = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        GG = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        BB = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        NX = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        NY = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        NZ = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							RR = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							GG = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							BB = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							NX = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							NY = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							NZ = tokenizedLine.at(9).toFloat(&(parseOK[9]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -305,34 +323,37 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        NX = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        NY = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        NZ = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        RR = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        GG = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        BB = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							Qual = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							NX = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							NY = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							NZ = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							RR = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							GG = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							BB = tokenizedLine.at(9).toFloat(&(parseOK[9]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -340,27 +361,30 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<6)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -368,29 +392,32 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<7)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5] && parseOK[6])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -398,34 +425,37 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        NX = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        NY = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        NZ = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							NX = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							NY = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							NZ = tokenizedLine.at(9).toFloat(&(parseOK[9]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -433,34 +463,37 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        NX = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        NY = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        NZ = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        Qual = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							RR = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							GG = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							BB = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							NX = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							NY = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							NZ = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							Qual = tokenizedLine.at(9).toFloat(&(parseOK[9]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -468,24 +501,27 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<6)
-                        {
-                            impFile.close();
-                            return false;
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
 
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4] && parseOK[5])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -493,34 +529,37 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
-
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        RR = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        GG = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        BB = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        Qual = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							RR = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							GG = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							BB = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							Qual = tokenizedLine.at(9).toFloat(&(parseOK[9]));
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
@@ -528,35 +567,38 @@ bool parseTXT(QString filename, CMeshO &m, int rowToSkip, int dataSeparator, int
                     {
                         // number of token mismatch
                         if(tokenizedLine.size()<10)
-                        {
-                            impFile.close();
-                            return false;
-                        }
+						{
+							if (onError == 1){ impFile.close(); return true; }
+						}
+						else
+						{
+							XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
+							YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
+							ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
+							NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
+							NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
+							NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
+							Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
+							RR = tokenizedLine.at(7).toFloat(&(parseOK[7]));
+							GG = tokenizedLine.at(8).toFloat(&(parseOK[8]));
+							BB = tokenizedLine.at(9).toFloat(&(parseOK[9]));
 
-                        XX = tokenizedLine.at(0).toFloat(&(parseOK[0]));
-                        YY = tokenizedLine.at(1).toFloat(&(parseOK[1]));
-                        ZZ = tokenizedLine.at(2).toFloat(&(parseOK[2]));
-                        NX = tokenizedLine.at(3).toFloat(&(parseOK[3]));
-                        NY = tokenizedLine.at(4).toFloat(&(parseOK[4]));
-                        NZ = tokenizedLine.at(5).toFloat(&(parseOK[5]));
-                        Qual = tokenizedLine.at(6).toFloat(&(parseOK[6]));
-                        RR = tokenizedLine.at(7).toFloat(&(parseOK[7]));
-                        GG = tokenizedLine.at(8).toFloat(&(parseOK[8]));
-                        BB = tokenizedLine.at(9).toFloat(&(parseOK[9]));
-
-                        if(rgbMode == 1) //[0.0-1.0]
-                        {
-                            RR *= 255; GG *= 255; BB *= 255;
-                        }
-                        if(parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
-                        && parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
-                        {
-                            CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m,1);
-                            (*vi).P().Import(Point3f(XX,YY,ZZ));
-                            (*vi).Q()=Qual;
-                            (*vi).C() = Color4b(RR, GG, BB, 255);
-                            (*vi).N().Import(Point3f(NX,NY,NZ));
-                        }
+							if (rgbMode == 1) //[0.0-1.0]
+							{
+								RR *= 255; GG *= 255; BB *= 255;
+							}
+							if (parseOK[0] && parseOK[1] && parseOK[2] && parseOK[3] && parseOK[4]
+								&& parseOK[5] && parseOK[6] && parseOK[7] && parseOK[8] && parseOK[9])    // no parsing error
+							{
+								CMeshO::VertexIterator vi = tri::Allocator<CMeshO>::AddVertices(m, 1);
+								(*vi).P().Import(Point3f(XX, YY, ZZ));
+								(*vi).Q() = Qual;
+								(*vi).C() = Color4b(RR, GG, BB, 255);
+								(*vi).N().Import(Point3f(NX, NY, NZ));
+							}
+							else
+								if (onError == 1){ impFile.close(); return true; }
+						}
                     }
                     break;
 
