@@ -2382,12 +2382,13 @@ bool MainWindow::appendProject(QString fileName)
 
         if (QString(fi.suffix()).toLower() == "mlp")
         {
+			int alreadyLoadedNum = meshDoc()->meshList.size();
             if (!MeshDocumentFromXML(*meshDoc(),fileName))
             {
                 QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
                 return false;
             }
-            for (int i=0; i<meshDoc()->meshList.size(); i++)
+			for (int i = alreadyLoadedNum-1; i<meshDoc()->meshList.size(); i++)
             {
                 QString fullPath = meshDoc()->meshList[i]->fullName();
                 meshDoc()->setBusy(true);
