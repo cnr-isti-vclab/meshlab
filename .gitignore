@@ -1,3 +1,19 @@
 
 *.pro.user
 build-*/
+*.obj
+*.tlog
+*.pdb
+*.user
+*.log
+*.vcxproj
+*.filters
+*.sln
+*.lib
+*.ilk
+*.exp
+*.suo
+moc_*.cpp
+*.dll
+ui_*.h
+qrc_*.cpp
