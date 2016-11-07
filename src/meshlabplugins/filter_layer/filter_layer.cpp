@@ -49,7 +49,8 @@ FilterLayerPlugin::FilterLayerPlugin()
         FP_RENAME_MESH <<
         FP_RENAME_RASTER <<
         FP_DUPLICATE <<
-        FP_SELECTCURRENT;
+        FP_SELECTCURRENT <<
+		FP_EXPORT_CAMERAS;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -71,6 +72,7 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
     case FP_RENAME_MESH :  return QString("Rename Current Mesh");
     case FP_RENAME_RASTER :  return QString("Rename Current Raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer");
+	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file");
     default : assert(0);
     }
 }
@@ -91,6 +93,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
     case FP_RENAME_MESH :  return QString("Explicitly change the label shown for a given mesh");
     case FP_RENAME_RASTER :  return QString("Explicitly change the label shown for a given raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer from its name");
+	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
     default : assert(0);
     }
 }
@@ -141,6 +144,13 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         parlst.addParam(new RichMesh ("mesh",md.mm(),&md, "Mesh",
             "The name of the current mesh"));
         break;
+	case FP_EXPORT_CAMERAS:
+		parlst.addParam(new RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format"));
+		parlst.addParam(new RichString("newName",
+			"cameras",
+			"Export file name (the right extension will be added at the end)",
+			"Name of the output file, it will be saved in the same folder as the project file"));
+		break;
     default: break; // do not add any parameter for the other filters
     }
 }
@@ -375,6 +385,188 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                 destMesh->updateDataMask(md.mm());
             }
         } break;
+	case FP_EXPORT_CAMERAS:
+	{
+		int output = par.getEnum("ExportFile");
+				
+		QString name = par.getString("newName");
+		
+		
+		if (output ==0)
+		{ 
+			FILE* outfile = NULL;
+			
+			name=name.append(".out");
+			outfile = fopen(name.toStdString().c_str(), "wb");
+
+			if (outfile == NULL)
+				return false;
+
+			int active = 0;
+			for (int i = 0; i < md.rasterList.size(); i++)
+			{
+				if (md.rasterList[i]->visible)
+					active++;
+			}
+		
+			fprintf(outfile, "# Bundle file v0.3\n");
+			fprintf(outfile, "%d %d\n", active, 0);
+
+			for (int i = 0; i < md.rasterList.size(); i++)
+			{
+				if (md.rasterList[i]->visible)
+				{
+					fprintf(outfile, "%f %d %d\n", md.rasterList[i]->shot.Intrinsics.FocalMm / md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0], 0, 0);
+
+					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+
+					Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+				
+					Point3f pos = Rt * md.rasterList[i]->shot.Extrinsics.Tra();
+					Rt.Transpose();
+
+					fprintf(outfile, "%f %f %f\n", Rt[0][0], Rt[1][0], Rt[2][0]);
+					fprintf(outfile, "%f %f %f\n", Rt[0][1], Rt[1][1], Rt[2][1]);
+					fprintf(outfile, "%f %f %f\n", Rt[0][2], Rt[1][2], Rt[2][2]);
+					fprintf(outfile, "%f %f %f\n", -pos[0], -pos[1], -pos[2]);
+
+				}
+				
+			}
+			fprintf(outfile, "%d %d %d\n", 0, 0,0);
+			fclose(outfile);
+			
+		}
+		else if (output==1)
+		{
+			name = name.append(".xml");
+			
+			QFileInfo fi(name);
+			QDir tmpDir = QDir::current();
+			QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+			//QDomDocument doc("AgisoftXML");
+			QFile file(name);
+			file.open(QIODevice::WriteOnly);
+
+			QXmlStreamWriter xmlWriter(&file);
+			xmlWriter.setAutoFormatting(true);
+			xmlWriter.writeStartDocument();
+
+			xmlWriter.writeStartElement("document");
+			xmlWriter.writeAttribute("version", "1.2.0");
+
+			xmlWriter.writeStartElement("chunk");
+			xmlWriter.writeStartElement("sensors");
+			
+			for (int i = 0; i < md.rasterList.size(); i++)
+			{
+				if (md.rasterList[i]->visible)
+				{
+					float focal, pixelX, pixelY;
+					if (md.rasterList[i]->shot.Intrinsics.FocalMm > 1000)
+					{
+						focal = md.rasterList[i]->shot.Intrinsics.FocalMm / 500;
+						pixelX = md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0] / 500;
+						pixelY = md.rasterList[i]->shot.Intrinsics.PixelSizeMm[1] / 500;
+					}
+					else
+					{
+						focal = md.rasterList[i]->shot.Intrinsics.FocalMm;
+						pixelX = md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0];
+						pixelY = md.rasterList[i]->shot.Intrinsics.PixelSizeMm[1];
+					}
+
+					xmlWriter.writeStartElement("sensor");
+					xmlWriter.writeAttribute("id", QString::number(i));
+					xmlWriter.writeAttribute("label", "unknown"+QString::number(i));
+					xmlWriter.writeAttribute("type", "frame");
+					xmlWriter.writeStartElement("resolution");
+					xmlWriter.writeAttribute("width", QString::number(md.rasterList[i]->shot.Intrinsics.ViewportPx[0]));
+					xmlWriter.writeAttribute("height", QString::number(md.rasterList[i]->shot.Intrinsics.ViewportPx[1]));
+					xmlWriter.writeEndElement();
+					xmlWriter.writeStartElement("property");
+					xmlWriter.writeAttribute("name", "pixel_width");
+					xmlWriter.writeAttribute("value", QString::number(pixelX));
+					xmlWriter.writeEndElement();
+					xmlWriter.writeStartElement("property");
+					xmlWriter.writeAttribute("name", "pixel_height");
+					xmlWriter.writeAttribute("value", QString::number(pixelY));
+					xmlWriter.writeEndElement();
+					xmlWriter.writeStartElement("property");
+					xmlWriter.writeAttribute("name", "focal_length");
+					xmlWriter.writeAttribute("value", QString::number(focal));
+					xmlWriter.writeEndElement();
+					xmlWriter.writeStartElement("property");
+					xmlWriter.writeAttribute("name", "fixed");
+					xmlWriter.writeAttribute("value", "false");
+					xmlWriter.writeEndElement();
+					xmlWriter.writeStartElement("calibration");
+					xmlWriter.writeAttribute("type", "frame");
+					xmlWriter.writeAttribute("class", "adjusted");
+					xmlWriter.writeStartElement("resolution");
+					xmlWriter.writeAttribute("width", QString::number(md.rasterList[i]->shot.Intrinsics.ViewportPx[0]));
+					xmlWriter.writeAttribute("height", QString::number(md.rasterList[i]->shot.Intrinsics.ViewportPx[1]));
+					xmlWriter.writeEndElement();
+					xmlWriter.writeTextElement("fx", QString::number(md.rasterList[i]->shot.Intrinsics.FocalMm / md.rasterList[i]->shot.Intrinsics.PixelSizeMm[0]));
+					xmlWriter.writeTextElement("fy", QString::number(md.rasterList[i]->shot.Intrinsics.FocalMm / md.rasterList[i]->shot.Intrinsics.PixelSizeMm[1]));
+					xmlWriter.writeTextElement("cx", QString::number(md.rasterList[i]->shot.Intrinsics.CenterPx[0]));
+					xmlWriter.writeTextElement("cy", QString::number(md.rasterList[i]->shot.Intrinsics.CenterPx[1]));
+					xmlWriter.writeTextElement("k1", "0");
+					xmlWriter.writeTextElement("k2", "0");
+					xmlWriter.writeTextElement("p1", "0");
+					xmlWriter.writeTextElement("p2", "0");
+					xmlWriter.writeEndElement();
+					xmlWriter.writeEndElement();
+				}
+			}
+			xmlWriter.writeEndElement();
+			xmlWriter.writeStartElement("cameras");
+			for (int i = 0; i < md.rasterList.size(); i++)
+			{
+				if (md.rasterList[i]->visible)
+				{
+					xmlWriter.writeStartElement("camera");
+					xmlWriter.writeAttribute("id", QString::number(i));
+					xmlWriter.writeAttribute("label", md.rasterList[i]->currentPlane->shortName());
+					xmlWriter.writeAttribute("sensor_id", QString::number(i));
+					xmlWriter.writeAttribute("enabled", "true");
+					Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+					Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
+					QString transform= QString::number(mat[0][0]);
+					transform.append(" " + QString::number(-mat[1][0]));
+					transform.append(" " + QString::number(-mat[2][0]));
+					transform.append(" " + QString::number(pos[0]));
+					transform.append(" " + QString::number(mat[0][1]));
+					transform.append(" " + QString::number(-mat[1][1]));
+					transform.append(" " + QString::number(-mat[2][1]));
+					transform.append(" " + QString::number(pos[1]));
+					transform.append(" " + QString::number(mat[0][2]));
+					transform.append(" " + QString::number(-mat[1][2]));
+					transform.append(" " + QString::number(-mat[2][2]));
+					transform.append(" " + QString::number(pos[2]));
+					transform.append(" 0");
+					transform.append(" 0");
+					transform.append(" 0");
+					transform.append(" 1");
+					
+					xmlWriter.writeTextElement("transform", transform);
+					xmlWriter.writeEndElement();
+				}
+			}
+
+			xmlWriter.writeEndElement();
+			xmlWriter.writeEndDocument();
+
+
+			file.close();
+		
+			
+		}
+
+		
+		
+	} break;
     }
 
     return true;
@@ -397,6 +589,7 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
+	case FP_EXPORT_CAMERAS:
         return MeshFilterInterface::RasterLayer;
 
     default :  assert(0);
@@ -419,6 +612,7 @@ MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filte
     case FP_RENAME_RASTER :
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
+	case FP_EXPORT_CAMERAS:
         return MeshFilterInterface::NONE;
     case FP_FLATTEN :
     case FP_DELETE_NON_VISIBLE_MESH :
