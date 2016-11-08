@@ -609,7 +609,7 @@ void MLPoliciesStandAloneFunctions::updatedRendAttsAccordingToPriorities(const M
     result = tmp;
 }
 
-void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dtout)
+void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshModel* meshmodel,MLRenderingData& dtout, size_t minpolnumpersmoothshading)
 {
     MLRenderingData dt; 
     if (meshmodel == NULL)
@@ -633,7 +633,8 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             dt.set(MLRenderingData::PR_POINTS,false);
             tmpatts.reset();
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = (meshmodel->cm.FN() > minpolnumpersmoothshading);
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = !(tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
 			if (meshmodel != NULL)
 				tmpatts[MLRenderingData::ATT_NAMES::ATT_FACECOLOR] = (meshmodel->hasDataMask(MeshModel::MM_FACECOLOR) && !meshmodel->hasDataMask(MeshModel::MM_VERTCOLOR));

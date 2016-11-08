@@ -224,7 +224,7 @@ struct MLPoliciesStandAloneFunctions
 
 	static void suggestedDefaultPerViewGLOptions(MLPerViewGLOptions& tmp);
 
-	static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel, MLRenderingData& dt);
+	static void suggestedDefaultPerViewRenderingData(MeshModel* meshmodel, MLRenderingData& dt,size_t minpolnumpersmoothshading = 0);
 
 	static void disableRedundatRenderingDataAccordingToPriorities(MLRenderingData& dt);
 

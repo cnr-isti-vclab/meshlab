@@ -81,6 +81,9 @@ public:
     size_t perbatchprimitives;
     inline static QString perBatchPrimitives() {return "MeshLab::System::perBatchPrimitives";}
 
+	size_t minpolygonpersmoothrendering;
+	inline static QString minPolygonNumberPerSmoothRendering() { return "MeshLab::System::minPolygonNumberPerSmoothRendering"; }
+
     std::ptrdiff_t maxTextureMemory;
     inline static QString maxTextureMemoryParam()  {return "MeshLab::System::maxTextureMemory";}
 };
