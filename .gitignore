@@ -13,6 +13,9 @@ build-*/
 *.log
 *.filters
 *.db
+*.opendb
+*.lib
+*.exe
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
