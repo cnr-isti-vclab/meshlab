@@ -23,6 +23,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <Psapi.h>
 #endif
 #include "Src/MyTime.h"
 #include "Src/MemoryUsage.h"
