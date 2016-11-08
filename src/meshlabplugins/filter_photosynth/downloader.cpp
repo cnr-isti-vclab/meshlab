@@ -683,7 +683,7 @@ float readBigEndianSingle(QIODevice *device, bool &error)
     if(error)
       return -1;
   }
-  char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
+  unsigned char reversed[] = { bytes[3],bytes[2],bytes[1],bytes[0] };
 
   float *f = (float *)(&  reversed[0]);
   return*f;
