@@ -6,6 +6,7 @@ SUBDIRS       = common \
                 meshlabserver \
 # IO plugins
                 meshlabplugins/io_base\
+				plugins_unsupported/io_bre \
                 meshlabplugins/io_3ds\
                 meshlabplugins/io_collada \
                 meshlabplugins/io_ctm \
@@ -44,7 +45,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_mls \
                 meshlabplugins/filter_photosynth \
                 meshlabplugins/filter_plymc \
-                meshlabplugins/filter_poisson \
+                meshlabplugins/filter_screened_poisson \
                 meshlabplugins/filter_qhull \
                 meshlabplugins/filter_quality \
                 meshlabplugins/filter_sampling \
@@ -55,7 +56,6 @@ SUBDIRS       = common \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
-                meshlabplugins/filter_zippering \
 # Rendering and Decoration Plugins
                 meshlabplugins/render_gdp \
                 meshlabplugins/render_radiance_scaling \
