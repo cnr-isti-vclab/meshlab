@@ -2545,9 +2545,10 @@ bool MainWindow::importRaster(const QString& fileImg)
             meshDoc()->setBusy(false);
             showLayerDlg(true);
 
-            /// Intrinsics extraction from EXIF
+			/// Intrinsics extraction from EXIF
             ///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
             /// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
+			
 
             ::ResetJpgfile();
             FILE * pFile = fopen(qPrintable(fileName), "rb");
@@ -2585,7 +2586,13 @@ bool MainWindow::importRaster(const QString& fileImg)
                 rm->shot.Intrinsics.FocalMm = ImageInfo.FocalLength;
             }
 
-            // End of EXIF reading
+			// End of EXIF reading
+
+			//// Since no extrinsic are available, the current trackball is reset (except for the FOV) and assigned to the raster
+			GLA()->resetTrackBall();
+			GLA()->fov = rm->shot.GetFovFromFocal();
+			rm->shot = GLA()->shotFromTrackball().first;
+           
 
             //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
             updateMenus();
