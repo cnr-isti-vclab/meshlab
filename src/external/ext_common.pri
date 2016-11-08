@@ -1,4 +1,4 @@
-macx:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/macx
+macx:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/macx64
 win32-g++:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/win32-gcc  
 win32-msvc2005:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/win32-msvc2005
 win32-msvc2008:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/win32-msvc2008
