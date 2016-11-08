@@ -20,4 +20,4 @@ SOURCES       += filter_mutualinfo.cpp \
 		
 TARGET        = filter_mutualinfo
 
-macx:QMAKE_POST_LINK = "cp "$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml"
+macx:QMAKE_POST_LINK = "cp "$$_PRO_FILE_PWD_/$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml"
