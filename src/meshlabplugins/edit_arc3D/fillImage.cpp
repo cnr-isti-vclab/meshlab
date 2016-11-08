@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "fillImage.h"
+#include <cstdlib>
 #include <cmath>
 #include <limits>
 
