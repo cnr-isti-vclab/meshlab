@@ -12,6 +12,7 @@ build-*/
 *.user
 *.log
 *.filters
+*.db
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
