@@ -250,9 +250,11 @@ class MLSceneGLSharedDataContext : public QGLWidget
 public:
 	//parent is set to NULL in order to avoid QT bug on MAC (business as usual...).
 	//The QGLWidget are destroyed by hand in the MainWindow destructor...
-	MLSceneGLSharedDataContext(MeshDocument& md, vcg::QtThreadSafeMemoryInfo& gpumeminfo, bool highprecision, size_t perbatchtriangles);
+	MLSceneGLSharedDataContext(MeshDocument& md, vcg::QtThreadSafeMemoryInfo& gpumeminfo, bool highprecision, size_t perbatchtriangles, size_t minfacespersmoothrendering);
 
 	~MLSceneGLSharedDataContext();
+
+	void setMinFacesForSmoothRendering(size_t fcnum);
 
 	vcg::QtThreadSafeMemoryInfo& memoryInfoManager() const
 	{
@@ -332,6 +334,7 @@ private:
 	MeshIDManMap _meshboman;
 	vcg::QtThreadSafeMemoryInfo& _gpumeminfo;
 	size_t _perbatchtriangles;
+	size_t _minfacessmoothrendering;
 	bool _highprecision;
 	QTimer* _timer;
 
