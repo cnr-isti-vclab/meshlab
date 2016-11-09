@@ -3,9 +3,9 @@ include (../../shared.pri)
 #QMAKE_CXXFLAGS -= -Wall -W
 macx:QMAKE_CXX = clang++-mp-3.9
 macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
-macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math
+macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math  -Wno-sign-compare -Wno-unused-parameter
 
-QMAKE_CXXFLAGS+=-fopenmp  -Wno-sign-compare -Wno-unused-parameter
+QMAKE_CXXFLAGS+=-fopenmp
 
 HEADERS       += filter_screened_poisson.h
 
