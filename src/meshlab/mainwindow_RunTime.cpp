@@ -1369,7 +1369,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     //A new mesh has been created by the filter. I have to add it in the shared context data structure
                     newmeshcreated = true;
                     currentmeshnewlycreated = true;
-                    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm,dttoberendered,mwsettings.minpolygonpersmoothrendering);
+                    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm,dttoberendered);
 					if (mm == meshDoc()->mm())
 					{
 						/*HORRIBLE TRICK IN ORDER TO HAVE VALID ACTIONS ASSOCIATED WITH THE CURRENT WIRE RENDERING MODALITY*/
@@ -2434,7 +2434,7 @@ void MainWindow::newProject(const QString& projName)
 {
     if (gpumeminfo == NULL)
         return;
-    MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mwsettings.minpolygonpersmoothrendering,mdiarea);
+    MultiViewer_Container *mvcont = new MultiViewer_Container(*gpumeminfo,mwsettings.highprecision,mwsettings.perbatchprimitives,mdiarea);
     connect(&mvcont->meshDoc,SIGNAL(meshAdded(int)),this,SLOT(meshAdded(int)));
     connect(&mvcont->meshDoc,SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 	connect(&mvcont->meshDoc, SIGNAL(documentUpdated()), this, SLOT(documentUpdateRequested()));
@@ -2660,8 +2660,8 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
     saveRecentFileList(fileName);
 
-    if (!(mm->cm.textures.empty()))
-        updateTexture(mm->id());
+    if(!meshDoc()->mm()->cm.textures.empty())
+        updateTexture(meshDoc()->mm()->id());
 
     // In case of polygonal meshes the normal should be updated accordingly
     if( mask & vcg::tri::io::Mask::IOM_BITPOLYGONAL)
@@ -2720,7 +2720,7 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
 		if ((shared != NULL) && (mm != NULL))
 		{
 			MLRenderingData defdt;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt,mwsettings.minpolygonpersmoothrendering);
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt);
 			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
 			{
 				GLArea* ar = mv->getViewer(glarid);
@@ -3800,7 +3800,7 @@ bool MainWindow::addRenderingDataIfNewlyGeneratedMesh(int meshid)
 		if ((meshDoc()->meshDocStateData().find(meshid) == meshDoc()->meshDocStateData().end()) && (mm != NULL))
 		{
 			MLRenderingData dttoberendered;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, dttoberendered,mwsettings.minpolygonpersmoothrendering);
+			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, dttoberendered);
 			foreach(GLArea* gla, mvc->viewerList)
 			{
 				if (gla != NULL)

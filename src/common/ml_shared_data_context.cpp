@@ -4,8 +4,8 @@
 
 #include "meshmodel.h"
 
-MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
-    :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles),_highprecision(highprecision), _minfacessmoothrendering(minfacespersmoothrendering)
+MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles) 
+    :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles),_highprecision(highprecision)
 {
     if (md.size() != 0)
         throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
@@ -32,11 +32,6 @@ MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtT
 
 MLSceneGLSharedDataContext::~MLSceneGLSharedDataContext()
 {
-}
-
-void MLSceneGLSharedDataContext::setMinFacesForSmoothRendering(size_t fcnum)
-{
-	_minfacessmoothrendering = fcnum;
 }
 
 MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext::meshAttributesMultiViewerManager( int mmid ) const
@@ -263,7 +258,7 @@ void MLSceneGLSharedDataContext::addView( QGLContext* viewerid,MLRenderingData& 
         MeshModel* mesh = _md.getMesh(it.key());
         if (mesh != NULL)
         {
-            MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mesh,dt, _minfacessmoothrendering);
+            MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mesh,dt);
             setRenderingDataPerMeshView(it.key(),viewerid,dt);
             manageBuffers(it.key());
         }

@@ -75,7 +75,7 @@ class MultiViewer_Container : public Splitter
         typedef vcg::Shot<double> Shot;
 
 public:
-    MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo,bool highprec,size_t perbatchprimitives,size_t minfacesforsmoothrendering,QWidget *parent);
+    MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo,bool highprec,size_t perbatchprimitives,QWidget *parent);
     ~MultiViewer_Container();
 
 	bool isMultiViewerContainer() const { return true; }
