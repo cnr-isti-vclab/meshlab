@@ -61,11 +61,11 @@ void SplitterHandle::mousePressEvent ( QMouseEvent * e )
 	}
 }
 
-MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo, bool highprec,size_t perbatchprimitives,QWidget *parent)
+MultiViewer_Container::MultiViewer_Container(vcg::QtThreadSafeMemoryInfo& meminfo, bool highprec,size_t perbatchprimitives, size_t minfacespersmoothrendering,QWidget *parent)
     : Splitter(parent),meshDoc()
 {
 	setChildrenCollapsible(false);
-    scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives);
+    scenecontext = new MLSceneGLSharedDataContext(meshDoc,meminfo,highprec,perbatchprimitives,minfacespersmoothrendering);
 	scenecontext->setHidden(true);
 	scenecontext->initializeGL();
 	currentId=-1;
