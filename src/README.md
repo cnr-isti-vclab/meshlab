@@ -7,7 +7,7 @@ __tl;dr__
 4. compile `src/meshlab_full.pro`
 
 ####Dependencies
-You need Qt5.7 and we assume that we have qtcreator installed and you know how to build something from a `*.pro` qt file (either from qtcreator, or from the command line). As external dependencies MeshLab uses the _vcglib_ c++ library for most of the mesh processing tasks; so you need to clone it from github ( http://github.com/cnr-isti-vclab/vcglib/ ) in a folder named `vcglib` at the same level of the folder `meshlab`. To be clear your folder structure should be something quite similar to:
+You need Qt5.7 and we assume that we have qtcreator installed and you know how to build something from a `*.pro` qt file (either from qtcreator, or from the command line). As external dependencies MeshLab uses the _vcglib_ c++ library for most of the mesh processing tasks; so you need to clone it from github ( http://github.com/cnr-isti-vclab/vcglib/ ) in a folder named `vcglib` at the same level of the folder `meshlab`.  To be clear your folder structure should be something quite similar to:
 
     yourdevelfolder/
      |
@@ -24,7 +24,7 @@ You need Qt5.7 and we assume that we have qtcreator installed and you know how t
          ├──...
          └──...
 
-All the include paths inside the `.pro` assume this relative positioning of the `meshlab` and `vcglib` folders.
+All the include paths inside the `.pro` assume this relative positioning of the `meshlab` and `vcglib` folders. Please note that, given the fact that the developement of the vcglib and meshlab are often intermixed, if you compile the devel branch of the meshlab repo, you should use the devel branch of the vcglib. 
 
 ##### Compiling
 MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Dont worry, if a plugin fails to compile just remove it and you lose just that functionality. As a first step you should try to use the `src/meshlab_mini.pro` that contains the info for building meshlab with a minimal set of plugins with no external dependencies and usually compile with no problem.
