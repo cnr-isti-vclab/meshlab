@@ -653,7 +653,7 @@ int main(int argc, char *argv[])
 
 	MeshDocument meshDocument;
 
-	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000);
+	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000, 50000);
 	shared.makeCurrent();
 	GLenum err = glewInit();
 	if (err != GLEW_NO_ERROR)
