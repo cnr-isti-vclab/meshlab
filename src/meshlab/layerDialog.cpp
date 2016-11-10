@@ -711,7 +711,6 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
         {
             if(item->_meshid == mm->id()) 
             {
-				qDebug() << "updato";
                 item->setBackground(1,QBrush(Qt::yellow));
                 item->setForeground(1,QBrush(Qt::blue));
                 item->setBackground(2,QBrush(Qt::yellow));
@@ -720,7 +719,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
                 item->setForeground(3,QBrush(Qt::blue));
                 ui->meshTreeWidget->setCurrentItem(item);
 				_tabw->updatePerMeshRenderingAction(item->_rendertoolbar->getRenderingActions());
-				_renderingtabcontainer->setTitle(mm->shortName());
+				_renderingtabcontainer->setTitle(mm->label());
 				updateDecoratorParsView();
             }
             else
