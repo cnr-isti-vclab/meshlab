@@ -301,6 +301,7 @@ void EditMutualCorrsPlugin::addNewPoint()
 
     // update dialog
     mutualcorrsDialog->updateTable();
+	mutualcorrsDialog->ui->tableWidget->selectRow(mutualcorrsDialog->ui->tableWidget->rowCount()-1);
     glArea->update();
 }
 
@@ -324,6 +325,7 @@ void EditMutualCorrsPlugin::deleteCurrentPoint()
 
     // update dialog
     mutualcorrsDialog->updateTable();
+	mutualcorrsDialog->ui->tableWidget->selectRow(0);
     glArea->update();
 }
 
