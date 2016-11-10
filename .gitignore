@@ -27,3 +27,4 @@ src/distrib/plugins/*.xml
 src/distrib/common.lib
 src/distrib/meshlab.exe
 src/distrib/meshlabserver.exe
+src/distrib/MeshLabBundle
