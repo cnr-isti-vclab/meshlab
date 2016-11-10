@@ -13,7 +13,6 @@ SUBDIRS       = common \
                 meshlabplugins/io_u3d\
                 meshlabplugins/io_tri\
                 meshlabplugins/io_x3d \
-                meshlabplugins/io_gts \
                 meshlabplugins/io_expe \
                 meshlabplugins/io_pdb \
                 plugins_experimental/io_TXT \

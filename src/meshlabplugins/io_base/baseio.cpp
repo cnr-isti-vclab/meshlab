@@ -29,6 +29,7 @@
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_ptx.h>
 #include <wrap/io_trimesh/import_vmi.h>
+#include <wrap/io_trimesh/import_gts.h>
 
 #include <wrap/io_trimesh/export_ply.h>
 #include <wrap/io_trimesh/export_stl.h>
@@ -36,6 +37,7 @@
 #include <wrap/io_trimesh/export_vrml.h>
 #include <wrap/io_trimesh/export_dxf.h>
 #include <wrap/io_trimesh/export_vmi.h>
+#include <wrap/io_trimesh/export_gts.h>
 #include <wrap/io_trimesh/export.h>
 
 using namespace std;
@@ -219,6 +221,23 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
             return false;
         }
     }
+    else if (formatName.toUpper() == tr("GTS"))
+  {
+      int loadMask;
+      if (!tri::io::ImporterGTS<CMeshO>::LoadMask(filename.c_str(),loadMask))
+          return false;
+      m.Enable(loadMask);
+
+      tri::io::ImporterGTS<CMeshO>::Options opt;
+      opt.flipFaces = true;
+
+      int result = tri::io::ImporterGTS<CMeshO>::Open(m.cm, filename.c_str(), mask, opt, cb);
+      if (result != 0)
+      {
+          errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterGTS<CMeshO>::ErrorMsg(result));
+          return false;
+      }
+  }
     else
   {
     assert(0); // Unknown File type
@@ -331,7 +350,16 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
       }
     return true;
   }
-
+    if( formatName.toUpper() == tr("GTS") )
+    {
+        int result = vcg::tri::io::ExporterGTS<CMeshO>::Save(m.cm,filename.c_str(),mask);
+        if(result!=0)
+        {
+            errorMessage =  errorMsgFormat.arg(fileName, vcg::tri::io::ExporterGTS<CMeshO>::ErrorMsg(result));
+            return false;
+        }
+        return true;
+    }
   assert(0); // unknown format
     return false;
 }
