@@ -70,7 +70,7 @@ LayerDialog::LayerDialog(QWidget *parent )
 	ui->renderingLayout->addWidget(_renderingtabcontainer);
 
     // The following connection is used to associate the click with the change of the current mesh.
-    connect(ui->meshTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
+    connect(ui->meshTreeWidget, SIGNAL(itemPressed(QTreeWidgetItem * , int  )) , this,  SLOT(meshItemClicked(QTreeWidgetItem * , int ) ) );
 
     connect(ui->meshTreeWidget, SIGNAL(itemExpanded(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
     connect(ui->meshTreeWidget, SIGNAL(itemCollapsed(QTreeWidgetItem * )) , this,  SLOT(adaptLayout(QTreeWidgetItem *)));
@@ -711,6 +711,7 @@ void LayerDialog::updatePerMeshItemSelectionStatus()
         {
             if(item->_meshid == mm->id()) 
             {
+				qDebug() << "updato";
                 item->setBackground(1,QBrush(Qt::yellow));
                 item->setForeground(1,QBrush(Qt::blue));
                 item->setBackground(2,QBrush(Qt::yellow));
