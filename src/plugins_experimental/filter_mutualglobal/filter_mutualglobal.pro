@@ -19,4 +19,4 @@ SOURCES       += filter_mutualglobal.cpp \
 			solver.cpp
 		
 TARGET        = filter_mutualglobal
-macx:QMAKE_POST_LINK = "cp "$$_PRO_FILE_PWD_/$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml"
+
