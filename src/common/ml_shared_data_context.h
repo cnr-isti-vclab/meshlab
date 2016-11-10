@@ -123,7 +123,7 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 
 	static float maxPointSize()
 	{
-		return 5.0f;
+		return 15.0f;
 	}
 
 	static float maxLineWidth()
