@@ -1161,7 +1161,7 @@ void MainWindow::connectionDone(QNetworkReply *reply)
   else 
     if (VerboseCheckingFlag)
     {
-      if(answer.left(2) == QString("ok"))
+      if (answer.left(2) == QString("ok"))
         QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
       else 
         QMessageBox::warning(this, "Warning. Update Checking server did not answer correctly",answer);

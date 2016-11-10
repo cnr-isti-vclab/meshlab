@@ -3461,13 +3461,13 @@ void MainWindow::showEvent(QShowEvent * event)
 		QDate lasttimechecked = QDate::fromString(settings.value(versioncheckeddatestring).toString());
 		if (lasttimechecked < today)
 		{
-			checkForUpdates();
+			checkForUpdates(false);
 			settings.setValue(versioncheckeddatestring, todayStr);
 		}
 	}
 	else
 	{
-		checkForUpdates();
+		checkForUpdates(false);
 		settings.setValue(versioncheckeddatestring, todayStr);
 	}
 	sendUsAMail();
