@@ -634,7 +634,6 @@ int main(int argc, char *argv[])
     QList<OutFileMesh> outmeshlist;
     QList<OutProject> outprojectfiles;
 
-
     QString cmdline;
     for(int ii = 1;ii < argc;++ii)
         cmdline = cmdline + argv[ii] + " ";
@@ -653,7 +652,7 @@ int main(int argc, char *argv[])
 
 	MeshDocument meshDocument;
 
-	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000);
+	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000,100000);
 	shared.makeCurrent();
 	GLenum err = glewInit();
 	if (err != GLEW_NO_ERROR)
