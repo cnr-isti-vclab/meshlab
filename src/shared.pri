@@ -14,10 +14,6 @@ mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
 
-win32-msvc2005:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-msvc2008:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-msvc2010:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
-win32-msvc2012:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-msvc2013:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-msvc2015:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
@@ -25,16 +21,6 @@ linux-g++:LIBS += -L../../distrib -lcommon -lGL -lGLU
 linux-g++-32:LIBS += -L../../distrib -lcommon -lGL -lGLU
 linux-g++-64:LIBS += -L../../distrib -lcommon -lGL -lGLU
 
-#CONFIG(debug, debug|release) {
-#	win32-msvc2005:  LIBS += ../../common/debug/common.lib
-#	win32-msvc2008:  LIBS += ../../common/debug/common.lib
-#	win32-g++:  LIBS += -L../../common/debug -lcommon
-#}
-
-win32-msvc2005:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
-win32-msvc2008:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
-win32-msvc2010:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
-win32-msvc2012:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
@@ -51,14 +37,8 @@ DEPENDPATH += ../.. $$VCGDIR
 # macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
 # macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
-##macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../../meshlab/plugins/lib$${TARGET}.dylib"
-
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
-win32-msvc2005:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-win32-msvc2008:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-win32-msvc2010:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
-win32-msvc2012:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2013:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2015:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release,debug | release){
@@ -78,9 +58,3 @@ contains(TEMPLATE,lib) {
    }
 }
 
-
-  win32-msvc2005: RCC_DIR = $(ConfigurationName)
-  win32-msvc2008: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2010: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2012: RCC_DIR = $(ConfigurationName)
-#	win32-msvc2013: RCC_DIR = $(ConfigurationName)
