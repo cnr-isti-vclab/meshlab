@@ -2,7 +2,7 @@
 __tl;dr__ 
 
 1. install Qt5.7, 
-2. clone vcglib at the same level of meshlab 
+2. clone vcglib (_devel_ branch) at the same level of meshlab 
 3. compile `src/external/external.pro`, 
 4. compile `src/meshlab_full.pro`
 
@@ -24,7 +24,7 @@ You need Qt5.7 and we assume that we have qtcreator installed and you know how t
          ├──...
          └──...
 
-All the include paths inside the `.pro` assume this relative positioning of the `meshlab` and `vcglib` folders. Please note that, given the fact that the developement of the vcglib and meshlab are often intermixed, if you compile the devel branch of the meshlab repo, you should use the devel branch of the vcglib. 
+All the include paths inside the `.pro` assume this relative positioning of the `meshlab` and `vcglib` folders. Please note that, given the fact that the developement of the vcglib and meshlab are often intermixed, if you compile the devel branch of the meshlab repo (or the current master until we reach a distributable beta), you should use the devel branch of the vcglib. 
 
 ##### Compiling
 MeshLab has a plugin architecture and therefore all the plugins are compiled separately; some of them are harder to be compiled. Dont worry, if a plugin fails to compile just remove it and you lose just that functionality. As a first step you should try to use the `src/meshlab_mini.pro` that contains the info for building meshlab with a minimal set of plugins with no external dependencies and usually compile with no problem.
