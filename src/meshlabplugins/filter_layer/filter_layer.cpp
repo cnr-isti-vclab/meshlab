@@ -28,6 +28,7 @@
 #include "filter_layer.h"
 
 #include<vcg/complex/append.h>
+#include <QImageReader>
 
 
 
@@ -50,7 +51,8 @@ FilterLayerPlugin::FilterLayerPlugin()
         FP_RENAME_RASTER <<
         FP_DUPLICATE <<
         FP_SELECTCURRENT <<
-		FP_EXPORT_CAMERAS;
+		FP_EXPORT_CAMERAS <<
+		FP_IMPORT_CAMERAS;
 
     foreach(FilterIDType tt , types())
         actionList << new QAction(filterName(tt), this);
@@ -72,7 +74,8 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
     case FP_RENAME_MESH :  return QString("Rename Current Mesh");
     case FP_RENAME_RASTER :  return QString("Rename Current Raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer");
-	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file");
+	case FP_EXPORT_CAMERAS:  return QString("Export active rasters cameras to file");
+	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
     default : assert(0);
     }
 }
@@ -94,6 +97,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
     case FP_RENAME_RASTER :  return QString("Explicitly change the label shown for a given raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer from its name");
 	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
+	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
     default : assert(0);
     }
 }
@@ -145,11 +149,14 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
             "The name of the current mesh"));
         break;
 	case FP_EXPORT_CAMERAS:
-		parlst.addParam(new RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format"));
+		parlst.addParam(new RichEnum("ExportFile", 0, QStringList("Bundler .out") << "Agisoft xml", "Output format", "Choose the output format, The filter enables to export the cameras to both Bundler and Agisoft Photoscan."));
 		parlst.addParam(new RichString("newName",
 			"cameras",
 			"Export file name (the right extension will be added at the end)",
 			"Name of the output file, it will be saved in the same folder as the project file"));
+		break;
+	case FP_IMPORT_CAMERAS:
+		parlst.addParam(new RichOpenFile("ImportFile", 0, QStringList("All Project Files (*.out *.xml);;Bundler Output (*.out);;Agisoft xml (*.xml)"),"Choose the camera file to be imported", "It's possible to import both Bundler .out and Agisoft .xml files. In both cases, distortion parameters won't be imported. In the case of Agisoft, it's necessary to undistort the images before exporting the xml file"));
 		break;
     default: break; // do not add any parameter for the other filters
     }
@@ -567,6 +574,253 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		
 		
 	} break;
+	case FP_IMPORT_CAMERAS:
+	{
+		QString fileName = par.getOpenFileName("ImportFile");
+		if (fileName.isEmpty())
+		{	
+			this->errorMessage = "No file to open";
+			return false;
+		}
+		QFileInfo fi(fileName);
+		
+		if ((fi.suffix().toLower() == "out"))
+		{
+			unsigned int   num_cams, num_points;
+			FILE *fp = fopen(qPrintable(fileName), "r");
+			if (!fp) return false;
+
+			////Read header
+
+			char line[100];
+			fgets(line, 100, fp);
+			if (line[0] == '\0') return false;
+			line[18] = '\0';
+			if (0 != strcmp("# Bundle file v0.3", line))  return false;
+			fgets(line, 100, fp);
+			if (line[0] == '\0') return false;
+			sscanf(line, "%d %d", &num_cams, &num_points);
+			
+			//////
+			///// Check if the number of active rasters and cameras is the same
+
+			int active = 0;
+			for (int i = 0; i < md.rasterList.size(); i++)
+			{
+				if (md.rasterList[i]->visible)
+					active++;
+			}
+
+			if (active != num_cams)
+			{
+				this->errorMessage = "Error!";
+				errorMessage = "Wait! The number of active rasters and the number of cams in the Bundler file is not the same!";
+				return false;
+			}
+
+			/////
+			//// Import cameras
+
+			for (uint i = 0; i < num_cams; ++i)
+			{
+				float f, k1, k2;
+				float R[16] = { 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1 };
+				vcg::Point3f t;
+
+				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &f, &k1, &k2);
+
+				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(R[0]), &(R[1]), &(R[2]));  R[3] = 0;
+				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(R[4]), &(R[5]), &(R[6]));  R[7] = 0;
+				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(R[8]), &(R[9]), &(R[10])); R[11] = 0;
+
+				fgets(line, 100, fp);; if (line[0] == '\0') return false; sscanf(line, "%f %f %f", &(t[0]), &(t[1]), &(t[2]));
+
+				Matrix44f mat = Matrix44f::Construct(Matrix44f(R));
+
+				Matrix33f Rt = Matrix33f(Matrix44f(mat), 3);
+				Rt.Transpose();
+
+				Point3f pos = Rt * Point3f(t[0], t[1], t[2]);
+
+				md.rasterList[i]->shot.Extrinsics.SetTra(Point3f(-pos[0], -pos[1], -pos[2]));
+				md.rasterList[i]->shot.Extrinsics.SetRot(mat);
+
+				md.rasterList[i]->shot.Intrinsics.FocalMm = f;
+				md.rasterList[i]->shot.Intrinsics.k[0] = 0.0;//k1; To be uncommented when distortion is taken into account reliably
+				md.rasterList[i]->shot.Intrinsics.k[1] = 0.0;//k2;
+				md.rasterList[i]->shot.Intrinsics.PixelSizeMm = vcg::Point2f(1, 1);
+				QSize size;
+				QImageReader sizeImg(md.rasterList[i]->currentPlane->fullPathFileName);
+				size = sizeImg.size();
+				md.rasterList[i]->shot.Intrinsics.ViewportPx = vcg::Point2i(size.width(), size.height());
+				md.rasterList[i]->shot.Intrinsics.CenterPx[0] = (int)((double)md.rasterList[i]->shot.Intrinsics.ViewportPx[0] / 2.0f);
+				md.rasterList[i]->shot.Intrinsics.CenterPx[1] = (int)((double)md.rasterList[i]->shot.Intrinsics.ViewportPx[1] / 2.0f);
+				
+			}
+
+			////////
+
+		}
+		else if ((fi.suffix().toLower() == "xml"))
+		{
+			QDomDocument doc;
+			QFile file(fileName);
+			if (!file.open(QIODevice::ReadOnly) || !doc.setContent(&file))
+				return false;
+			std::vector<Shotf >   shots;
+
+			////// Read and store sensors list
+
+			QDomNodeList sensors = doc.elementsByTagName("sensor");
+
+			if (sensors.size() == 0)
+			{
+				this->errorMessage = "Error!";
+				return false;
+			}
+
+			shots.resize(sensors.size());
+			for (int i = 0; i < sensors.size(); i++)
+			{
+				QDomNode n = sensors.item(i);
+				int id = n.attributes().namedItem("id").nodeValue().toInt();
+
+				QDomNode node = n.firstChild();
+				//Devices
+				while (!node.isNull())
+				{
+					if (QString::compare(node.nodeName(), "calibration") == 0)
+					{
+						QDomNode node1 = node.firstChild();
+						//Devices
+						while (!node1.isNull())
+						{
+							if (QString::compare(node1.nodeName(), "resolution") == 0)
+							{
+								int width = node1.attributes().namedItem("width").nodeValue().toInt();
+								int height = node1.attributes().namedItem("height").nodeValue().toInt();
+								shots[id].Intrinsics.ViewportPx[0] = width;
+								shots[id].Intrinsics.ViewportPx[1] = height;
+								shots[id].Intrinsics.CenterPx[0] = (float)width / 2.0f;
+								shots[id].Intrinsics.CenterPx[1] = (float)height / 2.0f;
+								//Log("Width %f, Height %f", shots[id].Intrinsics.CenterPx[0], shots[id].Intrinsics.CenterPx[1]);
+							}
+							else if (QString::compare(node1.nodeName(), "fx") == 0)
+							{
+								float fx = node1.toElement().text().toFloat();
+								if (fx > 100)
+								{
+									fx = fx / 100;
+									shots[id].Intrinsics.FocalMm = fx;
+									shots[id].Intrinsics.PixelSizeMm[0] = 0.01;
+									shots[id].Intrinsics.PixelSizeMm[1] = 0.01;
+								}
+								else
+								{
+									shots[id].Intrinsics.FocalMm = fx;
+									shots[id].Intrinsics.PixelSizeMm[0] = 1;
+									shots[id].Intrinsics.PixelSizeMm[1] = 1;
+								}
+								//Log("Focal %f", fx);
+							}
+							else if (QString::compare(node1.nodeName(), "k1") == 0)
+							{
+								float k1 = node1.toElement().text().toFloat();
+								if (k1 != 0.0f)
+								{
+									this->errorMessage = "Distortion is not supported";
+									Log("Warning! Distortion parameters won't be imported! Please undistort the images in Photoscan before!"); // text
+
+								}
+
+							}
+							node1 = node1.nextSibling();
+						}
+
+					}
+					node = node.nextSibling();
+				}
+			}
+
+			/////////
+			///////// Read and import cameras 
+
+			QDomNodeList cameras = doc.elementsByTagName("camera");
+
+			if (cameras.size() == 0)
+			{
+				this->errorMessage = "Error!";
+				return false;
+			}
+
+			for (int i = 0; i < cameras.size(); i++)
+			{
+				QDomNode n = cameras.item(i);
+				int id = n.attributes().namedItem("id").nodeValue().toInt();
+				int sensor_id = n.attributes().namedItem("sensor_id").nodeValue().toInt();
+				QString name = n.attributes().namedItem("label").nodeValue();
+
+				int rasterId = -1;
+				for (int i = 0; i < md.rasterList.size(); i++)
+				{
+					if (md.rasterList[i]->currentPlane->shortName() == name)
+					{
+						rasterId = i;
+						break;
+					}
+				}
+
+				QDomNode node = n.firstChild();
+				
+				while (!node.isNull() && rasterId != -1)
+				{
+					if (QString::compare(node.nodeName(), "transform") == 0)
+					{
+						md.rasterList[rasterId]->shot.Intrinsics.FocalMm = shots[sensor_id].Intrinsics.FocalMm;
+						md.rasterList[rasterId]->shot.Intrinsics.ViewportPx[0] = shots[sensor_id].Intrinsics.ViewportPx[0];
+						md.rasterList[rasterId]->shot.Intrinsics.ViewportPx[1] = shots[sensor_id].Intrinsics.ViewportPx[1];
+						md.rasterList[rasterId]->shot.Intrinsics.CenterPx[0] = shots[sensor_id].Intrinsics.CenterPx[0];
+						md.rasterList[rasterId]->shot.Intrinsics.CenterPx[1] = shots[sensor_id].Intrinsics.CenterPx[1];
+						md.rasterList[rasterId]->shot.Intrinsics.PixelSizeMm[0] = shots[sensor_id].Intrinsics.PixelSizeMm[0];
+						md.rasterList[rasterId]->shot.Intrinsics.PixelSizeMm[1] = shots[sensor_id].Intrinsics.PixelSizeMm[1];
+
+						QStringList values = node.toElement().text().split(" ", QString::SkipEmptyParts);
+						Matrix44f mat = md.rasterList[i]->shot.Extrinsics.Rot();
+						Point3f pos = md.rasterList[i]->shot.Extrinsics.Tra();
+						
+						mat[0][0] = values[0].toFloat();
+						mat[1][0] = -values[1].toFloat();
+						mat[2][0] = -values[2].toFloat();
+						pos[0] = values[3].toFloat();
+						mat[0][1] = values[4].toFloat();
+						mat[1][1] = -values[5].toFloat();
+						mat[2][1] = -values[6].toFloat();
+						pos[1] = values[7].toFloat();
+						mat[0][2] = values[8].toFloat();
+						mat[1][2] = -values[9].toFloat();
+						mat[2][2] = -values[10].toFloat();
+						pos[2] = values[11].toFloat();
+						md.rasterList[i]->shot.Extrinsics.SetRot(mat);
+						md.rasterList[i]->shot.Extrinsics.SetTra(pos);
+
+					}
+					node = node.nextSibling();
+				}
+				
+			}
+
+			////////
+		}
+
+		else
+		{
+			this->errorMessage = "No file to open";
+			errorMessage = "Unknown file type";
+			return false;
+		}
+		
+
+	} break;
     }
 
     return true;
@@ -590,7 +844,9 @@ FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
 	case FP_EXPORT_CAMERAS:
-        return MeshFilterInterface::RasterLayer;
+	     return MeshFilterInterface::RasterLayer;
+	case FP_IMPORT_CAMERAS:
+		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::RasterLayer);
 
     default :  assert(0);
         return MeshFilterInterface::Generic;
@@ -613,6 +869,7 @@ MeshFilterInterface::FILTER_ARITY FilterLayerPlugin::filterArity( QAction* filte
     case FP_DELETE_RASTER :
     case FP_DELETE_NON_SELECTED_RASTER :
 	case FP_EXPORT_CAMERAS:
+	case FP_IMPORT_CAMERAS:
         return MeshFilterInterface::NONE;
     case FP_FLATTEN :
     case FP_DELETE_NON_VISIBLE_MESH :

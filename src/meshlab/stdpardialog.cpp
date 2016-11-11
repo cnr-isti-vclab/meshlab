@@ -1548,6 +1548,8 @@ void OpenFileWidget::selectFile()
     fl = QFileDialog::getOpenFileName(this,tr("Open"),dec->defVal->getFileName(),dec->exts.join(" "));
     collectWidgetValue();
     updateFileName(fl);
+	FileValue fileName(fl);
+	rp->pd->defVal->set(fileName);
     emit dialogParamChanged();
 }
 
@@ -1574,5 +1576,7 @@ void SaveFileWidget::selectFile()
     fl = QFileDialog::getSaveFileName(this,tr("Save"),dec->defVal->getFileName(),dec->ext);
     collectWidgetValue();
     updateFileName(fl);
+	FileValue fileName(fl);
+	rp->pd->defVal->set(fileName);
     emit dialogParamChanged();
 }
