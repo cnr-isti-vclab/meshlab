@@ -333,7 +333,28 @@ public:
     bool isVisibleConditionValid(MeshModel*) const;
 };
 
-class MLRenderingUserDefinedColorAction : public MLRenderingAction
+class MLRenderingUserDefinedGeneralColorAction : public MLRenderingAction
+{
+	Q_OBJECT
+public:
+	MLRenderingUserDefinedGeneralColorAction(QObject* parent);
+	MLRenderingUserDefinedGeneralColorAction(int meshid, QObject* parent);
+	MLRenderingUserDefinedGeneralColorAction(MLRenderingUserDefinedGeneralColorAction* origin, QObject * par);
+
+	virtual void createSisterAction(MLRenderingAction*& sisteract, QObject* par) = 0;
+	virtual void updateRenderingData(MLRenderingData& rd) = 0;
+	virtual bool isRenderingDataEnabled(const MLRenderingData& rd) const = 0;
+
+	void setColor(const vcg::Color4b& col);
+	void setColor(const QColor& col);
+
+	vcg::Color4b& getColor();
+	virtual void readColor(const MLRenderingData& rd, vcg::Color4b& col) = 0;
+protected:
+	vcg::Color4b _coluser;
+};
+
+class MLRenderingUserDefinedColorAction : public MLRenderingUserDefinedGeneralColorAction
 {
     Q_OBJECT
 public:
@@ -345,16 +366,13 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    void setColor(const vcg::Color4b& col);
-    void setColor(const QColor& col);
 
-    vcg::Color4b& getColor();
+	void readColor(const MLRenderingData& rd, vcg::Color4b& col);
 private:
     MLRenderingData::PRIMITIVE_MODALITY _pm;
-    vcg::Color4b _coluser;
 };
 
-class MLRenderingBBoxUserDefinedColorAction : public MLRenderingAction
+class MLRenderingBBoxUserDefinedColorAction : public MLRenderingUserDefinedGeneralColorAction
 {
     Q_OBJECT
 public:
@@ -365,12 +383,8 @@ public:
 	void createSisterAction(MLRenderingAction*& sisteract, QObject* par);
     void updateRenderingData(MLRenderingData& rd);
     bool isRenderingDataEnabled(const MLRenderingData& rd) const;
-    void setColor(const QColor& col);
-    void setColor(const vcg::Color4b& col);
-
-    vcg::Color4b& getColor();
-private:
-    vcg::Color4b _col;
+ 
+	void readColor(const MLRenderingData& rd, vcg::Color4b& col);
 };
 
 

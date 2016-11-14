@@ -780,23 +780,55 @@ bool MLRenderingPerFaceColorAction::isVisibleConditionValid( MeshModel* mm) cons
     return mm->hasDataMask(MeshModel::MM_FACECOLOR);
 }
 
+
+MLRenderingUserDefinedGeneralColorAction::MLRenderingUserDefinedGeneralColorAction(QObject* parent)
+	:MLRenderingAction(parent)
+{
+}
+
+MLRenderingUserDefinedGeneralColorAction::MLRenderingUserDefinedGeneralColorAction(int meshid, QObject* parent)
+	:MLRenderingAction(meshid,parent)
+{
+}
+
+MLRenderingUserDefinedGeneralColorAction::MLRenderingUserDefinedGeneralColorAction(MLRenderingUserDefinedGeneralColorAction* origin, QObject * par)
+	:MLRenderingAction(origin->meshId(),par)
+{
+	setColor(origin->getColor());
+}
+
+void MLRenderingUserDefinedGeneralColorAction::setColor(const vcg::Color4b& col)
+{
+	_coluser = col;
+}
+
+void MLRenderingUserDefinedGeneralColorAction::setColor(const QColor& col)
+{
+	_coluser = vcg::ColorConverter::ToColor4b(col);
+}
+
+vcg::Color4b& MLRenderingUserDefinedGeneralColorAction::getColor()
+{
+	return _coluser;
+}
+
+
 MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderingData::PRIMITIVE_MODALITY pm,QObject* parent )
-    :MLRenderingAction(-1,parent),_pm(pm),_coluser(vcg::Color4b::DarkGray)
+    :MLRenderingUserDefinedGeneralColorAction(-1,parent),_pm(pm)
 {
     setText(QString("User-Def"));
 }
 
 MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction( MLRenderingData::PRIMITIVE_MODALITY pm,int meshid, QObject* parent )
-    :MLRenderingAction(meshid,parent),_pm(pm)
+    : MLRenderingUserDefinedGeneralColorAction(meshid,parent),_pm(pm)
 {
     setText(QString("User-Def"));
 }
 
 MLRenderingUserDefinedColorAction::MLRenderingUserDefinedColorAction(MLRenderingUserDefinedColorAction* origin, QObject * par)
-	: MLRenderingAction(origin->meshId(),par)
+	: MLRenderingUserDefinedGeneralColorAction(origin->meshId(),par)
 {
 	setText(origin->text());
-	setColor(origin->getColor());
 	_pm = origin->_pm;
 }
 
@@ -870,21 +902,33 @@ bool MLRenderingUserDefinedColorAction::isRenderingDataEnabled( const MLRenderin
     return false;
 }
 
-void MLRenderingUserDefinedColorAction::setColor( const vcg::Color4b& col )
+void MLRenderingUserDefinedColorAction::readColor(const MLRenderingData& rd, vcg::Color4b& col)
 {
-    _coluser = col;
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	if (valid)
+	{
+		switch (_pm)
+		{
+		case (MLRenderingData::PR_POINTS):
+		{
+			col = opts._perpoint_fixed_color;
+			break;
+		}
+		case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+		case (MLRenderingData::PR_WIREFRAME_EDGES):
+		{
+			col = opts._perwire_fixed_color;
+			break;
+		}
+		case (MLRenderingData::PR_SOLID):
+		{
+			col = opts._persolid_fixed_color;
+			break;
+		}
+		}
+	}
 }
-
-void MLRenderingUserDefinedColorAction::setColor( const QColor& col )
-{
-    _coluser = vcg::ColorConverter::ToColor4b(col);
-}
-
-vcg::Color4b& MLRenderingUserDefinedColorAction::getColor()
-{
-    return _coluser;
-}
-
 
 MLRenderingSelectionAction::MLRenderingSelectionAction( QObject* parent )
     :MLRenderingAction(-1,parent)
@@ -1078,22 +1122,22 @@ void MLRenderingBBoxPerMeshColorAction::setColor( const vcg::Color4b& col )
 }
 
 MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( QObject* parent )
-    :MLRenderingAction(-1,parent)
+    :MLRenderingUserDefinedGeneralColorAction(-1,parent)
 {
     setText("User-Def");
 }
 
 MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction( int meshid,QObject* parent )
-    :MLRenderingAction(meshid,parent)
+    : MLRenderingUserDefinedGeneralColorAction(meshid,parent)
 {
     setText("User-Def");
 }
 
 MLRenderingBBoxUserDefinedColorAction::MLRenderingBBoxUserDefinedColorAction(MLRenderingBBoxUserDefinedColorAction* origin, QObject * par)
-	: MLRenderingAction(origin->meshId(), par)
+	: MLRenderingUserDefinedGeneralColorAction(origin->meshId(), par)
 {
 	setText(origin->text());
-	_col = origin->_col;
+	_coluser = origin->_coluser;
 }
 
 void MLRenderingBBoxUserDefinedColorAction::createSisterAction(MLRenderingAction *& sisteract, QObject * par)
@@ -1108,7 +1152,7 @@ void MLRenderingBBoxUserDefinedColorAction::updateRenderingData( MLRenderingData
     if (valid)
     {
         opts._perbbox_fixed_color_enabled = isChecked();
-        opts._perbbox_fixed_color = _col;
+        opts._perbbox_fixed_color = _coluser;
         rd.set(opts);
     }
 }
@@ -1122,21 +1166,13 @@ bool MLRenderingBBoxUserDefinedColorAction::isRenderingDataEnabled( const MLRend
     return false;
 }
 
-void MLRenderingBBoxUserDefinedColorAction::setColor( const QColor& col )
+void MLRenderingBBoxUserDefinedColorAction::readColor(const MLRenderingData& rd, vcg::Color4b& col)
 {
-    _col = vcg::ColorConverter::ToColor4b(col);
+	MLPerViewGLOptions opts;
+	bool valid = rd.get(opts);
+	if (valid)
+		col = opts._perbbox_fixed_color;
 }
-
-void MLRenderingBBoxUserDefinedColorAction::setColor( const vcg::Color4b& col )
-{
-    _col = col;
-}
-
-vcg::Color4b& MLRenderingBBoxUserDefinedColorAction::getColor()
-{
-    return _col;
-}
-
 
 MLRenderingEdgeDecoratorAction::MLRenderingEdgeDecoratorAction( QObject* parent )
     :MLRenderingAction(-1,parent)

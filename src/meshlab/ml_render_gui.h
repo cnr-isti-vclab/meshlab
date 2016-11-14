@@ -52,16 +52,17 @@ private:
 	MLRenderingGlobalAction* _lastclicked;
 };
 
-class MLRenderingColorPicker : public QToolButton
+class MLRenderingColorPicker : public QPushButton
 {
     Q_OBJECT
 
 public:
-    MLRenderingColorPicker(int meshid,MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p);
-    MLRenderingColorPicker(MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p);
+    MLRenderingColorPicker(int meshid, MLRenderingUserDefinedGeneralColorAction* colact,QWidget *p);
+    MLRenderingColorPicker(MLRenderingUserDefinedGeneralColorAction* colact,QWidget *p);
     ~MLRenderingColorPicker();
 
-    void setColor(QColor def);
+    void setColor(const QColor& def);
+	void setColor(const vcg::Color4b& def);
 //protected:
 //    void paintEvent( QPaintEvent * );
 protected:
@@ -69,29 +70,7 @@ protected:
     void  updateColorInfo();
 
 public:
-    MLRenderingUserDefinedColorAction* _act;
-	QPushButton* _cbutton;
-
-signals:
-    void userDefinedColorAction(int,MLRenderingAction*);
-protected slots:
-    void pickColor();
-};
-
-class MLRenderingBBoxColorPicker : public QToolButton
-{
-    Q_OBJECT
-public:
-    MLRenderingBBoxColorPicker(QWidget* parent);
-    MLRenderingBBoxColorPicker(int meshid,QWidget* parent);
-    ~MLRenderingBBoxColorPicker();
-    void setColor(QColor def);
-protected:
-    void initGui();
-    void  updateColorInfo();
-public:
-	MLRenderingBBoxUserDefinedColorAction* _act;
-	QPushButton* _cbutton;
+	MLRenderingUserDefinedGeneralColorAction* _act;
 
 signals:
     void userDefinedColorAction(int,MLRenderingAction*);
@@ -157,22 +136,6 @@ private slots:
 	void toggle(QAction*);
 };
 
-class MLRenderingThreeStateButton : public QWidget
-{
-	Q_OBJECT
-public:
-	MLRenderingThreeStateButton(int meshid, QWidget* parent = NULL);
-	~MLRenderingThreeStateButton();
-
-	void setRenderingAction(MLRenderingAction* act);
-private:
-	void initGui();
-
-	int _meshid;
-	QGridLayout* _layout;
-	MLRenderingOnOffToolbar* _onofftool;
-};
-
 class MLRenderingToolbar : public QToolBar
 {
     Q_OBJECT
@@ -183,8 +146,7 @@ public:
     ~MLRenderingToolbar();
 
     virtual void addRenderingAction( MLRenderingAction* act );
-    void addColorPicker(MLRenderingColorPicker* pick);
-    void addColorPicker(MLRenderingBBoxColorPicker* pick);
+
     void setAccordingToRenderingData(const MLRenderingData& dt);
     void getCurrentRenderingDataAccordingToGUI(MLRenderingData& dt) const;
     QList<MLRenderingAction*>& getRenderingActions();
@@ -196,20 +158,23 @@ protected:
     QList<MLRenderingAction*> _acts;
     int _meshid;
     MLRenderingAction* _previoussel;
+	QMap<MLRenderingAction*, QAction*> _additionalacts;
 protected slots:
     virtual void toggle(QAction* act);
     void extraUpdateRequired(int,MLRenderingAction*);
 
 private:
     void initGui();
+	void addColorPicker(MLRenderingUserDefinedGeneralColorAction* usdefcolact);
 
+	QMap<MLRenderingUserDefinedGeneralColorAction*, MLRenderingColorPicker*> _colpicks;
 signals:
     void updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&);
 	void updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&);
 	void updateRenderingDataAccordingToAction(int, MLRenderingAction*);
     void activatedAction(MLRenderingAction*);
-    
-
+	void setColorPickerAccordingToRenderingData(const MLRenderingData& dt);
+	void getCurrentRenderingDataAccordingToColorPickerGUI(MLRenderingData& dt) const;
 protected:
     //if meshid is -1 it means that the actions are intended to be deployed to all the document and not to a specific mesh model
     QActionGroup* _actgroup;
@@ -229,20 +194,6 @@ private slots:
 
 private:
     void initGui();
-};
-
-class MLRenderingThreeStateSideToolbar : public MLRenderingToolbar
-{
-	Q_OBJECT
-public:
-	MLRenderingThreeStateSideToolbar(QWidget* parent = NULL);
-
-	~MLRenderingThreeStateSideToolbar() {}
-private slots:
-	//void toggle(QAction* act);
-
-private:
-	void initGui();
 };
 
 class MLRenderingParametersFrame : public QFrame
@@ -296,13 +247,13 @@ private:
 	MLRenderingGlobalAction* _smoothglobact;
 	MLRenderingGlobalAction* _flatglobact;
 
-	QActionGroup* _pointscolgroup;
+	/*QActionGroup* _pointscolgroup;
 	MLRenderingGlobalAction* _pointcolglobact;
 
 	QActionGroup* _solidcolgroup;
 	MLRenderingGlobalAction* _solidvertcolglobact;
 	MLRenderingGlobalAction* _solidfacecolglobact;
-	MLRenderingGlobalAction* _solidtextcolglobact;
+	MLRenderingGlobalAction* _solidtextcolglobact;*/
 signals:
 	void updateRenderingDataAccordingToActions(QList<MLRenderingGlobalAction*>);
 	//void updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool);

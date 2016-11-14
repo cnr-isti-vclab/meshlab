@@ -13,14 +13,14 @@
 #include <QDebug>
 
 MLRenderingToolbar::MLRenderingToolbar(QWidget* parent )
-    :QToolBar(parent),_meshid(-1),_previoussel(NULL),_actgroup(NULL)
+    :QToolBar(parent),_meshid(-1),_previoussel(NULL),_actgroup(NULL),_additionalacts(),_colpicks()
 {
     _actgroup = new QActionGroup(this);
     connect(this,SIGNAL(actionTriggered(QAction*)),this,SLOT(toggle(QAction*)));
 }
 
 MLRenderingToolbar::MLRenderingToolbar(int meshid,QWidget* parent )
-    :QToolBar(parent),_meshid(meshid),_previoussel(NULL),_actgroup(NULL)
+    :QToolBar(parent),_meshid(meshid),_previoussel(NULL),_actgroup(NULL), _additionalacts(),_colpicks()
 {
     _actgroup = new QActionGroup(this);
     connect(this,SIGNAL(actionTriggered(QAction*)),this,SLOT(toggle(QAction*)));
@@ -55,6 +55,11 @@ void MLRenderingToolbar::addRenderingAction( MLRenderingAction* act )
     _actgroup->addAction(act);  
     _acts.push_back(act);
     addAction(act);
+
+	MLRenderingUserDefinedGeneralColorAction* udcact = qobject_cast<MLRenderingUserDefinedGeneralColorAction*>(act);
+	if (udcact != NULL)
+		addColorPicker(udcact);
+
     act->setCheckable(true);
     act->setVisible(true);
 }
@@ -77,7 +82,21 @@ void MLRenderingToolbar::setAccordingToRenderingData(const MLRenderingData& dt)
 {
 	foreach(MLRenderingAction* rendact, _acts)
 	{
-		rendact->setChecked(rendact->isRenderingDataEnabled(dt));
+		if (rendact != NULL)
+		{
+			rendact->setChecked(rendact->isRenderingDataEnabled(dt));
+			MLRenderingUserDefinedGeneralColorAction* usdef = qobject_cast<MLRenderingUserDefinedGeneralColorAction*>(rendact);
+			if (usdef != NULL)
+			{
+				MLRenderingColorPicker* colpick = _colpicks[usdef];
+				if (colpick != NULL)
+				{
+					vcg::Color4b col;
+					usdef->readColor(dt, col);
+					colpick->setColor(col);
+				}
+			}
+		}
 	}
 }
 
@@ -100,12 +119,11 @@ QList<QAction*> MLRenderingToolbar::getTopLevelActions()
 	{
 		if (_acts[ii] != NULL)
 		{
-			MLRenderingUserDefinedColorAction* udcact = qobject_cast<MLRenderingUserDefinedColorAction*>(_acts[ii]);
-			MLRenderingBBoxUserDefinedColorAction* bbcact = qobject_cast<MLRenderingBBoxUserDefinedColorAction*>(_acts[ii]);
-			if ((udcact == NULL) && (bbcact == NULL))
+			/*MLRenderingUserDefinedGeneralColorAction* udcact = qobject_cast<MLRenderingUserDefinedGeneralColorAction*>(_acts[ii]);
+			if (udcact == NULL)
 				act.push_back(_acts[ii]);
 			else
-			{
+			{*/
 				QList<QAction*> curracts = actions();
 				if (curracts.size() == _acts.size())
 				{
@@ -113,34 +131,25 @@ QList<QAction*> MLRenderingToolbar::getTopLevelActions()
 					if ((tmp != NULL) && (tmp->actions().size() > 0))
 						act.push_back(tmp->actions()[0]);
 				}
-			}
+			/*}*/
 		}
 	}
 	return act;
 }
 
-void MLRenderingToolbar::addColorPicker( MLRenderingColorPicker* pick )
+void MLRenderingToolbar::addColorPicker( MLRenderingUserDefinedGeneralColorAction* act )
 {
-	if (pick == NULL)
+	if (act == NULL)
 		return;
-	MLRenderingUserDefinedColorAction* colact = qobject_cast<MLRenderingUserDefinedColorAction*>(pick->_act);
-	addRenderingAction(colact);
-	pick->_cbutton->setFixedSize(widgetForAction(colact)->height() / 2, widgetForAction(colact)->height() /2);
-	addWidget(pick);
-    connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
-    connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
-}
 
-void MLRenderingToolbar::addColorPicker( MLRenderingBBoxColorPicker* pick )
-{
-	if (pick == NULL)
-		return;
-    MLRenderingBBoxUserDefinedColorAction* colact = qobject_cast<MLRenderingBBoxUserDefinedColorAction*>(pick->_act);
-	addRenderingAction(colact);
-	pick->_cbutton->setFixedSize(widgetForAction(colact)->height() / 2, widgetForAction(colact)->height() / 2);
+	MLRenderingColorPicker* pick = new MLRenderingColorPicker(_meshid, act, this);
+	pick->setFixedSize(height() / 2, height() /2);
 	addWidget(pick);
+	_colpicks[act] = pick;
+	//_colpickacts.push_back(addWidget(pick));
     connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
     connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
+	//connect(this, SIGNAL(), pick, SLOT());
 }
 
 void MLRenderingToolbar::extraUpdateRequired( int,MLRenderingAction* act )
@@ -152,8 +161,8 @@ void MLRenderingToolbar::getCurrentRenderingDataAccordingToGUI( MLRenderingData&
 {
     for(int ii = 0;ii < _acts.size();++ii)
     {
-        if (_acts[ii] != NULL)
-            _acts[ii]->updateRenderingData(dt);
+		if (_acts[ii] != NULL)
+			_acts[ii]->updateRenderingData(dt);
     }
 }
 
@@ -199,54 +208,6 @@ void MLRenderingSideToolbar::toggle( QAction* clickedact )
 
     }
     MLRenderingToolbar::toggle(clickedact);
-}
-
-MLRenderingThreeStateSideToolbar::MLRenderingThreeStateSideToolbar(QWidget* parent /*= NULL*/)
-	:MLRenderingToolbar(parent)
-{
-
-	initGui();
-}
-
-void MLRenderingThreeStateSideToolbar::initGui()
-{
-	setStyleSheet("QToolBar{spacing:0px;padding:0px;} QToolButton{padding:0px;}");
-
-	MLRenderingThreeStateButton* bboxbut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingBBoxAction* bboxact =  new MLRenderingBBoxAction(_meshid, this);
-	_acts.push_back(bboxact);
-	bboxbut->setRenderingAction(bboxact);
-	addWidget(bboxbut);
-
-	MLRenderingThreeStateButton* pointbut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(_meshid, this);
-	_acts.push_back(pointact);
-	pointbut->setRenderingAction(pointact);
-	addWidget(pointbut);
-
-	MLRenderingThreeStateButton* wirebut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingWireAction* wireact = new MLRenderingWireAction(_meshid, this);
-	_acts.push_back(wireact);
-	wirebut->setRenderingAction(wireact);
-	addWidget(wirebut);
-
-	MLRenderingThreeStateButton* solidbut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingSolidAction* solidact =  new MLRenderingSolidAction(_meshid, this);
-	_acts.push_back(solidact);
-	solidbut->setRenderingAction(solidact);
-	addWidget(solidbut);
-
-	MLRenderingThreeStateButton* selbut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingSelectionAction* selact = new MLRenderingSelectionAction(_meshid, this);
-	_acts.push_back(selact);
-	selbut->setRenderingAction(selact);
-	addWidget(selbut);
-
-	MLRenderingThreeStateButton* edgebut = new MLRenderingThreeStateButton(_meshid, this);
-	MLRenderingEdgeDecoratorAction* edgeact = new MLRenderingEdgeDecoratorAction(_meshid, this);
-	_acts.push_back(edgeact);
-	edgebut->setRenderingAction(edgeact);
-	addWidget(edgebut);
 }
 
 MLRenderingParametersFrame::MLRenderingParametersFrame( int meshid,QWidget* parent )
@@ -321,12 +282,12 @@ void MLRenderingSolidParametersFrame::initGui()
     _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerFaceColorAction(_meshid,_colortool));
     _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_SOLID,_meshid,_colortool));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_SOLID,_colortool);
-    MLPerViewGLOptions tmp;
+	_colortool->addRenderingAction(new MLRenderingUserDefinedColorAction(MLRenderingData::PR_SOLID, _meshid, _colortool));
+    /*MLPerViewGLOptions tmp;
     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
-    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._persolid_fixed_color));
+    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._persolid_fixed_color));*/
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
-	_colortool->addColorPicker(colbut);
+	//_colortool->addColorPicker(colbut);
 	connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
     
@@ -362,6 +323,14 @@ void MLRenderingSolidParametersFrame::setPrimitiveButtonStatesAccordingToRenderi
 {
     _shadingtool->setAccordingToRenderingData(dt);
     _colortool->setAccordingToRenderingData(dt);
+	/*MLRenderingColorPicker* pick = NULL;
+	_colortool->getColorPicker(pick);
+	if (pick != NULL)
+	{
+		MLPerViewGLOptions opts;
+		dt.get(opts);
+		pick->setColor(opts._persolid_fixed_color);
+	}*/
 	_backfacetool->setAccordingToRenderingData(dt);
     _texttool->setAccordingToRenderingData(dt);
 }
@@ -481,8 +450,8 @@ void MLRenderingWireParametersFrame::initGui()
     _shadelab->setFont(boldfont);
     layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
 	_shadingtool->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _shadingtool));
+    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _shadingtool));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
@@ -492,14 +461,16 @@ void MLRenderingWireParametersFrame::initGui()
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
 	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid,this));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_WIREFRAME_TRIANGLES,_colortool);
+    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _colortool));
+    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES,_meshid, _colortool));
+	_colortool->addRenderingAction(new MLRenderingUserDefinedColorAction(MLRenderingData::PR_WIREFRAME_TRIANGLES, _meshid, _colortool));
+    /*MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_WIREFRAME_TRIANGLES,_colortool);
     MLPerViewGLOptions tmp;
     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
     colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perwire_fixed_color));
     _colortool->addColorPicker(colbut);
-    layout->addWidget(_colortool,1,1,Qt::AlignLeft);
+ */   
+	layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
 
@@ -642,9 +613,9 @@ void MLRenderingPointsParametersFrame::initGui()
     _shadelab->setFont(boldfont);
     layout->addWidget(_shadelab,0,0,Qt::AlignLeft);
 	_shadingtool->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS,_meshid,this));
-    _shadingtool->addRenderingAction(new MLRenderingDotAction(_meshid,this));
-    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid,this));
+    _shadingtool->addRenderingAction(new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS,_meshid, _shadingtool));
+    _shadingtool->addRenderingAction(new MLRenderingDotAction(_meshid, _shadingtool));
+    _shadingtool->addRenderingAction(new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS,_meshid, _shadingtool));
     layout->addWidget(_shadingtool,0,1,Qt::AlignLeft);
     connect(_shadingtool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_shadingtool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*, QList<MLRenderingAction*>&)));
@@ -654,13 +625,14 @@ void MLRenderingPointsParametersFrame::initGui()
     layout->addWidget(_colorlab,1,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
 	_colortool->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid,this));
-    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid,this));
-    MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_POINTS,_colortool);
+    _colortool->addRenderingAction(new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS,_meshid, _colortool));
+    _colortool->addRenderingAction(new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS,_meshid, _colortool));
+	_colortool->addRenderingAction(new MLRenderingUserDefinedColorAction(MLRenderingData::PR_POINTS, _meshid, _colortool));
+    /*MLRenderingColorPicker* colbut = new MLRenderingColorPicker(_meshid,MLRenderingData::PR_POINTS,_colortool);
     MLPerViewGLOptions tmp;
     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
     colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perpoint_fixed_color));
-    _colortool->addColorPicker(colbut);
+    _colortool->addColorPicker(colbut);*/
     layout->addWidget(_colortool,1,1,Qt::AlignLeft);
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
@@ -777,14 +749,15 @@ void MLRenderingBBoxParametersFrame::initGui()
     _colorlab->setFont(boldfont);
     layout->addWidget(_colorlab,0,0,Qt::AlignLeft);
     _colortool = new MLRenderingToolbar(_meshid,this);
-    _colortool->addRenderingAction(new MLRenderingBBoxPerMeshColorAction(_meshid,this));
-    MLRenderingBBoxColorPicker* colbut = new MLRenderingBBoxColorPicker(_meshid,_colortool);
-    MLPerViewGLOptions tmp; 
-    MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
-    //tmp._perbbox_fixed_color = vcg::Color4b(255,85,0,255);
-    colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perbbox_fixed_color));
+    _colortool->addRenderingAction(new MLRenderingBBoxPerMeshColorAction(_meshid, _colortool));
+	_colortool->addRenderingAction(new MLRenderingBBoxUserDefinedColorAction(_colortool));
+    //MLRenderingBBoxColorPicker* colbut = new MLRenderingBBoxColorPicker(_meshid,_colortool);
+    //MLPerViewGLOptions tmp; 
+    //MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(tmp);
+    ////tmp._perbbox_fixed_color = vcg::Color4b(255,85,0,255);
+    //colbut->setColor(vcg::ColorConverter::ToQColor(tmp._perbbox_fixed_color));
     layout->addWidget(_colortool,0,1,Qt::AlignLeft);
-	_colortool->addColorPicker(colbut);
+	/*_colortool->addColorPicker(colbut);*/
     connect(_colortool,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)),this,SIGNAL(updateRenderingDataAccordingToActions(int,const QList<MLRenderingAction*>&)));
 	connect(_colortool, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)), this, SIGNAL(updateRenderingDataAccordingToActions(int, MLRenderingAction*,QList<MLRenderingAction*>&)));
 
@@ -1141,26 +1114,21 @@ void MLRenderingParametersTab::getCurrentRenderingDataAccordingToGUI( MLRenderin
             it.value()->getCurrentRenderingDataAccordingToGUI(dt);
 }
 
-MLRenderingColorPicker::MLRenderingColorPicker( int meshid,MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p )
-    :QToolButton(p),_act(NULL)
+MLRenderingColorPicker::MLRenderingColorPicker(int meshid, MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
+    :QPushButton(p),_act(colact)
 {
-    _act = new MLRenderingUserDefinedColorAction(pr,meshid,this);
     //_act->setColor(vcg::ColorConverter::ToColor4b(def));
     initGui();
 }
 
-MLRenderingColorPicker::MLRenderingColorPicker( MLRenderingData::PRIMITIVE_MODALITY pr,QWidget *p )
-    :QToolButton(p),_act(NULL)
+MLRenderingColorPicker::MLRenderingColorPicker(MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
+    :QPushButton(p),_act(colact)
 {
-    _act = new MLRenderingUserDefinedColorAction(pr,-1,this);
-    //_act->setColor(vcg::ColorConverter::ToColor4b(def));
     initGui();
 }
 
 MLRenderingColorPicker::~MLRenderingColorPicker()
 {
-    delete _cbutton;
-    delete _act;
 }
 //
 void MLRenderingColorPicker::updateColorInfo()
@@ -1169,7 +1137,7 @@ void MLRenderingColorPicker::updateColorInfo()
         return;
     const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
     QPalette pal(cc);
-    _cbutton->setPalette(pal);
+    setPalette(pal);
 }
 
 void MLRenderingColorPicker::pickColor()
@@ -1201,114 +1169,30 @@ void MLRenderingColorPicker::initGui()
     //wa->setDefaultWidget(_cbutton);
     //colmenu->addAction(wa);
     //setMenu(colmenu);
-	QVBoxLayout* lay = new QVBoxLayout();
-	_cbutton = new QPushButton(this);
-	_cbutton->setAutoFillBackground(true);
-	_cbutton->setFlat(true);
-	_cbutton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	lay->addWidget(_cbutton);
-	lay->setMargin(2);
-	lay->setSizeConstraint(QLayout::SetFixedSize);
-	setLayout(lay);
+	//QVBoxLayout* lay = new QVBoxLayout();
+	setAutoFillBackground(true);
+	setFlat(true);
+	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	//lay->addWidget(this);
+	//lay->setMargin(2);
+	//lay->setSizeConstraint(QLayout::SetFixedSize);
+	//setLayout(lay);
     updateColorInfo();
-    connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
+    connect(this,SIGNAL(clicked()),this,SLOT(pickColor()));
 }
 
-void MLRenderingColorPicker::setColor( QColor def )
+void MLRenderingColorPicker::setColor( const QColor& def )
 {
     _act->setColor(def);
     updateColorInfo();
 }
 
-MLRenderingBBoxColorPicker::MLRenderingBBoxColorPicker(QWidget *p )
-    :QToolButton(p),_act(NULL)
+void MLRenderingColorPicker::setColor(const vcg::Color4b& def)
 {
-    _act = new MLRenderingBBoxUserDefinedColorAction(-1,this);
-    //_act->setColor(vcg::ColorConverter::ToColor4b(def));
-    initGui();
+	_act->setColor(def);
+	updateColorInfo();
 }
 
-MLRenderingBBoxColorPicker::MLRenderingBBoxColorPicker( int meshid,QWidget *p )
-    :QToolButton(p),_act(NULL)
-{
-    _act = new MLRenderingBBoxUserDefinedColorAction(meshid,this);
-    initGui();
-}
-
-MLRenderingBBoxColorPicker::~MLRenderingBBoxColorPicker()
-{
-    delete _cbutton;
-    delete _act;
-}
-
-//
-void MLRenderingBBoxColorPicker::updateColorInfo()
-{
-    if (_act == NULL)
-        return;
-    const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    QPalette pal(cc);
-    _cbutton->setPalette(pal);
-}
-
-void MLRenderingBBoxColorPicker::pickColor()
-{
-    if (_act == NULL)
-        return;
-    const QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-    QColor ret = QColorDialog::getColor(cc,this);
-    if (ret.isValid())
-    {
-        _act->setColor(vcg::ColorConverter::ToColor4b(ret));
-        updateColorInfo();
-        emit userDefinedColorAction(_act->meshId(),_act);
-    }
-}
-
-void MLRenderingBBoxColorPicker::initGui()
-{
-    if (_act == NULL)
-        return;
-    //setDefaultAction(_act);
-    //setText(_act->text());
-	/*QMenu* colmenu = new QMenu();
-	QWidgetAction* wa = new QWidgetAction(colmenu);
-	_cbutton = new QPushButton(colmenu);
-	_cbutton->setAutoFillBackground(true);
-	_cbutton->setFlat(true);
-	_cbutton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-	wa->setDefaultWidget(_cbutton);
-	colmenu->addAction(wa);
-	setMenu(colmenu);*/
-	QVBoxLayout* lay = new QVBoxLayout();
-	_cbutton = new QPushButton(this);
-	_cbutton->setAutoFillBackground(true);
-	_cbutton->setFlat(true);
-	_cbutton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	lay->addWidget(_cbutton);
-	lay->setMargin(2);
-	lay->setSizeConstraint(QLayout::SetFixedSize);
-	setLayout(lay);
-    updateColorInfo();
-    connect(_cbutton,SIGNAL(clicked()),this,SLOT(pickColor()));
-}
-
-void MLRenderingBBoxColorPicker::setColor( QColor def )
-{
-    _act->setColor(def);
-    updateColorInfo();
-}
-
-//void MLRenderingColorPicker::paintEvent( QPaintEvent * )
-//{
-//    QStylePainter p(this);
-//    QStyleOptionToolButton opt;
-//    initStyleOption( & opt ); 
-//    QColor cc = vcg::ColorConverter::ToQColor(_act->getColor());
-//    opt.palette = QPalette(QColor(255,0,0),QColor(0,255,0),QColor(0,0,255),QColor(255,255,0),QColor(255,0,255),QColor(0,125,125),QColor(255,255,255));
-//    //opt.features &= (~ QStyleOptionToolButton::HasMenu);
-//    p.drawComplexControl( QStyle::CC_ToolButton, opt );
-//}
 
 
 MLRenderingOnOffToolbar::MLRenderingOnOffToolbar( int meshid,QWidget* parent /*= NULL*/ )
@@ -1397,43 +1281,6 @@ bool MLRenderingOnOffToolbar::updateVisibility( MeshModel* mm )
 		return isvis;
     }
 	return false;
-}
-
-MLRenderingThreeStateButton::MLRenderingThreeStateButton(int meshid, QWidget* parent /*= NULL*/)
-	:QWidget(parent),_meshid(meshid)
-{
-	_onofftool = new MLRenderingOnOffToolbar(_meshid, parent);
-	initGui();
-}
-
-MLRenderingThreeStateButton::~MLRenderingThreeStateButton()
-{
-}
-
-void MLRenderingThreeStateButton::setRenderingAction(MLRenderingAction* act)
-{
-	if (act == NULL)
-		return;
-	_onofftool->setRenderingAction(act);
-	//_onofftool->setMaximumSize(QSize(40, 15));
-	QFont ff;
-	ff.setPointSize(4);
-	_onofftool->setFont(ff);
-	if (_layout != NULL)
-	{
-		QLabel* iconlabel = new QLabel();
-		iconlabel->setPixmap(act->icon().pixmap(QSize(20, 20)));
-		_layout->addWidget(iconlabel, 0, 0,1,1,Qt::AlignCenter);
-	}
-}
-
-void MLRenderingThreeStateButton::initGui()
-{
-	_layout = new QGridLayout();
-	if (_onofftool != NULL)
-		_layout->addWidget(_onofftool, 1, 0, 1, 1);
-	setLayout(_layout);
-	//connect(this, SIGNAL(actionTriggered(QAction*)), _onofftool, SLOT(toggle(QAction*)));
 }
 
 MLRenderingFloatSlider::MLRenderingFloatSlider( int meshid,QWidget *p )
@@ -1606,33 +1453,16 @@ void MLRenderingGlobalToolbar::initGui()
 
 	MLRenderingPointsAction* pointact = new MLRenderingPointsAction(this);
 	pointact->setChecked(false);
-	MLRenderingPerVertexNormalAction* pointnorm = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS, this);
+	/*MLRenderingPerVertexNormalAction* pointnorm = new MLRenderingPerVertexNormalAction(MLRenderingData::PR_POINTS, this);
 	pointnorm->setChecked(true);
 	MLRenderingNoShadingAction* pointnoshad = new MLRenderingNoShadingAction(MLRenderingData::PR_POINTS, this);
-	pointnoshad->setChecked(false);
+	pointnoshad->setChecked(false);*/
 	_pointglobact = new MLRenderingGlobalAction(pointact->text(), pointact->icon(), this);
 	_pointglobact->addMainAction(pointact);
-	_pointglobact->addMainAction(pointnorm);
-	_pointglobact->addRelatedAction(pointnoshad);
+	/*_pointglobact->addMainAction(pointnorm);
+	_pointglobact->addRelatedAction(pointnoshad);*/
 	_pointglobact->setCheckable(true);
 	addAction(_pointglobact);
-
-	/*MLRenderingPerVertexColorAction* pointvertcol = new MLRenderingPerVertexColorAction(MLRenderingData::PR_POINTS, this);
-	pointvertcol->setChecked(false);
-	MLRenderingPerMeshColorAction* pointmeshcol = new MLRenderingPerMeshColorAction(MLRenderingData::PR_POINTS, this);
-	pointmeshcol->setChecked(false);
-	MLRenderingUserDefinedColorAction* pointusercol = new MLRenderingUserDefinedColorAction(MLRenderingData::PR_POINTS, this);
-	pointusercol->setChecked(false);
-
-	_pointcolglobact = new MLRenderingGlobalAction(pointvertcol->text(), pointvertcol->icon(), this);
-	_pointcolglobact->setEnabled(false);
-	_pointcolglobact->addMainAction(pointvertcol);
-	_pointcolglobact->addRelatedAction(pointmeshcol);
-	_pointcolglobact->addRelatedAction(pointusercol);
-
-	_pointscolgroup = new QActionGroup(this);
-	_pointscolgroup->addAction(_pointcolglobact);*/
-	//addActions(_pointscolgroup->actions());
 
 	MLRenderingWireAction* wireact = new MLRenderingWireAction(this);
 	wireact->setChecked(false);
