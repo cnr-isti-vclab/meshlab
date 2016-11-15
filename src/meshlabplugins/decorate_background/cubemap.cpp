@@ -245,8 +245,8 @@ bool CICubeMap::LoadOld(const char *basename)
 			glBindTexture(GL_TEXTURE_2D, oti[i]);
 			glTexImage2D( GL_TEXTURE_2D, 0, 3, tx.width(), tx.height(), 0,
 													GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-			gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tx.width(), tx.height(), GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-
+			//gluBuild2DMipmaps(GL_TEXTURE_2D, 3, tx.width(), tx.height(), GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
+            glGenerateMipmap(GL_TEXTURE_2D);
 			//CIMsg::checkGLError("glTexImage2D");
 		}
 
@@ -294,7 +294,8 @@ bool CICubeMap::LoadExt(const char *basename)
 			QImage tx = QGLWidget::convertToGLFormat ( tt);
 
 			glTexImage2D( targets[i], 0,  3, tx.width(), tx.height(), 0,	GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
-			gluBuild2DMipmaps(targets[i], 4, tx.width(), tx.height(),     GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
+//			gluBuild2DMipmaps(targets[i], 4, tx.width(), tx.height(),     GL_RGBA, GL_UNSIGNED_BYTE, tx.bits() );
+            glGenerateMipmap(targets[i]);
 
 			//CIMsg::checkGLError("glTexImage2D");
 

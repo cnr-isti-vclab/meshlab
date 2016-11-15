@@ -171,7 +171,8 @@ GLuint MLSceneGLSharedDataContext::allocateTexturePerMesh( int meshid,const QIma
         glBindTexture( GL_TEXTURE_2D, tmpid );
         //qDebug("      	will be loaded as GL texture id %i  ( %i x %i )",txtcont[txtcont.size() - 1] ,imgGL.width(), imgGL.height());
         glTexImage2D( GL_TEXTURE_2D, 0, 3, imggl.width(), imggl.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imggl.bits() );
-        gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imggl.width(), imggl.height(), GL_RGBA, GL_UNSIGNED_BYTE, imggl.bits() );
+        //gluBuild2DMipmaps(GL_TEXTURE_2D, 3, imggl.width(), imggl.height(), GL_RGBA, GL_UNSIGNED_BYTE, imggl.bits() );
+        glGenerateMipmap(GL_TEXTURE_2D);
         txtcont.push_back(tmpid);
         res = tmpid;
         

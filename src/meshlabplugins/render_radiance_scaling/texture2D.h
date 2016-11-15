@@ -100,14 +100,14 @@ Texture2D<T>::Texture2D(const TextureFormat &tf,const TextureParams &tp,T* map,i
   glBindTexture(_format.target(),_id);
     
   if(_format.mipmapmode()==TextureFormat::MIPMAP_GLU_AUTOM) {
-      
-    gluBuild2DMipmaps(_format.target(),
-                      _format.internalformat(),
-                      _format.width(),
-                      _format.height(),
-                      _format.format(),
-                      _format.type(),
-                      (const GLvoid *)map);
+    glGenerateMipmap(_format.target());  
+//    gluBuild2DMipmaps(_format.target(),
+//                      _format.internalformat(),
+//                      _format.width(),
+//                      _format.height(),
+//                      _format.format(),
+//                      _format.type(),
+//                      (const GLvoid *)map);
   } else {
     
     glTexImage2D(_format.target(),
