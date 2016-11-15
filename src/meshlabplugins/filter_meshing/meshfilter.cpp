@@ -433,6 +433,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
 
 	case FP_INVERT_TRANSFORM:
+		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible mesh layers"));
 		break;
 
@@ -791,15 +792,15 @@ switch(ID(filter))
 	} break;
 
 	case FP_RESET_TRANSFORM:  
-		ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),false,false,false);  
+		ApplyTransform(md, Matrix44m::Identity(), par.getBool("allLayers"), false, false, false);
 	break;
 
 	case FP_FREEZE_TRANSFORM:
-		ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),true,false,true);
+		ApplyTransform(md, Matrix44m::Identity(), par.getBool("allLayers"), true, false, true);
 	break;
 
 	case FP_INVERT_TRANSFORM:
-		ApplyTransform(md,Matrix44m::Identity(),par.getBool("allLayers"),false,true,false);
+		ApplyTransform(md, Matrix44m::Identity(), par.getBool("allLayers"), par.getBool("Freeze"), true, true);
 	break;
 
 	case FP_SET_TRANSFORM_MATRIX:
