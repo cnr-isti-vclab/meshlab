@@ -3149,9 +3149,8 @@ void MainWindow::helpOnscreen()
 void MainWindow::helpOnline()
 {
     checkForUpdates(false);
-    QDesktopServices::openUrl(QUrl("http://sourceforge.net/apps/mediawiki/meshlab"));
+    QDesktopServices::openUrl(QUrl("http://www.meshlab.net"));
 }
-
 
 void MainWindow::showToolbarFile(){
     mainToolBar->setVisible(!mainToolBar->isVisible());

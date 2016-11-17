@@ -38,25 +38,7 @@ int main(int argc, char *argv[])
 
     QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
     QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
-    if(argc>1)
-    {
-        QString helpOpt1="-h";
-        QString helpOpt2="--help";
-        if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
-        {
-            printf("\n\n"
-                "    MeshLab: an open source mesh processing system\n"
-                "          Paolo Cignoni (and many many others) \n"
-                "              Visual Computing Lab\n"
-                "                  ISTI - CNR \n\n"
-                "usage:\n\n"
-                "    meshlab [meshfile] \n\n"
-                "Look at --- http://meshlab.sourceforge.net/wiki --- for a longer documentation\n\n"
-                );
-            exit(-1);
-        }
-    }
-
+   
     MainWindow window;
     window.showMaximized();
 
@@ -73,7 +55,7 @@ int main(int argc, char *argv[])
             printf(
             "usage:\n"
             "meshlab <meshfile>\n"
-            "Look at http://meshlab.sourceforge.net/wiki\n"
+            "Look at http://www.meshlab.net\n"
             "for a longer documentation\n"
             );
 
