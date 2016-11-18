@@ -33,12 +33,12 @@
   </Metadata>
   <VPCount numero="1">
     <Filenames>
-      <Filename0 VertexProgram=".\normalmap.vert" />
+      <Filename0 VertexProgram="normalmap.vert" />
     </Filenames>
   </VPCount>
   <FPCount numero="1">
     <Filenames>
-      <Filename0 FragmentProgram=".\normalmap.frag" />
+      <Filename0 FragmentProgram="normalmap.frag" />
     </Filenames>
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />
