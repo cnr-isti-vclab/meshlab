@@ -1956,6 +1956,8 @@ void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,cons
     else
     {
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Code executed in %d millisecs.\nOutput:\n%s",time,qPrintable(output));
+		//bool res;
+		//updateSharedContextDataAfterFilterExecution((int)MeshModel::MM_ALL, (int)MeshFilterInterface::Generic, res);
         GLA()->update();
     }
 }
