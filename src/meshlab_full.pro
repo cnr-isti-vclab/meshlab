@@ -1,3 +1,4 @@
+#config += debug_and_release
 TEMPLATE      = subdirs
 CONFIG += ordered
 SUBDIRS       = common \
@@ -50,6 +51,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_sdfgpu \
                 meshlabplugins/filter_select \
 				plugins_experimental/filter_sketchfab \
+                meshlabplugins/filter_ssynth \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
                 meshlabplugins/filter_unsharp \
@@ -75,5 +77,4 @@ SUBDIRS       = common \
 # Sample Plugins
                 sampleplugins/sampleedit \
                 sampleplugins/samplefilter \
-                sampleplugins/samplefilterdyn \
-                ## sampleplugins/io_m          
+                sampleplugins/samplefilterdyn \     
