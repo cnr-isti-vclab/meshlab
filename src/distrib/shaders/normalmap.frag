@@ -20,18 +20,24 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+uniform sampler2D bump;
+uniform float Kd;
+uniform float Ks;
+uniform float Ke;
+varying vec4 baseColor;
+varying vec3 ViewDirection;
+varying vec3 LightDirection;
 
-//
-// Normal Map
-//
-// by Massimiliano Corsini
-// Visual Computing Lab (2007)
-
-varying vec3 normal;
-
-void main()
+void main(void)
 {
-	vec3 color = vec3(normalize(normal));
-	color = color * 0.5 + 0.5;
-	gl_FragColor = vec4(color, 1.0);
+
+   vec3 bumpPert = normalize( -(0.5,0.5,0.5) + texture2D(bump, gl_TexCoord[0].st).rgb );
+
+   vec3 LightDir = normalize(LightDirection);
+   vec3 ViewDir = normalize(ViewDirection);
+   vec3 nNormal =  normalize(gl_NormalMatrix * bumpPert);
+   
+   float diffuse = clamp(dot(LightDir, nNormal), 0.0, 1.0);
+   float specular = pow(clamp(dot(reflect(ViewDir, nNormal),-LightDir),0.0, 1.0), Ke);
+   gl_FragColor = (Kd * diffuse * baseColor) +  (Ks * specular)*baseColor;
 }

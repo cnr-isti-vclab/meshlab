@@ -43,7 +43,20 @@
   </FPCount>
   <TexturesPlugins NumberOfPlugins="0" />
   <TexturedUsed NumberUsedTU="0" />
-  <UniformVariables NumberOfVariables="0" />
+    <UniformVariables NumberOfVariables="4">
+    <Uniform0 Type="1" Name="bump" ArraySize="1" Widget="0" Min="0" Max="1" Step="0.05">
+      <Values Value0="0"/>
+    </Uniform0>
+    <Uniform1 Type="5" Name="Kd" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.05">
+      <Values Value0="0.700000"/>
+    </Uniform1>
+    <Uniform2 Type="5" Name="Ks" ArraySize="1" Widget="2" Min="0" Max="1" Step="0.05">
+      <Values Value0="0.400000" />
+    </Uniform2>
+    <Uniform3 Type="5" Name="Ke" ArraySize="1" Widget="2" Min="1.000000" Max="64.000000" Step="0.5">
+      <Values Value0="35.840000" />
+    </Uniform3>
+  </UniformVariables>
   <FogParameters FogColorR="0" FogColorG="0" FogColorB="0" FogColorA="1" Density="1" Start="0" End="1" />
   <VertexProcessor CullFace="True" PolygonMode="DummieField" PolygonModeBack="6914" PolygonModeFront="6914" LocalValue="1" TwoSidedValue="0" ColorControlValue="33273" />
   <FragmentProcessor Shade="7425" AlphaTest="False" AlphaFunc="516" AlphaClamp="0.5" Blending="False" BlendFuncSRC="770" BlendFuncDST="771" BlendEquation="32774" DepthTest="True" DepthFunc="515" ClampNear="0" ClampFar="1" ClearColorR="0.5019608" ClearColorG="0.5019608" ClearColorB="0.5019608" ClearColorA="1" />

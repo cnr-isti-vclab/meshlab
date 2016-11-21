@@ -21,16 +21,15 @@
 *                                                                           *
 ****************************************************************************/
 
-//
-// Normal Map
-//
-// by Massimiliano Corsini
-// Visual Computing Lab (2007)
-
-varying vec3 normal;
-
-void main()
+varying vec3 ViewDirection;
+varying vec3 LightDirection;
+varying vec4 baseColor;
+void main(void)
 {
-	normal = gl_NormalMatrix * gl_Normal;
-	gl_Position = ftransform();
-} 
+   gl_Position = ftransform();
+   gl_TexCoord[0] = gl_MultiTexCoord0;
+   
+   ViewDirection = -vec3(gl_ModelViewMatrix * gl_Vertex);
+   LightDirection = gl_LightSource[0].position.xyz;
+   baseColor = gl_Color;
+}
