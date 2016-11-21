@@ -44,9 +44,8 @@ public:
     static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
     static const QString organization(){return tr("VCG");}
     static const QString organizationHost() {return tr("http://vcg.isti.cnr.it");}
-    static const QString webSite() {return tr("http://meshlab.sourceforge.net/");}
-    static const QString downloadSite() {return tr("http://downloads.sourceforge.net/project/meshlab");}
-    static const QString downloadUpdatesSite() {return downloadSite() + tr("/updates");}
+    static const QString webSite() {return tr("http://www.meshlab.net/");}
+    static const QString downloadSite() {return tr("http://www.meshlab.net/#download");}
 
     static const QString pluginsPathRegisterKeyName() {return tr("pluginsPath");}
     static const QString versionRegisterKeyName() {return tr("version");}

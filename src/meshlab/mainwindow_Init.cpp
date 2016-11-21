@@ -421,7 +421,7 @@ connectRenderModeActionList(rendlist);*/
 	aboutAct = new QAction(tr("&About"), this);
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-	aboutPluginsAct = new QAction(tr("About &Plugins"), this);
+	aboutPluginsAct = new QAction(tr("Plugin Info"), this);
 	connect(aboutPluginsAct, SIGNAL(triggered()), this, SLOT(aboutPlugins()));
 
 	onlineHelpAct = new QAction(tr("Online &Documentation"), this);
@@ -1181,7 +1181,7 @@ void MainWindow::submitBug()
 	QPushButton *submitBug = mb.addButton("Submit Bug", QMessageBox::AcceptRole);
 	mb.addButton(QMessageBox::Cancel);
 	mb.setText(tr("If Meshlab closed in unexpected way (e.g. it crashed badly) and"
-		"if you are able to repeat the bug, please consider to submit a report using the SourceForge tracking system.\n"
+		"if you are able to repeat the bug, please consider to submit a report using the github issue tracking system.\n"
 	));
 	mb.setInformativeText(tr(
 		"Hints for a good, useful bug report:\n"
@@ -1194,7 +1194,7 @@ void MainWindow::submitBug()
 	mb.exec();
 
 	if (mb.clickedButton() == submitBug)
-		QDesktopServices::openUrl(QUrl("http://sourceforge.net/tracker/?func=add&group_id=149444&atid=774731"));
+		QDesktopServices::openUrl(QUrl("https://github.com/cnr-isti-vclab/meshlab/issues"));
 
 }
 
