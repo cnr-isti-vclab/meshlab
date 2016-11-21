@@ -304,3 +304,12 @@ bool SampleEditPlugin::StartEdit(MeshModel &/*m*/, GLArea * gla, MLSceneGLShared
 	connect(this, SIGNAL(suspendEditToggle()), gla, SLOT(suspendEditToggle()));
 	return true;
 }
+
+void SampleEditPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/)
+{
+	haveToPick = false;
+	pickmode = 0; // 0 face 1 vertex
+	curFacePtr = 0;
+	curVertPtr = 0;
+	pIndex = 0;
+}
