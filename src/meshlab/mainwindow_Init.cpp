@@ -356,12 +356,12 @@ connectRenderModeActionList(rendlist);*/
 	viewTopAct->setShortcut(Qt::KeypadModifier + Qt::Key_7);
 	viewBottomAct->setShortcut(Qt::CTRL + Qt::KeypadModifier + Qt::Key_7);
 	// scene uses "engineering" reference system, with Z as vertical axis
-	viewFrontYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_1);
-	viewBackYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_1);
-	viewRightYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_3);
-	viewLeftYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_3);
-	viewTopYAct->setShortcut(Qt::SHIFT + Qt::KeypadModifier + Qt::Key_7);
-	viewBottomYAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::KeypadModifier + Qt::Key_7);
+	viewFrontYAct->setShortcut(Qt::ALT + Qt::KeypadModifier + Qt::Key_1);
+	viewBackYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_1);
+	viewRightYAct->setShortcut(Qt::ALT + Qt::KeypadModifier + Qt::Key_3);
+	viewLeftYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_3);
+	viewTopYAct->setShortcut(Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
+	viewBottomYAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::KeypadModifier + Qt::Key_7);
 
 	connect(viewFromGroupAct, SIGNAL(triggered(QAction *)), this, SLOT(viewFrom(QAction *)));
 
