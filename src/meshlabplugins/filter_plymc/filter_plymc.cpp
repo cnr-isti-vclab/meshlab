@@ -22,11 +22,10 @@
 ****************************************************************************/
 
 #include "filter_plymc.h"
-#include <vcg/complex/complex.h>
 #include <wrap/io_trimesh/export_vmi.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/create/plymc/plymc.h>
-#include "simplemeshprovider.h"
+#include <vcg/complex/algorithms/create/plymc/simplemeshprovider.h>
 
 using namespace vcg;
 
@@ -123,6 +122,7 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     srand(time(NULL));
 
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
+    pmc.MP.setCacheSize(64);
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> >::Parameter &p = pmc.p;
 
     int subdiv=par.getInt("subdiv");
@@ -169,7 +169,12 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         }
     }
 
-    pmc.Process(cb);
+    if(pmc.Process(cb)==false)
+    {
+      this->errorMessage = pmc.errorMessage;
+      return false; 
+    }
+      
 
     if(par.getBool("openResult"))
     {
