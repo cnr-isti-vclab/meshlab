@@ -41,7 +41,7 @@
 
 using namespace std;
 using namespace vcg;
-
+typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 // initialize importing parameters
 void PDBIOPlugin::initPreOpenParameter(const QString &formatName, const QString &/*filename*/, RichParameterSet &parlst)
 {
