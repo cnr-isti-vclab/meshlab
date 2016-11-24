@@ -3,9 +3,6 @@
 
 #include <vcg/complex/complex.h>
 
-#include <vcg/simplex/face/topology.h>
-#include <vcg/complex/algorithms/create/mc_trivial_walker.h>
-
 #ifndef MESHLAB_SCALAR
 #error "Fatal compilation error: MESHLAB_SCALAR must be defined"
 #endif
@@ -21,7 +18,6 @@ typedef vcg::Box3<MESHLAB_SCALAR>     Box3m;
 typedef vcg::Matrix44<MESHLAB_SCALAR> Matrix44m;
 typedef vcg::Matrix33<MESHLAB_SCALAR> Matrix33m;
 typedef vcg::Shot<MESHLAB_SCALAR>     Shotm;
-typedef vcg::SimpleVoxel<MESHLAB_SCALAR> SimpleVoxelm;
 typedef vcg::Similarity<MESHLAB_SCALAR> Similaritym;
 
 namespace vcg
