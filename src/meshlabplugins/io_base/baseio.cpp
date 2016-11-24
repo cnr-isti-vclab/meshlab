@@ -76,7 +76,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
         parlst.addParam(new RichFloat("angle",85.0,"Angle limit for face culling","short"));
         parlst.addParam(new RichBool("usecolor",true,"import color","Read color from PTX, if color is not present, uses reflectance instead"));
         parlst.addParam(new RichBool("pointcull",true,"delete unsampled points","Deletes unsampled points in the grid that are normally located in [0,0,0]"));
-        parlst.addParam(new RichBool("pointsonly",false,"Keep only points","Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
+        parlst.addParam(new RichBool("pointsonly",true,"Keep only points","Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
         parlst.addParam(new RichBool("switchside",false,"Swap rows/columns","On some PTX, the rows and columns number are switched over"));
         parlst.addParam(new RichBool("flipfaces",false,"Flip all faces","Flip the orientation of all the triangles"));
     }

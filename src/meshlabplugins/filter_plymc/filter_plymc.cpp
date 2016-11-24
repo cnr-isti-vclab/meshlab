@@ -25,7 +25,7 @@
 #include <vcg/complex/complex.h>
 #include <wrap/io_trimesh/export_vmi.h>
 #include <vcg/complex/algorithms/smooth.h>
-#include "plymc.h"
+#include <vcg/complex/algorithms/create/plymc/plymc.h>
 #include "simplemeshprovider.h"
 
 using namespace vcg;
