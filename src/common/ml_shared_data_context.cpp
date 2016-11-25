@@ -648,23 +648,22 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
 			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTTEXTURE] = true;
             dt.set(MLRenderingData::PR_SOLID,tmpatts);
         }
-        else
-        {
-            if ((meshmodel->cm.FN() == 0) && ((meshmodel->cm.EN() > 0)))
-            {
-                dt.reset();
-                tmpatts.reset();
-                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-                tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
-				MLPerViewGLOptions opts;
-				dt.get(opts);
-				opts._peredge_wire_enabled = true;
-				opts._peredge_fauxwire_enabled = true;
-				dt.set(opts);
-				dt.set(MLRenderingData::PR_SOLID, false);
-            }
-        }
+    
+		if (((meshmodel->cm.FN() == 0) && (meshmodel->cm.EN() > 0)) || (meshmodel->hasDataMask(MeshModel::MM_POLYGONAL)))
+		{
+			//dt.reset();
+			tmpatts.reset();
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+			tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
+			MLPerViewGLOptions opts;
+			dt.get(opts);
+			opts._peredge_wire_enabled = true;
+			opts._peredge_fauxwire_enabled = true;
+			dt.set(opts);
+			//dt.set(MLRenderingData::PR_SOLID, false);
+		}
+        
     }
 	MLPoliciesStandAloneFunctions::setBestWireModality(meshmodel, dt);
     MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMesh(meshmodel,dt,dtout);
