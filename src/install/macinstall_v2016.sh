@@ -43,6 +43,11 @@ do
 cp ./$x $BUNDLE/meshlab.app/Contents/PlugIns/
 done
 
+for x in $BUILDPATH/distrib/plugins/*.xml
+do
+cp ./$x $BUNDLE/meshlab.app/Contents/PlugIns/
+done
+
 for x in $BUNDLE/meshlab.app/Contents/plugins/*.dylib
 do
  install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $x
