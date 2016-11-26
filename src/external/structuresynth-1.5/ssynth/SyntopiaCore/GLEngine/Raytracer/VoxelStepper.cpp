@@ -122,7 +122,7 @@ namespace SyntopiaCore {
 						currentT = p;
 
 						// We do not intersect grid.
-						if (!found) return false;
+						if (!found) return nullptr;
 				}
 
 				stepX = (dir.x() > 0) ? 1 : -1;
