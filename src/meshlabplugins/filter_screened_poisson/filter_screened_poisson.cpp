@@ -228,13 +228,16 @@ public:
   {
     if(_curPos>=_m.vn)
       return false;
+    Point3m &nn = _m.vert[_curPos].N();
+    Point3m tp = _m.Tr * _m.vert[_curPos].P();
+    Point4m np = _m.Tr *  Point4m(nn[0],nn[1],nn[2],0);
     
-    pt.p[0] = _m.vert[_curPos].P()[0];
-    pt.p[1] = _m.vert[_curPos].P()[1];
-    pt.p[2] = _m.vert[_curPos].P()[2];
-    pt.n[0] = _m.vert[_curPos].N()[0];
-    pt.n[1] = _m.vert[_curPos].N()[1];
-    pt.n[2] = _m.vert[_curPos].N()[2];
+    pt.p[0] = tp[0];
+    pt.p[1] = tp[1];
+    pt.p[2] = tp[2];
+    pt.n[0] = np[0];
+    pt.n[1] = np[1];
+    pt.n[2] = np[2];
     
     d[0]=Real(_m.vert[_curPos].C()[0]);
     d[1]=Real(_m.vert[_curPos].C()[1]);
