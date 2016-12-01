@@ -32,14 +32,13 @@ SUBDIRS       = common \
                 meshlabplugins/filter_dirt \
                 meshlabplugins/filter_fractal \
                 meshlabplugins/filter_func \
-				sampleplugins/filter_geodesic \
-				plugins_experimental/filter_harmonic \
+                sampleplugins/filter_geodesic \
                 meshlabplugins/filter_img_patch_param \
                 meshlabplugins/filter_isoparametrization \
                 meshlabplugins/filter_layer \
                 meshlabplugins/filter_measure \
                 meshlabplugins/filter_meshing \
-				plugins_experimental/filter_mutualglobal \
+                plugins_experimental/filter_mutualglobal \
                 meshlabplugins/filter_mutualinfoxml \
                 meshlabplugins/filter_mls \
                 meshlabplugins/filter_photosynth \
@@ -50,7 +49,7 @@ SUBDIRS       = common \
                 meshlabplugins/filter_sampling \
                 meshlabplugins/filter_sdfgpu \
                 meshlabplugins/filter_select \
-				plugins_experimental/filter_sketchfab \
+                plugins_experimental/filter_sketchfab \
                 meshlabplugins/filter_ssynth \
                 meshlabplugins/filter_texture \
                 meshlabplugins/filter_trioptimize \
@@ -67,7 +66,7 @@ SUBDIRS       = common \
                 meshlabplugins/edit_arc3D \
                 meshlabplugins/edit_manipulators \
                 meshlabplugins/edit_measure \
-				plugins_experimental/edit_mutualcorrs \
+                plugins_experimental/edit_mutualcorrs \
                 meshlabplugins/edit_paint\
                 meshlabplugins/edit_pickpoints \
                 meshlabplugins/edit_point\

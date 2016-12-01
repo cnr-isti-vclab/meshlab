@@ -26,7 +26,7 @@
 #include <vcg/complex/algorithms/clean.h>
 #include <vcg/complex/algorithms/smooth.h>
 #include <vcg/complex/algorithms/crease_cut.h>
-
+#include <vcg/complex/algorithms/harmonic.h>
 
 using namespace vcg;
 using namespace std;
@@ -53,7 +53,8 @@ FilterUnsharp::FilterUnsharp()
               FP_RECOMPUTE_QUADFACE_NORMAL <<
               FP_FACE_NORMAL_NORMALIZE <<
               FP_VERTEX_NORMAL_NORMALIZE <<
-              FP_LINEAR_MORPH	;
+              FP_LINEAR_MORPH <<
+              FP_SCALAR_HARMONIC_FIELD;
   ;
 
   FilterIDType tt;
@@ -79,19 +80,20 @@ QString FilterUnsharp::filterName(FilterIDType filter) const
   case FP_DEPTH_SMOOTH :						return QString("Depth Smooth");
   case FP_DIRECTIONAL_PRESERVATION :            return QString("Directional Geom. Preserv.");
   case FP_CREASE_CUT :							return QString("Cut mesh along crease edges");
-  case FP_FACE_NORMAL_NORMALIZE:		return QString("Normalize Face Normals");
+  case FP_FACE_NORMAL_NORMALIZE:                return QString("Normalize Face Normals");
   case FP_VERTEX_NORMAL_NORMALIZE:		return QString("Normalize Vertex Normals");
   case FP_FACE_NORMAL_SMOOTHING:	  return QString("Smooth Face Normals");
   case FP_VERTEX_QUALITY_SMOOTHING:	return QString("Smooth Vertex Quality");
   case FP_UNSHARP_NORMAL:						return QString("UnSharp Mask Normals");
-  case FP_UNSHARP_GEOMETRY:					return QString("UnSharp Mask Geometry");
+  case FP_UNSHARP_GEOMETRY:                     return QString("UnSharp Mask Geometry");
   case FP_UNSHARP_QUALITY:					return QString("UnSharp Mask Quality");
   case FP_UNSHARP_VERTEX_COLOR:	    return QString("UnSharp Mask Color");
   case FP_RECOMPUTE_VERTEX_NORMAL:	return QString("Re-Compute Vertex Normals");
   case FP_RECOMPUTE_FACE_NORMAL:            return QString("Re-Compute Face Normals");
   case FP_RECOMPUTE_QUADFACE_NORMAL:		return QString("Re-Compute Per-Polygon Face Normals");
   case FP_LINEAR_MORPH :	return QString("Vertex Linear Morphing");
-
+  case FP_SCALAR_HARMONIC_FIELD: return QString("Generate Scalar Harmonic Field");
+    
 
   default: assert(0);
   }
@@ -131,6 +133,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   case FP_RECOMPUTE_FACE_NORMAL:      return tr("Recompute face normals as the normal of the plane of the face");
   case FP_RECOMPUTE_QUADFACE_NORMAL:  return tr("Recompute face normals as the normal of the average of the normals of the triangles that builds a polygon. Useful for showing shaded quad or polygonal meshes represented using faux edges.");
   case FP_LINEAR_MORPH :              return tr("Morph current mesh towards a target with the same number of vertices. <br> The filter assumes that the two meshes have also the same vertex ordering.");
+  case FP_SCALAR_HARMONIC_FIELD: return QString("Generates a scalar harmonic field over the mesh. Scalar values must be assigned to at least two vertices as Dirichlet boundary conditions. Applying the filter, a discrete Laplace operator generates the harmonic field values for all the mesh vertices. Note that the field values is stored in the quality per vertex attribute of the mesh\n\nFor more details see:\n Kai Xua, Hao Zhang, Daniel Cohen-Or, Yueshan Xionga,'Dynamic Harmonic Fields for Surface Processing'.\nin Computers & Graphics, 2009");
 
   default: assert(0);
   }
@@ -167,6 +170,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
             case FP_FACE_NORMAL_NORMALIZE:
             case FP_VERTEX_NORMAL_NORMALIZE:
                     return MeshFilterInterface::Normal;
+  case FP_SCALAR_HARMONIC_FIELD: return MeshFilterInterface::Remeshing;
 
     default : return MeshFilterInterface::Generic;
   }
@@ -175,32 +179,33 @@ int FilterUnsharp::getPreConditions(QAction *a) const
 {
   switch(ID(a))
   {
-            case FP_VERTEX_QUALITY_SMOOTHING:
-            case FP_UNSHARP_QUALITY:
+  case FP_VERTEX_QUALITY_SMOOTHING:
+  case FP_UNSHARP_QUALITY:
     return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTQUALITY;
-            case FP_SD_LAPLACIAN_SMOOTH:
-            case FP_HC_LAPLACIAN_SMOOTH:
-            case FP_LAPLACIAN_SMOOTH:
-            case FP_TWO_STEP_SMOOTH:
-            case FP_TAUBIN_SMOOTH:
-            case FP_DEPTH_SMOOTH:
-            case FP_LINEAR_MORPH :
-            case FP_UNSHARP_NORMAL:
-            case FP_UNSHARP_GEOMETRY:
-            case FP_DIRECTIONAL_PRESERVATION:
-            case FP_FACE_NORMAL_SMOOTHING:
-            case FP_RECOMPUTE_FACE_NORMAL :
-            case FP_RECOMPUTE_QUADFACE_NORMAL :
-            case FP_RECOMPUTE_VERTEX_NORMAL :
-            case FP_FACE_NORMAL_NORMALIZE:
-            case FP_CREASE_CUT:
-          return MeshModel::MM_FACENUMBER;
-            case FP_UNSHARP_VERTEX_COLOR:
-          return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTCOLOR;
-
-      case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshModel::MM_NONE;
-
-    default : assert(0); return MeshModel::MM_NONE;
+  case FP_SD_LAPLACIAN_SMOOTH:
+  case FP_HC_LAPLACIAN_SMOOTH:
+  case FP_LAPLACIAN_SMOOTH:
+  case FP_TWO_STEP_SMOOTH:
+  case FP_TAUBIN_SMOOTH:
+  case FP_DEPTH_SMOOTH:
+  case FP_LINEAR_MORPH :
+  case FP_UNSHARP_NORMAL:
+  case FP_UNSHARP_GEOMETRY:
+  case FP_DIRECTIONAL_PRESERVATION:
+  case FP_FACE_NORMAL_SMOOTHING:
+  case FP_RECOMPUTE_FACE_NORMAL :
+  case FP_RECOMPUTE_QUADFACE_NORMAL :
+  case FP_RECOMPUTE_VERTEX_NORMAL :
+  case FP_FACE_NORMAL_NORMALIZE:
+  case FP_CREASE_CUT:
+  case FP_SCALAR_HARMONIC_FIELD:
+    return MeshModel::MM_FACENUMBER;
+  case FP_UNSHARP_VERTEX_COLOR:
+    return MeshModel::MM_FACENUMBER | MeshModel::MM_VERTCOLOR;
+    
+  case FP_VERTEX_NORMAL_NORMALIZE:	  return MeshModel::MM_NONE;
+    
+  default : assert(0); return MeshModel::MM_NONE;
   }
 }
 
@@ -358,6 +363,13 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
             "<0 and >100 linearly extrapolate between the two mesh <br>"));
         }
         break;
+    case FP_SCALAR_HARMONIC_FIELD:
+		parlst.addParam(new RichPoint3f("point1",  md.mm()->cm.bbox.min, "Point 1", "A vertex on the mesh that represent one harmonic field boundary condition."));
+		parlst.addParam(new RichPoint3f("point2",  md.mm()->cm.bbox.max, "Point 2", "A vertex on the mesh that represent one harmonic field boundary condition."));
+		parlst.addParam(new RichDynamicFloat("value1", 0.0f, 0.0f, 1.0f, "value for the 1st point", "Harmonic field value for the vertex."));
+		parlst.addParam(new RichDynamicFloat("value2", 1.0f, 0.0f, 1.0f, "value for the 2nd point", "Harmonic field value for the vertex."));
+		parlst.addParam(new RichBool("colorize", true, "Colorize", "Colorize the mesh to provide an indication of the obtained harmonic field."));
+		break;
   }
 }
 
@@ -647,11 +659,8 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
             return false;
         }
 
-        vcg::tri::Allocator<CMeshO>::CompactVertexVector(sourceMesh);
-        vcg::tri::Allocator<CMeshO>::CompactFaceVector(sourceMesh);
-        vcg::tri::Allocator<CMeshO>::CompactVertexVector(targetMesh);
-        vcg::tri::Allocator<CMeshO>::CompactFaceVector(targetMesh);
-
+        vcg::tri::Allocator<CMeshO>::CompactEveryVector(sourceMesh);
+        vcg::tri::Allocator<CMeshO>::CompactEveryVector(targetMesh);
         float percentage = par.getDynamicFloat("PercentMorph")/100.f;
 
         int i;
@@ -664,9 +673,76 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
 
         m.UpdateBoxAndNormals();
     } break;
+    case FP_SCALAR_HARMONIC_FIELD:
+    {      
+      typedef double FieldScalar;
+      md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+      
+      cb(1, "Computing harmonic field...");
+      
+      CMeshO & m = md.mm()->cm;
+      vcg::tri::Allocator<CMeshO>::CompactEveryVector(m);      
+      if (vcg::tri::Clean<CMeshO>::CountConnectedComponents(m) > 1) {
+        this->errorMessage = "A mesh composed by a single connected component is required by the filter to properly work.";
+        return false;
+      }      
+      if (vcg::tri::Clean<CMeshO>::CountNonManifoldEdgeFF(md.mm()->cm) > 0) {
+        errorMessage = "Mesh has some not 2-manifold faces, this filter requires manifoldness";
+        return false;
+      }      
+      if (vcg::tri::Clean<CMeshO>::CountNonManifoldVertexFF(md.mm()->cm) > 0)  {
+        errorMessage = "Mesh has some not 2-manifold vertices, this filter requires manifoldness";
+        return false;
+      }
+      
+      md.mm()->updateDataMask(MeshModel::MM_VERTMARK | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
+      // Get the two vertices with value set
+      vcg::GridStaticPtr<CVertexO, Scalarm> vg;
+      vg.Set(m.vert.begin(), m.vert.end());
+      
+      vcg::vertex::PointDistanceFunctor<Scalarm> pd;
+      vcg::tri::Tmark<CMeshO, CVertexO> mv;
+      mv.SetMesh(&m);
+      mv.UnMarkAll();
+      Point3m  closestP;
+      Scalarm minDist = 0;
+      CVertexO * vp0 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point1"), m.bbox.Diag(), minDist, closestP);
+      CVertexO * vp1 = vcg::GridClosest(vg, pd, mv, par.getPoint3f("point2"), m.bbox.Diag(), minDist, closestP);
+      if (vp0 == NULL || vp1 == NULL || vp0 == vp1)
+      {
+        this->errorMessage = "Error occurred for selected points.";
+        return false;
+      }
+      
+      vcg::tri::Harmonic<CMeshO, FieldScalar>::ConstraintVec constraints;
+      constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp0, FieldScalar(par.getFloat("value1"))));
+      constraints.push_back(vcg::tri::Harmonic<CMeshO, FieldScalar>::Constraint(vp1, FieldScalar(par.getFloat("value2"))));
+      
+      CMeshO::PerVertexAttributeHandle<FieldScalar> handle = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<FieldScalar>(m, "harmonic");
+      
+      bool ok = vcg::tri::Harmonic<CMeshO, FieldScalar>::ComputeScalarField(m, constraints, handle);
+      
+      if (!ok)
+      {
+        this->errorMessage += "An error occurred.";
+        return false;
+      }
+      md.mm()->updateDataMask(MeshModel::MM_VERTQUALITY);
+      for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+        vi->Q() = handle[vi];
+      
+      if (par.getBool("colorize"))
+      {
+        md.mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
+        vcg::tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m);
+      }
+      
+      cb(100, "Done.");
+      return true;
+    }
     default : assert(0);
     }
-
+    
 
 
     return true;
@@ -695,6 +771,7 @@ MeshFilterInterface::FILTER_ARITY FilterUnsharp::filterArity( QAction * filter )
     case FP_RECOMPUTE_VERTEX_NORMAL:	
     case FP_RECOMPUTE_FACE_NORMAL:      
     case FP_RECOMPUTE_QUADFACE_NORMAL:
+    case FP_SCALAR_HARMONIC_FIELD:
         return MeshFilterInterface::SINGLE_MESH;
     case FP_LINEAR_MORPH :	
         return MeshFilterInterface::FIXED;

@@ -39,7 +39,7 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 		 - name of the plugin separated by _
 	*/
 	enum { 
-    FP_CREASE_CUT, 
+      FP_CREASE_CUT, 
 		FP_LAPLACIAN_SMOOTH, 
 		FP_DIRECTIONAL_PRESERVATION, 
 		FP_DEPTH_SMOOTH, 
@@ -59,7 +59,8 @@ class FilterUnsharp : public QObject, public MeshFilterInterface
 		FP_RECOMPUTE_VERTEX_NORMAL,
 		FP_RECOMPUTE_FACE_NORMAL,
 		FP_RECOMPUTE_QUADFACE_NORMAL,
-		FP_LINEAR_MORPH
+		FP_LINEAR_MORPH,
+        FP_SCALAR_HARMONIC_FIELD
   } ;
 	
 	/* default values for standard parameters' values of the plugin actions */
