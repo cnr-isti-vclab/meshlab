@@ -233,8 +233,8 @@ typename MeshType::ScalarType ApproxAngleDistortion(MeshType &mesh)
 
     ScalarType sum=0,div=0;
     //ScalarType area_tot=Area<MeshType>(mesh);
-    vcg::Point2<ScalarType> x_axis(0.5,sqrt(3.0)/2.0);
-    vcg::Point2<ScalarType> y_axis(1.0,0);
+    vcg::Point2<ScalarType> x_axis(0.5f, (ScalarType)(sqrt(3.0)/2.0));
+    vcg::Point2<ScalarType> y_axis(1.0f,0);
     for (unsigned int i=0;i<mesh.face.size();i++)
     {
         FaceType* f=&mesh.face[i];
@@ -265,7 +265,7 @@ typename MeshType::ScalarType ApproxAngleDistortion(MeshType &mesh)
             div+=area_3d;
         }
     }
-    return (fabs(sum)/(div*2)-1.0);
+    return (ScalarType)(fabs(sum)/(div*2)-1.0);
 }
 
 template <class MeshType>

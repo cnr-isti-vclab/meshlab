@@ -261,7 +261,7 @@ typename MeshType::ScalarType EstimateLenghtByParam
 
 //	assert((on_edge.size()==0)||(on_edge.size()==1));
     ScalarType estimated[2]={0,0};
-    int num[2]={0,0};
+    size_t num[2]={0,0};
 
     for (int i=0;i<2;i++)
     {
@@ -366,9 +366,9 @@ typename MeshType::ScalarType EstimateLenghtByParam
     else
         alpha1=num[1]/max_num;
 
-    estimated[0]=alpha0*estimated[0]+(1.0-alpha0)*(Distance(v0->RPos,v1->RPos));
-    estimated[1]=alpha1*estimated[1]+(1.0-alpha1)*(Distance(v0->RPos,v1->RPos));
-    return((estimated[0]+estimated[1])/2.0);
+    estimated[0]= (ScalarType)(alpha0*estimated[0]+(1.0-alpha0)*(Distance(v0->RPos,v1->RPos)));
+    estimated[1]= (ScalarType)(alpha1*estimated[1]+(1.0-alpha1)*(Distance(v0->RPos,v1->RPos)));
+    return(ScalarType)((estimated[0]+estimated[1])/2.0);
 }
 
 template <class MeshType>
@@ -434,8 +434,8 @@ typename FaceType::ScalarType EstimateAreaByParam(const FaceType* f)
     else
         alpha=num/max_num;
 
-    ScalarType Rarea=((f->cV(1)->RPos-f->cV(0)->RPos)^(f->cV(2)->RPos-f->cV(0)->RPos)).Norm()/2.0;
-    estimated=alpha*estimated+(1.0-alpha)*Rarea;
+    ScalarType Rarea= (ScalarType)(((f->cV(1)->RPos-f->cV(0)->RPos)^(f->cV(2)->RPos-f->cV(0)->RPos)).Norm()/2.0);
+    estimated=(ScalarType)(alpha*estimated+(1.0-alpha)*Rarea);
 
     return(estimated);
 }
@@ -485,11 +485,11 @@ typename MeshType::ScalarType EstimateAreaByParam
         alpha1=1;
     else
         alpha1=num[1]/max_num;
-    ScalarType Rarea0=((on_edge[0]->V(1)->RPos-on_edge[0]->V(0)->RPos)^(on_edge[0]->V(2)->RPos-on_edge[0]->V(0)->RPos)).Norm()/2.0;
-    ScalarType Rarea1=((on_edge[1]->V(1)->RPos-on_edge[1]->V(0)->RPos)^(on_edge[1]->V(2)->RPos-on_edge[1]->V(0)->RPos)).Norm()/2.0;
-    estimated[0]=alpha0*estimated[0]+(1.0-alpha0)*Rarea0;
-    estimated[1]=alpha1*estimated[1]+(1.0-alpha1)*Rarea1;
-    return((estimated[0]+estimated[1])/2.0);
+    ScalarType Rarea0= (ScalarType)(((on_edge[0]->V(1)->RPos-on_edge[0]->V(0)->RPos)^(on_edge[0]->V(2)->RPos-on_edge[0]->V(0)->RPos)).Norm()/2.0);
+    ScalarType Rarea1= (ScalarType)(((on_edge[1]->V(1)->RPos-on_edge[1]->V(0)->RPos)^(on_edge[1]->V(2)->RPos-on_edge[1]->V(0)->RPos)).Norm()/2.0);
+    estimated[0]= (ScalarType)(alpha0*estimated[0]+(1.0-alpha0)*Rarea0);
+    estimated[1]= (ScalarType)(alpha1*estimated[1]+(1.0-alpha1)*Rarea1);
+    return(ScalarType)((estimated[0]+estimated[1])/2.0);
 }
 
 ///template class used to sample surface
@@ -788,11 +788,11 @@ template <class MeshType>
 void AssingFather(typename MeshType::VertexType &v,
                                     typename MeshType::FaceType *father,
                                     typename MeshType::CoordType &bary,
-                  MeshType & /*domain*/)
+                  MeshType & domain)
 {
 #ifdef _DEBUG
     const typename MeshType::ScalarType eps=(typename MeshType::ScalarType)0.00001;
-    assert((father-&(*domain.face.begin()))<(int)domain.face.size());
+    assert(vcg::tri::IsValidPointer(domain,father));
     assert(!(father->IsD()));
     assert(!(father==NULL));
     assert((bary.X()>=0)&&(bary.X()<=1)&&
@@ -1306,7 +1306,7 @@ bool GetCoordFromUV(const MeshType &m,
                 if (((bary[x])>=1)&&(bary[x]<=1+_EPSILON))
                     bary[x]=1;
             }
-            ScalarType diff=(1.0-bary.X()-bary.Y()-bary.Z());
+            ScalarType diff= (ScalarType)(1.0-bary.X()-bary.Y()-bary.Z());
             bary.X()+=diff;
             if (!rpos)
                 val=f->cP(0)*bary.X()+f->cP(1)*bary.Y()+f->cP(0)*bary.Z();

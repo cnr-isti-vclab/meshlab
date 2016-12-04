@@ -268,8 +268,8 @@ public:
  void InitSum()
  {
 	 int k;
-         int n=Super::m.vert.size();
-         int n1=Super::m.face.size();
+         auto n=Super::m.vert.size();
+         auto n1=Super::m.face.size();
 #ifdef _USE_OMP
 	 #pragma omp parallel for default (none) shared(n) private(k)
 #endif

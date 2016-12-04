@@ -218,17 +218,12 @@ void CopyMeshFromFaces(const std::vector<typename MeshType::FaceType*> &faces,
 
     ///initialization of new mesh
     new_mesh.Clear();
-    new_mesh.vn=0;
-    new_mesh.fn=0;
-    new_mesh.face.resize(faces.size());
-    new_mesh.vert.resize(vertices.size());
-    new_mesh.vn=vertices.size();
-    new_mesh.fn=faces.size();
+	vcg::tri::Allocator<MeshType>::AddVertices(new_mesh,vertices.size());
+	vcg::tri::Allocator<MeshType>::AddFaces(new_mesh,faces.size());
 
     ///add new vertices
-    typename std::vector<VertexType*>::const_iterator iteV;
     int i=0;
-    for (iteV=vertices.begin();iteV!=vertices.end();iteV++)
+    for (auto iteV=vertices.begin();iteV!=vertices.end();iteV++)
     {
         ///copy position
         assert(!(*iteV)->IsD());
@@ -315,7 +310,7 @@ void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
         iteFath=std::find(faces.begin(),faces.end(),father);
         if (iteFath!=faces.end())
         {
-            int position=std::distance(faces.begin(),iteFath);
+            auto position=std::distance(faces.begin(),iteFath);
             AssingFather(hlevMesh.vert[i],&Domain.face[position],bary,Domain);
             ///associate new father
             //hlevMesh.vert[i].father=&Domain.face[position];
@@ -454,7 +449,7 @@ void CopyMeshFromVertices(std::vector<typename MeshType::VertexType*> &vertices,
     for (iteF=faces.begin();iteF!=faces.end();iteF++)
     {
         ///for each vertex get new reference
-        ///if there isn't one reference means the face does not appartain to group
+        ///if there isn't one reference means the face does not belong to group
         VertexType* v0=(*iteF)->V(0);
         VertexType* v1=(*iteF)->V(1);
         VertexType* v2=(*iteF)->V(2);
@@ -467,15 +462,13 @@ void CopyMeshFromVertices(std::vector<typename MeshType::VertexType*> &vertices,
     FindVertices(OrderedFaces,OrderedVertices);
 
     ///setting size
-    new_mesh.face.resize(OrderedFaces.size());
-    new_mesh.vert.resize(OrderedVertices.size());
-    new_mesh.vn=OrderedVertices.size();
-    new_mesh.fn=OrderedFaces.size();
+	new_mesh.Clear();
+	vcg::tri::Allocator<MeshType>::AddVertices(new_mesh,OrderedVertices.size());
+	vcg::tri::Allocator<MeshType>::AddFaces(new_mesh,OrderedFaces.size());
 
     ///setting of internal vertices
     int i=0;
-    typename std::vector<typename MeshType::VertexType*>::iterator iteVI;
-    for (iteVI=OrderedVertices.begin();iteVI!=OrderedVertices.end();iteVI++)
+    for (auto iteVI=OrderedVertices.begin();iteVI!=OrderedVertices.end();iteVI++)
     {
         ///copy position
         assert(!(*iteVI)->IsD());

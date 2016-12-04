@@ -30,7 +30,7 @@ bool UnFold(MeshType &mesh,int /*num_faces*/,bool fix_selected=false)
   //ScalarType speed=edge_esteem*0.005;*/
   //ScalarType edge_esteem=GetSmallestUVEdgeSize<MeshType>(mesh);
 	
-  ScalarType speed=edge_esteem*0.05;
+  ScalarType speed=(ScalarType)(edge_esteem*0.05);
   opt.SetSpeed(speed);
   ///then iterate until unfolding
   /*int iter=*/opt.IterateUntilConvergence();
