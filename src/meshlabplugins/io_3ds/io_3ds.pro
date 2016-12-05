@@ -10,7 +10,7 @@ HEADERS		= meshio.h \
 				
 SOURCES       += 	meshio.cpp \
 			
-
+DEFINES += LIB3DS_STATIC
 
 TARGET        = io_3ds
 
