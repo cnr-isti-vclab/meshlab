@@ -71,8 +71,8 @@ struct Lib3dsBackground {
     Lib3dsGradient gradient;
 };
 
-extern LIB3DSAPI Lib3dsBool lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_background_read(Lib3dsBackground *background, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_background_write(Lib3dsBackground *background, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

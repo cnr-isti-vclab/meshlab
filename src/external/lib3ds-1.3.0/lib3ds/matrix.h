@@ -31,30 +31,30 @@
 extern "C" {
 #endif
 
-extern LIB3DSAPI void lib3ds_matrix_zero(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_identity(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_copy(Lib3dsMatrix dest, Lib3dsMatrix src);
-extern LIB3DSAPI void lib3ds_matrix_neg(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_abs(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_transpose(Lib3dsMatrix m);
-extern LIB3DSAPI void _lib3ds_matrix_add(Lib3dsMatrix m, Lib3dsMatrix a, Lib3dsMatrix b);
-extern LIB3DSAPI void _lib3ds_matrix_sub(Lib3dsMatrix m, Lib3dsMatrix a, Lib3dsMatrix b);
-extern LIB3DSAPI void lib3ds_matrix_mult(Lib3dsMatrix m, Lib3dsMatrix n);
-extern LIB3DSAPI void lib3ds_matrix_scalar(Lib3dsMatrix m, Lib3dsFloat k);
-extern LIB3DSAPI Lib3dsFloat lib3ds_matrix_det(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_adjoint(Lib3dsMatrix m);
-extern LIB3DSAPI Lib3dsBool lib3ds_matrix_inv(Lib3dsMatrix m);
-extern LIB3DSAPI void lib3ds_matrix_translate_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z);
-extern LIB3DSAPI void lib3ds_matrix_translate(Lib3dsMatrix m, Lib3dsVector t);
-extern LIB3DSAPI void lib3ds_matrix_scale_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z);
-extern LIB3DSAPI void lib3ds_matrix_scale(Lib3dsMatrix m, Lib3dsVector s);
-extern LIB3DSAPI void lib3ds_matrix_rotate_x(Lib3dsMatrix m, Lib3dsFloat phi);
-extern LIB3DSAPI void lib3ds_matrix_rotate_y(Lib3dsMatrix m, Lib3dsFloat phi);
-extern LIB3DSAPI void lib3ds_matrix_rotate_z(Lib3dsMatrix m, Lib3dsFloat phi);
-extern LIB3DSAPI void lib3ds_matrix_rotate(Lib3dsMatrix m, Lib3dsQuat q);
-extern LIB3DSAPI void lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, Lib3dsFloat angle);
-extern LIB3DSAPI void lib3ds_matrix_camera(Lib3dsMatrix matrix, Lib3dsVector pos, Lib3dsVector tgt, Lib3dsFloat roll);
-extern LIB3DSAPI void lib3ds_matrix_dump(Lib3dsMatrix matrix);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_zero(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_identity(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_copy(Lib3dsMatrix dest, Lib3dsMatrix src);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_neg(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_abs(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_transpose(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void _lib3ds_matrix_add(Lib3dsMatrix m, Lib3dsMatrix a, Lib3dsMatrix b);
+LIB3DSEXTERN LIB3DSAPI void _lib3ds_matrix_sub(Lib3dsMatrix m, Lib3dsMatrix a, Lib3dsMatrix b);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_mult(Lib3dsMatrix m, Lib3dsMatrix n);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_scalar(Lib3dsMatrix m, Lib3dsFloat k);
+LIB3DSEXTERN LIB3DSAPI Lib3dsFloat lib3ds_matrix_det(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_adjoint(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_matrix_inv(Lib3dsMatrix m);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_translate_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_translate(Lib3dsMatrix m, Lib3dsVector t);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_scale_xyz(Lib3dsMatrix m, Lib3dsFloat x, Lib3dsFloat y, Lib3dsFloat z);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_scale(Lib3dsMatrix m, Lib3dsVector s);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_rotate_x(Lib3dsMatrix m, Lib3dsFloat phi);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_rotate_y(Lib3dsMatrix m, Lib3dsFloat phi);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_rotate_z(Lib3dsMatrix m, Lib3dsFloat phi);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_rotate(Lib3dsMatrix m, Lib3dsQuat q);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_rotate_axis(Lib3dsMatrix m, Lib3dsVector axis, Lib3dsFloat angle);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_camera(Lib3dsMatrix matrix, Lib3dsVector pos, Lib3dsVector tgt, Lib3dsFloat roll);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_matrix_dump(Lib3dsMatrix matrix);
 
 #ifdef __cplusplus
 }

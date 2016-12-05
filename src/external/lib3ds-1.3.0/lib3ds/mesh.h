@@ -134,21 +134,21 @@ struct Lib3dsMesh {
     Lib3dsMapData map_data;
 }; 
 
-extern LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
-extern LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_point_list(Lib3dsMesh *mesh, Lib3dsDword points);
-extern LIB3DSAPI void lib3ds_mesh_free_point_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_flag_list(Lib3dsMesh *mesh, Lib3dsDword flags);
-extern LIB3DSAPI void lib3ds_mesh_free_flag_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_texel_list(Lib3dsMesh *mesh, Lib3dsDword texels);
-extern LIB3DSAPI void lib3ds_mesh_free_texel_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_new_face_list(Lib3dsMesh *mesh, Lib3dsDword flags);
-extern LIB3DSAPI void lib3ds_mesh_free_face_list(Lib3dsMesh *mesh);
-extern LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
-extern LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
-extern LIB3DSAPI void lib3ds_mesh_dump(Lib3dsMesh *mesh);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_read(Lib3dsMesh *mesh, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_mesh_write(Lib3dsMesh *mesh, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsMesh* lib3ds_mesh_new(const char *name);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_free(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_new_point_list(Lib3dsMesh *mesh, Lib3dsDword points);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_free_point_list(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_new_flag_list(Lib3dsMesh *mesh, Lib3dsDword flags);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_free_flag_list(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_new_texel_list(Lib3dsMesh *mesh, Lib3dsDword texels);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_free_texel_list(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_new_face_list(Lib3dsMesh *mesh, Lib3dsDword flags);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_free_face_list(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_bounding_box(Lib3dsMesh *mesh, Lib3dsVector bmin, Lib3dsVector bmax);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_calculate_normals(Lib3dsMesh *mesh, Lib3dsVector *normalL);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_mesh_dump(Lib3dsMesh *mesh);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_read(Lib3dsMesh *mesh, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_mesh_write(Lib3dsMesh *mesh, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

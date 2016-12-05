@@ -166,20 +166,20 @@ typedef enum {
   LIB3DS_MORPH_MATERIALS = 0x40
 } Lib3dsNodeFlags2;
 
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_ambient();
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_object();
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_camera();
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_target();
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_light();
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_new_spot();
-extern LIB3DSAPI void lib3ds_node_free(Lib3dsNode *node);
-extern LIB3DSAPI void lib3ds_node_eval(Lib3dsNode *node, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* name,
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_ambient();
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_object();
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_camera();
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_target();
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_light();
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_new_spot();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_node_free(Lib3dsNode *node);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_node_eval(Lib3dsNode *node, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_by_name(Lib3dsNode *node, const char* name,
   Lib3dsNodeTypes type);
-extern LIB3DSAPI Lib3dsNode* lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id);
-extern LIB3DSAPI void lib3ds_node_dump(Lib3dsNode *node, Lib3dsIntd level);
-extern LIB3DSAPI Lib3dsBool lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsNode* lib3ds_node_by_id(Lib3dsNode *node, Lib3dsWord node_id);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_node_dump(Lib3dsNode *node, Lib3dsIntd level);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_node_read(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_node_write(Lib3dsNode *node, Lib3dsFile *file, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

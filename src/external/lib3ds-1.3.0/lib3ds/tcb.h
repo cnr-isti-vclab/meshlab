@@ -49,11 +49,11 @@ typedef struct Lib3dsTcb {
     Lib3dsFloat ease_from;
 } Lib3dsTcb;
 
-extern LIB3DSAPI void lib3ds_tcb(Lib3dsTcb *p, Lib3dsTcb *pc, Lib3dsTcb *c,
+LIB3DSEXTERN LIB3DSAPI void lib3ds_tcb(Lib3dsTcb *p, Lib3dsTcb *pc, Lib3dsTcb *c,
   Lib3dsTcb *nc, Lib3dsTcb *n, Lib3dsFloat *ksm, Lib3dsFloat *ksp,
   Lib3dsFloat *kdm, Lib3dsFloat *kdp);
-extern LIB3DSAPI Lib3dsBool lib3ds_tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_tcb_read(Lib3dsTcb *tcb, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_tcb_write(Lib3dsTcb *tcb, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

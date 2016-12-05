@@ -31,28 +31,28 @@
 extern "C" {
 #endif
 
-extern LIB3DSAPI void lib3ds_quat_zero(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_identity(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src);
-extern LIB3DSAPI void lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, Lib3dsFloat angle);
-extern LIB3DSAPI void lib3ds_quat_neg(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_abs(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_cnj(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b);
-extern LIB3DSAPI void lib3ds_quat_scalar(Lib3dsQuat c, Lib3dsFloat k);
-extern LIB3DSAPI void lib3ds_quat_normalize(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_inv(Lib3dsQuat c);
-extern LIB3DSAPI Lib3dsFloat lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b);
-extern LIB3DSAPI Lib3dsFloat lib3ds_quat_squared(Lib3dsQuat c);
-extern LIB3DSAPI Lib3dsFloat lib3ds_quat_length(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_ln(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b);
-extern LIB3DSAPI void lib3ds_quat_exp(Lib3dsQuat c);
-extern LIB3DSAPI void lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t);
-extern LIB3DSAPI void lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_zero(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_identity(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_copy(Lib3dsQuat dest, Lib3dsQuat src);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_axis_angle(Lib3dsQuat c, Lib3dsVector axis, Lib3dsFloat angle);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_neg(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_abs(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_cnj(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_mul(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_scalar(Lib3dsQuat c, Lib3dsFloat k);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_normalize(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_inv(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI Lib3dsFloat lib3ds_quat_dot(Lib3dsQuat a, Lib3dsQuat b);
+LIB3DSEXTERN LIB3DSAPI Lib3dsFloat lib3ds_quat_squared(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI Lib3dsFloat lib3ds_quat_length(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_ln(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_ln_dif(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_exp(Lib3dsQuat c);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_slerp(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat b, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_squad(Lib3dsQuat c, Lib3dsQuat a, Lib3dsQuat p, Lib3dsQuat q,
   Lib3dsQuat b, Lib3dsFloat t);
-extern LIB3DSAPI void lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n);
-extern LIB3DSAPI void lib3ds_quat_dump(Lib3dsQuat q);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_tangent(Lib3dsQuat c, Lib3dsQuat p, Lib3dsQuat q, Lib3dsQuat n);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_dump(Lib3dsQuat q);
 
 #ifdef __cplusplus
 }

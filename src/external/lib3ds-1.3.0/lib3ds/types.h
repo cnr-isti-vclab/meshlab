@@ -25,6 +25,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef LIB3DS_STATIC
+#define LIB3DSEXTERN 
+#define LIB3DSAPI
+#else
+
+#define LIB3DSEXTERN extern
 
 #ifdef _MSC_VER
 #ifdef LIB3DS_EXPORTS
@@ -35,6 +41,7 @@ extern "C" {
 #else
 #define LIB3DSAPI
 #endif
+#endif // LIB3DS_STATIC
 
 #define LIB3DS_TRUE 1
 #define LIB3DS_FALSE 0

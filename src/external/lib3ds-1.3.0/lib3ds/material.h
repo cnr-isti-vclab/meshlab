@@ -155,11 +155,11 @@ struct Lib3dsMaterial {
     Lib3dsAutoReflMap autorefl_map;
 };
 
-extern LIB3DSAPI Lib3dsMaterial* lib3ds_material_new();
-extern LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
-extern LIB3DSAPI void lib3ds_material_dump(Lib3dsMaterial *material);
-extern LIB3DSAPI Lib3dsBool lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsMaterial* lib3ds_material_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_material_free(Lib3dsMaterial *material);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_material_dump(Lib3dsMaterial *material);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_material_read(Lib3dsMaterial *material, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_material_write(Lib3dsMaterial *material, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

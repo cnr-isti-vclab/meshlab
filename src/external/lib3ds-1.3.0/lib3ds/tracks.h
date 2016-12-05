@@ -148,59 +148,59 @@ struct Lib3dsMorphTrack {
     Lib3dsMorphKey *keyL;
 };
 
-extern LIB3DSAPI Lib3dsBoolKey* lib3ds_bool_key_new();
-extern LIB3DSAPI void lib3ds_bool_key_free(Lib3dsBoolKey* key);
-extern LIB3DSAPI void lib3ds_bool_track_free_keys(Lib3dsBoolTrack *track);
-extern LIB3DSAPI void lib3ds_bool_track_insert(Lib3dsBoolTrack *track, Lib3dsBoolKey* key);
-extern LIB3DSAPI void lib3ds_bool_track_remove(Lib3dsBoolTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_bool_track_eval(Lib3dsBoolTrack *track, Lib3dsBool *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_bool_track_read(Lib3dsBoolTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_bool_track_write(Lib3dsBoolTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBoolKey* lib3ds_bool_key_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_bool_key_free(Lib3dsBoolKey* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_bool_track_free_keys(Lib3dsBoolTrack *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_bool_track_insert(Lib3dsBoolTrack *track, Lib3dsBoolKey* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_bool_track_remove(Lib3dsBoolTrack *track, Lib3dsIntd frame);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_bool_track_eval(Lib3dsBoolTrack *track, Lib3dsBool *p, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_bool_track_read(Lib3dsBoolTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_bool_track_write(Lib3dsBoolTrack *track, Lib3dsIo *io);
 
-extern LIB3DSAPI Lib3dsLin1Key* lib3ds_lin1_key_new();
-extern LIB3DSAPI void lib3ds_lin1_key_free(Lib3dsLin1Key* key);
-extern LIB3DSAPI void lib3ds_lin1_track_free_keys(Lib3dsLin1Track *track);
-extern LIB3DSAPI void lib3ds_lin1_key_setup(Lib3dsLin1Key *p, Lib3dsLin1Key *cp, Lib3dsLin1Key *c,
+LIB3DSEXTERN LIB3DSAPI Lib3dsLin1Key* lib3ds_lin1_key_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_key_free(Lib3dsLin1Key* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_track_free_keys(Lib3dsLin1Track *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_key_setup(Lib3dsLin1Key *p, Lib3dsLin1Key *cp, Lib3dsLin1Key *c,
   Lib3dsLin1Key *cn, Lib3dsLin1Key *n);
-extern LIB3DSAPI void lib3ds_lin1_track_setup(Lib3dsLin1Track *track);
-extern LIB3DSAPI void lib3ds_lin1_track_insert(Lib3dsLin1Track *track, Lib3dsLin1Key *key);
-extern LIB3DSAPI void lib3ds_lin1_track_remove(Lib3dsLin1Track *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_lin1_track_eval(Lib3dsLin1Track *track, Lib3dsFloat *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin1_track_read(Lib3dsLin1Track *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin1_track_write(Lib3dsLin1Track *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_track_setup(Lib3dsLin1Track *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_track_insert(Lib3dsLin1Track *track, Lib3dsLin1Key *key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_track_remove(Lib3dsLin1Track *track, Lib3dsIntd frame);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin1_track_eval(Lib3dsLin1Track *track, Lib3dsFloat *p, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_lin1_track_read(Lib3dsLin1Track *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_lin1_track_write(Lib3dsLin1Track *track, Lib3dsIo *io);
 
-extern LIB3DSAPI Lib3dsLin3Key* lib3ds_lin3_key_new();
-extern LIB3DSAPI void lib3ds_lin3_key_free(Lib3dsLin3Key* key);
-extern LIB3DSAPI void lib3ds_lin3_track_free_keys(Lib3dsLin3Track *track);
-extern LIB3DSAPI void lib3ds_lin3_key_setup(Lib3dsLin3Key *p, Lib3dsLin3Key *cp, Lib3dsLin3Key *c,
+LIB3DSEXTERN LIB3DSAPI Lib3dsLin3Key* lib3ds_lin3_key_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_key_free(Lib3dsLin3Key* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_track_free_keys(Lib3dsLin3Track *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_key_setup(Lib3dsLin3Key *p, Lib3dsLin3Key *cp, Lib3dsLin3Key *c,
   Lib3dsLin3Key *cn, Lib3dsLin3Key *n);
-extern LIB3DSAPI void lib3ds_lin3_track_setup(Lib3dsLin3Track *track);
-extern LIB3DSAPI void lib3ds_lin3_track_insert(Lib3dsLin3Track *track, Lib3dsLin3Key *key);
-extern LIB3DSAPI void lib3ds_lin3_track_remove(Lib3dsLin3Track *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_lin3_track_eval(Lib3dsLin3Track *track, Lib3dsVector p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin3_track_read(Lib3dsLin3Track *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_lin3_track_write(Lib3dsLin3Track *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_track_setup(Lib3dsLin3Track *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_track_insert(Lib3dsLin3Track *track, Lib3dsLin3Key *key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_track_remove(Lib3dsLin3Track *track, Lib3dsIntd frame);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_lin3_track_eval(Lib3dsLin3Track *track, Lib3dsVector p, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_lin3_track_read(Lib3dsLin3Track *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_lin3_track_write(Lib3dsLin3Track *track, Lib3dsIo *io);
 
-extern LIB3DSAPI Lib3dsQuatKey* lib3ds_quat_key_new();
-extern LIB3DSAPI void lib3ds_quat_key_free(Lib3dsQuatKey* key);
-extern LIB3DSAPI void lib3ds_quat_track_free_keys(Lib3dsQuatTrack *track);
-extern LIB3DSAPI void lib3ds_quat_key_setup(Lib3dsQuatKey *p, Lib3dsQuatKey *cp, Lib3dsQuatKey *c,
+LIB3DSEXTERN LIB3DSAPI Lib3dsQuatKey* lib3ds_quat_key_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_key_free(Lib3dsQuatKey* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_track_free_keys(Lib3dsQuatTrack *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_key_setup(Lib3dsQuatKey *p, Lib3dsQuatKey *cp, Lib3dsQuatKey *c,
   Lib3dsQuatKey *cn, Lib3dsQuatKey *n);
-extern LIB3DSAPI void lib3ds_quat_track_setup(Lib3dsQuatTrack *track);
-extern LIB3DSAPI void lib3ds_quat_track_insert(Lib3dsQuatTrack *track, Lib3dsQuatKey *key);
-extern LIB3DSAPI void lib3ds_quat_track_remove(Lib3dsQuatTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_quat_track_eval(Lib3dsQuatTrack *track, Lib3dsQuat p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_quat_track_read(Lib3dsQuatTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_quat_track_write(Lib3dsQuatTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_track_setup(Lib3dsQuatTrack *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_track_insert(Lib3dsQuatTrack *track, Lib3dsQuatKey *key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_track_remove(Lib3dsQuatTrack *track, Lib3dsIntd frame);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_quat_track_eval(Lib3dsQuatTrack *track, Lib3dsQuat p, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_quat_track_read(Lib3dsQuatTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_quat_track_write(Lib3dsQuatTrack *track, Lib3dsIo *io);
 
-extern LIB3DSAPI Lib3dsMorphKey* lib3ds_morph_key_new();
-extern LIB3DSAPI void lib3ds_morph_key_free(Lib3dsMorphKey* key);
-extern LIB3DSAPI void lib3ds_morph_track_free_keys(Lib3dsMorphTrack *track);
-extern LIB3DSAPI void lib3ds_morph_track_insert(Lib3dsMorphTrack *track, Lib3dsMorphKey *key);
-extern LIB3DSAPI void lib3ds_morph_track_remove(Lib3dsMorphTrack *track, Lib3dsIntd frame);
-extern LIB3DSAPI void lib3ds_morph_track_eval(Lib3dsMorphTrack *track, char *p, Lib3dsFloat t);
-extern LIB3DSAPI Lib3dsBool lib3ds_morph_track_read(Lib3dsMorphTrack *track, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_morph_track_write(Lib3dsMorphTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsMorphKey* lib3ds_morph_key_new();
+LIB3DSEXTERN LIB3DSAPI void lib3ds_morph_key_free(Lib3dsMorphKey* key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_morph_track_free_keys(Lib3dsMorphTrack *track);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_morph_track_insert(Lib3dsMorphTrack *track, Lib3dsMorphKey *key);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_morph_track_remove(Lib3dsMorphTrack *track, Lib3dsIntd frame);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_morph_track_eval(Lib3dsMorphTrack *track, char *p, Lib3dsFloat t);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_morph_track_read(Lib3dsMorphTrack *track, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_morph_track_write(Lib3dsMorphTrack *track, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

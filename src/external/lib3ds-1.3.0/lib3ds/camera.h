@@ -48,11 +48,11 @@ struct Lib3dsCamera {
     Lib3dsFloat far_range;
 }; 
 
-extern LIB3DSAPI Lib3dsCamera* lib3ds_camera_new(const char *name);
-extern LIB3DSAPI void lib3ds_camera_free(Lib3dsCamera *mesh);
-extern LIB3DSAPI void lib3ds_camera_dump(Lib3dsCamera *camera);
-extern LIB3DSAPI Lib3dsBool lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsCamera* lib3ds_camera_new(const char *name);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_camera_free(Lib3dsCamera *mesh);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_camera_dump(Lib3dsCamera *camera);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_camera_read(Lib3dsCamera *camera, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_camera_write(Lib3dsCamera *camera, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }

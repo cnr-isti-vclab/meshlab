@@ -267,20 +267,20 @@ typedef struct Lib3dsChunk {
     Lib3dsDword cur;
 } Lib3dsChunk; 
 
-extern LIB3DSAPI void lib3ds_chunk_enable_dump(Lib3dsBool enable, Lib3dsBool unknown);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io);
-extern LIB3DSAPI void lib3ds_chunk_read_tell(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsWord lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI void lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI void lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io);
-extern LIB3DSAPI const char* lib3ds_chunk_name(Lib3dsWord chunk);
-extern LIB3DSAPI void lib3ds_chunk_unknown(Lib3dsWord chunk);
-extern LIB3DSAPI void lib3ds_chunk_dump_info(const char *format, ...);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_enable_dump(Lib3dsBool enable, Lib3dsBool unknown);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_read(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_read_start(Lib3dsChunk *c, Lib3dsWord chunk, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_read_tell(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsWord lib3ds_chunk_read_next(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_read_reset(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_read_end(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_write(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_write_start(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_write_end(Lib3dsChunk *c, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_chunk_write_switch(Lib3dsWord chunk, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI const char* lib3ds_chunk_name(Lib3dsWord chunk);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_unknown(Lib3dsWord chunk);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_chunk_dump_info(const char *format, ...);
 
 #ifdef __cplusplus
 }

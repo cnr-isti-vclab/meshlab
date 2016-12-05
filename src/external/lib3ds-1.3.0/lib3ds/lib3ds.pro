@@ -8,7 +8,7 @@ TARGET = 3ds
 CONFIG += staticlib
 DEPENDPATH += .
 INCLUDEPATH += ..
-
+DEFINES += LIB3DS_STATIC
 
 # Input
 HEADERS += atmosphere.h \

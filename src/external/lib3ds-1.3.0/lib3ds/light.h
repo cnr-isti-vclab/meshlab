@@ -66,11 +66,11 @@ struct Lib3dsLight {
     Lib3dsFloat fall_off;
 }; 
 
-extern LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
-extern LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
-extern LIB3DSAPI void lib3ds_light_dump(Lib3dsLight *light);
-extern LIB3DSAPI Lib3dsBool lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io);
-extern LIB3DSAPI Lib3dsBool lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsLight* lib3ds_light_new(const char *name);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_light_free(Lib3dsLight *mesh);
+LIB3DSEXTERN LIB3DSAPI void lib3ds_light_dump(Lib3dsLight *light);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_light_read(Lib3dsLight *light, Lib3dsIo *io);
+LIB3DSEXTERN LIB3DSAPI Lib3dsBool lib3ds_light_write(Lib3dsLight *light, Lib3dsIo *io);
 
 #ifdef __cplusplus
 }
