@@ -5,24 +5,19 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "1.3.3BETA"
+!define PRODUCT_VERSION "2016BETA"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
-!define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt\qt-everywhere-opensource-src-5.1.0\qtbase"
-!define ICU_DLLS "C:\Users\ranzuglia\Desktop\icu\bin64"
+!define QT_BASE "C:\Qt_5.7\5.7\msvc2015_64\"
+!define ADDITIONAL_DLLS "C:\Users\ranzuglia\Desktop\MeshLab-related\additional_dlls"
+!define ICU_DLLS "${ADDITIONAL_DLLS}\icu\bin64"
 !define DISTRIB_FOLDER "../distrib"
 !define MICROSOFT_VS2010_REDIST_KEYDIR "Software\Microsoft\Windows\CurrentVersion\Uninstall\"
-!define MICROSOFT_VS2010_X64 "{1D8E6291-B0D5-35EC-8441-6616F567A0F7}"
-!define MICROSOFT_VS2010_IA64 "{88C73C1C-2DE5-3B01-AFB8-B46EF4AB41CD}"
 
-
-
-
-; MUI 1.67 compatible ------
+; MUI 1.67 compatible -----
 !include "MUI.nsh"
 
 ; MUI Settings
@@ -56,9 +51,9 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v133BETA_64bit_${NOW}.exe"
+OutFile "MeshLabDevel_v2016BETA_64bit_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
-InstallDir "${MAINDIR}\VCG\MeshLab"
+InstallDir "${MAINDIR}\VCG\MeshLab_2016BETA"
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -97,33 +92,31 @@ Section -Prerequisites
 	;MessageBox MB_OK "Letto : $0" 
 	;Quit
 	
-	!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_X64}
-	Pop $R0
-	${If} $R0 == "1" 
-		Goto endPrerequisites
-	${Else}
-		!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_IA64}
-		Pop $R0
-		${If} $R0 == "1" 
-			Goto endPrerequisites
-		${Else} 
-			MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2010 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
-			Quit
-		${Endif}
-	${Endif}
-	endPrerequisites:
+	;!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_X64}
+	;Pop $R0
+	;${If} $R0 == "1" 
+	;	Goto endPrerequisites
+	;${Else}
+	;	!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_IA64}
+	;	Pop $R0
+	;	${If} $R0 == "1" 
+	;		Goto endPrerequisites
+	;	${Else} 
+	;		MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2010 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
+	;		Quit
+	;	${Endif}
+	;${Endif}
+	;endPrerequisites:
 SectionEnd
 
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "${DISTRIB_FOLDER}\meshlab.exe"
-  File "${DISTRIB_FOLDER}\meshlabserver.exe"
 
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
-  CreateShortCut "$SMPROGRAMS\MeshLab\MeshLabServer.lnk" "cmd.exe"
 
   ;Let's delete all the dangerous stuff from previous releases.
   Delete "$INSTDIR\qt*.dll"
@@ -150,121 +143,12 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}\shaders\decorate_shadow\vsmb\*.frag"
   File "${DISTRIB_FOLDER}\shaders\decorate_shadow\vsmb\*.vert"
   File "${DISTRIB_FOLDER}\shaders\*.frag"
-  SetOutPath "$INSTDIR\shaders\shadersrm"
-  File "${DISTRIB_FOLDER}\shaders\shadersrm\*.rfx"
   SetOutPath "$INSTDIR\plugins"
-  ; IO Plugins (9)
-  File "${DISTRIB_FOLDER}/plugins\io_base.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_bre.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_collada.dll"
-  ;File "${DISTRIB_FOLDER}/plugins\io_3ds.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_json.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_u3d.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_x3d.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_tri.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_expe.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_gts.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_pdb.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_m.dll"
-  File "${DISTRIB_FOLDER}/plugins\io_ctm.dll"
   
-
-  ; filter plugins (23)
-  File "${DISTRIB_FOLDER}/plugins\filter_ao.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_aging.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_autoalign.dll"
+  ; MeshLab plugins
+  File "${DISTRIB_FOLDER}/plugins\*.dll"
+  File "${DISTRIB_FOLDER}/plugins\*.xml"
   
-  File "${DISTRIB_FOLDER}/plugins\filter_bnpts.dll"
-
-  File "${DISTRIB_FOLDER}/plugins\filter_camera.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_clean.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_colorproc.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_color_projection.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_colorize.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_create.dll"
-   File "${DISTRIB_FOLDER}/plugins\filter_csg.dll"
-
-  File "${DISTRIB_FOLDER}/plugins\filter_dirt.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_fractal.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_func.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_isoparametrization.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_img_patch_param.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_layer.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_measure.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_measure.xml"
-
-  File "${DISTRIB_FOLDER}/plugins\filter_meshing.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_mls.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_mutualinfo.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_mutualinfo.xml"
-
-  
-  File "${DISTRIB_FOLDER}/plugins\filter_photosynth.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_plymc.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_poisson.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_qhull.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_quality.dll"
-  
-  File "${DISTRIB_FOLDER}/plugins\filter_sampling.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_select.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_sdfgpu.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_ssynth.dll"
-  
-  
-  File "${DISTRIB_FOLDER}/plugins\filter_texture.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_trioptimize.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_unsharp.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_zippering.dll"
-  
-
-  File "${DISTRIB_FOLDER}/plugins\samplefilter.dll"
-  File "${DISTRIB_FOLDER}/plugins\samplefilterdyn.dll"
-
-  File "${DISTRIB_FOLDER}/plugins\filter_geodesic.dll"
-  File "${DISTRIB_FOLDER}/plugins\filter_createiso.dll"
- 
-
-  ; edit plugins (14)
-  File "${DISTRIB_FOLDER}/plugins\edit_align.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_arc3D.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_measure.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_paint.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_point.dll"
-  
-  ;File "${DISTRIB_FOLDER}/plugins\editrgbtri.dll"
-  ;File "${DISTRIB_FOLDER}/plugins\editsegment.dll"
-
-  File "${DISTRIB_FOLDER}/plugins\sampleedit.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_pickpoints.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_quality.dll"
-  
-  File "${DISTRIB_FOLDER}/plugins\edit_select.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_texture.dll"
-  File "${DISTRIB_FOLDER}/plugins\edit_hole.dll"
-   File "${DISTRIB_FOLDER}/plugins\edit_manipulators.dll"
-  ;File "${DISTRIB_FOLDER}/plugins\edit_topo.dll"
-
-  ; decorate plugins (2)
-  File "${DISTRIB_FOLDER}/plugins\decorate_base.dll"
-  File "${DISTRIB_FOLDER}/plugins\decorate_background.dll"
-  File "${DISTRIB_FOLDER}/plugins\decorate_shadow.dll"
-  File "${DISTRIB_FOLDER}/plugins\decorate_raster_proj.dll"
-  
-  ; render plugins (1)
-  File "${DISTRIB_FOLDER}/plugins\render_splatting.dll"
-  File "${DISTRIB_FOLDER}/plugins\render_radiance_scaling.dll"
-  File "${DISTRIB_FOLDER}/plugins\render_gdp.dll"
-  File "${DISTRIB_FOLDER}/plugins\render_rfx.dll"
-
-  
-  ; All the U3D binary stuff
-  SetOutPath "$INSTDIR\plugins\U3D_W32"
-  File "${DISTRIB_FOLDER}/plugins\U3D_W32\IDTFConverter.exe"
-  File "${DISTRIB_FOLDER}/plugins\U3D_W32\*.dll"
-  File "${DISTRIB_FOLDER}/plugins\U3D_W32\*.txt"
-  SetOutPath "$INSTDIR\plugins\U3D_W32\plugins"
-  File "${DISTRIB_FOLDER}/plugins\U3D_W32\Plugins\IFXExporting.dll"
-
   SetOutPath "$INSTDIR\textures"
   File "${DISTRIB_FOLDER}/textures\chrome.png"
   File "${DISTRIB_FOLDER}/textures\*.dds"
@@ -312,7 +196,7 @@ Section "MainSection" SEC01
   File "${ICU_DLLS}\icuin51.dll"
   File "${ICU_DLLS}\icudt51.dll"
   File "${ICU_DLLS}\icuuc51.dll"
-  
+  File "${ADDITIONAL_DLLS}\api-ms-win-crt-runtime-l1-1-0.dll"
   
   ;File "C:\MinGW\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
@@ -333,7 +217,6 @@ SectionEnd
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\meshlab.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY_S}" "" "$INSTDIR\meshlabserver.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\meshlab.exe"
