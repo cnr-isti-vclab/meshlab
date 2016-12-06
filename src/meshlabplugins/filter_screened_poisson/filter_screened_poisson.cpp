@@ -25,6 +25,7 @@
 #include <windows.h>
 #include <Psapi.h>
 #endif
+#include <cstdio>
 #include "Src/MyTime.h"
 #include "Src/MemoryUsage.h"
 #include "Src/MarchingCubes.h"
