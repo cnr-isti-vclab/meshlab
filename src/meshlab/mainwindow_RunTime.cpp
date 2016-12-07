@@ -3067,7 +3067,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         QSettings settings;
         int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
         settings.setValue("savedMeshCounter",savedMeshCounter+1);
-
+		updateLayerDialog();
     }
     return ret;
 }
