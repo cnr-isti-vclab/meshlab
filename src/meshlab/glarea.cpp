@@ -361,7 +361,12 @@ int GLArea::RenderForSelection(int pickX, int pickY)
 {
 	makeCurrent();
     if (mvc() == NULL)
-        return 0;
+        return -1;
+
+	MLSceneGLSharedDataContext* datacont = mvc()->sharedDataContext();
+	if (datacont == NULL)
+		return -1;
+
     int sz = int( md()->meshList.size())*5;
     GLuint *selectBuf =new GLuint[sz];
     glSelectBuffer(sz, selectBuf);
@@ -391,8 +396,9 @@ int GLArea::RenderForSelection(int pickX, int pickY)
     foreach(MeshModel * mp, this->md()->meshList)
     {
         glLoadName(mp->id());
-        //MLSceneRenderModeAdapter::renderMesh((unsigned int) mp->id(),*this);
-        //renderMesh(this->context(),MLThreadSafeGLMeshAttributesFeeder& feed,const RenderMode& rm,RichParameterSet& rps);
+		
+		datacont->setMeshTransformationMatrix(mp->id(), mp->cm.Tr);
+		datacont->draw(mp->id(), context());
     }
 
     long hits;
@@ -500,7 +506,9 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
                 {
                     Logf(0,"Selected new Mesh %i",newId);
                     md()->setCurrentMesh(newId);
-                    update();
+					if (mw() != NULL)
+						mw()->updateLayerDialog();
+                    //update();
                 }
                 hasToSelectMesh=false;
             }
