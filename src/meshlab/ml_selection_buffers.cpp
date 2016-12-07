@@ -138,6 +138,9 @@ void MLSelectionBuffers::drawSelection(ML_SELECTION_TYPE selbuf) const
 		glPointSize(3.0);
 		glPushMatrix();
 		glMultMatrix(_m.cm.Tr);
+
+		if (_pointsize > 0.0f)
+			glPointSize((GLfloat)_pointsize);
 		for (size_t ii = 0; ii < _selmap[ML_PERVERT_SEL].size(); ++ii)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, _selmap[ML_PERVERT_SEL][ii]);
@@ -208,4 +211,9 @@ void MLSelectionBuffers::deallocateBuffer(ML_SELECTION_TYPE selbuf)
 		glDeleteBuffers(_selmap[selbuf].size(), &(_selmap[selbuf][0]));
 		_selmap[selbuf].clear();
 	}
+}
+
+void MLSelectionBuffers::setPointSize(float ptsz)
+{
+	_pointsize = ptsz;
 }

@@ -39,7 +39,7 @@ public:
 	void updateBuffer(ML_SELECTION_TYPE selbuf);
 	void drawSelection(ML_SELECTION_TYPE selbuf) const;
 	void deallocateBuffer(ML_SELECTION_TYPE selbuf);
-
+	void setPointSize(float ptsz);
 private:
 	mutable QReadWriteLock _lock;
 
@@ -48,6 +48,7 @@ private:
 	typedef std::vector<GLuint> SelectionBufferNames;
 	typedef std::vector< SelectionBufferNames > SelMap;
 	SelMap _selmap;
+	float _pointsize;
 };
 
 #endif

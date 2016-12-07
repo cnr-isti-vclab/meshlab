@@ -228,7 +228,12 @@ void MLDefaultMeshDecorators::decorateMesh( MeshModel & m,const MLRenderingData&
 		{
 			CMeshO::PerMeshAttributeHandle< MLSelectionBuffers* > selbufhand = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<MLSelectionBuffers* >(m.cm, selectionAttName());
 			if (selbufhand() != NULL)
+			{
+				MLPerViewGLOptions opts;
+				dt.get(opts);
+				selbufhand()->setPointSize(opts._perpoint_pointsize);
 				selbufhand()->drawSelection(MLSelectionBuffers::ML_PERVERT_SEL);
+			}
 		}
     }
 
