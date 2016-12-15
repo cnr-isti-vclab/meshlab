@@ -45,6 +45,7 @@ public:
     AlignPairWidget (GLArea* ar, QWidget * parent);
 public slots:
         /// widget-based user interaction slots
+	void cleanDataOnClosing(int);
 signals:
         /// signal for setting the statusbar message
         void setStatusBar(QString message);
@@ -63,6 +64,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent * e);
     void drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &, vcg::Color4b color);
 
+
 private:
     /// the active mesh instance
     MeshNode* freeMesh;
@@ -74,6 +76,9 @@ private:
     vcg::Trackball* currentTrack;
 	MLSceneGLSharedDataContext* shared;
 	GLArea* gla;
+
+
+	void createRenderingData(MeshModel* mm, MLRenderingData& dt);
 public:
     std::vector<vcg::Point3f> freePickedPointVec;
     std::vector<vcg::Point3f> gluedPickedPointVec;

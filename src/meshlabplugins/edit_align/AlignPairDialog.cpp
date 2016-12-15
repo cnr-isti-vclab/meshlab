@@ -31,9 +31,10 @@
 AlignPairDialog::AlignPairDialog (GLArea* gla,QWidget * parent) : QDialog(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout();
-
+	
     aa=new AlignPairWidget(gla,this);
-    aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	connect(this, SIGNAL(finished(int)), aa, SLOT(cleanDataOnClosing(int)));
+	aa->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok  | QDialogButtonBox::Cancel);
 	QHBoxLayout* checklayout = new QHBoxLayout();
 	

@@ -37,9 +37,12 @@ public:
     AlignPairWidget *aa;
 
     AlignPairDialog (GLArea* gla, QWidget * parent = 0);
+
+
 private slots:
 	void setScalingFlag(bool);
 	void setPointRenderingFlag(bool);
 	void setFakeColorFlag(bool);
+	
 };
 #endif
