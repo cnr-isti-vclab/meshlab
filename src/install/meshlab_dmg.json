@@ -1,0 +1,15 @@
+{
+  "comment" : "This JSON contains the specs of the meshlab DMG volume",
+  "comment" : "It is done to be run using appdmg, installed with 'npm install -g appdmg'",
+  "comment" : "command line should be something like  'appdmg meshlab_dmg.json ../distrib/MeshLab2016.dmg'",
+  "title": "MeshLab2016",
+  "icon": "../meshlab/images/meshlab.icns",
+  "background": "meshlab_dmg_background.png",
+  "contents": [
+    { "x": 128, "y": 150, "type": "file", "path": "../distrib/MeshLabBundle/meshlab.app" },
+    { "x": 384, "y": 150, "type": "link", "path": "/Applications" },
+    { "x": 128, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/sample" },
+    { "x": 256, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/gpl.txt" },
+    { "x": 384, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/readme.txt" }
+  ]
+}
