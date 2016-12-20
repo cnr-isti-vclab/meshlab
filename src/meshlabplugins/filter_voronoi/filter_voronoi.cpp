@@ -206,11 +206,11 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     cb(1, "Init");
     vvs.Init(sampleSurfRadius);
     cb(30, "Sampling Volume...");
-    vvs.BuildVolumeSampling(sampleVolNum,0,poissonRadius,0);
+    vvs.BuildVolumeSampling(sampleVolNum,poissonRadius,0);
     tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
     tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mcVm->cm);
     //vvs.ThicknessEvaluator();
-    tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.poissonSurfaceMesh);
+    tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.psd.poissonSurfaceMesh);
     return true;
   }
   if(filterName=="Voronoi Scaffolding") /******************************************************/
@@ -226,7 +226,6 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     cb(10, "Sampling Surface...");
     float sampleSurfRadius = env.evalFloat("sampleSurfRadius");
     int sampleVolNum = env.evalInt("sampleVolNum");
-    int voronoiSeed = env.evalInt("voronoiSeed");
     int voxelRes = env.evalInt("voxelRes");
     float isoThr = env.evalFloat("isoThr");
     int smoothStep = env.evalInt("smoothStep");
@@ -241,7 +240,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     vvs.Init(sampleSurfRadius);
     cb(30, "Sampling Volume...");
     CMeshO::ScalarType poissonVolumeRadius=0;
-    vvs.BuildVolumeSampling(sampleVolNum,voronoiSeed,poissonVolumeRadius,0);
+    vvs.BuildVolumeSampling(sampleVolNum,poissonVolumeRadius,0);
     Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
 
     cb(40, "Relaxing Volume...");
@@ -257,7 +256,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     tri::Smooth<CMeshO>::VertexCoordLaplacian(sm->cm, smoothStep);
     sm->UpdateBoxAndNormals();
    tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
-   tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.poissonSurfaceMesh);
+   tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
     return true;
   }
 
