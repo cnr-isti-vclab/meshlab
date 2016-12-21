@@ -43,7 +43,13 @@ public slots:
     void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 private:
-    inline QString SketchFabKeyCode() const     { return  "MeshLab::Filter::SketchFabKeyCode" ; }
+    QString apiToken;
+    QString description;
+    QString name;
+    QString tags;
+    QString zipFileName;
+    QString sketchfabModelUrl;
+    vcg::CallBackPos * fcb;
 };
 
 #endif
