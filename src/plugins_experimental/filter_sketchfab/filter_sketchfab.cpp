@@ -109,7 +109,7 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
         return false;
       }
       
-      this->Log("Upload Completed\n");
+      this->Log("Upload Completed; you can access the uploaded model at the following URL:\n"); 
       this->Log("<a href=\"%s\">%s</a>\n",qPrintable(this->sketchfabModelUrl),qPrintable(this->sketchfabModelUrl));
       return true;
     }
