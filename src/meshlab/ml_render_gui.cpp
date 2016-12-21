@@ -147,7 +147,7 @@ void MLRenderingToolbar::addColorPicker( MLRenderingUserDefinedGeneralColorActio
 	addWidget(pick);
 	_colpicks[act] = pick;
 	//_colpickacts.push_back(addWidget(pick));
-    connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
+//    connect(pick,SIGNAL(triggered(QAction*)),this,SLOT(toggle(QAction*)));
     connect(pick,SIGNAL(userDefinedColorAction(int,MLRenderingAction*)),this,SLOT(extraUpdateRequired(int,MLRenderingAction*)));
 	//connect(this, SIGNAL(), pick, SLOT());
 }
