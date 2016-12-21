@@ -1138,7 +1138,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 		settings.setValue("UID", UID);
 	}
 
-	QString BaseCommand("/~cignoni/meshlab_beta.php");
+	QString BaseCommand("/~cignoni/meshlab_latest.php");
 
 #ifdef Q_OS_WIN
 	QString OS = "Win";
