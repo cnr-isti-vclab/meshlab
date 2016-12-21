@@ -160,7 +160,7 @@ Q_INVOKABLE inline Scalarm computeMaxFQ() const {  return vcg::tri::Stat<CMeshO>
     Q_INVOKABLE void setVertPosArray(const Point3Vector& pa);
     Q_INVOKABLE void setVertNormArray(const Point3Vector& na);
     //Q_INVOKABLE void setV(const QVector<VCGVertexSI*>& v);
-
+    Q_INVOKABLE QString label() const { return mm.label(); }
     Q_INVOKABLE int vn() const;
     Q_INVOKABLE int fn() const;
     Q_INVOKABLE VCGVertexSI* v(const int ind);
