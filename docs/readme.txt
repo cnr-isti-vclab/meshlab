@@ -1,8 +1,8 @@
    MeshLab
-   http://meshlab.sourceforge.net/
+   http://www.meshlab.net
    All rights reserved.
 
-   VCGLib  http://vcg.sf.net                                         o o
+   VCGLib  http://www.vcglib.net                                         o o
    Visual and Computer Graphics Library                            o     o
                                                                   _   O  _
    Paolo Cignoni                                                    \/)\/
@@ -27,20 +27,19 @@ Please, when using this tool, cite the following reference:
 
 MeshLab
 Visual Computing Lab - ISTI - CNR
-http://meshlab.sourceforge.net/
+http://www.meshlab.net
 
 @misc{Meshlab
     author = {Visual Computing Lab  ISTI - CNR},
     title = {MeshLab},
-    note = {http://meshlab.sourceforge.net/}
+    note = {http://www.meshlab.net}
 }
 
-For any general question about the use of this software use the sourceforge public forums 
-http://sourceforge.net/forum/forum.php?forum_id=499532
-
-or contact:
 Paolo Cignoni ( p.cignoni (at) isti.cnr.it )
 Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it ) 
 
-For bugs, feature requests and such, please use the sourceforge service
-http://sourceforge.net/tracker/?group_id=149444
+For documented and repeatable bugs, reasonable feature requests and grounded issues, please use the GitHub services
+https://github.com/cnr-isti-vclab/meshlab/issues
+
+For general questions use StackOverflow 
+http://stackoverflow.com/questions/tagged/meshlab
