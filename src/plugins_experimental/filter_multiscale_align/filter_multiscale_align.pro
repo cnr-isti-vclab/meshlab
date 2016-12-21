@@ -2,7 +2,6 @@ include (../../shared.pri)
 
 HEADERS     += filter_multiscale_align.h \
                multiscale_align.h \
-               localKdTree.h \
                struct.h \
                utils.h \
                generic_align.h 
