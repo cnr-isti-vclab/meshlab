@@ -1,0 +1,188 @@
+/*
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at http://mozilla.org/MPL/2.0/. 
+*/
+
+In this file you can find few guidelines for developers. We don't give in-depth details, fell free to inspire you from existing code
+and to use things that can make the code easy to read. If their is any lake, send us a mail on the devlist (patate-devel@lists.gforge.inria.fr).
+
+******
+Naming
+******
+
+
+General Naming Rules
+********************
+Function names, variable names, and filenames should be descriptive. In most of case use the CamelCase notation.
+
+File Names
+**********
+Use the lowerCamelCase notation : myFileIsCool.cpp
+
+Use .h for headers, .cpp for sources. If you are using templates use .hpp for the implemented part.
+
+Type Names
+**********
+Use the UpperCamelCase notation : MyClassIsReallyCool. Execept for enums, see below.
+
+Variable Names
+**************
+Use the lowerCamelCase notation. If you want, hungarian notation is tolerated.
+
+Use m_ for members variables.
+Use _ for function params.
+
+void function(float _scale)
+{
+  float scale  = _scale;
+  doSomething(scale);
+
+  m_scale = scale;
+}
+
+With hungarian notation : 
+void function(float _fScale)
+{
+  float fScale  = _fScale;
+  doSomething(fScale);
+	
+  m_fScale = fScale;
+}
+
+
+Constant Name
+*************
+
+Use a k followed by mixed case : kThisIsAConstant
+
+Function Names
+**************
+Regular functions have mixed case; accessors and mutators match the name of the variable. You can use get/set suffix if you want.
+
+Namespace Names
+***************
+Namespace names can be in UpperCamelStyle for important or in lowerCamelCase for smaller namespaces.
+
+For example :
+
+namespace Granaille
+{
+  //many things
+  
+  namespace internal
+  {
+    //few things
+  }
+}
+
+Enumerator Names
+****************
+Use this style : MY_ENUM.
+enum COOL_ENUM
+{
+  VALUE1 = 0,
+  VALUE2 = 1,
+  NBVALUE
+}
+
+Macro Names
+***********
+Same as enumerator : MY_MACRO_IS_COOL.
+
+Exceptions to Naming Rules
+**************************
+If you are naming something that is analogous to an existing C or C++ entity then you can follow the existing naming convention scheme.
+
+
+**********
+Formatting
+**********
+
+
+This are basics rules for a better reading of the code. We'll don't give more details. Feel free to llok existing code and respect those basic rules.
+
+Spaces versus Tabs
+******************
+We use spaces for indentation (4 spaces for 1 indent level). Do not use tabs in your code. You should set your editor to emit spaces when you hit the tab key.
+
+Brackets
+********
+Use the Allman style :
+void function()
+{
+  while(condition)
+  {
+    doSomething();
+  }
+}
+
+For empty functions put both brackets on the same line :
+void emptyFunction()
+{}
+
+Function Declarations and Definitions
+*************************************
+Return type on the same line as function name except for templates. Parameters on the same line if the line length is not to long.
+Functions look like this:
+
+ReturnType ClassName::FunctionName(Type par_name1, Type par_name2)
+{
+  DoSomething();
+  ...
+}
+
+If you have too much arguments on one line:
+ReturnType ClassName::ReallyLongFunctionName(Type par_name1, Type par_name2,
+                                             Type par_name3)
+{
+  DoSomething();
+  ...
+}
+
+You can also put one argument per line if the function name is very long and have many args.
+
+Class Format
+************
+There is no order and no indentations for public, protected, private sections. you can group
+methods by theme if you want. Prefer putting members variables at the end of the class.
+Be sure to separate variables and methods even if they are in the same section.
+
+class MyClass : public OtherClass
+{
+public:      // No indent!
+  MyClass();  // Regular 2 space indent.
+  explicit MyClass(int var);
+  ~MyClass() {}
+
+  void someFunction();
+  void someFunctionThatDoesNothing() 
+  {}
+
+private:
+  bool someInternalFunction();
+
+private: // Private variables separated from privat methods
+  int _var;
+  int _otherVar_;
+};
+
+Namespace Formatting
+********************
+Namespaces do not add an extra level of indentation. Use:
+
+namespace toto
+{
+
+void function() //No extra indentation within namespace.
+{
+  ...
+}
+
+}
+
+Line Length
+***********
+There is no length limit. The developer does with his felling but be moderate and don't have infinite line length...
+
+
