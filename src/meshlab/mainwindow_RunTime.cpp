@@ -523,6 +523,7 @@ while(ii < meshDoc()->meshList.size())
     }
     if (searchMenu != NULL)
         searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
+    updateWindowMenu();
 }
 
 void MainWindow::setSplit(QAction *qa)
@@ -3859,8 +3860,7 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 	if (_currviewcontainer != NULL)
 	{
 		updateLayerDialog();
-		updateMenus();
-		updateWindowMenu();
+		updateMenus();		
 		updateStdDialog();
 		updateXMLStdDialog();
 		updateDocumentScriptBindings();
