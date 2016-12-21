@@ -23,10 +23,10 @@
         <file>images/points.png</file>
         <file>images/reload.png</file>
         <file>images/save.png</file>
-		<file>images/selected.png</file>
+        <file>images/selected.png</file>
         <file>images/smooth.png</file>
         <file>images/snapshot.png</file>
-		<file>images/border.png</file>
+        <file>images/border.png</file>
         <file>images/textures.png</file>
         <file>images/wire.png</file>
         <file>images/layers.png</file>
@@ -44,13 +44,14 @@
         <file>images/new_project.png</file>
         <file>images/cursors/plain_pick.png</file>
         <file>images/view_raster.png</file>
-		<file>images/options.png</file>
-		<file>images/vert_color.png</file>
-		<file>images/face_color.png</file>
-		<file>images/text_color.png</file>
-    <file>images/ok.png</file>
-    <file>images/stop.png</file>
-    <file>images/search.png</file>
-    <file>images/dummy.png</file>
+        <file>images/options.png</file>
+        <file>images/vert_color.png</file>
+        <file>images/face_color.png</file>
+        <file>images/text_color.png</file>
+        <file>images/ok.png</file>
+        <file>images/stop.png</file>
+        <file>images/search.png</file>
+        <file>images/dummy.png</file>
+        <file>images/meshlabLogo_256x256.png</file>
     </qresource>
 </RCC>
