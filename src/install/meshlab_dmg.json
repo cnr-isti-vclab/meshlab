@@ -2,7 +2,7 @@
   "comment" : "This JSON contains the specs of the meshlab DMG volume",
   "comment" : "It is done to be run using appdmg, installed with 'npm install -g appdmg'",
   "comment" : "command line should be something like  'appdmg meshlab_dmg.json ../distrib/MeshLab2016.dmg'",
-  "title": "MeshLab2016",
+  "title": "MeshLab2016.12",
   "icon": "../meshlab/images/meshlab.icns",
   "background": "meshlab_dmg_background.png",
   "contents": [
