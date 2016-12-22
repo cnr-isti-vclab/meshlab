@@ -9,7 +9,7 @@
     { "x": 128, "y": 150, "type": "file", "path": "../distrib/MeshLabBundle/meshlab.app" },
     { "x": 384, "y": 150, "type": "link", "path": "/Applications" },
     { "x": 128, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/sample" },
-    { "x": 256, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/gpl.txt" },
+    { "x": 256, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/LICENSE.txt" },
     { "x": 384, "y": 384, "type": "file", "path": "../distrib/MeshLabBundle/readme.txt" }
   ]
 }
