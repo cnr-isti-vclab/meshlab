@@ -5,7 +5,7 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "2016BETA"
+!define PRODUCT_VERSION "2016"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -52,9 +52,9 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v2016BETA_64bit_${NOW}.exe"
+OutFile "MeshLab2016.12_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
-InstallDir "${MAINDIR}\VCG\MeshLab_2016BETA"
+InstallDir "${MAINDIR}\VCG\MeshLab"
 ShowInstDetails show
 ShowUnInstDetails show
 
