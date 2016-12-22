@@ -504,6 +504,10 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 	MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshCommonCode(meshmodel, inputdt, outputdt);
 	MLPoliciesStandAloneFunctions::setPerViewGLOptionsAccordindToWireModality(meshmodel, outputdt);
 	MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(outputdt);
+	MLPerViewGLOptions opts;
+	outputdt.get(opts);
+	MLPoliciesStandAloneFunctions::suggestedDefaultPerViewGLOptions(opts);
+	outputdt.set(opts);
 }
 
 void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithMeshCommonCode(MeshModel* meshmodel, const MLRenderingData& inputdt, MLRenderingData& outputdt)
@@ -680,7 +684,7 @@ void MLPoliciesStandAloneFunctions::disableRedundatRenderingDataAccordingToPrior
 		dt.set(pr, atts);
 	}
 
-	setPerViewGLOptionsPriorities(dt);
+	//setPerViewGLOptionsPriorities(dt);
 }
 
 
@@ -790,7 +794,6 @@ void MLPoliciesStandAloneFunctions::setPerViewGLOptionsPriorities(MLRenderingDat
             }
         }
     }
-    suggestedDefaultPerViewGLOptions(glopts);
     dt.set(glopts);
 }
 
