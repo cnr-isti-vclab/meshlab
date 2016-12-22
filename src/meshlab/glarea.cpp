@@ -579,6 +579,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
             hasToGetPickPos=false;
         }
     }
+
 	if (hasToPick && hasToGetPickCoords)
 	{
 		Point2f pp(pointToPick[0], pointToPick[1]);
@@ -586,6 +587,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 		emit transmitPickedPos(nameToGetPickCoords, pp);
 		hasToGetPickCoords = false;
 	}
+
     foreach(QAction * p , iPerDocDecoratorlist)
     {
         MeshDecorateInterface * decorInterface = qobject_cast<MeshDecorateInterface *>(p->parent());
@@ -613,7 +615,8 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 			loadRaster(md()->rm()->id());
 		drawTarget();
 	}
-    // Double click move picked point to center
+
+	// Double click move picked point to center
     // It has to be done in the before trackball space (we MOVE the trackball itself...)
     if(hasToPick && !hasToGetPickPos)
     {
@@ -636,7 +639,6 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if (isHelpVisible()) 
 		displayHelp();
 
-
     //Draw highlight if it is the current viewer
     if(mvc()->currentId==id)
         displayViewerHighlight();
@@ -656,17 +658,16 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 	{
 		glPushAttrib(GL_ENABLE_BIT);
 		glDisable(GL_DEPTH_TEST);
+		renderingFacilityString();
 		displayInfo(&painter);
 		displayRealTimeLog(&painter);
 		updateFps(time.elapsed());
 		glPopAttrib();
 	}
 	//doneCurrent();
-    painter.endNativePainting();
-    //glFinish();
-    //doneCurrent();
 	glFlush();
 	glFinish();
+    painter.endNativePainting();
 }
 
 void GLArea::displayMatrix(QPainter *painter, QRect areaRect)
@@ -777,7 +778,7 @@ void GLArea::displayInfo(QPainter *painter)
     painter->setFont(qFont);
     QFontMetrics metrics = QFontMetrics(qFont);
     int border = qMax(4, metrics.leading()) / 2;
-    int numLines = 5;
+    int numLines = 6;
 
     float barHeight = ((metrics.height() + metrics.leading())*numLines) + 2 * border;
 
@@ -806,7 +807,7 @@ void GLArea::displayInfo(QPainter *painter)
         {
             QLocale engLocale(QLocale::English, QLocale::UnitedStates);
             QFileInfo inf = mm()->label();
-            col1Text += QString("Current Mesh: %1\n").arg(inf.completeBaseName());
+			col1Text += QString("Current Mesh: %1\n").arg(inf.completeBaseName());
             col1Text += "Vertices: " + engLocale.toString(mm()->cm.vn) + "    (" + engLocale.toString(this->md()->vn()) + ") \n";
             col1Text += "Faces: " + engLocale.toString(mm()->cm.fn) + "    (" + engLocale.toString(this->md()->fn()) + ") \n";
         }
@@ -822,7 +823,7 @@ void GLArea::displayInfo(QPainter *painter)
 		}
 
         QLocale engLocale(QLocale::English, QLocale::UnitedStates);
-        col1Text += "Selection: v: " + engLocale.toString(svn) + " f: " + engLocale.toString(sfn) + " \n";
+		col1Text += "Selection: v: " + engLocale.toString(svn) + " f: " + engLocale.toString(sfn) + " \n";
                 
         col1Text += GetMeshInfoString();
 
@@ -831,44 +832,7 @@ void GLArea::displayInfo(QPainter *painter)
         if ((cfps>0) && (cfps<1999))
             col0Text += QString("FPS: %1\n").arg(cfps,7,'f',1);
 
-        enum RenderingType {FULL_BO,MIXED,FULL_IMMEDIATE_MODE};
-        RenderingType rendtype = FULL_IMMEDIATE_MODE;
-        if (parentmultiview != NULL)
-        {
-            MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
-            if (shared != NULL)
-            {
-                int hh = 0;
-                foreach(MeshModel* meshmod,md()->meshList)
-                {
-                    if (shared->isBORenderingAvailable(meshmod->id()))
-                    {
-                        rendtype = MIXED;
-                        if ((rendtype == MIXED) && (hh == md()->meshList.size() - 1))
-                            rendtype = FULL_BO;
-                    }
-                    ++hh;
-                }
-            }
-        }
-        switch(rendtype)
-        {
-        case(FULL_BO):
-            {
-                col0Text += QString("BO_RENDERING");
-                break;
-            }
-        case(MIXED):
-            {
-                col0Text += QString("MIXED_RENDERING");
-                break;
-            }
-        case(FULL_IMMEDIATE_MODE):
-            {
-                col0Text += QString("IMMEDIATE_MODE_RENDERING");
-                break;
-            }
-        }
+		col0Text += renderfacility;
 
         if (clipRatioNear!=clipRatioNearDefault())
             col0Text += QString("\nClipping Near:%1\n").arg(clipRatioNear,7,'f',2);
@@ -881,6 +845,55 @@ void GLArea::displayInfo(QPainter *painter)
     //glPopAttrib();
 }
 
+void GLArea::renderingFacilityString()
+{
+	
+	renderfacility.clear();
+	makeCurrent();
+	if (md()->size() > 0)
+	{
+		enum RenderingType { FULL_BO, MIXED, FULL_IMMEDIATE_MODE };
+		RenderingType rendtype = FULL_IMMEDIATE_MODE;
+
+		if (parentmultiview != NULL)
+		{
+			MLSceneGLSharedDataContext* shared = parentmultiview->sharedDataContext();
+			if (shared != NULL)
+			{
+				int hh = 0;
+				foreach(MeshModel* meshmod, md()->meshList)
+				{
+					if (shared->isBORenderingAvailable(meshmod->id()))
+					{
+						rendtype = MIXED;
+						if ((rendtype == MIXED) && (hh == md()->meshList.size() - 1))
+							rendtype = FULL_BO;
+					}
+					++hh;
+				}
+			}
+		}
+
+		switch (rendtype)
+		{
+			case(FULL_BO):
+			{
+				renderfacility += QString("BO_RENDERING");
+				break;
+			}
+			case(MIXED):
+			{
+				renderfacility += QString("MIXED_RENDERING");
+				break;
+			}
+			case(FULL_IMMEDIATE_MODE):
+			{
+				renderfacility += QString("IMMEDIATE_MODE_RENDERING");
+				break;
+			}
+		}
+	}
+}
 
 void GLArea::displayViewerHighlight()
 {
@@ -1191,39 +1204,46 @@ void GLArea::mousePressEvent(QMouseEvent*e)
 {
 	makeCurrent();
     e->accept();
-    if(!this->hasFocus()) this->setFocus();
+	if (!this->hasFocus())
+	{
+		this->setFocus();
+	}
 
-    if( (iEdit && !suspendedEditor) )
-        iEdit->mousePressEvent(e,*mm(),this);
-    else
-    {
-        if( e->button()==Qt::RightButton) // Select a new current mesh
-        {
-            hasToSelectMesh=true;
-            this->pointToPick=Point2i(QT2VCG_X(this,e),QT2VCG_Y(this,e));
-        }
-        else
-        {
-            if ((e->modifiers() & Qt::ShiftModifier) &&
-                    (e->modifiers() & Qt::ControlModifier) &&
-                    (e->button()==Qt::LeftButton) )
-                activeDefaultTrackball=false;
-            else activeDefaultTrackball=true;
+	{
+		if ((iEdit != NULL) && !suspendedEditor)
+		{
+			iEdit->mousePressEvent(e, *mm(), this);
+		}
+		else
+		{
+			if (e->button() == Qt::RightButton) // Select a new current mesh
+			{
+				hasToSelectMesh = true;
+				this->pointToPick = Point2i(QT2VCG_X(this, e), QT2VCG_Y(this, e));
+			}
+			else
+			{
+				if ((e->modifiers() & Qt::ShiftModifier) &&
+					(e->modifiers() & Qt::ControlModifier) &&
+					(e->button() == Qt::LeftButton))
+					activeDefaultTrackball = false;
+				else activeDefaultTrackball = true;
 
-            if (isDefaultTrackBall())
-            {
-                if(QApplication::keyboardModifiers () & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-                else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ControlModifier ) );
-                if(QApplication::keyboardModifiers () & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-                else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::ShiftModifier ) );
-                if(QApplication::keyboardModifiers () & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier ) );
-                else trackball.ButtonUp  (QT2VCG(Qt::NoButton, Qt::AltModifier ) );
+				if (isDefaultTrackBall())
+				{
+					if (QApplication::keyboardModifiers() & Qt::Key_Control) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ControlModifier));
+					else trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ControlModifier));
+					if (QApplication::keyboardModifiers() & Qt::Key_Shift) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::ShiftModifier));
+					else trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::ShiftModifier));
+					if (QApplication::keyboardModifiers() & Qt::Key_Alt) trackball.ButtonDown(QT2VCG(Qt::NoButton, Qt::AltModifier));
+					else trackball.ButtonUp(QT2VCG(Qt::NoButton, Qt::AltModifier));
 
-                trackball.MouseDown(QT2VCG_X(this,e), QT2VCG_Y(this,e), QT2VCG(e->button(), e->modifiers() ) );
-            }
-            else trackball_light.MouseDown(QT2VCG_X(this,e), QT2VCG_Y(this,e), QT2VCG(e->button(), Qt::NoModifier ) );
-        }
-    }
+					trackball.MouseDown(QT2VCG_X(this, e), QT2VCG_Y(this, e), QT2VCG(e->button(), e->modifiers()));
+				}
+				else trackball_light.MouseDown(QT2VCG_X(this, e), QT2VCG_Y(this, e), QT2VCG(e->button(), Qt::NoModifier));
+			}
+		}
+	}
     update();
 }
 
@@ -1332,8 +1352,11 @@ void GLArea::wheelEvent(QWheelEvent*e)
 void GLArea::mouseDoubleClickEvent ( QMouseEvent * e )
 {
 	makeCurrent();
-    hasToPick=true;
-    pointToPick=Point2i(QT2VCG_X(this,e), QT2VCG_Y(this,e));
+	if ((iEdit == NULL) || suspendedEditor)
+	{
+		hasToPick = true;
+		pointToPick = Point2i(QT2VCG_X(this, e), QT2VCG_Y(this, e));
+	}
     update();
 }
 
