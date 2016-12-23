@@ -35,6 +35,8 @@
 #include <wrap/gl/picking.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
+#include <wrap/qt/trackball.h>
+
 
 
 #include <math.h>
@@ -97,7 +99,7 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 				pickedPoint[0], pickedPoint[1], pickedPoint[2]); */
 
 				//let the dialog know that this was the pointed picked incase it wants the information
-		bool picked = Pick<Point3m>(currentMousePosition.x(), gla->height() - currentMousePosition.y(), pickedPoint);
+		bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pickedPoint);
 		pickPointsDialog->selectOrMoveThisPoint(pickedPoint);
 
 		moveSelectPoint = false;
@@ -113,9 +115,9 @@ void EditPickPointsPlugin::Decorate(MeshModel &mm, GLArea *gla, QPainter *painte
 
 
 					//find the normal of the face we just clicked
-			bool picked = Pick<Point3m>(currentMousePosition.x(), gla->height() - currentMousePosition.y(), pickedPoint);
+			bool picked = Pick<Point3m>(currentMousePosition.x(), currentMousePosition.y(), pickedPoint);
 			std::vector<CFaceO*> face;
-			int result = GLPickTri<CMeshO>::PickVisibleFace(currentMousePosition.x(), gla->height() - currentMousePosition.y(), mm.cm, face);
+			int result = GLPickTri<CMeshO>::PickVisibleFace(currentMousePosition.x(), currentMousePosition.y(), mm.cm, face);
 
 			if ((result == 0) || (face[0] == NULL)) {
 				qDebug() << "find nearest face failed!";
@@ -210,7 +212,7 @@ void EditPickPointsPlugin::mousePressEvent(QMouseEvent *event, MeshModel &mm, GL
 	if (Qt::RightButton == event->button() &&
 		pickPointsDialog->getMode() != PickPointsDialog::ADD_POINT) {
 
-		currentMousePosition = event->pos();
+		currentMousePosition =  QPoint(QT2VCG_X(gla, event), QT2VCG_Y(gla, event));        
 
 		pickPointsDialog->recordNextPointForUndo();
 
@@ -231,7 +233,7 @@ void EditPickPointsPlugin::mouseMoveEvent(QMouseEvent *event, MeshModel &mm, GLA
 
 		//qDebug() << "mouse move left button and move mode: ";
 
-		currentMousePosition = event->pos();
+		currentMousePosition = QPoint(QT2VCG_X(gla, event), QT2VCG_Y(gla, event)); //event->pos();
 
 		//set flag that we need to add a new point
 		registerPoint = true;
@@ -246,9 +248,8 @@ void EditPickPointsPlugin::mouseReleaseEvent(QMouseEvent *event, MeshModel &mm, 
 	if (mm.cm.fn < 1) return;
 
 	//only add points for the left button
-	if (Qt::RightButton == event->button()) {
-
-		currentMousePosition = event->pos();
+	if (Qt::RightButton == event->button()) { 
+		currentMousePosition = QPoint(QT2VCG_X(gla, event), QT2VCG_Y(gla, event));//event->pos();
 
 		//set flag that we need to add a new point
 		registerPoint = true;
