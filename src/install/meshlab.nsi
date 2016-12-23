@@ -4,7 +4,7 @@
 !define PRODUCT_NAME "MeshLab"
 !define PRODUCT_VERSION "1.3.3"
 !define PRODUCT_PUBLISHER "Paolo Cignoni, Guido Ranzuglia VCG - ISTI - CNR"
-!define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
+!define PRODUCT_WEB_SITE "http://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -24,7 +24,7 @@
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "..\..\docs\gpl.txt"
+!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE.txt"
 ; License page
 !insertmacro MUI_PAGE_LICENSE "..\..\docs\privacy.txt"
 ; Directory page

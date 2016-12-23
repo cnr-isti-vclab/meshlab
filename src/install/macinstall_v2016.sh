@@ -55,7 +55,7 @@ done
 
 echo 'Copying samples and other files'
 
-cp ../../docs/gpl.txt $BUNDLE
+cp ../../LICENSE.txt $BUNDLE
 cp ../../docs/readme.txt $BUNDLE
 
 mkdir $BUNDLE/sample

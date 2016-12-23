@@ -1,0 +1,98 @@
+/*
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+
+namespace Vitelotte {
+
+/*!
+  \page vitelotte_user_manual_rendering_page Rendering
+
+  \section vitelotte_user_manual_rendering_basics_sec Basic usage
+
+  VGMeshRenderer is a simple renderer whose job is to emit the right OpenGL 4 calls to render a given mesh. Currently it supports triangular meshes with linear or quadratic interpolation over each face, up to one singularity per triangle and curved edges.
+
+  Vitelotte is a header-only library, and its job is not to deal with OpenGL context creation and management. In practice, Vitelotte does not even include OpenGL headers because you may wish to use GLEW or a similar library that provides its own header that would lead to conflicts. So, to use the renderer you need to include your OpenGL header *before* `Patate/vitelotte_gl.h` like this:
+
+  \code{.cpp}
+  // Include some OpenGL header.
+  #include <GL/glew.h>
+
+  // Include Vitelotte's classes that depends on OpenGL. An OpenGL
+  // header *must* have been included beforehand.
+  #include <Patate/vitelotte_gl.h>
+  \endcode
+
+  Note that only `Patate/vitelotte_gl.h` depends on OpenGL. Other Vitelotte headers do not require to do this.
+
+  Creating the renderer is straightforward:
+
+  \code{.cpp}
+  // As usual, VGMeshRenderer is parametrized by the Mesh class.
+  VGMeshRenderer<Mesh> renderer;
+  \endcode
+
+  Every VGMeshRenderer manages some OpenGL resources. They can be released by calling VGMeshRenderer::releaseGLResources().
+
+  To upload data required for rendering to the GPU, just do
+
+  \code{.cpp}
+  renderer.updateBuffers(mesh);
+  \endcode
+
+  This must be called every time the mesh is modified. Note that the renderer does not keep reference to the mesh, so it can be deleted safely even if a renderer is setup to render it.
+
+  Rendering can be done with the following methods:
+
+  \code{.cpp}
+  // Render the mesh given an Eigen::Matrix4f view matrix
+  renderer.render(viewMatrix);
+
+  // Render the mesh in wireframe
+  renderer.renderWireframe(viewMatrix, viewportSize);
+  \endcode
+
+  Coordinates of the mesh vertices are multiplied by the viewMatrix in the shader to produce the OpenGL clip coordinates. You should build the viewMatrix yourself to place the image correctly on the screen. Wireframe rendering requires the viewport size to get the width of the lines right.
+
+  Note that render() and renderWireframe() should produce samples at the exact same depth. So to render a wireframe on top of a solid render, the easiest way is to set the depth test to GL_LEQUAL.
+
+
+  \section vitelotte_user_manual_rendering_advanced_sec Advanced usage
+
+  \subsection vitelotte_user_manual_rendering_sharing_resources Sharing resources
+
+  The renderer treats shaders as global resources that can be shared by several instances of VGMeshRenderer. By default, they are automatically created when needed (when you call a render method). You can allocate them explicitly to share the resources among several renderers:
+
+  \code{.cpp}
+  // Can be called anytime
+  VGMeshRendererResources resources;
+
+  // Must be called with the correct OpenGL context active.
+  resources.initialize();
+  \endcode
+
+  Then, you can pass the resources to an instance of VGMeshRenderer on construction or with VGMeshRenderer::setResources(). Resources can be released by calling VGMeshRendererResources::releaseGLResources() when the context is active (in the current implementation, this releases both shaders and buffers).
+
+  \subsection vitelotte_user_manual_rendering_color_spaces Color Spaces
+
+  The renderer support several color spaces natively. It does color interpolation in the space returned by VGMesh::colorSpace() and does the conversion to the screen color space just before outputing colors to the framebuffer. By default, the screen color space is assumed to be SRGB, but it can be changed with VGMeshRenderer::setScreenColorSpace(). If you do rendering with GL_FRAMEBUFFER_SRGB enabled, you should set the screen color space to linear because OpenGL will perform the conversion itself.
+
+  If the mesh values do not represent colors, the color space should be set to COLOR_NONE. In this case, no color conversion is performed.
+
+  \subsection vitelotte_user_manual_rendering_projection Coordinates and value projections
+
+  The input mesh can have an arbitrary number of dimensions and coefficients. By default, if the number of dimensions is smaller or equal to 4, the d first coordinates are sent to OpenGL and missing ones are replaced by 0, except the last one which is set to 1. It works well with 2D and 3D meshes, and with 4D meshes where the 4th dimension is 1 (unless you know what you do). In other cases, you can pass a functor to VGMeshRenderer constructor that takes a VGMesh::Vector reference in parameter and returns an Eigen::Vector4f which is sent to OpenGL.
+
+  A similar mechanism is available for values. By default, single valued coefficients are rendered as grayscale, 2D values are rendered as grayscale + alpha, 3D values are rendered as RGB and 4D as RGBA. Sending more than 4 coefficients to the shaders is not currently supported.
+
+  \subsection vitelotte_user_manual_rendering_custom_shaders Customizing shaders
+
+  If you want to really customize the output, you may need to write your own shaders. You can setup your own OpenGL states and then call VGMeshRenderer::drawGeometry to setup the VAO and do the draw call. This function takes a combination of the NORMAL_TRIANGLES and the SINGULAR_TRIANGLES flags in parameter to determine if it should render normal triangles, singular triangles or both.
+
+  Detailing the way shaders work would be mostly paraphrasing shader code. So if you need to write custom shaders, the easiest way is to start from Vitelotte's shaders (in `Patate/Vitelotte/Utils/VGMeshRendererShaders`) and modify them. If you need help, don't hesitate to send a mail to <a href="mailto:patate-info@lists.gforge.inria.fr"> our mailing list </a> .
+
+ */
+
+}

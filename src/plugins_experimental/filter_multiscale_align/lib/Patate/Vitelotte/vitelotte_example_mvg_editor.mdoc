@@ -1,0 +1,20 @@
+/*
+ This Source Code Form is subject to the terms of the Mozilla Public
+ License, v. 2.0. If a copy of the MPL was not distributed with this
+ file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+
+
+/*!
+  \page vitelotte_example_mvg_editor_page MVG Editor
+
+  `mvg_editor` is a graphical application designed to edit mvg files. It depends on Qt.
+
+  There are two modes of interaction :
+
+  - **Curve mode :** If the mesh contains curves information, this mode permits to edit constraints at a high level. Left click to select curve and point constraints. When a curve is selected, you can edit color gradients defined over them. Left click and drag on a color stop to move it, left click on it to change its color, right click to remove it. Left click near the selected curve away from a color stop add a new one.
+  - **Node mode :** This mode lets you edit the mesh at its lowest level.
+
+  Code of this example is too involved to be described here. However some parts are still interesting. The best place to look at is the Document class (`document.h` and `document.cpp`). Particularly, the commands classes implement all the operations done by the GUI (this is part of the undo mechanism).
+
+ */

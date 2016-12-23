@@ -1,6 +1,0 @@
-The latest information to build meshlab can be found on the 
-Wiki meshlab documentation at
-
-http://meshlab.sourceforge.net/wiki/index.php/Compiling
-
- 

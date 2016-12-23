@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>808</width>
-    <height>751</height>
+    <height>784</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,8 +33,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff/>
-   </iconset>
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -52,7 +51,16 @@
       <property name="spacing">
        <number>0</number>
       </property>
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -63,7 +71,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../meshlab.qrc">:/images/eye_256_splash.png</pixmap>
+           <pixmap resource="../meshlab.qrc">:/images/meshlabLogo_256x256.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -101,12 +109,7 @@
         <item>
          <widget class="QLabel" name="labelMLLink">
           <property name="text">
-           <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Lucida Grande'; font-size:13pt; font-weight:400; font-style:normal; text-decoration:none;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:8pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:12pt;&quot;&gt;&lt;a href=&quot;http://meshlab.sourceforge.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://meshlab.sourceforge.net/ &lt;/span&gt;&lt;/a&gt; &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg'; font-size:12;&quot;&gt;Protected by the GPL&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;a href=&quot;http://www.meshlab.net&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg'; font-size:16pt; font-weight:600; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.meshlab.net/ &lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-family:'MS Shell Dlg'; font-size:13pt;&quot;&gt;Protected by the GPL&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -136,18 +139,13 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-weight:600;&quot;&gt;General Info&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt; &lt;br /&gt;MeshLab is an extensible mesh processing system, aimed to the user assisted cleaning, filtering, editing and rendering of unstructured 3D triangular meshes. The tool found its natural use for the processing of the meshes that usually arise in 3D scanning. The system is heavily based on the VCG library (&lt;/span&gt;&lt;a href=&quot;http://vcg.sf.net&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://vcg.sf.net&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;). &lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-weight:600;&quot;&gt;References&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;Please, when using this tool in any academic activity, cite its use with the following reference:&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-style:italic;&quot;&gt;MeshLab&lt;br /&gt;Visual Computing Lab - ISTI - CNR&lt;br /&gt;http://meshlab.sourceforge.net/&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt; &lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-weight:600;&quot;&gt;Contacts&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;For bug reports, feature requests and technical issues please use the following sourceforge services.&lt;br /&gt;    - &lt;/span&gt;&lt;a href=&quot;http://sourceforge.net/forum/forum.php?forum_id=499533&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;help forum&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;    - &lt;/span&gt;&lt;a href=&quot;http://sourceforge.net/tracker/?group_id=149444&amp;amp;atid=774731&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;bug report tracking system &lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;    - &lt;/span&gt;&lt;a href=&quot;http://sourceforge.net/tracker/?group_id=149444&amp;amp;atid=774734&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;feature request tracking system&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;For any other general, high level, question about MeshLab  (no bug issue or feature request please) please contact: &lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Paolo Cignoni ( p.cignoni@isti.cnr.it ) &lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Guido Ranzuglia ( guido.ranzuglia@isti.cnr.it ) &lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-weight:600;&quot;&gt;Authors&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt; &lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-style:italic;&quot;&gt;Main Designers&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;:&lt;br /&gt;    - Paolo Cignoni&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;    - Guido Ranzuglia&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; font-style:italic;&quot;&gt;Stable Contributors&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;:&lt;br /&gt;    - Marco Callieri&lt;br /&gt;    - Massimiliano Corsini&lt;br /&gt;    - Fabio Ganovelli&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;    - Nico Pietroni&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;    - Marco Tarini&lt;br /&gt;The complete list of authors is available &lt;/span&gt;&lt;a href=&quot;http://meshlab.sourceforge.net/wiki/index.php/Developers&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;here &lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;Some of the authors of MeshLab have received financial support from various projects, acknowledged &lt;/span&gt;&lt;a href=&quot;http://meshlab.sourceforge.net/wiki/index.php/Licenses#Acknowledgments&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;here &lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;General Info&lt;/span&gt;&lt;br/&gt;MeshLab is the most used open source system for processing and editing 3D triangular meshes. It provides a set of tools for editing, cleaning, healing, inspecting, rendering, texturing and converting meshes. It offers features for processing raw data produced by 3D digitization tools/devices and for preparing models for 3D printing. The system is heavily based on the &lt;a href=&quot;http://www.vcglib.net&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;VCG library&lt;/span&gt;&lt;/a&gt;. &lt;br/&gt;Source code is available on &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub&lt;/span&gt;&lt;/a&gt;.&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;References&lt;/span&gt;&lt;br/&gt;Please, when using this tool in any academic activity, cite its use with the following reference:&lt;br/&gt;&lt;br/&gt;Meshlab: an open-source mesh processing tool.&lt;br/&gt;P. Cignoni, M. Callieri, M. Corsini, M. Dellepiane, F. Ganovelli, G. Ranzuglia&lt;br/&gt;Proceedings of the 2008 Eurographics Italian Chapter Conference,&lt;br/&gt;ISBN: 978-3-905673-68-5, pp. 129-136, &lt;br/&gt;DOI: 10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136&lt;br/&gt;&lt;br/&gt;Paper available on the&lt;a href=&quot;https://diglib.eg.org/handle/10.2312/LocalChapterEvents.ItalChap.ItalianChapConf2008.129-136&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Eurographics Digital Library&lt;/span&gt;&lt;/a&gt; (&lt;a href=&quot;http://vcg.isti.cnr.it/Publications/2008/CCCDGR08/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;PDF)&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Contacts&lt;/span&gt;&lt;br/&gt;For detailed bug reports, meaningful feature requests and grounded technical issues please use the &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;GitHub services&lt;/span&gt;&lt;/a&gt;.&lt;br/&gt;For any other high-level question about MeshLab (no bugs or feature requests, please) contact:&lt;br/&gt;- Paolo Cignoni (&lt;a href=&quot;mailto:p.cignoni@isti.cnr.it?subject=%5BMeshLab%5D%20Info%20request&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;paolo.cignoni@isti.cnr.it&lt;/span&gt;&lt;/a&gt;)&lt;br/&gt;The complete list of contributors is available &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab/graphs/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here.&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;Some of the contributors of MeshLab have received financial support from various projects, acknowledged &lt;a href=&quot;http://vcg.isti.cnr.it/projects.php&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
+          </property>
+          <property name="margin">
+           <number>3</number>
           </property>
           <property name="openExternalLinks">
            <bool>true</bool>
@@ -188,8 +186,10 @@ p, li { white-space: pre-wrap; }
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;Copyright(C) 2005-2013&lt;br /&gt;&lt;br /&gt;Paolo Cignoni &lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt; &lt;br /&gt;Visual Computing Lab &lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt; http://vcg.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;ISTI - Italian National Research Council&lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt; http://www.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt;&quot;&gt;Copyright(C) 2005-2017&lt;br /&gt;&lt;br /&gt;Paolo Cignoni&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;http://vcg.isti.cnr.it/%7Ecignoni&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; color:#0000ff;&quot;&gt;http://vcg.isti.cnr.it/~cignoni&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt;&quot;&gt;Visual Computing Lab&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; font-weight:600; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://vcg.isti.cnr.it&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; color:#0000ff;&quot;&gt;http://vcg.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; font-weight:600; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt;&quot;&gt;ISTI - CNR&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; font-weight:600; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://www.isti.cnr.it&quot;&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.isti.cnr.it&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Grande'; font-size:11pt; font-weight:600; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="openExternalLinks">
           <bool>true</bool>
@@ -244,6 +244,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
+  <include location="../meshlab.qrc"/>
   <include location="../meshlab.qrc"/>
  </resources>
  <connections>

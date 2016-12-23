@@ -5,10 +5,11 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "2016BETA"
+!define PRODUCT_VERSION "2016"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
-!define PRODUCT_WEB_SITE "http://meshlab.sourceforge.net"
+!define PRODUCT_WEB_SITE "http://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
+!define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define QT_BASE "C:\Qt_5.7\5.7\msvc2015_64\"
@@ -28,7 +29,7 @@
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "..\..\docs\gpl.txt"
+!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE.txt"
 ; License page
 !insertmacro MUI_PAGE_LICENSE "..\..\docs\privacy.txt"
 ; Directory page
@@ -51,9 +52,9 @@
 !define /date NOW "%Y_%m_%d"
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "MeshLabDevel_v2016BETA_64bit_${NOW}.exe"
+OutFile "MeshLab2016.12_${NOW}.exe"
 ;InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
-InstallDir "${MAINDIR}\VCG\MeshLab_2016BETA"
+InstallDir "${MAINDIR}\VCG\MeshLab"
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -86,37 +87,15 @@ ShowUnInstDetails show
   Exch $R2
 !macroend
 
-Section -Prerequisites
-	;EnumRegKey $0 HKCR "SOFTWARE\Test" 0
-	;ReadRegStr $0 HKLM ${MICROSOFT_VS2008_REDIST_KEYDIR} ${MICROSOFT_VS2008_X64}
-	;MessageBox MB_OK "Letto : $0" 
-	;Quit
-	
-	;!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_X64}
-	;Pop $R0
-	;${If} $R0 == "1" 
-	;	Goto endPrerequisites
-	;${Else}
-	;	!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_IA64}
-	;	Pop $R0
-	;	${If} $R0 == "1" 
-	;		Goto endPrerequisites
-	;	${Else} 
-	;		MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2010 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
-	;		Quit
-	;	${Endif}
-	;${Endif}
-	;endPrerequisites:
-SectionEnd
-
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite on
   File "${DISTRIB_FOLDER}\meshlab.exe"
-
+  File "${DISTRIB_FOLDER}\meshlabserver.exe"
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
+  CreateShortCut "$SMPROGRAMS\MeshLab\MeshLabServer.lnk" "cmd.exe"
 
   ;Let's delete all the dangerous stuff from previous releases.
   Delete "$INSTDIR\qt*.dll"
@@ -196,7 +175,7 @@ Section "MainSection" SEC01
   File "${ICU_DLLS}\icuin51.dll"
   File "${ICU_DLLS}\icudt51.dll"
   File "${ICU_DLLS}\icuuc51.dll"
-  File "${ADDITIONAL_DLLS}\api-ms-win-crt-runtime-l1-1-0.dll"
+  File "${ADDITIONAL_DLLS}\vc_redist.x64.exe"
   
   ;File "C:\MinGW\bin\mingwm10.dll"
   ;File "${QT_BASE}\..\mingw\bin\mingwm10.dll"
@@ -208,6 +187,36 @@ Section "MainSection" SEC01
   File "..\..\docs\gpl.txt"
 SectionEnd
 
+Section -Prerequisites
+	;EnumRegKey $0 HKCR "SOFTWARE\Test" 0
+	;ReadRegStr $0 HKLM ${MICROSOFT_VS2008_REDIST_KEYDIR} ${MICROSOFT_VS2008_X64}
+	;MessageBox MB_OK "Letto : $0" 
+	;Quit
+	
+	;!insertmacro IfKeyExists HKLM  ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_X64}
+	;Pop $R0
+	;${If} $R0 == "1" 
+	;	Goto endPrerequisites
+	;${Else}
+	;	!insertmacro IfKeyExists HKLM ${MICROSOFT_VS2010_REDIST_KEYDIR} ${MICROSOFT_VS2010_IA64}
+	;	Pop $R0
+	;	${If} $R0 == "1" 
+	;		Goto endPrerequisites
+	;	${Else} 
+	;		MessageBox MB_OK "Your system does not appear to have $\"Microsoft Visual C++ 2010 SP1 Redistributable Package (x64) installed$\".$\r MeshLab's Installation process will be aborted.$\r Please, install it and restart the MeshLab installer!" 
+	;		Quit
+	;	${Endif}
+	;${Endif}
+	;endPrerequisites:
+	ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Installed"
+	${If} $1 == "1"
+		Goto endPrerequisites
+	${Else}
+		ExecWait "$INSTDIR\vc_redist.x64.exe"
+	${EndIf}
+	endPrerequisites:
+SectionEnd
+
 Section -AdditionalIcons
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   CreateShortCut "$SMPROGRAMS\MeshLab\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
@@ -217,6 +226,7 @@ SectionEnd
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\meshlab.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY_S}" "" "$INSTDIR\meshlabserver.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\meshlab.exe"

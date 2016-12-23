@@ -937,7 +937,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
     vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
     Point3i &g=pp.pds.gridSize;
     Log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds.gridCellNum, g[0]*g[1]*g[2]);
-    Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
+	Log("Sampling created a new mesh of %i points", mm->cm.vn);
   }
     break;
 

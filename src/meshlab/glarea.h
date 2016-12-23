@@ -393,6 +393,8 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
+	void renderingFacilityString();
+	QString renderfacility;
     void setLightingColors(const MLPerViewGLOptions& opts);
 
     QMap<QString,QCursor> curMap;

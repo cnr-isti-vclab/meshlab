@@ -1,4 +1,7 @@
-To create the installer simply use nsis to run the script "meshlab.nsi" in this dir.
-remember to modify the script when changing the qt version (the qt dll files are specified in a absolute way)
+Windows:
 
-HM Nis Edit e' un buon tool per editare questi script ed eseguirli (il che genera il setup)
+
+MacOS
+After a full rebuild of meshlab_full.pro run the macinstall_v2016.sh script. It generate a relocable app folder. To build the dmg, install appdmg and use the following command line:
+
+appdmg meshlab_dmg.json ../distrib/MeshLab2016.12.dmg

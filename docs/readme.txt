@@ -1,8 +1,8 @@
    MeshLab
-   http://meshlab.sourceforge.net/
+   http://www.meshlab.net
    All rights reserved.
 
-   VCGLib  http://vcg.sf.net                                         o o
+   VCGLib  http://www.vcglib.net                                         o o
    Visual and Computer Graphics Library                            o     o
                                                                   _   O  _
    Paolo Cignoni                                                    \/)\/
@@ -12,9 +12,8 @@
 
 
 This program is free software; you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 2 of the License, or (at your option)
-any later version.
+under the terms of the GNU General Public License V 3.0 as published by the Free
+Software Foundation.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
@@ -25,22 +24,27 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 
 Please, when using this tool, cite the following reference:
 
-MeshLab
-Visual Computing Lab - ISTI - CNR
-http://meshlab.sourceforge.net/
+Meshlab: an open-source mesh processing tool.
+P. Cignoni, M. Callieri, M. Corsini, M. Dellepiane, F. Ganovelli, G. Ranzuglia
+Proceedings of the 2008 Eurographics Italian Chapter Conference, 
+ISBN: 978-3-905673-68-5, pp. 129-136, DOI: 10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136
 
-@misc{Meshlab
-    author = {Visual Computing Lab  ISTI - CNR},
-    title = {MeshLab},
-    note = {http://meshlab.sourceforge.net/}
+@inproceedings {LocalChapterEvents:ItalChap:ItalianChapConf2008:129-136,
+booktitle = {Eurographics Italian Chapter Conference},
+editor = {Vittorio Scarano and Rosario De Chiara and Ugo Erra},
+title = {{MeshLab: an Open-Source Mesh Processing Tool}},
+author = {Cignoni, Paolo and Callieri, Marco and Corsini, Massimiliano and Dellepiane, Matteo and Ganovelli, Fabio and Ranzuglia, Guido},
+year = {2008},
+publisher = {The Eurographics Association},
+ISBN = {978-3-905673-68-5},
+DOI = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
 }
 
-For any general question about the use of this software use the sourceforge public forums 
-http://sourceforge.net/forum/forum.php?forum_id=499532
-
-or contact:
 Paolo Cignoni ( p.cignoni (at) isti.cnr.it )
 Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it ) 
 
-For bugs, feature requests and such, please use the sourceforge service
-http://sourceforge.net/tracker/?group_id=149444
+For documented and repeatable bugs, reasonable feature requests and grounded issues, please use the GitHub services
+https://github.com/cnr-isti-vclab/meshlab/issues
+
+For general questions use StackOverflow 
+http://stackoverflow.com/questions/tagged/meshlab

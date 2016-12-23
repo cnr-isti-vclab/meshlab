@@ -57,10 +57,9 @@ AlignPairWidget::AlignPairWidget(GLArea* ar, QWidget * parent)
 	hasToPick = false;
 	hasToDelete = false;
 	pointToPick = vcg::Point2i(-1, -1);
+	shared->addView(context());
 	setAutoFillBackground(false);
-	ar->mvc()->sharedDataContext()->addView(context());
 }
-
 
 void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
 {
@@ -73,8 +72,12 @@ void AlignPairWidget::initMesh(MeshNode *_freeMesh, MeshTree *_gluedTree)
 
 void AlignPairWidget::initializeGL()
 {
+	if (shared == NULL)
+		return;
+
 	glewInit();  //needed to init extensions, used by the aligner GL window while rendering
 
+	shared->addView(context());
 	glClearColor(0, 0, 0, 0);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -98,6 +101,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (freeMesh == 0 || gluedTree == 0) return;
+
 
 	for (int i = 0; i < 2; ++i)
 	{
@@ -123,26 +127,6 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		else
 			bb.Import(gluedTree->gluedBBox());
 
-		MLRenderingData dt;
-		MLRenderingData::RendAtts atts;
-		MLPerViewGLOptions opts;
-		atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-		atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-		atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = (freeMesh->m->hasDataMask(MeshModel::MM_VERTCOLOR)) && (isUsingVertexColor);
-		dt.get(opts);
-		if ((freeMesh->m->cm.fn == 0) || (this->usePointRendering))
-		{
-			opts._perpoint_mesh_color_enabled =  !isUsingVertexColor;
-			opts._perpoint_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !opts._perpoint_mesh_color_enabled;
-			dt.set(MLRenderingData::PR_POINTS, atts);
-		}
-		else
-		{
-			opts._persolid_mesh_color_enabled = !isUsingVertexColor;
-			opts._persolid_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !opts._persolid_mesh_color_enabled;
-			dt.set(MLRenderingData::PR_SOLID, atts);
-		}
-		dt.set(opts);
 		glPushMatrix();
 		if (allowscaling)  
 			vcg::glScale(3.0f / bb.Diag());
@@ -151,7 +135,12 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		vcg::glTranslate(-bb.Center());
 		if (i == 0)
 		{
-			shared->drawAllocatedAttributesSubset(freeMesh->Id(), context(), dt);
+			MLRenderingData dt;
+			createRenderingData(freeMesh->m, dt);
+			shared->setRenderingDataPerMeshView(freeMesh->Id(), context(), dt);
+			shared->manageBuffers(freeMesh->Id());
+
+			shared->draw(freeMesh->Id(), context());
 			drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
 		}
 		else 
@@ -160,8 +149,15 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
           for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
           {
             MeshNode *mn=ni->second;
-            if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible) 
-              shared->drawAllocatedAttributesSubset(mn->m->id(), context(), dt);
+			if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible)
+			{
+				MLRenderingData dt;
+				createRenderingData(mn->m, dt);
+				shared->setRenderingDataPerMeshView(mn->m->id(), context(), dt);
+				shared->manageBuffers(mn->m->id());
+
+				shared->draw(mn->m->id(), context());
+			}
           }
           drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
 		}
@@ -226,6 +222,42 @@ void AlignPairWidget::drawPickedPoints(QPainter *qp, std::vector<vcg::Point3f> &
 		//        renderText( pt[0],pt[1],pt[2], QString("%1").arg(i) );
 	}
 	glPopAttrib();
+}
+
+void AlignPairWidget::cleanDataOnClosing(int)
+{
+	if (shared == NULL) 
+		return;
+
+	shared->removeView(context());
+}
+
+
+void AlignPairWidget::createRenderingData(MeshModel* mm, MLRenderingData& dt)
+{
+	if (mm == NULL)
+		return;
+
+	MLRenderingData::RendAtts atts;
+	MLPerViewGLOptions opts;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = true;
+	atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = (mm->hasDataMask(MeshModel::MM_VERTCOLOR)) && (isUsingVertexColor);
+	dt.get(opts);
+	if ((mm->cm.fn == 0) || (this->usePointRendering))
+	{
+		opts._perpoint_mesh_color_enabled = !isUsingVertexColor;
+		opts._perpoint_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !opts._perpoint_mesh_color_enabled;
+		dt.set(MLRenderingData::PR_POINTS, atts);
+	}
+	else
+	{
+		opts._persolid_mesh_color_enabled = !isUsingVertexColor;
+		opts._persolid_fixed_color_enabled = !atts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] && !opts._persolid_mesh_color_enabled;
+		dt.set(MLRenderingData::PR_SOLID, atts);
+	}
+	dt.set(opts);
 }
 
 void AlignPairWidget::keyReleaseEvent(QKeyEvent * e)

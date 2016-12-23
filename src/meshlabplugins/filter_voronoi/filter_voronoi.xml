@@ -88,10 +88,6 @@
     <PARAM_HELP><![CDATA[ Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Volume Sample Num."/>
    </PARAM>
-   <PARAM parName="voronoiSeed" parIsImportant="true" parType="Int" parDefault="20">
-    <PARAM_HELP><![CDATA[ Number of seeds of the voronoi cells ]]></PARAM_HELP>
-    <EDIT_GUI guiLabel="Voronoi Seed Num."/>
-   </PARAM>
    <PARAM parName="voxelRes" parIsImportant="true" parType="Int" parDefault="50">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Volume Side Resolution."/>

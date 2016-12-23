@@ -896,19 +896,26 @@ int main(int argc, char *argv[])
         }
     }
 
-    for(int ii = 0;ii < outmeshlist.size();++ii)
-    {
-        if (meshDocument.mm() != NULL)
-        {
-            bool exported = server.exportMesh(meshDocument.mm(), outmeshlist[ii].mask, outmeshlist[ii].filename,logfp);
-            if (exported)
-                fprintf(logfp,"Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshDocument.mm()->fullName()), qPrintable(outmeshlist[ii].filename), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
-            else
-                fprintf(logfp,"Output mesh %s has NOT been saved\n",qPrintable(outmeshlist[ii].filename));
-        }
-        else
-            fprintf(logfp,"Invalid current mesh. Output mesh %s will not be saved\n",qPrintable(outmeshlist[ii].filename));
-    }
+	if (meshDocument.size() < outmeshlist.size())
+		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", qPrintable(outmeshlist.size()), qPrintable(meshDocument.size()));
+	else
+	{
+		for (int ii = 0; ii < outmeshlist.size(); ++ii)
+		{
+			if (meshDocument.meshList[ii] != NULL)
+			{
+				bool exported = server.exportMesh(meshDocument.meshList[ii], outmeshlist[ii].mask, outmeshlist[ii].filename, logfp);
+				if (exported)
+					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshDocument.mm()->fullName()), qPrintable(outmeshlist[ii].filename), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
+				else
+					fprintf(logfp, "Output mesh %s has NOT been saved\n", qPrintable(outmeshlist[ii].filename));
+			}
+			else
+				fprintf(logfp, "Invalid layer %i. Output mesh %s will not be saved\n", qPrintable(ii), qPrintable(outmeshlist[ii].filename));
+		}
+
+	}
+
 
     if((logfp != NULL) && (logfp != stdout))
         fclose(logfp);

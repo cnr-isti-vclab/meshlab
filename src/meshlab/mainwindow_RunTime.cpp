@@ -523,6 +523,7 @@ while(ii < meshDoc()->meshList.size())
     }
     if (searchMenu != NULL)
         searchMenu->searchLineWidth() = longestActionWidthInAllMenus();
+    updateWindowMenu();
 }
 
 void MainWindow::setSplit(QAction *qa)
@@ -3131,7 +3132,7 @@ void MainWindow::about()
     QDialog *about_dialog = new QDialog();
     Ui::aboutDialog temp;
     temp.setupUi(about_dialog);
-    temp.labelMLName->setText(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize))+"   ("+__DATE__+")");
+    temp.labelMLName->setText(MeshLabApplication::completeName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize))+"   (built on "+__DATE__+")");
     //about_dialog->setFixedSize(566,580);
     about_dialog->show();
 }
@@ -3859,8 +3860,7 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 	if (_currviewcontainer != NULL)
 	{
 		updateLayerDialog();
-		updateMenus();
-		updateWindowMenu();
+		updateMenus();		
 		updateStdDialog();
 		updateXMLStdDialog();
 		updateDocumentScriptBindings();

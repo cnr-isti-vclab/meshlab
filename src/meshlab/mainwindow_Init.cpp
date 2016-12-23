@@ -613,11 +613,11 @@ void MainWindow::createMenus()
 	viewMenu->addSeparator();
 	toolBarMenu = viewMenu->addMenu(tr("&ToolBars"));
 	toolBarMenu->addAction(showToolbarStandardAct);
-	connect(toolBarMenu, SIGNAL(aboutToShow()), this, SLOT(updateMenus()));
+	//connect(toolBarMenu, SIGNAL(aboutToShow()), this, SLOT(updateMenus()));
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
-	connect(windowsMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
+    updateWindowMenu();
 	menuBar()->addSeparator();
 
 	//////////////////// Menu Preferences /////////////////////////////////////////////////////////////////////
@@ -1138,7 +1138,7 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 		settings.setValue("UID", UID);
 	}
 
-	QString BaseCommand("/~cignoni/meshlab_beta.php");
+	QString BaseCommand("/~cignoni/meshlab_latest.php");
 
 #ifdef Q_OS_WIN
 	QString OS = "Win";
