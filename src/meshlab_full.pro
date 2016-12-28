@@ -16,7 +16,7 @@ SUBDIRS       = common \
                 meshlabplugins/io_x3d \
                 meshlabplugins/io_expe \
                 meshlabplugins/io_pdb \
-                plugins_experimental/io_TXT \
+                plugins_experimental/io_txt \
 # Filter plugins
                 meshlabplugins/filter_aging \
                 meshlabplugins/filter_ao \
