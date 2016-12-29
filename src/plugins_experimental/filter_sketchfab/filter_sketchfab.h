@@ -20,8 +20,8 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef FILTER_HARMONIC_H
-#define FILTER_HARMONIC_H
+#ifndef FILTER_SKETCHFAB_H
+#define FILTER_SKETCHFAB_H
 
 #include <common/interfaces.h>
 #include <QNetworkAccessManager>
@@ -49,6 +49,8 @@ private:
     QString tags;
     QString zipFileName;
     QString sketchfabModelUrl;
+    QString isPrivate;
+    QString isPublished;
     vcg::CallBackPos * fcb;
 };
 

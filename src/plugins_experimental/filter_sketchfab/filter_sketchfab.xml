@@ -1,22 +1,22 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
   <PLUGIN pluginName="FilterSketchFab" pluginAuthor="Paolo Cignoni" pluginEmail="paolo.cignoni@isti.cnr.it">
-  <FILTER filterName="Export to SketchFab" filterFunction="exportToSketchFab" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
-    <FILTER_HELP><![CDATA[Upload a model on SketchFab. It requires that you have an account and that you set your private API token in the preferences of MeshLab.]]></FILTER_HELP>
+  <FILTER filterName="Export to Sketchfab" filterFunction="exportToSketchfab" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
+    <FILTER_HELP><![CDATA[Upload the current layer on Sketchfab. It requires that you have an account and that you set your private API token in the preferences of MeshLab.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
     <PARAM parType="String" parName="title" parDefault="MeshLabModel" parIsImportant="true">
       <PARAM_HELP><![CDATA[Mandatory.]]></PARAM_HELP>
       <STRING_GUI guiLabel="Title" />
     </PARAM>
-    <PARAM parType="String" parName="description" parDefault="a model generated with meshlab" parIsImportant="true">
-      <PARAM_HELP><![CDATA[Mandatory. A short description of the models ]]></PARAM_HELP>
+    <PARAM parType="String" parName="description" parDefault="A model generated with meshlab" parIsImportant="true">
+      <PARAM_HELP><![CDATA[Mandatory. A short description of the model that is uploaded ]]></PARAM_HELP>
       <STRING_GUI guiLabel="description" />
     </PARAM>
-    <PARAM parType="String" parName="tags" parDefault="scan" parIsImportant="true">
-      <PARAM_HELP><![CDATA[Mandatory. Typical tags usually used by MeshLab users: scan, photogrammetry ]]></PARAM_HELP>
+    <PARAM parType="String" parName="tags" parDefault="meshlab" parIsImportant="true">
+      <PARAM_HELP><![CDATA[Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry ]]></PARAM_HELP>
       <STRING_GUI guiLabel="Tags" />
     </PARAM>
-    <PARAM parName="private" parIsImportant="false" parType="Boolean" parDefault="false">
-       <PARAM_HELP><![CDATA[ This parameter can be true only for PRO account.  ]]></PARAM_HELP>
+    <PARAM parName="isPrivate" parIsImportant="false" parType="Boolean" parDefault="false">
+       <PARAM_HELP><![CDATA[This parameter can be true only for PRO account.  ]]></PARAM_HELP>
        <CHECKBOX_GUI guiLabel="Private"/>
     </PARAM>
     <PARAM parName="isPublished" parIsImportant="true" parType="Boolean" parDefault="false">

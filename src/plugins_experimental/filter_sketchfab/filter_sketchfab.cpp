@@ -68,7 +68,7 @@ int saveMeshZip(string fileName, string internalName, string zipName) {
 // Core Function doing the actual mesh processing.
 bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument& md, EnvWrap& env, vcg::CallBackPos * cb )
 {
-    if (filterName == "Export to SketchFab")
+    if (filterName == "Export to Sketchfab")
     {
       qDebug("Export to SketchFab start ");
       this->fcb=cb;
@@ -87,6 +87,8 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
       this->name = env.evalString("title");
       this->description = env.evalString("description");
       this->tags = env.evalString("tags");
+      this->isPrivate = (env.evalBool("isPrivate"))?"1":"0";
+      this->isPublished = (env.evalBool("isPublished"))?"1":"0";
       QString tmpObjFileName = QDir::tempPath() + "/xxxx.ply";
       QString tmpZipFileName = QDir::tempPath() + "/xxxx.zip";
       
@@ -148,8 +150,8 @@ bool FilterSketchFabPlugin::upload()
     multiPart->append(part_parameter("name", this->name));
     multiPart->append(part_parameter("description", this->description));
     multiPart->append(part_parameter("tags", this->tags));
-    multiPart->append(part_parameter("private", "0"));
-    multiPart->append(part_parameter("isPublished", "1"));
+    multiPart->append(part_parameter("private", this->isPrivate));
+    multiPart->append(part_parameter("isPublished", this->isPublished));
     multiPart->append(part_parameter("source", "meshlab-exporter"));
 
     // upload file data
