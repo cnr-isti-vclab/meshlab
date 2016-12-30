@@ -105,12 +105,30 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 
 	for (int i = 0; i < 2; ++i)
 	{
-		if (i == 0)
-			glViewport(0, 0, (GLsizei)QTLogicalToDevice(this, width() / 2), (GLsizei)QTLogicalToDevice(this, height()));
-		else
-			glViewport(QTLogicalToDevice(this, width() / 2), 0, (GLsizei)QTLogicalToDevice(this, width() / 2), (GLsizei)QTLogicalToDevice(this, height()));
-
-
+      if (i == 0)
+      {
+          MLRenderingData dt;
+          createRenderingData(freeMesh->m, dt);
+          shared->setRenderingDataPerMeshView(freeMesh->Id(), context(), dt);
+          shared->manageBuffers(freeMesh->Id());
+          glViewport(0, 0, (GLsizei)QTLogicalToDevice(this, width() / 2), (GLsizei)QTLogicalToDevice(this, height()));
+      }
+      else
+      {
+        for(auto ni=gluedTree->nodeMap.begin();ni!=gluedTree->nodeMap.end();++ni)
+        {
+          MeshNode *mn=ni->second;
+          if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible)
+          {
+            MLRenderingData dt;
+            createRenderingData(mn->m, dt);
+            shared->setRenderingDataPerMeshView(mn->m->id(), context(), dt);
+            shared->manageBuffers(mn->m->id());
+          }
+        } 
+        glViewport(QTLogicalToDevice(this, width() / 2), 0, (GLsizei)QTLogicalToDevice(this, width() / 2), (GLsizei)QTLogicalToDevice(this, height()));        
+      }
+      
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(30, (AlignPairWidget::width() / 2) / (float)AlignPairWidget::height(), 0.1, 100);
@@ -135,11 +153,6 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 		vcg::glTranslate(-bb.Center());
 		if (i == 0)
 		{
-			MLRenderingData dt;
-			createRenderingData(freeMesh->m, dt);
-			shared->setRenderingDataPerMeshView(freeMesh->Id(), context(), dt);
-			shared->manageBuffers(freeMesh->Id());
-
 			shared->draw(freeMesh->Id(), context());
 			drawPickedPoints(&painter, freePickedPointVec, vcg::Color4b(vcg::Color4b::Red));
 		}
@@ -151,12 +164,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
             MeshNode *mn=ni->second;
 			if ((mn != NULL) && (mn->m != NULL) && mn->glued && mn != freeMesh && mn->m->visible)
 			{
-				MLRenderingData dt;
-				createRenderingData(mn->m, dt);
-				shared->setRenderingDataPerMeshView(mn->m->id(), context(), dt);
-				shared->manageBuffers(mn->m->id());
-
-				shared->draw(mn->m->id(), context());
+              shared->draw(mn->m->id(), context());
 			}
           }
           drawPickedPoints(&painter, gluedPickedPointVec, vcg::Color4b(vcg::Color4b::Blue));
