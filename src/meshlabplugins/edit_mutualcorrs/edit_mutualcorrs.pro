@@ -1,7 +1,6 @@
 include (../../shared.pri)
 
-
-HEADERS       = += ./alignset.h \
+HEADERS += ./alignset.h \
     ./levmarmethods.h \
     ./mutual.h \
     ./parameters.h \
