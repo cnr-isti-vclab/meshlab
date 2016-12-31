@@ -128,6 +128,14 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}/plugins\*.dll"
   File "${DISTRIB_FOLDER}/plugins\*.xml"
   
+  ; All the U3D binary stuff
+  SetOutPath "$INSTDIR\plugins\U3D_W32"
+  File "${DISTRIB_FOLDER}/plugins\U3D_W32\IDTFConverter.exe"
+  File "${DISTRIB_FOLDER}/plugins\U3D_W32\*.dll"
+  File "${DISTRIB_FOLDER}/plugins\U3D_W32\*.txt"
+  SetOutPath "$INSTDIR\plugins\U3D_W32\plugins"
+  File "${DISTRIB_FOLDER}/plugins\U3D_W32\Plugins\IFXExporting.dll"
+  
   SetOutPath "$INSTDIR\textures"
   File "${DISTRIB_FOLDER}/textures\chrome.png"
   File "${DISTRIB_FOLDER}/textures\*.dds"
@@ -184,7 +192,7 @@ Section "MainSection" SEC01
   
   File "..\..\docs\readme.txt"
   ;File "..\..\docs\history.txt"
-  File "..\..\docs\gpl.txt"
+  File "..\..\LICENSE.txt"
 SectionEnd
 
 Section -Prerequisites
