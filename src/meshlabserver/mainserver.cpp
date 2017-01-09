@@ -29,7 +29,10 @@
 #include <common/filterscript.h>
 #include <common/meshlabdocumentxml.h>
 #include <common/mlexception.h>
+#include <common/filterparameter.h>
 #include <wrap/qt/qt_thread_safe_memory_info.h>
+#include "../meshlab/mainwindow.h"
+#include <clocale>
 
 #include <QFileInfo>
 
@@ -619,11 +622,11 @@ struct OutProject
 
 int main(int argc, char *argv[])
 {
-
-
     FILE* logfp = stdout;
     FILE* dumpfp = NULL;
     MeshLabApplication app(argc, argv);
+	std::setlocale(LC_ALL, "C");
+	QLocale::setDefault(QLocale::C);
     if(argc == 1)
     {
         commandline::usage();
@@ -645,9 +648,17 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-	QSettings st;
-	QVariant mbvar = st.value("MeshLab::System::maxGPUMemDedicatedToGeometry");
-	std::ptrdiff_t maxgpumem = (std::ptrdiff_t)mbvar.toInt() * (float)(1024 * 1024);
+	QSettings settings(MeshLabApplication::organization(),MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_64BIT));
+
+	QVariant xmlgpupar = settings.value(MainWindowSetting::maximumDedicatedGPUMem());
+
+	QDomDocument doc;
+	doc.setContent(xmlgpupar.toString(), false);
+
+	QDomElement paramelem = doc.firstChild().toElement();
+	int gpumemmb = paramelem.attribute("value").toInt();
+
+	std::ptrdiff_t maxgpumem = (std::ptrdiff_t) gpumemmb * (float)(1024 * 1024);
 	vcg::QtThreadSafeMemoryInfo gpumeminfo(maxgpumem);
 
 	MeshDocument meshDocument;
