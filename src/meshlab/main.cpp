@@ -20,6 +20,7 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+#include <locale.h>
 #include <common/mlapplication.h>
 #include <QMessageBox>
 #include "mainwindow.h"
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
 {
 
     MeshLabApplication app(argc, argv);
+    setlocale(LC_ALL, "C");
     QLocale::setDefault(QLocale::C);
     QCoreApplication::setOrganizationName(MeshLabApplication::organization());
 #if QT_VERSION >= 0x050100
