@@ -83,7 +83,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		else if (pickmode == 1)
 		{
 			NewVertSel.clear();
-			GLPickTri<CMeshO>::PickVert(cur.x(), gla->height() - cur.y(), m.cm, NewVertSel,10,10);
+			GLPickTri<CMeshO>::PickVert(cur.x(), gla->height() - cur.y(), m.cm, NewVertSel,15,15);
 			if (NewVertSel.size() > 0)
 			{
 				curVertPtr = NewVertSel[pIndex];
@@ -100,9 +100,9 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 	QString line3 = "";
 
 	if (pickmode == 0)
-		line1 = "Face Picking - SPACE for vertex<br>";
+		line1 = "Face Picking - T for vertex<br>";
 	else if (pickmode == 1)
-		line1 = "Vertex Picking - SPACE for face<br>";
+		line1 = "Vertex Picking - T for face<br>";
 
 	if ((curFacePtr != 0) || (curVertPtr != 0))
 	{
@@ -207,9 +207,9 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gl
 		if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
 			buf += QString(" - color(%1 %2 %3 %4)").arg(QString::number(fp->V(i)->C()[0])).arg(QString::number(fp->V(i)->C()[1])).arg(QString::number(fp->V(i)->C()[2])).arg(QString::number(fp->V(i)->C()[3]));
 		if( m.hasDataMask(MeshModel::MM_WEDGTEXCOORD) )
-			buf +=QString(" - uv(%1 %2) id:%3").arg(QString::number(fp->WT(i).U())).arg(QString::number(fp->WT(i).V())).arg(QString::number(fp->WT(i).N()));
+			buf +=QString(" - [W]uv(%1 %2) id:%3").arg(QString::number(fp->WT(i).U())).arg(QString::number(fp->WT(i).V())).arg(QString::number(fp->WT(i).N()));
 		if( m.hasDataMask(MeshModel::MM_VERTTEXCOORD) )
-			buf +=QString(" - uv(%1 %2) id:%3").arg(QString::number(fp->V(i)->T().U())).arg(QString::number(fp->V(i)->T().V())).arg(QString::number(fp->V(i)->T().N()));
+			buf +=QString(" - [V]uv(%1 %2) id:%3").arg(QString::number(fp->V(i)->T().U())).arg(QString::number(fp->V(i)->T().V())).arg(QString::number(fp->V(i)->T().N()));
 		
 		vcg::glLabel::render(p,fp->V(i)->P(),buf);
     }
@@ -224,14 +224,14 @@ void SampleEditPlugin::drawVert(CMeshO::VertexPointer vp, MeshModel &m, GLArea *
 	if (m.hasDataMask(MeshModel::MM_VERTCOLOR))
 		buf += QString(" - color(%1 %2 %3 %4)").arg(QString::number(vp->C()[0])).arg(QString::number(vp->C()[1])).arg(QString::number(vp->C()[2])).arg(QString::number(vp->C()[3]));
 	if (m.hasDataMask(MeshModel::MM_VERTTEXCOORD))
-		buf += QString(" - uv(%1 %2) id:%3").arg(QString::number(vp->T().U())).arg(QString::number(vp->T().V())).arg(QString::number(vp->T().N()));
+		buf += QString(" - [V]uv(%1 %2) id:%3").arg(QString::number(vp->T().U())).arg(QString::number(vp->T().V())).arg(QString::number(vp->T().N()));
 	
 	vcg::glLabel::render(p, vp->P(), buf);
 }
 
 void SampleEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 {
-	if (e->key() == Qt::Key_Space) // toggle pick mode
+	if (e->key() == Qt::Key_T) // toggle pick mode
 	{
 		pickmode = (pickmode + 1) % 2;
 		curFacePtr = 0;
