@@ -62,6 +62,7 @@ class RadianceScalingRendererPlugin : public QObject, public MeshRenderInterface
     inline void setEnable(bool enabled);
     inline void setLit(bool lit);
     inline void setInvert(int invert);
+	inline void setDoubleSide(int doubleSide);
     inline void setDisplay(int index);
     inline void setEnhancement(float enhancement);
     inline void setTransition(float transition);
@@ -155,6 +156,12 @@ inline void RadianceScalingRendererPlugin::setInvert(int invert) {
   _rsPass->enable();
   _rsPass->setUniform1i("invert",invert);
   _rsPass->disable();
+}
+
+inline void RadianceScalingRendererPlugin::setDoubleSide(int doubleSide) {
+	_rsPass->enable();
+	_rsPass->setUniform1i("doubleSide", doubleSide);
+	_rsPass->disable();
 }
 
 inline void RadianceScalingRendererPlugin::setDisplay(int index) {

@@ -32,6 +32,7 @@ uniform float     enhancement;
 uniform float     transition;
 uniform bool      enabled;
 uniform bool      invert;
+uniform bool      doubleSide;
 uniform int       display;
 uniform bool      twoLS;
 uniform sampler2D convexLS;
@@ -215,7 +216,7 @@ void main(void) {
   if(display==0)
   {
     // lambertian lighting
-    float cosineTerm = max(dot(n,l),0.0);
+    float cosineTerm = doubleSide ? max(dot(n,l),-dot(n,l)) : max(dot(n,l),0.0);
     float warpedTerm = enabled ? cosineTerm*warp(cosineTerm,c) : cosineTerm;
     gl_FragColor = vec4(m.rgb*warpedTerm,1.0);
   }

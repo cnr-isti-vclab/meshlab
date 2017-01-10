@@ -51,6 +51,7 @@ class ShaderDialog : public QDockWidget {
   void enableChanged(int);
   void displayChanged(int);
   void invertChanged(int);
+  void doubleSideChanged(int);
   void enhancementChanged(int);
   void transitionChanged(int);
   void litChanged(int);
@@ -63,6 +64,7 @@ class ShaderDialog : public QDockWidget {
   inline float getEnhancement() const;
   inline float getTransition()  const;
   inline bool  getInvert()      const;
+  inline bool  getDoubleSide()  const;
   inline bool  getTwoLS()       const;
 };
 
@@ -86,6 +88,10 @@ inline float ShaderDialog::getTransition() const {
 
 inline bool ShaderDialog::getInvert() const {
   return (_ui.invertCheckBox->checkState()==Qt::Checked);
+}
+
+inline bool ShaderDialog::getDoubleSide() const {
+	return (_ui.doubleSideCheckBox->checkState() == Qt::Checked);
 }
 
 inline bool ShaderDialog::getTwoLS() const {
