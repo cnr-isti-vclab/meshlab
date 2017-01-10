@@ -30,6 +30,7 @@ FIRST RELEASE
 #include "eqhandle.h"
 #include <QMouseEvent>
 #include <QGraphicsSceneMouseEvent>
+#include <math.h>
 
 EqHandle::EqHandle(CHART_INFO *environment_info, QColor color, QPointF position, 
 				   EQUALIZER_HANDLE_TYPE type, EqHandle** handles, qreal* midHandlePercentilePosition, QDoubleSpinBox* spinbox,
@@ -83,7 +84,7 @@ void EqHandle::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	setCursor(Qt::OpenHandCursor);
 
 	QPointF newPos = event->scenePos();
-	qreal handleOffset = std::fabs(newPos.x()-pos().x());
+	qreal handleOffset = fabs(newPos.x()-pos().x());
 
 	if (handleOffset >= std::numeric_limits<float>::epsilon())
 	{
