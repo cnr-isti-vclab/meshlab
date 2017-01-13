@@ -33,6 +33,7 @@ $Log: meshedit.cpp,v $
 #include<wrap/qt/gl_label.h>
 #include<wrap/gl/shot.h>
 #include <wrap/glw/glw.h>
+#include<vcg/complex/algorithms/update/flag.h>
 
 using namespace std;
 using namespace vcg;
@@ -89,12 +90,6 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
 	glViewport(0, 0, winsize, winsize);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(90, 1.0, 0.1, 100); // SISTEMARE NEAR E FAR
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
 	ctx.bindReadDrawFramebuffer(hFramebuffer);
 	GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
 
@@ -102,52 +97,64 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
 	shared->getRenderInfoPerMeshView(gla->context(), dt);
 
-	for (int i = 0; i < meshmodel->cm.vert.size(); ++i){
-		CMeshO::CoordType p = meshmodel->cm.vert[i].cP();
 
-		QImage image(int(width), int(height), QImage::Format_ARGB32);
+	QImage image(int(width), int(height), QImage::Format_ARGB32);
 		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glViewport(0, 0, winsize, winsize);
-		glPushMatrix();
+	glViewport(0, 0, winsize, winsize);
+	glPushMatrix();
 
-		/* set camera*/
-		GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, 1, 100);
+
+	/* set camera*/
+	GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, 1, 10000);
 		
-		/**/
+	/**/
 
-		{
-			MLSceneGLSharedDataContext* datacont = gla->mvc()->sharedDataContext();
-			if (datacont == NULL)
-				return;
+	{
+		MLSceneGLSharedDataContext* datacont = gla->mvc()->sharedDataContext();
+		if (datacont == NULL)
+			return;
 
-			foreach(MeshModel * mp, gla->md()->meshList){
-				MLRenderingData curr;
-				datacont->getRenderInfoPerMeshView(mp->id(), gla->context(), curr);
-				MLPerViewGLOptions opts;
-				curr.get(opts);
-				//if (curr.get(opts) == false)
-				//	throw MLException(QString("GLArea: invalid MLPerViewGLOptions"));
-				//gla->setLightingColors(opts);
+		foreach(MeshModel * mp, gla->md()->meshList){
+			MLRenderingData curr;
+			datacont->getRenderInfoPerMeshView(mp->id(), gla->context(), curr);
+			MLPerViewGLOptions opts;
+			curr.get(opts);
+			//if (curr.get(opts) == false)
+			//	throw MLException(QString("GLArea: invalid MLPerViewGLOptions"));
+			//gla->setLightingColors(opts);
 
 
-				if (opts._back_face_cull)
-					glEnable(GL_CULL_FACE);
-				else
-					glDisable(GL_CULL_FACE);
+			glEnable(GL_CULL_FACE);
+			datacont->setMeshTransformationMatrix(mp->id(), mp->cm.Tr);
 
-				datacont->setMeshTransformationMatrix(mp->id(), mp->cm.Tr);
 
-				if (mp->cm.fn)
-					datacont->draw(mp->id(), gla->context());
+			if (mp->cm.fn){
+				glPolygonMode(GL_FRONT, GL_FILL);
+				glDisable(GL_LIGHTING);
+				
+				glCullFace(GL_BACK);
+				glEnable(GL_POLYGON_OFFSET_FILL);
+				glPolygonOffset(1.0, 1);
+ 				drawer.DrawFill<vcg::GLW::NormalMode::NMNone,vcg::GLW::ColorMode::CMPerMesh,vcg::GLW::TextureMode::TMNone>();
+				glEnable(GL_LIGHTING);
+				glCullFace(GL_BACK);
+				glDisable(GL_POLYGON_OFFSET_FILL);
+
+				drawer.DrawWirePolygonal<vcg::GLW::NormalMode::NMNone, vcg::GLW::ColorMode::CMNone>();
+
+
 			}
 		}
-
-		glReadPixels(0, 0, 3 * winsize, 2 * winsize, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-
-		image.rgbSwapped().mirrored().save("pano_" + QString().setNum(i) + ".jpg");
 	}
+
+	GlShot<Shotm>::UnsetView();
+
+	glReadPixels(0, 0,  winsize,  winsize, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+
+	image.rgbSwapped().mirrored().save("edges.jpg");
+
 	ctx.unbindReadDrawFramebuffer();
 	ctx.release();
 	glViewport(vp[0], vp[1], vp[2], vp[3]);
@@ -258,5 +265,19 @@ bool CADtexturingEditPlugin::StartEdit(MeshModel & m , GLArea * gla, MLSceneGLSh
 
 	QObject::connect(control, SIGNAL(renderEdgesClicked()), this, SLOT(on_renderEdges()));
 	drawEdgesTrigger = false;
+
+	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	vcg::tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, -M_PI*0.5, M_PI*0.5);
+	drawer.m = &m.cm;
+	m.cm.C().SetGrayShade(0.5);
+
 	return true;
 }
+
+void CADtexturingEditPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/){
+
+	dock->setVisible(false);
+	delete control;
+	delete dock;
+
+};

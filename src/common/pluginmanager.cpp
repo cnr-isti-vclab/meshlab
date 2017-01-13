@@ -98,7 +98,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
     else
     {
       QPluginLoader loader(absfilepath);
-      QObject *plugin = loader.instance();
+      QObject *plugin  = loader.instance();
       if (plugin)
       {
         pluginsLoaded.push_back(fileName);

@@ -21,16 +21,46 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "CADtexturingControl.h"
-#include <QFileDialog>
+#ifndef QUALITYCHECKER_H_
+#define QUALITYCHECKER_H_
 
-CADtexturingControl::CADtexturingControl(QWidget * parent, Qt::WindowFlags flags) : QDockWidget(parent, flags)
+#include <vector>
+
+#include <vcg/math/base.h>
+#include <GL/glew.h>
+#include <QHash>
+#include <QUndoStack>
+#include <QUndoGroup>
+#include "ui_qualitychecker.h"
+
+
+
+/**
+ * This class manages the user interface and is concerned
+ * with emitting appropriate signals. It should not be 
+ * concerned with the application logic in any way.
+ */
+class QualityChecker : public QDockWidget, private Ui::QualityChecker
 {
-	 setupUi(this);
-	
-	QObject::connect(this->draw_mesh_edges, SIGNAL(clicked()), this, SLOT(on_renderEdges()));
-}
+	Q_OBJECT
 
-void CADtexturingControl::on_renderEdges(){
-	emit(renderEdgesClicked());
-}
+private:
+	
+public:	
+	QualityChecker(QWidget * parent = 0, Qt::WindowFlags flags = 0);
+
+
+signals: 
+	
+	void createImageSpaceClicked();
+	void compareClicked();
+	void layerChosenChanged();
+
+public slots :
+		void on_compare();
+		void on_createImageSpace();
+		void on_layerChosen();
+};
+
+
+#endif  

@@ -21,16 +21,30 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "CADtexturingControl.h"
+#include "qualitychecker.h"
 #include <QFileDialog>
 
-CADtexturingControl::CADtexturingControl(QWidget * parent, Qt::WindowFlags flags) : QDockWidget(parent, flags)
+QualityChecker::QualityChecker(QWidget * parent, Qt::WindowFlags flags) : QDockWidget(parent, flags)
 {
-	 setupUi(this);
+	setupUi(this);
 	
-	QObject::connect(this->draw_mesh_edges, SIGNAL(clicked()), this, SLOT(on_renderEdges()));
+	//QObject::connect(clone_source_view, SIGNAL(positionChanged(double, double)), this, SLOT(movePixmapDelta(double, double)));
+	//QObject::connect(clone_source_view, SIGNAL(positionReset()), this, SLOT(resetPixmapDelta()));
+
+	QObject::connect(this->createImageSpacePushButton, SIGNAL(clicked()), this, SLOT(on_createImageSpace()));
+	QObject::connect(this->createImageSpacePushButton, SIGNAL(clicked()), this, SLOT(on_compare()));
+	QObject::connect(this->useCurrentLayerPushButton, SIGNAL(clicked()), this, SLOT(on_layerChosen()));
+	comparePushButton->setVisible(false);
 }
 
-void CADtexturingControl::on_renderEdges(){
-	emit(renderEdgesClicked());
+void QualityChecker::on_createImageSpace(){
+	emit(createImageSpaceClicked());
+}
+
+void QualityChecker::on_compare(){
+	emit(compareClicked());
+}
+
+void QualityChecker::on_layerChosen(){
+	emit(layerChosenChanged());
 }

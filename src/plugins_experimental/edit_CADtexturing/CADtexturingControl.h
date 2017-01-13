@@ -32,7 +32,7 @@
 #include <QUndoStack>
 #include <QUndoGroup>
 #include <QFileDialog>
-#include <ui_CADtexturingControl.h>
+#include <generatedfiles/ui_CADtexturingControl.h>
 
 
 
