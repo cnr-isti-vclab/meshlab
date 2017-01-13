@@ -65,11 +65,25 @@ void CADtexturingEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/
 	//curVertPtr = 0;
 	//pIndex = 0;
 }
-void CADtexturingEditPlugin::renderEdges(GLArea * gla){
-	int winsize = 512;
-	int width = winsize;
-	int height = winsize;
 
+
+void CADtexturingEditPlugin::ComputeNearFar(const vcg::Shotf &  s,float & nearplane, float & farplane )
+{
+	float sx, dx, bt, tp,nr;
+	s.Intrinsics.GetFrustum(sx, dx, bt, tp, nr);
+	GLfloat fAspect = fabs((dx - sx) / (tp - bt));
+
+	vcg::Box3f b = this->meshmodel->cm.bbox;
+	vcg::Box3f bb;
+	for (int i = 0; i < 8; ++i) bb.Add(s.ConvertWorldToCameraCoordinates(b.P(i)));
+	nearplane = bb.min.Z();
+	farplane = bb.max.Z();
+}
+
+
+
+
+void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
 	//glarea = gla;
 	if (gla->mvc() == NULL)
@@ -78,17 +92,19 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	if (shared == NULL)
 		return;
 
+	vcg::Point2i cp = gla->mvc()->meshDoc.rm()->shot.Intrinsics.ViewportPx;
+
 	Context ctx;
 	ctx.acquire();
 
-	RenderbufferHandle hDepth = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, width, height);
-	Texture2DHandle    hColor = createTexture2D(ctx, GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+	RenderbufferHandle hDepth = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, cp[0], cp[1]);
+	Texture2DHandle    hColor = createTexture2D(ctx, GL_RGBA8, cp[0], cp[1], GL_RGBA, GL_UNSIGNED_BYTE);
 	FramebufferHandle  hFramebuffer = createFramebuffer(ctx, renderbufferTarget(hDepth), texture2DTarget(hColor));
 
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
 
-	glViewport(0, 0, winsize, winsize);
+	glViewport(0, 0, cp[0], cp[1]);
 
 	ctx.bindReadDrawFramebuffer(hFramebuffer);
 	GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
@@ -98,16 +114,18 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	shared->getRenderInfoPerMeshView(gla->context(), dt);
 
 
-	QImage image(int(width), int(height), QImage::Format_ARGB32);
+	QImage image(int(cp[0]), int(cp[1]), QImage::Format_ARGB32);
 		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glViewport(0, 0, winsize, winsize);
+	glViewport(0, 0, cp[0], cp[1]);
 	glPushMatrix();
 
 
 	/* set camera*/
-	GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, 1, 10000);
+	float np, fp;
+	ComputeNearFar(gla->mvc()->meshDoc.rm()->shot, np, fp);
+	GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np,fp);
 		
 	/**/
 
@@ -143,15 +161,13 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 				glDisable(GL_POLYGON_OFFSET_FILL);
 
 				drawer.DrawWirePolygonal<vcg::GLW::NormalMode::NMNone, vcg::GLW::ColorMode::CMNone>();
-
-
 			}
 		}
 	}
 
 	GlShot<Shotm>::UnsetView();
 
-	glReadPixels(0, 0,  winsize,  winsize, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+	glReadPixels(0, 0,  cp[0],  cp[1], GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
 	image.rgbSwapped().mirrored().save("edges.jpg");
 

@@ -49,6 +49,7 @@ public:
     void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
     void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
 	void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea *);
+	void ComputeNearFar(const vcg::Shotf &  s, float & near, float & far);
 
 	void renderEdges(GLArea *gla);
 	vcg::GlTrimesh<CMeshO> drawer;
