@@ -40,6 +40,7 @@ ShaderDialog::ShaderDialog(RadianceScalingRendererPlugin* wrp,QGLWidget* gla,QWi
 
   connect(_ui.enableCheckBox,SIGNAL(stateChanged(int)),this,SLOT(enableChanged(int)));
   connect(_ui.invertCheckBox,SIGNAL(stateChanged(int)),this,SLOT(invertChanged(int)));
+  connect(_ui.doubleSideCheckBox, SIGNAL(stateChanged(int)), this, SLOT(doubleSideChanged(int)));
   connect(_ui.displayBox,SIGNAL(currentIndexChanged(int)),this,SLOT(displayChanged(int)));
   connect(_ui.enSlider,SIGNAL(valueChanged(int)),this,SLOT(enhancementChanged(int)));
   connect(_ui.transitionSlider,SIGNAL(valueChanged(int)),this,SLOT(transitionChanged(int)));
@@ -64,15 +65,19 @@ ShaderDialog::~ShaderDialog() {
 }
 
 void ShaderDialog::enableChanged(int) {
-  bool enableChecked = (_ui.enableCheckBox->checkState()==Qt::Checked) ? true : false;
-
-  _wrp->setEnable(enableChecked);
-  _gla->update();
+	bool enableChecked = (_ui.enableCheckBox->checkState()==Qt::Checked) ? true : false;
+	_wrp->setEnable(enableChecked);
+	_gla->update();
 }
 
 void ShaderDialog::invertChanged(int) {
-  (_ui.invertCheckBox->checkState()==Qt::Checked) ? _wrp->setInvert(true) : _wrp->setInvert(false);
-  _gla->update();
+	(_ui.invertCheckBox->checkState()==Qt::Checked) ? _wrp->setInvert(true) : _wrp->setInvert(false);
+	_gla->update();
+}
+
+void ShaderDialog::doubleSideChanged(int) {
+	(_ui.doubleSideCheckBox->checkState() == Qt::Checked) ? _wrp->setDoubleSide(true) : _wrp->setDoubleSide(false);
+	_gla->update();
 }
 
 void ShaderDialog::displayChanged(int index) {

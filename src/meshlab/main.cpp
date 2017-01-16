@@ -24,11 +24,13 @@
 #include <QMessageBox>
 #include "mainwindow.h"
 #include <QString>
+#include <clocale>
 
 int main(int argc, char *argv[])
 {
 
     MeshLabApplication app(argc, argv);
+	std::setlocale(LC_ALL, "C");
     QLocale::setDefault(QLocale::C);
     QCoreApplication::setOrganizationName(MeshLabApplication::organization());
 #if QT_VERSION >= 0x050100

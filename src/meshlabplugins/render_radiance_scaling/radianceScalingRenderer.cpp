@@ -203,6 +203,7 @@ void RadianceScalingRendererPlugin::initShaders(bool reload)
 		_rsPass->addUniform("transition");
 		_rsPass->addUniform("enabled");
 		_rsPass->addUniform("invert");
+		_rsPass->addUniform("doubleSide");
 		_rsPass->addUniform("twoLS");
 		_rsPass->addUniform("display");
 		_rsPass->addUniform("grad");
@@ -231,6 +232,7 @@ void RadianceScalingRendererPlugin::initShaders(bool reload)
 	_rsPass->setUniform1i("enabled", _sDialog->getEnable());
 	_rsPass->setUniform1i("display", _sDialog->getDisplay());
 	_rsPass->setUniform1i("invert", _sDialog->getInvert());
+	_rsPass->setUniform1i("doubleSide", _sDialog->getDoubleSide());
 	_rsPass->setUniform1i("twoLS", _sDialog->getTwoLS());
 	_rsPass->setUniformTexture("grad", 0, _gradTex->format().target(), _gradTex->id());
 	_rsPass->setUniformTexture("norm", 1, _normTex->format().target(), _normTex->id());
