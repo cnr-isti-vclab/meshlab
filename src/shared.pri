@@ -14,6 +14,7 @@ mac:LIBS += ../../common/libcommon.dylib
 
 #correct qmake syntax requires CONFIG(option, list of options)
 
+win32-msvc2012:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-msvc2013:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-msvc2015:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
