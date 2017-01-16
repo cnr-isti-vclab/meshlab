@@ -85,6 +85,8 @@ void CADtexturingEditPlugin::ComputeNearFar(const vcg::Shotf &  s,float & nearpl
 
 void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
+// #define TOFILE
+
 	//glarea = gla;
 	if (gla->mvc() == NULL)
 		return;
@@ -92,9 +94,11 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	if (shared == NULL)
 		return;
 
+#ifdef TOFILE
 	vcg::Point2i cp = gla->mvc()->meshDoc.rm()->shot.Intrinsics.ViewportPx;
 
 	Context ctx;
+
 	ctx.acquire();
 
 	RenderbufferHandle hDepth = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, cp[0], cp[1]);
@@ -116,8 +120,11 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
 	QImage image(int(cp[0]), int(cp[1]), QImage::Format_ARGB32);
 		
+#endif
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+#ifdef TOFILE
 	glViewport(0, 0, cp[0], cp[1]);
 	glPushMatrix();
 
@@ -126,7 +133,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	float np, fp;
 	ComputeNearFar(gla->mvc()->meshDoc.rm()->shot, np, fp);
 	GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np,fp);
-		
+#endif		
 	/**/
 
 	{
@@ -164,7 +171,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 			}
 		}
 	}
-
+#ifdef TOFILE
 	GlShot<Shotm>::UnsetView();
 
 	glReadPixels(0, 0,  cp[0],  cp[1], GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
@@ -174,6 +181,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	ctx.unbindReadDrawFramebuffer();
 	ctx.release();
 	glViewport(vp[0], vp[1], vp[2], vp[3]);
+#endif
 	return;
 
 }
@@ -185,7 +193,7 @@ void CADtexturingEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
 	if (drawEdgesTrigger){
 		renderEdges(gla);
-		drawEdgesTrigger = false;
+//		drawEdgesTrigger = false;
 	}
 }
 void CADtexturingEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
