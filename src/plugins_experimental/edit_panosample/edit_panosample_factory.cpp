@@ -2,7 +2,7 @@
 * MeshLab                                                           o o     *
 * A versatile mesh processing toolbox                             o     o   *
 *                                                                _   O  _   *
-* Copyright(C) 2005                                                \/)\/    *
+* Copyright(C) 2005-2008                                           \/)\/    *
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *                                                                    \      *
@@ -21,51 +21,38 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef CADtexturingEDITPLUGIN_H
-#define CADtexturingEDITPLUGIN_H
+#include "edit_panosample_factory.h"
+#include "edit_panosample.h"
 
-#include <QObject>
-#include <meshlab/glarea.h>
-#include <common/interfaces.h>
-#include "CADtexturingControl.h"
-#include <wrap/gl/trimesh.h>
-
-class CADtexturingEditPlugin : public QObject, public MeshEditInterface
+EditPanosampleFactory::EditPanosampleFactory()
 {
-	Q_OBJECT
-	Q_INTERFACES(MeshEditInterface)
-		
-public:
-    CADtexturingEditPlugin();
-    virtual ~CADtexturingEditPlugin() {}
+	editPanosample = new QAction(QIcon(":/images/paintbrush-22.png"), "Z-painting", this);
 
-    static const QString Info();
+	actionList << editPanosample;
+	
+	foreach(QAction *editAction, actionList)
+		editAction->setCheckable(true); 	
+}
+	
+//gets a list of actions available from this plugin
+QList<QAction *> EditPanosampleFactory::actions() const
+{
+	return actionList;
+}
 
-    bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
-    void Decorate(MeshModel &/*m*/, GLArea * /*parent*/, QPainter *p);
-    void Decorate (MeshModel &/*m*/, GLArea * ){};
-    void mousePressEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    void mouseMoveEvent(QMouseEvent *, MeshModel &, GLArea * ) {};
-    void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea * );
-	void keyReleaseEvent(QKeyEvent *, MeshModel &, GLArea *);
-	void ComputeNearFar(const vcg::Shotf &  s, float & near, float & far);
+//get the edit tool for the given action
+MeshEditInterface* EditPanosampleFactory::getMeshEditInterface(QAction *action)
+{
+	if (action == editPanosample)
+	{
+		return new EditPanosamplePlugin();
+	} else assert(0); //should never be asked for an action that isnt here
+    return NULL;
+}
 
-	void renderEdges(GLArea *gla);
-	vcg::GlTrimesh<CMeshO> drawer;
+QString EditPanosampleFactory::getEditToolDescription(QAction *)
+{
+	return EditPanosamplePlugin::Info();
+}
 
-private:
-	bool drawEdgesTrigger;
-
-	MeshModel * meshmodel;
-	QDockWidget* dock;
-	CADtexturingControl * control;
-	GLArea * glarea;
-signals:
-	void suspendEditToggle();
-
-	public slots:
-	void on_renderEdges();
-};
-
-#endif
+MESHLAB_PLUGIN_NAME_EXPORTER(EditPanosampleFactory)

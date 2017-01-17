@@ -21,16 +21,67 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "CADtexturingControl.h"
-#include <QFileDialog>
+#ifndef EDITPAINT_H
+#define EDITPAINT_H
 
-CADtexturingControl::CADtexturingControl(QWidget * parent, Qt::WindowFlags flags) : QDockWidget(parent, flags)
-{
-	 setupUi(this);
-	
-	QObject::connect(this->draw_mesh_edges, SIGNAL(clicked()), this, SLOT(on_renderEdges()));
-}
+#include <GL/glew.h>
+#include <QObject>
+#include <QDockWidget>
 
-void CADtexturingControl::on_renderEdges(){
-	emit(renderEdgesClicked());
-}
+#include <meshlab/glarea.h>
+#include <common/interfaces.h>
+#include <wrap/gl/pick.h>
+
+#include "qualitychecker.h"
+
+
+
+
+/**
+ * EditPanosample plugin main class (MeshEditing plugin)
+ */
+class EditPanosamplePlugin : public QObject, public MeshEditInterface {
+	Q_OBJECT
+		Q_INTERFACES(MeshEditInterface)
+
+public:
+	EditPanosamplePlugin();
+	virtual ~EditPanosamplePlugin();
+
+	static const QString Info();
+
+	bool StartEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void EndEdit(MeshModel &/*m*/, GLArea * /*parent*/, MLSceneGLSharedDataContext* /*cont*/);
+	void Decorate(MeshModel &/*m*/, GLArea * /*parent*/);
+	void mousePressEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseMoveEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+	void mouseReleaseEvent(QMouseEvent *event, MeshModel &/*m*/, GLArea *);
+
+
+signals:
+	void setSelectionRendering(bool);
+
+public slots:
+	void update();
+	void on_createImageSpace();
+	void on_layerChosenChanged();
+
+	//void runPanoSample();
+	//void setSamplePoints();
+private:
+	bool createImageSpaceTrigger;
+
+
+	void panoRender(GLArea * gla);
+	void drawScene(GLArea * gla);
+
+	std::vector<QImage> panoramas;
+	QDockWidget* dock1;
+	QualityChecker * qualitychecker;
+	MeshModel * meshmodel;
+
+	GLArea * glarea;
+};
+
+
+#endif

@@ -13,13 +13,17 @@ CONFIG       += ordered
 SUBDIRS       = common \
                 meshlab \                         # the GUI framework
                 meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
-                meshlabplugins/filter_meshing \
+                meshlabplugins/filter_meshing \ 
+				sampleplugins/sample_filtergpu \
+				plugins_experimental/edit_panosample \
+				plugins_experimental/edit_CADtexturing \
 #
 # Next some other useful, but still easy to be compiled, plugins
 # Uncomment them if you succeed in compiling the above ones.
 #                meshlabplugins/decorate_background \
 #                meshlabplugins/decorate_base \
-                meshlabplugins/edit_align \
+#                meshlabplugins/edit_align \
+                 plugins_experimental/edit_panosample \
 #                meshlabplugins/edit_manipulators \
 #                meshlabplugins/edit_select \
 #                meshlabplugins/filter_clean\
