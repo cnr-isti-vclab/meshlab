@@ -28,9 +28,14 @@ CADtexturingControl::CADtexturingControl(QWidget * parent, Qt::WindowFlags flags
 {
 	 setupUi(this);
 	
-	QObject::connect(this->draw_mesh_edges, SIGNAL(clicked()), this, SLOT(on_renderEdges()));
+	QObject::connect(this->saverendering, SIGNAL(clicked()),	this, SLOT(on_saverendering()		));
+	QObject::connect(this->render_edges, SIGNAL(stateChanged(int)), this, SLOT(on_renderedgesChanged(int)));
 }
 
-void CADtexturingControl::on_renderEdges(){
-	emit(renderEdgesClicked());
+void CADtexturingControl::on_saverendering(){
+	emit(saverenderingClicked());
+}
+
+void CADtexturingControl::on_renderedgesChanged(int state){
+	emit(renderedgesChanged(state));
 }

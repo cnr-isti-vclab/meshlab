@@ -55,8 +55,7 @@ public:
 	vcg::GlTrimesh<CMeshO> drawer;
 
 private:
-	bool drawEdgesTrigger;
-
+	bool drawEdgesTrigger, saveRenderingTrigger;
 	MeshModel * meshmodel;
 	QDockWidget* dock;
 	CADtexturingControl * control;
@@ -65,7 +64,8 @@ signals:
 	void suspendEditToggle();
 
 	public slots:
-	void on_renderEdges();
+	void on_renderEdges(int);
+	void on_saverendering();
 };
 
 #endif

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>173</width>
     <height>87</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>CADtexturingControl</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
-   <widget class="QPushButton" name="draw_mesh_edges">
+   <widget class="QPushButton" name="saverendering">
     <property name="enabled">
      <bool>true</bool>
     </property>
@@ -22,15 +22,34 @@
      <rect>
       <x>40</x>
       <y>10</y>
-      <width>141</width>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>save rendering from the camera of the currently selected raster layer</string>
+    </property>
     <property name="text">
-     <string>draw_mesh_edges</string>
+     <string>save view</string>
     </property>
     <property name="default">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="render_edges">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>40</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>crease angle edge render mode</string>
+    </property>
+    <property name="text">
+     <string>render edges</string>
     </property>
    </widget>
   </widget>

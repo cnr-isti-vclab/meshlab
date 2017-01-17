@@ -85,7 +85,7 @@ void CADtexturingEditPlugin::ComputeNearFar(const vcg::Shotf &  s,float & nearpl
 
 void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
-// #define TOFILE
+	// #define TOFILE
 
 	//glarea = gla;
 	if (gla->mvc() == NULL)
@@ -94,46 +94,52 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	if (shared == NULL)
 		return;
 
-#ifdef TOFILE
-	vcg::Point2i cp = gla->mvc()->meshDoc.rm()->shot.Intrinsics.ViewportPx;
-
-	Context ctx;
-
-	ctx.acquire();
-
-	RenderbufferHandle hDepth = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, cp[0], cp[1]);
-	Texture2DHandle    hColor = createTexture2D(ctx, GL_RGBA8, cp[0], cp[1], GL_RGBA, GL_UNSIGNED_BYTE);
-	FramebufferHandle  hFramebuffer = createFramebuffer(ctx, renderbufferTarget(hDepth), texture2DTarget(hColor));
-
-	GLint vp[4];
-	glGetIntegerv(GL_VIEWPORT, vp);
-
-	glViewport(0, 0, cp[0], cp[1]);
-
-	ctx.bindReadDrawFramebuffer(hFramebuffer);
-	GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
-
-
 	MLSceneGLSharedDataContext::PerMeshRenderingDataMap dt;
-	shared->getRenderInfoPerMeshView(gla->context(), dt);
+	vcg::Point2i cp;
+	Context ctx;
+	RenderbufferHandle hDepth;
+	Texture2DHandle    hColor;
+	FramebufferHandle  hFramebuffer;
+	GLint vp[4];
+	QImage image;
+
+	if (saveRenderingTrigger)
+	{
+		cp = gla->mvc()->meshDoc.rm()->shot.Intrinsics.ViewportPx;
+		ctx.acquire();
+
+		hDepth = createRenderbuffer(ctx, GL_DEPTH_COMPONENT24, cp[0], cp[1]);
+		hColor = createTexture2D(ctx, GL_RGBA8, cp[0], cp[1], GL_RGBA, GL_UNSIGNED_BYTE);
+		hFramebuffer = createFramebuffer(ctx, renderbufferTarget(hDepth), texture2DTarget(hColor));
 
 
-	QImage image(int(cp[0]), int(cp[1]), QImage::Format_ARGB32);
-		
-#endif
+		glGetIntegerv(GL_VIEWPORT, vp);
+
+		glViewport(0, 0, cp[0], cp[1]);
+
+		ctx.bindReadDrawFramebuffer(hFramebuffer);
+		GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
+
+
+
+		shared->getRenderInfoPerMeshView(gla->context(), dt);
+
+
+		image = QImage(int(cp[0]), int(cp[1]), QImage::Format_ARGB32);
+	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#ifdef TOFILE
-	glViewport(0, 0, cp[0], cp[1]);
-	glPushMatrix();
+	if (saveRenderingTrigger){
+		glViewport(0, 0, cp[0], cp[1]);
+		glPushMatrix();
 
 
-	/* set camera*/
-	float np, fp;
-	ComputeNearFar(gla->mvc()->meshDoc.rm()->shot, np, fp);
-	GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np,fp);
-#endif		
+		/* set camera*/
+		float np, fp;
+		ComputeNearFar(gla->mvc()->meshDoc.rm()->shot, np, fp);
+		GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np, fp);
+	}
 	/**/
 
 	{
@@ -158,11 +164,11 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 			if (mp->cm.fn){
 				glPolygonMode(GL_FRONT, GL_FILL);
 				glDisable(GL_LIGHTING);
-				
+
 				glCullFace(GL_BACK);
 				glEnable(GL_POLYGON_OFFSET_FILL);
 				glPolygonOffset(1.0, 1);
- 				drawer.DrawFill<vcg::GLW::NormalMode::NMNone,vcg::GLW::ColorMode::CMPerMesh,vcg::GLW::TextureMode::TMNone>();
+				drawer.DrawFill<vcg::GLW::NormalMode::NMNone, vcg::GLW::ColorMode::CMPerMesh, vcg::GLW::TextureMode::TMNone>();
 				glEnable(GL_LIGHTING);
 				glCullFace(GL_BACK);
 				glDisable(GL_POLYGON_OFFSET_FILL);
@@ -171,29 +177,37 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 			}
 		}
 	}
-#ifdef TOFILE
-	GlShot<Shotm>::UnsetView();
+	if(saveRenderingTrigger){
 
-	glReadPixels(0, 0,  cp[0],  cp[1], GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+		GlShot<Shotm>::UnsetView();
 
-	image.rgbSwapped().mirrored().save("edges.jpg");
+		glReadPixels(0, 0,  cp[0],  cp[1], GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
-	ctx.unbindReadDrawFramebuffer();
-	ctx.release();
-	glViewport(vp[0], vp[1], vp[2], vp[3]);
-#endif
+		image.rgbSwapped().mirrored().save("edges.jpg");
+
+		ctx.unbindReadDrawFramebuffer();
+		ctx.release();
+		glViewport(vp[0], vp[1], vp[2], vp[3]);
+	}
+
 	return;
 
 }
-void CADtexturingEditPlugin::on_renderEdges(){
-	drawEdgesTrigger = true;
+void CADtexturingEditPlugin::on_renderEdges(int state){
+	drawEdgesTrigger = (state == Qt::Checked);
 	glarea->update();
 }
+
+void CADtexturingEditPlugin::on_saverendering(){
+	saveRenderingTrigger = true;
+	glarea->update();
+	saveRenderingTrigger = false;
+}
+
 void CADtexturingEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
 	if (drawEdgesTrigger){
 		renderEdges(gla);
-//		drawEdgesTrigger = false;
 	}
 }
 void CADtexturingEditPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
@@ -287,8 +301,10 @@ bool CADtexturingEditPlugin::StartEdit(MeshModel & m , GLArea * gla, MLSceneGLSh
 	dock->setFloating(true);
 	dock->setVisible(true);
 
-	QObject::connect(control, SIGNAL(renderEdgesClicked()), this, SLOT(on_renderEdges()));
+	QObject::connect(control, SIGNAL(saverenderingClicked()), this, SLOT(on_saverendering()));
+	QObject::connect(control, SIGNAL(renderedgesChanged(int)),	this, SLOT(on_renderEdges(int)));
 	drawEdgesTrigger = false;
+	saveRenderingTrigger = false;
 
 	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
 	vcg::tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, -M_PI*0.5, M_PI*0.5);
