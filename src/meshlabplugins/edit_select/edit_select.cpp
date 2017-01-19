@@ -36,7 +36,7 @@ EditSelectPlugin::EditSelectPlugin(int ConnectedMode) :selectionMode(ConnectedMo
 
 QString EditSelectPlugin::Info()
 {
-	return tr("Interactive selection of faces inside a dragged rectangle in screen space");
+	return tr("Interactive selection inside a dragged rectangle in screen space");
 }
 
 void EditSelectPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)

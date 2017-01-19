@@ -28,7 +28,7 @@ EditSelectFactory::EditSelectFactory()
 {
     editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
     editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
-    editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertexes", this);
+    editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertices", this);
 
     actionList << editSelectVert;
     actionList << editSelect;
