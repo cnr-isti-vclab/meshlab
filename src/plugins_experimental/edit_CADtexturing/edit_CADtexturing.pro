@@ -11,8 +11,6 @@ SOURCES       = edit_CADtexturing_factory.cpp \
 
 
 FORMS = CADtexturingControl.ui \
-=======
-
 
 
 TARGET        = CADtexturingedit
