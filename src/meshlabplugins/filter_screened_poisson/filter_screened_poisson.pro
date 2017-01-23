@@ -7,6 +7,8 @@ macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math  -Wno-sig
 
 QMAKE_CXXFLAGS+=-fopenmp
 
+win32:QMAKE_CXXFLAGS   += -openmp
+
 HEADERS       += filter_screened_poisson.h
 
 SOURCES       += filter_screened_poisson.cpp \
