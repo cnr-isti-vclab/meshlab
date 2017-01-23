@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>images/select_face.png</file>
         <file>images/select_face_connected.png</file>
         <file>images/select_vertex.png</file>
@@ -9,5 +9,6 @@
         <file>images/sel_rect_minus.png</file>
         <file>images/sel_rect_plus_eye.png</file>
         <file>images/sel_rect_minus_eye.png</file>
+        <file>images/select_area.png</file>
     </qresource>
 </RCC>

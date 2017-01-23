@@ -52,6 +52,7 @@ private:
   QAction *editSelect;
   QAction *editSelectVert;
   QAction *editSelectConnected;
+  QAction *editSelectArea;
 };
 
 #endif

@@ -32,7 +32,7 @@ class EditSelectPlugin : public QObject, public MeshEditInterface
 
 
 public:
-	enum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE };
+	enum { SELECT_FACE_MODE, SELECT_VERT_MODE, SELECT_CONN_MODE, SELECT_AREA_MODE };
 
 	EditSelectPlugin(int _ConnectedMode);
 
@@ -57,6 +57,15 @@ public:
 	std::vector<CMeshO::FacePointer> LastSelFace;
 	std::vector<CMeshO::VertexPointer> LastSelVert;
 
+	// for area selection
+	std::vector<vcg::Point2f> selPolyLine;
+	int areaMode = 0;
+	int multiMode = 0;
+	// proj data
+	GLdouble mvMatrix_f[16];
+	GLdouble prMatrix_f[16];
+	GLint viewpSize[4];
+
 signals:
 	void setDecorator(QString, bool);
 
@@ -65,6 +74,8 @@ private:
 	ComposingSelMode composingSelMode;
 	bool selectFrontFlag;
 	void DrawXORRect(GLArea * gla, bool doubleDraw);
+	void EditSelectPlugin::DrawXORPolyLine(GLArea * gla);
+	void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode);
 };
 
 #endif

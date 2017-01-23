@@ -29,10 +29,12 @@ EditSelectFactory::EditSelectFactory()
     editSelect = new QAction(QIcon(":/images/select_face.png"),"Select Faces in a rectagular region", this);
     editSelectConnected = new QAction(QIcon(":/images/select_face_connected.png"),"Select Connected Components in a region", this);
     editSelectVert = new QAction(QIcon(":/images/select_vertex.png"),"Select Vertices", this);
+	editSelectArea = new QAction(QIcon(":/images/select_area.png"), "Select Faces/Vertices inside polyline area", this);
 
     actionList << editSelectVert;
     actionList << editSelect;
     actionList << editSelectConnected;
+	actionList << editSelectArea;
 	
 	foreach(QAction *editAction, actionList)
 		editAction->setCheckable(true); 	
@@ -48,12 +50,14 @@ QList<QAction *> EditSelectFactory::actions() const
 MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 {
 	if(action == editSelect)
-      return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);
-  else if(action == editSelectConnected)
-      return new EditSelectPlugin(EditSelectPlugin::SELECT_CONN_MODE);
-  else if(action == editSelectVert)
-      return new EditSelectPlugin(EditSelectPlugin::SELECT_VERT_MODE);
-	 
+		return new EditSelectPlugin(EditSelectPlugin::SELECT_FACE_MODE);
+	else if(action == editSelectConnected)
+		return new EditSelectPlugin(EditSelectPlugin::SELECT_CONN_MODE);
+	else if(action == editSelectVert)
+		return new EditSelectPlugin(EditSelectPlugin::SELECT_VERT_MODE);
+	else if (action == editSelectArea)
+		return new EditSelectPlugin(EditSelectPlugin::SELECT_AREA_MODE);
+
 	assert(0); //should never be asked for an action that isnt here
 }
 
