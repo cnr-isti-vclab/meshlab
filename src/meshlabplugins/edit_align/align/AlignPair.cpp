@@ -403,8 +403,8 @@ bool AlignPair::Align(
     Matrix44d newout;
     switch (ap.MatchMode) 
     {
-    case AlignPair::Param::MMSimilarity: ComputeRotoTranslationScalingMatchMatrix(newout, Pfix, OPmov); break;
-    case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, OPmov, newout);   break;
+    case AlignPair::Param::MMSimilarity: ComputeRotoTranslationScalingMatchMatrix(newout, Pfix, Pmov); break;
+    case AlignPair::Param::MMRigid: ComputeRigidMatchMatrix(Pfix, Pmov, newout);   break;
     default:
       status = UNKNOWN_MODE;
       ii.Time = clock();
@@ -423,7 +423,7 @@ bool AlignPair::Align(
 
     // le passate successive utilizzano quindi come trasformazione iniziale questa appena trovata.
     // Nei prossimi cicli si parte da questa matrice come iniziale.
-    out = newout;
+    out = newout * out;
 
     assert(Pfix.size() == Pmov.size());
     int tts2 = clock();
@@ -447,6 +447,7 @@ bool AlignPair::Align(
     );
   /**************** END ICP LOOP ****************/
   int tt2 = clock();
+  out[3][0] = 0; out[3][1] = 0; out[3][2] = 0; out[3][3] = 1;
   Matrix44d ResCopy = out;
   Point3d scv, shv, rtv, trv;
   Decompose(ResCopy, scv, shv, rtv, trv);
@@ -639,15 +640,6 @@ bool AlignPair::SampleMovVert(vector<A2Vertex> &vert, int SampleNum, AlignPair::
 }
 
 
-// Function to retrieve a static random number generator object.
-static math::SubtractiveRingRNG &LocRnd(){
-  static math::SubtractiveRingRNG myrnd(time(NULL));
-  return myrnd;
-}
-// Gets a random number in the interval [0..n].
-static int LocRnd(int n){
-  return LocRnd().generate(n);
-}
 // Scelta a caso semplice
 bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
 {
@@ -655,7 +647,7 @@ bool AlignPair::SampleMovVertRandom(vector<A2Vertex> &vert, int SampleNum)
   int i;
   for (i = 0; i < SampleNum; ++i)
   {
-    int pos = LocRnd(vert.size());
+    int pos = myrnd.generate(vert.size());
     assert(pos >= 0 && pos < int(vert.size()));
     swap(vert[i], vert[pos]);
   }
@@ -680,7 +672,7 @@ bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleN
   //  assert(0);
 
   //	int t0=clock();
-  static vector<Point3d> NV;
+  vector<Point3d> NV;
   if (NV.size() == 0)
   {
     GenNormal<double>::Fibonacci(30, NV);
@@ -703,13 +695,13 @@ bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleN
 
   for (int i = 0; i < SampleNum;)
   {
-    int ind = LocRnd(BKT.size()); // Scelgo un Bucket
+    int ind = myrnd.generate(BKT.size()); // Scelgo un Bucket
     int &CURpos = BKTpos[ind];
     vector<int> &CUR = BKT[ind];
 
     if (CURpos<int(CUR.size()))
     {
-      swap(CUR[CURpos], CUR[CURpos + LocRnd(BKT[ind].size() - CURpos)]);
+      swap(CUR[CURpos], CUR[CURpos + myrnd.generate(BKT[ind].size() - CURpos)]);
       swap(vert[i], vert[CUR[CURpos]]);
       ++BKTpos[ind];
       ++i;

@@ -254,7 +254,7 @@ public:
 
   static const char *ErrorMsg( ErrorCode code);
   void Clear(){status=SUCCESS;}
-  AlignPair() {Clear();}
+  AlignPair() { Clear(); myrnd.initialize(time(NULL)); }
 
 /******* Data Members *********/
 
@@ -263,6 +263,8 @@ public:
 
   ErrorCode status;
   AlignPair::Param ap;
+
+  math::SubtractiveRingRNG myrnd;
 
 /**** End Data Members *********/
 
