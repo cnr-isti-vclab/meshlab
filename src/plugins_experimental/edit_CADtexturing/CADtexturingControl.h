@@ -32,7 +32,7 @@
 #include <QUndoStack>
 #include <QUndoGroup>
 #include <QFileDialog>
-#include <generatedfiles/ui_CADtexturingControl.h>
+#include <ui_CADtexturingControl.h>
 
 
 
@@ -53,11 +53,12 @@ public:
 
 signals: 
 	
-	void renderEdgesClicked();
-
+	void saverenderingClicked();
+	void renderedgesChanged(int);
 
 public slots :
-	void on_renderEdges();
+	void on_saverendering();
+	void on_renderedgesChanged(int);
 };
 
 

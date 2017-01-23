@@ -2,7 +2,8 @@ include (../../shared.pri)
 
 
 HEADERS       = edit_CADtexturing_factory.h \
-				CADtexturingedit.h
+				CADtexturingedit.h \
+				CADtexturingControl.h
 				 
 SOURCES       = edit_CADtexturing_factory.cpp \
                                 CADtexturingedit.cpp \
@@ -10,8 +11,6 @@ SOURCES       = edit_CADtexturing_factory.cpp \
 
 
 FORMS = CADtexturingControl.ui \
-=======
-
 
 
 TARGET        = CADtexturingedit
