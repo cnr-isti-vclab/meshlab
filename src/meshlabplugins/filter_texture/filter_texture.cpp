@@ -22,9 +22,7 @@
 ****************************************************************************/
 #include <vcg/math/base.h>
 
-#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <eigenlib/Eigen/Sparse>
-#include <eigenlib/unsupported/Eigen/SparseExtra>
 
 #include <float.h>
 #include <stdlib.h>
