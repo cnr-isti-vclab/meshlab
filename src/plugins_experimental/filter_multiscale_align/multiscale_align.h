@@ -9,7 +9,9 @@
 #include "generic_align.h"
 #include "struct.h"
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #define PI 3.14159265
 

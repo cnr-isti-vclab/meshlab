@@ -24,9 +24,9 @@
 #include <QObject>
 #include <QStringList>
 #include <QList>
-
+#ifdef _OPENMP
 #include <omp.h>
-
+#endif
 #include "meshtree.h"
 #include "align/AlignGlobal.h"
 using namespace vcg;
