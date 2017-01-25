@@ -74,8 +74,8 @@ private:
 	ComposingSelMode composingSelMode;
 	bool selectFrontFlag;
 	void DrawXORRect(GLArea * gla, bool doubleDraw);
-	void EditSelectPlugin::DrawXORPolyLine(GLArea * gla);
-	void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode);
+	void DrawXORPolyLine(GLArea * gla);
+	void doSelection(MeshModel &m, GLArea *gla, int mode);
 };
 
 #endif
