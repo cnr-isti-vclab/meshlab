@@ -576,7 +576,7 @@ bool HasGoodNormal(CMeshO &m)
 
 bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
-  if (filterName == "Screened Poisson Surface Reconstruction")
+  if (filterName == "Surface Reconstruction: Screened Poisson")
   {
     PoissonParam<Scalarm> pp;
     pp.MaxDepthVal = env.evalInt("depth");
