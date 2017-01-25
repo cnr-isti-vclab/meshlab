@@ -88,7 +88,7 @@ MlsPlugin::MlsPlugin()
         case FP_APSS_COLORIZE           : return QString("Colorize curvature (APSS)");
         case FP_RIMLS_COLORIZE          : return QString("Colorize curvature (RIMLS)");
         case FP_RADIUS_FROM_DENSITY     : return QString("Estimate radius from density");
-        case FP_SELECT_SMALL_COMPONENTS : return QString("Small component selection");
+        case FP_SELECT_SMALL_COMPONENTS : return QString("Select small disconnected component");
         default : assert(0);
     }
 return QString("Filter Unknown");
