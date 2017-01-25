@@ -56,9 +56,8 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 		std::vector<vcg::Point3f> rpv;
 		rpv.resize(privchunksize * 3);
 
-		for (size_t faceind = 0; faceind < _m.cm.FN(); ++faceind)
-		{
-			CFaceO& ff = _m.cm.face[faceind];
+		for (CFaceO& ff: _m.cm.face)
+		{			
 			size_t chunkindex = _m.cm.sfn % privchunksize;
 			if (!ff.IsD() && ff.IsS())
 			{	
@@ -70,7 +69,8 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 				++selectedperchunk;
 			}
 
-			if (((faceind == _m.cm.FN() - 1) && (selectedperchunk > 0)) || ((chunkindex == privchunksize - 1) && (selectedperchunk == privchunksize)))
+			if (((&ff == &_m.cm.face.back()) && (selectedperchunk > 0)) || 
+                ((chunkindex == privchunksize - 1) && (selectedperchunk == privchunksize)) )
 			{
 				_selmap[ML_PERFACE_SEL].push_back(0);
 				glGenBuffers(1, &(_selmap[ML_PERFACE_SEL][_selmap[ML_PERFACE_SEL].size() - 1]));
@@ -92,9 +92,8 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 		rpv.resize(privchunksize);
 		_m.cm.svn = 0;
 
-		for (size_t vertind = 0; vertind < _m.cm.VN(); ++vertind)
+		for (CVertexO& vv : _m.cm.vert)
 		{
-			CVertexO& vv = _m.cm.vert[vertind];
 			size_t chunkindex = _m.cm.svn % privchunksize;
 			if (!vv.IsD() && vv.IsS())
 			{
@@ -102,7 +101,8 @@ void MLSelectionBuffers::updateBuffer(ML_SELECTION_TYPE selbuf)
 				++_m.cm.svn;
 				++selectedperchunk;
 			}
-			if (((vertind == _m.cm.VN() - 1) && (selectedperchunk > 0)) || ((chunkindex == privchunksize - 1) && (selectedperchunk == privchunksize)))
+			if (((&vv ==  &_m.cm.vert.back()) && (selectedperchunk > 0)) ||
+                ((chunkindex == privchunksize - 1) && (selectedperchunk == privchunksize)))
 			{
 				_selmap[ML_PERVERT_SEL].push_back(0);
 
