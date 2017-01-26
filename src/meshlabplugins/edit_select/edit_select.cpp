@@ -67,54 +67,43 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 	if (e->key() == Qt::Key_A) // select all
 	{
 		if (areaMode == 0){ // vertices
-			for (size_t vi = 0; vi < m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
-				m.cm.vert[vi].SetS();
+          tri::UpdateSelection<CMeshO>::VertexAll(m.cm);
 			gla->updateSelection(m.id(), true, false);
 		}
 		else if (areaMode == 1){ //faces
-			for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD())
-				m.cm.face[fi].SetS();
+          tri::UpdateSelection<CMeshO>::FaceAll(m.cm);
 			gla->updateSelection(m.id(), false, true);
 		}
 		gla->update();
+        e->accept();
 	}
 
 	if (e->key() == Qt::Key_D) // deselect all
 	{
 		if (areaMode == 0){ // vertices
-			for (size_t vi = 0; vi < m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
-				m.cm.vert[vi].ClearS();
+          tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 			gla->updateSelection(m.id(), true, false);
 		}
 		else if (areaMode == 1){ //faces
-			for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD())
-				m.cm.face[fi].ClearS();
+          tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
 			gla->updateSelection(m.id(), false, true);
 		}
 		gla->update();
+        e->accept();
 	}
 
 	if (e->key() == Qt::Key_I) // invert all
 	{
 		if (areaMode == 0){ // vertices
-			for (size_t vi = 0; vi < m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD()) {
-				if (m.cm.vert[vi].IsS())
-					m.cm.vert[vi].ClearS();
-				else
-					m.cm.vert[vi].SetS();
-			}
+          tri::UpdateSelection<CMeshO>::VertexInvert(m.cm);
 			gla->updateSelection(m.id(), true, false);
 		}
 		else if (areaMode == 1){ //faces
-			for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD()) {
-				if (m.cm.face[fi].IsS())
-					m.cm.face[fi].ClearS();
-				else
-					m.cm.face[fi].SetS();
-			}
+          tri::UpdateSelection<CMeshO>::FaceInvert(m.cm);
 			gla->updateSelection(m.id(), false, true);
 		}
 		gla->update();
+        e->accept();        
 	}
 
 
@@ -124,12 +113,14 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		{
 			areaMode = (areaMode + 1) % 2;
 			gla->update();
+            e->accept();            
 		}
 
 		if (e->key() == Qt::Key_C) // clear Polyline
 		{
 			selPolyLine.clear();
 			gla->update();
+            e->accept();            
 		}
 
 		if (e->key() == Qt::Key_Backspace) // remove last point Polyline
@@ -137,24 +128,28 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 			if (selPolyLine.size() > 0)
 				selPolyLine.pop_back();
 			gla->update();
+            e->accept();            
 		}
 
 		if (e->key() == Qt::Key_Q) // add to selection
 		{
 			doSelection(m, gla, 0);
 			gla->update();
+            e->accept();
 		}
 
 		if (e->key() == Qt::Key_W) // sub from selection
 		{
 			doSelection(m, gla, 1);
 			gla->update();
+            e->accept();
 		}
 
 		if (e->key() == Qt::Key_E) // invert selection
 		{
 			doSelection(m, gla, 2);
 			gla->update();
+            e->accept();
 		}
 
 	}
@@ -169,26 +164,27 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
 	pgon.clear();
 	for (int ii = 0; ii < selPolyLine.size(); ii++)
 		pgon.push_back(Segment2m(selPolyLine[ii], selPolyLine[(ii + 1) % selPolyLine.size()]));
-
-	if (areaMode == 0) // vertices
-	{
+    
+    static Eigen::Matrix<Scalarm,4,4> LastSelMatrix;
+    static vector<Point3m> projVec;
+    static MeshModel *lastMeshModel=0;
+    if((LastSelMatrix != SelMatrix) || lastMeshModel != &m)
+    {
+      int t0=clock();
+      GLPickTri<CMeshO>::FillProjectedVector(m.cm,projVec,this->SelMatrix,this->SelViewport);
+      LastSelMatrix=this->SelMatrix;
+      lastMeshModel=&m;
+      qDebug("proj Time %4.5f",float(clock()-t0)/CLOCKS_PER_SEC);
+    }    
+    if (areaMode == 0) // vertices
+	{        
 		for (size_t vi = 0; vi<m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
 		{
-			bool res=false;
-			GLdouble resCoords[3];
-
-			gluProject(m.cm.vert[vi].P().X(), m.cm.vert[vi].P().Y(), m.cm.vert[vi].P().Z(),
-				(const GLdouble *)mvMatrix_f, (const GLdouble *)prMatrix_f, (const GLint *)viewpSize,
-				&resCoords[0], &resCoords[1], &resCoords[2]);
-
-			Point2m pp(resCoords[0], resCoords[1]);
-			if ((resCoords[2] <= -1.0) || (resCoords[2] >= 1.0))
-				res = false;
-			else
-				res = PointInsidePolygon<CMeshO::ScalarType>(pp, pgon);
-
-			//res = (resCoords[0] > (viewpSize[2]/2.0));
-
+          bool res=false;
+          if ((projVec[vi][2] <= -1.0) || (projVec[vi][2] >= 1.0))
+            res = false;
+          else
+            res = PointInsidePolygon<CMeshO::ScalarType>(Point2m(projVec[vi][0],projVec[vi][1]), pgon);
 			if (res)
 			{
 				if (mode == 0) //add
@@ -203,57 +199,49 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
 						m.cm.vert[vi].SetS();
 				}
 			}
-
 		}
-
 		gla->updateSelection(m.id(), true, false);
 	}
 	else if (areaMode == 1) //faces
 	{
-		for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD())
-		{
-			bool res=false;
-			GLdouble PP[3][3];
-
-			for (int vi = 0; vi < 3; vi++)
-			{
-				gluProject(m.cm.face[fi].V(vi)->P().X(), m.cm.face[fi].V(vi)->P().Y(), m.cm.face[fi].V(vi)->P().Z(),
-					(const GLdouble *)mvMatrix_f, (const GLdouble *)prMatrix_f, (const GLint *)viewpSize,
-					&(PP[vi][0]), &(PP[vi][1]), &(PP[vi][2]));
-
-				Point2m projP(PP[vi][0], PP[vi][1]);
-				if ((PP[vi][2] <= -1.0) || (PP[vi][2] >= 1.0))
-					res = false;
-				else
-					res = PointInsidePolygon<CMeshO::ScalarType>(projP, pgon);
-
-				if (res)
-					break; //early out, we already know it is inside, no need for further testing
-			}
-
-			if (!res) // now test segment-segment
-			{
-			}
-
-			if (res) // do the actual selection
-			{
-				if (mode == 0) //add
-					m.cm.face[fi].SetS();
-				else if (mode == 1) //sub
-					m.cm.face[fi].ClearS();
-				else if (mode == 2) //invert
-				{
-					if (m.cm.face[fi].IsS())
-						m.cm.face[fi].ClearS();
-					else
-						m.cm.face[fi].SetS();
-				}
-			}
-		}
-
-		gla->updateSelection(m.id(), false, true);
-	}
-
+      for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD())
+      {
+        bool res=false;
+        for (int vi = 0; vi < 3; vi++)
+        {
+          int vInd=tri::Index(m.cm,m.cm.face[fi].V(vi));
+          if ((projVec[vInd][2] <= -1.0) || (projVec[vInd][2] >= 1.0))
+            res = false;
+          else
+            res = PointInsidePolygon<CMeshO::ScalarType>(Point2m(projVec[vInd][0],projVec[vInd][1]), pgon);
+          
+          if (res)
+            break; //early out, we already know it is inside, no need for further testing
+        }
+        
+        if (!res) // now test segment-segment
+        {
+        }
+        
+        if (res) // do the actual selection
+        {
+          if (mode == 0) //add
+            m.cm.face[fi].SetS();
+          else if (mode == 1) //sub
+            m.cm.face[fi].ClearS();
+          else if (mode == 2) //invert
+          {
+            if (m.cm.face[fi].IsS())
+              m.cm.face[fi].ClearS();
+            else
+              m.cm.face[fi].SetS();
+          }
+        }
+      }
+      
+      gla->updateSelection(m.id(), false, true);
+    }
+    
 
 
 	//this->Log(GLLogStream::FILTER, "%i ");
@@ -472,6 +460,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 		// get proj data of last rendering
 		glPushMatrix();
 		glMultMatrix(m.cm.Tr);
+        GLPickTri<CMeshO>::glGetMatrixAndViewport(this->SelMatrix, this->SelViewport);                
 		glGetDoublev(GL_MODELVIEW_MATRIX, mvMatrix_f);
 		glGetDoublev(GL_PROJECTION_MATRIX, prMatrix_f);
 		glGetIntegerv(GL_VIEWPORT, viewpSize);
