@@ -55,6 +55,7 @@ fi;\
 "
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
+    $$EIGENDIR \
     $$GLEWDIR/include
 TEMPLATE = lib
 linux-g++:CONFIG += dll

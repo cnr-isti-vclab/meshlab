@@ -9,6 +9,7 @@ INCLUDEPATH *= . \
 	.. \
 	../.. \
     $$VCGDIR \
+    $$EIGENDIR \
     $$GLEWDIR/include \
 	$$EXIF_DIR
 DEPENDPATH += $$VCGDIR \

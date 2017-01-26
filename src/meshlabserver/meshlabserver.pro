@@ -1,6 +1,6 @@
 include (../general.pri)
 
-INCLUDEPATH += . .. $$VCGDIR $$GLEWDIR/include
+INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR $$GLEWDIR/include
 
 HEADERS        = 
 

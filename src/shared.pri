@@ -2,6 +2,7 @@
 
 include (general.pri)
 VCGDIR = ../$$VCGDIR
+EIGENDIR = ../$$EIGENDIR
 
 TEMPLATE      = lib
 CONFIG       += plugin
@@ -28,7 +29,7 @@ win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 # DEFINES += VCG_USE_EIGEN
 # CONFIG += warn_off
 
-INCLUDEPATH  *= ../.. $$VCGDIR ../$$GLEWDIR/include
+INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR ../$$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
 
 # Uncomment these if you want to experiment with newer gcc compilers
