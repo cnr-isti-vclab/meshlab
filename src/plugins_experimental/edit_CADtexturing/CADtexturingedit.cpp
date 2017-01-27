@@ -34,10 +34,46 @@ $Log: meshedit.cpp,v $
 #include<wrap/gl/shot.h>
 #include <wrap/glw/glw.h>
 #include<vcg/complex/algorithms/update/flag.h>
+#include "image_edge_detection.h"
 
 using namespace std;
 using namespace vcg;
 using namespace glw;
+
+void FaceFauxSignedSilouette(CMeshO &m, const vcg::Matrix44f &mvpm)
+{
+	std::vector<CMeshO::CoordType> opos;
+	opos.resize(m.vn);
+	int i = 0;
+	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi) if (!((*vi).IsD())){
+		opos[i++] = (*vi).P();
+		vcg::Point4f p4 = vcg::Point4f((*vi).cP()[0], (*vi).cP()[1], (*vi).cP()[2], 1.0);
+		p4 = mvpm*p4;
+		p4 = p4 / p4[3];
+		(*vi).P() = *(CMeshO::CoordType*)&p4[0];
+	}
+
+	// Then mark faux only if the signed angle is the range.
+	for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi) if (!(*fi).IsD())
+	{
+		for (int z = 0; z<(*fi).VN(); ++z)
+		{
+			if (!face::IsBorder(*fi, z))
+			{
+				CMeshO::CoordType N0 = vcg::Normal((*fi).P(0), (*fi).P(1), (*fi).P(2) );
+				CMeshO::CoordType N1 = vcg::Normal((*fi).FFp(z)->P(0), (*fi).FFp(z)->P(1), (*fi).FFp(z)->P(2));
+
+				if ( N0.Z()>0 ^ N1.Z() > 0 )
+					(*fi).ClearF(z);
+			}
+		}
+	}
+	i = 0;
+	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi) if (!((*vi).IsD())){
+		(*vi).P() = opos[i++];
+	}
+
+}
 
 CADtexturingEditPlugin::CADtexturingEditPlugin() 
 {
@@ -82,10 +118,11 @@ void CADtexturingEditPlugin::ComputeNearFar(const vcg::Shotf &  s,float & nearpl
 
 
 
+bool first;
 
 void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 
-	// #define TOFILE
+
 
 	//glarea = gla;
 	if (gla->mvc() == NULL)
@@ -102,6 +139,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 	FramebufferHandle  hFramebuffer;
 	GLint vp[4];
 	QImage image;
+	QImage depth;
 
 	if (saveRenderingTrigger)
 	{
@@ -120,12 +158,11 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 		ctx.bindReadDrawFramebuffer(hFramebuffer);
 		GLW_CHECK_GL_READ_DRAW_FRAMEBUFFER_STATUS;
 
-
-
 		shared->getRenderInfoPerMeshView(gla->context(), dt);
 
 
 		image = QImage(int(cp[0]), int(cp[1]), QImage::Format_ARGB32);
+		depth = QImage(int(cp[0]), int(cp[1]), QImage::Format_Grayscale8);
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -141,6 +178,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 		GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np, fp);
 	}
 	/**/
+
 
 	{
 		MLSceneGLSharedDataContext* datacont = gla->mvc()->sharedDataContext();
@@ -160,6 +198,18 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 			glEnable(GL_CULL_FACE);
 			datacont->setMeshTransformationMatrix(mp->id(), mp->cm.Tr);
 
+			if (first ){
+				vcg::Matrix44f mvpm, pm,mv4;
+				glGetFloatv(GL_PROJECTION_MATRIX, &pm[0][0]);
+				pm.transposeInPlace();
+
+				glGetFloatv(GL_MODELVIEW_MATRIX, &mvpm[0][0]);
+				mvpm.transposeInPlace();
+
+				FaceFauxSignedSilouette(mp->cm, pm* mvpm);
+				first = false;
+			}
+
 
 			if (mp->cm.fn){
 				glPolygonMode(GL_FRONT, GL_FILL);
@@ -169,11 +219,12 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 				glEnable(GL_POLYGON_OFFSET_FILL);
 				glPolygonOffset(1.0, 1);
 				drawer.DrawFill<vcg::GLW::NormalMode::NMNone, vcg::GLW::ColorMode::CMPerMesh, vcg::GLW::TextureMode::TMNone>();
-				glEnable(GL_LIGHTING);
-				glCullFace(GL_BACK);
+				
+			 	glCullFace(GL_BACK);
 				glDisable(GL_POLYGON_OFFSET_FILL);
-
+				glColor3f(1.0, 0.0, 0.0);
 				drawer.DrawWirePolygonal<vcg::GLW::NormalMode::NMNone, vcg::GLW::ColorMode::CMNone>();
+				glEnable(GL_LIGHTING);
 			}
 		}
 	}
@@ -182,12 +233,25 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 		GlShot<Shotm>::UnsetView();
 
 		glReadPixels(0, 0,  cp[0],  cp[1], GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+		glReadPixels(0, 0, cp[0], cp[1], GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, depth.bits());
 
-		image.rgbSwapped().mirrored().save("edges.jpg");
+		image.mirrored().save("crease_angles.jpg");
+		//depth.save("depth.jpg");
 
 		ctx.unbindReadDrawFramebuffer();
 		ctx.release();
+		
+		detect_edges(depth.convertToFormat(QImage::Format_ARGB32).mirrored(), "3dedges.jpg");
 		glViewport(vp[0], vp[1], vp[2], vp[3]);
+
+		/*save edges of the raster*/
+		Plane * pl = gla->mvc()->meshDoc.rm()->currentPlane;
+// if (!pl->IsInCore()) pl->Load();
+ 		detect_edges(pl->image,"imageedges.jpg");
+		/**************************/
+
+		saveRenderingTrigger = false;
+
 	}
 
 	return;
@@ -201,12 +265,11 @@ void CADtexturingEditPlugin::on_renderEdges(int state){
 void CADtexturingEditPlugin::on_saverendering(){
 	saveRenderingTrigger = true;
 	glarea->update();
-	saveRenderingTrigger = false;
 }
 
 void CADtexturingEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 {
-	if (drawEdgesTrigger){
+	if (drawEdgesTrigger || saveRenderingTrigger){
 		renderEdges(gla);
 	}
 }
@@ -307,10 +370,14 @@ bool CADtexturingEditPlugin::StartEdit(MeshModel & m , GLArea * gla, MLSceneGLSh
 	saveRenderingTrigger = false;
 
 	m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+	vcg::tri::UpdateFlags<CMeshO>::FaceClearF(m.cm);
+	vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	
 	vcg::tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, -M_PI*0.5, M_PI*0.5);
+	vcg::tri::UpdateNormal<CMeshO>::PerFace(m.cm);
+
 	drawer.m = &m.cm;
 	m.cm.C().SetGrayShade(0.5);
-
+	first = true;
 	return true;
 }
 
