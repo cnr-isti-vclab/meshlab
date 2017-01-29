@@ -338,18 +338,20 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, RichParameterSet & parlst)
 {
     float maxVal;
-    QStringList methods;
+    QStringList curvCalcMethods;
+    QStringList curvColorMethods;
     QStringList loopWeightLst;
 
     switch(ID(action))
     {
     case FP_COMPUTE_PRINC_CURV_DIR:
-        methods.push_back("Taubin approximation");
-        methods.push_back("Principal Component Analysis");
-        methods.push_back("Normal Cycles");
-        methods.push_back("Pseudoinverse Quadric Fitting");
-        parlst.addParam(new RichEnum("Method", 3, methods, tr("Method:"), tr("Choose a method")));
-        parlst.addParam(new RichEnum("CurvatureType", 0, QStringList()<<"Mean Curvature"<<"Gaussian Curvature"<<"None", tr("Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
+        curvCalcMethods.push_back("Taubin approximation");
+        curvCalcMethods.push_back("Principal Component Analysis");
+        curvCalcMethods.push_back("Normal Cycles");
+        curvCalcMethods.push_back("Pseudoinverse Quadric Fitting");
+        curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
+        parlst.addParam(new RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
+        parlst.addParam(new RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
         parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
         break;
 
@@ -1237,17 +1239,20 @@ switch(ID(filter))
 			case 3: tri::UpdateCurvatureFitting<CMeshO>::computeCurvature(m.cm); break;
 			default:assert(0);break;
 		}
-		switch(par.getEnum("CurvatureType"))
+		switch(par.getEnum("CurvColorMethod"))
 		{
 			case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureDir    (m.cm); break;
 			case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
-			case 2: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
+			case 2: tri::UpdateQuality<CMeshO>::VertexFromMinCurvatureDir(m.cm); break;
+            case 3: tri::UpdateQuality<CMeshO>::VertexFromMaxCurvatureDir(m.cm); break;
+            case 4: tri::UpdateQuality<CMeshO>::VertexFromShapeIndexCurvatureDir(m.cm); break;
+            case 5: tri::UpdateQuality<CMeshO>::VertexFromCurvednessCurvatureDir(m.cm); break;
+            case 6: tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0); break;          
 		}
 
 		Histogramf H;
 		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m.cm,H);
-		if(par.getEnum("CurvatureType")!=2)
-			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
+        tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm,H.Percentile(0.1f),H.Percentile(0.9f));
 
 		Log( "Curvature Range: %f %f (Used 90 percentile %f %f) ",H.MinV(),H.MaxV(),H.Percentile(0.1f),H.Percentile(0.9f));
 	} break;
