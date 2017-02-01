@@ -231,10 +231,11 @@ class SimpleDistanceSampler
 
 public:
 
-	SimpleDistanceSampler(CMeshO* _m, bool signedDist=false) :markerFunctor(_m)
+	SimpleDistanceSampler(CMeshO* _m, bool signedDist, double maxd) :markerFunctor(_m)
 	{
 		m = _m;
 		useSigned = signedDist;
+		maxDistABS = maxd;
 		init();
 	}
 
@@ -248,6 +249,7 @@ public:
 	tri::FaceTmark<CMeshO> markerFunctor;
 
 	bool useSigned;
+	double maxDistABS;
 
 	// distance data
 	int  n_total_samples;
@@ -301,23 +303,17 @@ public:
 
 		if (useVertexSampling)
 		{
-			nearestV = tri::GetClosestVertex<CMeshO, MetroMeshVertexGrid>(*m, unifGridVert, startPt, std::numeric_limits<CMeshO::ScalarType>::max(), dist);
-			if (nearestV == NULL)
-			{
-				qDebug("SHOULD NEVER GET HERE - no closest vert found");
-				return 0.0;
-			}
+			nearestV = tri::GetClosestVertex<CMeshO, MetroMeshVertexGrid>(*m, unifGridVert, startPt, maxDistABS, dist);
+			if (nearestV == NULL) return (maxDistABS*2.0);
+
 			closestPt = nearestV->P();
 			closestNm = nearestV->N();
 		}
 		else
 		{
-			nearestF = unifGridFace.GetClosest(PDistFunct, markerFunctor, startPt, std::numeric_limits<CMeshO::ScalarType>::max(), dist, closestPt);
-			if (nearestF == NULL)
-			{
-				qDebug("SHOULD NEVER GET HERE - no closest face found");
-				return 0.0;
-			}
+			nearestF = unifGridFace.GetClosest(PDistFunct, markerFunctor, startPt, maxDistABS, dist, closestPt);
+			if (nearestF == NULL) return (maxDistABS*2.0);
+
 			closestNm = nearestF->N();
 		}
 
@@ -593,6 +589,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 
 		parlst.addParam(new RichBool("SignedDist", true, "Compute Signed Distance",
 			"If TRUE, the distance is signed; if FALSE, it will compute the distance absolute value."));
+
+		parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag(), 0.0f, md.bbox().Diag(),
+			tr("Max Distance [abs]"), tr("Search is interrupted when nothing is found within this distance range [+maxDistance -maxDistance].")));
   } break;
 
   case FP_VERTEX_RESAMPLING:
@@ -1037,6 +1036,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 	MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
 
 	bool useSigned = par.getBool("SignedDist");
+	float maxDistABS = par.getAbsPerc("MaxDist");
 
 	// the meshes have to return to their original position
 	// only if source different from target (if single mesh, it does not matter)
@@ -1058,7 +1058,7 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 	}
 	mm1->updateDataMask(MeshModel::MM_FACEMARK);
 
-	SimpleDistanceSampler ds(&(mm1->cm), useSigned);
+	SimpleDistanceSampler ds(&(mm1->cm), useSigned, maxDistABS);
 
 	tri::SurfaceSampling<CMeshO, SimpleDistanceSampler>::AllVertex(mm0->cm, ds);
 
@@ -1071,6 +1071,11 @@ bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParam
 		if (mm1->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 	}
+
+	Log("Distance from Reference Mesh computed");
+	Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qPrintable(mm0->label()), qPrintable(mm1->label()));
+	Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
+
   } break;
 
   case	 FP_VERTEX_RESAMPLING :
