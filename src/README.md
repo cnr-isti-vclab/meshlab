@@ -36,3 +36,30 @@ Once you have the required lib (check for lib files in the folder `meshlab/src/e
 ##### Platform specific notes
 On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparametrization) so you need a compiler supporting it and the clang provided by xcode does not support openmp. Install 'clang++-mp-3.9' using macport or modify the .pro accordingly.
 
+###### Ubuntu 16 Compilation example
+* Make sure you selected the correct version of Qt: `qmake -v`. You can use `qtchooser -l` to list the versions and if in doubt use the direct path to your qmake binary.
+* Clone repositories:
+```
+git clone --depth 1 git@github.com:cnr-isti-vclab/meshlab.git
+git clone --depth 1 git@github.com:cnr-isti-vclab/vcglib.git -b devel
+cd meshlab
+```
+* Set build flags:
+```
+QMAKE_FLAGS=('-spec' 'linux-g++' 'CONFIG+=release' 'CONFIG+=qml_release' 'CONFIG+=c++11' 'QMAKE_CXXFLAGS+=-fPIC' 'QMAKE_CXXFLAGS+=-std=c++11' 'QMAKE_CXXFLAGS+=-fpermissive' 'INCLUDEPATH+=/usr/include/eigen3' "LIBS+=-L`pwd`/lib/linux-g++")
+MAKE_FLAGS=('-j11')
+```
+* Build:
+```
+cd src/external
+qmake external.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+cd ../common
+qmake common.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+cd ..
+qmake meshlab_mini.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+qmake meshlab_full.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+```
+* Run:
+```
+./distrib/meshlab
+```
