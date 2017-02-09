@@ -1,8 +1,8 @@
 #include "image_edge_detection.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <opencv2/line_descriptor.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include "C:/devel/opencv/build/install/include/opencv2/line_descriptor.hpp"
 #include <opencv2\flann.hpp>
 
 using namespace cv;
@@ -34,7 +34,7 @@ bool mergeSegments(std::vector< cv::line_descriptor::KeyLine > & kp, float close
 	for (int i = 0; i < kp.size()*2; ++i) if(!joined[i/2]){
 		cv::Mat querypoint(1, 2, CV_32F);
 		std::vector<int> indices;
-		std::vector<float> distances(2,1000.0);
+		std::vector<float> distances(2,10000.0);
 
 		querypoint.at<float>(0, 0) = features.at<float>(i, 0);
 		querypoint.at<float>(0, 1) = features.at<float>(i, 1);
@@ -169,6 +169,7 @@ int detect_edges(QImage input, const  char * filename)
 
 	cv::Mat output = src2.clone();
 	cv::Mat output1 = src2.clone();
+	cv::Mat corners = src2.clone();
 	cv::Mat mask = Mat::ones(src1.size(), CV_8UC1);
 	std::vector< cv::line_descriptor::KeyLine >   	keypoints;
 	cv::Ptr<cv::line_descriptor::LSDDetector> lsd = cv::line_descriptor::LSDDetector::createLSDDetector();
@@ -190,7 +191,26 @@ int detect_edges(QImage input, const  char * filename)
 
 	lsd->detect(src2, keypoints, 2, 1);
 
+	{ // corner harris 
+		cv::cornerHarris(src2, corners, 2, 3, 0.04);
+		/// Normalizing
+		cv::Mat corners_norm, corners_norm_sclaed;
+		normalize(corners, corners_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat());
+		convertScaleAbs(corners_norm, corners_norm_sclaed);
 
+		/// Drawing a circle around corners
+		for (int j = 0; j < corners_norm.rows; j++)
+		{
+			for (int i = 0; i < corners_norm.cols; i++)
+			{
+				if ((int)corners_norm.at<float>(j, i) > 100)
+				{
+					circle(corners_norm_sclaed, Point(i, j), 5, Scalar(0), 2, 8, 0);
+				}
+			}
+		}
+		cv::imwrite("corners.jpg", corners_norm_sclaed);
+	}
 	//{ // DEBUG WRITE OUT EDGES
 	//	FILE * f = fopen("edges.txt", "w");
 	//	fprintf(f, "%d\n", keypoints.size());
@@ -232,11 +252,5 @@ int detect_edges(QImage input, const  char * filename)
 	//}
 	//cv::imwrite("contour.jpg", outputC);
 
-
-
-
  	return 0;
-
-
-
 }

@@ -40,6 +40,51 @@ using namespace std;
 using namespace vcg;
 using namespace glw;
 
+//struct EVertType;
+//struct EEdgeType;
+//
+//struct UT : public vcg::UsedTypes<vcg::Use<EVertType>::AsVertexType, vcg::Use<EEdgeType   >::AsEdgeType >{};
+//class EVertType : public vcg::Vertex< UT,
+//	vcg::vertex::InfoOcf,           /*  4b */
+//	vcg::vertex::Coord3m,           /* 12b */
+//	vcg::vertex::BitFlags,          /*  4b */
+//	vcg::vertex::Normal3m,          /* 12b */
+//	vcg::vertex::Qualityf,          /*  4b */
+//	vcg::vertex::Color4b,           /*  4b */
+//	vcg::vertex::VEAdj,          /*  0b */
+//	vcg::vertex::MarkOcf,           /*  0b */
+//	vcg::vertex::TexCoordfOcf      /*  0b */
+//>{
+//};
+//
+//class EEdgeType : public vcg::Edge<UT,
+//	vcg::edge::BitFlags,          /*  4b */
+//	vcg::edge::EVAdj,
+//	vcg::edge::EEAdj
+//>{
+//};
+//
+//class EMesh : public vcg::tri::TriMesh< vcg::vertex::vector_ocf<EVertType>, std::vector<EEdgeType> >
+//{};
+
+
+struct EdgeEval{
+	EdgeEval(){};
+	const bool operator()(CMeshO::FaceType & f, int e){
+		return !f.IsF(e);
+	}
+
+};
+
+template < class EEVal>
+void AddMeshEdges(CMeshO & m, EEVal e){
+	for (CMeshO::FaceIterator fi = m.face.begin(); fi != m.face.end(); ++fi) if (!(*fi).IsD())
+	for (int i = 0; i < (*fi).VN(); ++i) if (e(*fi, i))
+		vcg::tri::Allocator<CMeshO>::AddEdge(m, (*fi).V(i), (*fi).V((i + 1) % (*fi).VN()));
+}
+
+
+
 void FaceFauxSignedSilouette(CMeshO &m, const vcg::Matrix44f &mvpm)
 {
 	std::vector<CMeshO::CoordType> opos;
@@ -175,7 +220,7 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 		/* set camera*/
 		float np, fp;
 		ComputeNearFar(gla->mvc()->meshDoc.rm()->shot, np, fp);
-		GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, np, fp);
+		GlShot<Shotm>::SetView(gla->mvc()->meshDoc.rm()->shot, (np>0.01)?np:0.01, fp);
 	}
 	/**/
 
@@ -241,13 +286,14 @@ void CADtexturingEditPlugin::renderEdges(GLArea * gla){
 		ctx.unbindReadDrawFramebuffer();
 		ctx.release();
 		
-		detect_edges(depth.convertToFormat(QImage::Format_ARGB32).mirrored(), "3dedges.jpg");
 		glViewport(vp[0], vp[1], vp[2], vp[3]);
 
 		/*save edges of the raster*/
 		Plane * pl = gla->mvc()->meshDoc.rm()->currentPlane;
-// if (!pl->IsInCore()) pl->Load();
- 		detect_edges(pl->image,"imageedges.jpg");
+
+		if (!pl->IsInCore()) pl->Load();
+
+		detect_edges(pl->image,"imageedges.jpg");
 		/**************************/
 
 		saveRenderingTrigger = false;
@@ -373,6 +419,8 @@ bool CADtexturingEditPlugin::StartEdit(MeshModel & m , GLArea * gla, MLSceneGLSh
 	vcg::tri::UpdateFlags<CMeshO>::FaceClearF(m.cm);
 	vcg::tri::UpdateTopology<CMeshO>::FaceFace(m.cm);	
 	vcg::tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, -M_PI*0.5, M_PI*0.5);
+
+	AddMeshEdges(m.cm,EdgeEval());
 	vcg::tri::UpdateNormal<CMeshO>::PerFace(m.cm);
 
 	drawer.m = &m.cm;
