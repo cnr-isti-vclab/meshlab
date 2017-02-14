@@ -216,7 +216,11 @@ public:
       if(colorFlag) p.C().lerp(nearestF->V(0)->C(),nearestF->V(1)->C(),nearestF->V(2)->C(),interp);
       if(normalFlag) p.N() = nearestF->V(0)->N()*interp[0] + nearestF->V(1)->N()*interp[1] + nearestF->V(2)->N()*interp[2];
       if(qualityFlag) p.Q()= nearestF->V(0)->Q()*interp[0] + nearestF->V(1)->Q()*interp[1] + nearestF->V(2)->Q()*interp[2];
-      if(selectionFlag) if(nearestF->IsS()) p.SetS();
+	  if (selectionFlag)
+	  {
+		  if (nearestF->IsS()) p.SetS();
+		  else if (nearestF->V(0)->IsS() || nearestF->V(1)->IsS() || nearestF->V(2)->IsS()) p.SetS();
+	  }
     }
   }
 }; // end class RedetailSampler
