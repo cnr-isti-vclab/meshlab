@@ -552,12 +552,15 @@ int _Execute(OrientedPointStream< Real > *pointStream, Box3m bb, CMeshO &pm, Poi
 template <class MeshType>
 void PoissonClean(MeshType &m, bool scaleNormal, bool cleanFlag)
 {
-  if(cleanFlag) {
-    if(m.face.size()>0)
-      vcg::tri::Clean<MeshType>::RemoveUnreferencedVertex(m);
-  }
-  vcg::tri::Allocator<MeshType>::CompactEveryVector(m);
   vcg::tri::UpdateNormal<MeshType>::NormalizePerVertex(m);
+
+  if(cleanFlag) {
+	for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+		if (vcg::SquaredNorm(vi->N()) < std::numeric_limits<float>::min()*10.0)
+			vi->setD();
+  }
+
+  vcg::tri::Allocator<MeshType>::CompactEveryVector(m);
   if(scaleNormal)
   {
     for(auto vi=m.vert.begin();vi!=m.vert.end();++vi)
@@ -611,8 +614,10 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     {
       this->errorMessage = "Filter requires correct per vertex normals.<br>"
                            "E.g. it is necessary that your <b>ALL</b> the input vertices have a proper, not-null normal.<br> "
-                           "If you enconuter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> "
+                           "If you encounter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> "
                            "filter (usually unreferenced vertices on surfaces have null normals).<br>"
+						   "If you encounter this error on a pointcloud try to use the <i>Conditional Vertex Selection</i> filter"
+						   "with function '(nx==0.0) && (ny==0.0)  && (nz==0.0)', and then <i>delete selected vertices</i>.<br>"
                            "Enabling the Cleaning option also works.";
       return false;
     }
