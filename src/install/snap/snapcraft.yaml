@@ -1,0 +1,52 @@
+# Known to build in Ubuntu 17.04
+name: meshlab
+version: '2016.12-0'
+summary: MeshLab
+description: |
+  The open source system for processing and editing 3D triangular meshes.
+  It provides a set of tools for editing, cleaning, healing, inspecting,
+  rendering, texturing and converting meshes. It offers features for processing
+  raw data produced by 3D digitization tools/devices and for preparing models
+  for 3D printing.
+icon: snap/gui/meshlab.png
+
+grade: stable
+confinement: strict
+
+apps:
+  meshlab:
+    command: desktop-launch meshlab
+    plugs: [home, x11, mir, opengl, unity7]
+
+
+parts:
+  meshlab:
+    after: [desktop-qt5,vcglib]
+    plugin: qmake
+    qt-version: qt5
+    source: https://github.com/cnr-isti-vclab/meshlab.git
+    source-commit: cc446b39dfc84d2354edce93043fc151e0e8e08e
+    build-packages:
+      - qt5-default
+    prepare: |
+      ln -sf ../vcglib/install ../vcglib 
+      sed -i '/filter_csg/d' src/meshlab_full.pro
+    build: |
+      cd src/external
+      qmake external.pro
+      make -j4
+      cd ..
+      qmake meshlab_full.pro
+      make -j4
+    install: |
+      cd src/distrib
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp -a meshlab* plugins shaders textures $SNAPCRAFT_PART_INSTALL/bin
+      mkdir -p $SNAPCRAFT_PART_INSTALL/lib
+      cp -a lib* $SNAPCRAFT_PART_INSTALL/lib
+  vcglib:
+    plugin: dump
+    source: https://github.com/cnr-isti-vclab/vcglib.git
+    source-branch: devel
+    prime: [ -* ]
+
