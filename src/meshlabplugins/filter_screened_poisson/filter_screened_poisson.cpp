@@ -581,6 +581,14 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
 {
   if (filterName == "Surface Reconstruction: Screened Poisson")
   {
+	//check if folder is writable
+	QFileInfo fi(QDir::currentPath(), "file.tmp");
+	if (!fi.isWritable())
+	{
+		Log("ERROR - current folder is not writable. VCG Merging need to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		return false;
+	}
+
     PoissonParam<Scalarm> pp;
     pp.MaxDepthVal = env.evalInt("depth");
     pp.FullDepthVal = env.evalInt("fullDepth");

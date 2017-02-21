@@ -121,6 +121,14 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     {
     srand(time(NULL));
 
+	//check if folder is writable
+	QFileInfo fi(QDir::currentPath(),"file.tmp");
+	if (!fi.isWritable())
+	{
+		Log("ERROR - current folder is not writable. VCG Merging need to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		return false;
+	}
+
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> > pmc;
     pmc.MP.setCacheSize(64);
     tri::PlyMC<SMesh,SimpleMeshProvider<SMesh> >::Parameter &p = pmc.p;
