@@ -853,7 +853,7 @@ switch(ID(filter))
         tri::TriEdgeCollapseQuadricParameter pp;
         pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
         pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
-        pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
+        pp.BoundaryQuadricWeight = pp.BoundaryQuadricWeight * par.getFloat("BoundaryWeight");
         pp.PreserveTopology=lastq_PreserveTopology = par.getBool("PreserveTopology");
         pp.QualityWeight=lastq_QualityWeight = par.getBool("QualityWeight");
         pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");

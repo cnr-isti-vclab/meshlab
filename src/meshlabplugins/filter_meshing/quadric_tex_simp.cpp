@@ -70,7 +70,7 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::
 	while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
 	{
     char buf[256];
-    sprintf(buf,"Simplifing heap size %i ops %i\n",int(DeciSession.h.size()),DeciSession.nPerfmormedOps);
+    sprintf(buf,"Simplifing: heap size %i ops %i\n",int(DeciSession.h.size()),DeciSession.nPerformedOps);
 	   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), buf);
 	};
 
