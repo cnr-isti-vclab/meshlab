@@ -323,15 +323,18 @@ bool BaseMeshIOPlugin::save(const QString &formatName,const QString &fileName, M
     {
       tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
       int result;
-      if(mask & tri::io::Mask::IOM_BITPOLYGONAL)
+	  
+	  if ((mask & tri::io::Mask::IOM_BITPOLYGONAL) && (par.findParameter("poligonalize")->val->getBool()))
       {
-        m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-        PMesh pm;
-        tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(pm,m.cm);
-        result = tri::io::ExporterOBJ<PMesh>::Save(pm,filename.c_str(),mask,cb);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		PMesh pm;
+		tri::PolygonSupport<CMeshO,PMesh>::ImportFromTriMesh(pm,m.cm);
+		result = tri::io::ExporterOBJ<PMesh>::Save(pm,filename.c_str(),mask,cb);
       }
-      else
-      result = tri::io::ExporterOBJ<CMeshO>::Save(m.cm,filename.c_str(),mask,cb);
+	  else
+	  {
+		result = tri::io::ExporterOBJ<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
+	  }
       if(result!=0)
       {
         errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
@@ -427,15 +430,20 @@ void BaseMeshIOPlugin::initOpenParameter(const QString &format, MeshModel &/*m*/
         par.addParam(new RichBool("Unify",true, "Unify Duplicated Vertices",
                                 "The STL format is not an vertex-indexed format. Each triangle is composed by independent vertices, so, usually, duplicated vertices should be unified"));
 }
-void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &/*m*/, RichParameterSet &par)
+
+void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, RichParameterSet &par)
 {
     if(format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
         par.addParam(new RichBool("Binary",true, "Binary encoding",
-                                "Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format"));
-    if(format.toUpper() == tr("STL") )
-      par.addParam(new RichBool("ColorMode",true, "Materialise Color Encoding",
-                              "Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)"));
+                                "Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
 
+    if(format.toUpper() == tr("STL"))
+      par.addParam(new RichBool("ColorMode",true, "Materialise Color Encoding",
+                              "Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
+
+	if (format.toUpper() == tr("OBJ") && m.hasDataMask(MeshModel::MM_POLYGONAL)) //only shows up when the poligonalization is possible
+		par.addParam(new RichBool("poligonalize", false, "Convert triangles to polygons",
+									"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting."));
 }
 void BaseMeshIOPlugin::applyOpenParameter(const QString &format, MeshModel &m, const RichParameterSet &par)
 {
