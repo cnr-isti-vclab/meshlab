@@ -473,6 +473,18 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 	bool onSelected = par.getBool("onselected");
 
+	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
+	if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
+	{
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+	}
+
     // muparser initialization and explicitely define parser variables
     // function for x,y and z must use different parser and variables
     Parser p1,p2,p3,p4;
@@ -542,6 +554,18 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     std::string func_q = par.getString("q").toStdString();
 	bool onSelected = par.getBool("onselected");
 
+	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
+	if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
+	{
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+	}
+
     m.updateDataMask(MeshModel::MM_VERTQUALITY);
 
     // muparser initialization and define custom variables
@@ -591,6 +615,18 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     std::string func_v = par.getString("v").toStdString();
 	bool onSelected = par.getBool("onselected");
 
+	if (onSelected && m.cm.svn == 0 && m.cm.sfn == 0) // if no selection at all, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
+	if (onSelected && (m.cm.svn == 0 && m.cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
+	{
+		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
+	}
+
     m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 
     // muparser initialization and define custom variables
@@ -635,6 +671,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     std::string func_u2 = par.getString("u2").toStdString();
     std::string func_v2 = par.getString("v2").toStdString();
 	bool onSelected = par.getBool("onselected");
+
+	if (onSelected && m.cm.sfn == 0) // if no selection, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
 
     m.updateDataMask(MeshModel::MM_VERTTEXCOORD);
 
@@ -681,6 +724,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     std::string func_b = par.getString("b").toStdString();
     std::string func_a = par.getString("a").toStdString();
 	bool onSelected = par.getBool("onselected");
+
+	if (onSelected && m.cm.sfn == 0) // if no selection, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
 
 	m.updateDataMask(MeshModel::MM_FACECOLOR);
 
@@ -737,6 +787,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
   {
     std::string func_q = par.getString("q").toStdString();
 	bool onSelected = par.getBool("onselected");
+
+	if (onSelected && m.cm.sfn == 0) // if no selection, fail
+	{
+		Log("Cannot apply only on selection: there is no selection");
+		errorMessage = "Cannot apply only on selection: there is no selection";
+		return false;
+	}
 
     m.updateDataMask(MeshModel::MM_FACEQUALITY);
 
