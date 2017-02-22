@@ -927,11 +927,11 @@ switch(ID(filter))
 
 		if (m.cm.svn == 0 && m.cm.sfn == 0) // if no selection, fail
 		{
-			errorMessage = "No selection";
+			Log("Cannot compute rotation: there is no selection");
+			errorMessage = "Cannot compute rotation: there is no selection";
 			return false;
 		}
-
-		if (m.cm.svn == 0 || m.cm.sfn != 0)
+		if (m.cm.svn == 0 && m.cm.sfn > 0) // if no vert selected, but some faces selected, use their vertices
 		{
 			tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
