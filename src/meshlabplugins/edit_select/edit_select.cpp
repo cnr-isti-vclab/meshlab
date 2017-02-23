@@ -151,100 +151,87 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 			gla->update();
             e->accept();
 		}
-
+        gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}
 
-	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
+	
 }
 
 void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
 {
-	//polyLine -> polygon
-	std::vector<Segment2m > pgon;
-	pgon.clear();
-	for (int ii = 0; ii < selPolyLine.size(); ii++)
-		pgon.push_back(Segment2m(selPolyLine[ii], selPolyLine[(ii + 1) % selPolyLine.size()]));
+  QImage bufQImg(this->viewpSize[2],this->viewpSize[3],QImage::Format_RGB32);
+  bufQImg.fill(Qt::white);
+  QPainter bufQPainter(&bufQImg);
+  vector<QPointF> qpoints;
+  for(int i=0;i<selPolyLine.size();++i)
+    qpoints.push_back(QPointF(selPolyLine[i][0],selPolyLine[i][1]));    
+  bufQPainter.setBrush(QBrush(Qt::black));
+  bufQPainter.drawPolygon(&qpoints[0],qpoints.size(), Qt::WindingFill); 
+  QRgb blk=QColor(Qt::black).rgb();
+  
     
-    static Eigen::Matrix<Scalarm,4,4> LastSelMatrix;
-    static vector<Point3m> projVec;
-    static MeshModel *lastMeshModel=0;
-    if((LastSelMatrix != SelMatrix) || lastMeshModel != &m)
-    {
-      int t0=clock();
-      GLPickTri<CMeshO>::FillProjectedVector(m.cm,projVec,this->SelMatrix,this->SelViewport);
-      LastSelMatrix=this->SelMatrix;
-      lastMeshModel=&m;
-      qDebug("proj Time %4.5f",float(clock()-t0)/CLOCKS_PER_SEC);
-    }    
+  static Eigen::Matrix<Scalarm,4,4> LastSelMatrix;
+  static vector<Point3m> projVec;
+  static MeshModel *lastMeshModel=0;
+  if((LastSelMatrix != SelMatrix) || lastMeshModel != &m)
+  {
+    int t0=clock();
+    GLPickTri<CMeshO>::FillProjectedVector(m.cm,projVec,this->SelMatrix,this->SelViewport);
+    LastSelMatrix=this->SelMatrix;
+    lastMeshModel=&m;
+  }    
+  
     if (areaMode == 0) // vertices
-	{        
-		for (size_t vi = 0; vi<m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
-		{
-          bool res=false;
-          if ((projVec[vi][2] <= -1.0) || (projVec[vi][2] >= 1.0))
-            res = false;
-          else
-            res = PointInsidePolygon<CMeshO::ScalarType>(Point2m(projVec[vi][0],projVec[vi][1]), pgon);
-			if (res)
-			{
-				if (mode == 0) //add
-					m.cm.vert[vi].SetS();
-				else if (mode == 1) //sub
-					m.cm.vert[vi].ClearS();
-				else if (mode == 2) //invert
-				{
-					if (m.cm.vert[vi].IsS())
-						m.cm.vert[vi].ClearS();
-					else
-						m.cm.vert[vi].SetS();
-				}
-			}
-		}
-		gla->updateSelection(m.id(), true, false);
-	}
-	else if (areaMode == 1) //faces
+    {   
+      int t0=clock();
+      for (size_t vi = 0; vi<m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
+      {
+        bool res=false;
+        if ((projVec[vi][2] <= -1.0) || (projVec[vi][2] >= 1.0) ||
+            (projVec[vi][0] <= 0) || (projVec[vi][0] >= this->viewpSize[2]) ||
+            (projVec[vi][1] <= 0) || (projVec[vi][1] >= this->viewpSize[3]))
+          res = false;
+        else
+        {
+          res = (bufQImg.pixel( projVec[vi][0],projVec[vi][1]) == blk);
+        }
+        if (res)
+          switch(mode){
+          case 0: m.cm.vert[vi].SetS(); break;
+          case 1: m.cm.vert[vi].ClearS(); break;
+          case 2: m.cm.vert[vi].IsS() ? m.cm.vert[vi].ClearS() : m.cm.vert[vi].SetS();
+          }
+      }
+      gla->updateSelection(m.id(), true, false);
+    }
+    else if (areaMode == 1) //faces
 	{
       for (size_t fi = 0; fi < m.cm.face.size(); ++fi) if (!m.cm.face[fi].IsD())
       {
         bool res=false;
-        for (int vi = 0; vi < 3; vi++)
+        for (int vi = 0; vi < 3 && !res ; vi++)
         {
           int vInd=tri::Index(m.cm,m.cm.face[fi].V(vi));
-          if ((projVec[vInd][2] <= -1.0) || (projVec[vInd][2] >= 1.0))
-            res = false;
+          if ((projVec[vInd][2] <= -1.0) || (projVec[vInd][2] >= 1.0) ||
+              (projVec[vInd][0] <= 0) || (projVec[vInd][0] >= this->viewpSize[2]) ||
+              (projVec[vInd][1] <= 0) || (projVec[vInd][1] >= this->viewpSize[3]))
+            res = false; 
           else
-            res = PointInsidePolygon<CMeshO::ScalarType>(Point2m(projVec[vInd][0],projVec[vInd][1]), pgon);
-          
-          if (res)
-            break; //early out, we already know it is inside, no need for further testing
+            res = (bufQImg.pixel( projVec[vInd][0],projVec[vInd][1]) == blk);
         }
-        
-        if (!res) // now test segment-segment
-        {
-        }
-        
+
         if (res) // do the actual selection
         {
-          if (mode == 0) //add
-            m.cm.face[fi].SetS();
-          else if (mode == 1) //sub
-            m.cm.face[fi].ClearS();
-          else if (mode == 2) //invert
-          {
-            if (m.cm.face[fi].IsS())
-              m.cm.face[fi].ClearS();
-            else
-              m.cm.face[fi].SetS();
+          switch(mode){
+          case 0: m.cm.face[fi].SetS(); break;
+          case 1: m.cm.face[fi].ClearS(); break;
+          case 2: m.cm.face[fi].IsS() ? m.cm.face[fi].ClearS() : m.cm.face[fi].SetS();
           }
         }
       }
-      
       gla->updateSelection(m.id(), false, true);
     }
     
-
-
-	//this->Log(GLLogStream::FILTER, "%i ");
 }
 
 void EditSelectPlugin::keyPressEvent(QKeyEvent */*event*/, MeshModel &/*m*/, GLArea *gla)
@@ -381,7 +368,7 @@ void EditSelectPlugin::DrawXORPolyLine(GLArea * gla)
 	glColor3f(1, 1, 1);
 	glLineStipple(1, 0xAAAA);
 	glEnable(GL_LINE_STIPPLE);
-
+    glLineWidth(QTLogicalToDevice(gla,1));
 	//draw PolyLine
 	if (selPolyLine.size() == 1)
 	{
@@ -614,6 +601,7 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 	if (selectionMode == SELECT_AREA_MODE)
 	{
 		selPolyLine.clear();
+        gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}
 
 	if (selectionMode == SELECT_VERT_MODE)

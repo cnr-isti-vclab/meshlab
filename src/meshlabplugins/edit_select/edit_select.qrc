@@ -10,5 +10,6 @@
         <file>images/sel_rect_plus_eye.png</file>
         <file>images/sel_rect_minus_eye.png</file>
         <file>images/select_area.png</file>
+        <file>images/sel_area.png</file>
     </qresource>
 </RCC>
