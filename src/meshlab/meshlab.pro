@@ -151,7 +151,7 @@ win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcom
 #	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 #}
 
-linux-g++:LIBS += -L../external/lib/linux-g++ -ljhead -L../distrib -lcommon -lGLU
+linux-g++:LIBS += -L$$PWD/../external/lib/linux-g++ -ljhead -L../distrib -lcommon -lGLU
 linux-g++:QMAKE_RPATHDIR += ../distrib
 linux-g++-32:LIBS += -L../external/lib/linux-g++-32 -ljhead -L../distrib -lcommon -lGLU
 linux-g++-32:QMAKE_RPATHDIR += ../distrib
