@@ -1,4 +1,0 @@
-GL_EXT_cull_vertex
-http://www.opengl.org/registry/specs/EXT/cull_vertex.txt
-	void glCullParameterdvEXT (GLenum pname, GLdouble* params)
-	void glCullParameterfvEXT (GLenum pname, GLfloat* params)

@@ -1,2 +1,0 @@
-GLX_VERSION_1_2
-	Display* glXGetCurrentDisplay (void)
