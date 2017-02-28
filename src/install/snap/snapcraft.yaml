@@ -1,6 +1,6 @@
 # Known to build in Ubuntu 17.04
 name: meshlab
-version: '2016.12-0'
+version: '2016.12-1'
 summary: MeshLab
 description: |
   The open source system for processing and editing 3D triangular meshes.
@@ -25,12 +25,19 @@ parts:
     plugin: qmake
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
-    source-commit: cc446b39dfc84d2354edce93043fc151e0e8e08e
+    source-tag: v2016.12
     build-packages:
+      - libqt5opengl5-dev
+      - libqt5xmlpatterns5-dev
       - qt5-default
+      - qtscript5-dev
     prepare: |
       ln -sf ../vcglib/install ../vcglib 
       sed -i '/filter_csg/d' src/meshlab_full.pro
+      sed -i '/plugins_experimental\/io_TXT/d' src/meshlab_full.pro
+      sed -i 's| abs(| qAbs(|' src/meshlabplugins/edit_quality/eqhandle.cpp
+      sed -i -e '2ilinux:QMAKE_LFLAGS += -fopenmp -lgomp\' src/meshlabplugins/filter_screened_poisson/filter_screened_poisson.pro
+      sed -i 's|PR_XXXXXX|/tmp/PR_XXXXXX|' src/meshlabplugins/filter_screened_poisson/Src/Geometry.cpp
     build: |
       cd src/external
       qmake external.pro
@@ -39,6 +46,10 @@ parts:
       qmake meshlab_full.pro
       make -j4
     install: |
+      cp src/meshlabplugins/filter_screened_poisson/filter_screened_poisson.xml \
+          src/meshlabplugins/filter_mutualinfoxml/filter_mutualinfo.xml \
+          src/meshlabplugins/filter_measure/filter_measure.xml \
+          src/distrib/plugins/
       cd src/distrib
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
       cp -a meshlab* plugins shaders textures $SNAPCRAFT_PART_INSTALL/bin
@@ -47,6 +58,6 @@ parts:
   vcglib:
     plugin: dump
     source: https://github.com/cnr-isti-vclab/vcglib.git
-    source-branch: devel
+    source-tag: v1.0.1
     prime: [ -* ]
 
