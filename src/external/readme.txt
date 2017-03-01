@@ -6,7 +6,7 @@ Currently:
 
 ---- bzip2-1.0.5
 
----- glew-1.5.1
+---- glew-1.7.0
 
 -----lib3ds-1.3.0
 Direct expansion of lib3ds-1.3.0.zip
@@ -15,12 +15,7 @@ Downloaded from lib3ds.sourceforge.net
 Modifications:
 * added qmake project files in folder lib3ds
 
----- muparser_v130
-
----- ode-0.11.1
-put there the direct unzip of the ode-0.11.1.zip file 
-https://sourceforge.net/projects/opende/files/ODE/0.11.1/ode-0.11.1.zip/download
-compilation info in the folder.
+---- muparser_v225
 
 ---- qhull-2003.1
 Direct expansion of qhull-2003.1.tar.gz. 
