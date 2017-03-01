@@ -115,6 +115,8 @@ MainWindow::MainWindow()
 	statusBar()->addPermanentWidget(qb, 0);
 
 	nvgpumeminfo = new QProgressBar(this);
+    nvgpumeminfo->setStyleSheet(" QProgressBar { background-color: #d0d0d0; border: 2px solid grey; border-radius: 0px; text-align: center; }"
+                                " QProgressBar::chunk {background-color: #80c080; width: 1px;}");
 	statusBar()->addPermanentWidget(nvgpumeminfo, 0);
 	//updateMenus();
 	newProject();

@@ -39,7 +39,6 @@ SUBDIRS       = common \
                 meshlabplugins/filter_mls \
                 meshlabplugins/filter_mutualglobal \
                 meshlabplugins/filter_mutualinfoxml \
-                meshlabplugins/filter_photosynth \
                 meshlabplugins/filter_plymc \
                 meshlabplugins/filter_qhull \
                 meshlabplugins/filter_quality \
@@ -62,7 +61,6 @@ SUBDIRS       = common \
                 meshlabplugins/decorate_shadow \
 # Edit Plugins
                 meshlabplugins/edit_align \
-                meshlabplugins/edit_arc3D \
                 meshlabplugins/edit_manipulators \
                 meshlabplugins/edit_measure \
                 meshlabplugins/edit_mutualcorrs \
