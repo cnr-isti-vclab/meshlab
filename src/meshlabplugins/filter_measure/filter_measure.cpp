@@ -306,7 +306,8 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		CMeshO &m = md.mm()->cm;
 		if (m.sfn == 0) // no face selected, fail
 		{
-			Log("There is no face selection!");
+			errorMessage = "Cannot apply: there is no face selection";
+			Log("Cannot apply: there is no face selection");
 			return false;
 		}
 
