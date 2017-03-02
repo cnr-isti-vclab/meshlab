@@ -23,6 +23,6 @@ win32-msvc2015:LIBS	+= ../../external/lib/win32-msvc2015/openctm.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/libopenctm.a
 linux-g++:LIBS		+= $$PWD/../../external/lib/linux-g++/libopenctm.a
 linux-g++-32:LIBS	+= $$PWD/../../external/lib/linux-g++-32/libopenctm.a
-linux-g++-64:LIBS	+= $$PWD../../external/lib/linux-g++-64/libopenctm.a
+linux-g++-64:LIBS	+= $$PWD/../../external/lib/linux-g++-64/libopenctm.a
 #macx:LIBS += ../../external/lib/macx/libopenctm.a
 macx:LIBS += $$MACLIBDIR/libopenctm.a
