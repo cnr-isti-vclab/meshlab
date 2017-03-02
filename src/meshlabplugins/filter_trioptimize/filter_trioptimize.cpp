@@ -127,7 +127,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 	switch (filterId) {
 		case FP_PLANAR_EDGE_FLIP:				return tr("Planar flipping optimization");
 		case FP_CURVATURE_EDGE_FLIP:		return tr("Curvature flipping optimization");
-		case FP_NEAR_LAPLACIAN_SMOOTH: 	return tr("Laplacian smooth (surface preserve)");
+		case FP_NEAR_LAPLACIAN_SMOOTH: 	return tr("Laplacian Smooth (surface preserving)");
 		default:		assert(0);
 	}
 }
@@ -156,7 +156,7 @@ TriOptimizePlugin::TriOptimizePlugin()
 			return tr("Mesh optimization by edge flipping, to improve local "
 								"mesh curvature");
 		case FP_NEAR_LAPLACIAN_SMOOTH:
-			return tr("Laplacian smooth without surface modification: move "
+			return tr("Laplacian smooth with limited surface modification: move "
 					   "each vertex in the average position of neighbors "
 					   "vertices, only if the new position still (almost) lies "
 					   "on original surface");
