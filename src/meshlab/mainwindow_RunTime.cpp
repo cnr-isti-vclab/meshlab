@@ -2494,6 +2494,7 @@ void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
 {
     if (nvgpumeminfo != NULL)
     {
+        nvgpumeminfo->setVisible(allmem != 0);
         nvgpumeminfo->setFormat( "Mem %p% %v/%m MB" );
         int allmb = allmem/1024;
         nvgpumeminfo->setRange(  0 , allmb );
