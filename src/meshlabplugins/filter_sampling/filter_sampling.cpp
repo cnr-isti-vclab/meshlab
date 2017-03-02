@@ -374,10 +374,10 @@ FilterDocSampling::FilterDocSampling()
 QString FilterDocSampling::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-  case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Subsampling");
+  case FP_ELEMENT_SUBSAMPLING    :  return QString("Mesh Element Sampling");
   case FP_MONTECARLO_SAMPLING :  return QString("Montecarlo Sampling");
   case FP_STRATIFIED_SAMPLING :  return QString("Stratified Triangle Sampling");
-  case FP_CLUSTERED_SAMPLING :  return QString("Clustered Vertex Subsampling");
+  case FP_CLUSTERED_SAMPLING :  return QString("Clustered Vertex Sampling");
   case FP_POISSONDISK_SAMPLING : return QString("Poisson-disk Sampling");
   case FP_HAUSDORFF_DISTANCE  :  return QString("Hausdorff Distance");
   case FP_DISTANCE_REFERENCE:  return QString("Distance from Reference Mesh");
@@ -397,30 +397,29 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
 // (this string is used in the About plugin dialog)
 QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 {
-  switch(filterId) {
-  case FP_ELEMENT_SUBSAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh, At most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen.");
-  case FP_MONTECARLO_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
-  case FP_STRATIFIED_SAMPLING  :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i> stratified</i> strategies. Distribution is often biased by triangle shape.");
-  case FP_CLUSTERED_SAMPLING   :  return QString("Create a new layer populated with a  subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
-  case FP_POINTCLOUD_SIMPLIFICATION:  return QString("Create a new layer populated with a simplified version of the current point cloud.");
-  case FP_POISSONDISK_SAMPLING :  return QString("Create a new layer populated with a point sampling of the current mesh;"
-                                                 "samples are generated according to a Poisson-disk distribution.  using the algorithm described in:<br>"
-                                                 "<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
-                                                 " Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
-  case FP_HAUSDORFF_DISTANCE   :  return QString("Compute the Hausdorff Distance between two meshes, sampling one of the two and finding foreach sample the closest point over the other mesh.");
-  case FP_DISTANCE_REFERENCE   :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
-  case FP_TEXEL_SAMPLING       :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
-  case FP_VERTEX_RESAMPLING    :  return QString("Transfer the choosen per-vertex attributes from one mesh to another. Useful to transfer attributes to different representations of a same object.<br>"
-                                                 "For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
-                                                 "The algorithm assumes that the two meshes are reasonably similar and aligned.");
-  case FP_UNIFORM_MESH_RESAMPLING       :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
-                                                          "The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
-                                                          "The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume.");
-  case FP_VORONOI_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis.");
-  case FP_DISK_COLORING   :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
-  case FP_REGULAR_RECURSIVE_SAMPLING   :  return QString("The bbox is recrusively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples.");
-  default : assert(0); return QString("unknown filter!!!!");
-
+	switch(filterId) {
+		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen.");
+		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
+		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
+		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
+		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud.");
+		case FP_POISSONDISK_SAMPLING       :  return QString("Create a new layer populated with a point sampling of the current mesh;"
+													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
+													"<b>'Efficient and Flexible Sampling with Blue Noise Properties of Triangular Meshes'</b><br>"
+													" Massimiliano Corsini, Paolo Cignoni, Roberto Scopigno<br>IEEE TVCG 2012");
+		case FP_HAUSDORFF_DISTANCE         :  return QString("Compute the Hausdorff Distance between two layers, sampling one of the two and finding for each sample the closest point over the other mesh.");
+		case FP_DISTANCE_REFERENCE         :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
+		case FP_TEXEL_SAMPLING             :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
+		case FP_VERTEX_RESAMPLING          :  return QString("Transfer the choosen per-vertex attributes from one layer to another. Useful to transfer attributes to different representations of a same object.<br>"
+													"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
+													"The algorithm assumes that the two meshes are reasonably similar and aligned.");
+		case FP_UNIFORM_MESH_RESAMPLING    :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
+															"The resampling is done by building a uniform volumetric representation where each voxel contains the signed distance from the original surface. "
+															"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume.");
+		case FP_VORONOI_COLORING           :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis.");
+		case FP_DISK_COLORING              :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
+		case FP_REGULAR_RECURSIVE_SAMPLING :  return QString("The bbox is recursively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples.");
+		default : assert(0); return QString("unknown filter!!!!");
   }
 }
 int FilterDocSampling::getRequirements(QAction *action)
@@ -467,11 +466,11 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                  "Quality Weighted Sampling",
                                  "Use per vertex quality to drive the vertex sampling. The number of samples falling in each face is proportional to the face area multiplied by the average quality of the face vertices."));
     parlst.addParam(new RichBool("PerFaceNormal",  false,
-                                 "Per Face Normal",
+                                 "Per-Face Normal",
                                  "If true for each sample we take the normal of the sampled face, otherwise the normal interpolated from the vertex normals."));
     parlst.addParam(new RichFloat("RadiusVariance", 1, "Radius Variance", "The radius of the disk is allowed to vary between r/var and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"));
     parlst.addParam(new RichBool("ExactNum",  true,
-                                 "Exact Sample Num",
+                                 "Exact Sample Number",
                                  "If the required total number of samples is not a strict exact requirement we can exploit a different algorithm"
                                  "based on the choice of the number of samples inside each triangle by a random Poisson-distributed number with mean equal to the expected number of samples times the area of the triangle over the surface of the whole mesh."));
     parlst.addParam(new RichBool("EdgeSampling",  false,
@@ -506,7 +505,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                  tr(	"<b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br>"
                                         "<b>Closest to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones."
                                         )));
-    parlst.addParam(new RichBool ("Selected", false, "Selected",
+    parlst.addParam(new RichBool ("Selected", false, "Only on Selection",
                                   "If true only for the filter is applied only on the selected subset of the mesh."));
 
   }
@@ -643,7 +642,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                   "but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.<br>"
                                   "Useful only for simulating the output of 3D printing devices."));
 
-    parlst.addParam(new RichBool ("multisample", false, "Multisample",
+    parlst.addParam(new RichBool ("multisample", false, "Multi-sample",
                                   "If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts."));
     parlst.addParam(new RichBool ("absDist", false, "Absolute Distance",
                                   "If true a <b> not</b> signed distance field is computed. "
@@ -694,586 +693,662 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 
 bool FilterDocSampling::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-  switch(ID(action))
-  {
-  case FP_ELEMENT_SUBSAMPLING :
-  {
-    MeshModel *curMM= md.mm();
-    /*RenderMode rm;
-    rm.drawMode = GLW::DMPoints;*/
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true/*,rm*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    mm->updateDataMask(curMM);
-
-    BaseSampler mps(&(mm->cm));
-
-    switch(par.getEnum("Sampling"))
-    {
-    case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::VertexUniform(curMM->cm,mps,par.getInt("SampleNum"));	break;
-    case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"),true);		break;
-    case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
-    }
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-    Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
-  }
-    break;
-  case FP_TEXEL_SAMPLING :
-  {
-    MeshModel *curMM= md.mm();
-    if(!tri::HasPerWedgeTexCoord(curMM->cm)) break;
-    /*RenderMode rm;
-    rm.drawMode = GLW::DMPoints;
-    rm.colorMode = GLW::CMPerVert;*/
-    MeshModel *mm= md.addNewMesh("","Sampled Mesh",true/*,rm*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    bool RecoverColor = par.getBool("RecoverColor");
-    BaseSampler mps(&(mm->cm));
-    mps.texSamplingWidth=par.getInt("TextureW");
-    mps.texSamplingHeight=par.getInt("TextureH");
-
-    if(RecoverColor && curMM->cm.textures.size()>0)
-    {
-      mps.tex= new QImage(curMM->cm.textures[0].c_str());
-      if(mps.texSamplingWidth==0)  mps.texSamplingWidth  = mps.tex->width();
-      if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
-    }
-    mps.uvSpaceFlag = par.getBool("TextureSpace");
-    vcg::tri::UpdateFlags<CMeshO>::FaceClearB(curMM->cm);
-    tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,mps.texSamplingWidth,mps.texSamplingHeight);
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-    mm->updateDataMask(MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTCOLOR);
-  }
-    break;
-  case FP_MONTECARLO_SAMPLING :
-  {
-    if (md.mm()->cm.fn==0) {
-      errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
-      return false; // can't continue, mesh can't be processed
-    }
-
-    MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Montecarlo Samples",false/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    mm->updateDataMask(curMM);
-    BaseSampler mps(&(mm->cm));
-
-    if(par.getBool("EdgeSampling"))
-    {
-      tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),false);
-    }
-    else
-    {
-      if(par.getBool("Weighted"))
-        tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),par.getFloat("RadiusVariance"));
-      else if(par.getBool("ExactNum")) tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
-      else tri::SurfaceSampling<CMeshO,BaseSampler>::MontecarloPoisson(curMM->cm,mps,par.getInt("SampleNum"));
-    }
-
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-    Log("Sampling created a new mesh of %i points",md.mm()->cm.vn);
-  }
-    break;
-  case FP_STRATIFIED_SAMPLING :
-  {
-    if (md.mm()->cm.fn==0) {
-      errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
-      return false; // can't continue, mesh can't be processed
-    }
-
-    MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Subdiv Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    mm->updateDataMask(curMM);
-    int samplingMethod = par.getEnum("Sampling");
-    BaseSampler mps(&(mm->cm));
-    switch(samplingMethod)
-    {
-    case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), false ,par.getBool("Random"));
-      Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);
-      break;
-    case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), true ,par.getBool("Random"));
-      Log("Dual Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);
-      break;
-    case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
-      Log("Subdivision Sampling created a new mesh of %i points",md.mm()->cm.vn);
-      break;
-    case 3 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), true);
-      Log("Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
-      break;
-    case 4 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), false);
-      Log("Non Faux Edge Sampling created a new mesh of %i points",md.mm()->cm.vn);
-      break;
-
-    }
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-  }
-    break;
-  case FP_CLUSTERED_SAMPLING :
-  {
-    MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Cluster Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    int samplingMethod = par.getEnum("Sampling");
-    float threshold = par.getAbsPerc("Threshold");
-    bool selected = par.getBool("Selected");
-    if(selected)
-    {
-      int cnt =tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(curMM->cm);
-      Log("Using only %i selected vertexes for choosing",cnt);
-    }
-    switch(samplingMethod)
-    {
-    case 0 :
-    {
-      tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
-      ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
-      ClusteringGrid.AddPointSet(curMM->cm,selected);
-      ClusteringGrid.ExtractPointSet(mm->cm);
-      ClusteringGrid.SelectPointSet(curMM->cm);
-      tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
-      Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);
-    }
-      break;
-    case 1 :
-    {
-      vcg::tri::Clustering<CMeshO, vcg::tri::NearestToCenter<CMeshO> > ClusteringGrid;
-      ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
-      ClusteringGrid.AddPointSet(curMM->cm,selected);
-      ClusteringGrid.SelectPointSet(curMM->cm);
-      tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
-      ClusteringGrid.ExtractPointSet(mm->cm);
-      Log("Similar Sampling created a new mesh of %i points",md.mm()->cm.vn);
-    }
-      break;
-    }
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-  }
-    break;
-  case FP_POINTCLOUD_SIMPLIFICATION :
-  {
-    MeshModel *curMM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Simplified",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    mm->updateDataMask(curMM);
-    BaseSampler mps(&(mm->cm));
-    tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
-
-    CMeshO::ScalarType radius = par.getAbsPerc("Radius");
-    int sampleNum = par.getInt("SampleNum");
-    if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
-          else sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
-    if(par.getBool("ExactNumFlag") && radius==0)
-      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, curMM->cm, sampleNum, radius,pp,0.005);
-    else
-      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, curMM->cm, radius,pp);
-    UpdateBounding<CMeshO>::Box(mm->cm);
-  } break;
-  case FP_POISSONDISK_SAMPLING :
-  {
-    MeshModel *curMM= md.mm();
-    CMeshO::ScalarType radius = par.getAbsPerc("Radius");
-    int sampleNum = par.getInt("SampleNum");
-    if(radius==0) radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
-          else sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
-
-    tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
-    pp.radiusVariance = par.getFloat("RadiusVariance");
-    if(pp.radiusVariance != 1.0)
-    {
-      if(!md.mm()->hasDataMask(MeshModel::MM_VERTQUALITY)) {
-        errorMessage = "Variable radius requires per vertex quality for biasing the distribution.";
-        return false; // cannot continue
-      }
-      pp.adaptiveRadiusFlag=true;
-      Log("Variable Density variance is %f, radius can vary from %f to %f",pp.radiusVariance,radius/pp.radiusVariance,radius*pp.radiusVariance);
-    }
-
-    bool subsampleFlag = par.getBool("Subsample");
-    if (md.mm()->cm.fn==0 && subsampleFlag==false)
-    {
-      errorMessage = "Current mesh has no triangles. We cannot create a montecarlo sampling of the surface.<br> Please select the Subsample flag.";
-      return false; // cannot continue
-    }
-
-    MeshModel *mm= md.addNewMesh("","Poisson-disk Samples",false/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
-    mm->updateDataMask(curMM);
-
-    Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
-
-    // first of all generate montecarlo samples for fast lookup
-    CMeshO *presampledMesh=0;
-
-    CMeshO MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
-    if(subsampleFlag)
-      presampledMesh = &(curMM->cm);
-    else
-    {
-      MeshModel *mcm;
-      if(par.getBool("SaveMontecarlo"))
-      {
-        mcm=md.addNewMesh("","Montecarlo Samples",false/*,RenderMode(GLW::DMPoints)*/);
-      presampledMesh=&(mcm->cm);
-      }
-      else
-        presampledMesh=&MontecarloMesh;
-
-      QTime tt;tt.start();
-      BaseSampler sampler(presampledMesh);
-      sampler.qualitySampling=true;
-      if(pp.adaptiveRadiusFlag)
-        tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"),pp.radiusVariance);
-      else
-        tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
-      presampledMesh->bbox = curMM->cm.bbox; // we want the same bounding box
-      Log("Generated %i Montecarlo Samples (%i msec)",presampledMesh->vn,tt.elapsed());
-    }
-
-    BaseSampler mps(&(mm->cm));
-    if(par.getBool("RefineFlag"))
-    {
-      pp.preGenFlag=true;
-      pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
-    }
-    pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
-    pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
-    pp.bestSamplePoolSize =par.getInt("BestSamplePool");
-    if(par.getBool("ExactNumFlag"))
-      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, *presampledMesh, sampleNum, radius,pp,0.005);
-    else
-      tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, *presampledMesh, radius,pp);
-
-    //tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
-    vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
-    Point3i &g=pp.pds.gridSize;
-    Log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds.gridCellNum, g[0]*g[1]*g[2]);
-	Log("Sampling created a new mesh of %i points", mm->cm.vn);
-  }
-    break;
-
-  case FP_HAUSDORFF_DISTANCE :
-  {
-    MeshModel* mm0 = par.getMesh("SampledMesh");  // surface where we choose the random samples
-    MeshModel* mm1 = par.getMesh("TargetMesh");   // surface that is sought for the closest point to each sample.
-    bool saveSampleFlag=par.getBool("SaveSample");
-    bool sampleVert=par.getBool("SampleVert");
-    bool sampleEdge=par.getBool("SampleEdge");
-    bool sampleFauxEdge=par.getBool("SampleFauxEdge");
-    bool sampleFace=par.getBool("SampleFace");
-    float distUpperBound = par.getAbsPerc("MaxDist");
-
-    if(sampleEdge && mm0->cm.fn==0) {
-      Log("Disabled edge sampling. Meaningless when sampling point clouds");
-      sampleEdge=false;
-    }
-    if(sampleFace && mm0->cm.fn==0) {
-      Log("Disabled face sampling. Meaningless when sampling point clouds");
-      sampleFace=false;
-    }
-
-	// the meshes have to be transformed
-	// only if source different from target (if single mesh, it does not matter)
-	if (mm0 != mm1)
+switch(ID(action))
+{
+	case FP_ELEMENT_SUBSAMPLING :
 	{
+		MeshModel *curMM = md.mm();
+		if (par.getInt("SampleNum") == 0) {
+			Log("Mesh Element Sampling: Number of Samples is  0, cannot do anything");
+			errorMessage = "Number of Samples is  0, cannot do anything";
+			return false; // can't continue, mesh can't be processed
+		}
+		if ((par.getEnum("Sampling")>0) && (curMM->cm.fn == 0)) {
+			Log("Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces");
+			errorMessage = "Mesh Element Sampling: cannot sample on faces/edges, mesh has no faces";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		MeshModel *mm= md.addNewMesh("", "Element samples", true); // The new mesh is the current one
+		mm->updateDataMask(curMM);
+
+		BaseSampler mps(&(mm->cm));
+
+		switch(par.getEnum("Sampling"))
+		{
+			case 0 :	tri::SurfaceSampling<CMeshO,BaseSampler>::VertexUniform(curMM->cm,mps,par.getInt("SampleNum"));	break;
+			case 1 :	tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"),true);		break;
+			case 2 :	tri::SurfaceSampling<CMeshO,BaseSampler>::AllFace(curMM->cm,mps);		break;
+		}
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		Log("Mesh Element Sampling created a new mesh of %i points",mm->cm.vn);
+	} break;
+
+	case FP_TEXEL_SAMPLING :
+	{
+		MeshModel *curMM= md.mm();
+		if (!tri::HasPerWedgeTexCoord(curMM->cm)) {
+			Log("Texel Sampling requires a mesh with UV parametrization");
+			errorMessage = "Texel Sampling requires a mesh with UV parametrization";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		MeshModel *mm= md.addNewMesh("", "Texel samples", true); // The new mesh is the current one
+		bool RecoverColor = par.getBool("RecoverColor");
+		BaseSampler mps(&(mm->cm));
+		mps.texSamplingWidth=par.getInt("TextureW");
+		mps.texSamplingHeight=par.getInt("TextureH");
+
+		if(RecoverColor && curMM->cm.textures.size()>0)
+		{
+			mps.tex= new QImage(curMM->cm.textures[0].c_str());
+			if(mps.texSamplingWidth==0)  mps.texSamplingWidth  = mps.tex->width();
+			if(mps.texSamplingHeight==0) mps.texSamplingHeight = mps.tex->height();
+		}
+		mps.uvSpaceFlag = par.getBool("TextureSpace");
+		vcg::tri::UpdateFlags<CMeshO>::FaceClearB(curMM->cm);
+		tri::SurfaceSampling<CMeshO,BaseSampler>::Texture(curMM->cm,mps,mps.texSamplingWidth,mps.texSamplingHeight);
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		mm->updateDataMask(MeshModel::MM_VERTNORMAL | MeshModel::MM_VERTCOLOR);
+		Log("Texel Sampling created a new mesh of %i points", mm->cm.vn);
+	} break;
+
+	case FP_MONTECARLO_SAMPLING :
+	{
+		MeshModel *curMM = md.mm();
+		if (curMM->cm.fn == 0) {
+			Log("Montecarlo Sampling requires a mesh with faces, it does not work on Point Clouds");
+			errorMessage = "Montecarlo Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
+			return false; // can't continue, mesh can't be processed
+		}
+		if (par.getInt("SampleNum") == 0) {
+			Log("Montecarlo Sampling: Number of Samples is 0, cannot do anything");
+			errorMessage = "Number of Samples is 0, cannot do anything";
+			return false; // can't continue, mesh can't be processed
+		}
+		if (par.getBool("Weighted") && !curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
+			Log("Montecarlo Sampling: cannot do weighted samplimg, layer has no Vertex Quality value");
+			errorMessage = "Cannot do weighted samplimg, layer has no Vertex Quality value";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		MeshModel *mm= md.addNewMesh("","Montecarlo Samples", true); // The new mesh is the current one
+		mm->updateDataMask(curMM);
+		BaseSampler mps(&(mm->cm));
+
+		if(par.getBool("EdgeSampling"))
+		{
+			tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),false);
+		}
+		else
+		{
+			if(par.getBool("Weighted"))
+				tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),par.getFloat("RadiusVariance"));
+			else if(par.getBool("ExactNum")) 
+				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm,mps,par.getInt("SampleNum"));
+			else 
+				tri::SurfaceSampling<CMeshO,BaseSampler>::MontecarloPoisson(curMM->cm,mps,par.getInt("SampleNum"));
+		}
+
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		Log("Sampling created a new mesh of %i points", mm->cm.vn);
+	} break;
+
+	case FP_STRATIFIED_SAMPLING :
+	{
+		MeshModel *curMM = md.mm();
+		if (curMM->cm.fn == 0) {
+			Log("Stratified Sampling requires a mesh with faces, it does not work on Point Clouds");
+			errorMessage = "Stratified Sampling requires a mesh with faces,<br> it does not work on Point Clouds";
+			return false; // can't continue, mesh can't be processed
+		}
+		if (par.getInt("SampleNum") == 0) {
+			Log("Stratified Sampling: Number of Samples is  0, cannot do anything");
+			errorMessage = "Number of Samples is  0, cannot do anything";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		MeshModel *mm= md.addNewMesh("","Subdiv Samples", true); // The new mesh is the current one
+		mm->updateDataMask(curMM);
+		int samplingMethod = par.getEnum("Sampling");
+		BaseSampler mps(&(mm->cm));
+		switch(samplingMethod)
+		{
+			case 0:
+				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), false ,par.getBool("Random"));
+				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				break;
+			case 1:
+				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSimilar(curMM->cm,mps,par.getInt("SampleNum"), true ,par.getBool("Random"));
+				Log("Dual Similar Sampling created a new mesh of %i points", mm->cm.vn);
+				break;
+			case 2:	
+				tri::SurfaceSampling<CMeshO,BaseSampler>::FaceSubdivision(curMM->cm,mps,par.getInt("SampleNum"), par.getBool("Random"));
+				Log("Subdivision Sampling created a new mesh of %i points", mm->cm.vn);
+				break;
+			case 3:
+				tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), true);
+				Log("Edge Sampling created a new mesh of %i points", mm->cm.vn);
+				break;
+			case 4:	
+				tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeUniform(curMM->cm,mps,par.getInt("SampleNum"), false);
+				Log("Non Faux Edge Sampling created a new mesh of %i points", mm->cm.vn);
+				break;
+		}
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+	} break;
+
+	case FP_CLUSTERED_SAMPLING :
+	{
+		MeshModel *curMM= md.mm();
+		int samplingMethod = par.getEnum("Sampling");
+		float threshold = par.getAbsPerc("Threshold");
+		bool selected = par.getBool("Selected");
+
+		if (selected && curMM->cm.svn == 0 && curMM->cm.sfn == 0) // if no selection at all, fail
+		{
+			Log("Clustered Sampling: Cannot apply only on selection: there is no selection");
+			errorMessage = "Cannot apply only on selection: there is no selection";
+			return false;
+		}
+		if (selected && (curMM->cm.svn == 0 && curMM->cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
+		{
+			tri::UpdateSelection<CMeshO>::VertexClear(curMM->cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(curMM->cm);
+		}
+		Log("Using only %i selected vertices", curMM->cm.svn);
+
+		MeshModel *mm= md.addNewMesh("", "Cluster samples", true); // The new mesh is the current one
+
+	    switch(samplingMethod)
+	    {
+			case 0 :
+			{
+				tri::Clustering<CMeshO, vcg::tri::AverageColorCell<CMeshO> > ClusteringGrid;
+				ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
+				ClusteringGrid.AddPointSet(curMM->cm,selected);
+				ClusteringGrid.ExtractPointSet(mm->cm);
+				ClusteringGrid.SelectPointSet(curMM->cm);
+				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
+				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+			} break;
+
+			case 1 :
+			{
+				vcg::tri::Clustering<CMeshO, vcg::tri::NearestToCenter<CMeshO> > ClusteringGrid;
+				ClusteringGrid.Init(curMM->cm.bbox,100000,threshold);
+				ClusteringGrid.AddPointSet(curMM->cm,selected);
+				ClusteringGrid.SelectPointSet(curMM->cm);
+				tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(curMM->cm);
+				ClusteringGrid.ExtractPointSet(mm->cm);
+				Log("Similar Sampling created a new mesh of %i points", mm->cm.vn);
+			} break;
+		}
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+	} break;
+
+	case FP_POINTCLOUD_SIMPLIFICATION :
+	{
+		MeshModel *curMM= md.mm();
+		CMeshO::ScalarType radius = par.getAbsPerc("Radius");
+		int sampleNum = par.getInt("SampleNum");
+
+		if ((radius == 0.0) && (sampleNum == 0)){
+			Log("Point Cloud Simplification: Number of Samples AND Radius are both 0, cannot do anything");
+			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		MeshModel *mm= md.addNewMesh("", "Simplified cloud", true); // The new mesh is the current one
+		mm->updateDataMask(curMM);
+		BaseSampler mps(&(mm->cm));
+		tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskParam pp;
+		
+		if(radius==0) 
+			radius = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonDiskRadius(curMM->cm,sampleNum);
+		else 
+			sampleNum = tri::SurfaceSampling<CMeshO,BaseSampler>::ComputePoissonSampleNum(curMM->cm,radius);
+
+		if(par.getBool("ExactNumFlag") && radius==0)
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, curMM->cm, sampleNum, radius,pp,0.005);
+		else
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, curMM->cm, radius,pp);
+
+		Log("Point Cloud Simplification created a new mesh of %i points", mm->cm.vn);
+		UpdateBounding<CMeshO>::Box(mm->cm);
+	} break;
+
+	case FP_POISSONDISK_SAMPLING :
+	{
+		MeshModel *curMM= md.mm();
+		CMeshO::ScalarType radius = par.getAbsPerc("Radius");
+		int sampleNum = par.getInt("SampleNum");
+		tri::SurfaceSampling<CMeshO, BaseSampler>::PoissonDiskParam pp;
+		pp.radiusVariance = par.getFloat("RadiusVariance");
+		bool subsampleFlag = par.getBool("Subsample");
+
+		if ((radius == 0.0) && (sampleNum == 0)){
+			Log("Poisson disk Sampling: Number of Samples AND Radius are both 0, cannot do anything");
+			errorMessage = "Number of Samples AND Radius are both 0, cannot do anything";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		if (radius == 0)
+			radius = tri::SurfaceSampling<CMeshO, BaseSampler>::ComputePoissonDiskRadius(curMM->cm, sampleNum);
+		else
+			sampleNum = tri::SurfaceSampling<CMeshO, BaseSampler>::ComputePoissonSampleNum(curMM->cm, radius);
+
+		if (pp.radiusVariance != 1.0)
+		{
+			if (!curMM->hasDataMask(MeshModel::MM_VERTQUALITY)) {
+				Log("Poisson disk Sampling: Variable radius requires per-Vertex quality for biasing the distribution");
+				errorMessage = "Variable radius requires per-Vertex Quality for biasing the distribution";
+				return false; // cannot continue
+			}
+			pp.adaptiveRadiusFlag = true;
+			Log("Variable Density variance is %f, radius can vary from %f to %f", pp.radiusVariance, radius / pp.radiusVariance, radius*pp.radiusVariance);
+		}
+
+		if (curMM->cm.fn == 0 && subsampleFlag == false)
+		{
+			Log("Poisson disk Sampling: Current mesh has no triangles. We cannot create a montecarlo sampling of the surface. Please select the Subsample flag");
+			errorMessage = "Current mesh has no triangles. We cannot create a montecarlo sampling of the surface.<br> Please select the Subsample flag";
+			return false; // cannot continue
+		}
+
+		MeshModel *mm= md.addNewMesh("","Poisson-disk Samples", true); // The new mesh is the current one
+		mm->updateDataMask(curMM);
+
+		Log("Computing %i Poisson Samples for an expected radius of %f",sampleNum,radius);
+
+		// first of all generate montecarlo samples for fast lookup
+		CMeshO *presampledMesh=0;
+
+		CMeshO MontecarloMesh; // this mesh is used only if we need real poisson sampling (and therefore we need to choose points different from the starting mesh vertices)
+		if(subsampleFlag)
+			presampledMesh = &(curMM->cm);
+		else
+		{
+			MeshModel *mcm;
+			if(par.getBool("SaveMontecarlo"))
+			{
+				mcm = md.addNewMesh("", "Montecarlo Samples", false); // the new mesh is NOT the current one (byproduct of sampling)
+				presampledMesh=&(mcm->cm);
+			}
+			else
+				presampledMesh=&MontecarloMesh;
+
+			QTime tt;tt.start();
+			BaseSampler sampler(presampledMesh);
+			sampler.qualitySampling=true;
+			if(pp.adaptiveRadiusFlag)
+				tri::SurfaceSampling<CMeshO,BaseSampler>::WeightedMontecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"),pp.radiusVariance);
+			else
+				tri::SurfaceSampling<CMeshO,BaseSampler>::Montecarlo(curMM->cm, sampler, sampleNum*par.getInt("MontecarloRate"));
+			presampledMesh->bbox = curMM->cm.bbox; // we want the same bounding box
+			Log("Generated %i Montecarlo Samples (%i msec)",presampledMesh->vn,tt.elapsed());
+		}
+
+		BaseSampler mps(&(mm->cm));
+		if(par.getBool("RefineFlag"))
+		{
+			pp.preGenFlag=true;
+			pp.preGenMesh=&(par.getMesh("RefineMesh")->cm);
+		}
+		pp.geodesicDistanceFlag=par.getBool("ApproximateGeodesicDistance");
+		pp.bestSampleChoiceFlag=par.getBool("BestSampleFlag");
+		pp.bestSamplePoolSize =par.getInt("BestSamplePool");
+		if(par.getBool("ExactNumFlag"))
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruningByNumber(mps, *presampledMesh, sampleNum, radius,pp,0.005);
+		else
+			tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDiskPruning(mps, *presampledMesh, radius,pp);
+
+		//tri::SurfaceSampling<CMeshO,BaseSampler>::PoissonDisk(curMM->cm, mps, *presampledMesh, radius,pp);
+		vcg::tri::UpdateBounding<CMeshO>::Box(mm->cm);
+		Point3i &g=pp.pds.gridSize;
+		Log("Grid size was %i %i %i (%i allocated on %i)",g[0],g[1],g[2], pp.pds.gridCellNum, g[0]*g[1]*g[2]);
+		Log("Poisson Disk Sampling created a new mesh of %i points", mm->cm.vn);
+	} break;
+
+	case FP_HAUSDORFF_DISTANCE :
+	{
+		MeshModel* mm0 = par.getMesh("SampledMesh");  // surface where we choose the random samples
+		MeshModel* mm1 = par.getMesh("TargetMesh");   // surface that is sought for the closest point to each sample.
+		bool saveSampleFlag=par.getBool("SaveSample");
+		bool sampleVert=par.getBool("SampleVert");
+		bool sampleEdge=par.getBool("SampleEdge");
+		bool sampleFauxEdge=par.getBool("SampleFauxEdge");
+		bool sampleFace=par.getBool("SampleFace");
+		float distUpperBound = par.getAbsPerc("MaxDist");
+
+		if (mm0 = mm1){
+			Log("Housdorff Distance: cannot compute, it is the same mesh");
+			errorMessage = "Cannot compute, it is the same mesh";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		if(sampleEdge && mm0->cm.fn==0) {
+			Log("Disabled edge sampling. Meaningless when sampling point clouds");
+			sampleEdge=false;
+		}
+		if(sampleFace && mm0->cm.fn==0) {
+			Log("Disabled face sampling. Meaningless when sampling point clouds");
+			sampleFace=false;
+		}
+
+		// the meshes have to be transformed
 		if (mm0->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, mm0->cm.Tr, true);
 		if (mm1->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, mm1->cm.Tr, true);
-	}
 
-    mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
-    mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
-    mm1->updateDataMask(MeshModel::MM_FACEMARK);
-    tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm1->cm);
-
-    MeshModel *samplePtMesh =0;
-    MeshModel *closestPtMesh =0;
-    HausdorffSampler<CMeshO> hs(&(mm1->cm));
-    if(saveSampleFlag)
-    {
-      closestPtMesh=md.addNewMesh("","Hausdorff Closest Points"); // After Adding a mesh to a MeshDocument the new mesh is the current one
-      closestPtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-      samplePtMesh=md.addNewMesh("","Hausdorff Sample Point");
-      samplePtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-      hs.init(&(samplePtMesh->cm),&(closestPtMesh->cm));
-    }
-
-    hs.dist_upper_bound = distUpperBound;
-
-    qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
-    qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
-    qDebug("Max sampling distance %f on a bbox diag of %f",distUpperBound,mm1->cm.bbox.Diag());
-
-    if(sampleVert)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
-    if(sampleEdge)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
-    if(sampleFace)
-      tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
-
-	// the meshes have to return to their original position
-	// only if source different from target (if single mesh, it does not matter)
-	if (mm0 != mm1)
-	{
-		if (mm0->cm.Tr != Matrix44m::Identity())
-			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, Inverse(mm0->cm.Tr), true);
-		if (mm1->cm.Tr != Matrix44m::Identity())
-			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
-	}
-
-    Log("Hausdorff Distance computed");
-    Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
-    Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
-    float d = mm0->cm.bbox.Diag();
-    Log("Values w.r.t. BBox Diag (%f)",d);
-    Log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
-
-
-    if(saveSampleFlag)
-    {
-      tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
-      tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
-
-      tri::UpdateColor<CMeshO>::PerVertexQualityRamp(samplePtMesh->cm);
-      tri::UpdateColor<CMeshO>::PerVertexQualityRamp(closestPtMesh->cm);
-    }
-  }
-    break;
-
-  case FP_DISTANCE_REFERENCE:
-  {
-								// DO STUFF
-	MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
-	MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
-
-	bool useSigned = par.getBool("SignedDist");
-	float maxDistABS = par.getAbsPerc("MaxDist");
-
-	// the meshes have to return to their original position
-	// only if source different from target (if single mesh, it does not matter)
-	if (mm0 != mm1)
-	{
-		if (mm0->cm.Tr != Matrix44m::Identity())
-			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, mm0->cm.Tr, true);
-		if (mm1->cm.Tr != Matrix44m::Identity())
-			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, mm1->cm.Tr, true);
-	}
-
-	// add quality to vertex of measured mesh
-	mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
-	// if reference has faces, recompute and normalize normals
-	if (mm1->cm.fn > 0)
-	{
+		mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
+		mm1->updateDataMask(MeshModel::MM_VERTQUALITY);
+		mm1->updateDataMask(MeshModel::MM_FACEMARK);
 		tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm1->cm);
-		tri::UpdateNormal<CMeshO>::PerVertexNormalized(mm1->cm);
-	}
-	mm1->updateDataMask(MeshModel::MM_FACEMARK);
 
-	SimpleDistanceSampler ds(&(mm1->cm), useSigned, maxDistABS);
+		MeshModel *samplePtMesh =0;
+		MeshModel *closestPtMesh =0;
+		HausdorffSampler<CMeshO> hs(&(mm1->cm));
+		if(saveSampleFlag)
+		{
+		  closestPtMesh=md.addNewMesh("","Hausdorff Closest Points", false); // the new mesh is NOT the current one (byproduct of measurement)
+		  closestPtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+		  samplePtMesh = md.addNewMesh("", "Hausdorff Sample Point", false); // the new mesh is NOT the current one (byproduct of measurement)
+		  samplePtMesh->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+		  hs.init(&(samplePtMesh->cm),&(closestPtMesh->cm));
+		}
 
-	tri::SurfaceSampling<CMeshO, SimpleDistanceSampler>::AllVertex(mm0->cm, ds);
+		hs.dist_upper_bound = distUpperBound;
 
-	// the meshes have to return to their original position
-	// only if source different from target (if single mesh, it does not matter)
-	if (mm0 != mm1)
-	{
+		qDebug("Sampled  mesh has %7i vert %7i face",mm0->cm.vn,mm0->cm.fn);
+		qDebug("Searched mesh has %7i vert %7i face",mm1->cm.vn,mm1->cm.fn);
+		qDebug("Max sampling distance %f on a bbox diag of %f",distUpperBound,mm1->cm.bbox.Diag());
+
+		if(sampleVert)
+		  tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::VertexUniform(mm0->cm,hs,par.getInt("SampleNum"));
+		if(sampleEdge)
+		  tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::EdgeUniform(mm0->cm,hs,par.getInt("SampleNum"),sampleFauxEdge);
+		if(sampleFace)
+		  tri::SurfaceSampling<CMeshO,HausdorffSampler<CMeshO> >::Montecarlo(mm0->cm,hs,par.getInt("SampleNum"));
+
+		// the meshes have to return to their original position
 		if (mm0->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, Inverse(mm0->cm.Tr), true);
 		if (mm1->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
-	}
 
-	Log("Distance from Reference Mesh computed");
-	Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qPrintable(mm0->label()), qPrintable(mm1->label()));
-	Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
+		Log("Hausdorff Distance computed");
+		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
+		Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
+		float d = mm0->cm.bbox.Diag();
+		Log("Values w.r.t. BBox Diag (%f)",d);
+		Log("     min : %f   max %f   mean : %f   RMS : %f\n",hs.getMinDist()/d,hs.getMaxDist()/d,hs.getMeanDist()/d,hs.getRMSDist()/d);
 
-  } break;
 
-  case	 FP_VERTEX_RESAMPLING :
-  {
-    MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
-    MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
-    float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
-	bool onlySelected = par.getBool("onSelected");
-	bool colorT = par.getBool("ColorTransfer");
-	bool geomT = par.getBool("GeomTransfer");
-	bool normalT = par.getBool("NormalTransfer");
-	bool qualityT = par.getBool("QualityTransfer");
-	bool selectionT = par.getBool("SelectionTransfer");
-	bool distquality = par.getBool("QualityDistance");
+		if(saveSampleFlag)
+		{
+		  tri::UpdateBounding<CMeshO>::Box(samplePtMesh->cm);
+		  tri::UpdateBounding<CMeshO>::Box(closestPtMesh->cm);
 
-	if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
+		  tri::UpdateColor<CMeshO>::PerVertexQualityRamp(samplePtMesh->cm);
+		  tri::UpdateColor<CMeshO>::PerVertexQualityRamp(closestPtMesh->cm);
+		}
+	} break;
+
+	case FP_DISTANCE_REFERENCE:
 	{
-		errorMessage = QString("You have to choose at least one attribute to be sampled");
-		return false;
-	}
+		MeshModel* mm0 = par.getMesh("MeasureMesh");  // this mesh gets measured.
+		MeshModel* mm1 = par.getMesh("RefMesh");      // this is the reference mesh
+		bool useSigned = par.getBool("SignedDist");
+		float maxDistABS = par.getAbsPerc("MaxDist");
 
-	// the meshes have to be transformed
-	// only if source different from target (if single mesh, it does not matter)
-	if (srcMesh != trgMesh)
+		if (mm0 = mm1){
+			Log("Distance from Reference: cannot compute, it is the same mesh");
+			errorMessage = "Cannot compute, it is the same mesh";
+			return false; // can't continue, mesh can't be processed
+		}
+
+		// the meshes have to return to their original position
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, mm0->cm.Tr, true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, mm1->cm.Tr, true);
+
+		// add quality to vertex of measured mesh
+		mm0->updateDataMask(MeshModel::MM_VERTQUALITY);
+		// if reference has faces, recompute and normalize normals
+		if (mm1->cm.fn > 0)
+		{
+			tri::UpdateNormal<CMeshO>::PerFaceNormalized(mm1->cm);
+			tri::UpdateNormal<CMeshO>::PerVertexNormalized(mm1->cm);
+		}
+			mm1->updateDataMask(MeshModel::MM_FACEMARK);
+
+		SimpleDistanceSampler ds(&(mm1->cm), useSigned, maxDistABS);
+
+		tri::SurfaceSampling<CMeshO, SimpleDistanceSampler>::AllVertex(mm0->cm, ds);
+
+		// the meshes have to return to their original position
+		if (mm0->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm0->cm, Inverse(mm0->cm.Tr), true);
+		if (mm1->cm.Tr != Matrix44m::Identity())
+			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
+
+		Log("Distance from Reference Mesh computed");
+		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qPrintable(mm0->label()), qPrintable(mm1->label()));
+		Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
+
+	} break;
+
+	case FP_VERTEX_RESAMPLING :
 	{
+		MeshModel* srcMesh = par.getMesh("SourceMesh"); // mesh whose attribute are read
+		MeshModel* trgMesh = par.getMesh("TargetMesh"); // this whose surface is sought for the closest point to each sample.
+		float upperbound = par.getAbsPerc("UpperBound"); // maximum distance to stop search
+		bool onlySelected = par.getBool("onSelected");
+		bool colorT = par.getBool("ColorTransfer");
+		bool geomT = par.getBool("GeomTransfer");
+		bool normalT = par.getBool("NormalTransfer");
+		bool qualityT = par.getBool("QualityTransfer");
+		bool selectionT = par.getBool("SelectionTransfer");
+		bool distquality = par.getBool("QualityDistance");
+
+		if (srcMesh = trgMesh){
+			Log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
+			errorMessage = "Cannot compute, it is the same mesh";
+			return false; // can't continue, mesh can't be processed
+		}
+		if (!colorT && !geomT && !qualityT && !normalT && !selectionT)
+		{
+			Log("Vertex Attribute Transfer: you have to choose at least one attribute to be sampled");
+			errorMessage = QString("You have to choose at least one attribute to be sampled");
+			return false;
+		}
+
+		if (onlySelected && trgMesh->cm.svn == 0 && trgMesh->cm.sfn == 0) // if no selection at all, fail
+		{
+			Log("Vertex Attribute Transfer: Cannot apply only on selection: there is no selection");
+			errorMessage = "Cannot apply only on selection: there is no selection";
+			return false;
+		}
+		if (onlySelected && (trgMesh->cm.svn == 0 && trgMesh->cm.sfn > 0)) // if no vert selected, but some faces selected, use their vertices
+		{
+			tri::UpdateSelection<CMeshO>::VertexClear(trgMesh->cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(trgMesh->cm);
+		}
+
+		// the meshes have to be transformed
 		if (srcMesh->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, srcMesh->cm.Tr, true);
 		if (trgMesh->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, trgMesh->cm.Tr, true);
-	}
 	
-	srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
-    tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
+		srcMesh->updateDataMask(MeshModel::MM_FACEMARK);
+		tri::UpdateNormal<CMeshO>::PerFaceNormalized(srcMesh->cm);
 	
-    LocalRedetailSampler rs;
-    rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
+		LocalRedetailSampler rs;
+		rs.init(&(srcMesh->cm),cb,trgMesh->cm.vn);
 
-    rs.dist_upper_bound = upperbound;
-	rs.colorFlag = colorT;
-	rs.coordFlag = geomT;
-	rs.normalFlag = normalT;
-	rs.qualityFlag = qualityT;
-	rs.selectionFlag = selectionT;
-	rs.storeDistanceAsQualityFlag = distquality;
+		rs.dist_upper_bound = upperbound;
+		rs.colorFlag = colorT;
+		rs.coordFlag = geomT;
+		rs.normalFlag = normalT;
+		rs.qualityFlag = qualityT;
+		rs.selectionFlag = selectionT;
+		rs.storeDistanceAsQualityFlag = distquality;
 
-    if(rs.colorFlag)   trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
-    if(rs.qualityFlag) trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
+		if(rs.colorFlag)   trgMesh->updateDataMask(MeshModel::MM_VERTCOLOR);
+		if(rs.qualityFlag) trgMesh->updateDataMask(MeshModel::MM_VERTQUALITY);
 
-    qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
-    qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
+		qDebug("Source  mesh has %7i vert %7i face",srcMesh->cm.vn,srcMesh->cm.fn);
+		qDebug("Target  mesh has %7i vert %7i face",trgMesh->cm.vn,trgMesh->cm.fn);
 
-	tri::SurfaceSampling<CMeshO, LocalRedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
+		tri::SurfaceSampling<CMeshO, LocalRedetailSampler>::VertexUniform(trgMesh->cm, rs, trgMesh->cm.vn, onlySelected);
 
-    if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
+		if(rs.coordFlag) tri::UpdateNormal<CMeshO>::PerFaceNormalized(trgMesh->cm);
 
-	// the meshes have to return to their original position
-	// only if source different from target (if single mesh, it does not matter)
-	if (srcMesh != trgMesh)
-	{
+		// the meshes have to return to their original position
 		if (srcMesh->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(srcMesh->cm, Inverse(srcMesh->cm.Tr), true);
 		if (trgMesh->cm.Tr != Matrix44m::Identity())
 			tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, Inverse(trgMesh->cm.Tr), true);
-	}
 
-  } break;
-  case FP_UNIFORM_MESH_RESAMPLING :
-  {
-    if (md.mm()->cm.fn==0) {
-      errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
-      return false; // can't continue, mesh can't be processed
-    }
+	} break;
 
-    CMeshO::ScalarType voxelSize = par.getAbsPerc("CellSize");
-    float offsetThr = par.getAbsPerc("Offset");
-    bool discretizeFlag = par.getBool("discretize");
-    bool multiSampleFlag = par.getBool("multisample");
-    bool absDistFlag = par.getBool("absDist");
-    bool mergeCloseVert = par.getBool("mergeCloseVert");
+	case FP_UNIFORM_MESH_RESAMPLING :
+	{
+		if (md.mm()->cm.fn==0) {
+			Log("Uniform Mesh Resampling: requires a mesh with faces, it does not work on Point Clouds");
+			errorMessage = "Uniform Mesh Resampling requires a mesh with faces,<br> it does not work on Point Clouds";
+			return false; // can't continue, mesh can't be processed
+		}
 
-    MeshModel *baseMesh= md.mm();
-    MeshModel *offsetMesh =md.addNewMesh("","Offset mesh");
-    baseMesh->updateDataMask(MeshModel::MM_FACEMARK);
+		CMeshO::ScalarType voxelSize = par.getAbsPerc("CellSize");
+		float offsetThr = par.getAbsPerc("Offset");
+		bool discretizeFlag = par.getBool("discretize");
+		bool multiSampleFlag = par.getBool("multisample");
+		bool absDistFlag = par.getBool("absDist");
+		bool mergeCloseVert = par.getBool("mergeCloseVert");
 
-    Point3i volumeDim;
-    Box3m volumeBox = baseMesh->cm.bbox;
-    volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
-    BestDim(volumeBox , voxelSize, volumeDim );
+		MeshModel *baseMesh= md.mm();
+		MeshModel *offsetMesh = md.addNewMesh("", "Offset mesh", true); // the new mesh is the current one
+		baseMesh->updateDataMask(MeshModel::MM_FACEMARK);
 
-    Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
-    Log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
-    Log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
+		Point3i volumeDim;
+		Box3m volumeBox = baseMesh->cm.bbox;
+		volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
+		BestDim(volumeBox , voxelSize, volumeDim );
 
-    tri::Resampler<CMeshO,CMeshO>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
-    tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
-    if(mergeCloseVert)
-    {
-      float mergeThr =offsetMesh->cm.bbox.Diag()/10000.0f;
-      int total = tri::Clean<CMeshO>::MergeCloseVertex(offsetMesh->cm,mergeThr);
-      Log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
-    }
-    tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
-  } break;
+		Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
+		Log("     VoxelSize is %f, offset is %f ", voxelSize,offsetThr);
+		Log("     Mesh Box is %f %f %f",baseMesh->cm.bbox.DimX(),baseMesh->cm.bbox.DimY(),baseMesh->cm.bbox.DimZ() );
 
-  case FP_VORONOI_COLORING :
-  {
-    MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples
-    MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample.
-    bool backwardFlag = par.getBool("backward");
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
-    tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
-    tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
-    mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);
-    vector<CMeshO::CoordType> vecP;
-    // Fills the point vector with the position of the Point cloud
-    for(CMeshO::VertexIterator vi= mmV->cm.vert.begin(); vi!= mmV->cm.vert.end(); ++vi) if(!(*vi).IsD())
-      vecP.push_back((*vi).cP());
+		tri::Resampler<CMeshO,CMeshO>::Resample(baseMesh->cm, offsetMesh->cm, volumeBox, volumeDim, voxelSize*3.5, offsetThr,discretizeFlag,multiSampleFlag,absDistFlag, cb);
+		tri::UpdateBounding<CMeshO>::Box(offsetMesh->cm);
+		if(mergeCloseVert)
+		{
+			float mergeThr =offsetMesh->cm.bbox.Diag()/10000.0f;
+			int total = tri::Clean<CMeshO>::MergeCloseVertex(offsetMesh->cm,mergeThr);
+			Log("Successfully merged %d vertices with a distance lower than %f", total,mergeThr);
+		}
+		tri::UpdateNormal<CMeshO>::PerVertexPerFace(offsetMesh->cm);
+	} break;
 
-    vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh;
-    tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
-    Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
-    tri::EuclideanDistance<CMeshO> edFunc;
-    tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV,edFunc);
+	case FP_VORONOI_COLORING :
+	{
+		MeshModel* mmM = par.getMesh("ColoredMesh");  // surface where we choose the random samples
+		MeshModel* mmV = par.getMesh("VertexMesh");   // surface that is sought for the closest point to each sample.
+		bool backwardFlag = par.getBool("backward");
 
-    for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
-    tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm,backwardFlag);
-  } break;
+		tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
+		tri::Allocator<CMeshO>::CompactVertexVector(mmM->cm);
+		tri::Allocator<CMeshO>::CompactFaceVector(mmM->cm);
+		mmM->updateDataMask(MeshModel::MM_VERTFACETOPO);
+		vector<CMeshO::CoordType> vecP;
+		// Fills the point vector with the position of the Point cloud
+		for(CMeshO::VertexIterator vi= mmV->cm.vert.begin(); vi!= mmV->cm.vert.end(); ++vi) if(!(*vi).IsD())
+			vecP.push_back((*vi).cP());
 
-  case FP_DISK_COLORING :
-  {
-    MeshModel* mmM = par.getMesh("ColoredMesh");
-    MeshModel* mmV = par.getMesh("VertexMesh");
-    typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
-    SampleSHT sht;
-	tri::EmptyTMark<CMeshO> markerFunctor;
-    typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
-    tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
-    tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
-    bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
-    bool sampleRadiusFlag = par.getBool("SampleRadius");
-    sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());
-    std::vector<CMeshO::VertexType*> closests;
-    float radius = par.getDynamicFloat("Radius");
+		vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh;
+		tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
+		Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
+		tri::EuclideanDistance<CMeshO> edFunc;
+		tri::VoronoiProcessing<CMeshO>::ComputePerVertexSources(mmM->cm,vecV,edFunc);
 
-    for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
-    {
-      Point3m p = viv->cP();
-      if(sampleRadiusFlag) radius = viv->Q();
-      Box3m bb(p-Point3m(radius,radius,radius),p+Point3m(radius,radius,radius));
-      GridGetInBox(sht, markerFunctor, bb, closests);
+		for(uint i=0;i<vecV.size();++i) vecV[i]->C()=Color4b::Red;
+		tri::VoronoiProcessing<CMeshO>::VoronoiColoring(mmM->cm,backwardFlag);
+	} break;
 
-      for(size_t i=0; i<closests.size(); ++i)
-      {
-        float dist;
-        if(approximateGeodeticFlag)
-          dist = ApproximateGeodesicDistance(viv->cP(),viv->cN(),closests[i]->cP(),closests[i]->cN());
-        else
-          dist = Distance(p,closests[i]->cP());
+	case FP_DISK_COLORING :
+	{
+		MeshModel* mmM = par.getMesh("ColoredMesh");
+		MeshModel* mmV = par.getMesh("VertexMesh");
+		typedef vcg::SpatialHashTable<CMeshO::VertexType, CMeshO::ScalarType> SampleSHT;
+		SampleSHT sht;
+		tri::EmptyTMark<CMeshO> markerFunctor;
+		typedef vcg::vertex::PointDistanceFunctor<float> VDistFunct;
+		tri::UpdateColor<CMeshO>::PerVertexConstant(mmM->cm, Color4b::LightGray);
+		tri::UpdateQuality<CMeshO>::VertexConstant(mmM->cm, std::numeric_limits<float>::max());
+		bool approximateGeodeticFlag = par.getBool("ApproximateGeodetic");
+		bool sampleRadiusFlag = par.getBool("SampleRadius");
+		sht.Set(mmM->cm.vert.begin(),mmM->cm.vert.end());
+		std::vector<CMeshO::VertexType*> closests;
+		float radius = par.getDynamicFloat("Radius");
 
-        if(dist < radius && closests[i]->Q() > dist)
-        {
-          closests[i]->Q() = dist;
-          closests[i]->C().lerp(Color4b::White,Color4b::Red,dist/radius);
-        }
-      }
-    }
-  } break;
-  case FP_REGULAR_RECURSIVE_SAMPLING :
-  {
-    if (md.mm()->cm.fn==0) {
-      errorMessage = "This filter requires a mesh with some faces,<br> it does not work on PointSet";
-      return false; // can't continue, mesh can't be processed
-    }
-    float CellSize = par.getAbsPerc("CellSize");
-    float offset=par.getAbsPerc("Offset");
+		for(CMeshO::VertexIterator viv = mmV->cm.vert.begin(); viv!= mmV->cm.vert.end(); ++viv) if(!(*viv).IsD())
+		{
+		  Point3m p = viv->cP();
+		  if(sampleRadiusFlag) radius = viv->Q();
+		  Box3m bb(p-Point3m(radius,radius,radius),p+Point3m(radius,radius,radius));
+		  GridGetInBox(sht, markerFunctor, bb, closests);
 
-    MeshModel *mmM= md.mm();
-    MeshModel *mm= md.addNewMesh("","Recur Samples",true/*,RenderMode(GLW::DMPoints)*/); // After Adding a mesh to a MeshDocument the new mesh is the current one
+		  for(size_t i=0; i<closests.size(); ++i)
+		  {
+			float dist;
+			if(approximateGeodeticFlag)
+			  dist = ApproximateGeodesicDistance(viv->cP(),viv->cN(),closests[i]->cP(),closests[i]->cN());
+			else
+			  dist = Distance(p,closests[i]->cP());
 
-    tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
-    tri::Allocator<CMeshO>::CompactEveryVector(mmM->cm);
+			if(dist < radius && closests[i]->Q() > dist)
+			{
+			  closests[i]->Q() = dist;
+			  closests[i]->C().lerp(Color4b::White,Color4b::Red,dist/radius);
+			}
+		  }
+		}
+	} break;
 
-    tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
-    std::vector<Point3m> pvec;
+	case FP_REGULAR_RECURSIVE_SAMPLING :
+	{
+		if (md.mm()->cm.fn==0) {
+			Log("Regular Recursive Sampling: requires a mesh with faces, it does not work on Point Clouds");
+			errorMessage = "Regular Recursive Sampling requires a mesh with  faces,<br> it does not work on Point Clouds";
+			return false; // can't continue, mesh can't be processed
+		}
+		float CellSize = par.getAbsPerc("CellSize");
+		float offset=par.getAbsPerc("Offset");
 
-    tri::SurfaceSampling<CMeshO,LocalRedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
-    qDebug("Generated %i points",int(pvec.size()));
-    tri::BuildMeshFromCoordVector(mm->cm,pvec);
-  }
-    break;
-  default : assert(0);
-  }
-  return true;
+		MeshModel *mmM= md.mm();
+		MeshModel *mm= md.addNewMesh("","Recursive Samples",true); // the new mesh is the current one
+
+		tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmM->cm);
+		tri::Allocator<CMeshO>::CompactEveryVector(mmM->cm);
+
+		tri::UpdateNormal<CMeshO>::PerFaceNormalized(mmM->cm);
+		std::vector<Point3m> pvec;
+
+		tri::SurfaceSampling<CMeshO,LocalRedetailSampler>::RegularRecursiveOffset(mmM->cm,pvec, offset, CellSize);
+		qDebug("Generated %i points",int(pvec.size()));
+		tri::BuildMeshFromCoordVector(mm->cm,pvec);
+	} break;
+
+	default : assert(0);
 }
+ return true;
+}
+
 MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
 {
   switch(ID(action))
