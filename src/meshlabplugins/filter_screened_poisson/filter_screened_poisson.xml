@@ -1,6 +1,6 @@
 <MESHLAB_FILTER_INTERFACE mfiVersion="2.0">
 <PLUGIN pluginName="FilterScreenedPoissonPlugin" pluginAuthor="Paolo Cignoni" pluginEmail="paolo.cignoni@isti.cnr.it">
-<FILTER filterFunction="screenedPoissonSurfaceReconstruction" filterName="Screened Poisson Surface Reconstruction" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Remeshing" filterPost="MM_VERTNUMBER | MM_FACENUMBER" filterArity="Variable" filterIsInterruptible="true">
+<FILTER filterFunction="screenedPoissonSurfaceReconstruction" filterName="Surface Reconstruction: Screened Poisson" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Remeshing" filterPost="MM_VERTNUMBER | MM_FACENUMBER" filterArity="Variable" filterIsInterruptible="true">
 <FILTER_HELP><![CDATA[This surface reconstruction algorithm
 creates watertight surfaces from oriented point sets.
 <br> The filter uses the original code of Michael Kazhdan and Matthew Bolitho implementing the algorithm described in the following paper:<br>
