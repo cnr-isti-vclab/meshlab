@@ -2492,6 +2492,7 @@ void MainWindow::documentUpdateRequested()
 
 void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
 {
+#ifdef Q_OS_WIN
     if (nvgpumeminfo != NULL)
     {
         nvgpumeminfo->setFormat( "Mem %p% %v/%m MB" );
@@ -2501,8 +2502,10 @@ void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
         nvgpumeminfo->setValue( remainingmb);
         nvgpumeminfo->setFixedWidth(300);
     }
+#else
+    nvgpumeminfo->hide();
+#endif
 }
-
 //WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //Temporary disgusting inequality between open (slot) - importMesh (function)
 //and importRaster (slot). It's not also difficult to remove the problem because
