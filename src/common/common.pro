@@ -65,6 +65,8 @@ linux-g++-32:DESTDIR = ../distrib
 linux-g++-64:CONFIG += dll
 linux-g++-64:DESTDIR = ../distrib
 
+linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
+
 win32-msvc2005:CONFIG += staticlib
 win32-msvc2008:CONFIG += staticlib
 win32-msvc2010:CONFIG += staticlib
