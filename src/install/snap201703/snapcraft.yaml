@@ -37,8 +37,6 @@ parts:
     prepare: |
       ln -sf ../vcglib/install ../vcglib 
       sed -i '/filter_csg/d' src/meshlab_full.pro
-      sed -i '/plugins_experimental\/io_TXT/d' src/meshlab_full.pro
-      sed -i 's| abs(| qAbs(|' src/meshlabplugins/edit_quality/eqhandle.cpp
       sed -i -e '2ilinux:QMAKE_LFLAGS += -fopenmp -lgomp\' src/meshlabplugins/filter_screened_poisson/filter_screened_poisson.pro
       sed -i 's|PR_XXXXXX|/tmp/PR_XXXXXX|' src/meshlabplugins/filter_screened_poisson/Src/Geometry.cpp
     build: |
@@ -64,5 +62,6 @@ parts:
 #    source-tag: v1.0.2
     source: https://github.com/cnr-isti-vclab/vcglib.git
     source-branch: devel
+    - -vcglib/apps  
     prime: [ -* ]
 
