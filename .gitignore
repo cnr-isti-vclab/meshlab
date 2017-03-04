@@ -28,3 +28,7 @@ src/distrib/common.lib
 src/distrib/meshlab.exe
 src/distrib/meshlabserver.exe
 src/distrib/MeshLabBundle
+src/distrib/snap20????/prime
+src/distrib/snap20????/parts
+src/distrib/snap20????/stage
+src/distrib/snap20????/*.snap
