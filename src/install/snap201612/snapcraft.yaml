@@ -19,7 +19,7 @@ apps:
     plugs: [home, x11, mir, opengl, unity7]
   meshlabserver:
     command: desktop-launch meshlabserver
-    plugs: [home, x11, opengl]
+    plugs: [home, x11, opengl, unity7]
 
 
 parts:
@@ -42,12 +42,12 @@ parts:
       sed -i -e '2ilinux:QMAKE_LFLAGS += -fopenmp -lgomp\' src/meshlabplugins/filter_screened_poisson/filter_screened_poisson.pro
       sed -i 's|PR_XXXXXX|/tmp/PR_XXXXXX|' src/meshlabplugins/filter_screened_poisson/Src/Geometry.cpp
     build: |
+      rm -f -r src/distrib/plugins/U3D_OSX
+      rm -f -r src/distrib/plugins/U3D_W32
       cd src/external
       qmake external.pro
       make -j4
       cd ..
-      rm -f -r distrib/plugins/U3D_OSX
-      rm -f -r distrib/plugins/U3D_W32
       qmake meshlab_full.pro
       make -j4
     install: |
