@@ -8,7 +8,7 @@ description: |
   rendering, texturing and converting meshes. It offers features for processing
   raw data produced by 3D digitization tools/devices and for preparing models
   for 3D printing.
-icon: gui/meshlab.png
+icon: snap/gui/meshlab.png
 
 grade: stable
 confinement: strict
