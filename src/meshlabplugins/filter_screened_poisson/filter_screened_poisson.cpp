@@ -586,10 +586,11 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
   if (filterName == "Surface Reconstruction: Screened Poisson")
   {
 	//check if folder is writable
-	QFileInfo fi(QDir::currentPath(), "file.tmp");
-	if (!fi.isWritable())
+	QTemporaryFile file("./_tmp_XXXXXX.tmp");
+	if (!file.open())
 	{
-		Log("ERROR - current folder is not writable. VCG Merging need to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		Log("ERROR - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		errorMessage = "current folder is not writable.<br>  Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder";
 		return false;
 	}
 
