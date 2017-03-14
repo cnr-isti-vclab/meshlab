@@ -122,10 +122,11 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
     srand(time(NULL));
 
 	//check if folder is writable
-	QFileInfo fi(QDir::currentPath(),"file.tmp");
-	if (!fi.isWritable())
+	QTemporaryFile file("./_tmp_XXXXXX.tmp");
+	if (!file.open()) 
 	{
-		Log("ERROR - current folder is not writable. VCG Merging need to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		Log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
+		errorMessage = "current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder";
 		return false;
 	}
 
@@ -170,6 +171,8 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
             if(retVal!=0)
             {
                 qDebug("Failed to write vmi temp file %s",qPrintable(mshTmpPath));
+				errorMessage = "Failed to write vmi temp file " + mshTmpPath;
+				Log("ERROR - Failed to write vmi temp file %s", qPrintable(mshTmpPath));
                 return false;
             }
             pmc.MP.AddSingleMesh(qPrintable(mshTmpPath));
@@ -191,7 +194,7 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
             if(!p.SimplificationFlag) name = p.OutNameVec[i].c_str();
             else name = p.OutNameSimpVec[i].c_str();
 
-            MeshModel *mp=md.addNewMesh("",name.c_str(),false);
+            MeshModel *mp=md.addNewMesh("",name.c_str(),true);  // created mesh is the current one, if multiple meshes are created last mesh is the current one
             int loadMask=-1;
             tri::io::ImporterPLY<CMeshO>::Open(mp->cm,name.c_str(),loadMask);
             if(p.MergeColor) mp->updateDataMask(MeshModel::MM_VERTCOLOR);
