@@ -13,10 +13,17 @@ meshlabserver [logargs] [args]
                             All the mesh attributes will be exported in the
                             saved files
     -i filename             mesh that has to be loaded
-    -o filename [-m <opt>]  the name of the file where to write the current mesh
+    -o filename [-l <opt_layer>][-m <opt_mask>]  the name of the file where to write the current mesh
                             of the MeshLab document.
-                            If -m is specified  the specified mesh attributes will
-                            be saved in the output file. the param <opt> can be a
+							If -l parameter is set the specified layer is going to be saved into the passed
+							filename. 
+							Valid values for <opt_layer> can be:
+								an integer number in the range [0,last_layer_in_the_document]
+								c referring to the current layer in the document 
+								x referring to the last layer in the document 
+							If -l param is not specified, by default, the current layer will be saved
+                            If -m is specified the specified mesh attributes will
+                            be saved in the output file. the param <opt_mask> can be a
                             space separated list of the following attributes:
                                 vc -> vertex colors,  vf -> vertex flags,
                                 vq -> vertex quality, vn-> vertex normals,
@@ -33,7 +40,15 @@ meshlabserver [logargs] [args]
            the script contained in file 'meshclean.mlx' will be applied to the
            mesh contained into 'input.obj'. The vertex coordinates and the
            per-vertex-color, the per-face-quality and the per-wedge-texture
-           attributes will be saved into the output.ply file
+           attributes contained in the current layer will be saved into the output.ply file
+		   
+	 'meshlabserver -i input.obj -o output.ply -l 0 -m vc fq wt -o output_last.ply -l l -s meshclean.mlx'
+           the script contained in file 'meshclean.mlx' will be applied to the
+           mesh contained into 'input.obj'. The vertex coordinates and the
+           per-vertex-color, the per-face-quality and the per-wedge-texture
+           attributes contained in the layer 0 (if it exists!) will be saved into the output.ply file,
+		   instead in the file output_last.ply will be saved the default geometric attributes of the last layer
+		   of the current document.
 
     'meshlabserver -i input0.obj -i input1.ply -w outproj.mlp -x -s meshclean.mlx'
            the script file meshclean.mlx will be applied to the document

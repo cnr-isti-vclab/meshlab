@@ -557,6 +557,9 @@ namespace commandline
     const char overwrite('x');
     const char inputmeshes('i');
     const char outputmesh('o');
+	const char layer('l');
+	const char lastlayer('x');
+	const char currentlayer('c');
     const char mask('m');
     const char vertex('v');
     const char face('f');
@@ -588,9 +591,14 @@ namespace commandline
         return QString ("-" + QString(cmdlineopt) + "\\s+\\S+");
     }
 
+
     QString outputmeshExpression()
     {
-        return optionValueExpression(outputmesh) + "(\\s+-" + QString(mask) + "(\\s+(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + ")+(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + ")+)+)?";
+
+		QString savingmask("-" + QString(mask) + "\\s+((" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + ")+(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + ")+)+");
+		QString layernumber("\\d+");
+		QString layertosave("-" + QString(layer) + "\\s+(" + layernumber + "|" + currentlayer + "|" + lastlayer + ")");
+        return optionValueExpression(outputmesh) + "(\\s+(" + savingmask + "|" + layertosave + "|" + layertosave + "\\s+" + savingmask + "))?";
     }
 
     bool validateCommandLine(const QString& str)
@@ -601,6 +609,7 @@ namespace commandline
         QString args("(" + arg + ")(\\s+" + arg + ")*");
         QString completecommandline("(" + logstring + "|" + logstring + "\\s+" + args + "|" + args + ")");
         QRegExp completecommandlineexp(completecommandline);
+		bool ret = completecommandlineexp.isValid();
         completecommandlineexp.indexIn(str);
         QString rr = completecommandlineexp.cap();
         return (completecommandlineexp.matchedLength() == str.size());
@@ -612,6 +621,18 @@ struct OutFileMesh
 {
     QString filename;
     int mask;
+
+	/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+	/*we need these two constant values because when we parse the command line we don't know yet how many layers will have the current document and which will be the current one. Opening a project and/or importing a file happens after the parsing of the commandline is completed*/
+	static const int lastlayerconst = -2;
+	static const int currentlayerconst = -1;
+	/**********************************************************************************************************************************************************************************************************************/
+
+	//possible values can be:
+	//	- lastlayerconst #the last layer of a document, DEFAULT value
+	//	- currentlayerconst #the current layer of a document, sometimes it's different from the last layer of a document
+	//	- a number between [0,inf) #identifying the correspondent layer position  WARNING!!!!! Please note that the layer position is DIFFERENT from the layer id
+	int layerposition;
 };
 
 struct OutProject
@@ -777,9 +798,28 @@ int main(int argc, char *argv[])
                 {
                     QFileInfo info(argv[i+1]);
                     outfl.filename = info.absoluteFilePath();
+
+					/*WARNING! in order to maintain backward SYNTAX compatibility (not the SEMANTIC one!) by default the outputmesh saved is the one contained in the current layer*/
+					outfl.layerposition = OutFileMesh::currentlayerconst;
+
                     fprintf(logfp,"output mesh  %s\n", qPrintable(outfl.filename));
                     i++;
                 }
+
+				if (((i + 1) < argc) && (QString(argv[i + 1]) == (QString("-") + commandline::layer)))
+				{
+					i = i + 2;
+					if (argv[i][0] == commandline::lastlayer)
+						outfl.layerposition = OutFileMesh::lastlayerconst;
+					else
+					{
+						if (argv[i][0] == commandline::currentlayer)
+							outfl.layerposition = OutFileMesh::currentlayerconst;
+						else
+							outfl.layerposition = QString(argv[i]).toInt();
+					}
+				}
+
                 if (((i + 1) < argc) && (QString(argv[i+1]) == (QString("-") + commandline::mask)))
                 {
                     i = i + 2;
@@ -909,22 +949,35 @@ int main(int argc, char *argv[])
 
 	if (meshDocument.size() < outmeshlist.size())
 		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", qPrintable(outmeshlist.size()), qPrintable(meshDocument.size()));
-	else
+	
+	for (int ii = 0; ii < outmeshlist.size(); ++ii)
 	{
-		for (int ii = 0; ii < outmeshlist.size(); ++ii)
+		bool exported = false;
+		if (outmeshlist[ii].layerposition < meshDocument.meshList.size())
 		{
-			if (meshDocument.meshList[ii] != NULL)
+			int layertobesaved = outmeshlist[ii].layerposition;
+			
+			if (layertobesaved == OutFileMesh::lastlayerconst)
+				layertobesaved = meshDocument.meshList.size() - 1;
+			else
+				if (layertobesaved == OutFileMesh::currentlayerconst)
+					layertobesaved = meshDocument.meshList.indexOf(meshDocument.mm());
+
+			if ((layertobesaved >= 0) && (layertobesaved < meshDocument.meshList.size()))
 			{
-				bool exported = server.exportMesh(meshDocument.meshList[ii], outmeshlist[ii].mask, outmeshlist[ii].filename, logfp);
+				MeshModel* meshmod = meshDocument.meshList[layertobesaved];
+				if (meshmod != NULL)
+					exported = server.exportMesh(meshDocument.meshList[layertobesaved], outmeshlist[ii].mask, outmeshlist[ii].filename, logfp);
 				if (exported)
-					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshDocument.mm()->fullName()), qPrintable(outmeshlist[ii].filename), meshDocument.mm()->cm.vn, meshDocument.mm()->cm.fn);
+					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshmod->fullName()), qPrintable(outmeshlist[ii].filename), meshmod->cm.vn, meshmod->cm.fn);
 				else
 					fprintf(logfp, "Output mesh %s has NOT been saved\n", qPrintable(outmeshlist[ii].filename));
 			}
 			else
-				fprintf(logfp, "Invalid layer %i. Output mesh %s will not be saved\n", qPrintable(ii), qPrintable(outmeshlist[ii].filename));
+				fprintf(logfp, "Output mesh %s has NOT been saved. A not existent layer has been requested to be saved\n", qPrintable(outmeshlist[ii].filename));
 		}
-
+		else
+			fprintf(logfp, "Invalid layer number %i. Last layer in the current document is the number %i. Output mesh %s will not be saved\n", outmeshlist[ii].layerposition, meshDocument.meshList.size() - 1, qPrintable(outmeshlist[ii].filename));
 	}
 
 
