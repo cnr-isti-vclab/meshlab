@@ -3308,7 +3308,7 @@ void MainWindow::updateTexture(int meshid)
         GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
    
         if (sometextfailed)
-            QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+            QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 
         for(int tt = 0;tt < mvc->viewerCounter();++tt)
         {
@@ -3318,7 +3318,7 @@ void MainWindow::updateTexture(int meshid)
         }
     }
     if (sometextfailed)
-        QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+        QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 }
 
 void MainWindow::updateProgressBar( const int pos,const QString& text )
