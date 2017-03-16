@@ -90,7 +90,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     updateRasterSetVisibilities();
     setAutoFillBackground(false);
 
-    //Ratser support
+    //Raster support
     _isRaster =false;
     opacity = 0.5;
     zoom = false;
@@ -262,6 +262,9 @@ void GLArea::pasteTile()
                         rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
                         rastm->shot.Intrinsics.CenterPx[0]= rastm->shot.Intrinsics.ViewportPx[0]/2.0;
                         rastm->shot.Intrinsics.CenterPx[1]= rastm->shot.Intrinsics.ViewportPx[1]/2.0;
+
+						//importRaster has destroyed the original trackball state, now we restore it
+						loadShot(QPair<Shotm, float>(shot_tmp, trackball.track.sca));
                     }
                 }
                 else
@@ -1582,11 +1585,11 @@ void GLArea::setView()
     bb.Add(Matrix44m::Construct(mt),this->md()->bbox());
     float cameraDist = this->getCameraDistance();
 
-    if(fov==5) cameraDist = 3.0f; // small hack for orthographic projection where camera distance is rather meaningless...
+    if(fov<=5) cameraDist = 8.0f; // small hack for orthographic projection where camera distance is rather meaningless...
 
     nearPlane = cameraDist*clipRatioNear;
     farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
-    if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
+    if(nearPlane<=cameraDist*.01f) nearPlane=cameraDist*.01f;
 
     //    qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
     //    qDebug("camera dist %f far  %f",cameraDist, farPlane);
@@ -1865,11 +1868,11 @@ void GLArea::loadRaster(int id)
                 Matrix44f rotFrom;
                 rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
 
-                Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+				// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
+                //Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+				//Point3f p2 = (Point3f(0,0,cameraDist));
+				//trackball.track.sca =fabs(p2.Z()/p1.Z());
 
-                Point3f p2 = (Point3f(0,0,cameraDist));
-
-                trackball.track.sca =fabs(p2.Z()/p1.Z());
                 loadShot(QPair<Shotm, float> (rm->shot,trackball.track.sca));
             }
             else
@@ -2052,11 +2055,10 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     Matrix44f rotFrom;
     shot.Extrinsics.Rot().ToMatrix(rotFrom);
 
-    Point3f p1 = rotFrom*(vcg::Point3f::Construct(shot.Extrinsics.Tra()));
-
-    Point3f p2 = (Point3f(0,0,cameraDist));
-
-    trackball.track.sca =fabs(p2.Z()/p1.Z());
+	// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
+	//Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+	//Point3f p2 = (Point3f(0,0,cameraDist));
+	//trackball.track.sca =fabs(p2.Z()/p1.Z());
 
     loadShot(QPair<Shotm, float> (shot,trackball.track.sca));
 
@@ -2204,10 +2206,10 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
     trackball.Reset();
     trackball.track.sca = shotAndScale.second;
 
-    /*Point3f point = this->md()->bbox().Center();
-    Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
-    shot2Track(shot, cameraDist,trackball);
+    shot2Track(shot, cameraDist, trackball);
 
+	/*Point3f point = this->md()->bbox().Center();
+	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
     //Expressing the translation along Z with a scale factor k
     //Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
@@ -2232,7 +2234,6 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
 
     //trackball.track.sca =sca;
     //trackball.track.tra =t1 /*+ tb.track.rot.Inverse().Rotate(glLookAt)*/ ;
-
 
     update();
 }

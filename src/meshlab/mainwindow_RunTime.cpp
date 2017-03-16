@@ -3116,18 +3116,6 @@ bool MainWindow::saveSnapshot()
     {
         GLA()->ss=dialog.getValues();
         GLA()->saveSnapshot();
-
-        // if user ask to add the snapshot to raster layers
-        /*
-        if(dialog.addToRasters())
-        {
-        QString savedfile = QString("%1/%2%3.png")
-        .arg(GLA()->ss.outdir).arg(GLA()->ss.basename)
-        .arg(GLA()->ss.counter,2,10,QChar('0'));
-
-        importRaster(savedfile);
-        }
-        */
         return true;
     }
 
