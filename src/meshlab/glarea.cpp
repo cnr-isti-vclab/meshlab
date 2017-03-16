@@ -251,6 +251,7 @@ void GLArea::pasteTile()
                     {
 						// get current transform, before is reset by the following importRaster
 						Shotm shot_tmp = shotFromTrackball().first;
+						float tmp_sca = trackball.track.sca;
                         mw()->importRaster(outfile);
 
                         RasterModel *rastm = md()->rm();
@@ -264,6 +265,7 @@ void GLArea::pasteTile()
                         rastm->shot.Intrinsics.CenterPx[1]= rastm->shot.Intrinsics.ViewportPx[1]/2.0;
 
 						//importRaster has destroyed the original trackball state, now we restore it
+						trackball.track.sca = tmp_sca;
 						loadShot(QPair<Shotm, float>(shot_tmp, trackball.track.sca));
                     }
                 }
