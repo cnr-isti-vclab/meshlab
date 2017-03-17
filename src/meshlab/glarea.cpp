@@ -1309,7 +1309,6 @@ void GLArea::wheelEvent(QWheelEvent*e)
         float notch = e->delta()/ float(WHEEL_STEP);
         switch(e->modifiers())
         {
-        //        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.1f, notch),0.01f,50000.0f); break;
         case Qt::ControlModifier: 
             {
                 clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); 
@@ -1591,7 +1590,6 @@ void GLArea::setView()
 
     nearPlane = cameraDist*clipRatioNear;
     farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
-    if(nearPlane<=cameraDist*.01f) nearPlane=cameraDist*.01f;
 
     //    qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
     //    qDebug("camera dist %f far  %f",cameraDist, farPlane);
@@ -1606,7 +1604,7 @@ void GLArea::setView()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 0, cameraDist,0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, cameraDist, 0, 0, 0, 0, 1, 0);
 }
 
 void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float /*cameraDist*/)
@@ -1866,14 +1864,24 @@ void GLArea::loadRaster(int id)
             {
 				fov = (rm->shot.Intrinsics.cameraType == 0) ? rm->shot.GetFovFromFocal() : 5.0;
 
-                float cameraDist = getCameraDistance();
-                Matrix44f rotFrom;
-                rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
-
 				// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
+				//float cameraDist = getCameraDistance();
+				//Matrix44f rotFrom;
+				//rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
                 //Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
 				//Point3f p2 = (Point3f(0,0,cameraDist));
 				//trackball.track.sca =fabs(p2.Z()/p1.Z());
+
+				trackball.track.sca = 3.0f / this->md()->bbox().Diag(); // hack, we reset the trackball scale factor to the size of the mesh object
+
+				/*
+				Box3m bb;
+				float sceneCamSize = this->md()->bbox().Diag();
+				bb.Add(this->md()->bbox());
+				bb.Add(rm->shot.Extrinsics.Tra());
+				sceneCamSize = bb.Diag();
+				trackball.track.sca = 1.0f / sceneCamSize; // hack, we reset the trackball scale factor to the size of the mesh object + viewpoint DOES NOT WORK !
+				*/
 
                 loadShot(QPair<Shotm, float> (rm->shot,trackball.track.sca));
             }
@@ -2181,6 +2189,7 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
 
     return QPair<Shotm, float> (newShot,trackball.track.sca);
 }
+
 void GLArea::viewFromCurrentShot(QString kind)
 {
     Shotm localShot;

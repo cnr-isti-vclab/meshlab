@@ -2598,7 +2598,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			GLA()->resetTrackBall();
 			GLA()->fov = rm->shot.GetFovFromFocal();
 			rm->shot = GLA()->shotFromTrackball().first;
-           
+			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 
             //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
             updateMenus();

@@ -516,7 +516,7 @@ private:
 
     // This parameter is the one that controls HOW LARGE IS THE TRACKBALL ICON ON THE SCREEN.
     inline float viewRatio() const { return 1.75f; }
-    inline float clipRatioNearDefault() const { return 0.3f; }
+    inline float clipRatioNearDefault() const { return 0.1f; }
     inline float fovDefault() const { return 60.f; }
     void initializeShot(Shotm &shot);
     void loadShotFromTextAlignFile(const QDomDocument &doc);
