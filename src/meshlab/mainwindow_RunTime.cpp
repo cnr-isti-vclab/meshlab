@@ -3499,7 +3499,7 @@ void MainWindow::meshAdded(int mid)
                     }
                     shared->manageBuffers(mid);
                 }
-				layerDialog->setVisible(meshDoc()->meshList.size() > 0);
+				//layerDialog->setVisible(meshDoc()->meshList.size() > 0);
 				updateLayerDialog();
             }
         }
