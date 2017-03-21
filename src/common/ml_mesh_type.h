@@ -20,6 +20,28 @@ typedef vcg::Matrix33<MESHLAB_SCALAR> Matrix33m;
 typedef vcg::Shot<MESHLAB_SCALAR>     Shotm;
 typedef vcg::Similarity<MESHLAB_SCALAR> Similaritym;
 
+template<typename T>
+struct MeshLabScalarTest
+{
+
+};
+
+template<>
+struct MeshLabScalarTest<float>
+{
+	static const char* floatingPointPrecision() { return "fp"; }
+	static const char* floatingPointPrecisionIOToken() { return "%f"; }
+	static bool doublePrecision() { return false; }
+};
+
+template<>
+struct MeshLabScalarTest<double>
+{
+	static const char* floatingPointPrecision() { return "dp"; }
+	static const char* floatingPointPrecisionIOToken() { return "%lf"; }
+	static bool doublePrecision() { return true; }
+};
+
 namespace vcg
 {
     namespace vertex

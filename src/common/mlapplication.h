@@ -6,29 +6,6 @@
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_mesh_type.h"
 
-template<typename T>
-struct MeshLabScalarTest
-{
-
-};
-
-template<>
-struct MeshLabScalarTest<float>
-{
-	static const QString floatingPointPrecision() {return QString("fp");}
-    static const char* floatingPointPrecisionIOToken() {return "%f";}
-	static bool doublePrecision() {return false;}
-};
-
-template<>
-struct MeshLabScalarTest<double>
-{
-	static const QString floatingPointPrecision() {return QString("dp");}
-    static const char* floatingPointPrecisionIOToken() {return "%lf";}
-	static bool doublePrecision() {return true;}
-};
-
-
 class MeshLabApplication : public QApplication
 {
 public:
