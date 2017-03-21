@@ -2598,7 +2598,7 @@ bool MainWindow::importRaster(const QString& fileImg)
 			GLA()->resetTrackBall();
 			GLA()->fov = rm->shot.GetFovFromFocal();
 			rm->shot = GLA()->shotFromTrackball().first;
-           
+			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 
             //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
             updateMenus();
@@ -3116,18 +3116,6 @@ bool MainWindow::saveSnapshot()
     {
         GLA()->ss=dialog.getValues();
         GLA()->saveSnapshot();
-
-        // if user ask to add the snapshot to raster layers
-        /*
-        if(dialog.addToRasters())
-        {
-        QString savedfile = QString("%1/%2%3.png")
-        .arg(GLA()->ss.outdir).arg(GLA()->ss.basename)
-        .arg(GLA()->ss.counter,2,10,QChar('0'));
-
-        importRaster(savedfile);
-        }
-        */
         return true;
     }
 
@@ -3308,7 +3296,7 @@ void MainWindow::updateTexture(int meshid)
         GLuint textid = shared->allocateTexturePerMesh(meshid,img,singleMaxTextureSizeMpx);
    
         if (sometextfailed)
-            QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+            QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 
         for(int tt = 0;tt < mvc->viewerCounter();++tt)
         {
@@ -3318,7 +3306,7 @@ void MainWindow::updateTexture(int meshid)
         }
     }
     if (sometextfailed)
-        QMessageBox::warning(this,"Texture files has not been correctly loaded",unexistingtext);
+        QMessageBox::warning(this,"Texture file has not been correctly loaded",unexistingtext);
 }
 
 void MainWindow::updateProgressBar( const int pos,const QString& text )

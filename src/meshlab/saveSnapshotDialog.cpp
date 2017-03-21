@@ -38,9 +38,13 @@ void SaveSnapshotDialog::setValues(const SnapshotSetting& ss)
 {
 	settings=ss;
 	ui->baseNameLineEdit->setText(settings.basename);
-  ui->outDirLineEdit->setText(settings.outdir);
+	ui->outDirLineEdit->setText(settings.outdir);
 	ui->resolutionSpinBox->setValue(settings.resolution);
-	ui->counterSpinBox->setValue(settings.counter);		
+	ui->counterSpinBox->setValue(settings.counter);
+	ui->backgroundComboBox->setCurrentIndex(settings.background);
+	ui->alllayersCheckBox->setChecked(settings.snapAllLayers);
+	ui->tiledSaveCheckBox->setChecked(settings.tiledSave);
+	ui->addToRastersCheckBox->setChecked(settings.addToRasters);
 }
 
 SnapshotSetting SaveSnapshotDialog::getValues()
@@ -65,7 +69,7 @@ void SaveSnapshotDialog::browseDir()
 	if (fd.exec())
 	{
 		selection = fd.selectedFiles();
-		ui->outDirLineEdit->setText(selection.at(0));;	
+		ui->outDirLineEdit->setText(selection.at(0));	
 	}
 
 }

@@ -90,7 +90,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     updateRasterSetVisibilities();
     setAutoFillBackground(false);
 
-    //Ratser support
+    //Raster support
     _isRaster =false;
     opacity = 0.5;
     zoom = false;
@@ -251,6 +251,7 @@ void GLArea::pasteTile()
                     {
 						// get current transform, before is reset by the following importRaster
 						Shotm shot_tmp = shotFromTrackball().first;
+						float tmp_sca = trackball.track.sca;
                         mw()->importRaster(outfile);
 
                         RasterModel *rastm = md()->rm();
@@ -262,6 +263,10 @@ void GLArea::pasteTile()
                         rastm->shot.Intrinsics.PixelSizeMm[0]/=ratio;
                         rastm->shot.Intrinsics.CenterPx[0]= rastm->shot.Intrinsics.ViewportPx[0]/2.0;
                         rastm->shot.Intrinsics.CenterPx[1]= rastm->shot.Intrinsics.ViewportPx[1]/2.0;
+
+						//importRaster has destroyed the original trackball state, now we restore it
+						trackball.track.sca = tmp_sca;
+						loadShot(QPair<Shotm, float>(shot_tmp, trackball.track.sca));
                     }
                 }
                 else
@@ -1304,7 +1309,6 @@ void GLArea::wheelEvent(QWheelEvent*e)
         float notch = e->delta()/ float(WHEEL_STEP);
         switch(e->modifiers())
         {
-        //        case Qt::ControlModifier+Qt::ShiftModifier     : clipRatioFar  = math::Clamp( clipRatioFar*powf(1.1f, notch),0.01f,50000.0f); break;
         case Qt::ControlModifier: 
             {
                 clipRatioNear = math::Clamp(clipRatioNear*powf(1.1f, notch),0.01f,500.0f); 
@@ -1582,11 +1586,10 @@ void GLArea::setView()
     bb.Add(Matrix44m::Construct(mt),this->md()->bbox());
     float cameraDist = this->getCameraDistance();
 
-    if(fov==5) cameraDist = 3.0f; // small hack for orthographic projection where camera distance is rather meaningless...
+    if(fov<=5) cameraDist = 8.0f; // small hack for orthographic projection where camera distance is rather meaningless...
 
     nearPlane = cameraDist*clipRatioNear;
     farPlane = cameraDist + max(viewRatio(),float(-bb.min[2]));
-    if(nearPlane<=cameraDist*.1f) nearPlane=cameraDist*.1f;
 
     //    qDebug("tbcenter %f %f %f",trackball.center[0],trackball.center[1],trackball.center[2]);
     //    qDebug("camera dist %f far  %f",cameraDist, farPlane);
@@ -1601,7 +1604,7 @@ void GLArea::setView()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 0, cameraDist,0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 0, cameraDist, 0, 0, 0, 0, 1, 0);
 }
 
 void GLArea::setTiledView(GLdouble fovY, float viewRatio, float fAspect, GLdouble zNear, GLdouble zFar,  float /*cameraDist*/)
@@ -1861,15 +1864,25 @@ void GLArea::loadRaster(int id)
             {
 				fov = (rm->shot.Intrinsics.cameraType == 0) ? rm->shot.GetFovFromFocal() : 5.0;
 
-                float cameraDist = getCameraDistance();
-                Matrix44f rotFrom;
-                rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
+				// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
+				//float cameraDist = getCameraDistance();
+				//Matrix44f rotFrom;
+				//rm->shot.Extrinsics.Rot().ToMatrix(rotFrom);
+                //Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+				//Point3f p2 = (Point3f(0,0,cameraDist));
+				//trackball.track.sca =fabs(p2.Z()/p1.Z());
 
-                Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+				trackball.track.sca = 3.0f / this->md()->bbox().Diag(); // hack, we reset the trackball scale factor to the size of the mesh object
 
-                Point3f p2 = (Point3f(0,0,cameraDist));
+				/*
+				Box3m bb;
+				float sceneCamSize = this->md()->bbox().Diag();
+				bb.Add(this->md()->bbox());
+				bb.Add(rm->shot.Extrinsics.Tra());
+				sceneCamSize = bb.Diag();
+				trackball.track.sca = 1.0f / sceneCamSize; // hack, we reset the trackball scale factor to the size of the mesh object + viewpoint DOES NOT WORK !
+				*/
 
-                trackball.track.sca =fabs(p2.Z()/p1.Z());
                 loadShot(QPair<Shotm, float> (rm->shot,trackball.track.sca));
             }
             else
@@ -2052,11 +2065,10 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     Matrix44f rotFrom;
     shot.Extrinsics.Rot().ToMatrix(rotFrom);
 
-    Point3f p1 = rotFrom*(vcg::Point3f::Construct(shot.Extrinsics.Tra()));
-
-    Point3f p2 = (Point3f(0,0,cameraDist));
-
-    trackball.track.sca =fabs(p2.Z()/p1.Z());
+	// this code seems useless, and if the camera translation is[0 0 0] (or even just with a small z), there is a division by zero
+	//Point3f p1 = rotFrom*(vcg::Point3f::Construct(rm->shot.Extrinsics.Tra()));
+	//Point3f p2 = (Point3f(0,0,cameraDist));
+	//trackball.track.sca =fabs(p2.Z()/p1.Z());
 
     loadShot(QPair<Shotm, float> (shot,trackball.track.sca));
 
@@ -2177,6 +2189,7 @@ QPair<Shotm,float> GLArea::shotFromTrackball()
 
     return QPair<Shotm, float> (newShot,trackball.track.sca);
 }
+
 void GLArea::viewFromCurrentShot(QString kind)
 {
     Shotm localShot;
@@ -2204,10 +2217,10 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
     trackball.Reset();
     trackball.track.sca = shotAndScale.second;
 
-    /*Point3f point = this->md()->bbox().Center();
-    Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
-    shot2Track(shot, cameraDist,trackball);
+    shot2Track(shot, cameraDist, trackball);
 
+	/*Point3f point = this->md()->bbox().Center();
+	Point3f p1 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));*/
     //Expressing the translation along Z with a scale factor k
     //Point3f p2 = ((trackball.track.Matrix()*(point-trackball.center))- Point3f(0,0,cameraDist));
 
@@ -2232,7 +2245,6 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
 
     //trackball.track.sca =sca;
     //trackball.track.tra =t1 /*+ tb.track.rot.Inverse().Rotate(glLookAt)*/ ;
-
 
     update();
 }
