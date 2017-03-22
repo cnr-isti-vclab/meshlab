@@ -132,9 +132,10 @@ void ExtraMeshColorizePlugin::initParameterSet(QAction *a, MeshModel &m, RichPar
         curvNameList.push_back("RMS Curvature");
         curvNameList.push_back("ABS Curvature");
         par.addParam(new RichEnum("CurvatureType", 0, curvNameList, tr("Type:"),
-            QString("Choose the curvatures. Mean and Gaussian curvature are computed according the technique described in the Desbrun et al. paper.<br>"
-            "Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation"
-            "for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. ")));
+            QString("Choose the curvature value that you want transferred onto the scalar Quality."
+                    "Mean (H) and Gaussian (K) curvature are computed according the technique described in the Desbrun et al. paper.<br>"
+                    "Absolute curvature is defined as |H|+|K| and RMS curvature as sqrt(4* H^2 - 2K) as explained in <br><i>Improved curvature estimation"
+                    "for watershed segmentation of 3-dimensional meshes </i> by S. Pulla, A. Razdan, G. Farin. ")));
         break;
     case CP_SATURATE_QUALITY:
         par.addParam(new RichFloat("gradientThr",1,"Gradient Threshold","The maximum value admitted for the quality gradient (in absolute valu)"));

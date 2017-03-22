@@ -90,16 +90,18 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 
     foreach(tt, types())
         actionList << new QAction(filterName(tt), this);
-
-    lastq_QualityThr       = 0.3f;
+    
+    tri::TriEdgeCollapseQuadricParameter lpp;
+    lastq_QualityThr       = lpp.QualityThr;// 0.3f;
     lastq_PreserveBoundary = false;
     lastq_PreserveNormal   = false;
     lastq_PreserveTopology = false;
     lastq_OptimalPlacement = true;
     lastq_Selected         = false;
     lastq_PlanarQuadric    = false;
+    lastq_PlanarWeight     = lpp.QualityQuadricWeight;
     lastq_QualityWeight    = false;
-    lastq_BoundaryWeight   = 1.0;
+    lastq_BoundaryWeight   = lpp.BoundaryQuadricWeight;
     lastqtex_QualityThr    = 0.3f;
     lastqtex_extratw       = 1.0;
 }
@@ -364,7 +366,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
         parlst.addParam(new RichBool ("PreserveTopology",lastq_PreserveTopology,"Preserve Topology","Avoid all the collapses that should cause a topology change in the mesh (like closing holes, squeezing handles, etc). If checked the genus of the mesh should stay unchanged."));
         parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
-        parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh."));
+        parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh, as a side effect, more triangles will be preserved in flat areas (allowing better shaped triangles)."));
+        parlst.addParam(new RichFloat("PlanarWeight",lastq_PlanarWeight,"Planar Simp. Weight","How much we should try to preserve the triangles in the planar regions. If you lower this value planar areas will be simplified more."));
         parlst.addParam(new RichBool ("QualityWeight",lastq_QualityWeight,"Weighted Simplification","Use the Per-Vertex quality as a weighting factor for the simplification. The weight is used as a error amplification value, so a vertex with a high quality value will not be simplified and a portion of the mesh with low quality values will be aggressively simplified."));
         parlst.addParam(new RichBool ("AutoClean",true,"Post-simplification cleaning","After the simplification an additional set of steps is performed to clean the mesh (unreferenced vertices, bad faces, etc)"));
         parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
@@ -859,6 +862,7 @@ switch(ID(filter))
         pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");
         pp.OptimalPlacement=lastq_OptimalPlacement = par.getBool("OptimalPlacement");
         pp.QualityQuadric=lastq_PlanarQuadric = par.getBool("PlanarQuadric");
+        pp.QualityQuadricWeight=lastq_PlanarWeight = par.getFloat("PlanarWeight");
         lastq_Selected = par.getBool("Selected");
 
         QuadricSimplification(m.cm,TargetFaceNum,lastq_Selected,pp,  cb);
