@@ -42,30 +42,29 @@ int SnapVertexBorder(CMeshO &m, float threshold,vcg::CallBackPos * cb);
 CleanFilter::CleanFilter()
 {
   typeList
-        << FP_BALL_PIVOTING
-        << FP_REMOVE_WRT_Q
-        << FP_REMOVE_ISOLATED_COMPLEXITY
-        << FP_REMOVE_ISOLATED_DIAMETER
-    << FP_REMOVE_TVERTEX_FLIP
-    << FP_REMOVE_TVERTEX_COLLAPSE
-    << FP_SNAP_MISMATCHED_BORDER
-        << FP_REMOVE_DUPLICATE_FACE
-    << FP_REMOVE_FOLD_FACE
-    << FP_REMOVE_NON_MANIF_EDGE
-    << FP_REMOVE_NON_MANIF_VERT
-        << FP_MERGE_CLOSE_VERTEX
-        << FP_COMPACT_FACE
-        << FP_COMPACT_VERT;
+	<< FP_BALL_PIVOTING
+	<< FP_REMOVE_WRT_Q
+	<< FP_REMOVE_ISOLATED_COMPLEXITY
+	<< FP_REMOVE_ISOLATED_DIAMETER
+	<< FP_REMOVE_TVERTEX_FLIP
+	<< FP_REMOVE_TVERTEX_COLLAPSE
+	<< FP_SNAP_MISMATCHED_BORDER
+	<< FP_REMOVE_DUPLICATE_FACE
+	<< FP_REMOVE_FOLD_FACE
+	<< FP_REMOVE_NON_MANIF_EDGE
+	<< FP_REMOVE_NON_MANIF_VERT
+	<< FP_MERGE_CLOSE_VERTEX
+	<< FP_COMPACT_FACE
+	<< FP_COMPACT_VERT;
 
   FilterIDType tt;
   foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
   AC(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
-    maxDiag1=0;
+	maxDiag1=0;
     maxDiag2=-1;
     minCC=25;
     val1=1.0;
-
 }
 
 CleanFilter::~CleanFilter() {
@@ -77,21 +76,21 @@ QString CleanFilter::filterName(FilterIDType filter) const
 {
   switch(filter)
   {
-  case FP_BALL_PIVOTING :					return QString("Surface Reconstruction: Ball Pivoting");
-  case FP_REMOVE_WRT_Q :            		return QString("Remove Vertices wrt Quality");
-  case FP_REMOVE_ISOLATED_DIAMETER   :		return QString("Remove Isolated pieces (wrt Diameter)");
-  case FP_REMOVE_ISOLATED_COMPLEXITY :		return QString("Remove Isolated pieces (wrt Face Num.)");
-  case FP_REMOVE_TVERTEX_FLIP :             return QString("Remove T-Vertices by Edge Flip");
-  case FP_REMOVE_TVERTEX_COLLAPSE :         return QString("Remove T-Vertices by Edge Collapse");
-  case FP_SNAP_MISMATCHED_BORDER :          return QString("Snap Mismatched Borders");
-  case FP_MERGE_CLOSE_VERTEX :              return QString("Merge Close Vertices");
-  case FP_REMOVE_DUPLICATE_FACE:            return QString("Remove Duplicate Faces");
-  case FP_REMOVE_FOLD_FACE:                 return QString("Remove Isolated Folded Faces by Edge Flip");
-  case FP_REMOVE_NON_MANIF_EDGE:            return QString("Remove Faces from Non Manifold Edges");
-  case FP_REMOVE_NON_MANIF_VERT:            return QString("Split Vertexes Incident on Non Manifold Faces");
-  case FP_COMPACT_VERT:						return QString("Compact vertices");
-  case FP_COMPACT_FACE:						return QString("Compact faces");
-  default: assert(0);
+	case FP_BALL_PIVOTING:                return QString("Surface Reconstruction: Ball Pivoting");
+	case FP_REMOVE_WRT_Q:                 return QString("Remove Vertices wrt Quality");
+	case FP_REMOVE_ISOLATED_DIAMETER:     return QString("Remove Isolated pieces (wrt Diameter)");
+	case FP_REMOVE_ISOLATED_COMPLEXITY:   return QString("Remove Isolated pieces (wrt Face Num.)");
+	case FP_REMOVE_TVERTEX_FLIP:          return QString("Remove T-Vertices by Edge Flip");
+	case FP_REMOVE_TVERTEX_COLLAPSE:      return QString("Remove T-Vertices by Edge Collapse");
+	case FP_SNAP_MISMATCHED_BORDER:       return QString("Snap Mismatched Borders");
+	case FP_MERGE_CLOSE_VERTEX:           return QString("Merge Close Vertices");
+	case FP_REMOVE_DUPLICATE_FACE:        return QString("Remove Duplicate Faces");
+	case FP_REMOVE_FOLD_FACE:             return QString("Remove Isolated Folded Faces by Edge Flip");
+	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Remove Faces from Non Manifold Edges");
+	case FP_REMOVE_NON_MANIF_VERT:        return QString("Split Vertexes Incident on Non Manifold Faces");
+	case FP_COMPACT_VERT:                 return QString("Compact vertices");
+	case FP_COMPACT_FACE:                 return QString("Compact faces");
+	default: assert(0);
   }
   return QString("error!");
 }
@@ -100,7 +99,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
 {
   switch(filterId)
   {
-        case FP_BALL_PIVOTING :	return QString("Given a point cloud with normals it reconstructs a surface using the <b>Ball Pivoting Algorithm</b>."
+	case FP_BALL_PIVOTING :	return QString("Given a point cloud with normals it reconstructs a surface using the <b>Ball Pivoting Algorithm</b>."
                                                "Starting with a seed triangle, the BPA algorithm  pivots a ball of the given radius around the already formed edges"
                                                "until it touches another point, forming another triangle. The process continues until all reachable edges have been tried."
                                                "This surface reconstruction algoritm uses the existing points without creating new ones. Works better with uniformly sampled point clouds. "
@@ -222,29 +221,31 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
 
 bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * cb)
 {
-    MeshModel &m=*(md.mm());
-    switch(ID(filter))
-  {
-    case FP_BALL_PIVOTING:
-    {
-      float Radius = par.getAbsPerc("BallRadius");
-      float Clustering = par.getFloat("Clustering") / 100.0f;
-      float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
-      bool DeleteFaces = par.getBool("DeleteFaces");
-      if(DeleteFaces) {
-        m.cm.fn=0;
-        m.cm.face.resize(0);
-      }
-      m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-      int startingFn=m.cm.fn;
-      tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr);
-      // the main processing
-      pivot.BuildMesh(cb);
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-      Log("Reconstructed surface. Added %i faces",m.cm.fn-startingFn);
-    } break;
-    case FP_REMOVE_ISOLATED_DIAMETER:
-    {
+ MeshModel &m=*(md.mm());
+ switch(ID(filter))
+ {
+	case FP_BALL_PIVOTING:
+	{
+		float Radius = par.getAbsPerc("BallRadius");
+		float Clustering = par.getFloat("Clustering") / 100.0f;
+		float CreaseThr = math::ToRad(par.getFloat("CreaseThr"));
+		bool DeleteFaces = par.getBool("DeleteFaces");
+		if(DeleteFaces) 
+		{
+			m.cm.fn=0;
+			m.cm.face.resize(0);
+		}
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		int startingFn=m.cm.fn;
+		tri::BallPivoting<CMeshO> pivot(m.cm, Radius, Clustering, CreaseThr);
+		// the main processing
+		pivot.BuildMesh(cb);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		Log("Reconstructed surface. Added %i faces",m.cm.fn-startingFn);
+	} break;
+
+	case FP_REMOVE_ISOLATED_DIAMETER:
+	{
 		float minCC= par.getAbsPerc("MinComponentDiag");
 		std::pair<int,int> delInfo= tri::Clean<CMeshO>::RemoveSmallConnectedComponentsDiameter(m.cm,minCC);
 		Log("Removed %i connected components out of %i", delInfo.second, delInfo.first);
@@ -253,6 +254,7 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			Log("Removed %d unreferenced vertices", delvert);
 		}
+		m.UpdateBoxAndNormals();
     }break;
 	case FP_REMOVE_ISOLATED_COMPLEXITY:
 	{
@@ -264,105 +266,107 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 			Log("Removed %d unreferenced vertices", delvert);
 		}
-	}break;
-    case FP_REMOVE_WRT_Q:
-      {
-            int deletedFN=0;
-            int deletedVN=0;
-      float val=par.getAbsPerc("MaxQualityThr");
-      CMeshO::VertexIterator vi;
-      for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-                        if(!(*vi).IsD() && (*vi).Q()<val)
-                        {
-                            tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
-                            deletedVN++;
-                        }
+		m.UpdateBoxAndNormals();
+	} break;
 
-      CMeshO::FaceIterator fi;
-      for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
-                 if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() )
-                         {
-                                tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
-                                deletedFN++;
-                         }
+	case FP_REMOVE_WRT_Q:
+	{
+		int deletedFN=0;
+		int deletedVN=0;
+		float val=par.getAbsPerc("MaxQualityThr");
+		CMeshO::VertexIterator vi;
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
+			if(!(*vi).IsD() && (*vi).Q()<val)
+			{
+				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
+				deletedVN++;
+			}
 
-      m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-            Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val);
+		CMeshO::FaceIterator fi;
+		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
+			if((*fi).V(0)->IsD() ||(*fi).V(1)->IsD() ||(*fi).V(2)->IsD() )
+			{
+				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+				deletedFN++;
+			}
 
-      }break;
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		Log("Deleted %i vertices and %i faces with a quality lower than %f", deletedVN,deletedFN,val);
+		m.UpdateBoxAndNormals();
+	} break;
 
     case FP_REMOVE_TVERTEX_COLLAPSE :
     {
-        float threshold = par.getFloat("Threshold");
-        bool repeat = par.getBool("Repeat");
-
-        int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
-        Log("Successfully removed %d t-vertices", total);
-    }
-        break;
-    case FP_REMOVE_TVERTEX_FLIP :
-    {
-        float threshold = par.getFloat("Threshold");
-        bool repeat = par.getBool("Repeat");
-        int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
-        Log("Successfully removed %d t-vertices", total);
-    }
-    break;
-   case FP_MERGE_CLOSE_VERTEX :
-    {
-        float threshold = par.getAbsPerc("Threshold");
-        int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
-        Log("Successfully merged %d vertices", total);
-    }
-    break;
-  case FP_REMOVE_DUPLICATE_FACE :
-   {
-       int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
-       Log("Successfully deleted %d duplicated faces", total);
-   }
-   break;
-  case FP_REMOVE_FOLD_FACE:
-    {
-      m.updateDataMask(MeshModel::MM_FACECOLOR);
-      int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
-      m.UpdateBoxAndNormals();
-      Log("Successfully flipped %d folded faces", total);
-    }
-      break;
-  case FP_REMOVE_NON_MANIF_EDGE :
-  {
-      int total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
-      Log("Successfully removed %d non-manifold faces", total);
-  }
-  break;
-  case FP_REMOVE_NON_MANIF_VERT :
-  {
-      float threshold = par.getFloat("VertDispRatio");
-
-      int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
-      Log("Successfully split %d non manifold vertices faces", total);
-  }
-  break;
-  case FP_SNAP_MISMATCHED_BORDER :
-    {
-      float threshold = par.getFloat("EdgeDistRatio");
-      int total = SnapVertexBorder(m.cm, threshold,cb);
-      Log("Successfully Splitted %d faces to snap", total);
+		float threshold = par.getFloat("Threshold");
+		bool repeat = par.getBool("Repeat");
+		int total = tri::Clean<CMeshO>::RemoveTVertexByCollapse(m.cm, threshold, repeat);
+		Log("Successfully removed %d t-vertices", total);
     } break;
 
-  case FP_COMPACT_FACE :
-      {
-          vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
-          break;
-      }
-  case FP_COMPACT_VERT :
-      {
-          vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
-          break;
-      }
-  default : assert(0); // unknown filter;
-    }
-    return true;
+	case FP_REMOVE_TVERTEX_FLIP :
+    {
+		float threshold = par.getFloat("Threshold");
+		bool repeat = par.getBool("Repeat");
+		int total = tri::Clean<CMeshO>::RemoveTVertexByFlip(m.cm, threshold, repeat);
+		Log("Successfully removed %d t-vertices", total);
+    } break;
+
+	case FP_MERGE_CLOSE_VERTEX :
+	{
+		float threshold = par.getAbsPerc("Threshold");
+		int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);
+		Log("Successfully merged %d vertices", total);
+	} break;
+
+	case FP_REMOVE_DUPLICATE_FACE :
+	{
+		int total = tri::Clean<CMeshO>::RemoveDuplicateFace(m.cm);
+		Log("Successfully deleted %d duplicated faces", total);
+	} break;
+
+	case FP_REMOVE_FOLD_FACE:
+	{
+		m.updateDataMask(MeshModel::MM_FACECOLOR);
+		int total = tri::Clean<CMeshO>::RemoveFaceFoldByFlip(m.cm);
+		Log("Successfully flipped %d folded faces", total);
+		m.UpdateBoxAndNormals();
+	} break;
+
+	case FP_REMOVE_NON_MANIF_EDGE :
+	{
+		int total = tri::Clean<CMeshO>::RemoveNonManifoldFace(m.cm);
+		Log("Successfully removed %d non-manifold faces", total);
+		m.UpdateBoxAndNormals();
+	} break;
+
+	case FP_REMOVE_NON_MANIF_VERT :
+	{
+		float threshold = par.getFloat("VertDispRatio");
+		int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
+		Log("Successfully split %d non manifold vertices faces", total);
+		m.UpdateBoxAndNormals();
+	} break;
+
+	case FP_SNAP_MISMATCHED_BORDER :
+	{
+		float threshold = par.getFloat("EdgeDistRatio");
+		int total = SnapVertexBorder(m.cm, threshold,cb);
+		Log("Successfully Splitted %d faces to snap", total);
+	} break;
+
+	case FP_COMPACT_FACE :
+	{
+		vcg::tri::Allocator<CMeshO>::CompactFaceVector(m.cm);
+	} break;
+
+	case FP_COMPACT_VERT :
+	{
+		vcg::tri::Allocator<CMeshO>::CompactVertexVector(m.cm);
+	} break;
+
+	default : assert(0); // unknown filter;
+ }
+ return true;
 }
 
 
