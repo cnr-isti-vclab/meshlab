@@ -106,6 +106,7 @@ protected:
     bool lastq_PreserveTopology;
     bool lastq_OptimalPlacement;
     bool lastq_PlanarQuadric;
+    float lastq_PlanarWeight;
 
     float lastqtex_QualityThr;
     float lastqtex_extratw;
