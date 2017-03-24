@@ -410,6 +410,13 @@ public:
 							dt.set(pm, atts);
 							iFilter->glContext->initPerViewRenderingData(meshDocument.mm()->id(), dt);
 						}
+
+						if (meshDocument.mm() != NULL)
+						{
+							meshDocument.mm()->cm.svn = int(vcg::tri::UpdateSelection<CMeshO>::VertexCount(meshDocument.mm()->cm));
+							meshDocument.mm()->cm.sfn = int(vcg::tri::UpdateSelection<CMeshO>::FaceCount(meshDocument.mm()->cm));
+						}
+
 					}
 					else
 					{
@@ -421,6 +428,12 @@ public:
 							{
 								dt.set(pm, atts);
 								iFilter->glContext->initPerViewRenderingData(mm->id(), dt);
+							}
+
+							if (mm != NULL)
+							{
+								mm->cm.svn = int(vcg::tri::UpdateSelection<CMeshO>::VertexCount(mm->cm));
+								mm->cm.sfn = int(vcg::tri::UpdateSelection<CMeshO>::FaceCount(mm->cm));
 							}
 						}
 					}
@@ -497,6 +510,12 @@ public:
 									dt.set(pm, atts);
 									cppfilt->glContext->initPerViewRenderingData(meshDocument.mm()->id(), dt);
 								}
+
+								if (meshDocument.mm() != NULL)
+								{
+									meshDocument.mm()->cm.svn = int(vcg::tri::UpdateSelection<CMeshO>::VertexCount(meshDocument.mm()->cm));
+									meshDocument.mm()->cm.sfn = int(vcg::tri::UpdateSelection<CMeshO>::FaceCount(meshDocument.mm()->cm));
+								}
 							}
 							else
 							{
@@ -509,6 +528,13 @@ public:
 										dt.set(pm, atts);
 										cppfilt->glContext->initPerViewRenderingData(mm->id(), dt);
 									}
+
+									if (mm != NULL)
+									{
+										mm->cm.svn = int(vcg::tri::UpdateSelection<CMeshO>::VertexCount(mm->cm));
+										mm->cm.sfn = int(vcg::tri::UpdateSelection<CMeshO>::FaceCount(mm->cm));
+									}
+
 								}
 							}
 						}
