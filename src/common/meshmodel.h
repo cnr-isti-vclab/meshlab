@@ -585,10 +585,10 @@ public:
     bool isBusy() { return busy;}    // used in processing. To disable access to the mesh by the rendering thread
     void setBusy(bool _busy)
     {
-        if(busy && _busy==false)
+        /*if(busy && _busy==false)
         {
             emit meshDocumentModified();
-        }
+        }*/
         busy=_busy;
     }
 

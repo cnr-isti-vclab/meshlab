@@ -97,7 +97,7 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     targetTex = 0;
 
     connect(this->md(), SIGNAL(currentMeshChanged(int)), this, SLOT(manageCurrentMeshChange()),Qt::QueuedConnection);
-    connect(this->md(), SIGNAL(meshDocumentModified()), this, SLOT(updateAllPerMeshDecorators()),Qt::QueuedConnection);
+    //connect(this->md(), SIGNAL(meshDocumentModified()), this, SLOT(updateAllPerMeshDecorators()),Qt::QueuedConnection);
     connect(this->md(), SIGNAL(meshSetChanged()), this, SLOT(updateMeshSetVisibilities()));
     connect(this->md(), SIGNAL(rasterSetChanged()), this, SLOT(updateRasterSetVisibilities()));
     connect(this->md(),SIGNAL(documentUpdated()),this,SLOT(completeUpdateRequested()));
@@ -1075,7 +1075,7 @@ void GLArea::updateAllDecorators()
 		decorInterface->startDecorate(p, *md(), this->glas.currentGlobalParamSet, this);
 	}
 	if (mvc() != NULL)
-		mvc()->updateAllViewer();
+		mvc()->updateAllViewers();
 }
 
 void GLArea::setCurrentEditAction(QAction *editAction)

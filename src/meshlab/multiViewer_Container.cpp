@@ -196,7 +196,7 @@ void MultiViewer_Container::removeView(int viewerId)
 	GLArea* viewer;
 	for (int i=0; i< viewerList.count(); i++)
 	{
-		if(viewerList.at(i)->getId() == viewerId)
+		if((viewer != NULL) && (viewerList.at(i)->getId() == viewerId))
 			viewer = viewerList.at(i);
 	}
 	assert(viewer);
@@ -282,16 +282,20 @@ void MultiViewer_Container::updateCurrent(int current)
 GLArea * MultiViewer_Container::getViewer(int id)
 {
 	foreach ( GLArea* viewer, viewerList)
-		if (viewer->getId() == id)
+		if ((viewer != NULL) && (viewer->getId() == id))
 			return viewer;
 	return 0;
 }
 
 int MultiViewer_Container::getViewerByPicking(QPoint p){
-	foreach ( GLArea* viewer, viewerList){
-		QPoint pViewer = viewer->mapFromGlobal(p);
-		if(viewer->visibleRegion().contains(pViewer))
-			return viewer->getId();
+	foreach ( GLArea* viewer, viewerList)
+	{
+		if (viewer != NULL)
+		{
+			QPoint pViewer = viewer->mapFromGlobal(p);
+			if (viewer->visibleRegion().contains(pViewer))
+				return viewer->getId();
+		}
 	}
 	return -1;
 }
@@ -304,14 +308,32 @@ int MultiViewer_Container::viewerCounter(){
 	return viewerList.count();
 }
 
-void MultiViewer_Container::updateAllViewer(){
-	foreach ( GLArea* viewer, viewerList)
-		viewer->update();
+void MultiViewer_Container::updateAllViewers(){
+	foreach(GLArea* viewer, viewerList)
+	{
+		if (viewer != NULL)
+			viewer->update();
+	}
 }
 
-void MultiViewer_Container::resetAllTrackBall(){
-	foreach ( GLArea* viewer, viewerList)
-		viewer->resetTrackBall();
+void MultiViewer_Container::updateAllDecoratorsForAllViewers()
+{
+	foreach(GLArea* viewer, viewerList)
+	{
+		if (viewer != NULL)
+			viewer->updateAllPerMeshDecorators();
+	}
+}
+
+
+
+void MultiViewer_Container::resetAllTrackBall()
+{
+	foreach(GLArea* viewer, viewerList)
+	{
+		if (viewer != NULL)
+			viewer->resetTrackBall();
+	}
 }
 
 void MultiViewer_Container::update(int id){

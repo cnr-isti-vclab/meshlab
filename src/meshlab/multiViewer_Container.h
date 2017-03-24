@@ -86,9 +86,10 @@ public:
     int getNextViewerId();
     int viewerCounter();
 
-	void updateAllViewer();
+	void updateAllViewers();
 
-    void resetAllTrackBall();
+	void updateAllDecoratorsForAllViewers();
+	void resetAllTrackBall();
     void update(int id);
 
     GLArea* getViewer(int id);

@@ -483,6 +483,9 @@ void MLDefaultMeshDecorators::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp
 
 bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLRenderingData& dt )
 {
+	if (_mw == NULL)
+		return false;
+
     MLPerViewGLOptions opts;
     bool valid = dt.get(opts);
     if (!valid)

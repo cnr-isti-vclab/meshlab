@@ -336,7 +336,7 @@ void MainWindow::switchOffDecorator(QAction* decorator)
 
 void MainWindow::updateLayerDialog()
 {
-	if (meshDoc() == NULL)
+	if ((meshDoc() == NULL) || ((layerDialog != NULL) && !(layerDialog->isVisible())))
 		return;
     MultiViewer_Container* mvc = currentViewContainer();
     if (mvc == NULL)
@@ -1063,6 +1063,8 @@ void MainWindow::runFilterScript()
         qb->reset();
         GLA()->update();
         GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii)->filterName()));
+		if (_currviewcontainer != NULL)
+			_currviewcontainer->updateAllDecoratorsForAllViewers();
     }
 }
 
@@ -1598,9 +1600,11 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     updateLayerDialog();
     updateMenus();
     MultiViewer_Container* mvc = currentViewContainer();
-    if(mvc)
-        mvc->updateAllViewer();
-
+	if (mvc)
+	{
+		mvc->updateAllDecoratorsForAllViewers();
+		mvc->updateAllViewers();
+	}
 }
 
 void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* /*mfc*/)
@@ -1866,7 +1870,7 @@ void MainWindow::postFilterExecution()
         updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
         MultiViewer_Container* mvc = currentViewContainer();
         if(mvc)
-            mvc->updateAllViewer();
+            mvc->updateAllViewers();
     }
     meshDoc()->meshDocStateData().clear();
     meshDoc()->setBusy(false);
@@ -1944,6 +1948,12 @@ void MainWindow::postFilterExecution()
     layerDialog->setVisible((layerDialog->isVisible() || ((newmeshcreated) && (meshDoc()->size() > 0))));
     updateLayerDialog();
     updateMenus();
+	MultiViewer_Container* mvc = currentViewContainer();
+	if (mvc)
+	{
+		mvc->updateAllDecoratorsForAllViewers();
+		mvc->updateAllViewers();
+	}
     delete obj;
 }
 
@@ -2224,6 +2234,7 @@ bool MainWindow::openProject(QString fileName)
     meshDoc()->setFileName(fileName);
     mdiarea->currentSubWindow()->setWindowTitle(fileName);
     meshDoc()->setDocLabel(fileName);
+
     meshDoc()->setBusy(true);
 
     // this change of dir is needed for subsequent textures/materials loading
@@ -2262,7 +2273,7 @@ bool MainWindow::openProject(QString fileName)
         for (int i=0; i<meshDoc()->meshList.size(); i++)
         {
             QString fullPath = meshDoc()->meshList[i]->fullName();
-            meshDoc()->setBusy(true);
+            //meshDoc()->setBusy(true);
             Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
             if (!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm))
                 meshDoc()->delMesh(meshDoc()->meshList[i]);
@@ -2311,17 +2322,22 @@ GLA()->setDrawMode(GLW::DMPoints);*/
 GLA()->setDrawMode(GLW::DMPoints);*/
 /////////////////////////////////////////////////////////
     }
-
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
+
     MultiViewer_Container* mvc = currentViewContainer();
 	if (mvc != NULL)
+	{
 		mvc->resetAllTrackBall();
+		mvc->updateAllDecoratorsForAllViewers();
+	}
+
 	setCurrentMeshBestTab();
     qb->reset();
     saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
     showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 0));
+
     return true;
 }
 
@@ -2407,7 +2423,10 @@ bool MainWindow::appendProject(QString fileName)
     if(this->GLA() == 0)  return false;
 	MultiViewer_Container* mvc = currentViewContainer();
 	if (mvc != NULL)
+	{
+		mvc->updateAllDecoratorsForAllViewers();
 		mvc->resetAllTrackBall();
+	}
 
 	setCurrentMeshBestTab();
     qb->reset();
@@ -2484,7 +2503,7 @@ void MainWindow::documentUpdateRequested()
 			if (currentViewContainer() != NULL)
 			{
 				currentViewContainer()->resetAllTrackBall();
-				currentViewContainer()->updateAllViewer();
+				currentViewContainer()->updateAllViewers();
 			}
 		}
 	}
@@ -2600,9 +2619,13 @@ bool MainWindow::importRaster(const QString& fileImg)
 			rm->shot = GLA()->shotFromTrackball().first;
 			GLA()->resetTrackBall(); // and then we reset the trackball again, to have the standard view
 
+			if (_currviewcontainer != NULL)
+				_currviewcontainer->updateAllDecoratorsForAllViewers();
+
             //			if(mdiarea->isVisible()) GLA()->mvc->showMaximized();
             updateMenus();
             updateLayerDialog();
+
         }
         else
             return false;
@@ -2642,6 +2665,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     }
     meshDoc()->setBusy(true);
     pCurrentIOPlugin->setLog(&meshDoc()->Log);
+
     if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,*prePar,QCallBack,this /*gla*/))
     {
         QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text+
@@ -2649,6 +2673,9 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         meshDoc()->setBusy(false);
         return false;
     }
+
+
+	//std::cout << "Opened mesh: in " << tm.elapsed() << " secs\n";
 	// After opening the mesh lets ask to the io plugin if this format
     // requires some optional, or userdriven post-opening processing.
     // and in that case ask for the required parameters and then
@@ -2829,7 +2856,8 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         QFileInfo info(fileName);
         MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),info.fileName());
         qb->show();
-        QTime t;t.start();
+		QTime t;
+		t.start();
 		Matrix44m mtr;
 		mtr.SetIdentity();
         bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,isareload);
@@ -2864,9 +2892,11 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
     }// end foreach file of the input list
     GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
 
-    this->currentViewContainer()->resetAllTrackBall();
-
-    qb->reset();
+	if (_currviewcontainer != NULL)
+	{
+		_currviewcontainer->resetAllTrackBall();
+		_currviewcontainer->updateAllDecoratorsForAllViewers();
+	}
     return true;
 }
 
@@ -2929,9 +2959,12 @@ void MainWindow::reloadAllMesh()
         loadMeshWithStandardParams(fileName,mmm,mat,true);
     }
     qb->reset();
-    update();
-    if (GLA() != NULL)
-        GLA()->update();
+    
+	if (_currviewcontainer != NULL)
+	{
+		_currviewcontainer->updateAllDecoratorsForAllViewers();
+		_currviewcontainer->updateAllViewers();
+	}
 }
 
 void MainWindow::reload()
@@ -2951,9 +2984,11 @@ void MainWindow::reload()
 	mat.SetIdentity();
     loadMeshWithStandardParams(fileName,meshDoc()->mm(),mat,true);
     qb->reset();
-    update();
-    if (GLA() != NULL)
-        GLA()->update();
+	if (_currviewcontainer != NULL)
+	{
+		_currviewcontainer->updateAllDecoratorsForAllViewers();
+		_currviewcontainer->updateAllViewers();
+	}
 }
 
 bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes)
@@ -3223,19 +3258,20 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
-    int static lastPos=-1;
-    if(pos==lastPos) return true;
-    lastPos=pos;
+	int static lastPos = -1;
+	if (pos == lastPos) return true;
+	lastPos = pos;
 
-    static QTime currTime = QTime::currentTime();
-    if(currTime.elapsed()< 100) return true;
-    currTime.start();
-    MainWindow::globalStatusBar()->showMessage(str,5000);
-    qb->show();
-    qb->setEnabled(true);
-    qb->setValue(pos);
-    MainWindow::globalStatusBar()->update();
-    qApp->processEvents();
+	static QTime currTime = QTime::currentTime();
+	if (currTime.elapsed() < 100) 
+		return true;
+	currTime.start();
+	MainWindow::globalStatusBar()->showMessage(str, 5000);
+	qb->show();
+	qb->setEnabled(true);
+	qb->setValue(pos);
+	MainWindow::globalStatusBar()->update();
+	qApp->processEvents();
     return true;
 }
 
