@@ -13,16 +13,13 @@ install:
       brew update > /dev/null
       brew install qt5
       export QTDIR="/usr/local/opt/qt5"
-      ls /usr/local/opt
-      ls /usr/local/opt/qt5
     fi
 
 script:
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-   then
-      PATH="$QTDIR/bin:$PATH"
-      LDFLAGS=-L$QTDIR/lib
-      CPPFLAGS=-I$QTDIR/include
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
+      PATH="$QTDIR/bin:$PATH" ;
+      LDFLAGS=-L$QTDIR/lib ;
+      CPPFLAGS=-I$QTDIR/include ;
    fi
   - cd src
   - source /opt/qt55/bin/qt55-env.sh
