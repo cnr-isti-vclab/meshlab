@@ -10,7 +10,6 @@ install:
     then
       brew update > /dev/null
       brew install llvm
-      ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9
       export PATH="/usr/local/opt/llvm/bin:$PATH"
       which clang
       clang++-mp-3.9 --version
@@ -24,6 +23,8 @@ install:
 
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ls /usr/local/opt/llvm            ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ls /usr/local/opt/llvm/lib           ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ls  /usr/local/opt/llvm/bin            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
