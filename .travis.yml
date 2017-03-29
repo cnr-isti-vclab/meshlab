@@ -29,12 +29,12 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS="-L$QTDIR/lib -L/usr/local/opt/llvm/lib"            ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
   - cd src
   - cd external
   - qmake 
   - make
   - cd ..
-  - qmake meshlab_mini.pro
+  - qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_mini.pro 
   - make 
