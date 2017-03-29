@@ -24,3 +24,6 @@ script:
   - qmake --version
   - qmake 
   - make
+  - cd ..
+  - qmake meshlab_mini.pro
+  - make 
