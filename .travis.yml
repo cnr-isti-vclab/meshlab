@@ -29,7 +29,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib -L/usr/local/opt/llvm/lib            ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS="-L$QTDIR/lib -L/usr/local/opt/llvm/lib"            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
   - cd src
   - cd external
