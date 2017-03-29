@@ -7,6 +7,9 @@ os:
 # OS X Qt http://braumeister.org/search/qt5
 # we need to use macdeployqtfix after using macdeployqt to fix the library paths!
 install:
+  - cd ..
+  - git clone -b devel https://github.com/cnr-isti-vclab/vcglib.git
+  - cd meshlab
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
