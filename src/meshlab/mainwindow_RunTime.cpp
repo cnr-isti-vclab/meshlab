@@ -2897,6 +2897,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
 		_currviewcontainer->resetAllTrackBall();
 		_currviewcontainer->updateAllDecoratorsForAllViewers();
 	}
+	qb->reset();
     return true;
 }
 
