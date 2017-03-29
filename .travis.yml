@@ -16,13 +16,10 @@ install:
     fi
 
 script:
- - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then
-      PATH="$QTDIR/bin:$PATH" ;
-      LDFLAGS=-L$QTDIR/lib ;
-      CPPFLAGS=-I$QTDIR/include ;
-   fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"             ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib             ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include              ;fi
   - cd src
-  - source /opt/qt55/bin/qt55-env.sh
   - cd external
   - qmake --version
   - qmake 
