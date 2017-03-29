@@ -1,0 +1,30 @@
+#sudo: required
+#dist: trusty
+
+#before_install:
+#  - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+#  - sudo apt-get update -qq
+
+#install:
+#  - sudo apt-get -y install qt55[QTPACKAGE]
+
+os:
+#  - linux
+  - osx
+
+# OS X Qt http://braumeister.org/search/qt5
+# we need to use macdeployqtfix after using macdeployqt to fix the library paths!
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      brew update > /dev/null
+      brew install qt5
+      export QTDIR="/usr/local/opt/qt5"
+    fi
+
+
+script:
+  - cd src
+  - source /opt/qt55/bin/qt55-env.sh
+  - cd external
+  - qmake
