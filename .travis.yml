@@ -1,3 +1,6 @@
+# Enable C++ support
+language: cpp
+
 os:
   - osx
 
@@ -15,8 +18,7 @@ install:
     fi
 
 script:
- - |
-   if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+ - if [[ "$TRAVIS_OS_NAME" == "osx" ]]
    then
       PATH="$QTDIR/bin:$PATH"
       LDFLAGS=-L$QTDIR/lib
