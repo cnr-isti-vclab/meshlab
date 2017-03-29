@@ -49,8 +49,7 @@ public:
 	void getActionsWithNMatches(const int n,QList<QAction*>& res); 
 private:
 	friend int WordActionsMapAccessor::rankedMatchesPerInputString(const QString& input,RankedMatches& rm) const;
-	int computeRankedMatches(const QStringList& inputst,const WordActionsMap& map);
-	QMap<QAction*,int> wordmatchesperaction;
+	int computeRankedMatches(const QStringList& inputst,const WordActionsMap& map,bool matchesontitlearemoreimportant = true);
     QVector<QList<QAction*> > ranking;
 };
 

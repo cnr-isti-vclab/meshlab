@@ -80,29 +80,43 @@ void WordActionsMapAccessor::addSubStrings( QStringList& res ) const
 }
 
 RankedMatches::RankedMatches()
-:wordmatchesperaction(),ranking()
+:ranking()
 {
 }
 
-int RankedMatches::computeRankedMatches( const QStringList& inputst,const WordActionsMap& map )
+int RankedMatches::computeRankedMatches( const QStringList& inputst,const WordActionsMap& map, bool matchesontitlearemoreimportant)
 {
-	wordmatchesperaction.clear();
+	QMap<QAction*, float> wordmatchesperaction;
 	ranking.clear();
-	ranking.resize(inputst.size());
+	int inputstsize = inputst.size();
+	ranking.resize(inputstsize);
+	float bonuspertitleword = 0.0f;
+	if (matchesontitlearemoreimportant)
+		bonuspertitleword = 1.0f / pow(10,inputstsize);
 	foreach(const QString& st,inputst)
 	{
 		QList<QAction*> res;
 		bool found = map.getActionsPerWord(st,res);
 		if (found)
 		{
-			foreach(QAction* act,res)
+			foreach(QAction* act, res)
+			{
 				++wordmatchesperaction[act];
+				QString title = act->text().toLower().trimmed();
+				if (title.contains(st))
+					wordmatchesperaction[act] = wordmatchesperaction[act] + bonuspertitleword;
+			}
 		}
 	}
+
+	QMap<float, QList<QAction*> > rankedmatches;
+	for (QMap<QAction*, float>::iterator it = wordmatchesperaction.begin(); it != wordmatchesperaction.end(); ++it)
+		rankedmatches[it.value()].push_back(it.key());
+
 	int maxindex = -1;
-	for(QMap<QAction*,int>::iterator it = wordmatchesperaction.begin();it != wordmatchesperaction.end();++it)
+	for(QMap<float,QList<QAction*> >::iterator it = rankedmatches.end() - 1;it != rankedmatches.begin() - 1;--it)
 	{
-		int index = it.value() - 1;
+		int index = std::floor(it.key()) - 1;
 		if (index >= ranking.size())
 		{
 			throw InvalidInvariantException("WARNING! Index contained in wordmatchesperaction it's out-of-bound.");
@@ -110,7 +124,7 @@ int RankedMatches::computeRankedMatches( const QStringList& inputst,const WordAc
 		}
 		if (index > maxindex)
 			maxindex = index;
-		ranking[index].push_back(it.key());
+		ranking[index].append(it.value());
 	}
 	return maxindex + 1;
 }
