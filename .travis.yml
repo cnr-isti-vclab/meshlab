@@ -16,12 +16,12 @@ install:
 
 script:
  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
-    then
+   if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+   then
       PATH="$QTDIR/bin:$PATH"
       LDFLAGS=-L$QTDIR/lib
       CPPFLAGS=-I$QTDIR/include
-    fi
+   fi
   - cd src
   - source /opt/qt55/bin/qt55-env.sh
   - cd external
