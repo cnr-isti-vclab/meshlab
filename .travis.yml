@@ -13,6 +13,8 @@ install:
     then
       brew update > /dev/null
       brew install qt5
+      brew install llvm
+      ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9
       export QTDIR="/usr/local/opt/qt5"
     fi
 
@@ -25,5 +27,5 @@ script:
   - qmake 
   - make
   - cd ..
-  - qmake meshlab_full.pro
+  - qmake meshlab_mini.pro
   - make 
