@@ -1,6 +1,8 @@
 #include "searcher.h"
 #include "mlexception.h"
 
+#include <cmath>
+
 WordActionsMap::WordActionsMap()
 :wordacts()
 {
@@ -92,7 +94,7 @@ int RankedMatches::computeRankedMatches( const QStringList& inputst,const WordAc
 	ranking.resize(inputstsize);
 	float bonuspertitleword = 0.0f;
 	if (matchesontitlearemoreimportant)
-		bonuspertitleword = 1.0f / pow(10,inputstsize);
+		bonuspertitleword = 1.0f / std::pow(10,inputstsize);
 	foreach(const QString& st,inputst)
 	{
 		QList<QAction*> res;
