@@ -372,11 +372,12 @@ void MainWindow::updateLayerDialog()
 
 void MainWindow::updateMenus()
 {
-	if (meshDoc() == NULL)
-		return;
 
-    bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-    bool notEmptyActiveDoc = activeDoc && !meshDoc()->meshList.empty();
+    bool activeDoc = !(mdiarea->subWindowList().empty()) && (mdiarea->currentSubWindow() != NULL);
+    bool notEmptyActiveDoc = activeDoc && (meshDoc() != NULL) && !(meshDoc()->meshList.empty());
+
+	//std::cout << "SubWindowsList empty: " << mdiarea->subWindowList().empty() << " Valid Current Sub Windows: " << (mdiarea->currentSubWindow() != NULL) << " MeshList empty: " << meshDoc()->meshList.empty() << "\n";
+
     importMeshAct->setEnabled(activeDoc);
 
     exportMeshAct->setEnabled(notEmptyActiveDoc);
@@ -507,7 +508,7 @@ while(ii < meshDoc()->meshList.size())
     if(tmp != NULL)
     {
         showLayerDlgAct->setChecked(layerDialog->isVisible());
-        showRasterAct->setEnabled(meshDoc()->rm() != 0);
+        showRasterAct->setEnabled((meshDoc() != NULL) && (meshDoc()->rm() != 0));
         showRasterAct->setChecked(tmp->isRaster());
     }
     else
@@ -3904,4 +3905,5 @@ void MainWindow::closeCurrentDocument()
 	layerDialog->setVisible(false);
 	if (mdiarea != NULL)
 		mdiarea->closeActiveSubWindow();
+	updateMenus();
 }
