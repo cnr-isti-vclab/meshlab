@@ -2,7 +2,7 @@
 language: cpp
 
 os:
-#  - osx
+  - osx
   - linux
 
 sudo: required
