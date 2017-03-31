@@ -48,6 +48,6 @@ script:
   - qmake 
   - make
   - cd ..
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_mini.pro         ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_full.pro         ;fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then qmake meshlab_full.pro         ;fi
   - make 
