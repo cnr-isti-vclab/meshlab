@@ -51,5 +51,6 @@ script:
   - qmake 
   - make
   - cd ..
-  - qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_mini.pro 
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_mini.pro         ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then qmake meshlab_mini.pro         ;fi
   - make 
