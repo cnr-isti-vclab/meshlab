@@ -1,4 +1,7 @@
 # ![MeshLab Logo](src/meshlab/images/eye64.png) MeshLab
+
+[![Build Status](https://travis-ci.org/cnr-isti-vclab/meshlab.svg?branch=master)](https://travis-ci.org/cnr-isti-vclab/meshlab)
+
 This is the official repository for the sources and the binaries of MeshLab. 
 
 MeshLab is an open source, portable, and extensible system for the processing and editing of unstructured large 3D triangular meshes. The source is released under the GPL license.
