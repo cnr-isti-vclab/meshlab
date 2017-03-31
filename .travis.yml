@@ -9,7 +9,7 @@ sudo: required
 dist: trusty
 
 before_install:
-  -|
+  - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
       sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
