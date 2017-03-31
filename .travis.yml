@@ -2,7 +2,19 @@
 language: cpp
 
 os:
-  - osx
+#  - osx
+  - linux
+
+sudo: required
+dist: trusty
+
+before_install:
+  -|
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+      sudo apt-get update -qq
+    fi
 
 install:
   - |
@@ -11,11 +23,12 @@ install:
       brew update > /dev/null
       brew install llvm
       export PATH="/usr/local/opt/llvm/bin:$PATH"
-      which clang
-      clang++-mp-3.9 --version
-      clang --version
       brew install qt5      
       export QTDIR="/usr/local/opt/qt5"
+    fi
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      sudo apt-get -y install qt55[QTPACKAGE]
     fi
   - cd ..
   - git clone -b devel https://github.com/cnr-isti-vclab/vcglib.git
@@ -31,8 +44,10 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
   - cd src
   - cd external
+  - qmake --version
   - qmake 
   - make
   - cd ..
