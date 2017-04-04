@@ -35,8 +35,6 @@ SdfGpuPlugin::SdfGpuPlugin()
 
 void SdfGpuPlugin::initParameterSet(QAction *action, MeshModel &/*m*/, RichParameterSet &par)
 {
-
-    qDebug() << "called here!";
     mAction = ID(action);
     QStringList onPrimitive; onPrimitive.push_back("On vertices"); onPrimitive.push_back("On Faces");
     par.addParam( new RichEnum("onPrimitive", 0, onPrimitive, "Metric:",
