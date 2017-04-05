@@ -591,6 +591,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
 		parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
 		parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
+        parlst.addParam(new RichBool("splitSurfaceWithSection",false,"Create also split surfaces","If selected, it will create two layers with the portion of the mesh under and over the section plane. It requires manifoldness of the mesh."));
 	} break;
 
 	case FP_QUAD_DOMINANT:
@@ -1265,7 +1266,7 @@ switch(ID(filter))
 	{
         m.updateDataMask(MeshModel::MM_FACEFACETOPO);
         if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0){
-            errorMessage = "Mesh has some not 2-manifold edges, filter require edge manifoldness";
+            errorMessage = "Mesh has some not 2-manifold edges, filter requires edge manifoldness";
             return false;
         }
 
@@ -1420,7 +1421,7 @@ switch(ID(filter))
         m.updateDataMask(MeshModel::MM_FACEQUALITY | MeshModel::MM_FACEFACETOPO );
         if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m.cm) > 0)
         {
-            errorMessage = "Mesh has some not 2 manifoldfaces, filter require manifoldness"; // text
+            errorMessage = "Mesh has some not 2 manifoldfaces, filter requires manifoldness"; // text
             return false;
         }
         tri::BitQuadCreation<CMeshO>::MakeTriEvenBySplit(m.cm);
@@ -1613,24 +1614,63 @@ switch(ID(filter))
         }
         sectionName.append(QString::number(planeOffset));
 
-        //this is used to generate svg slices
-//WARNING!!!! it should be useless....
-        MeshModel* cap= md.addNewMesh("",sectionName,true/*,RenderMode(GLW::DMWire)*/);
+        MeshModel* cap= md.addNewMesh("",sectionName,true);
         vcg::IntersectionPlaneMesh<CMeshO, CMeshO, CMeshO::ScalarType>(orig->cm, slicingPlane, cap->cm );
         tri::Clean<CMeshO>::RemoveDuplicateVertex(cap->cm);
 		tri::UpdateBounding<CMeshO>::Box(cap->cm);
 
-		// the mesh has to return to its original position
-		if (m.cm.Tr != Matrix44m::Identity())
-			tri::UpdatePosition<CMeshO>::Matrix(m.cm, Inverse(m.cm.Tr), true);
-			
-		if(par.getBool("createSectionSurface"))
+        // the mesh has to return to its original position
+        if (m.cm.Tr != Matrix44m::Identity())
+          tri::UpdatePosition<CMeshO>::Matrix(m.cm, Inverse(m.cm.Tr), true);
+        
+        if(par.getBool("createSectionSurface"))
         {
-            sectionName.append("_mesh");
-            MeshModel* cap2= md.addNewMesh("",sectionName);
+            MeshModel* cap2= md.addNewMesh("",sectionName+"_filled");
             tri::CapEdgeMesh(cap->cm, cap2->cm);
             cap2->UpdateBoxAndNormals();
         }
+        
+        if(par.getBool("splitSurfaceWithSection"))
+        {
+          MeshModel* underM= md.addNewMesh("",sectionName+"_under");
+          underM->updateDataMask(MeshModel::MM_FACEFACETOPO);
+          underM->updateDataMask(MeshModel::MM_VERTQUALITY);
+          
+          tri::Append<CMeshO,CMeshO>::Mesh(underM->cm,orig->cm);
+          tri::UpdateQuality<CMeshO>::VertexFromPlane(underM->cm, slicingPlane);
+          tri::QualityMidPointFunctor<CMeshO> slicingfunc(0.0);
+          tri::QualityEdgePredicate<CMeshO> slicingpred(0.0,0.0);
+          tri::UpdateTopology<CMeshO>::FaceFace(underM->cm);
+          if (  tri::Clean<CMeshO>::CountNonManifoldEdgeFF(underM->cm) > 0)
+          {
+              Log("Mesh has some not 2 manifoldfaces, splitting surfaces requires manifoldness");
+              md.delMesh(underM);
+          }
+          else
+          {
+            tri::RefineE<CMeshO, tri::QualityMidPointFunctor<CMeshO>, tri::QualityEdgePredicate<CMeshO> > (underM->cm, slicingfunc, slicingpred, false);
+            
+            tri::UpdateSelection<CMeshO>::VertexFromQualityRange(underM->cm,0,std::numeric_limits<float>::max());
+            tri::UpdateSelection<CMeshO>::FaceFromVertexStrict(underM->cm);
+            tri::UpdateSelection<CMeshO>::FaceInvert(underM->cm);
+            
+            MeshModel* overM= md.addNewMesh("",sectionName+"_over");
+            tri::Append<CMeshO,CMeshO>::Mesh(overM->cm,underM->cm,true);
+            
+            tri::UpdateSelection<CMeshO>::VertexClear(underM->cm);
+            tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(underM->cm);
+            for(auto fi=underM->cm.face.begin();fi!=underM->cm.face.end();++fi)
+              if(!(*fi).IsD() && (*fi).IsS()) 
+                tri::Allocator<CMeshO>::DeleteFace(underM->cm,*fi);
+            for(auto vi=underM->cm.vert.begin();vi!=underM->cm.vert.end();++vi)
+              if(!(*vi).IsD() && (*vi).IsS()) 
+                tri::Allocator<CMeshO>::DeleteVertex(underM->cm,*vi);
+            
+            underM->UpdateBoxAndNormals();
+            overM->UpdateBoxAndNormals();
+          }
+        }
+        
 	} break;
 }
 return true;
