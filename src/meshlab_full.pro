@@ -76,5 +76,6 @@ SUBDIRS       = common \
                 sampleplugins/samplefilterdyn \     
                 sampleplugins/filter_createiso \
                 sampleplugins/filter_geodesic \
+				sampleplugins/sample_filtergpu \
 
 

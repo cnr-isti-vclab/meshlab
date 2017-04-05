@@ -1475,7 +1475,9 @@ void RichParameterToQTableWidgetItemConstructor::visit( RichDynamicFloat& pd )
 IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
     :MeshLabWidget(p,rpar),fl()
 {
-    filename = new QLineEdit(this);
+	if (rpar != NULL)
+		fl = rpar->val->getFileName();
+	filename = new QLineEdit(this);
     filename->setText(tr(""));
     browse = new QPushButton(this);
     descLab = new QLabel(rp->pd->fieldDesc,this);
@@ -1487,8 +1489,6 @@ IOFileWidget::IOFileWidget( QWidget* p,RichParameter* rpar )
     hlay = new QHBoxLayout();
     hlay->addWidget(filename,2);
     hlay->addWidget(browse);
-
-    //gridLay->addLayout(lay,row,1,Qt::AlignTop);
 
     connect(browse,SIGNAL(clicked()),this,SLOT(selectFile()));
     connect(this,SIGNAL(dialogParamChanged()),p,SIGNAL(parameterChanged()));
@@ -1563,6 +1563,7 @@ SaveFileWidget::SaveFileWidget( QWidget* p,RichSaveFile* rpar )
     :IOFileWidget(p,rpar)
 {
     filename->setText(rpar->val->getFileName());
+	QString tmp = rp->val->getFileName();
 }
 
 SaveFileWidget::~SaveFileWidget()

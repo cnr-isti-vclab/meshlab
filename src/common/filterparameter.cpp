@@ -384,7 +384,7 @@ void RichParameterXMLVisitor::visit( RichOpenFile& pd )
 
 void RichParameterXMLVisitor::visit( RichSaveFile& pd )
 {
-    fillRichParameterAttribute("RichOpenFile",pd.name,pd.val->getFileName(),pd.pd->fieldDesc,pd.pd->tooltip);
+    fillRichParameterAttribute("RichSaveFile",pd.name,pd.val->getFileName(),pd.pd->fieldDesc,pd.pd->tooltip);
     SaveFileDecoration* dec = reinterpret_cast<SaveFileDecoration*>(pd.pd);
     parElem.setAttribute("ext",dec->ext);
 }
@@ -540,7 +540,7 @@ bool RichParameterFactory::create( const QDomElement& np,RichParameter** par )
 
     if(type == "RichOpenFile")
     {
-    QStringList list;
+		QStringList list;
         int exts_card = np.attribute(QString("exts_cardinality")).toUInt(&corrconv);
         if (!corrconv)
             return false;

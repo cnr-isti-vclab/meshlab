@@ -92,7 +92,8 @@ void ExtraSampleGPUPlugin::initParameterSet(QAction * action, MeshModel & m, Ric
 			parlst.addParam(new RichColor    ("ImageBackgroundColor", QColor(50, 50, 50),                 "Image Background Color", "The color used as image background."        ));
 			parlst.addParam(new RichInt      ("ImageWidth",           512,                                "Image Width",            "The width in pixels of the produced image." ));
 			parlst.addParam(new RichInt      ("ImageHeight",          512,                                "Image Height",           "The height in pixels of the produced image."));
-			parlst.addParam(new RichSaveFile ("ImageFileName",        "gpu_generated_image.png", "*.png", "Image File Name",        "The file name used to save the image."      ));
+			QString curr = QDir::currentPath();
+			parlst.addParam(new RichSaveFile ("ImageFileName",        curr + "/gpu_generated_image.png", "*.png", "Base Image File Name",   "The file name used to save the image."      ));
 			break;
 		}
 		default : assert(0);
@@ -192,7 +193,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			const vcg::Point3f lightDirectionVS = vcg::Point3f(0.0f, 0.0f, -1.0f).Normalize();
 
 			glEnable(GL_DEPTH_TEST);
-			glClearColor(GLfloat(backgroundColor.red())/255.0f, GLfloat(backgroundColor.green())/255.0f, GLfloat(backgroundColor.blue())/255.0f, 0.0f);
+			glClearColor(GLfloat(backgroundColor.red())/255.0f, GLfloat(backgroundColor.green())/255.0f, GLfloat(backgroundColor.blue())/255.0f, GLfloat(backgroundColor.alpha()) / 255.0f);
 
 			glViewport(0, 0, width, height);
 
@@ -245,6 +246,8 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			ctx.release();
 			glPopAttrib();
 			glContext->doneCurrent();
+
+			QString st = par.getSaveFileName("ImageFileName");
 
 			image.rgbSwapped().mirrored().save(par.getSaveFileName("ImageFileName"));
 
