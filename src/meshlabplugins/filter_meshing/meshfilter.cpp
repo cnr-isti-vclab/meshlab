@@ -1092,12 +1092,16 @@ switch(ID(filter))
                 for(int i=0;i<3;i++)
                     qDebug("%8.3f %8.3f %8.3f ",eigenvecMatrix[i][0],eigenvecMatrix[i][1],eigenvecMatrix[i][2]);
 
-                qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);
-
+                qDebug("\n%8.3f %8.3f %8.3f ",eigenvecVector[0],eigenvecVector[1],eigenvecVector[2]);                
                 for(int i=0;i<3;++i)
                     for(int j=0;j<3;++j)
 						transfM[i][j] = eigenvecMatrix[i][j];
 				transfM.transposeInPlace();
+                if(transfM.Determinant()<0) 
+                  for(int i=0;i<3;++i) transfM[2][i]=-transfM[2][i];
+                  
+                qDebug("Determinant %f", transfM.Determinant());
+                
         }
         else
         {
@@ -1106,16 +1110,20 @@ switch(ID(filter))
             Matrix33m PCA;
             Point3m pcav;
             I.InertiaTensorEigen(PCA,pcav);
-            for(int i=0;i<4;i++)
-                qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+            for(int i=0;i<3;i++)
+                qDebug("%8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2]);
             PCA.transposeInPlace();
+            qDebug("Determinant %f", PCA.Determinant());
 
-            for(int i=0;i<4;i++)
-                qDebug("%8.3f %8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2],PCA[i][3]);
+            for(int i=0;i<3;i++)
+              qDebug("%8.3f %8.3f %8.3f",PCA[i][0],PCA[i][1],PCA[i][2]);
 
             for(int i=0;i<3;++i)
                 for(int j=0;j<3;++j)
 					transfM[i][j] = PCA[i][j];
+            if(transfM.Determinant()<0) 
+              for(int i=0;i<3;++i) transfM[2][i]=-transfM[2][i];
+            
         }
 
 		ApplyTransform(md, transfM, par.getBool("allLayers"), par.getBool("Freeze"), false, false);
