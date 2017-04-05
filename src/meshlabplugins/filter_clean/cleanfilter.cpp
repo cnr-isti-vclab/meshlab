@@ -115,7 +115,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_SNAP_MISMATCHED_BORDER :    return QString("Try to snap together adjacent borders that are slightly mismatched.<br>"
                                                        "This situation can happen on badly triangulated adjacent patches defined by high order surfaces.<br>"
                                                        "For each border vertex the filter snap it onto the closest boundary edge only if it is closest of <i>edge_lenght*threshold</i>. When vertex is snapped the correspoinding face it split and a new vertex is created.");
-    case FP_MERGE_CLOSE_VERTEX :        return QString("Merge together all the vertices that are nearer than the speicified threshold. Like a unify duplicated vertices but with some tolerance.");
+    case FP_MERGE_CLOSE_VERTEX :        return QString("Merge together all the vertices that are nearer than the specified threshold. Like a unify duplicated vertices but with some tolerance.");
     case FP_REMOVE_DUPLICATE_FACE :     return QString("Delete all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
