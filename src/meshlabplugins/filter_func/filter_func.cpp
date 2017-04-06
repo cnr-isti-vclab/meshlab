@@ -966,32 +966,28 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     }
 
     // use Grid function to generate Grid
-    std::vector<float> data(w*h,0);
-    tri::Grid<CMeshO>(m.cm, w, h, wl, hl, &data[0]);
+    tri::Grid<CMeshO>(m.cm, w, h, wl, hl);
 
     // if "centered on origin" is checked than move generated Grid in (0,0,0)
     if(par.getBool("center"))
     {
       // move x and y
-      double halfw = double(w-1)/2;
-      double halfh = double(h-1)/2;
-      double wld = wl/double(w);
-      double hld = hl/float(h);
+      Scalarm halfw = Scalarm(w-1)/2;
+      Scalarm halfh = Scalarm(h-1)/2;
+      Scalarm wld = wl/Scalarm(w);
+      Scalarm hld = hl/Scalarm(h);
 
-      CMeshO::VertexIterator vi;
-      for(vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+      for(auto vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
       {
         (*vi).P()[0] = (*vi).P()[0] - (wld * halfw);
         (*vi).P()[1] = (*vi).P()[1] - (hld * halfh);
       }
     }
     // update bounding box, normals
-    Matrix44m rot; rot.SetRotateDeg(180,Point3m(0,1,0));
+//    Matrix44m rot; rot.SetRotateDeg(180,Point3m(0,1,0));
+    Matrix44m rot; rot.SetScale(-1,1,-1);
     tri::UpdatePosition<CMeshO>::Matrix(m.cm,rot,false);
-    tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m.cm);
-    tri::UpdateNormal<CMeshO>::NormalizePerFace(m.cm);
-    tri::UpdateBounding<CMeshO>::Box(m.cm);
-
+    m.UpdateBoxAndNormals();
     return true;
   }
     break;
