@@ -45,6 +45,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECT_DILATE <<
     FP_SELECT_BORDER <<
     FP_SELECT_INVERT <<
+    FP_SELECT_CONNECTED <<
     FP_SELECT_BY_VERT_QUALITY <<
     FP_SELECT_BY_FACE_QUALITY <<
     CP_SELFINTERSECT_SELECT <<
@@ -109,6 +110,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 	case FP_SELECT_ALL :                  return tr("Select All");
 	case FP_SELECT_NONE :                 return tr("Select None");
 	case FP_SELECT_INVERT :               return tr("Invert Selection");
+    case FP_SELECT_CONNECTED :            return tr("Select Connected Faces");
 	case FP_SELECT_DELETE_VERT :          return tr("Delete Selected Vertices");
 	case FP_SELECT_DELETE_FACE :          return tr("Delete Selected Faces");
 	case FP_SELECT_DELETE_FACEVERT :      return tr("Delete Selected Faces and Vertices");
@@ -138,6 +140,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case FP_SELECT_DILATE :             return tr("Dilate (expand) the current set of selected faces.");
 	case FP_SELECT_ERODE :              return tr("Erode (reduce) the current set of selected faces.");
 	case FP_SELECT_INVERT :             return tr("Invert the current set of selected faces.");
+    case FP_SELECT_CONNECTED:           return tr("Expand the current face selection so that it includes all the faces in the connected components where there is at least a selected face.");
 	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces.");
 	case FP_SELECT_ALL :                return tr("Select all the faces of the current mesh.");
 	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
@@ -278,7 +281,10 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 		m.UpdateBoxAndNormals();
 	break;
 
-	case FP_SELECT_DELETE_FACEVERT :
+	case FP_SELECT_CONNECTED:
+      tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
+   break;
+ case FP_SELECT_DELETE_FACEVERT :
 		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
@@ -500,6 +506,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 		return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
 
 	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
+    case FP_SELECT_CONNECTED:
 	case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection);
 
 	case FP_SELECT_BY_FACE_QUALITY :
@@ -517,6 +524,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
   {
 	case CP_SELECT_NON_MANIFOLD_FACE:
 	case CP_SELECT_NON_MANIFOLD_VERTEX:       
+    case FP_SELECT_CONNECTED:
 		return MeshModel::MM_FACEFACETOPO;
   
 	case CP_SELECT_TEXBORDER: return MeshModel::MM_FACEFACETOPO;
@@ -536,6 +544,7 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
       case FP_SELECT_NONE:
       case FP_SELECT_INVERT:
       case FP_SELECT_ERODE:
+      case FP_SELECT_CONNECTED:
       case FP_SELECT_DILATE:
       case FP_SELECT_BORDER:
       case FP_SELECT_BY_VERT_QUALITY:
@@ -560,6 +569,7 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
 	case   CP_SELFINTERSECT_SELECT:
 	case   FP_SELECT_FACES_BY_EDGE:    
 	case   FP_SELECT_BORDER:           return MeshModel::MM_FACENUMBER;
+    case   FP_SELECT_CONNECTED:        return MeshModel::MM_FACENUMBER;
 	case   FP_SELECT_BY_COLOR:         return MeshModel::MM_VERTCOLOR;
 	case   FP_SELECT_BY_VERT_QUALITY:  return MeshModel::MM_VERTQUALITY;
 	case   FP_SELECT_BY_FACE_QUALITY:  return MeshModel::MM_FACEQUALITY;
