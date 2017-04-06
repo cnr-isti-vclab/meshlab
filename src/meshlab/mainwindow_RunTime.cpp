@@ -1288,7 +1288,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
                         bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
                     {    
-                        updatemask = MeshModel::MM_ALL;
+						updatemask = mm->dataMask();
                         connectivitychanged = true;
                     }
                     else
