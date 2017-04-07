@@ -115,8 +115,11 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
           }
         }
         MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
-        if (iIO)
-          meshIOPlug.push_back(iIO);
+		if (iIO)
+		{
+			meshIOPlug.push_back(iIO);
+			iIO->initGlobalParameterSet(NULL,defaultGlobal);
+		}
 
         MeshDecorateInterface *iDecorator = qobject_cast<MeshDecorateInterface *>(plugin);
         if (iDecorator)

@@ -1288,7 +1288,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                         bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
                         bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
                     {    
-						updatemask = mm->dataMask();
+						updatemask = MeshModel::MM_ALL;
                         connectivitychanged = true;
                     }
                     else
@@ -2852,6 +2852,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
             preOpenDialog.setFocus();
             preOpenDialog.exec();
         }
+		prePar.join(currentGlobalParams);
         int mask = 0;
         //MeshModel *mm= new MeshModel(gla->meshDoc);
         QFileInfo info(fileName);
@@ -2929,6 +2930,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
     {
         RichParameterSet prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
+		prePar = prePar.join(currentGlobalParams);
         int mask = 0;
         QTime t;t.start();
         bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload);
