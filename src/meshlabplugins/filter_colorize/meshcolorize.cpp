@@ -452,14 +452,26 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
             m.updateDataMask(MeshModel::MM_VERTCOLOR);
             if(!HasPerWedgeTexCoord(m.cm)) break;
             CMeshO::FaceIterator fi;
-            QImage tex(m.cm.textures[0].c_str());
+
+			vector <QImage> srcImgs;
+			srcImgs.resize(m.cm.textures.size());
+			QString path(m.fullName());
+
+			for (int textInd = 0; textInd < m.cm.textures.size(); textInd++)
+			{
+				path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(m.cm.textures[textInd].c_str());
+				CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
+				CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+			}
+
             for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
             {
                 for (int i=0; i<3; i++)
                 {
                     // note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
                     vcg::Point2f newcoord((*fi).WT(i).P().X()-floor((*fi).WT(i).P().X()),(*fi).WT(i).P().Y()-floor((*fi).WT(i).P().Y()));
-                    QRgb val = tex.pixel(newcoord[0]*tex.width(),(1-newcoord[1])*tex.height()-1);
+					int textInd = (*fi).WT(i).N();
+					QRgb val = srcImgs[textInd].pixel(newcoord[0] * srcImgs[textInd].width(), (1 - newcoord[1])*srcImgs[textInd].height() - 1);
                     (*fi).V(i)->C()=Color4b(qRed(val),qGreen(val),qBlue(val),255);
                 }
             }
