@@ -176,185 +176,169 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
 // Core Function doing the actual mesh processing.
 bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-    CMeshO::FaceIterator fi;
-    int numFacesSel,numVertSel;
+ CMeshO::FaceIterator fi;
+ int numFacesSel,numVertSel;
 
-    switch(ID(filter))
-    {
-    case  FP_RENAME_MESH:          md.mm()->setLabel(par.getString("newName"));  break;
-    case  FP_RENAME_RASTER:          md.rm()->setLabel(par.getString("newName"));  break;
-    case  FP_SELECTCURRENT:     md.setCurrent(par.getMesh("mesh"));           break;
-    case  FP_MESH_VISIBILITY:   
-    {
-      MeshModel *mm=par.getMesh("mesh");
-      if(mm) 
-        md.setVisible(mm->id(),par.getBool("isMeshVisible"));
-    } break;
-    case  FP_DELETE_MESH :
-        if(md.mm())
-            md.delMesh(md.mm());
-        break;
-    case  FP_DELETE_NON_VISIBLE_MESH :
-        foreach(MeshModel *mmp, md.meshList)
-        {
-            if(!mmp->visible)
-            {
-                md.delMesh(mmp);
-            }
-        }
-        break;
-    case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm());            break;
-    case  FP_DELETE_NON_SELECTED_RASTER :
-        foreach(RasterModel *rmp, md.rasterList)
-        {
-            if(!rmp->visible)
-            {
-                md.delRaster(rmp);
-            }
-        }
-        break;
-    case FP_SPLITSELECTEDVERTICES :
-        {
-            MeshModel* currentmesh = md.mm();
+ switch(ID(filter))
+ {
+	case  FP_RENAME_MESH:     md.mm()->setLabel(par.getString("newName")); break;
 
-            MeshModel* destmesh = md.addNewMesh("","SelectedVerticesSubset",true);
-            destmesh->updateDataMask(currentmesh);
-            numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentmesh->cm);
-            tri::Append<CMeshO,CMeshO>::Mesh(destmesh->cm, currentmesh->cm, true);
-            destmesh->updateDataMask(currentmesh);
-            if(par.getBool("DeleteOriginal"))	// delete original faces
-            {
-                CMeshO::VertexIterator vi;
+	case  FP_RENAME_RASTER:   md.rm()->setLabel(par.getString("newName")); break;
 
-                int delfaces = tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(currentmesh->cm);
-                for(CMeshO::FaceIterator fi=currentmesh->cm.face.begin();fi!=currentmesh->cm.face.end();++fi)
-                    if(!(*fi).IsD() && (*fi).IsS() )
-                        tri::Allocator<CMeshO>::DeleteFace(currentmesh->cm,*fi);
-                for(vi=currentmesh->cm.vert.begin();vi!=currentmesh->cm.vert.end();++vi)
-                    if(!(*vi).IsD() && (*vi).IsS() )
-                        tri::Allocator<CMeshO>::DeleteVertex(currentmesh->cm,*vi);
+	case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("mesh")); break;
 
-                tri::UpdateSelection<CMeshO>::VertexClear(currentmesh->cm);
+	case  FP_MESH_VISIBILITY:   
+	{
+		MeshModel *mm=par.getMesh("mesh");
+		if(mm) 
+			md.setVisible(mm->id(),par.getBool("isMeshVisible"));
+	} break;
 
-                currentmesh->clearDataMask(MeshModel::MM_FACEFACETOPO );
+	case  FP_DELETE_MESH:
+	{
+		if (md.mm())
+			md.delMesh(md.mm());
+	} break;
 
-                Log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
-            }
-            else								// keep original faces
-            {
-                Log("Moved %i vertices to layer %i", numVertSel, md.meshList.size());
-            }
-            vcg::tri::UpdateFlags<CMeshO>::VertexClear(destmesh->cm,CMeshO::VertexType::SELECTED);
+	case  FP_DELETE_NON_VISIBLE_MESH:
+	{
+		foreach(MeshModel *mmp, md.meshList)
+		{
+			if (!mmp->visible)
+				md.delMesh(mmp);
+		}
+	} break;
 
-            // init new layer
-            destmesh->UpdateBoxAndNormals();
-            destmesh->cm.Tr = currentmesh->cm.Tr;
-            destmesh->updateDataMask(currentmesh);
+    case  FP_DELETE_RASTER :  if(md.rm()) md.delRaster(md.rm()); break;
 
-            break;
-        }
+	case  FP_DELETE_NON_SELECTED_RASTER:
+	{
+		foreach(RasterModel *rmp, md.rasterList)
+		{
+			if (!rmp->visible)
+			   md.delRaster(rmp);
+		}
+	} break;
+
+	case FP_SPLITSELECTEDVERTICES :
+	{
+		MeshModel* currentModel = md.mm();
+
+		MeshModel* destModel = md.addNewMesh("","SelectedVerticesSubset",true);
+		destModel->updateDataMask(currentModel);
+
+		numVertSel = tri::UpdateSelection<CMeshO>::VertexCount(currentModel->cm);
+
+		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm, true);
+
+		if(par.getBool("DeleteOriginal"))	// delete original vert/faces
+		{
+			CMeshO::VertexIterator vi;
+
+			int delfaces = tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(currentModel->cm);
+			for (CMeshO::FaceIterator fi = currentModel->cm.face.begin(); fi != currentModel->cm.face.end(); ++fi)
+				if(!(*fi).IsD() && (*fi).IsS() )
+					tri::Allocator<CMeshO>::DeleteFace(currentModel->cm, *fi);
+			for (vi = currentModel->cm.vert.begin(); vi != currentModel->cm.vert.end(); ++vi)
+				if(!(*vi).IsD() && (*vi).IsS() )
+					tri::Allocator<CMeshO>::DeleteVertex(currentModel->cm, *vi);
+
+			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
+			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
+
+			Log("Moved %i vertices to layer %i, deleted %i faces", numVertSel, delfaces, md.meshList.size());
+		}
+		else								// keep original faces
+		{
+			Log("Copied %i vertices to layer %i", numVertSel, md.meshList.size());
+		}
+		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
+
+		// init new layer
+		destModel->UpdateBoxAndNormals();
+		destModel->cm.Tr = currentModel->cm.Tr;
+		destModel->updateDataMask(currentModel);
+	} break;
+
     case FP_SPLITSELECTEDFACES :
-        {
-            // creating the new layer
-            // that is the back one
-            MeshModel *currentMesh  = md.mm();				// source = current
-           /* RenderMode rm;
-            if (currentMesh->hasDataMask(MeshModel::MM_VERTCOLOR))
-                rm.colorMode = GLW::CMPerVert;
-            else if (currentMesh->hasDataMask(MeshModel::MM_FACECOLOR))
-                    rm.colorMode = GLW::CMPerFace;
-            else if (currentMesh->hasDataMask(MeshModel::MM_COLOR))
-                    rm.colorMode = GLW::CMPerMesh;
+	{
+		MeshModel *currentModel = md.mm();
 
-            if (currentMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-                rm.textureMode = GLW::TMPerWedgeMulti;
-            else if (currentMesh->hasDataMask(MeshModel::MM_VERTTEXCOORD))
-                    rm.textureMode = GLW::TMPerVert;*/
-            //vcg::GLW::TextureMode tex = rm.textureMode;
-            MeshModel *destMesh= md.addNewMesh("","SelectedFacesSubset",true); // After Adding a mesh to a MeshDocument the new mesh is the current one
-            destMesh->updateDataMask(currentMesh);
+		MeshModel *destModel = md.addNewMesh("", "SelectedFacesSubset", true);
+		destModel->updateDataMask(currentModel);
 
-            // select all points involved
-            //if (currentMesh->cm.fn > 0)
-            //{
-            //tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
-            tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentMesh->cm);
-            //}
+		// select all points involved
+		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(currentModel->cm);
+		numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentModel->cm);
+		numVertSel = tri::UpdateSelection<CMeshO>::VertexCount(currentModel->cm);
 
-            tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm, true);
+		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm, true);
 
-            numFacesSel = tri::UpdateSelection<CMeshO>::FaceCount(currentMesh->cm);
-            numVertSel  = tri::UpdateSelection<CMeshO>::VertexCount(currentMesh->cm);
+		if(par.getBool("DeleteOriginal"))	// delete original faces
+		{
+			CMeshO::VertexIterator vi;
+			CMeshO::FaceIterator   fi;
+			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentModel->cm);
+			for (fi = currentModel->cm.face.begin(); fi != currentModel->cm.face.end(); ++fi)
+				if(!(*fi).IsD() && (*fi).IsS() )
+					tri::Allocator<CMeshO>::DeleteFace(currentModel->cm, *fi);
+			for (vi = currentModel->cm.vert.begin(); vi != currentModel->cm.vert.end(); ++vi)
+				if(!(*vi).IsD() && (*vi).IsS() )
+					tri::Allocator<CMeshO>::DeleteVertex(currentModel->cm, *vi);
 
-            if(par.getBool("DeleteOriginal"))	// delete original faces
-            {
-                CMeshO::VertexIterator vi;
-                CMeshO::FaceIterator   fi;
-                tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
-                tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(currentMesh->cm);
-                for(fi=currentMesh->cm.face.begin();fi!=currentMesh->cm.face.end();++fi)
-                    if(!(*fi).IsD() && (*fi).IsS() )
-                        tri::Allocator<CMeshO>::DeleteFace(currentMesh->cm,*fi);
-                for(vi=currentMesh->cm.vert.begin();vi!=currentMesh->cm.vert.end();++vi)
-                    if(!(*vi).IsD() && (*vi).IsS() )
-                        tri::Allocator<CMeshO>::DeleteVertex(currentMesh->cm,*vi);
+			tri::UpdateSelection<CMeshO>::VertexClear(currentModel->cm);
+			tri::UpdateSelection<CMeshO>::FaceClear(currentModel->cm);
+			currentModel->clearDataMask(MeshModel::MM_FACEFACETOPO);
 
-                tri::UpdateSelection<CMeshO>::VertexClear(currentMesh->cm);
-                tri::UpdateSelection<CMeshO>::FaceClear(currentMesh->cm);
+			Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+		}
+		else								// keep original faces
+		{
+			Log("Copied %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
+		}
+		vcg::tri::UpdateFlags<CMeshO>::VertexClear(destModel->cm, CMeshO::VertexType::SELECTED);
+		vcg::tri::UpdateFlags<CMeshO>::FaceClear(destModel->cm, CMeshO::FaceType::SELECTED);
 
-                currentMesh->clearDataMask(MeshModel::MM_FACEFACETOPO );
+		// init new layer
+		destModel->UpdateBoxAndNormals();
+		destModel->cm.Tr = currentModel->cm.Tr;
+		destModel->updateDataMask(currentModel);
+	} break;
 
-                Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
-            }
-            else								// keep original faces
-            {
-                Log("Moved %i faces and %i vertices to layer %i", numFacesSel, numVertSel, md.meshList.size());
-            }
-            vcg::tri::UpdateFlags<CMeshO>::VertexClear(destMesh->cm,CMeshO::VertexType::SELECTED);
-            vcg::tri::UpdateFlags<CMeshO>::FaceClear(destMesh->cm,CMeshO::FaceType::SELECTED);
+	case FP_DUPLICATE :
+	{
+		MeshModel *currentModel = md.mm();				// source = current
+		QString newName = currentModel->label() + "_copy";
+		MeshModel *destModel = md.addNewMesh("", newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
+		destModel->updateDataMask(currentModel);
+		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm);
 
-            // init new layer
-            destMesh->UpdateBoxAndNormals();
-            destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
-            destMesh->updateDataMask(currentMesh);
-        } break;
+		Log("Duplicated current model to layer %i", md.meshList.size());
 
-
-    case FP_DUPLICATE :
-        {
-            // creating the new layer
-            // that is the back one
-            MeshModel *currentMesh  = md.mm();				// source = current
-            QString newName = currentMesh->label() + "_copy";
-            MeshModel *destMesh= md.addNewMesh("",newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
-            destMesh->updateDataMask(currentMesh);
-            tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, currentMesh->cm);
-
-            Log("Duplicated current model to layer %i", md.meshList.size());
-
-            // init new layer
-            destMesh->UpdateBoxAndNormals();
-            destMesh->cm.Tr = currentMesh->cm.Tr;								// copy transformation
-        } break;
+		// init new layer
+		destModel->UpdateBoxAndNormals();
+		destModel->cm.Tr = currentModel->cm.Tr;
+	} break;
 
     case FP_FLATTEN :
-        {
-            // to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-            bool deleteLayer = par.getBool("DeleteLayer");
-            bool mergeVisible = par.getBool("MergeVisible");
-            bool mergeVertices = par.getBool("MergeVertices");
-            bool alsoUnreferenced = par.getBool("AlsoUnreferenced");
+	{
+		bool deleteLayer = par.getBool("DeleteLayer");
+		bool mergeVisible = par.getBool("MergeVisible");
+		bool mergeVertices = par.getBool("MergeVertices");
+		bool alsoUnreferenced = par.getBool("AlsoUnreferenced");
 
-            MeshModel *destMesh= md.addNewMesh("","Merged Mesh");
+		MeshModel *destModel = md.addNewMesh("", "Merged Mesh");
 
-            QList<MeshModel *> toBeDeletedList;
+		QList<MeshModel *> toBeDeletedList;
 
-            int cnt=0;
-            foreach(MeshModel *mmp, md.meshList)
-            { ++cnt;
+		int cnt=0;
+		foreach(MeshModel *mmp, md.meshList)
+		{ 
+			++cnt;
             if(mmp->visible || !mergeVisible)
             {
-                if(mmp!=destMesh)
+				if (mmp != destModel)
                 {
                     cb(cnt*100/md.meshList.size(), "Merging layers...");
                     tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,mmp->cm.Tr,true);
@@ -363,59 +347,63 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
                     {
                         vcg::tri::Clean<CMeshO>::RemoveUnreferencedVertex(mmp->cm);
                     }
-                    destMesh->updateDataMask(mmp);
-                    tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm,mmp->cm);
+					destModel->updateDataMask(mmp);
+					tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, mmp->cm);
                     tri::UpdatePosition<CMeshO>::Matrix(mmp->cm,Inverse(mmp->cm.Tr),true);
                     
                 }
             }
-            }
+		}
             
-            if( deleteLayer )	{
-                Log( "Deleted %d merged layers", toBeDeletedList.size());
-                foreach(MeshModel *mmp,toBeDeletedList) {
-                    md.delMesh(mmp);
-                }
-            }
+		if( deleteLayer )
+		{
+			Log( "Deleted %d merged layers", toBeDeletedList.size());
+			foreach(MeshModel *mmp,toBeDeletedList)
+				md.delMesh(mmp);
+		}
 
-            if( mergeVertices )
-            {
-                int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(destMesh->cm);
-                Log( "Removed %d duplicated vertices", delvert);
-            }
-            destMesh->UpdateBoxAndNormals();
-            Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
-        } break;
+		if( mergeVertices )
+		{
+			int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(destModel->cm);
+			Log( "Removed %d duplicated vertices", delvert);
+		}
+
+		destModel->UpdateBoxAndNormals();
+		Log("Merged all the layers to single mesh of %i vertices",md.mm()->cm.vn);
+	} break;
 
     case FP_SPLITCONNECTED :
-        {
-            CMeshO &cm = md.mm()->cm;
-            md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
-            std::vector< std::pair<int,CMeshO::FacePointer> > connectedCompVec;
-            int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm,  connectedCompVec);
-            Log("Found %i Connected Components",numCC);
-            for(size_t i=0; i<connectedCompVec.size();++i)
-            {
-                tri::UpdateSelection<CMeshO>::FaceClear(cm);
-                connectedCompVec[i].second->SetS();
-                tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm/*,true*/);
-                tri::UpdateSelection<CMeshO>::VertexClear(cm);
-                tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
+	{
+		MeshModel *currentModel = md.mm();
+		CMeshO &cm = md.mm()->cm;
+		md.mm()->updateDataMask(MeshModel::MM_FACEFACETOPO);
+		std::vector< std::pair<int,CMeshO::FacePointer> > connectedCompVec;
+		int numCC = tri::Clean<CMeshO>::ConnectedComponents(cm,  connectedCompVec);
+		Log("Found %i Connected Components",numCC);
+		
+		for(size_t i=0; i<connectedCompVec.size();++i)
+		{
+			tri::UpdateSelection<CMeshO>::FaceClear(cm);
+			connectedCompVec[i].second->SetS();
+			tri::UpdateSelection<CMeshO>::FaceConnectedFF(cm/*,true*/);
+			tri::UpdateSelection<CMeshO>::VertexClear(cm);
+			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
 
-                MeshModel *destMesh= md.addNewMesh("",QString("CC %1").arg(i));
-                tri::Append<CMeshO,CMeshO>::Mesh(destMesh->cm, cm, true);
-                destMesh->UpdateBoxAndNormals();
-                destMesh->cm.Tr = cm.Tr; // copy transformation
-                destMesh->updateDataMask(md.mm());
-            }
-        } break;
+			MeshModel *destModel= md.addNewMesh("",QString("CC %1").arg(i));
+			destModel->updateDataMask(currentModel);
+			tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, cm, true);
+
+			// init new layer
+			destModel->UpdateBoxAndNormals();
+			destModel->cm.Tr = currentModel->cm.Tr;
+		}
+	} break;
+
 	case FP_EXPORT_CAMERAS:
 	{
 		int output = par.getEnum("ExportFile");
-				
 		QString name = par.getString("newName");
-		
-		
+				
 		if (output ==0)
 		{ 
 			FILE* outfile = NULL;
@@ -578,19 +566,13 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 					xmlWriter.writeEndElement();
 				}
 			}
-
 			xmlWriter.writeEndElement();
 			xmlWriter.writeEndDocument();
 
-
 			file.close();
-		
-			
 		}
-
-		
-		
 	} break;
+
 	case FP_IMPORT_CAMERAS:
 	{
 		QString fileName = par.getOpenFileName("ImportFile");
@@ -618,9 +600,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			if (line[0] == '\0') return false;
 			sscanf(line, "%d %d", &num_cams, &num_points);
 			
-			//////
 			///// Check if the number of active rasters and cameras is the same
-
 			int active = 0;
 			for (int i = 0; i < md.rasterList.size(); i++)
 			{
@@ -635,9 +615,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 				return false;
 			}
 
-			/////
 			//// Import cameras
-
 			for (uint i = 0; i < num_cams; ++i)
 			{
 				float f, k1, k2;
@@ -671,12 +649,8 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 				size = sizeImg.size();
 				md.rasterList[i]->shot.Intrinsics.ViewportPx = vcg::Point2i(size.width(), size.height());
 				md.rasterList[i]->shot.Intrinsics.CenterPx[0] = (int)((double)md.rasterList[i]->shot.Intrinsics.ViewportPx[0] / 2.0f);
-				md.rasterList[i]->shot.Intrinsics.CenterPx[1] = (int)((double)md.rasterList[i]->shot.Intrinsics.ViewportPx[1] / 2.0f);
-				
+				md.rasterList[i]->shot.Intrinsics.CenterPx[1] = (int)((double)md.rasterList[i]->shot.Intrinsics.ViewportPx[1] / 2.0f);	
 			}
-
-			////////
-
 		}
 		else if ((fi.suffix().toLower() == "xml"))
 		{
@@ -687,7 +661,6 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			std::vector<Shotf >   shots;
 
 			////// Read and store sensors list
-
 			QDomNodeList sensors = doc.elementsByTagName("sensor");
 
 			if (sensors.size() == 0)
@@ -759,9 +732,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 				}
 			}
 
-			/////////
 			///////// Read and import cameras 
-
 			QDomNodeList cameras = doc.elementsByTagName("camera");
 
 			if (cameras.size() == 0)
@@ -819,14 +790,10 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 						pos[2] = values[11].toFloat();
 						md.rasterList[i]->shot.Extrinsics.SetRot(mat);
 						md.rasterList[i]->shot.Extrinsics.SetTra(pos);
-
 					}
 					node = node.nextSibling();
 				}
-				
 			}
-
-			////////
 		}
 
 		else
@@ -835,12 +802,10 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			errorMessage = "Unknown file type";
 			return false;
 		}
-		
-
 	} break;
-    }
 
-    return true;
+ } // end case
+ return true;
 }
 
 FilterLayerPlugin::FilterClass FilterLayerPlugin::getClass(QAction *a)
