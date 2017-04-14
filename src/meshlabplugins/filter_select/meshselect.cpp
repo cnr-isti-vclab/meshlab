@@ -30,6 +30,10 @@
 
 using namespace vcg;
 
+// ERROR CHECKING UTILITY
+#define CheckError(x,y); if ((x)) {this->errorMessage = (y); return false;}
+///////////////////////////////////////////////////////
+
 SelectionFilterPlugin::SelectionFilterPlugin()
 {
   typeList <<
@@ -260,42 +264,57 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 
  switch(ID(action))
  {
-	case FP_SELECT_DELETE_VERT :
+	case FP_SELECT_DELETE_VERT:
+	{
+		if (m.cm.svn == 0) { Log("Nothing done: no vertex selected"); break; }
 		tri::UpdateSelection<CMeshO>::FaceClear(m.cm);
 		tri::UpdateSelection<CMeshO>::FaceFromVertexLoose(m.cm);
-		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-			if(!(*fi).IsD() && (*fi).IsS()) 
-				tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-			if(!(*vi).IsD() && (*vi).IsS()) 
-				tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-		m.clearDataMask(MeshModel::MM_FACEFACETOPO );
+		int vvn = m.cm.vn;
+		int ffn = m.cm.fn;
+		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+			if (!(*fi).IsD() && (*fi).IsS())
+				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+		for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+			if (!(*vi).IsD() && (*vi).IsS())
+				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
-	break;
+		Log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
+	} break;
 
-	case FP_SELECT_DELETE_FACE :
-		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-			if(!(*fi).IsD() && (*fi).IsS()) 
-				tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-		m.clearDataMask(MeshModel::MM_FACEFACETOPO );
+	case FP_SELECT_DELETE_FACE:
+	{
+		if (m.cm.sfn == 0) { Log("Nothing done: no faces selected"); break; }
+		int ffn = m.cm.fn;
+		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+			if (!(*fi).IsD() && (*fi).IsS())
+				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
-	break;
+		Log("Deleted %i faces.", ffn - m.cm.fn);
+	} break;
 
-	case FP_SELECT_CONNECTED:
-      tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
-   break;
- case FP_SELECT_DELETE_FACEVERT :
+	case FP_SELECT_DELETE_FACEVERT:
+	{
+		if (m.cm.sfn == 0) { Log("Nothing done: no faces selected"); break; }
 		tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
 		tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-		for(fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
-			if(!(*fi).IsD() && (*fi).IsS()) 
-				tri::Allocator<CMeshO>::DeleteFace(m.cm,*fi);
-        for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
-			if(!(*vi).IsD() && (*vi).IsS()) 
-				tri::Allocator<CMeshO>::DeleteVertex(m.cm,*vi);
-		m.clearDataMask(MeshModel::MM_FACEFACETOPO );
+		int vvn = m.cm.vn;
+		int ffn = m.cm.fn;
+		for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+			if (!(*fi).IsD() && (*fi).IsS())
+				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+		for (vi = m.cm.vert.begin(); vi != m.cm.vert.end(); ++vi)
+			if (!(*vi).IsD() && (*vi).IsS())
+				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
-    break;
+		Log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
+	} break;
+
+	case FP_SELECT_CONNECTED:
+		tri::UpdateSelection<CMeshO>::FaceConnectedFF(m.cm);
+	break;
 
 	case FP_SELECTBYANGLE :
 	{
@@ -567,8 +586,11 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
 	case   CP_SELECT_NON_MANIFOLD_VERTEX:
 	case   CP_SELECT_NON_MANIFOLD_FACE:
 	case   CP_SELFINTERSECT_SELECT:
-	case   FP_SELECT_FACES_BY_EDGE:    
-	case   FP_SELECT_BORDER:           return MeshModel::MM_FACENUMBER;
+	case   FP_SELECT_FACES_BY_EDGE:
+	case   FP_SELECT_FACE_FROM_VERT:
+	case   FP_SELECT_BORDER:
+	case   FP_SELECT_ERODE:
+	case   FP_SELECT_DILATE:
     case   FP_SELECT_CONNECTED:        return MeshModel::MM_FACENUMBER;
 	case   FP_SELECT_BY_COLOR:         return MeshModel::MM_VERTCOLOR;
 	case   FP_SELECT_BY_VERT_QUALITY:  return MeshModel::MM_VERTQUALITY;
