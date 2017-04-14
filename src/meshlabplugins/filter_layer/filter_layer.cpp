@@ -124,16 +124,15 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         break;
     case FP_FLATTEN :
         parlst.addParam(new RichBool ("MergeVisible", true, "Merge Only Visible Layers",
-            "Merge the vertices that are duplicated among different layers. <br>"
-            "Very useful when the layers are spliced portions of a single big mesh."));
+            "If true, flatten only visible layers, othwerwise, all layers are used"));
         parlst.addParam(new RichBool ("DeleteLayer", true, "Delete Layers ",
-            "Delete all the merged layers. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
+            "Delete all the layers used as source in flattening. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
         parlst.addParam(new RichBool ("MergeVertices", true,  "Merge duplicate vertices",
             "Merge the vertices that are duplicated among different layers. \n\n"
             "Very useful when the layers are spliced portions of a single big mesh."));
         parlst.addParam(new RichBool ("AlsoUnreferenced", false, "Keep unreferenced vertices",
             "Do not discard unreferenced vertices from source layers\n\n"
-            "Necessary for point-only layers"));
+            "Necessary for point-cloud layers"));
         break;
     case FP_RENAME_MESH :
         parlst.addParam(new RichString ("newName",
