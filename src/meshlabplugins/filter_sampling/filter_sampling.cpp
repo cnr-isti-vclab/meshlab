@@ -1021,7 +1021,7 @@ switch(ID(action))
 		bool sampleFace=par.getBool("SampleFace");
 		float distUpperBound = par.getAbsPerc("MaxDist");
 
-		if (mm0 = mm1){
+		if (mm0 == mm1){
 			Log("Housdorff Distance: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
@@ -1103,7 +1103,7 @@ switch(ID(action))
 		bool useSigned = par.getBool("SignedDist");
 		float maxDistABS = par.getAbsPerc("MaxDist");
 
-		if (mm0 = mm1){
+		if (mm0 == mm1){
 			Log("Distance from Reference: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
@@ -1154,7 +1154,7 @@ switch(ID(action))
 		bool selectionT = par.getBool("SelectionTransfer");
 		bool distquality = par.getBool("QualityDistance");
 
-		if (srcMesh = trgMesh){
+		if (srcMesh == trgMesh){
 			Log("Vertex Attribute Transfer: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
