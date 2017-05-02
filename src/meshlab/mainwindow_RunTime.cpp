@@ -2534,6 +2534,13 @@ void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
 
 bool MainWindow::importRaster(const QString& fileImg)
 {
+	if (!GLA())
+	{
+		this->newProject();
+		if (!GLA())
+			return false;
+	}
+
     QStringList filters;
     filters.push_back("Images (*.jpg *.png *.xpm)");
     filters.push_back("*.jpg");
@@ -3147,8 +3154,10 @@ bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
 
 bool MainWindow::saveSnapshot()
 {
-    SaveSnapshotDialog dialog(this);
+	if (!GLA()) return false;
+	if (meshDoc()->isBusy()) return false;
 
+    SaveSnapshotDialog dialog(this);
     dialog.setValues(GLA()->ss);
 
     if (dialog.exec()==QDialog::Accepted)
