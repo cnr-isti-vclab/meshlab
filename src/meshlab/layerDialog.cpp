@@ -115,7 +115,7 @@ void LayerDialog::keyReleaseEvent(QKeyEvent * event)
 
 void LayerDialog::enterEvent(QEvent* /*event*/)
 {
-    activateWindow();
+    //activateWindow();		// why it was so?
 	setFocus();
 }
 
