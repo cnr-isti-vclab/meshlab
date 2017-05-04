@@ -168,7 +168,7 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
 
   if((current_manip == EditManipulatorsPlugin::ManRotate) || (current_manip == EditManipulatorsPlugin::ManScale))
   {
-    if(e->key() == Qt::Key_Space)
+    if ((e->key() == Qt::Key_Space) || (e->key() == Qt::Key_C))
     {
       aroundOrigin = !aroundOrigin;
     }
@@ -234,7 +234,7 @@ void EditManipulatorsPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &model, GLA
   }
 	
   // numerical input
-  if(current_manip_mode != EditManipulatorsPlugin::ModNone)  // transform on one axis only
+  if ((current_manip == EditManipulatorsPlugin::ManScale) || (current_manip == EditManipulatorsPlugin::ManRotate) || (current_manip_mode != EditManipulatorsPlugin::ModNone))  // transform on one axis only
   {
 	bool hasNumberChanged = false;
 
@@ -1088,8 +1088,8 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     
     if((current_manip == EditManipulatorsPlugin::ManRotate) || (current_manip == EditManipulatorsPlugin::ManScale))
     {
-      if(aroundOrigin)  HelpString2 += "  -  press SPACE to pivot on BBox center";
-                  else  HelpString2 += "  -  press SPACE to pivot on Mesh Origin";
+      if(aroundOrigin)  HelpString2 += "  -  press SPACE or C to pivot on BBox center";
+                  else  HelpString2 += "  -  press SPACE or C to pivot on Mesh Origin";
     }
 
     HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
@@ -1185,8 +1185,8 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
           displayOffset *= snapto; 
         }
 
-        if(useinputnumber)
-          displayOffset = inputnumber;
+		if (useinputnumber)
+			displayOffset = inputnumber;
 
         delta_Transform.SetTranslate(axis * displayOffset);  
         newmatrix = delta_Transform * original_Transform;
@@ -1207,7 +1207,7 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
         }
 
         if(useinputnumber)
-          displayOffset = inputnumber;
+			displayOffset = inputnumber;
 
         delta_Transform.SetRotateDeg(displayOffset, axis);
 
@@ -1239,7 +1239,6 @@ void EditManipulatorsPlugin::UpdateMatrix(MeshModel &model, GLArea * gla, bool a
 
         if(useinputnumber)
           displayOffset = inputnumber;
-
 
 		if ((current_manip_mode == EditManipulatorsPlugin::ModX) || (current_manip_mode == EditManipulatorsPlugin::ModXX))
 		{
