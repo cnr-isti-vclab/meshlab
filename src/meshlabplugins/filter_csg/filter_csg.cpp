@@ -119,7 +119,33 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             MeshModel *firstMesh = par.getMesh("FirstMesh");
             MeshModel *secondMesh = par.getMesh("SecondMesh");
 			if ((firstMesh == NULL) || (secondMesh == NULL))
+			{
+				Log("CSG filter: cannot compute, mesh does not exist");
+				errorMessage = "cannot compute, mesh does not exist";
 				return false;
+			}
+
+			if ((firstMesh->cm.fn == 0) || (secondMesh->cm.fn == 0))
+			{
+				Log("CSG filter: cannot compute, mesh has no faces");
+				errorMessage = "cannot compute, mesh has no faces";
+				return false;
+			}
+
+			if (firstMesh == secondMesh){
+				Log("CSG filter: cannot compute, it is the same mesh");
+				errorMessage = "Cannot compute, it is the same mesh";
+				return false; // can't continue, mesh can't be processed
+			}
+
+			//check if folder is writable
+			QTemporaryFile file("./_tmp_XXXXXX.tmp");
+			if (!file.open())
+			{
+				Log("ERROR - current folder is not writable. CSG needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+				errorMessage = "current folder is not writable.<br> CSG needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
+				return false;
+			}
 
             firstMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
             secondMesh->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
@@ -140,7 +166,6 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
 				tmpsecondmesh.cm.vert[ii].P() = tmpsecondmesh.cm.Tr * tmpsecondmesh.cm.vert[ii].P();
 			vcg::tri::UpdateBounding<CMeshO>::Box(tmpsecondmesh.cm);
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(tmpfirstmesh.cm);
-
 
 //            typedef CMeshO::ScalarType scalar;
             typedef Intercept<mpq_class,Scalarm> intercept;

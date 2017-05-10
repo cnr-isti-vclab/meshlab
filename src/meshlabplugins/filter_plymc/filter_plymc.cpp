@@ -125,8 +125,8 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 	QTemporaryFile file("./_tmp_XXXXXX.tmp");
 	if (!file.open()) 
 	{
-		Log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder");
-		errorMessage = "current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder";
+		Log("ERROR - current folder is not writable. VCG Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+		errorMessage = "current folder is not writable.<br> VCG Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
 		return false;
 	}
 
