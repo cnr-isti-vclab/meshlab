@@ -43,6 +43,7 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
     FP_SELECT_ALL,
     FP_SELECT_NONE,
     FP_SELECTBYANGLE,
+	FP_SELECT_UGLY,
     FP_SELECT_INVERT,
     FP_SELECT_CONNECTED,
     FP_SELECT_FACE_FROM_VERT,
