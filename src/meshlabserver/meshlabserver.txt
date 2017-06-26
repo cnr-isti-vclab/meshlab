@@ -36,13 +36,13 @@ meshlabserver [logargs] [args]
 
    Examples:
 
-    'meshlabserver -i input.obj -o output.ply -m vc fq wt -s meshclean.mlx'
+    'meshlabserver -i input.obj -o output.ply -m vcfqwt -s meshclean.mlx'
            the script contained in file 'meshclean.mlx' will be applied to the
            mesh contained into 'input.obj'. The vertex coordinates and the
            per-vertex-color, the per-face-quality and the per-wedge-texture
            attributes contained in the current layer will be saved into the output.ply file
 		   
-	 'meshlabserver -i input.obj -o output.ply -l 0 -m vc fq wt -o output_last.ply -l l -s meshclean.mlx'
+	 'meshlabserver -i input.obj -o output.ply -l 0 -m vcfqwt -o output_last.ply -l l -s meshclean.mlx'
            the script contained in file 'meshclean.mlx' will be applied to the
            mesh contained into 'input.obj'. The vertex coordinates and the
            per-vertex-color, the per-face-quality and the per-wedge-texture
