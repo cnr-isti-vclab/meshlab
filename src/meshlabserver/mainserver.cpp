@@ -590,10 +590,12 @@ namespace commandline
     const char vertex('v');
     const char face('f');
     const char wedge('w');
+	const char mesh('m');
     const char color('c');
     const char flags('f');
     const char normal('n');
     const char quality('q');
+	const char polygon('p');
     const char texture('t');
     const char log('l');
     const char dump('d');
@@ -612,19 +614,27 @@ namespace commandline
         docum.close();
     }
 
+	QString filePath()
+	{
+		QString filecharcont("[a-z]|[A-Z]|\\\\|/|\\d|-|_|\\.|\\:");
+		QString filechars("(" + filecharcont + ")+");
+		QString filecharswithspace("(" + filecharcont + "|\\s)+");
+		return QString("(\"" + filecharswithspace + "\"|" + filechars + ")");
+	}
+
     QString optionValueExpression(const char cmdlineopt)
     {
-        return QString ("-" + QString(cmdlineopt) + "\\s+\\S+");
+        return QString ("-" + QString(cmdlineopt) + "\\s+" + filePath());
     }
 
-
     QString outputmeshExpression()
-    {
-
-		QString savingmask("-" + QString(mask) + "\\s+((" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + ")+(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + ")+)+");
+	{
+		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + "|" + QString(polygon) + ")");
+		QString optionslist(options + "(\\s+" + options + ")*");	
+		QString savingmask("-" + QString(mask) + "\\s+" + optionslist);
 		QString layernumber("\\d+");
 		QString layertosave("-" + QString(layer) + "\\s+(" + layernumber + "|" + currentlayer + "|" + lastlayer + ")");
-        return optionValueExpression(outputmesh) + "(\\s+(" + savingmask + "|" + layertosave + "|" + layertosave + "\\s+" + savingmask + "))?";
+        return optionValueExpression(outputmesh) + "(\\s+(" + savingmask + "|" + layertosave + "\\s+" + savingmask + "|" + layertosave + "))*";
     }
 
     bool validateCommandLine(const QString& str)
@@ -635,7 +645,11 @@ namespace commandline
         QString args("(" + arg + ")(\\s+" + arg + ")*");
         QString completecommandline("(" + logstring + "|" + logstring + "\\s+" + args + "|" + args + ")");
         QRegExp completecommandlineexp(completecommandline);
-		bool ret = completecommandlineexp.isValid();
+		//completecommandlineexp.setMinimal(true);
+
+		bool valid = completecommandlineexp.isValid();
+		if (!valid)
+			return false;
         completecommandlineexp.indexIn(str);
         QString rr = completecommandlineexp.cap();
         return (completecommandlineexp.matchedLength() == str.size());
@@ -672,6 +686,7 @@ int main(int argc, char *argv[])
     FILE* logfp = stdout;
     FILE* dumpfp = NULL;
     MeshLabApplication app(argc, argv);
+	QStringList st = app.arguments();
 	std::setlocale(LC_ALL, "C");
 	QLocale::setDefault(QLocale::C);
     if(argc == 1)
@@ -685,8 +700,14 @@ int main(int argc, char *argv[])
     QList<OutProject> outprojectfiles;
 
     QString cmdline;
-    for(int ii = 1;ii < argc;++ii)
-        cmdline = cmdline + argv[ii] + " ";
+	for (int ii = 1; ii < argc; ++ii)
+	{
+		QString argum(argv[ii]);
+		argum = argum.trimmed();
+		if (argum.contains(' '))
+			argum = "\"" + argum + "\"";
+		cmdline = cmdline + argum + " ";
+	}
     if (!commandline::validateCommandLine(cmdline.trimmed()))
     {
         printf("CommandLine Syntax Error: please refer to the following documentation for a complete list of the MeshLabServer parameters.\n");
@@ -889,6 +910,16 @@ int main(int argc, char *argv[])
                                 }
                                 break;
                             }
+						
+						case commandline::mesh :
+							{
+								switch (argv[i][1])
+								{
+								case commandline::polygon: i++; fprintf(logfp, "mesh polygon, "); mask |= vcg::tri::io::Mask::IOM_BITPOLYGONAL;   break;
+								default:  i++; fprintf(logfp, "WARNING: unknowns per MESH attribute '%s'", argv[i + 1]); break;
+								}
+								break;
+							}
                         default :  i++; fprintf(logfp,"WARNING: unknowns attribute '%s'",argv[i]);break;
                         }
                     }while (((i) < argc) && (argv[i][0] != '-'));
