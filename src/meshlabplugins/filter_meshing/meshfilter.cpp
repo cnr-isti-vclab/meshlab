@@ -517,7 +517,8 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 	{
 		QStringList traslMethod;
 		traslMethod.push_back("XYZ translation");
-		traslMethod.push_back("Center on BBox");
+        traslMethod.push_back("Center on Scene BBox");
+        traslMethod.push_back("Center on Layer BBox");
 		traslMethod.push_back("Set new Origin");
 		parlst.addParam(new RichEnum("traslMethod", 0, traslMethod, tr("Transformation:"), tr("[XYZ translation] adds X,Y and Z offset to Layer transformation, [Center on BBox] moves Layer Origin to the Bounding Box center, [Set new Origin] moves Layer Origin to a specific point")));
 		Box3m &bb=m.cm.bbox;
@@ -1143,7 +1144,8 @@ switch(ID(filter))
 		{
 			case 0: break; //we already got it from interface
 			case 1: translation = -(m.cm.Tr * md.bbox().Center()); break; // we consider current transformation when finding bbox center
-			case 2: translation = -par.getPoint3m("newOrigin"); break;
+            case 2: translation = -(m.cm.Tr * m.cm.bbox.Center()); break; // we consider current transformation when finding bbox center
+			case 3: translation = -par.getPoint3m("newOrigin"); break;
 		}
 
         transfM.SetTranslate(translation);
