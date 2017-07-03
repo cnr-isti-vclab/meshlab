@@ -397,11 +397,9 @@ connectRenderModeActionList(rendlist);*/
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 
 	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
-	copyShotToClipboardAct->setShortcut(QKeySequence::Copy);
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
 
 	pasteShotFromClipboardAct = new QAction(tr("Paste shot"), this);
-	pasteShotFromClipboardAct->setShortcut(QKeySequence::Paste);
 	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
