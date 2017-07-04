@@ -56,7 +56,7 @@ void ShowUsage( char* ex )
 	printf( "Usage: %s\n" , ex );
 	printf( "\t --%s <input polygon mesh>\n" , In.name );
 	printf( "\t[--%s <trimming value>]\n" , Trim.name );
-	printf( "\t[--%s <ouput polygon mesh>]\n" , Out.name );
+	printf( "\t[--%s <output polygon mesh>]\n" , Out.name );
 	printf( "\t[--%s <smoothing iterations>=%d]\n" , Smooth.name , Smooth.value );
 	printf( "\t[--%s <relative area of islands>=%f]\n" , IslandAreaRatio.name , IslandAreaRatio.value );
 	printf( "\t[--%s]\n" , PolygonMesh.name );

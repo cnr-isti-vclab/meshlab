@@ -50,7 +50,7 @@ void ShowUsage(char* ex)
 	printf("Usage: %s\n",ex);
 	printf("\t--in  <input points>\n");
 
-	printf("\t--out <ouput triangle mesh>\n");
+	printf("\t--out <output triangle mesh>\n");
 
 	printf("\t[--depth <maximum reconstruction depth>]\n");
 	printf("\t\t Running at depth d corresponds to solving on a 2^d x 2^d x 2^d\n");
