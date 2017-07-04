@@ -277,6 +277,7 @@ connectRenderModeActionList(rendlist);*/
 
 	showTrackBallAct = new QAction(tr("Show &Trackball"), this);
 	showTrackBallAct->setCheckable(true);
+	showTrackBallAct->setShortcut(Qt::SHIFT + Qt::Key_H);
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	resetTrackBallAct = new QAction(tr("Reset &Trackball"), this);
