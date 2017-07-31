@@ -429,11 +429,11 @@ Per ogni componente connessa,
 
 ******************************/
 
-bool AlignGlobal::GlobalAlign(const std::map<int,string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp, CallBack* cb )
+bool AlignGlobal::GlobalAlign(const std::map<int,string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp, CallBackPos* cb )
 {
   double change;
   int step, localmaxiter;
-  cb("Global Alignment...");
+  cb(0,"Global Alignment...");
   LOG(elfp,"----------------\n----------------\nGlobalAlignment (target eps %7.3f)\n",epsilon);
 
   queue<AlignGlobal::Node *>	Q;
