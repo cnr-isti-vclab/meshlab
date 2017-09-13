@@ -51,7 +51,7 @@ public:
 	void drawVert(CMeshO::VertexPointer vp, MeshModel &m, GLArea *gla, QPainter *p);
 
 private:
-    QPoint cur;
+    QPoint curGL;
 	QFont qFont;
     bool haveToPick;
 	int pickmode;
