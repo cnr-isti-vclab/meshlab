@@ -104,6 +104,11 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
     connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
+	QShortcut *copyViewSC = new QShortcut(QKeySequence::Copy, (QWidget*)this);
+	QObject::connect(copyViewSC, SIGNAL(activated()), (QWidget*)this, SLOT(copyToClip()));
+	QShortcut *pasteViewSC = new QShortcut(QKeySequence::Paste, (QWidget*)this);
+	QObject::connect(pasteViewSC, SIGNAL(activated()), (QWidget*)this, SLOT(pasteFromClip()));
+
     /*getting the meshlab MainWindow from parent, which is QWorkspace.
     *note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
     *which takes care about the window frame (its parent is the QWorkspace again).

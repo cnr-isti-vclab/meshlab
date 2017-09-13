@@ -265,6 +265,15 @@ signals:
 
 public slots:
 
+	void copyToClip()
+	{
+		viewToClipboard();
+	}
+	void pasteFromClip()
+	{
+		viewFromClipboard();
+	}
+
     // Called when we change layer, notifies the edit tool if one is open
     void manageCurrentMeshChange();
     // Called when we modify the document
