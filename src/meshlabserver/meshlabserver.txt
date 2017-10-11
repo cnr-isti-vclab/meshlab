@@ -2,7 +2,7 @@ meshlabserver [logargs] [args]
   where logargs can be:
     -d filename             dump on a text file a list of all the
                             filtering functions
-    -l filename             log of the filters is ouput on a file
+    -l filename             log of the filters is output on a file
   where args can be:
     -p filename             meshlab project (.mlp) to be loaded
     -w filename [-x]        output meshlab project (.mlp) to be saved.
@@ -32,6 +32,7 @@ meshlabserver [logargs] [args]
                                 fq -> face quality, fn-> face normals,
                                 wc -> wedge colors, wn-> wedge normals,
                                 wt -> wedge texture coords
+								mp -> polygonal mesh info
     -s filename		          the script to be applied
 
    Examples:

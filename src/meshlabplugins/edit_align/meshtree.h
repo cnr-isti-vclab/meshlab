@@ -28,6 +28,7 @@
 
 #include <common/interfaces.h>
 #include "align/AlignPair.h"
+#include "align/AlignGlobal.h"
 #include "align/OccupancyGrid.h"
 #include <wrap/gui/trackball.h>
 

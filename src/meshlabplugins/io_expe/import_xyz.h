@@ -156,7 +156,7 @@ class ImporterXYZ
         // check the first line
         buf = stream.readLine(0);
         buf = buf.trimmed();
-        line = buf.split(QRegExp("[ |\t]"));
+		line = buf.split(QRegExp("[ |\t]"), QString::SkipEmptyParts);
 
         if (line.size()==6)
         {
@@ -176,7 +176,7 @@ class ImporterXYZ
       {
         buf = stream.readLine(0);
         buf = buf.trimmed();
-        line = buf.split(QRegExp("[ |\t]"));
+		line = buf.split(QRegExp("[ |\t]"), QString::SkipEmptyParts);
 
         if (line.size()==6)
         {

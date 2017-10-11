@@ -30,7 +30,8 @@ $Log: meshedit.cpp,v $
 #include <meshlab/glarea.h>
 #include "sampleedit.h"
 #include <wrap/gl/pick.h>
-#include<wrap/qt/gl_label.h>
+#include <wrap/qt/gl_label.h>
+#include <wrap/qt/device_to_logical.h>
 
 using namespace std;
 using namespace vcg;
@@ -55,7 +56,8 @@ const QString SampleEditPlugin::Info()
 void SampleEditPlugin::mouseReleaseEvent(QMouseEvent * event, MeshModel &/*m*/, GLArea * gla)
 {
 	gla->update();
-	cur = event->pos();
+	const Point2f loc = QTLogicalToOpenGL(gla, event->pos());
+	curGL = QPoint(int(loc.X()), int(loc.Y()));
 	haveToPick = true;
 	curFacePtr = 0;
 	curVertPtr = 0;
@@ -73,7 +75,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		if (pickmode == 0)
 		{
 			NewFaceSel.clear();
-			GLPickTri<CMeshO>::PickVisibleFace(cur.x(), gla->height() - cur.y(), m.cm, NewFaceSel);
+			GLPickTri<CMeshO>::PickVisibleFace(curGL.x(), curGL.y(), m.cm, NewFaceSel);
 			if (NewFaceSel.size() > 0)
 			{
 				curFacePtr = NewFaceSel[pIndex];
@@ -83,7 +85,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 		else if (pickmode == 1)
 		{
 			NewVertSel.clear();
-			GLPickTri<CMeshO>::PickVert(cur.x(), gla->height() - cur.y(), m.cm, NewVertSel,15,15);
+			GLPickTri<CMeshO>::PickVert(curGL.x(), curGL.y(), m.cm, NewVertSel,15,15);
 			if (NewVertSel.size() > 0)
 			{
 				curVertPtr = NewVertSel[pIndex];

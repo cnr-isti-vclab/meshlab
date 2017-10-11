@@ -28,7 +28,6 @@
 #include <omp.h>
 #endif
 #include "meshtree.h"
-#include "align/AlignGlobal.h"
 using namespace vcg;
 
 MeshTree::MeshTree()

@@ -191,9 +191,9 @@ void ShowUsage( char* ex )
 	printf( "Usage: %s\n" , ex );
 	printf( "\t --%s <input points>\n" , In.name );
 
-	printf( "\t[--%s <ouput triangle mesh>]\n" , Out.name );
+	printf( "\t[--%s <output triangle mesh>]\n" , Out.name );
 
-	printf( "\t[--%s <ouput voxel grid>]\n" , VoxelGrid.name );
+	printf( "\t[--%s <output voxel grid>]\n" , VoxelGrid.name );
 
 #ifndef FAST_COMPILE
 	printf( "\t[--%s <b-spline degree>=%d]\n" , Degree.name , Degree.value );
