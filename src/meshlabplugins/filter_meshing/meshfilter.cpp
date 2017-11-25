@@ -99,9 +99,9 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
     lastq_OptimalPlacement = true;
     lastq_Selected         = false;
     lastq_PlanarQuadric    = false;
-    lastq_PlanarWeight     = lpp.QualityQuadricWeight;
+    lastq_PlanarWeight     = lpp.QualityWeightFactor;
     lastq_QualityWeight    = false;
-    lastq_BoundaryWeight   = lpp.BoundaryQuadricWeight;
+    lastq_BoundaryWeight   = lpp.BoundaryWeight;
     lastqtex_QualityThr    = 0.3f;
     lastqtex_extratw       = 1.0;
 }
@@ -857,13 +857,13 @@ switch(ID(filter))
         tri::TriEdgeCollapseQuadricParameter pp;
         pp.QualityThr=lastq_QualityThr =par.getFloat("QualityThr");
         pp.PreserveBoundary=lastq_PreserveBoundary = par.getBool("PreserveBoundary");
-        pp.BoundaryQuadricWeight = pp.BoundaryQuadricWeight * par.getFloat("BoundaryWeight");
+        pp.BoundaryWeight = pp.BoundaryWeight * par.getFloat("BoundaryWeight");
         pp.PreserveTopology=lastq_PreserveTopology = par.getBool("PreserveTopology");
         pp.QualityWeight=lastq_QualityWeight = par.getBool("QualityWeight");
         pp.NormalCheck=lastq_PreserveNormal = par.getBool("PreserveNormal");
         pp.OptimalPlacement=lastq_OptimalPlacement = par.getBool("OptimalPlacement");
         pp.QualityQuadric=lastq_PlanarQuadric = par.getBool("PlanarQuadric");
-        pp.QualityQuadricWeight=lastq_PlanarWeight = par.getFloat("PlanarWeight");
+        pp.QualityWeightFactor =lastq_PlanarWeight = par.getFloat("PlanarWeight");
         lastq_Selected = par.getBool("Selected");
 
         QuadricSimplification(m.cm,TargetFaceNum,lastq_Selected,pp,  cb);
@@ -1256,10 +1256,10 @@ switch(ID(filter))
 		{
 			case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureDir    (m.cm); break;
 			case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureDir(m.cm); break;
-			case 2: tri::UpdateQuality<CMeshO>::VertexFromMinCurvatureDir(m.cm); break;
-            case 3: tri::UpdateQuality<CMeshO>::VertexFromMaxCurvatureDir(m.cm); break;
-            case 4: tri::UpdateQuality<CMeshO>::VertexFromShapeIndexCurvatureDir(m.cm); break;
-            case 5: tri::UpdateQuality<CMeshO>::VertexFromCurvednessCurvatureDir(m.cm); break;
+			//case 2: tri::UpdateQuality<CMeshO>::VertexFromMinCurvatureDir(m.cm); break;
+            //case 3: tri::UpdateQuality<CMeshO>::VertexFromMaxCurvatureDir(m.cm); break;
+            //case 4: tri::UpdateQuality<CMeshO>::VertexFromShapeIndexCurvatureDir(m.cm); break;
+            //case 5: tri::UpdateQuality<CMeshO>::VertexFromCurvednessCurvatureDir(m.cm); break;
             case 6: tri::UpdateQuality<CMeshO>::VertexConstant(m.cm,0); break;          
 		}
 
