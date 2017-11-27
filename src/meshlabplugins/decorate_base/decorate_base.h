@@ -123,7 +123,7 @@ public:
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }
 
   inline QString ShowCameraDetails() const     { return  "MeshLab::Decoration::CameraShowCameraDetails" ; }
-
+  inline QString ApplyMeshTr() const { return  "MeshLab::Decoration::ApplyMeshTr"; }
   inline QString ShowMeshCameras() const     { return  "MeshLab::Decoration::ShowMeshCameras" ; }
   inline QString ShowRasterCameras() const   { return  "MeshLab::Decoration::ShowRasterCameras" ; }
 

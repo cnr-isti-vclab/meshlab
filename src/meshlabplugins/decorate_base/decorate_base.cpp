@@ -83,7 +83,7 @@ void DecorateBasePlugin::decorateDoc(QAction *a, MeshDocument &md, RichParameter
     case DP_SHOW_CAMERA:
 	{
 		bool showCameraDetails = rm->getBool(ShowCameraDetails());
-
+    
 		// draw all visible mesh cameras
 		if(rm->getBool(ShowMeshCameras()))
 		{
@@ -788,13 +788,13 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
     glDepthFunc(GL_ALWAYS);
     glDisable(GL_LIGHTING);
 
-    if(ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
+    if (ls.Intrinsics.cameraType == Camera<float>::PERSPECTIVE)
     {
         // draw scale
         float drawscale = 1.0;
-        if(rm->getEnum(CameraScaleParam()) == 1)  // fixed scale
+        if (rm->getEnum(CameraScaleParam()) == 1)  // fixed scale
         {
-            drawscale = rm->getFloat(FixedScaleParam());
+          drawscale = rm->getFloat(FixedScaleParam());
         }
 
         // arbitrary size to draw axis
@@ -802,7 +802,16 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         len = ls.Intrinsics.FocalMm * drawscale;
 
         glPushMatrix();
-        glMultMatrix(Inverse(currtr));  //remove current mesh transform
+        if (rm->getBool(ApplyMeshTr()))
+        {
+          if (m != NULL)
+          {
+            glMultMatrix(m->cm.Tr);
+            glRotatef(180, 0.0, 1.0, 0.0);
+          }
+          else
+            glMultMatrix(currtr);  //add current mesh transform for raster camera
+        }
 
         // grey axis, aligned with scene axis
         glColor3f(.7f,.7f,.7f);
@@ -812,8 +821,8 @@ void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcol
         glVertex3f(vp[0],vp[1],vp[2]-(len/2.0)); 	glVertex3f(vp[0],vp[1],vp[2]+(len/2.0));
         glEnd();
 
-        if(m!=NULL) //if mesh camera, apply mesh transform
-            glMultMatrix(m->cm.Tr);
+        //if(m!=NULL) //if mesh camera, apply mesh transform
+        //    glMultMatrix(m->cm.Tr);
 
         // RGB axis, aligned with camera axis
         glBegin(GL_LINES);
@@ -1066,6 +1075,7 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
             parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
             parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
             parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
+            parset.addParam(new RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the poistions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
         } break;
     case DP_SHOW_QUALITY_CONTOUR :
         {
