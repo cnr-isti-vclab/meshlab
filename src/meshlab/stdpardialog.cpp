@@ -380,7 +380,8 @@ void Point3fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 //QHBoxLayout(NULL)
 Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_curr): MeshLabWidget(p,rpf)
 {
-
+    valid = false;
+    m.SetIdentity();
     paramName = rpf->name;
     //int row = gridLay->rowCount() - 1;
 
@@ -407,7 +408,7 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
         coordSB[i]->setAlignment(Qt::AlignRight);
         //this->addWidget(coordSB[i],1,Qt::AlignHCenter);
         lay44->addWidget(coordSB[i],i/4,i%4);
-
+        connect(coordSB[i], SIGNAL(textChanged(const QString&)), this, SLOT(invalidateMatrix(const QString&)));
     }
     this->setValue(paramName,rp->val->getMatrix44f());
 
@@ -437,16 +438,22 @@ void Matrix44fWidget::setValue(QString name,Matrix44m newVal)
     {
         for(int i =0;i<16;++i)
             coordSB[i]->setText(QString::number(newVal[i/4][i%4],'g',4));
+        valid = true;
+        m = newVal;
     }
 }
 
 
 vcg::Matrix44f Matrix44fWidget::getValue()
 {
+  if (!valid)
+  {
     float val[16];
-    for(unsigned int i  = 0; i < 16; ++i)
-        val[i] = coordSB[i]->text().toFloat();
+    for (unsigned int i = 0; i < 16; ++i)
+      val[i] = coordSB[i]->text().toFloat();
     return Matrix44f(val);
+  }
+  return m;
 }
 
 void Matrix44fWidget::getMatrix()
@@ -458,29 +465,47 @@ void Matrix44fWidget::pasteMatrix()
 {
     QClipboard *clipboard = QApplication::clipboard();
     QString shotString = clipboard->text().trimmed();
-    QStringList list1 = shotString.split(" ");
-    if(list1.size() != 16) 
+    if (shotString.contains(' '))
+    {
+      QStringList list1 = shotString.split(" ");
+      if (list1.size() != 16)
         return;
-    int id = 0;
-    for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id){
+      valid = false;
+      int id = 0;
+      for (QStringList::iterator i = list1.begin(); i != list1.end(); ++i, ++id) {
         bool ok = true;
         (*i).toFloat(&ok);
-        if(!ok) return;
+        if (!ok) return;
+      }
+      id = 0;
+      for (QStringList::iterator i = list1.begin(); i != list1.end(); ++i, ++id)
+        coordSB[id]->setText(*i);
     }
-    id = 0;
-    for(QStringList::iterator i = list1.begin(); i != list1.end(); ++i,++id)
-        coordSB[id]->setText(*i) ;
+    else
+    {
+      QByteArray value = QByteArray::fromBase64(shotString.toLocal8Bit());
+      memcpy(m.V(), value.data(), sizeof(Matrix44m::ScalarType) * 16);
+      int id = 0;
+      for (int i = 0; i < 16; ++i, ++id)
+        coordSB[id]->setText(QString::number(m.V()[i]));
+    }
 }
 
 void Matrix44fWidget::collectWidgetValue()
 {
-    vcg::Matrix44f  m;
-    for(unsigned int i  = 0; i < 16; ++i) m[i/4][i%4] = coordSB[i]->text().toFloat();
+  if (!valid)
+  {
+    vcg::Matrix44f  tempM;
+    for (unsigned int i = 0; i < 16; ++i) tempM[i / 4][i % 4] = coordSB[i]->text().toFloat();
+    rp->val->set(Matrix44fValue(tempM));
+  }
+  else
     rp->val->set(Matrix44fValue(m));
 }
 
 void Matrix44fWidget::resetWidgetValue()
 {
+  valid = false;
     vcg::Matrix44f  m; m.SetIdentity();
     for(unsigned int ii = 0; ii < 16;++ii)
         coordSB[ii]->setText(QString::number(rp->pd->defVal->getMatrix44f()[ii/4][ii%4],'g',3));
@@ -488,6 +513,8 @@ void Matrix44fWidget::resetWidgetValue()
 
 void Matrix44fWidget::setWidgetValue( const Value& nv )
 {
+  valid = true;
+  m = nv.getMatrix44f();
     for(unsigned int ii = 0; ii < 16;++ii)
         coordSB[ii]->setText(QString::number(nv.getMatrix44f()[ii/4][ii%4],'g',3));
 }
@@ -501,6 +528,12 @@ void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
     }
     MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
+
+void Matrix44fWidget::invalidateMatrix(const QString& s)
+{
+  valid = false;
+}
+
 /********************/
 // ShotfWidget Implementation
 
