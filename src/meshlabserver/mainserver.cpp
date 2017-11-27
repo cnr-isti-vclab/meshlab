@@ -241,7 +241,7 @@ public:
     {
       QDir curDir = QDir::current();
         QFileInfo fi(filename);
-        bool opened = MeshDocumentFromXML(md,fi.absoluteFilePath());
+        bool opened = MeshDocumentFromXML(md,fi.absoluteFilePath(), fi.suffix().toLower() == "mlb");
         if (!opened)
             return false;
         QDir::setCurrent(fi.absolutePath());
@@ -298,7 +298,7 @@ public:
         }
 
         QDir::setCurrent(curDir.absolutePath());
-        return MeshDocumentToXMLFile(md,filename,false);
+        return MeshDocumentToXMLFile(md,filename,false, outprojinfo.suffix().toLower() == "mlb");
     }
 
     bool script(MeshDocument &meshDocument,const QString& scriptfile,FILE* fp)

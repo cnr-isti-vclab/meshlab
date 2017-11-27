@@ -782,7 +782,7 @@ void MainWindow::dropEvent ( QDropEvent * event )
                 this->newProject();
             }
 
-            if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive) || path.endsWith("out",Qt::CaseInsensitive) || path.endsWith("nvm",Qt::CaseInsensitive) )
+            if(path.endsWith("mlp",Qt::CaseInsensitive) || path.endsWith("mlb", Qt::CaseInsensitive) || path.endsWith("aln",Qt::CaseInsensitive) || path.endsWith("out",Qt::CaseInsensitive) || path.endsWith("nvm",Qt::CaseInsensitive) )
                 openProject(path);
             else
             {
@@ -2119,7 +2119,7 @@ void MainWindow::saveProject()
             }
         }
     }
-    QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;Align Project (*.aln)"));
+    QFileDialog* saveDiag = new QFileDialog(this,tr("Save Project File"),lastUsedDirectory.path().append(""), tr("MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln)"));
 #if defined(Q_OS_WIN)
     saveDiag->setOption(QFileDialog::DontUseNativeDialog);
 #endif
@@ -2190,7 +2190,16 @@ void MainWindow::saveProject()
         ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
     }
     else
-        ret = MeshDocumentToXMLFile(*meshDoc(),fileName,onlyVisibleLayers->isChecked());
+    {
+      std::map<int, MLRenderingData> rendOpt;
+      foreach(MeshModel * mp, meshDoc()->meshList)
+      {
+        MLRenderingData ml;
+        getRenderingData(mp->id(), ml);
+        rendOpt.insert(std::pair<int, MLRenderingData>(mp->id(), ml));
+      }
+      ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
+    }
 
     if (saveAllFile->isChecked())
     {
@@ -2213,14 +2222,13 @@ bool MainWindow::openProject(QString fileName)
     showLayerDlg(false);
 	globrendtoolbar->setEnabled(false);
     if (fileName.isEmpty())
-        fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln *.out *.nvm);;MeshLab Project (*.mlp);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)");
+        fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"), lastUsedDirectory.path(), tr("All Project Files (*.mlp *.mlb *.aln *.out *.nvm);;MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)"));
 
     if (fileName.isEmpty()) return false;
 
     QFileInfo fi(fileName);
     lastUsedDirectory = fi.absoluteDir();
-
-    if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp")  && (fi.suffix().toLower()!="out") && (fi.suffix().toLower()!="nvm"))
+    if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp")  && (fi.suffix().toLower() != "mlb") && (fi.suffix().toLower()!="out") && (fi.suffix().toLower()!="nvm"))
     {
         QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
         return false;
@@ -2264,19 +2272,23 @@ bool MainWindow::openProject(QString fileName)
         }
     }
 
-    if (QString(fi.suffix()).toLower() == "mlp")
+    if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
     {
-        if (!MeshDocumentFromXML(*meshDoc(),fileName))
+        std::map<int, MLRenderingData> rendOpt;
+        if (!MeshDocumentFromXML(*meshDoc(), fileName, (QString(fi.suffix()).toLower() == "mlb"), rendOpt))
         {
-            QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
-            return false;
+          QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
+          return false;
         }
         for (int i=0; i<meshDoc()->meshList.size(); i++)
         {
             QString fullPath = meshDoc()->meshList[i]->fullName();
             //meshDoc()->setBusy(true);
             Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
-            if (!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm))
+            MLRenderingData* ptr = NULL;
+            if (rendOpt.find(meshDoc()->meshList[i]->id()) != rendOpt.end())
+              ptr = &rendOpt[meshDoc()->meshList[i]->id()];
+            if (!loadMeshWithStandardParams(fullPath, this->meshDoc()->meshList[i], trm, false, ptr))
                 meshDoc()->delMesh(meshDoc()->meshList[i]);
         }
     }
@@ -2323,6 +2335,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
 GLA()->setDrawMode(GLW::DMPoints);*/
 /////////////////////////////////////////////////////////
     }
+    
     meshDoc()->setBusy(false);
     if(this->GLA() == 0)  return false;
 
@@ -2338,7 +2351,7 @@ GLA()->setDrawMode(GLW::DMPoints);*/
     saveRecentProjectList(fileName);
 	globrendtoolbar->setEnabled(true);
     showLayerDlg(visiblelayer || (meshDoc()->meshList.size() > 0));
-
+  
     return true;
 }
 
@@ -2346,8 +2359,8 @@ bool MainWindow::appendProject(QString fileName)
 {
     QStringList fileNameList;
 	globrendtoolbar->setEnabled(false);
-    if (fileName.isEmpty())
-        fileNameList = QFileDialog::getOpenFileNames(this,tr("Append Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.aln);;MeshLab Project (*.mlp);;Align Project (*.aln)");
+  if (fileName.isEmpty())
+    fileNameList = QFileDialog::getOpenFileNames(this, tr("Append Project File"), lastUsedDirectory.path(), "All Project Files (*.mlp *.mlb *.aln *.out *.nvm);;MeshLab Project (*.mlp);;MeshLab Binary Project (*.mlb);;Align Project (*.aln);;Bundler Output (*.out);;VisualSFM Output (*.nvm)");
     else
         fileNameList.append(fileName);
 
@@ -2371,7 +2384,7 @@ bool MainWindow::appendProject(QString fileName)
         QFileInfo fi(fileName);
         lastUsedDirectory = fi.absoluteDir();
 
-        if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp"))
+        if((fi.suffix().toLower()!="aln") && (fi.suffix().toLower()!="mlp") && (fi.suffix().toLower() != "mlb") && (fi.suffix().toLower() != "out") && (fi.suffix().toLower() != "nvm"))
         {
             QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unknown project file extension");
             return false;
@@ -2400,22 +2413,57 @@ bool MainWindow::appendProject(QString fileName)
             }
         }
 
-        if (QString(fi.suffix()).toLower() == "mlp")
+        if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
         {
-			int alreadyLoadedNum = meshDoc()->meshList.size();
-            if (!MeshDocumentFromXML(*meshDoc(),fileName))
+			      int alreadyLoadedNum = meshDoc()->meshList.size();
+            std::map<int, MLRenderingData> rendOpt;
+            if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
             {
-                QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MLP file");
+                QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
                 return false;
             }
-			for (int i = alreadyLoadedNum-1; i<meshDoc()->meshList.size(); i++)
+      			for (int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
             {
                 QString fullPath = meshDoc()->meshList[i]->fullName();
                 meshDoc()->setBusy(true);
                 Matrix44m trm = this->meshDoc()->meshList[i]->cm.Tr; // save the matrix, because loadMeshClear it...
-                if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm))
+                MLRenderingData* ptr = NULL;
+                if (rendOpt.find(meshDoc()->meshList[i]->id()) != rendOpt.end())
+                  ptr = &rendOpt[meshDoc()->meshList[i]->id()];
+                if(!loadMeshWithStandardParams(fullPath,this->meshDoc()->meshList[i],trm, false, ptr))
                     meshDoc()->delMesh(meshDoc()->meshList[i]);
             }
+        }
+
+        if (QString(fi.suffix()).toLower() == "out") {
+
+          QString cameras_filename = fileName;
+          QString image_list_filename;
+          QString model_filename;
+
+          image_list_filename = QFileDialog::getOpenFileName(
+            this, tr("Open image list file"),
+            QFileInfo(fileName).absolutePath(),
+            tr("Bundler images list file (*.txt)")
+          );
+          if (image_list_filename.isEmpty())
+            return false;
+
+          if (!MeshDocumentFromBundler(*meshDoc(), cameras_filename, image_list_filename, model_filename)) {
+            QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open OUTs file");
+            return false;
+          }
+        }
+
+       if (QString(fi.suffix()).toLower() == "nvm") {
+
+          QString cameras_filename = fileName;
+          QString model_filename;
+
+          if (!MeshDocumentFromNvm(*meshDoc(), cameras_filename, model_filename)) {
+            QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open NVMs file");
+            return false;
+          }
         }
     }
 
@@ -2641,7 +2689,7 @@ bool MainWindow::importRaster(const QString& fileImg)
     return true;
 }
 
-bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr, bool isareload)
+bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPlugin, MeshModel* mm, int& mask,RichParameterSet* prePar, const Matrix44m &mtr, bool isareload, MLRenderingData* rendOpt)
 {
     if ((GLA() == NULL) || (mm == NULL))
         return false;
@@ -2743,7 +2791,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         QMessageBox::warning(this, "MeshLab Warning", QString("Warning mesh contains %1 vertices with NAN coords and %2 degenerated faces.\nCorrected.").arg(delVertNum).arg(delFaceNum) );
     mm->cm.Tr = mtr;
 
-	computeRenderingDataOnLoading(mm,isareload);
+	computeRenderingDataOnLoading(mm,isareload, rendOpt);
 	updateLayerDialog();
 
 
@@ -2752,7 +2800,7 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
     return true;
 }
 
-void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
+void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt)
 {
 	MultiViewer_Container* mv = currentViewContainer();
 	if (mv != NULL)
@@ -2761,7 +2809,9 @@ void MainWindow::computeRenderingDataOnLoading(MeshModel* mm,bool isareload)
 		if ((shared != NULL) && (mm != NULL))
 		{
 			MLRenderingData defdt;
-			MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt,mwsettings.minpolygonpersmoothrendering);
+		  MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm, defdt,mwsettings.minpolygonpersmoothrendering);
+      if (rendOpt != NULL)
+        defdt = *rendOpt;
 			for (int glarid = 0; glarid < mv->viewerCounter(); ++glarid)
 			{
 				GLArea* ar = mv->getViewer(glarid);
@@ -2924,15 +2974,22 @@ void MainWindow::openRecentProj()
     if (action)	openProject(action->data().toString());
 }
 
-bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr,bool isreload)
+bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr, bool isreload, MLRenderingData* rendOpt)
 {
     if ((meshDoc() == NULL) || (mm == NULL))
         return false;
     bool ret = false;
-    mm->Clear();
+    if (!mm->isVisible())
+    {
+      mm->Clear();
+      mm->visible = false;
+    }
+    else
+      mm->Clear();
     QFileInfo fi(fullPath);
     QString extension = fi.suffix();
     MeshIOInterface *pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
+   
     if(pCurrentIOPlugin != NULL)
     {
         RichParameterSet prePar;
@@ -2940,7 +2997,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
 		prePar = prePar.join(currentGlobalParams);
         int mask = 0;
         QTime t;t.start();
-        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload);
+        bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);
         if(open)
         {
             GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
