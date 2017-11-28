@@ -246,13 +246,13 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool bi
 
 	foreach(MeshModel *mmp, md.meshList)
 	{
-		if ((!onlyVisibleLayers) || (mmp->visible))
+    if ((!onlyVisibleLayers) || (mmp->visible))
 		{
       QDomElement meshElem;
       if (rendOpt.find(mmp->id()) != rendOpt.end())
-        MeshModelToXML(mmp, ddoc, binary, &rendOpt[mmp->id()]);
+        meshElem = MeshModelToXML(mmp, ddoc, binary, &rendOpt[mmp->id()]);
       else
-        MeshModelToXML(mmp, ddoc, binary);
+        meshElem = MeshModelToXML(mmp, ddoc, binary);
 			mgroot.appendChild(meshElem);
 		}
 	}
