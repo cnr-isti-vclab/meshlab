@@ -17,6 +17,7 @@ mac:LIBS += ../../common/libcommon.dylib
 
 win32-msvc2013:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-msvc2015:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
 linux-g++:LIBS += -L../../distrib -lcommon -lGL -lGLU
 linux-g++-32:LIBS += -L../../distrib -lcommon -lGL -lGLU
@@ -24,6 +25,7 @@ linux-g++-64:LIBS += -L../../distrib -lcommon -lGL -lGLU
 
 win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
+win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
 # uncomment to try Eigen
 # DEFINES += VCG_USE_EIGEN
@@ -42,6 +44,7 @@ DEPENDPATH += ../.. $$VCGDIR
 # old printf are all around the code
 win32-msvc2013:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 win32-msvc2015:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
+win32-msvc:DEFINES	+= _CRT_SECURE_NO_DEPRECATE
 CONFIG(release,debug | release){
 # Uncomment the following line to disable assert in mingw
 #DEFINES += NDEBUG

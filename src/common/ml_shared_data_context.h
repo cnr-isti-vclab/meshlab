@@ -122,7 +122,7 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 	}
 
 
-  size_t serialize(std::string& str)
+  size_t serialize(std::string& str) const
   {
     str.append(((_visible) ? "1" : "0"));
     str.append(((_perbbox_quoted_info_enabled) ? "1" : "0"));

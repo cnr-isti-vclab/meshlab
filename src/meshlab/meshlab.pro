@@ -125,6 +125,7 @@ win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2012:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2013:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2015:DEFINES += _CRT_SECURE_NO_DEPRECATE
+win32-msvc:DEFINES += _CRT_SECURE_NO_DEPRECATE
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)
@@ -143,6 +144,7 @@ win32-msvc2010:LIBS		+= -L../external/lib/win32-msvc2010 -ljhead -L../distrib -l
 win32-msvc2012:LIBS		+= -L../external/lib/win32-msvc2012 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2013:LIBS		+= -L../external/lib/win32-msvc2013 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2015:LIBS		+= -L../external/lib/win32-msvc2015 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
+win32-msvc:LIBS		+= -L../external/lib/win32-msvc -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 
 #CONFIG(release,debug | release) {
