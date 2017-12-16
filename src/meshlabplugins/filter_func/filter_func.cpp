@@ -28,6 +28,7 @@
 #include <vcg/complex/algorithms/create/mc_trivial_walker.h>
 
 #include "muParser.h"
+#include "string_conversion.h"
 
 using namespace mu;
 using namespace vcg;
@@ -372,13 +373,14 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
   case FF_VERT_SELECTION :
   {
     std::string expr = par.getString("condSelect").toStdString();
+	std::wstring wexpr = conversion::fromStringToWString(expr);
 
     // muparser initialization and explicitely define parser variables
     Parser p;
     setPerVertexVariables(p,m.cm);
 
     // set expression inserted by user as string (required by muparser)
-    p.SetExpr(expr);
+    p.SetExpr(wexpr);
 
     int numvert = 0;
     time_t start = clock();
@@ -396,7 +398,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       try {
         selected = p.Eval();
       } catch(Parser::exception_type &e) {
-        errorMessage = e.GetMsg().c_str();
+        errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
         return false;
       }
 
@@ -423,7 +425,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerFaceVariables(p,m.cm);
 
     // set expression inserted by user as string (required by muparser)
-    p.SetExpr(select.toStdString());
+    p.SetExpr(conversion::fromStringToWString(select.toStdString()));
 
     int numface = 0;
     time_t start = clock();
@@ -441,7 +443,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       try {
         selected = p.Eval();
       } catch(Parser::exception_type &e) {
-        errorMessage = e.GetMsg().c_str();
+        errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
         return false;
       }
 
@@ -494,10 +496,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerVertexVariables(p3,m.cm);
     setPerVertexVariables(p4,m.cm);
 
-    p1.SetExpr(func_x);
-    p2.SetExpr(func_y);
-    p3.SetExpr(func_z);
-    p4.SetExpr(func_a);
+    p1.SetExpr(conversion::fromStringToWString(func_x));
+    p2.SetExpr(conversion::fromStringToWString(func_y));
+    p3.SetExpr(conversion::fromStringToWString(func_z));
+    p4.SetExpr(conversion::fromStringToWString(func_a));
 
     double newx=0,newy=0,newz=0,newa=255;
     errorMessage = "";
@@ -573,7 +575,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerVertexVariables(p,m.cm);
 
     // set expression to calc with parser
-    p.SetExpr(func_q);
+    p.SetExpr(conversion::fromStringToWString(func_q));
 
     // every parser variables is related to vertex coord and attributes.
     time_t start = clock();
@@ -589,7 +591,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			try {
 			  (*vi).Q() = p.Eval();
 			} catch(Parser::exception_type &e) {
-			  errorMessage = e.GetMsg().c_str();
+			  errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
 			  return false;
 			}
 		  }
@@ -635,8 +637,8 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerVertexVariables(pv,m.cm);
 
     // set expression to calc with parser
-    pu.SetExpr(func_u);
-    pv.SetExpr(func_v);
+    pu.SetExpr(conversion::fromStringToWString(func_u));
+    pv.SetExpr(conversion::fromStringToWString(func_v));
 
     // every parser variables is related to vertex coord and attributes.
     time_t start = clock();
@@ -653,7 +655,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			  (*vi).T().U() = pu.Eval();
 			  (*vi).T().V() = pv.Eval();
 			} catch(Parser::exception_type &e) {
-			  errorMessage = e.GetMsg().c_str();
+			  errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
 			  return false;
 			}
 		  }
@@ -688,9 +690,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerFaceVariables(pu2,m.cm); setPerFaceVariables(pv2,m.cm);
 
     // set expression to calc with parser
-    pu0.SetExpr(func_u0); pv0.SetExpr(func_v0);
-    pu1.SetExpr(func_u1); pv1.SetExpr(func_v1);
-    pu2.SetExpr(func_u2); pv2.SetExpr(func_v2);
+    pu0.SetExpr(conversion::fromStringToWString(func_u0)); pv0.SetExpr(conversion::fromStringToWString(func_v0));
+    pu1.SetExpr(conversion::fromStringToWString(func_u1)); pv1.SetExpr(conversion::fromStringToWString(func_v1));
+    pu2.SetExpr(conversion::fromStringToWString(func_u2)); pv2.SetExpr(conversion::fromStringToWString(func_v2));
 
     // every parser variables is related to vertex coord and attributes.
     time_t start = clock();
@@ -708,7 +710,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			  (*fi).WT(1).U() = pu1.Eval(); (*fi).WT(1).V() = pv1.Eval();
 			  (*fi).WT(2).U() = pu2.Eval(); (*fi).WT(2).V() = pv2.Eval();
 			} catch(Parser::exception_type &e) {
-			  errorMessage = e.GetMsg().c_str();
+				errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
 			  return false;
 			}
 		  }
@@ -743,10 +745,10 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerFaceVariables(p3,m.cm);
     setPerFaceVariables(p4,m.cm);
 
-    p1.SetExpr(func_r);
-    p2.SetExpr(func_g);
-    p3.SetExpr(func_b);
-    p4.SetExpr(func_a);
+    p1.SetExpr(conversion::fromStringToWString(func_r));
+    p2.SetExpr(conversion::fromStringToWString(func_g));
+    p3.SetExpr(conversion::fromStringToWString(func_b));
+    p4.SetExpr(conversion::fromStringToWString(func_a));
 
     // RGB is related to every face
     CMeshO::FaceIterator fi;
@@ -802,7 +804,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerFaceVariables(pf,m.cm);
 
     // set expression to calc with parser
-    pf.SetExpr(func_q);
+    pf.SetExpr(conversion::fromStringToWString(func_q));
 
     time_t start = clock();
     errorMessage = "";
@@ -865,7 +867,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     qDebug("Now mesh has %lu vertex float attribute",AllVertexAttribName.size());
     Parser p;
     setPerVertexVariables(p,m.cm);
-    p.SetExpr(expr);
+    p.SetExpr(conversion::fromStringToWString(expr));
 
     time_t start = clock();
 
@@ -879,7 +881,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       try {
         h[vi] = p.Eval();
       } catch(Parser::exception_type &e) {
-        errorMessage = e.GetMsg().c_str();
+        errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
         return false;
       }
     }
@@ -919,7 +921,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       h = tri::Allocator<CMeshO>::AddPerFaceAttribute<float> (m.cm,name);
     Parser p;
     setPerFaceVariables(p,m.cm);
-    p.SetExpr(expr);
+    p.SetExpr(conversion::fromStringToWString(expr));
 
     time_t start = clock();
 
@@ -933,7 +935,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       try {
         h[fi] = p.Eval();
       } catch(Parser::exception_type &e) {
-        errorMessage = e.GetMsg().c_str();
+        errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
         return false;
       }
     }
@@ -1011,11 +1013,11 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
     Parser p;
     double x,y,z;
-    p.DefineVar("x", &x);
-    p.DefineVar("y", &y);
-    p.DefineVar("z", &z);
+    p.DefineVar(conversion::fromStringToWString("x"), &x);
+    p.DefineVar(conversion::fromStringToWString("y"), &y);
+    p.DefineVar(conversion::fromStringToWString("z"), &z);
     std::string expr = par.getString("expr").toStdString();
-    p.SetExpr(expr);
+    p.SetExpr(conversion::fromStringToWString(expr));
     Log("Filling a Volume of %i %i %i",siz[0],siz[1],siz[2]);
     volume.Init(siz,RangeBBox);
     for(double i=0;i<siz[0];i++)
@@ -1028,7 +1030,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
           try {
             volume.Val(i,j,k)=p.Eval();
           } catch(Parser::exception_type &e) {
-            errorMessage = e.GetMsg().c_str();
+            errorMessage = conversion::fromWStringToString(e.GetMsg()).c_str();
             return false;
           }
         }
@@ -1093,7 +1095,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 void FilterFunctionPlugin::showParserError(const QString &s, Parser::exception_type &e)
 {
   errorMessage += s;
-  errorMessage += e.GetMsg().c_str();
+  errorMessage += conversion::fromWStringToString(e.GetMsg()).c_str();
   errorMessage += "\n";
 }
 
@@ -1253,23 +1255,23 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
 // and q for quality
 void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 {
-	p.DefineVar("x", &x);
-	p.DefineVar("y", &y);
-	p.DefineVar("z", &z);
-	p.DefineVar("nx", &nx);
-	p.DefineVar("ny", &ny);
-	p.DefineVar("nz", &nz);
-	p.DefineVar("r", &r);
-	p.DefineVar("g", &g);
-	p.DefineVar("b", &b);
-	p.DefineVar("a", &a);
-	p.DefineVar("q", &q);
-	p.DefineVar("vi",&v);
-	p.DefineVar("rad",&rad);
-	p.DefineVar("vtu",&vtu);
-	p.DefineVar("vtv",&vtv);
-	p.DefineVar("ti", &ti);
-	p.DefineVar("vsel", &vsel);
+	p.DefineVar(conversion::fromStringToWString("x"), &x);
+	p.DefineVar(conversion::fromStringToWString("y"), &y);
+	p.DefineVar(conversion::fromStringToWString("z"), &z);
+	p.DefineVar(conversion::fromStringToWString("nx"), &nx);
+	p.DefineVar(conversion::fromStringToWString("ny"), &ny);
+	p.DefineVar(conversion::fromStringToWString("nz"), &nz);
+	p.DefineVar(conversion::fromStringToWString("r"), &r);
+	p.DefineVar(conversion::fromStringToWString("g"), &g);
+	p.DefineVar(conversion::fromStringToWString("b"), &b);
+	p.DefineVar(conversion::fromStringToWString("a"), &a);
+	p.DefineVar(conversion::fromStringToWString("q"), &q);
+	p.DefineVar(conversion::fromStringToWString("vi"),&v);
+	p.DefineVar(conversion::fromStringToWString("rad"),&rad);
+	p.DefineVar(conversion::fromStringToWString("vtu"),&vtu);
+	p.DefineVar(conversion::fromStringToWString("vtv"),&vtv);
+	p.DefineVar(conversion::fromStringToWString("ti"), &ti);
+	p.DefineVar(conversion::fromStringToWString("vsel"), &vsel);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed
@@ -1287,7 +1289,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 		v_handlers.push_back(hh);
 		v_attrNames.push_back(AllVertexAttribName[i]);
 		v_attrValue.push_back(0);
-		p.DefineVar(v_attrNames.back(), &v_attrValue.back());
+		p.DefineVar(conversion::fromStringToWString(v_attrNames.back()), &v_attrValue.back());
 		qDebug("Adding custom per vertex float variable %s",v_attrNames.back().c_str());
 	}
 	AllVertexAttribName.clear();
@@ -1300,15 +1302,15 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 
 		v3_attrValue.push_back(0);
 		v3_attrNames.push_back(AllVertexAttribName[i]+"_x");
-		p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+		p.DefineVar(conversion::fromStringToWString(v3_attrNames.back()), &v3_attrValue.back());
 
 		v3_attrValue.push_back(0);
 		v3_attrNames.push_back(AllVertexAttribName[i]+"_y");
-		p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+		p.DefineVar(conversion::fromStringToWString(v3_attrNames.back()), &v3_attrValue.back());
 
 		v3_attrValue.push_back(0);
 		v3_attrNames.push_back(AllVertexAttribName[i]+"_z");
-		p.DefineVar(v3_attrNames.back(), &v3_attrValue.back());
+		p.DefineVar(conversion::fromStringToWString(v3_attrNames.back()), &v3_attrValue.back());
 		qDebug("Adding custom per vertex Point3f variable %s",v3_attrNames.back().c_str());
 	}
 }
@@ -1318,85 +1320,85 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 {
     // coord of the three vertices within a face
-    p.DefineVar("x0", &x0);
-    p.DefineVar("y0", &y0);
-    p.DefineVar("z0", &z0);
-    p.DefineVar("x1", &x1);
-    p.DefineVar("y1", &y1);
-    p.DefineVar("z1", &z1);
-    p.DefineVar("x2", &x2);
-    p.DefineVar("y2", &y2);
-    p.DefineVar("z2", &z2);
+    p.DefineVar(conversion::fromStringToWString("x0"), &x0);
+    p.DefineVar(conversion::fromStringToWString("y0"), &y0);
+    p.DefineVar(conversion::fromStringToWString("z0"), &z0);
+    p.DefineVar(conversion::fromStringToWString("x1"), &x1);
+    p.DefineVar(conversion::fromStringToWString("y1"), &y1);
+    p.DefineVar(conversion::fromStringToWString("z1"), &z1);
+    p.DefineVar(conversion::fromStringToWString("x2"), &x2);
+    p.DefineVar(conversion::fromStringToWString("y2"), &y2);
+    p.DefineVar(conversion::fromStringToWString("z2"), &z2);
 
     // attributes of the vertices
     // normals:
-    p.DefineVar("nx0", &nx0);
-    p.DefineVar("ny0", &ny0);
-    p.DefineVar("nz0", &nz0);
+    p.DefineVar(conversion::fromStringToWString("nx0"), &nx0);
+    p.DefineVar(conversion::fromStringToWString("ny0"), &ny0);
+    p.DefineVar(conversion::fromStringToWString("nz0"), &nz0);
 
-    p.DefineVar("nx1", &nx1);
-    p.DefineVar("ny1", &ny1);
-    p.DefineVar("nz1", &nz1);
+    p.DefineVar(conversion::fromStringToWString("nx1"), &nx1);
+    p.DefineVar(conversion::fromStringToWString("ny1"), &ny1);
+    p.DefineVar(conversion::fromStringToWString("nz1"), &nz1);
 
-    p.DefineVar("nx2", &nx2);
-    p.DefineVar("ny2", &ny2);
-    p.DefineVar("nz2", &nz2);
+    p.DefineVar(conversion::fromStringToWString("nx2"), &nx2);
+    p.DefineVar(conversion::fromStringToWString("ny2"), &ny2);
+    p.DefineVar(conversion::fromStringToWString("nz2"), &nz2);
 
     // colors:
-    p.DefineVar("r0", &r0);
-    p.DefineVar("g0", &g0);
-    p.DefineVar("b0", &b0);
-	p.DefineVar("a0", &a0);
+    p.DefineVar(conversion::fromStringToWString("r0"), &r0);
+    p.DefineVar(conversion::fromStringToWString("g0"), &g0);
+    p.DefineVar(conversion::fromStringToWString("b0"), &b0);
+	p.DefineVar(conversion::fromStringToWString("a0"), &a0);
 
-    p.DefineVar("r1", &r1);
-    p.DefineVar("g1", &g1);
-    p.DefineVar("b1", &b1);
-	p.DefineVar("a1", &a1);
+    p.DefineVar(conversion::fromStringToWString("r1"), &r1);
+    p.DefineVar(conversion::fromStringToWString("g1"), &g1);
+    p.DefineVar(conversion::fromStringToWString("b1"), &b1);
+	p.DefineVar(conversion::fromStringToWString("a1"), &a1);
 
-    p.DefineVar("r2", &r2);
-    p.DefineVar("g2", &g2);
-    p.DefineVar("b2", &b2);
-	p.DefineVar("a2", &a2);
+    p.DefineVar(conversion::fromStringToWString("r2"), &r2);
+    p.DefineVar(conversion::fromStringToWString("g2"), &g2);
+    p.DefineVar(conversion::fromStringToWString("b2"), &b2);
+	p.DefineVar(conversion::fromStringToWString("a2"), &a2);
 
     // quality
-    p.DefineVar("q0", &q0);
-    p.DefineVar("q1", &q1);
-    p.DefineVar("q2", &q2);
+    p.DefineVar(conversion::fromStringToWString("q0"), &q0);
+    p.DefineVar(conversion::fromStringToWString("q1"), &q1);
+    p.DefineVar(conversion::fromStringToWString("q2"), &q2);
 
     // face color
-    p.DefineVar("fr", &fr);
-    p.DefineVar("fg", &fg);
-    p.DefineVar("fb", &fb);
-	p.DefineVar("fa", &fa);
+    p.DefineVar(conversion::fromStringToWString("fr"), &fr);
+    p.DefineVar(conversion::fromStringToWString("fg"), &fg);
+    p.DefineVar(conversion::fromStringToWString("fb"), &fb);
+	p.DefineVar(conversion::fromStringToWString("fa"), &fa);
 
 	// face normal
-	p.DefineVar("fnx", &fnx);
-	p.DefineVar("fny", &fny);
-	p.DefineVar("fnz", &fnz);
+	p.DefineVar(conversion::fromStringToWString("fnx"), &fnx);
+	p.DefineVar(conversion::fromStringToWString("fny"), &fny);
+	p.DefineVar(conversion::fromStringToWString("fnz"), &fnz);
 
 	// face quality
-	p.DefineVar("fq", &fq);
+	p.DefineVar(conversion::fromStringToWString("fq"), &fq);
 
     // index
-    p.DefineVar("fi",&f);
-    p.DefineVar("vi0",&v0i);
-    p.DefineVar("vi1",&v1i);
-    p.DefineVar("vi2",&v2i);
+    p.DefineVar(conversion::fromStringToWString("fi"),&f);
+    p.DefineVar(conversion::fromStringToWString("vi0"),&v0i);
+    p.DefineVar(conversion::fromStringToWString("vi1"),&v1i);
+    p.DefineVar(conversion::fromStringToWString("vi2"),&v2i);
 
 	// texture
-	p.DefineVar("wtu0",&wtu0);
-	p.DefineVar("wtv0",&wtv0);
-	p.DefineVar("wtu1",&wtu1);
-	p.DefineVar("wtv1",&wtv1);
-	p.DefineVar("wtu2",&wtu2);
-	p.DefineVar("wtv2",&wtv2);
-	p.DefineVar("ti", &ti);
+	p.DefineVar(conversion::fromStringToWString("wtu0"),&wtu0);
+	p.DefineVar(conversion::fromStringToWString("wtv0"),&wtv0);
+	p.DefineVar(conversion::fromStringToWString("wtu1"),&wtu1);
+	p.DefineVar(conversion::fromStringToWString("wtv1"),&wtv1);
+	p.DefineVar(conversion::fromStringToWString("wtu2"),&wtu2);
+	p.DefineVar(conversion::fromStringToWString("wtv2"),&wtv2);
+	p.DefineVar(conversion::fromStringToWString("ti"), &ti);
 
 	//selection
-	p.DefineVar("vsel0", &vsel0);
-	p.DefineVar("vsel1", &vsel1);
-	p.DefineVar("vsel2", &vsel2);
-	p.DefineVar("fsel", &fsel);
+	p.DefineVar(conversion::fromStringToWString("vsel0"), &vsel0);
+	p.DefineVar(conversion::fromStringToWString("vsel1"), &vsel1);
+	p.DefineVar(conversion::fromStringToWString("vsel2"), &vsel2);
+	p.DefineVar(conversion::fromStringToWString("fsel"), &fsel);
 
     // define var for user-defined attributes (if any exists)
     // if vector is empty, code won't be executed
@@ -1411,7 +1413,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 		f_handlers.push_back(hh);
 		f_attrNames.push_back(AllFaceAttribName[i]);
 		f_attrValue.push_back(0);
-		p.DefineVar(f_attrNames.back(), &f_attrValue.back());
+		p.DefineVar(conversion::fromStringToWString(f_attrNames.back()), &f_attrValue.back());
 	}
 
 }

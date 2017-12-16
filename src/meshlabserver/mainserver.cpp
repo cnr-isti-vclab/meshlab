@@ -241,7 +241,8 @@ public:
     {
       QDir curDir = QDir::current();
         QFileInfo fi(filename);
-        bool opened = MeshDocumentFromXML(md,fi.absoluteFilePath(), fi.suffix().toLower() == "mlb");
+		std::map<int, MLRenderingData> tmp;
+        bool opened = MeshDocumentFromXML(md,fi.absoluteFilePath(), fi.suffix().toLower() == "mlb",tmp);
         if (!opened)
             return false;
         QDir::setCurrent(fi.absolutePath());

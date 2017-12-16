@@ -22,7 +22,7 @@ macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_p
 
 mac:LIBS += ../distrib/meshlab.app/Contents/MacOS/libcommon.dylib
 
-
+win32-msvc:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2005:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2008:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2010:  LIBS += -L../distrib -lcommon -lopengl32 -lGLU32
@@ -41,6 +41,7 @@ linux-g++-64:QMAKE_RPATHDIR += ../distrib
 #	win32-g++:release:LIBS += -L../common/release -lcommon
 #}
 
+win32-msvc:DEFINES += GLEW_STATIC
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC
 win32-msvc2010:DEFINES += GLEW_STATIC 

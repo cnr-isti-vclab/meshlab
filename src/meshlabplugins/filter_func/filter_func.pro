@@ -11,6 +11,7 @@ INCLUDEPATH += ../../external/muparser_v225/include
 # Note: we need static libs so when building muparser lib use 
 # ./configure --enable-shared=no
 
+win32-msvc:LIBS += ../../external/lib/win32-msvc/muparser.lib
 win32-msvc2005:LIBS += ../../external/lib/win32-msvc2005/muparser.lib
 win32-msvc2008:LIBS += ../../external/lib/win32-msvc2008/muparser.lib
 win32-msvc2010:LIBS += ../../external/lib/win32-msvc2010/muparser.lib
