@@ -33,12 +33,9 @@ void FilterThread::run()
         Env env;
 		QScriptValue val;
 	
-		if (_mw != NULL)
-			val = env.loadMLScriptEnv(_md,_pm,_mw->currentGlobalPars());
-		else
-			val = env.loadMLScriptEnv(_md,_pm);
-        if (val.isError())
-            throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + val.toString() + "\n");
+		val = env.loadMLScriptEnv(_md, _pm);
+		if (val.isError())
+			throw JavaScriptException("A Plugin-bridge-code generated a JavaScript Error: " + val.toString() + "\n");
 
         QMap<QString,MeshLabXMLFilterContainer>::iterator it =_pm.stringXMLFilterMap.find(_fname);
         if ((it == _pm.stringXMLFilterMap.end()) || (it->xmlInfo == NULL))
@@ -80,8 +77,8 @@ void FilterThread::run()
                 }
 
             }
-            for (QMap<QString,QString>::const_iterator itp = _parexpval.constBegin();itp != _parexpval.constEnd();++itp)
-                env.insertExpressionBinding(itp.key(),itp.value());
+			for (QMap<QString, QString>::const_iterator itp = _parexpval.constBegin(); itp != _parexpval.constEnd(); ++itp)
+				env.insertExpressionBinding(itp.key(), itp.value());
             EnvWrap envwrap(env);
             _cur = this;
             _success = it->filterInterface->applyFilter(_fname, _md, envwrap, &localCallBack);
