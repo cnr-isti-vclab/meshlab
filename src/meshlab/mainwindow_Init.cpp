@@ -1007,7 +1007,7 @@ void MainWindow::loadMeshLabSettings()
 		RichParameter* rpar = NULL;
 		if (!docElem.isNull())
 		{
-			bool ret = RichParameterFactory::create(docElem, &rpar);
+			bool ret = RichParameterAdapter::create(docElem, &rpar);
 			if (!ret)
 			{
 				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
@@ -1249,10 +1249,6 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 	glbset->addParam(new RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
 	glbset->addParam(new RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
-
-	//WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
-	glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode", "0000000", "SketchFab KeyCode", ""));
-	/****************************************************************************************************************/
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		glbset->addParam(new RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));

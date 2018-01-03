@@ -943,7 +943,14 @@ void MainWindow::runFilterScript()
                     cppfilt->setLog(&meshDoc()->Log);
 
                     Env env ;
-                    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM,this->currentGlobalPars());
+					QMap<QString, QString> persistentparam;
+					foreach(RichParameter* rp, currentGlobalPars().paramList)
+					{
+						if (rp != NULL)
+							persistentparam[rp->name] = RichParameterAdapter::convertToStringValue(*rp);
+					}
+
+					QScriptValue val = env.loadMLScriptEnv(*meshDoc(), PM, persistentparam);
                     XMLFilterNameParameterValuesPair* xmlfilt = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
                     QMap<QString,QString>& parmap = xmlfilt->pair.second;
                     for(QMap<QString,QString>::const_iterator it = parmap.constBegin();it != parmap.constEnd();++it)
@@ -1784,7 +1791,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
     try
     {
         MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
-        QString funcall = "Plugins." + mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName) + "." + mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterScriptFunctName) + "(";
+		QString funcall = MLXMLUtilityFunctions::completeFilterProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName), mfc->xmlInfo->filterAttribute(fname, MLXMLElNames::filterScriptFunctName)) + "(";
         if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity && !jscode)
         {
             funcall = funcall + QString::number(meshDoc()->mm()->id());
@@ -1825,7 +1832,14 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
             QTime t;
             t.start();
             Env env;
-            env.loadMLScriptEnv(*meshDoc(),PM,currentGlobalPars());
+			QMap<QString, QString> persistentparam;
+			foreach(RichParameter* rp, currentGlobalPars().paramList)
+			{
+				if (rp != NULL)
+					persistentparam[rp->name] = RichParameterAdapter::convertToStringValue(*rp);
+			}
+
+			env.loadMLScriptEnv(*meshDoc(), PM, persistentparam);
             QScriptValue result = env.evaluate(funcall);
             scriptCodeExecuted(result,t.elapsed(),"");
             postFilterExecution();
