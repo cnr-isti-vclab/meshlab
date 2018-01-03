@@ -56,9 +56,9 @@ class QScriptEngine;
 class MeshModel;
 
 /** The MainWindowInterface class defines just the executeFilter() callback function
-	that is invoked by the standard parameter input dialog.
-	It is used as base class of the MainWindow.
-	*/
+that is invoked by the standard parameter input dialog.
+It is used as base class of the MainWindow.
+*/
 class MainWindowInterface
 {
 public:
@@ -67,26 +67,28 @@ public:
 	//These parameter expression values will be evaluated when the filter will start.
 	virtual void executeFilter(MeshLabXMLFilterContainer*, const QMap<QString, QString>&, bool = false) {}
 	//virtual void executeFilter(MeshLabXMLFilterContainer*,Env& envcode , bool  isPreview = false) {}
+
+	//virtual void getCurrentPersistentParsMap(QMap<QString, QString>&) const {}
 };
 
 /** \brief The MeshLabInterface class is the base of all the plugin interfaces.
 
-  The main idea common to all the framework is that each plugin export a set of actions,
-  internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
+The main idea common to all the framework is that each plugin export a set of actions,
+internally each action is associated to a FilterIDType, and for each action a name and a formatted INFO is defined.
 
-  For coding easyness ID are more practical (you can use them in switches).
-  Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
-  Moreover ID are UNSAFE (different plugin can have same id) so they should be used only INTERNALLY
+For coding easyness ID are more practical (you can use them in switches).
+Using action on the other hand is practical because it simplify their management in menus/toolbars and it allows to define icons and other things in a automatic way.
+Moreover ID are UNSAFE (different plugin can have same id) so they should be used only INTERNALLY
 
-	\todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
+\todo There is inconsistency in the usage of ID and actions for retrieving particular filters. Remove.
 
 */
 class MeshLabInterface
 {
 public:
 	/** the type used to identify plugin actions; there is a one-to-one relation betweeen an ID and an Action.
-	  \todo To be renamed as ActionIDType
-	  */
+	\todo To be renamed as ActionIDType
+	*/
 
 	MeshLabInterface() :log(0) {}
 	virtual ~MeshLabInterface() {}
@@ -113,34 +115,34 @@ public:
 	virtual QString pluginName(void) const { return ""; }
 
 	/** \brief This function is called by the framework, for each plugin that has global parameters (e.g. \ref MeshDecorateInterface) at the start of the application.
-	 The rationale is to allow to each plugin to have a list of global persistent parameters that can be changed from the meshlab itself and whose value is persistent between different meshlab invocations.
-	 A typical example is the background color.
+	The rationale is to allow to each plugin to have a list of global persistent parameters that can be changed from the meshlab itself and whose value is persistent between different meshlab invocations.
+	A typical example is the background color.
 
-	 For the global parameters the following rules apply:
+	For the global parameters the following rules apply:
 
-	 \li there is a <b>hardwired</b> default value: a safe consistent value that is directly coded into the plugin and to which the user can always revert if needed.
-	 \li there is a <b>saved</b> value: a value that is stored into a persistent location into the user space (registry/home/library) and it is presented as default value of the parameter at each MeshLab invocation.
-	 \li there is a <b>current</b> value: a value that is currently used, different for each document instance and that is not stored permanently.
+	\li there is a <b>hardwired</b> default value: a safe consistent value that is directly coded into the plugin and to which the user can always revert if needed.
+	\li there is a <b>saved</b> value: a value that is stored into a persistent location into the user space (registry/home/library) and it is presented as default value of the parameter at each MeshLab invocation.
+	\li there is a <b>current</b> value: a value that is currently used, different for each document instance and that is not stored permanently.
 
-	 The plugin use the current value to draw its decoration.
-	 at startup the current value is always silently initialized to the saved value.
-	 User can revert current value to the saved values and to the hardwired values.
-	 In the dialog for each parameter some buttons should be present:
+	The plugin use the current value to draw its decoration.
+	at startup the current value is always silently initialized to the saved value.
+	User can revert current value to the saved values and to the hardwired values.
+	In the dialog for each parameter some buttons should be present:
 
-	 \li apply: use the currently edited parameter value without saving it anywhere. After the closure of the document these values will be lost.
-	 \li load:  load from the saved values
-	 \li save:  save to a permanent location the current value (to the registry),
-	 \li reset:  revert to the hardwired values
+	\li apply: use the currently edited parameter value without saving it anywhere. After the closure of the document these values will be lost.
+	\li load:  load from the saved values
+	\li save:  save to a permanent location the current value (to the registry),
+	\li reset:  revert to the hardwired values
 
-	 If your plugins/action has no GlobalParameter, do nothing.
-	 The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
-	 At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
-	 If a filter wants to save some permanent stuff should set the permanent default values.
-  */
+	If your plugins/action has no GlobalParameter, do nothing.
+	The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
+	At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
+	If a filter wants to save some permanent stuff should set the permanent default values.
+	*/
 	virtual void initGlobalParameterSet(QAction * /*format*/, RichParameterSet & /*globalparam*/) {}
 };
 /** \brief The MeshIOInterface is the base class for all the single mesh loading plugins.
-  */
+*/
 class MeshIOInterface : public MeshCommonInterface
 {
 public:
@@ -159,10 +161,10 @@ public:
 	virtual QList<Format> exportFormats() const = 0;
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require
-	  // it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
-	  // The instanced parameters are then passed to the open at the loading time.
-	  // Typical example of use to decide what subportion of a mesh you have to load.
-	  // If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
+	// it is called by the framework BEFORE the actual mesh loading to perform to determine how parse the input file
+	// The instanced parameters are then passed to the open at the loading time.
+	// Typical example of use to decide what subportion of a mesh you have to load.
+	// If you do not need any additional processing simply do not override this and ignore the parameterSet in the open
 	virtual void initPreOpenParameter(const QString &/*format*/, const QString &/*fileName*/, RichParameterSet & /*par*/) {}
 
 	// This function is called to initialize the list of additional parameters that a OPENING filter could require
@@ -215,14 +217,14 @@ public:
 };
 
 /**
-  \brief The MeshFilterInterface class provide the interface of the filter plugins.
+\brief The MeshFilterInterface class provide the interface of the filter plugins.
 
 */
 class MeshFilterInterface : public MeshCommonInterface
 {
 public:
 	/** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
-	 Each filter can belong to one or more filtering class, or-ed togheter.
+	Each filter can belong to one or more filtering class, or-ed togheter.
 	*/
 	enum FilterClass
 	{
@@ -262,7 +264,7 @@ public:
 	virtual QString filterName(FilterIDType) const = 0;
 
 	/** The long, formatted string describing each filtering action.
-	  // This string is printed in the top of the parameter window
+	// This string is printed in the top of the parameter window
 	// so it should be at least one or two paragraphs long. The more the better.
 	// you can use simple html formatting tags (like "<br>" "<b>" and "<i>") to improve readability.
 	// This string is used in the 'About plugin' dialog and by meshlabserver to create the filter list wiki page and the doxygen documentation of the filters.
@@ -278,16 +280,16 @@ public:
 	virtual QString filterInfo(FilterIDType filter) const = 0;
 
 	/** The FilterClass describes in which generic class of filters it fits.
-	  // This choice affect the submenu in which each filter will be placed
-	  // For example filters that perform an action only on the selection will be placed in the Selection Class
+	// This choice affect the submenu in which each filter will be placed
+	// For example filters that perform an action only on the selection will be placed in the Selection Class
 	*/
 	virtual FilterClass getClass(QAction *) { return MeshFilterInterface::Generic; }
 
 	/**
-	 The filters can have some additional requirements on the mesh capabiliteis.
-	  // For example if a filters requires Face-Face Adjacency you shoud re-implement
-	  // this function making it returns MeshModel::MM_FACEFACETOPO.
-	  // The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
+	The filters can have some additional requirements on the mesh capabiliteis.
+	// For example if a filters requires Face-Face Adjacency you shoud re-implement
+	// this function making it returns MeshModel::MM_FACEFACETOPO.
+	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	//
 	// Furthermore, requirements are checked just before the invocation of a filter. If your filter
 	// outputs a never used before mesh property (e.g. face colors), it will be allocated by a call
@@ -296,18 +298,18 @@ public:
 	virtual int getRequirements(QAction *) { return MeshModel::MM_NONE; }
 
 	/** The FilterPrecondition mask is used to explicitate what kind of data a filter really needs to be applied.
-	  // For example algorithms that compute per face quality have as precondition the existence of faces
-	  // (but quality per face is not a precondition, because quality per face is created by these algorithms)
-	  // on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
-	  // and Face as precondition.
+	// For example algorithms that compute per face quality have as precondition the existence of faces
+	// (but quality per face is not a precondition, because quality per face is created by these algorithms)
+	// on the other hand an algorithm that deletes faces according to the stored quality has both FaceQuality
+	// and Face as precondition.
 	// These conditions do NOT include computed properties like borderFlags, manifoldness or watertightness.
 	// They are also used to grayout menus un-appliable entries.
 	*/
 	virtual int getPreConditions(QAction *) const { return MeshModel::MM_NONE; }
 
 	/** Function used by the framework to get info about the mesh properties changed by the filter.
-	  // It is widely used by the meshlab's preview system.
-	  //TO BE REPLACED WITH = 0
+	// It is widely used by the meshlab's preview system.
+	//TO BE REPLACED WITH = 0
 	*/
 	virtual int postCondition(QAction*) const { return MeshModel::MM_UNKNOWN; }
 
@@ -336,15 +338,15 @@ public:
 
 	/** \brief this function informs the MeshLab core on how many meshes the filter will work on.
 	Valid value:
-	  - SINGLE_MESH: the filter works just on the current mesh
-	  - FIXED: the number (and the names) of the meshes involved in the filter computation is determined by the parameters selected in the filter's parameters form
-	  - VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
+	- SINGLE_MESH: the filter works just on the current mesh
+	- FIXED: the number (and the names) of the meshes involved in the filter computation is determined by the parameters selected in the filter's parameters form
+	- VARIABLE: the filter works on a not predetermined number of meshes. The meshes involved are typically selected by the user checking on the correspondent layer on the layer dialog
 	*/
 	virtual FILTER_ARITY filterArity(QAction *act) const = 0;
 
 	// This function is called to initialized the list of parameters.
-  // it is always called. If a filter does not need parameter it leave it empty and the framework
-  // will not create a dialog (unless for previewing)
+	// it is always called. If a filter does not need parameter it leave it empty and the framework
+	// will not create a dialog (unless for previewing)
 	virtual void initParameterSet(QAction *, MeshModel &/*m*/, RichParameterSet & /*par*/) {}
 	virtual void initParameterSet(QAction *filter, MeshDocument &md, RichParameterSet &par)
 	{
@@ -352,9 +354,9 @@ public:
 	}
 
 	/** \brief is invoked by the framework when the applyFilter fails to give some info to the user about the filter failure
-	  * Filters \b must never use QMessageBox for reporting errors.
-	  * Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
-	  */
+	* Filters \b must never use QMessageBox for reporting errors.
+	* Failing filters should put some meaningful information inside the errorMessage string and return false with the \ref applyFilter
+	*/
 	const QString &errorMsg() { return this->errorMessage; }
 	virtual QString filterInfo(QAction *a) const { return this->filterInfo(ID(a)); }
 	virtual QString filterName(QAction *a) const { return this->filterName(ID(a)); }
@@ -391,15 +393,15 @@ public:
 	virtual QList<FilterIDType> types() const { return typeList; }
 
 	/** Generate the mask of attributes would be created IF the MeshFilterInterface filt would has been called on MeshModel mm
-		BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
+	BE CAREFUL! this function does NOT change in anyway the state of the MeshModel!!!! **/
 	int previewOnCreatedAttributes(QAction* act, const MeshModel& mm);
 	QString generatedScriptCode;
 
 	MLPluginGLContext* glContext;
 protected:
 	// Each plugins exposes a set of filtering possibilities.
-		// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id.
-		//
+	// Each filtering procedure corresponds to a single QAction with a corresponding FilterIDType id.
+	//
 
 	// The list of actions exported by the plugin. Each actions strictly corresponds to
 	QList <QAction *> actionList;
@@ -423,10 +425,10 @@ The typical rendering loop of a Render plugin is something like, :
 
 <your own opengl setup>
 
-		foreach(MeshModel * mp, meshDoc.meshList)
-				{
-					if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
-				}
+foreach(MeshModel * mp, meshDoc.meshList)
+{
+if(mp->visible) mp->Render(rm.drawMode,rm.colorMode,rm.textureMode);
+}
 
 */
 
@@ -443,36 +445,36 @@ public:
 	virtual QList<QAction *> actions() = 0;
 };
 /**
-  MeshDecorateInterface is the base class of all <b> decorators </b>
-  Decorators are 'read-only' visualization aids that helps to show some data about a document.
-  Decorators can make some permesh precomputation but the rendering has to be efficient.
-  Decorators should save the additional data into per-mesh attribute.
+MeshDecorateInterface is the base class of all <b> decorators </b>
+Decorators are 'read-only' visualization aids that helps to show some data about a document.
+Decorators can make some permesh precomputation but the rendering has to be efficient.
+Decorators should save the additional data into per-mesh attribute.
 
 
-  There are two classes of Decorations
-  - PerMesh
-  - PerDocument
+There are two classes of Decorations
+- PerMesh
+- PerDocument
 
-  PerMesh Decorators are associated to each mesh/view
-  Some example of PerDocument Decorations
-	- backgrounds
-	- trackball icon
-	- axis
-	- shadows
-	- screen space Ambient occlusion (think it as a generic 'darkner')
+PerMesh Decorators are associated to each mesh/view
+Some example of PerDocument Decorations
+- backgrounds
+- trackball icon
+- axis
+- shadows
+- screen space Ambient occlusion (think it as a generic 'darkner')
 
-  Some example of PerMesh Decorations
-	- coloring of selected vertex/face
-	- displaying of normals/curvature directions
-	- display of specific tagging
-  */
+Some example of PerMesh Decorations
+- coloring of selected vertex/face
+- displaying of normals/curvature directions
+- display of specific tagging
+*/
 
 class MeshDecorateInterface : public MeshCommonInterface
 {
 public:
 
 	/** The DecorationClass enum represents the set of keywords that must be used to categorize a filter.
-	 Each filter can belong to one or more filtering class, or-ed togheter.
+	Each filter can belong to one or more filtering class, or-ed togheter.
 	*/
 	enum DecorationClass
 	{
@@ -503,7 +505,7 @@ public:
 	virtual void endDecorate(QAction *, MeshDocument &, RichParameterSet *, GLArea *) {}
 
 	/** \brief tests if a decoration is applicable to a mesh.
-	 * used only for PerMesh Decorators.
+	* used only for PerMesh Decorators.
 	For istance curvature cannot be shown on a mesh without curvature.
 	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
 	It is invoked only for decoration of \i PerMesh class;
@@ -605,11 +607,11 @@ public:
 
 
 /** MeshEditInterfaceFactory
-	\short The MeshEditInterfaceFactory class is a <i>factory</i> is used to generate a object for each starting of an editing filter.
+\short The MeshEditInterfaceFactory class is a <i>factory</i> is used to generate a object for each starting of an editing filter.
 
-	This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
-	This class is used by the framework to generate an independent MeshEditInterface for each document.
- */
+This is needed because editing filters have a internal state, so if you want to have an editing tool for two different documents you have to instance two objects.
+This class is used by the framework to generate an independent MeshEditInterface for each document.
+*/
 class MeshEditInterfaceFactory
 {
 public:

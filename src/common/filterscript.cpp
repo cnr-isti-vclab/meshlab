@@ -136,7 +136,7 @@ bool FilterScript::open(QString filename)
             for(QDomElement np = nf.firstChildElement("Param"); !np.isNull(); np = np.nextSiblingElement("Param"))
             {
                 RichParameter* rp = NULL;
-                RichParameterFactory::create(np,&rp);
+                RichParameterAdapter::create(np,&rp);
                 //FilterParameter::addQDomElement(par,np);
                 par.paramList.push_back(rp);
             }

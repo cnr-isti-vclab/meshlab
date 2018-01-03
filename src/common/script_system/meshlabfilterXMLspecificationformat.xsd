@@ -90,6 +90,7 @@
    <xs:attribute name='parName' type='xs:string' use='required'/>
    <xs:attribute name='parDefault' type='xs:string' use='required'/>
    <xs:attribute name='parIsImportant' type='xs:string' use='required'/>
+   <xs:attribute name='parIsPersistent' type='xs:string' use='required'/>
   </xs:complexType>
  </xs:element>
 

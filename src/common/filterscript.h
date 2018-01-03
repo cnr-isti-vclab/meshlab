@@ -34,27 +34,27 @@ class QDomElement;
 class FilterNameParameterValuesPair
 {
 public:
-  virtual QString filterName() const = 0;
-  virtual bool isXMLFilter() const = 0;
-  virtual ~FilterNameParameterValuesPair(){}
+	virtual QString filterName() const = 0;
+	virtual bool isXMLFilter() const = 0;
+	virtual ~FilterNameParameterValuesPair() {}
 };
 
 class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
-  ~XMLFilterNameParameterValuesPair(){}
-  bool isXMLFilter() const {return true;}
-  QString filterName() const {return pair.first;}
-  QPair< QString , QMap<QString,QString> > pair;
+	~XMLFilterNameParameterValuesPair() {}
+	bool isXMLFilter() const { return true; }
+	QString filterName() const { return pair.first; }
+	QPair< QString, QMap<QString, QString> > pair;
 };
 
 class OldFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
-  ~OldFilterNameParameterValuesPair(){}
-  bool isXMLFilter() const {return false;}
-  QString filterName() const {return pair.first;}
-  QPair< QString , RichParameterSet > pair;
+	~OldFilterNameParameterValuesPair() {}
+	bool isXMLFilter() const { return false; }
+	QString filterName() const { return pair.first; }
+	QPair< QString, RichParameterSet > pair;
 };
 
 /*
@@ -65,19 +65,19 @@ Each action is a pair <filtername, parameters>
 
 class FilterScript : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    FilterScript();
-    ~FilterScript();
-    bool open(QString filename);
-    bool save(QString filename);
-    QDomDocument xmlDoc();
+	FilterScript();
+	~FilterScript();
+	bool open(QString filename);
+	bool save(QString filename);
+	QDomDocument xmlDoc();
 
-    QList< FilterNameParameterValuesPair* > filtparlist;
-    typedef QList< FilterNameParameterValuesPair* >::iterator iterator;
+	QList< FilterNameParameterValuesPair* > filtparlist;
+	typedef QList< FilterNameParameterValuesPair* >::iterator iterator;
 
 public slots:
-    void addExecutedXMLFilter(const QString& name,const QMap<QString,QString>& parvalue);
+	void addExecutedXMLFilter(const QString& name, const QMap<QString, QString>& parvalue);
 };
 
 #endif

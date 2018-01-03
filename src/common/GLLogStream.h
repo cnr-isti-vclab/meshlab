@@ -32,9 +32,9 @@
 #include <QString>
 #include <QObject>
 /**
-  This is the logging class.
-  One for each document. Responsible of getting an history of the logging message printed out by filters.
-  */
+This is the logging class.
+One for each document. Responsible of getting an history of the logging message printed out by filters.
+*/
 class GLLogStream : public QObject
 {
 	Q_OBJECT
@@ -47,35 +47,36 @@ public:
 		DEBUG = 3
 	};
 
-	GLLogStream ();
-   ~GLLogStream (){}
-  void print(QStringList &list);		// Fills a QStringList with the log entries
-  void Save(int Level, const char *filename);
-  void Clear();
-    void Logf(int Level, const char * f, ... );
-  void Log(int Level, const char * buf );
+	GLLogStream();
+	~GLLogStream() {}
+	void print(QStringList &list);		// Fills a QStringList with the log entries
+	void Save(int Level, const char *filename);
+	void Clear();
+	void Logf(int Level, const char * f, ...);
+	void Log(int Level, const char * buf);
 
-  void SetBookmark();
-  void ClearBookmark();
-  void BackToBookmark();
+	void SetBookmark();
+	void ClearBookmark();
+	void BackToBookmark();
 
-//private:
-  QList<std::pair<int,QString> > S;
+	//private:
+	QList<std::pair<int, QString> > S;
 
-  // The list of strings used in realtime display of info over the mesh.
-  // Each box is identified by the title, name of the mesh and text.
-  // the name of the mesh is shown only if two or more box with the same title are shown.
-  QMultiMap<QString,QPair<QString,QString> > RealTimeLogText;
+	// The list of strings used in realtime display of info over the mesh.
+	// Each box is identified by the title, name of the mesh and text.
+	// the name of the mesh is shown only if two or more box with the same title are shown.
+	QMultiMap<QString, QPair<QString, QString> > RealTimeLogText;
 
-  void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ... );
-  void RealTimeLog(const QString& Id, const QString &meshName,const QString& text);
+	void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ...);
+	void RealTimeLog(const QString& Id, const QString &meshName, const QString& text);
 
 signals:
-  void logUpdated();
+	void logUpdated();
 
 private:
-  int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing
+	int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing
 
 };
 
 #endif //GLLOGSTREAM_H
+
