@@ -28,7 +28,22 @@ public:
     ~XMLWidgetException() throw() {}
 };
 
-//
+class XMLPersistenToolbox : public QFrame
+{
+	Q_OBJECT
+public:
+	XMLPersistenToolbox(QWidget* parent);
+	~XMLPersistenToolbox() {}
+
+	private slots:
+	void saveClicked();
+	void loadClicked();
+
+signals:
+	void saveRequested();
+	void loadRequested();
+};
+
 class XMLMeshLabWidget : public QWidget
 {
     Q_OBJECT
@@ -47,7 +62,7 @@ public:
     virtual ~XMLMeshLabWidget() {}
     inline QLabel* helpLabel() {return helpLab;}
 
-    virtual void addWidgetToGridLayout(QGridLayout* lay,const int r) = 0;
+    virtual void addWidgetToGridLayout(QGridLayout* lay,const int r);
 
     bool isImportant;
     // called when the user press the 'default' button to reset the parameter values to its default.
@@ -58,14 +73,21 @@ public:
 
 signals:
     void parameterChanged();
+	void savePersistentParameterValueRequested(QString name);
+	void loadPersistentParameterValueRequested(QString name);
     //void widgetEvaluateExpression(const Expression& exp,Value** res);
     //void insertParamInEnv(const QString& paramName,Expression* paramExp);
 
     //int row;
     //QGridLayout* gridLay;
+private slots:
+	void savePersistentParameterValue();
+	void loadPersistentParameterValue();
 protected:
     QLabel* helpLab;
     EnvWrap env;
+	XMLPersistenToolbox* perstb;
+	QString parname;
     /*const XMLFilterInfo::XMLMap& map;*/
     //QLineEdit* lExprEditor;
     //QTextEdit* tExprEditor;
@@ -426,28 +448,25 @@ class XMLStdParFrame : public QFrame
     Q_OBJECT
 public:
     XMLStdParFrame(QWidget *p,QWidget *gla=0);
-    void loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir,MeshDocument* md);
+	~XMLStdParFrame();
+	void loadFrameContent(const MeshLabXMLFilterContainer& filtcont, EnvWrap& envir, MeshDocument* md);
     void extendedView(bool ext,bool help);
-    //void loadFrameContent(RichParameter* par,MeshDocument *mdPt = 0);
-
-    //// The curParSet that is passed must be 'compatible' with the RichParameterSet that have been used to create the frame.
-    //// This function updates the RichParameterSet used to create the frame AND fill also the passed <curParSet>
-    //void readValues(RichParameterSet &curParSet);
-    void resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist);
+	bool setValue(const QString& name, const QString& val);
+	bool getValue(const QString& name, QString& val);
 
     void toggleHelp(const bool help);
 
-    QVector<XMLMeshLabWidget*> xmlfieldwidgets;
-    QVector<QLabel *> helpList;
-
     QWidget *curr_gla; // used for having a link to the glarea that spawned the parameter asking.
-    ~XMLStdParFrame();
 signals:
-    //void frameEvaluateExpression(const Expression& exp,Value** res);
     void parameterChanged();
+	void savePersistentParameterValueRequested(QString name, QString value);
+	void loadPersistentParameterValueRequested(QString name);
 
+private slots:
+	void savePersistentParameterValue(QString name);
 private:
-    //QGridLayout * vLayout;
+	QMap<QString, XMLMeshLabWidget*> xmlfieldwidgets;
+	QMap<QString, QLabel *> helpList;
     bool extended;
 
 };
@@ -483,11 +502,14 @@ private slots:
     void changeCurrentMesh(int meshInd);
     void extendedView(bool ext);
     void postFilterExecution();
+	void loadPersistent(QString name);
+	void savePersistent(QString name, QString expr);
 
 private:
     void startFilterExecution();
     void setDialogStateRelativeToFilterExecution(const bool isfilterinexecution);
     static QString applyButtonLabel(const bool applystate);
+
     bool isfilterexecuting;
 
     Env env;

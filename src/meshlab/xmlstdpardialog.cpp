@@ -44,7 +44,7 @@ void MeshLabXMLStdDialog::loadFrameContent()
 
 
     QGridLayout *gridLayout = new QGridLayout(qf);
-    QString fname(curmfc->act->text());
+	QString fname(curmfc->filterName());
     setWindowTitle(fname);
     ql = new QLabel("<i>"+curmfc->xmlInfo->filterHelp(fname)+"</i>",qf);
     ql->setTextFormat(Qt::RichText);
@@ -52,11 +52,11 @@ void MeshLabXMLStdDialog::loadFrameContent()
     gridLayout->addWidget(ql,0,0,1,2,Qt::AlignTop); // this widgets spans over two columns.
 
     stdParFrame = new XMLStdParFrame(this,curgla);
-    //connect(stdParFrame,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),this,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
+	connect(stdParFrame, SIGNAL(savePersistentParameterValueRequested(QString, QString)), this, SLOT(savePersistent(QString, QString)));
+	connect(stdParFrame, SIGNAL(loadPersistentParameterValueRequested(QString)), this, SLOT(loadPersistent(QString)));
 
-    MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
     EnvWrap wrap(env);
-    stdParFrame->loadFrameContent(mplist,wrap,curMeshDoc);
+	stdParFrame->loadFrameContent(*curmfc, wrap, curMeshDoc);
     gridLayout->addWidget(stdParFrame,1,0,1,2);
 
     //int buttonRow = 2;  // the row where the line of buttons start
@@ -92,9 +92,10 @@ void MeshLabXMLStdDialog::loadFrameContent()
     connect(defaultButton,SIGNAL(clicked()),this,SLOT(resetExpressions()));
     connect(applyButton,SIGNAL(clicked()),this,SLOT(applyClick()));
 
+	MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(curmfc->filterName());
     foreach(MLXMLPluginInfo::XMLMap mp,mplist)
     {
-        bool important = (mp[MLXMLElNames::paramIsImportant] == QString("true"));
+		bool important = (wrap.evalBool(mp[MLXMLElNames::paramIsImportant]));
         onlyimportant &= important;
     }
     if (!onlyimportant)
@@ -137,19 +138,28 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
     curgla=gla;
 
     QString fname = mfc.act->text();
-    //mfi->initParameterSet(action, *mdp, curParSet);
-    MLXMLPluginInfo::XMLMapList mplist = mfc.xmlInfo->filterParametersExtendedInfo(fname);
-    curParMap = mplist;
+    
+	curParMap = mfc.xmlInfo->filterParametersExtendedInfo(fname);
     //curmask = mfc->xmlInfo->filterAttribute(mfc->act->text(),QString("postCond"));
     if(curParMap.isEmpty() && !isPreviewable())
         return false;
 
     GLArea* tmpgl = qobject_cast<GLArea*>(curgla);
 
-    if ((tmpgl != NULL) && (tmpgl->mw() != NULL))
-        env.loadMLScriptEnv(*md,pm,tmpgl->mw()->currentGlobalPars());
-    else
-        env.loadMLScriptEnv(*md,pm);
+	if ((tmpgl != NULL) && (tmpgl->mw() != NULL))
+	{
+		QMap<QString, QString> persistentparam;
+		foreach(RichParameter* rp, tmpgl->mw()->currentGlobalPars().paramList)
+		{
+			if ((rp != NULL) && (rp->isDerivedFromXMLParam()))
+				persistentparam[rp->name] = RichParameterAdapter::convertToStringValue(*rp);
+		}
+
+		env.loadMLScriptEnv(*md, pm, persistentparam);
+	}
+	else
+		env.loadMLScriptEnv(*md, pm);
+
     QTime tt;
     tt.start();
     createFrame();
@@ -172,7 +182,12 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 
 void MeshLabXMLStdDialog::applyClick()
 {
-    //env.pushContext();
+	if (stdParFrame == NULL)
+		throw MLException("MeshLabXMLStdDialog: stdParFrame is NULL. It should not happen!");
+
+	if ((curmfc == NULL) || (!curmfc->isValid()))
+		throw MLException("MeshLabXMLStdDialog: curmfc is NULL and/or not valid. It should not happen!");
+
     QString fname = curmfc->act->text();
     if ((isfilterexecuting) && (curmfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true"))
     {
@@ -181,12 +196,19 @@ void MeshLabXMLStdDialog::applyClick()
     }
 
     QMap<QString,QString> parvalue;
-    assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
+
     for(int ii = 0;ii < curParMap.size();++ii)
     {
-        XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
-        QString exp = wid->getWidgetExpression();
-        parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
+		QString exp;
+
+		bool valid = stdParFrame->getValue(curParMap[ii][MLXMLElNames::paramName], exp);
+		if (!valid)
+		{
+			QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
+			throw MLException(err.toLocal8Bit());
+		}
+
+		parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
     }
     emit filterParametersEvaluated(fname,parvalue);
     ////int mask = 0;//curParSet.getDynamicFloatMask();
@@ -275,23 +297,31 @@ void MeshLabXMLStdDialog::applyDynamic()
 {
     if(!previewCB->isChecked())
         return;
-    //QAction *q = curAction;
-    //env.pushContext();
-    assert(curParMap.size() == stdParFrame->xmlfieldwidgets.size());
-    QMap<QString,QString> parval;
-    for(int ii = 0;ii < curParMap.size();++ii)
-    {
-        XMLMeshLabWidget* wid = stdParFrame->xmlfieldwidgets[ii];
-        QString exp = wid->getWidgetExpression();
-        parval[curParMap[ii][MLXMLElNames::paramName]] = exp;
-        //delete exp;
-    }
+
+	QMap<QString, QString> parvalue;
+
+	for (int ii = 0; ii < curParMap.size(); ++ii)
+	{
+		if (curParMap[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
+		{
+			QString exp;
+
+			bool valid = stdParFrame->getValue(curParMap[ii][MLXMLElNames::paramName], exp);
+			if (!valid)
+			{
+				QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
+				throw MLException(err.toLocal8Bit());
+			}
+
+			parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
+		}
+	}
     //two different executions give the identical result if the two contexts (with the filter's parameters inside) are identical
     //previewContext = env.currentContext()->toString();
 
     meshState.apply(curModel);
     startFilterExecution();
-    curmwi->executeFilter(this->curmfc, parval, true);
+    curmwi->executeFilter(this->curmfc, parvalue, true);
     //env.pushContext();
     meshCacheState.create(curmask,curModel);
     validcache = true;
@@ -331,8 +361,17 @@ bool MeshLabXMLStdDialog::isPreviewable() const
 void MeshLabXMLStdDialog::resetExpressions()
 {
     QString fname(curmfc->act->text());
-    MLXMLPluginInfo::XMLMapList mplist = curmfc->xmlInfo->filterParametersExtendedInfo(fname);
-    stdParFrame->resetExpressions(mplist);
+	for (int ii = 0; ii < curParMap.size(); ++ii)
+	{
+		if (curParMap[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
+		{
+			if (!stdParFrame->setValue(curParMap[ii][MLXMLElNames::paramName], curParMap[ii][MLXMLElNames::paramDefExpr]))
+			{
+				QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
+				throw MLException(err.toLocal8Bit());
+			}
+		}
+	}
 }
 
 void MeshLabXMLStdDialog::closeEvent( QCloseEvent * /*event*/ )
@@ -350,6 +389,29 @@ void MeshLabXMLStdDialog::resetPointers()
 void MeshLabXMLStdDialog::postFilterExecution()
 {
     setDialogStateRelativeToFilterExecution(false);
+}
+
+void MeshLabXMLStdDialog::loadPersistent(QString name)
+{
+	if (curmfc == NULL)
+		throw MLException(QString("MeshLabXMLStdDialog: curmfc is NULL!"));
+
+	if (stdParFrame == NULL)
+		throw MLException(QString("MeshLabXMLStdDialog: stdParFrame is NULL!"));
+
+	QString valexpr = curmfc->readPersistentValueFromSetting(name);
+	stdParFrame->setValue(name, valexpr);
+}
+
+void MeshLabXMLStdDialog::savePersistent(QString name, QString expr)
+{
+	if (curmfc == nullptr)
+		throw MLException(QString("MeshLabXMLStdDialog: curmfc is NULL!"));
+
+	if (curmfc->xmlInfo == nullptr)
+		throw MLException(QString("MeshLabXMLStdDialog: xmlinfo is NULL!"));
+
+	curmfc->writePersistentValueFromSetting(name, expr);
 }
 
 void MeshLabXMLStdDialog::startFilterExecution()
@@ -408,18 +470,35 @@ XMLStdParFrame::~XMLStdParFrame()
 
 }
 
-void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,EnvWrap& envir,MeshDocument* md)
+void XMLStdParFrame::loadFrameContent(const MeshLabXMLFilterContainer& filtcont, EnvWrap& envir, MeshDocument* md)
 {
+	if ((filtcont.act == nullptr) || (filtcont.xmlInfo == nullptr))
+		return;
+
     QGridLayout* glay = new QGridLayout();
     int ii = 0;
-    for(MLXMLPluginInfo::XMLMapList::const_iterator it = parMap.constBegin();it != parMap.constEnd();++it)
+
+	MeshLabXMLStdDialog* parent = qobject_cast<MeshLabXMLStdDialog*>(parentWidget());
+	if (parent == NULL)
+		return;
+	MLXMLPluginInfo::XMLMapList mplist = filtcont.xmlInfo->filterParametersExtendedInfo(filtcont.filterName());
+	for (MLXMLPluginInfo::XMLMapList::const_iterator it = mplist.constBegin(); it != mplist.constEnd(); ++it)
     {
-        XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it,envir,md,this);
-        if (widg == NULL)
-            return;
-        xmlfieldwidgets.push_back(widg);
-        helpList.push_back(widg->helpLabel());
-        widg->addWidgetToGridLayout(glay,ii);
+		XMLMeshLabWidget* widg = XMLMeshLabWidgetFactory::create(*it, envir, md, this);
+		if (widg == NULL)
+			return;
+
+		if (envir.evalBool((*it)[MLXMLElNames::paramIsPersistent]))
+		{
+			QString pers = filtcont.readPersistentValueFromSetting((*it)[MLXMLElNames::paramName]);
+			widg->set(pers);
+		}
+
+		connect(widg, SIGNAL(loadPersistentParameterValueRequested(QString)), this, SIGNAL(loadPersistentParameterValueRequested(QString)));
+		connect(widg, SIGNAL(savePersistentParameterValueRequested(QString)), this, SLOT(savePersistentParameterValue(QString)));
+		xmlfieldwidgets[(*it)[MLXMLElNames::paramName]] = widg;
+		helpList[(*it)[MLXMLElNames::paramName]] = widg->helpLabel();
+		widg->addWidgetToGridLayout(glay, ii);
         ++ii;
     }
     setLayout(glay);
@@ -430,27 +509,60 @@ void XMLStdParFrame::loadFrameContent(const MLXMLPluginInfo::XMLMapList& parMap,
 
 void XMLStdParFrame::toggleHelp(bool help)
 {
-    for(int i = 0; i < helpList.count(); i++)
-        helpList.at(i)->setVisible(help && xmlfieldwidgets[i]->isVisible()) ;
+	for (QMap<QString, QLabel*>::iterator it = helpList.begin(); it != helpList.end(); ++it)
+		it.value()->setVisible(help && xmlfieldwidgets[it.key()]->isVisible());
     updateGeometry();
     adjustSize();
 }
 
+void XMLStdParFrame::savePersistentParameterValue(QString name)
+{
+	auto it = xmlfieldwidgets.find(name);
+
+	if (it != xmlfieldwidgets.end())
+	{
+		XMLMeshLabWidget* widg = it.value();
+		if (widg != nullptr)
+			emit savePersistentParameterValueRequested(name, widg->getWidgetExpression());
+	}
+}
+
 void XMLStdParFrame::extendedView(bool ext,bool help)
 {
-    for(int i = 0; i < xmlfieldwidgets.count(); i++)
-        xmlfieldwidgets[i]->setVisibility(ext || xmlfieldwidgets[i]->isImportant);
+	for (QMap<QString, XMLMeshLabWidget*>::iterator it = xmlfieldwidgets.begin(); it != xmlfieldwidgets.end(); ++it)
+		(*it)->setVisibility(ext || (*it)->isImportant);
     if (help)
         toggleHelp(help);
     updateGeometry();
     adjustSize();
 }
 
-void XMLStdParFrame::resetExpressions(const MLXMLPluginInfo::XMLMapList& mplist)
+bool XMLStdParFrame::setValue(const QString& name, const QString& val)
 {
-    for(int i = 0; i < xmlfieldwidgets.count(); i++)
-        xmlfieldwidgets[i]->set(mplist[i][MLXMLElNames::paramDefExpr]);
+	bool isvalid = false;
+
+	QMap<QString, XMLMeshLabWidget*>::iterator it = xmlfieldwidgets.find(name);
+	if ((it != xmlfieldwidgets.end()) && (it.value() != NULL))
+	{
+		(*it)->set(val);
+		isvalid = true;
+	}
+
+	return isvalid;
 }
+
+bool XMLStdParFrame::getValue(const QString& name, QString& val)
+{
+	bool isvalid = false;
+	QMap<QString, XMLMeshLabWidget*>::iterator it = xmlfieldwidgets.find(name);
+	if ((it != xmlfieldwidgets.end()) && (it.value() != NULL))
+	{
+		val = (*it)->getWidgetExpression();
+		isvalid = true;
+	}
+	return isvalid;
+}
+
 
 XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& envir,QWidget* parent )
     :QWidget(parent),env(envir)
@@ -460,7 +572,8 @@ XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& en
     //we must break the construction of the widget in two steps because otherwise in the constructor (called by XMLMeshLabWidgetFactory::create) the emit is invoked
     //before the connection!
     //connect(this,SIGNAL(widgetEvaluateExpression(const Expression&,Value**)),parent,SIGNAL(frameEvaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-    isImportant = env.evalBool(mp[MLXMLElNames::paramIsImportant]);
+	parname = mp[MLXMLElNames::paramName];
+	isImportant = env.evalBool(mp[MLXMLElNames::paramIsImportant]);
     setVisible(isImportant);
 
     helpLab = new QLabel("<small>"+ mp[MLXMLElNames::paramHelpTag] +"</small>",this);
@@ -470,39 +583,36 @@ XMLMeshLabWidget::XMLMeshLabWidget(const MLXMLPluginInfo::XMLMap& mp,EnvWrap& en
     helpLab->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     helpLab->setMinimumWidth(250);
     helpLab->setMaximumWidth(QWIDGETSIZE_MAX);
-    //gridLay = qobject_cast<QGridLayout*>(parent->layout());
-    //assert(gridLay != 0);
-
-    //row = gridLay->rowCount();
-    ////WARNING!!!!!!!!!!!!!!!!!! HORRIBLE PATCH FOR THE BOOL WIDGET PROBLEM
-    //if ((row == 1) && (mp[MLXMLElNames::guiType] == MLXMLElNames::checkBoxTag))
-    //{
-
-    //	QLabel* lb = new QLabel("",this);
-    //	gridLay->addWidget(lb);
-    //	gridLay->addWidget(helpLab,row+1,3,1,1,Qt::AlignTop);
-    //}
-    ///////////////////////////////////////////////////////////////////////////
-    //else
-    //	gridLay->addWidget(helpLab,row,3,1,1,Qt::AlignTop);
+	perstb = new XMLPersistenToolbox(this);
+	perstb->setVisible(env.evalBool(mp[MLXMLElNames::paramIsPersistent]));
+	perstb->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+	connect(perstb, SIGNAL(saveRequested()), this, SLOT(savePersistentParameterValue()));
+	connect(perstb, SIGNAL(loadRequested()), this, SLOT(loadPersistentParameterValue()));
 }
 
 void XMLMeshLabWidget::setVisibility( const bool vis )
 {
     helpLabel()->setVisible(helpLabel()->isVisible() && vis);
+	perstb->setVisible(perstb->isVisible() && vis);
     updateVisibility(vis);
     setVisible(vis);
 }
 
 void XMLMeshLabWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-    if (lay != NULL)
-        lay->addWidget(helpLab,r,2,1,1);
+	if (lay != NULL)
+		lay->addWidget(helpLab, r, 3, 1, 1);
 }
-//void XMLMeshLabWidget::reset()
-//{
-//	this->set(map[MLXMLElNames::paramDefExpr]);
-//}
+
+void XMLMeshLabWidget::savePersistentParameterValue()
+{
+	emit savePersistentParameterValueRequested(parname);
+}
+
+void XMLMeshLabWidget::loadPersistentParameterValue()
+{
+	emit loadPersistentParameterValueRequested(parname);
+}
 
 XMLCheckBoxWidget::XMLCheckBoxWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* parent )
     :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
@@ -558,45 +668,51 @@ void XMLCheckBoxWidget::setVisibility( const bool vis )
     cb->setVisible(vis);
 }
 
-void XMLCheckBoxWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
+void XMLCheckBoxWidget::addWidgetToGridLayout(QGridLayout* lay, const int r)
 {
-    if (lay !=NULL)
-        lay->addWidget(cb,r,0,1,2);
-    XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
+	if (lay != NULL)
+	{
+		QHBoxLayout* hlay = new QHBoxLayout();
+		hlay->addWidget(cb);
+		hlay->addWidget(perstb);
+		hlay->addStretch();
+		lay->addLayout(hlay, r, 0, 1, 2);
+	}
+	XMLMeshLabWidget::addWidgetToGridLayout(lay, r);
 }
 
 XMLMeshLabWidget* XMLMeshLabWidgetFactory::create(const MLXMLPluginInfo::XMLMap& widgetTable,EnvWrap& env,MeshDocument* md,QWidget* parent)
 {
-    QString guiType = widgetTable[MLXMLElNames::guiType];
-    if (guiType == MLXMLElNames::editTag)
-        return new XMLEditWidget(widgetTable,env,parent);
+	QString guiType = widgetTable[MLXMLElNames::guiType];
+	if (guiType == MLXMLElNames::editTag)
+		return new XMLEditWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::checkBoxTag)
-        return new XMLCheckBoxWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::checkBoxTag)
+		return new XMLCheckBoxWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::absPercTag)
-        return new XMLAbsWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::absPercTag)
+		return new XMLAbsWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::vec3WidgetTag)
-        return new XMLVec3Widget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::vec3WidgetTag)
+		return new XMLVec3Widget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::colorWidgetTag)
-        return new XMLColorWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::colorWidgetTag)
+		return new XMLColorWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::sliderWidgetTag)
-        return new XMLSliderWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::sliderWidgetTag)
+		return new XMLSliderWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::enumWidgetTag)
-        return new XMLEnumWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::enumWidgetTag)
+		return new XMLEnumWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::meshWidgetTag)
-        return new XMLMeshWidget(md,widgetTable,env,parent);
+	if (guiType == MLXMLElNames::meshWidgetTag)
+		return new XMLMeshWidget(md, widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::shotWidgetTag)
-        return new XMLShotWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::shotWidgetTag)
+		return new XMLShotWidget(widgetTable, env, parent);
 
-    if (guiType == MLXMLElNames::stringWidgetTag)
-        return new XMLStringWidget(widgetTable,env,parent);
+	if (guiType == MLXMLElNames::stringWidgetTag)
+		return new XMLStringWidget(widgetTable, env, parent);
     return NULL;
 }
 
@@ -665,11 +781,15 @@ void XMLEditWidget::setVisibility( const bool vis )
 
 void XMLEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-    if (lay !=NULL)
-    {
-        lay->addWidget(fieldDesc,r,0);
-        lay->addWidget(lineEdit,r,1);
-    }
+	QHBoxLayout* hlay = new QHBoxLayout();
+	hlay->addWidget(lineEdit);
+	hlay->addWidget(perstb);
+
+	if (lay != NULL)
+	{
+		lay->addWidget(fieldDesc, r, 0);
+		lay->addLayout(hlay, r, 1);
+	}
     XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
@@ -680,7 +800,7 @@ XMLStringWidget::XMLStringWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,Env
     lineEdit = new QLineEdit(this);
     //int row = gridLay->rowCount() -1;
 
-    fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
+	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
     lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
 
     //gridLay->addWidget(fieldDesc,row,0,Qt::AlignTop);
@@ -724,10 +844,13 @@ void XMLStringWidget::setVisibility( const bool vis )
 
 void XMLStringWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
+	QHBoxLayout* hlay = new QHBoxLayout();
+	hlay->addWidget(lineEdit);
+	hlay->addWidget(perstb);
     if (lay !=NULL)
     {
         lay->addWidget(fieldDesc,r,0);
-        lay->addWidget(lineEdit,r,1);
+		lay->addLayout(hlay, r, 1);
     }
     XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
@@ -772,7 +895,7 @@ XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap&
     glay->addWidget(percLab,0,1,Qt::AlignHCenter);
     glay->addWidget(absSB,1,0,Qt::AlignTop);
     glay->addWidget(percSB,1,1,Qt::AlignTop);
-    //gridLay->addLayout(lay,row,1,1,2,Qt::AlignTop);
+	glay->addWidget(perstb, 0, 2, 2, 1, Qt::AlignVCenter);
 
 
     connect(absSB,SIGNAL(valueChanged(double)),this,SLOT(on_absSB_valueChanged(double)));
@@ -1548,71 +1671,81 @@ void OldScriptingSystemXMLParamDialog::resetValues()
     {
         QString fname(_mfc.act->text());
         MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
-        _stdparframe->resetExpressions(mplist);
+		for (int ii = 0; ii < mplist.size(); ++ii)
+		{
+			if (mplist[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
+			{
+				if (!_stdparframe->setValue(mplist[ii][MLXMLElNames::paramName], mplist[ii][MLXMLElNames::paramDefExpr]))
+				{
+					QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + mplist[ii][MLXMLElNames::paramName] + " has not been found!";
+					throw MLException(err.toLocal8Bit());
+				}
+			}
+		}
     }
 }
 
 
 void OldScriptingSystemXMLParamDialog::createFrame()
 {
-    if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
-    {
-        QString fname(_mfc.act->text());
-        MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
-        if (mplist.size() != _paramvalues.size())
-            MLException("OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. The mplist and _paramvalues MUST have the same number of items.");
+    //if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
+    //{
+    //    QString fname(_mfc.act->text());
+    //    MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
+    //    if (mplist.size() != _paramvalues.size())
+    //        MLException("OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. The mplist and _paramvalues MUST have the same number of items.");
 
-        QVBoxLayout *vboxLayout = new QVBoxLayout(this);
-        setLayout(vboxLayout);
+    //    QVBoxLayout *vboxLayout = new QVBoxLayout(this);
+    //    setLayout(vboxLayout);
 
-        GLArea* tmpgl = qobject_cast<GLArea*>(_gla);
+    //    GLArea* tmpgl = qobject_cast<GLArea*>(_gla);
 
-        if (tmpgl != NULL)
-            _env.loadMLScriptEnv(*_meshdocument,_pm,tmpgl->mw()->currentGlobalPars());
-        else
-            _env.loadMLScriptEnv(*_meshdocument,_pm);
+    //    if (tmpgl != NULL)
+    //        _env.loadMLScriptEnv(*_meshdocument,_pm,tmpgl->mw()->currentGlobalPars());
+    //    else
+    //        _env.loadMLScriptEnv(*_meshdocument,_pm);
 
-        EnvWrap envwrap(_env);
-        _stdparframe = new XMLStdParFrame(this);
-        _stdparframe->loadFrameContent(mplist, envwrap,_meshdocument);
-        for(int ii = 0;ii < mplist.size();++ii)
-        {
-            QMap<QString,QString>::iterator it = _paramvalues.find(mplist[ii][MLXMLElNames::paramName]);
-            if (it == _paramvalues.end())
-            {
-                QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
-                throw MLException(err);
-            }
-            _stdparframe->xmlfieldwidgets[ii]->set(it.value());
-            //in this dialog we will not make distinction between important/not-important parameters
-            _stdparframe->xmlfieldwidgets[ii]->setVisibility(true);
+    //    EnvWrap envwrap(_env);
+    //    _stdparframe = new XMLStdParFrame(this);
+    //    _stdparframe->loadFrameContent(mplist, envwrap,_meshdocument);
+    //    for(int ii = 0;ii < mplist.size();++ii)
+    //    {
+    //        QMap<QString,QString>::iterator it = _paramvalues.find(mplist[ii][MLXMLElNames::paramName]);
+    //        if (it == _paramvalues.end())
+    //        {
+    //            QString err = "OldScriptingSystemXMLParamDialog::createFrame() : Something really bad happened. Param " + mplist[ii][MLXMLElNames::paramName] + " has not been found in the _paramvalues map.";
+    //            throw MLException(err);
+    //        }
+    //        _stdparframe->xmlfieldwidgets[ii]->set(it.value());
+    //        //in this dialog we will not make distinction between important/not-important parameters
+    //        _stdparframe->xmlfieldwidgets[ii]->setVisibility(true);
 
-        }
-        layout()->addWidget(_stdparframe);
+    //    }
+    //    layout()->addWidget(_stdparframe);
 
-        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel );
-        //add the reset button so we can get its signals
-        QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
-        layout()->addWidget(buttonBox);
+    //    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok  | QDialogButtonBox::Cancel );
+    //    //add the reset button so we can get its signals
+    //    QPushButton *resetButton = buttonBox->addButton(QDialogButtonBox::Reset);
+    //    layout()->addWidget(buttonBox);
 
-        connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
-        connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-        connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
-        connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
+    //    connect(buttonBox, SIGNAL(accepted()), this, SLOT(getAccept()));
+    //    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    //    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(toggleHelp()));
+    //    connect(resetButton, SIGNAL(clicked()), this, SLOT(resetValues()));
 
-        setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    //    setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
 
-        //set the minimum size so it will shrink down to the right size	after the help is toggled
-        this->setMinimumSize(_stdparframe->sizeHint());
-        this->showNormal();
-        this->adjustSize();
-    }
+    //    //set the minimum size so it will shrink down to the right size	after the help is toggled
+    //    this->setMinimumSize(_stdparframe->sizeHint());
+    //    this->showNormal();
+    //    this->adjustSize();
+    //}
 }
 
 
 void OldScriptingSystemXMLParamDialog::getAccept()
 {
-    if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
+    /*if ((_mfc.act != NULL) && (_mfc.xmlInfo != NULL))
     {
         QString fname(_mfc.act->text());
         MLXMLPluginInfo::XMLMapList mplist = _mfc.xmlInfo->filterParametersExtendedInfo(fname);
@@ -1630,7 +1763,7 @@ void OldScriptingSystemXMLParamDialog::getAccept()
         }
         accept();
     }
-    reject();
+    reject();*/
 }
 
 void OldScriptingSystemXMLParamDialog::toggleHelp()
@@ -1639,4 +1772,45 @@ void OldScriptingSystemXMLParamDialog::toggleHelp()
     _stdparframe->toggleHelp(_showhelp);
     updateGeometry();
     adjustSize();
+}
+
+XMLPersistenToolbox::XMLPersistenToolbox(QWidget* parent)
+	:QFrame(parent)
+{
+	//setStyleSheet("QFrame {margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;shape:box}");
+	QMargins m(0, 0, 0, 0);
+	setContentsMargins(m);
+	QVBoxLayout* layout = new QVBoxLayout();
+	layout->setSpacing(0);
+	QFont f;
+	int pointsize = 5;
+	int widsize = pointsize * 3;
+	f.setPointSize(pointsize);
+	QPushButton* savebutton = new QPushButton(tr("S"), this);
+	savebutton->setFont(f);
+	savebutton->setToolTipDuration(0);
+	savebutton->setToolTip(tr("Save"));
+	savebutton->setFixedSize(widsize, widsize);
+	connect(savebutton, SIGNAL(clicked()), this, SLOT(saveClicked()));
+	QPushButton* loadbutton = new QPushButton(tr("L"), this);
+	loadbutton->setFont(f);
+	loadbutton->setToolTip(tr("Load"));
+	loadbutton->setFixedSize(widsize, widsize);
+	connect(loadbutton, SIGNAL(clicked()), this, SLOT(loadClicked()));
+
+	layout->addWidget(savebutton);
+	layout->addWidget(loadbutton);
+	layout->setContentsMargins(m);
+
+	setLayout(layout);
+}
+
+void XMLPersistenToolbox::saveClicked()
+{
+	emit saveRequested();
+}
+
+void XMLPersistenToolbox::loadClicked()
+{
+	emit loadRequested();
 }
