@@ -57,6 +57,7 @@ private:
 	QLineEdit* pname;
 	QLineEdit* pdefault;
 	QCheckBox* pisimp;
+	QCheckBox* pispers;
 	QPlainTextEdit* phel;
 	//QTreeWidget* pguitree;
 	QLineEdit* pguilab;
