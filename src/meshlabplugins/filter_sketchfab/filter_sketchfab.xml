@@ -3,30 +3,34 @@
   <FILTER filterName="Export to Sketchfab" filterFunction="exportToSketchfab" filterClass="Measure" filterPre="MM_NONE" filterPost="MM_NONE" filterArity="SingleMesh" filterRasterArity="NoRaster" filterIsInterruptible="false">
     <FILTER_HELP><![CDATA[Upload the current layer on Sketchfab. It requires that you have an account and that you set your private API token in the preferences of MeshLab.]]></FILTER_HELP>
     <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-    <PARAM parType="String" parName="title" parDefault="MeshLabModel" parIsImportant="true">
+	<PARAM parType="String" parName="sketchFabKeyCode" parDefault="00000000" parIsImportant="true" parIsPersistent="true">
+      <PARAM_HELP><![CDATA[Mandatory.]]></PARAM_HELP>
+      <STRING_GUI guiLabel="Sketch Fab Code" />
+    </PARAM>
+    <PARAM parType="String" parName="title" parDefault="MeshLabModel" parIsImportant="true" parIsPersistent="false">
       <PARAM_HELP><![CDATA[Mandatory.]]></PARAM_HELP>
       <STRING_GUI guiLabel="Title" />
     </PARAM>
-    <PARAM parType="String" parName="description" parDefault="A model generated with meshlab" parIsImportant="true">
+    <PARAM parType="String" parName="description" parDefault="A model generated with meshlab" parIsImportant="true" parIsPersistent="false">
       <PARAM_HELP><![CDATA[Mandatory. A short description of the model that is uploaded ]]></PARAM_HELP>
       <STRING_GUI guiLabel="description" />
     </PARAM>
-    <PARAM parType="String" parName="tags" parDefault="meshlab" parIsImportant="true">
+    <PARAM parType="String" parName="tags" parDefault="meshlab" parIsImportant="true" parIsPersistent="false">
       <PARAM_HELP><![CDATA[Mandatory. Tags must be separated by a space. Typical tags usually used by MeshLab users: scan, photogrammetry ]]></PARAM_HELP>
       <STRING_GUI guiLabel="Tags" />
     </PARAM>
-    <PARAM parName="isPrivate" parIsImportant="false" parType="Boolean" parDefault="false">
+    <PARAM parName="isPrivate" parIsImportant="false" parType="Boolean" parDefault="false" parIsPersistent="false">
        <PARAM_HELP><![CDATA[This parameter can be true only for PRO account.  ]]></PARAM_HELP>
        <CHECKBOX_GUI guiLabel="Private"/>
     </PARAM>
-    <PARAM parName="isPublished" parIsImportant="true" parType="Boolean" parDefault="false">
+    <PARAM parName="isPublished" parIsImportant="true" parType="Boolean" parDefault="false" parIsPersistent="false">
         <PARAM_HELP><![CDATA[ If true the model will be published immediately ]]></PARAM_HELP>
         <CHECKBOX_GUI guiLabel="Publish"/>
     </PARAM>
-    <PARAM parName="autoRotate" parIsImportant="false" parType="Boolean" parDefault="true">
-    <PARAM_HELP><![CDATA[ If true the model rotated by 90 degree on the X axis to maintain similar default orientation.]]></PARAM_HELP>
-    <CHECKBOX_GUI guiLabel="Auto Rotate"/>
-</PARAM>
+    <PARAM parName="autoRotate" parIsImportant="false" parType="Boolean" parDefault="true" parIsPersistent="false">
+		<PARAM_HELP><![CDATA[ If true the model rotated by 90 degree on the X axis to maintain similar default orientation.]]></PARAM_HELP>
+		<CHECKBOX_GUI guiLabel="Auto Rotate"/>
+	</PARAM>
   </FILTER>
   </PLUGIN>
 </MESHLAB_FILTER_INTERFACE>

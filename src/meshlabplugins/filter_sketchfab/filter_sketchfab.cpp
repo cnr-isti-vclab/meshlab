@@ -72,7 +72,7 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
     {
       qDebug("Export to SketchFab start ");
       this->fcb=cb;
-      QString APIToken=env.evalString(Env::convertToAMLScriptValidName("MeshLab::Plugins::sketchFabKeyCode"));
+      QString APIToken = env.evalString("sketchFabKeyCode");
       this->fcb(1,"Compressing Mesh");
       qDebug("APIToken = '%s' ",qPrintable(APIToken));
       Matrix44m rot; rot.SetRotateDeg(-90,Point3m(1,0,0));
