@@ -6,6 +6,8 @@ SOURCES       += filter_func.cpp
 
 TARGET        = filter_func
 
+
+DEFINES += _UNICODE
 INCLUDEPATH += ../../external/muparser_v225/include
 
 # Note: we need static libs so when building muparser lib use 

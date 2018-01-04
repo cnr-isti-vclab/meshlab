@@ -1378,7 +1378,7 @@ void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 
 	// face quality
 	p.DefineVar(conversion::fromStringToWString("fq"), &fq);
-
+	
     // index
     p.DefineVar(conversion::fromStringToWString("fi"),&f);
     p.DefineVar(conversion::fromStringToWString("vi0"),&v0i);

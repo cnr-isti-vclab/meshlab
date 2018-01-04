@@ -278,7 +278,7 @@ void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type, co
 	parElem.setAttribute("isxmlparam", isxmlpar);
 }
 
-void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val,const QString& desc,const QString& tooltipp, bool isxmlpar)
+void RichParameterXMLVisitor::fillRichParameterAttribute(const QString& type,const QString& name,const QString& val,const QString& desc,const QString& tooltip, bool isxmlpar)
 {
     fillRichParameterAttribute(type,name,desc,tooltip, isxmlpar);
     parElem.setAttribute("value",val);
@@ -849,7 +849,8 @@ RichString::~RichString()
 RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44d& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 
-RichMatrix44f::RichMatrix44f(const QString nm, const vcg::Matrix44f& defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/) : RichParameter(nm, new Matrix44fValue(defval), new Matrix44fDecoration(new Matrix44fValue(defval), desc, tltip)) { }
+RichMatrix44f::RichMatrix44f(const QString nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool isxmlpar /*= false*/)
+	: RichParameter(nm, new Matrix44fValue(val), new Matrix44fDecoration(new Matrix44fValue(defval), desc, tltip)) { }
 
 void RichMatrix44f::accept( Visitor& v )
 {
@@ -1014,12 +1015,6 @@ RichMesh::RichMesh( const QString nm,int meshind,MeshDocument* doc,const QString
         val = NULL;
 }
 
-RichMesh::RichMesh(const QString nm, int meshind, MeshDocument* doc, const QString desc/*=QString()*/, const QString tltip/*=QString()*/)
-	:RichParameter(nm, NULL, new MeshDecoration(meshind, doc, desc, tltip))
-{
-    meshindex = meshind;
-}
-
 RichMesh::RichMesh(const QString nm, int meshind, bool isxmlpar /*= false*/)
 	: RichParameter(nm, new MeshValue(NULL), new MeshDecoration(meshind), isxmlpar)
 {
@@ -1032,6 +1027,12 @@ RichMesh::RichMesh(const QString nm, MeshModel* val, MeshModel* defval, MeshDocu
     meshindex = -1;
     if (doc != NULL)
         meshindex = doc->meshList.indexOf(val);
+}
+
+RichMesh::RichMesh(const QString nm, int meshind, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool isxmlpar /*= false*/)
+	: RichParameter(nm, new MeshValue(NULL), new MeshDecoration(meshind, desc, tltip), isxmlpar)
+{
+	meshindex = meshind;
 }
 
 void RichMesh::accept( Visitor& v )

@@ -12,8 +12,16 @@ CONFIG       += ordered
                            # the common framework, used by all the plugins,
 SUBDIRS       = common \
                 meshlab \                         # the GUI framework
-                meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
-                meshlabplugins/filter_meshing \ 
+                meshlabserver \
+				meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
+                meshlabplugins/filter_meshing \
+				meshlabplugins/decorate_base \
+				meshlabplugins/filter_sketchfab \
+				meshlabplugins/filter_mutualinfoxml \
+				meshlabplugins/filter_measure \
+				sampleplugins/sample_xmlfilter \
+				
+				
 #
 # Next some other useful, but still easy to be compiled, plugins
 # Uncomment them if you succeed in compiling the above ones.
