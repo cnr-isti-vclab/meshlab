@@ -602,7 +602,7 @@ bool RichParameterAdapter::create(const QString& namepreamble, const MLXMLPlugin
 	QString desc = xmlparam[MLXMLElNames::guiLabel];
 	QString tooltip = xmlparam[MLXMLElNames::paramHelpTag];
 
-	qDebug("    Reading Param with name %s : %s", qPrintable(name), xmlparam[MLXMLElNames::paramDefExpr]);
+	qDebug("    Reading Param with name %s : %s", qPrintable(name), qPrintable(xmlparam[MLXMLElNames::paramDefExpr]));
 
 	*par = new RichString(name, xmlparam[MLXMLElNames::paramDefExpr], desc, tooltip);
 	if (par != NULL)
