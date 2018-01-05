@@ -89,29 +89,34 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 			try
 			{
 				MLXMLPluginInfo* pluginfo = loadXMLPlugin(fileName);
+                if (pluginfo == NULL)
+                {
+                    QString err;
+                    err = "WARNING! " + fileName + " xml-based plugin was not found!";
+                    throw MLException(err);
+                }
+//				//WARNING!!!! Why this piece of code is not inside the loadXMLPlugin function?!?!?!?!?!?!
+//				//Because one day, hopefully, the RichParameterSet class (the old parameters system) will disappear and we don't want to spread it inside the XML functions
 
-				//WARNING!!!! Why this piece of code is not inside the loadXMLPlugin function?!?!?!?!?!?!
-				//Because one day, hopefully, the RichParameterSet class (the old parameters system) will disappear and we don't want to spread it inside the XML functions
-
-				if (pluginfo != NULL)
-				{
-					QString pluginprogname = pluginfo->pluginScriptName();
-					foreach(QString filtername, pluginfo->filterNames())
-					{
-						QString filterprogname = pluginfo->filterAttribute(filtername, MLXMLElNames::filterScriptFunctName);
-						foreach(MLXMLPluginInfo::XMLMap params, pluginfo->filterParametersExtendedInfo(filtername))
-						{
-							if (params[MLXMLElNames::paramIsPersistent] == QString("true"))
-							{
-								RichParameter* rp = NULL;
-								QString completepreamble = MLXMLUtilityFunctions::completeFilterProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), pluginprogname, filterprogname);
-								/*RichParameterAdapter::create(completepreamble,params, &rp);
-								if (rp != NULL)
-								defaultGlobal.addParam(rp);*/
-							}
-						}
-					}
-				}
+//				if (pluginfo != NULL)
+//				{
+//					QString pluginprogname = pluginfo->pluginScriptName();
+//					foreach(QString filtername, pluginfo->filterNames())
+//					{
+//						QString filterprogname = pluginfo->filterAttribute(filtername, MLXMLElNames::filterScriptFunctName);
+//						foreach(MLXMLPluginInfo::XMLMap params, pluginfo->filterParametersExtendedInfo(filtername))
+//						{
+//							if (params[MLXMLElNames::paramIsPersistent] == QString("true"))
+//							{
+//                                //RichParameter* rp = NULL;
+//								QString completepreamble = MLXMLUtilityFunctions::completeFilterProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), pluginprogname, filterprogname);
+//								/*RichParameterAdapter::create(completepreamble,params, &rp);
+//								if (rp != NULL)
+//								defaultGlobal.addParam(rp);*/
+//							}
+//						}
+//					}
+//				}
 			}
 			catch (MeshLabXMLParsingException& e)
 			{
