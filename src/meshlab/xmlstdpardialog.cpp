@@ -399,7 +399,7 @@ void MeshLabXMLStdDialog::loadPersistent(QString name)
 	if (stdParFrame == NULL)
 		throw MLException(QString("MeshLabXMLStdDialog: stdParFrame is NULL!"));
 
-	QString valexpr = curmfc->readPersistentValueFromSetting(name);
+	QString valexpr = curmfc->readPersistentValueFromSettings(name);
 	stdParFrame->setValue(name, valexpr);
 }
 
@@ -411,7 +411,7 @@ void MeshLabXMLStdDialog::savePersistent(QString name, QString expr)
 	if (curmfc->xmlInfo == nullptr)
 		throw MLException(QString("MeshLabXMLStdDialog: xmlinfo is NULL!"));
 
-	curmfc->writePersistentValueFromSetting(name, expr);
+	curmfc->writePersistentValueIntoSettings(name, expr);
 }
 
 void MeshLabXMLStdDialog::startFilterExecution()
@@ -490,7 +490,7 @@ void XMLStdParFrame::loadFrameContent(const MeshLabXMLFilterContainer& filtcont,
 
 		if (envir.evalBool((*it)[MLXMLElNames::paramIsPersistent]))
 		{
-			QString pers = filtcont.readPersistentValueFromSetting((*it)[MLXMLElNames::paramName]);
+			QString pers = filtcont.readPersistentValueFromSettings((*it)[MLXMLElNames::paramName]);
 			widg->set(pers);
 		}
 

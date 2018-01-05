@@ -328,7 +328,7 @@ struct MeshLabXMLFilterContainer
 		return QString();
 	}
 
-	QString readPersistentValueFromSetting(const QString& varname) const
+	QString readPersistentValueFromSettings(const QString& varname) const
 	{
 		QString expr;
 		if ((act == nullptr) || (xmlInfo == nullptr))
@@ -337,11 +337,12 @@ struct MeshLabXMLFilterContainer
 		QSettings settings;
 		QString filterscriptname = xmlInfo->filterAttribute(filtname, MLXMLElNames::filterScriptFunctName);
 		QString paramnamepath = MLXMLUtilityFunctions::completeVariableProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), xmlInfo->pluginScriptName(), filterscriptname, varname);
-		expr = settings.value(paramnamepath, QVariant(xmlInfo->filterAttribute(filtname, MLXMLElNames::paramDefExpr))).toString();
+		QString defval = xmlInfo->filterParameterExtendedInfo(filtname, varname)[MLXMLElNames::paramDefExpr];
+		expr = settings.value(paramnamepath, defval).toString();
 		return expr;
 	}
 
-	void writePersistentValueFromSetting(const QString& varname, const QString& expr) const
+	void writePersistentValueIntoSettings(const QString& varname, const QString& expr) const
 	{
 		if ((act == nullptr) || (xmlInfo == nullptr))
 			return;
