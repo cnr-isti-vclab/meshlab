@@ -119,13 +119,14 @@ win32:DEFINES += NOMINMAX
 
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
+win32-msvc:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2005:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2008:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2010:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2012:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2013:DEFINES += _CRT_SECURE_NO_DEPRECATE
 win32-msvc2015:DEFINES += _CRT_SECURE_NO_DEPRECATE
-win32-msvc:DEFINES += _CRT_SECURE_NO_DEPRECATE
+
 
 # Uncomment these if you want to experiment with newer gcc compilers
 # (here using the one provided with macports)
@@ -138,13 +139,13 @@ CONFIG += stl
 macx:LIBS		+= -L../external/lib/macx64 -ljhead ../common/libcommon.dylib
 macx:QMAKE_POST_LINK ="cp -P ../common/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS; install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib ../distrib/meshlab.app/Contents/MacOS/meshlab"
 
+win32-msvc:LIBS			+= -L../external/lib/win32-msvc -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2005:LIBS		+= -L../external/lib/win32-msvc2005 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2008:LIBS		+= -L../external/lib/win32-msvc2008 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2010:LIBS		+= -L../external/lib/win32-msvc2010 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2012:LIBS		+= -L../external/lib/win32-msvc2012 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2013:LIBS		+= -L../external/lib/win32-msvc2013 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-msvc2015:LIBS		+= -L../external/lib/win32-msvc2015 -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
-win32-msvc:LIBS		+= -L../external/lib/win32-msvc -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcommon -lopengl32 -lGLU32
 
 #CONFIG(release,debug | release) {
