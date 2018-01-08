@@ -363,13 +363,10 @@ void MeshLabXMLStdDialog::resetExpressions()
     QString fname(curmfc->act->text());
 	for (int ii = 0; ii < curParMap.size(); ++ii)
 	{
-		if (curParMap[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
+		if (!stdParFrame->setValue(curParMap[ii][MLXMLElNames::paramName], curParMap[ii][MLXMLElNames::paramDefExpr]))
 		{
-			if (!stdParFrame->setValue(curParMap[ii][MLXMLElNames::paramName], curParMap[ii][MLXMLElNames::paramDefExpr]))
-			{
-				QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
-				throw MLException(err.toLocal8Bit());
-			}
+			QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
+			throw MLException(err.toLocal8Bit());
 		}
 	}
 }
