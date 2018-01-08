@@ -54,6 +54,7 @@ public:
     //virtual void collectWidgetValue() = 0;
     //void reset();
     virtual void set(const QString& nwExpStr) = 0;
+
     virtual QString getWidgetExpression() = 0;
     //virtual void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag) = 0;
     void setVisibility(const bool vis);
@@ -169,6 +170,10 @@ public:
     void set(const QString& nwExpStr);
     //void updateWidget(const XMLFilterInfo::XMLMap& xmlWidgetTag);
     void updateVisibility(const bool vis);
+
+	/*WARNING!!!! In order to be coherent with the scripting evaluation environment at the value of the XMLStringWidget a pair of double quotes is added at the beginning and at the end of the string*/
+	/*The best, and safest way to remove them (if they are not needed), is to let the scripting environment to evaluate the resulting string: Env e; QString st = e.evaluate(string_widg->getWidgetExpr).toString(); */
+
     QString getWidgetExpression();
 
     void addWidgetToGridLayout(QGridLayout* lay,const int r);

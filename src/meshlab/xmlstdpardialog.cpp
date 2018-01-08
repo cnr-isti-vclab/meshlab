@@ -523,7 +523,13 @@ void XMLStdParFrame::savePersistentParameterValue(QString name)
 	{
 		XMLMeshLabWidget* widg = it.value();
 		if (widg != nullptr)
-			emit savePersistentParameterValueRequested(name, widg->getWidgetExpression());
+		{
+			/*WARNING!!!! In order to be coherent with the scripting evaluation environment at the value of the XMLStringWidget a pair of double quotes is added at the beginning and at the end of the string*/
+			/*The best, and safest way to remove them (if they are not needed), is to let the scripting environment to evaluate the resulting string: Env e; QString st = e.evaluate(string_widg->getWidgetExpr).toString(); */
+			Env e;
+ 			QString expr = e.evaluate(widg->getWidgetExpression()).toString();
+			emit savePersistentParameterValueRequested(name,expr);
+		}
 	}
 }
 
@@ -830,6 +836,9 @@ void XMLStringWidget::updateVisibility( const bool vis )
     setVisibility(vis);
 }
 
+
+/*WARNING!!!! In order to be coherent with the scripting evaluation environment at the value of the XMLStringWidget a pair of double quotes is added at the beginning and at the end of the string*/
+/*The best, and safest way to remove them (if they are not needed), is to let the scripting environment to evaluate the resulting string: Env e; QString st = e.evaluate(string_widg->getWidgetExpr).toString(); */
 
 QString XMLStringWidget::getWidgetExpression()
 {
