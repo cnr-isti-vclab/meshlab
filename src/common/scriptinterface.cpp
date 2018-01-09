@@ -684,38 +684,20 @@ QColor EnvWrap::evalColor(const QString& nm)
 	int colorComp = resList.size();
 	if ((colorComp >= 3) && (colorComp <= 4))
 	{
-		bool isReal01 = true;
 		bool isInt0255 = true;
 		for (int ii = 0; ii < colorComp; ++ii)
 		{
-			bool isScalarReal = false;
 			bool isScalarInt = false;
-			float resFloat = (float)resList[ii].toReal(&isScalarReal);
 			int resInt = resList[ii].toInt(&isScalarInt);
-			if ((!isScalarReal) && (!isScalarInt))
+
+			if (!isScalarInt)
 				throw ExpressionHasNotThisTypeException("Color", nm);
-			if ((resFloat >= 0.0f) && (resFloat <= 1.0f))
-			{
-				isReal01 = isReal01 && true;
-				isInt0255 = false;
-			}
 			else
-				if ((resInt >= 0) && (resInt <= 255))
-				{
-					isInt0255 = isInt0255 && true;
-					isReal01 = false;
-				}
+				if ((resInt < 0) && (resInt > 255))
+					isInt0255 = false;
 		}
-		if (isReal01)
+		if (isInt0255)
 		{
-			if (colorComp == 3)
-				return QColor::fromRgbF(resList[0].toReal(), resList[1].toReal(), resList[2].toReal());
-			if (colorComp == 4)
-				return QColor::fromRgbF(resList[0].toReal(), resList[1].toReal(), resList[2].toReal(), resList[3].toReal());
-		}
-		else if (isInt0255)
-		{
-			//if the
 			if (colorComp == 3)
 				return QColor(resList[0].toInt(), resList[1].toInt(), resList[2].toInt());
 			if (colorComp == 4)

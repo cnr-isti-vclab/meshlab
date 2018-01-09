@@ -523,8 +523,14 @@ void XMLStdParFrame::savePersistentParameterValue(QString name)
 		{
 			/*WARNING!!!! In order to be coherent with the scripting evaluation environment at the value of the XMLStringWidget a pair of double quotes is added at the beginning and at the end of the string*/
 			/*The best, and safest way to remove them (if they are not needed), is to let the scripting environment to evaluate the resulting string: Env e; QString st = e.evaluate(string_widg->getWidgetExpr).toString(); */
-			Env e;
- 			QString expr = e.evaluate(widg->getWidgetExpression()).toString();
+			QString expr = widg->getWidgetExpression();
+			XMLStringWidget* stringwid = qobject_cast<XMLStringWidget*>(widg);
+			if (stringwid != nullptr)
+			{
+				/*WARNING!!!! WHY NOT USING THE ENV PATTERN FOR ALL THE CASES? Because QT when convert a QScriptValue to a QString of a javascript array (eg. [i0,i1,...,in]) return a i0,i1,...,in without the square brackets, making impossible to correctly re evalute again the resulting value*/
+				Env e;
+				expr = e.evaluate(expr).toString();
+			}
 			emit savePersistentParameterValueRequested(name,expr);
 		}
 	}
@@ -872,9 +878,11 @@ XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap&
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel] + " (abs and %)",this);
     fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
     absSB = new QDoubleSpinBox(this);
+	absSB->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     percSB = new QDoubleSpinBox(this);
-
-    absSB->setMinimum(m_min-(m_max-m_min));
+	percSB->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    
+	absSB->setMinimum(m_min-(m_max-m_min));
     absSB->setMaximum(m_max*2);
     absSB->setAlignment(Qt::AlignRight);
 
@@ -1125,6 +1133,7 @@ XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
     colorButton = new QPushButton(this);
     colorButton->setAutoFillBackground(true);
     colorButton->setFlat(true);
+	colorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     //const QColor cl = rp->pd->defVal->getColor();
     //resetWidgetValue();
     QColor cl = envir.evalColor(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -1142,6 +1151,7 @@ XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
     colorLabel->setMinimumWidth(sz.width());
     hlay->addWidget(colorLabel,0,Qt::AlignRight);
     hlay->addWidget(colorButton);
+	hlay->addWidget(perstb,0,Qt::AlignVCenter);
 
     //gridLay->addLayout(lay,row,1,Qt::AlignTop);
     connect(colorButton,SIGNAL(clicked()),this,SLOT(pickColor()));
@@ -1226,7 +1236,8 @@ XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,En
     hlay = new QHBoxLayout();
     hlay->addWidget(valueLE,0,Qt::AlignHCenter);
     //lay->addWidget(valueSlider,0,Qt::AlignJustify);
-    hlay->addWidget(valueSlider,0,0);
+    hlay->addWidget(valueSlider,0);
+	hlay->addWidget(perstb, 0, Qt::AlignVCenter);
     //gridLay->addLayout(hlay,row,1,Qt::AlignTop);
 
     connect(valueLE,SIGNAL(textChanged(const QString &)),this,SLOT(setValue()));
