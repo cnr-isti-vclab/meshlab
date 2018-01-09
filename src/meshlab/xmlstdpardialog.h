@@ -156,6 +156,8 @@ private:
     //updateVisibility.
     //THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
     void setVisibility(const bool vis);
+
+	QHBoxLayout* hlay;
     QLabel* fieldDesc;
     QLineEdit* lineEdit;
 };
@@ -188,6 +190,7 @@ private:
     //updateVisibility.
     //THE CODE OF VIRTUAL FUNCTION updateVisibility WILL BE ONLY A CALL TO THE NON VIRTUAL FUNCTION setVisibility.
     void setVisibility(const bool vis);
+	QHBoxLayout* hlay;
     QLabel* fieldDesc;
     QLineEdit* lineEdit;
 };
@@ -359,6 +362,8 @@ class XMLComboWidget : public XMLMeshLabWidget
 protected:
     QComboBox *enumCombo;
     QLabel *enumLabel;
+	QHBoxLayout* hlay;
+
 public:
     XMLComboWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p);
     ~XMLComboWidget();
@@ -366,7 +371,7 @@ public:
     virtual QString getWidgetExpression();
     virtual void set(const QString &) {}
     void addWidgetToGridLayout(QGridLayout* lay,const int r);
-
+	
 private:
     //WHY WE NEED THIS FUNCTION?
     //IN C++ IS NOT HEALTHY AT ALL TO CALL A VIRTUAL FUNCTION FROM OBJECT CONSTRUCTOR.
@@ -390,6 +395,9 @@ public:
     ~XMLEnumWidget(){};
 
     QString getWidgetExpression();
+	void set(const QString&);
+private:
+	QMap<int, QString> mp;
 };
 
 class XMLMeshWidget : public XMLEnumWidget

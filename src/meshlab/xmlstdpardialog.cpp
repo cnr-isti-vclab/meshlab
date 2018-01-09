@@ -729,8 +729,14 @@ XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
     :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
-    lineEdit = new QLineEdit(this);
+	fieldDesc->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+	lineEdit = new QLineEdit(this);
+	lineEdit->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     //int row = gridLay->rowCount() -1;
+	QHBoxLayout* hlay = new QHBoxLayout();
+	hlay->addWidget(lineEdit);
+	
+	hlay->addWidget(perstb);
 
     fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
     lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -790,11 +796,7 @@ void XMLEditWidget::setVisibility( const bool vis )
 
 void XMLEditWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	QHBoxLayout* hlay = new QHBoxLayout();
-	hlay->addWidget(lineEdit);
-	hlay->addWidget(perstb);
-
-	if (lay != NULL)
+	if (lay != nullptr)
 	{
 		lay->addWidget(fieldDesc, r, 0);
 		lay->addLayout(hlay, r, 1);
@@ -806,8 +808,15 @@ XMLStringWidget::XMLStringWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,Env
     :XMLMeshLabWidget(xmlWidgetTag,envir,parent)
 {
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
+
+	fieldDesc->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     lineEdit = new QLineEdit(this);
+	lineEdit->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     //int row = gridLay->rowCount() -1;
+	hlay = new QHBoxLayout();
+	hlay->addWidget(lineEdit);
+	hlay->addWidget(perstb);
+
 
 	fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
     lineEdit->setText(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -856,10 +865,7 @@ void XMLStringWidget::setVisibility( const bool vis )
 
 void XMLStringWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-	QHBoxLayout* hlay = new QHBoxLayout();
-	hlay->addWidget(lineEdit);
-	hlay->addWidget(perstb);
-    if (lay !=NULL)
+    if (lay != nullptr)
     {
         lay->addWidget(fieldDesc,r,0);
 		lay->addLayout(hlay, r, 1);
@@ -878,9 +884,9 @@ XMLAbsWidget::XMLAbsWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag, EnvWrap&
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel] + " (abs and %)",this);
     fieldDesc->setToolTip(xmlWidgetTag[MLXMLElNames::paramHelpTag]);
     absSB = new QDoubleSpinBox(this);
-	absSB->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+	absSB->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     percSB = new QDoubleSpinBox(this);
-	percSB->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+	percSB->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     
 	absSB->setMinimum(m_min-(m_max-m_min));
     absSB->setMaximum(m_max*2);
@@ -998,7 +1004,7 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
             coordSB[i]->setValidator(new QDoubleValidator(this));
             coordSB[i]->setAlignment(Qt::AlignRight);
             //this->addWidget(coordSB[i],1,Qt::AlignHCenter);
-            coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
+            coordSB[i]->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
             hlay->addWidget(coordSB[i]);
         }
         vcg::Point3f def = envir.evalVec3(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -1009,7 +1015,7 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
             getPoint3Button->setMaximumWidth(getPoint3Button->sizeHint().width()/2);
 
             getPoint3Button->setFlat(true);
-            getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+            getPoint3Button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
             hlay->addWidget(getPoint3Button);
             QStringList names;
@@ -1134,7 +1140,7 @@ XMLColorWidget::XMLColorWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
     colorButton = new QPushButton(this);
     colorButton->setAutoFillBackground(true);
     colorButton->setFlat(true);
-	colorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+	colorButton->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     //const QColor cl = rp->pd->defVal->getColor();
     //resetWidgetValue();
     QColor cl = envir.evalColor(xmlWidgetTag[MLXMLElNames::paramDefExpr]);
@@ -1221,7 +1227,7 @@ XMLSliderWidget::XMLSliderWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,En
     valueLE = new QLineEdit(this);
     valueLE->setAlignment(Qt::AlignRight);
     valueSlider = new QSlider(Qt::Horizontal,this);
-    valueSlider->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    valueSlider->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
     fieldDesc = new QLabel(xmlWidgetTag[MLXMLElNames::guiLabel],this);
     valueSlider->setMinimum(0);
     valueSlider->setMaximum(100);
@@ -1320,6 +1326,12 @@ XMLComboWidget::XMLComboWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvW
     enumLabel = new QLabel(this);
     enumLabel->setText(xmlWidgetTag[MLXMLElNames::guiLabel]);
     enumCombo = new QComboBox(this);
+	enumCombo->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+	
+	hlay = new QHBoxLayout();
+	hlay->addWidget(enumCombo);
+	hlay->addWidget(perstb);
+
     int def;
     try
     {
@@ -1361,11 +1373,11 @@ XMLComboWidget::~XMLComboWidget()
 
 void XMLComboWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
 {
-    if (lay != NULL)
-    {
-        lay->addWidget(enumLabel,r,0);
-        lay->addWidget(enumCombo,r,1);
-    }
+	if (lay != nullptr)
+	{
+		lay->addWidget(enumLabel, r, 0);
+		lay->addLayout(hlay, r, 1);
+	}
     XMLMeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
@@ -1373,7 +1385,6 @@ XMLEnumWidget::XMLEnumWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
     :XMLComboWidget(xmlWidgetTag,envir,p)
 {
     QString typ = xmlWidgetTag[MLXMLElNames::paramType];
-    QMap<int,QString> mp;
     bool rr = MLXMLUtilityFunctions::getEnumNamesValuesFromString(typ,mp);
     if (rr)
     {
@@ -1388,6 +1399,14 @@ QString XMLEnumWidget::getWidgetExpression()
     return enumCombo->itemData(enumCombo->currentIndex()).toString();
 }
 
+
+void XMLEnumWidget::set(const QString& ind)
+{
+	int index = ind.toInt();
+	auto it = mp.find(index);
+	if (it != mp.end())
+		enumCombo->setCurrentIndex(index);
+}
 
 XMLMeshWidget::XMLMeshWidget( MeshDocument* mdoc,const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap& envir,QWidget* p )
     :XMLEnumWidget(xmlWidgetTag,envir,p)
@@ -1415,7 +1434,7 @@ XMLShotWidget::XMLShotWidget( const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWra
     hlay = new QHBoxLayout();
     getShotButton = new QPushButton("Get Shot",this);
 
-    getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Preferred);
+    getShotButton->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed);
     getShotCombo = new QComboBox(this);
     int def;
     try
