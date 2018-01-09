@@ -177,7 +177,8 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
         {
             glPushAttrib(GL_ENABLE_BIT );
             float NormalLen=rm->getFloat(NormalLength());
-            float LineLen = m.cm.bbox.Diag()*NormalLen;
+			bool showselection = rm->getBool(NormalSelection());
+			float LineLen = m.cm.bbox.Diag()*NormalLen;
             glDisable(GL_LIGHTING);
             glDisable(GL_TEXTURE_2D);
             glEnable(GL_BLEND);
@@ -188,8 +189,11 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
                 glColor4f(.4f,.4f,1.f,.6f);
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
                 {
-                    glVertex((*vi).P());
-                    glVertex((*vi).P()+(*vi).N()*LineLen);
+					if ((!showselection) || (showselection && vi->IsS()))
+					{
+						glVertex((*vi).P());
+						glVertex((*vi).P() + (*vi).N()*LineLen);
+					}
                 }
             }
             if(rm->getBool(NormalFaceFlag())) // face Normals
@@ -197,9 +201,12 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
                 glColor4f(.1f,.4f,4.f,.6f);
                 for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
                 {
-                    Point3m b=Barycenter(*fi);
-                    glVertex(b);
-                    glVertex(b+(*fi).N()*LineLen);
+					if ((!showselection) || (showselection && fi->IsS()))
+					{
+						Point3m b = Barycenter(*fi);
+						glVertex(b);
+						glVertex(b + (*fi).N()*LineLen);
+					}
                 }
             }
             glEnd();
@@ -1046,6 +1053,7 @@ void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSe
         parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
         parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
+		parset.addParam(new RichBool(NormalSelection(), false, "Show Selected", ""));
                            } break;
     case DP_SHOW_CURVATURE : {
         parset.addParam(new RichFloat(CurvatureLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));

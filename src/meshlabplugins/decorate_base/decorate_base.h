@@ -163,6 +163,7 @@ public:
   inline QString LabelFaceFlag() const { return  "MeshLab::Decoration::LabelFaceFlag" ; }
 
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
+  inline QString NormalSelection() const { return  "MeshLab::Decoration::NormalSelection"; }
   inline QString NormalVertFlag() const { return  "MeshLab::Decoration::NormalVertFlag" ; }
   inline QString NormalFaceFlag() const { return  "MeshLab::Decoration::NormalFaceFlag" ; }
 
