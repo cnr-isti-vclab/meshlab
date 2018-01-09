@@ -1024,6 +1024,7 @@ XMLVec3Widget::XMLVec3Widget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
             //getPoint3Combo->setMinimumWidth(getPoint3Combo->sizeHint().width());
             //this->addWidget(getPoint3Combo,0,Qt::AlignHCenter);
             hlay->addWidget(getPoint3Combo);
+			hlay->addWidget(perstb, 0, Qt::AlignVCenter);
 
             connect(getPoint3Button,SIGNAL(clicked()),this,SLOT(getPoint()));
             connect(getPoint3Combo,SIGNAL(currentIndexChanged(int)),this,SLOT(getPoint()));
