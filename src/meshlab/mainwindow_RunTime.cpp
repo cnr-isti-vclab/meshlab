@@ -1070,7 +1070,7 @@ void MainWindow::runFilterScript()
 
         qb->reset();
         GLA()->update();
-        GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qPrintable((*ii)->filterName()));
+        GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable((*ii)->filterName()));
 		if (_currviewcontainer != NULL)
 			_currviewcontainer->updateAllDecoratorsForAllViewers();
     }
@@ -1510,7 +1510,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
         if(ret)
         {
-            meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qPrintable(action->text()),tt.elapsed());
+            meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec",qUtf8Printable(action->text()),tt.elapsed());
             if (meshDoc()->mm() != NULL)
                 meshDoc()->mm()->meshModified() = true;
             MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
@@ -1524,7 +1524,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         else // filter has failed. show the message error.
         {
             QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter <font color=red>: '%1'</font><br><br>").arg(action->text())+iFilter->errorMsg()); // text
-            meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
+            meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qUtf8Printable(iFilter->errorMsg()));
             MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
         }
 
@@ -1896,7 +1896,7 @@ void MainWindow::postFilterExecution()
 
     if(obj->succeed())
     {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec\n",qPrintable(fname),xmlfiltertimer.elapsed());
+        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Applied filter %s in %i msec\n",qUtf8Printable(fname),xmlfiltertimer.elapsed());
         MainWindow::globalStatusBar()->showMessage("Filter successfully completed...",2000);
         if(GLA())
         {
@@ -1909,7 +1909,7 @@ void MainWindow::postFilterExecution()
     {
         MeshLabFilterInterface         *iFilter = mfc->filterInterface;
         QMessageBox::warning(this, tr("Filter Failure"), QString("Failure of filter: '%1'<br><br>").arg(fname)+iFilter->errorMsg()); // text
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qPrintable(iFilter->errorMsg()));
+        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Filter failed: %s",qUtf8Printable(iFilter->errorMsg()));
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
     }
 
@@ -1976,12 +1976,12 @@ void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,cons
 {
     if (val.isError())
     {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",val.property("lineNumber").toInt32(),qPrintable(val.toString()));
+        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Interpreter Error: line %i: %s",val.property("lineNumber").toInt32(),qUtf8Printable(val.toString()));
         layerDialog->updateLog(meshDoc()->Log);
     }
     else
     {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Code executed in %d millisecs.\nOutput:\n%s",time,qPrintable(output));
+        meshDoc()->Log.Logf(GLLogStream::SYSTEM,"Code executed in %d millisecs.\nOutput:\n%s",time,qUtf8Printable(output));
 		//bool res;
 		//updateSharedContextDataAfterFilterExecution((int)MeshModel::MM_ALL, (int)MeshFilterInterface::Generic, res);
         GLA()->update();
@@ -2078,7 +2078,7 @@ void MainWindow::applyRenderMode()
             if (!initsupport)
             {
                 QString msg = "The selected shader is not supported by your graphic hardware!";
-                GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
+                GLA()->Logf(GLLogStream::SYSTEM,qUtf8Printable(msg));
             }
             iRenderTemp->Finalize(action,meshDoc(),GLA());
         }
@@ -2088,7 +2088,7 @@ void MainWindow::applyRenderMode()
     if ((action->parent() == this) || (!initsupport))
     {
         QString msg("No Shader.");
-        GLA()->Logf(GLLogStream::SYSTEM,qPrintable(msg));
+        GLA()->Logf(GLLogStream::SYSTEM,qUtf8Printable(msg));
         GLA()->setRenderer(0,0); //default opengl pipeline or vertex and fragment programs not supported
     }
     GLA()->update();
@@ -2179,7 +2179,7 @@ void MainWindow::saveProject()
 
 
     bool ret;
-    qDebug("Saving aln file %s\n",qPrintable(fileName));
+	qDebug("Saving aln file %s\n", qUtf8Printable(fileName));
     if (fileName.isEmpty()) return;
     else
     {
@@ -2197,11 +2197,11 @@ void MainWindow::saveProject()
         {
             if((!onlyVisibleLayers->isChecked()) || (mp->visible))
             {
-                meshNameVector.push_back(qPrintable(mp->relativePathName()));
+				meshNameVector.push_back(qUtf8Printable(mp->relativePathName()));
                 transfVector.push_back(mp->cm.Tr);
             }
         }
-        ret= ALNParser::SaveALN(qPrintable(fileName),meshNameVector,transfVector);
+		ret = ALNParser::SaveALN(qUtf8Printable(fileName), meshNameVector, transfVector);
     }
     else
     {
@@ -2267,7 +2267,7 @@ bool MainWindow::openProject(QString fileName)
     if (QString(fi.suffix()).toLower() == "aln")
     {
         vector<RangeMap> rmv;
-        int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
+		int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
         if(retVal != ALNParser::NoError)
         {
             QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
@@ -2411,7 +2411,7 @@ bool MainWindow::appendProject(QString fileName)
         if (QString(fi.suffix()).toLower() == "aln")
         {
             vector<RangeMap> rmv;
-            int retVal=ALNParser::ParseALN(rmv,qPrintable(fileName));
+			int retVal = ALNParser::ParseALN(rmv, qUtf8Printable(fileName));
             if(retVal != ALNParser::NoError)
             {
                 QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open ALN file");
@@ -2644,9 +2644,8 @@ bool MainWindow::importRaster(const QString& fileImg)
             ///	If no CCD Width value is provided, the intrinsics are extracted using the Equivalent 35mm focal
             /// If no or invalid EXIF info is found, the Intrinsics are initialized as a "plausible" 35mm sensor, with 50mm focal
 			
-
             ::ResetJpgfile();
-            FILE * pFile = fopen(qPrintable(fileName), "rb");
+			FILE * pFile = fopen(qUtf8Printable(fileName), "rb");
 
             int ret = ::ReadJpegSections (pFile, READ_METADATA);
             fclose(pFile);
@@ -2927,7 +2926,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         int mask = 0;
         //MeshModel *mm= new MeshModel(gla->meshDoc);
         QFileInfo info(fileName);
-        MeshModel *mm=meshDoc()->addNewMesh(qPrintable(fileName),info.fileName());
+		MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
         qb->show();
 		QTime t;
 		t.start();
@@ -2936,7 +2935,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         bool open = loadMesh(fileName,pCurrentIOPlugin,mm,mask,&prePar,mtr,isareload);
         if(open)
         {
-            GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fileName),t.elapsed());
+			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fileName), t.elapsed());
             RichParameterSet par;
             pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
             if(!par.isEmpty())
@@ -2960,7 +2959,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         else
         {
             meshDoc()->delMesh(mm);
-            GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fileName));
+			GLA()->Logf(0, "Warning: Mesh %s has not been opened", qUtf8Printable(fileName));
         }
     }// end foreach file of the input list
     GLA()->Logf(0,"All files opened in %i msec",allFileTime.elapsed());
@@ -3014,17 +3013,17 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
         bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);
         if(open)
         {
-            GLA()->Logf(0,"Opened mesh %s in %i msec",qPrintable(fullPath),t.elapsed());
+			GLA()->Logf(0, "Opened mesh %s in %i msec", qUtf8Printable(fullPath), t.elapsed());
             RichParameterSet par;
             pCurrentIOPlugin->initOpenParameter(extension, *mm, par);
             pCurrentIOPlugin->applyOpenParameter(extension,*mm,par);
             ret = true;
         }
         else
-            GLA()->Logf(0,"Warning: Mesh %s has not been opened",qPrintable(fullPath));
+			GLA()->Logf(0, "Warning: Mesh %s has not been opened", qUtf8Printable(fullPath));
     }
     else
-        GLA()->Logf(0,"Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format",qPrintable(fullPath),qPrintable(extension));
+		GLA()->Logf(0, "Warning: Mesh %s cannot be opened. Your MeshLab version has not plugin to read %s file format", qUtf8Printable(fullPath), qUtf8Printable(extension));
     return ret;
 }
 
@@ -3114,7 +3113,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
             QString ext = saveDialog->selectedNameFilter();
             ext.chop(1); ext = ext.right(4);
             fileName = fileName + ext;
-            qDebug("File without extension adding it by hand '%s'", qPrintable(fileName));
+			qDebug("File without extension adding it by hand '%s'", qUtf8Printable(fileName));
         }
     }
 
@@ -3181,7 +3180,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         QTime tt; tt.start();
         ret = pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack,this);
         qb->reset();
-        GLA()->Logf(GLLogStream::SYSTEM,"Saved Mesh %s in %i msec",qPrintable(fileName),tt.elapsed());
+		GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
 
         qApp->restoreOverrideCursor();
         mod->setFileName(fileName);
@@ -3252,7 +3251,7 @@ void MainWindow::about()
 
 void MainWindow::aboutPlugins()
 {
-    qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qPrintable(pluginManager().getDefaultPluginDirPath()));
+    qDebug( "aboutPlugins(): Current Plugins Dir: %s ",qUtf8Printable(pluginManager().getDefaultPluginDirPath()));
     PluginDialog dialog(pluginManager().getDefaultPluginDirPath(), pluginManager().pluginsLoaded, this);
     dialog.exec();
 }
@@ -3397,7 +3396,7 @@ void MainWindow::updateTexture(int meshid)
             if(!res)
             {
                 QString errmsg = QString("Failure of loading texture %1").arg(fi.fileName());
-                meshDoc()->Log.Log(GLLogStream::WARNING,qPrintable(errmsg));
+                meshDoc()->Log.Log(GLLogStream::WARNING,qUtf8Printable(errmsg));
                 unexistingtext += "<font color=red>" + filename + "</font><br>";
             }
         }
@@ -3431,7 +3430,7 @@ void MainWindow::updateTexture(int meshid)
 
 void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
-    this->QCallBack(pos,qPrintable(text));
+    this->QCallBack(pos,qUtf8Printable(text));
 }
 
 //void MainWindow::evaluateExpression(const Expression& exp,Value** res )

@@ -176,7 +176,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
         fullPath = fi.absoluteFilePath();
     }
 
-    MeshModel *newMesh = new MeshModel(this,qPrintable(fullPath),newlabel);
+    MeshModel *newMesh = new MeshModel(this,fullPath,newlabel);
     meshList.push_back(newMesh);
     
 	if(setAsCurrent)
