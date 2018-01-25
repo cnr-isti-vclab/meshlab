@@ -979,7 +979,7 @@ void GLArea::saveSnapshot()
         {
             tileRow=tileCol=0;
             qDebug("Snapping layer %i",currSnapLayer);
-            this->md()->setCurrentMesh(currSnapLayer);
+            this->md()->setCurrentMesh(this->md()->meshList.at(currSnapLayer)->id());
             foreach(MeshModel *mp,this->md()->meshList) {
                 meshSetVisibility(mp,false);
             }
