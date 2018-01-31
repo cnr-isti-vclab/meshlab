@@ -745,6 +745,8 @@ switch(ID(filter))
 	{
 		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
 		Log( "Removed %d unreferenced vertices",delvert);
+        if (delvert != 0)
+            m.UpdateBoxAndNormals();
 	} break;
 
     case FP_REMOVE_DUPLICATED_VERTEX:
