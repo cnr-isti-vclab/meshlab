@@ -650,7 +650,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // Check textName and eventually add .png ext
             CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-            if (!textName.endsWith(".png", Qt::CaseInsensitive) && !textName.endsWith(".dds", Qt::CaseInsensitive) )
+			if (!textName.endsWith(".png", Qt::CaseInsensitive) && !textName.endsWith(".dds", Qt::CaseInsensitive) && !textName.endsWith(".jpg", Qt::CaseInsensitive))
                 textName.append(".png");
 
             // Creates path to texture file
@@ -678,7 +678,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                 }
 
                 // Save texture
-                CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
+                CheckError(!img.save(fileName, NULL), "Specified file cannot be saved");
                 Log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
                 assert(textFile.exists());
             }
