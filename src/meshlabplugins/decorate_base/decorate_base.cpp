@@ -574,7 +574,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
             CVp->clear();
             float NormalLen=rm->getFloat(CurvatureLength());
             float LineLen = m.cm.bbox.Diag()*NormalLen;
-            if(rm->getBool(this->ShowPerVertexCurvature()))
+			if (rm->getBool(this->ShowPerVertexCurvature()) && m.hasDataMask(MeshModel::MM_VERTCURVDIR))
             {
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi)
                     if(!(*vi).IsD())
@@ -589,7 +589,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
                             Color4b::Red));
                     }
             }
-            if(rm->getBool(this->ShowPerFaceCurvature()))
+			if (rm->getBool(this->ShowPerFaceCurvature()) && m.hasDataMask(MeshModel::MM_FACECURVDIR))
             {
                 for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi)
                     if(!(*fi).IsD())
