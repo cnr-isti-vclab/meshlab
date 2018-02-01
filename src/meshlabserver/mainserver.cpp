@@ -605,7 +605,8 @@ namespace commandline
 
     void usage()
     {
-        QFile docum(":/meshlabserver.txt");
+		printf("MeshLabServer version: %s\n", qPrintable(MeshLabApplication::appVer()));
+		QFile docum(":/meshlabserver.txt");
         if (!docum.open(QIODevice::ReadOnly))
         {
             printf("MeshLabServer was not able to locate meshlabserver.txt file. The program will be closed\n");
