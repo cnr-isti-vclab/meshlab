@@ -597,6 +597,7 @@ namespace commandline
     const char flags('f');
     const char normal('n');
     const char quality('q');
+    const char radius('r');
 	const char polygon('p');
     const char texture('t');
     const char log('l');
@@ -631,8 +632,8 @@ namespace commandline
     }
 
     QString outputmeshExpression()
-	{
-		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + "|" + QString(polygon) + ")");
+    {
+		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + ")");
 		QString optionslist(options + "(\\s+" + options + ")*");	
 		QString savingmask("-" + QString(mask) + "\\s+" + optionslist);
 		QString layernumber("\\d+");
@@ -885,6 +886,7 @@ int main(int argc, char *argv[])
                                 case commandline::flags : i++; fprintf(logfp,"vertex flags, "     ); mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;    break;
                                 case commandline::normal : i++; fprintf(logfp,"vertex normals, "   ); mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;   break;
                                 case commandline::quality : i++; fprintf(logfp,"vertex quality, "   ); mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;  break;
+                                case commandline::radius : i++; fprintf(logfp,"vertex radii, "   ); mask |= vcg::tri::io::Mask::IOM_VERTRADIUS;  break;
                                 case commandline::texture : i++; fprintf(logfp,"vertex tex coords, "); mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD; break;
                                 default :  i++; fprintf(logfp,"WARNING: unknowns per VERTEX attribute '%s'",argv[i+1]);break;
                                 }
