@@ -68,7 +68,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
 QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-  case CR_BOX : return QString("Create a Box, Cube, an hexahedron. You can specify the side lenght");
+  case CR_BOX : return QString("Create a Box, Cube, Hexahedron. You can specify the side length.");
   case CR_ANNULUS : return QString("Create an Annulus e.g. a flat region bounded by two concentric circles, or a holed disk.");
   case CR_SPHERE: return QString("Create a Sphere, whose topology is obtained as regular subdivision of an icosahedron.");
   case CR_SPHERE_CAP: return QString("Create a Sphere Cap, or spherical dome, subtended by a cone of given angle");
