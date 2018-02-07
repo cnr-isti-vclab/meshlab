@@ -68,7 +68,7 @@ namespace io {
 				<meta content='*enter filename' name='title'/>
 				<meta content='Generated from Meshlab X3D Exported' name='description'/>
 				<meta content='*enter date' name='created'/>
-				<meta content='Meshlab X3D Exported, http://meshlab.sourceforge.net' name='generator'/>
+				<meta content='Meshlab X3D Exported, http://www.meshlab.net/' name='generator'/>
 			</head>
 			<Scene>
 				...
