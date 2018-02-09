@@ -28,12 +28,13 @@ meshlabserver [logargs] [args]
                                 vc -> vertex colors,  vf -> vertex flags,
                                 vq -> vertex quality, vn-> vertex normals,
                                 vt -> vertex texture coords,
+                                vr -> vertex radius,
                                 fc -> face colors,  ff -> face flags,
                                 fq -> face quality, fn-> face normals,
                                 wc -> wedge colors, wn-> wedge normals,
                                 wt -> wedge texture coords
 								mp -> polygonal mesh info
-    -s filename		          the script to be applied
+    -s filename		        the script to be applied
 
    Examples:
 
