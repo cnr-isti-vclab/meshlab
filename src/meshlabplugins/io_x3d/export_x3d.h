@@ -80,7 +80,7 @@ namespace io {
 			QDomProcessingInstruction proc = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
 			doc.appendChild(proc);
 			QString metaName[] = {"title", "description", "created", "generator"};
-			QString metaContent[] = {QFileInfo(filename).fileName(), "Generated from Meshlab X3D Exported", QDate::currentDate().toString("d MMMM yyyy"), "Meshlab X3D Exported, http://meshlab.sourceforge.net"};
+			QString metaContent[] = {QFileInfo(filename).fileName(), "Generated from Meshlab X3D Exported", QDate::currentDate().toString("d MMMM yyyy"), "Meshlab X3D Exported, http://www.meshlab.net"};
 			QDomElement root = doc.createElement("X3D");
 			root.setAttribute("profile", "Immersive");
 			root.setAttribute("version", "3.1");
