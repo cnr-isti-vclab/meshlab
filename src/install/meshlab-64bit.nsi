@@ -163,9 +163,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\samples\images"
   File "${DISTRIB_FOLDER}/sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
-  File ${QT_BASE}\plugins\imageformats\qjpeg.dll
-  File ${QT_BASE}\plugins\imageformats\qgif.dll
-  File ${QT_BASE}\plugins\imageformats\qtiff.dll
+  File "${QT_BASE}\plugins\imageformats\qjpeg.dll"
+  File "${QT_BASE}\plugins\imageformats\qgif.dll"
+  File "${QT_BASE}\plugins\imageformats\qtiff.dll"
    SetOutPath "$INSTDIR\platforms"
   File "${QT_BASE}\plugins\platforms\qminimal.dll"
   File "${QT_BASE}\plugins\platforms\qwindows.dll"
