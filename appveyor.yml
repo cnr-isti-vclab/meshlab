@@ -29,7 +29,6 @@ environment:
 before_build:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd ..
-  - dir
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - dir 
   # Set paths
@@ -44,16 +43,20 @@ before_build:
   # Show build folder
   - echo %APPVEYOR_BUILD_FOLDER%
   - echo %CONFIGURATION%
-  - dir
-  - dir mkspecs
   
 # To run your custom scripts instead of automatic MSBuild
 build_script:
   # Go to clone directory
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd src
+  - cd external
+  - qmake external.pro -r 
+  - call %COMPILER%
+  - dir lib
+  - dir lib\win32-msvc2015
+  - cd ..
   - dir
-  # Run qmake
+  # Run qmake for the REAL project
   # - qmake meshlab_mini.pro -r -spec %SPEC% "CONFIG+=%CONFIGURATION%"
   - qmake meshlab_mini.pro -r 
   - dir
