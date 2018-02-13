@@ -39,14 +39,18 @@ before_build:
   - echo %APPVEYOR_BUILD_FOLDER%
   - echo %CONFIGURATION%
   - dir
+  - dir mkspecs
   
 # To run your custom scripts instead of automatic MSBuild
 build_script:
   # Go to clone directory
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd src
+  - dir
   # Run qmake
-  - qmake meshlab_mini.pro -r -spec %SPEC% "CONFIG+=%CONFIGURATION%"
+  # - qmake meshlab_mini.pro -r -spec %SPEC% "CONFIG+=%CONFIGURATION%"
+  - qmake meshlab_mini.pro -r 
+  - dir
   # Run compiler
   #- '%COMPILER%'
   - call %COMPILER%
