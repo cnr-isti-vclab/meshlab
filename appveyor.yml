@@ -6,7 +6,8 @@ branches:
 image: Visual Studio 2015
 
 # clone directory
-clone_folder: c:\projects\vcglib
+shallow_clone: true
+clone_folder: c:\projects\meshlab
 # Build Configuration, i.e. Debug, Release, etc.
 configuration:
 #  - release
@@ -26,6 +27,11 @@ environment:
 
 # Set paths, etc.
 before_build:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd ..
+  - dir
+  - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+  - dir 
   # Set paths
   #- '%QTDIR%\bin\qtenv2.bat'
   - call "%QTDIR%\bin\qtenv2.bat"
