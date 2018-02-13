@@ -31,15 +31,15 @@ before_build:
   - call "%QTDIR%\bin\qtenv2.bat"
   # Show qmake and make version
   - qmake -v
-  - if %COMPILER%==mingw32-make call %COMPILER% -v
   # Detect architecture (32bit or 64bit)
   - if %QTDIR:_64=%==%QTDIR% (set ARCH=x86) else (set ARCH=x64)
   # Set more... if Microsoft Visual Studio
   - if %COMPILER%==nmake call "%ProgramFiles(x86)%\Microsoft Visual Studio %VSVER%\VC\vcvarsall.bat" %ARCH%
   # Show build folder
-  #- echo %APPVEYOR_BUILD_FOLDER%
-  #- echo %CONFIGURATION%
-
+  - echo %APPVEYOR_BUILD_FOLDER%
+  - echo %CONFIGURATION%
+  - dir
+  
 # To run your custom scripts instead of automatic MSBuild
 build_script:
   # Go to clone directory
