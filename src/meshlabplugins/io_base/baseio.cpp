@@ -272,7 +272,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
+bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();

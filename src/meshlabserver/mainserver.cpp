@@ -1010,7 +1010,7 @@ int main(int argc, char *argv[])
     }
 
 	if (meshDocument.size() < outmeshlist.size())
-		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", qPrintable(outmeshlist.size()), qPrintable(meshDocument.size()));
+		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", outmeshlist.size(), meshDocument.size());
 	
 	for (int ii = 0; ii < outmeshlist.size(); ++ii)
 	{
