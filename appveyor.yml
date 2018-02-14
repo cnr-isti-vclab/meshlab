@@ -20,6 +20,7 @@ environment:
       VSVER: 14.0
       SPEC: win32-msvc2015
       COMPILER: nmake
+      PATH: C:\Program Files (x86)\NSIS\;%PATH%
       #ARTIFACT: $(APPVEYOR_PROJECT_NAME)-%APPVEYOR_REPO_TAG_NAME%.%APPVEYOR_BUILD_NUMBER%-win64.zip
       #ARTIFACT: $(APPVEYOR_PROJECT_NAME)-%APPVEYOR_REPO_TAG_NAME%-win64.zip
 
@@ -28,11 +29,13 @@ environment:
 # Set paths, etc.
 before_build:
   - dir "C:\Program Files (x86)\NSIS"
+  - makensis /CMDHELP
+  - "C:\Program Files (x86)\NSIS\makensis" 
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - dir 
-  - PATH: C:\Program Files (x86)\NSIS\;%PATH%
+  - 
   # Set paths
   #- '%QTDIR%\bin\qtenv2.bat'
   - call "%QTDIR%\bin\qtenv2.bat"
