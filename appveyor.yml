@@ -30,7 +30,8 @@ environment:
 before_build:
   - dir "C:\Program Files (x86)\NSIS"
   - makensis /CMDHELP
-  - "C:\Program Files (x86)\NSIS\makensis" 
+  - path
+#  - "C:\Program Files (x86)\NSIS\makensis" 
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
