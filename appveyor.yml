@@ -53,7 +53,7 @@ build_script:
   - qmake external.pro -r 
   - call %COMPILER%
   - dir lib
-  - dir lib\win32-msvc2015
+  - dir lib\win32-msvc
   - cd ..
   - dir
   # Run qmake for the REAL project
@@ -63,3 +63,7 @@ build_script:
   # Run compiler
   #- '%COMPILER%'
   - call %COMPILER%
+  - cd %APPVEYOR_BUILD_FOLDER% 
+  - cd src\install
+  - makensis /V4 meshlab-64bit-appveyor.nsi
+  - dir ..\distrib
