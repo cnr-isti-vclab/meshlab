@@ -29,8 +29,8 @@ environment:
 # Set paths, etc.
 before_build:
   - dir "C:\Program Files (x86)\NSIS"
-  - makensis /CMDHELP
-  - path
+#  - makensis /CMDHELP
+#  - path
 #  - "C:\Program Files (x86)\NSIS\makensis" 
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd ..
