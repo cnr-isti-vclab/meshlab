@@ -77,11 +77,13 @@ build_script:
   - dir
   - cd %APPVEYOR_BUILD_FOLDER% 
   - dir
-  - 7z a distrib.zip src\distrib
   - cd src\distrib
   - dir
   - windeployqt meshlab.exe
-  - 
-  - cd src\install
-  - makensis /V4 meshlab-64bit-appveyor.nsi
-  - dir ..\distrib
+  - dir
+  - cd %APPVEYOR_BUILD_FOLDER% 
+  - 7z a distrib.zip src\distrib
+  - dir
+#  - cd ..\install
+#  - makensis /V4 meshlab-64bit-appveyor.nsi
+#  - dir ..\distrib
