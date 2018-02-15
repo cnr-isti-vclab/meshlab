@@ -28,10 +28,7 @@ environment:
 
 # Set paths, etc.
 before_build:
-  - dir "C:\Program Files (x86)\NSIS"
-#  - makensis /CMDHELP
 #  - path
-#  - "C:\Program Files (x86)\NSIS\makensis" 
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
@@ -50,6 +47,14 @@ before_build:
   - echo %APPVEYOR_BUILD_FOLDER%
   - echo %CONFIGURATION%
   
+
+artifacts:
+ - path: %APPVEYOR_BUILD_FOLDER%\src\distrib\meshlab.exe
+ - name: bareexe
+ 
+ - path: %APPVEYOR_BUILD_FOLDER%\distrib.zip
+ - name: distrib.zip
+ 
 # To run your custom scripts instead of automatic MSBuild
 build_script:
   # Go to clone directory
@@ -72,7 +77,11 @@ build_script:
   - dir
   - cd %APPVEYOR_BUILD_FOLDER% 
   - dir
-  - windeployqt
+  - 7z a distrib.zip src\distrib
+  - cd src\distrib
+  - dir
+  - windeployqt meshlab.exe
+  - 
   - cd src\install
   - makensis /V4 meshlab-64bit-appveyor.nsi
   - dir ..\distrib
