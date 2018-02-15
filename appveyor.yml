@@ -49,10 +49,10 @@ before_build:
   
 
 artifacts:
- - path: $(APPVEYOR_BUILD_FOLDER)\src\distrib\meshlab.exe
+ - path: src\distrib\meshlab.exe
    name: bareexe
  
- - path: $(APPVEYOR_BUILD_FOLDER)\distrib.zip
+ - path: distrib.zip
    name: distrib.zip
  
 # To run your custom scripts instead of automatic MSBuild
