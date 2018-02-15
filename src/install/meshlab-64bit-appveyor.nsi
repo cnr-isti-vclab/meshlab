@@ -12,7 +12,8 @@
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 ;!define QT_BASE "C:\Qt_5.7\5.7\msvc2015_64\"
-!define QT_BASE ${QTDIR}
+;!define QT_BASE ${QTDIR}
+ReadEnvStr $QT_BASE "QTDIR"
 !define ADDITIONAL_DLLS "C:\Users\ranzuglia\Desktop\MeshLab-related\additional_dlls"
 !define ICU_DLLS "${ADDITIONAL_DLLS}\icu\bin64"
 !define DISTRIB_FOLDER "../distrib"

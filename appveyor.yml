@@ -69,7 +69,10 @@ build_script:
   # Run compiler
   #- '%COMPILER%'
   - call %COMPILER%
+  - dir
   - cd %APPVEYOR_BUILD_FOLDER% 
+  - dir
+  - windeployqt
   - cd src\install
   - makensis /V4 meshlab-64bit-appveyor.nsi
   - dir ..\distrib
