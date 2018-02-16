@@ -297,7 +297,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 			}
 			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
 				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
-					pi.AddPerVertexPoint3fAttribute(m, qUtf8Printable(pname.mid(5)));
+					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
 			}
 			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
 				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
