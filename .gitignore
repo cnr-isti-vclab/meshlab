@@ -1,4 +1,5 @@
 
+.qmake.stash
 *.ipch
 *.pro.user
 build-*/
