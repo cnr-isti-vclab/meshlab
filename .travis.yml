@@ -8,6 +8,9 @@ os:
 sudo: required
 dist: trusty
 
+git: 
+  depth 1
+
 before_install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
@@ -31,9 +34,12 @@ install:
       sudo apt-get -y install qt55[QTPACKAGE]
     fi
   - cd ..
-  - git clone -b devel https://github.com/cnr-isti-vclab/vcglib.git
+  - git clone --depth 1 -b devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
-
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+    - $HOME/vcglib
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
