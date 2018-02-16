@@ -293,7 +293,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 			QString pname = par.paramList[parI]->name;
 			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
 				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
-					pi.AddPerVertexFloatAttribute(pname.mid(4).toStdString());
+					pi.AddPerVertexFloatAttribute(qPrintable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
 				//if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
@@ -301,7 +301,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 			}
 			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
 				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
-					pi.AddPerFaceFloatAttribute(pname.mid(4).toStdString());
+					pi.AddPerFaceFloatAttribute(qPrintable(pname.mid(4)));
 			}
 			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
 				//if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
