@@ -9,7 +9,7 @@ sudo: required
 dist: trusty
 
 git: 
-  depth 1
+  depth: 1
 
 before_install:
   - |
