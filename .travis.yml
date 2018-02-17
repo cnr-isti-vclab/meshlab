@@ -5,8 +5,8 @@ os:
   - osx
   - linux
 
-sudo: required
 dist: trusty
+sudo: required
 
 git: 
   depth: 1
