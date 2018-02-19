@@ -52,7 +52,7 @@ before_build:
  
 
 artifacts:
- - path: distrib.zip
+ - path: src/distrib.zip
    name: distrib.zip
  
 # To run your custom scripts instead of automatic MSBuild
