@@ -585,7 +585,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		if ((fi.suffix().toLower() == "out"))
 		{
 			unsigned int   num_cams, num_points;
-			FILE *fp = fopen(qPrintable(fileName), "r");
+			FILE *fp = fopen(qUtf8Printable(fileName), "r");
 			if (!fp) return false;
 
 			////Read header

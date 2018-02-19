@@ -106,9 +106,9 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
         {
             if(!cm.IsValid() || (lastname != cubemapFileName ) )
             {
-                qDebug( "Current CubeMapPath Dir: %s ",qPrintable(cubemapFileName));
+                qDebug( "Current CubeMapPath Dir: %s ",qUtf8Printable(cubemapFileName));
                 glewInit();
-                bool ret = cm.Load(qPrintable(cubemapFileName));
+                bool ret = cm.Load(qUtf8Printable(cubemapFileName));
                 lastname=cubemapFileName;
                 if(! ret ) return;
                 //QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + cubemapFileName );

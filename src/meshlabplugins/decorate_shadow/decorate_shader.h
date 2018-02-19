@@ -245,7 +245,7 @@ protected:
         bool ret=vertexShaderFile.open(QIODevice::ReadOnly | QIODevice::Text);
         if(!ret)
         {
-          qDebug("Unable to open '%s'",qPrintable(path + QString(".vert")));
+          qDebug("Unable to open '%s'",qUtf8Printable(path + QString(".vert")));
           return false;
         }
 

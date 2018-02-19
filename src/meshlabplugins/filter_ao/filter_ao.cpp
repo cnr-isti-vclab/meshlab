@@ -927,7 +927,7 @@ void AmbientOcclusionPlugin::dumpFloatTexture(QString filename, float *texdata, 
         cdata[i] = (unsigned char)(texdata[i]*255.0);
 
     FILE *f;
-    f=fopen(qPrintable(filename) ,"wb+");
+    f=fopen(qUtf8Printable(filename) ,"wb+");
     fwrite(cdata,sizeof(unsigned char),elems,f);
     fclose(f);
 

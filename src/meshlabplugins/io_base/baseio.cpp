@@ -265,7 +265,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		}
 	}
 	if (someTextureNotFound)
-		Log("Missing texture files: %s", qPrintable(missingTextureFilesMsg));
+		Log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
 

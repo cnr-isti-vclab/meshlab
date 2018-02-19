@@ -327,7 +327,7 @@ Point3fWidget::~Point3fWidget() {
 
 void Point3fWidget::setValue(QString name,Point3m newVal)
 {
-    //qDebug("setValue parametername: %s ",qPrintable(name));
+    //qDebug("setValue parametername: %s ", qUtf8Printable(name));
     if(name==paramName)
     {
         for(int i =0;i<3;++i)

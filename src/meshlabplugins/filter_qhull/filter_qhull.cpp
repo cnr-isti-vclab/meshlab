@@ -417,7 +417,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                         break;
                 }
 
-        MeshModel &pm =*md.addNewMesh("",qPrintable(name));
+        MeshModel &pm =*md.addNewMesh("",qUtf8Printable(name));
 
                 if (!alphashape && !pm.hasDataMask(MeshModel::MM_FACEQUALITY))
                 {

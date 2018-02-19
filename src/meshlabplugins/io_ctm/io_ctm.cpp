@@ -40,7 +40,7 @@ using namespace vcg;
 bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qPrintable(fileName), mask, cb);
+    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
     if (result != 0) // all the importers return 0 on success
     {
       errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result));
@@ -53,11 +53,11 @@ bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, Me
 {
     bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
     float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();
-    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qPrintable(fileName),mask,lossLessFlag,relativePrecisionParam);
+    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
     if(result!=0)
     {
         QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qPrintable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
+        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
         return false;
     }
     return true;

@@ -53,7 +53,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		{
 			mask |= vcg::tri::io::Mask::IOM_WEDGTEXCOORD;
 			m.Enable(mask);			
-			return parseTRI(qPrintable(fileName), m.cm);
+			return parseTRI(qUtf8Printable(fileName), m.cm);
 		}
 	if(formatName.toUpper() == tr("ASC"))
 		{
@@ -61,7 +61,7 @@ bool TriIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 			m.Enable(mask);			
 			bool triangulate = parlst.getBool("triangulate");
 			int rowToSkip = parlst.getInt("rowToSkip");
-			int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qPrintable(fileName),cb,triangulate,rowToSkip);
+			int result = tri::io::ImporterASC<CMeshO>::Open(m.cm, qUtf8Printable(fileName),cb,triangulate,rowToSkip);
 			if (result != 0) // all the importers return 0 on success
 			{
 				errorMessage = QString("Failed to open:")+fileName;
@@ -247,12 +247,12 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 	texturePNG.load(texPNG);
 	if(!texturePNG.isNull())
 	{
-		qDebug("Image Loaded %s has %i keys",qPrintable(texPNG),texturePNG.textKeys().size());
+		qDebug("Image Loaded %s has %i keys",qUtf8Printable(texPNG),texturePNG.textKeys().size());
 		QString infoPNG=texturePNG.text("uv");
 		if(!infoPNG.isNull())
 		{
-			m.textures.push_back(qPrintable(texPNG));
-			qDebug("Loading texture %s",qPrintable(texPNG));
+			m.textures.push_back(qUtf8Printable(texPNG));
+			qDebug("Loading texture %s",qUtf8Printable(texPNG));
 			QStringList numList = infoPNG.split(" ", QString::SkipEmptyParts);
 			qDebug("Found %i numbers for %i faces",numList.size(),numFaces);
 			for (int i = 0; i < numFaces ; ++i) 
@@ -291,8 +291,8 @@ bool parseTRI(const std::string &filename, CMeshO &m) {
 
 			if(texCode==QString("TC00")) floatFlag=false;
 			
-			m.textures.push_back(qPrintable(texJPG));
-			qDebug("Loading texture %s",qPrintable(texJPG));
+			m.textures.push_back(qUtf8Printable(texJPG));
+			qDebug("Loading texture %s",qUtf8Printable(texJPG));
 			
 			for (int i = 0; i < numFaces ; ++i) 
 			{

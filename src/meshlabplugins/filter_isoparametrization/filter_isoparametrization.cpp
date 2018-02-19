@@ -272,7 +272,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
     {
       AbstractMesh *abs_mesh = new AbstractMesh();
       ParamMesh *para_mesh = new ParamMesh();
-      bool Done=isoPHandle().LoadBaseDomain<CMeshO>(qPrintable(AbsLoadName),mesh,para_mesh,abs_mesh,true);
+      bool Done=isoPHandle().LoadBaseDomain<CMeshO>(qUtf8Printable(AbsLoadName),mesh,para_mesh,abs_mesh,true);
       if (!Done)
       {
         this->errorMessage="Abstract domain doesnt fit well with the parametrized mesh";
@@ -285,7 +285,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
     QString AbsSaveName = par.getString("AbsSaveName");
     if(!AbsSaveName.isEmpty())
     {
-      isoPHandle().SaveBaseDomain(qPrintable(AbsSaveName));
+      isoPHandle().SaveBaseDomain(qUtf8Printable(AbsSaveName));
     }
     return true;
   }

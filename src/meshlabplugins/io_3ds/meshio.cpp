@@ -115,7 +115,7 @@ bool ExtraMeshIOPlugin::open(const QString &formatName, const QString &fileName,
             {
                 bool normalsUpdated = false;
 
-                MeshModel &mm = *m.parent->addNewMesh(qPrintable(fileName), QString(p->name), false);
+                MeshModel &mm = *m.parent->addNewMesh(qUtf8Printable(fileName), QString(p->name), false);
                 if (cb != NULL)	(*cb)(i, (QString("Loading Mesh ")+QString(p->name)).toStdString().c_str());
 
                 vcg::tri::io::Importer3DS<CMeshO>::LoadMask(file, p, info);
