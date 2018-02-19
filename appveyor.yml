@@ -18,7 +18,8 @@ environment:
     # Microsoft Visual Studio 64bit
     - QTDIR: C:\Qt\5.10.0\msvc2015
       VSVER: 14.0
-      SPEC: win32-msvc2015
+#      SPEC: win32-msvc2015
+      SPEC: win64-msvc2015     
       COMPILER: nmake
       PATH: C:\Program Files (x86)\NSIS\;%PATH%
       #ARTIFACT: $(APPVEYOR_PROJECT_NAME)-%APPVEYOR_REPO_TAG_NAME%.%APPVEYOR_BUILD_NUMBER%-win64.zip
@@ -49,9 +50,6 @@ before_build:
   
 
 artifacts:
- - path: src\distrib\meshlab.exe
-   name: bareexe
- 
  - path: distrib.zip
    name: distrib.zip
  
