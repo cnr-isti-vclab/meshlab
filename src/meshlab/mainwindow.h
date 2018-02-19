@@ -448,7 +448,6 @@ private:
     QAction *saveSnapshotAct;
     QAction *recentFileActs[MAXRECENTFILES];
     QAction *recentProjActs[MAXRECENTFILES];
-    QAction *separatorAct;
     QAction *exitAct;
     //////
     QAction *lastFilterAct;

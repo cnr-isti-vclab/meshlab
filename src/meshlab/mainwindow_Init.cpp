@@ -569,7 +569,7 @@ void MainWindow::createMenus()
 	fileMenu->addSeparator();
 
 	fileMenu->addAction(saveSnapshotAct);
-	separatorAct = fileMenu->addSeparator();
+	fileMenu->addSeparator();
 	recentProjMenu = fileMenu->addMenu(tr("Recent Projects"));
 	recentFileMenu = fileMenu->addMenu(tr("Recent Files"));
 
