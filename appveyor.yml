@@ -16,7 +16,8 @@ configuration:
 environment:
   matrix:
     # Microsoft Visual Studio 64bit
-    - QTDIR: C:\Qt\5.10.0\msvc2015
+#    - QTDIR: C:\Qt\5.10.0\msvc2015
+    - QTDIR: C:\Qt\5.10.0\msvc2015_64
       VSVER: 14.0
 #      SPEC: win32-msvc2015
       SPEC: win64-msvc2015     
