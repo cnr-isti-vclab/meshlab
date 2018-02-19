@@ -412,6 +412,9 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
     }
     this->setValue(paramName,rp->val->getMatrix44f());
 
+	QLabel* headerL = new QLabel("Matrix:", this);
+	vlay->addWidget(headerL, 0, Qt::AlignTop);
+
     vlay->addLayout(lay44);
 
     QPushButton     * getMatrixButton = new QPushButton("Read from current layer");
@@ -529,7 +532,7 @@ void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
     MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
-void Matrix44fWidget::invalidateMatrix(const QString& s)
+void Matrix44fWidget::invalidateMatrix(const QString& /*s*/)
 {
   valid = false;
 }
