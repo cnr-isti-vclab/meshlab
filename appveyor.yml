@@ -10,8 +10,8 @@ shallow_clone: true
 clone_folder: c:\projects\meshlab
 # Build Configuration, i.e. Debug, Release, etc.
 configuration:
-#  - release
-  - debug
+  - release
+#  - debug
   
 environment:
   matrix:
@@ -48,7 +48,8 @@ before_build:
   # Show build folder
   - echo %APPVEYOR_BUILD_FOLDER%
   - echo %CONFIGURATION%
-  
+  - echo %ARCH% 
+ 
 
 artifacts:
  - path: distrib.zip
@@ -78,7 +79,7 @@ build_script:
   - dir
   - cd src\distrib
   - dir
-  - windeployqt meshlab.exe
+  - windeployqt --no-translations meshlab.exe
   - dir
   - cd %APPVEYOR_BUILD_FOLDER% 
   - 7z a distrib.zip src\distrib
