@@ -51,6 +51,7 @@ public:
         FP_REMOVE_NON_MANIF_EDGE,
         FP_REMOVE_NON_MANIF_VERT,
         FP_MERGE_CLOSE_VERTEX,
+        FP_MERGE_WEDGE_TEX,
         FP_COMPACT_VERT,
         FP_COMPACT_FACE
     } ;
