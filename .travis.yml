@@ -11,13 +11,15 @@ sudo: required
 git: 
   depth: 1
 
-#before_install:
-#  - |
-#    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-#    then
-#      sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
-#      sudo apt-get update -qq
-#    fi
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      # suggested by https://stackoverflow.com/questions/29721240/ci-for-qt-app-build-with-different-qt-versions      
+      #sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+      sudo add-apt-repository --yes ppa:beineri/opt-qt594-trusty
+      sudo apt-get update -qq
+    fi
 
 install:
   - |
@@ -31,9 +33,10 @@ install:
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
-      sudo apt-get -y install qt5-default
-      sudo apt-get -y install qtscript5-dev
-      sudo apt-get -y install libqt5xmlpatterns5-dev
+      sudo apt-get -y install qt59[QTPACKAGE]
+      #sudo apt-get -y install qt5-default
+      #sudo apt-get -y install qtscript5-dev
+      #sudo apt-get -y install libqt5xmlpatterns5-dev
       qmake --version
     fi
   - cd ..
@@ -52,6 +55,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
   #- if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt59-env.sh        ;fi
   - cd src
   - cd external
   - qmake --version
