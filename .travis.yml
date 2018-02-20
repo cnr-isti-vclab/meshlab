@@ -11,13 +11,13 @@ sudo: required
 git: 
   depth: 1
 
-before_install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
-    then
-      sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
-      sudo apt-get update -qq
-    fi
+#before_install:
+#  - |
+#    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+#    then
+#      sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+#      sudo apt-get update -qq
+#    fi
 
 install:
   - |
@@ -31,7 +31,8 @@ install:
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
-      sudo apt-get -y install qt59[QTPACKAGE]
+      sudo apt-get -y install qt5-default
+      qmake --version
     fi
   - cd ..
   - git clone --depth=1 -b devel https://github.com/cnr-isti-vclab/vcglib.git
