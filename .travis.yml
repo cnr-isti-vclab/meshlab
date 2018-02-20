@@ -32,8 +32,8 @@ install:
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
       sudo apt-get -y install qt5-default
-      sudo apt-get -y install libqt5script5
-      sudo apt-get -y install libqt5xmlpatterns5
+      sudo apt-get -y install libqt5script5-dev
+      sudo apt-get -y install libqt5xmlpatterns5-dev
       qmake --version
     fi
   - cd ..
