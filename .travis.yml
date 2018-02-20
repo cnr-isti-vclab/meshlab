@@ -20,8 +20,7 @@ git:
 #    fi
 
 install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
       brew update > /dev/null
       brew install llvm
@@ -29,9 +28,11 @@ install:
       brew install qt5      
       export QTDIR="/usr/local/opt/qt5"
     fi
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+ - if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
       sudo apt-get -y install qt5-default
+      sudo apt-get -y install libqt5script5
+      sudo apt-get -y install libqt5xmlpatterns5
       qmake --version
     fi
   - cd ..
@@ -49,7 +50,7 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
   - cd src
   - cd external
   - qmake --version
