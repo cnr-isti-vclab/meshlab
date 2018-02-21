@@ -8,6 +8,9 @@ os:
 dist: trusty
 sudo: required
 
+compiler:
+  - clang
+
 git: 
   depth: 1
 
@@ -40,7 +43,7 @@ install:
       qmake --version
     fi
   - cd ..
-  - git clone --depth=1 -b devel https://github.com/cnr-isti-vclab/vcglib.git
+  - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
 cache:
 #  directories:
