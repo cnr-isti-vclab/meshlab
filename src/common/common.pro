@@ -59,12 +59,9 @@ INCLUDEPATH *= ../.. \
     $$EIGENDIR \
     $$GLEWDIR/include
 TEMPLATE = lib
-linux-g++:CONFIG += dll
-linux-g++:DESTDIR = ../distrib
-linux-g++-32:CONFIG += dll
-linux-g++-32:DESTDIR = ../distrib
-linux-g++-64:CONFIG += dll
-linux-g++-64:DESTDIR = ../distrib
+
+linux:CONFIG += dll
+linux:DESTDIR = ../distrib
 
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
 
