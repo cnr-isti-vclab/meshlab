@@ -65,6 +65,8 @@ build_script:
   - call %COMPILER%
   - dir lib
   - dir lib\win32-msvc
+  # for some reason it seems that external get different defaults lib...
+  - copy lib\win32-msvc\* ..\win32-msvc2015
   - cd ..
   - dir
   # Run qmake for the REAL project
