@@ -1045,7 +1045,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		assert(srcMesh!=NULL);
 		assert(trgMesh!=NULL);
 
-		CheckError(trgMesh->cm.fn == 0, "Source mesh requires to have faces");
+		CheckError(srcMesh->cm.fn == 0, "Source mesh requires to have faces");
 
 		// Check whether is possible to access source mesh texture
 		CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");

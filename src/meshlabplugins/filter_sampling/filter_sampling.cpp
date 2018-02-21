@@ -776,6 +776,8 @@ switch(ID(action))
 		mm->updateDataMask(curMM);
 		BaseSampler mps(&(mm->cm));
 
+    mps.perFaceNormal = par.getBool("PerFaceNormal");
+
 		if(par.getBool("EdgeSampling"))
 		{
 			tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),false);
@@ -1237,7 +1239,7 @@ switch(ID(action))
 
 		Point3i volumeDim;
 		Box3m volumeBox = baseMesh->cm.bbox;
-		volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
+		volumeBox.Offset(volumeBox.Diag()/10.0f+abs(offsetThr));
 		BestDim(volumeBox , voxelSize, volumeDim );
 
 		Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
