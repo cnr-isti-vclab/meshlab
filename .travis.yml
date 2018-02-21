@@ -43,10 +43,10 @@ install:
   - git clone --depth=1 -b devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
 cache:
-  directories:
-    - $HOME/Library/Caches/Homebrew
-    - $HOME/vcglib
-    - $HOME/meshlab/src/external/lib/macx64
+#  directories:
+#    - $HOME/Library/Caches/Homebrew
+#    - $HOME/vcglib
+#    - $HOME/meshlab/src/external/lib/macx64
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
