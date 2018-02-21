@@ -5,11 +5,11 @@ SUBDIRS       = common \
                 meshlab \
                 meshlabserver \
 # IO plugins
-#                meshlabplugins/io_3ds\
+                meshlabplugins/io_3ds\
                 meshlabplugins/io_base\
                 meshlabplugins/io_bre \
                 meshlabplugins/io_collada \
-#                meshlabplugins/io_ctm \
+                meshlabplugins/io_ctm \
                 meshlabplugins/io_expe \
                 meshlabplugins/io_json \
                 meshlabplugins/io_tri\
