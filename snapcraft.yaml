@@ -13,13 +13,13 @@ icon: snap/gui/meshlab.png
 grade: stable
 confinement: devmode
 
-apps:
-  meshlab:
-    command: desktop-launch meshlab
-    plugs: [home, x11, mir, opengl, unity7]
-  meshlabserver:
-    command: desktop-launch meshlabserver
-    plugs: [home, x11, opengl]
+#apps:
+#  meshlab:
+#    command: desktop-launch meshlab
+#    plugs: [home, x11, mir, opengl, unity7]
+#  meshlabserver:
+#    command: desktop-launch meshlabserver
+#    plugs: [home, x11, opengl]
 
 parts:
   meshlab:
