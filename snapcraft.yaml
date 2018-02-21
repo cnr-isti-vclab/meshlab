@@ -11,7 +11,7 @@ description: |
 icon: snap/gui/meshlab.png
 
 grade: stable
-confinement: strict
+confinement: devmode
 
 apps:
   meshlab:
@@ -21,14 +21,12 @@ apps:
     command: desktop-launch meshlabserver
     plugs: [home, x11, opengl]
 
-
 parts:
   meshlab:
     after: [desktop-qt5,vcglib]
     plugin: qmake
     qt-version: qt5
     source: https://github.com/cnr-isti-vclab/meshlab.git
-#    source-tag: v2017.03
     build-packages:
       - libqt5opengl5-dev
       - libqt5xmlpatterns5-dev
