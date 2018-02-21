@@ -67,7 +67,7 @@ build_script:
   - dir lib\win32-msvc
   - dir lib\win32-msvc2015
   # for some reason it seems that external get different defaults lib...
-  - copy lib\win32-msvc\*.lib ..\win32-msvc2015
+  - copy lib\win32-msvc\*.lib lib\win32-msvc2015
   - dir lib\win32-msvc2015
   - cd ..
   - dir
