@@ -183,6 +183,10 @@ QString CleanFilter::filterName(FilterIDType filter) const
     }
   return 0;
 }
+ int CleanFilter::postCondition( QAction* /*filter*/ ) const
+ {
+     return MeshModel::MM_ALL;
+ }
 
 void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
 {
