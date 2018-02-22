@@ -334,7 +334,7 @@ public:
 	bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
 
 
-	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3 };
+	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
 
 	/** \brief this function informs the MeshLab core on how many meshes the filter will work on.
 	Valid value:

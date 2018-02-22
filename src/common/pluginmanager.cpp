@@ -140,6 +140,16 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 						actionFilterMap.insert(filterAction->text(), filterAction);
 						stringFilterMap.insert(filterAction->text(), iFilter);
 						iFilter->initGlobalParameterSet(filterAction, defaultGlobal);
+                        if(iFilter->getClass(filterAction)==MeshFilterInterface::Generic)     
+                          throw MLException("Missing class for "        +fileName+filterAction->text());
+                        if(iFilter->getRequirements(filterAction) == MeshModel::MM_UNKNOWN)   
+                          throw MLException("Missing requirements for " +fileName+filterAction->text());
+                        if(iFilter->getPreConditions(filterAction) == MeshModel::MM_UNKNOWN)  
+                          throw MLException("Missing preconditions for "+fileName+filterAction->text());
+                        if(iFilter->postCondition(filterAction) == MeshModel::MM_UNKNOWN )    
+                          throw MLException("Missing postcondition for "+fileName+filterAction->text());
+                        if(iFilter->filterArity(filterAction) == MeshFilterInterface::UNKNOWN_ARITY )    
+                          throw MLException("Missing Arity for "        +fileName+filterAction->text());
 					}
 				}
 				MeshIOInterface *iIO = qobject_cast<MeshIOInterface *>(plugin);
