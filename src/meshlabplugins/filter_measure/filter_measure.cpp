@@ -157,7 +157,13 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 					quadFound = true;
 				}
 			}
-			assert(quadFound);
+			
+			if (!quadFound)
+			{
+				errorMessage = "QuadMesh problem: current mesh doesn't contain quads.";
+				return false;
+			}
+
 			for (int i = 0; i<4; ++i)
 				AngleD.Add(fabs(90 - math::ToDeg(Angle(qv[(i + 0) % 4] - qv[(i + 1) % 4], qv[(i + 2) % 4] - qv[(i + 1) % 4]))));
 			float edgeLen[4];

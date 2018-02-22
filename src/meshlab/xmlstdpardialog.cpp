@@ -733,7 +733,7 @@ XMLEditWidget::XMLEditWidget(const MLXMLPluginInfo::XMLMap& xmlWidgetTag,EnvWrap
 	lineEdit = new QLineEdit(this);
 	lineEdit->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     //int row = gridLay->rowCount() -1;
-	QHBoxLayout* hlay = new QHBoxLayout();
+	hlay = new QHBoxLayout();
 	hlay->addWidget(lineEdit);
 	
 	hlay->addWidget(perstb);

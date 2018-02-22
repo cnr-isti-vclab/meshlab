@@ -419,6 +419,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 		defaultBits = capability;
 		defaultBits &= (~tri::io::Mask::IOM_FLAGS);
 		defaultBits &= (~tri::io::Mask::IOM_VERTNORMAL);
+		defaultBits &= (~tri::io::Mask::IOM_FACENORMAL);
 	}
 	if (format.toUpper() == tr("STL")) {
 		capability = tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();
