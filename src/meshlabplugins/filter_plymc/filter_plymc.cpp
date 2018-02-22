@@ -166,17 +166,17 @@ bool PlyMCPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
               tri::Smooth<SMesh>::FaceNormalLaplacianVF(sm);
             //QString mshTmpPath=QDir::tempPath()+QString("/")+QString(mm->shortName())+QString(".vmi");
             QString mshTmpPath=QString("__TMP")+QString(mm->shortName())+QString(".vmi");
-            qDebug("Saving tmp file %s",qPrintable(mshTmpPath));
-            int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qPrintable(mshTmpPath) );
+            qDebug("Saving tmp file %s",qUtf8Printable(mshTmpPath));
+            int retVal = tri::io::ExporterVMI<SMesh>::Save(sm,qUtf8Printable(mshTmpPath) );
             if(retVal!=0)
             {
-                qDebug("Failed to write vmi temp file %s",qPrintable(mshTmpPath));
+                qDebug("Failed to write vmi temp file %s",qUtf8Printable(mshTmpPath));
 				errorMessage = "Failed to write vmi temp file " + mshTmpPath;
-				Log("ERROR - Failed to write vmi temp file %s", qPrintable(mshTmpPath));
+				Log("ERROR - Failed to write vmi temp file %s", qUtf8Printable(mshTmpPath));
                 return false;
             }
-            pmc.MP.AddSingleMesh(qPrintable(mshTmpPath));
-            Log("Preprocessing mesh %s",qPrintable(mm->shortName()));
+            pmc.MP.AddSingleMesh(qUtf8Printable(mshTmpPath));
+            Log("Preprocessing mesh %s",qUtf8Printable(mm->shortName()));
         }
     }
 

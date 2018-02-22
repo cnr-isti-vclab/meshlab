@@ -167,7 +167,7 @@ MeshTreeWidgetItem::MeshTreeWidgetItem(MeshNode *meshNode)
 	if (meshNode->m->visible)  setIcon(1, QIcon(":/layer_eye_open.png"));
 	else setIcon(1, QIcon(":/layer_eye_close.png"));
 
-	labelText.sprintf("%s", qPrintable(meshName));
+	labelText.sprintf("%s", qUtf8Printable(meshName));
 	setText(3, labelText);
 
 	n = meshNode;

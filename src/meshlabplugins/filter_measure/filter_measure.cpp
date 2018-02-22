@@ -393,7 +393,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
 
-			for (size_t i = 0; i<m.vn; ++i)
+			for (int i = 0; i<m.vn; ++i)
 				H.Add(m.vert[i].Q(), aVec[i]);
 		}
 		else{
@@ -401,7 +401,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
 
-			for (size_t i = 0; i<m.fn; ++i)
+			for (int i = 0; i<m.fn; ++i)
 				H.Add(m.face[i].Q(), aVec[i]);
 		}
 		if (areaFlag)
@@ -424,7 +424,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
 
-			for (size_t i = 0; i<m.vn; ++i)
+			for (int i = 0; i<m.vn; ++i)
 				H.Add(m.vert[i].Q(), aVec[i]);
 		}
 		else{
@@ -432,7 +432,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
 
-			for (size_t i = 0; i<m.fn; ++i)
+			for (int i = 0; i<m.fn; ++i)
 				H.Add(m.face[i].Q(), aVec[i]);
 		}
 		if (areaFlag)

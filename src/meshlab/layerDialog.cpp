@@ -1078,7 +1078,7 @@ void DecoratorParamsTreeWidget::save()
         p->accept(v);
         doc.appendChild(v.parElem);
         QString docstring =  doc.toString();
-        qDebug("Writing into Settings param with name %s and content ****%s****",qPrintable(p->name),qPrintable(docstring));
+        qDebug("Writing into Settings param with name %s and content ****%s****", qUtf8Printable(p->name), qUtf8Printable(docstring));
         QSettings setting;
         setting.setValue(p->name,QVariant(docstring));
         RichParameterSet& currSet = mainWin->currentGlobalPars();

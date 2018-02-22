@@ -33,6 +33,7 @@
 #include <vcg/complex/algorithms/create/platonic.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/create/ball_pivoting.h>
+#include <vcg/complex/algorithms/update/texture.h>
 
 using namespace std;
 using namespace vcg;
@@ -54,6 +55,7 @@ CleanFilter::CleanFilter()
 	<< FP_REMOVE_NON_MANIF_EDGE
 	<< FP_REMOVE_NON_MANIF_VERT
 	<< FP_MERGE_CLOSE_VERTEX
+    << FP_MERGE_WEDGE_TEX
 	<< FP_COMPACT_FACE
 	<< FP_COMPACT_VERT;
 
@@ -84,6 +86,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
 	case FP_REMOVE_TVERTEX_COLLAPSE:      return QString("Remove T-Vertices by Edge Collapse");
 	case FP_SNAP_MISMATCHED_BORDER:       return QString("Snap Mismatched Borders");
 	case FP_MERGE_CLOSE_VERTEX:           return QString("Merge Close Vertices");
+    case FP_MERGE_WEDGE_TEX:              return QString("Merge Wedge Texture Coord");
 	case FP_REMOVE_DUPLICATE_FACE:        return QString("Remove Duplicate Faces");
 	case FP_REMOVE_FOLD_FACE:             return QString("Remove Isolated Folded Faces by Edge Flip");
 	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Remove Faces from Non Manifold Edges");
@@ -116,6 +119,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
                                                        "This situation can happen on badly triangulated adjacent patches defined by high order surfaces.<br>"
                                                        "For each border vertex the filter snap it onto the closest boundary edge only if it is closest of <i>edge_lenght*threshold</i>. When vertex is snapped the correspoinding face it split and a new vertex is created.");
     case FP_MERGE_CLOSE_VERTEX :        return QString("Merge together all the vertices that are nearer than the specified threshold. Like a unify duplicated vertices but with some tolerance.");
+    case FP_MERGE_WEDGE_TEX :           return QString("Merge together per-wedge texture coords that are very close. Used to correct apparent texture seams that can arise from numerical approximations when saving in ascii formats.");
     case FP_REMOVE_DUPLICATE_FACE :     return QString("Delete all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
@@ -146,8 +150,10 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_COMPACT_FACE:
       return MeshFilterInterface::Cleaning;
     case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
+    case FP_MERGE_WEDGE_TEX: 	return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Texture);    
     default : assert(0);
     }
+  return MeshFilterInterface::Generic;
 }
 
  int CleanFilter::getRequirements(QAction *action)
@@ -170,6 +176,9 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_MERGE_CLOSE_VERTEX:
     case FP_REMOVE_DUPLICATE_FACE:
       return MeshModel::MM_NONE;
+    case FP_MERGE_WEDGE_TEX: 
+      return MeshModel::MM_VERTFACETOPO | MeshModel::MM_WEDGTEXCOORD;
+    
     default: assert(0);
     }
   return 0;
@@ -187,7 +196,7 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
           parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
           break;
     case FP_REMOVE_ISOLATED_DIAMETER:
-          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
+          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0f,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
 		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
@@ -198,8 +207,11 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
           qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
           parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
           break;
-    case FP_MERGE_CLOSE_VERTEX :
-          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0,0,md.mm()->cm.bbox.Diag()/100.0,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+    case  FP_MERGE_CLOSE_VERTEX:
+          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0f,0,md.mm()->cm.bbox.Diag()/100.0f,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+          break;
+    case FP_MERGE_WEDGE_TEX :
+          parlst.addParam(new RichFloat("MergeThr",1.0f/10000.0f,"Merging Threshold","All the per-wedge texture coords that are on the same vertex and are distant less then the given threshold are merged together. It can be used to remove the fake texture seams that arise from error. Distance is in texture space (the default, 1e-4, corresponds to one texel on a 10kx10x texture) "));
           break;
     case FP_SNAP_MISMATCHED_BORDER:
     parlst.addParam(new RichFloat("EdgeDistRatio",1/100.0f,"Edge Distance Ratio", "Collapse edge when the edge / distance ratio is greater than this value. E.g. for default value 1000 two straight border edges are collapsed if the central vertex dist from the straight line composed by the two edges less than a 1/1000 of the sum of the edges lenght. Larger values enforce that only vertexes very close to the line are removed."));
@@ -311,7 +323,15 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		Log("Successfully removed %d t-vertices", total);
     } break;
 
-	case FP_MERGE_CLOSE_VERTEX :
+	case FP_MERGE_WEDGE_TEX :
+    {
+      float threshold = par.getFloat("MergeThr");
+      tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
+      int total = tri::UpdateTexture<CMeshO>::WedgeTexMergeClose(m.cm, threshold);
+      Log("Successfully merged %d wedge tex coord distant less than %f", total,threshold);
+    } break;
+   
+    case FP_MERGE_CLOSE_VERTEX :
 	{
 		float threshold = par.getAbsPerc("Threshold");
 		int total = tri::Clean<CMeshO>::MergeCloseVertex(m.cm, threshold);

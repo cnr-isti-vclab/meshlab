@@ -2,7 +2,6 @@
 
 ; HM NIS Edit Wizard helper defines
 
-
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
 !define PRODUCT_VERSION "2018.03"
@@ -12,7 +11,9 @@
 !define PRODUCT_DIR_REGKEY_S "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlabserver.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define QT_BASE "C:\Qt_5.7\5.7\msvc2015_64\"
+;!define QT_BASE "C:\Qt_5.7\5.7\msvc2015_64\"
+;!define QT_BASE ${QTDIR}
+ReadEnvStr $QT_BASE "QTDIR"
 !define ADDITIONAL_DLLS "C:\Users\ranzuglia\Desktop\MeshLab-related\additional_dlls"
 !define ICU_DLLS "${ADDITIONAL_DLLS}\icu\bin64"
 !define DISTRIB_FOLDER "../distrib"

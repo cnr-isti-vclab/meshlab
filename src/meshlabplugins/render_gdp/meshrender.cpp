@@ -57,7 +57,7 @@ void MeshShaderRenderPlugin::initActionList() {
 			"Unable to find the shaders directory.\n"
 			"No shaders will be loaded.");
 	}
-	qDebug("Shader directory found '%s', and it contains %i gdp files", qPrintable(shadersDir.path()), shadersDir.entryList(QStringList("*.gdp")).size());
+	qDebug("Shader directory found '%s', and it contains %i gdp files", qUtf8Printable(shadersDir.path()), shadersDir.entryList(QStringList("*.gdp")).size());
 
 
 	QDomDocument doc;
@@ -218,14 +218,14 @@ void MeshShaderRenderPlugin::initActionList() {
 						qa->setCheckable(false);
 						actionList << qa;
 					}
-					else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qPrintable(fileName));
+					else qDebug("Failed root.nodeName() == GLSLang) (for %s)", qUtf8Printable(fileName));
 				}
 				else {
-					qDebug("Failed doc.setContent(%s)", qPrintable(fileName));
+					qDebug("Failed doc.setContent(%s)", qUtf8Printable(fileName));
 					file.close();
 				}
 			}
-			else  qDebug("Failed file.open(%s)", qPrintable(shadersDir.absoluteFilePath(fileName)));
+			else  qDebug("Failed file.open(%s)", qUtf8Printable(shadersDir.absoluteFilePath(fileName)));
 		}
 	}
 }

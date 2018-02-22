@@ -88,7 +88,7 @@ public:
         if(!fp) return;
         foreach(MeshFilterInterface *iFilter, PM.meshFilterPlugins())
             foreach(QAction *filterAction, iFilter->actions())
-            fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n",qPrintable(filterAction->text()), qPrintable(iFilter->filterInfo(filterAction)));
+            fprintf(fp, "*<b><i>%s</i></b> <br>%s<br>\n", qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
     }
 
     void dumpPluginInfoDoxygen(FILE *fp)
@@ -106,7 +106,7 @@ public:
                 fprintf(fp,
                     "\n\\section f%i %s \n\n"
                     "%s\n"
-                    ,i++,qPrintable(filterAction->text()),qPrintable(iFilter->filterInfo(filterAction)));
+                    ,i++, qUtf8Printable(filterAction->text()), qUtf8Printable(iFilter->filterInfo(filterAction)));
 
                 fprintf(fp,  "<H2> Parameters </h2>\n");
                 //            fprintf(fp,  "\\paragraph fp%i Parameters\n",i);
@@ -117,7 +117,7 @@ public:
                     foreach(RichParameter* pp, FPM[filterAction->text()].paramList)
                     {
                         fprintf(fp,"<TR><TD> \\c %s  </TD> <TD> %s </TD> <TD><i> %s -- </i></TD> </TR>\n",
-                            qPrintable(pp->val->typeName()),qPrintable(pp->pd->fieldDesc),qPrintable(pp->pd->tooltip));
+							qUtf8Printable(pp->val->typeName()), qUtf8Printable(pp->pd->fieldDesc), qUtf8Printable(pp->pd->tooltip));
                     }
                     fprintf(fp,"</TABLE>\n");
                 }
@@ -145,7 +145,7 @@ public:
         QDir::setCurrent(fi.absolutePath());
 
         QString extension = fi.suffix();
-        qDebug("Opening a file with extention %s",qPrintable(extension));
+        qDebug("Opening a file with extention %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
         MeshIOInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
@@ -161,7 +161,7 @@ public:
 
         if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
         {
-            fprintf(fp,"MeshLabServer: Failed loading of %s from dir %s\n",qPrintable(fileName),qPrintable(QDir::currentPath()));
+            fprintf(fp,"MeshLabServer: Failed loading of %s from dir %s\n", qUtf8Printable(fileName), qUtf8Printable(QDir::currentPath()));
             QDir::setCurrent(curDir.absolutePath());
             return false;
         }
@@ -317,7 +317,7 @@ public:
         }
         if (!scriptPtr.open(scriptfile))
         {
-            printf("File %s was not found.\n",qPrintable(scriptfile));
+            printf("File %s was not found.\n", qUtf8Printable(scriptfile));
             return false;
         }
         fprintf(fp,"Starting Script of %i actions",scriptPtr.filtparlist.size());
@@ -327,13 +327,13 @@ public:
             bool ret = false;
             //RichParameterSet &par = (*ii).second;
             QString fname = (*ii)->filterName();
-            fprintf(fp,"filter: %s\n",qPrintable(fname));
+            fprintf(fp,"filter: %s\n", qUtf8Printable(fname));
             if (!(*ii)->isXMLFilter())
             {
                 QAction *action = PM.actionFilterMap[ fname];
                 if (action == NULL)
                 {
-                    fprintf(fp,"filter %s not found",qPrintable(fname));
+                    fprintf(fp,"filter %s not found", qUtf8Printable(fname));
                     return false;
                 }
 
@@ -355,7 +355,7 @@ public:
                 //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.
                 if (required.paramList.size() < parameterSet.paramList.size())
                 {
-                    fprintf(fp,"The parameters in the script file are more than the filter %s requires.\n",qPrintable(fname));
+                    fprintf(fp,"The parameters in the script file are more than the filter %s requires.\n", qUtf8Printable(fname));
                     return false;
                 }
 
@@ -562,10 +562,10 @@ public:
             QStringList logOutput;
             log.print(logOutput);
             foreach(QString logEntry, logOutput)
-                fprintf(fp,"%s\n",qPrintable(logEntry));
+                fprintf(fp,"%s\n",qUtf8Printable(logEntry));
             if(!ret)
             {
-                fprintf(fp,"Problem with filter: %s\n",qPrintable(fname));
+                fprintf(fp,"Problem with filter: %s\n",qUtf8Printable(fname));
                 return false;
             }
         }
@@ -597,6 +597,7 @@ namespace commandline
     const char flags('f');
     const char normal('n');
     const char quality('q');
+    const char radius('r');
 	const char polygon('p');
     const char texture('t');
     const char log('l');
@@ -605,7 +606,7 @@ namespace commandline
 
     void usage()
     {
-		printf("MeshLabServer version: %s\n", qPrintable(MeshLabApplication::appVer()));
+		printf("MeshLabServer version: %s\n", qUtf8Printable(MeshLabApplication::appVer()));
 		QFile docum(":/meshlabserver.txt");
         if (!docum.open(QIODevice::ReadOnly))
         {
@@ -613,7 +614,7 @@ namespace commandline
             exit(-1);
         }
         QString help(docum.readAll());
-        printf("\nUsage:\n%s",qPrintable(help));
+        printf("\nUsage:\n%s",qUtf8Printable(help));
         docum.close();
     }
 
@@ -631,8 +632,8 @@ namespace commandline
     }
 
     QString outputmeshExpression()
-	{
-		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(texture) + "|" + QString(polygon) + ")");
+    {
+		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + ")");
 		QString optionslist(options + "(\\s+" + options + ")*");	
 		QString savingmask("-" + QString(mask) + "\\s+" + optionslist);
 		QString layernumber("\\d+");
@@ -763,19 +764,19 @@ int main(int argc, char *argv[])
                     QString inputproject = finfo.absoluteFilePath();
                     if (finfo.completeSuffix().toLower() != "mlp")
                     {
-                        fprintf(logfp,"Project %s is not a valid \'mlp\' file format. MeshLabServer application will exit.\n",qPrintable(inputproject));
+                        fprintf(logfp,"Project %s is not a valid \'mlp\' file format. MeshLabServer application will exit.\n",qUtf8Printable(inputproject));
 						//system("pause");
                         exit(-1);
                     }
                     bool opened = server.openProject(meshDocument,inputproject);
                     if (!opened)
                     {
-                        fprintf(logfp,"MeshLab Project %s has not been correctly opened. MeshLabServer application will exit.\n",qPrintable(inputproject));
+                        fprintf(logfp,"MeshLab Project %s has not been correctly opened. MeshLabServer application will exit.\n",qUtf8Printable(inputproject));
 						//system("pause");
                         exit(-1);
                     }
                     else
-                        fprintf(logfp,"MeshLab Project %s has been loaded.\n",qPrintable(inputproject));
+                        fprintf(logfp,"MeshLab Project %s has been loaded.\n",qUtf8Printable(inputproject));
                     ++i;
                 }
                 else
@@ -797,7 +798,7 @@ int main(int argc, char *argv[])
                     pr.filename = finfo.absoluteFilePath();
                     if (finfo.completeSuffix().toLower() != "mlp")
                     {
-                        fprintf(logfp,"Project %s is not a valid \'mlp\' file format. Output file will be renamed as %s.mlp .\n",qPrintable(pr.filename),qPrintable(pr.filename + ".mlp"));
+                        fprintf(logfp,"Project %s is not a valid \'mlp\' file format. Output file will be renamed as %s.mlp .\n",qUtf8Printable(pr.filename),qUtf8Printable(pr.filename + ".mlp"));
                         pr.filename += ".mlp";
                     }
                     ++i;
@@ -822,18 +823,18 @@ int main(int argc, char *argv[])
                     MeshModel* mmod = meshDocument.addNewMesh(info.absoluteFilePath(),"");
                     if (mmod == NULL)
                     {
-                        fprintf(logfp,"It was not possible to add new mesh %s to MeshLabServer. The program will exit\n",qPrintable(info.absoluteFilePath()));
+                        fprintf(logfp,"It was not possible to add new mesh %s to MeshLabServer. The program will exit\n",qUtf8Printable(info.absoluteFilePath()));
 						//system("pause");
                         exit(-1);
                     }
                     bool opened = server.importMesh(*mmod, info.absoluteFilePath(),logfp);
                     if (!opened)
                     {
-                        fprintf(logfp,"It was not possible to import mesh %s into MeshLabServer. The program will exit\n ",qPrintable(info.absoluteFilePath()));
+                        fprintf(logfp,"It was not possible to import mesh %s into MeshLabServer. The program will exit\n ",qUtf8Printable(info.absoluteFilePath()));
 						//system("pause");
                         exit(-1);
                     }
-                    fprintf(logfp,"Mesh %s loaded has %i vn %i fn\n", qPrintable(info.absoluteFilePath()), mmod->cm.vn, mmod->cm.fn);
+                    fprintf(logfp,"Mesh %s loaded has %i vn %i fn\n", qUtf8Printable(info.absoluteFilePath()), mmod->cm.vn, mmod->cm.fn);
                     i++;
                 }
                 i++;
@@ -852,7 +853,7 @@ int main(int argc, char *argv[])
 					/*WARNING! in order to maintain backward SYNTAX compatibility (not the SEMANTIC one!) by default the outputmesh saved is the one contained in the current layer*/
 					outfl.layerposition = OutFileMesh::currentlayerconst;
 
-                    fprintf(logfp,"output mesh  %s\n", qPrintable(outfl.filename));
+                    fprintf(logfp,"output mesh  %s\n", qUtf8Printable(outfl.filename));
                     i++;
                 }
 
@@ -885,6 +886,7 @@ int main(int argc, char *argv[])
                                 case commandline::flags : i++; fprintf(logfp,"vertex flags, "     ); mask |= vcg::tri::io::Mask::IOM_VERTFLAGS;    break;
                                 case commandline::normal : i++; fprintf(logfp,"vertex normals, "   ); mask |= vcg::tri::io::Mask::IOM_VERTNORMAL;   break;
                                 case commandline::quality : i++; fprintf(logfp,"vertex quality, "   ); mask |= vcg::tri::io::Mask::IOM_VERTQUALITY;  break;
+                                case commandline::radius : i++; fprintf(logfp,"vertex radii, "   ); mask |= vcg::tri::io::Mask::IOM_VERTRADIUS;  break;
                                 case commandline::texture : i++; fprintf(logfp,"vertex tex coords, "); mask |= vcg::tri::io::Mask::IOM_VERTTEXCOORD; break;
                                 default :  i++; fprintf(logfp,"WARNING: unknowns per VERTEX attribute '%s'",argv[i+1]);break;
                                 }
@@ -968,7 +970,7 @@ int main(int argc, char *argv[])
             }
         default:
             {
-                printf("Something bad happened parsing the document. String %s\n",qPrintable(argv[i]));
+                printf("Something bad happened parsing the document. String %s\n",qUtf8Printable(argv[i]));
 				//system("pause");
                 exit(-1);
             }
@@ -977,11 +979,11 @@ int main(int argc, char *argv[])
 
     for(int ii = 0; ii < scriptfiles.size();++ii)
     {
-        fprintf(logfp,"Apply FilterScript: '%s'\n",qPrintable(scriptfiles[ii]));
+        fprintf(logfp,"Apply FilterScript: '%s'\n",qUtf8Printable(scriptfiles[ii]));
         bool returnValue = server.script(meshDocument, scriptfiles[ii],logfp);
         if(!returnValue)
         {
-            fprintf(logfp,"Failed to apply script file %s\n",qPrintable(scriptfiles[ii]));
+            fprintf(logfp,"Failed to apply script file %s\n",qUtf8Printable(scriptfiles[ii]));
 			//system("pause");
             exit(-1);
         }
@@ -998,17 +1000,17 @@ int main(int argc, char *argv[])
         }
         bool saved = server.saveProject(meshDocument,outprojectfiles[ii].filename,outfilemiddlename);
         if (saved)
-            fprintf(logfp,"Output project has been saved in %s.\n",qPrintable(outprojectfiles[ii].filename));
+            fprintf(logfp,"Output project has been saved in %s.\n",qUtf8Printable(outprojectfiles[ii].filename));
         else
         {
-            fprintf(logfp,"Project %s has not been correctly saved in. MeshLabServer Application will exit.\n",qPrintable(outprojectfiles[ii].filename));
+            fprintf(logfp,"Project %s has not been correctly saved in. MeshLabServer Application will exit.\n",qUtf8Printable(outprojectfiles[ii].filename));
 			//system("pause");
             exit(-1);
         }
     }
 
 	if (meshDocument.size() < outmeshlist.size())
-		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", qPrintable(outmeshlist.size()), qPrintable(meshDocument.size()));
+		fprintf(logfp, "Error: trying to save %i meshes, but only %i available in the project\n", outmeshlist.size(), meshDocument.size());
 	
 	for (int ii = 0; ii < outmeshlist.size(); ++ii)
 	{
@@ -1029,15 +1031,15 @@ int main(int argc, char *argv[])
 				if (meshmod != NULL)
 					exported = server.exportMesh(meshDocument.meshList[layertobesaved], outmeshlist[ii].mask, outmeshlist[ii].filename, logfp);
 				if (exported)
-					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qPrintable(meshmod->fullName()), qPrintable(outmeshlist[ii].filename), meshmod->cm.vn, meshmod->cm.fn);
+					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qUtf8Printable(meshmod->fullName()), qUtf8Printable(outmeshlist[ii].filename), meshmod->cm.vn, meshmod->cm.fn);
 				else
-					fprintf(logfp, "Output mesh %s has NOT been saved\n", qPrintable(outmeshlist[ii].filename));
+					fprintf(logfp, "Output mesh %s has NOT been saved\n", qUtf8Printable(outmeshlist[ii].filename));
 			}
 			else
-				fprintf(logfp, "Output mesh %s has NOT been saved. A not existent layer has been requested to be saved\n", qPrintable(outmeshlist[ii].filename));
+				fprintf(logfp, "Output mesh %s has NOT been saved. A not existent layer has been requested to be saved\n", qUtf8Printable(outmeshlist[ii].filename));
 		}
 		else
-			fprintf(logfp, "Invalid layer number %i. Last layer in the current document is the number %i. Output mesh %s will not be saved\n", outmeshlist[ii].layerposition, meshDocument.meshList.size() - 1, qPrintable(outmeshlist[ii].filename));
+			fprintf(logfp, "Invalid layer number %i. Last layer in the current document is the number %i. Output mesh %s will not be saved\n", outmeshlist[ii].layerposition, meshDocument.meshList.size() - 1, qUtf8Printable(outmeshlist[ii].filename));
 	}
 
 

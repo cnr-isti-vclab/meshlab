@@ -368,7 +368,7 @@ public:
 			if (a->text() == this->filterName(tt)) return tt;
 
 
-		qDebug("unable to find the id corresponding to action  '%s'", qPrintable(a->text()));
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
 		assert(0);
 		return -1;
 	}
@@ -384,7 +384,7 @@ public:
 		foreach(QAction *tt, actionList)
 			if (idName == tt->text()) return tt;
 
-		qDebug("unable to find the action corresponding to action  '%s'", qPrintable(idName));
+		qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
 		assert(0);
 		return 0;
 	}
@@ -523,7 +523,7 @@ protected:
 	{
 		foreach(FilterIDType tt, types())
 			if (a->text() == this->decorationName(tt)) return tt;
-		qDebug("unable to find the id corresponding to action  '%s'", qPrintable(a->text()));
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
 		assert(0);
 		return -1;
 	}
@@ -531,7 +531,7 @@ protected:
 	{
 		foreach(FilterIDType tt, types())
 			if (name == this->decorationName(tt)) return tt;
-		qDebug("unable to find the id corresponding to action  '%s'", qPrintable(name));
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
 		assert(0);
 		return -1;
 	}
@@ -540,7 +540,7 @@ public:
 	{
 		foreach(QAction *tt, actions())
 			if (name == this->decorationName(ID(tt))) return tt;
-		qDebug("unable to find the id corresponding to action  '%s'", qPrintable(name));
+		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
 		return 0;
 	}
 };

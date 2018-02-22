@@ -58,7 +58,7 @@ QString U3DIOPlugin::computePluginsPath()
 		#elif defined(Q_OS_LINUX)
 				pluginsDir.cd("U3D_LINUX");
 		#endif
-		qDebug("U3D plugins dir %s", qPrintable(pluginsDir.absolutePath()));
+		qDebug("U3D plugins dir %s", qUtf8Printable(pluginsDir.absolutePath()));
 		return pluginsDir.absolutePath();
 }
 
@@ -124,7 +124,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 			return false;
 		}
 		
-		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qPrintable(converterCommandLine),_param,mask);
+		int result = tri::io::ExporterU3D<CMeshO>::Save(m.cm,filename.c_str(),qUtf8Printable(converterCommandLine),_param,mask);
 		vcg::tri::io::ExporterIDTF<CMeshO>::removeConvertedTGATextures(lst);
 		if(result!=0)
 		{

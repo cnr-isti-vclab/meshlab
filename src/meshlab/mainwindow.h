@@ -448,7 +448,6 @@ private:
     QAction *saveSnapshotAct;
     QAction *recentFileActs[MAXRECENTFILES];
     QAction *recentProjActs[MAXRECENTFILES];
-    QAction *separatorAct;
     QAction *exitAct;
     //////
     QAction *lastFilterAct;
@@ -565,7 +564,7 @@ protected:
             noEvent=false;
             QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
             mainWindow->importMeshWithLayerManagement(fileEvent->file());
-            qDebug("event fileopen %s",qPrintable(fileEvent->file()));
+            qDebug("event fileopen %s", qUtf8Printable(fileEvent->file()));
             return true;
         } else {
             // standard event processing

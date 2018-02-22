@@ -333,8 +333,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
                         (*fi).Q() = Distortion<CMeshO,false>::AngleDistortion(&*fi);
                 }
                 tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
-                minV = distrib.Percentile(0.05);
-                maxV = distrib.Percentile(0.95);
+                minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+                maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
                     } break;
 
             case 5: { //TEXTURE Area Distortion
@@ -351,8 +351,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 
                 }
                 tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
-                minV = distrib.Percentile(0.05);
-                maxV = distrib.Percentile(0.95);
+                minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+                maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
                     } break;
             case 6:
             case 7: { // polygonal planarity
@@ -389,8 +389,8 @@ bool ExtraMeshColorizePlugin::applyFilter(QAction *filter, MeshDocument &md, Ric
 
                     }
                     tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m.cm,distrib);
-                    minV = distrib.Percentile(0.05);
-                    maxV = distrib.Percentile(0.95);
+                    minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+                    maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
                     } break;
 
             default: assert(0);

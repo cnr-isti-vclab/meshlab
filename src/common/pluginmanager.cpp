@@ -74,7 +74,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 	//only the file with extension pluginfilters will be listed by function entryList()
 	pluginsDir.setNameFilters(pluginfilters);
 
-	qDebug("Current Plugins Dir is: %s ", qPrintable(pluginsDir.absolutePath()));
+	qDebug("Current Plugins Dir is: %s ", qUtf8Printable(pluginsDir.absolutePath()));
 	scriptplugcode = "";
 	ScriptAdapterGenerator gen;
 	scriptplugcode += gen.mergeOptParamsCodeGenerator() + "\n";
@@ -236,7 +236,7 @@ QString PluginManager::getBaseDirPath()
     if(baseDir.exists("plugins")) break;
     baseDir.cdUp();
   }
-  qDebug("The base dir is %s",qPrintable(baseDir.absolutePath()));
+  qDebug("The base dir is %s", qUtf8Printable(baseDir.absolutePath()));
 #endif
   return baseDir.absolutePath();
 }
@@ -414,7 +414,7 @@ MLXMLPluginInfo* PluginManager::loadXMLPlugin(const QString& fileName)
 		else
 		{
 			QString err = xmlErr.statusMessage();
-			qDebug("Error in XMLFile: %s - line: %d, column: %d - %s", qPrintable(fileName), xmlErr.line(), xmlErr.column(), qPrintable(err));
+			qDebug("Error in XMLFile: %s - line: %d, column: %d - %s", qUtf8Printable(fileName), xmlErr.line(), xmlErr.column(), qUtf8Printable(err));
 		}
 	}
 	return nullptr;

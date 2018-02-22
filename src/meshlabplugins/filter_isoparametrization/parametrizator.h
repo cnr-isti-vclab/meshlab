@@ -85,7 +85,7 @@ private:
         for (unsigned int i=0;i<final_mesh.face.size();i++)
         {
             BaseFace *f=&final_mesh.face[i];
-            ScalarType areaf=vcg::DoubleArea(*f)/2.0;//(((f->V(1)->P()-f->V(0)->P())^(f->V(2)->P()-f->V(0)->P())).Norm())/2.0;
+            ScalarType areaf= (ScalarType)DoubleArea(*f)/2.0;//(((f->V(1)->P()-f->V(0)->P())^(f->V(2)->P()-f->V(0)->P())).Norm())/2.0;
             f->V(0)->area+=areaf/(ScalarType)3.0;
             f->V(1)->area+=areaf/(ScalarType)3.0;
             f->V(2)->area+=areaf/(ScalarType)3.0;
@@ -748,7 +748,7 @@ public:
 #endif
       BaryOptimizatorDual<BaseMesh> BaryOpt;
       BaryOpt.Init(base_mesh,final_mesh,cb,accuracy,EType);
-      BaryOpt.Optimize(4.0/(double)accuracy,accuracy*4);
+      BaryOpt.Optimize(4.0f/(float)accuracy,accuracy*4);
 #ifndef _MESHLAB
       printf("\n POST DUAL OPT:	\n");
       PrintAttributes();

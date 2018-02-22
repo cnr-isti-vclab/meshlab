@@ -265,14 +265,14 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		}
 	}
 	if (someTextureNotFound)
-		Log("Missing texture files: %s", qPrintable(missingTextureFilesMsg));
+		Log("Missing texture files: %s", qUtf8Printable(missingTextureFilesMsg));
 
 	if (cb != NULL)	(*cb)(99, "Done");
 
 	return true;
 }
 
-bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget */*parent*/)
+bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet & par, CallBackPos *cb, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData();
@@ -284,7 +284,32 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 
 	if (formatName.toUpper() == tr("PLY"))
 	{
-		int result = tri::io::ExporterPLY<CMeshO>::Save(m.cm, filename.c_str(), mask, binaryFlag, cb);
+		tri::io::PlyInfo pi;
+		pi.mask = mask;
+
+		// custom attributes
+		for (int parI = 0; parI < par.paramList.size(); parI++)
+		{
+			QString pname = par.paramList[parI]->name;
+			if (pname.startsWith("PVAF")){						// if pname starts with PVAF, it is a PLY per-vertex float custom attribute
+				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+					pi.AddPerVertexFloatAttribute(qUtf8Printable(pname.mid(4)));
+			}
+			else if (pname.startsWith("PVA3F")){				// if pname starts with PVA3F, it is a PLY per-vertex point3f custom attribute
+				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+					pi.AddPerVertexPoint3fAttribute(m.cm, qUtf8Printable(pname.mid(5)));
+			}
+			else if (pname.startsWith("PFAF")){					// if pname starts with PFAF, it is a PLY per-face float custom attribute
+				if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+					pi.AddPerFaceFloatAttribute(qUtf8Printable(pname.mid(4)));
+			}
+			else if (pname.startsWith("PFA3F")){				// if pname starts with PFA3F, it is a PLY per-face point3f custom attribute
+				//if (par.findParameter(pname)->val->getBool())	// if it is true, add to save list
+					//pi.add(m, qUtf8Printable(pname.mid(5)));
+			}
+		}
+
+		int result = tri::io::ExporterPLY<CMeshO>::Save(m.cm, filename.c_str(), binaryFlag, pi, cb);
 		if (result != 0)
 		{
 			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterPLY<CMeshO>::ErrorMsg(result));
@@ -444,15 +469,43 @@ void BaseMeshIOPlugin::initSaveParameter(const QString &format, MeshModel &m, Ri
 {
 	if (format.toUpper() == tr("STL") || format.toUpper() == tr("PLY"))
 		par.addParam(new RichBool("Binary", true, "Binary encoding",
-			"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
+		"Save the mesh using a binary encoding. If false the mesh is saved in a plain, readable ascii format."));
 
 	if (format.toUpper() == tr("STL"))
 		par.addParam(new RichBool("ColorMode", true, "Materialise Color Encoding",
-			"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
+		"Save the color using a binary encoding according to the Materialise's Magic style (e.g. RGB coding instead of BGR coding)."));
 
 	if (format.toUpper() == tr("OBJ") && m.hasDataMask(MeshModel::MM_POLYGONAL)) //only shows up when the poligonalization is possible
 		par.addParam(new RichBool("poligonalize", false, "Convert triangles to polygons",
-			"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting."));
+		"The layer seems to have faux-edges, if true, MeshLab will try to convert triangles to polygons before exporting. WARNING: unstable, may cause crash")); // default is false, because it is a bit buggy, and should be anable only when sure
+
+	if (format.toUpper() == tr("PLY")){
+		std::vector<std::string> AttribNameVector;
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< float >(m.cm, AttribNameVector);
+		for (int i = 0; i < (int)AttribNameVector.size(); i++)
+		{
+			QString va_name = AttribNameVector[i].c_str();
+			par.addParam(new RichBool("PVAF" + va_name, false, "V(f): " + va_name, "Save this custom scalar (f) per-vertex attribute."));
+		}
+		vcg::tri::Allocator<CMeshO>::GetAllPerVertexAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		for (int i = 0; i < (int)AttribNameVector.size(); i++)
+		{
+			QString va_name = AttribNameVector[i].c_str();
+			par.addParam(new RichBool("PVA3F" + va_name, false, "V(3f): " + va_name, "Save this custom vector (3f) per-vertex attribute."));
+		}
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< float >(m.cm, AttribNameVector);
+		for (int i = 0; i < (int)AttribNameVector.size(); i++)
+		{
+			QString va_name = AttribNameVector[i].c_str();
+			par.addParam(new RichBool("PFAF" + va_name, false, "F(f): " + va_name, "Save this custom scalar (f) per-face attribute."));
+		}
+		vcg::tri::Allocator<CMeshO>::GetAllPerFaceAttribute< vcg::Point3f >(m.cm, AttribNameVector);
+		for (int i = 0; i < (int)AttribNameVector.size(); i++)
+		{
+			QString va_name = AttribNameVector[i].c_str();
+			par.addParam(new RichBool("PFA3F" + va_name, false, "F(3f): " + va_name, "Save this custom vector (3f) per-face attribute."));
+		}
+	}
 }
 
 void BaseMeshIOPlugin::initGlobalParameterSet(QAction * /*format*/, RichParameterSet & globalparam)

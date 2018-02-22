@@ -55,7 +55,7 @@ RichParameter* RichParameterSet::findParameter(QString name) const
             return *fpli;
     }
     qDebug("FilterParameter Warning: Unable to find a parameter with name '%s',\n"
-        "      Please check types and names of the parameter in the calling filter",qPrintable(name));
+        "      Please check types and names of the parameter in the calling filter", qUtf8Printable(name));
     assert(0);
     return 0;
 }
@@ -407,7 +407,7 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
 	if (isxml.isNull())
 		isxml = QString("0");
 
-    qDebug("    Reading Param with name %s : %s",qPrintable(name),qPrintable(type));
+    qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(type));
 
     bool corrconv = false;
     if(type=="RichBool")
@@ -602,7 +602,7 @@ bool RichParameterAdapter::create(const QString& namepreamble, const MLXMLPlugin
 	QString desc = xmlparam[MLXMLElNames::guiLabel];
 	QString tooltip = xmlparam[MLXMLElNames::paramHelpTag];
 
-	qDebug("    Reading Param with name %s : %s", qPrintable(name), qPrintable(xmlparam[MLXMLElNames::paramDefExpr]));
+	qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(xmlparam[MLXMLElNames::paramDefExpr]));
 
 	*par = new RichString(name, xmlparam[MLXMLElNames::paramDefExpr], desc, tooltip);
 	if (par != NULL)
@@ -849,7 +849,7 @@ RichString::~RichString()
 RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44d& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 
-RichMatrix44f::RichMatrix44f(const QString nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool isxmlpar /*= false*/)
+RichMatrix44f::RichMatrix44f(const QString nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool /*isxmlpar = false*/)
 	: RichParameter(nm, new Matrix44fValue(val), new Matrix44fDecoration(new Matrix44fValue(defval), desc, tltip)) { }
 
 void RichMatrix44f::accept( Visitor& v )

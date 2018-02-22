@@ -1655,7 +1655,7 @@ void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* /*mfc*/)
     //            catch (ExpressionHasNotThisTypeException&)
     //            {
     //                QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-    //                meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+    //                meshDoc()->Log.Logf(GLLogStream::FILTER, qUtf8Printable(st));
     //            }
     //        }
     //    }
@@ -1703,7 +1703,7 @@ void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* /*mfc*
     //    //			catch (ExpressionHasNotThisTypeException& e)
     //    //			{
     //    //				QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-    //    //				meshDoc()->Log.Logf(GLLogStream::FILTER,qPrintable(st));
+    //    //				meshDoc()->Log.Logf(GLLogStream::FILTER, qUtf8Printable(st));
     //    //			}
     //    //		}
     //    //	}

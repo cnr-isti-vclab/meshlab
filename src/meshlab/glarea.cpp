@@ -657,7 +657,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     QString error = checkGLError::makeString("There are gl errors: ");
     if(!error.isEmpty()) {
-        Logf(GLLogStream::WARNING,qPrintable(error));
+        Logf(GLLogStream::WARNING, qUtf8Printable(error));
     }
     //check if viewers are linked
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
@@ -1139,7 +1139,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
     }
     else
     {
-        Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+        Logf(GLLogStream::SYSTEM,"Started Mode %s", qUtf8Printable(currentEditor->text()));
 		if(mm()!=NULL)
             mm()->meshModified() = true;
         else assert(!iEdit->isSingleMeshEdit());
@@ -1427,9 +1427,9 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
             if(toggle || stateToSet==false){
                 iDecorateTemp->endDecorate(action,*md(),glas.currentGlobalParamSet,this);
                 iDecorateTemp->setLog(NULL);
-                this->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s", qUtf8Printable(action->text()));
         }
         else{
             if(toggle || stateToSet==true){
@@ -1437,11 +1437,11 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
                 bool ret = iDecorateTemp->startDecorate(action,*md(), glas.currentGlobalParamSet, this);
                 if(ret) {
                     this->iPerDocDecoratorlist.push_back(action);
-                    this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+                    this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s", qUtf8Printable(action->text()));
                 }
-                else this->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s",qPrintable(action->text()));
+                else this->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s", qUtf8Printable(action->text()));
         }
     }
 
@@ -1454,9 +1454,9 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
             if(toggle || stateToSet==false){
                 iDecorateTemp->endDecorate(action,currentMeshModel,glas.currentGlobalParamSet,this);
                 iDecorateTemp->setLog(NULL);
-                this->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(0,"Disabled Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s", qUtf8Printable(action->text()));
         }
         else{
             if(toggle || stateToSet==true){
@@ -1467,11 +1467,11 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
                     bool ret = iDecorateTemp->startDecorate(action,currentMeshModel, glas.currentGlobalParamSet, this);
                     if(ret) {
                         this->iCurPerMeshDecoratorList().push_back(action);
-                        this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+                        this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s", qUtf8Printable(action->text()));
                     }
-                    else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+                    else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s", qUtf8Printable(action->text()));
                 } else
-                    this->Logf(GLLogStream::SYSTEM,"Error in Decorate mode %s: %s",qPrintable(action->text()),qPrintable(errorMessage));
+                    this->Logf(GLLogStream::SYSTEM,"Error in Decorate mode %s: %s", qUtf8Printable(action->text()), qUtf8Printable(errorMessage));
 
             }
         }
@@ -1694,14 +1694,14 @@ void GLArea::sendViewPos(QString name)
 
 void GLArea::sendSurfacePos(QString name)
 {
-    qDebug("sendSurfacePos %s",qPrintable(name));
+    qDebug("sendSurfacePos %s", qUtf8Printable(name));
     nameToGetPickPos = name;
     hasToGetPickPos=true;
 }
 
 void GLArea::sendPickedPos(QString name)
 {
-	qDebug("sendPickedPos %s", qPrintable(name));
+	qDebug("sendPickedPos %s", qUtf8Printable(name));
 	nameToGetPickCoords = name;
 	hasToGetPickCoords = true;
 }
@@ -2205,7 +2205,7 @@ void GLArea::viewFromCurrentShot(QString kind)
     if(kind=="Raster" && this->md()->rm()) localShot = this->md()->rm()->shot;
     if(!localShot.IsValid())
     {
-        this->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
+        this->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s", qUtf8Printable(kind));
         return;
     }
 
@@ -2315,7 +2315,7 @@ void GLArea::createOrthoView(QString dir)
     QPair<Shotm,float> shotAndScale = QPair<Shotm,float> (shot, trackball.track.sca);
     loadShot(shotAndScale);
 
-	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qPrintable(dir));
+	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qUtf8Printable(dir));
 }
 
 void GLArea::toggleOrtho()

@@ -88,7 +88,7 @@ bool PDBIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 		mask |= vcg::tri::io::Mask::IOM_VERTCOLOR;
 		m.Enable(mask);
 
-		return parsePDB(qPrintable(fileName), m.cm, parlst, cb);
+		return parsePDB(qUtf8Printable(fileName), m.cm, parlst, cb);
  
 
 		/*

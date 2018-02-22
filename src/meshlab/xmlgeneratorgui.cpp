@@ -755,7 +755,7 @@ void PluginGeneratorGUI::loadScriptCode()
         return;
     QFile file(files[0]);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        qDebug("Warning: File %s has not been loaded.",qPrintable(files[0]));
+        qDebug("Warning: File %s has not been loaded.", qUtf8Printable(files[0]));
     finfo.setFile(files[0]);
     QByteArray code = file.readAll();
     file.close();
@@ -770,7 +770,7 @@ void PluginGeneratorGUI::saveScriptCode()
     QString filename = QFileDialog::getSaveFileName(this,tr("Save Script File"),finfo.absolutePath(),tr("Script File (*.js)"));
     QFile file(filename);
     if (!file.open(QFile::WriteOnly | QIODevice::Text))
-        qDebug("Warning: File %s has not been saved.",qPrintable(filename));
+        qDebug("Warning: File %s has not been saved.", qUtf8Printable(filename));
     finfo.setFile(filename);
     FilterGeneratorTab* tb = tab(tabs->currentIndex());
     if (tb != NULL)

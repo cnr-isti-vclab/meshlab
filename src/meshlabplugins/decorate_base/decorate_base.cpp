@@ -662,12 +662,12 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshModel &m, RichParam
                 QGLShaderProgram *gsp =  this->contourShaderProgramMap[&m];
 
                 ret &= gsp->addShaderFromSourceFile(QGLShader::Vertex,":/decorate/contour.vert");
-                //      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
+                //      qDebug("Compiled shader. Log is %s", qUtf8Printable(contourShaderProgram->log()));
                 ret &= gsp->addShaderFromSourceFile(QGLShader::Fragment,":/decorate/contour.frag");
-                //      qDebug("Compiled shader. Log is %s", qPrintable(contourShaderProgram->log()));
+                //      qDebug("Compiled shader. Log is %s", qUtf8Printable(contourShaderProgram->log()));
                 ret &= gsp->link();
 				QString rs = gsp->log();
-                //      qDebug("Linked shader. Log is %s", qPrintable(contourShaderProgram->log()));
+                //      qDebug("Linked shader. Log is %s", qUtf8Printable(contourShaderProgram->log()));
                 if(!ret) return false;
             }
         } break;
@@ -968,7 +968,7 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
     QString textureName("-- no texture --");
 
 	if (!m.cm.textures.empty())
-		textureName = qPrintable(QString(m.cm.textures[0].c_str())) + QString("  ");
+		textureName = qUtf8Printable(QString(m.cm.textures[0].c_str())) + QString("  ");
 
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
     checkGLError::debugInfo("DrawTexParam");

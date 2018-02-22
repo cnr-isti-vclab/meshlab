@@ -187,7 +187,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
     QString fileName=pathDirectory+"/"+parent;
     QDir dir(pathDirectory);
     QPluginLoader loader(fileName);
-    qDebug("Trying to load the plugin '%s'",qPrintable(fileName));
+    qDebug("Trying to load the plugin '%s'", qUtf8Printable(fileName));
     QObject *plugin = loader.instance();
     if (plugin) {
         MeshIOInterface *iMeshIO = qobject_cast<MeshIOInterface *>(plugin);

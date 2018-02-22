@@ -37,10 +37,10 @@
 
 using namespace vcg;
 
-bool IOMPlugin::open(const QString &/*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget */*parent*/)
+bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, MeshModel &m, int& mask,const RichParameterSet & /*par*/,  CallBackPos *cb, QWidget * /*parent*/)
 {
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qPrintable(fileName), mask, cb);
+    int result = tri::io::ImporterCTM<CMeshO>::Open(m.cm, qUtf8Printable(fileName), mask, cb);
     if (result != 0) // all the importers return 0 on success
     {
       errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterCTM<CMeshO>::ErrorMsg(result));
@@ -49,15 +49,15 @@ bool IOMPlugin::open(const QString &/*formatName*/, const QString &fileName, Mes
     return true;
 }
 
-bool IOMPlugin::save(const QString &/*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
+bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
 {
     bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
     float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();
-    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qPrintable(fileName),mask,lossLessFlag,relativePrecisionParam);
+    int result = vcg::tri::io::ExporterCTM<CMeshO>::Save(m.cm,qUtf8Printable(fileName),mask,lossLessFlag,relativePrecisionParam);
     if(result!=0)
     {
         QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
-        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qPrintable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
+        QMessageBox::warning(parent, tr("Saving Error"), errorMsgFormat.arg(qUtf8Printable(fileName), vcg::tri::io::ExporterCTM<CMeshO>::ErrorMsg(result)));
         return false;
     }
     return true;
@@ -96,7 +96,7 @@ void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, R
 {
   par.addParam(new RichBool("LossLess",false, "LossLess compression",
                               "If true it does not apply any lossy compression technique."));
-  par.addParam(new RichFloat("relativePrecisionParam",0.0001, "Relative Coord Precision",
+  par.addParam(new RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
                              "It is a number relative to the average edge lenght. (e.g. the default means that the error should be roughly 1/10000 of the average edge lenght)"));
 }

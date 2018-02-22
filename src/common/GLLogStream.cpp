@@ -68,7 +68,7 @@ void GLLogStream::Save(int /*Level*/, const char * filename )
 	FILE *fp=fopen(filename,"wb");
 	QList<pair <int,QString> > ::iterator li;
 	for(li=S.begin();li!=S.end();++li)
-        fprintf(fp,"%s",qPrintable((*li).second));
+        fprintf(fp,"%s", qUtf8Printable((*li).second));
 }
 
 void GLLogStream::ClearBookmark()

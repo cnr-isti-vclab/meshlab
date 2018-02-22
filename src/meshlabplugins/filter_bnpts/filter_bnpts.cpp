@@ -99,9 +99,9 @@ bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
       FILE* outfile=NULL;
 
       if(appendexisting)
-        outfile  = fopen(qPrintable(filename), "wba");
+        outfile  = fopen(qUtf8Printable(filename), "wba");
       else
-        outfile  = fopen(qPrintable(filename), "wb");
+        outfile  = fopen(qUtf8Printable(filename), "wb");
 
       if(outfile==NULL)
         return false;

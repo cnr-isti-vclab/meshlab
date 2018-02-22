@@ -776,6 +776,8 @@ switch(ID(action))
 		mm->updateDataMask(curMM);
 		BaseSampler mps(&(mm->cm));
 
+    mps.perFaceNormal = par.getBool("PerFaceNormal");
+
 		if(par.getBool("EdgeSampling"))
 		{
 			tri::SurfaceSampling<CMeshO,BaseSampler>::EdgeMontecarlo(curMM->cm,mps,par.getInt("SampleNum"),false);
@@ -1079,7 +1081,7 @@ switch(ID(action))
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
 		Log("Hausdorff Distance computed");
-		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
+		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qUtf8Printable(mm0->label()),qUtf8Printable(mm1->label()));
 		Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
 		float d = mm0->cm.bbox.Diag();
 		Log("Values w.r.t. BBox Diag (%f)",d);
@@ -1136,7 +1138,7 @@ switch(ID(action))
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
 		Log("Distance from Reference Mesh computed");
-		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qPrintable(mm0->label()), qPrintable(mm1->label()));
+		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qUtf8Printable(mm0->label()), qUtf8Printable(mm1->label()));
 		Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
 
 	} break;
@@ -1237,7 +1239,7 @@ switch(ID(action))
 
 		Point3i volumeDim;
 		Box3m volumeBox = baseMesh->cm.bbox;
-		volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
+		volumeBox.Offset(volumeBox.Diag()/10.0f+abs(offsetThr));
 		BestDim(volumeBox , voxelSize, volumeDim );
 
 		Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);

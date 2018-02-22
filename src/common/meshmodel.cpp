@@ -390,7 +390,7 @@ QString MeshModel::relativePathName() const
     QString relPath=documentDir.relativeFilePath(this->fullPathFileName);
 
     if(relPath.size()>1 && relPath[0]=='.' &&  relPath[1]=='.')
-        qDebug("Error we have a mesh that is not in the same folder of the project: %s ",qPrintable(relPath));
+        qDebug("Error we have a mesh that is not in the same folder of the project: %s ", qUtf8Printable(relPath));
 
     return relPath;
 }

@@ -327,7 +327,7 @@ Point3fWidget::~Point3fWidget() {
 
 void Point3fWidget::setValue(QString name,Point3m newVal)
 {
-    //qDebug("setValue parametername: %s ",qPrintable(name));
+    //qDebug("setValue parametername: %s ", qUtf8Printable(name));
     if(name==paramName)
     {
         for(int i =0;i<3;++i)
@@ -411,6 +411,9 @@ Matrix44fWidget::Matrix44fWidget(QWidget *p, RichMatrix44f* rpf,  QWidget *gla_c
         connect(coordSB[i], SIGNAL(textChanged(const QString&)), this, SLOT(invalidateMatrix(const QString&)));
     }
     this->setValue(paramName,rp->val->getMatrix44f());
+
+	QLabel* headerL = new QLabel("Matrix:", this);
+	vlay->addWidget(headerL, 0, Qt::AlignTop);
 
     vlay->addLayout(lay44);
 
@@ -529,7 +532,7 @@ void Matrix44fWidget::addWidgetToGridLayout( QGridLayout* lay,const int r )
     MeshLabWidget::addWidgetToGridLayout(lay,r);
 }
 
-void Matrix44fWidget::invalidateMatrix(const QString& s)
+void Matrix44fWidget::invalidateMatrix(const QString& /*s*/)
 {
   valid = false;
 }
