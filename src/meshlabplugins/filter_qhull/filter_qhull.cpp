@@ -30,6 +30,8 @@
 
 #include "qhull_tools.h"
 
+#include <vcg\complex\algorithms\convex_hull.h>
+
 using namespace std;
 using namespace vcg;
 
@@ -133,7 +135,7 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
      switch(ID(action))	 {
         case FP_QHULL_CONVEX_HULL :
             {
-                parlst.addParam(new RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
+               //parlst.addParam(new RichBool("reorient", false,"Re-orient all faces coherentely","Re-orient all faces coherentely"));
                 break;
             }
         case FP_QHULL_DELAUNAY_TRIANGULATION :
@@ -181,8 +183,8 @@ void QhullPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSe
 
                 parlst.addParam(new RichBool("convex_hullFP",false,"Show Partial Convex Hull of flipped points", "Show Partial Convex Hull of the transformed point cloud"));
                 parlst.addParam(new RichBool("triangVP",false,"Show a triangulation of the visible points", "Show a triangulation of the visible points"));
-                parlst.addParam(new RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
-                                "If no Convex Hulls are selected , this value is ignored"));
+                //parlst.addParam(new RichBool("reorient", false,"Re-orient all faces of the CH coherentely","Re-orient all faces of the CH coherentely."
+                //                "If no Convex Hulls are selected , this value is ignored"));
                 break;
                 break;
             }
@@ -198,90 +200,11 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
         case FP_QHULL_CONVEX_HULL :
             {
                 MeshModel &m=*md.mm();
-        MeshModel &pm =*md.addNewMesh("","Convex Hull");
-
-                    m.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                    m.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-
-                int dim= 3;				/* dimension of points */
-                int numpoints= m.cm.vn;	/* number of mesh vertices */
-
-                //facet_list contains the convex hull
-                //facet_list contains simplicial (triangulated) facets.
-                //The convex hull of a set of points is the smallest convex set containing the points.
-
-                facetT *facet_list = compute_convex_hull(dim,numpoints,m);
-
-                if(facet_list!=NULL){
-
-                    int convexNumFaces = qh num_facets;
-                    int convexNumVert = qh_setsize(qh_facetvertices (facet_list, NULL, false));
-                    assert( qh num_vertices == convexNumVert);
-
-                    tri::Allocator<CMeshO>::AddVertices(pm.cm,convexNumVert);
-                    tri::Allocator<CMeshO>::AddFaces(pm.cm,convexNumFaces);
-
-
-                    /*ivp length is 'numpoints' because each vertex is accessed through its ID whose range is
-                      0<=qh_pointid(vertex->point)<numpoints. qh num_vertices is < numpoints*/
-                    vector<tri::Allocator<CMeshO>::VertexPointer> ivp(numpoints);
-                    vertexT *vertex;
-                    int i=0;
-                    FORALLvertices{
-                        if ((*vertex).point){
-                            pm.cm.vert[i].P()[0] = (*vertex).point[0];
-                            pm.cm.vert[i].P()[1] = (*vertex).point[1];
-                            pm.cm.vert[i].P()[2] = (*vertex).point[2];
-                            ivp[qh_pointid(vertex->point)] = &pm.cm.vert[i];
-                            i++;
-                        }
-                    }
-
-                    facetT *facet;
-                    i=0;
-                    FORALLfacet_(facet_list){
-                        vertexT *vertex;
-                        int vertex_n, vertex_i;
-                        FOREACHvertex_i_((*facet).vertices){
-                            pm.cm.face[i].V(vertex_i)= ivp[qh_pointid(vertex->point)];
-                        }
-                        i++;
-                    }
-
-                    assert( pm.cm.fn == convexNumFaces);
-                    //m.cm.Clear();
-
-                    //Re-orient normals
-                    bool reorient= par.getBool("reorient");
-                    if (reorient){
-                        pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                        bool oriented, orientable;
-
-                        tri::Clean<CMeshO>::OrientCoherentlyMesh(pm.cm, oriented,orientable);
-                        vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
-                        vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
-                        pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-                        tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
-                    }
-
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-                    pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",m.cm.vn,m.cm.fn);
-
-                    int curlong, totlong;	  /* memory remaining after qh_memfreeshort */
-                    qh_freeqhull(!qh_ALL);
-                    qh_memfreeshort (&curlong, &totlong);
-                    if (curlong || totlong)
-                        fprintf (stderr, "qhull internal warning (main): did not free %d bytes of long memory (%d pieces)\n",
-                                     totlong, curlong);
-
-                    return true;
-
-                }
-                else
-                    return false;
-
+                MeshModel &pm =*md.addNewMesh("","Convex Hull");
+                pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+                bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
+                pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+                return result;
             }
         case FP_QHULL_DELAUNAY_TRIANGULATION:
             {
@@ -466,77 +389,25 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                     viewpoint = m.cm.shot.GetViewPoint();
                 }
 
-        MeshModel &pm =*md.addNewMesh("","CH Flipped Points");
-
-                    pm.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                    pm.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-
-        MeshModel &pm2 =*md.addNewMesh("","Visible Points Triangulation");
-
-                    pm2.clearDataMask(MeshModel::MM_WEDGTEXCOORD);
-                    pm2.clearDataMask(MeshModel::MM_VERTTEXCOORD);
-
+                MeshModel &pm2 =*md.addNewMesh("","Visible Points Triangulation");
                 bool convex_hullFP = par.getBool("convex_hullFP");
                 bool triangVP = par.getBool("triangVP");
-
-                int result = visible_points(dim,numpoints,m,pm,pm2,viewpoint,threshold,convex_hullFP,triangVP);
-
-                if(!convex_hullFP)
-                    md.delMesh(&pm);
-                else{
-                    //Re-orient normals
-                    bool reorient= par.getBool("reorient");
-                    if (reorient){
-                        pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                        bool oriented,orientable;
-
-                        tri::Clean<CMeshO>::OrientCoherentlyMesh(pm.cm, oriented,orientable);
-                        vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm.cm);
-                        vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm.cm);
-                        pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
-                        //Clear all face because,somewhere, they have been selected
-                        tri::UpdateSelection<CMeshO>::FaceClear(pm.cm);
-                    }
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm.cm);
-                    pm.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm.cm.vn,pm.cm.fn);
+                pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
+                vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputePointVisibility(m.cm, pm2.cm, viewpoint, threshold);
+                if (!convex_hullFP)
+                {
+                  MeshModel &pm = *md.addNewMesh("", "CH Flipped Points");
+                  pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
+                  vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(pm2.cm, pm.cm);
                 }
+                int result = pm2.cm.vert.size();
 
-
-                if(!triangVP){
+                if(!triangVP)
                     md.delMesh(&pm2);
-                }
-                else{
-                    //Re-orient normals
-                    bool reorient= par.getBool("reorient");
-                    if (reorient){
-                        pm2.updateDataMask(MeshModel::MM_FACEFACETOPO);
-                        bool oriented,orientable;
-            if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(pm2.cm)>0) {
-                errorMessage = "Mesh has some not 2-manifold faces, Orientability requires manifoldness";
-                                return false; // can't continue, mesh can't be processed
-                        }
-
-                        tri::Clean<CMeshO>::OrientCoherentlyMesh(pm2.cm, oriented,orientable);
-                        vcg::tri::UpdateTopology<CMeshO>::FaceFace(pm2.cm);
-                        vcg::tri::UpdateTopology<CMeshO>::TestFaceFace(pm2.cm);
-                        pm2.clearDataMask(MeshModel::MM_FACEFACETOPO);
-                        //Clear all face because,somewhere, they have been selected
-                        tri::UpdateSelection<CMeshO>::FaceClear(pm2.cm);
-                    }
-
-                    //vcg::tri::UpdateBounding<CMeshO>::Box(pm2.cm);
-                    //vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(pm2.cm);
-                    pm2.UpdateBoxAndNormals();
-                    Log("Successfully created a mesh of %i vert and %i faces",pm2.cm.vn,pm2.cm.fn);
-                }
-
                 if(result>=0){
                     Log("Selected %i visible points", result);
                     return true;
                 }
-
                 else return false;
             }
     }
