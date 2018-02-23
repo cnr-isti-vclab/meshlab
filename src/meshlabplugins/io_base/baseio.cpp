@@ -85,15 +85,20 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
 	bool normalsUpdated = false;
+    QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
+    if(!QFile::exists(fileName))
+    {
+        errorMessage = errorMsgFormat.arg(fileName, "File does not exist");
+        return false;
+    } 
 	// initializing mask
 	mask = 0;
 
 	// initializing progress bar status
 	if (cb != NULL)		(*cb)(0, "Loading...");
 
-	QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
-
+	
 	//string filename = fileName.toUtf8().data();
 	string filename = QFile::encodeName(fileName).constData();
 
@@ -119,7 +124,7 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 	{
 		if (!tri::io::ImporterSTL<CMeshO>::LoadMask(filename.c_str(), mask))
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_CANTOPEN));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ImporterSTL<CMeshO>::ErrorMsg(tri::io::ImporterSTL<CMeshO>::E_MALFORMED));
 			return false;
 		}
 		m.Enable(mask);
@@ -444,6 +449,7 @@ void BaseMeshIOPlugin::GetExportMaskCapability(QString &format, int &capability,
 		defaultBits = capability;
 		defaultBits &= (~tri::io::Mask::IOM_FLAGS);
 		defaultBits &= (~tri::io::Mask::IOM_VERTNORMAL);
+		defaultBits &= (~tri::io::Mask::IOM_FACENORMAL);
 	}
 	if (format.toUpper() == tr("STL")) {
 		capability = tri::io::ExporterSTL<CMeshO>::GetExportMaskCapability();

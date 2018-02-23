@@ -295,11 +295,11 @@ int FilterFractal::postCondition(QAction *filter) const
     switch(ID(filter))
     {
     case CR_FRACTAL_TERRAIN:
-		return MeshModel::MM_UNKNOWN;
+		return MeshModel::MM_ALL;
 		break;
     case FP_FRACTAL_MESH:
     case FP_CRATERS:
-        return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEFLAG;
+        return MeshModel::MM_ALL;
         break;
     default: assert(0);
     }

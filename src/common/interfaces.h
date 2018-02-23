@@ -311,7 +311,7 @@ public:
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
 	*/
-	virtual int postCondition(QAction*) const { return MeshModel::MM_UNKNOWN; }
+	virtual int postCondition(QAction*) const { return MeshModel::MM_ALL; }
 
 	/** \brief applies the selected filter with the already stabilished parameters
 	* This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet
@@ -334,7 +334,7 @@ public:
 	bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
 
 
-	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3 };
+	enum FILTER_ARITY { NONE = 0, SINGLE_MESH = 1, FIXED = 2, VARIABLE = 3, UNKNOWN_ARITY = 4 };
 
 	/** \brief this function informs the MeshLab core on how many meshes the filter will work on.
 	Valid value:

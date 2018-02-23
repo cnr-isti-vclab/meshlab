@@ -33,23 +33,6 @@
 #include <limits>
 #include <common/meshmodel.h>
 #include <common/interfaces.h>
-#include<vector>
-#include<vcg/space/index/base.h>
-#include<vcg/complex/complex.h>
-#include <vcg/space/point3.h>
-#include <vcg/space/intersection2.h>
-#include <vcg/complex/algorithms/clean.h>
-#include <vcg/complex/algorithms/closest.h>
-#include <vcg/simplex/face/distance.h>
-#include <vcg/complex/algorithms/geodesic.h>
-#include <vcg/complex/algorithms/update/normal.h>
-#include <vcg/complex/algorithms/point_sampling.h>
-#include <vcg/complex/algorithms/create/resampler.h>
-#include <vcg/complex/algorithms/clustering.h>
-#include <vcg/simplex/face/distance.h>
-#include <vcg/space/distance3.h>
-#include <vcg/space/index/grid_static_ptr.h>
-#include <vcg/space/intersection3.h>
 #include "particle.h"
 
 using namespace vcg;
@@ -59,15 +42,10 @@ typedef GridStaticPtr<CMeshO::FaceType, CMeshO::ScalarType > MetroMeshFaceGrid;
 typedef GridStaticPtr<CMeshO::VertexType, CMeshO::ScalarType > MetroMeshVertexGrid;
 typedef FaceTmark<CMeshO> MarkerFace;
 
-#define PI 3.14159265
 #define EPSILON 0.0001
-
-
-
 
 CMeshO::CoordType RandomBaricentric();
 CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f);
-CMeshO::CoordType getBaricenter(CMeshO::FacePointer f);
 CMeshO::CoordType GetSafePosition(CMeshO::CoordType p,CMeshO::FacePointer f);
 CMeshO::CoordType StepForward(CMeshO::CoordType p,CMeshO::CoordType v,Scalarm m,CMeshO::FacePointer &face,CMeshO::CoordType force,Scalarm l,Scalarm t=1);
 CMeshO::CoordType getRandomDirection();

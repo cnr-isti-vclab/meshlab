@@ -522,7 +522,7 @@ void MLPoliciesStandAloneFunctions::computeRequestedRenderingDataCompatibleWithM
 	}
 	bool validfaces = (mesh.FN() > 0);
 	
-	MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
+//	MLRenderingData::PRIMITIVE_MODALITY_MASK tmpoutputpm = inputdt.getPrimitiveModalityMask();
 	for (size_t pmind = 0; pmind < size_t(MLRenderingData::PR_ARITY); ++pmind)
 	{
 		MLRenderingData::PRIMITIVE_MODALITY pmc = MLRenderingData::PRIMITIVE_MODALITY(pmind);

@@ -1705,7 +1705,7 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 	case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
 	case FP_NORMAL_EXTRAPOLATION :   
     case FP_NORMAL_SMOOTH_POINTCLOUD : return MeshModel::MM_VERTNORMAL;
-    default                  : return MeshModel::MM_UNKNOWN;
+    default                  : return MeshModel::MM_ALL;
     }
 }
 

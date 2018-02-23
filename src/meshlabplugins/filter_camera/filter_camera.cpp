@@ -695,7 +695,7 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
         return MeshModel::MM_ALL + RasterModel::RM_ALL;
     case FP_QUALITY_FROM_CAMERA           :
         return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
-    default                  : return MeshModel::MM_UNKNOWN;
+    default                  : return MeshModel::MM_ALL;
     }
 }
 

@@ -209,8 +209,9 @@ int FilterFunctionPlugin::postCondition(QAction *action) const
 	case FF_ISOSURFACE:
 	case FF_DEF_FACE_ATTRIB:
 	case FF_REFINE:
-		return MeshModel::MM_UNKNOWN;
+		return MeshModel::MM_ALL;
   }
+  
   return MeshModel::MM_UNKNOWN;
 }
 

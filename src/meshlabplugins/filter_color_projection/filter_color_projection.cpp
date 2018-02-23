@@ -935,10 +935,10 @@ int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
         return MeshModel::MM_VERTCOLOR;
         break;
     case FP_MULTIIMAGETRIVIALPROJTEXTURE:
-        return MeshModel::MM_UNKNOWN;
+        return MeshModel::MM_ALL;
         break;
-    default: assert(0);
-        return MeshModel::MM_NONE;
+    default: 
+        return MeshModel::MM_ALL;
     }
 }
 

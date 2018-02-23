@@ -3,47 +3,47 @@
   <FILTER filterFunction="voronoiSampling"    filterName="Voronoi Sampling"       filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
    <FILTER_HELP><![CDATA[Compute a sampling over a mesh and perform a Lloyd relaxation. It can]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="iterNum" parIsImportant="true" parType="Int" parDefault="10">
+   <PARAM parName="iterNum" parIsImportant="true" parType="Int" parDefault="10" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ number of iterations ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Iteration"/>
    </PARAM>
-   <PARAM parName="sampleNum" parIsImportant="true" parType="Int" parDefault="10">
+   <PARAM parName="sampleNum" parIsImportant="true" parType="Int" parDefault="10" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of samples ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Sample Num."/>
    </PARAM>
-   <PARAM parName="radiusVariance" parIsImportant="true" parType="Real" parDefault="1">
+   <PARAM parName="radiusVariance" parIsImportant="true" parType="Real" parDefault="1" parIsPersistent="false">
     <PARAM_HELP><![CDATA[The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality. ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Radius Variance"/>
    </PARAM>
-   <PARAM parName="colorStrategy" parIsImportant="false" parType="Enum {None: 0 | Seed_Distance : 1 | Border_Distance : 2 | Region_Area : 3}" parDefault="1">
+   <PARAM parName="colorStrategy" parIsImportant="false" parType="Enum {None: 0 | Seed_Distance : 1 | Border_Distance : 2 | Region_Area : 3}" parDefault="1" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <ENUM_GUI guiLabel="Color Strategy"/>
    </PARAM>
-   <PARAM parName="distanceType" parIsImportant="true" parType="Enum { Euclidean : 0 | QualityWeighted : 1 | Anisotropic : 2}" parDefault="0">
+   <PARAM parName="distanceType" parIsImportant="true" parType="Enum { Euclidean : 0 | QualityWeighted : 1 | Anisotropic : 2}" parDefault="0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <ENUM_GUI guiLabel="distanceType"/>
    </PARAM>
-   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true">
+   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Preprocessing"/>
    </PARAM>
-   <PARAM parName="refineFactor" parIsImportant="false" parType="Int" parDefault="10">
+   <PARAM parName="refineFactor" parIsImportant="false" parType="Int" parDefault="10" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Refinement Factor."/>
    </PARAM>
-   <PARAM parName="perturbProbability" parIsImportant="false" parType="Real" parDefault="0">
+   <PARAM parName="perturbProbability" parIsImportant="false" parType="Real" parDefault="0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Perturbation Probability."/>
    </PARAM>
-   <PARAM parName="perturbAmount" parIsImportant="false" parType="Real" parDefault="0.001">
+   <PARAM parName="perturbAmount" parIsImportant="false" parType="Real" parDefault="0.001" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples. ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Perturbation Amount."/>
    </PARAM>
-   <PARAM parName="randomSeed" parIsImportant="false" parType="Int" parDefault="0">
+   <PARAM parName="randomSeed" parIsImportant="false" parType="Int" parDefault="0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Random seed."/>
    </PARAM>
-   <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 | Restricted : 2 }" parDefault="1">
+   <PARAM parName="relaxType" parIsImportant="true" parType="Enum { Geodesic : 0 | SquaredDistance : 1 | Restricted : 2 }" parDefault="1" parIsPersistent="false">
     <PARAM_HELP><![CDATA[
     At each relaxation step we search for each voronoi region the new position of the seed.
     According to the classical LLoyd relaxation strategy it should have been placed onto the
@@ -60,19 +60,19 @@
   <FILTER filterFunction="volumeSampling"     filterName="Volumetric Sampling"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="Variable" filterIsInterruptible="true">
    <FILTER_HELP><![CDATA[Compute a volumetric sampling over a watertight mesh. ]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 500.0">
+   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 500.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Surface Sampling is used only as an optimization ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Surface Sampling Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="200000">
+   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="200000" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Volume Sample Num."/>
    </PARAM>
-   <PARAM parName="poissonFiltering" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="poissonFiltering" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Poisson Filtering"/>
    </PARAM>
-   <PARAM parName="poissonRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="poissonRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0"  parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Poisson Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
@@ -80,35 +80,35 @@
   <FILTER filterFunction="voronoiScaffolding" filterName="Voronoi Scaffolding"    filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Sampling" filterPost="MM_VERTCOLOR | MM_VERTQUALITY" filterArity="SingleMesh" filterIsInterruptible="true">
    <FILTER_HELP><![CDATA[Compute a volumetric sampling over a watertight mesh]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="sampleSurfRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0"  parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Surface Sampling is used only as an optimization ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Surface Sampling Radius." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="100000">
+   <PARAM parName="sampleVolNum" parIsImportant="true" parType="Int" parDefault="100000" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram.]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Volume Sample Num."/>
    </PARAM>
-   <PARAM parName="voxelRes" parIsImportant="true" parType="Int" parDefault="50">
+   <PARAM parName="voxelRes" parIsImportant="true" parType="Int" parDefault="50" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Volume Side Resolution."/>
    </PARAM>
-   <PARAM parName="isoThr" parIsImportant="true" parType="Real" parDefault="1">
+   <PARAM parName="isoThr" parIsImportant="true" parType="Real" parDefault="1" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Width of the entity (in voxel)"/>
    </PARAM>
-   <PARAM parName="smoothStep" parIsImportant="true" parType="Int" parDefault="3">
+   <PARAM parName="smoothStep" parIsImportant="true" parType="Int" parDefault="3" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Smooth Step"/>
    </PARAM>
-   <PARAM parName="relaxStep" parIsImportant="true" parType="Int" parDefault="5">
+   <PARAM parName="relaxStep" parIsImportant="true" parType="Int" parDefault="5" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of Lloyd relaxation step to get a better distribution of the voronoi seeds ]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Lloyd Relax Step"/>
    </PARAM>
-   <PARAM parName="surfFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="surfFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of voxel per side in the volumetric representation ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Add original surface"/>
    </PARAM>
-     <PARAM parName="elemType" parIsImportant="true" parType="Enum { Seed : 0 | Edge : 1 | Face :2}" parDefault="1">
+     <PARAM parName="elemType" parIsImportant="true" parType="Enum { Seed : 0 | Edge : 1 | Face :2}" parDefault="1" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <ENUM_GUI guiLabel="Voronoi Element"/>
    </PARAM>
@@ -116,47 +116,47 @@
   <FILTER filterFunction="buildShell"         filterName="Create Solid Wireframe" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Remeshing" filterPost="MM_NONE" filterArity="Variable" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="edgeCylFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="edgeCylFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If True all the edges are converted into cylinders ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Edge -> Cyl."/>
    </PARAM>
-   <PARAM parName="edgeCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="edgeCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ The radius of the cylinder replacing each edge ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Edge Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="vertCylFlag" parIsImportant="true" parType="Boolean" parDefault="false">
+   <PARAM parName="vertCylFlag" parIsImportant="true" parType="Boolean" parDefault="false" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If True all the vertexes are converted into cylinders ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Vertex -> Cyl."/>
    </PARAM>
-   <PARAM parName="vertCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="vertCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ The radius of the cylinder replacing each vertex ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Vertex Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="vertSphFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="vertSphFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If True all the vertexes are converted into sphere ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Vertex -> Sph."/>
    </PARAM>
-   <PARAM parName="vertSphRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="vertSphRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ The radius of the sphere replacing each vertex ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Vertex Sphere Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="faceExtFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="faceExtFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If True all the faces are converted into prism ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Face -> Prism"/>
    </PARAM>
-   <PARAM parName="faceExtHeight" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0">
+   <PARAM parName="faceExtHeight" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ The Height of the prism that is substitued with each face ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Face Prism Height." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="faceExtInset" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0">
+   <PARAM parName="faceExtInset" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 200.0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism ]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Face Prism Inset." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="edgeFauxFlag" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="edgeFauxFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ If true only the Non-Faux edges will be considered for conversion ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Ignore faux edges"/>
    </PARAM>
-   <PARAM parName="cylinderSideNum" parIsImportant="false" parType="Int" parDefault="16">
+   <PARAM parName="cylinderSideNum" parIsImportant="false" parType="Int" parDefault="16" parIsPersistent="false">
     <PARAM_HELP><![CDATA[ Number of sides of the cylinder (both edge and vertex)]]></PARAM_HELP>
     <EDIT_GUI guiLabel="Cylinder Side"/>
    </PARAM>
@@ -165,7 +165,7 @@
   <FILTER filterFunction="crossFieldCreation" filterName="Cross Field Creation"   filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Normal" filterPost="MM_VERTCURVDIR" filterArity="SingleMesh" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="crossType" parIsImportant="true" parType="Enum { Linear_Y : 0 | Radial : 1 | Curvature :2}" parDefault="0">
+   <PARAM parName="crossType" parIsImportant="true" parType="Enum { Linear_Y : 0 | Radial : 1 | Curvature :2}" parDefault="0" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <ENUM_GUI guiLabel="crossType"/>
    </PARAM>
@@ -173,7 +173,7 @@
   <FILTER filterFunction="crossFieldSmoothing" filterName="Cross Field Smoothing"   filterPre="MM_VERTCURVDIR" filterRasterArity="SingleRaster" filterClass="Generic" filterPost="MM_VERTCOLOR" filterArity="SingleMesh" filterIsInterruptible="false">
    <FILTER_HELP><![CDATA[]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true">
+   <PARAM parName="preprocessFlag" parIsImportant="false" parType="Boolean" parDefault="true" parIsPersistent="false">
     <PARAM_HELP><![CDATA[]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Preprocessing"/>
    </PARAM>

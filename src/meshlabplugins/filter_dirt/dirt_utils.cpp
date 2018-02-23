@@ -44,7 +44,7 @@ return true if a particle of that face fall out
 bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,Scalarm a){
     Point3m n=f->N();
     if(a>1) return false;
-    if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((PI/2)*(1-a))) return true;
+    if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((M_PI/2)*(1-a))) return true;
     return false;
 }
 
@@ -110,22 +110,6 @@ CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f){
     Point3m p2=f->P(2);
     p=f->P(0)*bc[0]+f->P(1)*bc[1]+f->P(2)*bc[2];
     return p;
-}
-
-/**
-@def Given a face return the coordinates of its baricenter
-
-@param FacePointer f -
-
-@return The Baricenter of the face
-*/
-CMeshO::CoordType getBaricenter(CMeshO::FacePointer f){
-    Point3m bc;
-    bc[0]=0.33f;
-    bc[1]=0.33f;
-    bc[2]=1-bc[0]-bc[1];
-    CMeshO::CoordType pc=fromBarCoords(bc,f);
-    return pc;
 }
 
 
