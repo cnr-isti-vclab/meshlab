@@ -61,7 +61,9 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
     CP_SELECT_TEXBORDER,
     CP_SELECT_NON_MANIFOLD_FACE,
     CP_SELECT_NON_MANIFOLD_VERTEX,
-    FP_SELECT_FACES_BY_EDGE        
+    FP_SELECT_FACES_BY_EDGE,
+    FP_SELECT_FOLD_FACE,
+    FP_SELECT_OUTLIER
 	} ;
 
 	SelectionFilterPlugin();
