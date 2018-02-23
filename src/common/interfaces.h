@@ -311,7 +311,7 @@ public:
 	// It is widely used by the meshlab's preview system.
 	//TO BE REPLACED WITH = 0
 	*/
-	virtual int postCondition(QAction*) const { return MeshModel::MM_UNKNOWN; }
+	virtual int postCondition(QAction*) const { return MeshModel::MM_ALL; }
 
 	/** \brief applies the selected filter with the already stabilished parameters
 	* This function is called by the framework after getting values for the parameters specified in the \ref InitParameterSet

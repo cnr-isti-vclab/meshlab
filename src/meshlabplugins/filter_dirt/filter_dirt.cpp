@@ -244,8 +244,8 @@ bool FilterDirt::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet
 int FilterDirt::postCondition( QAction *a) const
 {
     switch (ID(a)){
-    case FP_DIRT : return MeshModel::MM_UNKNOWN;
-    case FP_CLOUD_MOVEMENT : return MeshModel::MM_UNKNOWN;
+    case FP_DIRT : return MeshModel::MM_ALL;
+    case FP_CLOUD_MOVEMENT : return MeshModel::MM_ALL;
     default: assert(0);
     }
 
