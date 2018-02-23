@@ -181,7 +181,11 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
 
 //   md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOLOR));
    if (intteruptreq) return true;
-
+   
+   tri::UpdateSelection<CMeshO>::VertexClear(m.cm);
+   for(auto vi =seedVec.begin();vi!=seedVec.end();++vi)
+     (*vi)->SetS();
+     
    om->UpdateBoxAndNormals();
    return true;
   }
