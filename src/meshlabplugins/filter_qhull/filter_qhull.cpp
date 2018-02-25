@@ -30,7 +30,7 @@
 
 #include "qhull_tools.h"
 
-#include <vcg\complex\algorithms\convex_hull.h>
+#include <vcg/complex/algorithms/convex_hull.h>
 
 using namespace std;
 using namespace vcg;
