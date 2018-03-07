@@ -606,8 +606,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
   {
 	case   CP_SELFINTERSECT_SELECT:
 	case   CP_SELECT_NON_MANIFOLD_VERTEX:
-	case   CP_SELECT_NON_MANIFOLD_FACE:
-		return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
+	case   CP_SELECT_NON_MANIFOLD_FACE:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
 
 	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
     case FP_SELECT_CONNECTED:
@@ -615,8 +614,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 	case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection);
 
 	case FP_SELECT_BY_FACE_QUALITY :
-	case FP_SELECT_BY_VERT_QUALITY : 
-		return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
+	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
 
 	case FP_SELECTBYANGLE : return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);
   }
@@ -629,13 +627,12 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
   {
 	case CP_SELECT_NON_MANIFOLD_FACE:
 	case CP_SELECT_NON_MANIFOLD_VERTEX:       
-    case FP_SELECT_CONNECTED:
-		return MeshModel::MM_FACEFACETOPO;
+    case FP_SELECT_CONNECTED: return MeshModel::MM_FACEFACETOPO;
   
 	case CP_SELECT_TEXBORDER: return MeshModel::MM_FACEFACETOPO;
 	case CP_SELFINTERSECT_SELECT: return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
 
-  case FP_SELECT_FOLD_FACE: return MeshModel::MM_VERTFACETOPO;
+	case FP_SELECT_FOLD_FACE: return MeshModel::MM_VERTFACETOPO;
 
 	default: return 0;
   }
@@ -643,31 +640,30 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 
 int SelectionFilterPlugin::postCondition(QAction *action) const
 {
-  switch(ID(action))
-  {
-      case FP_SELECT_ALL:
-      case FP_SELECT_FACE_FROM_VERT:
-      case FP_SELECT_VERT_FROM_FACE:
-      case FP_SELECT_NONE:
-      case FP_SELECT_INVERT:
-      case FP_SELECT_ERODE:
-      case FP_SELECT_CONNECTED:
-      case FP_SELECT_DILATE:
-      case FP_SELECT_BORDER:
-      case FP_SELECT_BY_VERT_QUALITY:
-      case FP_SELECT_BY_FACE_QUALITY:
-      case FP_SELECT_BY_COLOR:
-      case CP_SELFINTERSECT_SELECT:
-      case CP_SELECT_TEXBORDER:
-      case CP_SELECT_NON_MANIFOLD_FACE:
-      case CP_SELECT_NON_MANIFOLD_VERTEX:
-      case FP_SELECT_FACES_BY_EDGE :
-	    case FP_SELECT_UGLY:
-      case FP_SELECT_FOLD_FACE:
-      case FP_SELECT_OUTLIER:
-    return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+	switch(ID(action))
+	{
+		case FP_SELECT_ALL                  :
+		case FP_SELECT_FACE_FROM_VERT       :
+		case FP_SELECT_VERT_FROM_FACE       :
+		case FP_SELECT_NONE                 :
+		case FP_SELECT_INVERT               :
+		case FP_SELECT_ERODE                :
+		case FP_SELECT_CONNECTED            :
+		case FP_SELECT_DILATE               :
+		case FP_SELECT_BORDER               :
+		case FP_SELECT_BY_VERT_QUALITY      :
+		case FP_SELECT_BY_FACE_QUALITY      :
+		case FP_SELECT_BY_COLOR             :
+		case CP_SELFINTERSECT_SELECT        :
+		case CP_SELECT_TEXBORDER            :
+		case CP_SELECT_NON_MANIFOLD_FACE    :
+		case CP_SELECT_NON_MANIFOLD_VERTEX  :
+		case FP_SELECT_FACES_BY_EDGE        :
+		case FP_SELECT_UGLY                 :
+		case FP_SELECT_FOLD_FACE            :
+		case FP_SELECT_OUTLIER              : return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
   }
-  return MeshModel::MM_UNKNOWN;
+  return MeshModel::MM_ALL;
 }
 
 int SelectionFilterPlugin::getPreConditions( QAction * action) const
@@ -682,8 +678,8 @@ int SelectionFilterPlugin::getPreConditions( QAction * action) const
 	case   FP_SELECT_BORDER:
 	case   FP_SELECT_ERODE:
 	case   FP_SELECT_DILATE:
-  case   FP_SELECT_FOLD_FACE:
-  case   FP_SELECT_CONNECTED:        return MeshModel::MM_FACENUMBER;
+	case   FP_SELECT_FOLD_FACE:
+	case   FP_SELECT_CONNECTED:        return MeshModel::MM_FACENUMBER;
 	case   FP_SELECT_BY_COLOR:         return MeshModel::MM_VERTCOLOR;
 	case   FP_SELECT_BY_VERT_QUALITY:  return MeshModel::MM_VERTQUALITY;
 	case   FP_SELECT_BY_FACE_QUALITY:  return MeshModel::MM_FACEQUALITY;
