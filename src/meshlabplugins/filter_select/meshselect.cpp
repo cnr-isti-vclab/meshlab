@@ -150,10 +150,10 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
  {
 	case FP_SELECT_DILATE :             return tr("Dilate (expand) the current set of selected faces.");
 	case FP_SELECT_ERODE :              return tr("Erode (reduce) the current set of selected faces.");
-	case FP_SELECT_INVERT :             return tr("Invert the current set of selected faces.");
+	case FP_SELECT_INVERT :             return tr("Invert the current set of selected faces/vertices.");
     case FP_SELECT_CONNECTED:           return tr("Expand the current face selection so that it includes all the faces in the connected components where there is at least a selected face.");
-	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces.");
-	case FP_SELECT_ALL :                return tr("Select all the faces of the current mesh.");
+	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces/vertices.");
+	case FP_SELECT_ALL :                return tr("Select all the faces/vertices of the current mesh.");
 	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
 	case FP_SELECT_DELETE_FACE :        return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
 	case FP_SELECT_DELETE_FACEVERT :    return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");
@@ -170,9 +170,8 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case CP_SELECT_TEXBORDER :          return tr("Colorize only border edges.");
 	case CP_SELECT_NON_MANIFOLD_FACE:   return tr("Select the faces and the vertices incident on non manifold edges (e.g. edges where more than two faces are incident); note that this function select the components that are related to non manifold edges. The case of non manifold vertices is specifically managed by the pertinent filter.");
 	case CP_SELECT_NON_MANIFOLD_VERTEX: return tr("Select the non manifold vertices that do not belong to non manifold edges. For example two cones connected by their apex. Vertices incident on non manifold edges are ignored.");
-  case FP_SELECT_FOLD_FACE:           return tr("Select the folded faces created by the Quadric Edge Collapse decimation. The face is selected if the angle between the face normal and the normal of the best fitting plane of the neighbor vertices is above the selected threshold.");
-  case  FP_SELECT_OUTLIER:            return tr("Select the vertex classified as outlier using Local Outlier Propabilty measure described in:<br>"
-													"<b>'LoOP: Local Outlier Probabilities'</b> Kriegel et al.<br>CIKM 2009");
+	case FP_SELECT_FOLD_FACE:           return tr("Select the folded faces created by the Quadric Edge Collapse decimation. The face is selected if the angle between the face normal and the normal of the best fitting plane of the neighbor vertices is above the selected threshold.");
+	case  FP_SELECT_OUTLIER:            return tr("Select the vertex classified as outlier using Local Outlier Propabilty measure described in:<br> <b>'LoOP: Local Outlier Probabilities'</b> Kriegel et al.<br>CIKM 2009");
  }
  assert(0);
  return QString("Unknown filter");
@@ -265,8 +264,11 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 
 	case FP_SELECT_INVERT:
 	{
-		parlst.addParam(new RichBool("InvFaces", true, "Invert Faces", "If true the filter will invert the selected faces."));
-		parlst.addParam(new RichBool("InvVerts", true, "Invert Vertices", "If true the filter will invert the selected vertices."));
+		bool defF = (m.cm.sfn > 0) ? true : false;
+		bool defV = (m.cm.svn > 0) ? true : false;
+
+		parlst.addParam(new RichBool("InvFaces", defF, "Invert Faces", "If true the filter will invert the set of selected faces."));
+		parlst.addParam(new RichBool("InvVerts", defV, "Invert Vertices", "If true the filter will invert the set of selected vertices."));
 	} break;
 
   case FP_SELECT_FOLD_FACE:
