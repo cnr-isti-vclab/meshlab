@@ -1375,12 +1375,20 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
 }
 int FilterDocSampling::postCondition( QAction* a ) const
 {
-  switch(ID(a)){
-  case FP_VORONOI_COLORING:
-  case FP_DISK_COLORING:
-    return MeshModel::MM_VERTCOLOR;
+	switch(ID(a)){
+		case FP_VORONOI_COLORING    :
+		case FP_DISK_COLORING       : return MeshModel::MM_VERTCOLOR;
+
+		case FP_ELEMENT_SUBSAMPLING       :
+		case FP_MONTECARLO_SAMPLING       :
+		case FP_STRATIFIED_SAMPLING       :
+		case FP_CLUSTERED_SAMPLING        :
+		case FP_POINTCLOUD_SIMPLIFICATION :
+		case FP_POISSONDISK_SAMPLING      : 
+		case FP_TEXEL_SAMPLING            :			
+		case FP_UNIFORM_MESH_RESAMPLING   : return MeshModel::MM_NONE;  // none, because they create a new layer, without affecting old one
   }
-  return MeshModel::MM_UNKNOWN;
+  return MeshModel::MM_ALL;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity( QAction * filter ) const
