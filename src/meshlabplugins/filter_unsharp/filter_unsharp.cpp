@@ -226,7 +226,7 @@ int FilterUnsharp::postCondition(QAction *a) const
 		case FP_DIRECTIONAL_PRESERVATION:
 		case FP_VERTEX_QUALITY_SMOOTHING:
 		case FP_UNSHARP_QUALITY:
-		case FP_CREASE_CUT: return MeshModel::MM_UNKNOWN;
+		case FP_CREASE_CUT: return MeshModel::MM_ALL;
 		case FP_FACE_NORMAL_SMOOTHING:
 		case FP_RECOMPUTE_FACE_NORMAL:
 		case FP_RECOMPUTE_QUADFACE_NORMAL:
@@ -234,6 +234,7 @@ int FilterUnsharp::postCondition(QAction *a) const
 		case FP_RECOMPUTE_VERTEX_NORMAL:
 		case FP_VERTEX_NORMAL_NORMALIZE: return MeshModel::MM_VERTNORMAL;
 		case FP_UNSHARP_VERTEX_COLOR: return MeshModel::MM_VERTCOLOR;
+		case FP_SCALAR_HARMONIC_FIELD: return MeshModel::MM_VERTQUALITY;
 		default : assert(0); return MeshModel::MM_ALL;
 	}
 }
@@ -263,12 +264,11 @@ int FilterUnsharp::postCondition(QAction *a) const
     case FP_UNSHARP_GEOMETRY:
     case FP_UNSHARP_QUALITY:
     case FP_VERTEX_QUALITY_SMOOTHING:
-    case FP_UNSHARP_VERTEX_COLOR:
-      return 0;
-
+	case FP_SCALAR_HARMONIC_FIELD:
+	case FP_UNSHARP_VERTEX_COLOR: return MeshModel::MM_NONE;
     default: assert(0);
   }
-  return 0;
+  return MeshModel::MM_NONE;
 }
 
 void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
