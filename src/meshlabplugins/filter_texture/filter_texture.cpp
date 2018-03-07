@@ -131,15 +131,15 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 {
     switch (ID(a))
     {
-    case FP_VORONOI_ATLAS : return MeshModel::MM_UNKNOWN;
-    case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
+	case FP_VORONOI_ATLAS: return MeshModel::MM_WEDGTEXCOORD;
+	case FP_UV_WEDGE_TO_VERTEX: return MeshModel::MM_VERTTEXCOORD;
     case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
-    case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_COLOR_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_TEX_TO_VCOLOR_TRANSFER : return MeshModel::MM_UNKNOWN;
+    case FP_SET_TEXTURE : return MeshModel::MM_ALL;
+    case FP_COLOR_TO_TEXTURE : return MeshModel::MM_NONE;
+    case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
+	case FP_TEX_TO_VCOLOR_TRANSFER: return MeshModel::MM_VERTCOLOR;
     default: assert(0);
     }
     return MeshModel::MM_NONE;
