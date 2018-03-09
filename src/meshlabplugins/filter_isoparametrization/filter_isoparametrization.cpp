@@ -455,7 +455,7 @@ MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *)
 
 int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
 {
-  return MeshModel::MM_UNKNOWN;
+	return MeshModel::MM_WEDGTEXCOORD + MeshModel::MM_VERTTEXCOORD;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity( QAction* filter) const
