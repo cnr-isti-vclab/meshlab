@@ -212,7 +212,7 @@ int FilterFunctionPlugin::postCondition(QAction *action) const
 		return MeshModel::MM_ALL;
   }
   
-  return MeshModel::MM_UNKNOWN;
+  return MeshModel::MM_NONE;
 }
 
 int FilterFunctionPlugin::getRequirements(QAction *action)

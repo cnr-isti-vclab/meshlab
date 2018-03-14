@@ -92,7 +92,7 @@ QString FilterIsoParametrization::filterInfo(FilterIDType filterId) const
 
 int FilterIsoParametrization::getRequirements(QAction *)
 {
-  return MeshModel::MM_UNKNOWN;
+	return MeshModel::MM_NONE;
 }
 
 void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, RichParameterSet & par)
@@ -455,7 +455,7 @@ MeshFilterInterface::FilterClass FilterIsoParametrization::getClass(QAction *)
 
 int FilterIsoParametrization::postCondition( QAction* /*filter*/ ) const
 {
-	return MeshModel::MM_WEDGTEXCOORD + MeshModel::MM_VERTTEXCOORD;
+	return MeshModel::MM_WEDGTEXCOORD | MeshModel::MM_VERTTEXCOORD;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterIsoParametrization::filterArity( QAction* filter) const
