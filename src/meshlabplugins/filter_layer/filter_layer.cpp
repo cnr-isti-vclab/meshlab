@@ -309,7 +309,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 	{
 		MeshModel *currentModel = md.mm();				// source = current
 		QString newName = currentModel->label() + "_copy";
-		MeshModel *destModel = md.addNewMesh("", newName); // After Adding a mesh to a MeshDocument the new mesh is the current one
+		MeshModel *destModel = md.addNewMesh("", newName, true); // After Adding a mesh to a MeshDocument the new mesh is the current one
 		destModel->updateDataMask(currentModel);
 		tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, currentModel->cm);
 
@@ -327,7 +327,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 		bool mergeVertices = par.getBool("MergeVertices");
 		bool alsoUnreferenced = par.getBool("AlsoUnreferenced");
 
-		MeshModel *destModel = md.addNewMesh("", "Merged Mesh");
+		MeshModel *destModel = md.addNewMesh("", "Merged Mesh", true);
 
 		QList<MeshModel *> toBeDeletedList;
 
@@ -359,8 +359,9 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			Log( "Deleted %d merged layers", toBeDeletedList.size());
 			foreach(MeshModel *mmp,toBeDeletedList)
 				md.delMesh(mmp);
+			md.setCurrent(destModel); // setting again newly created model as current
 		}
-
+		
 		if( mergeVertices )
 		{
 			int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(destModel->cm);
@@ -388,7 +389,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			tri::UpdateSelection<CMeshO>::VertexClear(cm);
 			tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(cm);
 
-			MeshModel *destModel= md.addNewMesh("",QString("CC %1").arg(i));
+			MeshModel *destModel= md.addNewMesh("",QString("CC %1").arg(i), true);
 			destModel->updateDataMask(currentModel);
 			tri::Append<CMeshO, CMeshO>::Mesh(destModel->cm, cm, true);
 
