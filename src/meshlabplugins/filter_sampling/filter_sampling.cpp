@@ -570,9 +570,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
 			"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
 			"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
-		parlst.addParam(new RichBool("SampleEdge", true, "Sample Edges", "See the above comment."));
+		parlst.addParam(new RichBool("SampleEdge", false, "Sample Edges", "See the above comment."));
 		parlst.addParam(new RichBool("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
-		parlst.addParam(new RichBool("SampleFace", true, "Sample Faces", "See the above comment."));
+		parlst.addParam(new RichBool("SampleFace", false, "Sample Faces", "See the above comment."));
 		parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
 		parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
@@ -1024,7 +1024,7 @@ switch(ID(action))
 		float distUpperBound = par.getAbsPerc("MaxDist");
 
 		if (mm0 == mm1){
-			Log("Housdorff Distance: cannot compute, it is the same mesh");
+			Log("Hausdorff Distance: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
 		}
