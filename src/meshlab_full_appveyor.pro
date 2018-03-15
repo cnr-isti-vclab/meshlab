@@ -65,7 +65,7 @@ SUBDIRS       = common \
                 meshlabplugins/edit_measure \
                 meshlabplugins/edit_mutualcorrs \
                 meshlabplugins/edit_paint\
-                meshlabplugins/edit_pickpoints \
+#no longer supported#   meshlabplugins/edit_pickpoints \
                 meshlabplugins/edit_point\
                 meshlabplugins/edit_referencing \
                 meshlabplugins/edit_quality \
