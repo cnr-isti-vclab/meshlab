@@ -657,6 +657,7 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     }
     pm->UpdateBoxAndNormals();
     md.setVisible(pm->id(),true);
+	md.setCurrentMesh(pm->id());
 
     return true;
   }
