@@ -43,6 +43,7 @@ SelectionFilterPlugin::SelectionFilterPlugin()
     FP_SELECTBYANGLE <<
 	FP_SELECT_UGLY <<
     FP_SELECT_DELETE_VERT <<
+	FP_SELECT_DELETE_ALL_FACE <<
     FP_SELECT_DELETE_FACE <<
     FP_SELECT_DELETE_FACEVERT <<
     FP_SELECT_FACE_FROM_VERT <<
@@ -120,10 +121,11 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 	case FP_SELECT_INVERT :               return tr("Invert Selection");
     case FP_SELECT_CONNECTED :            return tr("Select Connected Faces");
 	case FP_SELECT_DELETE_VERT :          return tr("Delete Selected Vertices");
+	case FP_SELECT_DELETE_ALL_FACE :      return tr("Delete ALL Faces");
 	case FP_SELECT_DELETE_FACE :          return tr("Delete Selected Faces");
 	case FP_SELECT_DELETE_FACEVERT :      return tr("Delete Selected Faces and Vertices");
 	case FP_SELECTBYANGLE :               return tr("Select Faces by view angle");
-	case FP_SELECT_UGLY :                 return tr("select 'problematic' faces");
+	case FP_SELECT_UGLY :                 return tr("Select 'problematic' faces");
 	case FP_SELECT_FACE_FROM_VERT :       return tr("Select Faces from Vertices");
 	case FP_SELECT_VERT_FROM_FACE :       return tr("Select Vertices from Faces");
 	case FP_SELECT_ERODE :                return tr("Erode Selection");
@@ -136,9 +138,9 @@ SelectionFilterPlugin::SelectionFilterPlugin()
 	case CP_SELECT_TEXBORDER :            return tr("Select Vertex Texture Seams");
 	case CP_SELECT_NON_MANIFOLD_FACE :    return tr("Select non Manifold Edges ");
 	case CP_SELECT_NON_MANIFOLD_VERTEX :  return tr("Select non Manifold Vertices");
-  case FP_SELECT_FACES_BY_EDGE:         return tr("Select Faces with edges longer than...");
-  case FP_SELECT_FOLD_FACE :            return tr("Select Folded Faces");
-  case  FP_SELECT_OUTLIER:              return tr("Select Outliers");
+	case FP_SELECT_FACES_BY_EDGE:         return tr("Select Faces with edges longer than...");
+	case FP_SELECT_FOLD_FACE :            return tr("Select Folded Faces");
+	case  FP_SELECT_OUTLIER:              return tr("Select Outliers");
  }
  assert(0);
  return QString("Unknown filter");
@@ -155,10 +157,11 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces/vertices.");
 	case FP_SELECT_ALL :                return tr("Select all the faces/vertices of the current mesh.");
 	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
+	case FP_SELECT_DELETE_ALL_FACE:     return tr("Delete ALL faces, turning the mesh into a pointcloud. May be applied also to all visible layers.");
 	case FP_SELECT_DELETE_FACE :        return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
 	case FP_SELECT_DELETE_FACEVERT :    return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");
 	case FP_SELECTBYANGLE :             return tr("Select faces according to the angle between their normal and the view direction. It is used in range map processing to select and delete steep faces parallel to viewdirection.");
-	case FP_SELECT_UGLY :               return tr("select faces with 'problems', like normal inverted w.r.t the surrounding areas, or extremely elongated");
+	case FP_SELECT_UGLY :               return tr("Select faces with 'problems', like normal inverted w.r.t the surrounding areas, or extremely elongated");
 	case CP_SELFINTERSECT_SELECT :      return tr("Select only self intersecting faces.");
 	case FP_SELECT_FACE_FROM_VERT :     return tr("Select faces from selected vertices.");
 	case FP_SELECT_VERT_FROM_FACE :     return tr("Select vertices from selected faces.");
@@ -271,30 +274,35 @@ void SelectionFilterPlugin::initParameterSet(QAction *action, MeshModel &m, Rich
 		parlst.addParam(new RichBool("InvVerts", defV, "Invert Vertices", "If true the filter will invert the set of selected vertices."));
 	} break;
 
-  case FP_SELECT_FOLD_FACE:
-  {
-    parlst.addParam(new RichDynamicFloat("AngleThreshold", 160.0f, 90.0f, 180.0f, tr("Angle Threshold"), tr("Angle between the face and the best fitting plane of the neighbours vertices. If it is above the threshold the face is selected.")));
-  } break;
+	case FP_SELECT_FOLD_FACE:
+	{
+		parlst.addParam(new RichDynamicFloat("AngleThreshold", 160.0f, 90.0f, 180.0f, tr("Angle Threshold"), tr("Angle between the face and the best fitting plane of the neighbours vertices. If it is above the threshold the face is selected.")));
+	} break;
 
-  case FP_SELECT_OUTLIER:
-  {
-    parlst.addParam(new RichDynamicFloat("PropThreshold", 0.8, 0.0, 1.0, tr("Probability"), tr("Threshold to select the vertex. The vertex is selected if the LoOP value is above the threshold.")));
-    parlst.addParam(new RichInt("KNearest", 32, tr("Number of neighbors"), tr("Number of neighbours used to compute the LoOP")));
-  } break;
+	case FP_SELECT_OUTLIER:
+	{
+		parlst.addParam(new RichDynamicFloat("PropThreshold", 0.8, 0.0, 1.0, tr("Probability"), tr("Threshold to select the vertex. The vertex is selected if the LoOP value is above the threshold.")));
+		parlst.addParam(new RichInt("KNearest", 32, tr("Number of neighbors"), tr("Number of neighbours used to compute the LoOP")));
+	} break;
+
+	case FP_SELECT_DELETE_ALL_FACE:
+	{
+		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected, the filter will be applied to all visible mesh Layers."));
+	} break;
  }
 }
 
 bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
- if (md.mm() == NULL)
+if (md.mm() == NULL)
 	return false;
 
- MeshModel &m=*(md.mm());
- CMeshO::FaceIterator fi;
- CMeshO::VertexIterator vi;
+MeshModel &m=*(md.mm());
+CMeshO::FaceIterator fi;
+CMeshO::VertexIterator vi;
 
- switch(ID(action))
- {
+switch(ID(action))
+{
 	case FP_SELECT_DELETE_VERT:
 	{
 		if (m.cm.svn == 0) { Log("Nothing done: no vertex selected"); break; }
@@ -311,6 +319,34 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
 		Log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
+	} break;
+
+	case FP_SELECT_DELETE_ALL_FACE:
+	{
+		if (par.getBool("allLayers"))
+		{
+			MeshModel   *ml = NULL;
+			while (ml = md.nextVisibleMesh(ml))
+			{
+				int ffn = ml->cm.fn;
+				for (fi = ml->cm.face.begin(); fi != ml->cm.face.end(); ++fi)
+				if (!(*fi).IsD())
+					tri::Allocator<CMeshO>::DeleteFace(ml->cm, *fi);
+				ml->clearDataMask(MeshModel::MM_FACEFACETOPO);
+				ml->UpdateBoxAndNormals();
+				Log("Layer %i: deleted all %i faces.", ml->id(), ffn - ml->cm.fn);
+			}
+		}
+		else
+		{
+			int ffn = m.cm.fn;
+			for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
+			if (!(*fi).IsD())
+				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
+			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+			m.UpdateBoxAndNormals();
+			Log("Deleted all %i faces.", ffn - m.cm.fn);
+		}
 	} break;
 
 	case FP_SELECT_DELETE_FACE:
@@ -576,37 +612,36 @@ bool SelectionFilterPlugin::applyFilter(QAction *action, MeshDocument &md, RichP
 		Log( "Selected %d faces with and edge longer than %f",selFaceNum,threshold);
 	} break;
 
-  case FP_SELECT_FOLD_FACE:
-  {
-    float angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
-    m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-    tri::Clean<CMeshO>::SelectFoldedFaceFromOneRingFaces(m.cm, cos(angle));
-    m.clearDataMask(MeshModel::MM_VERTFACETOPO);
-  } break;
+	case FP_SELECT_FOLD_FACE:
+	{
+		float angle = math::ToRad(par.getDynamicFloat("AngleThreshold"));
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		tri::Clean<CMeshO>::SelectFoldedFaceFromOneRingFaces(m.cm, cos(angle));
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
+	} break;
 
-  case FP_SELECT_OUTLIER:
-  {
-    float threshold = par.getDynamicFloat("PropThreshold");
-    int kNearest = par.getInt("KNearest");
-    VertexConstDataWrapper<CMeshO> wrapper(m.cm);
-    KdTree<typename CMeshO::ScalarType> kdTree(wrapper);
-    int selVertexNum = tri::OutlierRemoval<CMeshO>::SelectLoOPOutliers(m.cm, kdTree, kNearest, threshold);
-    Log("Selected %d outlier vertices", selVertexNum);
-  } break;
-
+	case FP_SELECT_OUTLIER:
+	{
+		float threshold = par.getDynamicFloat("PropThreshold");
+		int kNearest = par.getInt("KNearest");
+		VertexConstDataWrapper<CMeshO> wrapper(m.cm);
+		KdTree<typename CMeshO::ScalarType> kdTree(wrapper);
+		int selVertexNum = tri::OutlierRemoval<CMeshO>::SelectLoOPOutliers(m.cm, kdTree, kNearest, threshold);
+		Log("Selected %d outlier vertices", selVertexNum);
+	} break;
 
 	default: assert(0);
- }
- return true;
+}
+return true;
 }
 
 MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action)
 {
   switch(ID(action))
   {
-	case   CP_SELFINTERSECT_SELECT:
-	case   CP_SELECT_NON_MANIFOLD_VERTEX:
-	case   CP_SELECT_NON_MANIFOLD_FACE:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
+	case CP_SELFINTERSECT_SELECT:
+	case CP_SELECT_NON_MANIFOLD_VERTEX:
+	case CP_SELECT_NON_MANIFOLD_FACE:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
 
 	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
     case FP_SELECT_CONNECTED:
