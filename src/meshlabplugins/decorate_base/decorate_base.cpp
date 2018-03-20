@@ -167,12 +167,14 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
     glMultMatrix(m.cm.Tr);
     switch (ID(a))
     {
+
     case DP_SHOW_CURVATURE:
         {
             // Note the standard way for adding extra per-mesh data using the per-mesh attributes.
             CMeshO::PerMeshAttributeHandle< vector<PointPC> > bvH = vcg::tri::Allocator<CMeshO>::GetPerMeshAttribute<vector<PointPC> >(m.cm,"CurvatureVector");
             DrawLineVector(bvH());
         } break;
+
     case DP_SHOW_NORMALS:
         {
             glPushAttrib(GL_ENABLE_BIT );
@@ -212,6 +214,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             glEnd();
             glPopAttrib();
         } break;
+
     case DP_SHOW_BOX_CORNERS:
         {
 			bool untrasformed = rm->getBool(this->BBAbsParam());
@@ -229,14 +232,15 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
 				"</table>""Warning: values do not consider transformation", bmin[0], bmin[1], bmin[2], bmax[0], bmax[1], bmax[2], 
 				math::Abs(bmax[0] - bmin[0]), math::Abs(bmax[1] - bmin[1]), math::Abs(bmax[2] - bmin[2]), 
 				(bmax[0] + bmin[0]) / 2.0, (bmax[1] + bmin[1]) / 2.0, (bmax[2] + bmin[2]) / 2.0);
-        }
-        break;
+        } break;
+
     case DP_SHOW_LABEL:
         {
             if(rm->getBool(LabelVertFlag())) DrawVertLabel(m,painter);
             if(rm->getBool(LabelEdgeFlag())) DrawEdgeLabel(m,painter);
             if(rm->getBool(LabelFaceFlag())) DrawFaceLabel(m,painter);
         } break;
+
     case DP_SHOW_TEXPARAM : this->DrawTexParam(m,gla,painter,rm,qf); break;
 
     case DP_SHOW_QUALITY_HISTOGRAM :
@@ -246,6 +250,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             CHist &ch=qH();
             this->DrawColorHistogram(ch,gla, painter,rm,qf);
         } break;
+
     case DP_SHOW_QUALITY_CONTOUR :
         {
             glPushAttrib(GL_ENABLE_BIT|GL_VIEWPORT_BIT|	  GL_CURRENT_BIT |  GL_DEPTH_BUFFER_BIT);
@@ -965,16 +970,23 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
     glTranslatef(ratio-1.0,0.0f,0.0f);
     glScalef(0.9f,0.9f,0.9f);
 
-    QString textureName("-- no texture --");
+	int texInd = 0;
+	QString textureName; 
 
-	if (!m.cm.textures.empty())
-		textureName = qUtf8Printable(QString(m.cm.textures[0].c_str())) + QString("  ");
+	if (m.cm.textures.empty())
+	{
+		textureName = "-- no texture --";
+	}
+	else
+	{
+		texInd = std::min(rm->getInt(this->TextureIndexParam()), int(m.cm.textures.size())-1);
+		textureName = "TEX " + QString::number(texInd) + ": " + QString(m.cm.textures[texInd].c_str()) + " ";
+	}
 
     glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
     checkGLError::debugInfo("DrawTexParam");
     drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
     drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,painter,qf,90.0f);
-
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_DEPTH_TEST);
@@ -993,22 +1005,23 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 		this->RealTimeLog("Show UV Tex Param","The model has no face color", "The model has no Face Color");
 		faceColor = false;
 	}
-
-
 	
     if(!m.cm.textures.empty())
     {
 		MLSceneGLSharedDataContext* ctx = gla->getSceneGLSharedContext();
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, ctx->getTextureId(m.id(),0));
+		glBindTexture(GL_TEXTURE_2D, ctx->getTextureId(m.id(), texInd));
 		
     }
 
     glBegin(GL_TRIANGLES);
     for(size_t i=0;i<m.cm.face.size();++i)
-        if(!m.cm.face[i].IsD())
+	if (!m.cm.face[i].IsD() && (m.cm.face[i].WT(0).N()==texInd))
         {
-            if(faceColor) glColor(m.cm.face[i].C());
+            if(faceColor) 
+				glColor(m.cm.face[i].C());
+			else 
+				m.cm.face[i].IsS() ? glColor(vcg::Color4b(vcg::Color4b::Red)) : glColor(vcg::Color4b(vcg::Color4b::White));
             glTexCoord(m.cm.face[i].WT(0).P());
             glVertex(m.cm.face[i].WT(0).P());
             glTexCoord(m.cm.face[i].WT(1).P());
@@ -1032,74 +1045,86 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
 {
 
-    switch(ID(action)){
+switch(ID(action))
+{
     case DP_SHOW_BOX_CORNERS :
-        {
-            parset.addParam(new RichBool(this->BBAbsParam(), false, "Draw Untrasformed","If true the bbox is drawn in the original, untrasformed position "
-                "(instead of the position obtained by transforming it using the matrix associated to the current Layer)"));
-        }    break;
-    case DP_SHOW_TEXPARAM : {
+	{
+		parset.addParam(new RichBool(this->BBAbsParam(), false, "Draw Untrasformed","If true the bbox is drawn in the original, untrasformed position "
+			"(instead of the position obtained by transforming it using the matrix associated to the current Layer)"));
+	} break;
+
+    case DP_SHOW_TEXPARAM : 
+	{
         assert(!parset.hasParameter(TextureStyleParam()));
         parset.addParam(new RichBool(TextureStyleParam(), true,"Texture Param Wire","if true the parametrization is drawn in a textured wireframe style"));
         parset.addParam(new RichBool(TextureFaceColorParam(), false,"Face Color","if true the parametrization is drawn with a per face color (useful if you want display per face parametrization distortion)"));
-                            } break;
+		parset.addParam(new RichInt(TextureIndexParam(), 0, "Texture Index", "Which texture is shown, for models with multiple textures (index start at 0)."));
+	} break;
+
     case DP_SHOW_LABEL :
-        {
-            parset.addParam(new RichBool(LabelVertFlag(),true,"Per Vertex",""));
-            parset.addParam(new RichBool(LabelEdgeFlag(),true,"Per Edge",""));
-            parset.addParam(new RichBool(LabelFaceFlag(),true,"Per Face",""));
-        } break;
-    case DP_SHOW_NORMALS : {
+	{
+        parset.addParam(new RichBool(LabelVertFlag(),true,"Per Vertex",""));
+        parset.addParam(new RichBool(LabelEdgeFlag(),true,"Per Edge",""));
+        parset.addParam(new RichBool(LabelFaceFlag(),true,"Per Face",""));
+	} break;
+
+    case DP_SHOW_NORMALS : 
+	{
         parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
         parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
 		parset.addParam(new RichBool(NormalSelection(), false, "Show Selected", ""));
-                           } break;
-    case DP_SHOW_CURVATURE : {
+	} break;
+
+    case DP_SHOW_CURVATURE : 
+	{
         parset.addParam(new RichFloat(CurvatureLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
         parset.addParam(new RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
-                             } break;
+	} break;
+
     case DP_SHOW_QUALITY_HISTOGRAM :
-        {
-            parset.addParam(new RichEnum(HistTypeParam(),0,QStringList()<<"Per Vertex"<<"Per Face","Quality Src","Set the source of the quality, it can be either per vertex or per face."));
-            parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
-            parset.addParam(new RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
-                "e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
-            parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Width","if true the parametrization is drawn in a textured wireframe style"));
-            parset.addParam(new RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-            parset.addParam(new RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
-            parset.addParam(new RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
-                "Useful only if you have to compare multiple histograms.<br>"
-                "Warning, with wrong values the histogram can become excessively flat or it can overflow"));
-        } break;
+	{
+		parset.addParam(new RichEnum(HistTypeParam(),0,QStringList()<<"Per Vertex"<<"Per Face","Quality Src","Set the source of the quality, it can be either per vertex or per face."));
+		parset.addParam(new RichInt(HistBinNumParam(), 256,"Histogram Bins","If true the parametrization is drawn in a textured wireframe style"));
+		parset.addParam(new RichBool(HistAreaParam(), false,"Area Weighted","If true the histogram is computed according to the surface of the involved elements.<br>"
+			"e.g. each face contribute to the histogram proportionally to its area and each vertex with 1/3 of sum of the areas of the incident triangles."));
+		parset.addParam(new RichBool(HistFixedParam(), false,"Fixed Width","if true the parametrization is drawn in a textured wireframe style"));
+		parset.addParam(new RichFloat(HistFixedMinParam(), 0,"Min Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+		parset.addParam(new RichFloat(HistFixedMaxParam(), 0,"Max Hist Value","Used only if the Fixed Histogram Width Parameter is checked"));
+		parset.addParam(new RichFloat(HistFixedWidthParam(), 0,"Hist Width","If not zero, this value is used to scale histogram width  so that it is the indicated value.<br>"
+			"Useful only if you have to compare multiple histograms.<br>"
+			"Warning, with wrong values the histogram can become excessively flat or it can overflow"));
+	} break;
 
     case DP_SHOW_CAMERA :
-        {
-            QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
-            QStringList scale; scale << "No Scale" << "Fixed Factor";
-            parset.addParam(new RichEnum(this->CameraScaleParam(), 0, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
-            parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
-            parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
-            parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
-            parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
-            parset.addParam(new RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the poistions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
-        } break;
+	{
+		QStringList methods; methods << "Trackball" << "Mesh Camera" << "Raster Camera";
+		QStringList scale; scale << "No Scale" << "Fixed Factor";
+		parset.addParam(new RichEnum(this->CameraScaleParam(), 0, scale,"Camera Scale Method","Change rendering scale for better visibility in the scene"));
+		parset.addParam(new RichFloat(this->FixedScaleParam(), 5.0,"Scale Factor","Draw scale. Used only if the Fixed Factor scaling is chosen"));
+		parset.addParam(new RichBool(this->ShowMeshCameras(), false, "Show Mesh Cameras","if true, valid cameras are shown for all visible mesh layers"));
+		parset.addParam(new RichBool(this->ShowRasterCameras(), true, "Show Raster Cameras","if true, valid cameras are shown for all visible raster layers"));
+		parset.addParam(new RichBool(this->ShowCameraDetails(), false, "Show Current Camera Details","if true, prints on screen all intrinsics and extrinsics parameters for current camera"));
+		parset.addParam(new RichBool(this->ApplyMeshTr(), false, "Apply Current Mesh Matrix", "if true, the poistions of the cameras are mutiplied with the transformation matrix of the current mesh layer"));
+	} break;
+
     case DP_SHOW_QUALITY_CONTOUR :
-        {
-            QStringList ColorMapList; ColorMapList << "None" << "ColorJet"<<"Parula";
-            parset.addParam(new RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
-            parset.addParam(new RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
-            parset.addParam(new RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
-            parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
-            parset.addParam(new RichEnum(this->ShowContourColorMap(), 0, ColorMapList,"ColorMap","Choose a colormap for the contours"));
-            
-        } break;
+	{
+		QStringList ColorMapList; ColorMapList << "None" << "ColorJet"<<"Parula";
+		parset.addParam(new RichFloat       (this->ShowContourFreq(), 20, "Number of Contours","The number of contours that are drawn between min and max of the quality values."));
+		parset.addParam(new RichDynamicFloat(this->ShowContourWidth(), 0.5f,0.0f,1.0f, "Width","Relative width of the contours; in the 0..1 range."));
+		parset.addParam(new RichDynamicFloat(this->ShowContourAlpha(), 0.5f,0.0f,1.0f, "Alpha of Contours","Transparency of che contours that are overdrawn over the mesh."));
+		parset.addParam(new RichBool(this->ShowContourRamp(), true, "Ramp Contour","If enabled show a ramp that gives you info about the gradient of the quality field (transparent to opaque means increasing values) "));
+		parset.addParam(new RichEnum(this->ShowContourColorMap(), 0, ColorMapList,"ColorMap","Choose a colormap for the contours"));        
+	} break;
+
     case DP_SHOW_SELECTED_MESH :
-        {
-            parset.addParam(new RichColor(selectedMeshBlendingColor(),QColor(255, 178,0, 50),QString("Curr Mesh Blend Color"),QString("Current Mesh Blending Color")));
-        } break;
-    }
+	{
+		parset.addParam(new RichColor(selectedMeshBlendingColor(),QColor(255, 178,0, 50),QString("Curr Mesh Blend Color"),QString("Current Mesh Blending Color")));
+	} break;
+}
+
 }
 
 
