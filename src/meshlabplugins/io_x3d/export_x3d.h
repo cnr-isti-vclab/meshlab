@@ -234,7 +234,7 @@ namespace io {
 				{
 					QDomElement appearance = doc.createElement("Appearance");
 					QDomElement imageTexture = doc.createElement("ImageTexture");
-					imageTexture.setAttribute("url", m.textures[indexTexture].c_str());
+					imageTexture.setAttribute("url", ("\"" + m.textures[indexTexture] + "\"").c_str());
 					appearance.appendChild(imageTexture);
 					shape.appendChild(appearance);
 				}
