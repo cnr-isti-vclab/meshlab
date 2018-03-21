@@ -150,7 +150,7 @@ void EditPaintPlugin::mousePressEvent(QMouseEvent * event, MeshModel &, GLArea *
 	gla->update();
 }
 
-void EditPaintPlugin::mouseMoveEvent(QMouseEvent* event, MeshModel & m, GLArea * gla)
+void EditPaintPlugin::mouseMoveEvent(QMouseEvent* event, MeshModel & /*m*/, GLArea * gla)
 {
 	if (gla == NULL)
 		return;
@@ -575,7 +575,6 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 
 		if ((!smoothed_vertices.contains(v)) && (glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
 		{
-			int meshid = glarea->md()->mm()->id();
 			if (paintbox->getCurrentType() == COLOR_SMOOTH) 
 				paintbox->getUndoStack()->push(new SingleColorUndo(v, v->C()));
 			else 
@@ -660,7 +659,7 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 
 }
 
-inline void EditPaintPlugin::sculpt(MeshModel & m, vector< pair<CVertexO *, PickingData> > * vertices)
+inline void EditPaintPlugin::sculpt(MeshModel & /*m*/, vector< pair<CVertexO *, PickingData> > * vertices)
 {
 	//	int opac = 1.0;
 	float decrease_pos = paintbox->getHardness() / 100.0;
@@ -783,7 +782,6 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 		
 		if ((glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
 		{
-			int meshid = glarea->md()->mm()->id();
 			if (!painted_vertices.contains(data.first)) 
 			{
 				if (paintbox->getCurrentType() == COLOR_CLONE)
@@ -796,7 +794,6 @@ inline void EditPaintPlugin::paint(vector< pair<CVertexO *, PickingData> > * ver
 					Color4b(data.first->C()[0], data.first->C()[1], data.first->C()[2], data.first->C()[3]),
 					(int)(op*opac)));
 
-				int meshid = glarea->md()->mm()->id();
 				paintbox->getUndoStack()->push(new SingleColorUndo(data.first, data.first->C()));
 
 				applyColor(data.first, color, (int)(op * opac));

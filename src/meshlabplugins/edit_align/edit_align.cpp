@@ -50,7 +50,7 @@ const QString EditAlignPlugin::Info()
     return tr("Allow to align different layers together.");
 }
 
-void EditAlignPlugin::suggestedRenderingData(MeshModel &m, MLRenderingData& dt)
+void EditAlignPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData& dt)
 {
 	MLPerViewGLOptions opts;
 	dt.get(opts);

@@ -118,7 +118,7 @@ bool DecorateShadowPlugin::startDecorate(QAction* action, MeshDocument& /*m*/, R
 	return false;
 }
 
-void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & md, RichParameterSet * parset, GLArea * gla)
+void DecorateShadowPlugin::endDecorate(QAction * action, MeshDocument & /*md*/, RichParameterSet * parset, GLArea * /*gla*/)
 {
 	switch (ID(action))
 	{

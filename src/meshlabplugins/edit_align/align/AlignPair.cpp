@@ -88,7 +88,7 @@ void AlignPair::Stat::clear()
 bool AlignPair::Stat::Stable(int lastiter)
 {
   if (I.empty()) return false;
-  int parag = I.size() - lastiter;
+  int parag = int(I.size()) - lastiter;
 
   if (parag < 0) parag = 0;
   if (I.back().pcl50 < I[parag].pcl50) return false; // se siamo diminuiti non e' stabile
@@ -151,7 +151,7 @@ bool AlignPair::ChoosePoints(vector<Point3d> &Ps,		// vertici corrispondenti su 
   const int N = ap.MaxPointNum;
   double newmaxd = H.Percentile(float(PassHi));
   //printf("%5.1f of the pairs has a distance less than %g and greater than %g (0..%g) avg %g\n",	Perc*100,newmind,newmaxd,H.maxv,H.Percentile(.5));
-  int sz = Ps.size();
+  int sz = int(Ps.size());
   int fnd = 0;
   int lastgood = sz - 1;
   math::SubtractiveRingRNG myrnd;
@@ -236,7 +236,7 @@ bool AlignPair::InitFixVert(AlignPair::A2Mesh *fm,
   u.SetBBox(bb2);
 
   //Inserisco la src nella griglia
-  if (PreferredGridSize == 0) PreferredGridSize = fm->vert.size()*pp.UGExpansionFactor;
+  if (PreferredGridSize == 0) PreferredGridSize = int(fm->vert.size())*pp.UGExpansionFactor;
   u.Set(fm->vert.begin(), fm->vert.end());//, PreferredGridSize);
   printf("UG %i %i %i\n", u.siz[0], u.siz[1], u.siz[2]);
   return true;
@@ -259,7 +259,7 @@ bool AlignPair::InitFix(AlignPair::A2Mesh *fm,
   u.SetBBox(bb2);
 
   //Inserisco la src nella griglia
-  if (PreferredGridSize == 0) PreferredGridSize = fm->face.size()*pp.UGExpansionFactor;
+  if (PreferredGridSize == 0) PreferredGridSize = int(fm->face.size())*pp.UGExpansionFactor;
   u.Set(fm->face.begin(), fm->face.end(), PreferredGridSize);
   printf("UG %i %i %i\n", u.siz[0], u.siz[1], u.siz[2]);
   return true;
@@ -322,7 +322,7 @@ bool AlignPair::Align(
     Stat::IterInfo ii;
     Box3d movbox;
     InitMov(movvert, movnorm, movbox, out);
-    H.SetRange(0.0f, StartMinDist, 512, 2.5f);
+    H.SetRange(0.0f, float(StartMinDist), 512, 2.5f);
     Pfix.clear();
     Nfix.clear();
     Pmov.clear();
@@ -684,7 +684,7 @@ bool AlignPair::SampleMovVertNormalEqualized(vector<A2Vertex> &vert, int SampleN
   for (size_t i = 0; i < vert.size(); ++i)
   {
     int ind = GenNormal<double>::BestMatchingNormal(vert[i].N(), NV);
-    BKT[ind].push_back(i);
+    BKT[ind].push_back(int(i));
   }
   //int t1=clock();
 

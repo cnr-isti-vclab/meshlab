@@ -115,7 +115,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 
   /******* Occupancy Grid Computation *************/
   cb(0,qUtf8Printable(buf.sprintf("Computing Overlaps %i glued meshes...\n",gluedNum() )));
-  OG.Init(nodeMap.size(), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
+  OG.Init(int(nodeMap.size()), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
   for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni) { 
     MeshNode *mn=ni->second;
 //	foreach(MeshNode *mn, nodeList)

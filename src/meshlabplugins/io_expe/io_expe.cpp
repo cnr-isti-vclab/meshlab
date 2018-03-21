@@ -40,7 +40,7 @@ using namespace vcg;
 
 
 
-bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet & /*parlst*/, CallBackPos *cb, QWidget *parent)
 {
 	// initializing mask
 	mask = 0;
@@ -52,8 +52,6 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	QString error_2MsgFormat = "Error encountered while loading file:\n\"%1\"\n\n File with more than a mesh.\n Load only the first!";
 
 	string filename = QFile::encodeName(fileName).constData ();
-
-	bool normalsUpdated = false;
 
 	if ( (formatName.toLower() == tr("pts")) || (formatName.toLower() == tr("apts")) )
 	{
@@ -98,7 +96,7 @@ bool ExpeIOPlugin::open(const QString &formatName, const QString &fileName, Mesh
 	return true;
 }
 
-bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool ExpeIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
 	QString errorMsgFormat = "Error encountered while exporting file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();

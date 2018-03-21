@@ -167,13 +167,13 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
   QGLFramebufferObject fbo(fbosize,frmt);
 
   float _near, _far;
-  _near=0.1;
-  _far=10000;
+  _near = 0.1f;
+  _far = 10000.0f;
   vcg::Box3f bb=vcg::Box3f::Construct(mesh->bbox);
   GlShot< vcg::Shot<float> >::GetNearFarPlanes(view, bb, _near, _far);
   //assert(_near <= _far);
-  if(_near <= 0) _near = 0.1;
-  if(_far < _near) _far = 1000;
+  if(_near <= 0) _near = 0.1f;
+  if(_far < _near) _far = 1000.0f;
 
 
 //GLenum err = glGetError();

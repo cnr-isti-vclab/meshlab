@@ -47,6 +47,7 @@ MeshEditInterface* EditMutualCorrsFactory::getMeshEditInterface(QAction *action)
 	{
         return new EditMutualCorrsPlugin();
 	} else assert(0); //should never be asked for an action that isnt here
+	return NULL;
 }
 
 QString EditMutualCorrsFactory::getEditToolDescription(QAction *)

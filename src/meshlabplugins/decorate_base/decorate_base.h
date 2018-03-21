@@ -116,7 +116,7 @@ public:
   void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
-  int getDecorationClass(QAction */*action*/) const;
+  int getDecorationClass(QAction * /*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }

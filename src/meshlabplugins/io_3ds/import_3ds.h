@@ -266,7 +266,7 @@ static int Load( OpenMeshType &m, Lib3dsFile *file, Lib3dsNode *node, _3dsInfo &
 							// adding texture name into textures vector (if not already present)
 							// avoid adding the same name twice
 							bool found = false;
-							unsigned size = m.textures.size();
+							unsigned size = unsigned(m.textures.size());
 							unsigned j = 0;
 							while (!found && (j < size))
 							{

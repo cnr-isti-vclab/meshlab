@@ -118,7 +118,7 @@ bool AlignGlobal::VirtAlign::Check()
 			fd +=       Distance(mp,F2M*fp);
 			fd2+=SquaredDistance(mp,F2M*fp);
 		}
-  int nn=MovP.size();
+  int nn = int(MovP.size());
 
     printf("Arc %3i -> %3i : %i pt\n",Fix->id,Mov->id,nn);
   printf("SquaredSum Distance %7.3f %7.3f Avg %7.3f %7.3f\n",fd2, md2, fd2/nn, md2/nn);
@@ -534,7 +534,7 @@ void AlignGlobal::BuildGraph(std::vector<AlignPair::Result *> &Res, vector<Matri
 {
 		Clear();
 		// si suppone che la matrice Tr[i] sia relativa ad un nodo con id Id[i];
-		int i,mn=Tr.size();
+		int i,mn = int(Tr.size());
 
 	//	printf("building graph\n");
 		AlignGlobal::Node rgn;

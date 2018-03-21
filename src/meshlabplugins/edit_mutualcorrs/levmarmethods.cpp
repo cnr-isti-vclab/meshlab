@@ -28,7 +28,7 @@ bool LevmarMethods::calibrate( vcg::Shot<float>* shot,std::list<LevmarCorrelatio
 
     if(createDataSet(corr,shot,data,x,opts,info))
 	{
-		int n= corr->size()*2;
+		int n= int(corr->size())*2;
 		if(!p_foc){
 			int m=6;
 
@@ -159,7 +159,7 @@ void LevmarMethods::Levmar2Shot(vcg::Shot<float>* shot,  double *p,bool p_foc) {
 		//* ROTATION */
 		vcg::Matrix44<vcg::Shot<float>::ScalarType> mat;
 		mat.SetIdentity();
-		mat.FromEulerAngles(p[0],p[1],p[2]);
+		mat.FromEulerAngles(float(p[0]), float(p[1]), float(p[2]));
 
 		shot->Extrinsics.SetRot(mat);
 
@@ -168,13 +168,13 @@ void LevmarMethods::Levmar2Shot(vcg::Shot<float>* shot,  double *p,bool p_foc) {
 		//
 		//tl = vcg::Inverse(shot->Extrinsics.Rot())* vcg::Point3d(-cc.Tx,cc.Ty,cc.Tz);
 
-		shot->Extrinsics.SetTra(vcg::Point3f(p[3], p[4], p[5]));
+		shot->Extrinsics.SetTra(vcg::Point3f(float(p[3]), float(p[4]), float(p[5])));
 	}
 	else
-		shot->Intrinsics.FocalMm=p[0];
+		shot->Intrinsics.FocalMm = float(p[0]);
 }
 
-void LevmarMethods::Cam2Levmar(vcg::Shot<float> *s){
+void LevmarMethods::Cam2Levmar(vcg::Shot<float> * /*s*/){
 	
 	//cp.Ncx = s->Intrinsics.ViewportPx.X();	// [sel]     Number of sensor elements in camera's x direction //
 	//cp.Nfx = s->Intrinsics.ViewportPx.X();	// [pix]     Number of pixels in frame grabber's x direction   //
@@ -194,7 +194,7 @@ void LevmarMethods::Cam2Levmar(vcg::Shot<float> *s){
 }
 
 //Estimate only extrinsics.
-void LevmarMethods::estimateExtr(double *p, double *x, int m, int n, void *data)
+void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
 	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;
@@ -207,9 +207,9 @@ void LevmarMethods::estimateExtr(double *p, double *x, int m, int n, void *data)
 	levmarCam.Extrinsics.SetTra(vcg::Point3d(p[4], p[5], p[6]));
 #else
 	matrix.SetIdentity();
-	matrix.FromEulerAngles(p[0], p[1], p[2]);
+	matrix.FromEulerAngles(float(p[0]), float(p[1]), float(p[2]));
 	levmarCam->Extrinsics.SetRot(matrix);
-	levmarCam->Extrinsics.SetTra(vcg::Point3f(p[3], p[4], p[5]));
+	levmarCam->Extrinsics.SetTra(vcg::Point3f(float(p[3]), float(p[4]), float(p[5])));
 #endif
 	
 	for (int i = 0; i < n/2; i++)

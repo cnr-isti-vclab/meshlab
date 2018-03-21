@@ -319,7 +319,7 @@ void DecorateBasePlugin::DrawLineVector(std::vector<PointPC> &EV)
 
         glVertexPointer(3,vcg::GL_TYPE_NM<Scalarm>::SCALAR(),sizeof(PointPC),&(EV.begin()[0].first));
         glColorPointer(4,GL_UNSIGNED_BYTE,sizeof(PointPC),&(EV.begin()[0].second));
-        glDrawArrays(GL_LINES,0,EV.size());
+        glDrawArrays(GL_LINES,0,GLsizei(EV.size()));
         glDisableClientState (GL_COLOR_ARRAY);
         glDisableClientState (GL_VERTEX_ARRAY);
     }
@@ -786,7 +786,7 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
         focal,ls.Intrinsics.PixelSizeMm[0],ls.Intrinsics.PixelSizeMm[1]);
 }
 
-void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter */*painter*/, QFont /*qf*/)
+void DecorateBasePlugin::DrawCamera(MeshModel *m, Shotm &ls, vcg::Color4b camcolor, Matrix44m &currtr, RichParameterSet *rm, QPainter * /*painter*/, QFont /*qf*/)
 {
     if(!ls.IsValid())  // no drawing if camera not valid
         return;
@@ -912,7 +912,7 @@ void DecorateBasePlugin::DrawColorHistogram(CHist &ch, GLArea *gla, QPainter *pa
     }
     float bn = ch.BinNum();
 
-    float border = 0.15;
+    float border = 0.15f;
     float histH = 1.0f - 2.f*border;
     float histW = 0.3f;
 
@@ -958,20 +958,20 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 {
 	if ((gla == NULL) && (gla->getSceneGLSharedContext() == NULL))
 		return;
-    if(!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    float ratio = float(gla->width())/gla->height();
-    glOrtho(-ratio,ratio,-1,1,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glTranslatef(ratio-1.0,0.0f,0.0f);
-    glScalef(0.9f,0.9f,0.9f);
+	if (!m.hasDataMask(MeshModel::MM_WEDGTEXCOORD)) return;
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	float ratio = float(gla->width()) / gla->height();
+	glOrtho(-ratio, ratio, -1, 1, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(ratio - 1.0, 0.0f, 0.0f);
+	glScalef(0.9f, 0.9f, 0.9f);
 
 	int texInd = 0;
-	QString textureName; 
+	QString textureName;
 
 	if (m.cm.textures.empty())
 	{
@@ -979,67 +979,67 @@ void DecorateBasePlugin::DrawTexParam(MeshModel &m, GLArea *gla, QPainter *paint
 	}
 	else
 	{
-		texInd = std::min(rm->getInt(this->TextureIndexParam()), int(m.cm.textures.size())-1);
+		texInd = std::min(rm->getInt(this->TextureIndexParam()), int(m.cm.textures.size()) - 1);
 		textureName = "TEX " + QString::number(texInd) + ": " + QString(m.cm.textures[texInd].c_str()) + " ";
 	}
 
-    glLabel::render(painter,Point3f(0.0,-0.10,0.0),textureName,glLabel::Mode(textColor));
-    checkGLError::debugInfo("DrawTexParam");
-    drawQuotedLine(Point3d(0,0,0),Point3d(0,1,0),0,1,0.1,painter,qf,0,true);
-    drawQuotedLine(Point3d(0,0,0),Point3d(1,0,0),0,1,0.1,painter,qf,90.0f);
+	glLabel::render(painter, Point3f(0.0f, -0.10f, 0.0f), textureName, glLabel::Mode(textColor));
+	checkGLError::debugInfo("DrawTexParam");
+	drawQuotedLine(Point3d(0, 0, 0), Point3d(0, 1, 0), 0.0f, 1.0f, 0.1f, painter, qf, 0.0f, true);
+	drawQuotedLine(Point3d(0, 0, 0), Point3d(1, 0, 0), 0.0f, 1.0f, 0.1f, painter, qf, 90.0f);
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if( rm->getBool(this->TextureStyleParam()) )
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (rm->getBool(this->TextureStyleParam()))
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	bool faceColor = rm->getBool(this->TextureFaceColorParam());
 	if (faceColor && !m.hasDataMask(MeshModel::MM_FACECOLOR))
 	{
-		this->RealTimeLog("Show UV Tex Param","The model has no face color", "The model has no Face Color");
+		this->RealTimeLog("Show UV Tex Param", "The model has no face color", "The model has no Face Color");
 		faceColor = false;
 	}
-	
-    if(!m.cm.textures.empty())
-    {
+
+	if (!m.cm.textures.empty())
+	{
 		MLSceneGLSharedDataContext* ctx = gla->getSceneGLSharedContext();
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, ctx->getTextureId(m.id(), texInd));
-		
-    }
 
-    glBegin(GL_TRIANGLES);
-    for(size_t i=0;i<m.cm.face.size();++i)
-	if (!m.cm.face[i].IsD() && (m.cm.face[i].WT(0).N()==texInd))
-        {
-            if(faceColor) 
-				glColor(m.cm.face[i].C());
-			else 
-				m.cm.face[i].IsS() ? glColor(vcg::Color4b(vcg::Color4b::Red)) : glColor(vcg::Color4b(vcg::Color4b::White));
-            glTexCoord(m.cm.face[i].WT(0).P());
-            glVertex(m.cm.face[i].WT(0).P());
-            glTexCoord(m.cm.face[i].WT(1).P());
-            glVertex(m.cm.face[i].WT(1).P());
-            glTexCoord(m.cm.face[i].WT(2).P());
-            glVertex(m.cm.face[i].WT(2).P());
-        }
-        glEnd();
-        glDisable(GL_TEXTURE_2D);
+	}
 
-        // Closing 2D
-        glPopAttrib();
+	glBegin(GL_TRIANGLES);
+	for (size_t i = 0; i<m.cm.face.size(); ++i)
+	if (!m.cm.face[i].IsD() && (m.cm.face[i].WT(0).N() == texInd))
+	{
+		if (faceColor)
+			glColor(m.cm.face[i].C());
+		else
+			m.cm.face[i].IsS() ? glColor(vcg::Color4b(vcg::Color4b::Red)) : glColor(vcg::Color4b(vcg::Color4b::White));
+		glTexCoord(m.cm.face[i].WT(0).P());
+		glVertex(m.cm.face[i].WT(0).P());
+		glTexCoord(m.cm.face[i].WT(1).P());
+		glVertex(m.cm.face[i].WT(1).P());
+		glTexCoord(m.cm.face[i].WT(2).P());
+		glVertex(m.cm.face[i].WT(2).P());
+	}
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 
-        glPopMatrix(); // restore modelview
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
+	// Closing 2D
+	glPopAttrib();
 
+	glPopMatrix(); // restore modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
 }
 
 void DecorateBasePlugin::initGlobalParameterSet(QAction *action, RichParameterSet &parset)
@@ -1070,7 +1070,7 @@ switch(ID(action))
 
     case DP_SHOW_NORMALS : 
 	{
-        parset.addParam(new RichFloat(NormalLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+        parset.addParam(new RichFloat(NormalLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
         parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
 		parset.addParam(new RichBool(NormalSelection(), false, "Show Selected", ""));
@@ -1078,7 +1078,7 @@ switch(ID(action))
 
     case DP_SHOW_CURVATURE : 
 	{
-        parset.addParam(new RichFloat(CurvatureLength(),0.05,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+        parset.addParam(new RichFloat(CurvatureLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
         parset.addParam(new RichBool(ShowPerVertexCurvature(),true,"Per Vertex",""));
         parset.addParam(new RichBool(ShowPerFaceCurvature(),true,"Per Face",""));
 	} break;
