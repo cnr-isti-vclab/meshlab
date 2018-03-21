@@ -175,7 +175,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		}
 
 		Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-			AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05), AngleD.Percentile(0.95));
+			AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05f), AngleD.Percentile(0.95f));
 
 		Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
 		return true;

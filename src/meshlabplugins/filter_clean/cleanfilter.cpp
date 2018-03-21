@@ -420,7 +420,7 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
   for(CMeshO::VertexIterator vi=m.vert.begin();vi!=m.vert.end();++vi)
     if((*vi).IsB())
       {
-        cb((tri::Index(m,*vi) *100) / m.vn,"Snapping vertices");
+        cb((int(tri::Index(m,*vi)) * 100) / m.vn,"Snapping vertices");
         vector<CMeshO::FacePointer> faceVec;
         vector<float> distVec;
         vector<Point3m> pointVec;
@@ -435,8 +435,8 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 //        qDebug("Found %i face for vertex %i",faceFound,vi-m.vert.begin());
         for(int i=0;i<faceFound;++i)
         {
-          const float epsilonSmall = 1e-5;
-          const float epsilonBig = 1e-2;
+          const float epsilonSmall = float(1e-5);
+		  const float epsilonBig = float(1e-2);
           CMeshO::FacePointer fp=faceVec[i];
           InterpolationParameters(*fp,fp->cN(),pointVec[i],u);
 //          qDebug(" face %i face for vertex %5.3f %5.3f %5.3f  dist %5.3f  (%c %c %c)",fp-&*m.face.begin(),u[0],u[1],u[2],distVec[i],IsBorder(*fp,0)?'b':' ',IsBorder(*fp,1)?'b':' ',IsBorder(*fp,2)?'b':' ');
@@ -506,7 +506,7 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
       ++firstVert;
     }
   tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(m);
-  return splitVertVec.size();
+  return int(splitVertVec.size());
   }
 
 

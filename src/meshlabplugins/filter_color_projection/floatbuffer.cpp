@@ -124,7 +124,6 @@ int floatbuffer::setval(int xx, int yy, float val)
 int floatbuffer::applysobel(floatbuffer *from)
 {
   int xx,yy;
-  float val;
   float accum;
   if(!loaded)
 	  return -1;
@@ -183,8 +182,6 @@ int floatbuffer::fillwith(float val)
 
 int floatbuffer::initborder(floatbuffer* zerofrom)
 {
- int kk;
- int xx,yy;
  float maxf,minf;
  maxf = -10000000;
  minf =  10000000;
@@ -216,7 +213,7 @@ int floatbuffer::initborder(floatbuffer* zerofrom)
 	 if(data[kk] != 0)
 		myhist.Add(data[kk]);
 
- float bthreshold = myhist.Percentile(0.90);
+ float bthreshold = myhist.Percentile(0.90f);
 
  for(int kk=0; kk< sx*sy; kk++)
  {
@@ -322,17 +319,12 @@ int floatbuffer::distancefield()
 int floatbuffer::dumppfm(QString filename)
 {
  FILE* miofile;
+ int res;
 
  miofile = fopen(filename.toUtf8().data(), "wb");
 
- int res;
-
- char buff[64];
-
  fprintf(miofile,"PF\n");
-
  fprintf(miofile,"%i %i\n",sx,sy);
-
  fprintf(miofile,"-1.000000\n",sx,sy);
 
  for(int kk=0; kk< sx*sy; kk++)
@@ -342,9 +334,8 @@ int floatbuffer::dumppfm(QString filename)
   res = fwrite(&(data[kk]), sizeof(float), 1, miofile);
  }
 
-
  fclose(miofile);
 
-	return 1;
+ return 1;
 }
 

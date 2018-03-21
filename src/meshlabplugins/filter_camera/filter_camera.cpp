@@ -61,6 +61,7 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
     case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Re-Orient vertex normals using cameras");
     default : assert(0);
     }
+	return NULL;
 }
 
 // Info() return the longer string describing each filtering action
@@ -77,6 +78,7 @@ QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
     case FP_ORIENT_NORMALS_WITH_CAMERAS:return QString("Reorient vertex normals using cameras. For this  filter to work the mesh needs to have the attribute 'correspondences' which is only created when loading Bundler files (.out projects)");
     default : assert(0);
     }
+	return NULL;
 }
 
 // This function define the needed parameters for each filter.
@@ -177,7 +179,7 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos */*cb*/)
+bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
     MeshModel* mesh = md.mm();
     CMeshO* cm = NULL;
@@ -687,15 +689,15 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
 {
     switch (ID(filter))
     {
-    case FP_SET_MESH_CAMERA :
-    case FP_CAMERA_ROTATE   :
-    case FP_CAMERA_TRANSLATE   :
-    case FP_CAMERA_TRANSFORM:
-    case FP_CAMERA_SCALE                  :
-        return MeshModel::MM_ALL + RasterModel::RM_ALL;
-    case FP_QUALITY_FROM_CAMERA           :
-        return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
-    default                  : return MeshModel::MM_ALL;
+	case FP_SET_MESH_CAMERA:
+	case FP_CAMERA_ROTATE:
+	case FP_CAMERA_TRANSLATE:
+	case FP_CAMERA_TRANSFORM:
+	case FP_CAMERA_SCALE:
+		return MeshModel::MM_ALL + RasterModel::RM_ALL;
+	case FP_QUALITY_FROM_CAMERA:
+		return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
+	default: return MeshModel::MM_ALL;
     }
 }
 
@@ -717,42 +719,43 @@ FilterCameraPlugin::FilterClass FilterCameraPlugin::getClass(QAction *a)
 		return FilterClass(MeshFilterInterface::Camera + MeshFilterInterface::Layer);
     }
     assert(0);
+	return MeshFilterInterface::Camera;
 }
 
 int FilterCameraPlugin::getPreConditions( QAction * a) const
 {
-    switch(ID(a))
-    {
-    case FP_CAMERA_ROTATE :
-    case FP_CAMERA_SCALE :
-    case FP_CAMERA_TRANSLATE :
-    case FP_CAMERA_TRANSFORM:
-    case FP_QUALITY_FROM_CAMERA :
-    case FP_SET_RASTER_CAMERA :
-    case FP_SET_MESH_CAMERA :
-        return MeshModel::MM_NONE;
-    case FP_ORIENT_NORMALS_WITH_CAMERAS:
-        return MeshModel::MM_VERTNORMAL;
-    }
-    assert(0);
+	switch (ID(a))
+	{
+	case FP_CAMERA_ROTATE:
+	case FP_CAMERA_SCALE:
+	case FP_CAMERA_TRANSLATE:
+	case FP_CAMERA_TRANSFORM:
+	case FP_QUALITY_FROM_CAMERA:
+	case FP_SET_RASTER_CAMERA:
+	case FP_SET_MESH_CAMERA:
+		return MeshModel::MM_NONE;
+	case FP_ORIENT_NORMALS_WITH_CAMERAS:
+		return MeshModel::MM_VERTNORMAL;
+	}
+	assert(0);
+	return NULL;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity( QAction* act ) const
 {
-    switch(ID(act))
-    {
-    case FP_CAMERA_ROTATE :
-    case FP_CAMERA_SCALE :
-    case FP_CAMERA_TRANSLATE :
-    case FP_CAMERA_TRANSFORM:
-    case FP_QUALITY_FROM_CAMERA :
-    case FP_SET_RASTER_CAMERA :
-        return SINGLE_MESH;
-    case FP_SET_MESH_CAMERA :
-        return SINGLE_MESH;
-    case FP_ORIENT_NORMALS_WITH_CAMERAS:
-        return SINGLE_MESH;
-    }
+	switch (ID(act))
+	{
+	case FP_CAMERA_ROTATE:
+	case FP_CAMERA_SCALE:
+	case FP_CAMERA_TRANSLATE:
+	case FP_CAMERA_TRANSFORM:
+	case FP_QUALITY_FROM_CAMERA:
+	case FP_SET_RASTER_CAMERA:
+	case FP_SET_MESH_CAMERA:
+	case FP_ORIENT_NORMALS_WITH_CAMERAS:
+		return SINGLE_MESH;
+	}
+	return SINGLE_MESH;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterCameraPlugin)

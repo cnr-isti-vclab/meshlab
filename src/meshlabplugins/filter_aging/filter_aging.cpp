@@ -62,6 +62,7 @@ GeometryAgingPlugin::~GeometryAgingPlugin()
         default:
             assert(0);
     }
+	return NULL;
 }
 
 
@@ -74,6 +75,7 @@ GeometryAgingPlugin::~GeometryAgingPlugin()
         default:
             assert(0);
     }
+	return NULL;
 }
 
 /* Initializes the list of parameters (called by the auto dialog framework) */

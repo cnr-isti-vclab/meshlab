@@ -80,6 +80,7 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
     default : assert(0);
     }
+	return NULL;
 }
 
 // Info() return the longer string describing each filtering action
@@ -103,6 +104,7 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
     default : assert(0);
     }
+	return NULL;
 }
 
 // This function define the needed parameters for each filter.
@@ -744,7 +746,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			for (int i = 0; i < cameras.size(); i++)
 			{
 				QDomNode n = cameras.item(i);
-				int id = n.attributes().namedItem("id").nodeValue().toInt();
+				//int id = n.attributes().namedItem("id").nodeValue().toInt();
 				int sensor_id = n.attributes().namedItem("sensor_id").nodeValue().toInt();
 				QString name = n.attributes().namedItem("label").nodeValue();
 

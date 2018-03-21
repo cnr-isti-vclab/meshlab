@@ -61,6 +61,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
   case CR_FITPLANE: return QString("Fit a plane to selection");
   default : assert(0);
   }
+  return NULL;
 }
 
 // Info() must return the longer string describing each filtering action
@@ -82,6 +83,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
   case CR_FITPLANE: return QString("Create a quad on the plane fitting the selection");
   default : assert(0);
   }
+  return NULL;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -450,7 +452,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 					vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
 				tri::UpdateBounding<CMeshO>::Box(tt);
 
-				const float SphereArea = 4*M_PI;
+				const float SphereArea = float(4 * M_PI);
 				float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
 
 				std::vector<Point3m> sampleVec;
@@ -562,6 +564,7 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
 		case CR_FITPLANE:  return QString("fitplane");
 		default : assert(0);
     }
+	return NULL;
  }
 
 

@@ -108,27 +108,27 @@ void FilterFractal::initParameterSetForFractalDisplacement(QAction *filter, Mesh
 
     if(terrain_filter) {
         par.addParam(new RichInt("steps", 8, "Subdivision steps:", "Defines the detail of the generated terrain. Allowed values are in range [2,9]. Use values from 6 to 9 to obtain reasonable results."));
-        par.addParam(new RichDynamicFloat("maxHeight", 0.2, 0, 1, "Max height:", "Defines the maximum perturbation height as a fraction of the terrain's side."));
+        par.addParam(new RichDynamicFloat("maxHeight", 0.2f, 0.0f, 1.0f, "Max height:", "Defines the maximum perturbation height as a fraction of the terrain's side."));
     } else {
         float diag = md.mm()->cm.bbox.Diag();
         par.addParam(new RichAbsPerc("maxHeight", 0.02 * diag, 0, 0.5*diag, "Max height:", "Defines the maximum height for the perturbation."));
     }
 
-    par.addParam(new RichDynamicFloat("scale", 1, 0, 10, "Scale factor:", "Scales the fractal perturbation in and out. Values larger than 1 mean zoom out; values smaller than one mean zoom in."));
+    par.addParam(new RichDynamicFloat("scale", 1.0f, 0.0f, 10.0f, "Scale factor:", "Scales the fractal perturbation in and out. Values larger than 1 mean zoom out; values smaller than one mean zoom in."));
     if (!terrain_filter)
     {
         par.addParam(new RichInt("smoothingSteps", 5, "Normals smoothing steps:", "Face normals will be smoothed to make the perturbation more homogeneous. This parameter represents the number of smoothing steps." ));
     }
-    par.addParam(new RichFloat("seed", 2, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
+    par.addParam(new RichFloat("seed", 2.0f, "Seed:", "By varying this seed, the terrain morphology will change.\nDon't change the seed if you want to refine the current terrain morphology by changing the other parameters."));
 
     QStringList algList;
     algList << "fBM (fractal Brownian Motion)" << "Standard multifractal" << "Heterogeneous multifractal" << "Hybrid multifractal terrain" << "Ridged multifractal terrain";
     par.addParam(new RichEnum("algorithm", 4, algList, "Algorithm", "The algorithm with which the fractal terrain will be generated."));
-    par.addParam(new RichDynamicFloat("octaves", 8.0, 1.0, 20.0, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]."));
+    par.addParam(new RichDynamicFloat("octaves", 8.0f, 1.0f, 20.0f, "Octaves:", "The number of Perlin noise frequencies that will be used to generate the terrain. Reasonable values are in range [2,9]."));
     par.addParam(new RichFloat("lacunarity", 4.0, "Lacunarity:", "The gap between noise frequencies. This parameter is used in conjunction with fractal increment to compute the spectral weights that contribute to the noise in each octave."));
-    par.addParam(new RichFloat("fractalIncrement", terrain_filter? 0.5 : 0.2, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
-    par.addParam(new RichFloat("offset", 0.9, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
-    par.addParam(new RichFloat("gain", 2.5, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
+    par.addParam(new RichFloat("fractalIncrement", terrain_filter? 0.5f : 0.2f, "Fractal increment:", "This parameter defines how rough the generated terrain will be. The range of reasonable values changes according to the used algorithm, however you can choose it in range [0.2, 1.5]."));
+    par.addParam(new RichFloat("offset", 0.9f, "Offset:", "This parameter controls the multifractality of the generated terrain. If offset is low, then the terrain will be smooth."));
+    par.addParam(new RichFloat("gain", 2.5f, "Gain:", "Ignored in all the algorithms except the ridged one. This parameter defines how hard the terrain will be."));
     par.addParam(new RichBool("saveAsQuality", false, "Save as vertex quality", "Saves the perturbation value as vertex quality."));
 }
 
@@ -161,16 +161,16 @@ void FilterFractal::initParameterSetForCratersGeneration(MeshDocument &md, RichP
     algList << "f1 (Gaussian)" << "f2 (Multiquadric)" << "f3";
     par.addParam(new RichEnum("rbf", 1, algList, "Radial function:", "The radial function used to generate craters."));
 
-    par.addParam(new RichDynamicFloat("min_radius", 0.1, 0, 1, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
-    par.addParam(new RichDynamicFloat("max_radius", 0.35, 0, 1, "Max crater radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
-    par.addParam(new RichDynamicFloat("min_depth", 0.05, 0, 1, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
-    par.addParam(new RichDynamicFloat("max_depth", 0.15, 0, 1, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
-    par.addParam(new RichDynamicFloat("elevation", 0.4, 0, 1, "Elevation:", "Defines how much the crater rise itself from the mesh surface, giving an \"impact-effect\"."));
+	par.addParam(new RichDynamicFloat("min_radius", 0.1f, 0.0f, 1.0f, "Min crater radius:", "Defines the minimum radius of craters in range [0, 1]. Values near 0 mean very small craters."));
+	par.addParam(new RichDynamicFloat("max_radius", 0.35f, 0.0f, 1.0f, "Max crater radius:", "Defines the maximum radius of craters in range [0, 1]. Values near 1 mean very large craters."));
+	par.addParam(new RichDynamicFloat("min_depth", 0.05f, 0.0f, 1.0f, "Min crater depth:", "Defines the minimum depth of craters in range [0, 1]."));
+	par.addParam(new RichDynamicFloat("max_depth", 0.15f, 0.0f, 1.0f, "Max crater depth:", "Defines the maximum depth of craters in range [0, 1]. Values near 1 mean very deep craters."));
+	par.addParam(new RichDynamicFloat("elevation", 0.4f, 0.0f, 1.0f, "Elevation:", "Defines how much the crater rise itself from the mesh surface, giving an \"impact-effect\"."));
 
     QStringList blendList;
     blendList << "Exponential blending" << "Linear blending" << "Gaussian blending" << "f3 blending";
     par.addParam(new RichEnum("blend", 3, blendList, "Blending algorithm:", "The algorithm that is used to blend the perturbation towards the mesh surface."));
-    par.addParam(new RichDynamicFloat("blendThreshold", 0.8, 0, 1, "Blending threshold:", "The fraction of craters radius beyond which the radial function is replaced with the blending function."));
+	par.addParam(new RichDynamicFloat("blendThreshold", 0.8f, 0.0f, 1.0f, "Blending threshold:", "The fraction of craters radius beyond which the radial function is replaced with the blending function."));
     par.addParam(new RichBool("successiveImpacts", true, "Successive impacts", "If not checked, the impact-effects of generated craters will be superimposed with each other."));
     par.addParam(new RichBool("ppNoise", true, "Postprocessing noise", "Slightly perturbates the craters with a noise function."));
     par.addParam(new RichBool("invert", false, "Invert perturbation", "If checked, inverts the sign of radial perturbation to create bumps instead of craters."));
@@ -288,6 +288,7 @@ int FilterFractal::getRequirements(QAction *filter)
         break;
     default: assert(0);
     }
+	return MeshModel::MM_NONE;
 }
 
 int FilterFractal::postCondition(QAction *filter) const
@@ -295,14 +296,13 @@ int FilterFractal::postCondition(QAction *filter) const
     switch(ID(filter))
     {
     case CR_FRACTAL_TERRAIN:
-		return MeshModel::MM_ALL;
-		break;
     case FP_FRACTAL_MESH:
     case FP_CRATERS:
         return MeshModel::MM_ALL;
         break;
     default: assert(0);
     }
+	return MeshModel::MM_ALL;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterFractal::filterArity( QAction* act ) const

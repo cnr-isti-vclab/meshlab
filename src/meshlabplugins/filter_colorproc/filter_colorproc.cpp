@@ -479,6 +479,7 @@ bool FilterColorProc::applyFilter(QAction *filter, MeshDocument& md, RichParamet
 
     default: assert(0);
   }
+  return MeshFilterInterface::VertexColoring;
 }
 
 int FilterColorProc::postCondition( QAction* filter ) const

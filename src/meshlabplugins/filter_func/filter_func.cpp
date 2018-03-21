@@ -341,13 +341,13 @@ void FilterFunctionPlugin::initParameterSet(QAction *action,MeshModel &m, RichPa
                                  "Grid is first generated and than moved into origin (using muparser lib to perform fast calc on every vertex)"));
     break;
   case FF_ISOSURFACE :
-    parlst.addParam(new RichFloat("voxelSize", 0.05, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times."));
-    parlst.addParam(new RichFloat("minX", -1, "Min X", "Range where the field is sampled"));
-    parlst.addParam(new RichFloat("minY", -1, "Min Y", "Range where the field is sampled"));
-    parlst.addParam(new RichFloat("minZ", -1, "Min Z", "Range where the field is sampled"));
-    parlst.addParam(new RichFloat("maxX",  1, "Max X", "Range where the field is sampled"));
-    parlst.addParam(new RichFloat("maxY",  1, "Max Y", "Range where the field is sampled"));
-    parlst.addParam(new RichFloat("maxZ",  1, "Max Z", "Range where the field is sampled"));
+    parlst.addParam(new RichFloat("voxelSize", 0.05f, "Size of Voxel", "Size of the voxel that is used by for the grid where the field is sampled. Smaller this value, higher precision, but higher processing times."));
+    parlst.addParam(new RichFloat("minX", -1.0f, "Min X", "Range where the field is sampled"));
+	parlst.addParam(new RichFloat("minY", -1.0f, "Min Y", "Range where the field is sampled"));
+	parlst.addParam(new RichFloat("minZ", -1.0f, "Min Z", "Range where the field is sampled"));
+	parlst.addParam(new RichFloat("maxX", 1.0f, "Max X", "Range where the field is sampled"));
+	parlst.addParam(new RichFloat("maxY", 1.0f, "Max Y", "Range where the field is sampled"));
+	parlst.addParam(new RichFloat("maxZ", 1.0f, "Max Z", "Range where the field is sampled"));
     parlst.addParam(new RichString("expr","x*x+y*y+z*z-0.5","Function =", "This expression is evaluated for each voxel of the grid. The surface passing through the zero valued points of this field is then extracted using marching cube."));
 
     break;

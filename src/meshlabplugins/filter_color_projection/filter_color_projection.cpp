@@ -75,6 +75,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
     case FP_MULTIIMAGETRIVIALPROJTEXTURE	:	return QString("Project active rasters color to current mesh, filling the texture");
     default : assert(0);
     }
+	return NULL;
 }
 
 // Info() return the longer string describing each filtering action
@@ -86,6 +87,7 @@ QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
     case FP_MULTIIMAGETRIVIALPROJTEXTURE  :	return QString("Color information from all the active rasters is perspective-projected on the current mesh, filling the texture, using basic weighting");
     default : assert(0);
     }
+	return NULL;
 }
 
 // What "new" properties the plugin requires
@@ -103,8 +105,6 @@ int FilterColorProjectionPlugin::getRequirements(QAction *action){
 // This function define the needed parameters for each filter.
 void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
-    MeshModel *mm=md.mm();
-
     switch(ID(action))
     {
     case FP_SINGLEIMAGEPROJ :
@@ -347,9 +347,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             double *acc_red;
             double *acc_grn;
             double *acc_blu;
-
-            // filename for debug dump
-            char dumpFileName[1024];
 
             // get current model
             model = md.mm();
@@ -595,7 +592,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                 return false;
             }
 
-            bool onselection = par.getBool("onselection");
+            //bool onselection = par.getBool("onselection");
             int texsize = par.getInt("texsize");
             bool  dorefill = par.getBool("dorefill");
             float eta = par.getFloat("deptheta");
