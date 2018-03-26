@@ -468,7 +468,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 		line2 = "C to clear polyline, BACKSPACE to remove last point";
 
 		if (selPolyLine.size() < 3)
-			line3 = "more points needed";
+			line3 = "cannot select - more points needed";
 		else
 			line3 = "Q to add, W to subtract, E to invert";
 
@@ -598,6 +598,11 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 
 	if (selectionMode == SELECT_AREA_MODE)
 	{
+		if (m.cm.fn > 0)
+			areaMode = 1;
+		else
+			areaMode = 0;
+
 		selPolyLine.clear();
         gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}
