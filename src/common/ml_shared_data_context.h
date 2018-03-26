@@ -200,6 +200,10 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
     _perpoint_pointattenuation_enabled = bset[31];
   }
 
+	static float minPointSize()
+	{
+		return 1.0f;
+	}
 
 	static float maxPointSize()
 	{

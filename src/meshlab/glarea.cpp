@@ -1329,7 +1329,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
             }
         case Qt::AltModifier:
             { 
-                glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f, MLPerViewGLOptions::maxPointSize());
+				glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
                 MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
                 if (cont != NULL)
                 {
@@ -1980,8 +1980,8 @@ float GLArea::getCameraDistance()
 
 void GLArea::initializeShot(Shotm &shot)
 {
-    shot.Intrinsics.PixelSizeMm[0]=0.036916077;
-    shot.Intrinsics.PixelSizeMm[1]=0.036916077;
+    shot.Intrinsics.PixelSizeMm[0]=0.036916077f;
+    shot.Intrinsics.PixelSizeMm[1]=0.036916077f;
 
     shot.Intrinsics.DistorCenterPx[0]=width()/2;
     shot.Intrinsics.DistorCenterPx[1]=height()/2;
@@ -2330,7 +2330,7 @@ void GLArea::toggleOrtho()
 
 void GLArea::trackballStep(QString dir)
 {
-	float stepAngle = M_PI / 12.0;
+	float stepAngle = float(M_PI / 12.0);
 
 	if (dir == tr("Horizontal +"))
 		trackball.track.rot = Quaternionf(-stepAngle, Point3f(0.0, 1.0, 0.0)) * trackball.track.rot;
