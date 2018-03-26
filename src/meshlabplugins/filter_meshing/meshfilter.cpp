@@ -312,8 +312,8 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_COMPUTE_PRINC_CURV_DIR             : return tr("Compute the principal directions of curvature with several algorithms");
     case FP_CLOSE_HOLES                        : return tr("Close holes smaller than a given threshold");
     case FP_CYLINDER_UNWRAP                    : return tr("Unwrap the geometry of current mesh along a clylindrical equatorial projection. The cylindrical projection axis is centered on the origin and directed along the vertical <b>Y</b> axis.");
-    case FP_QUAD_PAIRING                       : return tr("Convert into a tri-mesh into a quad mesh by pairing triangles.");
-    case FP_QUAD_DOMINANT                      : return tr("Convert into a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
+    case FP_QUAD_PAIRING                       : return tr("Convert a tri-mesh into a quad mesh by pairing triangles.");
+    case FP_QUAD_DOMINANT                      : return tr("Convert a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
     case FP_MAKE_PURE_TRI                      : return tr("Convert into a tri-mesh by splitting any polygonal face.");
     case FP_FAUX_CREASE                        : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.<br>"
                                                            "Angle between face normal is considered signed according to convexity/concavity."
