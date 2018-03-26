@@ -31,7 +31,6 @@ SUBDIRS       = common \
 #                meshlabplugins/filter_colorize\
 #                meshlabplugins/filter_create\
 #                meshlabplugins/filter_layer\
-#                meshlabplugins/filter_measure\
 #                meshlabplugins/filter_mutualinfoxml \                
 #                meshlabplugins/filter_sampling\
 #                meshlabplugins/filter_select \
