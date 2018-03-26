@@ -692,7 +692,6 @@ void EditReferencingPlugin::calculateMatrix()
     vector<vcg::Point3d> MovP;
 
     int pindex = 0;
-    float TrError=0;
 
     // constructing a vector of only ACTIVE points, plus indices and names, just for convenience
     // matrix calculation function uses all points in the vector, while in the filter we keep

@@ -193,7 +193,7 @@ void SampleEditPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 	}
 }
 
-void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gla, QPainter *p)
+void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea * /*gla*/, QPainter *p)
 {
 	QString buf = QString("f#%1 - v#(%2 %3 %4)").arg(QString::number(tri::Index(m.cm, fp))).arg(QString::number(tri::Index(m.cm, fp->V(0)))).arg(QString::number(tri::Index(m.cm, fp->V(1)))).arg(QString::number(tri::Index(m.cm, fp->V(2))));
 	if (m.hasDataMask(MeshModel::MM_FACECOLOR))
@@ -217,7 +217,7 @@ void SampleEditPlugin::drawFace(CMeshO::FacePointer fp, MeshModel &m, GLArea *gl
     }
 }
 
-void SampleEditPlugin::drawVert(CMeshO::VertexPointer vp, MeshModel &m, GLArea *gla, QPainter *p)
+void SampleEditPlugin::drawVert(CMeshO::VertexPointer vp, MeshModel &m, GLArea * /*gla*/, QPainter *p)
 {
 	QString buf;
 	buf = QString("v#%1 - pos[%2 %3 %4]").arg(QString::number(vp - &m.cm.vert[0])).arg(QString::number(vp->P()[0])).arg(QString::number(vp->P()[1])).arg(QString::number(vp->P()[2]));

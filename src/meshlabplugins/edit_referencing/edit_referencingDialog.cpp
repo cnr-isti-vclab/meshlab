@@ -474,7 +474,7 @@ void edit_referencingDialog::on_tableWidgetDist_cellDoubleClicked(int row, int c
     return;
 }
 
-void edit_referencingDialog::on_tableWidgetDist_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+void edit_referencingDialog::on_tableWidgetDist_currentCellChanged(int /*currentRow*/, int /*currentColumn*/, int /*previousRow*/, int /*previousColumn*/)
 {
     this->referencingPlugin->status_error = "";
     this->referencingPlugin->glArea->update();

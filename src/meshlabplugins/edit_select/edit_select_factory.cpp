@@ -61,7 +61,7 @@ MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 	assert(0); //should never be asked for an action that isnt here
 }
 
-QString EditSelectFactory::getEditToolDescription(QAction */*a*/)
+QString EditSelectFactory::getEditToolDescription(QAction * /*a*/)
 {
   return EditSelectPlugin::Info();
 }

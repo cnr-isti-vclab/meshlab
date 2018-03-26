@@ -87,7 +87,7 @@ bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDat
 	return true;
 }
 
-void QualityMapperPlugin::EndEdit(MeshModel & m, GLArea *,MLSceneGLSharedDataContext* cont)
+void QualityMapperPlugin::EndEdit(MeshModel & /*m*/, GLArea *,MLSceneGLSharedDataContext* /*cont*/)
 {
 	//if a dialog exists, it's time to destroy it
 	if ( _qualityMapperDialog )
