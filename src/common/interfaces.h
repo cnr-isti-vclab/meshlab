@@ -228,26 +228,26 @@ public:
 	*/
 	enum FilterClass
 	{
-		Generic = 0x00000, /*!< Should be avoided if possible. */  //
-		Selection = 0x00001, /*!<  select or de-select something, basic operation on selections (like deleting)*/
-		Cleaning = 0x00002, /*!<  Filters that can be used to clean meshes (duplicated vertices etc)*/
-		Remeshing = 0x00004, /*!<  Simplification, Refinement, Reconstruction and mesh optimization*/
-		FaceColoring = 0x00008,
+		Generic        = 0x00000, /*!< Should be avoided if possible. */  //
+		Selection      = 0x00001, /*!<  select or de-select something, basic operation on selections (like deleting)*/
+		Cleaning       = 0x00002, /*!<  Filters that can be used to clean meshes (duplicated vertices etc)*/
+		Remeshing      = 0x00004, /*!<  Simplification, Refinement, Reconstruction and mesh optimization*/
+		FaceColoring   = 0x00008,
 		VertexColoring = 0x00010,
-		MeshColoring = 0x00020,
-		MeshCreation = 0x00040,
-		Smoothing = 0x00080, /*!<  Stuff that does not change the topology, but just the vertex positions*/
-		Quality = 0x00100,
-		Layer = 0x00200, /*!<  Layers, attributes */
-		RasterLayer = 0x00400, /*!<  Raster Layers, attributes */
-		Normal = 0x00800, /*!<  Normal, Curvature, orientation (rotations and transformations fall here)*/
-		Sampling = 0x01000,
-		Texture = 0x02000,
-		RangeMap = 0x04000, /*!<  filters specific for range map processing*/
-		PointSet = 0x08000,
-		Measure = 0x10000,  /*!<  Filters that compute measures and information on meshes.*/
-		Polygonal = 0x20000,   /*!<  Filters that works on polygonal and quad meshes.*/
-		Camera = 0x40000          /*!<  Filters that works on shot of mesh and raster.*/
+		MeshColoring   = 0x00020,
+		MeshCreation   = 0x00040,
+		Smoothing      = 0x00080, /*!<  Stuff that does not change the topology, but just the vertex positions*/
+		Quality        = 0x00100,
+		Layer          = 0x00200, /*!<  Layers, attributes */
+		RasterLayer    = 0x00400, /*!<  Raster Layers, attributes */
+		Normal         = 0x00800, /*!<  Normal, Curvature, orientation (rotations and transformations fall here)*/
+		Sampling       = 0x01000,
+		Texture        = 0x02000,
+		RangeMap       = 0x04000, /*!<  filters specific for range map processing*/
+		PointSet       = 0x08000,
+		Measure        = 0x10000, /*!<  Filters that compute measures and information on meshes.*/
+		Polygonal      = 0x20000, /*!<  Filters that works on polygonal and quad meshes.*/
+		Camera         = 0x40000  /*!<  Filters that works on shot of mesh and raster.*/
 	};
 
 
