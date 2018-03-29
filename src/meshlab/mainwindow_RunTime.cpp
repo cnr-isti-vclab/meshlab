@@ -2558,7 +2558,7 @@ void MainWindow::newProject(const QString& projName)
 	//if(mdiarea->isVisible())
     updateLayerDialog();
     mvcont->showMaximized();
-    connect(mvcont->sharedDataContext(),SIGNAL(currentAllocatedGPUMem(int,int)),this,SLOT(updateGPUMemBar(int,int)));
+    connect(mvcont->sharedDataContext(),SIGNAL(currentAllocatedGPUMem(int,int,int,int)),this,SLOT(updateGPUMemBar(int,int,int,int)));
 }
 
 void MainWindow::documentUpdateRequested()
@@ -2581,17 +2581,36 @@ void MainWindow::documentUpdateRequested()
 	}
 }
 
-void MainWindow::updateGPUMemBar(int allmem,int currentallocated)
+void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati_free_tex, int ati_free_vbo)
 {
 #ifdef Q_OS_WIN
     if (nvgpumeminfo != NULL)
     {
-        nvgpumeminfo->setFormat( "Mem %p% %v/%m MB" );
-        int allmb = allmem/1024;
-        nvgpumeminfo->setRange(  0 , allmb );
-        int remainingmb = (allmem-currentallocated)/1024;
-        nvgpumeminfo->setValue( remainingmb);
-        nvgpumeminfo->setFixedWidth(300);
+		if (nv_allmem + nv_currentallocated > 0)
+		{
+			nvgpumeminfo->setFormat("Mem %p% %v/%m MB");
+			int allmb = nv_allmem / 1024;
+			nvgpumeminfo->setRange(0, allmb);
+			int remainingmb = (nv_allmem - nv_currentallocated) / 1024;
+			nvgpumeminfo->setValue(remainingmb);
+			nvgpumeminfo->setFixedWidth(300);
+		}
+		else if (ati_free_tex + ati_free_vbo > 0)
+		{
+			int texmb = ati_free_tex / 1024;
+			int vbomb = ati_free_vbo / 1024;
+			nvgpumeminfo->setFormat(QString("Free: " + QString::number(vbomb) + "MB vbo - " + QString::number(texmb) + "MB tex"));
+			nvgpumeminfo->setRange(0, 100);
+			nvgpumeminfo->setValue(100);
+			nvgpumeminfo->setFixedWidth(300);
+		}
+		else
+		{
+			nvgpumeminfo->setFormat("UNRECOGNIZED CARD");
+			nvgpumeminfo->setRange(0, 100);
+			nvgpumeminfo->setValue(0);
+			nvgpumeminfo->setFixedWidth(300);
+		}
     }
 #else
     nvgpumeminfo->hide();

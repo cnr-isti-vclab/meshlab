@@ -389,17 +389,28 @@ bool MLSceneGLSharedDataContext::isBORenderingAvailable( int mmid )
 
 #define GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX   0x9048
 #define GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX 0x9049
+#define VBO_FREE_MEMORY_ATI 0x87FB
+#define TEXTURE_FREE_MEMORY_ATI  0x87FC
+#define RENDERBUFFER_FREE_MEMORY_ATI 0x87FD
 
 void MLSceneGLSharedDataContext::updateGPUMemInfo()
 {   
     QGLContext* ctx = makeCurrentGLContext();
-    GLint allmem = 0;
-    glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
 
+	GLint allmem = 0;
+    glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
     GLint currentallocated = 0;
     glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &currentallocated);
+	GLenum errorNV = glGetError(); // purge errors
+
+	GLint ATI_vbo[4] = { 0, 0, 0, 0 };
+	glGetIntegerv(VBO_FREE_MEMORY_ATI, ATI_vbo);
+	GLint ATI_tex[4] = { 0, 0, 0, 0 };
+	glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, ATI_tex);
+	GLenum errorATI = glGetError(); // purge errors
+
     doneCurrentGLContext(ctx);
-    emit currentAllocatedGPUMem((int)allmem,(int)currentallocated);
+	emit currentAllocatedGPUMem((int)allmem, (int)currentallocated, (int)ATI_tex[0], (int)ATI_vbo[0]);
 }
 
 //void MLSceneGLSharedDataContext::updateRequested( int meshid,MLRenderingData::ATT_NAMES name )

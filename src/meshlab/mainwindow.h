@@ -249,7 +249,7 @@ private slots:
 	void switchCurrentContainer(QMdiSubWindow *);
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
-    void updateGPUMemBar(int,int);
+    void updateGPUMemBar(int,int,int,int);
 
 	void updateLog();
 private:
