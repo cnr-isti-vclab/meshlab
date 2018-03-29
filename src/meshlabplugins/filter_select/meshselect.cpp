@@ -665,7 +665,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
     case FP_SELECT_CONNECTED: return MeshModel::MM_FACEFACETOPO;
   
 	case CP_SELECT_TEXBORDER: return MeshModel::MM_FACEFACETOPO;
-	case CP_SELFINTERSECT_SELECT: return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACECOLOR;
+	case CP_SELFINTERSECT_SELECT: return MeshModel::MM_FACEMARK | MeshModel::MM_FACEFACETOPO;
 
 	case FP_SELECT_FOLD_FACE: return MeshModel::MM_VERTFACETOPO;
 
