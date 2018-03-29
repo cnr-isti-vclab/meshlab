@@ -1058,7 +1058,8 @@ void MainWindow::runFilterScript()
             {
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
             }
-            if(classes & MeshFilterInterface::VertexColoring ){
+            if(classes & MeshFilterInterface::VertexColoring )
+			{
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
             }
             if(classes & MeshModel::MM_COLOR)
@@ -1590,7 +1591,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
                 if(iFilter->getClass(action) & MeshFilterInterface::VertexColoring )
                     mm->updateDataMask(MeshModel::MM_VERTCOLOR);
 
-                if((iFilter->getClass(action) & MeshFilterInterface::MeshColoring ) || (iFilter->postCondition(action) & MeshModel::MM_COLOR))
+                if(iFilter->getClass(action) & MeshFilterInterface::MeshColoring )
                     mm->updateDataMask(MeshModel::MM_COLOR);
 
                 if(iFilter->postCondition(action) & MeshModel::MM_CAMERA)
