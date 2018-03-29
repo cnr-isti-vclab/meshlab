@@ -644,14 +644,30 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 	case CP_SELECT_NON_MANIFOLD_FACE:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
 
 	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
-    case FP_SELECT_CONNECTED:
-	case FP_SELECT_UGLY:
-	case FP_SELECT_BY_COLOR : return FilterClass(MeshFilterInterface::Selection);
 
 	case FP_SELECT_BY_FACE_QUALITY :
 	case FP_SELECT_BY_VERT_QUALITY : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Quality);
 
 	case FP_SELECTBYANGLE : return MeshFilterInterface::FilterClass(MeshFilterInterface::RangeMap + MeshFilterInterface::Selection);
+
+	case FP_SELECT_ALL :
+	case FP_SELECT_NONE :
+	case FP_SELECT_CONNECTED:
+	case FP_SELECT_UGLY:
+	case FP_SELECT_DELETE_VERT:
+	case FP_SELECT_DELETE_ALL_FACE:
+	case FP_SELECT_DELETE_FACE:
+	case FP_SELECT_DELETE_FACEVERT:
+	case FP_SELECT_FACE_FROM_VERT:
+	case FP_SELECT_VERT_FROM_FACE:
+	case FP_SELECT_ERODE:
+	case FP_SELECT_DILATE:
+	case FP_SELECT_BORDER:
+	case FP_SELECT_INVERT:
+	case FP_SELECT_FACES_BY_EDGE:
+	case FP_SELECT_FOLD_FACE:
+	case FP_SELECT_OUTLIER:
+	case FP_SELECT_BY_COLOR: return FilterClass(MeshFilterInterface::Selection);
   }
   return MeshFilterInterface::Selection;
 }
@@ -669,7 +685,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 
 	case FP_SELECT_FOLD_FACE: return MeshModel::MM_VERTFACETOPO;
 
-	default: return 0;
+	default: return MeshModel::MM_NONE;
   }
 }
 
