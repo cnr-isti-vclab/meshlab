@@ -182,6 +182,9 @@ int CleanFilter::getRequirements(QAction *action)
 		case FP_MERGE_CLOSE_VERTEX:
 		case FP_REMOVE_DUPLICATE_FACE:        return MeshModel::MM_NONE;
 		case FP_MERGE_WEDGE_TEX:              return MeshModel::MM_VERTFACETOPO | MeshModel::MM_WEDGTEXCOORD;
+		case FP_REMOVE_UNREFERENCED_VERTEX:   return MeshModel::MM_NONE;
+		case FP_REMOVE_DUPLICATED_VERTEX:     return MeshModel::MM_NONE;
+		case FP_REMOVE_FACE_ZERO_AREA:        return MeshModel::MM_NONE;
 		default: assert(0);
 	}
 	return 0;
@@ -415,6 +418,8 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 		Log("Removed %d duplicated vertices", delvert);
 		if (delvert != 0) m.UpdateBoxAndNormals();
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 	} break;
 
 	case FP_SNAP_MISMATCHED_BORDER :
@@ -422,6 +427,8 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		float threshold = par.getFloat("EdgeDistRatio");
 		int total = SnapVertexBorder(m.cm, threshold,cb);
 		Log("Successfully Splitted %d faces to snap", total);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 	} break;
 
 	case FP_COMPACT_FACE :
