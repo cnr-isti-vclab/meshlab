@@ -54,6 +54,9 @@ CleanFilter::CleanFilter()
 	<< FP_REMOVE_FOLD_FACE
 	<< FP_REMOVE_NON_MANIF_EDGE
 	<< FP_REMOVE_NON_MANIF_VERT
+	<< FP_REMOVE_UNREFERENCED_VERTEX
+	<< FP_REMOVE_DUPLICATED_VERTEX
+	<< FP_REMOVE_FACE_ZERO_AREA
 	<< FP_MERGE_CLOSE_VERTEX
     << FP_MERGE_WEDGE_TEX
 	<< FP_COMPACT_FACE
@@ -87,6 +90,9 @@ QString CleanFilter::filterName(FilterIDType filter) const
 	case FP_REMOVE_FOLD_FACE:             return QString("Remove Isolated Folded Faces by Edge Flip");
 	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Repair non Manifold Edges by removing faces");
 	case FP_REMOVE_NON_MANIF_VERT:        return QString("Repair non Manifold Vertices by splitting");
+	case FP_REMOVE_UNREFERENCED_VERTEX:   return QString("Remove Unreferenced Vertices");
+	case FP_REMOVE_DUPLICATED_VERTEX:     return QString("Remove Duplicate Vertices");
+	case FP_REMOVE_FACE_ZERO_AREA:        return QString("Remove Zero Area Faces");
 	case FP_COMPACT_VERT:                 return QString("Compact vertices");
 	case FP_COMPACT_FACE:                 return QString("Compact faces");
 	default: assert(0);
@@ -120,8 +126,11 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non Manifold edge it iteratively deletes the smallest area face until it becomes 2-Manifold.");
     case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non Manifold vertices until it becomes 2-Manifold.");
-    case FP_COMPACT_VERT:            return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
-    case FP_COMPACT_FACE:            return QString("Compact all the faces that have been deleted and put them to the end of the vector");
+	case FP_REMOVE_UNREFERENCED_VERTEX: return QString("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
+	case FP_REMOVE_DUPLICATED_VERTEX:   return QString("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged into a single one.");
+	case FP_REMOVE_FACE_ZERO_AREA:      return QString("Remove null faces (the one with area equal to zero)");
+    case FP_COMPACT_VERT:               return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
+    case FP_COMPACT_FACE:               return QString("Compact all the faces that have been deleted and put them to the end of the vector");
     default: assert(0);
   }
   return QString("error!");
@@ -142,6 +151,9 @@ QString CleanFilter::filterName(FilterIDType filter) const
 		case FP_SNAP_MISMATCHED_BORDER:
 		case FP_REMOVE_NON_MANIF_EDGE:
 		case FP_REMOVE_NON_MANIF_VERT:
+		case FP_REMOVE_FACE_ZERO_AREA:
+		case FP_REMOVE_UNREFERENCED_VERTEX:
+		case FP_REMOVE_DUPLICATED_VERTEX:
 		case FP_COMPACT_VERT:
 		case FP_COMPACT_FACE:                 return MeshFilterInterface::Cleaning;
 		case FP_BALL_PIVOTING: 	              return MeshFilterInterface::Remeshing;
@@ -192,8 +204,11 @@ int CleanFilter::postCondition(QAction* action) const
 		case FP_REMOVE_FOLD_FACE:
 		case FP_REMOVE_NON_MANIF_EDGE:
 		case FP_REMOVE_NON_MANIF_VERT:
+		case FP_REMOVE_UNREFERENCED_VERTEX:
+		case FP_REMOVE_DUPLICATED_VERTEX:
+		case FP_REMOVE_FACE_ZERO_AREA:        return MeshModel::MM_GEOMETRY_CHANGE;
 		case FP_COMPACT_VERT:
-		case FP_COMPACT_FACE:                 return MeshModel::MM_GEOMETRY_CHANGE;
+		case FP_COMPACT_FACE:                 return MeshModel::MM_NONE; // only internal vector storage should change, nothing more
 	}
 	return MeshModel::MM_ALL;
 }
@@ -379,6 +394,27 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		int total = tri::Clean<CMeshO>::SplitNonManifoldVertex(m.cm,threshold);
 		Log("Successfully split %d non manifold vertices faces", total);
 		m.UpdateBoxAndNormals();
+	} break;
+
+	case FP_REMOVE_FACE_ZERO_AREA:
+	{
+		int nullFaces = tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm, 0);
+		Log("Removed %d null faces", nullFaces);
+		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+	} break;
+
+	case FP_REMOVE_UNREFERENCED_VERTEX:
+	{
+		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+		Log("Removed %d unreferenced vertices", delvert);
+		if (delvert != 0) m.UpdateBoxAndNormals();
+	} break;
+
+	case FP_REMOVE_DUPLICATED_VERTEX:
+	{
+		int delvert = tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+		Log("Removed %d duplicated vertices", delvert);
+		if (delvert != 0) m.UpdateBoxAndNormals();
 	} break;
 
 	case FP_SNAP_MISMATCHED_BORDER :

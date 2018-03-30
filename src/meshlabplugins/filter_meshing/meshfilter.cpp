@@ -48,8 +48,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
     typeList
         << FP_LOOP_SS
         << FP_BUTTERFLY_SS
-        << FP_REMOVE_UNREFERENCED_VERTEX
-        << FP_REMOVE_DUPLICATED_VERTEX
         << FP_CLUSTERING
         << FP_QUADRIC_SIMPLIFICATION
         << FP_QUADRIC_TEXCOORD_SIMPLIFICATION
@@ -83,7 +81,6 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_REFINE_LS3_LOOP
         << FP_SLICE_WITH_A_PLANE
 		<< FP_PERIMETER_POLYLINE
-        << FP_REMOVE_FACE_ZERO_AREA
         ;
 
     FilterIDType tt;
@@ -110,9 +107,6 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 {
     switch (ID(a))
     {
-    case FP_REMOVE_FACE_ZERO_AREA            :
-    case FP_REMOVE_UNREFERENCED_VERTEX       :
-    case FP_REMOVE_DUPLICATED_VERTEX         : return MeshFilterInterface::Cleaning;
     case FP_BUTTERFLY_SS                     :
     case FP_LOOP_SS                          :
     case FP_MIDPOINT                         :
@@ -149,10 +143,10 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
 	case FP_SET_TRANSFORM_PARAMS             :
 	case FP_SET_TRANSFORM_MATRIX             :
     case FP_RESET_TRANSFORM                  : return FilterClass(Normal + Layer);
-	case FP_PERIMETER_POLYLINE               :
-    case FP_SLICE_WITH_A_PLANE               : return MeshFilterInterface::Measure;
 
-    case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Smoothing;
+	case FP_PERIMETER_POLYLINE               :
+    case FP_SLICE_WITH_A_PLANE               :
+	case FP_CYLINDER_UNWRAP                  : return MeshFilterInterface::Measure;
 
     default                                  : assert(0); return MeshFilterInterface::Generic;
     }
@@ -169,8 +163,6 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_BUTTERFLY_SS                     :
     case FP_MIDPOINT                         :
     case FP_REFINE_CATMULL                   :
-    case FP_REMOVE_UNREFERENCED_VERTEX       :
-    case FP_REMOVE_DUPLICATED_VERTEX         :
     case FP_QUADRIC_SIMPLIFICATION           :
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
     case FP_REORIENT                         :
@@ -186,7 +178,6 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_VATTR_SEAM                       :
     case FP_SLICE_WITH_A_PLANE               :
 	case FP_PERIMETER_POLYLINE               :
-    case FP_REMOVE_FACE_ZERO_AREA            :
     case FP_REFINE_LS3_LOOP                  : return MeshModel::MM_FACENUMBER;
     case FP_NORMAL_SMOOTH_POINTCLOUD         : return MeshModel::MM_VERTNORMAL;
     case FP_CLUSTERING                       :
@@ -214,9 +205,6 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_BUTTERFLY_SS                     : return tr("Subdivision Surfaces: Butterfly Subdivision");
     case FP_MIDPOINT                         : return tr("Subdivision Surfaces: Midpoint");
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
-    case FP_REMOVE_UNREFERENCED_VERTEX       : return tr("Remove Unreferenced Vertices");
-    case FP_REMOVE_DUPLICATED_VERTEX         : return tr("Remove Duplicate Vertices");
-    case FP_REMOVE_FACE_ZERO_AREA            : return tr("Remove Zero Area Faces");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
     case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
@@ -280,8 +268,6 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "<b>4-8 Subdivision</b>"
                                                            "<br> <i>Luiz Velho, Denis Zorin </i>"
                                                            "<br>CAGD, volume 18, Issue 5, Pages 397-427. ");
-    case FP_REMOVE_UNREFERENCED_VERTEX         : return tr("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
-    case FP_REMOVE_DUPLICATED_VERTEX           : return tr("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged into a single one.");
     case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
     case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
@@ -324,7 +310,6 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
 	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
     case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
-    case FP_REMOVE_FACE_ZERO_AREA              : return tr("Remove null faces (the one with area equal to zero)");
 
     default                                  : assert(0);
     }
@@ -733,29 +718,6 @@ switch(ID(filter))
 		}
 		m.UpdateBoxAndNormals();
 		} break;
-
-	case FP_REMOVE_FACE_ZERO_AREA:
-	{
-		int nullFaces=tri::Clean<CMeshO>::RemoveFaceOutOfRangeArea(m.cm,0);
-		Log( "Removed %d null faces", nullFaces);
-		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
-	} break;
-
-    case FP_REMOVE_UNREFERENCED_VERTEX:
-	{
-		int delvert=tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
-		Log( "Removed %d unreferenced vertices",delvert);
-        if (delvert != 0)
-            m.UpdateBoxAndNormals();
-	} break;
-
-    case FP_REMOVE_DUPLICATED_VERTEX:
-	{
-		int delvert=tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
-		Log( "Removed %d duplicated vertices", delvert);
-		if (delvert != 0)
-			m.UpdateBoxAndNormals();
-	} break;
 
     case FP_REORIENT:
 	{
@@ -1690,23 +1652,59 @@ return true;
 
 int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 {
-    switch (ID(filter))
-    {
-    case FP_ROTATE_FIT           :
-    case FP_PRINCIPAL_AXIS       :
-    case FP_FLIP_AND_SWAP        :
-    case FP_SCALE                :
-    case FP_CENTER               :
-    case FP_ROTATE               :
-	case FP_SET_TRANSFORM_PARAMS :
-	case FP_SET_TRANSFORM_MATRIX :
-	case FP_FREEZE_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL;
-	case FP_RESET_TRANSFORM      :
-	case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
-	case FP_NORMAL_EXTRAPOLATION :   
-    case FP_NORMAL_SMOOTH_POINTCLOUD : return MeshModel::MM_VERTNORMAL;
-    default                  : return MeshModel::MM_ALL;
-    }
+	switch (ID(filter))
+	{
+		case FP_ROTATE_FIT           :
+		case FP_PRINCIPAL_AXIS       :
+		case FP_FLIP_AND_SWAP        :
+		case FP_SCALE                :
+		case FP_CENTER               :
+		case FP_ROTATE               :
+		case FP_SET_TRANSFORM_PARAMS :
+		case FP_SET_TRANSFORM_MATRIX :
+		case FP_FREEZE_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
+		case FP_RESET_TRANSFORM      :
+		case FP_INVERT_TRANSFORM     : return MeshModel::MM_TRANSFMATRIX;
+		case FP_NORMAL_EXTRAPOLATION :   
+		case FP_NORMAL_SMOOTH_POINTCLOUD : return MeshModel::MM_VERTNORMAL;
+
+		case FP_LOOP_SS :
+		case FP_BUTTERFLY_SS :
+		case FP_CLUSTERING :
+		case FP_QUADRIC_SIMPLIFICATION :
+		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
+		case FP_MIDPOINT :
+		case FP_REORIENT :
+		case FP_INVERT_FACES :
+		case FP_CLOSE_HOLES :
+		case FP_REFINE_CATMULL :
+		case FP_REFINE_HALF_CATMULL :
+		case FP_QUAD_DOMINANT :
+		case FP_MAKE_PURE_TRI :
+		case FP_QUAD_PAIRING :
+		case FP_FAUX_CREASE :
+		case FP_FAUX_EXTRACT :
+		case FP_VATTR_SEAM :
+		case FP_REFINE_LS3_LOOP : return MeshModel::MM_GEOMETRY_CHANGE;
+
+		case FP_COMPUTE_PRINC_CURV_DIR : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR | MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
+
+		case FP_SLICE_WITH_A_PLANE :
+		case FP_PERIMETER_POLYLINE :
+		case FP_CYLINDER_UNWRAP : return MeshModel::MM_NONE; // they create a new layer
+
+		default                  : return MeshModel::MM_ALL;
+
+			/*
+
+
+
+
+
+			*/
+
+
+	}
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(ExtraMeshFilterPlugin)
