@@ -136,7 +136,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
     case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
-    case FP_SET_TEXTURE : return MeshModel::MM_ALL;
+    case FP_SET_TEXTURE : return MeshModel::MM_NONE;
     case FP_COLOR_TO_TEXTURE : return MeshModel::MM_NONE;
     case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
 	case FP_TEX_TO_VCOLOR_TRANSFER: return MeshModel::MM_VERTCOLOR;
