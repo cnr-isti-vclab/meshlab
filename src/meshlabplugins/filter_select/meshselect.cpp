@@ -639,9 +639,7 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 {
   switch(ID(action))
   {
-	case CP_SELFINTERSECT_SELECT:
-	case CP_SELECT_NON_MANIFOLD_VERTEX:
-	case CP_SELECT_NON_MANIFOLD_FACE:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);;
+	case CP_SELFINTERSECT_SELECT:	return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Cleaning);
 
 	case CP_SELECT_TEXBORDER : return FilterClass(MeshFilterInterface::Selection + MeshFilterInterface::Texture);
 
@@ -667,7 +665,9 @@ MeshFilterInterface::FilterClass SelectionFilterPlugin::getClass(QAction *action
 	case FP_SELECT_FACES_BY_EDGE:
 	case FP_SELECT_FOLD_FACE:
 	case FP_SELECT_OUTLIER:
-	case FP_SELECT_BY_COLOR: return FilterClass(MeshFilterInterface::Selection);
+	case FP_SELECT_BY_COLOR: 
+	case CP_SELECT_NON_MANIFOLD_VERTEX:
+	case CP_SELECT_NON_MANIFOLD_FACE:  return FilterClass(MeshFilterInterface::Selection);
   }
   return MeshFilterInterface::Selection;
 }

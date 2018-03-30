@@ -85,8 +85,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_MERGE_WEDGE_TEX:              return QString("Merge Wedge Texture Coord");
 	case FP_REMOVE_DUPLICATE_FACE:        return QString("Remove Duplicate Faces");
 	case FP_REMOVE_FOLD_FACE:             return QString("Remove Isolated Folded Faces by Edge Flip");
-	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Remove Faces from Non Manifold Edges");
-	case FP_REMOVE_NON_MANIF_VERT:        return QString("Split Vertexes Incident on Non Manifold Faces");
+	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Repair non Manifold Edges by removing faces");
+	case FP_REMOVE_NON_MANIF_VERT:        return QString("Repair non Manifold Vertices by splitting");
 	case FP_COMPACT_VERT:                 return QString("Compact vertices");
 	case FP_COMPACT_FACE:                 return QString("Compact faces");
 	default: assert(0);
@@ -118,8 +118,8 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_MERGE_WEDGE_TEX :           return QString("Merge together per-wedge texture coords that are very close. Used to correct apparent texture seams that can arise from numerical approximations when saving in ascii formats.");
     case FP_REMOVE_DUPLICATE_FACE :     return QString("Delete all the duplicate faces. Two faces are considered equal if they are composed by the same set of verticies, regardless of the order of the vertices.");
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
-    case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non manifold edge it iteratively deletes the smallest area face until it becomes 2-manifold.");
-    case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non manifold vertices until it becomes 2-manifold.");
+    case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non Manifold edge it iteratively deletes the smallest area face until it becomes 2-Manifold.");
+    case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non Manifold vertices until it becomes 2-Manifold.");
     case FP_COMPACT_VERT:            return QString("Compact all the vertices that have been deleted and put them to the end of the vector");
     case FP_COMPACT_FACE:            return QString("Compact all the faces that have been deleted and put them to the end of the vector");
     default: assert(0);
@@ -129,55 +129,50 @@ QString CleanFilter::filterName(FilterIDType filter) const
 
  CleanFilter::FilterClass CleanFilter::getClass(QAction *a)
 {
-  switch(ID(a))
-  {
-    case FP_REMOVE_WRT_Q :
-    case FP_REMOVE_ISOLATED_DIAMETER :
-    case FP_REMOVE_ISOLATED_COMPLEXITY :
-    case FP_REMOVE_TVERTEX_COLLAPSE :
-    case FP_REMOVE_TVERTEX_FLIP :
-    case FP_REMOVE_FOLD_FACE :
-    case FP_MERGE_CLOSE_VERTEX :
-    case FP_REMOVE_DUPLICATE_FACE:
-    case FP_SNAP_MISMATCHED_BORDER:
-    case FP_REMOVE_NON_MANIF_EDGE:
-    case FP_REMOVE_NON_MANIF_VERT:
-    case FP_COMPACT_VERT:
-    case FP_COMPACT_FACE:
-      return MeshFilterInterface::Cleaning;
-    case FP_BALL_PIVOTING: 	return MeshFilterInterface::Remeshing;
-    case FP_MERGE_WEDGE_TEX: 	return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Texture);    
-    default : assert(0);
-    }
-  return MeshFilterInterface::Generic;
+	switch(ID(a))
+	{
+		case FP_REMOVE_WRT_Q :
+		case FP_REMOVE_ISOLATED_DIAMETER :
+		case FP_REMOVE_ISOLATED_COMPLEXITY :
+		case FP_REMOVE_TVERTEX_COLLAPSE :
+		case FP_REMOVE_TVERTEX_FLIP :
+		case FP_REMOVE_FOLD_FACE :
+		case FP_MERGE_CLOSE_VERTEX :
+		case FP_REMOVE_DUPLICATE_FACE:
+		case FP_SNAP_MISMATCHED_BORDER:
+		case FP_REMOVE_NON_MANIF_EDGE:
+		case FP_REMOVE_NON_MANIF_VERT:
+		case FP_COMPACT_VERT:
+		case FP_COMPACT_FACE:                 return MeshFilterInterface::Cleaning;
+		case FP_BALL_PIVOTING: 	              return MeshFilterInterface::Remeshing;
+		case FP_MERGE_WEDGE_TEX: 	          return MeshFilterInterface::FilterClass(MeshFilterInterface::Cleaning + MeshFilterInterface::Texture);    
+		default : assert(0);
+	}
+	return MeshFilterInterface::Generic;
 }
 
 int CleanFilter::getRequirements(QAction *action)
 {
-  switch(ID(action))
-  {
-    case FP_COMPACT_FACE:
-    case FP_COMPACT_VERT:
-    case FP_REMOVE_WRT_Q:
-    case FP_BALL_PIVOTING: return MeshModel::MM_VERTMARK;
-    case FP_REMOVE_ISOLATED_COMPLEXITY:
-    case FP_REMOVE_ISOLATED_DIAMETER:
-      return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK;
-    case FP_REMOVE_TVERTEX_COLLAPSE: return MeshModel::MM_VERTMARK;
-    case FP_REMOVE_TVERTEX_FLIP: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-    case FP_REMOVE_NON_MANIF_EDGE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-    case FP_REMOVE_NON_MANIF_VERT: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-    case FP_SNAP_MISMATCHED_BORDER: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK| MeshModel::MM_FACEMARK;
-    case FP_REMOVE_FOLD_FACE: return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
-    case FP_MERGE_CLOSE_VERTEX:
-    case FP_REMOVE_DUPLICATE_FACE:
-      return MeshModel::MM_NONE;
-    case FP_MERGE_WEDGE_TEX: 
-      return MeshModel::MM_VERTFACETOPO | MeshModel::MM_WEDGTEXCOORD;
-    
-    default: assert(0);
-    }
-  return 0;
+	switch(ID(action))
+	{
+		case FP_COMPACT_FACE:
+		case FP_COMPACT_VERT:
+		case FP_REMOVE_WRT_Q:
+		case FP_BALL_PIVOTING:                return MeshModel::MM_VERTMARK;
+		case FP_REMOVE_ISOLATED_COMPLEXITY:
+		case FP_REMOVE_ISOLATED_DIAMETER:     return MeshModel::MM_FACEFACETOPO | MeshModel::MM_FACEMARK;
+		case FP_REMOVE_TVERTEX_COLLAPSE:      return MeshModel::MM_VERTMARK;
+		case FP_REMOVE_TVERTEX_FLIP:          return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_REMOVE_NON_MANIF_EDGE:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_REMOVE_NON_MANIF_VERT:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_SNAP_MISMATCHED_BORDER:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK| MeshModel::MM_FACEMARK;
+		case FP_REMOVE_FOLD_FACE:             return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_MERGE_CLOSE_VERTEX:
+		case FP_REMOVE_DUPLICATE_FACE:        return MeshModel::MM_NONE;
+		case FP_MERGE_WEDGE_TEX:              return MeshModel::MM_VERTFACETOPO | MeshModel::MM_WEDGTEXCOORD;
+		default: assert(0);
+	}
+	return 0;
 }
  
 int CleanFilter::postCondition(QAction* action) const
