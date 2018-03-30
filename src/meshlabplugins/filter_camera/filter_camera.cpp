@@ -690,11 +690,12 @@ int FilterCameraPlugin::postCondition(QAction * filter) const
     switch (ID(filter))
     {
 	case FP_SET_MESH_CAMERA:
+		return MeshModel::MM_CAMERA;
 	case FP_CAMERA_ROTATE:
 	case FP_CAMERA_TRANSLATE:
 	case FP_CAMERA_TRANSFORM:
 	case FP_CAMERA_SCALE:
-		return MeshModel::MM_ALL + RasterModel::RM_ALL;
+		return MeshModel::MM_TRANSFMATRIX + MeshModel::MM_VERTCOORD + MeshModel::MM_VERTNORMAL + MeshModel::MM_FACENORMAL;
 	case FP_QUALITY_FROM_CAMERA:
 		return MeshModel::MM_VERTQUALITY + MeshModel::MM_VERTCOLOR;
 	default: return MeshModel::MM_ALL;

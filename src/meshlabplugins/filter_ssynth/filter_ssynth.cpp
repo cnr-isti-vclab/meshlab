@@ -143,7 +143,7 @@ int FilterSSynth::getRequirements(QAction *)
 }
 int FilterSSynth::postCondition(QAction* filter) const
 {
-        return MeshModel::MM_ALL;
+	return MeshModel::MM_NONE;
 }
  MeshFilterInterface::FilterClass FilterSSynth::getClass(QAction *filter)
 {
