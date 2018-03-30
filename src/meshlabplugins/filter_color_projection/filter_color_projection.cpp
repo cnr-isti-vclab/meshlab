@@ -932,63 +932,12 @@ int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
         return MeshModel::MM_VERTCOLOR;
         break;
     case FP_MULTIIMAGETRIVIALPROJTEXTURE:
-        return MeshModel::MM_ALL;
+		return MeshModel::MM_WEDGTEXCOORD;
         break;
     default: 
         return MeshModel::MM_ALL;
     }
 }
-
-
-
-
-// function to compute sobel on depth image, to find discontinuities
-/*
-int FilterColorProjectionPlugin::applysobel()
-{
-int xx,yy;
-float val;
-float accum;
-
-for(xx=0; xx<sx; xx++)
-for(yy=0; yy<sy; yy++)
-data[(yy * sx) + xx] = 0;
-
-for(xx=1; xx<sx-1; xx++)
-for(yy=1; yy<sy-1; yy++)
-if (from->getval(xx, yy) != 0)
-{
-accum=0;
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += -2.0 * from->getval(xx-1, yy  );
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += +1.0 * from->getval(xx+1, yy-1);
-accum += +2.0 * from->getval(xx+1, yy  );
-accum += +1.0 * from->getval(xx+1, yy-1);
-
-data[(yy * sx) + xx] += abs(accum);
-}
-
-
-for(xx=1; xx<sx-1; xx++)
-for(yy=1; yy<sy-1; yy++)
-if (from->getval(xx, yy) != 0)
-{
-accum=0;
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += -2.0 * from->getval(xx  , yy-1);
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += +1.0 * from->getval(xx+1, yy+1);
-accum += +2.0 * from->getval(xx  , yy+1);
-accum += +1.0 * from->getval(xx+1, yy+1);
-
-data[(yy * sx) + xx] += abs(accum);
-}
-
-
-return 1;
-}
-*/
 
 //--- this function calculates the near and far values
 int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near_acc, std::vector<float> *far_acc)
@@ -1065,8 +1014,5 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
 
     return 0;
 }
-
-
-
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProjectionPlugin)
