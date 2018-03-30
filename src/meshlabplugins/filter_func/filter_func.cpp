@@ -205,11 +205,15 @@ int FilterFunctionPlugin::postCondition(QAction *action) const
 		return MeshModel::MM_FACECOLOR + MeshModel::MM_FACEQUALITY;
 
 	case FF_DEF_VERT_ATTRIB:
-	case FF_GRID:
-	case FF_ISOSURFACE:
 	case FF_DEF_FACE_ATTRIB:
+		return MeshModel::MM_NONE;  // none, because they do not change any existing data
+
 	case FF_REFINE:
 		return MeshModel::MM_ALL;
+
+	case FF_GRID:
+	case FF_ISOSURFACE:
+		return MeshModel::MM_NONE;  // none, because they create a new layer, without affecting old one
   }
   
   return MeshModel::MM_NONE;
