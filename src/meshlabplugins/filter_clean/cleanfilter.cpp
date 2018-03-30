@@ -63,10 +63,6 @@ CleanFilter::CleanFilter()
   foreach(tt , types())
         actionList << new QAction(filterName(tt), this);
   AC(FP_SNAP_MISMATCHED_BORDER)->setShortcut(QKeySequence("ALT+`"));
-	maxDiag1=0;
-    maxDiag2=-1;
-    minCC=25;
-    val1=1.0;
 }
 
 CleanFilter::~CleanFilter() {
@@ -156,7 +152,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
   return MeshFilterInterface::Generic;
 }
 
- int CleanFilter::getRequirements(QAction *action)
+int CleanFilter::getRequirements(QAction *action)
 {
   switch(ID(action))
   {
@@ -183,10 +179,29 @@ QString CleanFilter::filterName(FilterIDType filter) const
     }
   return 0;
 }
- int CleanFilter::postCondition( QAction* /*filter*/ ) const
- {
-     return MeshModel::MM_ALL;
- }
+ 
+int CleanFilter::postCondition(QAction* action) const
+{
+	switch (ID(action))
+	{
+		case FP_BALL_PIVOTING:
+		case FP_REMOVE_WRT_Q:
+		case FP_REMOVE_ISOLATED_DIAMETER:
+		case FP_REMOVE_ISOLATED_COMPLEXITY:
+		case FP_REMOVE_TVERTEX_FLIP:
+		case FP_REMOVE_TVERTEX_COLLAPSE:
+		case FP_SNAP_MISMATCHED_BORDER:
+		case FP_MERGE_CLOSE_VERTEX:
+		case FP_MERGE_WEDGE_TEX:
+		case FP_REMOVE_DUPLICATE_FACE:
+		case FP_REMOVE_FOLD_FACE:
+		case FP_REMOVE_NON_MANIF_EDGE:
+		case FP_REMOVE_NON_MANIF_VERT:
+		case FP_COMPACT_VERT:
+		case FP_COMPACT_FACE:                 return MeshModel::MM_GEOMETRY_CHANGE;
+	}
+	return MeshModel::MM_ALL;
+}
 
 void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParameterSet & parlst)
 {
@@ -194,25 +209,25 @@ void CleanFilter::initParameterSet(QAction *action,MeshDocument &md, RichParamet
   switch(ID(action))
   {
     case FP_BALL_PIVOTING :
-          parlst.addParam(new RichAbsPerc("BallRadius",(float)maxDiag1,0,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
+          parlst.addParam(new RichAbsPerc("BallRadius",0.0f,0.0f,md.mm()->cm.bbox.Diag(),"Pivoting Ball radius (0 autoguess)","The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled."));
           parlst.addParam(new RichFloat("Clustering",20.0f,"Clustering radius (% of ball radius)","To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it."));
           parlst.addParam(new RichFloat("CreaseThr", 90.0f,"Angle Threshold (degrees)","If we encounter a crease angle that is too large we should stop the ball rolling"));
           parlst.addParam(new RichBool("DeleteFaces",false,"Delete intial set of faces","if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch, other wise the current faces are used as a starting point. Useful if you run multiple times the algorithm with an incrasing ball radius."));
           break;
     case FP_REMOVE_ISOLATED_DIAMETER:
-          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0f,0,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
+          parlst.addParam(new RichAbsPerc("MinComponentDiag",md.mm()->cm.bbox.Diag()/10.0f,0.0f,md.mm()->cm.bbox.Diag(),"Enter max diameter of isolated pieces","Delete all the connected components (floating pieces) with a diameter smaller than the specified one"));
 		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_ISOLATED_COMPLEXITY:
-          parlst.addParam(new RichInt("MinComponentSize",(int)minCC,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
+          parlst.addParam(new RichInt("MinComponentSize",25,"Enter minimum conn. comp size:","Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one"));
 		  parlst.addParam(new RichBool("removeUnref", true, "Remove unfreferenced vertices", "if true, the unreferenced vertices remaining after the face deletion are removed."));
           break;
     case FP_REMOVE_WRT_Q:
           qualityRange=tri::Stat<CMeshO>::ComputePerVertexQualityMinMax(md.mm()->cm);
-          parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)val1, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
+          parlst.addParam(new RichAbsPerc("MaxQualityThr",(float)1.0, qualityRange.first, qualityRange.second,"Delete all vertices with quality under:"));
           break;
     case  FP_MERGE_CLOSE_VERTEX:
-          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0f,0,md.mm()->cm.bbox.Diag()/100.0f,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
+          parlst.addParam(new RichAbsPerc("Threshold",md.mm()->cm.bbox.Diag()/10000.0f,0.0f,md.mm()->cm.bbox.Diag()/100.0f,"Merging distance","All the vertices that closer than this threshold are merged together. Use very small values, default values is 1/10000 of bounding box diagonal. "));
           break;
     case FP_MERGE_WEDGE_TEX :
           parlst.addParam(new RichFloat("MergeThr",1.0f/10000.0f,"Merging Threshold","All the per-wedge texture coords that are on the same vertex and are distant less then the given threshold are merged together. It can be used to remove the fake texture seams that arise from error. Distance is in texture space (the default, 1e-4, corresponds to one texel on a 10kx10x texture) "));

@@ -56,13 +56,6 @@ public:
         FP_COMPACT_FACE
     } ;
 
-    /* default values for standard parameters' values of the plugin actions */
-    float maxDiag1;
-    float maxDiag2;
-    int minCC;
-    float val1;
-
-
     CleanFilter();
     ~CleanFilter();
 

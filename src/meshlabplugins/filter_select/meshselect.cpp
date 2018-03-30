@@ -713,6 +713,10 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
 		case FP_SELECT_UGLY                 :
 		case FP_SELECT_FOLD_FACE            :
 		case FP_SELECT_OUTLIER              : return MeshModel::MM_VERTFLAGSELECT | MeshModel::MM_FACEFLAGSELECT;
+		case FP_SELECT_DELETE_VERT          :
+		case FP_SELECT_DELETE_ALL_FACE      :
+		case FP_SELECT_DELETE_FACE          :
+		case FP_SELECT_DELETE_FACEVERT      : return MeshModel::MM_GEOMETRY_CHANGE;
   }
   return MeshModel::MM_ALL;
 }
