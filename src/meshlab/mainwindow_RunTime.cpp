@@ -3292,7 +3292,7 @@ void MainWindow::helpOnscreen()
 void MainWindow::helpOnline()
 {
     checkForUpdates(false);
-    QDesktopServices::openUrl(QUrl("http://www.meshlab.net"));
+    QDesktopServices::openUrl(QUrl("http://www.meshlab.net/#support"));
 }
 
 void MainWindow::showToolbarFile(){
