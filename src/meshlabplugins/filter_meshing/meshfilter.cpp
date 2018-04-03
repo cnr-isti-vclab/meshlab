@@ -1694,16 +1694,6 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 		case FP_CYLINDER_UNWRAP : return MeshModel::MM_NONE; // they create a new layer
 
 		default                  : return MeshModel::MM_ALL;
-
-			/*
-
-
-
-
-
-			*/
-
-
 	}
 }
 
