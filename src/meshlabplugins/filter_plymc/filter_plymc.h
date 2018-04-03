@@ -33,7 +33,10 @@ class PlyMCPlugin : public QObject, public MeshFilterInterface
     Q_INTERFACES(MeshFilterInterface)
 
 public:
-    enum { FP_PLYMC, FP_MC_SIMPLIFY } ;
+    enum { 
+		FP_PLYMC, 
+		FP_MC_SIMPLIFY 
+	} ;
 
     PlyMCPlugin();
 
@@ -43,6 +46,7 @@ public:
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
     FilterClass getClass(QAction *a);
     MeshFilterInterface::FILTER_ARITY filterArity(QAction * filter) const;
+	int postCondition(QAction *filter) const;
 };
 
 #endif
