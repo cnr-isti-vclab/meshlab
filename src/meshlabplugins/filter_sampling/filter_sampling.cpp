@@ -728,8 +728,8 @@ switch(ID(action))
 	{
 		MeshModel *curMM= md.mm();
 		if (!tri::HasPerWedgeTexCoord(curMM->cm)) {
-			Log("Texel Sampling requires a mesh with UV parametrization");
-			errorMessage = "Texel Sampling requires a mesh with UV parametrization";
+			Log("Texel Sampling requires a mesh with Per Wedge UV parametrization");
+			errorMessage = "Texel Sampling requires a mesh with Per Wedge UV parametrization";
 			return false; // can't continue, mesh can't be processed
 		}
 
