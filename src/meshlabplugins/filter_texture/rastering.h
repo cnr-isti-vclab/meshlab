@@ -80,15 +80,23 @@ public:
         assert(ret);
         interp[2]=1.0-interp[1]-interp[0];
 
-		int w = srcImgs[nearestF->cWT(0).N()].width(), h = srcImgs[nearestF->cWT(0).N()].height();
-        int x, y;
-        x = w * (interp[0]*nearestF->cWT(0).U()+interp[1]*nearestF->cWT(1).U()+interp[2]*nearestF->cWT(2).U());
-        y = h * (1.0 - (interp[0]*nearestF->cWT(0).V()+interp[1]*nearestF->cWT(1).V()+interp[2]*nearestF->cWT(2).V()));
-        // repeat mode
-        x = (x%w + w)%w;
-        y = (y%h + h)%h;
-		QRgb px = srcImgs[nearestF->cWT(0).N()].pixel(x, y);
-        v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
+		int tIndex = nearestF->cWT(0).N();
+		if ((tIndex >= 0) && (tIndex < srcImgs.size()))
+		{
+			int w = srcImgs[tIndex].width(), h = srcImgs[tIndex].height();
+			int x, y;
+			x = w * (interp[0] * nearestF->cWT(0).U() + interp[1] * nearestF->cWT(1).U() + interp[2] * nearestF->cWT(2).U());
+			y = h * (1.0 - (interp[0] * nearestF->cWT(0).V() + interp[1] * nearestF->cWT(1).V() + interp[2] * nearestF->cWT(2).V()));
+			// repeat mode
+			x = (x%w + w) % w;
+			y = (y%h + h) % h;
+			QRgb px = srcImgs[tIndex].pixel(x, y);
+			v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
+		}
+		else
+		{
+			v.C() = CMeshO::VertexType::ColorType(255, 255, 255, 255);
+		}
     }
 };
 
