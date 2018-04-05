@@ -36,8 +36,8 @@ install:
        ls $HOME
        ls $HOME/Library/macport
        PATH="/opt/local/bin:$PATH"
-       sudo port install llvm-6.0
-       port install qt59
+       sudo port -N install llvm-6.0
+       sudo port -N install qt59
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
