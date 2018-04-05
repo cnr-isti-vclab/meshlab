@@ -1,14 +1,7 @@
 include (../../shared.pri)
 
-macx:QMAKE_CXX = clang++-mp-3.9
-macx:QMAKE_CXXFLAGS+=-fopenmp
-macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
 linux:QMAKE_LFLAGS += -fopenmp -lgomp
-macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math  -Wno-sign-compare -Wno-unused-parameter
-
-
 win32:QMAKE_CXXFLAGS   += -openmp
-
 
 HEADERS       = edit_align_factory.h \
                 edit_align.h \

@@ -1,10 +1,5 @@
 include (../../shared.pri)
 
-# uncomment these three lines for using the latest clang compiler on OSX to use openmp
-# using macports install clang-6.0 and libomp
-macx:QMAKE_CXX = /opt/local/bin/clang++-mp-6.0
-macx:QMAKE_CXXFLAGS += -fopenmp
-macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
 
 linux:QMAKE_LFLAGS += -fopenmp -lgomp
 macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math  -Wno-sign-compare -Wno-unused-parameter
