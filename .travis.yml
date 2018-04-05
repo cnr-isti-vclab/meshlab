@@ -33,14 +33,21 @@ install:
        chmod +x ./macports-ci
        #./macports-ci install --prefix=$HOME/Library/macport
        ./macports-ci install
-       ls $HOME
-       ls $HOME/Library/macport
        PATH="/opt/local/bin:$PATH"
        sudo port -N install llvm-6.0
        sudo port -N install qt59
        ls /opt
+       echo "----------"
        ls /opt/local
+       echo "----------"
        echo $PATH
+       echo "----------"
+       echo /opt/local/bin
+       echo "----------"
+       find /opt/local -name qmake -print
+       echo "----------"
+       clang --version
+       echo "----------"
        qmake --version
        
     fi
