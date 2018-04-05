@@ -28,9 +28,12 @@ install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
+       export COLUMNS=80
        curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
        chmod +x ./macports-ci
-       ./macports-ci install
+       ./macports-ci install --prefix=$HOME/Library/macport
+       ls $HOME
+       ls $HOME/Library/macport
        PATH="/opt/local/bin:$PATH"
        port install llvm-6.0
        port install qt59
