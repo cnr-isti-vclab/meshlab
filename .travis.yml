@@ -32,8 +32,8 @@ install:
        chmod +x ./macports-ci
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
-       port install llvm-6.0 
-       port install qt59       
+       port install llvm-6.0
+       port install qt59
 #      brew update > /dev/null
 #      brew install llvm
 #      export PATH="/usr/local/opt/llvm/bin:$PATH"
