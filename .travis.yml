@@ -38,6 +38,11 @@ install:
        PATH="/opt/local/bin:$PATH"
        sudo port -N install llvm-6.0
        sudo port -N install qt59
+       ls /opt
+       ls /opt/local
+       echo $PATH
+       qmake --version
+       
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
