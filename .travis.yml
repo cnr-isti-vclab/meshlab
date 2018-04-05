@@ -35,6 +35,7 @@ install:
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
        sudo port -N install llvm-6.0
+       sudo port -N install openmpi-clang
        sudo port -N install qt59
        ls /opt
        echo "----------"
@@ -45,6 +46,10 @@ install:
        echo /opt/local/bin
        echo "----------"
        find /opt/local -name qmake -print
+       echo "----------"
+       find /opt/local -name qt59-env -print
+       echo "----------"
+       find /opt/local -name qt5 -print
        echo "----------"
        clang --version
        echo "----------"
