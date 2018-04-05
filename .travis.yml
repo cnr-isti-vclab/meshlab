@@ -48,8 +48,7 @@ install:
       #sudo apt-get -y install libqt5xmlpatterns5-dev
       qmake --version
       echo $QMAKESPEC
-      export QMAKESPEC="linux-clang"
-      
+      export QMAKESPEC="linux-clang"      
     fi
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
