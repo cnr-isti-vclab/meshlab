@@ -31,14 +31,13 @@ install:
        export COLUMNS=80
        curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
        chmod +x ./macports-ci
-       #./macports-ci install --prefix=$HOME/Library/macport
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
-       #sudo port -N install llvm-6.0
-       #sudo port -N install openmpi-clang
+       sudo port -N install llvm-6.0
+       sudo port -N install clang
+       sudo port -N install libomp
        sudo port -N install qt59
        sudo port -N install qt59-qtscript
-       sudo port -N install libomp
        #Set up Qt environment
        #Use Qt from MacPorts, change QTDIR if using own version of Qt
        export QTDIR=/opt/local/libexec/qt5
