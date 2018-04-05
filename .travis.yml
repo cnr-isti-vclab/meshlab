@@ -43,7 +43,11 @@ install:
        echo "----------"
        echo $PATH
        echo "----------"
-       echo /opt/local/bin
+       ls /opt/local/bin/
+       echo "----------"
+       ls /opt/local/libexec/qt5/    
+       echo "----------"
+       ls /opt/local/libexec/qt5/bin/
        echo "----------"
        find /opt/local -name qmake -print
        echo "----------"
