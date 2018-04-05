@@ -28,13 +28,17 @@ install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
-      brew update > /dev/null
-      brew install llvm
-      brew search llvm
-      brew search qt5
-      export PATH="/usr/local/opt/llvm/bin:$PATH"
-      brew install qt5      
-      export QTDIR="/usr/local/opt/qt5"
+       curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+       chmod +x ./macports-ci
+       ./macports-ci install
+       PATH="/opt/local/bin:$PATH"
+       port install llvm-6.0 
+       port install qt59       
+#      brew update > /dev/null
+#      brew install llvm
+#      export PATH="/usr/local/opt/llvm/bin:$PATH"
+#      brew install qt5      
+#      export QTDIR="/usr/local/opt/qt5"
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
