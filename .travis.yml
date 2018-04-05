@@ -37,23 +37,14 @@ install:
        #sudo port -N install llvm-6.0
        #sudo port -N install openmpi-clang
        sudo port -N install qt59
-       ls /opt
-       echo "----------"
-       ls /opt/local
+       #Set up Qt environment
+       #Use Qt from MacPorts, change QTDIR if using own version of Qt
+       export QTDIR=/opt/local/libexec/qt5
+       export PATH=$QTDIR/bin:$PATH
+       export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+       export PKG_CONFIG_PATH=$QTDIR/lib:$PKG_CONFIG_PATH   
        echo "----------"
        echo $PATH
-       echo "----------"
-       ls /opt/local/bin/
-       echo "----------"
-       ls /opt/local/libexec/qt5/    
-       echo "----------"
-       ls /opt/local/libexec/qt5/bin/
-       echo "----------"
-       find /opt/local -name qmake -print
-       echo "----------"
-       find /opt/local -name qt59-env -print
-       echo "----------"
-       find /opt/local -name qt5 -print
        echo "----------"
        clang --version
        echo "----------"
