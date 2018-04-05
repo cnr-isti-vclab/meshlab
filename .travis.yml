@@ -37,6 +37,7 @@ install:
        #sudo port -N install llvm-6.0
        #sudo port -N install openmpi-clang
        sudo port -N install qt59
+       sudo port -N install qt59-qtscript
        #Set up Qt environment
        #Use Qt from MacPorts, change QTDIR if using own version of Qt
        export QTDIR=/opt/local/libexec/qt5
