@@ -34,8 +34,8 @@ install:
        #./macports-ci install --prefix=$HOME/Library/macport
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
-       sudo port -N install llvm-6.0
-       sudo port -N install openmpi-clang
+       #sudo port -N install llvm-6.0
+       #sudo port -N install openmpi-clang
        sudo port -N install qt59
        ls /opt
        echo "----------"
