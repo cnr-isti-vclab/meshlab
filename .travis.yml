@@ -33,8 +33,8 @@ install:
        chmod +x ./macports-ci
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
-       sudo port -N install llvm-6.0
-       sudo port -N install clang
+       #sudo port -N install llvm-6.0
+       sudo port -N install clang-6.0
        sudo port -N install libomp
        sudo port -N install qt59
        sudo port -N install qt59-qtscript
@@ -49,8 +49,7 @@ install:
        echo "----------"
        clang --version
        echo "----------"
-       qmake --version
-       
+       qmake --version 
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
