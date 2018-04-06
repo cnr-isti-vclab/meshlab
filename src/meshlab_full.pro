@@ -18,7 +18,7 @@ SUBDIRS       = common \
                 meshlabplugins/io_txt \
                 meshlabplugins/io_u3d\
 # Filter plugins
-                meshlabplugins/filter_aging \
+#no longer needed# meshlabplugins/filter_aging \
                 meshlabplugins/filter_ao \
 #no longer needed# meshlabplugins/filter_bnpts \
                 meshlabplugins/filter_camera \
