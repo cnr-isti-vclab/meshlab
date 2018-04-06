@@ -20,7 +20,7 @@ SUBDIRS       = common \
 # Filter plugins
                 meshlabplugins/filter_aging \
                 meshlabplugins/filter_ao \
-                meshlabplugins/filter_bnpts \
+#no longer needed# meshlabplugins/filter_bnpts \
                 meshlabplugins/filter_camera \
                 meshlabplugins/filter_clean \
                 meshlabplugins/filter_color_projection \
