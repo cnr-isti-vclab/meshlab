@@ -3,6 +3,9 @@ include($$EXTERNAL_BASE_PATH/ext_common.pri)
 TEMPLATE = lib
 TARGET = ssynth
 CONFIG += staticlib
+macx:QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-format -Wno-pointer-sign -Wno-deprecated-declarations\
+  -Wno-deprecated-register -Wno-delete-non-virtual-dtor -Wno-logical-not-parentheses
+macx:QMAKE_CXXFLAGS_WARN_ON = 
 
 DEPENDPATH += . \
               ssynth \
