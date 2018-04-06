@@ -33,11 +33,13 @@ install:
        chmod +x ./macports-ci
        ./macports-ci install
        PATH="/opt/local/bin:$PATH"
+       ./macports-ci ccache
        #sudo port -N install llvm-6.0
        sudo port -N install clang-6.0
        sudo port -N install libomp
        sudo port -N install qt59
        sudo port -N install qt59-qtscript
+       ./macports-ci ccache --save
        #Set up Qt environment
        #Use Qt from MacPorts, change QTDIR if using own version of Qt
        export QTDIR=/opt/local/libexec/qt5
@@ -65,7 +67,8 @@ install:
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
 cache:
-#  directories:
+  directories:
+  - $HOME/.macports-ci-ccache
 #    - $HOME/Library/Caches/Homebrew
 #    - $HOME/vcglib
 #    - $HOME/meshlab/src/external/lib/macx64
