@@ -1,6 +1,7 @@
 include (../../shared.pri)
 
 HEADERS       += baseio.h \
+		$$VCGDIR/wrap/io_trimesh/import_ply.h \
 		$$VCGDIR/wrap/io_trimesh/import_obj.h \
 		$$VCGDIR/wrap/io_trimesh/import_off.h \
 		$$VCGDIR/wrap/io_trimesh/import_ptx.h \
