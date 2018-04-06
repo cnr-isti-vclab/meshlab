@@ -29,7 +29,6 @@ bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString imag
 
     //
     QStringList image_filenames_q;
-    QSize size;
     for(unsigned int i  = 0; i < image_filenames.size(); ++i)
     {
         QImageReader sizeImg(QString::fromStdString(image_filenames[i]));

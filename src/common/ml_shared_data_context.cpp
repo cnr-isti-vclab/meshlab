@@ -5,7 +5,7 @@
 #include "meshmodel.h"
 
 MLSceneGLSharedDataContext::MLSceneGLSharedDataContext(MeshDocument& md,vcg::QtThreadSafeMemoryInfo& gpumeminfo,bool highprecision,size_t perbatchtriangles, size_t minfacespersmoothrendering)
-    :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles),_highprecision(highprecision), _minfacessmoothrendering(minfacespersmoothrendering)
+    :QGLWidget(),_md(md),_gpumeminfo(gpumeminfo),_perbatchtriangles(perbatchtriangles), _minfacessmoothrendering(minfacespersmoothrendering),_highprecision(highprecision)
 {
     if (md.size() != 0)
         throw MLException(QString("MLSceneGLSharedDataContext: MeshDocument is not empty when MLSceneGLSharedDataContext is constructed."));
@@ -401,13 +401,13 @@ void MLSceneGLSharedDataContext::updateGPUMemInfo()
     glGetIntegerv(GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &allmem);
     GLint currentallocated = 0;
     glGetIntegerv(GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &currentallocated);
-	GLenum errorNV = glGetError(); // purge errors
+	/*GLenum errorNV =*/ glGetError(); // purge errors
 
 	GLint ATI_vbo[4] = { 0, 0, 0, 0 };
 	glGetIntegerv(VBO_FREE_MEMORY_ATI, ATI_vbo);
 	GLint ATI_tex[4] = { 0, 0, 0, 0 };
 	glGetIntegerv(TEXTURE_FREE_MEMORY_ATI, ATI_tex);
-	GLenum errorATI = glGetError(); // purge errors
+	/*GLenum errorATI =*/ glGetError(); // purge errors
 
     doneCurrentGLContext(ctx);
 	emit currentAllocatedGPUMem((int)allmem, (int)currentallocated, (int)ATI_tex[0], (int)ATI_vbo[0]);
@@ -654,7 +654,7 @@ void MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(MeshMod
             dt.set(MLRenderingData::PR_POINTS,false);
             tmpatts.reset();
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = (meshmodel->cm.FN() > minpolnumpersmoothshading);
+            tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = (size_t(meshmodel->cm.FN()) > minpolnumpersmoothshading);
 			tmpatts[MLRenderingData::ATT_NAMES::ATT_FACENORMAL] = !(tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL]);
             tmpatts[MLRenderingData::ATT_NAMES::ATT_VERTCOLOR] = true;
 			if (meshmodel != NULL)
