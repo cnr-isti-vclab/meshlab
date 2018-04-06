@@ -28,11 +28,30 @@ install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
-      brew update > /dev/null
-      brew install llvm
-      export PATH="/usr/local/opt/llvm/bin:$PATH"
-      brew install qt5      
-      export QTDIR="/usr/local/opt/qt5"
+       export COLUMNS=80
+       curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+       chmod +x ./macports-ci
+       ./macports-ci install
+       PATH="/opt/local/bin:$PATH"
+       ./macports-ci ccache
+       #sudo port -N install llvm-6.0
+       sudo port -N install clang-6.0
+       sudo port -N install libomp
+       sudo port -N install qt59
+       sudo port -N install qt59-qtscript
+       ./macports-ci ccache --save
+       #Set up Qt environment
+       #Use Qt from MacPorts, change QTDIR if using own version of Qt
+       export QTDIR=/opt/local/libexec/qt5
+       export PATH=$QTDIR/bin:$PATH
+       export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+       export PKG_CONFIG_PATH=$QTDIR/lib:$PKG_CONFIG_PATH   
+       echo "----------"
+       echo $PATH
+       echo "----------"
+       clang --version
+       echo "----------"
+       qmake --version 
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
@@ -42,22 +61,22 @@ install:
       #sudo apt-get -y install libqt5xmlpatterns5-dev
       qmake --version
       echo $QMAKESPEC
-      export QMAKESPEC="linux-clang"
-      
+      export QMAKESPEC="linux-clang"      
     fi
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
 cache:
-#  directories:
+  directories:
+  - $HOME/.macports-ci-ccache
 #    - $HOME/Library/Caches/Homebrew
 #    - $HOME/vcglib
 #    - $HOME/meshlab/src/external/lib/macx64
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
   #- if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
@@ -68,6 +87,16 @@ script:
   - qmake 
   - make
   - cd ..
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_full.pro         ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_full.pro         ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake meshlab_full.pro         ;fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then qmake meshlab_full.pro         ;fi
   - make 
+after_success:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then
+      pwd
+      ls distrib
+      cd install
+      ./macinstall_v2018.sh      
+    fi

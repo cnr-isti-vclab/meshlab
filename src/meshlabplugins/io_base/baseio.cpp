@@ -257,6 +257,11 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		return false;
 	}
 
+    // Add a small pass to convert backslash into forward slash
+    for(auto i = m.cm.textures.begin();i!=m.cm.textures.end();++i)
+    {
+      std::replace(i->begin(), i->end(), '\\', '/');
+    }
 	// verify if texture files are present
 	QString missingTextureFilesMsg = "The following texture files were not found:\n";
 	bool someTextureNotFound = false;

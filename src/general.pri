@@ -15,6 +15,13 @@ macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 macx:CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O3 -DNDEBUG
 macx:CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
 
+# uncomment these three lines for using the latest clang compiler on OSX to use openmp
+# using macports install clang-6.0 and libomp
+macx:QMAKE_CXX = /opt/local/bin/clang++-mp-6.0
+macx:QMAKE_CXXFLAGS += -fopenmp
+macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
+
+
 MACLIBDIR = ../../external/lib/macx64
 
 # the following line is needed to avoid mismatch between
