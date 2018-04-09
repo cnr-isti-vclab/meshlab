@@ -35,13 +35,11 @@
 #include <vcg/complex/algorithms/pointcloud_normal.h>
 #include <vcg/space/fitting3.h>
 #include <wrap/gl/glu_tessellator_cap.h>
-#include "quadric_tex_simp.h"
 #include "quadric_simp.h"
 
 using namespace std;
 using namespace vcg;
 
-void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricTexParameter &pp, CallBackPos *cb);
 
 ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
 {
