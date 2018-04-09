@@ -27,18 +27,8 @@ win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
-# uncomment to try Eigen
-# DEFINES += VCG_USE_EIGEN
-# CONFIG += warn_off
-
 INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR ../$$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
-
-# Uncomment these if you want to experiment with newer gcc compilers
-# (here using the one provided with macports)
-# macx-g++:QMAKE_CXX=g++-mp-4.3
-# macx-g++:QMAKE_CXXFLAGS_RELEASE -= -Os
-# macx-g++:QMAKE_CXXFLAGS_RELEASE += -O3
 
 # the following line is to hide the hundred of warnings about the deprecated
 # old printf are all around the code
