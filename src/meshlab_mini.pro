@@ -27,7 +27,7 @@ SUBDIRS       = common \
 #                meshlabplugins/edit_manipulators \
 #                meshlabplugins/edit_select \
 #                meshlabplugins/filter_clean\
-#                meshlabplugins/filter_colorize\
+#                meshlabplugins/filter_colorproc\
 #                meshlabplugins/filter_create\
 #                meshlabplugins/filter_layer\
 #                meshlabplugins/filter_mutualinfoxml\
