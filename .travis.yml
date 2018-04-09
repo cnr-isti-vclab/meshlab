@@ -79,7 +79,7 @@ script:
   - cd external
   - qmake --version
   - qmake 
-  - make
+  - make -j4
   - cd ..
   #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_full.pro         ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake meshlab_full.pro         ;fi
