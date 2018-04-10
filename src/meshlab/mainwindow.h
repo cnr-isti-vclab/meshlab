@@ -72,8 +72,8 @@ public:
     std::ptrdiff_t maxgpumem;
     inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
 
-    bool permeshtoolbar;
-    inline static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
+//    bool permeshtoolbar;
+//    inline static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 
     bool highprecision;
     inline static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
