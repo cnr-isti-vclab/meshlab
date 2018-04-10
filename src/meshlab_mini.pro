@@ -22,7 +22,6 @@ SUBDIRS       = common \
 # Uncomment them if you succeed in compiling the above ones.
 #                sampleplugins/sample_xmlfilter \
 #                meshlabplugins/decorate_background \
-#                meshlabplugins/decorate_base \
 #                meshlabplugins/edit_align \
 #                meshlabplugins/edit_manipulators \
 #                meshlabplugins/edit_select \
