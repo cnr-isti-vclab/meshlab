@@ -81,9 +81,7 @@ script:
   - qmake 
   - make -j4
   - cd ..
-  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake "QMAKE_LFLAGS+=-L/usr/local/opt/llvm/lib -lomp" meshlab_full.pro         ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then qmake meshlab_full.pro         ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then qmake meshlab_full.pro         ;fi
+  - qmake meshlab_full.pro
   - make -j4
 after_success:
   - |
@@ -91,6 +89,6 @@ after_success:
     then
       pwd
       ls distrib
-      cd install
-      ./macinstall_v2018.sh      
+      cd install/macx
+      ./macinstall_v2018.sh ../..
     fi
