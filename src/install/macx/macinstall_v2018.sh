@@ -1,7 +1,8 @@
 #!/bin/bash
 # this is a script shell for setting up the application bundle for the mac
 # It should be run (not sourced) in the meshlab/src/install dir.
-# It moves plugins and frameworks into the package and runs the 
+#
+# It does all the dirty work of moving all the needed plugins and frameworks into the package and runs the 
 # install_tool on them to change the linking path to the local version of qt
 # the build was issued with
 # qmake-4.3 "CONFIG += debug_and_release warn_off" meshlabv12.pro -recursive -spec macx-g++
@@ -9,11 +10,17 @@
 # make release
 # Note that sometimes you have to copy by hand the icons in the meshlab.app/Contents/Resources directory
 # 
-cd ../distrib
-QTPATH=$HOME/Qt/5.7/clang_64
+cd ../../distrib
+QTPATH=$HOME/Qt/5.9.4/clang_64
 # change this according to the shadow build dir.
-BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_7_0_clang_64bit-Release"
+BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_9_4_clang_64bit2-Release"
 #BUILDPATH=""
+
+if ! [ -e $BUILDPATH ] 
+then
+  echo "trying to use the passed param"
+  BUILDPATH=$1
+fi
 
 APPNAME="meshlab.app"
 APPFOLDER=$BUILDPATH/distrib/$APPNAME
@@ -101,3 +108,6 @@ cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 echo "Changing the paths of the qt component frameworks using the qt tool macdeployqt"
 $QTPATH/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2
 cd ../install
+# final step create the dmg using appdmg
+# appdmg is installed with 'npm install -g appdmg'",
+appdmg meshlab_dmg.json ../distrib/MeshLab201804.dmg
