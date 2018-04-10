@@ -67,7 +67,6 @@ FilterColorProc::FilterColorProc()
 		   << CP_TEXTURE_TO_VERTEX
 		   << CP_VERTEX_TO_FACE
 		   << CP_MESH_TO_FACE
-		   << CP_COLOR_NON_TOPO_COHERENT
 		   << CP_RANDOM_FACE
 		   << CP_RANDOM_CONNECTED_COMPONENT ;
 
@@ -872,7 +871,7 @@ switch(ID(filter))
 		srcImgs.resize(m->cm.textures.size());
 		QString path;
 
-		for (int textInd = 0; textInd < m->cm.textures.size(); textInd++)
+		for (size_t textInd = 0; textInd < m->cm.textures.size(); textInd++)
 		{
 			path = m->fullName();
 			path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(m->cm.textures[textInd].c_str());
