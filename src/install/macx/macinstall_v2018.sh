@@ -1,28 +1,28 @@
 #!/bin/bash
 # this is a script shell for setting up the application bundle for the mac
-# It should be run (not sourced) in the meshlab/src/install dir.
+# It should be run (not sourced) in the meshlab/src/install/macx dir.
 #
 # It does all the dirty work of moving all the needed plugins and frameworks into the package and runs the 
 # install_tool on them to change the linking path to the local version of qt
-# the build was issued with
-# qmake-4.3 "CONFIG += debug_and_release warn_off" meshlabv12.pro -recursive -spec macx-g++
-# make clean
-# make release
-# Note that sometimes you have to copy by hand the icons in the meshlab.app/Contents/Resources directory
-# 
+
+# All the stuff to be copies is in the 'distrib' folder. 
 cd ../../distrib
 QTPATH=$HOME/Qt/5.9.4/clang_64
-# change this according to the shadow build dir.
-BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_9_4_clang_64bit2-Release"
-#BUILDPATH=""
 
-if ! [ -e $BUILDPATH ] 
-then
-  echo "trying to use the passed param"
-  BUILDPATH=$1
-fi
+# change this according to the shadow build dir.
+# is the root of the build e.g. where the meshlab_full.pro it can be something like 
+BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_9_4_clang_64bit2-Release"
 
 APPNAME="meshlab.app"
+echo "Current folder is" `pwd`
+echo "Hopefully I should find: " $BUILDPATH/distrib/$APPNAME
+echo "Or alternatively in    : " ../distrib/$APPNAME
+if ! [ -e $BUILDPATH ] 
+then
+  BUILDPATH=..
+  echo "Hopefully I should find" $BUILDPATH/distrib/$APPNAME
+fi
+
 APPFOLDER=$BUILDPATH/distrib/$APPNAME
 BUNDLE="MeshLabBundle"
 

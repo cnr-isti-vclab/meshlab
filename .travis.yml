@@ -90,5 +90,7 @@ after_success:
       pwd
       ls distrib
       cd install/macx
-      ./macinstall_v2018.sh ../..
+      ./macinstall_v2018.sh
+      pwd
+      ls -la 
     fi
