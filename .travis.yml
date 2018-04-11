@@ -91,6 +91,8 @@ after_success:
       pwd
       ls distrib
       cd install/macx
+      echo "qtdir:" $QTDIR
+      export QTDIR=/opt/local/libexec/qt5
       ./macinstall_v2018.sh
       pwd
       echo "------"
