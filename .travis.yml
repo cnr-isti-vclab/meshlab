@@ -95,7 +95,8 @@ after_success:
       ./macinstall_v2018.sh
       pwd
       echo "------ Completed!!! We should have a dmg here "
-      ls -la ../../distrib/MeshLab201804.dmg
+      cd ../../..
+      ls -la src/distrib/MeshLab201804.dmg      
     fi
 before_deploy:
   - ls 
