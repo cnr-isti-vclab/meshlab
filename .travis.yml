@@ -95,6 +95,15 @@ after_success:
       echo "qtdir1:" $QTDIR
       export QTDIR=/opt/local/libexec/qt5
       echo "qtdir2:" $QTDIR
+      echo "********************------"
+      ls /opt/local/libexec/qt5
+      echo "********************------"
+      ls /opt/local/libexec/qt5/bin
+      echo "********************------"
+      macdeployqt
+      echo "********************------"
+      mdfind macdeployqt
+      echo "********************------"
       ./macinstall_v2018.sh
       pwd
       echo "------"
@@ -107,6 +116,7 @@ deploy:
   api_key:
     secure: DwQcZjW9DJQvfSh0hIc1xHu3mrX6TJ5IqEBz8H6W4Y+/hln4+qGHBBqYBB2KfdhA1Tlb0cy6vthZIVXWL0LWdFVX9Al8hZeQ1EXIJO3WlqTqZUQgy01lgT5FxXBDeaACH9+InyGM2nXw3i0WJW+bUdWJ2dQQaDyEc+JMmvg5Pi5vzK4DusbpBxZkL0T2egfJuxlNi+C5a8kPu31L6uew5pf5EhBEcjLjayB+QulfX9XN/cmGqFIy8+nlRXjay7dankCsOaznEbZh9PRzeLX+YO2A5qVHtcJpBxMkm50BhpuWQtSFa8JA08spVhVABCB7sY35qL2BzVJH0KeoqNKZRBOAkLSvQefyg7nAR093YUiB+1LgyefBZWU17THMjp2XMwyYsA57eF58EPP3uZal/w2voQ1FgZh7uIN+2b/lXl2qBm0dy4E9XGNR+hSsTJOQd5VNPsP76P9Uc9iTidGHi2KN34tL+ySvPAZ1DWLfR4lrjloe3PhHUMrYOg9pvv9lCfbL/23sAWyBsIII+YXohuXp/PR5hbYxRFyVQM4lizgXNICHc++RldqjlsLbd3uSzSaAmTftclcoL7hB2X7SkLKOlYaQl6lz+B9elo4Y92Zi8tv7t31SlgbjpDX9FUX0GOS/XIjvZX1xqe0lLuJgLTt6bo8X5rDCoXkNVNhvtzw=
   file: src/distrib/MeshLab201804.dmg
+  skip_cleanup: true
   on:
     repo: cnr-isti-vclab/meshlab
     condition: $TRAVIS_OS_NAME = osx
