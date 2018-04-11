@@ -107,7 +107,7 @@ cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
 echo "Changing the paths of the qt component frameworks using the qt tool macdeployqt"
 $QTPATH/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2
-cd ../install
+cd ../install/macx
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
-appdmg meshlab_dmg.json ../distrib/MeshLab201804.dmg
+appdmg meshlab_dmg.json ../../distrib/MeshLab201804.dmg

@@ -81,7 +81,7 @@ script:
   - qmake 
   - make -j4
   - cd ..
-  - qmake meshlab_full.pro
+  - qmake meshlab_mini.pro
   - make -j4
 after_success:
   - |
@@ -92,5 +92,8 @@ after_success:
       cd install/macx
       ./macinstall_v2018.sh
       pwd
+      echo "------"
       ls -la 
+      echo "------"
+      ls -la ../../distrib/MeshLab201804.dmg
     fi
