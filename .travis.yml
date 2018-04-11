@@ -92,23 +92,9 @@ after_success:
       pwd
       ls distrib
       cd install/macx
-      echo "qtdir1:" $QTDIR
-      export QTDIR=/opt/local/libexec/qt5
-      echo "qtdir2:" $QTDIR
-      echo "********************------"
-      ls /opt/local/libexec/qt5
-      echo "********************------"
-      ls /opt/local/libexec/qt5/bin
-      echo "********************------"
-      macdeployqt
-      echo "********************------"
-      mdfind macdeployqt
-      echo "********************------"
       ./macinstall_v2018.sh
       pwd
-      echo "------"
-      ls -la 
-      echo "------"
+      echo "------ Completed!!! We should have a dmg here "
       ls -la ../../distrib/MeshLab201804.dmg
     fi
 deploy:
