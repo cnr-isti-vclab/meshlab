@@ -116,7 +116,15 @@ cp shaders/shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shaders/shadersrm
 cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
 echo "Changing the paths of the qt component frameworks using the qt tool macdeployqt"
+
+if [ -e $QTDIR/bin/macdeployqt ]
+then
+echo
 $QTDIR/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2
+else
+macdeployqt $BUNDLE/$APPNAME -verbose=2
+fi
+
 cd ../install/macx
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
