@@ -28,6 +28,7 @@ install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
+       npm install -g appdmg
        export COLUMNS=80
        curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
        chmod +x ./macports-ci

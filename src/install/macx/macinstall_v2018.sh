@@ -7,7 +7,17 @@
 
 # All the stuff to be copies is in the 'distrib' folder. 
 cd ../../distrib
-QTPATH=$HOME/Qt/5.9.4/clang_64
+
+if QTDIR="" 
+then
+QTDIR=$HOME/Qt/5.9.4/clang_64
+echo "Warning QTDIR was not set. trying to guess it to" $QTDIR
+fi
+
+if ! [ -e $QTDIR ] 
+then
+echo "Missing QT; QTDIR was wrong:" $QTDIR
+fi
 
 # change this according to the shadow build dir.
 # is the root of the build e.g. where the meshlab_full.pro it can be something like 
@@ -106,8 +116,9 @@ cp shaders/shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shaders/shadersrm
 cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
 echo "Changing the paths of the qt component frameworks using the qt tool macdeployqt"
-$QTPATH/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2
+$QTDIR/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2
 cd ../install/macx
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
+rm -f ../../distrib/MeshLab201804.dmg  
 appdmg meshlab_dmg.json ../../distrib/MeshLab201804.dmg
