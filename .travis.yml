@@ -97,6 +97,10 @@ after_success:
       echo "------ Completed!!! We should have a dmg here "
       ls -la ../../distrib/MeshLab201804.dmg
     fi
+before_deploy:
+  - ls 
+  - ls src/distrib
+  - ls -la src/distrib/MeshLab201804.dmg
 deploy:
   provider: releases
   api_key:
