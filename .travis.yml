@@ -109,6 +109,5 @@ deploy:
   file: "./src/distrib/MeshLab201804.dmg"
   skip_cleanup: true
   on:
-    tags: true
     repo: cnr-isti-vclab/meshlab
     condition: $TRAVIS_OS_NAME = osx
