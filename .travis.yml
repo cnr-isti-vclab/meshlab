@@ -104,7 +104,7 @@ before_deploy:
   - ls -la src/distrib/MeshLab201804.dmg
   - git config --local user.name "cignoni"
   - git config --local user.email "cignoni@isti.cnr.it"
-  - git tag "MeshLabBeta-$(date +'%Y%m%d%')"
+  - git tag "MeshLab-$(date +'%Y%m%d')-$(echo 'beta')"
   #- git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
 deploy:
   overwrite: true
