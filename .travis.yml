@@ -102,6 +102,9 @@ before_deploy:
   - ls 
   - ls src/distrib
   - ls -la src/distrib/MeshLab201804.dmg
+  - git config --local user.name "cignoni"
+  - git config --local user.email "cignoni@isti.cnr.it"
+  - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
 deploy:
   provider: releases
   api_key:
