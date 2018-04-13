@@ -627,11 +627,11 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     {
       this->errorMessage = "Filter requires correct per vertex normals.<br>"
                            "E.g. it is necessary that your <b>ALL</b> the input vertices have a proper, not-null normal.<br> "
-                           "If you encounter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> "
-                           "filter (usually unreferenced vertices on surfaces have null normals).<br>"
+						   "Try enabling the <i>pre-clean<i> option and retry.<br><br>"
+						   "To permanently remove this problem:<br>"
+						   "If you encounter this error on a triangulated mesh try to use the <i>Remove Unreferenced Vertices</i> filter"
 						   "If you encounter this error on a pointcloud try to use the <i>Conditional Vertex Selection</i> filter"
-						   "with function '(nx==0.0) && (ny==0.0)  && (nz==0.0)', and then <i>delete selected vertices</i>.<br>"
-                           "Enabling the Cleaning option also works.";
+						   "with function '(nx==0.0) && (ny==0.0) && (nz==0.0)', and then <i>delete selected vertices</i>.<br>";
       return false;
     }
     
