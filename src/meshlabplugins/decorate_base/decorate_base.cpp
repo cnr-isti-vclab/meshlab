@@ -178,17 +178,36 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
     case DP_SHOW_NORMALS:
         {
             glPushAttrib(GL_ENABLE_BIT );
-            float NormalLen=rm->getFloat(NormalLength());
+			float NormalLen=rm->getFloat(NormalLength());
+			float NormalWid = rm->getFloat(NormalWidth());
+			vcg::Color4b VertNormalColor = rm->getColor4b(NormalVertColor());
+			vcg::Color4b FaceNormalColor = rm->getColor4b(NormalFaceColor());
 			bool showselection = rm->getBool(NormalSelection());
+
 			float LineLen = m.cm.bbox.Diag()*NormalLen;
-            glDisable(GL_LIGHTING);
+
+			//query line width range
+			GLfloat widthRange[2];
+			widthRange[0] = 1.0f; widthRange[1] = 1.0f;
+			glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, widthRange);
+
+			//set line width according to the width range
+			NormalWid = (NormalWid < widthRange[0]) ?  widthRange[0] :  NormalWid;
+			NormalWid = (NormalWid > widthRange[1]) ?  widthRange[1] :  NormalWid;
+
+			//store current linewidth and set new line width
+			GLfloat lineWidthtmp[1];
+			glGetFloatv(GL_LINE_WIDTH, lineWidthtmp);
+			glLineWidth(NormalWid);
+
+			glDisable(GL_LIGHTING);
             glDisable(GL_TEXTURE_2D);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
             glBegin(GL_LINES);
             if(rm->getBool(NormalVertFlag())) // vert Normals
             {
-                glColor4f(.4f,.4f,1.f,.6f);
+				glColor(VertNormalColor);
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
                 {
 					if ((!showselection) || (showselection && vi->IsS()))
@@ -200,7 +219,7 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
             }
             if(rm->getBool(NormalFaceFlag())) // face Normals
             {
-                glColor4f(.1f,.4f,4.f,.6f);
+				glColor(FaceNormalColor);
                 for(CMeshO::FaceIterator fi=m.cm.face.begin();fi!=m.cm.face.end();++fi) if(!(*fi).IsD())
                 {
 					if ((!showselection) || (showselection && fi->IsS()))
@@ -212,6 +231,8 @@ void DecorateBasePlugin::decorateMesh(QAction *a, MeshModel &m, RichParameterSet
                 }
             }
             glEnd();
+			//restore previous line width
+			glLineWidth(lineWidthtmp[0]);
             glPopAttrib();
         } break;
 
@@ -1071,6 +1092,9 @@ switch(ID(action))
     case DP_SHOW_NORMALS : 
 	{
         parset.addParam(new RichFloat(NormalLength(),0.05f,"Vector Length","The length of the normal expressed as a percentage of the bbox of the mesh"));
+		parset.addParam(new RichFloat(NormalWidth(), 1.0f,"Normal Width","The width of the normal expressed in pixels"));
+		parset.addParam(new RichColor(NormalVertColor(),QColor(102, 102, 255, 153),QString("Curr Vert Normal Color"),QString("Current Vert Normal Color")));
+		parset.addParam(new RichColor(NormalFaceColor(),QColor(102, 102, 255, 153),QString("Curr Face Normal Color"),QString("Current Face Normal Color")));
         parset.addParam(new RichBool(NormalVertFlag(),true,"Per Vertex",""));
         parset.addParam(new RichBool(NormalFaceFlag(),true,"Per Face",""));
 		parset.addParam(new RichBool(NormalSelection(), false, "Show Selected", ""));
