@@ -1,82 +1,107 @@
 meshlabserver [logargs] [args]
+
+
   where logargs can be:
-    -d filename             dump on a text file a list of all the
-                            filtering functions
-    -l filename             log of the filters is output on a file
+
+    -d filename         dump on a text file a list of all the
+                        filtering functions
+    -l filename         log of the filters is output on a file
+
+
   where args can be:
-    -p filename             meshlab project (.mlp) to be loaded
-    -w filename [-x]        output meshlab project (.mlp) to be saved.
-                            If -x flag is specified a 3D model meshfile.ext
-                            contained in the input project will be overwritten,
-                            otherwise it will be saved in the same directory of
-                            input mesh as a new file called meshfile_out.ext.
-                            All the mesh attributes will be exported in the
-                            saved files
-    -i filename             mesh that has to be loaded
-    -o filename [-l <opt_layer>][-m <opt_mask>]  the name of the file where to write the current mesh
-                            of the MeshLab document.
-							If -l parameter is set the specified layer is going to be saved into the passed
-							filename. 
-							Valid values for <opt_layer> can be:
-								an integer number in the range [0,last_layer_in_the_document]
-								c referring to the current layer in the document 
-								x referring to the last layer in the document 
-							If -l param is not specified, by default, the current layer will be saved
-                            If -m is specified the specified mesh attributes will
-                            be saved in the output file. the param <opt_mask> can be a
-                            space separated list of the following attributes:
-                                vc -> vertex colors,  vf -> vertex flags,
-                                vq -> vertex quality, vn-> vertex normals,
-                                vt -> vertex texture coords,
-                                vr -> vertex radius,
-                                fc -> face colors,  ff -> face flags,
-                                fq -> face quality, fn-> face normals,
-                                wc -> wedge colors, wn-> wedge normals,
-                                wt -> wedge texture coords
-								mp -> polygonal mesh info
-    -s filename		        the script to be applied
+
+    -p filename         meshlab project (.mlp) to be loaded
+
+    -w filename [-x]    output meshlab project (.mlp) to be saved.
+                        If -x flag is specified a 3D model meshfile.ext
+                        contained in the input project will be 
+                        overwritten, otherwise it will be saved in the 
+                        same directory of input mesh as a new file 
+                        called meshfile_out.ext.
+                        ALL the mesh attributes will be exported in the
+                        saved files
+
+    -i filename         mesh that has to be loaded
+
+    -o filename [-l <opt_layer>][-m <opt_mask>]  the name of the file 
+                        where to write the current layer of the project
+                        If -l parameter is set the specified layer is
+                        going to be saved with the chosen filename
+                        Valid values for <opt_layer> can be:
+                          [0,last_layer_in_the_project] to indicate the
+                             desired layer by its index
+                          c  to indicate the CURRENT layer in the project
+                          x  to indicate the LAST layer in the project
+                        If -l param is not specified, by default the 
+                        CURRENT layer will be saved
+                        If -m is specified the listed mesh attributes
+                        will be saved in the output file
+                        The param <opt_mask> can be a space-separated
+                        list of the following attributes:
+                          vc -> vertex colors,
+                          vf -> vertex flags,
+                          vq -> vertex quality,
+                          vn-> vertex normals,
+                          vt -> vertex texture coords,
+                          vr -> vertex radius,
+                          fc -> face colors,
+                          ff -> face flags,
+                          fq -> face quality,
+                          fn-> face normals,
+                          wc -> wedge colors,
+                          wn-> wedge normals,
+                          wt -> wedge texture coords,
+                          mp -> polygonal mesh info
+
+    -s filename         the script to be applied
+
 
    Examples:
 
-    'meshlabserver -i input.obj -o output.ply -m vc fq wt -s meshclean.mlx'
-           the script contained in file 'meshclean.mlx' will be applied to the
-           mesh contained into 'input.obj'. The vertex coordinates and the
-           per-vertex-color, the per-face-quality and the per-wedge-texture
-           attributes contained in the current layer will be saved into the output.ply file
-		   
-	 'meshlabserver -i input.obj -o output.ply -l 0 -m vc fq wt -o output_last.ply -l l -s meshclean.mlx'
-           the script contained in file 'meshclean.mlx' will be applied to the
-           mesh contained into 'input.obj'. The vertex coordinates and the
-           per-vertex-color, the per-face-quality and the per-wedge-texture
-           attributes contained in the layer 0 (if it exists!) will be saved into the output.ply file,
-		   instead in the file output_last.ply will be saved the default geometric attributes of the last layer
-		   of the current document.
+'meshlabserver -i input.obj -o output.ply -m vc fq wt -s meshclean.mlx'
+           the script contained in file 'meshclean.mlx' will be applied
+           to the mesh contained into 'input.obj'. The per-vertex-color,
+           the per-face-quality and the per-wedge-texture attributes 
+           contained in the current layer will be saved into the
+           output.ply file
 
-    'meshlabserver -i input0.obj -i input1.ply -w outproj.mlp -x -s meshclean.mlx'
-           the script file meshclean.mlx will be applied to the document
+'meshlabserver -i input.obj -o output.ply -l 2 -m vc fq wt -o output_last.ply -l l -s meshclean.mlx'
+           the script contained in file 'meshclean.mlx' will be applied
+           to the mesh contained into 'input.obj'.
+           The per-vertex-color, the per-face-quality and the 
+           per-wedge-texture attributes contained in the layer 2 
+           (if it exists!) will be saved into the output.ply file
+           The last layer of the project will be saved in the file
+           output_last, with the default geometric attributes.
+
+'meshlabserver -i input0.obj -i input1.ply -w outproj.mlp -x -s meshclean.mlx'
+           the script file meshclean.mlx will be applied to the project
            composed by input0.obj and input1.ply meshes.
-           The mesh input1.ply will become the current mesh of the document
-           (e.g. the mesh to which the filters operating on a single model will
-           be applied). A new output project outproj.mlp file will be generated
+           The mesh input1.ply will become the current mesh of the 
+           project (e.g. the mesh to which the filters operating on a
+           single model will be applied).
+           A new output project outproj.mlp file will be generated
            (containing references to the input0.obj an input1.ply).
            The files input0.obj and input1.ply will be overwritten.
 
-    'meshlabserver -l logfile.txt -p proj.mlp -i input.obj -w outproj.mlp -s meshclean.mlx'
-           the mesh file input.obj will be added to the meshes referred by the
-           loaded meshlab project file proj.mlp. The mesh input.obj will become
-           the current mesh of the document, the script file meshclean.mlx will
-           be applied to the meshes contained into the resulting document.
-           the project file outproj.mlp will be generated
-           A 3D model meshfile.ext contained in the input project proj.mlp will
-           be saved in a new file called meshfile_out.ext
-           (if you want to overwrite the original files use the -v flag after
-           the outproject filename) all the attributes of the meshes will be
-           saved into the output files; the log info will be saved into the
-           file logfile.txt.
+'meshlabserver -l logfile.txt -p proj.mlp -i input.obj -w outproj.mlp -s meshclean.mlx'
+           the mesh file input.obj will be added to the meshes referred
+           by the loaded meshlab project file proj.mlp. The mesh 
+           input.obj will become the current mesh of the project, the 
+           script file meshclean.mlx will be applied to the meshes
+           contained into the resulting project.
+           The project file outproj.mlp will be generated.
+           A 3D model meshfile.ext contained in the input project 
+           proj.mlp will be saved in a new file called meshfile_out.ext.
+           (if you want to overwrite the original files use the -v flag
+           after the outproject filename) all the attributes of the 
+           meshes will be saved into the output files; the log info 
+           will be saved into the file logfile.txt.
 
    Notes:
-   There can be multiple meshes loaded and the order they are listed matters because
-   filters that use meshes as parameters choose the mesh based on the order.
+   There can be multiple meshes loaded and the order they are listed
+   matters because filters that use meshes as parameters choose the 
+   mesh based on the order.
    The format of the output mesh is guessed by the used extension.
    Script is optional and must be in the xml format saved by MeshLab.
 
