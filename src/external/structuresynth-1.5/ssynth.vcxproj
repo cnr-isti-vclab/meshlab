@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}</ProjectGuid>
+    <RootNamespace>ssynth</RootNamespace>
+    <Keyword>Qt4VSv1.0</Keyword>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <PlatformToolSet>v140</PlatformToolSet>
+    <OutputDirectory>..\lib\win32-msvc2015\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <IntermediateDirectory>release\</IntermediateDirectory>
+    <PrimaryOutput>ssynth</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <PlatformToolSet>v140</PlatformToolSet>
+    <OutputDirectory>..\lib\win32-msvc2015\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <IntermediateDirectory>debug\</IntermediateDirectory>
+    <PrimaryOutput>ssynth</PrimaryOutput>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
+    <QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\lib\win32-msvc2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ssynth</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\lib\win32-msvc2015\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ssynth</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;ssynth;$(QTDIR)\include;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtXml;$(QTDIR)\include\QtScript;$(QTDIR)\include\QtCore;release;$(QTDIR)\mkspecs\win32-msvc2015;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>release\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)\ssynth.lib</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc2015;.;./ssynth;$(QTDIR)\include;$(QTDIR)\include/QtOpenGL;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtXml;$(QTDIR)\include/QtScript;$(QTDIR)\include/QtCore</IncludePath>
+      <Define>UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_MSC_VER=1900;_WIN32;_WIN64</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;ssynth;$(QTDIR)\include;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtXml;$(QTDIR)\include\QtScript;$(QTDIR)\include\QtCore;debug;$(QTDIR)\mkspecs\win32-msvc2015;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>debug\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)\ssynth.lib</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc2015;.;./ssynth;$(QTDIR)\include;$(QTDIR)\include/QtOpenGL;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtXml;$(QTDIR)\include/QtScript;$(QTDIR)\include/QtCore</IncludePath>
+      <Define>UNICODE;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_MSC_VER=1900;_WIN32;_WIN64</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ssynth\StructureSynth\Model\Action.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\AmbiguousRule.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Raytracer\AtomicCounter.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Box.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\Builder.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\ColorPool.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Misc\ColorUtils.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\CustomRule.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Dot.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Parser\EisenParser.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\ExecutionStack.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Grid.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Line.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Logging\ListWidgetLogger.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Logging\Logging.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Math\Matrix4.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Mesh.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Misc\MiniParser.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Object3D.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Misc\Persistence.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Parser\Preprocessor.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\PrimitiveClass.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\PrimitiveRule.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Math\Random.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\RandomStreams.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\RaytraceTriangle.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Raytracer\RenderThread.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\Rendering\Renderer.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\Rule.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\RuleRef.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\RuleSet.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Raytracer\Sampler.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\State.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\Rendering\TemplateRenderer.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Parser\Tokenizer.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\Transformation.cpp" />
+    <ClCompile Include="ssynth\StructureSynth\Model\TransformationLoop.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Triangle.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Math\Vector3.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\Misc\Version.cpp" />
+    <ClCompile Include="ssynth\SyntopiaCore\GLEngine\Raytracer\VoxelStepper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ssynth\StructureSynth\Model\Action.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\AmbiguousRule.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Raytracer\AtomicCounter.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Box.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Builder.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\ColorPool.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Misc\ColorUtils.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\CustomRule.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Dot.h" />
+    <ClInclude Include="ssynth\StructureSynth\Parser\EisenParser.h" />
+    <QtMoc Include="ssynth\SyntopiaCore\GLEngine\EngineWidget.h">
+    </QtMoc>
+    <ClInclude Include="ssynth\SyntopiaCore\Exceptions\Exception.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\ExecutionStack.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Grid.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Line.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Logging\ListWidgetLogger.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Logging\Logging.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Math\Matrix4.h" />
+    <ClInclude Include="ssynth\ThirdPartyCode\MersenneTwister\MersenneTwister.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Mesh.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Misc\MiniParser.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Object3D.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Rendering\OpenGLRenderer.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Misc\Persistence.h" />
+    <ClInclude Include="ssynth\StructureSynth\Parser\Preprocessor.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\PrimitiveClass.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\PrimitiveRule.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Math\Random.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\RandomStreams.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Raytracer\RayTracer.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\RaytraceTriangle.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Raytracer\RenderThread.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Rendering\Renderer.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Rule.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\RuleRef.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\RuleSet.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Raytracer\Sampler.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Sphere.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\State.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Rendering\TemplateRenderer.h" />
+    <ClInclude Include="ssynth\StructureSynth\Parser\Tokenizer.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\Transformation.h" />
+    <ClInclude Include="ssynth\StructureSynth\Model\TransformationLoop.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Triangle.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Math\Vector3.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\Misc\Version.h" />
+    <ClInclude Include="ssynth\SyntopiaCore\GLEngine\Raytracer\VoxelStepper.h" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="Qt5.7.0" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

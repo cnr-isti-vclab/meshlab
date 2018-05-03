@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bz2", "bzip2-1.0.5\bz2.vcxproj", "{B9319FA7-7242-3346-B518-A2B01B5BAE10}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "muparser", "muparser_v225\src\muparser.vcxproj", "{7C252D4C-7312-3016-85D8-60315A35C999}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "levmar", "levmar-2.3\levmar.vcxproj", "{B08106F9-3E81-31D3-BD7E-048E56916D6A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ssynth", "structuresynth-1.5\ssynth.vcxproj", "{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openctm", "OpenCTM-1.0.3\openctm.vcxproj", "{7A34C1DE-8E0B-3F42-8F46-7DD7AB80D107}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jhead", "jhead-2.95\jhead.vcxproj", "{12ADBE23-D212-3ED6-8864-BF0E978C7E61}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3ds", "lib3ds-1.3.0\lib3ds\3ds.vcxproj", "{66191744-D4D8-30B7-8306-81FFFFFC3616}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B9319FA7-7242-3346-B518-A2B01B5BAE10}.Debug|x64.ActiveCfg = Debug|x64
+		{B9319FA7-7242-3346-B518-A2B01B5BAE10}.Debug|x64.Build.0 = Debug|x64
+		{B9319FA7-7242-3346-B518-A2B01B5BAE10}.Release|x64.ActiveCfg = Release|x64
+		{B9319FA7-7242-3346-B518-A2B01B5BAE10}.Release|x64.Build.0 = Release|x64
+		{7C252D4C-7312-3016-85D8-60315A35C999}.Debug|x64.ActiveCfg = Debug|x64
+		{7C252D4C-7312-3016-85D8-60315A35C999}.Debug|x64.Build.0 = Debug|x64
+		{7C252D4C-7312-3016-85D8-60315A35C999}.Release|x64.ActiveCfg = Release|x64
+		{7C252D4C-7312-3016-85D8-60315A35C999}.Release|x64.Build.0 = Release|x64
+		{B08106F9-3E81-31D3-BD7E-048E56916D6A}.Debug|x64.ActiveCfg = Debug|x64
+		{B08106F9-3E81-31D3-BD7E-048E56916D6A}.Debug|x64.Build.0 = Debug|x64
+		{B08106F9-3E81-31D3-BD7E-048E56916D6A}.Release|x64.ActiveCfg = Release|x64
+		{B08106F9-3E81-31D3-BD7E-048E56916D6A}.Release|x64.Build.0 = Release|x64
+		{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}.Debug|x64.ActiveCfg = Debug|x64
+		{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}.Debug|x64.Build.0 = Debug|x64
+		{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}.Release|x64.ActiveCfg = Release|x64
+		{0614EBC0-F7DE-38F5-AD6D-BD1C7BD93C43}.Release|x64.Build.0 = Release|x64
+		{7A34C1DE-8E0B-3F42-8F46-7DD7AB80D107}.Debug|x64.ActiveCfg = Debug|x64
+		{7A34C1DE-8E0B-3F42-8F46-7DD7AB80D107}.Debug|x64.Build.0 = Debug|x64
+		{7A34C1DE-8E0B-3F42-8F46-7DD7AB80D107}.Release|x64.ActiveCfg = Release|x64
+		{7A34C1DE-8E0B-3F42-8F46-7DD7AB80D107}.Release|x64.Build.0 = Release|x64
+		{12ADBE23-D212-3ED6-8864-BF0E978C7E61}.Debug|x64.ActiveCfg = Debug|x64
+		{12ADBE23-D212-3ED6-8864-BF0E978C7E61}.Debug|x64.Build.0 = Debug|x64
+		{12ADBE23-D212-3ED6-8864-BF0E978C7E61}.Release|x64.ActiveCfg = Release|x64
+		{12ADBE23-D212-3ED6-8864-BF0E978C7E61}.Release|x64.Build.0 = Release|x64
+		{66191744-D4D8-30B7-8306-81FFFFFC3616}.Debug|x64.ActiveCfg = Debug|x64
+		{66191744-D4D8-30B7-8306-81FFFFFC3616}.Debug|x64.Build.0 = Debug|x64
+		{66191744-D4D8-30B7-8306-81FFFFFC3616}.Release|x64.ActiveCfg = Release|x64
+		{66191744-D4D8-30B7-8306-81FFFFFC3616}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		Qt5Version = Qt5.7.0
+	EndGlobalSection
+EndGlobal
