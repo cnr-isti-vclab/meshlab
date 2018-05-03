@@ -223,8 +223,13 @@ public:
     void appendOutput(const QString& output);
     QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm);
 
-	//It's a temporary solution to access the global parameters still expressed with the old parameter set class 
-	QScriptValue loadMLScriptEnv(MeshDocument& md,PluginManager& pm,const RichParameterSet& global);
+	//global map contains purified name (i.e. Env::convertToAMLScriptValidName(paramname) fun is called) of the global parameters and their values
+	QScriptValue loadMLScriptEnv(MeshDocument& md, PluginManager& pm, const QMap<QString, QString>& global);
+	////global map contains purified name (i.e. Env::convertToAMLScriptValidName(paramname) fun is called) of the global parameters and their values
+	//QScriptValue loadMLScriptEnv(MeshDocument& md, PluginManager& pm, const QString & xmlpluginnamespace, const QString & pluginname, const QString & filtername, const QMap<QString,QString>& global);
+
+private:
+	void insertParamsExpressionBinding(const QString & xmlpluginnamespace, const QString & pluginname, const QString & filtername, const QMap<QString, QString>& parvalmap);
 
 	static QString convertToAMLScriptValidName(const QString& name);
 };

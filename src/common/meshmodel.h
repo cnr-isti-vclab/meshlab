@@ -117,8 +117,14 @@ public:
         MM_TRANSFMATRIX     = 0x10000000,
         MM_COLOR            = 0x20000000,
         MM_POLYGONAL        = 0x40000000,
+
+		// unknown - will raise exceptions, to be avoided, here just for compatibility
         MM_UNKNOWN          = 0x80000000,
 
+		// geometry chenge (for filters that remove stuff or modify geoemtry, but not color)
+		MM_GEOMETRY_CHANGE  = 0x431e7be7,
+
+		// everything - dangerous, will add unwanted data to layer
         MM_ALL				= 0xffffffff
     };
 

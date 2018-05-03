@@ -193,10 +193,10 @@ void MultiViewer_Container::addView(GLArea* viewer,Qt::Orientation orient)
 
 void MultiViewer_Container::removeView(int viewerId)
 {
-	GLArea* viewer;
+	GLArea* viewer = NULL;
 	for (int i=0; i< viewerList.count(); i++)
 	{
-		if((viewer != NULL) && (viewerList.at(i)->getId() == viewerId))
+		if(viewerList.at(i)->getId() == viewerId)
 			viewer = viewerList.at(i);
 	}
 	assert(viewer);

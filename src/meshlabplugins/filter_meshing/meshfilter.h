@@ -42,8 +42,6 @@ public:
     enum {
         FP_LOOP_SS,
         FP_BUTTERFLY_SS,
-        FP_REMOVE_UNREFERENCED_VERTEX,
-        FP_REMOVE_DUPLICATED_VERTEX,
         FP_CLUSTERING,
         FP_QUADRIC_SIMPLIFICATION,
         FP_QUADRIC_TEXCOORD_SIMPLIFICATION,
@@ -77,8 +75,7 @@ public:
         FP_FAUX_CREASE,
         FP_FAUX_EXTRACT,
         FP_VATTR_SEAM,
-        FP_REFINE_LS3_LOOP,
-        FP_REMOVE_FACE_ZERO_AREA
+        FP_REFINE_LS3_LOOP
     } ;
 
 

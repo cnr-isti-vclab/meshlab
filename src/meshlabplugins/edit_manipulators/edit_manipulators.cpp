@@ -970,16 +970,16 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
   {
     switch(current_manip) 
     {
-      case EditManipulatorsPlugin::ManMove:
-        snapto = powf(10.f,ceil(log10(diag))-2);
-        break;
-      case EditManipulatorsPlugin::ManRotate:
-        snapto = 1.0;
-        break;
-      case EditManipulatorsPlugin::ManScale:
-        snapto = 0.1;
-        break;
-      default: ;
+	case EditManipulatorsPlugin::ManMove:
+		snapto = Scalarm(powf(10.f, ceil(log10(diag)) - 2));
+		break;
+	case EditManipulatorsPlugin::ManRotate:
+		snapto = Scalarm(1.0);
+		break;
+	case EditManipulatorsPlugin::ManScale:
+		snapto = Scalarm(0.1);
+		break;
+	default:;
     }
   }
 
@@ -1095,7 +1095,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     HelpString3 = "<br>press RETURN to apply, BACKSPACE to cancel";
   }
 
-  this->RealTimeLog("Manipulator","",qPrintable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
+  this->RealTimeLog("Manipulator","",qUtf8Printable("<b>"+StatusString1+"</b>"+StatusString2+HelpString1+HelpString2+HelpString3));
 
   // render original mesh BBox
   DrawMeshBox(model);

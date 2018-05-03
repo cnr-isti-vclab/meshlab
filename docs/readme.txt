@@ -8,7 +8,7 @@
    Paolo Cignoni                                                    \/)\/
    Visual Computing Lab  http://vcg.isti.cnr.it                    /\/|
    ISTI - Italian National Research Council                           |
-   Copyright(C) 2005-2011                                             \
+   Copyright(C) 2005-2018                                             \
 
 
 This program is free software; you can redistribute it and/or modify it
@@ -40,8 +40,8 @@ ISBN = {978-3-905673-68-5},
 DOI = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
 }
 
-Paolo Cignoni ( p.cignoni (at) isti.cnr.it )
-Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it ) 
+Paolo Cignoni (p.cignoni (at) isti.cnr.it)
+Guido Ranzuglia (g.ranzuglia (at) isti.cnr.it) 
 
 For documented and repeatable bugs, reasonable feature requests and grounded issues, please use the GitHub services
 https://github.com/cnr-isti-vclab/meshlab/issues

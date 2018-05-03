@@ -31,55 +31,113 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
   QZero.SetZero();
   tri::QuadricTemp TD(m.vert,QZero);
   tri::QHelper::TDp()=&TD;
-
+  
   if(Selected) // simplify only inside selected faces
   {
     // select only the vertices having ALL incident faces selected
     tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
-
+    
     // Mark not writable un-selected vertices
-    CMeshO::VertexIterator  vi;
-    for(vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+    for(auto vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
     {
-          if(!(*vi).IsS()) (*vi).ClearW();
-                      else (*vi).SetW();
+      if(!(*vi).IsS()) (*vi).ClearW();
+      else (*vi).SetW();
     }
   }
-
+  
   if(pp.PreserveBoundary && !Selected) 
-	{
+  {
     pp.FastPreserveBoundary=true;
-		pp.PreserveBoundary = false;
-	}
-		
+    pp.PreserveBoundary = false;
+  }
+  
   if(pp.NormalCheck) pp.NormalThrRad = M_PI/4.0;
-	
+  
+  vcg::LocalOptimization<CMeshO> DeciSession(m,&pp);
+  cb(1,"Initializing simplification");
+  DeciSession.Init<tri::MyTriEdgeCollapse >();
+  
+  if(Selected)
+    TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
+  DeciSession.SetTargetSimplices(TargetFaceNum);
+  DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
+  //  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
+  //int startFn=m.fn;
+  int faceToDel=m.fn-TargetFaceNum;
+  while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
+  {
+    cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
+  };
+  
+  DeciSession.Finalize<tri::MyTriEdgeCollapse >();
+  
+  if(Selected) // Clear Writable flags 
+  {
+    for(auto vi=m.vert.begin();vi!=m.vert.end();++vi) 
+    {
+      if (!(*vi).IsD()) (*vi).SetW();
+      if ((*vi).IsS()) (*vi).ClearS();
+    }
+  }
+}
+
+
+
+void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::TriEdgeCollapseQuadricTexParameter &pp, CallBackPos *cb)
+{
+  tri::UpdateNormal<CMeshO>::PerFace(m);
+	math::Quadric<double> QZero;
+	QZero.SetZero();
+  tri::QuadricTexHelper<CMeshO>::QuadricTemp TD3(m.vert,QZero);
+  tri::QuadricTexHelper<CMeshO>::TDp3()=&TD3;
+
+  std::vector<std::pair<vcg::TexCoord2<float>,Quadric5<double> > > qv;
+
+  tri::QuadricTexHelper<CMeshO>::Quadric5Temp TD(m.vert,qv);
+  tri::QuadricTexHelper<CMeshO>::TDp()=&TD;
+
+	if(Selected) // simplify only inside selected faces
+  {
+    // select only the vertices having ALL incident faces selected
+    tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m);
+		
+    // Mark not writable un-selected vertices
+    for(auto vi=m.vert.begin();vi!=m.vert.end();++vi) if(!(*vi).IsD())
+    {
+			if(!(*vi).IsS()) (*vi).ClearW();
+			else (*vi).SetW();
+    }
+  }
 	
   vcg::LocalOptimization<CMeshO> DeciSession(m,&pp);
 	cb(1,"Initializing simplification");
-	DeciSession.Init<tri::MyTriEdgeCollapse >();
+	DeciSession.Init<tri::MyTriEdgeCollapseQTex>();
 
 	if(Selected)
 		TargetFaceNum= m.fn - (m.sfn-TargetFaceNum);
 	DeciSession.SetTargetSimplices(TargetFaceNum);
-	DeciSession.SetTimeBudget(0.1f); // this allow to update the progress bar 10 time for sec...
-//  if(TargetError< numeric_limits<double>::max() ) DeciSession.SetTargetMetric(TargetError);
-  //int startFn=m.fn;
-  int faceToDel=m.fn-TargetFaceNum;
- while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
- {
-   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), "Simplifying...");
- };
-
-	DeciSession.Finalize<tri::MyTriEdgeCollapse >();
+	DeciSession.SetTimeBudget(0.1f);
+//	int startFn=m.fn;
   
-  if(Selected) // Clear Writable flags 
-  {
-    CMeshO::VertexIterator  vi;
-    for(vi=m.vert.begin();vi!=m.vert.end();++vi) 
+	int faceToDel=m.fn-TargetFaceNum;
+	
+	while( DeciSession.DoOptimization() && m.fn>TargetFaceNum )
 	{
-      if (!(*vi).IsD()) (*vi).SetW();
-	  if ((*vi).IsS()) (*vi).ClearS();
+    char buf[256];
+    sprintf(buf,"Simplifing: heap size %i ops %i\n",int(DeciSession.h.size()),DeciSession.nPerformedOps);
+	   cb(100-100*(m.fn-TargetFaceNum)/(faceToDel), buf);
+	};
+
+	DeciSession.Finalize<tri::MyTriEdgeCollapseQTex>();
+	
+	if(Selected) // Clear Writable flags 
+  {
+    for (auto vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	{
+		if (!(*vi).IsD()) (*vi).SetW();
+		if ((*vi).IsS()) (*vi).ClearS();
 	}
   }
+	
+
 }

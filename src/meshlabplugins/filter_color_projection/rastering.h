@@ -186,7 +186,7 @@ public:
     }
 
     // expects points outside face (affecting face color) with edge distance > 0
-    void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp, float edgeDist= 0.0)
+    void AddTextureSample(const CMeshO::FaceType &f, const CMeshO::CoordType &p, const vcg::Point2i &tp, float /*edgeDist*/)
     {
         Point3m meshpoint = f.cP(0)*p[0] + f.cP(1)*p[1] +f.cP(2)*p[2];
         Point3m meshnorm  = (f.cV(0)->N()*p[0] + f.cV(1)->N()*p[1] + f.cV(2)->N()*p[2]).Normalize();

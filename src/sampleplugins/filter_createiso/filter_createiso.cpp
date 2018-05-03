@@ -121,7 +121,7 @@ FilterCreateIso::~FilterCreateIso() {
    }
    return true;
  }
- void FilterCreateIso::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+ void FilterCreateIso::initParameterSet(QAction *action,MeshModel & /*m*/, RichParameterSet & parlst)
 {
     pair<float,float> qualityRange;
   switch(ID(action))

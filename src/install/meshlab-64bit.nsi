@@ -5,7 +5,7 @@
 
 !define MAINDIR $PROGRAMFILES64
 !define PRODUCT_NAME "MeshLab_64b"
-!define PRODUCT_VERSION "2016"
+!define PRODUCT_VERSION "2018.03"
 !define PRODUCT_PUBLISHER "Paolo Cignoni - Guido Ranzuglia VCG - ISTI - CNR"
 !define PRODUCT_WEB_SITE "http://www.meshlab.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\meshlab.exe"
@@ -163,9 +163,9 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\samples\images"
   File "${DISTRIB_FOLDER}/sample\images\duckCM.jpg"
   SetOutPath "$INSTDIR\imageformats"
-  File ${QT_BASE}\plugins\imageformats\qjpeg.dll
-  File ${QT_BASE}\plugins\imageformats\qgif.dll
-  File ${QT_BASE}\plugins\imageformats\qtiff.dll
+  File "${QT_BASE}\plugins\imageformats\qjpeg.dll"
+  File "${QT_BASE}\plugins\imageformats\qgif.dll"
+  File "${QT_BASE}\plugins\imageformats\qtiff.dll"
    SetOutPath "$INSTDIR\platforms"
   File "${QT_BASE}\plugins\platforms\qminimal.dll"
   File "${QT_BASE}\plugins\platforms\qwindows.dll"

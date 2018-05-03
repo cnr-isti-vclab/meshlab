@@ -1,4 +1,6 @@
 
+.qmake.stash
+*.ipch
 *.pro.user
 build-*/
 *.pdb
@@ -14,6 +16,8 @@ build-*/
 *.filters
 *.db
 *.opendb
+*.db-shm
+*.db-wal
 moc_*.cpp
 ui_*.h
 qrc_*.cpp
@@ -21,6 +25,7 @@ Debug/
 Release/
 src/external/lib/win32-msvc2013/*.lib
 src/external/lib/win32-msvc2015/*.lib
+src/external/lib/win32-msvc/*.lib
 src/distrib/plugins/*.lib
 src/distrib/plugins/*.dll
 src/distrib/plugins/*.xml

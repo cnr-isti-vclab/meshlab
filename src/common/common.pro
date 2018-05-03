@@ -9,17 +9,8 @@ win32-msvc2010:DESTDIR = ../distrib
 win32-msvc2012:DESTDIR = ../distrib
 win32-msvc2013:DESTDIR = ../distrib
 win32-msvc2015:DESTDIR = ../distrib
+win32-msvc:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
-
-# CONFIG(release,debug | release) {
-# win32-msvc2005:DESTDIR     = ./release
-# win32-msvc2008:DESTDIR     = ./release
-# win32-msvc2010:DESTDIR     = ./release
-# win32-msvc2012:DESTDIR     = ./release
-# win32-g++:DLLDESTDIR     = ./release
-# }
-
-mac:DLLDESTDIR = .
 
 # The following lines are necessary to avoid that when you re-compile everything you still find old dll in the plugins dir
 macx:QMAKE_CLEAN +=  ../distrib/plugins/*.dylib
@@ -56,14 +47,12 @@ fi;\
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$EIGENDIR \
-    $$GLEWDIR/include
+    $$GLEWDIR/include \
+    $$EXIF_DIR
 TEMPLATE = lib
-linux-g++:CONFIG += dll
-linux-g++:DESTDIR = ../distrib
-linux-g++-32:CONFIG += dll
-linux-g++-32:DESTDIR = ../distrib
-linux-g++-64:CONFIG += dll
-linux-g++-64:DESTDIR = ../distrib
+
+linux:CONFIG += dll
+linux:DESTDIR = ../distrib
 
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
 
@@ -73,6 +62,7 @@ win32-msvc2010:CONFIG += staticlib
 win32-msvc2012:CONFIG += staticlib
 win32-msvc2013:CONFIG += staticlib
 win32-msvc2015:CONFIG += staticlib
+win32-msvc:CONFIG += staticlib
 
 QT += opengl
 QT += xml
@@ -82,14 +72,9 @@ QT += script
 
 TARGET = common
 DEPENDPATH += .
-INCLUDEPATH += . $$EXIF_DIR
 DEFINES += GLEW_STATIC
-win32-msvc2005:DEFINES += _CRT_SECURE_NO_WARNINGS
-win32-msvc2008:DEFINES += _CRT_SECURE_NO_WARNINGS
-win32-msvc2010:DEFINES += _CRT_SECURE_NO_WARNINGS
-win32-msvc2012:DEFINES += _CRT_SECURE_NO_WARNINGS
-win32-msvc2013:DEFINES += _CRT_SECURE_NO_WARNINGS
-win32-msvc2015:DEFINES += _CRT_SECURE_NO_WARNINGS
+
+win32-msvc:DEFINES += _CRT_SECURE_NO_WARNINGS
 
 
 # Input

@@ -194,7 +194,7 @@ int QualityMapperFilter::postCondition( QAction* a) const
 		return MeshModel::MM_VERTCOLOR;
 	default :  
 		assert(0);			
-		return MeshModel::MM_UNKNOWN;
+		return MeshModel::MM_NONE;
 	}
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(QualityMapperFilter)

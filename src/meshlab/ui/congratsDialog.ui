@@ -25,6 +25,13 @@
   <layout class="QVBoxLayout">
    <item>
     <widget class="QTextBrowser" name="congratsTextBrowser">
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-size:18pt;&quot;&gt;Congratulations! &lt;/span&gt;&lt;br /&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;&lt;br /&gt;You have successfully used MeshLab to open and process more than &lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-style:italic;&quot;&gt;one hundred meshes&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;!&lt;br /&gt;We hope that this means that you have found MeshLab useful.&lt;br /&gt;&lt;br /&gt;Please consider to send a short email to the developers of MeshLab, describing how MeshLab fitted your needs, attach to the email some screenshots of your processed meshes and tell us your impression about MeshLab. &lt;br /&gt;&lt;br /&gt;MeshLab is developed on public funding and assessment of its impact on the whole community is necessary, so, &lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans'; font-style:italic;&quot;&gt;please&lt;/span&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt;, spend a couple of minutes writing down a mail to us (or at least connect with the MeshLab FaceBook page).&lt;br /&gt;&lt;br /&gt;Thanks for using MeshLab&lt;br /&gt;&lt;br /&gt;Paolo Cignoni&lt;br /&gt;&lt;br /&gt;&lt;/span&gt;&lt;a href=&quot;http://www.facebook.com/MeshLab&quot;&gt;&lt;img src=&quot;:images/facebook.gif&quot; /&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Lucida Sans';&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="source">
       <url>
        <string>qrc:/images/100mesh.html</string>

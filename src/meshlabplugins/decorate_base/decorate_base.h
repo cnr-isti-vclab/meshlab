@@ -116,14 +116,14 @@ public:
   void endDecorate(QAction * /*mode*/, MeshModel &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool startDecorate(QAction * /*mode*/, MeshDocument &/*m*/, RichParameterSet *, GLArea * /*parent*/);
   bool isDecorationApplicable(QAction *action, const MeshModel& m, QString &ErrorMessage) const;
-  int getDecorationClass(QAction */*action*/) const;
+  int getDecorationClass(QAction * /*action*/) const;
   void initGlobalParameterSet(QAction *, RichParameterSet &/*globalparam*/);
 
   inline QString CameraScaleParam() const    { return  "MeshLab::Decoration::CameraRenderScaleType" ; }
   inline QString FixedScaleParam() const     { return  "MeshLab::Decoration::CameraFixedScaleParam" ; }
 
   inline QString ShowCameraDetails() const     { return  "MeshLab::Decoration::CameraShowCameraDetails" ; }
-
+  inline QString ApplyMeshTr() const { return  "MeshLab::Decoration::ApplyMeshTr"; }
   inline QString ShowMeshCameras() const     { return  "MeshLab::Decoration::ShowMeshCameras" ; }
   inline QString ShowRasterCameras() const   { return  "MeshLab::Decoration::ShowRasterCameras" ; }
 
@@ -136,6 +136,7 @@ public:
 
   inline QString TextureStyleParam() const   { return  "MeshLab::Decoration::TextureStyle" ; }
   inline QString TextureFaceColorParam() const   { return  "MeshLab::Decoration::TextureFaceColor" ; }
+  inline QString TextureIndexParam() const   { return  "MeshLab::Decoration::TextureIndex"; }
   inline QString VertDotSizeParam() const    { return  "MeshLab::Decoration::VertDotSize" ; }
 
   inline QString HistBinNumParam() const     { return  "MeshLab::Decoration::HistBinNumParam" ; }
@@ -163,6 +164,10 @@ public:
   inline QString LabelFaceFlag() const { return  "MeshLab::Decoration::LabelFaceFlag" ; }
 
   inline QString NormalLength() const { return  "MeshLab::Decoration::NormalLength" ; }
+  inline QString NormalWidth() const { return  "MeshLab::Decoration::NormalWidth" ; }
+  inline QString NormalVertColor() const { return  "MeshLab::Decoration::NormalVertColor" ; }
+  inline QString NormalFaceColor() const { return  "MeshLab::Decoration::NormalFaceColor" ; }
+  inline QString NormalSelection() const { return  "MeshLab::Decoration::NormalSelection"; }
   inline QString NormalVertFlag() const { return  "MeshLab::Decoration::NormalVertFlag" ; }
   inline QString NormalFaceFlag() const { return  "MeshLab::Decoration::NormalFaceFlag" ; }
 

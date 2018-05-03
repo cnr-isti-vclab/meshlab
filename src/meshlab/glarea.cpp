@@ -104,6 +104,11 @@ GLArea::GLArea(QWidget *parent, MultiViewer_Container *mvcont, RichParameterSet 
     connect(this, SIGNAL(updateLayerTable()), this->mw(), SIGNAL(updateLayerTable()));
     connect(md(),SIGNAL(meshRemoved(int)),this,SLOT(meshRemoved(int)));
 
+	QShortcut *copyViewSC = new QShortcut(QKeySequence::Copy, (QWidget*)this);
+	QObject::connect(copyViewSC, SIGNAL(activated()), (QWidget*)this, SLOT(copyToClip()));
+	QShortcut *pasteViewSC = new QShortcut(QKeySequence::Paste, (QWidget*)this);
+	QObject::connect(pasteViewSC, SIGNAL(activated()), (QWidget*)this, SLOT(pasteFromClip()));
+
     /*getting the meshlab MainWindow from parent, which is QWorkspace.
     *note as soon as the GLArea is added as Window to the QWorkspace the parent of GLArea is a QWidget,
     *which takes care about the window frame (its parent is the QWorkspace again).
@@ -652,7 +657,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     QString error = checkGLError::makeString("There are gl errors: ");
     if(!error.isEmpty()) {
-        Logf(GLLogStream::WARNING,qPrintable(error));
+        Logf(GLLogStream::WARNING, qUtf8Printable(error));
     }
     //check if viewers are linked
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());
@@ -974,11 +979,14 @@ void GLArea::saveSnapshot()
         {
             tileRow=tileCol=0;
             qDebug("Snapping layer %i",currSnapLayer);
-            this->md()->setCurrentMesh(currSnapLayer);
+			int mmit = 0;
             foreach(MeshModel *mp,this->md()->meshList) {
-                meshSetVisibility(mp,false);
+				if (mmit == currSnapLayer)
+					meshSetVisibility(mp, true);
+				else
+					meshSetVisibility(mp, false);
+				mmit++;
             }
-            meshSetVisibility(mm(),true);
 
             takeSnapTile=true;
 			for (int tilenum = 0; tilenum < (ss.resolution*ss.resolution); tilenum++)
@@ -1131,7 +1139,7 @@ void GLArea::setCurrentEditAction(QAction *editAction)
     }
     else
     {
-        Logf(GLLogStream::SYSTEM,"Started Mode %s", qPrintable(currentEditor->text()));
+        Logf(GLLogStream::SYSTEM,"Started Mode %s", qUtf8Printable(currentEditor->text()));
 		if(mm()!=NULL)
             mm()->meshModified() = true;
         else assert(!iEdit->isSingleMeshEdit());
@@ -1321,7 +1329,7 @@ void GLArea::wheelEvent(QWheelEvent*e)
             }
         case Qt::AltModifier:
             { 
-                glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch),0.01f, MLPerViewGLOptions::maxPointSize());
+				glas.pointSize = math::Clamp(glas.pointSize*powf(1.2f, notch), MLPerViewGLOptions::minPointSize(), MLPerViewGLOptions::maxPointSize());
                 MLSceneGLSharedDataContext* cont = mvc()->sharedDataContext();
                 if (cont != NULL)
                 {
@@ -1419,9 +1427,9 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
             if(toggle || stateToSet==false){
                 iDecorateTemp->endDecorate(action,*md(),glas.currentGlobalParamSet,this);
                 iDecorateTemp->setLog(NULL);
-                this->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Disabled Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s", qUtf8Printable(action->text()));
         }
         else{
             if(toggle || stateToSet==true){
@@ -1429,11 +1437,11 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
                 bool ret = iDecorateTemp->startDecorate(action,*md(), glas.currentGlobalParamSet, this);
                 if(ret) {
                     this->iPerDocDecoratorlist.push_back(action);
-                    this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+                    this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s", qUtf8Printable(action->text()));
                 }
-                else this->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s",qPrintable(action->text()));
+                else this->Logf(GLLogStream::SYSTEM,"Failed start of Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to enable an already enabled Decorate mode %s", qUtf8Printable(action->text()));
         }
     }
 
@@ -1446,9 +1454,9 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
             if(toggle || stateToSet==false){
                 iDecorateTemp->endDecorate(action,currentMeshModel,glas.currentGlobalParamSet,this);
                 iDecorateTemp->setLog(NULL);
-                this->Logf(0,"Disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(0,"Disabled Decorate mode %s", qUtf8Printable(action->text()));
             } else
-                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s",qPrintable(action->text()));
+                this->Logf(GLLogStream::SYSTEM,"Trying to disable an already disabled Decorate mode %s", qUtf8Printable(action->text()));
         }
         else{
             if(toggle || stateToSet==true){
@@ -1459,11 +1467,11 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
                     bool ret = iDecorateTemp->startDecorate(action,currentMeshModel, glas.currentGlobalParamSet, this);
                     if(ret) {
                         this->iCurPerMeshDecoratorList().push_back(action);
-                        this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s",qPrintable(action->text()));
+                        this->Logf(GLLogStream::SYSTEM,"Enabled Decorate mode %s", qUtf8Printable(action->text()));
                     }
-                    else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s",qPrintable(action->text()));
+                    else this->Logf(GLLogStream::SYSTEM,"Failed Decorate mode %s", qUtf8Printable(action->text()));
                 } else
-                    this->Logf(GLLogStream::SYSTEM,"Error in Decorate mode %s: %s",qPrintable(action->text()),qPrintable(errorMessage));
+                    this->Logf(GLLogStream::SYSTEM,"Error in Decorate mode %s: %s", qUtf8Printable(action->text()), qUtf8Printable(errorMessage));
 
             }
         }
@@ -1686,14 +1694,14 @@ void GLArea::sendViewPos(QString name)
 
 void GLArea::sendSurfacePos(QString name)
 {
-    qDebug("sendSurfacePos %s",qPrintable(name));
+    qDebug("sendSurfacePos %s", qUtf8Printable(name));
     nameToGetPickPos = name;
     hasToGetPickPos=true;
 }
 
 void GLArea::sendPickedPos(QString name)
 {
-	qDebug("sendPickedPos %s", qPrintable(name));
+	qDebug("sendPickedPos %s", qUtf8Printable(name));
 	nameToGetPickCoords = name;
 	hasToGetPickCoords = true;
 }
@@ -1972,8 +1980,8 @@ float GLArea::getCameraDistance()
 
 void GLArea::initializeShot(Shotm &shot)
 {
-    shot.Intrinsics.PixelSizeMm[0]=0.036916077;
-    shot.Intrinsics.PixelSizeMm[1]=0.036916077;
+    shot.Intrinsics.PixelSizeMm[0]=0.036916077f;
+    shot.Intrinsics.PixelSizeMm[1]=0.036916077f;
 
     shot.Intrinsics.DistorCenterPx[0]=width()/2;
     shot.Intrinsics.DistorCenterPx[1]=height()/2;
@@ -2197,7 +2205,7 @@ void GLArea::viewFromCurrentShot(QString kind)
     if(kind=="Raster" && this->md()->rm()) localShot = this->md()->rm()->shot;
     if(!localShot.IsValid())
     {
-        this->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s",qPrintable(kind));
+        this->Logf(GLLogStream::SYSTEM, "Unable to set Shot from current %s", qUtf8Printable(kind));
         return;
     }
 
@@ -2307,7 +2315,7 @@ void GLArea::createOrthoView(QString dir)
     QPair<Shotm,float> shotAndScale = QPair<Shotm,float> (shot, trackball.track.sca);
     loadShot(shotAndScale);
 
-	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qPrintable(dir));
+	this->Logf(GLLogStream::SYSTEM, "View scene from %s", qUtf8Printable(dir));
 }
 
 void GLArea::toggleOrtho()
@@ -2322,7 +2330,7 @@ void GLArea::toggleOrtho()
 
 void GLArea::trackballStep(QString dir)
 {
-	float stepAngle = M_PI / 12.0;
+	float stepAngle = float(M_PI / 12.0);
 
 	if (dir == tr("Horizontal +"))
 		trackball.track.rot = Quaternionf(-stepAngle, Point3f(0.0, 1.0, 0.0)) * trackball.track.rot;

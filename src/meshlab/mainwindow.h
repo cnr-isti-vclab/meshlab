@@ -72,8 +72,8 @@ public:
     std::ptrdiff_t maxgpumem;
     inline static QString maximumDedicatedGPUMem() {return "MeshLab::System::maxGPUMemDedicatedToGeometry";}
 
-    bool permeshtoolbar;
-    inline static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
+//    bool permeshtoolbar;
+//    inline static QString perMeshRenderingToolBar() {return "MeshLab::GUI::perMeshToolBar";}
 
     bool highprecision;
     inline static QString highPrecisionRendering() {return "MeshLab::System::highPrecisionRendering";}
@@ -156,11 +156,11 @@ private slots:
 public:
 
     bool exportMesh(QString fileName,MeshModel* mod,const bool saveAllPossibleAttributes);
-    bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false);
+    bool loadMesh(const QString& fileName,MeshIOInterface *pCurrentIOPlugin,MeshModel* mm,int& mask,RichParameterSet* prePar,const Matrix44m &mtr=Matrix44m::Identity(), bool isareload = false, MLRenderingData* rendOpt = NULL);
 
-	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload);
+	void computeRenderingDataOnLoading(MeshModel* mm,bool isareload, MLRenderingData* rendOpt = NULL);
 
-	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(),bool isareload = false);
+	bool loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, const Matrix44m &mtr = Matrix44m::Identity(),bool isareload = false, MLRenderingData* rendOpt = NULL);
     
     void defaultPerViewRenderingData(MLRenderingData& dt) const;
     void getRenderingData(int mid,MLRenderingData& dt) const;
@@ -249,7 +249,7 @@ private slots:
 	void switchCurrentContainer(QMdiSubWindow *);
     void scriptCodeExecuted(const QScriptValue& val,const int time,const QString& output);
     
-    void updateGPUMemBar(int,int);
+    void updateGPUMemBar(int,int,int,int);
 
 	void updateLog();
 private:
@@ -448,7 +448,6 @@ private:
     QAction *saveSnapshotAct;
     QAction *recentFileActs[MAXRECENTFILES];
     QAction *recentProjActs[MAXRECENTFILES];
-    QAction *separatorAct;
     QAction *exitAct;
     //////
     QAction *lastFilterAct;
@@ -565,7 +564,7 @@ protected:
             noEvent=false;
             QFileOpenEvent *fileEvent = static_cast<QFileOpenEvent*>(event);
             mainWindow->importMeshWithLayerManagement(fileEvent->file());
-            qDebug("event fileopen %s",qPrintable(fileEvent->file()));
+            qDebug("event fileopen %s", qUtf8Printable(fileEvent->file()));
             return true;
         } else {
             // standard event processing

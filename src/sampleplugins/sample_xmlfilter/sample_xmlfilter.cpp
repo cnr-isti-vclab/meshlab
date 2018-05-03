@@ -54,7 +54,7 @@ bool SampleXMLFilterPlugin::applyFilter( const QString& filterName,MeshDocument&
 			m.cm.vert[i].P() += Point3m(rndax,rnday,rndaz);
 			//if ( i % 1000 == 0)
 			
-			md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOORD));
+			//md.updateRenderStateMeshes(meshlist,int(MeshModel::MM_VERTCOORD));
 			if (intteruptreq)
 				return true;
 		}

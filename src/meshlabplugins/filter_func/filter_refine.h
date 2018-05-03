@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include <common/meshmodel.h>
+#include "string_conversion.h"
 
 using namespace vcg;
 using namespace mu;
@@ -36,9 +37,9 @@ public :
   MidPointCustom(MESH_TYPE &_m,std::string expr1, std::string expr2, std::string expr3, bool &error, std::string &msg):m(_m)
     {
         // expr1, expr2, expr3 are parameters for x,y and z coord respectively
-        this->p1.SetExpr(expr1);
-        this->p2.SetExpr(expr2);
-        this->p3.SetExpr(expr3);
+        this->p1.SetExpr(conversion::fromStringToWString(expr1));
+        this->p2.SetExpr(conversion::fromStringToWString(expr2));
+        this->p3.SetExpr(conversion::fromStringToWString(expr3));
 
         this->setVars(p1);
         this->setVars(p2);
@@ -52,7 +53,7 @@ public :
             p2.Eval();
             p3.Eval();
         } catch(Parser::exception_type &e) {
-            msg = e.GetMsg().c_str();
+            msg = conversion::fromWStringToString(e.GetMsg()).c_str();
             error = true;
         }
     }
@@ -149,12 +150,12 @@ protected:
     // parser variables
     void setVars(Parser &p)
     {
-        p.DefineVar("x0", &x0);
-        p.DefineVar("y0", &y0);
-        p.DefineVar("z0", &z0);
-        p.DefineVar("x1", &x1);
-        p.DefineVar("y1", &y1);
-        p.DefineVar("z1", &z1);
+        p.DefineVar(conversion::fromStringToWString("x0"), &x0);
+        p.DefineVar(conversion::fromStringToWString("y0"), &y0);
+        p.DefineVar(conversion::fromStringToWString("z0"), &z0);
+        p.DefineVar(conversion::fromStringToWString("x1"), &x1);
+        p.DefineVar(conversion::fromStringToWString("y1"), &y1);
+        p.DefineVar(conversion::fromStringToWString("z1"), &z1);
     }
 };
 
@@ -167,7 +168,7 @@ public:
     CustomEdge(std::string expr, bool &error, std::string &msg)
     {
         // set expression and variables needed by parser
-        this->p.SetExpr(expr);
+        this->p.SetExpr(conversion::fromStringToWString(expr));
         this->setVars(p);
         this->varDefined = false;
 
@@ -175,7 +176,7 @@ public:
         try {
             p.Eval();
         } catch(Parser::exception_type &e) {
-            msg = e.GetMsg().c_str();
+            msg = conversion::fromWStringToString(e.GetMsg()).c_str();
             error = true;
         }
     }
@@ -239,30 +240,30 @@ protected:
     // parser variables
     void setVars(Parser &p)
     {
-        p.DefineVar("x0", &x0);
-        p.DefineVar("y0", &y0);
-        p.DefineVar("z0", &z0);
-        p.DefineVar("x1", &x1);
-        p.DefineVar("y1", &y1);
-        p.DefineVar("z1", &z1);
+        p.DefineVar(conversion::fromStringToWString("x0"), &x0);
+        p.DefineVar(conversion::fromStringToWString("y0"), &y0);
+        p.DefineVar(conversion::fromStringToWString("z0"), &z0);
+        p.DefineVar(conversion::fromStringToWString("x1"), &x1);
+        p.DefineVar(conversion::fromStringToWString("y1"), &y1);
+        p.DefineVar(conversion::fromStringToWString("z1"), &z1);
 
-        p.DefineVar("nx0", &nx0);
-        p.DefineVar("ny0", &ny0);
-        p.DefineVar("nz0", &nz0);
+        p.DefineVar(conversion::fromStringToWString("nx0"), &nx0);
+        p.DefineVar(conversion::fromStringToWString("ny0"), &ny0);
+        p.DefineVar(conversion::fromStringToWString("nz0"), &nz0);
 
-        p.DefineVar("nx1", &nx1);
-        p.DefineVar("ny1", &ny1);
-        p.DefineVar("nz1", &nz1);
+        p.DefineVar(conversion::fromStringToWString("nx1"), &nx1);
+        p.DefineVar(conversion::fromStringToWString("ny1"), &ny1);
+        p.DefineVar(conversion::fromStringToWString("nz1"), &nz1);
 
-        p.DefineVar("r0", &r0);
-        p.DefineVar("g0", &g0);
-        p.DefineVar("b0", &b0);
+        p.DefineVar(conversion::fromStringToWString("r0"), &r0);
+        p.DefineVar(conversion::fromStringToWString("g0"), &g0);
+        p.DefineVar(conversion::fromStringToWString("b0"), &b0);
 
-        p.DefineVar("r1", &r1);
-        p.DefineVar("g1", &g1);
-        p.DefineVar("b1", &b1);
+        p.DefineVar(conversion::fromStringToWString("r1"), &r1);
+        p.DefineVar(conversion::fromStringToWString("g1"), &g1);
+        p.DefineVar(conversion::fromStringToWString("b1"), &b1);
 
-        p.DefineVar("q0", &q0);
-        p.DefineVar("q1", &q1);
+        p.DefineVar(conversion::fromStringToWString("q0"), &q0);
+        p.DefineVar(conversion::fromStringToWString("q1"), &q1);
     }
 };

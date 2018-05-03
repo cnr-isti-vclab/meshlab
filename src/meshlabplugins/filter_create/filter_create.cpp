@@ -61,6 +61,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
   case CR_FITPLANE: return QString("Fit a plane to selection");
   default : assert(0);
   }
+  return NULL;
 }
 
 // Info() must return the longer string describing each filtering action
@@ -68,7 +69,7 @@ QString FilterCreate::filterName(FilterIDType filterId) const
 QString FilterCreate::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
-  case CR_BOX : return QString("Create a Box, Cube, an hexahedron. You can specify the side lenght");
+  case CR_BOX : return QString("Create a Box, Cube, Hexahedron. You can specify the side length.");
   case CR_ANNULUS : return QString("Create an Annulus e.g. a flat region bounded by two concentric circles, or a holed disk.");
   case CR_SPHERE: return QString("Create a Sphere, whose topology is obtained as regular subdivision of an icosahedron.");
   case CR_SPHERE_CAP: return QString("Create a Sphere Cap, or spherical dome, subtended by a cone of given angle");
@@ -82,6 +83,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
   case CR_FITPLANE: return QString("Create a quad on the plane fitting the selection");
   default : assert(0);
   }
+  return NULL;
 }
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
@@ -450,7 +452,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 					vi->P()=math::GeneratePointOnUnitSphereUniform<CMeshO::ScalarType>(rng);
 				tri::UpdateBounding<CMeshO>::Box(tt);
 
-				const float SphereArea = 4*M_PI;
+				const float SphereArea = float(4 * M_PI);
 				float poissonRadius = 2.0*sqrt((SphereArea / float(pointNum*2))/M_PI);
 
 				std::vector<Point3m> sampleVec;
@@ -562,6 +564,7 @@ QString FilterCreate::filterScriptFunctionName( FilterIDType filterID )
 		case CR_FITPLANE:  return QString("fitplane");
 		default : assert(0);
     }
+	return NULL;
  }
 
 

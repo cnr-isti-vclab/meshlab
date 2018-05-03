@@ -68,7 +68,7 @@ namespace io {
 				<meta content='*enter filename' name='title'/>
 				<meta content='Generated from Meshlab X3D Exported' name='description'/>
 				<meta content='*enter date' name='created'/>
-				<meta content='Meshlab X3D Exported, http://meshlab.sourceforge.net' name='generator'/>
+				<meta content='Meshlab X3D Exported, http://www.meshlab.net/' name='generator'/>
 			</head>
 			<Scene>
 				...
@@ -80,7 +80,7 @@ namespace io {
 			QDomProcessingInstruction proc = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
 			doc.appendChild(proc);
 			QString metaName[] = {"title", "description", "created", "generator"};
-			QString metaContent[] = {QFileInfo(filename).fileName(), "Generated from Meshlab X3D Exported", QDate::currentDate().toString("d MMMM yyyy"), "Meshlab X3D Exported, http://meshlab.sourceforge.net"};
+			QString metaContent[] = {QFileInfo(filename).fileName(), "Generated from Meshlab X3D Exported", QDate::currentDate().toString("d MMMM yyyy"), "Meshlab X3D Exported, http://www.meshlab.net"};
 			QDomElement root = doc.createElement("X3D");
 			root.setAttribute("profile", "Immersive");
 			root.setAttribute("version", "3.1");
@@ -234,7 +234,7 @@ namespace io {
 				{
 					QDomElement appearance = doc.createElement("Appearance");
 					QDomElement imageTexture = doc.createElement("ImageTexture");
-					imageTexture.setAttribute("url", m.textures[indexTexture].c_str());
+					imageTexture.setAttribute("url", ("\"" + m.textures[indexTexture] + "\"").c_str());
 					appearance.appendChild(imageTexture);
 					shape.appendChild(appearance);
 				}

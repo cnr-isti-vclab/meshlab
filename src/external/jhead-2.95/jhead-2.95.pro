@@ -5,6 +5,8 @@ TARGET = jhead
 CONFIG += staticlib
 DEPENDPATH += .
 INCLUDEPATH += .
+macx:QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-format -Wno-pointer-sign
+macx:QMAKE_CXXFLAGS_WARN_ON = 
 
 # Input
 HEADERS += jhead.h

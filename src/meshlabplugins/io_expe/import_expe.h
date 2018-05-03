@@ -160,7 +160,7 @@ class ImporterExpePTS
 		}
 
 		static int Open(MESH_TYPE &mesh, const char *filename, int &loadmask,
-			const Options& options, CallBackPos *cb=0)
+			const Options& options, CallBackPos * /*cb*/)
 		{
 			QFile device(filename);
 			if ( (!device.open(QFile::ReadOnly)) )

@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <QtXml>
 
+#include "mlapplication.h"
+
 MLXMLInfo::MLXMLInfo( const QString& file )
 :fileName(file),filevarname(inputDocName())
 {
@@ -361,6 +363,7 @@ MLXMLPluginInfo::XMLMapList MLXMLPluginInfo::filterParameters( const QString& fi
       map[MLXMLElNames::paramName] = paramnode.attribute(MLXMLElNames::paramName);
       map[MLXMLElNames::paramDefExpr] = paramnode.attribute(MLXMLElNames::paramDefExpr);
       map[MLXMLElNames::paramIsImportant] = paramnode.attribute(MLXMLElNames::paramIsImportant);
+	  map[MLXMLElNames::paramIsPersistent] = paramnode.attribute(MLXMLElNames::paramIsPersistent);
       mplist.push_back(map);
   }
   return mplist;
@@ -538,6 +541,7 @@ MLXMLPluginInfo::XMLMap MLXMLPluginInfo::filterParameterExtendedInfo( const QStr
     map[MLXMLElNames::paramName] = paramnode.attribute(MLXMLElNames::paramName);
     map[MLXMLElNames::paramDefExpr] = paramnode.attribute(MLXMLElNames::paramDefExpr);
     map[MLXMLElNames::paramIsImportant] = paramnode.attribute(MLXMLElNames::paramIsImportant);
+	map[MLXMLElNames::paramIsPersistent] = paramnode.attribute(MLXMLElNames::paramIsPersistent);
     QDomNodeList phelpnode = paramnode.elementsByTagName(MLXMLElNames::paramHelpTag);
     if (phelpnode.size() == 1)
         map[MLXMLElNames::paramHelpTag] = phelpnode.at(0).firstChild().toCDATASection().data();
@@ -866,7 +870,8 @@ QString MLXMLUtilityFunctions::generateXMLParam( const MLXMLParamSubTree& param 
     result += "<" + MLXMLElNames::paramTag + " " + xmlAttrNameValue(param.paraminfo,MLXMLElNames::paramType) + " "
         + xmlAttrNameValue(param.paraminfo,MLXMLElNames::paramName) + " "
         + xmlAttrNameValue(param.paraminfo,MLXMLElNames::paramDefExpr) + " "
-        + xmlAttrNameValue(param.paraminfo,MLXMLElNames::paramIsImportant) + ">";
+		+ xmlAttrNameValue(param.paraminfo, MLXMLElNames::paramIsImportant) + " "
+		+ xmlAttrNameValue(param.paraminfo, MLXMLElNames::paramIsPersistent) + ">";
     result += "<" + MLXMLElNames::paramHelpTag + ">" + param.paraminfo[MLXMLElNames::paramHelpTag] + "</" + MLXMLElNames::paramHelpTag + ">";
     result += generateXMLGUI(param.gui) ;
     result += "</" + MLXMLElNames::paramTag + ">";
@@ -1116,6 +1121,16 @@ void MLXMLUtilityFunctions::loadXMLGUI(const QString& filtername,const QString& 
     }
 }
 
+QString MLXMLUtilityFunctions::completeFilterProgrammingName(const QString& xmlpluginsnamespace, const QString& xmlpluginsname, const QString& filterprogname)
+{
+	return	xmlpluginsnamespace + "." + xmlpluginsname + "." + filterprogname;
+}
+
+QString MLXMLUtilityFunctions::completeVariableProgrammingName(const QString& xmlpluginsnamespace, const QString& xmlpluginsname, const QString& filterprogname, const QString& varname)
+{
+	return completeFilterProgrammingName(xmlpluginsnamespace, xmlpluginsname, filterprogname) + "." + varname;
+}
+
 void MLXMLElNames::initMLXMLTypeList( QStringList& ls )
 {
     ls << MLXMLElNames::intType;
@@ -1215,7 +1230,7 @@ void MLXMLElNames::initMLXMLFilterElemsTag( QStringList& ls )
 
 void MLXMLElNames::initMLXMLParamAttributesTag( QStringList& ls )
 {
-    ls << MLXMLElNames::paramType << MLXMLElNames::paramName << MLXMLElNames::paramDefExpr << MLXMLElNames::paramIsImportant;
+	ls << MLXMLElNames::paramType << MLXMLElNames::paramName << MLXMLElNames::paramDefExpr << MLXMLElNames::paramIsImportant << MLXMLElNames::paramIsPersistent;
 }
 
 void MLXMLElNames::initMLXMLParamElemsTag( QStringList& ls )

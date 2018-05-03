@@ -653,7 +653,7 @@ void MLRenderingPointsParametersFrame::initGui()
     _dimension = new MLRenderingFloatSlider(_meshid,this);
     _dimension->setRenderingFloatAction(new MLRenderingPointsSizeAction(_meshid,this));
     _dimension->setOrientation(Qt::Horizontal);
-    _dimension->setMinimum(1);
+	_dimension->setMinimum(int(MLPerViewGLOptions::minPointSize()));
     _dimension->setMaximum(int(MLPerViewGLOptions::maxPointSize()));
     connect(_dimension,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)),this,SIGNAL(updateRenderingDataAccordingToAction(int,MLRenderingAction*)));
 	connect(_dimension, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)), this, SIGNAL(updateRenderingDataAccordingToAction(int, MLRenderingAction*,bool)));

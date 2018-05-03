@@ -28,7 +28,6 @@
 #include <omp.h>
 #endif
 #include "meshtree.h"
-#include "align/AlignGlobal.h"
 using namespace vcg;
 
 MeshTree::MeshTree()
@@ -112,11 +111,11 @@ void MeshTree::ProcessArc(int fixId, int movId, vcg::Matrix44d &MovM, vcg::Align
 void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 {
   QString buf;
-  cb(0,qPrintable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeMap.size())));
+  cb(0,qUtf8Printable(buf.sprintf("Starting Processing of %i glued meshes out of %i meshes\n",gluedNum(),nodeMap.size())));
 
   /******* Occupancy Grid Computation *************/
-  cb(0,qPrintable(buf.sprintf("Computing Overlaps %i glued meshes...\n",gluedNum() )));
-  OG.Init(nodeMap.size(), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
+  cb(0,qUtf8Printable(buf.sprintf("Computing Overlaps %i glued meshes...\n",gluedNum() )));
+  OG.Init(int(nodeMap.size()), vcg::Box3d::Construct(gluedBBox()), mtp.OGSize);
   for(auto ni=nodeMap.begin();ni!=nodeMap.end();++ni) { 
     MeshNode *mn=ni->second;
 //	foreach(MeshNode *mn, nodeList)
@@ -163,7 +162,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 
   //if there are no arcs at all complain and return
   if (totalArcNum == 0) {
-    cb(0, qPrintable(buf.sprintf("\n Failure. There are no overlapping meshes?\n No candidate alignment arcs. Nothing Done.\n")));
+    cb(0, qUtf8Printable(buf.sprintf("\n Failure. There are no overlapping meshes?\n No candidate alignment arcs. Nothing Done.\n")));
     return;
   }
 
@@ -172,8 +171,8 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
   if (totalArcNum > 32)
     num_max_thread = omp_get_max_threads(); 
 #endif
-  cb(0,qPrintable(buf.sprintf("Arc with good overlap %6i (on  %6lu)\n",totalArcNum,OG.SVA.size())));
-  cb(0,qPrintable(buf.sprintf(" %6i preserved %i Recalc \n",preservedArcNum,recalcArcNum)));
+  cb(0,qUtf8Printable(buf.sprintf("Arc with good overlap %6i (on  %6lu)\n",totalArcNum,OG.SVA.size())));
+  cb(0,qUtf8Printable(buf.sprintf(" %6i preserved %i Recalc \n",preservedArcNum,recalcArcNum)));
 
   bool hasValidAlign = false;
 
@@ -191,19 +190,19 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
         hasValidAlign = true;
         std::pair<double,double> dd=curResult->ComputeAvgErr(); 
 #pragma omp critical
-        cb(0,qPrintable(buf.sprintf("(%3i/%3i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
+        cb(0,qUtf8Printable(buf.sprintf("(%3i/%3i) %2i -> %2i Aligned AvgErr dd=%f -> dd=%f \n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,dd.first,dd.second)));
       }
       else
       {
 #pragma omp critical
-        cb(0,qPrintable(buf.sprintf( "(%3i/%3i) %2i -> %2i Failed Alignment of one arc %s\n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
+        cb(0,qUtf8Printable(buf.sprintf( "(%3i/%3i) %2i -> %2i Failed Alignment of one arc %s\n",int(i+1),totalArcNum,OG.SVA[i].s,OG.SVA[i].t,vcg::AlignPair::ErrorMsg(curResult->status))));
       }
     }
   }
 
   //if there are no valid arcs complain and return
   if(!hasValidAlign) {
-    cb(0,qPrintable(buf.sprintf("\n Failure. No succesful arc among candidate Alignment arcs. Nothing Done.\n")));
+    cb(0,qUtf8Printable(buf.sprintf("\n Failure. No succesful arc among candidate Alignment arcs. Nothing Done.\n")));
     return;
   }
 
@@ -211,7 +210,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
   for(QList<vcg::AlignPair::Result>::iterator li=resultList.begin();li!=resultList.end();++li)
     if ((*li).IsValid())
       H.Add(li->err);
-  cb(0,qPrintable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f Median %5.3f 90\% %5.3f\n",H.Avg(),H.Percentile(0.5f),H.Percentile(0.9f))));
+  cb(0,qUtf8Printable(buf.sprintf("Completed Mesh-Mesh Alignment: Avg Err %5.3f Median %5.3f 90\% %5.3f\n",H.Avg(),H.Percentile(0.5f),H.Percentile(0.9f))));
 
   ProcessGlobal(ap);
 }
@@ -220,7 +219,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 {
 	QString buf;
 	/************** Preparing Matrices for global alignment *************/
-//	cb(0,qPrintable(buf.sprintf("Starting Global Alignment\n")));
+//	cb(0,qUtf8Printable(buf.sprintf("Starting Global Alignment\n")));
 
 //	vcg::Matrix44d Zero44; Zero44.SetZero();
 //	std::vector<vcg::Matrix44d> PaddedTrVec(nodeMap.size(),Zero44);
@@ -240,7 +239,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 			GluedIdVec.push_back(mn->Id());
 			GluedTrVec.push_back(vcg::Matrix44d::Construct(mn->tr()));
 //			PaddedTrVec[mn->Id()]=GluedTrVec.back();
-			names[mn->Id()]=qPrintable(mn->m->label());
+			names[mn->Id()]=qUtf8Printable(mn->m->label());
 		}
 	}
 
@@ -264,7 +263,7 @@ void MeshTree::ProcessGlobal(vcg::AlignPair::Param &ap)
 	for(int ii=0;ii<GluedTrVecOut.size();++ii)
 		MM(GluedIdVec[ii])->cm.Tr.Import(GluedTrVecOut[ii]);
 
-	cb(0,qPrintable(buf.sprintf("Completed Global Alignment (error bound %6.4f)\n",StartGlobErr)));
+	cb(0,qUtf8Printable(buf.sprintf("Completed Global Alignment (error bound %6.4f)\n",StartGlobErr)));
 
 }
 

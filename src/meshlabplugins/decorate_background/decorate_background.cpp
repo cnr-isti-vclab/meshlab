@@ -67,9 +67,9 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
         }
         break;
     case DP_SHOW_GRID :
-        parset.addParam(new RichFloat(BoxRatioParam(),1.2,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
-        parset.addParam(new RichFloat(GridMajorParam(),10,"Major Spacing",""));
-        parset.addParam(new RichFloat(GridMinorParam(),1,"Minor Spacing",""));
+        parset.addParam(new RichFloat(BoxRatioParam(),1.2f,"Box Ratio","The size of the grid around the object w.r.t. the bbox of the object"));
+        parset.addParam(new RichFloat(GridMajorParam(),10.0f,"Major Spacing",""));
+        parset.addParam(new RichFloat(GridMinorParam(),1.0f,"Minor Spacing",""));
         parset.addParam(new RichBool(GridBackParam(),true,"Front grid culling",""));
         parset.addParam(new RichBool(ShowShadowParam(),false,"Show silhouette",""));
         parset.addParam(new RichColor(GridColorBackParam(), QColor(163,116,35,255), "Back Grid Color", ""));
@@ -106,9 +106,9 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
         {
             if(!cm.IsValid() || (lastname != cubemapFileName ) )
             {
-                qDebug( "Current CubeMapPath Dir: %s ",qPrintable(cubemapFileName));
+                qDebug( "Current CubeMapPath Dir: %s ",qUtf8Printable(cubemapFileName));
                 glewInit();
-                bool ret = cm.Load(qPrintable(cubemapFileName));
+                bool ret = cm.Load(qUtf8Printable(cubemapFileName));
                 lastname=cubemapFileName;
                 if(! ret ) return;
                 //QMessageBox::warning(gla,"Cubemapped background decoration","Warning unable to load cube map images: " + cubemapFileName );

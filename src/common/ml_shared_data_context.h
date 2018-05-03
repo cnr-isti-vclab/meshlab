@@ -121,6 +121,90 @@ struct MLPerViewGLOptions : public vcg::RenderingModalityGLOptions
 		return (*this);
 	}
 
+
+  size_t serialize(std::string& str) const
+  {
+    str.append(((_visible) ? "1" : "0"));
+    str.append(((_perbbox_quoted_info_enabled) ? "1" : "0"));
+    str.append(((_peredge_extra_enabled) ? "1" : "0"));
+    str.append(((_peredge_edgeboundary_enabled) ? "1" : "0"));
+    str.append(((_peredge_faceboundary_enabled) ? "1" : "0"));
+    str.append(((_peredge_edgemanifold_enabled) ? "1" : "0"));
+    str.append(((_peredge_vertmanifold_enabled) ? "1" : "0"));
+    str.append(((_peredge_text_boundary_enabled) ? "1" : "0"));
+    str.append(((_peredge_fauxwire_enabled) ? "1" : "0"));
+    str.append(((_peredge_wire_enabled) ? "1" : "0"));
+    str.append(((_back_face_cull) ? "1" : "0"));
+    str.append(((_single_side_lighting) ? "1" : "0"));
+    str.append(((_double_side_lighting) ? "1" : "0"));
+    str.append(((_fancy_lighting) ? "1" : "0"));
+    str.append(((_sel_enabled) ? "1" : "0"));
+    str.append(((_vertex_sel) ? "1" : "0"));
+    str.append(((_face_sel) ? "1" : "0"));
+
+    str.append(((_perbbox_enabled) ? "1" : "0"));
+    str.append(((_perbbox_fixed_color_enabled) ? "1" : "0"));
+    str.append(((_perpoint_fixed_color_enabled) ? "1" : "0"));
+    str.append(((_perwire_fixed_color_enabled) ? "1" : "0"));
+    str.append(((_persolid_fixed_color_enabled) ? "1" : "0"));
+    str.append(((_perbbox_mesh_color_enabled) ? "1" : "0"));
+    str.append(((_perpoint_mesh_color_enabled) ? "1" : "0"));
+    str.append(((_perwire_mesh_color_enabled) ? "1" : "0"));
+    str.append(((_persolid_mesh_color_enabled) ? "1" : "0"));
+    str.append(((_perpoint_dot_enabled) ? "1" : "0"));
+    str.append(((_perpoint_noshading) ? "1" : "0"));
+    str.append(((_perwire_noshading) ? "1" : "0"));
+    str.append(((_persolid_noshading) ? "1" : "0"));
+    str.append(((_perpoint_pointsmooth_enabled) ? "1" : "0"));
+    str.append(((_perpoint_pointattenuation_enabled) ? "1" : "0"));
+
+    return str.size();
+  }
+
+  void deserialize(std::string& str)
+  {
+    std::string s(str.rbegin(), str.rend());
+    std::bitset<32> bset(s);
+    _visible = bset[0];
+    _perbbox_quoted_info_enabled = bset[1];
+    _peredge_extra_enabled = bset[2];
+    _peredge_edgeboundary_enabled = bset[3];
+    _peredge_faceboundary_enabled = bset[4];
+    _peredge_edgemanifold_enabled = bset[5];
+    _peredge_vertmanifold_enabled = bset[6];
+    _peredge_text_boundary_enabled = bset[7];
+    _peredge_fauxwire_enabled = bset[8];
+    _peredge_wire_enabled = bset[9];
+    _back_face_cull = bset[10];
+    _single_side_lighting = bset[11];
+    _double_side_lighting = bset[12];
+    _fancy_lighting = bset[13];
+    _sel_enabled = bset[14];
+    _vertex_sel = bset[15];
+    _face_sel = bset[16];
+
+    _perbbox_enabled = bset[17];
+    _perbbox_fixed_color_enabled = bset[18];
+    _perpoint_fixed_color_enabled = bset[19];
+    _perwire_fixed_color_enabled = bset[20];
+    _persolid_fixed_color_enabled = bset[21];
+    _perbbox_mesh_color_enabled = bset[22];
+    _perpoint_mesh_color_enabled = bset[23];
+    _perwire_mesh_color_enabled = bset[24];
+    _persolid_mesh_color_enabled = bset[25];
+    _perpoint_dot_enabled = bset[26];
+    _perpoint_noshading = bset[27];
+    _perwire_noshading = bset[28];
+    _persolid_noshading = bset[29];
+    _perpoint_pointsmooth_enabled = bset[30];
+    _perpoint_pointattenuation_enabled = bset[31];
+  }
+
+	static float minPointSize()
+	{
+		return 1.0f;
+	}
+
 	static float maxPointSize()
 	{
 		return 15.0f;
@@ -165,7 +249,7 @@ private:
 class MLRenderingData : public vcg::PerViewData<MLPerViewGLOptions>
 {
 public:
-	MLRenderingData();
+ 	MLRenderingData();
 	MLRenderingData(const MLRenderingData& dt);
 
 	bool set(MLRenderingData::PRIMITIVE_MODALITY pm, const MLRenderingData::RendAtts& atts);
@@ -340,7 +424,7 @@ private:
 
 signals:
 
-	void currentAllocatedGPUMem(int all, int current);
+	void currentAllocatedGPUMem(int nv_all, int nv_current, int ati_tex, int ati_vbo);
 
 	///*signals intended for the plugins living in the same thread*/
 	//void initPerMeshViewRequestST(int,QGLContext*,const MLRenderingData&);

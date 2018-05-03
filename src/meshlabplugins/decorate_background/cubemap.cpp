@@ -192,13 +192,13 @@ bool CICubeMap::GetName(int i, QString basename, QString &filename)
 	exts[3]="_posy";
 	exts[4]="_negz";
 	exts[5]="_posz";
-//	qDebug("filename = %s basename = %s", qPrintable(filename), qPrintable(basename));
+//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
   filename=basename;
     QString ext= basename.right(4);
     filename=filename.left(filename.length()-4);
     filename.append(exts[i]);
     filename.append(ext);
-//	qDebug("filename = %s basename = %s", qPrintable(filename), qPrintable(basename));
+//	qDebug("filename = %s basename = %s", qUtf8Printable(filename), qUtf8Printable(basename));
     return true;
 }
 

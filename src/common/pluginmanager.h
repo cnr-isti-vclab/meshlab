@@ -39,14 +39,15 @@ class QScriptEngine;
 class PluginManager
 {
 private:
-    //MeshDocumentSI* currentDocInterface;
+	QString scriptplugcode;
+
 public:
     PluginManager();
     ~PluginManager();
     enum TypeIO{IMPORT,EXPORT};
     void loadPlugins(RichParameterSet& defaultGlobal);
     QString pluginsCode() const;
-    void loadXMLPlugin(const QString& filename);
+	MLXMLPluginInfo* loadXMLPlugin(const QString& filename);
     //MLXMLPluginInfo* getXMLPluginInfo( const QString& plugname );
     void deleteXMLPlugin(const QString& plugscriptname);
 
@@ -93,18 +94,10 @@ public:
 
     static QString osDependentFileBaseName(const QString& plname);
     static QString osIndependentPluginName(const QString& plname);
-    static QString pluginNameSpace();
     //highlight and autocomplete
     /*QStringList pluginnamespaces;
     QStringList filterscriptnames;*/
     QList<LibraryElementInfo> libinfolist;
-    //Env env;
-
-    //void updateDocumentScriptBindings(MeshDocument& doc);
-private:
-    /*void loadPluginsCode();*/
-    QString scriptplugcode;
-
 };
 
 #endif // PLUGINMANAGER_H

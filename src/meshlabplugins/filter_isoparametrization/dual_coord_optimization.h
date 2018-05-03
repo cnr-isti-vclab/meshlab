@@ -651,7 +651,7 @@ public:
             distArea=ApproxAreaDistortion<BaseMesh>(*h_res_mesh,domain->fn);
             distAngle=ApproxAngleDistortion<BaseMesh>(*h_res_mesh);
             ScalarType distAggregate1=geomAverage<ScalarType>(distArea+1.0,distAngle+1.0,3,1)-1;
-            ScalarType NewGap=((distAggregate0-distAggregate1)*100.0)/distAggregate0;
+            ScalarType NewGap=((distAggregate0-distAggregate1)*ScalarType(100.0))/distAggregate0;
             if ((NewGap<gap)||(k>max_step))
                 ContinueOpt=false;
             distAggregate0=distAggregate1;

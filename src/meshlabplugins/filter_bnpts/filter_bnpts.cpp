@@ -43,6 +43,7 @@ QString FilterBnptsPlugin::filterName(FilterIDType filterId) const
 		case FP_BNPTSGEN	:	return QString("Generate a BNPTS file for out-of-core poisson");
 		default : assert(0);
 	}
+	return NULL;
 }
 
 // Info() return the longer string describing each filtering action
@@ -52,13 +53,12 @@ QString FilterBnptsPlugin::filterName(FilterIDType filterId) const
 		case FP_BNPTSGEN	:	return QString("Generate a BNPTS file using data from all layers. This file contains points+normals and it is used with the external tool for out-of-core poisson merging");
     default : assert(0);
 	}
+	return NULL;
 }
 
 // This function define the needed parameters for each filter.
-void FilterBnptsPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
+void FilterBnptsPlugin::initParameterSet(QAction *action, MeshDocument & /*md*/, RichParameterSet & parlst)
 {
-	MeshModel *mm=md.mm();
-	
 	switch(ID(action))
 	{
 		case FP_BNPTSGEN :
@@ -74,14 +74,13 @@ void FilterBnptsPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
 				"the existing BNPTS"));				
 		}
 		break;
-   
-   
+      
 		default: break; // do not add any parameter for the other filters
 	}
 }
 
 // Core Function doing the actual mesh processing.
-bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
 	CMeshO::FaceIterator fi;
 
@@ -99,9 +98,9 @@ bool FilterBnptsPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
       FILE* outfile=NULL;
 
       if(appendexisting)
-        outfile  = fopen(qPrintable(filename), "wba");
+        outfile  = fopen(qUtf8Printable(filename), "wba");
       else
-        outfile  = fopen(qPrintable(filename), "wb");
+        outfile  = fopen(qUtf8Printable(filename), "wb");
 
       if(outfile==NULL)
         return false;

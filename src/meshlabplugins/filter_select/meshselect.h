@@ -43,11 +43,13 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
     FP_SELECT_ALL,
     FP_SELECT_NONE,
     FP_SELECTBYANGLE,
+	FP_SELECT_UGLY,
     FP_SELECT_INVERT,
     FP_SELECT_CONNECTED,
     FP_SELECT_FACE_FROM_VERT,
     FP_SELECT_VERT_FROM_FACE,
     FP_SELECT_DELETE_VERT,
+	FP_SELECT_DELETE_ALL_FACE,
     FP_SELECT_DELETE_FACE,
     FP_SELECT_DELETE_FACEVERT,
     FP_SELECT_ERODE,
@@ -60,7 +62,9 @@ class SelectionFilterPlugin : public QObject, public MeshFilterInterface
     CP_SELECT_TEXBORDER,
     CP_SELECT_NON_MANIFOLD_FACE,
     CP_SELECT_NON_MANIFOLD_VERTEX,
-    FP_SELECT_FACES_BY_EDGE        
+    FP_SELECT_FACES_BY_EDGE,
+    FP_SELECT_FOLD_FACE,
+    FP_SELECT_OUTLIER
 	} ;
 
 	SelectionFilterPlugin();

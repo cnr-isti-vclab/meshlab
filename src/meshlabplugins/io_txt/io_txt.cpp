@@ -62,7 +62,7 @@ void TxtIOPlugin::initPreOpenParameter(const QString &format, const QString &/*f
     }
 }
 
-bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget *parent)
+bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
     bool result=false;
 
@@ -89,7 +89,7 @@ bool TxtIOPlugin::open(const QString &formatName, const QString &fileName, MeshM
 	return result;
 }
 
-bool TxtIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool TxtIOPlugin::save(const QString & /*formatName*/, const QString & /*fileName*/, MeshModel & /*m*/, const int /*mask*/, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	assert(0);
 	return false;
@@ -119,7 +119,7 @@ QList<MeshIOInterface::Format> TxtIOPlugin::exportFormats() const
 	returns the mask on the basis of the file's type. 
 	otherwise it returns 0 if the file format is unknown
 */
-void TxtIOPlugin::GetExportMaskCapability(QString &format, int &capability, int &defaultBits) const
+void TxtIOPlugin::GetExportMaskCapability(QString & /*format*/, int &capability, int &defaultBits) const
 {
   capability=defaultBits=0;
 	return;

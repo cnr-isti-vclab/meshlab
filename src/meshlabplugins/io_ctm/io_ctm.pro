@@ -14,7 +14,7 @@ win32-msvc2012:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
 win32-msvc2015:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
 win32-g++:DEFINES += OPENCTM_STATIC
 
-win32-msvc.net:LIBS	+= ../../external/lib/win32-msvc.net/openctm.lib
+win32-msvc:LIBS	+= ../../external/lib/win32-msvc/openctm.lib
 win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/openctm.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/openctm.lib
 win32-msvc2010:LIBS	+= ../../external/lib/win32-msvc2010/openctm.lib

@@ -570,9 +570,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
 			"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
 			"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
-		parlst.addParam(new RichBool("SampleEdge", true, "Sample Edges", "See the above comment."));
+		parlst.addParam(new RichBool("SampleEdge", false, "Sample Edges", "See the above comment."));
 		parlst.addParam(new RichBool("SampleFauxEdge", false, "Sample FauxEdge", "See the above comment."));
-		parlst.addParam(new RichBool("SampleFace", true, "Sample Faces", "See the above comment."));
+		parlst.addParam(new RichBool("SampleFace", false, "Sample Faces", "See the above comment."));
 		parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
 		parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
@@ -728,8 +728,8 @@ switch(ID(action))
 	{
 		MeshModel *curMM= md.mm();
 		if (!tri::HasPerWedgeTexCoord(curMM->cm)) {
-			Log("Texel Sampling requires a mesh with UV parametrization");
-			errorMessage = "Texel Sampling requires a mesh with UV parametrization";
+			Log("Texel Sampling requires a mesh with Per Wedge UV parametrization");
+			errorMessage = "Texel Sampling requires a mesh with Per Wedge UV parametrization";
 			return false; // can't continue, mesh can't be processed
 		}
 
@@ -775,6 +775,8 @@ switch(ID(action))
 		MeshModel *mm= md.addNewMesh("","Montecarlo Samples", true); // The new mesh is the current one
 		mm->updateDataMask(curMM);
 		BaseSampler mps(&(mm->cm));
+
+    mps.perFaceNormal = par.getBool("PerFaceNormal");
 
 		if(par.getBool("EdgeSampling"))
 		{
@@ -1022,7 +1024,7 @@ switch(ID(action))
 		float distUpperBound = par.getAbsPerc("MaxDist");
 
 		if (mm0 == mm1){
-			Log("Housdorff Distance: cannot compute, it is the same mesh");
+			Log("Hausdorff Distance: cannot compute, it is the same mesh");
 			errorMessage = "Cannot compute, it is the same mesh";
 			return false; // can't continue, mesh can't be processed
 		}
@@ -1079,7 +1081,7 @@ switch(ID(action))
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
 		Log("Hausdorff Distance computed");
-		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qPrintable(mm0->label()),qPrintable(mm1->label()));
+		Log("     Sampled %i pts (rng: 0) on %s searched closest on %s",hs.n_total_samples,qUtf8Printable(mm0->label()),qUtf8Printable(mm1->label()));
 		Log("     min : %f   max %f   mean : %f   RMS : %f",hs.getMinDist(),hs.getMaxDist(),hs.getMeanDist(),hs.getRMSDist());
 		float d = mm0->cm.bbox.Diag();
 		Log("Values w.r.t. BBox Diag (%f)",d);
@@ -1136,7 +1138,7 @@ switch(ID(action))
 			tri::UpdatePosition<CMeshO>::Matrix(mm1->cm, Inverse(mm1->cm.Tr), true);
 
 		Log("Distance from Reference Mesh computed");
-		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qPrintable(mm0->label()), qPrintable(mm1->label()));
+		Log("     Sampled %i vertices on %s searched closest on %s", mm0->cm.vn, qUtf8Printable(mm0->label()), qUtf8Printable(mm1->label()));
 		Log("     min : %f   max %f   mean : %f   RMS : %f", ds.getMaxDist(), ds.getMaxDist(), ds.getMeanDist(), ds.getRMSDist());
 
 	} break;
@@ -1237,7 +1239,7 @@ switch(ID(action))
 
 		Point3i volumeDim;
 		Box3m volumeBox = baseMesh->cm.bbox;
-		volumeBox.Offset(volumeBox.Diag()/10.0f+offsetThr);
+		volumeBox.Offset(volumeBox.Diag()/10.0f+abs(offsetThr));
 		BestDim(volumeBox , voxelSize, volumeDim );
 
 		Log("Resampling mesh using a volume of %i x %i x %i",volumeDim[0],volumeDim[1],volumeDim[2]);
@@ -1373,12 +1375,20 @@ MeshFilterInterface::FilterClass FilterDocSampling::getClass(QAction *action)
 }
 int FilterDocSampling::postCondition( QAction* a ) const
 {
-  switch(ID(a)){
-  case FP_VORONOI_COLORING:
-  case FP_DISK_COLORING:
-    return MeshModel::MM_VERTCOLOR;
+	switch(ID(a)){
+		case FP_VORONOI_COLORING    :
+		case FP_DISK_COLORING       : return MeshModel::MM_VERTCOLOR;
+
+		case FP_ELEMENT_SUBSAMPLING       :
+		case FP_MONTECARLO_SAMPLING       :
+		case FP_STRATIFIED_SAMPLING       :
+		case FP_CLUSTERED_SAMPLING        :
+		case FP_POINTCLOUD_SIMPLIFICATION :
+		case FP_POISSONDISK_SAMPLING      : 
+		case FP_TEXEL_SAMPLING            :			
+		case FP_UNIFORM_MESH_RESAMPLING   : return MeshModel::MM_NONE;  // none, because they create a new layer, without affecting old one
   }
-  return MeshModel::MM_UNKNOWN;
+  return MeshModel::MM_ALL;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterDocSampling::filterArity( QAction * filter ) const

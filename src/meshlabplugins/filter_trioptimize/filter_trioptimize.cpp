@@ -173,17 +173,15 @@ TriOptimizePlugin::TriOptimizePlugin()
 	}
  return MeshFilterInterface::Generic;
 }
+
 int TriOptimizePlugin::postCondition(QAction *a) const
 {
-  switch(ID(a))
-  {
-            case FP_PLANAR_EDGE_FLIP:
-            case FP_CURVATURE_EDGE_FLIP:
-                    return MeshModel::MM_UNKNOWN;
-            case FP_NEAR_LAPLACIAN_SMOOTH:
-                    return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL;
-
-			default: assert(0);
+	switch(ID(a))
+	{
+		case FP_PLANAR_EDGE_FLIP      :
+		case FP_CURVATURE_EDGE_FLIP   : return MeshModel::MM_ALL;
+		case FP_NEAR_LAPLACIAN_SMOOTH : return MeshModel::MM_VERTCOORD | MeshModel::MM_VERTNORMAL;
+		default                       : assert(0);
 	}
 }
 

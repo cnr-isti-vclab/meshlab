@@ -157,7 +157,13 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 					quadFound = true;
 				}
 			}
-			assert(quadFound);
+			
+			if (!quadFound)
+			{
+				errorMessage = "QuadMesh problem: current mesh doesn't contain quads.";
+				return false;
+			}
+
 			for (int i = 0; i<4; ++i)
 				AngleD.Add(fabs(90 - math::ToDeg(Angle(qv[(i + 0) % 4] - qv[(i + 1) % 4], qv[(i + 2) % 4] - qv[(i + 1) % 4]))));
 			float edgeLen[4];
@@ -169,7 +175,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		}
 
 		Log("Right Angle Discrepancy  Avg %4.3f Min %4.3f Max %4.3f StdDev %4.3f Percentile 0.05 %4.3f percentile 95 %4.3f",
-			AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05), AngleD.Percentile(0.95));
+			AngleD.Avg(), AngleD.Min(), AngleD.Max(), AngleD.StandardDeviation(), AngleD.Percentile(0.05f), AngleD.Percentile(0.95f));
 
 		Log("Quad Ratio   Avg %4.3f Min %4.3f Max %4.3f", RatioD.Avg(), RatioD.Min(), RatioD.Max());
 		return true;
@@ -387,7 +393,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
 
-			for (size_t i = 0; i<m.vn; ++i)
+			for (int i = 0; i<m.vn; ++i)
 				H.Add(m.vert[i].Q(), aVec[i]);
 		}
 		else{
@@ -395,7 +401,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
 
-			for (size_t i = 0; i<m.fn; ++i)
+			for (int i = 0; i<m.fn; ++i)
 				H.Add(m.face[i].Q(), aVec[i]);
 		}
 		if (areaFlag)
@@ -418,7 +424,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerVertexArea(m, aVec);
 
-			for (size_t i = 0; i<m.vn; ++i)
+			for (int i = 0; i<m.vn; ++i)
 				H.Add(m.vert[i].Q(), aVec[i]);
 		}
 		else{
@@ -426,7 +432,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 			if (areaFlag)
 				tri::MeshToMatrix<CMeshO>::PerFaceArea(m, aVec);
 
-			for (size_t i = 0; i<m.fn; ++i)
+			for (int i = 0; i<m.fn; ++i)
 				H.Add(m.face[i].Q(), aVec[i]);
 		}
 		if (areaFlag)

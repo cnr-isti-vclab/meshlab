@@ -8,7 +8,8 @@ TARGET = bz2
 CONFIG += staticlib
 DEPENDPATH += .
 INCLUDEPATH += .
-
+macx:QMAKE_CFLAGS += -Wno-unused-parameter -Wno-format -Wno-pointer-sign
+macx:QMAKE_CFLAGS_WARN_ON = 
 # Input
 HEADERS += bzlib.h bzlib_private.h
 SOURCES += blocksort.c \

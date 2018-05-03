@@ -25,7 +25,7 @@
 
 
 /*!
- * \defgroup io Binary Input/Ouput Abstraction Layer
+ * \defgroup io Binary Input/Output Abstraction Layer
  */
 
 typedef union { 

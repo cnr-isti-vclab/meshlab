@@ -100,7 +100,7 @@
 using namespace std;
 using namespace vcg;
 
-bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, CallBackPos *cb, QWidget *parent)
+bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &, CallBackPos *cb, QWidget * /*parent*/)
 {
 	// initializing mask
   mask = 0;
@@ -172,7 +172,7 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 	{
 		QString idVal = geomList.at(i).toElement().attribute("id");
 		idList.push_back(idVal);
-		qDebug("Node %i geom id = '%s'",i,qPrintable(idVal));
+		qDebug("Node %i geom id = '%s'",i,qUtf8Printable(idVal));
 	}
 	parlst.addParam(new RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
 	qDebug("Time elapsed: %d ms", t.elapsed());
@@ -180,7 +180,7 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 
 
 
-bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos *cb, QWidget *parent)
+bool ColladaIOPlugin::save(const QString &formatName, const QString &fileName, MeshModel &m, const int mask, const RichParameterSet &, vcg::CallBackPos * /*cb*/, QWidget * /*parent*/)
 {
 	QString errorMsgFormat = "Error encountered while exportering file %1:\n%2";
 	string filename = QFile::encodeName(fileName).constData ();

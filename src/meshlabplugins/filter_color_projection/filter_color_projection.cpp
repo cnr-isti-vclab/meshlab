@@ -75,6 +75,7 @@ QString FilterColorProjectionPlugin::filterName(FilterIDType filterId) const
     case FP_MULTIIMAGETRIVIALPROJTEXTURE	:	return QString("Project active rasters color to current mesh, filling the texture");
     default : assert(0);
     }
+	return NULL;
 }
 
 // Info() return the longer string describing each filtering action
@@ -86,6 +87,7 @@ QString FilterColorProjectionPlugin::filterInfo(FilterIDType filterId) const
     case FP_MULTIIMAGETRIVIALPROJTEXTURE  :	return QString("Color information from all the active rasters is perspective-projected on the current mesh, filling the texture, using basic weighting");
     default : assert(0);
     }
+	return NULL;
 }
 
 // What "new" properties the plugin requires
@@ -103,8 +105,6 @@ int FilterColorProjectionPlugin::getRequirements(QAction *action){
 // This function define the needed parameters for each filter.
 void FilterColorProjectionPlugin::initParameterSet(QAction *action, MeshDocument &md, RichParameterSet & parlst)
 {
-    MeshModel *mm=md.mm();
-
     switch(ID(action))
     {
     case FP_SINGLEIMAGEPROJ :
@@ -347,9 +347,6 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
             double *acc_red;
             double *acc_grn;
             double *acc_blu;
-
-            // filename for debug dump
-            char dumpFileName[1024];
 
             // get current model
             model = md.mm();
@@ -595,7 +592,7 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                 return false;
             }
 
-            bool onselection = par.getBool("onselection");
+            //bool onselection = par.getBool("onselection");
             int texsize = par.getInt("texsize");
             bool  dorefill = par.getBool("dorefill");
             float eta = par.getFloat("deptheta");
@@ -935,63 +932,12 @@ int FilterColorProjectionPlugin::postCondition( QAction* a ) const{
         return MeshModel::MM_VERTCOLOR;
         break;
     case FP_MULTIIMAGETRIVIALPROJTEXTURE:
-        return MeshModel::MM_UNKNOWN;
+		return MeshModel::MM_WEDGTEXCOORD;
         break;
-    default: assert(0);
-        return MeshModel::MM_NONE;
+    default: 
+        return MeshModel::MM_ALL;
     }
 }
-
-
-
-
-// function to compute sobel on depth image, to find discontinuities
-/*
-int FilterColorProjectionPlugin::applysobel()
-{
-int xx,yy;
-float val;
-float accum;
-
-for(xx=0; xx<sx; xx++)
-for(yy=0; yy<sy; yy++)
-data[(yy * sx) + xx] = 0;
-
-for(xx=1; xx<sx-1; xx++)
-for(yy=1; yy<sy-1; yy++)
-if (from->getval(xx, yy) != 0)
-{
-accum=0;
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += -2.0 * from->getval(xx-1, yy  );
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += +1.0 * from->getval(xx+1, yy-1);
-accum += +2.0 * from->getval(xx+1, yy  );
-accum += +1.0 * from->getval(xx+1, yy-1);
-
-data[(yy * sx) + xx] += abs(accum);
-}
-
-
-for(xx=1; xx<sx-1; xx++)
-for(yy=1; yy<sy-1; yy++)
-if (from->getval(xx, yy) != 0)
-{
-accum=0;
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += -2.0 * from->getval(xx  , yy-1);
-accum += -1.0 * from->getval(xx-1, yy-1);
-accum += +1.0 * from->getval(xx+1, yy+1);
-accum += +2.0 * from->getval(xx  , yy+1);
-accum += +1.0 * from->getval(xx+1, yy+1);
-
-data[(yy * sx) + xx] += abs(accum);
-}
-
-
-return 1;
-}
-*/
 
 //--- this function calculates the near and far values
 int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std::vector<float> *near_acc, std::vector<float> *far_acc)
@@ -1068,8 +1014,5 @@ int FilterColorProjectionPlugin::calculateNearFarAccurate(MeshDocument &md, std:
 
     return 0;
 }
-
-
-
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterColorProjectionPlugin)

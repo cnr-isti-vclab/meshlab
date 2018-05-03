@@ -292,7 +292,7 @@ public:
         CratersUtils<MeshType>::FindSamplesFaces(args.target_mesh, args.samples_mesh, sfv);
 
         // detectes crater faces and applies the radial perturbation
-        int cratersNo = args.samples_mesh->vert.size(), currentCrater = 0;
+        int cratersNo = int(args.samples_mesh->vert.size()), currentCrater = 0;
         char buffer[50];
         typename SampleFaceVector::iterator sfvi;
         SampleFace p;

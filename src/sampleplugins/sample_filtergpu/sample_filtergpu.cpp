@@ -66,9 +66,9 @@ QString ExtraSampleGPUPlugin::filterName(FilterIDType filterId) const
 // More than a single class can be choosen.
 ExtraSampleGPUPlugin::FilterClass ExtraSampleGPUPlugin::getClass(QAction *a)
 {
-  switch(ID(a))
+	switch(ID(a))
 	{
-		case FP_GPU_EXAMPLE :  return MeshFilterInterface::Generic;
+		case FP_GPU_EXAMPLE:  return MeshFilterInterface::RasterLayer;  //should be generic, but better avoid it
 		default : assert(0);
 	}
 	return MeshFilterInterface::Generic;

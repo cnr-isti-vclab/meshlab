@@ -39,11 +39,18 @@ void ParamGeneratorGUI::collectInfo( MLXMLParamSubTree& param )
         param.paraminfo[MLXMLElNames::paramType] += " " + enumnames->text();
     param.paraminfo[MLXMLElNames::paramName] = pname->text();
     param.paraminfo[MLXMLElNames::paramDefExpr] = pdefault->text();
-    QString isimp("false");
+    
+	QString isimp("false");
     if (pisimp->isChecked())
         isimp = "true";
-    param.paraminfo[MLXMLElNames::paramIsImportant] = isimp;
-    param.paraminfo[MLXMLElNames::paramHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(phel->toPlainText());
+	param.paraminfo[MLXMLElNames::paramIsImportant] = isimp;
+
+	QString ispers("false");
+	if (pispers->isChecked())
+		isimp = "true";
+	param.paraminfo[MLXMLElNames::paramIsPersistent] = ispers;
+    
+	param.paraminfo[MLXMLElNames::paramHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(phel->toPlainText());
     param.gui.guiinfo[MLXMLElNames::guiType] = pguitype->currentText();
     param.gui.guiinfo[MLXMLElNames::guiLabel] = pguilab->text();
     param.gui.guiinfo[MLXMLElNames::guiMinExpr] = pguimin->text();
@@ -80,6 +87,8 @@ void ParamGeneratorGUI::initUI()
     pdefault = new QLineEdit(this);
     pisimp = new QCheckBox("isImportant",this);
     pisimp->setCheckState(Qt::Checked);
+	pispers = new QCheckBox("isPersistent", this);
+	pispers->setCheckState(Qt::Unchecked);
     //QLabel* hlab = new QLabel("Help",this);
     QGroupBox* gpbox = new QGroupBox("Parameter Help",this);
     QGridLayout* laybox = new QGridLayout();
@@ -174,10 +183,16 @@ void ParamGeneratorGUI::importInfo( const MLXMLParamSubTree& tree )
     pname->setText(tree.paraminfo[MLXMLElNames::paramName]);
     pdefault->setText(tree.paraminfo[MLXMLElNames::paramDefExpr]);
     phel->setPlainText(tree.paraminfo[MLXMLElNames::paramHelpTag]);
-    bool check = true;
+	bool isimpcheck = true;
     if (tree.paraminfo[MLXMLElNames::paramIsImportant].trimmed() == QString("false"))
-        check = false;
-    pisimp->setChecked(check);
+		isimpcheck = false;
+	pisimp->setChecked(isimpcheck);
+
+	bool isperscheck = true;
+	if (tree.paraminfo[MLXMLElNames::paramIsPersistent].trimmed() == QString("false"))
+		isperscheck = false;
+	pispers->setChecked(isperscheck);
+
     QString guity = tree.gui.guiinfo[MLXMLElNames::guiType];
     pguitype->setCurrentIndex(pguitype->findText(guity));
     pguilab->setText(tree.gui.guiinfo[MLXMLElNames::guiLabel]);
@@ -740,7 +755,7 @@ void PluginGeneratorGUI::loadScriptCode()
         return;
     QFile file(files[0]);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        qDebug("Warning: File %s has not been loaded.",qPrintable(files[0]));
+        qDebug("Warning: File %s has not been loaded.", qUtf8Printable(files[0]));
     finfo.setFile(files[0]);
     QByteArray code = file.readAll();
     file.close();
@@ -755,7 +770,7 @@ void PluginGeneratorGUI::saveScriptCode()
     QString filename = QFileDialog::getSaveFileName(this,tr("Save Script File"),finfo.absolutePath(),tr("Script File (*.js)"));
     QFile file(filename);
     if (!file.open(QFile::WriteOnly | QIODevice::Text))
-        qDebug("Warning: File %s has not been saved.",qPrintable(filename));
+        qDebug("Warning: File %s has not been saved.", qUtf8Printable(filename));
     finfo.setFile(filename);
     FilterGeneratorTab* tb = tab(tabs->currentIndex());
     if (tb != NULL)

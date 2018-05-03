@@ -72,9 +72,9 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
     {
       qDebug("Export to SketchFab start ");
       this->fcb=cb;
-      QString APIToken=env.evalString(Env::convertToAMLScriptValidName("MeshLab::Plugins::sketchFabKeyCode"));
+      QString APIToken = env.evalString("sketchFabKeyCode");
       this->fcb(1,"Compressing Mesh");
-      qDebug("APIToken = '%s' ",qPrintable(APIToken));
+      qDebug("APIToken = '%s' ",qUtf8Printable(APIToken));
       Matrix44m rot; rot.SetRotateDeg(-90,Point3m(1,0,0));
       Matrix44m rotI; rot.SetRotateDeg(90,Point3m(1,0,0));
       
@@ -95,14 +95,14 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
       int mask=0;
       if(md.mm()->hasDataMask(MeshModel::MM_VERTCOLOR)) mask+=tri::io::Mask::IOM_VERTCOLOR;
       tri::UpdatePosition<CMeshO>::Matrix(md.mm()->cm,rot);
-      vcg::tri::io::ExporterPLY<CMeshO>::Save(md.mm()->cm,qPrintable(tmpObjFileName),mask,true);
+      vcg::tri::io::ExporterPLY<CMeshO>::Save(md.mm()->cm,qUtf8Printable(tmpObjFileName),mask,true);
       tri::UpdatePosition<CMeshO>::Matrix(md.mm()->cm,rotI);
-      qDebug("Saved %20s",qPrintable(tmpObjFileName));
-      qDebug("Compressed %20s",qPrintable(tmpZipFileName));
-      saveMeshZip(qPrintable(tmpObjFileName),"xxxx.ply",qPrintable(tmpZipFileName));
+      qDebug("Saved %20s",qUtf8Printable(tmpObjFileName));
+      qDebug("Compressed %20s",qUtf8Printable(tmpZipFileName));
+      saveMeshZip(qUtf8Printable(tmpObjFileName),"xxxx.ply",qUtf8Printable(tmpZipFileName));
       this->zipFileName = tmpZipFileName;
       
-      qDebug("Model Title %s %s %s\n",qPrintable(this->name),qPrintable(this->description),qPrintable(this->tags));
+      qDebug("Model Title %s %s %s\n",qUtf8Printable(this->name),qUtf8Printable(this->description),qUtf8Printable(this->tags));
       qDebug("Starting Upload");
       this->fcb(10,"Starting Upload");
       bool ret = this->upload();
@@ -112,7 +112,7 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
       }
       
       this->Log("Upload Completed; you can access the uploaded model at the following URL:\n"); 
-      this->Log("<a href=\"%s\">%s</a>\n",qPrintable(this->sketchfabModelUrl),qPrintable(this->sketchfabModelUrl));
+      this->Log("<a href=\"%s\">%s</a>\n",qUtf8Printable(this->sketchfabModelUrl),qUtf8Printable(this->sketchfabModelUrl));
       return true;
     }
       return false;

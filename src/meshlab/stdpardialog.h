@@ -304,6 +304,7 @@ public slots:
     void setValue(QString name, Matrix44m val);
     void getMatrix();
     void pasteMatrix();
+    void invalidateMatrix(const QString& s);
 signals:
     void askMeshMatrix(QString);
 
@@ -314,6 +315,8 @@ protected:
     QLabel* descLab;
     QGridLayout* lay44;
     QVBoxLayout* vlay;
+    vcg::Matrix44f m;
+    bool valid;
 };
 
 /// Widget to enter a Shot,

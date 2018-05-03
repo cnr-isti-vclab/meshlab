@@ -302,13 +302,13 @@ GLuint AlignSet::createShaderFromFiles(QString name) {
 
     const char *vs_src = ShaderUtils::importShaders(vert.toLocal8Bit().data());
     if(!vs_src) {
-        cerr << "Could not load shader: " << qPrintable(vert) << endl;
+        cerr << "Could not load shader: " << qUtf8Printable(vert) << endl;
         return 0;
     }
 
     const char *fs_src = ShaderUtils::importShaders(frag.toLocal8Bit().data());
     if(!fs_src) {
-        cerr << "Could not load shader: " << qPrintable(frag) << endl;
+        cerr << "Could not load shader: " << qUtf8Printable(frag) << endl;
         return 0;
     }
 

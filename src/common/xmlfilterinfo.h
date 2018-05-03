@@ -5,6 +5,7 @@
 #include<QtXmlPatterns/QAbstractMessageHandler>
 #include <QtXmlPatterns/QXmlSchema>
 #include <QtXmlPatterns/QXmlSchemaValidator>
+#include <QSettings>
 //#include <QtXmlPatterns/QXmlQuery>
 #include <QUrl>
 #include<QAction>
@@ -97,6 +98,7 @@ namespace MLXMLElNames
     const QString paramName("parName");
     const QString paramDefExpr("parDefault");
     const QString paramIsImportant("parIsImportant");
+	const QString paramIsPersistent("parIsPersistent");
     //paramHelp == name to access to the value of PARAM_HELP inside the Map produced by the XMLFilterInfo
     //const QString paramHelp("p_help");
 
@@ -281,6 +283,21 @@ public:
 
     static QString generateH(const QString& basefilename,const MLXMLTree& tree );
     static QString generateCPP(const QString& basefilename,const MLXMLTree& tree );
+
+	/*HORRIBLE!
+	public PluginManager::xmlPluginsNameSpace -> for the namespace of the temporary environment create for the evaluation of the parameters and for the complete naming of the persistent parameters
+	private PluginManager::pluginNameSpace -> for calling from the XMLScriptingSystem the MeshLab Filters...but it's private even if at the end it's the one that a final user will deal with
+	WHY TWO AND NOT ONE?!?!?!? because for making the things easy from the programming point of view I need to have two different Plugins namespace
+	*/
+
+	//static QString xmlPluginsNameSpace() { return QString("XML") + pluginsNameSpace(); }
+	static QString pluginsNameSpace() { return QString("Plugins"); }
+
+	static QString completeFilterProgrammingName(const QString& xmlpluginsnamespace, const QString& xmlpluginsname, const QString& filterprogname);
+	static QString completeVariableProgrammingName(const QString& xmlpluginsnamespace, const QString& xmlpluginsname, const QString& filterprogname, const QString& varname);
+	//static QString completeVariableProgrammingName(const QString& vaname, const QString& filtername, MLXMLPluginInfo* info);
+
+	//static QString namespaceVariableAssignment(const QString& variable, const QString& val);
 };
 
 
@@ -298,6 +315,43 @@ struct MeshLabXMLFilterContainer
     QAction* act;
     MLXMLPluginInfo* xmlInfo;
     MeshLabFilterInterface* filterInterface;
+
+	bool isValid() const
+	{
+		return ((act != NULL) && (xmlInfo != NULL) && (filterInterface != NULL));
+	}
+
+	QString filterName() const
+	{
+		if (act != nullptr)
+			return act->text();
+		return QString();
+	}
+
+	QString readPersistentValueFromSettings(const QString& varname) const
+	{
+		QString expr;
+		if ((act == nullptr) || (xmlInfo == nullptr))
+			return expr;
+		QString filtname = filterName();
+		QSettings settings;
+		QString filterscriptname = xmlInfo->filterAttribute(filtname, MLXMLElNames::filterScriptFunctName);
+		QString paramnamepath = MLXMLUtilityFunctions::completeVariableProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), xmlInfo->pluginScriptName(), filterscriptname, varname);
+		QString defval = xmlInfo->filterParameterExtendedInfo(filtname, varname)[MLXMLElNames::paramDefExpr];
+		expr = settings.value(paramnamepath, defval).toString();
+		return expr;
+	}
+
+	void writePersistentValueIntoSettings(const QString& varname, const QString& expr) const
+	{
+		if ((act == nullptr) || (xmlInfo == nullptr))
+			return;
+		QString filtname = filterName();
+		QSettings settings;
+		QString filterscriptname = xmlInfo->filterAttribute(filtname, MLXMLElNames::filterScriptFunctName);
+		QString paramnamepath = MLXMLUtilityFunctions::completeVariableProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), xmlInfo->pluginScriptName(), filterscriptname, varname);
+		settings.setValue(paramnamepath, expr);
+	}
 };
 
 #endif

@@ -59,7 +59,7 @@ public:
     {
       v.clear();
       for(size_t i=0;i<OG_MAX_MCB_SIZE;++i)
-        if(cnt.test(i)) v.push_back(i);
+        if(cnt.test(int(i))) v.push_back(int(i));
     }
 
     bool operator < (const MeshCounter &c) const {

@@ -142,8 +142,7 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 			currim = imagePoints[pindex];
 			Point2m onGL = fromImageToGL(currim);
 
-
-			QImage &curImg = glArea->md()->rm()->currentPlane->image;
+			//QImage &curImg = glArea->md()->rm()->currentPlane->image;
 			//float imageRatio = float(curImg.width()) / float(curImg.height());
 			float screenRatio = float(glArea->width()) / float(glArea->height());
 			//set orthogonal view

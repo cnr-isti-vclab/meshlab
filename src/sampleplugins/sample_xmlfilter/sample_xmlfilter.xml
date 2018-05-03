@@ -3,11 +3,11 @@
   <FILTER filterFunction="randomVerticesDisplacement" filterName="Random vertex displacement" filterPre="MM_NONE" filterRasterArity="SingleRaster" filterClass="Smoothing | Remeshing" filterPost="MM_FACENORMAL | MM_VERTCOORD | MM_VERTNORMAL" filterArity="SingleMesh" filterIsInterruptible="true">
    <FILTER_HELP><![CDATA[Move the vertices of the mesh of a random quantity.]]></FILTER_HELP>
    <FILTER_JSCODE><![CDATA[]]></FILTER_JSCODE>
-   <PARAM parName="Displacement" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
+   <PARAM parName="Displacement" parIsImportant="true" parIsPersistent="false" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0">
     <PARAM_HELP><![CDATA[The vertex are displaced of a vector whose norm is bounded by this value]]></PARAM_HELP>
     <ABSPERC_GUI guiLabel="Max displacement" guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
-   <PARAM parName="UpdateNormals" parIsImportant="true" parType="Boolean" parDefault="true">
+   <PARAM parName="UpdateNormals" parIsImportant="true" parIsPersistent="false" parType="Boolean" parDefault="true">
     <PARAM_HELP><![CDATA[Toggle the recomputation of the normals after the random displacement.\n\n
 					If disabled the face normals will remains unchanged resulting in a visually pleasant effect.]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Recompute normals"/>

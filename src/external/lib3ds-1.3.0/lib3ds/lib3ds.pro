@@ -9,6 +9,9 @@ CONFIG += staticlib
 DEPENDPATH += .
 INCLUDEPATH += ..
 DEFINES += LIB3DS_STATIC
+macx:QMAKE_CFLAGS += -Wno-unused-parameter -Wno-format -Wno-pointer-sign -Wno-deprecated-declarations\
+  -Wno-deprecated-register -Wno-delete-non-virtual-dtor -Wno-logical-not-parentheses -Wno-switch -Wno-unknown-pragmas -Wno-comment
+macx:QMAKE_CFLAGS_WARN_ON = 
 
 # Input
 HEADERS += atmosphere.h \

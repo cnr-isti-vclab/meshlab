@@ -277,6 +277,7 @@ connectRenderModeActionList(rendlist);*/
 
 	showTrackBallAct = new QAction(tr("Show &Trackball"), this);
 	showTrackBallAct->setCheckable(true);
+	showTrackBallAct->setShortcut(Qt::SHIFT + Qt::Key_H);
 	connect(showTrackBallAct, SIGNAL(triggered()), this, SLOT(showTrackBall()));
 
 	resetTrackBallAct = new QAction(tr("Reset &Trackball"), this);
@@ -397,11 +398,9 @@ connectRenderModeActionList(rendlist);*/
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 
 	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
-	copyShotToClipboardAct->setShortcut(QKeySequence::Copy);
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
 
 	pasteShotFromClipboardAct = new QAction(tr("Paste shot"), this);
-	pasteShotFromClipboardAct->setShortcut(QKeySequence::Paste);
 	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
@@ -570,7 +569,7 @@ void MainWindow::createMenus()
 	fileMenu->addSeparator();
 
 	fileMenu->addAction(saveSnapshotAct);
-	separatorAct = fileMenu->addSeparator();
+	fileMenu->addSeparator();
 	recentProjMenu = fileMenu->addMenu(tr("Recent Projects"));
 	recentFileMenu = fileMenu->addMenu(tr("Recent Files"));
 
@@ -1008,16 +1007,16 @@ void MainWindow::loadMeshLabSettings()
 		RichParameter* rpar = NULL;
 		if (!docElem.isNull())
 		{
-			bool ret = RichParameterFactory::create(docElem, &rpar);
+			bool ret = RichParameterAdapter::create(docElem, &rpar);
 			if (!ret)
 			{
-				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qPrintable(docElem.attribute("name")),qPrintable(docElem.attribute("value")));
+				//  qDebug("Warning Ignored parameter '%s' = '%s'. Malformed.", qUtf8Printable(docElem.attribute("name")), qUtf8Printable(docElem.attribute("value")));
 				continue;
 			}
 			if (!defaultGlobalParams.hasParameter(rpar->name))
 			{
 				//  qDebug("Warning Ignored parameter %s. In the saved parameters there are ones that are not in the HardWired ones. "
-				//         "It happens if you are running MeshLab with only a subset of the plugins. ",qPrintable(rpar->name));
+				//         "It happens if you are running MeshLab with only a subset of the plugins. ", qUtf8Printable(rpar->name));
 			}
 			else
 				currentGlobalParams.addParam(rpar);
@@ -1027,7 +1026,7 @@ void MainWindow::loadMeshLabSettings()
 	// 2) eventually fill missing values with the hardwired defaults
 	for (int ii = 0; ii < defaultGlobalParams.paramList.size(); ++ii)
 	{
-		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ",ii,qPrintable(defaultGlobalParams.paramList.at(ii)->name));
+		//		qDebug("Searching param[%i] %s of the default into the loaded settings. ", ii, qUtf8Printable(defaultGlobalParams.paramList.at(ii)->name));
 		if (!currentGlobalParams.hasParameter(defaultGlobalParams.paramList.at(ii)->name))
 		{
 			qDebug("Warning! a default param was not found in the saved settings. This should happen only on the first run...");
@@ -1249,11 +1248,7 @@ void MainWindowSetting::initGlobalParameterSet(RichParameterSet* glbset)
 	glbset->addParam(new RichInt(perBatchPrimitives(), 100000, "Per batch primitives loaded in GPU", "Per batch primitives (vertices and faces) loaded in the GPU memory. It's used in order to do not overwhelm the system memory with an entire temporary copy of a mesh."));
 	glbset->addParam(new RichInt(minPolygonNumberPerSmoothRendering(), 50000, "Default Face number per smooth rendering", "Minimum number of faces in order to automatically render a newly created mesh layer with the per vertex normal attribute activated."));
 
-	glbset->addParam(new RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
-
-	//WARNING!!!! REMOVE THIS LINE AS SOON AS POSSIBLE! A plugin global variable has been introduced by MeshLab Core!
-	glbset->addParam(new RichString("MeshLab::Plugins::sketchFabKeyCode", "0000000", "SketchFab KeyCode", ""));
-	/****************************************************************************************************************/
+//	glbset->addParam(new RichBool(perMeshRenderingToolBar(), true, "Show Per-Mesh Rendering Side ToolBar", "If true the per-mesh rendering side toolbar will be redendered inside the layerdialog."));
 
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		glbset->addParam(new RichBool(highPrecisionRendering(), false, "High Precision Rendering", "If true all the models in the scene will be rendered at the center of the world"));
@@ -1265,7 +1260,7 @@ void MainWindowSetting::updateGlobalParameterSet(RichParameterSet& rps)
 	maxgpumem = (std::ptrdiff_t)rps.getInt(maximumDedicatedGPUMem()) * (float)(1024 * 1024);
 	perbatchprimitives = (size_t)rps.getInt(perBatchPrimitives());
 	minpolygonpersmoothrendering = (size_t)rps.getInt(minPolygonNumberPerSmoothRendering());
-	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
+//	permeshtoolbar = rps.getBool(perMeshRenderingToolBar());
 	highprecision = false;
 	if (MeshLabScalarTest<Scalarm>::doublePrecision())
 		highprecision = rps.getBool(highPrecisionRendering());

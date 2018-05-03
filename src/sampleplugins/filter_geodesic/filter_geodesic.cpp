@@ -41,13 +41,12 @@ using namespace vcg;
 
 FilterGeodesic::FilterGeodesic()
 {
-  typeList << FP_QUALITY_BORDER_GEODESIC
-                     << FP_QUALITY_POINT_GEODESIC;
+ typeList << FP_QUALITY_BORDER_GEODESIC
+          << FP_QUALITY_POINT_GEODESIC;
 
   FilterIDType tt;
   foreach(tt , types())
-        actionList << new QAction(filterName(tt), this);
-
+    actionList << new QAction(filterName(tt), this);
 }
 
 FilterGeodesic::~FilterGeodesic() {
@@ -57,47 +56,46 @@ FilterGeodesic::~FilterGeodesic() {
 
 QString FilterGeodesic::filterName(FilterIDType filter) const
 {
- switch(filter)
-  {
-      case FP_QUALITY_BORDER_GEODESIC :								return QString("Colorize by border distance");
-      case FP_QUALITY_POINT_GEODESIC :								return QString("Colorize by geodesic distance from a given point");
-    default: assert(0);
-  }
-  return QString("error!");
+	switch(filter)
+	{
+		case FP_QUALITY_BORDER_GEODESIC  : return QString("Colorize by border distance");
+		case FP_QUALITY_POINT_GEODESIC   : return QString("Colorize by geodesic distance from a given point");
+		default                          : assert(0);
+	}
+	return QString("error!");
 }
 
  QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 {
-  switch(filterId)
-  {
-        case FP_QUALITY_BORDER_GEODESIC:	   return tr("Store in the quality field the geodesic distance from borders and color the mesh accordingly.");
-        case FP_QUALITY_POINT_GEODESIC:	     return tr("Store in the quality field the geodesic distance from a given point on the mesh surface and color the mesh accordingly.");
-    default: assert(0);
-  }
-  return QString("error!");
+	switch(filterId)
+	{
+		case FP_QUALITY_BORDER_GEODESIC  : return tr("Store in the quality field the geodesic distance from borders and color the mesh accordingly.");
+		case FP_QUALITY_POINT_GEODESIC   : return tr("Store in the quality field the geodesic distance from a given point on the mesh surface and color the mesh accordingly.");
+		default                          : assert(0);
+	}
+	return QString("error!");
 }
 
  FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
 {
-  switch(ID(a))
-  {
-    case FP_QUALITY_BORDER_GEODESIC :
-    case FP_QUALITY_POINT_GEODESIC :
-          return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
-    default : assert(0);
-                            return MeshFilterInterface::Generic;
-  }
+	switch(ID(a))
+	{
+		case FP_QUALITY_BORDER_GEODESIC  :
+		case FP_QUALITY_POINT_GEODESIC   : return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
+		default                          : assert(0);
+	}
+	return MeshFilterInterface::Generic;
 }
 
  int FilterGeodesic::getRequirements(QAction *action)
 {
-  switch(ID(action))
-  {
-        case FP_QUALITY_BORDER_GEODESIC :
-    case FP_QUALITY_POINT_GEODESIC :	return MeshModel::MM_VERTFACETOPO ;
-    default: assert(0);
-  }
-  return 0;
+	switch(ID(action))
+	{
+		case FP_QUALITY_BORDER_GEODESIC  :
+		case FP_QUALITY_POINT_GEODESIC   : return MeshModel::MM_VERTFACETOPO;
+		default: assert(0);
+	}
+	return 0;
 }
 
 bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
@@ -185,23 +183,24 @@ return true;
 
 void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
-    switch(ID(action))
-        {
-            case FP_QUALITY_POINT_GEODESIC :
-                    parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
-          parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
-                    break;
-    default: break; // do not add any parameter for the other filters
-    }
-    return;
+	switch(ID(action))
+	{
+		case FP_QUALITY_POINT_GEODESIC :
+			parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
+			parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
+			break;
+		default: break; // do not add any parameter for the other filters
+	}
+	return;
 }
 
 int FilterGeodesic::postCondition(QAction * filter) const
 {
-  switch (ID(filter))
-  {
-    case FP_QUALITY_POINT_GEODESIC:  return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
-    default                  : return MeshModel::MM_UNKNOWN;
-  }
+	switch (ID(filter))
+	{
+		case FP_QUALITY_BORDER_GEODESIC    :
+		case FP_QUALITY_POINT_GEODESIC     : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
+		default                            : return MeshModel::MM_ALL;
+	}
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterGeodesic)

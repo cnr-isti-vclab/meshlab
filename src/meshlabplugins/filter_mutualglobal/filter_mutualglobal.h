@@ -60,7 +60,7 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_UNKNOWN;};
+	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
     FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
 	bool preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);

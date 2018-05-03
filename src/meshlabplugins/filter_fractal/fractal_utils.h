@@ -98,7 +98,7 @@ public:
 
         // some variables to manage the progress bar
         char buffer[50];
-        int vCount = m.vert.size(), i=0;
+        int vCount = int(m.vert.size()), i=0;
 
         // other variables for scaling and normalization of points
         std::vector<PertPair> pertVector;
@@ -130,7 +130,7 @@ public:
         ScalarType range1 = max - min, range2 = hmax - hmin;
 
         i = 0;
-        int pairsCount = pertVector.size();
+        int pairsCount = int(pertVector.size());
 
         // second loop: normalizes and applies the perturbation
         for(PertIterator pi=pertVector.begin(); pi!=pertVector.end(); ++pi, ++i)

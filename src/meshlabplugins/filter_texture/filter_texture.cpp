@@ -131,15 +131,15 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 {
     switch (ID(a))
     {
-    case FP_VORONOI_ATLAS : return MeshModel::MM_UNKNOWN;
-    case FP_UV_WEDGE_TO_VERTEX : return MeshModel::MM_UNKNOWN;
+	case FP_VORONOI_ATLAS: return MeshModel::MM_WEDGTEXCOORD;
+	case FP_UV_WEDGE_TO_VERTEX: return MeshModel::MM_VERTTEXCOORD;
     case FP_UV_VERTEX_TO_WEDGE : return MeshModel::MM_WEDGTEXCOORD;
     case FP_PLANAR_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
     case FP_BASIC_TRIANGLE_MAPPING : return MeshModel::MM_WEDGTEXCOORD;
-    case FP_SET_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_COLOR_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_UNKNOWN;
-    case FP_TEX_TO_VCOLOR_TRANSFER : return MeshModel::MM_UNKNOWN;
+    case FP_SET_TEXTURE : return MeshModel::MM_NONE;
+    case FP_COLOR_TO_TEXTURE : return MeshModel::MM_NONE;
+    case FP_TRANSFER_TO_TEXTURE : return MeshModel::MM_NONE;
+	case FP_TEX_TO_VCOLOR_TRANSFER: return MeshModel::MM_VERTCOLOR;
     default: assert(0);
     }
     return MeshModel::MM_NONE;
@@ -650,7 +650,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
             // Check textName and eventually add .png ext
             CheckError(std::max<int>(textName.lastIndexOf("\\"),textName.lastIndexOf("/")) != -1, "Path in Texture file not allowed");
-            if (!textName.endsWith(".png", Qt::CaseInsensitive) && !textName.endsWith(".dds", Qt::CaseInsensitive) )
+			if (!textName.endsWith(".png", Qt::CaseInsensitive) && !textName.endsWith(".dds", Qt::CaseInsensitive) && !textName.endsWith(".jpg", Qt::CaseInsensitive))
                 textName.append(".png");
 
             // Creates path to texture file
@@ -678,7 +678,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                 }
 
                 // Save texture
-                CheckError(!img.save(fileName, "PNG"), "Specified file cannot be saved");
+                CheckError(!img.save(fileName, NULL), "Specified file cannot be saved");
                 Log( "Dummy Texture \"%s\" Created ", fileName.toStdString().c_str());
                 assert(textFile.exists());
             }
@@ -1045,7 +1045,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		assert(srcMesh!=NULL);
 		assert(trgMesh!=NULL);
 
-		CheckError(trgMesh->cm.fn == 0, "Source mesh requires to have faces");
+		CheckError(srcMesh->cm.fn == 0, "Source mesh requires to have faces");
 
 		// Check whether is possible to access source mesh texture
 		CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
@@ -1053,10 +1053,11 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
 		vector <QImage> srcImgs;
 		srcImgs.resize(srcMesh->cm.textures.size());
-		QString path(srcMesh->fullName());
+		QString path;
 
 		for (int textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
 		{
+			path = m.fullName();
 			path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(srcMesh->cm.textures[textInd].c_str());
 			CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
 			CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
@@ -1090,6 +1091,8 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 			if (trgMesh->cm.Tr != Matrix44m::Identity())
 				tri::UpdatePosition<CMeshO>::Matrix(trgMesh->cm, Inverse(trgMesh->cm.Tr), true);
 		}
+
+		srcMesh->clearDataMask(MeshModel::MM_FACEMARK);
 	}
 	break;
 

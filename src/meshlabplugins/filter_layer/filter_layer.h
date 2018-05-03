@@ -35,7 +35,23 @@ class FilterLayerPlugin : public QObject, public MeshFilterInterface
         Q_INTERFACES(MeshFilterInterface)
 
 public:
-    enum { FP_FLATTEN, FP_MESH_VISIBILITY, FP_SPLITSELECTEDFACES, FP_SPLITSELECTEDVERTICES, FP_SPLITCONNECTED, FP_DUPLICATE, FP_RENAME_MESH, FP_RENAME_RASTER, FP_DELETE_MESH, FP_DELETE_NON_VISIBLE_MESH,FP_DELETE_RASTER, FP_DELETE_NON_SELECTED_RASTER,FP_SELECTCURRENT, FP_EXPORT_CAMERAS, FP_IMPORT_CAMERAS};
+    enum { 
+		FP_FLATTEN, 
+		FP_MESH_VISIBILITY, 
+		FP_SPLITSELECTEDFACES, 
+		FP_SPLITSELECTEDVERTICES, 
+		FP_SPLITCONNECTED, 
+		FP_DUPLICATE, 
+		FP_RENAME_MESH, 
+		FP_RENAME_RASTER, 
+		FP_DELETE_MESH, 
+		FP_DELETE_NON_VISIBLE_MESH,
+		FP_DELETE_RASTER, 
+		FP_DELETE_NON_SELECTED_RASTER,
+		FP_SELECTCURRENT, 
+		FP_EXPORT_CAMERAS, 
+		FP_IMPORT_CAMERAS
+	};
 
     FilterLayerPlugin();
 
@@ -44,6 +60,7 @@ public:
     virtual FilterClass getClass(QAction *);
     virtual void initParameterSet(QAction *,MeshDocument &/*m*/, RichParameterSet & /*parent*/);
     virtual bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(QAction *filter) const;
     FILTER_ARITY filterArity(QAction*) const;
 };
 

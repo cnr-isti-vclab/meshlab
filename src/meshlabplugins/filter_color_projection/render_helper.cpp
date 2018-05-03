@@ -204,12 +204,12 @@ void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode,
 
   if((camNear <= 0) || (camFar == 0))  // if not provided by caller, then evaluate using bbox
   {
-    _near=0.1;
-    _far=20000;
+    _near=0.1f;
+    _far=20000.0f;
 
     GlShot< Shotm >::GetNearFarPlanes(view, mesh->cm.bbox, _near, _far);
-    if(_near <= 0) _near = 0.01;
-    if(_far < _near) _far = 1000;
+    if(_near <= 0) _near = 0.01f;
+    if(_far < _near) _far = 1000.0f;
   }
   else
   {

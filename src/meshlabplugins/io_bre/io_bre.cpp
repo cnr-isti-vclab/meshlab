@@ -147,7 +147,7 @@ bool BreMeshIOPlugin::open(const QString &/*formatName*/, const QString &fileNam
   return true;
 }
 
-bool BreMeshIOPlugin::save(const QString &/*formatName*/,const QString &/*fileName*/, MeshModel &, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos *, QWidget */*parent*/)
+bool BreMeshIOPlugin::save(const QString & /*formatName*/,const QString & /*fileName*/, MeshModel &, const int /*mask*/, const RichParameterSet & /*par*/, CallBackPos *, QWidget * /*parent*/)
 {
   return false;
 }

@@ -40,7 +40,7 @@ QString EditSelectPlugin::Info()
 	return tr("Interactive selection inside a dragged rectangle in screen space");
 }
 
-void EditSelectPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)
+void EditSelectPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData & dt)
 {
 	MLPerViewGLOptions opts;
 	dt.get(opts);
@@ -175,7 +175,6 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
   static MeshModel *lastMeshModel=0;
   if((LastSelMatrix != SelMatrix) || lastMeshModel != &m)
   {
-    int t0=clock();
     GLPickTri<CMeshO>::FillProjectedVector(m.cm,projVec,this->SelMatrix,this->SelViewport);
     LastSelMatrix=this->SelMatrix;
     lastMeshModel=&m;
@@ -183,7 +182,6 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
   
     if (areaMode == 0) // vertices
     {   
-      int t0=clock();
       for (size_t vi = 0; vi<m.cm.vert.size(); ++vi) if (!m.cm.vert[vi].IsD())
       {
         bool res=false;
@@ -234,7 +232,7 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
     
 }
 
-void EditSelectPlugin::keyPressEvent(QKeyEvent */*event*/, MeshModel &/*m*/, GLArea *gla)
+void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, GLArea *gla)
 {
 	if (selectionMode == SELECT_AREA_MODE)
 		return;
@@ -301,7 +299,7 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 	return;
 }
 
-void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel & m, GLArea * gla)
+void EditSelectPlugin::mouseMoveEvent(QMouseEvent * event, MeshModel & /*m*/, GLArea * gla)
 {
 	if (selectionMode == SELECT_AREA_MODE)
 	{
@@ -470,7 +468,7 @@ void EditSelectPlugin::Decorate(MeshModel &m, GLArea * gla)
 		line2 = "C to clear polyline, BACKSPACE to remove last point";
 
 		if (selPolyLine.size() < 3)
-			line3 = "more points needed";
+			line3 = "cannot select - more points needed";
 		else
 			line3 = "Q to add, W to subtract, E to invert";
 
@@ -600,6 +598,11 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 
 	if (selectionMode == SELECT_AREA_MODE)
 	{
+		if (m.cm.fn > 0)
+			areaMode = 1;
+		else
+			areaMode = 0;
+
 		selPolyLine.clear();
         gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}

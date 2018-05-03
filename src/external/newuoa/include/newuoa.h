@@ -64,7 +64,7 @@ TYPE min_newuoa(int n, TYPE *x, Func &func, TYPE r_start=1e7, TYPE tol=1e-8, int
 template<class TYPE, class Func>
 static int biglag_(int n, int npt, TYPE *xopt, TYPE *xpt, TYPE *bmat, TYPE *zmat, int *idz,
                    int *ndim, int *knew, TYPE *delta, TYPE *d__, TYPE *alpha, TYPE *hcol, TYPE *gc,
-                   TYPE *gd, TYPE *s, TYPE *w, Func &func)
+                   TYPE *gd, TYPE *s, TYPE *w, Func & /*func*/)
 {
     /* N is the number of variables. NPT is the number of interpolation
      * equations. XOPT is the best interpolation point so far. XPT

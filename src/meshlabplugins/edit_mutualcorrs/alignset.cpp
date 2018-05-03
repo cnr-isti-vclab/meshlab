@@ -167,13 +167,13 @@ void AlignSet::renderScene(vcg::Shot<float> &view, int component) {
   QGLFramebufferObject fbo(fbosize,frmt);
 
   float _near, _far;
-  _near=0.1;
-  _far=10000;
+  _near = 0.1f;
+  _far = 10000.0f;
   vcg::Box3f bb=vcg::Box3f::Construct(mesh->bbox);
   GlShot< vcg::Shot<float> >::GetNearFarPlanes(view, bb, _near, _far);
   //assert(_near <= _far);
-  if(_near <= 0) _near = 0.1;
-  if(_far < _near) _far = 1000;
+  if(_near <= 0) _near = 0.1f;
+  if(_far < _near) _far = 1000.0f;
 
 
 //GLenum err = glGetError();
@@ -327,13 +327,13 @@ GLuint AlignSet::createShaderFromFiles(QString name) {
 
   const char *vs_src = ShaderUtils::importShaders(vert.toLocal8Bit().data());
   if(!vs_src) {
-    cerr << "Could not load shader: " << qPrintable(vert) << endl;
+    cerr << "Could not load shader: " << qUtf8Printable(vert) << endl;
     return 0;
   }
 
   const char *fs_src = ShaderUtils::importShaders(frag.toLocal8Bit().data());
   if(!fs_src) {
-    cerr << "Could not load shader: " << qPrintable(frag) << endl;
+    cerr << "Could not load shader: " << qUtf8Printable(frag) << endl;
     return 0;
   }
 

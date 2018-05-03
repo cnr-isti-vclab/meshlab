@@ -44,7 +44,7 @@ return true if a particle of that face fall out
 bool CheckFallPosition(CMeshO::FacePointer f,Point3m g,Scalarm a){
     Point3m n=f->N();
     if(a>1) return false;
-    if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((PI/2)*(1-a))) return true;
+    if(acos(n.dot(g)/(n.Norm()*g.Norm()))<((M_PI/2)*(1-a))) return true;
     return false;
 }
 
@@ -110,22 +110,6 @@ CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f){
     Point3m p2=f->P(2);
     p=f->P(0)*bc[0]+f->P(1)*bc[1]+f->P(2)*bc[2];
     return p;
-}
-
-/**
-@def Given a face return the coordinates of its baricenter
-
-@param FacePointer f -
-
-@return The Baricenter of the face
-*/
-CMeshO::CoordType getBaricenter(CMeshO::FacePointer f){
-    Point3m bc;
-    bc[0]=0.33f;
-    bc[1]=0.33f;
-    bc[2]=1-bc[0]-bc[1];
-    CMeshO::CoordType pc=fromBarCoords(bc,f);
-    return pc;
 }
 
 
@@ -294,7 +278,7 @@ void ColorizeMesh(MeshModel* m){
 @return the intersection edge index if there is an intersection -1 elsewhere
 Step
 */
-int ComputeIntersection(CMeshO::CoordType p1,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point){
+int ComputeIntersection(CMeshO::CoordType /*p1*/,CMeshO::CoordType p2,CMeshO::FacePointer &f,CMeshO::FacePointer &new_f,CMeshO::CoordType &int_point){
 
     CMeshO::CoordType v0=f->V(0)->P();
     CMeshO::CoordType v1=f->V(1)->P();
@@ -372,14 +356,14 @@ void ComputeNormalDustAmount(MeshModel* m,CMeshO::CoordType u,Scalarm k,Scalarm 
 
 @return nothing
 */
-void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
+void ComputeSurfaceExposure(MeshModel* m, int /*r*/, int n_ray){
 
     CMeshO::PerFaceAttributeHandle<Scalarm> eh=vcg::tri::Allocator<CMeshO>::AddPerFaceAttribute<Scalarm>(m->cm,std::string("exposure"));
 
-    Scalarm dh=1.2;
-    Scalarm exp=0;
-    Scalarm di=0;
-    Scalarm xi=0;
+	Scalarm dh = Scalarm(1.2);
+	Scalarm exp = Scalarm(0);
+	Scalarm di = Scalarm(0);
+	Scalarm xi = Scalarm(0);
 
     CMeshO::FacePointer face;
     CMeshO::CoordType p_c;
@@ -397,7 +381,7 @@ void ComputeSurfaceExposure(MeshModel* m,int r,int n_ray){
             //For every f_face  get the central point
             p_c=fromBarCoords(RandomBaricentric(),&*fi);
             //Create a ray with p_c as origin and direction N
-            p_c=p_c+TriangleNormal(*fi).Normalize()*0.1;
+            p_c=p_c+TriangleNormal(*fi).Normalize()*0.1f;
             Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,fi->N());
             di=0;
             face=0;
@@ -427,7 +411,7 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
     for(vi=cloud_mesh->cm.vert.begin();vi!=cloud_mesh->cm.vert.end();++vi){
         Particle<CMeshO> info=ph[vi];
         if((*vi).IsS()){
-            Point3m p_c=vi->P()+info.face->N().normalized()*0.1;
+            Point3m p_c=vi->P()+info.face->N().normalized()*0.1f;
             Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,dir);
             Scalarm di;
             CMeshO::FacePointer new_f=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,base_mesh->cm.bbox.Diag(),di);
@@ -462,8 +446,8 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
 
 @return ?
 */
-bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,Scalarm threshold){
-
+bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::vector< Particle<CMeshO> > &dpv,*/int d,Scalarm /*threshold*/)
+{
     //Handler
     CMeshO::PerFaceAttributeHandle<Scalarm> eh=vcg::tri::Allocator<CMeshO>::GetPerFaceAttribute<Scalarm>(m->cm,std::string("exposure"));
 
@@ -479,15 +463,10 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::v
     for(fi=m->cm.face.begin();fi!=m->cm.face.end();++fi){
         int n_dust=0;
         a1=a0+r*eh[fi];
-        if(a1<0)
-            a=0;
-        if(a1>1)
-            a=1;
-        if(a1>=0 && a1<=1)
-            a=a1;
-
-
-        if(eh[fi]==1) a=1;
+        if(a1<0) a=0;
+        if(a1>1) a=1;
+        if(a1>=0 && a1<=1) a=a1;
+		if(eh[fi]==1) a=1;
         else a=0;
 
         n_dust=(int)d*fi->Q()*a;
@@ -499,10 +478,9 @@ bool GenerateParticles(MeshModel* m,std::vector<CMeshO::CoordType> &cpv,/*std::v
             cpv.push_back(n_p);
         }
 
-          fi->Q()=n_dust;
+        fi->Q()=n_dust;
 
     }
-
 
     return true;
 }
@@ -646,7 +624,7 @@ This function compute the repulsion beetwen particles
 @param Scalarm l        - lenght of the step
 @return nothing       - adhesion factor
 */
-void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,Scalarm l,Point3m g,Scalarm a){
+void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,Scalarm /*l*/,Point3m g,Scalarm a){
     CMeshO::PerVertexAttributeHandle<Particle<CMeshO> > ph = Allocator<CMeshO>::GetPerVertexAttribute<Particle<CMeshO> >(c_m->cm,"ParticleInfo");
     MetroMeshVertexGrid v_grid;
     std::vector< Point3<Scalarm> > v_points;

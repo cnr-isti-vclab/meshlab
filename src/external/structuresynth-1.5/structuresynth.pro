@@ -1,6 +1,11 @@
+EXTERNAL_BASE_PATH = ../
+include($$EXTERNAL_BASE_PATH/ext_common.pri)
 TEMPLATE = lib
 TARGET = ssynth
 CONFIG += staticlib
+macx:QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-format -Wno-pointer-sign -Wno-deprecated-declarations\
+  -Wno-deprecated-register -Wno-delete-non-virtual-dtor -Wno-logical-not-parentheses
+macx:QMAKE_CXXFLAGS_WARN_ON = 
 
 DEPENDPATH += . \
               ssynth \
@@ -113,14 +118,3 @@ SOURCES += ssynth/StructureSynth/Model/Action.cpp \
            ssynth/StructureSynth/Model/Rendering/TemplateRenderer.cpp
 CONFIG+=opengl
 QT+=xml opengl script
-macx:DESTDIR       = ../lib/macx
-win32-g++:DESTDIR       = ../lib/win32-gcc
-win32-msvc2005:DESTDIR       = ../lib/win32-msvc2005
-win32-msvc2008:DESTDIR       = ../lib/win32-msvc2008
-win32-msvc2010:DESTDIR       = ../lib/win32-msvc2010
-win32-msvc2012:DESTDIR       = ../lib/win32-msvc2012
-win32-msvc2013:DESTDIR       = ../lib/win32-msvc2013
-win32-msvc2015:DESTDIR       = ../lib/win32-msvc2015
-linux-g++-32:DESTDIR = ../lib/linux-g++-32
-linux-g++-64:DESTDIR = ../lib/linux-g++-64
-linux-g++:DESTDIR = ../lib/linux-g++
