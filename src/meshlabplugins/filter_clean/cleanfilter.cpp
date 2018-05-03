@@ -209,7 +209,7 @@ int CleanFilter::postCondition(QAction* action) const
 		case FP_REMOVE_NON_MANIF_VERT:
 		case FP_REMOVE_UNREFERENCED_VERTEX:
 		case FP_REMOVE_DUPLICATED_VERTEX:
-		case FP_REMOVE_FACE_ZERO_AREA:        return MeshModel::MM_GEOMETRY_CHANGE;
+		case FP_REMOVE_FACE_ZERO_AREA:        return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
 		case FP_COMPACT_VERT:
 		case FP_COMPACT_FACE:                 return MeshModel::MM_NONE; // only internal vector storage should change, nothing more
 	}

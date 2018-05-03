@@ -121,10 +121,10 @@ public:
 		// unknown - will raise exceptions, to be avoided, here just for compatibility
         MM_UNKNOWN          = 0x80000000,
 
-		// geometry chenge (for filters that remove stuff or modify geoemtry, but not color)
-		MM_GEOMETRY_CHANGE  = 0x431e7be7,
+		// geometry change (for filters that remove stuff or modify geometry or topology, but not touch face/vertex color or face/vertex quality)
+		MM_GEOMETRY_AND_TOPOLOGY_CHANGE  = 0x431e7be7,
 
-		// everything - dangerous, will add unwanted data to layer
+		// everything - dangerous, will add unwanted data to layer (e.g. if you use MM_ALL it could means that it could add even color or quality)
         MM_ALL				= 0xffffffff
     };
 

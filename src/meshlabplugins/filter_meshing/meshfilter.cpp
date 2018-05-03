@@ -49,6 +49,7 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         << FP_CLUSTERING
         << FP_QUADRIC_SIMPLIFICATION
         << FP_QUADRIC_TEXCOORD_SIMPLIFICATION
+        << FP_EXPLICIT_ISOTROPIC_REMESHING
         << FP_MIDPOINT
         << FP_REORIENT
         << FP_FLIP_AND_SWAP
@@ -110,6 +111,7 @@ ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
     case FP_MIDPOINT                         :
     case FP_QUADRIC_SIMPLIFICATION           :
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
+    case FP_EXPLICIT_ISOTROPIC_REMESHING     :
     case FP_CLUSTERING                       :
     case FP_CLOSE_HOLES                      :
     case FP_FAUX_CREASE                      :
@@ -163,6 +165,7 @@ int ExtraMeshFilterPlugin::getPreCondition(QAction *filter) const
     case FP_REFINE_CATMULL                   :
     case FP_QUADRIC_SIMPLIFICATION           :
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  :
+    case FP_EXPLICIT_ISOTROPIC_REMESHING     :
     case FP_REORIENT                         :
     case FP_INVERT_FACES                     :
     case FP_COMPUTE_PRINC_CURV_DIR           :
@@ -205,6 +208,7 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_REFINE_CATMULL                   : return tr("Subdivision Surfaces: Catmull-Clark");
 	case FP_QUADRIC_SIMPLIFICATION           : return tr("Simplification: Quadric Edge Collapse Decimation");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION  : return tr("Simplification: Quadric Edge Collapse Decimation (with texture)");
+    case FP_EXPLICIT_ISOTROPIC_REMESHING     : return tr("Remeshing: Isotropic Explicit Remeshing");
     case FP_CLUSTERING                       : return tr("Simplification: Clustering Decimation");
     case FP_REORIENT                         : return tr("Re-Orient all faces coherentely");
     case FP_INVERT_FACES                     : return tr("Invert Faces Orientation");
@@ -269,6 +273,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
     case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
     case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
+    case FP_EXPLICIT_ISOTROPIC_REMESHING       : return tr("Perform a explict remeshing of a triangular mesh, by repeatedly applying edge flip, collapse, relax and refine to improve aspect ratio (triangle quality) and topological regularity.");
     case FP_REORIENT                           : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
                                                            "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
                                                            "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
@@ -369,6 +374,12 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
         break;
 
+    case FP_EXPLICIT_ISOTROPIC_REMESHING:
+        parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces."));
+        parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."));
+        parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
+        parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries to do not affect mesh boundaries during simplification"));
+      break;
     case FP_CLOSE_HOLES:
         parlst.addParam(new RichInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary"));
         parlst.addParam(new RichBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed"));
@@ -887,7 +898,11 @@ switch(ID(filter))
 		tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
 		tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);
 	} break;
-
+    case FP_EXPLICIT_ISOTROPIC_REMESHING:
+    {
+  
+    } break;
+    
 	case FP_ROTATE_FIT:
 	{
 		Box3m selBox; //boundingbox of the selected vertices
@@ -1671,6 +1686,7 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 		case FP_CLUSTERING :
 		case FP_QUADRIC_SIMPLIFICATION :
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION :
+        case FP_EXPLICIT_ISOTROPIC_REMESHING :
 		case FP_MIDPOINT :
 		case FP_REORIENT :
 		case FP_INVERT_FACES :
@@ -1683,7 +1699,7 @@ int ExtraMeshFilterPlugin::postCondition(QAction * filter) const
 		case FP_FAUX_CREASE :
 		case FP_FAUX_EXTRACT :
 		case FP_VATTR_SEAM :
-		case FP_REFINE_LS3_LOOP : return MeshModel::MM_GEOMETRY_CHANGE;
+		case FP_REFINE_LS3_LOOP : return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
 
 		case FP_COMPUTE_PRINC_CURV_DIR : return MeshModel::MM_VERTFACETOPO | MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV | MeshModel::MM_VERTCURVDIR | MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 

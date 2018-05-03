@@ -716,7 +716,7 @@ int SelectionFilterPlugin::postCondition(QAction *action) const
 		case FP_SELECT_DELETE_VERT          :
 		case FP_SELECT_DELETE_ALL_FACE      :
 		case FP_SELECT_DELETE_FACE          :
-		case FP_SELECT_DELETE_FACEVERT      : return MeshModel::MM_GEOMETRY_CHANGE;
+		case FP_SELECT_DELETE_FACEVERT      : return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
   }
   return MeshModel::MM_ALL;
 }

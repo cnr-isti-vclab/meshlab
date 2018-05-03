@@ -255,7 +255,7 @@ int PlyMCPlugin::postCondition(QAction * filter) const
 	switch (ID(filter))
 	{
 		case FP_PLYMC:        return MeshModel::MM_NONE; // no change to old layers
-		case FP_MC_SIMPLIFY:  return MeshModel::MM_GEOMETRY_CHANGE;
+		case FP_MC_SIMPLIFY:  return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;
 		default:              return MeshModel::MM_ALL;
 	}
 }

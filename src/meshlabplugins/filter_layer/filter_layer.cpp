@@ -879,7 +879,7 @@ int FilterLayerPlugin::postCondition(QAction* filter) const
 		case FP_MESH_VISIBILITY:            return MeshModel::MM_NONE;
 
 		case FP_SPLITSELECTEDFACES:
-		case FP_SPLITSELECTEDVERTICES:      return MeshModel::MM_GEOMETRY_CHANGE;     
+		case FP_SPLITSELECTEDVERTICES:      return MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE;     
 
 		default:  assert(0);
 	}
