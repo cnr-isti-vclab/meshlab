@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mainserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    
+    
+    
+    
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\meshlab\images\100mesh.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\backlines.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\bbox.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\border.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\dummy.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\eye48.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\eye_256_splash.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\face_color.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\facebook.gif">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\flat.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\import_mesh.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\info.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\layer_edit_locked.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\layer_edit_unlocked.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\layer_eye_close.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\layer_eye_open.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\layers.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\lightoff.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\lighton.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\logo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\logo_aimatshape.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\logo_epoch.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\logo_epoch_2.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\common\script_system\math.js">
+      <Filter>Resource Files</Filter>
+    </None>
+    <QtRcc Include="..\meshlab\meshlab.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <None Include="..\meshlab\images\meshlabLogo_256x256.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\common\script_system\meshlabfilterXMLspecificationformat.xsd">
+      <Filter>Resource Files</Filter>
+    </None>
+    <QtRcc Include="meshlabserver.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <None Include="meshlabserver.txt">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\new_project.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\no_edit.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\ok.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\onscreenHelp.txt">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\open.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\open_project.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\options.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\cursors\plain.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\cursors\plain_pan.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\cursors\plain_pick.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\cursors\plain_trackball.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\cursors\plain_zoom.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\points.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\reload.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\save.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\search.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\selected.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\smooth.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\snapshot.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\splitH.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\splitV.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\stop.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\text_color.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\textures.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\vert_color.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\view_raster.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\meshlab\images\wire.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\meshlab\meshlab.rc" />
+  </ItemGroup>
+</Project>

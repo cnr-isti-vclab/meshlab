@@ -1,0 +1,377 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2EF81510-097E-3915-8BBF-68101A8CD3AC}</ProjectGuid>
+    <RootNamespace>meshlab</RootNamespace>
+    <Keyword>Qt4VSv1.0</Keyword>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <PlatformToolSet>v140</PlatformToolSet>
+    <OutputDirectory>..\distrib\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>release\</IntermediateDirectory>
+    <PrimaryOutput>meshlab</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <PlatformToolSet>v140</PlatformToolSet>
+    <OutputDirectory>..\distrib\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>Application</ConfigurationType>
+    <IntermediateDirectory>debug\</IntermediateDirectory>
+    <PrimaryOutput>meshlab</PrimaryOutput>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
+    <QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\distrib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">meshlab</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\distrib\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">meshlab</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;..;..\..;..\..\..\vcglib;..\..\..\vcglib\eigenlib;..\external\glew-2.1.0\include;..\external\jhead-2.95;$(QTDIR)\include;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtXml;$(QTDIR)\include\QtXmlPatterns;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtScript;$(QTDIR)\include\QtCore;release;$(QTDIR)\mkspecs\win32-msvc2015;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>release\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(QTDIR)\lib\qtmain.lib;shell32.lib;jhead.lib;common.lib;opengl32.lib;GLU32.lib;$(QTDIR)\lib\Qt5OpenGL.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Xml.lib;$(QTDIR)\lib\Qt5XmlPatterns.lib;$(QTDIR)\lib\Qt5Network.lib;$(QTDIR)\lib\Qt5Script.lib;$(QTDIR)\lib\Qt5Core.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;C:\utils\postgresql\pgsql\lib;C:\utils\my_sql\my_sql\lib;$(QTDIR)\lib;..\external\lib\win32-msvc2015;..\distrib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <LinkIncremental>false</LinkIncremental>
+      <OutputFile>$(OutDir)\meshlab.exe</OutputFile>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_NO_DEBUG;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_MSC_VER=1900;_WIN32;_WIN64</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <InputFile>%(FullPath)</InputFile>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc2015;.;D:/Workspace/meshlab/code/meshlab/src;D:/Workspace/meshlab/code/meshlab;D:/Workspace/meshlab/code/vcglib;D:/Workspace/meshlab/code/vcglib/eigenlib;D:/Workspace/meshlab/code/meshlab/src/external/glew-2.1.0/include;D:/Workspace/meshlab/code/meshlab/src/external/jhead-2.95;$(QTDIR)\include;$(QTDIR)\include/QtOpenGL;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtXml;$(QTDIR)\include/QtXmlPatterns;$(QTDIR)\include/QtNetwork;$(QTDIR)\include/QtScript;$(QTDIR)\include/QtCore</IncludePath>
+    </QtMoc>
+    <QtRcc>
+      <InitFuncName>meshlab</InitFuncName>
+      <OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
+      <Compression>default</Compression>
+      <InputFile>%(FullPath)</InputFile>
+    </QtRcc>
+    <QtUic>
+      <InputFile>%(FullPath)</InputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
+    </QtUic>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;..;..\..;..\..\..\vcglib;..\..\..\vcglib\eigenlib;..\external\glew-2.1.0\include;..\external\jhead-2.95;$(QTDIR)\include;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtXml;$(QTDIR)\include\QtXmlPatterns;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtScript;$(QTDIR)\include\QtCore;debug;$(QTDIR)\mkspecs\win32-msvc2015;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>debug\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(QTDIR)\lib\qtmaind.lib;shell32.lib;jhead.lib;common.lib;opengl32.lib;GLU32.lib;$(QTDIR)\lib\Qt5OpenGLd.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Xmld.lib;$(QTDIR)\lib\Qt5XmlPatternsd.lib;$(QTDIR)\lib\Qt5Networkd.lib;$(QTDIR)\lib\Qt5Scriptd.lib;$(QTDIR)\lib\Qt5Cored.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;C:\utils\postgresql\pgsql\lib;C:\utils\my_sql\my_sql\lib;$(QTDIR)\lib;..\external\lib\win32-msvc2015;..\distrib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+      <OutputFile>$(OutDir)\meshlab.exe</OutputFile>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <QtRcc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
+      <Compression>default</Compression>
+      <InitFuncName>meshlab</InitFuncName>
+      <OutputFile>.\GeneratedFiles\qrc_%(Filename).cpp</OutputFile>
+      <InputFile>%(FullPath)</InputFile>
+    </QtRcc>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;WIN64;MESHLAB_SCALAR=float;NOMINMAX;QT_DISABLE_DEPRECATED_BEFORE=0x000000;NOMINMAX;_CRT_SECURE_NO_DEPRECATE;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_XML_LIB;QT_XMLPATTERNS_LIB;QT_NETWORK_LIB;QT_SCRIPT_LIB;QT_CORE_LIB;_MSC_VER=1900;_WIN32;_WIN64</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <InputFile>%(FullPath)</InputFile>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc2015;.;D:/Workspace/meshlab/code/meshlab/src;D:/Workspace/meshlab/code/meshlab;D:/Workspace/meshlab/code/vcglib;D:/Workspace/meshlab/code/vcglib/eigenlib;D:/Workspace/meshlab/code/meshlab/src/external/glew-2.1.0/include;D:/Workspace/meshlab/code/meshlab/src/external/jhead-2.95;$(QTDIR)\include;$(QTDIR)\include/QtOpenGL;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtXml;$(QTDIR)\include/QtXmlPatterns;$(QTDIR)\include/QtNetwork;$(QTDIR)\include/QtScript;$(QTDIR)\include/QtCore</IncludePath>
+    </QtMoc>
+    <QtUic>
+      <InputFile>%(FullPath)</InputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
+    </QtUic>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="additionalgui.cpp" />
+    <ClCompile Include="changetexturename.cpp" />
+    <ClCompile Include="..\..\..\vcglib\wrap\gui\coordinateframe.cpp" />
+    <ClCompile Include="customDialog.cpp" />
+    <ClCompile Include="filterScriptDialog.cpp" />
+    <ClCompile Include="filterthread.cpp" />
+    <ClCompile Include="glarea.cpp" />
+    <ClCompile Include="glarea_setting.cpp" />
+    <ClCompile Include="layerDialog.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainwindow_Init.cpp" />
+    <ClCompile Include="mainwindow_RunTime.cpp" />
+    <ClCompile Include="ml_default_decorators.cpp" />
+    <ClCompile Include="ml_render_gui.cpp" />
+    <ClCompile Include="ml_rendering_actions.cpp" />
+    <ClCompile Include="ml_selection_buffers.cpp" />
+    <ClCompile Include="ml_std_par_dialog.cpp" />
+    <ClCompile Include="multiViewer_Container.cpp" />
+    <ClCompile Include="plugindialog.cpp" />
+    <ClCompile Include="saveSnapshotDialog.cpp" />
+    <ClCompile Include="savemaskexporter.cpp" />
+    <ClCompile Include="stdpardialog.cpp" />
+    <ClCompile Include="..\..\..\vcglib\wrap\gui\trackball.cpp" />
+    <ClCompile Include="..\..\..\vcglib\wrap\gui\trackmode.cpp" />
+    <ClCompile Include="xmlgeneratorgui.cpp" />
+    <ClCompile Include="xmlstdpardialog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="additionalgui.h">
+    </QtMoc>
+    <QtMoc Include="changetexturename.h">
+    </QtMoc>
+    <QtMoc Include="customDialog.h">
+    </QtMoc>
+    <QtMoc Include="filterScriptDialog.h">
+    </QtMoc>
+    <QtMoc Include="filterthread.h">
+    </QtMoc>
+    <QtMoc Include="glarea.h">
+    </QtMoc>
+    <ClInclude Include="glarea_setting.h" />
+    <QtMoc Include="..\common\interfaces.h">
+    </QtMoc>
+    <QtMoc Include="layerDialog.h">
+    </QtMoc>
+    <QtMoc Include="mainwindow.h">
+    </QtMoc>
+    <ClInclude Include="ml_default_decorators.h" />
+    <QtMoc Include="ml_render_gui.h">
+    </QtMoc>
+    <QtMoc Include="ml_rendering_actions.h">
+    </QtMoc>
+    <ClInclude Include="ml_selection_buffers.h" />
+    <QtMoc Include="ml_std_par_dialog.h">
+    </QtMoc>
+    <QtMoc Include="multiViewer_Container.h">
+    </QtMoc>
+    <QtMoc Include="plugindialog.h">
+    </QtMoc>
+    <QtMoc Include="saveSnapshotDialog.h">
+    </QtMoc>
+    <QtMoc Include="savemaskexporter.h">
+    </QtMoc>
+    <ClInclude Include="snapshotsetting.h" />
+    <QtMoc Include="stdpardialog.h">
+    </QtMoc>
+    <ClInclude Include="..\..\..\vcglib\wrap\gui\trackball.h" />
+    <ClInclude Include="..\..\..\vcglib\wrap\gui\trackmode.h" />
+    <ClInclude Include="..\..\..\vcglib\wrap\gl\trimesh.h" />
+    <QtMoc Include="xmlgeneratorgui.h">
+    </QtMoc>
+    <QtMoc Include="xmlstdpardialog.h">
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ui_aboutDialog.h" />
+    <ClInclude Include="ui_congratsDialog.h" />
+    <ClInclude Include="ui_customDialog.h" />
+    <ClInclude Include="ui_filterScriptDialog.h" />
+    <ClInclude Include="ui_filtercreatortab.h" />
+    <ClInclude Include="ui_filtergui.h" />
+    <ClInclude Include="ui_layerDialog.h" />
+    <ClInclude Include="ui_renametexture.h" />
+    <ClInclude Include="ui_savemaskexporter.h" />
+    <ClInclude Include="ui_savesnapshotDialog.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ui\aboutDialog.ui">
+    </QtUic>
+    <QtUic Include="ui\congratsDialog.ui">
+    </QtUic>
+    <QtUic Include="ui\customDialog.ui">
+    </QtUic>
+    <QtUic Include="ui\filterScriptDialog.ui">
+    </QtUic>
+    <QtUic Include="ui\filtercreatortab.ui">
+    </QtUic>
+    <QtUic Include="ui\filtergui.ui">
+    </QtUic>
+    <QtUic Include="ui\layerDialog.ui">
+    </QtUic>
+    <QtUic Include="ui\renametexture.ui">
+    </QtUic>
+    <QtUic Include="ui\savemaskexporter.ui">
+    </QtUic>
+    <QtUic Include="ui\savesnapshotDialog.ui">
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\100mesh.html" />
+    <None Include="images\backlines.png" />
+    <None Include="images\bbox.png" />
+    <None Include="images\border.png" />
+    <None Include="images\dummy.png" />
+    <None Include="images\eye48.png" />
+    <None Include="images\eye_256_splash.png" />
+    <None Include="images\face_color.png" />
+    <None Include="images\facebook.gif" />
+    <None Include="images\flat.png" />
+    <None Include="images\import_mesh.png" />
+    <None Include="images\info.png" />
+    <None Include="images\layer_edit_locked.png" />
+    <None Include="images\layer_edit_unlocked.png" />
+    <None Include="images\layer_eye_close.png" />
+    <None Include="images\layer_eye_open.png" />
+    <None Include="images\layers.png" />
+    <None Include="images\lightoff.png" />
+    <None Include="images\lighton.png" />
+    <None Include="images\logo.png" />
+    <None Include="images\logo_aimatshape.png" />
+    <None Include="images\logo_epoch.png" />
+    <None Include="images\logo_epoch_2.png" />
+    <None Include="..\common\script_system\math.js" />
+    <QtRcc Include="meshlab.qrc">
+    </QtRcc>
+    <None Include="images\meshlabLogo_256x256.png" />
+    <None Include="..\common\script_system\meshlabfilterXMLspecificationformat.xsd" />
+    <None Include="images\new_project.png" />
+    <None Include="images\no_edit.png" />
+    <None Include="images\ok.png" />
+    <None Include="images\onscreenHelp.txt" />
+    <None Include="images\open.png" />
+    <None Include="images\open_project.png" />
+    <None Include="images\options.png" />
+    <None Include="images\cursors\plain.png" />
+    <None Include="images\cursors\plain_pan.png" />
+    <None Include="images\cursors\plain_pick.png" />
+    <None Include="images\cursors\plain_trackball.png" />
+    <None Include="images\cursors\plain_zoom.png" />
+    <None Include="images\points.png" />
+    <None Include="images\reload.png" />
+    <None Include="images\save.png" />
+    <None Include="images\search.png" />
+    <None Include="images\selected.png" />
+    <None Include="images\smooth.png" />
+    <None Include="images\snapshot.png" />
+    <None Include="images\splitH.png" />
+    <None Include="images\splitV.png" />
+    <None Include="images\stop.png" />
+    <None Include="images\text_color.png" />
+    <None Include="images\textures.png" />
+    <None Include="images\vert_color.png" />
+    <None Include="images\view_raster.png" />
+    <None Include="images\wire.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="meshlab.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="Qt5.7.0" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

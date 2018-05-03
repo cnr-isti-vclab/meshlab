@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="edit_paint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="edit_paint_factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\meshlab\ml_selection_buffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paintbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="cloneview.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="colorframe.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="edit_paint.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="edit_paint_factory.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="paintbox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <ClInclude Include="ui_paintbox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="paintbox.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="images\add-16.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\add-24.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\blend-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\blur-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\bucket-fill-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\bw.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\circle.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\clone-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\color-picker-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\cursor_paint.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <QtRcc Include="edit_paint.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <None Include="images\fill.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\gradient.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\kcontrol.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\options-24.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\paintbrush-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\perlin.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\pick.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\pickbrush-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\pinsel.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\pinsel2.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\pinsel_select.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\redo-24.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\redo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\sculpt-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\smooth_me.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\smudge-22.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\square.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\swap-colors-12.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\switch.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\undo-24.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\undo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
