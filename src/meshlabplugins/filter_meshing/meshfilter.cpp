@@ -232,8 +232,8 @@ QString ExtraMeshFilterPlugin::filterName(FilterIDType filter) const
     case FP_QUAD_DOMINANT                    : return tr("Turn into Quad-Dominant mesh");
     case FP_MAKE_PURE_TRI                    : return tr("Turn into a Pure-Triangular mesh");
     case FP_QUAD_PAIRING                     : return tr("Tri to Quad by smart triangle pairing");
-    case FP_FAUX_CREASE                      : return tr("Crease Marking with NonFaux Edges");
-    case FP_FAUX_EXTRACT                     : return tr("Build a Polyline with NonFaux Edges");
+    case FP_FAUX_CREASE                      : return tr("Select Crease Edges");
+    case FP_FAUX_EXTRACT                     : return tr("Build a Polyline from Selected Edges");
     case FP_VATTR_SEAM                       : return tr("Vertex Attribute Seam");
     case FP_REFINE_LS3_LOOP                  : return tr("Subdivision Surfaces: LS3 Loop");
     case FP_SLICE_WITH_A_PLANE               : return tr("Compute Planar Section");
@@ -304,7 +304,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
     case FP_QUAD_PAIRING                       : return tr("Convert a tri-mesh into a quad mesh by pairing triangles.");
     case FP_QUAD_DOMINANT                      : return tr("Convert a tri-mesh into a quad-dominant mesh by pairing suitable triangles.");
     case FP_MAKE_PURE_TRI                      : return tr("Convert into a tri-mesh by splitting any polygonal face.");
-    case FP_FAUX_CREASE                        : return tr("Mark the crease edges of a mesh as Non-Faux according to edge dihedral angle.<br>"
+    case FP_FAUX_CREASE                        : return tr("It select the crease edges of a mesh according to edge dihedral angle.<br>"
                                                            "Angle between face normal is considered signed according to convexity/concavity."
                                                            "Convex angles are positive and concave are negative.");
     case FP_VATTR_SEAM                         : return tr("Make all selected vertex attributes connectivity-independent:<br/>"
@@ -312,7 +312,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
                                                            "This is particularly useful for GPU-friendly mesh layout, where a single index must be used to access all required vertex attributes.");
     case FP_SLICE_WITH_A_PLANE                 : return tr("Compute the polyline representing a planar section (a slice) of a mesh; if the resulting polyline is closed the result is filled and also a triangular mesh representing the section is saved");
 	case FP_PERIMETER_POLYLINE                 : return tr("Create a new Layer with the perimeter polyline(s) of the selection borders");
-    case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the non faux edges of the current mesh");
+    case FP_FAUX_EXTRACT                       : return tr("Create a new Layer with an edge mesh composed only by the selected edges of the current mesh");
 
     default                                  : assert(0);
     }
@@ -1441,7 +1441,7 @@ switch(ID(filter))
         float AngleDegNeg = par.getFloat("AngleDegNeg");
         float AngleDegPos = par.getFloat("AngleDegPos");
 //		tri::UpdateFlags<CMeshO>::FaceFauxCrease(m.cm,math::ToRad(AngleDeg));
-        tri::UpdateFlags<CMeshO>::FaceFauxSignedCrease(m.cm, math::ToRad(AngleDegNeg), math::ToRad(AngleDegPos));
+        tri::UpdateFlags<CMeshO>::FaceEdgeSelSignedCrease(m.cm, math::ToRad(AngleDegNeg), math::ToRad(AngleDegPos));
         m.updateDataMask(MeshModel::MM_POLYGONAL);
 	} break;
 
@@ -1449,7 +1449,7 @@ switch(ID(filter))
 	{
 		//WARNING!!!! the RenderMode(GLW::DMWire) should be useless but...
 		MeshModel *em= md.addNewMesh("","EdgeMesh",true/*,RenderMode(GLW::DMWire)*/);
-		BuildFromNonFaux(m.cm,em->cm);
+		BuildFromFaceEdgeSel(m.cm,em->cm);
 	} break;
 
     case FP_VATTR_SEAM :
