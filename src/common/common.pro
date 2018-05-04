@@ -23,10 +23,7 @@ if [ -d  ../distrib/meshlab.app/Contents/MacOS/ ]; \
 then  \
 echo "Copying";  \
 else  \
-mkdir ../distrib;  \
-mkdir ../distrib/meshlab.app ;  \
-mkdir ../distrib/meshlab.app/Contents;  \
-mkdir ../distrib/meshlab.app/Contents/MacOS;  \
+mkdir -p ../distrib/meshlab.app/Contents/MacOS;  \
 fi;   \
 cp libcommon.* ../distrib/meshlab.app/Contents/MacOS/ ;\
 if [ -d ../external/ ];\
