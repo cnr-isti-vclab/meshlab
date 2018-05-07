@@ -55,7 +55,7 @@ before_build:
 
 artifacts:
  - path: src/%DISTRIBNAME%
- - name: %DISTRIBNAME%
+ - name: meshlab-portable
  
 # To run your custom scripts instead of automatic MSBuild
 build_script:
