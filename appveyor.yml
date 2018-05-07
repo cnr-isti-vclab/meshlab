@@ -51,10 +51,13 @@ before_build:
   - echo %CONFIGURATION%
   - echo %ARCH%
   - echo %DISTRIBNAME%
+  - appveyor SetVariable -Name DISTRIBNAME -Value %DISTRIBNAME%
+
  
 
 artifacts:
  - path: src/%DISTRIBNAME%
+ #hope it works...
  - name: meshlab-portable
  
 # To run your custom scripts instead of automatic MSBuild
