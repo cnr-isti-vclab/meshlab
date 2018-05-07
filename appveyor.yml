@@ -36,7 +36,7 @@ before_build:
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - dir 
-  - 
+  - set DISTRIBNAME=MeshLab_%DATE:~-4%%DATE:~4,2%%DATE:~7,2%.zip
   # Set paths
   #- '%QTDIR%\bin\qtenv2.bat'
   - call "%QTDIR%\bin\qtenv2.bat"
@@ -49,12 +49,13 @@ before_build:
   # Show build folder
   - echo %APPVEYOR_BUILD_FOLDER%
   - echo %CONFIGURATION%
-  - echo %ARCH% 
+  - echo %ARCH%
+  - echo %DISTRIBNAME%
  
 
 artifacts:
- - path: src/distrib.zip
-   name: distrib.zip
+ - path: src/%DISTRIBNAME%
+   name: %DISTRIBNAME%
  
 # To run your custom scripts instead of automatic MSBuild
 build_script:
@@ -88,7 +89,7 @@ build_script:
   - dir
   - cd %APPVEYOR_BUILD_FOLDER% 
   - cd src 
-  - 7z a distrib.zip distrib
+  - 7z a %DISTRIBNAME% distrib
   - dir
 #  - cd ..\install
 #  - makensis /V4 meshlab-64bit-appveyor.nsi
