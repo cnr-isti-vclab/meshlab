@@ -108,6 +108,15 @@ protected:
 
     float lastqtex_QualityThr;
     float lastqtex_extratw;
-};
 
+	float lastisor_FeatureDeg;
+	bool lastisor_RemeshingAdaptivity;
+	bool lastisor_SelectedOnly;
+	bool lastisor_RefineFlag;
+	bool lastisor_CollapseFlag;
+	bool lastisor_SwapFlag;
+	bool lastisor_SmoothFlag;
+	bool lastisor_ProjectFlag;
+
+};
 #endif
