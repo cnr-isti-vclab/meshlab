@@ -33,6 +33,7 @@
 #include <vcg/complex/algorithms/update/curvature.h>
 #include <vcg/complex/algorithms/update/curvature_fitting.h>
 #include <vcg/complex/algorithms/pointcloud_normal.h>
+#include <vcg/complex/algorithms/isotropic_remeshing.h>
 #include <vcg/space/fitting3.h>
 #include <wrap/gl/glu_tessellator_cap.h>
 #include "quadric_simp.h"
@@ -88,18 +89,27 @@ ExtraMeshFilterPlugin::ExtraMeshFilterPlugin(void)
         actionList << new QAction(filterName(tt), this);
     
     tri::TriEdgeCollapseQuadricParameter lpp;
-    lastq_QualityThr       = lpp.QualityThr;// 0.3f;
-    lastq_PreserveBoundary = false;
-    lastq_PreserveNormal   = false;
-    lastq_PreserveTopology = false;
-    lastq_OptimalPlacement = true;
-    lastq_Selected         = false;
-    lastq_PlanarQuadric    = false;
-    lastq_PlanarWeight     = lpp.QualityQuadricWeight;
-    lastq_QualityWeight    = false;
-    lastq_BoundaryWeight   = lpp.BoundaryQuadricWeight;
-    lastqtex_QualityThr    = 0.3f;
-    lastqtex_extratw       = 1.0;
+	lastq_QualityThr          = lpp.QualityThr;// 0.3f;
+	lastq_PreserveBoundary    = false;
+	lastq_PreserveNormal      = false;
+	lastq_PreserveTopology    = false;
+	lastq_OptimalPlacement    = true;
+	lastq_Selected            = false;
+	lastq_PlanarQuadric       = false;
+	lastq_PlanarWeight        = lpp.QualityQuadricWeight;
+	lastq_QualityWeight       = false;
+	lastq_BoundaryWeight      = lpp.BoundaryQuadricWeight;
+	lastqtex_QualityThr       = 0.3f;
+	lastqtex_extratw          = 1.0;
+
+	lastisor_RemeshingAdaptivity = false;
+	lastisor_SelectedOnly        = false;
+	lastisor_RefineFlag          = true;
+	lastisor_CollapseFlag        = true;
+	lastisor_SmoothFlag          = true;
+	lastisor_SwapFlag            = true;
+	lastisor_ProjectFlag         = true;
+	lastisor_FeatureDeg          = 30.0f;
 }
 
 ExtraMeshFilterPlugin::FilterClass ExtraMeshFilterPlugin::getClass(QAction * a)
@@ -375,10 +385,21 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
         break;
 
     case FP_EXPLICIT_ISOTROPIC_REMESHING:
-        parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces."));
-        parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."));
-        parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-        parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries to do not affect mesh boundaries during simplification"));
+		parlst.addParam(new RichInt  ("Iterations", 3, "Iterations", "Number of iterations of the remeshing operations to repeat on the mesh."));
+		parlst.addParam(new RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
+		parlst.addParam(new RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applyed only to the selected faces."));
+		maxVal = m.cm.bbox.Diag();
+		parlst.addParam(new RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
+		parlst.addParam(new RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Minimum angle between faces to consider the shared edge as a feature to be preserved."));
+
+		parlst.addParam(new RichBool ("SplitFlag", lastisor_RefineFlag, "Refine Step", "If checked the remeshing operations will include a refine step."));
+		parlst.addParam(new RichBool ("CollapseFlag", lastisor_CollapseFlag, "Collapse Step", "If checked the remeshing operations will include a collapse step."));
+		parlst.addParam(new RichBool ("SwapFlag", lastisor_SwapFlag, "Edge-Swap Step", "If checked the remeshing operations will include a edge-swap step, aimed at improving the vertex valence of the resulting mesh."));
+		parlst.addParam(new RichBool ("SmoothFlag", lastisor_SmoothFlag, "Smooth Step", "If checked the remeshing operations will include a smoothing step, aimed at relaxing the vertex positions in a Laplacian sense."));
+		parlst.addParam(new RichBool ("ReprojectFlag", lastisor_ProjectFlag, "Reproject Step", "If checked the remeshing operations will include a step to reproject the mesh vertices on the original surface."));
+
+
+
       break;
     case FP_CLOSE_HOLES:
         parlst.addParam(new RichInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary"));
@@ -900,7 +921,49 @@ switch(ID(filter))
 	} break;
     case FP_EXPLICIT_ISOTROPIC_REMESHING:
     {
-  
+	    m.updateDataMask( MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG );
+
+		tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
+		tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
+		tri::Allocator<CMeshO>::CompactEveryVector(m.cm);
+
+		m.UpdateBoxAndNormals();
+
+		CMeshO toProjectCopy;
+
+		toProjectCopy.face.EnableMark();
+
+		tri::Append<CMeshO, CMeshO>::MeshCopy(toProjectCopy, m.cm);
+
+		tri::IsotropicRemeshing<CMeshO>::Params params;
+		params.SetTargetLen(par.getAbsPerc("TargetLen"));
+		params.SetFeatureAngleDeg(par.getFloat("FeatureDeg"));
+
+		params.iter         = par.getInt("Iterations");
+		params.adapt        = par.getBool("Adaptive");
+		params.selectedOnly = par.getBool("SelectedOnly");
+		params.splitFlag    = par.getBool("SplitFlag");
+		params.collapseFlag = par.getBool("CollapseFlag");
+		params.swapFlag     = par.getBool("SwapFlag");
+		params.smoothFlag   = par.getBool("SmoothFlag");
+		params.projectFlag  = par.getBool("ReprojectFlag");
+
+		lastisor_RemeshingAdaptivity = params.adapt;
+		lastisor_SelectedOnly        = params.selectedOnly;
+		lastisor_RefineFlag          = params.splitFlag;
+		lastisor_CollapseFlag        = params.collapseFlag;
+		lastisor_SwapFlag            = params.swapFlag;
+		lastisor_SmoothFlag          = params.smoothFlag;
+		lastisor_ProjectFlag         = params.projectFlag;
+
+		lastisor_FeatureDeg = par.getFloat("FeatureDeg");
+
+		tri::IsotropicRemeshing<CMeshO>::Do(m.cm, toProjectCopy, params, cb);
+
+		m.UpdateBoxAndNormals();
+
+//		m.clearDataMask(MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
+
     } break;
     
 	case FP_ROTATE_FIT:
