@@ -3208,13 +3208,20 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
         QTime tt; tt.start();
         ret = pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack,this);
         qb->reset();
-		GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
-
+		if (ret)
+		{
+			GLA()->Logf(GLLogStream::SYSTEM, "Saved Mesh %s in %i msec", qUtf8Printable(fileName), tt.elapsed());
+			mod->setFileName(fileName);
+			QSettings settings;
+			int savedMeshCounter = settings.value("savedMeshCounter", 0).toInt();
+			settings.setValue("savedMeshCounter", savedMeshCounter + 1);
+		}
+		else
+		{
+			GLA()->Logf(GLLogStream::SYSTEM, "Error Saving Mesh %s", qUtf8Printable(fileName));
+			QMessageBox::critical(this, tr("Meshlab Saving Error"),  pCurrentIOPlugin->errorMessage);
+		}
         qApp->restoreOverrideCursor();
-        mod->setFileName(fileName);
-        QSettings settings;
-        int savedMeshCounter=settings.value("savedMeshCounter",0).toInt();
-        settings.setValue("savedMeshCounter",savedMeshCounter+1);
 		updateLayerDialog();
 
 		if (ret)

@@ -353,10 +353,10 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 	{
 		if (mask && tri::io::Mask::IOM_BITPOLYGONAL)
 			m.updateDataMask(MeshModel::MM_FACEFACETOPO);
-		int result = tri::io::Exporter<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
+		int result = tri::io::ExporterOFF<CMeshO>::Save(m.cm, filename.c_str(), mask);
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterOFF<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
@@ -380,7 +380,7 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 		}
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterOBJ<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
@@ -388,10 +388,10 @@ bool BaseMeshIOPlugin::save(const QString &formatName, const QString &fileName, 
 
 	if (formatName.toUpper() == tr("DXF"))
 	{
-		int result = tri::io::Exporter<CMeshO>::Save(m.cm, filename.c_str(), mask, cb);
+		int result = tri::io::ExporterDXF<CMeshO>::Save(m.cm, filename.c_str());
 		if (result != 0)
 		{
-			errorMessage = errorMsgFormat.arg(fileName, tri::io::Exporter<CMeshO>::ErrorMsg(result));
+			errorMessage = errorMsgFormat.arg(fileName, tri::io::ExporterDXF<CMeshO>::ErrorMsg(result));
 			return false;
 		}
 		return true;
