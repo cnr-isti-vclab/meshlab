@@ -72,13 +72,12 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 	{
 		parlst.addParam(new RichInt("meshindex", 0, "Index of Range Map to be Imported",
 			"PTX files may contain more than one range map. 0 is the first range map. If the number if higher than the actual mesh number, the import will fail"));
+		parlst.addParam(new RichBool("pointsonly", true, "Keep only points", "Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
+		parlst.addParam(new RichBool("usecolor", true, "import color", "Read color from PTX, if color is not present, uses reflectance instead"));
+		parlst.addParam(new RichBool("flipfaces", false, "LEICA: flip normal direction", "LEICA PTX exporter goes counterclockwise, FARO PTX exporter goes clockwise"));
+		parlst.addParam(new RichBool("pointcull", true, "delete unsampled points", "Deletes unsampled points in the grid that are normally located in [0,0,0]"));
 		parlst.addParam(new RichBool("anglecull", true, "Cull faces by angle", "short"));
 		parlst.addParam(new RichFloat("angle", 85.0, "Angle limit for face culling", "short"));
-		parlst.addParam(new RichBool("usecolor", true, "import color", "Read color from PTX, if color is not present, uses reflectance instead"));
-		parlst.addParam(new RichBool("pointcull", true, "delete unsampled points", "Deletes unsampled points in the grid that are normally located in [0,0,0]"));
-		parlst.addParam(new RichBool("pointsonly", true, "Keep only points", "Import points a point cloud only, with radius and normals, no triangulation involved, isolated points and points with normals with steep angles are removed."));
-		parlst.addParam(new RichBool("switchside", false, "Swap rows/columns", "On some PTX, the rows and columns number are switched over"));
-		parlst.addParam(new RichBool("flipfaces", false, "Flip all faces", "Flip the orientation of all the triangles"));
 	}
 }
 
@@ -179,7 +178,6 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 		importparams.savecolor = parlst.getBool("usecolor");
 		importparams.pointcull = parlst.getBool("pointcull");
 		importparams.pointsonly = parlst.getBool("pointsonly");
-		importparams.switchside = parlst.getBool("switchside");
 		importparams.flipfaces = parlst.getBool("flipfaces");
 
 		// if color, add to mesh
