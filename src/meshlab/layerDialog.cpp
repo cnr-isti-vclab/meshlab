@@ -78,6 +78,14 @@ LayerDialog::LayerDialog(QWidget *parent )
     // The following connection is used to associate the click with the switch between raster and mesh view.
     connect(ui->rasterTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem * , int  )) , this,  SLOT(rasterItemClicked(QTreeWidgetItem * , int ) ) );
 
+	// state buttons
+	isRecording = false;
+	W1 = W2 = W3 = W4 = "";
+	connect(ui->bW1, SIGNAL(clicked()), this, SLOT(clickW1()));
+	connect(ui->bW2, SIGNAL(clicked()), this, SLOT(clickW2()));
+	connect(ui->bW3, SIGNAL(clicked()), this, SLOT(clickW3()));
+	connect(ui->bW4, SIGNAL(clicked()), this, SLOT(clickW4()));
+
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->rasterTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -102,6 +110,11 @@ void LayerDialog::keyPressEvent ( QKeyEvent * event )
 		if (_applytovis != NULL)
 			_applytovis->setCheckState(Qt::Checked);
 	}
+
+	if (event->key() == Qt::Key_Control)
+	{
+		isRecording = true;
+	}
 }
 
 void LayerDialog::keyReleaseEvent(QKeyEvent * event)
@@ -110,6 +123,79 @@ void LayerDialog::keyReleaseEvent(QKeyEvent * event)
 	{
 		if (_applytovis != NULL)
 			_applytovis->setCheckState(Qt::Unchecked);
+	}
+
+	if (event->key() == Qt::Key_Control)
+	{
+		isRecording = false;
+	}
+}
+
+void LayerDialog::clickW1()
+{
+	if (isRecording)
+	{
+		W1 = mw->GLA()->viewToText();
+		isRecording = false;
+		ui->bW1->setText(QChar(0x2460));
+	}
+	else
+		if (W1 != "")
+		{
+			QDomDocument doc("StringDoc");
+			doc.setContent(W1);
+			mw->GLA()->loadViewFromViewStateFile(doc);
+		}
+}
+
+void LayerDialog::clickW2()
+{
+	if (isRecording)
+	{
+		W2 = mw->GLA()->viewToText();
+		isRecording = false;
+		ui->bW2->setText(QChar(0x2461));
+	}
+	else
+	if (W2 != "")
+	{
+		QDomDocument doc("StringDoc");
+		doc.setContent(W2);
+		mw->GLA()->loadViewFromViewStateFile(doc);
+	}
+}
+
+void LayerDialog::clickW3()
+{
+	if (isRecording)
+	{
+		W3 = mw->GLA()->viewToText();
+		isRecording = false;
+		ui->bW3->setText(QChar(0x2462));
+	}
+	else
+	if (W3 != "")
+	{
+		QDomDocument doc("StringDoc");
+		doc.setContent(W3);
+		mw->GLA()->loadViewFromViewStateFile(doc);
+	}
+}
+
+void LayerDialog::clickW4()
+{
+	if (isRecording)
+	{
+		W4 = mw->GLA()->viewToText();
+		isRecording = false;
+		ui->bW4->setText(QChar(0x2463));
+	}
+	else
+	if (W4 != "")
+	{
+		QDomDocument doc("StringDoc");
+		doc.setContent(W4);
+		mw->GLA()->loadViewFromViewStateFile(doc);
 	}
 }
 
