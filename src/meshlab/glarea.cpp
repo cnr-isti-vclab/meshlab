@@ -2068,7 +2068,7 @@ void GLArea::loadShotFromTextAlignFile(const QDomDocument &doc)
     // introduced by the shot.
 	fov = (shot.Intrinsics.cameraType == 0) ? shot.GetFovFromFocal() : 5.0;
 
-    float cameraDist = getCameraDistance();
+    // float cameraDist = getCameraDistance();
 
     Matrix44f rotFrom;
     shot.Extrinsics.Rot().ToMatrix(rotFrom);
