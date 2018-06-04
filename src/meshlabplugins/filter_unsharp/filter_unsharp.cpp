@@ -316,12 +316,13 @@ void FilterUnsharp::initParameterSet(QAction *action, MeshDocument &md, RichPara
             parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
             parlst.addParam(new RichBool ("Boundary",true,"1D Boundary Smoothing", "If true the boundary edges are smoothed only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). Can reduce the shrinking on the border but can have strange effects on very small boundaries."));
             parlst.addParam(new RichBool ("cotangentWeight",true,"Cotangent weighting", "If true the cotangente weighting scheme is computed for the averaging of the position. Otherwise (false) the simpler umbrella scheme (1 if the edge is present) is used."));
-            parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
+			parlst.addParam(new RichBool("Selected", md.mm()->cm.sfn>0, "Affect only selection", "If checked the filter is performed only on the selected area"));
             break;
         case FP_DEPTH_SMOOTH:
-            parlst.addParam(new RichInt  ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
-            parlst.addParam(new RichPoint3f  ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
-            parlst.addParam(new RichBool ("Selected",md.mm()->cm.sfn>0,"Affect only selected faces","If checked the filter is performed only on the selected faces"));
+            parlst.addParam(new RichInt     ("stepSmoothNum", (int) 3,"Smoothing steps", "The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."));
+            parlst.addParam(new RichPoint3f ("viewPoint", Point3f(0,0,0),"Viewpoint", "The position of the view point that is used to get the constraint direction."));
+			parlst.addParam(new RichAbsPerc ("delta", 1.0, 0, 1.0, "Strength", "How much smoothign is applied: 0 (no smoot) e 1 (full smoot)"));
+            parlst.addParam(new RichBool    ("Selected",md.mm()->cm.sfn>0,"Affect only selection","If checked the filter is performed only on the selected area"));
             break;
         case FP_DIRECTIONAL_PRESERVATION:
             parlst.addParam(new RichEnum("step", 0,
@@ -407,19 +408,20 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
       if(!boundarySmooth) tri::UpdateFlags<CMeshO>::FaceClearB(m.cm);
 
       tri::Smooth<CMeshO>::VertexCoordLaplacian(m.cm,stepSmoothNum,Selected,cotangentWeight,cb);
-      Log( "Smoothed %d vertices", Selected>0 ? m.cm.svn : m.cm.vn);
+      Log( "Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
       m.UpdateBoxAndNormals();
       }
         break;
     case FP_DEPTH_SMOOTH :
       {
             int stepSmoothNum = par.getInt("stepSmoothNum");
-            size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-            //float delta = par.getAbsPerc("delta");
+			bool Selected = par.getBool("Selected");
+			if (Selected && m.cm.svn == 0)
+				m.cm.svn = tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
+            float delta = par.getAbsPerc("delta");
 			Point3m viewpoint = par.getPoint3m("viewPoint");
-            float alpha = 1;
-            tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm,viewpoint,alpha,stepSmoothNum,true);
-            Log( "depth Smoothed %d vertices", cnt>0 ? cnt : m.cm.vn);
+			tri::Smooth<CMeshO>::VertexCoordViewDepth(m.cm, viewpoint, delta, stepSmoothNum, Selected,true);
+			Log("depth Smoothed %d vertices", Selected ? m.cm.svn : m.cm.vn);
             m.UpdateBoxAndNormals();
       }
         break;
