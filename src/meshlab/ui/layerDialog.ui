@@ -55,11 +55,12 @@
            <font>
             <pointsize>9</pointsize>
             <weight>75</weight>
+            <italic>false</italic>
             <bold>true</bold>
            </font>
           </property>
           <property name="toolTip">
-           <string>CTRL-click to set view, click to recall</string>
+           <string>CTRL-click to store view, click to recall</string>
           </property>
           <property name="text">
            <string>1</string>
@@ -76,7 +77,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>CTRL-click to set view, click to recall</string>
+           <string>CTRL-click to store view, click to recall</string>
           </property>
           <property name="text">
            <string>2</string>
@@ -93,7 +94,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>CTRL-click to set view, click to recall</string>
+           <string>CTRL-click to store view, click to recall</string>
           </property>
           <property name="text">
            <string>3</string>
@@ -110,7 +111,7 @@
            </font>
           </property>
           <property name="toolTip">
-           <string>CTRL-click to set view, click to recall</string>
+           <string>CTRL-click to store view, click to recall</string>
           </property>
           <property name="text">
            <string>4</string>
@@ -129,6 +130,74 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="bV1">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>CTRL-click to store layer visibility, click to recall</string>
+          </property>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="bV2">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>CTRL-click to store layer visibility, click to recall</string>
+          </property>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="bV3">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>CTRL-click to store layer visibility, click to recall</string>
+          </property>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="bV4">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>CTRL-click to store layer visibility, click to recall</string>
+          </property>
+          <property name="text">
+           <string>4</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

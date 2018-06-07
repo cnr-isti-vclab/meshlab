@@ -80,11 +80,15 @@ LayerDialog::LayerDialog(QWidget *parent )
 
 	// state buttons
 	isRecording = false;
-	W1 = W2 = W3 = W4 = "";
+	viewState[0] = viewState[1] = viewState[2] = viewState[3] = "";
 	connect(ui->bW1, SIGNAL(clicked()), this, SLOT(clickW1()));
 	connect(ui->bW2, SIGNAL(clicked()), this, SLOT(clickW2()));
 	connect(ui->bW3, SIGNAL(clicked()), this, SLOT(clickW3()));
 	connect(ui->bW4, SIGNAL(clicked()), this, SLOT(clickW4()));
+	connect(ui->bV1, SIGNAL(clicked()), this, SLOT(clickV1()));
+	connect(ui->bV2, SIGNAL(clicked()), this, SLOT(clickV2()));
+	connect(ui->bV3, SIGNAL(clicked()), this, SLOT(clickV3()));
+	connect(ui->bV4, SIGNAL(clicked()), this, SLOT(clickV4()));
 
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->meshTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -135,68 +139,201 @@ void LayerDialog::clickW1()
 {
 	if (isRecording)
 	{
-		W1 = mw->GLA()->viewToText();
+		viewState[0] = mw->GLA()->viewToText();
 		isRecording = false;
 		ui->bW1->setText(QChar(0x2460));
+		mw->meshDoc()->Log.Log(0, "Stored View #1");
+	}
+	else if (viewState[0] != "")
+	{
+		QDomDocument doc("StringDoc");
+		doc.setContent(viewState[0]);
+		mw->GLA()->loadViewFromViewStateFile(doc);
+		mw->meshDoc()->Log.Log(0, "Restored View #1");
 	}
 	else
-		if (W1 != "")
-		{
-			QDomDocument doc("StringDoc");
-			doc.setContent(W1);
-			mw->GLA()->loadViewFromViewStateFile(doc);
-		}
+		mw->meshDoc()->Log.Log(0, "No View to Restore");
 }
 
 void LayerDialog::clickW2()
 {
 	if (isRecording)
 	{
-		W2 = mw->GLA()->viewToText();
+		viewState[1] = mw->GLA()->viewToText();
 		isRecording = false;
 		ui->bW2->setText(QChar(0x2461));
+		mw->meshDoc()->Log.Log(0, "Stored View #2");
 	}
-	else
-	if (W2 != "")
+	else if (viewState[1] != "")
 	{
 		QDomDocument doc("StringDoc");
-		doc.setContent(W2);
+		doc.setContent(viewState[1]);
 		mw->GLA()->loadViewFromViewStateFile(doc);
+		mw->meshDoc()->Log.Log(0, "Restored View #2");
 	}
+	else
+		mw->meshDoc()->Log.Log(0, "No View to Restore");
 }
 
 void LayerDialog::clickW3()
 {
 	if (isRecording)
 	{
-		W3 = mw->GLA()->viewToText();
+		viewState[2] = mw->GLA()->viewToText();
 		isRecording = false;
 		ui->bW3->setText(QChar(0x2462));
+		mw->meshDoc()->Log.Log(0, "Stored View #3");
 	}
-	else
-	if (W3 != "")
+	else if (viewState[2] != "")
 	{
 		QDomDocument doc("StringDoc");
-		doc.setContent(W3);
+		doc.setContent(viewState[2]);
 		mw->GLA()->loadViewFromViewStateFile(doc);
+		mw->meshDoc()->Log.Log(0, "Restored View #3");
 	}
+	else
+		mw->meshDoc()->Log.Log(0, "No View to Restore");
 }
 
 void LayerDialog::clickW4()
 {
 	if (isRecording)
 	{
-		W4 = mw->GLA()->viewToText();
+		viewState[3] = mw->GLA()->viewToText();
 		isRecording = false;
 		ui->bW4->setText(QChar(0x2463));
+		mw->meshDoc()->Log.Log(0, "Stored View #4");
 	}
-	else
-	if (W4 != "")
+	else if (viewState[3] != "")
 	{
 		QDomDocument doc("StringDoc");
-		doc.setContent(W4);
+		doc.setContent(viewState[3]);
 		mw->GLA()->loadViewFromViewStateFile(doc);
+		mw->meshDoc()->Log.Log(0, "Restored View #4");
 	}
+	else
+		mw->meshDoc()->Log.Log(0, "No View to Restore");
+}
+
+void LayerDialog::clickV1()
+{
+	MeshDocument  *md = mw->meshDoc();
+	if (isRecording)
+	{
+		visibilityState[0].clear();
+		foreach(MeshModel *mp, md->meshList)
+		{
+			visibilityState[0].insert(mp->id(), mp->isVisible());
+		}
+		isRecording = false;
+		ui->bV1->setText(QChar(0x2460));
+		mw->meshDoc()->Log.Log(0, "Stored Visibility #1");
+	}
+	else if (!visibilityState[0].isEmpty())
+	{
+		QMapIterator<int, bool> i(visibilityState[0]);
+		while (i.hasNext()) {
+			i.next();
+			if (md->getMesh(i.key()) != NULL)
+				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+		mw->meshDoc()->Log.Log(0, "Restored Visibility #1");
+	}
+	else
+		mw->meshDoc()->Log.Log(0, "No Visibility to Restore");
+}
+void LayerDialog::clickV2()
+{
+	MeshDocument  *md = mw->meshDoc();
+	if (isRecording)
+	{
+		visibilityState[1].clear();
+		foreach(MeshModel *mp, md->meshList)
+		{
+			visibilityState[1].insert(mp->id(), mp->isVisible());
+		}
+		isRecording = false;
+		ui->bV2->setText(QChar(0x2461));
+		mw->meshDoc()->Log.Log(0, "Stored Visibility #2");
+	}
+	else if (!visibilityState[1].isEmpty())
+	{
+		QMapIterator<int, bool> i(visibilityState[1]);
+		while (i.hasNext()) {
+			i.next();
+			if (md->getMesh(i.key()) != NULL)
+				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+		mw->meshDoc()->Log.Log(0, "Restored Visibility #2");
+	}
+	else
+		mw->meshDoc()->Log.Log(0, "No Visibility to Restore");
+}
+void LayerDialog::clickV3()
+{
+	MeshDocument  *md = mw->meshDoc();
+	if (isRecording)
+	{
+		visibilityState[2].clear();
+		foreach(MeshModel *mp, md->meshList)
+		{
+			visibilityState[2].insert(mp->id(), mp->isVisible());
+		}
+		isRecording = false;
+		ui->bV3->setText(QChar(0x2462));
+		mw->meshDoc()->Log.Log(0, "Stored Visibility #3");
+	}
+	else if (!visibilityState[2].isEmpty())
+	{
+		QMapIterator<int, bool> i(visibilityState[2]);
+		while (i.hasNext()) {
+			i.next();
+			if (md->getMesh(i.key()) != NULL)
+				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+		mw->meshDoc()->Log.Log(0, "Restored Visibility #3");
+	}
+	else
+		mw->meshDoc()->Log.Log(0, "No Visibility to Restore");
+}
+void LayerDialog::clickV4()
+{
+	MeshDocument  *md = mw->meshDoc();
+	if (isRecording)
+	{
+		visibilityState[3].clear();
+		foreach(MeshModel *mp, md->meshList)
+		{
+			visibilityState[3].insert(mp->id(), mp->isVisible());
+		}
+		isRecording = false;
+		ui->bV4->setText(QChar(0x2463));
+		mw->meshDoc()->Log.Log(0, "Stored Visibility #4");
+	}
+	else if (!visibilityState[3].isEmpty())
+	{
+		QMapIterator<int, bool> i(visibilityState[3]);
+		while (i.hasNext()) {
+			i.next();
+			if (md->getMesh(i.key()) != NULL)
+				mw->GLA()->meshSetVisibility(md->getMesh(i.key()), i.value());
+		}
+		updatePerMeshItemVisibility();
+		updatePerMeshItemSelectionStatus();
+		mw->GLA()->update();
+		mw->meshDoc()->Log.Log(0, "Restored Visibility #4");
+	}
+	else
+		mw->meshDoc()->Log.Log(0, "No Visibility to Restore");
 }
 
 void LayerDialog::enterEvent(QEvent* /*event*/)
