@@ -2303,6 +2303,7 @@ bool MainWindow::openProject(QString fileName)
           QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
           return false;
         }
+		GLA()->updateMeshSetVisibilities();
         for (int i=0; i<meshDoc()->meshList.size(); i++)
         {
             QString fullPath = meshDoc()->meshList[i]->fullName();
@@ -2389,11 +2390,9 @@ bool MainWindow::appendProject(QString fileName)
 
     if (fileNameList.isEmpty()) return false;
 
-    // Common Part: init a Doc if necessary, and
+    // Ccheck if we have a doc and if it is empty
     bool activeDoc = (bool) !mdiarea->subWindowList().empty() && mdiarea->currentSubWindow();
-    bool activeEmpty = activeDoc && meshDoc()->meshList.empty();
-
-    if (activeEmpty)  // it is wrong to try appending to an empty project, even if it is possible
+	if (!activeDoc || meshDoc()->meshList.empty())  // it is wrong to try appending to an empty project, even if it is possible
     {
         QMessageBox::critical(this, tr("Meshlab Opening Error"), "Current project is empty, cannot append");
         return false;
@@ -2438,14 +2437,15 @@ bool MainWindow::appendProject(QString fileName)
 
         if (QString(fi.suffix()).toLower() == "mlp" || QString(fi.suffix()).toLower() == "mlb")
         {
-			      int alreadyLoadedNum = meshDoc()->meshList.size();
+			int alreadyLoadedNum = meshDoc()->meshList.size();
             std::map<int, MLRenderingData> rendOpt;
             if (!MeshDocumentFromXML(*meshDoc(),fileName, QString(fi.suffix()).toLower() == "mlb", rendOpt))
             {
                 QMessageBox::critical(this, tr("Meshlab Opening Error"), "Unable to open MeshLab Project file");
                 return false;
             }
-      			for (int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
+			GLA()->updateMeshSetVisibilities();
+			for (int i = alreadyLoadedNum; i<meshDoc()->meshList.size(); i++)
             {
                 QString fullPath = meshDoc()->meshList[i]->fullName();
                 meshDoc()->setBusy(true);
