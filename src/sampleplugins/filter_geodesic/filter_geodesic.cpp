@@ -41,155 +41,205 @@ using namespace vcg;
 
 FilterGeodesic::FilterGeodesic()
 {
- typeList << FP_QUALITY_BORDER_GEODESIC
-          << FP_QUALITY_POINT_GEODESIC;
+	typeList << FP_QUALITY_BORDER_GEODESIC
+	         << FP_QUALITY_POINT_GEODESIC
+	         << FP_QUALITY_SELECTED_GEODESIC;
 
-  FilterIDType tt;
-  foreach(tt , types())
-    actionList << new QAction(filterName(tt), this);
+	FilterIDType tt;
+	foreach(tt , types())
+		actionList << new QAction(filterName(tt), this);
 }
 
 FilterGeodesic::~FilterGeodesic() {
-    for (int i = 0; i < actionList.count() ; i++ )
-        delete actionList.at(i);
+	for (int i = 0; i < actionList.count() ; i++ )
+		delete actionList.at(i);
 }
 
 QString FilterGeodesic::filterName(FilterIDType filter) const
 {
 	switch(filter)
 	{
-		case FP_QUALITY_BORDER_GEODESIC  : return QString("Colorize by border distance");
-		case FP_QUALITY_POINT_GEODESIC   : return QString("Colorize by geodesic distance from a given point");
-		default                          : assert(0);
+	case FP_QUALITY_BORDER_GEODESIC     : return QString("Colorize by border distance");
+	case FP_QUALITY_POINT_GEODESIC      : return QString("Colorize by geodesic distance from a given point");
+	case FP_QUALITY_SELECTED_GEODESIC   : return QString("Colorize by geodesic distance from the selected points");
+	default                             : assert(0);
 	}
 	return QString("error!");
 }
 
- QString FilterGeodesic::filterInfo(FilterIDType filterId) const
+QString FilterGeodesic::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId)
 	{
-		case FP_QUALITY_BORDER_GEODESIC  : return tr("Store in the quality field the geodesic distance from borders and color the mesh accordingly.");
-		case FP_QUALITY_POINT_GEODESIC   : return tr("Store in the quality field the geodesic distance from a given point on the mesh surface and color the mesh accordingly.");
-		default                          : assert(0);
+	case FP_QUALITY_BORDER_GEODESIC     : return tr("Store in the quality field the geodesic distance from borders and color the mesh accordingly.");
+	case FP_QUALITY_POINT_GEODESIC      : return tr("Store in the quality field the geodesic distance from a given point on the mesh surface and color the mesh accordingly.");
+	case FP_QUALITY_SELECTED_GEODESIC   : return tr("Store in the quality field the geodesic distance from the selected points on the mesh surface and color the mesh accordingly.");
+	default                             : assert(0);
 	}
 	return QString("error!");
 }
 
- FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
+FilterGeodesic::FilterClass FilterGeodesic::getClass(QAction *a)
 {
 	switch(ID(a))
 	{
-		case FP_QUALITY_BORDER_GEODESIC  :
-		case FP_QUALITY_POINT_GEODESIC   : return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
-		default                          : assert(0);
+	case FP_QUALITY_BORDER_GEODESIC    :
+	case FP_QUALITY_SELECTED_GEODESIC  :
+	case FP_QUALITY_POINT_GEODESIC     : return FilterGeodesic::FilterClass(MeshFilterInterface::VertexColoring + MeshFilterInterface::Quality);
+	default                          : assert(0);
 	}
 	return MeshFilterInterface::Generic;
 }
 
- int FilterGeodesic::getRequirements(QAction *action)
+int FilterGeodesic::getRequirements(QAction *action)
 {
 	switch(ID(action))
 	{
-		case FP_QUALITY_BORDER_GEODESIC  :
-		case FP_QUALITY_POINT_GEODESIC   : return MeshModel::MM_VERTFACETOPO;
-		default: assert(0);
+	case FP_QUALITY_BORDER_GEODESIC  :
+	case FP_QUALITY_SELECTED_GEODESIC:
+	case FP_QUALITY_POINT_GEODESIC   : return MeshModel::MM_VERTFACETOPO;
+	default: assert(0);
 	}
 	return 0;
 }
 
 bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos * /*cb*/)
 {
-    MeshModel &m=*(md.mm());
-    CMeshO::FaceIterator fi;
-    CMeshO::VertexIterator vi;
-    switch (ID(filter)) {
-        case FP_QUALITY_POINT_GEODESIC:
-            {
-                m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-                m.updateDataMask(MeshModel::MM_VERTMARK);
-                m.updateDataMask(MeshModel::MM_VERTQUALITY);
-                m.updateDataMask(MeshModel::MM_VERTCOLOR);
-                tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
-                tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
-                Point3m startPoint = par.getPoint3m("startPoint");
-                // first search the closest point on the surface;
-                CMeshO::VertexPointer startVertex=0;
-                float minDist= std::numeric_limits<float>::max();
+	MeshModel &m=*(md.mm());
+	CMeshO::FaceIterator fi;
+	CMeshO::VertexIterator vi;
+	switch (ID(filter)) {
+	case FP_QUALITY_POINT_GEODESIC:
+	{
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		m.updateDataMask(MeshModel::MM_VERTMARK);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+		tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+		tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
+		Point3m startPoint = par.getPoint3m("startPoint");
+		// first search the closest point on the surface;
+		CMeshO::VertexPointer startVertex=0;
+		float minDist= std::numeric_limits<float>::max();
 
-                for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-                    if(SquaredDistance(startPoint,(*vi).P()) < minDist) {
-                        startVertex=&*vi;
-                        minDist=SquaredDistance(startPoint,(*vi).P());
-                        }
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+			if(SquaredDistance(startPoint,(*vi).P()) < minDist) {
+				startVertex=&*vi;
+				minDist=SquaredDistance(startPoint,(*vi).P());
+			}
 
 
-                Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
+		Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 
-                // Now actually compute the geodesic distnace from the closest point
-                float dist_thr = par.getAbsPerc("maxDistance");
-                tri::EuclideanDistance<CMeshO> dd;
-                tri::Geodesic<CMeshO>::Compute(m.cm, vector<CVertexO*>(1,startVertex),dd,dist_thr);
+		// Now actually compute the geodesic distnace from the closest point
+		float dist_thr = par.getAbsPerc("maxDistance");
+		tri::EuclideanDistance<CMeshO> dd;
+		tri::Geodesic<CMeshO>::Compute(m.cm, vector<CVertexO*>(1,startVertex),dd,dist_thr);
 
-                // Cleaning Quality value of the unrefernced vertices
-                // Unreached vertexes has a quality that is maxfloat
-                int unreachedCnt=0;
-                float unreached  = std::numeric_limits<float>::max();
-                for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-                    if((*vi).Q() == unreached) {
-                            unreachedCnt++;
-                            (*vi).Q()=0;
-                        }
-                if(unreachedCnt >0 )
-                        Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+		// Cleaning Quality value of the unrefernced vertices
+		// Unreached vertexes has a quality that is maxfloat
+		int unreachedCnt=0;
+		float unreached  = std::numeric_limits<float>::max();
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+			if((*vi).Q() == unreached) {
+				unreachedCnt++;
+				(*vi).Q()=0;
+			}
+		if(unreachedCnt >0 )
+			Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
-                tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
+		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 
-            }
-            break;
-        case FP_QUALITY_BORDER_GEODESIC:
-            {
-                m.updateDataMask(MeshModel::MM_VERTFACETOPO);
-                m.updateDataMask(MeshModel::MM_VERTMARK);
-                m.updateDataMask(MeshModel::MM_VERTQUALITY);
-                m.updateDataMask(MeshModel::MM_VERTCOLOR);
-                tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
-                tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
+	}
+		break;
+	case FP_QUALITY_BORDER_GEODESIC:
+	{
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		m.updateDataMask(MeshModel::MM_VERTMARK);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+		tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+		tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
 
-                bool ret = tri::Geodesic<CMeshO>::DistanceFromBorder(m.cm);
+		bool ret = tri::Geodesic<CMeshO>::DistanceFromBorder(m.cm);
 
-                // Cleaning Quality value of the unrefernced vertices
-                // Unreached vertexes has a quality that is maxfloat
-                int unreachedCnt=0;
-                float unreached  = std::numeric_limits<float>::max();
-                for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
-                    if((*vi).Q() == unreached) {
-                            unreachedCnt++;
-                            (*vi).Q()=0;
-                        }
-                if(unreachedCnt >0 )
-                        Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+		// Cleaning Quality value of the unrefernced vertices
+		// Unreached vertexes has a quality that is maxfloat
+		int unreachedCnt=0;
+		float unreached  = std::numeric_limits<float>::max();
+		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
+			if((*vi).Q() == unreached) {
+				unreachedCnt++;
+				(*vi).Q()=0;
+			}
+		if(unreachedCnt >0 )
+			Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
-                if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
-                    else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
-                }
+		if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
+		else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
+	}
 
-            break;
-        default: assert(0);
-            break;
-    }
-return true;
+		break;
+	case FP_QUALITY_SELECTED_GEODESIC:
+	{
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		m.updateDataMask(MeshModel::MM_VERTMARK);
+		m.updateDataMask(MeshModel::MM_VERTQUALITY);
+		m.updateDataMask(MeshModel::MM_VERTCOLOR);
+		tri::UpdateFlags<CMeshO>::FaceBorderFromVF(m.cm);
+		tri::UpdateFlags<CMeshO>::VertexBorderFromFaceBorder(m.cm);
+
+		std::vector<CMeshO::VertexPointer> seedVec;
+		ForEachVertex(m.cm, [&seedVec] (CMeshO::VertexType & v) {
+			if (v.IsS())
+				seedVec.push_back(&v);
+		});
+
+		if (seedVec.size() > 0)
+		{
+			float dist_thr = par.getAbsPerc("maxDistance");
+			tri::EuclideanDistance<CMeshO> dd;
+			tri::Geodesic<CMeshO>::Compute(m.cm, seedVec, dd, dist_thr);
+
+			// Cleaning Quality value of the unrefernced vertices
+			// Unreached vertexes has a quality that is maxfloat
+			int unreachedCnt=0;
+			float unreached  = std::numeric_limits<float>::max();
+			ForEachVertex(m.cm, [&] (CMeshO::VertexType & v){
+				if (v.Q() == unreached)
+				{
+					++unreachedCnt;
+					v.Q() = 0;
+				}
+			});
+
+			if(unreachedCnt >0 )
+				Log("Warning: %i vertices were unreacheable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
+
+			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
+		}
+		else
+			Log("Warning: no vertices are selected! aborting geodesic computation.");
+	}
+		break;
+	default: assert(0);
+		break;
+	}
+	return true;
 }
 
 void FilterGeodesic::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 	switch(ID(action))
 	{
-		case FP_QUALITY_POINT_GEODESIC :
-			parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
-			parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
-			break;
-		default: break; // do not add any parameter for the other filters
+	case FP_QUALITY_POINT_GEODESIC :
+		parlst.addParam(new RichPoint3f("startPoint",m.cm.bbox.min,"Starting point","The starting point from which geodesic distance has to be computed. If it is not a surface vertex, the closest vertex to the specified point is used as starting seed point."));
+		parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
+		break;
+	case FP_QUALITY_SELECTED_GEODESIC :
+		parlst.addParam(new RichAbsPerc("maxDistance",m.cm.bbox.Diag(),0,m.cm.bbox.Diag()*2,"Max Distance","If not zero it indicates a cut off value to be used during geodesic distance computation."));
+		break;
+	default: break; // do not add any parameter for the other filters
 	}
 	return;
 }
@@ -198,9 +248,10 @@ int FilterGeodesic::postCondition(QAction * filter) const
 {
 	switch (ID(filter))
 	{
-		case FP_QUALITY_BORDER_GEODESIC    :
-		case FP_QUALITY_POINT_GEODESIC     : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
-		default                            : return MeshModel::MM_ALL;
+	case FP_QUALITY_BORDER_GEODESIC    :
+	case FP_QUALITY_SELECTED_GEODESIC  :
+	case FP_QUALITY_POINT_GEODESIC     : return MeshModel::MM_VERTCOLOR + MeshModel::MM_VERTQUALITY;
+	default                            : return MeshModel::MM_ALL;
 	}
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterGeodesic)

@@ -34,29 +34,31 @@ class FilterGeodesic : public QObject, public MeshFilterInterface
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
-		public:
-	/* naming convention :
-		 - FP -> Filter Plugin
-		 - name of the plugin separated by _
-	*/
-	enum { 
-    FP_QUALITY_BORDER_GEODESIC, 
-    FP_QUALITY_POINT_GEODESIC, 
-  } ;
+	public:
+	    /* naming convention :
+						 - FP -> Filter Plugin
+						 - name of the plugin separated by _
+		*/
+	    enum {
+		FP_QUALITY_BORDER_GEODESIC,
+		        FP_QUALITY_POINT_GEODESIC,
+		        FP_QUALITY_SELECTED_GEODESIC
+
+	} ;
 	
 	/* default values for standard parameters' values of the plugin actions */
 	FilterGeodesic();
 	~FilterGeodesic();
 
-  QString filterName(FilterIDType filter) const;
-  QString filterInfo(FilterIDType filter) const;
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
 
-  FilterClass getClass(QAction *);
-  int getRequirements(QAction *);
-  bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-  void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-  int postCondition(QAction * filter) const;
-  FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
+	FilterClass getClass(QAction *);
+	int getRequirements(QAction *);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	int postCondition(QAction * filter) const;
+	FILTER_ARITY filterArity(QAction*) const {return SINGLE_MESH;}
 };
 
 
