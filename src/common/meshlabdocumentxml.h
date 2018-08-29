@@ -8,8 +8,8 @@
 #include<map>
 
 
-QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool binary, const std::map<int, MLRenderingData>& rendOpt = std::map<int, MLRenderingData>());
-bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers, bool binary, const std::map<int, MLRenderingData>& rendOpt = std::map<int, MLRenderingData>());
+QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool saveViewState, bool binary, const std::map<int, MLRenderingData>& rendOpt = std::map<int, MLRenderingData>());
+bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers, bool saveViewState, bool binary, const std::map<int, MLRenderingData>& rendOpt = std::map<int, MLRenderingData>());
 bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::map<int, MLRenderingData>& rendOpt);
 QDomElement RasterModelToXML(RasterModel *mp,QDomDocument &doc, bool binary);
 QDomElement PlaneToXML(Plane* pl,const QString& basePath,QDomDocument& doc);

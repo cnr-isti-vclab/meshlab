@@ -6,13 +6,13 @@
 #include "meshlabdocumentxml.h"
 #include <wrap/qt/shot_qt.h>
 
-bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers, bool binary, const std::map<int, MLRenderingData>& rendOpt)
+bool MeshDocumentToXMLFile(MeshDocument &md, QString filename, bool onlyVisibleLayers, bool saveViewState, bool binary, const std::map<int, MLRenderingData>& rendOpt)
 {
 	md.setFileName(filename);
 	QFileInfo fi(filename);
 	QDir tmpDir = QDir::current();
 	QDir::setCurrent(fi.absoluteDir().absolutePath());
-	QDomDocument doc = MeshDocumentToXML(md, onlyVisibleLayers, binary, rendOpt);
+	QDomDocument doc = MeshDocumentToXML(md, onlyVisibleLayers, saveViewState, binary, rendOpt);
 	QFile file(filename);
 	file.open(QIODevice::WriteOnly);
 	QTextStream qstream(&file);
@@ -80,11 +80,6 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 					visible = (mesh.attributes().namedItem("visible").nodeValue().toInt() == 1);
 				MeshModel* mm = md.addNewMesh(filen, label);
 				mm->visible = visible;
-				/*if (mesh.attributes().contains("renderingOptions"))
-				{
-				  QString value = mesh.attributes().namedItem("renderingOptions").nodeValue();
-				  rendOpt.insert(std::pair<int, std::string>(mm->id(), value.toStdString()));
-				}*/
 				QDomNode tr = mesh.firstChildElement("MLMatrix44");
 
 				if (!tr.isNull())
@@ -181,33 +176,37 @@ bool MeshDocumentFromXML(MeshDocument &md, QString filename, bool binary, std::m
 	return true;
 }
 
-QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, bool binary, const MLRenderingData& rendOpt = MLRenderingData())
+QDomElement MeshModelToXML(MeshModel *mp, QDomDocument &doc, bool binary, bool saveViewState, const MLRenderingData& rendOpt = MLRenderingData())
 {
 	QDomElement meshElem = doc.createElement("MLMesh");
 	meshElem.setAttribute("label", mp->label());
 	meshElem.setAttribute("filename", mp->relativePathName());
-	meshElem.setAttribute("visible", mp->isVisible());
+	meshElem.setAttribute("visible", saveViewState?mp->isVisible():true);
 	if (binary)
 		meshElem.appendChild(Matrix44mToBinaryXML(mp->cm.Tr, doc));
 	else
 		meshElem.appendChild(Matrix44mToXML(mp->cm.Tr, doc));
-	
-	QDomElement renderingElem = doc.createElement("RenderingOption");
-	std::string text;
-	rendOpt.serialize(text);
-	QDomText nd = doc.createTextNode(QString(text.c_str()));
-	renderingElem.appendChild(nd);
-	MLRenderingData::GLOptionsType opt;
-	if (rendOpt.get(opt))
+
+	if (saveViewState)
 	{
-		renderingElem.setAttribute("boxColor", QString("%1 %2 %3 %4").arg(opt._perbbox_fixed_color[0]).arg(opt._perbbox_fixed_color[1]).arg(opt._perbbox_fixed_color[2]).arg(opt._perbbox_fixed_color[3]));
-		renderingElem.setAttribute("pointColor", QString("%1 %2 %3 %4").arg(opt._perpoint_fixed_color[0]).arg(opt._perpoint_fixed_color[1]).arg(opt._perpoint_fixed_color[2]).arg(opt._perpoint_fixed_color[3]));
-		renderingElem.setAttribute("wireColor", QString("%1 %2 %3 %4").arg(opt._perwire_fixed_color[0]).arg(opt._perwire_fixed_color[1]).arg(opt._perwire_fixed_color[2]).arg(opt._perwire_fixed_color[3]));
-		renderingElem.setAttribute("solidColor", QString("%1 %2 %3 %4").arg(opt._persolid_fixed_color[0]).arg(opt._persolid_fixed_color[1]).arg(opt._persolid_fixed_color[2]).arg(opt._persolid_fixed_color[3]));
-		renderingElem.setAttribute("pointSize", opt._perpoint_pointsize);
-		renderingElem.setAttribute("wireWidth", opt._perwire_wirewidth);
+		QDomElement renderingElem = doc.createElement("RenderingOption");
+		std::string text;
+		rendOpt.serialize(text);
+		QDomText nd = doc.createTextNode(QString(text.c_str()));
+		renderingElem.appendChild(nd);
+		MLRenderingData::GLOptionsType opt;
+		if (rendOpt.get(opt))
+		{
+			renderingElem.setAttribute("boxColor", QString("%1 %2 %3 %4").arg(opt._perbbox_fixed_color[0]).arg(opt._perbbox_fixed_color[1]).arg(opt._perbbox_fixed_color[2]).arg(opt._perbbox_fixed_color[3]));
+			renderingElem.setAttribute("pointColor", QString("%1 %2 %3 %4").arg(opt._perpoint_fixed_color[0]).arg(opt._perpoint_fixed_color[1]).arg(opt._perpoint_fixed_color[2]).arg(opt._perpoint_fixed_color[3]));
+			renderingElem.setAttribute("wireColor", QString("%1 %2 %3 %4").arg(opt._perwire_fixed_color[0]).arg(opt._perwire_fixed_color[1]).arg(opt._perwire_fixed_color[2]).arg(opt._perwire_fixed_color[3]));
+			renderingElem.setAttribute("solidColor", QString("%1 %2 %3 %4").arg(opt._persolid_fixed_color[0]).arg(opt._persolid_fixed_color[1]).arg(opt._persolid_fixed_color[2]).arg(opt._persolid_fixed_color[3]));
+			renderingElem.setAttribute("pointSize", opt._perpoint_pointsize);
+			renderingElem.setAttribute("wireWidth", opt._perwire_wirewidth);
+		}
+		meshElem.appendChild(renderingElem);
 	}
-	meshElem.appendChild(renderingElem);
+
 	return meshElem;
 }
 
@@ -233,7 +232,7 @@ QDomElement PlaneToXML(Plane* pl, const QString& basePath, QDomDocument& doc)
 	return planeElem;
 }
 
-QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool binary, const std::map<int, MLRenderingData>& rendOpt)
+QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool saveViewState, bool binary, const std::map<int, MLRenderingData>& rendOpt)
 {
 	QDomDocument ddoc("MeshLabDocument");
 
@@ -247,9 +246,9 @@ QDomDocument MeshDocumentToXML(MeshDocument &md, bool onlyVisibleLayers, bool bi
 		{
 			QDomElement meshElem;
 			if (rendOpt.find(mmp->id()) != rendOpt.end())
-				meshElem = MeshModelToXML(mmp, ddoc, binary, rendOpt.at(mmp->id()));
+				meshElem = MeshModelToXML(mmp, ddoc, binary, saveViewState, rendOpt.at(mmp->id()));
 			else
-				meshElem = MeshModelToXML(mmp, ddoc, binary);
+				meshElem = MeshModelToXML(mmp, ddoc, binary, saveViewState);
 			mgroot.appendChild(meshElem);
 		}
 	}

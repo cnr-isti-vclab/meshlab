@@ -2150,11 +2150,14 @@ void MainWindow::saveProject()
     saveAllFile->setCheckState(Qt::Unchecked);
     QCheckBox* onlyVisibleLayers = new QCheckBox(QString("Only Visible Layers"),saveDiag);
     onlyVisibleLayers->setCheckState(Qt::Unchecked);
+	QCheckBox* saveViewState = new QCheckBox(QString("Save View State"), saveDiag);
+	saveViewState->setCheckState(Qt::Checked);
     QGridLayout* layout = qobject_cast<QGridLayout*>(saveDiag->layout());
     if (layout != NULL)
     {
-        layout->addWidget(saveAllFile,4,2);
-        layout->addWidget(onlyVisibleLayers,4,1);
+		layout->addWidget(onlyVisibleLayers, 4, 0);
+		layout->addWidget(saveViewState, 4, 1);
+		layout->addWidget(saveAllFile, 4, 2);
     }
     saveDiag->setAcceptMode(QFileDialog::AcceptSave);
     saveDiag->exec();
@@ -2215,13 +2218,13 @@ void MainWindow::saveProject()
     else
     {
       std::map<int, MLRenderingData> rendOpt;
-      foreach(MeshModel * mp, meshDoc()->meshList)
-      {
-        MLRenderingData ml;
-        getRenderingData(mp->id(), ml);
-        rendOpt.insert(std::pair<int, MLRenderingData>(mp->id(), ml));
-      }
-      ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
+	  foreach(MeshModel * mp, meshDoc()->meshList)
+	  {
+		MLRenderingData ml;
+		getRenderingData(mp->id(), ml);
+		rendOpt.insert(std::pair<int, MLRenderingData>(mp->id(), ml));
+	  }
+	  ret = MeshDocumentToXMLFile(*meshDoc(), fileName, onlyVisibleLayers->isChecked(), saveViewState->isChecked(), QString(fi.suffix()).toLower() == "mlb", rendOpt);
     }
 
     if (saveAllFile->isChecked())
