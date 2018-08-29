@@ -23,6 +23,7 @@
 
 #include "paintbox.h"
 #include <QFileDialog>
+#include <QAction>
 
 Paintbox::Paintbox(QWidget * parent, Qt::WindowFlags flags) : QWidget(parent, flags)
 {
