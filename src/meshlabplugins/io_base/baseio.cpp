@@ -28,6 +28,7 @@
 #include <wrap/io_trimesh/import_obj.h>
 #include <wrap/io_trimesh/import_off.h>
 #include <wrap/io_trimesh/import_ptx.h>
+#include <wrap/io_trimesh/import_fbx.h>
 #include <wrap/io_trimesh/import_vmi.h>
 #include <wrap/io_trimesh/import_gts.h>
 
@@ -249,8 +250,21 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			return false;
 		}
 	}
-	else
-	{
+    else if (formatName.toUpper() == tr("FBX"))
+    {      
+      m.Enable(tri::io::Mask::IOM_WEDGTEXCOORD);
+      
+      int result = tri::io::ImporterFBX<CMeshO>::Open(m.cm, filename.c_str(),cb);
+      if(m.cm.textures.empty()) 
+        m.clearDataMask(tri::io::Mask::IOM_WEDGTEXCOORD);
+      
+      if (result != 0)
+      {
+        errorMessage = errorMsgFormat.arg(fileName, vcg::tri::io::ImporterFBX<CMeshO>::ErrorMsg(result));
+        return false;
+      }
+    }else
+    {
 		assert(0); // Unknown File type
 		return false;
 	}
@@ -421,6 +435,7 @@ QList<MeshIOInterface::Format> BaseMeshIOPlugin::importFormats() const
 	formatList << Format("Object File Format", tr("OFF"));
 	formatList << Format("PTX File Format", tr("PTX"));
 	formatList << Format("VCG Dump File Format", tr("VMI"));
+    formatList << Format("FBX Autodesk Interchange Format", tr("FBX"));
 
 	return formatList;
 }
