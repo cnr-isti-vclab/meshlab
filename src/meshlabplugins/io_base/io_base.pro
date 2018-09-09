@@ -20,6 +20,3 @@ SOURCES       += baseio.cpp \
 
 
 TARGET        = io_base
-CONFIG += c++14
-linux-clang++:QMAKE_CXXFLAGS += -std=c++14
-linux-g++:QMAKE_CXXFLAGS += -std=c++14
