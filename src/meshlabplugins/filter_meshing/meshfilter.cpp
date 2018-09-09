@@ -921,7 +921,7 @@ switch(ID(filter))
 	} break;
     case FP_EXPLICIT_ISOTROPIC_REMESHING:
     {
-	    m.updateDataMask( MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG );
+	    m.updateDataMask( MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTFACETOPO | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG );
 
 		tri::Clean<CMeshO>::RemoveDuplicateVertex(m.cm);
 		tri::Clean<CMeshO>::RemoveUnreferencedVertex(m.cm);
