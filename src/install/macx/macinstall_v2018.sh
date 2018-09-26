@@ -70,11 +70,6 @@ do
  install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $x
 done
 
-MESHLABSERVER_PATH=$BUNDLE/meshlab.app/Contents/MacOS/meshlabserver
-install_name_tool -rpath "/Users/cignoni/Qt/5.7/clang_64/lib" "@executable_path/../Frameworks" $MESHLABSERVER_PATH 2>/dev/null || \
-  install_name_tool -rpath "@executable_path/Frameworks" "@executable_path/../Frameworks" $MESHLABSERVER_PATH 2>/dev/null || \
-  install_name_tool -add_rpath "@executable_path/../Frameworks" $MESHLABSERVER_PATH 2>/dev/null
-
 echo 'Copying samples and other files'
 
 cp ../../LICENSE.txt $BUNDLE

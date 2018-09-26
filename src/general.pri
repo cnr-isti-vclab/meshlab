@@ -20,6 +20,10 @@ macx:CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
 macx:QMAKE_CXX = /opt/local/bin/clang++-mp-6.0
 macx:QMAKE_CXXFLAGS += -fopenmp
 macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
+macx:{
+  QMAKE_LFLAGS_RPATH=
+  QMAKE_LFLAGS += "-Wl,-rpath,@executable_path/../Frameworks"
+}
 
 
 MACLIBDIR = ../../external/lib/macx64
