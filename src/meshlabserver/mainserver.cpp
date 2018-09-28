@@ -158,6 +158,7 @@ public:
 
         RichParameterSet prePar;
         pCurrentIOPlugin->initPreOpenParameter(extension, fileName,prePar);
+		prePar.join(defaultGlobal);
 
         if (!pCurrentIOPlugin->open(extension, fileName, mm ,mask,prePar))
         {
