@@ -32,6 +32,8 @@
 #include "shaderStructs.h"
 #include "ui_shaderDialog.h"
 #include <QMap>
+#include <QLineEdit>
+#include <QSlider>
 
 class QGLWidget;
 
