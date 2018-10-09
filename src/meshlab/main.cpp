@@ -61,10 +61,14 @@ int main(int argc, char *argv[])
             "for a longer documentation\n"
             );
 
-        if(QString::fromLocal8Bit(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("mlb", Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("aln",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("out",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("nvm",Qt::CaseInsensitive))
-            window.openProject(QString::fromLocal8Bit(argv[1]));
-        else
-            window.importMeshWithLayerManagement(QString::fromLocal8Bit(argv[1]));
+        for (int i = 1; i < argc; ++i)
+        {
+            QString arg = QString::fromLocal8Bit(argv[i]);
+            if(arg.endsWith("mlp",Qt::CaseInsensitive) || arg.endsWith("mlb",Qt::CaseInsensitive) || arg.endsWith("aln",Qt::CaseInsensitive) || arg.endsWith("out",Qt::CaseInsensitive) || arg.endsWith("nvm",Qt::CaseInsensitive))
+                window.openProject(arg);
+            else
+                window.importMeshWithLayerManagement(arg);
+        }
     }
     //else 	if(filterObj->noEvent) window.open();
     return app.exec();
