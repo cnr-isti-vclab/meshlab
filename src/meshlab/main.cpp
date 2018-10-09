@@ -55,20 +55,17 @@ int main(int argc, char *argv[])
         QString helpOpt2="--help";
         if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
             printf(
-                "usage:\n"
-                "meshlab <mesh_file|meshlab_project_file>\n"
-                "See http://www.meshlab.net for more documentation\n"
-                );
+            "usage:\n"
+            "meshlab <meshfile>\n"
+            "Look at http://www.meshlab.net\n"
+            "for a longer documentation\n"
+            );
 
-        for (int i = 1; i < argc; ++i)
-        {
-            QString arg = QString::fromLocal8Bit(argv[i]);
-            if(arg.endsWith("mlp",Qt::CaseInsensitive) || arg.endsWith("mlb",Qt::CaseInsensitive) || arg.endsWith("aln",Qt::CaseInsensitive) || arg.endsWith("out",Qt::CaseInsensitive) || arg.endsWith("nvm",Qt::CaseInsensitive))
-                window.openProject(arg);
-            else
-                window.importMeshWithLayerManagement(arg);
-        }
+        if(QString::fromLocal8Bit(argv[1]).endsWith("mlp",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("mlb", Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("aln",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("out",Qt::CaseInsensitive) || QString::fromLocal8Bit(argv[1]).endsWith("nvm",Qt::CaseInsensitive))
+            window.openProject(QString::fromLocal8Bit(argv[1]));
+        else
+            window.importMeshWithLayerManagement(QString::fromLocal8Bit(argv[1]));
     }
-    //else  if (filterObj->noEvent) window.open();
+    //else 	if(filterObj->noEvent) window.open();
     return app.exec();
 }
