@@ -783,7 +783,7 @@ namespace io {
 					QString coorTag[] = {"Coordinate", "CoordinateDouble"};
 					QDomElement coordinate = findNode(coorTag, 2, geometry);
 					//If geometry node is supported, get info on color, normal and texture coordinate (per vertex, per color, or per wedge)
-					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid") || (tagName == "Cylinder"))
+					if ((!coordinate.isNull() && ((coordinate.attribute("point")!= "") || coordinate.attribute("USE", "") != "")) || (tagName == "ElevationGrid") || (tagName == "Cylinder") || (tagName == "Sphere"))
 					{
 						bool copyTextureFile = true;
 						QStringList colorList, normalList, textureList;
@@ -1891,6 +1891,32 @@ namespace io {
 			return E_NOERROR;
 		}
 
+		static int LoadSphere(QDomElement geometry,
+									OpenMeshType& m,
+									const vcg::Matrix44<ScalarType>& tMatrix,
+									AdditionalInfoX3D* info,
+									CallBackPos *cb)
+		{
+			vcg::Matrix44<ScalarType> t, tmp;
+			t.SetIdentity();
+
+			QStringList radiusList;
+			findAndParseAttribute(radiusList, geometry, "radius", "1");
+			float radius = radiusList[0].toFloat();
+			tmp.SetScale(radius,radius,radius);
+			t *= tmp;
+			tmp = tMatrix * t;
+			OpenMeshType newSphere;
+			vcg::tri::Sphere<OpenMeshType>(newSphere, 3);
+			if (info->meshColor)
+				vcg::tri::UpdateColor<OpenMeshType>::PerVertexConstant(newSphere, info->color, false);
+//			vcg::tri::UpdatePosition<OpenMeshType>::Matrix(newSphere, tMatrix, false);
+			vcg::tri::UpdatePosition<OpenMeshType>::Matrix(newSphere, tmp, false);
+			vcg::tri::Append<OpenMeshType, OpenMeshType>::Mesh(m, newSphere);			
+			info->numvert++;
+			if (cb !=NULL) (*cb)(10 + 80*info->numvert/info->numface, "Loading X3D Object...");
+			return E_NOERROR;
+		}
 
 		
 		//Load texture info from Appearance node.
@@ -2486,7 +2512,7 @@ namespace io {
 					QDomElement coordinate = findNode(coordTag, 2, geometry);
 					result = solveDefUse(coordinate, defMap, coordinate, info);
 					if (result != E_NOERROR) return result;
-					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid") || (geometry.tagName() == "Cylinder"))
+					if ((!coordinate.isNull() && (coordinate.attribute("point") != "")) || (geometry.tagName() == "ElevationGrid") || (geometry.tagName() == "Cylinder") || (geometry.tagName() == "Sphere"))
 					{
 						//Get coordinate 
 						QStringList coordList;
@@ -2602,6 +2628,8 @@ namespace io {
 							return LoadPointSet(geometry, m, tMatrix, coordList, colorList, colorComponent, info, cb);
 						else if (geometry.tagName() == "Cylinder")
 							return LoadCylinder(geometry, m, tMatrix, info, cb);
+						else if (geometry.tagName() == "Sphere")
+							return LoadSphere(geometry, m, tMatrix, info, cb);
 					}
 					else if (geometry.tagName() == "Polypoint2D")
 						return LoadPolypoint2D(geometry, m, tMatrix, info, cb);
