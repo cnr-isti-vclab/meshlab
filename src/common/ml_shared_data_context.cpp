@@ -106,13 +106,17 @@ void MLSceneGLSharedDataContext::deAllocateTexturesPerMesh( int mmid )
     if (man != NULL)
     {
         QGLContext* ctx = makeCurrentGLContext();
+        std::vector<GLuint> texids;
         for(size_t ii = 0;ii < man->textureIDContainer().size();++ii)
         {
-            GLuint textid = man->textureIDContainer().remove(man->textureIDContainer()[ii]);
-            glDeleteTextures(1,&textid);
+            texids.push_back(man->textureIDContainer()[ii]);
         }
-        doneCurrentGLContext(ctx);
 
+        for (auto tex : texids)
+            man->textureIDContainer().remove(tex);
+
+        glDeleteTextures(texids.size(), texids.data());
+        doneCurrentGLContext(ctx);
     }
 }
 
