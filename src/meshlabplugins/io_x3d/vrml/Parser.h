@@ -160,7 +160,7 @@ QDomDocument *doc;
 	  x3dNode.insert("TriangleFanSet"); x3dNode.insert("TriangleSet"); x3dNode.insert("TriangleSet2D");
 	  x3dNode.insert("TriangleStripSet"); x3dNode.insert("TwoSidedMaterial"); x3dNode.insert("UniversalJoint");
 	  x3dNode.insert(" Viewpoint"); x3dNode.insert("ViewpointGroup"); x3dNode.insert("VolumeEmitter");
-	  x3dNode.insert("VolumePicker"); x3dNode.insert("WindPhysicsModel"); x3dNode.insert("Cylinder");
+	  x3dNode.insert("VolumePicker"); x3dNode.insert("WindPhysicsModel"); x3dNode.insert("Cylinder"); x3dNode.insert("Sphere");
 	}
 	
 
