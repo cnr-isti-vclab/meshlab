@@ -432,7 +432,7 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
   align->shot = p.toShot();
 
   delete []x;
-  delete _p;
+  delete []_p;
 
 
   return niter;

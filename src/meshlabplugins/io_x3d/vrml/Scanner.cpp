@@ -417,6 +417,7 @@ Scanner::Scanner(const wchar_t* fileName) {
 	if ((stream = fopen(chFileName, "rb")) == NULL) {
 		char msg[50];
 		sprintf(msg, "Can not open file: %s", chFileName);
+		coco_string_delete(chFileName);
 		throw msg;
 	}
 	coco_string_delete(chFileName);

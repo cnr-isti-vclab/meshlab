@@ -256,7 +256,10 @@ bool FilterColorProjectionPlugin::applyFilter(QAction *filter, MeshDocument &md,
                 // init rendermanager
                 rendermanager = new RenderHelper();
                 if( rendermanager->initializeGL(cb) != 0 )
+                {
+                    delete rendermanager;
                     return false;
+                }
                 Log("init GL");
                 //if( rendermanager->initializeMeshBuffers(model, cb) != 0 )
                 //    return false;

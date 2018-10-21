@@ -719,7 +719,7 @@ QColor EnvWrap::evalColor(const QString& nm)
 			if (!isScalarInt)
 				throw ExpressionHasNotThisTypeException("Color", nm);
 			else
-				if ((resInt < 0) && (resInt > 255))
+				if ((resInt < 0) || (resInt > 255))
 					isInt0255 = false;
 		}
 		if (isInt0255)
