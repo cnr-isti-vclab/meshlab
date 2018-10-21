@@ -400,7 +400,7 @@ void MainWindow::updateMenus()
     lastFilterAct->setText(QString("Apply filter"));
     editMenu->setEnabled(!editMenu->actions().isEmpty());
     updateMenuItems(editMenu,activeDoc);
-    renderMenu->setEnabled(!editMenu->actions().isEmpty());
+    renderMenu->setEnabled(!renderMenu->actions().isEmpty());
     updateMenuItems(renderMenu,activeDoc);
     fullScreenAct->setEnabled(activeDoc);
 	showLayerDlgAct->setEnabled(activeDoc);

@@ -848,7 +848,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		assert (srcMesh != NULL);
 		assert (trgMesh != NULL);
 		CheckError(!QFile(trgMesh->fullName()).exists(), "Save the target mesh before creating a texture");
-		CheckError(trgMesh->cm.fn == 0 || trgMesh->cm.fn == 0, "Both meshes require to have faces");
+		CheckError(srcMesh->cm.fn == 0 || trgMesh->cm.fn == 0, "Both meshes require to have faces");
 		CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh doesn't have Per Wedge Texture Coordinates");
 		CheckError(textW <= 0, "Texture Width has an incorrect value");
 		CheckError(textH <= 0, "Texture Height has an incorrect value");
