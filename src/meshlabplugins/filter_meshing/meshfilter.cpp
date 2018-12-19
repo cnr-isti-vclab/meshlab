@@ -958,8 +958,16 @@ switch(ID(filter))
 
 		lastisor_FeatureDeg = par.getFloat("FeatureDeg");
 
-		tri::IsotropicRemeshing<CMeshO>::Do(m.cm, toProjectCopy, params, cb);
-
+        try
+        {
+            tri::IsotropicRemeshing<CMeshO>::Do(m.cm, toProjectCopy, params, cb);
+        }
+        catch(vcg::MissingPreconditionException& excp)
+        {
+            Log(excp.what());
+            errorMessage = excp.what();
+            return false;
+        }
 		m.UpdateBoxAndNormals();
 
 //		m.clearDataMask(MeshModel::MM_GEOMETRY_AND_TOPOLOGY_CHANGE | MeshModel::MM_FACEFACETOPO  | MeshModel::MM_VERTQUALITY | MeshModel::MM_FACEMARK | MeshModel::MM_FACEFLAG);
