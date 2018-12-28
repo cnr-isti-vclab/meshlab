@@ -78,6 +78,8 @@ class MlsSurface
             mDomainNormalScale = 1.;
         }
 
+        virtual ~MlsSurface() {}
+
         /** \returns the value of the reconstructed scalar field at point \a x */
         virtual Scalar potential(const VectorType& x, int* errorMask = 0) const = 0;
 
