@@ -250,8 +250,10 @@ public:
     bool evalBool(const QString& nm);
     double evalDouble(const QString& nm);
     float evalFloat( const QString& nm );
+    MESHLAB_SCALAR evalReal(const QString& nm);
     int evalInt( const QString& nm );
     vcg::Point3f evalVec3(const QString& nm);
+    vcg::Point3<MESHLAB_SCALAR> evalVec3Real(const QString& nm);
     QColor evalColor(const QString& nm);
     /*QString getExpType(const QString& nm);*/
     QString evalString(const QString& nm);

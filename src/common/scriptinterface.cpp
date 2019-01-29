@@ -635,6 +635,20 @@ float EnvWrap::evalFloat(const QString& nm)
 	return float();
 }
 
+MESHLAB_SCALAR EnvWrap::evalReal(const QString& nm)
+{
+    try
+    {
+        double result = evalDouble(nm);
+        return (MESHLAB_SCALAR)result;
+    }
+    catch (ExpressionHasNotThisTypeException& /*exc*/)
+    {
+        throw ExpressionHasNotThisTypeException("Real", nm);
+    }
+    return MESHLAB_SCALAR();
+}
+
 int EnvWrap::evalInt(const QString& nm)
 {
 	try
@@ -659,6 +673,18 @@ vcg::Point3f EnvWrap::evalVec3(const QString& nm)
 	else
 		throw ExpressionHasNotThisTypeException("Vec3", nm);
 	return vcg::Point3f();
+}
+
+vcg::Point3<MESHLAB_SCALAR> EnvWrap::evalVec3Real(const QString& nm)
+{
+    QScriptValue result = evalExp(nm);
+    QVariant resVar = result.toVariant();
+    QVariantList resList = resVar.toList();
+    if (resList.size() == 3)
+        return vcg::Point3<MESHLAB_SCALAR>(resList[0].toReal(), resList[1].toReal(), resList[2].toReal());
+    else
+        throw ExpressionHasNotThisTypeException("Vec3", nm);
+    return vcg::Point3<MESHLAB_SCALAR>();
 }
 
 int EnvWrap::evalEnum(const QString& nm)

@@ -130,7 +130,10 @@ public:
 
     MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
 	MeshModel(MeshModel* cp);
-	
+    ~MeshModel()
+    {
+    }
+
 	MeshDocument *parent;
 
     CMeshO cm;
