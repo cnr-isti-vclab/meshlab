@@ -560,7 +560,7 @@ public:
 
     void updateRenderStateMeshes(const QList<int>& mm,const int meshupdatemask);
     void updateRenderStateRasters(const QList<int>& rm,const int rasterupdatemask);*/
-
+	void requestUpdatingPerMeshDecorators(int mesh_id);
 
 private:
     int meshIdCounter;
@@ -664,6 +664,7 @@ signals:
 
     //this signal is emitted when a filter request to update the mesh in the renderingState
     void documentUpdated();
+	void updateDecorators(int mesh_id);
 
 };// end class MeshDocument
 

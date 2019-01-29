@@ -112,7 +112,7 @@ public:
 
 
 
-  void Clear();
+  void Clear() {};
   bool Init(int _mn, Box3d bb, int size);
 
   void Add(const char *MeshName, Matrix44d &Tr, int id);

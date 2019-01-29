@@ -203,7 +203,7 @@ void AbsPercWidget::on_percSB_valueChanged(double newv)
 void AbsPercWidget::setValue(float val, float minV, float maxV)
 {
     assert(absSB);
-    absSB->setValue (val);
+    absSB->setValue(val);
     m_min=minV;
     m_max=maxV;
 }

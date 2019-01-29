@@ -1426,7 +1426,7 @@ from the user defined dialog
 
 void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool isPreview)
 {
-    MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+     MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
     qb->show();
     iFilter->setLog(&meshDoc()->Log);
 
@@ -1441,15 +1441,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 
     // (3) save the current filter and its parameters in the history
     if(!isPreview)
-    {
-        if (meshDoc()->filterHistory != NULL)
-        {
-            OldFilterNameParameterValuesPair* oldpair = new OldFilterNameParameterValuesPair();
-            oldpair->pair = qMakePair(action->text(),params);
-            meshDoc()->filterHistory->filtparlist.append(oldpair);
-        }
         meshDoc()->Log.ClearBookmark();
-    }
     else
         meshDoc()->Log.BackToBookmark();
     // (4) Apply the Filter

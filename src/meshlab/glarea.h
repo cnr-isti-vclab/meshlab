@@ -317,6 +317,12 @@ public slots:
 			defdec.initMeshDecorationData(*mm, dt);
 		}
 	}
+
+	void updatePerMeshDecorators(int mesh_id)
+	{
+		update();
+	}
+
 	void updateAllDecorators();
 
 public:

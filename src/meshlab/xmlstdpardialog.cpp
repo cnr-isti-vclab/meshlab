@@ -5,6 +5,16 @@
 #include <QDialogButtonBox>
 #include "mainwindow.h"
 
+static void updateRenderingData(GLArea* glarea, MeshModel* curmodel)
+{
+	MLSceneGLSharedDataContext* shar = glarea->getSceneGLSharedContext();
+	if (shar != NULL)
+	{
+		shar->meshAttributesUpdated(curmodel->id(), true, MLRenderingData::RendAtts(true));
+		shar->manageBuffers(curmodel->id());
+	}
+}
+
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
     :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false),previewCB(NULL)
 {
@@ -286,6 +296,7 @@ void MeshLabXMLStdDialog::togglePreview()
 	else
 	{
 		meshState.apply(curModel);
+		updateRenderingData(glarea, curModel);
 		if (glarea != NULL)
 			glarea->updateAllDecorators();
 	}
@@ -945,13 +956,17 @@ QString XMLAbsWidget::getWidgetExpression()
 
 void XMLAbsWidget::on_absSB_valueChanged(double newv)
 {
+	disconnect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
     percSB->setValue((100*(newv - m_min))/(m_max - m_min));
+	connect(percSB, SIGNAL(valueChanged(double)), this, SLOT(on_percSB_valueChanged(double)));
     emit dialogParamChanged();
 }
 
 void XMLAbsWidget::on_percSB_valueChanged(double newv)
 {
+	disconnect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
     absSB->setValue((m_max - m_min)*0.01*newv + m_min);
+	connect(absSB, SIGNAL(valueChanged(double)), this, SLOT(on_absSB_valueChanged(double)));
     emit dialogParamChanged();
 }
 
