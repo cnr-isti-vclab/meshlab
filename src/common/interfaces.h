@@ -673,6 +673,7 @@ protected:
 	bool intteruptreq;
 signals:
 	void renderingDataRequested(int);
+	void updateDecorators(int);
 };
 
 #if (QT_VERSION  >= 0x050000)

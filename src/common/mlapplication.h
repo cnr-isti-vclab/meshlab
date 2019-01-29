@@ -2,6 +2,7 @@
 #define ML_APPLICATION_H
 
 #include <QApplication>
+#include <QDate>
 #include <QString>
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_mesh_type.h"
@@ -16,7 +17,12 @@ public:
     static const QString appName(){return tr("MeshLab"); }
     static const QString architecturalSuffix(const HW_ARCHITECTURE hw) {return "_" + QString::number(int(hw)) + "bit";}
     static const QString appArchitecturalName(const HW_ARCHITECTURE hw) {return appName() + architecturalSuffix(hw) + "_" + MeshLabScalarTest<MESHLAB_SCALAR>::floatingPointPrecision();}
-    static const QString appVer() {return tr("2018.04"); }
+    static const QString appVer() 
+	{
+		const QDate dt = QDate::currentDate();
+		return QString::number(dt.year()) + "." + QString::number(dt.month()); 
+	}
+
 	static const QString shortName() { return appName() + " " + appVer(); }
     static const QString completeName(const HW_ARCHITECTURE hw){return appArchitecturalName(hw) + " v" + appVer(); }
     static const QString organization(){return tr("VCG");}

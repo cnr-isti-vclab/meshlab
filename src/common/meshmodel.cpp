@@ -121,6 +121,11 @@ void MeshDocument::setCurrentRaster( int i)
     return;
 }
 
+void MeshDocument::requestUpdatingPerMeshDecorators(int meshid)
+{	
+	emit updateDecorators(meshid);
+}
+
 template <class LayerElement>
 QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
 {
@@ -606,11 +611,13 @@ bool MeshModelState::apply(MeshModel *_m)
 
     if(changeMask & MeshModel::MM_VERTCOORD)
     {
-        if(vertCoord.size() != m->cm.vert.size()) return false;
+        if(vertCoord.size() != m->cm.vert.size()) 
+			return false;
         std::vector<Point3m>::iterator ci;
         CMeshO::VertexIterator vi;
         for(vi = m->cm.vert.begin(), ci = vertCoord.begin(); vi != m->cm.vert.end(); ++vi, ++ci)
-            if(!(*vi).IsD()) (*vi).P()=(*ci);
+            if(!(*vi).IsD()) 
+				(*vi).P()=(*ci);
     }
 
     if(changeMask & MeshModel::MM_VERTNORMAL)

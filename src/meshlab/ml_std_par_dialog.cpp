@@ -196,6 +196,13 @@ void MeshlabStdDialog::applyClick()
 
 	//PreView Caching: if the apply parameters are the same to those used in the preview mode
 	//we don't need to reapply the filter to the mesh
+	if ((q != nullptr) && (curMeshDoc != nullptr) && (curMeshDoc->filterHistory != nullptr))
+	{
+		OldFilterNameParameterValuesPair* oldpair = new OldFilterNameParameterValuesPair();
+		oldpair->pair = qMakePair(q->text(), curParSet);
+		curMeshDoc->filterHistory->filtparlist.append(oldpair);
+	}
+
 	bool isEqual = (curParSet == prevParSet);
 	if (curModel && (isEqual) && (validcache))
 	{
