@@ -52,12 +52,12 @@ MAKE_FLAGS=('-j11')
 * Build:
 ```
 cd src/external
-qmake external.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+qmake external.pro ${QMAKE_FLAGS[@]} && make ${MAKE_FLAGS[@]} 
 cd ../common
-qmake common.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+qmake common.pro ${QMAKE_FLAGS[@]} && make ${MAKE_FLAGS[@]}
 cd ..
-qmake meshlab_mini.pro $QMAKE_FLAGS && make $MAKE_FLAGS
-qmake meshlab_full.pro $QMAKE_FLAGS && make $MAKE_FLAGS
+qmake meshlab_mini.pro ${QMAKE_FLAGS[@]} && make ${MAKE_FLAGS[@]}
+qmake meshlab_full.pro ${QMAKE_FLAGS[@]} && make ${MAKE_FLAGS[@]}
 ```
 * Run:
 ```
