@@ -154,7 +154,7 @@ win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcom
 #	win32-g++:release:LIBS 			+= -L../common/release -lcommon
 #}
 
-linux:LIBS += -L$$PWD/../external/lib/linux -ljhead -L../distrib -lcommon -lGLU
+linux:LIBS += -L$$PWD/../external/lib/linux-g++ -ljhead -L../distrib -lcommon -lGLU
 linux:QMAKE_RPATHDIR += ../distrib
 
 # uncomment in your local copy only in emergency cases.

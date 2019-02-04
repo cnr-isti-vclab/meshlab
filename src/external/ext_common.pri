@@ -12,7 +12,7 @@ win32-msvc2015:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc2017:DEFINES += _CRT_SECURE_NO_WARNINGS
 win32-msvc:DEFINES += _CRT_SECURE_NO_WARNINGS
 
-linux:DESTDIR = $$EXTERNAL_BASE_PATH/lib/linux
+linux:DESTDIR = $$EXTERNAL_BASE_PATH/lib/linux-g++
 
 unix:CONFIG(release, debug|release) {
 	DEFINES *= NDEBUG
