@@ -53,7 +53,7 @@ public:
 
 	bool valid;
 
-	bool CreatePair(int imId, int prId, int mId, float mut, float ar, bool val) {imageId=imId; projId=prId, meshId=mId, mutual=mut; area=ar; valid=val; }
+	void CreatePair(int imId, int prId, int mId, float mut, float ar, bool val) {imageId=imId; projId=prId, meshId=mId, mutual=mut; area=ar; valid=val; }
 
 	
 
