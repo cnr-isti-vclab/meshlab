@@ -225,7 +225,11 @@ public:
         // optional saving parameters (like ascii/binary encoding)
         RichParameterSet savePar;
         pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
-        if(savePar.hasParameter("Binary")){
+        
+/* The commented code below is me just hacking around getting a feel for
+ * how to use RichParameter sets */
+
+/*        if(savePar.hasParameter("Binary")){
             printf("Binary is a parameter\n");
             if(savePar.getBool("Binary")){
                     printf("Binary is set\n");
@@ -244,6 +248,12 @@ public:
             printf("Write ascii\n");
             savePar.setValue("Binary",BoolValue(false));
         }
+*/
+
+        if(savePar.hasParameter("Binary")){
+            savePar.setValue("Binary",BoolValue(writebinary));
+        }
+        
         int formatmask = 0;
         int defbits = 0;
         pCurrentIOPlugin->GetExportMaskCapability(extension,formatmask,defbits);
@@ -623,6 +633,7 @@ namespace commandline
     const char log('l');
     const char dump('d');
     const char script('s');
+    const char saveparam('s');
     const char ascii('a');
 
     void usage()
@@ -654,7 +665,7 @@ namespace commandline
 
     QString outputmeshExpression()
     {
-		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + "|" +QString(ascii) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + "|" + QString(ascii) + ")");
+		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + "|" +QString(saveparam) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + "|" + QString(ascii) + ")");
 		QString optionslist(options + "(\\s+" + options + ")*");	
 		QString savingmask("-" + QString(mask) + "\\s+" + optionslist);
 		QString layernumber("\\d+");
@@ -938,7 +949,7 @@ int main(int argc, char *argv[])
                                 break;
                             }
 						
-                        case commandline::ascii :
+                        case commandline::saveparam :
                              {
                                 switch( argv[i][1])
                                 {

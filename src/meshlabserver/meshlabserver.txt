@@ -52,7 +52,8 @@ meshlabserver [logargs] [args]
                           wn-> wedge normals,
                           wt -> wedge texture coords,
                           mp -> polygonal mesh info
-
+                          sa -> save in ascii format
+ 
     -s filename         the script to be applied
 
 
