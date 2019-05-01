@@ -202,7 +202,7 @@ public:
         return true;
     }
 
-    bool exportMesh(MeshModel *mm, const int mask, const QString& fileName,FILE* fp = stdout)
+    bool exportMesh(MeshModel *mm, const int mask, const QString& fileName,bool writebinary,FILE* fp = stdout)
     {
         QFileInfo fi(fileName);
         // this change of dir is needed for subsequent textures/materials loading
@@ -225,6 +225,25 @@ public:
         // optional saving parameters (like ascii/binary encoding)
         RichParameterSet savePar;
         pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
+        if(savePar.hasParameter("Binary")){
+            printf("Binary is a parameter\n");
+            if(savePar.getBool("Binary")){
+                    printf("Binary is set\n");
+                }
+                else{
+                printf("Binary is not set\n");
+                }
+  
+                }
+
+        printf("Got here\n");
+        if(writebinary){
+            printf("Write in binary\n");
+        }
+        else{
+            printf("Write ascii\n");
+            savePar.setValue("Binary",BoolValue(false));
+        }
         int formatmask = 0;
         int defbits = 0;
         pCurrentIOPlugin->GetExportMaskCapability(extension,formatmask,defbits);
@@ -295,7 +314,7 @@ public:
                 m->setFileName(outfilename);
                 QFileInfo of(outfilename);
                 m->setLabel(of.fileName());
-                exportMesh(m,m->dataMask(),outfilename);
+                exportMesh(m,m->dataMask(),outfilename,true);
             }
         }
 
@@ -604,6 +623,7 @@ namespace commandline
     const char log('l');
     const char dump('d');
     const char script('s');
+    const char ascii('a');
 
     void usage()
     {
@@ -634,7 +654,7 @@ namespace commandline
 
     QString outputmeshExpression()
     {
-		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + ")");
+		QString options("(" + QString(vertex) + "|" + QString(face) + "|" + QString(wedge) + "|" + QString(mesh) + "|" +QString(ascii) + ")(" + QString(color) + "|" + QString(quality) + "|" + QString(flags) + "|" + QString(normal) + "|" + QString(radius) + "|" + QString(texture) + "|" + QString(polygon) + "|" + QString(ascii) + ")");
 		QString optionslist(options + "(\\s+" + options + ")*");	
 		QString savingmask("-" + QString(mask) + "\\s+" + optionslist);
 		QString layernumber("\\d+");
@@ -664,9 +684,10 @@ namespace commandline
 
 struct OutFileMesh
 {
+    OutFileMesh() : writebinary(true) {}
     QString filename;
     int mask;
-
+    bool writebinary;
 	/*WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 	/*we need these two constant values because when we parse the command line we don't know yet how many layers will have the current document and which will be the current one. Opening a project and/or importing a file happens after the parsing of the commandline is completed*/
 	static const int lastlayerconst = -2;
@@ -750,7 +771,7 @@ int main(int argc, char *argv[])
 	MeshLabServer server(&shared);
     server.loadPlugins();
 
-    
+    bool writebinary = true; 
     int i = 1;
     while(i < argc)
     {
@@ -917,6 +938,19 @@ int main(int argc, char *argv[])
                                 break;
                             }
 						
+                        case commandline::ascii :
+                             {
+                                switch( argv[i][1])
+                                {
+                                    case commandline::ascii:
+                                        {
+                                            writebinary = false;
+                                            i++;
+                                            break;
+                                         }
+                                }
+                                break;
+                             }
 						case commandline::mesh :
 							{
 								switch (argv[i][1])
@@ -933,6 +967,7 @@ int main(int argc, char *argv[])
                 else
                     ++i;
                 outfl.mask = mask;
+                outfl.writebinary = writebinary;
                 outmeshlist << outfl;
                 break;
             }
@@ -1030,7 +1065,7 @@ int main(int argc, char *argv[])
 			{
 				MeshModel* meshmod = meshDocument.meshList[layertobesaved];
 				if (meshmod != NULL)
-					exported = server.exportMesh(meshDocument.meshList[layertobesaved], outmeshlist[ii].mask, outmeshlist[ii].filename, logfp);
+					exported = server.exportMesh(meshDocument.meshList[layertobesaved], outmeshlist[ii].mask, outmeshlist[ii].filename, outmeshlist[ii].writebinary, logfp);
 				if (exported)
 					fprintf(logfp, "Mesh %s saved as %s (%i vn %i fn)\n", qUtf8Printable(meshmod->fullName()), qUtf8Printable(outmeshlist[ii].filename), meshmod->cm.vn, meshmod->cm.fn);
 				else
