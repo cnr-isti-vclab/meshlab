@@ -34,6 +34,7 @@
 #include "../meshlab/mainwindow.h"
 #include <clocale>
 
+#include <QGLFormat>
 #include <QFileInfo>
 
 
@@ -733,6 +734,10 @@ int main(int argc, char *argv[])
 
 	std::ptrdiff_t maxgpumem = (std::ptrdiff_t) gpumemmb * (float)(1024 * 1024);
 	vcg::QtThreadSafeMemoryInfo gpumeminfo(maxgpumem);
+
+    QGLFormat fmt = QGLFormat::defaultFormat();
+    fmt.setAlphaBufferSize(8);
+    QGLFormat::setDefaultFormat(fmt);
 
 	MeshDocument meshDocument;
 

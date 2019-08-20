@@ -23,6 +23,7 @@
 #include <common/mlapplication.h>
 #include <QMessageBox>
 #include "mainwindow.h"
+#include <QGLFormat>
 #include <QString>
 #include <clocale>
 
@@ -40,7 +41,11 @@ int main(int argc, char *argv[])
 
     QString tmp = MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize));
     QCoreApplication::setApplicationName(MeshLabApplication::appArchitecturalName(MeshLabApplication::HW_ARCHITECTURE(QSysInfo::WordSize)));
-   
+
+    QGLFormat fmt = QGLFormat::defaultFormat();
+    fmt.setAlphaBufferSize(8);
+    QGLFormat::setDefaultFormat(fmt);
+
     MainWindow window;
     window.showMaximized();
 
