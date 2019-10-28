@@ -47,12 +47,25 @@ public:
 		DEBUG = 3
 	};
 
+	static constexpr std::size_t buf_size = 4096;
+
 	GLLogStream();
 	~GLLogStream() {}
 	void print(QStringList &list);		// Fills a QStringList with the log entries
 	void Save(int Level, const char *filename);
 	void Clear();
-	void Logf(int Level, const char * f, ...);
+	template <typename... Ts>
+	void Logf(int Level, const char * f, Ts&&... ts )
+	{
+		char buf[buf_size];
+		int chars_written = snprintf(buf, buf_size, f, std::forward<Ts>(ts)...);   
+		Log(Level, buf);
+
+		if(chars_written >= static_cast<int>(buf_size)){
+			Log(Level, "Log message truncated.");
+		}
+	}
+
 	void Log(int Level, const char * buf);
 
 	void SetBookmark();
@@ -67,7 +80,17 @@ public:
 	// the name of the mesh is shown only if two or more box with the same title are shown.
 	QMultiMap<QString, QPair<QString, QString> > RealTimeLogText;
 
-	void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ...);
+	template <typename... Ts>
+	void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, Ts&&... ts )
+	{
+		char buf[buf_size];
+		int chars_written = snprintf(buf, buf_size, f, std::forward<Ts>(ts)...);   
+		RealTimeLog(Id, meshName, buf);
+
+		if(chars_written >= static_cast<int>(buf_size)){
+			RealTimeLog(Id, meshName, "Log message truncated.");
+		}
+	}	
 	void RealTimeLog(const QString& Id, const QString &meshName, const QString& text);
 
 signals:

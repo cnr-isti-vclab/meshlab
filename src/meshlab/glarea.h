@@ -131,7 +131,14 @@ public:
 
     vcg::Trackball trackball;
     vcg::Trackball trackball_light;
-    void Logf(int Level, const char * f, ... );
+    template <typename... Ts>
+    void Logf(int Level, const char * f, Ts&&... ts)
+    {
+        makeCurrent();
+        if( this->md() != nullptr){
+            this->md()->Log.Logf(Level, f, std::forward<Ts>(ts)...);
+        }
+    }
 
     GLAreaSetting glas;
     QSize minimumSizeHint() const;

@@ -152,21 +152,6 @@ QString GLArea::GetMeshInfoString()
     return info;
 }
 
-
-void GLArea::Logf(int Level, const char * f, ... )
-{
-	makeCurrent();
-    if(this->md()==0) return;
-
-    char buf[4096];
-    va_list marker;
-    va_start( marker, f );
-
-    vsprintf(buf,f,marker);
-    va_end( marker );
-    this->md()->Log.Log(Level,buf);
-}
-
 QSize GLArea::minimumSizeHint() const {return QSize(400,300);}
 QSize GLArea::sizeHint() const				{return QSize(400,300);}
 

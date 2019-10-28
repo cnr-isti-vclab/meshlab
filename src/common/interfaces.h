@@ -100,9 +100,32 @@ public:
 	void setLog(GLLogStream *log) { this->log = log; }
 	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
-	void Log(const char * f, ...);
-	void Log(int Level, const char * f, ...);
-	void RealTimeLog(QString Id, const QString &meshName, const char * f, ...);
+	template <typename... Ts>
+	void Log(const char * f, Ts&&... ts )
+	{
+		if(log != nullptr)
+		{
+			log->Logf(GLLogStream::FILTER, f, std::forward<Ts>(ts)...);
+		}
+	}
+
+	template <typename... Ts>
+	void Log(int Level, const char * f, Ts&&... ts )
+	{
+		if(log != nullptr)
+		{
+			log->Logf(Level, f, std::forward<Ts>(ts)...);
+		}
+	}
+
+	template <typename... Ts>
+	void RealTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts )
+	{
+		if(log != nullptr)
+		{
+			log->RealTimeLogf(Id, meshName, f, std::forward<Ts>(ts)...);
+		}
+	}
 };
 
 class MeshCommonInterface : public MeshLabInterface
