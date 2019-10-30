@@ -58,6 +58,7 @@ Section "MainSection" SEC01
   File "${DISTRIB_FOLDER}\meshlab.exe"
   File "${DISTRIB_FOLDER}\meshlabserver.exe"
 
+  SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\MeshLab"
   CreateShortCut "$SMPROGRAMS\MeshLab\MeshLab.lnk" "$INSTDIR\meshlab.exe"
   CreateShortCut "$DESKTOP\MeshLab.lnk" "$INSTDIR\meshlab.exe"
@@ -314,6 +315,7 @@ Section Uninstall
   Delete "$INSTDIR\textures\*.jpg"
   Delete "$INSTDIR\textures\*.tga"
 
+  SetShellVarContext all
   Delete "$SMPROGRAMS\MeshLab\Uninstall.lnk"
   Delete "$SMPROGRAMS\MeshLab\Website.lnk"
   Delete "$DESKTOP\MeshLab.lnk"
