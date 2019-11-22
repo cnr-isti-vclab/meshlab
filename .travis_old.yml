@@ -1,73 +1,91 @@
 # Enable C++ support
 language: cpp
 
+os:
+  - osx
+  - linux
+
+dist: trusty
+sudo: required
+
 compiler:
   - clang
 
-addons:
-  apt:
-    sources:
-    - sourceline: ppa:beineri/opt-qt-5.12.0-bionic
-    packages:
-    - qt512[QTPACKAGE]
-    - qt512script
-    - qt512xmlpatterns
-    - mesa-common-dev
-    - libglu1-mesa-dev
-  homebrew:
-    packages:
-    - llvm
-    - libomp
-    - qt
-
-matrix:
-  include:
-    - os: osx
-      osx_image: xcode11
-    
-    - os: linux
-      dist: bionic
-      sudo: required
-      
 git: 
   depth: 1
+
+before_install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+    then
+      # suggested by https://stackoverflow.com/questions/29721240/ci-for-qt-app-build-with-different-qt-versions      
+      #sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+      sudo add-apt-repository --yes ppa:beineri/opt-qt594-trusty
+      sudo apt-get update -qq
+    fi
 
 install:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then
-       export CXX = /usr/local/opt/llvm/bin/clang++
        npm install -g appdmg
        echo "appdmg version: " 
        npm list --depth=0
        export COLUMNS=80
-          
-       #Set up Qt from brew
-       export QTDIR=/usr/local/opt/qt
+       curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci
+       chmod +x ./macports-ci
+       ./macports-ci install
+       PATH="/opt/local/bin:$PATH"
+       sudo port -N install clang-6.0
+       sudo port -N install libomp
+       sudo port -N install qt59
+       sudo port -N install qt59-qtscript
+       sudo port -N install qt59-qttools
+       #Set up Qt environment
+       #Use Qt from MacPorts, change QTDIR if using own version of Qt
+       export QTDIR=/opt/local/libexec/qt5
        export PATH=$QTDIR/bin:$PATH
        export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-       export PKG_CONFIG_PATH=$QTDIR/lib:$PKG_CONFIG_PATH
+       export PKG_CONFIG_PATH=$QTDIR/lib:$PKG_CONFIG_PATH   
+       echo "----------"
+       echo $PATH
+       echo "----------"
+       clang --version
+       echo "----------"
+       qmake --version 
     fi
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
+      sudo apt-get -y install qt59[QTPACKAGE]
+      #sudo apt-get -y install qt5-default
+      #sudo apt-get -y install qtscript5-dev
+      #sudo apt-get -y install libqt5xmlpatterns5-dev
+      qmake --version
+      echo $QMAKESPEC
       export QMAKESPEC="linux-clang"      
     fi
   - cd ..
   - git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
   - cd meshlab
-
+cache:
+#  directories:
+#  - $HOME/.macports-ci-ccache
 script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="/usr/local/opt/llvm/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then which clang             ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then ln -s /usr/local/opt/llvm/bin/clang /usr/local/opt/llvm/bin/clang++-mp-3.9       ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then PATH="$QTDIR/bin:$PATH"          ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then LDFLAGS=-L$QTDIR/lib            ;fi
   - if [[ "$TRAVIS_OS_NAME" == "osx"   ]]; then CPPFLAGS=-I$QTDIR/include        ;fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt512/bin/qt512-env.sh        ;fi
+  #- if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt55/bin/qt55-env.sh        ;fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then source /opt/qt59/bin/qt59-env.sh        ;fi
   - cd src
   - cd external
   - qmake --version
   - qmake 
   - make -j4
   - cd ..
+  #- qmake meshlab_mini.pro
   - qmake meshlab_full.pro
   - make -j4
 after_success:

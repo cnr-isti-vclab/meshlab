@@ -16,10 +16,10 @@ macx:CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O3 -DNDEBUG
 macx:CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
 
 # uncomment these three lines for using the latest clang compiler on OSX to use openmp
-# using macports install clang-6.0 and libomp
-macx:QMAKE_CXX = /opt/local/bin/clang++-mp-6.0
-macx:QMAKE_CXXFLAGS += -fopenmp
-macx:QMAKE_LFLAGS += -L/opt/local/lib/libomp -lomp
+# using brew install clang from llvm and libomp
+macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
+macx:QMAKE_CXXFLAGS += -fopenmp -I/usr/local/opt/llvm/include
+macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib -lomp
 
 
 MACLIBDIR = ../../external/lib/macx64
