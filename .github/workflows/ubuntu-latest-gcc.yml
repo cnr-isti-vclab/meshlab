@@ -1,0 +1,40 @@
+name: UbuntuLatestGCC
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+       sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
+       sudo apt update
+       sudo apt install -y qt512base qt512script qt512xmlpatterns mesa-common-dev libglu1-mesa-dev
+       cd ..
+       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       cd meshlab       
+    - name: Compiling external
+      run: |
+        export QT_BASE_DIR=/opt/qt512
+        export QTDIR=$QT_BASE_DIR
+        export PATH=$QT_BASE_DIR/bin:$PATH
+        export LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH
+        export PKG_CONFIG_PATH=$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH
+        cd src/external
+        qmake external.pro
+        make -j4
+    - name: Compiling meshlab
+      run: |
+        #need to reset the qt env variables here...
+        export QT_BASE_DIR=/opt/qt512
+        export QTDIR=$QT_BASE_DIR
+        export PATH=$QT_BASE_DIR/bin:$PATH
+        export LD_LIBRARY_PATH=$QT_BASE_DIR/lib/x86_64-linux-gnu:$QT_BASE_DIR/lib:$LD_LIBRARY_PATH
+        export PKG_CONFIG_PATH=$QT_BASE_DIR/lib/pkgconfig:$PKG_CONFIG_PATH
+        cd src/
+        qmake meshlab_full.pro
+        make -j4
