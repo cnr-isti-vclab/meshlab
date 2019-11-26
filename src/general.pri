@@ -27,4 +27,11 @@ MACLIBDIR = ../../external/lib/macx64
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
+
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
+
+# Set up library search paths
+linux:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux
+linux-g++:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux-g++
+linux-g++-32:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-32
+linux-g++-64:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-64
