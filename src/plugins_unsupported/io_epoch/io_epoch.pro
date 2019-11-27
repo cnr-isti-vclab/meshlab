@@ -32,12 +32,7 @@ win32-msvc2008:LIBS	   += ../../external/lib/win32-msvc2008/bz2.lib
 win32-g++:LIBS	+= ../../external/lib/win32-gcc/libbz2.a
 linux-g++:LIBS	+= -lbz2
 
-win32-msvc2005:INCLUDEPATH += ../../external/bzip2-1.0.5
-win32-msvc2008:INCLUDEPATH += ../../external/bzip2-1.0.5
-win32-g++:INCLUDEPATH  += ../../external/bzip2-1.0.5
-linux-g++:INCLUDEPATH	+= ../../external/bzip2-1.0.5
-linux-g++-32:INCLUDEPATH	+= ../../external/bzip2-1.0.5
-linux-g++-64:INCLUDEPATH	+= ../../external/bzip2-1.0.5
+!CONFIG(system_bz2): INCLUDEPATH  *= ../../external/bzip2-1.0.5
 
 mac:LIBS   += -lbz2
 

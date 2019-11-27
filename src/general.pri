@@ -6,8 +6,9 @@
 DEFINES += MESHLAB_SCALAR=float
 
 VCGDIR   = ../../../vcglib
-EIGENDIR = $$VCGDIR/eigenlib
-GLEWDIR = ../external/glew-2.1.0
+CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
+!CONFIG(system_eigen3):EIGENDIR = $$VCGDIR/eigenlib
+!CONFIG(system_glew):  GLEWDIR = ../external/glew-2.1.0
 
 CONFIG += c++11
 

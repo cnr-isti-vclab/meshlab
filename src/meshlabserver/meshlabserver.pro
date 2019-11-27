@@ -1,6 +1,8 @@
 include (../general.pri)
 
-INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR $$GLEWDIR/include
+INCLUDEPATH += . .. $$VCGDIR $$EIGENDIR
+
+!CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 
 HEADERS        = 
 
@@ -43,6 +45,8 @@ win32-msvc2008:DEFINES += GLEW_STATIC
 win32-msvc2010:DEFINES += GLEW_STATIC 
 win32-msvc2012:DEFINES += GLEW_STATIC
 win32-msvc2015:DEFINES += GLEW_STATIC
+
+CONFIG(system_glew):LIBS += -lGLEW
 
 #DEFINES += GLEW_STATIC
 

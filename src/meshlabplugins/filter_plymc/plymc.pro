@@ -1,7 +1,6 @@
 TARGET = plymc
 DEPENDPATH += .
-INCLUDEPATH += ../../../../vcglib \
-    ../../code/lib/glew/include
+INCLUDEPATH += ../../../../vcglib
 CONFIG += console \
     stl \
     debug_and_release
@@ -23,6 +22,8 @@ HEADERS = plymc.h \
     tri_edge_collapse_mc.h \
     simplemeshprovider.h \
     ../../meshlab/alnParser.h
+
+!CONFIG(system_glew): INCLUDEPATH *= ../../code/lib/glew/include
 
 #macx-g++:DEFINES += NDEBUG
 

@@ -32,9 +32,12 @@ SOURCES       = edit_align_factory.cpp \
                 ../../meshlab/stdpardialog.cpp \
                 $$VCGDIR/wrap/ply/plylib.cpp\
                 $$VCGDIR/wrap/gui/trackball.cpp\
-                $$VCGDIR/wrap/gui/trackmode.cpp \
-                $$GLEWCODE 
-    
+                $$VCGDIR/wrap/gui/trackmode.cpp
+
+!CONFIG(system_glew): SOURCES += $$GLEWCODE
+CONFIG(system_glew) {
+    linux: LIBS += -lGLEW
+}
                 
 INCLUDEPATH += ../../external
 

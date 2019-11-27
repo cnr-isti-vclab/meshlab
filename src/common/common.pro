@@ -1,7 +1,6 @@
 include (../general.pri)
 EXIF_DIR = ../external/jhead-2.95
 
-GLEWCODE = $$GLEWDIR/src/glew.c
 
 win32-msvc2005:DESTDIR = ../distrib
 win32-msvc2008:DESTDIR = ../distrib
@@ -44,8 +43,11 @@ fi;\
 INCLUDEPATH *= ../.. \
     $$VCGDIR \
     $$EIGENDIR \
-    $$GLEWDIR/include \
     $$EXIF_DIR
+!CONFIG(system_glew) {
+	INCLUDEPATH *= $$GLEWDIR/include
+	GLEWCODE = $$GLEWDIR/src/glew.c
+}
 TEMPLATE = lib
 
 linux:CONFIG += dll
@@ -69,7 +71,6 @@ QT += script
 
 TARGET = common
 DEPENDPATH += .
-DEFINES += GLEW_STATIC
 
 win32-msvc:DEFINES += _CRT_SECURE_NO_WARNINGS
 
@@ -102,7 +103,11 @@ SOURCES += 	filterparameter.cpp \
 			mlapplication.cpp \
 			scriptsyntax.cpp \
 			searcher.cpp \
-			$$GLEWCODE \
 			meshlabdocumentxml.cpp \
 			meshlabdocumentbundler.cpp \
 			ml_shared_data_context.cpp 
+
+!CONFIG(system_glew) {
+	SOURCES += $$GLEWCODE
+	DEFINES += GLEW_STATIC
+}

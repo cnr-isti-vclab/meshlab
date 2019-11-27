@@ -8,8 +8,11 @@ HEADERS   = edit_paint_factory.h \
 			 
 SOURCES   = edit_paint_factory.h \
 			editpaint.cpp \
-			$$GLEWCODE  \
 			paintbox.cpp
+!CONFIG(system_glew): SOURCES += $$GLEWCODE
+CONFIG(system_glew) {
+    linux: LIBS += -lGLEW
+}
 	
 TARGET = editpaint
 

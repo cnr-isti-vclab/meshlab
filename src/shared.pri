@@ -2,7 +2,8 @@
 
 include (general.pri)
 VCGDIR = ../$$VCGDIR
-EIGENDIR = ../$$EIGENDIR
+# only adjust relative path if we're not using system Eigen
+!CONFIG(system_eigen3):EIGENDIR = ../$$EIGENDIR
 
 TEMPLATE      = lib
 CONFIG       += plugin
@@ -27,7 +28,8 @@ win32-msvc2013:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc2015:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
-INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR ../$$GLEWDIR/include
+INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR
+!CONFIG(system_glew): INCLUDEPATH *=  ../$$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
 
 # the following line is to hide the hundred of warnings about the deprecated

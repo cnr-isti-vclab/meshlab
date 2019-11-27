@@ -8,13 +8,14 @@ HEADERS		= meshio.h \
 			import_3ds.h \
 			io_3ds.h 
 				
-SOURCES       += 	meshio.cpp \
-			
-DEFINES += LIB3DS_STATIC
+SOURCES       += 	meshio.cpp
 
 TARGET        = io_3ds
 
-INCLUDEPATH += ../../external/lib3ds-1.3.0/
+!CONFIG(system_lib3ds) {
+	INCLUDEPATH *= ../../external/lib3ds-1.3.0/
+	DEFINES += LIB3DS_STATIC
+}
 
 # Notes on the paths of lib3ds files.
 # Once you have compiled the library put the lib files in a dir named lib/XXX/ 
@@ -27,8 +28,6 @@ win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/3ds.lib
 win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/3ds.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
 linux-g++:LIBS += -l3ds
-
-# unix:LIBS		+= -L../../../../code/lib/lib3ds-1.3.0/lib3ds/lib/unix -l3ds
 
 # mac:LIBS -= -l3ds 
 # mac:LIBS += ../../../../code/lib/lib3ds-1.3.0/lib/mac/lib3ds.a
