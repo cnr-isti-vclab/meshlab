@@ -30,8 +30,8 @@ Revision 1.1  2006/09/25 09:24:39  e_cerisoli
 add sampleplugins
 
 ****************************************************************************/
-
-
+#ifndef ALIGNGLOBAL_H
+#define ALIGNGLOBAL_H
 
 #include <common/interfaces.h>
 
@@ -101,3 +101,5 @@ public:
 
 //std::vector<SubGraph*> graphs;
 
+
+#endif // ALIGNGLOBAL_H
