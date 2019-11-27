@@ -318,6 +318,11 @@ switch(ID(action))
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
+		// Update Topology of result mesh
+		if (tri::HasFFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);    
+		if (tri::HasVFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 		Log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
 	} break;
 
@@ -358,6 +363,11 @@ switch(ID(action))
 				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
+		// Update Topology of result mesh
+		if (tri::HasFFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);    
+		if (tri::HasVFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 		Log("Deleted %i faces.", ffn - m.cm.fn);
 	} break;
 
@@ -376,6 +386,11 @@ switch(ID(action))
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
 		m.UpdateBoxAndNormals();
+		// Update Topology of result mesh
+		if (tri::HasFFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::FaceFace(m.cm);    
+		if (tri::HasVFAdjacency(m.cm))
+		    tri::UpdateTopology<CMeshO>::VertexFace(m.cm);
 		Log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
 	} break;
 
