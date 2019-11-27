@@ -36,6 +36,17 @@ Once you have the required lib (check for lib files in the folder `meshlab/src/e
 ### Platform specific notes
 On __osx__ some plugins exploit openmp parallelism (screened poisson, isoparametrization) so you need a compiler supporting it and the clang provided by xcode does not support openmp. Install 'clang++-mp-3.9' using macport or modify the .pro accordingly.
 
+On __Linux__, you may optionally choose to use your system installs of some libraries rather than the bundled versions.
+The library name, argument to add to all `qmake` calls (e.g. by adding to `QMAKE_FLAGS` in the example below), and Debian package name are listed below:
+
+* Eigen3 (at least 3.2) - `CONFIG+=system_eigen3` - package `libeigen3-dev`
+* GLEW (version 2 or newer) - `CONFIG+=system_glew` - package `libglew-dev`
+* lib3ds - `CONFIG+=system_lib3ds` - package `lib3ds-dev`
+* OpenCTM - `CONFIG+=system_openctm` - package `libopenctm-dev`
+* BZip2 - `CONFIG+=system_bzip2` - package `libbz2-dev`
+
+The versions found in Debian Buster are all new enough to meet these requirements.
+
 ###### Ubuntu 16 Compilation example
 * Make sure you selected the correct version of Qt: `qmake -v`. You can use `qtchooser -l` to list the versions and if in doubt use the direct path to your qmake binary.
 * Clone repositories:
@@ -45,7 +56,7 @@ git clone --depth 1 git@github.com:cnr-isti-vclab/vcglib.git -b devel
 cd meshlab
 ```
 * Set build flags:
-```
+```and
 QMAKE_FLAGS=('-spec' 'linux-g++' 'CONFIG+=release' 'CONFIG+=qml_release' 'CONFIG+=c++11' 'QMAKE_CXXFLAGS+=-fPIC' 'QMAKE_CXXFLAGS+=-std=c++11' 'QMAKE_CXXFLAGS+=-fpermissive' 'INCLUDEPATH+=/usr/include/eigen3' "LIBS+=-L`pwd`/lib/linux-g++")
 MAKE_FLAGS=('-j11')
 ```
