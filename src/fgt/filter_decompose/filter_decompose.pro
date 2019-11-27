@@ -11,7 +11,7 @@ SOURCES       += \
 ../../external/maxflow-v2.21.src/adjacency_list/graph.cpp \
 ../../../../vcglib/wrap/ply/plylib.cpp \
     filter_decomposer.cpp
-
+INCLUDEPATH *= ../../external/maxflow-v2.21.src/
 TARGET        = filter_decomposer
 
 
