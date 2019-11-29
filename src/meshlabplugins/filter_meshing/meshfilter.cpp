@@ -636,7 +636,7 @@ void ApplyTransform(MeshDocument &md, const Matrix44m &tr, bool toAllFlag, bool 
   if(toAllFlag)
   {
     MeshModel   *m=NULL;    
-    while (m=md.nextVisibleMesh(m))
+    while ((m=md.nextVisibleMesh(m)))
     {
       if(invertFlag) m->cm.Tr = Inverse(m->cm.Tr);
       if(composeFlage) m->cm.Tr = tr * m->cm.Tr;
