@@ -6,8 +6,9 @@
 DEFINES += MESHLAB_SCALAR=float
 
 VCGDIR   = ../../../vcglib
-EIGENDIR = $$VCGDIR/eigenlib
-GLEWDIR = ../external/glew-2.1.0
+CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
+!CONFIG(system_eigen3):EIGENDIR = $$VCGDIR/eigenlib
+!CONFIG(system_glew):  GLEWDIR = ../external/glew-2.1.0
 
 CONFIG += c++11
 
@@ -27,4 +28,11 @@ MACLIBDIR = ../../external/lib/macx64
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
+
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
+
+# Set up library search paths
+linux:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux
+linux-g++:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux-g++
+linux-g++-32:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-32
+linux-g++-64:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-64

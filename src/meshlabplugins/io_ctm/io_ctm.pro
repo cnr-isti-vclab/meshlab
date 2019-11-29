@@ -3,8 +3,9 @@ HEADERS += io_ctm.h \
     $$VCGDIR/wrap/io_trimesh/import_ctm.h \
     $$VCGDIR/wrap/io_trimesh/export_ctm.h
 SOURCES += io_ctm.cpp
-INCLUDEPATH += ../../external/OpenCTM-1.0.3/lib
 TARGET = io_ctm
+
+!CONFIG(system_openctm): INCLUDEPATH *= ../../external/OpenCTM-1.0.3/lib
 
 win32-msvc.net:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
 win32-msvc2005:QMAKE_CXXFLAGS += /DOPENCTM_STATIC
@@ -21,8 +22,6 @@ win32-msvc2010:LIBS	+= ../../external/lib/win32-msvc2010/openctm.lib
 win32-msvc2012:LIBS	+= ../../external/lib/win32-msvc2012/openctm.lib
 win32-msvc2015:LIBS	+= ../../external/lib/win32-msvc2015/openctm.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/libopenctm.a
-linux-g++:LIBS		+= $$PWD/../../external/lib/linux-g++/libopenctm.a
-linux-g++-32:LIBS	+= $$PWD/../../external/lib/linux-g++-32/libopenctm.a
-linux-g++-64:LIBS	+= $$PWD/../../external/lib/linux-g++-64/libopenctm.a
+linux-g++:LIBS		+= -lopenctm
 #macx:LIBS += ../../external/lib/macx/libopenctm.a
 macx:LIBS += $$MACLIBDIR/libopenctm.a

@@ -13,8 +13,11 @@ HEADERS       = edit_fit_factory.h \
 SOURCES       = edit_fit_factory.cpp \
 				editfit.cpp\
   				fittoolbox.cpp\
-  				primitive.cpp\
-				$$GLEWCODE				
+  				primitive.cpp
+!CONFIG(system_glew): SOURCES += $$GLEWCODE
+CONFIG(system_glew) {
+    linux: LIBS += -lGLEW
+}
 
 FORMS 	  += fittoolbox.ui
 

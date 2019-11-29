@@ -6,7 +6,8 @@ GLEWDIR = ../../../../external/glew-1.5.1
 win32-msvc2005:DEFINES += GLEW_STATIC
 win32-msvc2008:DEFINES += GLEW_STATIC 
 
-INCLUDEPATH  *= ../.. $$VCGDIR $$GLEWDIR/include
+INCLUDEPATH  *= ../.. $$VCGDIR
+!CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 DEPENDPATH += $$VCGDIR
 
 # the following line is to hide the hundred of warnings about the deprecated
@@ -109,7 +110,7 @@ QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 LIBS +=    -lGLEW 
 LIBS +=    -lkyotocabinet
 
-QMAKE_LIBDIR += $$GLEWDIR/lib
+!CONFIG(system_glew): QMAKE_LIBDIR += $$GLEWDIR/lib
 QMAKE_LIBDIR += ../../../../external/kyotocabinet-1.2.34
 
 

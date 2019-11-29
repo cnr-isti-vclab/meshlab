@@ -14,8 +14,9 @@ SOURCES     += filter_multiscale_align.cpp \
 TARGET       = filter_multiscale_align
 
 ## Dependencies
-INCLUDEPATH += lib \
-               $$VCGDIR/eigenlib   #needed by Grenaille
+INCLUDEPATH += lib
+!CONFIG(system_eigen3): INCLUDEPATH *= $$VCGDIR/eigenlib   #needed by Grenaille
+CONFIG(system_eigen3):  INCLUDEPATH *= $$EIGENDIR   #needed by Grenaille
 
 
 unix: QMAKE_CXXFLAGS += -DQ_OS_LINUX

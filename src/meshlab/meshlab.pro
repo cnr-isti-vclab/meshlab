@@ -10,8 +10,8 @@ INCLUDEPATH *= . \
 	../.. \
     $$VCGDIR \
     $$EIGENDIR \
-    $$GLEWDIR/include \
 	$$EXIF_DIR
+!CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 DEPENDPATH += $$VCGDIR \
     $$VCGDIR/vcg \
     $$VCGDIR/wrap
@@ -65,7 +65,6 @@ SOURCES = main.cpp \
 	$$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
 	$$VCGDIR/wrap/gui/coordinateframe.cpp \
-	#$$GLEWDIR/src/glew.c \
     glarea_setting.cpp \
 	filterthread.cpp 
 
@@ -156,6 +155,11 @@ win32-g++:LIBS        	+= -L../external/lib/win32-gcc -ljhead -L../distrib -lcom
 
 linux:LIBS += -L$$PWD/../external/lib/linux-g++ -ljhead -L../distrib -lcommon -lGLU
 linux:QMAKE_RPATHDIR += ../distrib
+
+!CONFIG(system_glew) {
+	INCLUDEPATH *= $$GLEWDIR/include
+}
+CONFIG(system_glew): LIBS += -lGLEW
 
 # uncomment in your local copy only in emergency cases.
 # We should never be too permissive

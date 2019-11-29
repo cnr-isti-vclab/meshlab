@@ -16,8 +16,11 @@ SOURCES  = rmmeshrender.cpp \
            glstateholder.cpp \
            parser/RmPass.cpp \
            parser/RmXmlParser.cpp \
-           parser/UniformVar.cpp \
-		   $$GLEWCODE
+           parser/UniformVar.cpp
+!CONFIG(system_glew): SOURCES += $$GLEWCODE
+CONFIG(system_glew) {
+    linux: LIBS += -lGLEW
+}
 
 FORMS    = rmShadowDialog.ui
 

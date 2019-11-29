@@ -14,6 +14,11 @@ addons:
     - qt512xmlpatterns
     - mesa-common-dev
     - libglu1-mesa-dev
+    - lib3ds-dev
+    - libglew-dev
+    - libeigen3-dev
+    - libopenctm-dev
+    - libbz2-dev
   homebrew:
     packages:
     - llvm
@@ -70,6 +75,19 @@ script:
   - cd ..
   - qmake meshlab_full.pro
   - make -j4
+  # On linux, rebuild using system libs.
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux"   ]]; then
+      make clean
+      cd external
+      make clean
+      qmake CONFIG+=system_eigen3 CONFIG+=system_glew CONFIG+=system_lib3ds CONFIG+=system_openctm CONFIG+=system_bzip2
+      make -j4
+      cd ..
+      qmake CONFIG+=system_eigen3 CONFIG+=system_glew CONFIG+=system_lib3ds CONFIG+=system_openctm CONFIG+=system_bzip2 meshlab_full.pro
+      make -j4
+    fi
+      
 after_success:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
