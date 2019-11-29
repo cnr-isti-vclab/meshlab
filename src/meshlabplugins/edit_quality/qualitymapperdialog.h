@@ -77,6 +77,7 @@ class TFDoubleClickCatcher : public QObject, public QGraphicsItem
 {
 	Q_OBJECT
 
+	Q_INTERFACES(QGraphicsItem)
 private:
 	CHART_INFO		*_environmentInfo;
 	QGraphicsView	*_myView;
