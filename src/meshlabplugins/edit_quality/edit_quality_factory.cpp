@@ -48,6 +48,7 @@ MeshEditInterface* QualityMapperFactory::getMeshEditInterface(QAction *action)
 	{
 		return new QualityMapperPlugin();
 	} else assert(0); //should never be asked for an action that isnt here
+	return nullptr;
 }
 
 QString QualityMapperFactory::getEditToolDescription(QAction *)
