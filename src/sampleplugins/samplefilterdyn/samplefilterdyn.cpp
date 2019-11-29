@@ -50,6 +50,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 		case FP_VERTEX_COLOR_NOISE :  return QString("Vertex Color Noise"); 
 		default : assert(0); 
 	}
+	return {};
 }
 
 // Info() must return the longer string describing each filtering action 
@@ -60,6 +61,7 @@ QString ExtraSampleDynPlugin::filterName(FilterIDType filterId) const
 		case FP_VERTEX_COLOR_NOISE :  return QString("Randomly add a small amount of a random base color to the mesh"); 
 		default : assert(0); 
 	}
+	return {};
 }
 
 // The FilterClass describes in which generic class of filters it fits. 

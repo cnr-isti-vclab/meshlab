@@ -47,6 +47,7 @@ MeshEditInterface* SampleEditFactory::getMeshEditInterface(QAction *action)
 	{
 		return new SampleEditPlugin();
 	} else assert(0); //should never be asked for an action that isnt here
+	return nullptr;
 }
 
 QString SampleEditFactory::getEditToolDescription(QAction *)
