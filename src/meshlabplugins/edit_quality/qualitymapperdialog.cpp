@@ -1211,7 +1211,7 @@ void QualityMapperDialog::on_resetButton_clicked()
 // Method invoked when moving left/right EqHandles. It calls drawEqualizerHistogram with the correct parameters
 void QualityMapperDialog::on_EqHandle_crossing_histogram(EqHandle* sender, bool insideHistogram)
 {
-	if (sender = _equalizerHandles[LEFT_HANDLE])
+	if (sender == _equalizerHandles[LEFT_HANDLE])
 		drawEqualizerHistogram(insideHistogram, _rightHandleWasInsideHistogram);
 	else
 		drawEqualizerHistogram(_leftHandleWasInsideHistogram, insideHistogram);
