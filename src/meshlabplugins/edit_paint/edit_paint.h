@@ -332,16 +332,17 @@ inline void fastMultiply(float x, float y, float z, double matrix[], double *xr,
  */
 inline int getNearest(QPointF center, QPointF *points, int num)
 {
+	using std::abs;
 	int index = 0;
 
-	float dist = fabsf(center.x() - points[0].x())*fabsf(center.x() - points[0].x()) + fabsf(center.y() - points[0].y())*fabsf(center.y() - points[0].y());
+	float dist = abs(center.x() - points[0].x())*abs(center.x() - points[0].x()) + abs(center.y() - points[0].y())*abs(center.y() - points[0].y());
 
 	float temp = 0;
 
 	for (int i = 1; i < num; i++)
 	{
-		temp = fabsf(center.x() - points[i].x())*fabsf(center.x() - points[i].x()) +
-			fabsf(center.y() - points[i].y())*fabsf(center.y() - points[i].y());
+		temp = abs(center.x() - points[i].x())*abs(center.x() - points[i].x()) +
+			abs(center.y() - points[i].y())*abs(center.y() - points[i].y());
 
 		if (temp < dist) {
 			index = i;

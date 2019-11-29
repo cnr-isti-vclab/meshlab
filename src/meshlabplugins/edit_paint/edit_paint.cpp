@@ -1342,7 +1342,7 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 			da = da / 2.0;
 			db = db / 2.0;
 			dc = dc / 2.0;
-			if (fabsf(zz - pix_z) < 0.001)
+			if (std::abs(zz - pix_z) < 0.001)
 			{
 				proj_points[i] = QPointF(pix_x, inv_yy);
 				break;
