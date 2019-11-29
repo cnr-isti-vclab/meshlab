@@ -463,7 +463,7 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 //			corrTsai->point2d = currentPoint2d;
 //		}
 //        qDebug("Point3d %f %f %f",(float)corrTsai->point3d.X(),(float)corrTsai->point3d.Y(),(float)(float)corrTsai->point3d.Z());
-//        qDebug("Point2d %f %f %f",(float)corrTsai->point2d.X(),(float)corrTsai->point2d.Y());
+//        qDebug("Point2d %f %f",(float)corrTsai->point2d.X(),(float)corrTsai->point2d.Y());
 //
 //        corrs->push_back(*corrTsai);
 //    }
@@ -637,7 +637,7 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
 			corrLevmar->point2d = currentPoint2d;
 		}
 		qDebug("Point3d %f %f %f",(float)corrLevmar->point3d.X(),(float)corrLevmar->point3d.Y(),(float)(float)corrLevmar->point3d.Z());
-		qDebug("Point2d %f %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
+		qDebug("Point2d %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
 
 		corrs->push_back(*corrLevmar);
 	}
