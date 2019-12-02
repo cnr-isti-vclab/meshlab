@@ -30,6 +30,8 @@
 #include <wrap/gl/shot.h>
 #include <wrap/callback.h>
 
+#include "floatbuffer.h"
+
 class QGLFramebufferObject;
 
 class RenderHelper {
