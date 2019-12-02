@@ -21,20 +21,20 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <QtGui>
 
 #include "align_tools.h"
 
-#include <meshlabplugins/edit_pickpoints/pickedPoints.h>
+#include "../edit_pickpoints/pickedPoints.h"
+#include "../edit_align/align/align_parameter.h"
+#include "../edit_align/meshtree.h"
+#include "../edit_align/align/AlignPair.h"
 
-#include <meshlabplugins/editalign/align/align_parameter.h>
-#include <meshlabplugins/editalign/meshtree.h>
-#include <meshlabplugins/editalign/align/AlignPair.h>
-
-#include <vcg/math/point_matching.h>
+#include <vcg/space/point_matching.h>
 
 #include <vcg/complex/algorithms/update/position.h>
 #include <vcg/complex/algorithms/update/bounding.h>
+
+#include <QtGui>
 
 using namespace vcg;
 
