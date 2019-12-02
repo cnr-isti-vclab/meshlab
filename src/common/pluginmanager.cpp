@@ -254,11 +254,24 @@ QString PluginManager::getBaseDirPath()
 QString PluginManager::getDefaultPluginDirPath()
 {
 	QDir pluginsDir(getBaseDirPath());
-	if (!pluginsDir.exists("plugins"))
-		//QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
-		qDebug("Meshlab Initialization: Serious error. Unable to find the plugins directory.");
-	pluginsDir.cd("plugins");
-	return pluginsDir.absolutePath();
+	if (pluginsDir.exists("plugins")) {
+		pluginsDir.cd("plugins");
+		return pluginsDir.absolutePath();
+	}
+#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+	if (pluginsDir.dirName() == "bin") {
+		pluginsDir.cdUp();
+		pluginsDir.cd("lib");
+		pluginsDir.cd("meshlab");
+		if (pluginsDir.exists("plugins")) {
+			pluginsDir.cd("plugins");
+			return pluginsDir.absolutePath();
+		}
+	}
+#endif
+	//QMessageBox::warning(0,"Meshlab Initialization","Serious error. Unable to find the plugins directory.");
+	qDebug("Meshlab Initialization: Serious error. Unable to find the plugins directory.");
+	return {};
 }
 
 
