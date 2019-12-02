@@ -74,6 +74,7 @@ HEADERS += 	filterparameter.h \
 			scriptsyntax.h \
 			meshlabdocumentxml.h \
 			ml_shared_data_context.h \
+			ml_selection_buffers.h \
 			meshlabdocumentxml.h
 			
 SOURCES += 	filterparameter.cpp \
@@ -89,7 +90,8 @@ SOURCES += 	filterparameter.cpp \
 			searcher.cpp \
 			meshlabdocumentxml.cpp \
 			meshlabdocumentbundler.cpp \
-			ml_shared_data_context.cpp 
+			ml_shared_data_context.cpp \
+			ml_selection_buffers.cpp
 
 !CONFIG(system_glew) {
 	SOURCES += $$GLEWCODE

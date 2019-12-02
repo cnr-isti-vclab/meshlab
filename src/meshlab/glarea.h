@@ -41,7 +41,7 @@
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
-#include "ml_selection_buffers.h"
+#include <common/ml_selection_buffers.h>
 #include "ml_default_decorators.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4

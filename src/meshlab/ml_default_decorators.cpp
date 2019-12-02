@@ -28,7 +28,7 @@
 #include <wrap/qt/gl_label.h>
 
 #include "mainwindow.h"
-#include "ml_selection_buffers.h"
+#include <common/ml_selection_buffers.h>
 
 MLDefaultMeshDecorators::MLDefaultMeshDecorators(MainWindow* mw)
 	:_mw(mw)
