@@ -101,7 +101,8 @@ QList<float> RichParameterSet::getFloatList(QString name)    const { return find
 
 RichParameterSet& RichParameterSet::operator=( const RichParameterSet& rps )
 {
-    return copy(rps);
+    copy(rps);
+    return *this;
 }
 
 bool RichParameterSet::operator==( const RichParameterSet& rps )
@@ -132,13 +133,15 @@ RichParameterSet::~RichParameterSet()
 
 RichParameterSet& RichParameterSet::copy( const RichParameterSet& rps )
 {
-    clear();
+    if (this != &rps) {
+        clear();
 
-    RichParameterCopyConstructor copyvisitor;
-    for(int ii = 0;ii < rps.paramList.size();++ii)
-    {
-        rps.paramList.at(ii)->accept(copyvisitor);
-        paramList.push_back(copyvisitor.lastCreated);
+        RichParameterCopyConstructor copyvisitor;
+        for(int ii = 0;ii < rps.paramList.size();++ii)
+        {
+            rps.paramList.at(ii)->accept(copyvisitor);
+            paramList.push_back(copyvisitor.lastCreated);
+        }
     }
     return (*this);
 }
