@@ -128,7 +128,7 @@ public:
         MM_ALL				= 0xffffffff
     };
 
-    MeshModel(MeshDocument *parent, QString fullFileName, QString labelName);
+    MeshModel(MeshDocument *parent, const QString& fullFileName, const QString& labelName);
 	MeshModel(MeshModel* cp);
     ~MeshModel()
     {
@@ -268,7 +268,7 @@ public:
     const QString shortName() const { return QFileInfo(fullPathFileName).fileName(); }
 
     Plane(const Plane& pl);
-    Plane(const QString pathName, const int _semantic);
+    Plane(const QString& pathName, const int _semantic);
 
 }; //end class Plane
 
@@ -484,8 +484,8 @@ public:
 
     /// returns the mesh with the given unique id
     MeshModel *getMesh(int id);
-    MeshModel *getMesh(QString name);
-    MeshModel *getMeshByFullName(QString pathName);
+    MeshModel *getMesh(const QString& name);
+    MeshModel *getMeshByFullName(const QString& pathName);
 
 
     //set the current mesh to be the one with the given ID
@@ -607,7 +607,7 @@ private:
 public:
     ///add a new mesh with the given name
     MeshModel *addNewMesh(QString fullPath, QString Label, bool setAsCurrent=true);
-    MeshModel *addOrGetMesh(QString fullPath, QString Label, bool setAsCurrent=true);
+    MeshModel *addOrGetMesh(QString fullPath, const QString& Label, bool setAsCurrent=true);
     
 
     ///remove the mesh from the list and delete it from memory

@@ -35,7 +35,7 @@
 using namespace vcg;
 
 // Very similar to the findParameter but this one does not print out debugstuff.
-bool RichParameterSet::hasParameter(QString name) const
+bool RichParameterSet::hasParameter(const QString& name) const
 {
     QList<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
@@ -46,7 +46,7 @@ bool RichParameterSet::hasParameter(QString name) const
     return false;
 }
 // You should never use this one to know if a given parameter is present.
-RichParameter* RichParameterSet::findParameter(QString name) const
+RichParameter* RichParameterSet::findParameter(const QString& name) const
 {
     QList<RichParameter*>::const_iterator fpli;
     for(fpli=paramList.begin();fpli!=paramList.end();++fpli)
@@ -60,7 +60,7 @@ RichParameter* RichParameterSet::findParameter(QString name) const
     return 0;
 }
 
-RichParameterSet& RichParameterSet::removeParameter(QString name){
+RichParameterSet& RichParameterSet::removeParameter(const QString& name){
     paramList.removeAll(findParameter(name));
     return (*this);
 }
@@ -75,29 +75,29 @@ RichParameterSet& RichParameterSet::addParam(RichParameter* pd )
 //--------------------------------------
 
 
-void RichParameterSet::setValue(QString name,const Value& newval){ findParameter(name)->val->set(newval); }
+void RichParameterSet::setValue(const QString& name,const Value& newval){ findParameter(name)->val->set(newval); }
 
 //- All the get<TYPE> are very similar. Nothing interesting here.
 
-        bool RichParameterSet::getBool(QString name)     const { return findParameter(name)->val->getBool(); }
-         int RichParameterSet::getInt(QString name)      const { return findParameter(name)->val->getInt();}
-       float RichParameterSet::getFloat(QString name)    const { return findParameter(name)->val->getFloat();}
-      QColor RichParameterSet::getColor(QString name)    const { return findParameter(name)->val->getColor();}
-     Color4b RichParameterSet::getColor4b(QString name)  const { return ColorConverter::ToColor4b(findParameter(name)->val->getColor());}
-     QString RichParameterSet::getString(QString name)   const { return findParameter(name)->val->getString();}
-   Matrix44f RichParameterSet::getMatrix44(QString name) const { return findParameter(name)->val->getMatrix44f();}
-   Matrix44<MESHLAB_SCALAR> RichParameterSet::getMatrix44m(QString name) const { return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getMatrix44f());}
-     Point3f RichParameterSet::getPoint3f(QString name)  const { return findParameter(name)->val->getPoint3f();}
-     Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(QString name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getPoint3f());}
-       Shotf RichParameterSet::getShotf(QString name)    const { return findParameter(name)->val->getShotf();}
-       Shot<MESHLAB_SCALAR> RichParameterSet::getShotm(QString name)    const { return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getShotf());}
-       float RichParameterSet::getAbsPerc(QString name)  const { return findParameter(name)->val->getAbsPerc();}
-         int RichParameterSet::getEnum(QString name)     const { return findParameter(name)->val->getEnum();}
-QList<float> RichParameterSet::getFloatList(QString name)    const { return findParameter(name)->val->getFloatList();}
- MeshModel * RichParameterSet::getMesh(QString name)         const { return findParameter(name)->val->getMesh();}
-       float RichParameterSet::getDynamicFloat(QString name) const { return findParameter(name)->val->getDynamicFloat();}
-     QString RichParameterSet::getOpenFileName(QString name) const { return findParameter(name)->val->getFileName();}
-     QString RichParameterSet::getSaveFileName(QString name) const { return findParameter(name)->val->getFileName(); }
+        bool RichParameterSet::getBool(const QString& name)     const { return findParameter(name)->val->getBool(); }
+         int RichParameterSet::getInt(const QString& name)      const { return findParameter(name)->val->getInt();}
+       float RichParameterSet::getFloat(const QString& name)    const { return findParameter(name)->val->getFloat();}
+      QColor RichParameterSet::getColor(const QString& name)    const { return findParameter(name)->val->getColor();}
+     Color4b RichParameterSet::getColor4b(const QString& name)  const { return ColorConverter::ToColor4b(findParameter(name)->val->getColor());}
+     QString RichParameterSet::getString(const QString& name)   const { return findParameter(name)->val->getString();}
+   Matrix44f RichParameterSet::getMatrix44(const QString& name) const { return findParameter(name)->val->getMatrix44f();}
+   Matrix44<MESHLAB_SCALAR> RichParameterSet::getMatrix44m(const QString& name) const { return Matrix44<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getMatrix44f());}
+     Point3f RichParameterSet::getPoint3f(const QString& name)  const { return findParameter(name)->val->getPoint3f();}
+     Point3<MESHLAB_SCALAR> RichParameterSet::getPoint3m(const QString& name)  const { return Point3<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getPoint3f());}
+       Shotf RichParameterSet::getShotf(const QString& name)    const { return findParameter(name)->val->getShotf();}
+       Shot<MESHLAB_SCALAR> RichParameterSet::getShotm(const QString& name)    const { return Shot<MESHLAB_SCALAR>::Construct(findParameter(name)->val->getShotf());}
+       float RichParameterSet::getAbsPerc(const QString& name)  const { return findParameter(name)->val->getAbsPerc();}
+         int RichParameterSet::getEnum(const QString& name)     const { return findParameter(name)->val->getEnum();}
+QList<float> RichParameterSet::getFloatList(const QString& name)    const { return findParameter(name)->val->getFloatList();}
+ MeshModel * RichParameterSet::getMesh(const QString& name)         const { return findParameter(name)->val->getMesh();}
+       float RichParameterSet::getDynamicFloat(const QString& name) const { return findParameter(name)->val->getDynamicFloat();}
+     QString RichParameterSet::getOpenFileName(const QString& name) const { return findParameter(name)->val->getFileName();}
+     QString RichParameterSet::getSaveFileName(const QString& name) const { return findParameter(name)->val->getFileName(); }
 
 RichParameterSet& RichParameterSet::operator=( const RichParameterSet& rps )
 {
@@ -159,7 +159,7 @@ RichParameterSet::RichParameterSet( const RichParameterSet& rps )
     }
 }
 
-RichParameterSet::RichParameterSet() :paramList()
+RichParameterSet::RichParameterSet()
 {
 
 }
@@ -628,7 +628,7 @@ BoolValue::BoolValue( const bool val ) : pval(val)
 
 }
 
-ParameterDecoration::ParameterDecoration( Value* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :fieldDesc(desc),tooltip(tltip),defVal(defvalue)
+ParameterDecoration::ParameterDecoration( Value* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :fieldDesc(desc),tooltip(tltip),defVal(defvalue)
 {
 
 }
@@ -638,71 +638,71 @@ ParameterDecoration::~ParameterDecoration()
     delete defVal;
 }
 
-BoolDecoration::BoolDecoration( BoolValue* defvalue,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+BoolDecoration::BoolDecoration( BoolValue* defvalue,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-IntDecoration::IntDecoration( IntValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+IntDecoration::IntDecoration( IntValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-FloatDecoration::FloatDecoration( FloatValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+FloatDecoration::FloatDecoration( FloatValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-StringDecoration::StringDecoration( StringValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+StringDecoration::StringDecoration( StringValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-Matrix44fDecoration::Matrix44fDecoration( Matrix44fValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+Matrix44fDecoration::Matrix44fDecoration( Matrix44fValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-Point3fDecoration::Point3fDecoration( Point3fValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+Point3fDecoration::Point3fDecoration( Point3fValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
-ShotfDecoration::ShotfDecoration( ShotfValue* defvalue,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
-{
-
-}
-
-ColorDecoration::ColorDecoration( ColorValue* defvalue,const QString desc /*= QString()*/,const QString tltip/*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
+ShotfDecoration::ShotfDecoration( ShotfValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-AbsPercDecoration::AbsPercDecoration( AbsPercValue* defvalue,const float minVal,const float maxVal,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
+ColorDecoration::ColorDecoration( ColorValue* defvalue,const QString& desc /*= QString()*/,const QString& tltip/*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip)
 {
 
 }
 
-EnumDecoration::EnumDecoration( EnumValue* defvalue, QStringList values,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),enumvalues(values)
+AbsPercDecoration::AbsPercDecoration( AbsPercValue* defvalue,const float minVal,const float maxVal,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
 {
 
 }
 
-DynamicFloatDecoration::DynamicFloatDecoration( DynamicFloatValue* defvalue, const float minVal,const float maxVal,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
+EnumDecoration::EnumDecoration( EnumValue* defvalue, QStringList values,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),enumvalues(std::move(values))
 {
 
 }
 
-SaveFileDecoration::SaveFileDecoration( FileValue* defvalue,const QString extension/*=QString(".*")*/,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),ext(extension)
+DynamicFloatDecoration::DynamicFloatDecoration( DynamicFloatValue* defvalue, const float minVal,const float maxVal,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),min(minVal),max(maxVal)
 {
 
 }
 
-OpenFileDecoration::OpenFileDecoration( FileValue* directorydefvalue,const QStringList extensions,const QString desc /*= QString()*/,const QString tltip /*= QString()*/ ) :ParameterDecoration(directorydefvalue,desc,tltip),exts(extensions)
+SaveFileDecoration::SaveFileDecoration( FileValue* defvalue,const QString& extension/*=QString(".*")*/,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),ext(extension)
 {
 
 }
 
-MeshDecoration::MeshDecoration( MeshValue* defvalue,MeshDocument* doc,const QString desc/*=QString()*/, const QString tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),meshdoc(doc)
+OpenFileDecoration::OpenFileDecoration( FileValue* directorydefvalue,const QStringList& extensions,const QString& desc /*= QString()*/,const QString& tltip /*= QString()*/ ) :ParameterDecoration(directorydefvalue,desc,tltip),exts(extensions)
+{
+
+}
+
+MeshDecoration::MeshDecoration( MeshValue* defvalue,MeshDocument* doc,const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/ ) :ParameterDecoration(defvalue,desc,tltip),meshdoc(doc)
 {
     meshindex = -1;
     if (doc != NULL)
@@ -710,7 +710,7 @@ MeshDecoration::MeshDecoration( MeshValue* defvalue,MeshDocument* doc,const QStr
     assert((meshindex != -1) || (doc == NULL));
 }
 
-MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString desc/*=QString()*/, const QString tltip/*=QString()*/ ) :ParameterDecoration(NULL,desc,tltip),meshdoc(doc)
+MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/ ) :ParameterDecoration(NULL,desc,tltip),meshdoc(doc)
 {
     assert(meshind < doc->size() && meshind >= 0);
     meshindex = meshind;
@@ -718,12 +718,12 @@ MeshDecoration::MeshDecoration( int meshind,MeshDocument* doc,const QString desc
         defVal = new MeshValue(doc->meshList.at(meshind));
 }
 
-MeshDecoration::MeshDecoration( int meshind,const QString desc/*=QString()*/,const QString tooltip/*=QString()*/) :ParameterDecoration(NULL,desc,tooltip),meshdoc(NULL),meshindex(meshind)
+MeshDecoration::MeshDecoration( int meshind,const QString& desc/*=QString()*/,const QString& tooltip/*=QString()*/) :ParameterDecoration(NULL,desc,tooltip),meshdoc(NULL),meshindex(meshind)
 {
 
 }
 
-RichParameter::RichParameter(const QString nm, Value* v, ParameterDecoration* prdec, bool isxmlpar) : name(nm), val(v), pd(prdec), isxmlparam(isxmlpar)
+RichParameter::RichParameter(const QString& nm, Value* v, ParameterDecoration* prdec, bool isxmlpar) : name(nm), val(v), pd(prdec), isxmlparam(isxmlpar)
 {
 
 }
@@ -742,11 +742,11 @@ RichBool::RichBool( const QString nm,const bool defval,const QString desc) : Ric
 
 }
 */
-RichBool::RichBool( const QString nm,const bool defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
+RichBool::RichBool( const QString& nm,const bool defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
 {}
 
 
-RichBool::RichBool(const QString nm, const bool val, const bool defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new BoolValue(val), new BoolDecoration(new BoolValue(defval), desc, tltip), isxmlpar)
+RichBool::RichBool(const QString& nm, const bool val, const bool defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new BoolValue(val), new BoolDecoration(new BoolValue(defval), desc, tltip), isxmlpar)
 {}
 
 void RichBool::accept( Visitor& v )
@@ -764,12 +764,12 @@ RichBool::~RichBool()
 
 }
 
-RichInt::RichInt( const QString nm,const int defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new IntValue(defval),new IntDecoration(new IntValue(defval),desc,tltip))
+RichInt::RichInt( const QString& nm,const int defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new IntValue(defval),new IntDecoration(new IntValue(defval),desc,tltip))
 {
 
 }
 
-RichInt::RichInt(const QString nm, const int val, const int defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new IntValue(val), new IntDecoration(new IntValue(defval), desc, tltip), isxmlpar)
+RichInt::RichInt(const QString& nm, const int val, const int defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new IntValue(val), new IntDecoration(new IntValue(defval), desc, tltip), isxmlpar)
 {
 
 }
@@ -789,12 +789,12 @@ RichInt::~RichInt()
 
 }
 
-RichFloat::RichFloat( const QString nm,const float defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new FloatValue(defval),new FloatDecoration(new FloatValue(defval),desc,tltip))
+RichFloat::RichFloat( const QString& nm,const float defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new FloatValue(defval),new FloatDecoration(new FloatValue(defval),desc,tltip))
 {
 
 }
 
-RichFloat::RichFloat(const QString nm, const float val, const float defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new FloatValue(val), new FloatDecoration(new FloatValue(defval), desc, tltip), isxmlpar)
+RichFloat::RichFloat(const QString& nm, const float val, const float defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new FloatValue(val), new FloatDecoration(new FloatValue(defval), desc, tltip), isxmlpar)
 {
 
 }
@@ -814,22 +814,22 @@ RichFloat::~RichFloat()
 
 }
 
-RichString::RichString( const QString nm,const QString defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,tltip))
+RichString::RichString( const QString& nm,const QString& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,tltip))
 {
 
 }
 
-RichString::RichString(const QString nm, const QString val, const QString defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new StringValue(val), new StringDecoration(new StringValue(defval), desc, tltip), isxmlpar)
+RichString::RichString(const QString& nm, const QString& val, const QString& defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new StringValue(val), new StringDecoration(new StringValue(defval), desc, tltip), isxmlpar)
 {
 
 }
 
-RichString::RichString( const QString nm,const QString defval ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),"",""))
+RichString::RichString( const QString& nm,const QString& defval ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),"",""))
 {
 
 }
 
-RichString::RichString( const QString nm,const QString defval,const QString desc ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,""))
+RichString::RichString( const QString& nm,const QString& defval,const QString& desc ) : RichParameter(nm,new StringValue(defval),new StringDecoration(new StringValue(defval),desc,""))
 {
 
 }
@@ -849,10 +849,10 @@ RichString::~RichString()
 
 }
 
-RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44f& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
-RichMatrix44f::RichMatrix44f( const QString nm,const vcg::Matrix44d& defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
+RichMatrix44f::RichMatrix44f( const QString& nm,const vcg::Matrix44f& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
+RichMatrix44f::RichMatrix44f( const QString& nm,const vcg::Matrix44d& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new Matrix44fValue(defval),new Matrix44fDecoration(new Matrix44fValue(defval),desc,tltip)) { }
 
-RichMatrix44f::RichMatrix44f(const QString nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool /*isxmlpar = false*/)
+RichMatrix44f::RichMatrix44f(const QString& nm, const vcg::Matrix44f& val, const vcg::Matrix44f& defval, const QString& desc /*= QString()*/, const QString& tltip /*= QString()*/, bool /*isxmlpar = false*/)
 	: RichParameter(nm, new Matrix44fValue(val), new Matrix44fDecoration(new Matrix44fValue(defval), desc, tltip)) { }
 
 void RichMatrix44f::accept( Visitor& v )
@@ -870,10 +870,10 @@ RichMatrix44f::~RichMatrix44f()
 
 }
 
-RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3f defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
-RichPoint3f::RichPoint3f( const QString nm,const vcg::Point3d defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
+RichPoint3f::RichPoint3f( const QString& nm,const vcg::Point3f& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
+RichPoint3f::RichPoint3f( const QString& nm,const vcg::Point3d& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new Point3fValue(defval),new Point3fDecoration(new Point3fValue(defval),desc,tltip)){}
 
-RichPoint3f::RichPoint3f(const QString nm, const vcg::Point3f val, const vcg::Point3f defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new Point3fValue(val), new Point3fDecoration(new Point3fValue(defval), desc, tltip), isxmlpar)
+RichPoint3f::RichPoint3f(const QString& nm, const vcg::Point3f& val, const vcg::Point3f& defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new Point3fValue(val), new Point3fDecoration(new Point3fValue(defval), desc, tltip), isxmlpar)
 {
 
 }
@@ -893,10 +893,10 @@ RichPoint3f::~RichPoint3f()
 
 }
 //----
-RichShotf::RichShotf( const QString nm,const vcg::Shotf defval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new ShotfValue(defval),new ShotfDecoration(new ShotfValue(defval),desc,tltip))
+RichShotf::RichShotf( const QString& nm,const vcg::Shotf& defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new ShotfValue(defval),new ShotfDecoration(new ShotfValue(defval),desc,tltip))
 {}
 
-RichShotf::RichShotf(const QString nm, const vcg::Shotf val, const vcg::Shotf defval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new ShotfValue(val), new ShotfDecoration(new ShotfValue(defval), desc, tltip), isxmlpar)
+RichShotf::RichShotf(const QString& nm, const vcg::Shotf& val, const vcg::Shotf& defval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new ShotfValue(val), new ShotfDecoration(new ShotfValue(defval), desc, tltip), isxmlpar)
 {}
 
 void RichShotf::accept( Visitor& v )
@@ -912,23 +912,23 @@ bool RichShotf::operator==( const RichParameter& rb )
 RichShotf::~RichShotf()
 { }
 //----
-RichColor::RichColor( const QString nm,const QColor defval,const QString desc,const QString tltip ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))
+RichColor::RichColor( const QString& nm,const QColor& defval,const QString& desc,const QString& tltip ) :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,tltip))
 {
 
 }
 
-RichColor::RichColor(const QString nm, const QColor val, const QColor defval, const QString desc, const QString tltip, bool isxmlpar) : RichParameter(nm, new ColorValue(val), new ColorDecoration(new ColorValue(defval), desc, tltip), isxmlpar)
+RichColor::RichColor(const QString& nm, const QColor& val, const QColor& defval, const QString& desc, const QString& tltip, bool isxmlpar) : RichParameter(nm, new ColorValue(val), new ColorDecoration(new ColorValue(defval), desc, tltip), isxmlpar)
 {
 
 }
 
-RichColor::RichColor( const QString nm,const QColor defval )
+RichColor::RichColor( const QString& nm,const QColor& defval )
 :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),"",""))
 {
 
 }
 
-RichColor::RichColor( const QString nm,const QColor defval,const QString desc )
+RichColor::RichColor( const QString& nm,const QColor& defval,const QString& desc )
 :RichParameter(nm,new ColorValue(defval),new ColorDecoration(new ColorValue(defval),desc,""))
 {
 }
@@ -948,12 +948,12 @@ RichColor::~RichColor()
 
 }
 
-RichAbsPerc::RichAbsPerc( const QString nm,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm, new AbsPercValue(defval), new AbsPercDecoration(new AbsPercValue(defval),minval,maxval,desc,tltip))
+RichAbsPerc::RichAbsPerc( const QString& nm,const float defval,const float minval,const float maxval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm, new AbsPercValue(defval), new AbsPercDecoration(new AbsPercValue(defval),minval,maxval,desc,tltip))
 {
 
 }
 
-RichAbsPerc::RichAbsPerc(const QString nm, const float val, const float defval, const float minval, const float maxval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new AbsPercValue(val), new AbsPercDecoration(new AbsPercValue(defval), minval, maxval, desc, tltip), isxmlpar)
+RichAbsPerc::RichAbsPerc(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new AbsPercValue(val), new AbsPercDecoration(new AbsPercValue(defval), minval, maxval, desc, tltip), isxmlpar)
 {
 
 }
@@ -973,12 +973,12 @@ RichAbsPerc::~RichAbsPerc()
 
 }
 
-RichEnum::RichEnum( const QString nm,const int defval,const QStringList values,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new EnumValue(defval),new EnumDecoration(new EnumValue(defval),values,desc,tltip))
+RichEnum::RichEnum( const QString& nm,const int defval,const QStringList& values,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new EnumValue(defval),new EnumDecoration(new EnumValue(defval),values,desc,tltip))
 {
 
 }
 
-RichEnum::RichEnum(const QString nm, const int val, const int defval, const QStringList values, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new EnumValue(val), new EnumDecoration(new EnumValue(defval), values, desc, tltip), isxmlpar)
+RichEnum::RichEnum(const QString& nm, const int val, const int defval, const QStringList& values, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new EnumValue(val), new EnumDecoration(new EnumValue(defval), values, desc, tltip), isxmlpar)
 {
 
 }
@@ -998,7 +998,7 @@ RichEnum::~RichEnum()
 
 }
 
-RichMesh::RichMesh( const QString nm,MeshModel* defval,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ )
+RichMesh::RichMesh( const QString& nm,MeshModel* defval,MeshDocument* doc,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ )
     :RichParameter(nm, new MeshValue(defval),new MeshDecoration( new MeshValue(defval),doc,desc,tltip))
 {
     meshindex = -1;
@@ -1007,7 +1007,7 @@ RichMesh::RichMesh( const QString nm,MeshModel* defval,MeshDocument* doc,const Q
     assert((meshindex != -1) || (doc == NULL));
 }
 
-RichMesh::RichMesh( const QString nm,int meshind,MeshDocument* doc,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ )
+RichMesh::RichMesh( const QString& nm,int meshind,MeshDocument* doc,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ )
     :RichParameter(nm,NULL, new MeshDecoration(meshind,doc,desc,tltip))
 {
     assert(meshind < doc->size() && meshind >= 0);
@@ -1018,13 +1018,13 @@ RichMesh::RichMesh( const QString nm,int meshind,MeshDocument* doc,const QString
         val = NULL;
 }
 
-RichMesh::RichMesh(const QString nm, int meshind, bool isxmlpar /*= false*/)
+RichMesh::RichMesh(const QString& nm, int meshind, bool isxmlpar /*= false*/)
 	: RichParameter(nm, new MeshValue(NULL), new MeshDecoration(meshind), isxmlpar)
 {
 	meshindex = meshind;
 }
 
-RichMesh::RichMesh(const QString nm, MeshModel* val, MeshModel* defval, MeshDocument* doc, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar)
+RichMesh::RichMesh(const QString& nm, MeshModel* val, MeshModel* defval, MeshDocument* doc, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar)
 	: RichParameter(nm, new MeshValue(val), new MeshDecoration(new MeshValue(defval), doc, desc, tltip), isxmlpar)
 {
     meshindex = -1;
@@ -1032,7 +1032,7 @@ RichMesh::RichMesh(const QString nm, MeshModel* val, MeshModel* defval, MeshDocu
         meshindex = doc->meshList.indexOf(val);
 }
 
-RichMesh::RichMesh(const QString nm, int meshind, const QString desc /*= QString()*/, const QString tltip /*= QString()*/, bool isxmlpar /*= false*/)
+RichMesh::RichMesh(const QString& nm, int meshind, const QString& desc /*= QString()*/, const QString& tltip /*= QString()*/, bool isxmlpar /*= false*/)
 	: RichParameter(nm, new MeshValue(NULL), new MeshDecoration(meshind, desc, tltip), isxmlpar)
 {
 	meshindex = meshind;
@@ -1053,12 +1053,12 @@ RichMesh::~RichMesh()
 
 }
 
-RichFloatList::RichFloatList( const QString nm,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
+RichFloatList::RichFloatList( const QString& nm,FloatListValue* v,FloatListDecoration* prdec ) :RichParameter(nm,v,prdec)
 {
 
 }
 
-RichFloatList::RichFloatList(const QString nm, FloatListValue* /*val*/, FloatListValue* v, FloatListDecoration* prdec, bool isxmlpar) : RichParameter(nm, v, prdec, isxmlpar)
+RichFloatList::RichFloatList(const QString& nm, FloatListValue* /*val*/, FloatListValue* v, FloatListDecoration* prdec, bool isxmlpar) : RichParameter(nm, v, prdec, isxmlpar)
 {
 
 }
@@ -1078,12 +1078,12 @@ RichFloatList::~RichFloatList()
 
 }
 
-RichDynamicFloat::RichDynamicFloat( const QString nm,const float defval,const float minval,const float maxval,const QString desc/*=QString()*/,const QString tltip/*=QString()*/ ) :RichParameter(nm,new DynamicFloatValue(defval),new DynamicFloatDecoration(new DynamicFloatValue(defval),minval,maxval,desc,tltip))
+RichDynamicFloat::RichDynamicFloat( const QString& nm,const float defval,const float minval,const float maxval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) :RichParameter(nm,new DynamicFloatValue(defval),new DynamicFloatDecoration(new DynamicFloatValue(defval),minval,maxval,desc,tltip))
 {
 
 }
 
-RichDynamicFloat::RichDynamicFloat(const QString nm, const float val, const float defval, const float minval, const float maxval, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new DynamicFloatValue(val), new DynamicFloatDecoration(new DynamicFloatValue(defval), minval, maxval, desc, tltip), isxmlpar)
+RichDynamicFloat::RichDynamicFloat(const QString& nm, const float val, const float defval, const float minval, const float maxval, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) : RichParameter(nm, new DynamicFloatValue(val), new DynamicFloatDecoration(new DynamicFloatValue(defval), minval, maxval, desc, tltip), isxmlpar)
 {
 
 }
@@ -1103,7 +1103,7 @@ RichDynamicFloat::~RichDynamicFloat()
 
 }
 
-RichOpenFile::RichOpenFile(const QString nm, const QString directorydefval, const QStringList exts /*= QString("*.*")*/, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) :RichParameter(nm, new FileValue(directorydefval), new OpenFileDecoration(new FileValue(directorydefval), exts, desc, tltip), isxmlpar)
+RichOpenFile::RichOpenFile(const QString& nm, const QString& directorydefval, const QStringList& exts /*= QString("*.*")*/, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) :RichParameter(nm, new FileValue(directorydefval), new OpenFileDecoration(new FileValue(directorydefval), exts, desc, tltip), isxmlpar)
 {
 }
 
@@ -1122,7 +1122,7 @@ RichOpenFile::~RichOpenFile()
 
 }
 
-RichSaveFile::RichSaveFile(const QString nm, const QString filedefval, const QString ext, const QString desc/*=QString()*/, const QString tltip/*=QString()*/, bool isxmlpar) :RichParameter(nm, new FileValue(filedefval), new SaveFileDecoration(new FileValue(filedefval), ext, desc, tltip), isxmlpar) 
+RichSaveFile::RichSaveFile(const QString& nm, const QString& filedefval, const QString& ext, const QString& desc/*=QString()*/, const QString& tltip/*=QString()*/, bool isxmlpar) :RichParameter(nm, new FileValue(filedefval), new SaveFileDecoration(new FileValue(filedefval), ext, desc, tltip), isxmlpar) 
 {
 
 }
