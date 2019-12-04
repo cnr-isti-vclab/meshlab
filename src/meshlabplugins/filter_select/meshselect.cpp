@@ -317,6 +317,7 @@ switch(ID(action))
 			if (!(*vi).IsD() && (*vi).IsS())
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
 		Log("Deleted %i vertices, %i faces.", vvn - m.cm.vn, ffn - m.cm.fn);
 	} break;
@@ -333,6 +334,7 @@ switch(ID(action))
 				if (!(*fi).IsD())
 					tri::Allocator<CMeshO>::DeleteFace(ml->cm, *fi);
 				ml->clearDataMask(MeshModel::MM_FACEFACETOPO);
+				ml->clearDataMask(MeshModel::MM_VERTFACETOPO);
 				ml->UpdateBoxAndNormals();
 				Log("Layer %i: deleted all %i faces.", ml->id(), ffn - ml->cm.fn);
 			}
@@ -344,6 +346,7 @@ switch(ID(action))
 			if (!(*fi).IsD())
 				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 			m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+			m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 			m.UpdateBoxAndNormals();
 			Log("Deleted all %i faces.", ffn - m.cm.fn);
 		}
@@ -357,6 +360,7 @@ switch(ID(action))
 			if (!(*fi).IsD() && (*fi).IsS())
 				tri::Allocator<CMeshO>::DeleteFace(m.cm, *fi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
 		Log("Deleted %i faces.", ffn - m.cm.fn);
 	} break;
@@ -375,6 +379,7 @@ switch(ID(action))
 			if (!(*vi).IsD() && (*vi).IsS())
 				tri::Allocator<CMeshO>::DeleteVertex(m.cm, *vi);
 		m.clearDataMask(MeshModel::MM_FACEFACETOPO);
+		m.clearDataMask(MeshModel::MM_VERTFACETOPO);
 		m.UpdateBoxAndNormals();
 		Log("Deleted %i faces, %i vertices.", ffn - m.cm.fn, vvn - m.cm.vn);
 	} break;
