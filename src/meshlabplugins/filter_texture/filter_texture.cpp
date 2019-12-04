@@ -22,7 +22,7 @@
 ****************************************************************************/
 #include <vcg/math/base.h>
 
-#include <eigenlib/Eigen/Sparse>
+#include <Eigen/Sparse>
 
 #include <float.h>
 #include <stdlib.h>

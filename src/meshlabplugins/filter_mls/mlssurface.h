@@ -27,7 +27,7 @@
 #include "balltree.h"
 #include <vcg/space/box3.h>
 #include <vcg/math/matrix33.h>
-#include <eigenlib/Eigen/Dense>
+#include <Eigen/Dense>
 #include <iostream>
 
 namespace GaelMls {
