@@ -378,7 +378,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
   case FF_VERT_SELECTION :
   {
     std::string expr = par.getString("condSelect").toStdString();
-	std::wstring wexpr = conversion::fromStringToWString(expr);
+	  auto wexpr = conversion::fromStringToWString(expr);
 
     // muparser initialization and explicitely define parser variables
     Parser p;
@@ -642,8 +642,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerVertexVariables(pv,m.cm);
 
     // set expression to calc with parser
+#ifdef _UNICODE
     pu.SetExpr(conversion::fromStringToWString(func_u));
     pv.SetExpr(conversion::fromStringToWString(func_v));
+#else
+    pu.SetExpr(func_u);
+    pv.SetExpr(func_v);
+#endif
 
     // every parser variables is related to vertex coord and attributes.
     time_t start = clock();
