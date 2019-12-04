@@ -1,0 +1,127 @@
+name: CompileAndDeploy
+
+on:
+  schedule:
+    - cron:  '0 0 1 * *' #every first day of the month at midnight
+
+jobs:
+  ubuntu_build:
+    name: Build MeshLab (Ubuntu)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+       sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
+       sudo apt update
+       sudo apt install -y qt512base qt512script qt512xmlpatterns mesa-common-dev libglu1-mesa-dev
+       cd ..
+       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       cd meshlab
+    - name: Setting env variables
+      shell: bash
+      run: |
+        echo '::set-env name=QT_BASE_DIR::/opt/qt512'
+        echo '::set-env name=QTDIR::/opt/qt512'
+        echo '::add-path::/opt/qt512/bin'
+        echo '::set-env name=LD_LIBRARY_PATH::/opt/qt512/lib/x86_64-linux-gnu:/opt/qt512/lib:${{env.LD_LIBRARY_PATH}}'
+        echo '::set-env name=PKG_CONFIG_PATH::/opt/qt512/lib/pkgconfig:${{env.PKG_CONFIG_PATH}}'       
+    - name: Compiling external
+      run: |
+        cd src/external
+        qmake external.pro
+        make -j8
+    - name: Compiling meshlab
+      run: |
+        cd src/
+        qmake meshlab_full.pro
+        make -j8
+  
+  macos_build:
+    name: Build MeshLab (MacOS)
+    runs-on: macos
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+        brew install llvm libomp qt
+        npm install -g appdmg
+        export COLUMNS=80
+        cd ..
+        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+        cd meshlab 
+    - name: Setting env variables
+      shell: bash
+      run: |
+        echo '::set-env name=QTDIR::/usr/local/opt/qt'
+        echo '::add-path::/usr/local/opt/qt/bin'
+        echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
+        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'       
+    - name: Compiling external
+      run: |
+        cd src/external
+        qmake external.pro
+        make -j8
+    - name: Compiling meshlab
+      run: |
+        cd src/
+        qmake meshlab_full.pro
+        make -j8
+    - name: Creating DMG
+      run: |
+         cd src/install/macx
+         ./macinstall_v2018.sh
+         echo "------ Completed!!! We should have a dmg here "
+         cd ../../..
+         ls -la src/distrib/MeshLab201804.dmg
+    - name: Upload DMG
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_dmg
+        path: src/distrib/MeshLab201804.dmg
+         
+  create_prerelease:
+    name: Create Prerelease
+    needs: [ubuntu_build, macos_build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setting env variables
+      id: envs
+      run: |
+        echo ::set-output name=date::"$(date +%Y-%m)"
+    - name: Publish PreRelease 
+      id: create_prerelease
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        tag_name: Meshlab-${{steps.envs.outputs.date}}-${{github.sha}}
+        release_name: MeshLab-${{steps.envs.outputs.date}}-beta
+        draft: false
+        prerelease: true
+    - name: Download DMG
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_dmg
+    - name: Upload PreReleaseMacOS
+      id: upload-prerelease-macos
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: meshlab_dmg/MeshLab201804.dmg
+        asset_name: MeshLab201804.dmg
+        asset_content_type: MeshLab for MacOS
+#    - name: Upload PreReleaseUbuntu
+#      id: upload-prerelease-ubuntu
+#      uses: actions/upload-release-asset@v1.0.1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+#        asset_path: src/distrib/MeshLab201804.dmg
+#        asset_name: MeshLab201804.dmg
+#        asset_content_type: MeshLab for MacOS

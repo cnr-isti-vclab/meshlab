@@ -1,0 +1,49 @@
+name: CompileMacOS
+
+on:
+  [push, pull_request]
+
+jobs:
+  macos_build:
+    name: Build MeshLab (MacOS)
+    runs-on: macos
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+        brew install llvm libomp qt
+        npm install -g appdmg
+        export COLUMNS=80
+        cd ..
+        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+        cd meshlab 
+    - name: Setting env variables
+      shell: bash
+      run: |
+        echo '::set-env name=QTDIR::/usr/local/opt/qt'
+        echo '::add-path::/usr/local/opt/qt/bin'
+        echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
+        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'       
+    - name: Compiling external
+      run: |
+        cd src/external
+        qmake external.pro
+        make -j8
+    - name: Compiling meshlab
+      run: |
+        cd src/
+        qmake meshlab_full.pro
+        make -j8
+    - name: Creating DMG
+      run: |
+         cd src/install/macx
+         ./macinstall_v2018.sh
+         echo "------ Completed!!! We should have a dmg here "
+         cd ../../..
+         ls -la src/distrib/MeshLab201804.dmg
+    - name: Upload DMG
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_dmg
+        path: src/distrib/MeshLab201804.dmg

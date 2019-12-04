@@ -1,0 +1,38 @@
+name: CompileUbuntu
+
+on:
+  [push, pull_request]
+
+jobs:
+  ubuntu_build:
+    name: Build MeshLab (Ubuntu)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+       sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
+       sudo apt update
+       sudo apt install -y qt512base qt512script qt512xmlpatterns mesa-common-dev libglu1-mesa-dev
+       cd ..
+       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       cd meshlab
+    - name: Setting env variables
+      shell: bash
+      run: |
+        echo '::set-env name=QT_BASE_DIR::/opt/qt512'
+        echo '::set-env name=QTDIR::/opt/qt512'
+        echo '::add-path::/opt/qt512/bin'
+        echo '::set-env name=LD_LIBRARY_PATH::/opt/qt512/lib/x86_64-linux-gnu:/opt/qt512/lib:${{env.LD_LIBRARY_PATH}}'
+        echo '::set-env name=PKG_CONFIG_PATH::/opt/qt512/lib/pkgconfig:${{env.PKG_CONFIG_PATH}}'       
+    - name: Compiling external
+      run: |
+        cd src/external
+        qmake external.pro
+        make -j8
+    - name: Compiling meshlab
+      run: |
+        cd src/
+        qmake meshlab_full.pro
+        make -j8
