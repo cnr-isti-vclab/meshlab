@@ -15,6 +15,7 @@ template<class ScalarType>
 class Normalized3DFunctor
 {
 public:
+	virtual ~Normalized3DFunctor() = default;
     virtual ScalarType operator()(const Point3<ScalarType>& normalizedPoint) = 0;
 };
 
