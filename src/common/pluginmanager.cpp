@@ -190,7 +190,7 @@ void PluginManager::loadPlugins(RichParameterSet& defaultGlobal)
 }
 
 // Search among all the decorator plugins the one that contains a decoration with the given name
-MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(QString name)
+MeshDecorateInterface *PluginManager::getDecoratorInterfaceByName(const QString& name)
 {
   foreach(MeshDecorateInterface *tt, this->meshDecoratePlugins())
   {

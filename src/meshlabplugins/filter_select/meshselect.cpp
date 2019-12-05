@@ -327,7 +327,7 @@ switch(ID(action))
 		if (par.getBool("allLayers"))
 		{
 			MeshModel   *ml = NULL;
-			while (ml = md.nextVisibleMesh(ml))
+			while ((ml = md.nextVisibleMesh(ml)))
 			{
 				int ffn = ml->cm.fn;
 				for (fi = ml->cm.face.begin(); fi != ml->cm.face.end(); ++fi)

@@ -31,6 +31,7 @@
 #include "mlexception.h"
 #include "ml_shared_data_context.h"
 
+#include <utility>
 
 using namespace vcg;
 
@@ -56,7 +57,7 @@ MeshModel *MeshDocument::getMesh(int i)
     return 0;
 }
 
-MeshModel *MeshDocument::getMesh(QString name)
+MeshModel *MeshDocument::getMesh(const QString& name)
 {
     foreach(MeshModel *mmp, meshList)
     {
@@ -66,7 +67,7 @@ MeshModel *MeshDocument::getMesh(QString name)
     return 0;
 }
 
-MeshModel *MeshDocument::getMeshByFullName(QString pathName)
+MeshModel *MeshDocument::getMeshByFullName(const QString& pathName)
 {
     foreach(MeshModel *mmp, meshList)
     {
@@ -77,15 +78,15 @@ MeshModel *MeshDocument::getMeshByFullName(QString pathName)
 }
 
 
-void MeshDocument::setCurrentMesh( int i)
+void MeshDocument::setCurrentMesh( int new_curr_id)
 {
-    if(i<0)
+    if(new_curr_id<0)
     {
         currentMesh=0;
         return;
     }
-    currentMesh = getMesh(i);
-    emit currentMeshChanged(i);
+    currentMesh = getMesh(new_curr_id);
+    emit currentMeshChanged(new_curr_id);
     assert(currentMesh);
 }
 
@@ -101,9 +102,9 @@ RasterModel *MeshDocument::getRaster(int i)
 }
 
 //if i is <0 it means that no currentRaster is set
-void MeshDocument::setCurrentRaster( int i)
+void MeshDocument::setCurrentRaster( int new_curr_id)
 {
-    if(i<0)
+    if(new_curr_id<0)
     {
         currentRaster=0;
         return;
@@ -111,25 +112,24 @@ void MeshDocument::setCurrentRaster( int i)
 
     foreach(RasterModel *rmp, rasterList)
     {
-        if(rmp->id() == i)
+        if(rmp->id() == new_curr_id)
         {
             currentRaster = rmp;
             return;
         }
     }
     assert(0);
-    return;
 }
 
-void MeshDocument::requestUpdatingPerMeshDecorators(int meshid)
+void MeshDocument::requestUpdatingPerMeshDecorators(int mesh_id)
 {	
-	emit updateDecorators(meshid);
+	emit updateDecorators(mesh_id);
 }
 
 template <class LayerElement>
 QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
 {
-    QString newName=meshLabel;
+    QString newName=std::move(meshLabel);
     typename QList<LayerElement*>::iterator mmi;
 
     for(mmi=elemList.begin(); mmi!=elemList.end(); ++mmi)
@@ -173,7 +173,7 @@ QString NameDisambiguator(QList<LayerElement*> &elemList, QString meshLabel )
 
 MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAsCurrent)
 {
-    QString newlabel = NameDisambiguator(this->meshList,label);
+    QString newlabel = NameDisambiguator(this->meshList,std::move(label));
 
     if(!fullPath.isEmpty())
     {
@@ -192,7 +192,7 @@ MeshModel * MeshDocument::addNewMesh(QString fullPath, QString label, bool setAs
     return newMesh;
 }
 
-MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool setAsCurrent)
+MeshModel * MeshDocument::addOrGetMesh(QString fullPath, const QString& label, bool setAsCurrent)
 {
   MeshModel *newMesh = getMesh(label);
   if(newMesh) {
@@ -200,16 +200,16 @@ MeshModel * MeshDocument::addOrGetMesh(QString fullPath, QString label, bool set
         this->setCurrentMesh(newMesh->id());
     return newMesh;
   }
-  return addNewMesh(fullPath,label,setAsCurrent);
+  return addNewMesh(std::move(fullPath),label,setAsCurrent);
 }
 
 bool MeshDocument::delMesh(MeshModel *mmToDel)
 {
     if(!meshList.removeOne(mmToDel))
         return false;
-    if((currentMesh == mmToDel) && (meshList.size() != 0))
+    if((currentMesh == mmToDel) && (!meshList.empty()))
         setCurrentMesh(this->meshList.at(0)->id());
-    else if (meshList.size() == 0)
+    else if (meshList.empty())
         setCurrentMesh(-1);
 
     int index = mmToDel->id();
@@ -256,7 +256,7 @@ bool MeshDocument::delRaster(RasterModel *rasterToDel)
 
     if(currentRaster == rasterToDel)
     {
-        if (rasterList.size() > 0)
+        if (!rasterList.empty())
             setCurrentRaster(rasterList.at(0)->id());
         else
             setCurrentRaster(-1);
@@ -330,7 +330,7 @@ bool MeshDocument::hasBeenModified()
 //    currTime.start();
 //}
 
-MeshDocument::MeshDocument() : QObject(),Log(),xmlhistory()
+MeshDocument::MeshDocument() 
 {
     meshIdCounter=0;
     rasterIdCounter=0;
@@ -364,7 +364,7 @@ void MeshModel::UpdateBoxAndNormals()
     }
 }
 
-MeshModel::MeshModel(MeshDocument *_parent, QString fullFileName, QString labelName)
+MeshModel::MeshModel(MeshDocument *_parent, const QString& fullFileName, const QString& labelName)
 {
     /*glw.m = &(cm);*/
     Clear();
@@ -444,7 +444,7 @@ Plane::Plane(const Plane& pl)
     image = QImage(pl.image);
 }
 
-Plane::Plane(const QString pathName, const int _semantic)
+Plane::Plane(const QString& pathName, const int _semantic)
 {
     semantic =_semantic;
     fullPathFileName = pathName;
@@ -453,16 +453,14 @@ Plane::Plane(const QString pathName, const int _semantic)
 }
 
 RasterModel::RasterModel(MeshDocument *parent, QString _rasterName)
-    : MeshLabRenderRaster()
 {
     _id=parent->newRasterId();
     par = parent;
-    this->_label= _rasterName;
+    this->_label= std::move(_rasterName);
     visible=true;
 }
 
 RasterModel::RasterModel()
-    : MeshLabRenderRaster()
 {
 
 }
@@ -474,7 +472,7 @@ MeshLabRenderRaster::MeshLabRenderRaster()
 }
 
 MeshLabRenderRaster::MeshLabRenderRaster( const MeshLabRenderRaster& rm )
-    :shot(rm.shot),planeList()
+    :shot(rm.shot)
 {
     for(QList<Plane*>::const_iterator it = rm.planeList.begin();it != rm.planeList.end();++it)
     {
@@ -777,7 +775,7 @@ int MeshModel::dataMask() const
 }
 
 MeshDocumentStateData::MeshDocumentStateData()
-	:_lock(QReadWriteLock::Recursive),_existingmeshesbeforeoperation()
+	:_lock(QReadWriteLock::Recursive)
 {
 
 }

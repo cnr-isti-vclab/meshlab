@@ -739,7 +739,7 @@ int FilterCameraPlugin::getPreConditions( QAction * a) const
 		return MeshModel::MM_VERTNORMAL;
 	}
 	assert(0);
-	return NULL;
+	return 0;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterCameraPlugin::filterArity( QAction* act ) const

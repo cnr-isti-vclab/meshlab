@@ -866,7 +866,7 @@ void EditReferencingPlugin::updateDistances()
 		{
 			scaleFact[dindex] = targDist[dindex] / currDist[dindex];
 
-			if ((useDistance[dindex]) && (!scaleFact[dindex] == 0.0))
+			if ((useDistance[dindex]) && (scaleFact[dindex] != 0.0))
 			{
 				curr_scale += scaleFact[dindex];
 				numValid++;

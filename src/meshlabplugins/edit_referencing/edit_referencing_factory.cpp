@@ -47,6 +47,7 @@ MeshEditInterface* EditReferencingFactory::getMeshEditInterface(QAction *action)
 	{
         return new EditReferencingPlugin();
 	} else assert(0); //should never be asked for an action that isnt here
+    return nullptr;
 }
 
 QString EditReferencingFactory::getEditToolDescription(QAction *)

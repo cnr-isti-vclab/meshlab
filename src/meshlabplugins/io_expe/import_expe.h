@@ -116,7 +116,7 @@ class ImporterExpePTS
 				"No errors", "Can't open file", "Invalid file", "Unsupported version"
 			};
 
-			if(message_code>4 || message_code<0)
+			if(message_code>=4 || message_code<0)
 				return "Unknown error";
 			else
 				return error_msg[message_code];

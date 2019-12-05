@@ -59,6 +59,7 @@ MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 		return new EditSelectPlugin(EditSelectPlugin::SELECT_AREA_MODE);
 
 	assert(0); //should never be asked for an action that isnt here
+	return nullptr;
 }
 
 QString EditSelectFactory::getEditToolDescription(QAction * /*a*/)

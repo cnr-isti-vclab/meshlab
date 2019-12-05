@@ -64,7 +64,7 @@ public:
 
     QMap<QString,RichParameterSet> generateFilterParameterMap();
 
-    MeshDecorateInterface* getDecoratorInterfaceByName(QString name);
+    MeshDecorateInterface* getDecoratorInterfaceByName(const QString& name);
 
     QDir pluginsDir;
     QMap<QString, QAction*> actionFilterMap;

@@ -84,6 +84,16 @@ PluginDialog::PluginDialog(const QString &path, const QStringList &fileNames,QWi
         pathDirectory=path;
 }
 
+static QString computeXmlFilename(const QDir & dir, const QString & filename)
+{
+    QFileInfo f(dir.absoluteFilePath(filename));
+    QString tmp = f.baseName() + ".xml";
+    if (tmp.startsWith("lib")) {
+        tmp.replace("lib", "");
+    }
+    return dir.absoluteFilePath(tmp);
+}
+
 void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fileNames)
 {
     if (fileNames.isEmpty()) {
@@ -136,9 +146,7 @@ void PluginDialog::populateTreeWidget(const QString &path,const QStringList &fil
                                 MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
                                 if (iXMLFilter)
                                 {
-                                    QFileInfo f(dir.absoluteFilePath(fileName));
-                                    QString tmp = f.baseName() + ".xml";
-                                    QString xmlFile = dir.absoluteFilePath(tmp);
+                                    QString xmlFile = computeXmlFilename(dir, fileName);
                                     XMLMessageHandler xmlErr;
                                     MeshLabXMLFilterContainer fc;
                                     fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
@@ -219,9 +227,7 @@ void PluginDialog::displayInfo(QTreeWidgetItem* item,int /* ncolumn*/)
         MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(plugin);
         if (iXMLFilter)
         {
-            QFileInfo f(dir.absoluteFilePath(parent));
-            QString tmp = f.baseName() + ".xml";
-            QString xmlFile = dir.absoluteFilePath(tmp);
+            QString xmlFile = computeXmlFilename(dir, parent);
             XMLMessageHandler xmlErr;
             MeshLabXMLFilterContainer fc;
             fc.xmlInfo = MLXMLPluginInfo::createXMLPluginInfo(xmlFile,MLXMLUtilityFunctions::xmlSchemaFile(),xmlErr);
