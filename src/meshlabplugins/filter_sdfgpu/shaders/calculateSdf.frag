@@ -56,7 +56,7 @@ vec4 project(vec4 coords)
 
 
 /*
-Recostruct normal at the point of intersection and check for false intersection.
+Reconstruct normal at the point of intersection and check for false intersection.
 For each ray we check the normal at the point of intersection,
 and ignore intersections where the normal at the intersection
 points is in the same direction as the point-of-origin
@@ -68,7 +68,7 @@ bool isFalseIntersection(vec3 P, vec3 objSpaceNormal)
     //normal at intersection point
     vec3 intersectionNormal = texture2D(normalTextureBack, P.xy).rgb;
 
-    //if angles dont differ at least 90 degrees reject intersection
+    //if angles don't differ at least 90 degrees reject intersection
     if(dot(intersectionNormal, objSpaceNormal) > 0.0) return true;
 
     return false;

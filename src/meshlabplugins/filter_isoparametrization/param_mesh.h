@@ -82,7 +82,7 @@ public:
   
 };
 
-///class maintaing additional auxiliary data used during the parameterization
+///class maintaining additional auxiliary data used during the parameterization
 class AuxiliaryVertData{
 public:
 	BaseVertex::ScalarType area;

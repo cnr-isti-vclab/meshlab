@@ -110,14 +110,14 @@ QString SdfGpuPlugin::filterInfo(FilterIDType filterId) const
     case SDF_SDF                   :  return QString("Calculate the SDF (<b>shape diameter function</b>) on the mesh, you can visualize the result colorizing the mesh. "
                                           "The SDF is a scalar function on the mesh surface and represents the neighborhood diameter of the object at each point. "
                                           "Given a point on the mesh surface,"
-                                          "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lenghts. "
+                                          "several rays are sent inside a cone, centered around the point's inward-normal, to the other side of the mesh. The result is a weighted sum of all rays lengths. "
                                           "For further details, see the reference paper:<br>"
                                           "<b>Shapira Shamir Cohen-Or,<br>"
                                           "Consistent Mesh Partitioning and Skeletonisation using the shaper diamter function, Visual Comput. J. (2008)</b> ");
-    case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration paramater. "
-                                          "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration paramater. After having calulated the correct value,"
+    case SDF_DEPTH_COMPLEXITY      :  return QString("Calculate the depth complexity of the mesh, that is: the maximum number of layers that a ray can hit while traversing the mesh. To have a correct value, you should specify and high value in the peeling iteration parameter. "
+                                          "You can read the result in the MeshLab log window. <b>If warnings are not present, you have the exact value, otherwise try increasing the peeling iteration parameter. After having calculated the correct value,"
                                           "you can ignore further warnings that you may get using that value.</b>. ");
-    case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficents for the mesh. Obscurance is introduced to avoid the "
+    case SDF_OBSCURANCE            :  return QString("Calculates obscurance coefficients for the mesh. Obscurance is introduced to avoid the "
                                           "disadvantages of both classical ambient term and ambient occlusion. "
                                           "In ambient occlusion, totally occluded parts of the mesh are black. "
                                           "Instead obscurance, despite still based on a perfectly diffuse light coming "

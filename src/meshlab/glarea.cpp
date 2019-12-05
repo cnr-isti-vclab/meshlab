@@ -2229,7 +2229,7 @@ void GLArea::loadShot(const QPair<Shotm,float> &shotAndScale){
     //Point3f tra = trackball.track.tra;
     //
     //// Apply this formula:
-    //// SR(t+p) -v = k[S'R'(t'+p) -v] forall p, R=R', k is a costant
+    //// SR(t+p) -v = k[S'R'(t'+p) -v] forall p, R=R', k is a constant
     //// SR(t) -v = k[S'R(t') -v]
     //// t' = 1/k* S'^-1St + (k-1)/k S'^-1*R^-1v
     //Matrix44f s0 = Matrix44f().SetScale(trackball.track.sca,trackball.track.sca, trackball.track.sca);

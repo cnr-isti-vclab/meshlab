@@ -1493,9 +1493,9 @@ void RenderArea::UnifySet()
                     next->WT(n).u() = mu;
                     next->WT(n).v() = mv;
                 }
-                CFaceO* previus = next;
+                CFaceO* previous = next;
                 next = next->VFp(n);
-                n = previus->VFi(n);
+                n = previous->VFi(n);
                 if (next == 0) break;
             }
             int n1 = path1[i]->VFi();
@@ -1592,7 +1592,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
                     CVertexO *tmp2 = p->V((j+1)%3);
                     bool added = false;
                     int n, oldn;
-                    CFaceO *next, *previus;
+                    CFaceO *next, *previous;
                     float tu, tv;
                     if (tmp1 == path[path.size()-1] && ((verso && p->WT(j).u() >= oldu) || (!verso && p->WT(j).u() <= oldu)))
                     {
@@ -1602,7 +1602,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
                         else drawnPath1.push_back(Point2f(p->WT((j+1)%3).u(),p->WT((j+1)%3).v()));
                         if (tmp2 == end) {finish = true; break;}
                         n = tmp2->VFi(), oldn = (j+1)%3;
-                        next = tmp2->VFp(), previus = p;
+                        next = tmp2->VFp(), previous = p;
                         added = true;
                         lastadd = index; lastex = j;
                     }
@@ -1614,7 +1614,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
                         else drawnPath1.push_back(Point2f(p->WT(j).u(),p->WT(j).v()));
                         if (tmp1 == end) {finish = true; break;}
                         n = tmp1->VFi(), oldn = j;
-                        next = tmp1->VFp(), previus = p;
+                        next = tmp1->VFp(), previous = p;
                         added = true;
                         lastadd = index; lastex = j;
                     }
@@ -1626,10 +1626,10 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
                         {
                             if (tu == next->WT(n).u() && tv == next->WT(n).v() && next != p && !next->IsV())
                                 Q.push_back(next);
-                            previus = next;
+                            previous = next;
                             oldn = n;
                             next = next->VFp(n);
-                            n = previus->VFi(n);
+                            n = previous->VFi(n);
                             if (next == 0) break;
                         }
                         break;
@@ -1662,7 +1662,7 @@ vector<CVertexO*> RenderArea::FindPath(CVertexO* begin, CVertexO* end, CFaceO* f
 
 void RenderArea::HandleScale(QPoint e)
 {
-    // Move the rectangle of scaling and resize the selction area
+    // Move the rectangle of scaling and resize the selection area
     int tx = rectX - tpanX + e.x();
     int ty = rectY - tpanY + e.y();
     switch(highlighted)

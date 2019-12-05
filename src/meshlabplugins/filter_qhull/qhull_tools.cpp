@@ -80,7 +80,7 @@ facetT *compute_convex_hull(int dim, int numpoints, MeshModel &m)
     int exitcode;					/* 0 if no error from qhull */
 
     /* initialize points[] here.
-       points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+       points is an array of coordinates. Each triplet of coordinates represents a 3d vertex */
     points= qh_readpointsFromMesh(&numpoints, &dim, m);
 
     exitcode= qh_new_qhull (dim, numpoints, points, ismalloc,
@@ -134,7 +134,7 @@ facetT *compute_delaunay(int dim, int numpoints, MeshModel &m)
     int exitcode;						 /* 0 if no error from qhull */
 
     /* initialize points[] here.
-       points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+       points is an array of coordinates. Each triplet of coordinates represents a 3d vertex */
     points= qh_readpointsFromMesh(&numpoints, &dim, m);
 
     exitcode= qh_new_qhull (dim, numpoints, points, ismalloc,
@@ -192,7 +192,7 @@ bool compute_voronoi(int dim, int numpoints, MeshModel &m, MeshModel &pm, float 
     int exitcode;						/* 0 if no error from qhull */
 
     /* initialize points[] here.
-       points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+       points is an array of coordinates. Each triplet of coordinates represents a 3d vertex */
     points= qh_readpointsFromMesh(&numpoints, &dim, m);
     coordT* copypoints= (coordT*)malloc(numpoints*dim*sizeof(coordT));
     for(int i=0;i<numpoints*dim;i++)
@@ -498,7 +498,7 @@ bool compute_alpha_shapes(int dim, int numpoints, MeshModel &m, MeshModel &pm, d
     int exitcode;						/* 0 if no error from qhull */
 
     /* initialize points[] here.
-       points is an array of coordinates. Each triplet of coordinates rapresents a 3d vertex */
+       points is an array of coordinates. Each triplet of coordinates represents a 3d vertex */
     points= qh_readpointsFromMesh(&numpoints, &dim, m);
 
     int ridgesCount=0;
@@ -862,7 +862,7 @@ int visible_points(int dim, int numpoints, MeshModel &m, MeshModel &pm,MeshModel
 
     coordT *qh_readpointsFromMesh(int *numpoints, int *dimension, MeshModel &m)
         build an array of coordinates from the vertices of the mesh m.
-        Each triplet of coordinates rapresents a 3d vertex.
+        Each triplet of coordinates represents a 3d vertex.
 
     returns
         the array of coordinates.

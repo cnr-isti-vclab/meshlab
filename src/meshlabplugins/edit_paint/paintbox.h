@@ -180,7 +180,7 @@ inline float brush(Brush b, float distance, float dx, float dy, float hardness)
 	{
 		case CIRCLE : //circle
 			if (distance >= 1.0) op = 1.0;
-			else if (distance * 100.0 > hardness) //if after the treshold of total color 
+			else if (distance * 100.0 > hardness) //if after the threshold of total color 
 			{
 				op = (distance * 100.0 - hardness)/ (float) (100 - hardness);
 			}

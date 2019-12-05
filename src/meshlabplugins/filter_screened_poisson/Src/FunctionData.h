@@ -81,7 +81,7 @@ public:
 	 *		2] L2-norm equals 1
 	 * <useDotRatios> specifies if dot-products of derivatives
 	 * should be pre-divided by function integrals
-	 * <reflectBoundary> spcifies if function space should be
+	 * <reflectBoundary> specifies if function space should be
 	 * forced to be reflectively symmetric across the boundary
 	 ********************************************************/
 #if BOUNDARY_CONDITIONS

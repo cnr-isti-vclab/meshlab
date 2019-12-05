@@ -46,7 +46,7 @@ MeshEditInterface* EditSliceFactory::getMeshEditInterface(QAction *action)
 	if(action == editSlice)
 	{
 		return new ExtraMeshSlidePlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else assert(0); //should never be asked for an action that isn't here
 }
 
 QString EditSliceFactory::getEditToolDescription(QAction *)

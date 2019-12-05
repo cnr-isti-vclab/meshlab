@@ -186,7 +186,7 @@ int floatbuffer::initborder(floatbuffer* zerofrom)
  maxf = -10000000;
  minf =  10000000;
 
- // setting inital data
+ // setting initial data
  //
  // -99 outside object (using depthmap to decide -> if (zerofrom==0) )
  //
@@ -195,7 +195,7 @@ int floatbuffer::initborder(floatbuffer* zerofrom)
  //  -1 on pixels still to be filled
 
 
- //getting max/min for treshold
+ //getting max/min for threshold
  for(int kk=0; kk< sx*sy; kk++)
  {
 	{

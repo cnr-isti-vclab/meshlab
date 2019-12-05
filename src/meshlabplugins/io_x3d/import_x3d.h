@@ -1162,7 +1162,7 @@ namespace io {
 				std::vector<std::vector<int> > faceVect;
 				for (int ff = 0; ff < nFace; ff++)
 				{
-					//Tesselate the quadrangular face
+					//Tessellate the quadrangular face
 					std::vector<std::vector<CoordType> > polygonVect;
 					std::vector<CoordType> polygon;
 					for (int tt = 0; tt < 4; tt++)
@@ -1641,7 +1641,7 @@ namespace io {
 						return E_INVALIDINDEXFACESET;
 					}
 					ci++;
-					//Tesselate polygon
+					//Tessellate polygon
 					polygonVect.push_back(polygon);
 					std::vector<int> indexVect;
 					if (polygon.size() == 3)

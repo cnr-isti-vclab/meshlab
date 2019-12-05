@@ -207,7 +207,7 @@ public:
 
 		// update bridging status for holes remaining.
 		// some hole marked as "bridged" can be adjacent to bridge which is accepted
-		// because it is adjacent to hole filled and accepted, so they arent "bridged" now.
+		// because it is adjacent to hole filled and accepted, so they aren't "bridged" now.
 		for( it= holes.begin(); it != holes.end(); it++)
 		{
 			assert(!it->IsFilled());

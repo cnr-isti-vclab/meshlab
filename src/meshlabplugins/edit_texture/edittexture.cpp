@@ -224,7 +224,7 @@ bool EditTexturePlugin::StartEdit(MeshModel &m, GLArea *gla )
 	connect(this, SIGNAL(setSelectionRendering(bool)),gla,SLOT(setSelectionRendering(bool)));
 	setSelectionRendering(true);
 
-	// Create an istance of the interface
+	// Create an instance of the interface
 	if (widget == 0)
 	{
 		widget = new TextureEditor(gla->window(), &m, gla, degenerate);
@@ -305,7 +305,7 @@ void EditTexturePlugin::InitTexture(MeshModel &m)
 
 // DA METTERE IN Clean.h
 /**
-Chek if the parametrization is valid
+Check if the parametrization is valid
 */
 bool EditTexturePlugin::HasCollapsedTextCoords(MeshModel &m)
 {

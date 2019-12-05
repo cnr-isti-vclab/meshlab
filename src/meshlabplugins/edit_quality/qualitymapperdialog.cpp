@@ -428,7 +428,7 @@ bool QualityMapperDialog::drawEqualizerHistogram(bool leftHandleIsInsideHistogra
 			QMessageBox::warning(this, tr("Quality Mapper"), tr("The model vertex quality is a constant"), QMessageBox::Ok); 
 			return false;
 		}
-		//building histogram chart informations
+		//building histogram chart information
 		_histogram_info = new CHART_INFO( ui.equalizerGraphicsView, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV(), 0, computeEqualizerMaxY(_equalizer_histogram, _equalizer_histogram->MinV(), _equalizer_histogram->MaxV()) );
 	}
 	else
@@ -565,7 +565,7 @@ void QualityMapperDialog::initTF()
 	//comboBox operations complete. Re-enabling signals for comboBox
 	ui.presetComboBox->blockSignals( false );
 
-	//building transfer function chart informations (if necessary)
+	//building transfer function chart information (if necessary)
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView, /*_transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 
@@ -637,7 +637,7 @@ void QualityMapperDialog::drawGammaCorrection()
 	painter.drawLine(0,height-1,width-1,0);
 
 
-	//// Painting the spline representing the exponential funcion: x^exp, 0<=x<=1
+	//// Painting the spline representing the exponential function: x^exp, 0<=x<=1
 	int c = _equalizerMidHandlePercentilePosition*width;
 	QPainterPath path;
 	path.moveTo(0, height);
@@ -658,7 +658,7 @@ void QualityMapperDialog::drawTransferFunction()
 	//TF must exist!
 	assert(_transferFunction != 0);
 
-	//building transfer function chart informations
+	//building transfer function chart information
 	if ( _transferFunction_info == 0 )
 		_transferFunction_info = new CHART_INFO( ui.transferFunctionView, /* _transferFunction->size(),*/ 0.0f, 1.0f, 0.0f, 1.0f );
 	else
@@ -758,7 +758,7 @@ void QualityMapperDialog::updateColorBand()
 }
 
 /*
-Draws the partial histogram as background of the transfer funtion scene
+Draws the partial histogram as background of the transfer function scene
 */
 void QualityMapperDialog::drawTransferFunctionBG ()
 {
@@ -1325,7 +1325,7 @@ void QualityMapperDialog::on_TF_view_doubleClicked(QPointF pos)
 		on_applyButton_clicked();
 }
 
-// Cut unuseful tails from equalizer histogram
+// Cut useless tails from equalizer histogram
 void QualityMapperDialog::on_clampButton_clicked()
 {
 	_leftHandleWasInsideHistogram = false;

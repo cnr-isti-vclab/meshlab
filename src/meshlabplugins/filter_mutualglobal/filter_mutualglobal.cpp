@@ -78,7 +78,7 @@ QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
-// More than a single class can be choosen.
+// More than a single class can be chosen.
 FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
 {
   switch(ID(a))

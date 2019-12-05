@@ -46,7 +46,7 @@ MeshEditInterface* EditPickPointsFactory::getMeshEditInterface(QAction *action)
 	if(action == editPickPoints)
 	{
 		return new EditPickPointsPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else assert(0); //should never be asked for an action that isn't here
 }
 
 QString EditPickPointsFactory::getEditToolDescription(QAction *)

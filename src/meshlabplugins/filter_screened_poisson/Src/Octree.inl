@@ -1008,7 +1008,7 @@ void OctNode< NodeData >::ConstNeighborKey< LeftRadius , RightRadius >::getNeigh
 	neighbors.clear();
 	if( !node ) return;
 
-	// [WARNING] This estimate of the required radius is somewhat conservative if the readius is odd (depending on where the node is relative to its parent)
+	// [WARNING] This estimate of the required radius is somewhat conservative if the radius is odd (depending on where the node is relative to its parent)
 	const unsigned int _PLeftRadius = (_LeftRadius+1)/2 , _PRightRadius = (_RightRadius+1)/2;
 	// If we are at the root of the tree, we are done
 	if( !node->parent ) neighbors.neighbors[_LeftRadius][_LeftRadius][_LeftRadius] = node;

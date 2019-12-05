@@ -27,7 +27,7 @@
 using namespace vcg;
 using namespace mu;
 
-// MidPoint Function Object used by RefineE() to find new vertex position on splitted edge
+// MidPoint Function Object used by RefineE() to find new vertex position on split edge
 // Sets new attributes values on created vertex.
 template<class MESH_TYPE>
 struct MidPointCustom : public std::unary_function<face::Pos<typename MESH_TYPE::FaceType> , typename MESH_TYPE::CoordType >

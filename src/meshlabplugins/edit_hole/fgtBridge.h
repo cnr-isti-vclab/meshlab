@@ -369,8 +369,8 @@ public:
     /*  Build a bridge inner to the same hole. It chooses the best bridge computing quality
      *  of 2 faces and similarity (as number of edge) of two next hole. Bridge is build follow
      *  bridge's rule, bridge must have 2 border edge.
-     *  infoLabel paramter is used to show work progress.
-     *  Return number of bridge builded.
+     *  infoLabel parameter is used to show work progress.
+     *  Return number of bridge built.
      */
      static bool AutoSelfBridging(HoleSetManager<MESH>* holesManager, double dist_coeff=0.0, std::vector<FacePointer *> *app=0)
     {
@@ -472,7 +472,7 @@ public:
 
     /*  It connects iteratively selected holes with the best bridge.
      *  Result is unique hole instead of init holes.
-     *  Return number of bridges builded.
+     *  Return number of bridges built.
      */
     static void AutoMultiBridging(HoleSetManager<MESH>* holesManager, std::vector<FacePointer *> *app=0 )
     {
@@ -948,7 +948,7 @@ public:
                     if(dist==2)
                     {
                         // face used to close non-manifold holes, close entirely a "sub-hole" (sub-hole has
-                        // only 3 border edge). This face become a patch face wich fill an invisible subhole.
+                        // only 3 border edge). This face become a patch face which fill an invisible subhole.
                         holesManager->SetPatchAttr(&*fit);
                         fit->FFp(1) = p2.f;
                         fit->FFi(1) = p2.z;

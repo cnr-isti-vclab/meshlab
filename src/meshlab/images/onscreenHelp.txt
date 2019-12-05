@@ -22,8 +22,8 @@
 </H2>
 <table>
 <tr><td width="200" align='right'>Click on eye icon: </td><td width="100">Toggle visibility status of the layer</td></tr>
-<tr><td width="200" align='right'>Ctrl-Click on eye icon: </td><td width="100">Make Invisibile all other layers</td></tr>
-<tr><td width="200" align='right'>Alt-Click on eye icon: </td><td width="100">Make Visibile all other layers</td></tr>
+<tr><td width="200" align='right'>Ctrl-Click on eye icon: </td><td width="100">Make Invisible all other layers</td></tr>
+<tr><td width="200" align='right'>Alt-Click on eye icon: </td><td width="100">Make Visible all other layers</td></tr>
 <tr><td width="200" align='right'>Shift-Click on eye icon: </td><td width="100">Invert visibility status of all the layers</td></tr>
 </table>
 </font>

@@ -165,7 +165,7 @@ return QString("Filter Unknown");
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
@@ -237,7 +237,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
                                         "MLS - Spherical parameter",
                                         "Control the curvature of the fitted spheres: 0 is equivalent to a pure plane fit,"
                                         "1 to a pure spherical fit, values between 0 and 1 gives intermediate results,"
-                                        "while others real values might give interresting results, but take care with extreme"
+                                        "while other real values might give interesting results, but take care with extreme"
                                         "settings !"));
         if (!(id & _COLORIZE_))
             parlst.addParam(new RichBool( "AccurateNormal",

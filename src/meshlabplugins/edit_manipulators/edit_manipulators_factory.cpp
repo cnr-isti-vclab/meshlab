@@ -46,7 +46,7 @@ MeshEditInterface* EditManipulatorsFactory::getMeshEditInterface(QAction *action
 	if(action == editManipulators)
 	{
 		return new EditManipulatorsPlugin();
-	} else assert(0); //should never be asked for an action that isnt here
+	} else assert(0); //should never be asked for an action that isn't here
     return NULL;
 }
 

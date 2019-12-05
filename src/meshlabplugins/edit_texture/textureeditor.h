@@ -55,7 +55,7 @@ class TextureEditor : public QWidget
 		Ui::TextureEditorClass ui;
 		void ResetLayout();
 		void SmoothTextureCoordinates();
-		MeshModel *model;	// Ref to the model (for upate)
+		MeshModel *model;	// Ref to the model (for update)
 		GLArea *area;		// Ref to the GLArea (for refresh)
 		bool degenere;
 

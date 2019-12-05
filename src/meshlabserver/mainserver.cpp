@@ -134,7 +134,7 @@ public:
         // Opening files in a transparent form (IO plugins contribution is hidden to user)
         QStringList filters;
 
-        // HashTable storing all supported formats togheter with
+        // HashTable storing all supported formats together with
         // the (1-based) index  of first plugin which is able to open it
         QHash<QString, MeshIOInterface*> allKnownFormats;
 
@@ -146,7 +146,7 @@ public:
         QDir::setCurrent(fi.absolutePath());
 
         QString extension = fi.suffix();
-        qDebug("Opening a file with extention %s", qUtf8Printable(extension));
+        qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
         MeshIOInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
@@ -371,7 +371,7 @@ public:
                     }
                     assert(parameterSet.paramList.size() == required.paramList.size());
                     RichParameter* parameter = parameterSet.paramList[i];
-                    //if this is a mesh paramter and the index is valid
+                    //if this is a mesh parameter and the index is valid
                     if(parameter->val->isMesh())
                     {
                         RichMesh* md = reinterpret_cast<RichMesh*>(parameter);

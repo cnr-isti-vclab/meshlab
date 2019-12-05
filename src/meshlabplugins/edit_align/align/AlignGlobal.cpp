@@ -455,15 +455,15 @@ bool AlignGlobal::GlobalAlign(const std::map<int,string> &Names, 	const double e
 
 			curr=ChooseDormantWithMostDormantLink ();
 			if(curr==0) {
-										LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, choosen id:%i\n" ,0);
+										LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, chosen id:%i\n" ,0);
 										break; // non ci sono piu' componenti connesse composte da piu' di una singola mesh.
 									}
-				   else LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, choosen id:%i\n" ,curr->id);
+				   else LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, chosen id:%i\n" ,curr->id);
 	  curr->Active=true;
 			cursid=curr->sid;
 			curr=ChooseDormantWithMostActiveLink ();
-			if(curr==0) LOG(elfp,"\nFailed    ChooseDormantWithMostActiveLink, choosen id:%i\n" ,0);
-				else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, choosen id:%i\n" ,curr->id);
+			if(curr==0) LOG(elfp,"\nFailed    ChooseDormantWithMostActiveLink, chosen id:%i\n" ,0);
+				else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, chosen id:%i\n" ,curr->id);
 		}
 
     LOG(elfp,"\nAdded node %i '%s' with %i/%i Active link\n",curr->id,Names.find(curr->id)->second.c_str(),curr->ActiveAdjNum(),curr->Adj.size());

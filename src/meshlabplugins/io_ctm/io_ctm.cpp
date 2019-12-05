@@ -98,6 +98,6 @@ void IOMPlugin::initSaveParameter(const QString &/*format*/, MeshModel &/*m*/, R
                               "If true it does not apply any lossy compression technique."));
   par.addParam(new RichFloat("relativePrecisionParam",0.0001f, "Relative Coord Precision",
                              "When using a lossy compression this number control the introduced error and hence the compression factor."
-                             "It is a number relative to the average edge lenght. (e.g. the default means that the error should be roughly 1/10000 of the average edge lenght)"));
+                             "It is a number relative to the average edge length. (e.g. the default means that the error should be roughly 1/10000 of the average edge length)"));
 }
 MESHLAB_PLUGIN_NAME_EXPORTER(IOMPlugin)

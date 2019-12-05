@@ -188,7 +188,7 @@ bool FilterSketchFabPlugin::upload()
         return false;
     }
 
-    // get the api anwser
+    // get the api answer
     QByteArray result = reply->readAll();
     QScriptValue sc;
     QScriptEngine engine;

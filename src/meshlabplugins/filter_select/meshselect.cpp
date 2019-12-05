@@ -165,7 +165,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case CP_SELFINTERSECT_SELECT :      return tr("Select only self intersecting faces.");
 	case FP_SELECT_FACE_FROM_VERT :     return tr("Select faces from selected vertices.");
 	case FP_SELECT_VERT_FROM_FACE :     return tr("Select vertices from selected faces.");
-	case FP_SELECT_FACES_BY_EDGE :      return tr("Select all triangles having an edge with lenght greater or equal than a given threshold.");     
+	case FP_SELECT_FACES_BY_EDGE :      return tr("Select all triangles having an edge with length greater or equal than a given threshold.");
 	case FP_SELECT_BORDER :             return tr("Select vertices and faces on the boundary.");
 	case FP_SELECT_BY_VERT_QUALITY :    return tr("Select all the faces/vertexes within the specified vertex quality range.");
 	case FP_SELECT_BY_FACE_QUALITY :    return tr("Select all the faces/vertexes with within the specified face quality range.");

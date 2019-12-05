@@ -62,7 +62,7 @@ Q_SIGNALS:
      void RestoreDefault();
 private:
 	Ui::dialogsliceClass ui;
-	int numPlane; //numeber of plane
+	int numPlane; //number of plane
 	float distance; 
 	float distanceRange;
 	float defaultdistance;

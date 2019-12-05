@@ -142,7 +142,7 @@ template <class FaceType>
         if (bbox.IsIn(UVQuad[0])&&bbox.IsIn(UVQuad[1])&&bbox.IsIn(UVQuad[2]))
             return false; ///no intersection is possible
 
-        ///else test which edges must be splitted
+        ///else test which edges must be split
         //vcg::Segment2<float> border_seg[4];
         vcg::Line2<float> border_seg[4];
         border_seg[0].Set(vcg::Point2f(0,0),vcg::Point2f(1,0));
@@ -167,9 +167,9 @@ template <class FaceType>
                 const PScalarType _EPS=(PScalarType)0.0001;
                 if ((intersect)&&(l_test>=_EPS))
                 {
-                    float lenght=curr_edge.Length();
+                    float length=curr_edge.Length();
                     float dist=((curr_edge.P0()-p_inters).Norm());
-                    float Ndist=dist/lenght;
+                    float Ndist=dist/length;
                     float alpha=1.0-Ndist;
                     float dist_medium1=fabs(alpha-0.5);
 
@@ -195,7 +195,7 @@ template <class FaceType>
 
     // Basic subdivision class
     // This class must provide methods for finding the position of the newly created vertices
-    // In this implemenation we simply put the new vertex in the MidPoint position.
+    // In this implementation we simply put the new vertex in the MidPoint position.
     // Color and TexCoords are interpolated accordingly.
     template<class MESH_TYPE>
     struct SplitMidPoint : public   std::unary_function<vcg::face::Pos<typename MESH_TYPE::FaceType> ,  typename MESH_TYPE::CoordType >
@@ -215,7 +215,7 @@ template <class FaceType>
 
             ParamMesh *to_param=isoParam->ParaMesh();
 
-            ///get eth value on which the edge must be splitted
+            ///get eth value on which the edge must be split
             VertexType* v0=ep.f->V(ep.z);
             VertexType* v1=ep.f->V1(ep.z);
 

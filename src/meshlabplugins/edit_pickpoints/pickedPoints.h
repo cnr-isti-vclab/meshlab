@@ -78,7 +78,7 @@ public:
 	std::vector<Point3m> * getPoint3Vector();
 	
 	//translate each point using the matrix
-	//if the mesh moves you can then translate the points useing this function
+	//if the mesh moves you can then translate the points using this function
 	void translatePoints(Matrix44m &translation);
 	
 	//get the suggested filename for the points.  will be based on the mesh's filename

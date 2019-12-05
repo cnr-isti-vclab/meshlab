@@ -68,12 +68,12 @@ public:
     edgeF[0]=on_edge[0];
     edgeF[1]=on_edge[1];
     ScalarType costArea=EstimateAreaByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
-    ScalarType lenght=EstimateLenghtByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
+    ScalarType length=EstimateLengthByParam<BaseMesh>(Super::pos.V(0),Super::pos.V(1),edgeF);
 
     if (costArea<0)
         assert(0);
-    assert(lenght>=0);
-    return (pow(lenght,2)+costArea);
+    assert(length>=0);
+    return (pow(length,2)+costArea);
   }
 
   inline bool IsFeasible(BaseParameterClass *){
@@ -163,7 +163,7 @@ public:
   {
     minInfo0 &inf = *(minInfo0 *)data;
 
-    ///assing coordinate to the face
+    ///assign coordinate to the face
     inf.central->P().X()=p[0];
     inf.central->P().Y()=p[1];
     inf.central->P().Z()=p[2];
@@ -457,7 +457,7 @@ void AphaBetaToUV(VertexPair &pos,
             ///transform to UV
             ScalarType u,v;
       InterpolateUV<BaseMesh>(parametric_face,bary,u,v);
-            ///and assing
+            ///and assign
             brother->T().U()=u;
             brother->T().V()=v;
 

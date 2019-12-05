@@ -78,7 +78,7 @@ typedef typename OpenMeshType::VertexIterator VertexIterator;
 typedef typename OpenMeshType::FaceIterator FaceIterator;
 
 enum _3DSError {
-		// Successfull opening
+		// Successful opening
 	E_NOERROR,								// 0
 		// Opening Errors
 	E_CANTOPEN,								// 1

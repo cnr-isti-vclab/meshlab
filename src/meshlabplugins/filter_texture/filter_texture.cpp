@@ -66,6 +66,7 @@ QString FilterTexturePlugin::filterName(FilterIDType filterId) const
     case FP_TEX_TO_VCOLOR_TRANSFER : return QString("Transfer: Texture to Vertex Color (1 or 2 meshes)");
     default : assert(0);
     }
+    return {};
 }
 
 // Info() must return the longer string describing each filtering action
@@ -78,7 +79,7 @@ QString FilterTexturePlugin::filterInfo(FilterIDType filterId) const
                                             <i>Computing Discrete Minimal Surfaces and Their Conjugates</i> <br>\
                                             Experimental Mathematics, Vol 2 (1), 1993<br> .");
     case FP_UV_WEDGE_TO_VERTEX : return QString("Converts per Wedge Texture Coordinates to per Vertex Texture Coordinates splitting vertices with not coherent Wedge coordinates.");
-    case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluos vertices...");
+    case FP_UV_VERTEX_TO_WEDGE : return QString("Converts per Vertex Texture Coordinates to per Wedge Texture Coordinates. It does not merge superfluous vertices...");
     case FP_BASIC_TRIANGLE_MAPPING : return QString("Builds a trivial triangle-by-triangle parametrization. <br> Two methods are provided, the first maps maps all triangles into equal sized triangles, while the second one adapt the size of the triangles in texture space to their original size.");
     case FP_PLANAR_MAPPING : return QString("Builds a trivial flat-plane parametrization.");
     case FP_SET_TEXTURE : return QString("Set a texture associated with current mesh parametrization.<br>"
@@ -147,7 +148,7 @@ int FilterTexturePlugin::postCondition( QAction *a) const
 
 // The FilterClass describes in which generic class of filters it fits.
 // This choice affect the submenu in which each filter will be placed
-// More than a single class can be choosen.
+// More than a single class can be chosen.
 FilterTexturePlugin::FilterClass FilterTexturePlugin::getClass(QAction *a)
 {
     switch(ID(a))
@@ -174,7 +175,7 @@ static QString extractFilenameWOExt(MeshModel* mm)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
@@ -225,9 +226,9 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
             parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
                                           "The mesh whose texture will be filled according to source mesh data"));
             parlst.addParam(new RichEnum("AttributeEnum", 0, QStringList("Vertex Color")  << "Vertex Normal" << "Vertex Quality"<< "Texture Color", "Color Data Source",
-                                         "Choose what attribute has to be transferred onto the target texture. You can choos bettween Per vertex attributes (clor,normal,quality) or to transfer color information from source mesh texture"));
+                                         "Choose what attribute has to be transferred onto the target texture. You can choose bettween Per vertex attributes (clor,normal,quality) or to transfer color information from source mesh texture"));
             parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-                                            tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering data")));
+                                            tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering data")));
             parlst.addParam(new RichString("textName", fileName, "Texture file", "The texture file to be created"));
             parlst.addParam(new RichInt("textW", 1024, "Texture width (px)", "The texture width"));
             parlst.addParam(new RichInt("textH", 1024, "Texture height (px)", "The texture height"));
@@ -242,7 +243,7 @@ void FilterTexturePlugin::initParameterSet(QAction *action, MeshDocument &md, Ri
             parlst.addParam(new RichMesh ("targetMesh",md.mm(),&md, "Target Mesh",
                                           "The mesh whose vertex color will be filled according to source mesh texture"));
             parlst.addParam(new RichAbsPerc("upperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-                                            tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering color")));
+                                            tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering color")));
         }
         break;
     default: break; // do not add any parameter for the other filters

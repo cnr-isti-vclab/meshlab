@@ -86,7 +86,7 @@ Moreover ID are UNSAFE (different plugin can have same id) so they should be use
 class MeshLabInterface
 {
 public:
-	/** the type used to identify plugin actions; there is a one-to-one relation betweeen an ID and an Action.
+	/** the type used to identify plugin actions; there is a one-to-one relation between an ID and an Action.
 	\todo To be renamed as ActionIDType
 	*/
 
@@ -98,7 +98,7 @@ public:
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream *log) { this->log = log; }
-	// This fucntion must be used to communicate useful information collected in the parsing/saving of the files.
+	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
 	template <typename... Ts>
 	void Log(const char * f, Ts&&... ts )
@@ -158,7 +158,7 @@ public:
 	\li reset:  revert to the hardwired values
 
 	If your plugins/action has no GlobalParameter, do nothing.
-	The RichParameterSet comes to the StartDecorate already intialized with the values stored on the permanent storage.
+	The RichParameterSet comes to the StartDecorate already initialized with the values stored on the permanent storage.
 	At the start up the initGlobalParameterSet function is called with an empty RichParameterSet (to collect the default values)
 	If a filter wants to save some permanent stuff should set the permanent default values.
 	*/
@@ -247,7 +247,7 @@ class MeshFilterInterface : public MeshCommonInterface
 {
 public:
 	/** The FilterClass enum represents the set of keywords that must be used to categorize a filter.
-	Each filter can belong to one or more filtering class, or-ed togheter.
+	Each filter can belong to one or more filtering class, or-ed together.
 	*/
 	enum FilterClass
 	{
@@ -310,7 +310,7 @@ public:
 
 	/**
 	The filters can have some additional requirements on the mesh capabiliteis.
-	// For example if a filters requires Face-Face Adjacency you shoud re-implement
+	// For example if a filters requires Face-Face Adjacency you should re-implement
 	// this function making it returns MeshModel::MM_FACEFACETOPO.
 	// The framework will ensure that the mesh has the requirements satisfied before invoking the applyFilter function
 	//
@@ -351,7 +351,7 @@ public:
 
 	/** \brief tests if a filter is applicable to a mesh.
 	This function is a handy wrapper used by the framework for the \a getPreConditions callback;
-	For istance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
+	For instance a colorize by quality filter cannot be applied to a mesh without per-vertex-quality.
 	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
 	*/
 	bool isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const;
@@ -497,7 +497,7 @@ class MeshDecorateInterface : public MeshCommonInterface
 public:
 
 	/** The DecorationClass enum represents the set of keywords that must be used to categorize a filter.
-	Each filter can belong to one or more filtering class, or-ed togheter.
+	Each filter can belong to one or more filtering class, or-ed together.
 	*/
 	enum DecorationClass
 	{
@@ -529,7 +529,7 @@ public:
 
 	/** \brief tests if a decoration is applicable to a mesh.
 	* used only for PerMesh Decorators.
-	For istance curvature cannot be shown on a mesh without curvature.
+	For instance curvature cannot be shown on a mesh without curvature.
 	On failure (returning false) the function fills the MissingItems list with strings describing the missing items.
 	It is invoked only for decoration of \i PerMesh class;
 	*/
@@ -606,7 +606,7 @@ public:
 
 	// Called when the user changes the selected layer
 	//by default it calls end edit with the layer that was selected and start with the new layer that is
-	//selected.  This ensures that plugins who dont support layers do not get sent pointers to meshes
+	//selected.  This ensures that plugins who don't support layers do not get sent pointers to meshes
 	//they are not expecting.
 	// If your editing plugins is not singleMesh you MUST reimplement this to correctly handle the change of layer.
 	virtual void LayerChanged(MeshDocument &md, MeshModel &oldMeshModel, GLArea *parent, MLSceneGLSharedDataContext* cont)

@@ -219,7 +219,7 @@ void FilterScriptDialog::editOldParameters( const int row )
         return;
     }
 
-    //fill the paramter set with all the names and descriptions which are lost in the 
+    //fill the parameter set with all the names and descriptions which are lost in the 
     //filter script
     RichParameterSet newParameterSet;
     iFilter->initParameterSet(action, *(mainWindow->meshDoc()), newParameterSet);

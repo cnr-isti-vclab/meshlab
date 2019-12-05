@@ -131,12 +131,12 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 
 		Log("Input point is %f %f %f Closest on surf is %f %f %f",startPoint[0],startPoint[1],startPoint[2],startVertex->P()[0],startVertex->P()[1],startVertex->P()[2]);
 
-		// Now actually compute the geodesic distnace from the closest point
+		// Now actually compute the geodesic distance from the closest point
 		float dist_thr = par.getAbsPerc("maxDistance");
 		tri::EuclideanDistance<CMeshO> dd;
 		tri::Geodesic<CMeshO>::Compute(m.cm, vector<CVertexO*>(1,startVertex),dd,dist_thr);
 
-		// Cleaning Quality value of the unrefernced vertices
+		// Cleaning Quality value of the unreferenced vertices
 		// Unreached vertexes has a quality that is maxfloat
 		int unreachedCnt=0;
 		float unreached  = std::numeric_limits<float>::max();
@@ -146,7 +146,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
 		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 
@@ -163,7 +163,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 
 		bool ret = tri::Geodesic<CMeshO>::DistanceFromBorder(m.cm);
 
-		// Cleaning Quality value of the unrefernced vertices
+		// Cleaning Quality value of the unreferenced vertices
 		// Unreached vertexes has a quality that is maxfloat
 		int unreachedCnt=0;
 		float unreached  = std::numeric_limits<float>::max();
@@ -173,7 +173,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 				(*vi).Q()=0;
 			}
 		if(unreachedCnt >0 )
-			Log("Warning: %i vertices were unreacheable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
+			Log("Warning: %i vertices were unreachable from the borders, probably your mesh has unreferenced vertices",unreachedCnt);
 
 		if(!ret) Log("Mesh Has no borders. No geodesic distance computed");
 		else tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
@@ -201,7 +201,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 			tri::EuclideanDistance<CMeshO> dd;
 			tri::Geodesic<CMeshO>::Compute(m.cm, seedVec, dd, dist_thr);
 
-			// Cleaning Quality value of the unrefernced vertices
+			// Cleaning Quality value of the unreferenced vertices
 			// Unreached vertexes has a quality that is maxfloat
 			int unreachedCnt=0;
 			float unreached  = std::numeric_limits<float>::max();
@@ -214,7 +214,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 			});
 
 			if(unreachedCnt >0 )
-				Log("Warning: %i vertices were unreacheable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
+				Log("Warning: %i vertices were unreachable from the seeds, probably your mesh has unreferenced vertices",unreachedCnt);
 
 			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
 		}

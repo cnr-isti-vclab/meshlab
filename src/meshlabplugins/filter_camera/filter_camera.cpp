@@ -104,7 +104,7 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
             rotCenter.push_back("camera viewpoint");
             rotCenter.push_back("custom point");
             parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-            parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
+            parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
             parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
             parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
             parlst.addParam(new RichBool ("toallRaster", false, "Apply to all active Raster layers", "Apply the same scaling to all the active Raster layers: it is taken into account only if 'Raster Camera' is selected"));

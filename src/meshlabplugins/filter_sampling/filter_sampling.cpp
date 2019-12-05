@@ -260,7 +260,7 @@ public:
 	double          min_dist;
 	double          max_dist;
 	double          mean_dist;
-	double          RMS_dist;   /// from the wikipedia defintion RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
+	double          RMS_dist;   /// from the wikipedia definition RMS DIST is sqrt(Sum(distances^2)/n), here we store Sum(distances^2)
 
 	float getMeanDist() const { return mean_dist / n_total_samples; }
 	float getMinDist() const  { return min_dist; }
@@ -398,7 +398,7 @@ QString FilterDocSampling::filterName(FilterIDType filterId) const
 QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
-		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probabilty of being choosen.");
+		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.");
 		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
 		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
 		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
@@ -410,7 +410,7 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 		case FP_HAUSDORFF_DISTANCE         :  return QString("Compute the Hausdorff Distance between two layers, sampling one of the two and finding for each sample the closest point over the other mesh.");
 		case FP_DISTANCE_REFERENCE         :  return QString("Compute the signed/unsigned (per vertex) distance between a mesh/pointcloud and a reference mesh/pointcloud. Distance is stored in vertex quality.");
 		case FP_TEXEL_SAMPLING             :  return QString("Create a new layer with a point sampling of the current mesh, a sample for each texel of the mesh is generated");
-		case FP_VERTEX_RESAMPLING          :  return QString("Transfer the choosen per-vertex attributes from one layer to another. Useful to transfer attributes to different representations of a same object.<br>"
+		case FP_VERTEX_RESAMPLING          :  return QString("Transfer the chosen per-vertex attributes from one layer to another. Useful to transfer attributes to different representations of a same object.<br>"
 													"For each vertex of the target mesh the closest point (not vertex!) on the source mesh is computed, and the requested interpolated attributes from that source point are copied into the target vertex.<br>"
 													"The algorithm assumes that the two meshes are reasonably similar and aligned.");
 		case FP_UNIFORM_MESH_RESAMPLING    :  return QString("Create a new mesh that is a resampled version of the current one.<br>"
@@ -418,7 +418,7 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 															"The resampled surface is reconstructed using the <b>marching cube</b> algorithm over this volume.");
 		case FP_VORONOI_COLORING           :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the geodesic distance from these projected points. Projection and coloring are done on a per vertex basis.");
 		case FP_DISK_COLORING              :  return QString("Given a Mesh <b>M</b> and a Pointset <b>P</b>, The filter project each vertex of P over M and color M according to the Euclidean distance from these projected points. Projection and coloring are done on a per vertex basis.");
-		case FP_REGULAR_RECURSIVE_SAMPLING :  return QString("The bbox is recursively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building ofsetted samples.");
+		case FP_REGULAR_RECURSIVE_SAMPLING :  return QString("The bbox is recursively partitioned in a octree style, center of bbox are considered, when the center is nearer to the surface than a given thr it is projected on it. It works also for building offsetted samples.");
 		default : assert(0); return QString("unknown filter!!!!");
   }
 }
@@ -503,7 +503,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
                                  QStringList() << "Average" << "Closest to center",
                                  tr("Representative Strategy:"),
                                  tr(	"<b>Average</b>: for each cell we take the average of the sample falling into. The resulting point is a new point.<br>"
-                                        "<b>Closest to center</b>: for each cell we take the sample that is closest to the center of the cell. Choosen vertices are a subset of the original ones."
+                                        "<b>Closest to center</b>: for each cell we take the sample that is closest to the center of the cell. Chosen vertices are a subset of the original ones."
                                         )));
     parlst.addParam(new RichBool ("Selected", false, "Only on Selection",
                                   "If true only for the filter is applied only on the selected subset of the mesh."));
@@ -529,7 +529,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   case FP_POISSONDISK_SAMPLING :
     parlst.addParam(new RichInt("SampleNum", 1000, "Number of samples", "The desired number of samples. The ray of the disk is calculated according to the sampling density."));
     parlst.addParam(new RichAbsPerc("Radius", 0, 0, md.mm()->cm.bbox.Diag(), "Explicit Radius", "If not zero this parameter override the previous parameter to allow exact radius specification"));
-    parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the intial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
+    parlst.addParam(new RichInt("MontecarloRate", 20, "MonterCarlo OverSampling", "The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is <i>K</i> means that<i>K</i> x <i>poisson sample</i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."));
     parlst.addParam(new RichBool("SaveMontecarlo", false, "Save Montecarlo", "If true, it will generate an additional Layer with the montecarlo sampling that was pruned to build the poisson distribution."));
     parlst.addParam(new RichBool("ApproximateGeodesicDistance", false, "Approximate Geodesic Distance", "If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."));
     parlst.addParam(new RichBool("Subsample", false, "Base Mesh Subsampling", "If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.<br>Note that this option is very useful in the case you want to subsample a dense point cloud."));
@@ -544,7 +544,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
   case FP_TEXEL_SAMPLING :
     parlst.addParam(new RichInt (	"TextureW", 512, "Texture Width",
                                     "A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples).<br>"
-                                    "If this parameter is 0 the size of the current texture is choosen."));
+                                    "If this parameter is 0 the size of the current texture is chosen."));
     parlst.addParam(new RichInt (	"TextureH", 512, "Texture Height",
                                     "A sample for each texel is generated, so the desired texture size is need, only samples for the texels falling inside some faces are generated.\n Setting this param to 256 means that you get at most 256x256 = 65536 samples)"));
     parlst.addParam(new RichBool(	"TextureSpace", false, "UV Space Sampling",
@@ -576,7 +576,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 		parlst.addParam(new RichInt("SampleNum", md.mm()->cm.vn, "Number of samples",
 			"The desired number of samples. It can be smaller or larger than the mesh size, and according to the choosed sampling strategy it will try to adapt."));
 		parlst.addParam(new RichAbsPerc("MaxDist", md.mm()->cm.bbox.Diag() / 2.0, 0.0f, md.bbox().Diag(),
-			tr("Max Distance"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered neither for averaging nor for max.")));
+			tr("Max Distance"), tr("Sample points for which we do not find anything within this distance are rejected and not considered neither for averaging nor for max.")));
   } break;
 
   case FP_DISTANCE_REFERENCE:
@@ -620,7 +620,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichBool ("QualityDistance", false, "Store dist. as quality",
                                   "if enabled, we store the distance of the transferred value as in the vertex quality"));
     parlst.addParam(new RichAbsPerc("UpperBound", md.mm()->cm.bbox.Diag()/50.0, 0.0f, md.mm()->cm.bbox.Diag(),
-                                    tr("Max Dist Search"), tr("Sample points for which we do not find anything whithin this distance are rejected and not considered for recovering attributes.")));
+                                    tr("Max Dist Search"), tr("Sample points for which we do not find anything within this distance are rejected and not considered for recovering attributes.")));
 	parlst.addParam(new RichBool ("onSelected", false, "Only on selection",	"If checked, only transfer to selected vertices on TARGET mesh"));
 
   } break;

@@ -47,7 +47,7 @@ void Guess::ApplyTransformation(const Point3f &BaseTranslation, const Matrix44f 
 
 /*
     Very Low level function
-    Given a Occupancy grid intialized with the Fix mesh.
+    Given a Occupancy grid initialized with the Fix mesh.
     We search the best translation matrix T such that
     T * R * Mov has the greatest overlap with Fix
 */
@@ -99,7 +99,7 @@ void Guess::ComputeTrans(std::vector<Result> &rv)
     std::vector<Result> rvt;
     Point3d BestTransV;
 
-  // Second Step: Compute for each possibile Orientation the Best Translation
+  // Second Step: Compute for each possible Orientation the Best Translation
     Matrix44d TrBase;
   size_t i;
     for(i=0;i<MV.size();++i)
@@ -194,7 +194,7 @@ void Guess::ComputeAlign(std::vector<Result> &rv)
                                 ar.Pmov, ar.Nmov,
                                 ar.H, ar.as);
             ar.err=ar.as.LastPcl50();
-//			printf("Ornt %2i n %3i (%6.3f %6.3f %6.3f) ang %2i %s Err:%8.5f %4i  \n",
+//			printf("Ornt %2i n %3i (%6.3f %6.3f %6.3f) angle %2i %s Err:%8.5f %4i  \n",
 //				i, rv[i].nind,NV[rv[i].nind][0],NV[rv[i].nind][1],NV[rv[i].nind][2],rv[i].angl,
 //				AlignPair::ErrorMsg(aa.status),
 //				ar.err,
