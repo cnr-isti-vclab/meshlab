@@ -47,6 +47,7 @@ MeshEditInterface* EditTextureFactory::getMeshEditInterface(QAction *action)
 	{
 		return new EditTexturePlugin();
 	} else assert(0); //should never be asked for an action that isn't here
+	return nullptr;
 }
 
 QString EditTextureFactory::getEditToolDescription(QAction *)
