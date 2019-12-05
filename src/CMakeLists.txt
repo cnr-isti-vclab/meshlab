@@ -52,6 +52,7 @@ option(ALLOW_BUNDLED_QHULL "Allow use of bundled Qhull source" ON)
 option(ALLOW_SYSTEM_EIGEN "Allow use of system-provided Eigen" ON)
 option(ALLOW_SYSTEM_GLEW "Allow use of system-provided GLEW" ON)
 option(ALLOW_SYSTEM_LIB3DS "Allow use of system-provided lib3ds" ON)
+option(ALLOW_SYSTEM_GMP "Allow use of system-provided GMP" ON)
 option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
@@ -75,6 +76,7 @@ find_package(Eigen3)
 
 message(STATUS "Searching for optional components")
 find_package(Lib3ds)
+find_package(GMP)
 find_package(muparser)
 find_package(OpenCTM)
 # TODO dynamic qhull that isn't qhull_r is deprecated: port to qhull_r
@@ -194,7 +196,7 @@ else()
         meshlabplugins/filter_color_projection
         meshlabplugins/filter_colorproc
         meshlabplugins/filter_create
-        # meshlabplugins/filter_csg # needs mpirxx.h
+        meshlabplugins/filter_csg
         meshlabplugins/filter_dirt
         meshlabplugins/filter_fractal
         meshlabplugins/filter_func
