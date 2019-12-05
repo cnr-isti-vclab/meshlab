@@ -1,45 +1,5 @@
 #include "interfaces.h"
 
-void MeshLabInterface::Log(const char * f, ... )
-{
-  if(log)
-  {
-    char buf[4096];
-    va_list marker;
-    va_start( marker, f );
-    vsprintf(buf,f,marker);
-    va_end( marker );
-    log->Log(GLLogStream::FILTER,buf);
-  }
-}
-
-
-void MeshLabInterface::Log(int Level, const char * f, ... )
-{
-  if(log)
-  {
-    char buf[4096];
-    va_list marker;
-    va_start( marker, f );
-    vsprintf(buf,f,marker);
-    va_end( marker );
-    log->Log(Level,buf);
-  }
-}
-
-void MeshLabInterface::RealTimeLog(QString Id, const QString &meshName, const char * f, ... )
-{
-  if(log)
-  {
-    char buf[4096];
-    va_list marker;
-    va_start( marker, f );
-    vsprintf(buf,f,marker);
-    va_end( marker );
-    log->RealTimeLog(Id, meshName,buf);
-  }
-}
-
 bool MeshFilterInterface::isFilterApplicable(QAction *act, const MeshModel& m, QStringList &MissingItems) const
 {
   int preMask = getPreConditions(act);

@@ -34,29 +34,6 @@ GLLogStream::GLLogStream()
   ClearBookmark();
 }
 
-void GLLogStream::Logf(int Level, const char * f, ... )
-{
-	char buf[4096];
-	va_list marker;
-	va_start( marker, f );     
-
-	vsprintf(buf,f,marker);
-	va_end( marker );              
-	Log(Level,buf);
-}
-
-void GLLogStream::RealTimeLogf(const QString& Id, const QString &meshName, const char * f, ... )
-{
-	char buf[4096];
-	va_list marker;
-	va_start( marker, f );
-
-	vsprintf(buf,f,marker);
-	va_end( marker );
-	QString tmp(buf);
-	RealTimeLog(Id,meshName,tmp);
-}
-
 void GLLogStream::RealTimeLog(const QString& Id, const QString &meshName, const QString& text)
 {
   this->RealTimeLogText.insert(Id,qMakePair(meshName,text) );
