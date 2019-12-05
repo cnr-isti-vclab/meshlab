@@ -144,9 +144,9 @@ void Octree< Real >::_setFullDepth( TreeOctNode* node , LocalDepth depth ) const
 	LocalDepth d ; LocalOffset off;
 	_localDepthAndOffset( node , d , off );
 	if( d<depth )
-		if( d<0 ) refine = true;
-		else if( BType==BOUNDARY_FREE && !_outOfBounds< Degree , BType >( node ) ) refine = true;
-		else if( !BSplineSupportSizes< Degree >::OutOfBounds( d , off[0] ) && !BSplineSupportSizes< Degree >::OutOfBounds( d , off[1] ) && !BSplineSupportSizes< Degree >::OutOfBounds( d , off[2] ) ) refine = true;
+		if( d<0 ) { refine = true; }
+		else if( BType==BOUNDARY_FREE && !_outOfBounds< Degree , BType >( node ) ) { refine = true; }
+		else if( !BSplineSupportSizes< Degree >::OutOfBounds( d , off[0] ) && !BSplineSupportSizes< Degree >::OutOfBounds( d , off[1] ) && !BSplineSupportSizes< Degree >::OutOfBounds( d , off[2] ) ) { refine = true; }
 	if( refine )
 	{
 		if( !node->children ) node->initChildren( _NodeInitializer );

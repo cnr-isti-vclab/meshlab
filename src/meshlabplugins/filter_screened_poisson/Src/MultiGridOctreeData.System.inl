@@ -1848,7 +1848,7 @@ void Octree< Real >::_addFEMConstraints( const FEMConstraintFunctor& F , const C
 					{
 						const D* d = coefficients( _node );
 						if( d ) 
-							if( isInterior ) constraints[i] += _Dot( (D)stencil( x , y , z ) , *d );
+							if( isInterior ) { constraints[i] += _Dot( (D)stencil( x , y , z ) , *d ); }
 							else
 							{
 								LocalDepth _d ; LocalOffset _off;
@@ -2071,7 +2071,7 @@ double Octree< Real >::_dot( const DotFunctor& F , const InterpolationInfo< HasG
 						const TreeOctNode* _node = neighbors.neighbors[x][y][z];
 						const Real* _data2;
 						if( isValidFEMNode< FEMDegree2 , FEMBType2 >( _node ) && ( _data2=coefficients2( _node ) ) )
-							if( isInterior ) dot += (*_data1) * (*_data2 ) * stencil( x , y , z );
+							if( isInterior ) { dot += (*_data1) * (*_data2 ) * stencil( x , y , z ); }
 							else
 							{
 								LocalDepth _d ; LocalOffset _off;
