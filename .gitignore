@@ -1,8 +1,4 @@
-
-.qmake.stash
 *.ipch
-*.pro.user
-build-*/
 *.pdb
 *.sdf
 *.opensdf
@@ -18,13 +14,9 @@ build-*/
 *.opendb
 *.db-shm
 *.db-wal
-moc_*.cpp
-ui_*.h
-qrc_*.cpp
 Debug/
 Release/
-src/external/lib/win32-msvc2013/*.lib
-src/external/lib/win32-msvc2015/*.lib
+src/external/lib/win32-msvc20??/*.lib
 src/external/lib/win32-msvc/*.lib
 src/distrib/plugins/*.lib
 src/distrib/plugins/*.dll
@@ -32,6 +24,8 @@ src/distrib/plugins/*.xml
 src/distrib/common.lib
 src/distrib/meshlab.exe
 src/distrib/meshlabserver.exe
+src/distrib/meshlab
+src/distrib/meshlabserver
 src/distrib/MeshLabBundle
 src/install/snap20????/prime
 src/install/snap20????/parts
@@ -41,6 +35,8 @@ src/install/snap20????/*.snap
 *.lproj
 *.plist
 *.icns
+*.a
+*.dmg
 src/distrib/meshlab.app/*
 
 ##standard Qt and C++ gitignore##
@@ -62,6 +58,7 @@ object_script.*.Debug
 *_plugin_import.cpp
 /.qmake.cache
 /.qmake.stash
+.qmake.stash
 *.pro.user
 *.pro.user.*
 *.qbs.user
