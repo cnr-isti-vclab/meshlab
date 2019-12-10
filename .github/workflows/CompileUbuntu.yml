@@ -30,9 +30,9 @@ jobs:
       run: |
         cd src/external
         qmake external.pro
-        make -j8
-    - name: Compiling meshlab
+        make -j4
+    - name: Compiling Meshlab
       run: |
         cd src/
         qmake meshlab_full.pro
-        make -j8
+        make -j4

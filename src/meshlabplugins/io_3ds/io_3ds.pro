@@ -23,9 +23,6 @@ TARGET        = io_3ds
 # Linux users can rely on their own package managers and hope that it is installing the last version of lib3ds
 
 win32-msvc:LIBS	+= ../../external/lib/win32-msvc/3ds.lib
-win32-msvc2015:LIBS += ../../external/lib/win32-msvc2015/3ds.lib
-win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/3ds.lib
-win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/3ds.lib
 win32-g++:LIBS		+= ../../external/lib/win32-gcc/lib3ds.a
 linux-g++:LIBS += -l3ds
 

@@ -31,12 +31,12 @@ jobs:
       run: |
         cd src/external
         qmake external.pro
-        make -j8
-    - name: Compiling meshlab
+        make -j4
+    - name: Compiling Meshlab
       run: |
         cd src/
         qmake meshlab_full.pro
-        make -j8
+        make -j4
   
   macos_build:
     name: Build MeshLab (MacOS)
@@ -63,12 +63,12 @@ jobs:
       run: |
         cd src/external
         qmake external.pro
-        make -j8
-    - name: Compiling meshlab
+        make -j4
+    - name: Compiling Meshlab
       run: |
         cd src/
         qmake meshlab_full.pro
-        make -j8
+        make -j4
     - name: Creating DMG
       run: |
          cd src/install/macx
@@ -76,22 +76,59 @@ jobs:
          echo "------ Completed!!! We should have a dmg here "
          cd ../../..
          ls -la src/distrib/MeshLab201804.dmg
-    - name: Upload DMG
+    - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_dmg
         path: src/distrib/MeshLab201804.dmg
+        
+  windows_build:
+    name: Build MeshLab (Windows)
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setting MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Installing QT
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: qtscript xmlpatterns
+    - name: Installing dependencies
+      run: |
+        cd ..
+        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+    - name: Compiling external
+      run: |
+        cd src\external
+        qmake external.pro -r
+        nmake
+    - name: Compiling Meshlab
+      run: |
+        cd src\
+        qmake meshlab_full.pro -r
+        nmake
+    - name: Creating Meshlab Portable
+      run: |
+        cd src\distrib
+        windeployqt --no-translations meshlab.exe
+    - name: Uploading Meshlab Portable 
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_portable
+        path: src\distrib
+        
          
   create_prerelease:
-    name: Create Prerelease
-    needs: [ubuntu_build, macos_build]
+    name: Creating Prerelease
+    needs: [ubuntu_build, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
     - name: Setting env variables
       id: envs
       run: |
         echo ::set-output name=date::"$(date +%Y-%m)"
-    - name: Publish PreRelease 
+    - name: Publishing PreRelease 
       id: create_prerelease
       uses: actions/create-release@v1.0.0
       env:
@@ -101,11 +138,11 @@ jobs:
         release_name: MeshLab-${{steps.envs.outputs.date}}-beta
         draft: false
         prerelease: true
-    - name: Download DMG
+    - name: Downloading DMG
       uses: actions/download-artifact@v1
       with:
         name: meshlab_dmg
-    - name: Upload PreReleaseMacOS
+    - name: Uploading PreReleaseMacOS
       id: upload-prerelease-macos
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -115,7 +152,25 @@ jobs:
         asset_path: meshlab_dmg/MeshLab201804.dmg
         asset_name: MeshLab201804.dmg
         asset_content_type: MeshLab for MacOS
-#    - name: Upload PreReleaseUbuntu
+    - name: Downloading MeshLab Portable
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_portable
+    - name: Creating Meshlab Portable Archive
+      run: |
+        zip -r Meshlab${{steps.envs.outputs.date}}-portable.zip meshlab_portable/
+        ls
+    - name: Uploading PreReleaseWindowsPortable
+      id: upload-prerelease-windows-portable
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: Meshlab${{steps.envs.outputs.date}}-portable.zip
+        asset_name: Meshlab${{steps.envs.outputs.date}}-portable.zip
+        asset_content_type: MeshLab Portable for Windows 
+#    - name: Uploading PreReleaseUbuntu
 #      id: upload-prerelease-ubuntu
 #      uses: actions/upload-release-asset@v1.0.1
 #      env:

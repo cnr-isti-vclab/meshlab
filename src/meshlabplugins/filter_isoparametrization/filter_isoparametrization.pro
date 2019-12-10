@@ -27,11 +27,6 @@ INCLUDEPATH  += ./  \
                 ../../external/levmar-2.3/
 				
 win32-msvc:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
-win32-msvc2005:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
-win32-msvc2008:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
-win32-msvc2010:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
-win32-msvc2012:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
-win32-msvc2015:QMAKE_CXXFLAGS   +=  /openmp -D_USE_OMP
 #win32-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
 win32-g++:QMAKE_LFLAGS += -fopenmp
 #linux-g++:QMAKE_CXXFLAGS   +=  -fopenmp -D_USE_OMP
@@ -47,11 +42,6 @@ macx:QMAKE_LFLAGS += -fopenmp
   }
 }
 win32-msvc:LIBS	+= ../../external/lib/win32-msvc/levmar.lib
-win32-msvc2005:LIBS	+= ../../external/lib/win32-msvc2005/levmar.lib
-win32-msvc2008:LIBS	+= ../../external/lib/win32-msvc2008/levmar.lib
-win32-msvc2010:LIBS	+= ../../external/lib/win32-msvc2010/levmar.lib
-win32-msvc2012:LIBS	+= ../../external/lib/win32-msvc2012/levmar.lib
-win32-msvc2015:LIBS	+= ../../external/lib/win32-msvc2015/levmar.lib
 win32-g++:LIBS		+= -L../../external/lib/win32-gcc -llevmar
 linux-g++:LIBS		+= -llevmar
 macx:LIBS += $$MACLIBDIR/liblevmar.a

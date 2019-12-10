@@ -1,0 +1,43 @@
+name: CompileWindows
+
+on: [push, pull_request]
+
+jobs:
+  windows_build:
+    name: Build MeshLab (Windows)
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setting MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Installing QT
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: qtscript xmlpatterns
+    - name: Installing dependencies
+      run: |
+        cd ..
+        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+    - name: Compiling external
+      run: |
+        cd src\external
+        qmake external.pro -r
+        nmake #jom -j 4 -f Makefile #nmake does not support parallel compilation
+    - name: Compiling Meshlab
+      run: |
+        cd src\
+        qmake meshlab_full.pro -r
+        nmake #jom -j 4 -f Makefile #nmake does not support parallel compilation
+    - name: Creating Meshlab Portable
+      run: |
+        cd src\distrib
+        windeployqt --no-translations meshlab.exe
+    - name: Uploading Meshlab Portable 
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_portable
+        path: src\distrib
+        
+        
+        

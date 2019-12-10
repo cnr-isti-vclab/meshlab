@@ -1,13 +1,6 @@
 include (../general.pri)
 EXIF_DIR = ../external/jhead-2.95
 
-
-win32-msvc2005:DESTDIR = ../distrib
-win32-msvc2008:DESTDIR = ../distrib
-win32-msvc2010:DESTDIR = ../distrib
-win32-msvc2012:DESTDIR = ../distrib
-win32-msvc2013:DESTDIR = ../distrib
-win32-msvc2015:DESTDIR = ../distrib
 win32-msvc:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
 
@@ -55,12 +48,6 @@ linux:DESTDIR = ../distrib
 
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
 
-win32-msvc2005:CONFIG += staticlib
-win32-msvc2008:CONFIG += staticlib
-win32-msvc2010:CONFIG += staticlib
-win32-msvc2012:CONFIG += staticlib
-win32-msvc2013:CONFIG += staticlib
-win32-msvc2015:CONFIG += staticlib
 win32-msvc:CONFIG += staticlib
 
 QT += opengl
@@ -71,9 +58,6 @@ QT += script
 
 TARGET = common
 DEPENDPATH += .
-
-win32-msvc:DEFINES += _CRT_SECURE_NO_WARNINGS
-
 
 # Input
 HEADERS += 	filterparameter.h \
