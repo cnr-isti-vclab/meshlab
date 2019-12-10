@@ -54,12 +54,14 @@ jobs:
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
         cd meshlab 
     - name: Setting env variables
+      id: envs
       shell: bash
       run: |
         echo '::set-env name=QTDIR::/usr/local/opt/qt'
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
-        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'       
+        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
+        echo  ::set-output name=date::"$(date +%Y-%m)"   
     - name: Compiling external
       run: |
         cd src/external
@@ -76,12 +78,12 @@ jobs:
          ./macinstall_latest.sh
          echo "------ Completed!!! We should have a dmg here "
          cd ../../..
-         ls -la src/distrib/MeshLab*.dmg
+         ls -la src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_dmg
-        path: src/distrib/MeshLab*.dmg
+        path: src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
         
   windows_build:
     name: Build MeshLab (Windows)

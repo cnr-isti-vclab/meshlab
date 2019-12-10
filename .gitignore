@@ -1,8 +1,4 @@
-
-.qmake.stash
 *.ipch
-*.pro.user
-build-*/
 *.pdb
 *.sdf
 *.opensdf
@@ -18,13 +14,9 @@ build-*/
 *.opendb
 *.db-shm
 *.db-wal
-moc_*.cpp
-ui_*.h
-qrc_*.cpp
 Debug/
 Release/
-src/external/lib/win32-msvc2013/*.lib
-src/external/lib/win32-msvc2015/*.lib
+src/external/lib/win32-msvc20??/*.lib
 src/external/lib/win32-msvc/*.lib
 src/distrib/plugins/*.lib
 src/distrib/plugins/*.dll
@@ -41,6 +33,8 @@ src/install/snap20????/*.snap
 *.lproj
 *.plist
 *.icns
+*.a
+*.dmg
 src/distrib/meshlab.app/*
 
 ##standard Qt and C++ gitignore##
