@@ -24,6 +24,8 @@ src/distrib/plugins/*.xml
 src/distrib/common.lib
 src/distrib/meshlab.exe
 src/distrib/meshlabserver.exe
+src/distrib/meshlab
+src/distrib/meshlabserver
 src/distrib/MeshLabBundle
 src/install/snap20????/prime
 src/install/snap20????/parts
@@ -56,6 +58,7 @@ object_script.*.Debug
 *_plugin_import.cpp
 /.qmake.cache
 /.qmake.stash
+.qmake.stash
 *.pro.user
 *.pro.user.*
 *.qbs.user
