@@ -24,16 +24,16 @@ jobs:
         cd src\external
         qmake external.pro -r
         nmake #jom -j 4 -f Makefile #nmake does not support parallel compilation
-    - name: Compiling Meshlab
+    - name: Compiling MeshLab
       run: |
         cd src\
         qmake meshlab_full.pro -r
         nmake #jom -j 4 -f Makefile #nmake does not support parallel compilation
-    - name: Creating Meshlab Portable
+    - name: Creating MeshLab Portable
       run: |
         cd src\distrib
         windeployqt --no-translations meshlab.exe
-    - name: Uploading Meshlab Portable 
+    - name: Uploading MeshLab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable

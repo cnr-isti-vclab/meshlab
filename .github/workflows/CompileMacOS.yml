@@ -30,7 +30,7 @@ jobs:
         cd src/external
         qmake external.pro
         make -j4
-    - name: Compiling Meshlab
+    - name: Compiling MeshLab
       run: |
         cd src/
         qmake meshlab_full.pro
@@ -38,12 +38,12 @@ jobs:
     - name: Creating DMG
       run: |
          cd src/install/macx
-         ./macinstall_v2018.sh
+         ./macinstall_latest.sh
          echo "------ Completed!!! We should have a dmg here "
          cd ../../..
-         ls -la src/distrib/MeshLab201804.dmg
+         ls -la src/distrib/MeshLab*.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_dmg
-        path: src/distrib/MeshLab201804.dmg
+        path: src/distrib/MeshLab*.dmg

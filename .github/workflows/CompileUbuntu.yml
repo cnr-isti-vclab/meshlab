@@ -31,7 +31,7 @@ jobs:
         cd src/external
         qmake external.pro
         make -j4
-    - name: Compiling Meshlab
+    - name: Compiling MeshLab
       run: |
         cd src/
         qmake meshlab_full.pro
