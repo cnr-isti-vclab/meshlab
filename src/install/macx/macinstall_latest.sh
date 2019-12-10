@@ -4,34 +4,20 @@
 #
 # It does all the dirty work of moving all the needed plugins and frameworks into the package and runs the 
 # install_tool on them to change the linking path to the local version of qt
-
-# All the stuff to be copies is in the 'distrib' folder. 
+#
+# The env variable $QTDIR should be correctly set, and all the stuff to be copied
+# should be in the 'distrib' folder.
+ 
 cd ../../distrib
-
-if QTDIR="" 
-then
-QTDIR=$HOME/Qt/5.9.4/clang_64
-echo "Warning QTDIR was not set. trying to guess it to" $QTDIR
-fi
-
-if ! [ -e $QTDIR ] 
-then
-echo "Missing QT; QTDIR was wrong:" $QTDIR
-fi
 
 # change this according to the shadow build dir.
 # is the root of the build e.g. where the meshlab_full.pro it can be something like 
 BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_9_4_clang_64bit2-Release"
 
 APPNAME="meshlab.app"
-echo "Current folder is" `pwd`
-echo "Hopefully I should find: " $BUILDPATH/distrib/$APPNAME
-echo "Or alternatively in    : " ../distrib/$APPNAME
-if ! [ -e $BUILDPATH ] 
-then
-  BUILDPATH=..
-  echo "Hopefully I should find" $BUILDPATH/distrib/$APPNAME
-fi
+
+BUILDPATH=..
+echo "Hopefully I should find" $BUILDPATH/distrib/$APPNAME
 
 APPFOLDER=$BUILDPATH/distrib/$APPNAME
 BUNDLE="MeshLabBundle"
@@ -130,4 +116,4 @@ cd ../install/macx
 # appdmg is installed with 'npm install -g appdmg'",
 
 rm -f ../../distrib/MeshLab*.dmg  
-appdmg meshlab_dmg.json ../../distrib/MeshLab$(date +%Y-%m).dmg
+appdmg meshlab_dmg_latest.json ../../distrib/MeshLab$(date +%Y-%m).dmg
