@@ -156,7 +156,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
     case FP_SELECT_CONNECTED:           return tr("Expand the current face selection so that it includes all the faces in the connected components where there is at least a selected face.");
 	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces/vertices.");
 	case FP_SELECT_ALL :                return tr("Select all the faces/vertices of the current mesh.");
-	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
+	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertices are deleted too.");
 	case FP_SELECT_DELETE_ALL_FACE:     return tr("Delete ALL faces, turning the mesh into a pointcloud. May be applied also to all visible layers.");
 	case FP_SELECT_DELETE_FACE :        return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
 	case FP_SELECT_DELETE_FACEVERT :    return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");

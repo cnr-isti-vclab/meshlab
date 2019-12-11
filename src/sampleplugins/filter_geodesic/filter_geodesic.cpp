@@ -137,7 +137,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 		tri::Geodesic<CMeshO>::Compute(m.cm, vector<CVertexO*>(1,startVertex),dd,dist_thr);
 
 		// Cleaning Quality value of the unreferenced vertices
-		// Unreached vertexes has a quality that is maxfloat
+		// Unreached vertices has a quality that is maxfloat
 		int unreachedCnt=0;
 		float unreached  = std::numeric_limits<float>::max();
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
@@ -164,7 +164,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 		bool ret = tri::Geodesic<CMeshO>::DistanceFromBorder(m.cm);
 
 		// Cleaning Quality value of the unreferenced vertices
-		// Unreached vertexes has a quality that is maxfloat
+		// Unreached vertices has a quality that is maxfloat
 		int unreachedCnt=0;
 		float unreached  = std::numeric_limits<float>::max();
 		for(vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) if(!(*vi).IsD())
@@ -202,7 +202,7 @@ bool FilterGeodesic::applyFilter(QAction *filter, MeshDocument &md, RichParamete
 			tri::Geodesic<CMeshO>::Compute(m.cm, seedVec, dd, dist_thr);
 
 			// Cleaning Quality value of the unreferenced vertices
-			// Unreached vertexes has a quality that is maxfloat
+			// Unreached vertices has a quality that is maxfloat
 			int unreachedCnt=0;
 			float unreached  = std::numeric_limits<float>::max();
 			ForEachVertex(m.cm, [&] (CMeshO::VertexType & v){
