@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #ifdef _WIN32
     #include <direct.h> // for mkdir under windows.
-    #define mkdir(dir,mode) mkdir(dir)
+    #define mkdir(dir,mode) _mkdir(dir)
     #define S_ISDIR(a)   (a & _S_IFDIR)
 #endif
 

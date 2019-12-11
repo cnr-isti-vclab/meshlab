@@ -12,6 +12,7 @@ macx:QMAKE_CXXFLAGS_WARN_ON =
 HEADERS += jhead.h
 
 SOURCES += 		jpgfile.c \
+				jpgqguess.c \
 				jhead.c  \
                 paths.c \
                 exif.c \
@@ -20,3 +21,5 @@ SOURCES += 		jpgfile.c \
                 makernote.c
 
 win32:SOURCES += myglob.c
+
+DEFINES += main="jhead_main"

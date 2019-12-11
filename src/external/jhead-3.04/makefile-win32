@@ -3,16 +3,19 @@
 #--------------------------------
 
 CC=cl /nologo
-CFLAGS=-c -G3 -Ox -W3 -Zp -Zd
+CFLAGS=-c -Ox -Os -W3 -Zp -D _CRT_SECURE_NO_WARNINGS
+
+
 LINKER=link
 LINKCON = /nologo
 
 all:jhead.exe
 
-OBJ = .
+OBJ = obj
 
 OBJECTS_JHEAD = $(OBJ)\jhead.obj  \
                 $(OBJ)\jpgfile.obj \
+                $(OBJ)\jpgqguess.obj \
                 $(OBJ)\myglob.obj \
                 $(OBJ)\paths.obj \
                 $(OBJ)\exif.obj \

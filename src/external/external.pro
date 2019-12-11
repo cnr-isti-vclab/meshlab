@@ -5,7 +5,7 @@ TEMPLATE      = subdirs
 SUBDIRS	= 	muparser_v225/src \
 			levmar-2.3/levmar-2.3.pro \
 			structuresynth-1.5/structuresynth.pro \
-			jhead-2.95/jhead-2.95.pro \
+			jhead-3.04/jhead-3.04.pro \
 #			openkinect/openkinect.pro
 
 !CONFIG(system_bzip2)   SUBDIRS	+= 	bzip2-1.0.5/bzip2-1.0.5.pro

@@ -455,13 +455,13 @@ double ConvertAnyFormat(void * ValuePtr, int Format)
 // Process one of the nested EXIF directories.
 //--------------------------------------------------------------------------
 static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, 
-        unsigned ExifLength, int NestingLevel)
+        int ExifLength, int NestingLevel)
 {
     int de;
     int a;
     int NumDirEntries;
-    unsigned ThumbnailOffset = 0;
-    unsigned ThumbnailSize = 0;
+    int ThumbnailOffset = 0;
+    int ThumbnailSize = 0;
     char IndentString[25];
 
     if (NestingLevel > 4){
@@ -489,7 +489,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
             }
         }
         if (DumpExifMap){
-            printf("Map: %05d-%05d: Directory\n",(int)(DirStart-OffsetBase), (int)(DirEnd+4-OffsetBase));
+            printf("Map: %05u-%05u: Directory\n",(int)(DirStart-OffsetBase), (int)(DirEnd+4-OffsetBase));
         }
 
 
@@ -524,10 +524,10 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
         ByteCount = Components * BytesPerFormat[Format];
 
         if (ByteCount > 4){
-            unsigned OffsetVal;
+            int OffsetVal;
             OffsetVal = Get32u(DirEntry+8);
             // If its bigger than 4 bytes, the dir entry contains an offset.
-            if (OffsetVal+ByteCount > ExifLength){
+            if (OffsetVal+ByteCount > ExifLength || OffsetVal < 0 || OffsetVal > 65536){
                 // Bogus pointer offset and / or bytecount value
                 ErrNonfatal("Illegal value pointer for tag %04x in Exif", Tag,0);
                 continue;
@@ -539,7 +539,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
             }
 
             if (DumpExifMap){
-                printf("Map: %05d-%05d:   Data for tag %04x\n",OffsetVal, OffsetVal+ByteCount, Tag);
+                printf("Map: %05u-%05u:   Data for tag %04x\n",OffsetVal, OffsetVal+ByteCount, Tag);
             }
         }else{
             // 4 bytes or less and value is in the dir entry itself
@@ -744,7 +744,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
             case TAG_ORIENTATION:
                 if (NumOrientations >= 2){
                     // Can have another orientation tag for the thumbnail, but if there's
-                    // a third one, things are stringae.
+                    // a third one, things are strange.
                     ErrNonfatal("More than two orientation in Exif",0,0);
                     break;
                 }
@@ -755,7 +755,6 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
                 }
                 if (ImageInfo.Orientation < 0 || ImageInfo.Orientation > 8){
                     ErrNonfatal("Undefined rotation value %d in Exif", ImageInfo.Orientation, 0);
-                    ImageInfo.Orientation = 0;
                 }
                 NumOrientations += 1;
                 break;
@@ -823,10 +822,6 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
 
             case TAG_ISO_EQUIVALENT:
                 ImageInfo.ISOequivalent = (int)ConvertAnyFormat(ValuePtr, Format);
-                if ( ImageInfo.ISOequivalent < 50 ){
-                    // Fixes strange encoding on some older digicams.
-                    ImageInfo.ISOequivalent *= 200;
-                }
                 break;
 
             case TAG_DIGITALZOOMRATIO:
@@ -868,7 +863,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
                     if (SubdirStart < OffsetBase || SubdirStart > OffsetBase+ExifLength){
                         ErrNonfatal("Illegal GPS directory link in Exif",0,0);
                     }else{
-                        ProcessGpsInfo(SubdirStart, ByteCount, OffsetBase, ExifLength);
+                        ProcessGpsInfo(SubdirStart, OffsetBase, ExifLength);
                     }
                     continue;
                 }
@@ -920,7 +915,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
         // there's also a potential link to another directory at the end of each
         // directory.  this has got to be the result of a committee!
         unsigned char * SubdirStart;
-        unsigned Offset;
+        int Offset;
 
         if (DIR_ENTRY_ADDR(DirStart, NumDirEntries) + 4 <= OffsetBase+ExifLength){
             Offset = Get32u(DirStart+2+12*NumDirEntries);
@@ -936,7 +931,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
                         ErrNonfatal("Illegal subdirectory link in Exif header",0,0);
                     }
                 }else{
-                    if (SubdirStart <= OffsetBase+ExifLength){
+                    if (SubdirStart+2 <= OffsetBase+ExifLength){
                         if (ShowTags) printf("%s    Continued directory ",IndentString);
                         ProcessExifDir(SubdirStart, OffsetBase, ExifLength, NestingLevel+1);
                     }
@@ -971,28 +966,35 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
             ImageInfo.ThumbnailSize = ThumbnailSize;
 
             if (ShowTags){
-                printf("Thumbnail size: %d bytes\n",ThumbnailSize);
+                printf("Thumbnail size: %u bytes\n",ThumbnailSize);
             }
         }
     }
 }
 
+void Clear_EXIF ()
+{
+    FocalplaneXRes = 0;
+    FocalplaneUnits = 0;
+    ExifImageWidth = 0;
+    NumOrientations = 0;
+    MotorolaOrder = 0;
+    OrientationPtr[0] = OrientationPtr[1] = NULL;
+    OrientationNumFormat[0] = OrientationNumFormat[1] = 0;
+}
 
 //--------------------------------------------------------------------------
 // Process a EXIF marker
 // Describes all the drivel that most digital cameras include...
 //--------------------------------------------------------------------------
-void process_EXIF (unsigned char * ExifSection, unsigned int length)
+void process_EXIF (unsigned char * ExifSection, int length)
 {
-    unsigned int FirstOffset;
-
-    FocalplaneXRes = 0;
-    FocalplaneUnits = 0;
-    ExifImageWidth = 0;
-    NumOrientations = 0;
+    int FirstOffset;
+    
+    Clear_EXIF();
 
     if (ShowTags){
-        printf("Exif header %d bytes long\n",length);
+        printf("Exif header %u bytes long\n",length);
     }
 
     {   // Check the EXIF header component
@@ -1022,9 +1024,9 @@ void process_EXIF (unsigned char * ExifSection, unsigned int length)
         return;
     }
 
-    FirstOffset = Get32u(ExifSection+12);
+    FirstOffset = (int)Get32u(ExifSection+12);
     if (FirstOffset < 8 || FirstOffset > 16){
-        if (FirstOffset < 16 || FirstOffset > length-16){
+        if (FirstOffset < 16 || FirstOffset > length-16 || length < 16){
             ErrNonfatal("invalid offset for first Exif IFD value",0,0);
             return;
         }
@@ -1041,7 +1043,7 @@ void process_EXIF (unsigned char * ExifSection, unsigned int length)
     ImageInfo.ThumbnailAtEnd = ImageInfo.ThumbnailOffset >= ImageInfo.LargestExifOffset ? TRUE : FALSE;
 
     if (DumpExifMap){
-        unsigned a,b;
+        int a,b;
         printf("Map: %05d- End of exif\n",length-8);
         for (a=0;a<length-8;a+= 10){
             printf("Map: %05d ",a);
@@ -1052,7 +1054,7 @@ void process_EXIF (unsigned char * ExifSection, unsigned int length)
 
 
     // Compute the CCD width, in millimeters.
-    if (FocalplaneXRes != 0){
+    if (FocalplaneXRes != 0 && ExifImageWidth != 0){
         // Note: With some cameras, its not possible to compute this correctly because
         // they don't adjust the indicated focal plane resolution units when using less
         // than maximum resolution, so the CCDWidth value comes out too small.  Nothing
@@ -1209,6 +1211,7 @@ void create_EXIF(void)
 
 //--------------------------------------------------------------------------
 // Cler the rotation tag in the exif header to 1.
+// Returns NULL if no orietnation tag exists.
 //--------------------------------------------------------------------------
 const char * ClearOrientation(void)
 {
@@ -1242,54 +1245,12 @@ const char * ClearOrientation(void)
         }
     }
 
-    return OrientTab[ImageInfo.Orientation];
+    if (ImageInfo.Orientation >= 1 && ImageInfo.Orientation <= 8){
+        return OrientTab[ImageInfo.Orientation];
+    }else{
+        return "";
+    }
 }
-
-
-
-//--------------------------------------------------------------------------
-// Remove thumbnail out of the exif image.
-//--------------------------------------------------------------------------
-int RemoveThumbnail(unsigned char * ExifSection)
-{
-    if (!DirWithThumbnailPtrs || 
-        ImageInfo.ThumbnailOffset == 0 || 
-        ImageInfo.ThumbnailSize == 0){
-        // No thumbnail, or already deleted it.
-        return 0;
-    }
-    if (ImageInfo.ThumbnailAtEnd == FALSE){
-        ErrNonfatal("Thumbnail not at end of Exif header, can't remove it", 0, 0);
-        return 0;
-    }
-
-    {
-        int de;
-        int NumDirEntries;
-        NumDirEntries = Get16u(DirWithThumbnailPtrs);
-
-        for (de=0;de<NumDirEntries;de++){
-            int Tag;
-            unsigned char * DirEntry;
-            DirEntry = DIR_ENTRY_ADDR(DirWithThumbnailPtrs, de);
-            Tag = Get16u(DirEntry);
-            if (Tag == TAG_THUMBNAIL_LENGTH){
-                // Set length to zero.
-                if (Get16u(DirEntry+2) != FMT_ULONG){
-                    // non standard format encoding.  Can't do it.
-                    ErrNonfatal("Can't remove Exif thumbnail", 0, 0);
-                    return 0;
-                }
-                Put32u(DirEntry+8, 0);
-            }                    
-        }
-    }
-
-    // This is how far the non thumbnail data went.
-    return ImageInfo.ThumbnailOffset+8;
-
-}
-
 
 //--------------------------------------------------------------------------
 // Convert exif time to Unix time structure
@@ -1357,7 +1318,7 @@ void ShowImageInfo(int ShowFileInfo)
     }
     printf("Resolution   : %d x %d\n",ImageInfo.Width, ImageInfo.Height);
 
-    if (ImageInfo.Orientation > 1){
+    if (ImageInfo.Orientation > 1 && ImageInfo.Orientation <=8){
         // Only print orientation if one was supplied, and if its not 1 (normal orientation)
         printf("Orientation  : %s\n", OrientTab[ImageInfo.Orientation]);
     }
@@ -1555,7 +1516,7 @@ void ShowImageInfo(int ShowFileInfo)
     if (ImageInfo.Process != M_SOF0){
         // don't show it if its the plain old boring 'baseline' process, but do
         // show it if its something else, like 'progressive' (used on web sometimes)
-        int a;
+        unsigned a;
         for (a=0;;a++){
             if (a >= PROCESS_TABLE_SIZE){
                 // ran off the end of the table.
@@ -1573,6 +1534,10 @@ void ShowImageInfo(int ShowFileInfo)
         printf("GPS Latitude : %s\n",ImageInfo.GpsLat);
         printf("GPS Longitude: %s\n",ImageInfo.GpsLong);
         if (ImageInfo.GpsAlt[0]) printf("GPS Altitude : %s\n",ImageInfo.GpsAlt);
+    }
+
+    if (ImageInfo.QualityGuess){
+        printf("JPEG Quality : %d\n", ImageInfo.QualityGuess);
     }
 
     // Print the comment. Print 'Comment:' for each new line of comment.
