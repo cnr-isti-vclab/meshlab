@@ -12,6 +12,8 @@
 
 #include <wrap/qt/shot_qt.h>
 
+#include <wrap/io_trimesh/import_out.h>
+#include <wrap/io_trimesh/import_nvm.h>
 
 bool MeshDocumentFromBundler(MeshDocument &md, QString filename_out,QString image_list_filename, QString model_filename)
 {
