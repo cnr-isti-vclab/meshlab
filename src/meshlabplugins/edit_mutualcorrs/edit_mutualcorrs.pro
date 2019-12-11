@@ -26,8 +26,6 @@ RESOURCES     = edit_mutualcorrs.qrc
 FORMS         = edit_mutualcorrsDialog.ui
 
 win32-msvc:  LIBS += ../../external/lib/win32-msvc/levmar.lib
-win32-msvc2013:  LIBS += ../../external/lib/win32-msvc2013/levmar.lib
-win32-msvc2015:  LIBS += ../../external/lib/win32-msvc2015/levmar.lib
 win32-g++:LIBS += -L../../external -llevmar
 linux-g++:LIBS += -llevmar
 macx:LIBS            += $$MACLIBDIR/liblevmar.a
