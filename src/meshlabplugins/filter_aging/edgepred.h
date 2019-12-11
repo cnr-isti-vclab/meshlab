@@ -53,7 +53,7 @@ class QualityEdgePred
 			return (lenp(ep) && testQuality(ep));
 		}
 		
-		// Tests quality predicate but only on the first of the two vertexes of the edge
+		// Tests quality predicate but only on the first of the two vertices of the edge
 		bool qVertTest(face::Pos<CMeshO::FaceType> ep) const {
 			return (ep.f->V(ep.z)->Q() > qthVal);
 		}

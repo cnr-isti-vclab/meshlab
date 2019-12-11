@@ -167,8 +167,8 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case FP_SELECT_VERT_FROM_FACE :     return tr("Select vertices from selected faces.");
 	case FP_SELECT_FACES_BY_EDGE :      return tr("Select all triangles having an edge with length greater or equal than a given threshold.");
 	case FP_SELECT_BORDER :             return tr("Select vertices and faces on the boundary.");
-	case FP_SELECT_BY_VERT_QUALITY :    return tr("Select all the faces/vertexes within the specified vertex quality range.");
-	case FP_SELECT_BY_FACE_QUALITY :    return tr("Select all the faces/vertexes with within the specified face quality range.");
+	case FP_SELECT_BY_VERT_QUALITY :    return tr("Select all the faces/vertices within the specified vertex quality range.");
+	case FP_SELECT_BY_FACE_QUALITY :    return tr("Select all the faces/vertices with within the specified face quality range.");
 	case FP_SELECT_BY_COLOR :           return tr("Select part of the mesh based on its color.");
 	case CP_SELECT_TEXBORDER :          return tr("Colorize only border edges.");
 	case CP_SELECT_NON_MANIFOLD_FACE:   return tr("Select the faces and the vertices incident on non manifold edges (e.g. edges where more than two faces are incident); note that this function select the components that are related to non manifold edges. The case of non manifold vertices is specifically managed by the pertinent filter.");

@@ -189,7 +189,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Allow the selection of vertexes inside a dragged area</string>
+         <string>Allow the selection of vertices inside a dragged area</string>
         </property>
         <property name="text" >
          <string/>
@@ -231,7 +231,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Collapse a couple of vertexes</string>
+         <string>Collapse a couple of vertices</string>
         </property>
         <property name="text" >
          <string/>
@@ -353,7 +353,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Invert selected faces/vertexes</string>
+         <string>Invert selected faces/vertices</string>
         </property>
         <property name="text" >
          <string/>
@@ -382,7 +382,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip" >
-         <string>Clear selected faces/vertexes</string>
+         <string>Clear selected faces/vertices</string>
         </property>
         <property name="text" >
          <string/>

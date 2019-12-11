@@ -271,7 +271,7 @@ we have two meshes:
 - Fix the mesh that does not move and stays in the spatial indexing structure.
 - Mov the mesh we 'move' e.g. the one for which we search the transforamtion.
 
-requires normalize normals for vertexes AND faces
+requires normalize normals for vertices AND faces
 Allinea due mesh;
 Assume che:
 la uniform grid sia gia' inizializzata con la mesh fix

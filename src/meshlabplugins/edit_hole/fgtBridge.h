@@ -679,7 +679,7 @@ private:
             }
     };
 
-    /*  Set bridge vertexes according bridge build option
+    /*  Set bridge vertices according bridge build option
      */
     static void setVertexByOption(AbutmentType &sideA, AbutmentType &sideB, BridgeOption o,
         FaceType &bf0, FaceType &bf1)

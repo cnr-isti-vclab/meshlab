@@ -126,11 +126,11 @@ class RenderArea : public QGLWidget
 
 		QPoint start, end;	// Selection area
 		QRect area;			// Dragged rectangle
-		QRectF areaUV;		// Area of selected vertexes
+		QRectF areaUV;		// Area of selected vertices
 
 		// Info for interactive editing
 		vector<QRect> selRect;	// Vector of buttons area
-		QRect vertRect;			// Rectangle for vertexes
+		QRect vertRect;			// Rectangle for vertices
 		QRect selection;		// Selection area
 		QPoint selStart, selEnd;
 		int posX, posY, rectX, rectY, oldSRX, oldSRY;	// Stored value

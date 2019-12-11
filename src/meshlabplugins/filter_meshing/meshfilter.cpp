@@ -292,7 +292,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 			                                               "strip) the filter will not build a consistent orientation simply because it is not possible. The filter can end up in a consistent orientation that can be exactly the opposite of the expected one; in that case simply invert the whole mesh orientation.");
 		case FP_INVERT_FACES                       : return tr("Invert faces orientation, flipping the normals of the mesh. <br>"
 			                                               "If requested, it tries to guess the right orientation; "
-			                                               "mainly it decide to flip all the faces if the minimum/maximum vertexes have not outward point normals for a few directions.<br>"
+			                                               "mainly it decide to flip all the faces if the minimum/maximum vertices have not outward point normals for a few directions.<br>"
 			                                               "Works well for single component watertight objects.");
 		case FP_SCALE                              : return tr("Generate a matrix transformation that scale the mesh. The mesh can be also automatically scaled to a unit side box. ");
 		case FP_CENTER                             : return tr("Generate a matrix transformation that translate the mesh. The mesh can be translated around one of the axis or a given axis and w.r.t. to the origin or the baricenter, or a given point.");
@@ -1008,7 +1008,7 @@ switch(ID(filter))
 				selBox.Add(p);
 				selected_pts.push_back(p);
 			}
-		Log("Using %i vertexes to build a fitting  plane", int(selected_pts.size()));
+		Log("Using %i vertices to build a fitting plane", int(selected_pts.size()));
 		Plane3m plane;
 		FitPlaneToPointSet(selected_pts, plane);
 		float errorSum = 0;

@@ -235,7 +235,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 			selected_pts.push_back(p);
 			Naccum = Naccum + (*vi).N();
 		}
-		Log("Using %i vertexes to build a fitting  plane", int(selected_pts.size()));
+		Log("Using %i vertices to build a fitting plane", int(selected_pts.size()));
 		Plane3m plane;
 		FitPlaneToPointSet(selected_pts, plane);
 		plane.Normalize();
