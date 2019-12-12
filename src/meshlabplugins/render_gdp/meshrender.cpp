@@ -51,6 +51,15 @@ void MeshShaderRenderPlugin::initActionList() {
 	//	}
 #endif
 	bool ret = shadersDir.cd("shaders");
+
+#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+	if (! ret) {
+		shadersDir = QDir(qApp->applicationDirPath());
+		if (shadersDir.dirName() == "bin") {
+			ret = shadersDir.cdUp() && shadersDir.cd("share")&& shadersDir.cd("meshlab") && shadersDir.cd("shaders");
+		}
+	}
+#endif
 	if (!ret)
 	{
 		QMessageBox::information(0, "MeshLab",
