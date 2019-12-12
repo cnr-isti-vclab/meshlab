@@ -1,4 +1,4 @@
-.TH JHEAD 1 "16 Mar 2012" "jhead 2.95"
+.TH JHEAD 1 "22 Nov 2019" "jhead 3.04"
 .SH NAME
 jhead \- Digicam JPEG Exif header manipulation tool
 .SH SYNOPSIS
@@ -105,7 +105,6 @@ Replace comment with text from
 .TP
 .BI \-\^cl \ string
 Replace comment with specified string from command line
-.IR file
 
 .SH DATE / TIME MANIPULATION OPTIONS
 
@@ -121,16 +120,10 @@ pre-exist. Use \-mkexif option to create one if needed.
 This option causes files to be renamed and/ or mmoved using the date
 information from the Exif header "DateTimeOriginal" field.  If the file
 is not an Exif file, or the DateTimeOriginal does not contain a valid
-value, the file date is used.  Renaming is by default restricted to
-files whose names consist largely of digits.  This effectively restricts
-renaming to files that have not already been manually renamed, as the
-default sequential names from digital cameras consist largely of digits.
-Use the
-.B \-n
-option to force renaming of all files.  If the new name contains a '/',
+value, the file date is used.  If the new name contains a '/',
 this will be interpreted as a new path, and the file will be moved
 accordingly.
-                  
+
 If the
 .I format_string
 is omitted, the file will be renamed to MMDD-HHMMSS.  Note that this
@@ -190,10 +183,21 @@ valid as part of a filename on some systems.
 
 .TP
 .B \-ta<+|\-><timediff>
-Adjust time stored in the Exif header by h:mm backwards or forwards.
+Adjust time stored in the Exif header by h:mm forwards or backwards.
 Useful when having taken pictures with the wrong time set on the camera,
 such as after travelling across time zones, or when daylight savings
 time has changed.
+
+Examples:
+
+Add 1 hourand 5 minutes to the time
+.br
+jhead \-ta+1:05
+
+Decrease time by one second:
+.br
+jhead \-ta-0:0:1
+
 
 This option changes all Date/time fields in the exif header, including
 "DateTimeOriginal" (tag 0x9003) and "DateTimeDigitized" (tag 0x9004).

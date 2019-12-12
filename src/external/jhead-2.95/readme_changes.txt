@@ -1,1 +1,0 @@
-- In file jhead.c main function must be commented.

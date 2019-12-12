@@ -380,3 +380,65 @@ Handle very large unsigned rational numbers in exif header
 
 -------Released version 2.95 -- Mar 16 2012 --------
 
+Jun 18 2012:
+Fix printing file info when -ft option is used
+Do not skip readonle files with -st option
+
+-------Released version 2.96 -- Jun 22 2012 --------
+
+Jul 9 2012:
+Make it compile clean with visual studio 10
+
+Jul 28 2012:
+Various cleanups from debian folks.
+
+Oct 19 2012:
+Add feature to show quality of jpeg, (by Andy Spiegel)
+
+Dec 27 2012:
+Fix crash on some corrupt files bug, clarify time adjustment syntax in help
+
+
+-------Released version 2.97 -- Jan 30 2013 --------
+Jun 10 2013:
+Make max comment size 16000
+
+Oct 25 2013:
+Added "-zt" option to trim 32k of trailing zeroes from Nikon 1 J2 and J3 images.
+
+Sep 28 2014:
+Add ability to reset invalid rotation tag (from Moultrie game cameras)
+
+-------Released version 3.0 -- Feb 2 2015 --------
+Ma4 5 2015:
+Add option to set exif date from date from another file.
+
+Jul 28 2015:
+Remove some unnecessary warnings with some types of GPS data
+
+Aug 4 2015:
+Remove multiple copies of the same type of section when deleting section types
+
+Aug 11 2011:
+Bug fixes relating to fuzz testing.
+
+Aug 1 2017:
+Fix bug when no orientation tag is present
+
+Aug 12 2018:
+Fix bug of not clearing exif information when processing images with an without
+exif data in one invocation.
+
+-------Released version 3.02 -- Dec 11 2018 --------
+
+Dec 21 2018:
+Fix bug where thumbnail replacement DID NOT WORK.
+(broke while fixing compiler warnings for 3.02 release)
+
+-------Released version 3.03 -- Dec 31 2018 --------
+
+Nov 20 2019:
+Apply a whole bunch of patches from Debian.
+Spell check and fuzz test stuff from Debian, nothing useful to human users.
+
+-------Released version 3.04 -- Nov 22 2019 --------

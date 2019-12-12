@@ -17,6 +17,7 @@
 #include <io.h>
 #include "jhead.h"
 
+
 #define TRUE 1
 #define FALSE 0
 
@@ -255,14 +256,12 @@ int main (int argc, char **argv)
  {
     int argn;
     char * arg;
-    int Subdirs = 0;
 
     for (argn=1;argn<argc;argn++){
         arg = argv[argn];
         if (arg[0] != '-') break; // Filenames from here on.
         if (!strcmp(arg,"-r")){
             printf("do recursive\n");
-            Subdirs = 1;
         }else{
             fprintf(stderr, "Argument '%s' not understood\n",arg);
         }

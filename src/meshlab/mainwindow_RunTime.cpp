@@ -51,6 +51,10 @@
 #include "../common/mlapplication.h"
 #include "../common/filterscript.h"
 
+extern "C" {
+#include "jhead.h"
+}
+
 
 using namespace std;
 using namespace vcg;

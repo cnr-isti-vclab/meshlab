@@ -1,7 +1,7 @@
 include (../general.pri)
 #CONFIG += debug_and_release
 DESTDIR = ../distrib
-EXIF_DIR = ../external/jhead-2.95
+EXIF_DIR = ../external/jhead-3.04
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
 

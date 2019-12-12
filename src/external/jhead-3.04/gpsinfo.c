@@ -53,7 +53,7 @@ static const char * GpsTags[MAX_GPS_TAG+1]= {
 //--------------------------------------------------------------------------
 // Process GPS info directory
 //--------------------------------------------------------------------------
-void ProcessGpsInfo(unsigned char * DirStart, int ByteCountUnused, unsigned char * OffsetBase, unsigned ExifLength)
+void ProcessGpsInfo(unsigned char * DirStart, unsigned char * OffsetBase, unsigned ExifLength)
 {
     int de;
     unsigned a;
@@ -101,7 +101,8 @@ void ProcessGpsInfo(unsigned char * DirStart, int ByteCountUnused, unsigned char
             unsigned OffsetVal;
             OffsetVal = Get32u(DirEntry+8);
             // If its bigger than 4 bytes, the dir entry contains an offset.
-            if (OffsetVal+ByteCount > ExifLength){
+            if (OffsetVal > 0x1000000 || OffsetVal+ByteCount > ExifLength){
+                // Max exif in jpeg is 64k, so any offset bigger than that is bogus.
                 // Bogus pointer offset and / or bytecount value
                 ErrNonfatal("Illegal value pointer for Exif gps tag %04x", Tag,0);
                 continue;
@@ -147,7 +148,7 @@ void ProcessGpsInfo(unsigned char * DirStart, int ByteCountUnused, unsigned char
                     Values[a] = ConvertAnyFormat(ValuePtr+a*ComponentSize, Format);
                 }
 
-                sprintf(TempString, FmtString, Values[0], Values[1], Values[2]);
+                snprintf(TempString, sizeof(TempString), FmtString, Values[0], Values[1], Values[2]);
 
                 if (Tag == TAG_GPS_LAT){
                     strncpy(ImageInfo.GpsLat+2, TempString, 29);
@@ -161,8 +162,8 @@ void ProcessGpsInfo(unsigned char * DirStart, int ByteCountUnused, unsigned char
                 break;
 
             case TAG_GPS_ALT:
-                sprintf(ImageInfo.GpsAlt + 1, "%.2fm", 
-                    ConvertAnyFormat(ValuePtr, Format));
+                snprintf(ImageInfo.GpsAlt+1, sizeof(ImageInfo.GpsAlt)-1,
+                    "%.2fm", ConvertAnyFormat(ValuePtr, Format));
                 break;
         }
 

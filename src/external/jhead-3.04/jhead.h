@@ -6,8 +6,6 @@
 // where they get used as possible, so include files only get stuff that 
 // gets used in more than one file.
 //--------------------------------------------------------------------------
-#define _CRT_SECURE_NO_DEPRECATE 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +17,18 @@
 
 #ifdef _WIN32
     #include <sys/utime.h>
+
+    // Make the Microsoft Visual c 10 deprecate warnings go away.
+    // The _CRT_SECURE_NO_DEPRECATE doesn't do the trick like it should.
+    #define unlink _unlink
+    #define chmod _chmod
+    #define access _access
+    #define mktemp _mktemp
+    
+    #if _MSC_VER && _MSC_VER <= 1500
+        // The 2007 vintage compiler I use on windows doesn't have snprintf
+        #define snprintf(dest, len, format,...) sprintf (dest, format, __VA_ARGS__)
+    #endif
 #else
     #include <utime.h>
     #include <sys/types.h>
@@ -35,7 +45,7 @@ typedef unsigned char uchar;
     #define FALSE 0
 #endif
 
-#define MAX_COMMENT_SIZE 2000
+#define MAX_COMMENT_SIZE 16000
 
 #ifdef _WIN32
     #define PATH_MAX _MAX_PATH
@@ -84,7 +94,7 @@ typedef struct {
     char  CameraMake   [32];
     char  CameraModel  [40];
     char  DateTime     [20];
-    int   Height, Width;
+    unsigned Height, Width;
     int   Orientation;
     int   IsColor;
     int   Process;
@@ -112,9 +122,9 @@ typedef struct {
     char  Comments[MAX_COMMENT_SIZE];
     int   CommentWidthchars; // If nonzero, widechar comment, indicates number of chars.
 
-    unsigned ThumbnailOffset;          // Exif offset to thumbnail
-    unsigned ThumbnailSize;            // Size of thumbnail.
-    unsigned LargestExifOffset;        // Last exif data referenced (to check if thumbnail is at end)
+    int   ThumbnailOffset;          // Exif offset to thumbnail
+    int   ThumbnailSize;            // Size of thumbnail.
+    int   LargestExifOffset;        // Last exif data referenced (to check if thumbnail is at end)
 
     char  ThumbnailAtEnd;              // Exif header ends with the thumbnail
                                        // (we can only modify the thumbnail if its at the end)
@@ -127,11 +137,14 @@ typedef struct {
     char GpsLat[31];
     char GpsLong[31];
     char GpsAlt[20];
+
+    int  QualityGuess;
 }ImageInfo_t;
 
 
-
+#ifndef EXIT_FAILURE
 #define EXIT_FAILURE  1
+#endif
 #define EXIT_SUCCESS  0
 
 // jpgfile.c functions
@@ -144,14 +157,14 @@ typedef enum {
 
 
 // prototypes for jhead.c functions
-void ErrFatal(char * msg);
-void ErrNonfatal(char * msg, int a1, int a2);
+void ErrFatal(const char * msg);
+void ErrNonfatal(const char * msg, int a1, int a2);
 void FileTimeAsString(char * TimeStr);
 
 // Prototypes for exif.c functions.
 int Exif2tm(struct tm * timeptr, char * ExifTime);
-void process_EXIF (unsigned char * CharBuf, unsigned int length);
-int RemoveThumbnail(unsigned char * ExifSection);
+void Clear_EXIF();
+void process_EXIF (unsigned char * CharBuf, int length);
 void ShowImageInfo(int ShowFileInfo);
 void ShowConciseImageInfo(void);
 const char * ClearOrientation(void);
@@ -187,7 +200,7 @@ extern void ProcessMakerNote(unsigned char * DirStart, int ByteCount,
                  unsigned char * OffsetBase, unsigned ExifLength);
 
 // gpsinfo.c prototypes
-void ProcessGpsInfo(unsigned char * ValuePtr, int ByteCount, 
+void ProcessGpsInfo(unsigned char * ValuePtr,  
                 unsigned char * OffsetBase, unsigned ExifLength);
 
 // iptc.c prototpyes
@@ -218,6 +231,9 @@ Section_t * FindSection(int SectionType);
 Section_t * CreateSection(int SectionType, unsigned char * Data, int size);
 void ResetJpgfile(void);
 
+// Prototypes from jpgqguess.c
+void process_DQT (const uchar * Data, int length);
+void process_DHT (const uchar * Data, int length);
 
 // Variables from jhead.c used by exif.c
 extern ImageInfo_t ImageInfo;
@@ -249,7 +265,7 @@ extern int ShowTags;
 #define M_EXIF  0xE1          // Exif marker.  Also used for XMP data!
 #define M_XMP   0x10E1        // Not a real tag (same value in file as Exif!)
 #define M_COM   0xFE          // COMment 
-#define M_DQT   0xDB
-#define M_DHT   0xC4
+#define M_DQT   0xDB          // Define Quantization Table
+#define M_DHT   0xC4          // Define Huffmann Table
 #define M_DRI   0xDD
 #define M_IPTC  0xED          // IPTC marker

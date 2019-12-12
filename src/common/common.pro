@@ -1,5 +1,5 @@
 include (../general.pri)
-EXIF_DIR = ../external/jhead-2.95
+EXIF_DIR = ../external/jhead-3.04
 
 win32-msvc:DESTDIR = ../distrib
 win32-g++:DLLDESTDIR = ../distrib
