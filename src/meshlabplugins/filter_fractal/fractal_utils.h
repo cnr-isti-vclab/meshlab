@@ -182,7 +182,7 @@ public:
             ivp[i++] = &*vi;
         }
 
-        // defines the vertexes of each face
+        // defines the vertices of each face
         FaceIterator fi = m.face.begin();
         int evenFace[3] = {0, 1, k2}, oddFace[3] = {1, k2+1, k2};
         for(i=0; i<k; i++)

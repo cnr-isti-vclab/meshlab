@@ -105,7 +105,7 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
                 "area affected by the erosion process."));
         params.addParam(new RichAbsPerc("QualityThreshold", qRange.first+(qRange.second-qRange.first)*0.66,
                 qRange.first, qRange.second, "Min quality threshold",
-                "Represents the minimum quality value two vertexes must have <br>"
+                "Represents the minimum quality value two vertices must have <br>"
                 "to consider the edge they are sharing."));
         params.addParam(new RichAbsPerc("EdgeLenThreshold", m.cm.bbox.Diag()*0.02, 0,m.cm.bbox.Diag()*0.5,
                 "Edge len threshold",
@@ -197,7 +197,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             // refine needed edges
             refineMesh(m.cm, ep, selected, cb);
 
-            // if requested, add erosion attribute to vertexes and initialize it
+            // if requested, add erosion attribute to vertices and initialize it
             if(storeDispl) {
                 CMeshO::PerVertexAttributeHandle<Point3m> vah = tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "Erosion");
                 for(CMeshO::VertexIterator vi=m.cm.vert.begin(); vi!=m.cm.vert.end(); vi++)
@@ -205,13 +205,13 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             }
             CMeshO::PerVertexAttributeHandle<Point3m> vah = vcg::tri::Allocator<CMeshO>::GetPerVertexAttribute<Point3m>(m.cm, "Erosion");
 
-            // vertexes along selection border will not be displaced
+            // vertices along selection border will not be displaced
             if(selected) tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
 
-            // clear vertexes V bit (will be used to mark the vertexes as displaced)
+            // clear vertices V bit (will be used to mark the vertices as displaced)
             tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
 
-            // displace vertexes
+            // displace vertices
             for(int i=0; i<dispSteps; i++) {
                 GridStaticPtr<CFaceO, CMeshO::ScalarType> gM;
                 gM.Set(m.cm.face.begin(), m.cm.face.end());
@@ -252,7 +252,7 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
                             }
                     }
                 }
-                // clear vertexes V bit again
+                // clear vertices V bit again
                 tri::UpdateFlags<CMeshO>::VertexClearV(m.cm);
             }
 
@@ -384,7 +384,7 @@ void GeometryAgingPlugin::smoothPeaks(CMeshO &m, bool selected, bool updateErosi
 
     vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
 
-    // clear vertexes V bit again
+    // clear vertices V bit again
     tri::UpdateFlags<CMeshO>::VertexClearV(m);
 }
 

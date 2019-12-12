@@ -122,7 +122,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		Log("Mesh has %8i triangles \n", nTris);
 		Log("         %8i quads \n", nQuads);
 		Log("         %8i polygons \n", nPolys);
-		Log("         %8i large polygons (with internal faux vertexes)", nLargePolys);
+		Log("         %8i large polygons (with internal faux vertices)", nLargePolys);
 
 		if (!tri::Clean<CMeshO>::IsBitTriQuadOnly(m))
 		{

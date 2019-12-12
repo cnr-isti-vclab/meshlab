@@ -176,7 +176,7 @@ public:
                 qDebug("Created grid of %i (%i %i %i)\n",u[kk].size(),u[kk].siz[0],u[kk].siz[1],u[kk].siz[2]);
             }
 
-            // Step 2: add all the Vertexes of Fix Meshes to the UG;
+            // Step 2: add all the Vertices of Fix Meshes to the UG;
             typename MeshType::VertexIterator vi;
             Point3x tp;
             for(size_t i=0;i<FixMV.size();++i)
@@ -237,7 +237,7 @@ public:
   const int wide2=wide1*wide1;
 
 
-  // the rotated and translated) set of vertexes;
+  // the rotated and translated) set of vertices;
   std::vector< Point3x > movVert;
   std::vector< Point3x > movNorm;
   Box3x movBox;

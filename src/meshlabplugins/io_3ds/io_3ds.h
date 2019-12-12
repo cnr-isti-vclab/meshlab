@@ -46,7 +46,7 @@ public:
   int mask;  
 
   /// a Simple callback that can be used for long obj parsing. 
-  // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertexes, faces...)
+  // it returns the current position, and formats a string with a description of what th efunction is doing (loading vertices, faces...)
   CallBackPos *cb;
 
   /// number of vertices

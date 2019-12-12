@@ -65,7 +65,7 @@ protected:
 
     typedef typename TRIMESH_TYPE::VertContainer VertContainer;
 
-    // New curvature precomputed for the vertexes of the faces
+    // New curvature precomputed for the vertices of the faces
     // adjacent to edge to be flipped
     ScalarType _cv0, _cv1, _cv2, _cv3;
 
@@ -258,7 +258,7 @@ public:
         FacePointer f2 = this->_pos.F()->FFp(i);
         v3 = f2->V2(f1->FFi(i));
 
-        // save sum of curvatures of vertexes
+        // save sum of curvatures of vertices
         float cbefore = v0->Q() + v1->Q() + v2->Q() + v3->Q();
 
         // saving current vertex normals

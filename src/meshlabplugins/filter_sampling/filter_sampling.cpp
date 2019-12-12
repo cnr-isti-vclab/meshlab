@@ -401,7 +401,7 @@ QString FilterDocSampling::filterInfo(FilterIDType filterId) const
 		case FP_ELEMENT_SUBSAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; at most one sample for each element of the mesh is created. Samples are taking in a uniform way, one for each element (vertex/edge/face); all the elements have the same probability of being chosen.");
 		case FP_MONTECARLO_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; samples are generated in a randomly uniform way, or with a distribution biased by the per-vertex quality values of the mesh.");
 		case FP_STRATIFIED_SAMPLING        :  return QString("Create a new layer populated with a point sampling of the current mesh; to generate multiple samples inside a triangle each triangle is subdivided according to various <i>stratified</i> strategies. Distribution is often biased by triangle shape.");
-		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertexes of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
+		case FP_CLUSTERED_SAMPLING         :  return QString("Create a new layer populated with a subsampling of the vertices of the current mesh; the subsampling is driven by a simple one-per-gridded cell strategy.");
 		case FP_POINTCLOUD_SIMPLIFICATION  :  return QString("Create a new layer populated with a simplified version of the current point cloud.");
 		case FP_POISSONDISK_SAMPLING       :  return QString("Create a new layer populated with a point sampling of the current mesh;"
 													"samples are generated according to a Poisson-disk distribution, using the algorithm described in:<br>"
@@ -565,9 +565,9 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
 			"The mesh that is sampled for the comparison."));
 		parlst.addParam(new RichBool("SaveSample", false, "Save Samples",
 			"Save the position and distance of all the used samples on both the two surfaces, creating two new layers with two point clouds representing the used samples."));
-		parlst.addParam(new RichBool("SampleVert", true, "Sample Vertexes",
+		parlst.addParam(new RichBool("SampleVert", true, "Sample Vertices",
 			"For the search of maxima it is useful to sample vertices and edges of the mesh with a greater care. "
-			"It is quite probably the the farthest points falls along edges or on mesh vertexes, and with uniform montecarlo sampling approaches"
+			"It is quite probably the the farthest points falls along edges or on mesh vertices, and with uniform montecarlo sampling approaches"
 			"the probability of taking a sample over a vertex or an edge is theoretically null.<br>"
 			"On the other hand this kind of sampling could make the overall sampling distribution slightly biased and slightly affects the cumulative results."));
 		parlst.addParam(new RichBool("SampleEdge", false, "Sample Edges", "See the above comment."));
@@ -606,7 +606,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichMesh ("SourceMesh", md.mm(),&md, "Source Mesh",
                                   "The mesh that contains the source data that we want to transfer."));
     parlst.addParam(new RichMesh ("TargetMesh", vertexMesh,&md, "Target Mesh",
-                                  "The mesh whose vertexes will receive the data from the source."));
+                                  "The mesh whose vertices will receive the data from the source."));
     parlst.addParam(new RichBool ("GeomTransfer", false, "Transfer Geometry",
                                   "if enabled, the position of each vertex of the target mesh will be snapped onto the corresponding closest point on the source mesh"));
     parlst.addParam(new RichBool ("NormalTransfer", false, "Transfer Normal",
@@ -663,7 +663,7 @@ void FilterDocSampling::initParameterSet(QAction *action, MeshDocument & md, Ric
     parlst.addParam(new RichMesh ("ColoredMesh", colorMesh,&md, "To be Colored Mesh",
                                   "The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."));
     parlst.addParam(new RichMesh ("VertexMesh", vertexMesh,&md, "Vertex Mesh",
-                                  "The mesh whose vertexes are used as seed points for the color computation. These seeds point are projected onto the above mesh."));
+                                  "The mesh whose vertices are used as seed points for the color computation. These seeds point are projected onto the above mesh."));
     if(ID(action) ==	FP_DISK_COLORING) {
       float Diag = md.mm()->cm.bbox.Diag();
       parlst.addParam(new RichDynamicFloat("Radius", Diag/10.0f, 0.0f, Diag/3.0f,  tr("Radius"),
@@ -1272,7 +1272,7 @@ switch(ID(action))
 		for(CMeshO::VertexIterator vi= mmV->cm.vert.begin(); vi!= mmV->cm.vert.end(); ++vi) if(!(*vi).IsD())
 			vecP.push_back((*vi).cP());
 
-		vector<CMeshO::VertexPointer> vecV; // points to vertexes of ColoredMesh;
+		vector<CMeshO::VertexPointer> vecV; // points to vertices of ColoredMesh;
 		tri::VoronoiProcessing<CMeshO>::SeedToVertexConversion	(mmM->cm, vecP, vecV);
 		Log("Converted %ui points into %ui vertex ",vecP.size(),vecV.size());
 		tri::EuclideanDistance<CMeshO> edFunc;

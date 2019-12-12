@@ -125,7 +125,7 @@
     <ABSPERC_GUI guiLabel="Edge Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
    <PARAM parName="vertCylFlag" parIsImportant="true" parType="Boolean" parDefault="false" parIsPersistent="false">
-    <PARAM_HELP><![CDATA[ If True all the vertexes are converted into cylinders ]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[ If True all the vertices are converted into cylinders ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Vertex -> Cyl."/>
    </PARAM>
    <PARAM parName="vertCylRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsPersistent="false">
@@ -133,7 +133,7 @@
     <ABSPERC_GUI guiLabel="Vertex Cylinder Rad." guiMin="0" guiMax="meshDoc.current().bboxDiag()"/>
    </PARAM>
    <PARAM parName="vertSphFlag" parIsImportant="true" parType="Boolean" parDefault="true" parIsPersistent="false">
-    <PARAM_HELP><![CDATA[ If True all the vertexes are converted into sphere ]]></PARAM_HELP>
+    <PARAM_HELP><![CDATA[ If True all the vertices are converted into sphere ]]></PARAM_HELP>
     <CHECKBOX_GUI guiLabel="Vertex -> Sph."/>
    </PARAM>
    <PARAM parName="vertSphRadius" parIsImportant="true" parType="Real" parDefault="meshDoc.current().bboxDiag() / 100.0" parIsPersistent="false">

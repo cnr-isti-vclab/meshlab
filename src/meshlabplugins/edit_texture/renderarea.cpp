@@ -1251,7 +1251,7 @@ void RenderArea::SelectVertexes()
 
 void RenderArea::CheckVertex()
 {
-    // Search for unselected vertexes in UV Space
+    // Search for unselected vertices in UV Space
     banList.clear();
     CMeshO::FaceIterator fi;
     for(fi = model->cm.face.begin(); fi != model->cm.face.end(); ++fi)
@@ -1373,7 +1373,7 @@ void RenderArea::SelectConnectedComponent(QPoint e)
     }
 }
 
-// Clear every selected faces or vertexes
+// Clear every selected faces or vertices
 void RenderArea::ClearSelection()
 {
     //selBit = CFaceO::NewBitFlag();
@@ -1444,10 +1444,10 @@ void RenderArea::Flip(bool mode)
     }
 }
 
-// Collapse a couple of vertexes
+// Collapse a couple of vertices
 void RenderArea::UnifyCouple()
 {
-    // Calculate the average coordinates and unify a couple of vertexes
+    // Calculate the average coordinates and unify a couple of vertices
     if (VCount == 2)
     {
         float tu = (vc1.u() + vc2.u())/2.0;
@@ -1474,10 +1474,10 @@ void RenderArea::UnifyCouple()
     }
 }
 
-// Unify a set of border vertexes among the selected path
+// Unify a set of border vertices among the selected path
 void RenderArea::UnifySet()
 {
-    // Unify a set of vertexes
+    // Unify a set of vertices
     if (path.size() == path1.size() && drawP && drawP1)
     {
         for (unsigned i = 0; i < path.size(); i++)
@@ -1802,7 +1802,7 @@ void RenderArea::UpdateSelectionArea(int x, int y)
 
 void RenderArea::UpdateSelectionAreaV(int x, int y)
 {
-    // Update the buttons of the selection area for vertexes
+    // Update the buttons of the selection area for vertices
     selection.moveCenter(QPoint(selection.center().x() + x, selection.center().y() + y));
     selRect[0].moveBottomRight(selection.topLeft());
     selRect[1].moveBottomLeft(selection.topRight());
@@ -1812,7 +1812,7 @@ void RenderArea::UpdateSelectionAreaV(int x, int y)
 
 void RenderArea::UpdateVertexSelection()
 {
-    // Recalcultate the rectangle for selection of vertexes
+    // Recalculate the rectangle for selection of vertices
     selStart = QPoint(MAX,MAX);
     selEnd = QPoint(-MAX,-MAX);
     selectedV = false;
@@ -1893,7 +1893,7 @@ void RenderArea::DrawCircle(QPoint origin)
 
 void RenderArea::UpdateBoundingArea(QPoint topLeft, QPoint topRight)
 {
-    // Update the bounding box (selection rectangle) of the selected faces/vertexes
+    // Update the bounding box (selection rectangle) of the selected faces/vertices
     if (topLeft.x() < selStart.x()) selStart.setX(topLeft.x());
     if (topLeft.y() < selStart.y()) selStart.setY(topLeft.y());
     if (topRight.x() > selEnd.x()) selEnd.setX(topRight.x());
@@ -1932,7 +1932,7 @@ void RenderArea::ImportSelection()
 
 void RenderArea::CountVertexes()
 {
-    // Count the number of selected UV vertexes (not so easy...)
+    // Count the number of selected UV vertices (not so easy...)
     VCount = 0;
     collapse1 = 0;
     collapse2 = 0;

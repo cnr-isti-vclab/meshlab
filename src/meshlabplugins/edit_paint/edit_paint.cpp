@@ -592,7 +592,7 @@ inline void EditPaintPlugin::smooth(vector< pair<CVertexO *, PickingData> > * ve
 		CFaceO * f = one_face;
 
 		do
-		{ /// calc the sum of the surrounding vertexes pos or and vertexes color
+		{ /// calc the sum of the surrounding vertices pos or and vertices color
 			CFaceO * temp = one_face->VFp(pos); //next face in VF list
 			if (one_face != 0 && !one_face->IsD())
 			{

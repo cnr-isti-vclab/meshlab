@@ -42,7 +42,7 @@ QualityMapperPlugin::QualityMapperPlugin()
 
 const QString QualityMapperPlugin::Info() 
 {
-	return tr("Colorize mesh vertexes by Quality");
+	return tr("Colorize mesh vertices by Quality");
 }
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
