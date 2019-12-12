@@ -81,6 +81,7 @@ public:
     typedef typename vcg::face::Pos<FaceType>		PosType;
 
 public:
+    virtual ~FgtBridgeBase() = default;
     virtual PosType GetAbutmentA() const =0;
     virtual PosType GetAbutmentB() const =0;
 

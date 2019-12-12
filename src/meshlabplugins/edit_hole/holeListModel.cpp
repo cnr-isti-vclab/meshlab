@@ -53,12 +53,12 @@ void HoleListModel::drawHoles() const
 		if( it->IsSelected())
 		{
 			if(it->IsAccepted())
-				glColor(Color4b::DarkGreen);
+				glColor(Color4b(Color4b::DarkGreen));
 			else
-				glColor(Color4b::DarkRed);
+				glColor(Color4b(Color4b::DarkRed));
 		}
 		else
-			glColor(Color4b::DarkBlue);
+			glColor(Color4b(Color4b::DarkBlue));
 		it->Draw();
 	}
 
@@ -67,7 +67,7 @@ void HoleListModel::drawHoles() const
 	{
 		glDepthFunc(GL_ALWAYS);
 		glLineWidth(2.0f);
-		glColor(Color4b::Yellow);
+		glColor(Color4b(Color4b::Yellow));
 		glBegin(GL_LINES);
 			glVertex( pickedAbutment.f->V0(pickedAbutment.z)->P() );
 			glVertex( pickedAbutment.f->V1(pickedAbutment.z)->P() );
@@ -82,12 +82,12 @@ void HoleListModel::drawHoles() const
 		if(it->IsSelected())
 		{
 			if(it->IsAccepted())
-				glColor(Color4b::Green);
+				glColor(Color4b(Color4b::Green));
 			else
-				glColor(Color4b::Red);
+				glColor(Color4b(Color4b::Red));
 		}
 		else
-			glColor(Color4b::Blue);
+			glColor(Color4b(Color4b::Blue));
 
 		it->Draw();
 	}

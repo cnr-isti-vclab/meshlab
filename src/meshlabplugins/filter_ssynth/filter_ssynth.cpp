@@ -136,9 +136,6 @@ int FilterSSynth::getRequirements(QAction *)
                         catch(Exception& ex){
                                 return ex.getMessage();
                         }
-                        catch(ParseError& ex){
-                                return ex.getMessage();
-                        }
     return path;
 }
 int FilterSSynth::postCondition(QAction* filter) const

@@ -54,6 +54,7 @@ PlyMCPlugin::PlyMCPlugin()
 		case FP_MC_SIMPLIFY :  return QString("Simplfication: Edge Collapse for Marching Cube meshes");
 		default : assert(0);
 	}
+  return {};
 }
 
 // Info() must return the longer string describing each filtering action
