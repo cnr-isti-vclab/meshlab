@@ -249,7 +249,7 @@ typename VertexType::CoordType WarpRpos(const VertexType* v)
 }
 
 template <class MeshType>
-typename MeshType::ScalarType EstimateLenghtByParam
+typename MeshType::ScalarType EstimateLengthByParam
                                 (const typename MeshType::VertexType* v0,
                                  const typename MeshType::VertexType* v1,
                                  typename MeshType::FaceType* on_edge[2])
@@ -311,7 +311,7 @@ typename MeshType::ScalarType EstimateLenghtByParam
             }
         }
 
-        ///find if there's ant edge return inital lenght
+        ///find if there's ant edge return initial length
         if (edges.size()==0)
         {
             estimated[i]+=(Distance(v0->RPos,v1->RPos));
@@ -1023,7 +1023,7 @@ void ParametrizeStarEquilateral(MeshType &parametrized,
             uvAve.Normalize();
             vcg::Point2<ScalarType> p0=uvAve*(ScalarType)0.3;
             vcg::Point2<ScalarType> p1=uvAve*(ScalarType)(-0.3);
-            ///then test and set right assignement
+            ///then test and set right assignment
             non_border[0]->T().P()=p0;
             non_border[1]->T().P()=p1;
             if (!NonFolded(parametrized)){
@@ -1077,7 +1077,7 @@ void ParametrizeDiamondEquilateral(MeshType &parametrized,
     VertexType *v3=parametrized.face[1].V((edge1+2)%3);
     assert((v2!=v3)&&(v0!=v2)&&(v0!=v3)&&(v1!=v2)&&(v1!=v3));
 
-    ///assing texcoords
+    ///assign texcoords
     v0->T().P()=vcg::Point2<ScalarType>(0,-edge_len/2.0);
     v1->T().P()=vcg::Point2<ScalarType>(0,edge_len/2.0);
     v2->T().P()=vcg::Point2<ScalarType>(-h,0);
@@ -1126,7 +1126,7 @@ void ParametrizeLocally(MeshType &parametrized,
 
     ///do a first copy of the mesh
     ///and parametrize it
-    ///NB: order of faces is mantained
+    ///NB: order of faces is maintained
     CopyMeshFromFaces<MeshType>(orderedFaces,orderedVertex,parametrized);
 
     //CreateMeshVertexStar(subset,orderedFaces,parametrized);

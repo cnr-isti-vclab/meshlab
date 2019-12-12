@@ -538,7 +538,7 @@ void XMLStdParFrame::savePersistentParameterValue(QString name)
 			XMLStringWidget* stringwid = qobject_cast<XMLStringWidget*>(widg);
 			if (stringwid != nullptr)
 			{
-				/*WARNING!!!! WHY NOT USING THE ENV PATTERN FOR ALL THE CASES? Because QT when convert a QScriptValue to a QString of a javascript array (eg. [i0,i1,...,in]) return a i0,i1,...,in without the square brackets, making impossible to correctly re evalute again the resulting value*/
+				/*WARNING!!!! WHY NOT USING THE ENV PATTERN FOR ALL THE CASES? Because QT when convert a QScriptValue to a QString of a javascript array (eg. [i0,i1,...,in]) return a i0,i1,...,in without the square brackets, making impossible to correctly re evaluate again the resulting value*/
 				Env e;
 				expr = e.evaluate(expr).toString();
 			}

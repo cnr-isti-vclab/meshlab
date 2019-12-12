@@ -5,7 +5,7 @@
 #include "alignset.h"
 
 #include "parameters.h"
-#include "../../external/levmar-2.3/lm.h"
+#include "lm.h"
 
 #include <iostream>
 #include <fstream>

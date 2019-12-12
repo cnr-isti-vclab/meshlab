@@ -51,8 +51,8 @@
 class MyTriEdgeFlip : public vcg::tri::ParamEdgeFlip<BaseMesh>{};
 class MyTriEdgeCollapse: public vcg::tri::ParamEdgeCollapse<BaseMesh>{};
 
-///THIS CLASS MAINTAINS STRUCTURES WICH ARE USED FOR PARAMETRIZATION
-///TOGHETHER WITH METHOD FOR COLORIZATION FOR VISUALIZATION PURPOSES
+///THIS CLASS MAINTAINS STRUCTURES WHICH ARE USED FOR PARAMETRIZATION
+///TOGETHER WITH METHOD FOR COLORIZATION FOR VISUALIZATION PURPOSES
 
 class IsoParametrizator{
 
@@ -479,7 +479,7 @@ private:
         for (unsigned int i=0;i<base_mesh.vert.size();i++)
                 mesh->vert[i].RPos=base_mesh.vert[i].RPos;
 
-        ///copy linking for parameterization informations
+        ///copy linking for parameterization information
         int k=0;
         for (unsigned int i=0;i<base_mesh.face.size();i++)
         {
@@ -641,7 +641,7 @@ private:
                 ParaStack[i].ratio);
         }
         if ((isOK_interp)||(!test_interpolation))
-            printf("Choosen to stop at %d faces \n",ParaStack[indexmin].num_faces);
+            printf("Chosen to stop at %d faces \n",ParaStack[indexmin].num_faces);
         else
             printf("Not a right Interpolation Domain is found");
 #endif
@@ -923,7 +923,7 @@ public:
         UpdateTopologies(&base_mesh);
     }
 
-    ///equilateralize patch lenght and areas
+    ///equilateralize patch length and areas
     void EquiPatches()
     {
         PatchesOptimizer<BaseMesh> DomOpt(base_mesh,final_mesh);

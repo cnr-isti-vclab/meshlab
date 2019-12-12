@@ -7,7 +7,6 @@ HEADERS = edit_paint_factory.h \
     edit_paint.h
 
 SOURCES = 	edit_paint_factory.cpp \
-			../../meshlab/ml_selection_buffers.cpp \
 			paintbox.cpp \
 			edit_paint.cpp \
 			

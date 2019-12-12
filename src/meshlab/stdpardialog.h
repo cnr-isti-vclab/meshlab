@@ -682,7 +682,7 @@ private:
 This class is used to automatically create a frame from a set of parameters.
 it is used mostly for creating the main dialog of the filters, but it is used also
 in the creation of the additional saving options, post and pre opening processing
-and for general parameter setting in edit plugins (e.g. look at the aligment parameters)
+and for general parameter setting in edit plugins (e.g. look at the alignment parameters)
 */
 class StdParFrame : public QFrame
 {
@@ -712,7 +712,7 @@ signals:
 
 
 // This class provide a modal dialog box for asking a generic parameter set
-// It can be used by anyone needing for some values in a structred form and having some integrated help
+// It can be used by anyone needing for some values in a structured form and having some integrated help
 class GenericParamDialog: public QDialog
 {
     Q_OBJECT

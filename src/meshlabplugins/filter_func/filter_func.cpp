@@ -88,15 +88,15 @@ QString FilterFunctionPlugin::filterName(FilterIDType filterId) const
   return QString("error!");
 }
 
-const QString PossibleOperators("<br>It's possibile to use parenthesis <b>()</b>, and predefined operators:<br>"
+const QString PossibleOperators("<br>It's possible to use parenthesis <b>()</b>, and predefined operators:<br>"
 	"<b>&&</b> (logic and), <b>||</b> (logic or), <b>&lt;</b>, <b>&lt;=</b>, <b>></b>, <b>>=</b>, <b>!=</b> (not equal), <b>==</b> (equal), <b>_?_:_</b> (c/c++ ternary operator)<br><br>");
 
-const QString PerVertexAttributeString(	"It's possibile to use the following per-vertex variables in the expression:<br>"
+const QString PerVertexAttributeString(	"It's possible to use the following per-vertex variables in the expression:<br>"
 										"<b>x,y,z</b> (position), <b>nx,ny,nz</b> (normal), <b>r,g,b,a</b> (color), <b>q</b> (quality), "
 										"<b>rad</b> (radius), <b>vi</b> (vertex index), <b>vtu,vtv,ti</b> (texture coords and texture index), <b>vsel</b> (is the vertex selected? 1 yes, 0 no) "
 										"and all custom <i>vertex attributes</i> already defined by user.<br>");
 
-const QString PerFaceAttributeString("It's possibile to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
+const QString PerFaceAttributeString("It's possible to use the following per-face variables, or variables associated to the three vertex of every face:<br>"
 										"<b>x0,y0,z0</b> for the first vertex position, <b>x1,y1,z1</b> for the second vertex position, <b>x2,y2,z2</b> for the third vertex position, "
 										"<b>nx0,ny0,nz0 nx1,ny1,nz1 nx2,ny2,nz2</b> for vertex normals, <b>r0,g0,b0,a0 r1,g1,b1,a1 r2,g2,b2,a2</b> for vertex colors, "
 										"<b>q0,q1,q2</b> for vertex quality, <b>wtu0,wtv0 wtu1,wtv1 wtu2,wtv2</b> for per-wedge texture coords, <b>ti</b> for face texture index, <b>vsel0,vsel1,vsel2</b> for vertex selection (1 yes, 0 no) "
@@ -116,10 +116,10 @@ QString FilterFunctionPlugin::filterInfo(FilterIDType filterId) const
 			"You can change x,y,z for every vertex according to the function specified.<br>") + PerVertexAttributeString;
 
 		case FF_FACE_COLOR : return tr(	"Color function using muparser lib to generate new RGBA color for every face<br>"
-			"Red, Green, Blue and Alpha channels may be defined specifying a funcion in their respective fields.<br>") + PerFaceAttributeString;
+			"Red, Green, Blue and Alpha channels may be defined specifying a function in their respective fields.<br>") + PerFaceAttributeString;
 
 		case FF_VERT_COLOR : return tr(	"Color function using muparser lib to generate new RGBA color for every vertex<br>"
-			"Red, Green, Blue and Alpha channels may be defined specifying a funcion in their respective fields.<br>") + PerVertexAttributeString;
+			"Red, Green, Blue and Alpha channels may be defined specifying a function in their respective fields.<br>") + PerVertexAttributeString;
 
 		case FF_VERT_QUALITY: return tr("Quality function using muparser to generate new Quality for every vertex<br>") + PerVertexAttributeString;
 
@@ -245,7 +245,7 @@ int FilterFunctionPlugin::getRequirements(QAction *action)
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
@@ -378,9 +378,9 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
   case FF_VERT_SELECTION :
   {
     std::string expr = par.getString("condSelect").toStdString();
-	std::wstring wexpr = conversion::fromStringToWString(expr);
+	  auto wexpr = conversion::fromStringToWString(expr);
 
-    // muparser initialization and explicitely define parser variables
+    // muparser initialization and explicitly define parser variables
     Parser p;
     setPerVertexVariables(p,m.cm);
 
@@ -414,7 +414,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       } else (*vi).ClearS();
     }
 
-    // if succeded log stream contains number of vertices and time elapsed
+    // if succeeded log stream contains number of vertices and time elapsed
     Log( "selected %d vertices in %.2f sec.", numvert, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -425,7 +425,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
   {
     QString select = par.getString("condSelect");
 
-    // muparser initialization and explicitely define parser variables
+    // muparser initialization and explicitly define parser variables
     Parser p;
     setPerFaceVariables(p,m.cm);
 
@@ -459,7 +459,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       } else (*fi).ClearS();
     }
 
-    // if succeded log stream contains number of vertices and time elapsed
+    // if succeeded log stream contains number of vertices and time elapsed
     Log( "selected %d faces in %.2f sec.", numface, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -492,7 +492,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 		tri::UpdateSelection<CMeshO>::VertexFromFaceLoose(m.cm);
 	}
 
-    // muparser initialization and explicitely define parser variables
+    // muparser initialization and explicitly define parser variables
     // function for x,y and z must use different parser and variables
     Parser p1,p2,p3,p4;
 
@@ -549,7 +549,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
       tri::UpdateBounding<CMeshO>::Box(m.cm);
     }
 
-    // if succeded log stream contains number of vertices processed and time elapsed
+    // if succeeded log stream contains number of vertices processed and time elapsed
     Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -610,7 +610,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
         tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
         m.updateDataMask(MeshModel::MM_VERTCOLOR);
     }
-    // if succeded log stream contains number of vertices and time elapsed
+    // if succeeded log stream contains number of vertices and time elapsed
     Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -642,8 +642,13 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
     setPerVertexVariables(pv,m.cm);
 
     // set expression to calc with parser
+#ifdef _UNICODE
     pu.SetExpr(conversion::fromStringToWString(func_u));
     pv.SetExpr(conversion::fromStringToWString(func_v));
+#else
+    pu.SetExpr(func_u);
+    pv.SetExpr(func_v);
+#endif
 
     // every parser variables is related to vertex coord and attributes.
     time_t start = clock();
@@ -741,7 +746,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
 	m.updateDataMask(MeshModel::MM_FACECOLOR);
 
-    // muparser initialization and explicitely define parser variables
+    // muparser initialization and explicitly define parser variables
     // every function must uses own parser and variables
     Parser p1,p2,p3,p4;
 
@@ -782,7 +787,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 			  (*fi).C() = Color4b(newr,newg,newb,newa);
 			}
 
-    // if succeded log stream contains number of vertices processed and time elapsed
+    // if succeeded log stream contains number of vertices processed and time elapsed
     Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -841,7 +846,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
         m.updateDataMask(MeshModel::MM_FACECOLOR);
     }
 
-    // if succeded log stream contains number of faces processed and time elapsed
+    // if succeeded log stream contains number of faces processed and time elapsed
     Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -893,12 +898,12 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
     // add string, double and handler to vector.
     // vectors keep tracks of new attributes and let muparser use explicit variables
-    // it's possibile to use custom attributes in other filters
+    // it's possible to use custom attributes in other filters
     v_attrNames.push_back(name);
     v_attrValue.push_back(0);
     v_handlers.push_back(h);
 
-    // if succeded log stream contains number of vertices processed and time elapsed
+    // if succeeded log stream contains number of vertices processed and time elapsed
     Log( "%d vertices processed in %.2f sec.", m.cm.vn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -947,12 +952,12 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
     //				// add string, double and handler to vector.
     //				// vectors keep tracks of new attributes and let muparser use explicit variables
-    //				// it's possibile to use custom attributes in other filters
+    //				// it's possible to use custom attributes in other filters
     //				f_attrNames.push_back(name);
     //				f_attrValue.push_back(0);
     //				fhandlers.push_back(h);
 
-    // if succeded log stream contains number of vertices processed and time elapsed
+    // if succeeded log stream contains number of vertices processed and time elapsed
     Log( "%d faces processed in %.2f sec.", m.cm.fn, (clock() - start) / (float) CLOCKS_PER_SEC);
 
     return true;
@@ -1080,7 +1085,7 @@ bool FilterFunctionPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPa
 
     // Refine current mesh.
     // Only edge specified with CustomEdge pred are selected
-    //  and the new vertex is choosen with MidPointCustom created above
+    //  and the new vertex is chosen with MidPointCustom created above
     vcg::tri::RefineE<CMeshO, MidPointCustom<CMeshO>, CustomEdge<CMeshO> >
         (m.cm, mid, edge, false, cb);
     m.UpdateBoxAndNormals();
@@ -1255,7 +1260,7 @@ void FilterFunctionPlugin::setAttributes(CMeshO::FaceIterator &fi, CMeshO &m)
     f_attrValue[i] = f_handlers[i][fi];
 }
 
-// Function explicitely define parser variables to perform per-vertex filter action
+// Function explicitly define parser variables to perform per-vertex filter action
 // x, y, z for vertex coord, nx, ny, nz for normal coord, r, g ,b for color
 // and q for quality
 void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
@@ -1321,7 +1326,7 @@ void FilterFunctionPlugin::setPerVertexVariables(Parser &p, CMeshO &m)
 }
 
 
-// Function explicitely define parser variables to perform Per-Face filter action
+// Function explicitly define parser variables to perform Per-Face filter action
 void FilterFunctionPlugin::setPerFaceVariables(Parser &p, CMeshO &m)
 {
     // coord of the three vertices within a face

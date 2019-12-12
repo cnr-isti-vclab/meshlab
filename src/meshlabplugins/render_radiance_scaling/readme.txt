@@ -45,6 +45,6 @@ http://meshlab.sourceforge.net/
 
 --- How To ---
 
-To use it lauch meshlab, open an .obj, go inside the render->shader menu and choose Radiance Scaling. 
+To use it launch meshlab, open an .obj, go inside the render->shader menu and choose Radiance Scaling. 
 Do not forget to choose smooth shading display mode with the cylindrical icon.
 That's all  folks :)

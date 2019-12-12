@@ -7,7 +7,6 @@ HEADERS = edit_panosample_factory.h \
     edit_panosample.h
 
 SOURCES = 	edit_panosample_factory.cpp \
-			../../meshlab/ml_selection_buffers.cpp \
 			paintbox.cpp \
 			edit_panosample.cpp \
 			

@@ -167,7 +167,7 @@ void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
 }
 
 bool EditPointPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDataContext* /*cont*/) {
-    // Needed by MeshLab to colorize the selected points (for istance when we exit the plugin)
+    // Needed by MeshLab to colorize the selected points (for instance when we exit the plugin)
     connect(this, SIGNAL(setSelectionRendering(bool)), gla, SLOT(setSelectVertRendering(bool)));
     setSelectionRendering(true);
 

@@ -26,7 +26,7 @@
 
 #include <QReadWriteLock>
 #include <vector>
-#include <common/meshmodel.h>
+#include "meshmodel.h"
 
 class MLSelectionBuffers
 {

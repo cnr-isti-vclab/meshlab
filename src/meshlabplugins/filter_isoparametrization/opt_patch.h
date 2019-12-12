@@ -26,7 +26,7 @@ public:
 	};
 
 	ScalarType averageArea;
-	ScalarType averageLenght;
+	ScalarType averageLength;
 	MeshType &base_mesh;
 	MeshType &final_mesh;
 	int global_mark;
@@ -39,7 +39,7 @@ public:
 		/*const float MaxVal=10000.f;*/
 		minInfoUV &inf = *(minInfoUV *)data; 
 
-		///assing coordinate to central vertex
+		///assign coordinate to central vertex
 		inf.to_optimize->T().U()=p[0];
 		inf.to_optimize->T().V()=p[1];
 
@@ -71,7 +71,7 @@ public:
 		for (unsigned int i=0;i<inf.parametrized_domain->face.size();i++)
 			inf.parametrized_domain->face[i].vertices_bary.resize(0);
 
-		///update alphabeta from UV to calculate edge_lenght and area
+		///update alphabeta from UV to calculate edge_length and area
 		bool inside=true;
 		for (unsigned int i=0;i<inf.Hres_vert.size();i++)
 		{
@@ -131,11 +131,11 @@ public:
 				FaceType* edgeF[2];
 				edgeF[0]=on_edge[0];
 				edgeF[1]=on_edge[1];
-				ScalarType lenght=EstimateLenghtByParam<MeshType>(v0,v1,edgeF);
-				if (lenght<minEdge)
-					minEdge=lenght;
-				if (lenght>maxEdge)
-					maxEdge=lenght;
+				ScalarType length=EstimateLengthByParam<MeshType>(v0,v1,edgeF);
+				if (length<minEdge)
+					minEdge=length;
+				if (length>maxEdge)
+					maxEdge=length;
 			}
 		}
 		//if ((minArea<=0)||(minEdge<=0))
@@ -159,8 +159,8 @@ public:
 		FaceType* edgeF[2];
 		edgeF[0]=on_edge[0];
 		edgeF[1]=on_edge[1];
-		ScalarType lenght=EstimateLenghtByParam<FaceType>(v0,v1,edgeF);
-		return lenght;
+		ScalarType length=EstimateLengthByParam<FaceType>(v0,v1,edgeF);
+		return length;
 	}
 
 	/////return the priority of vertex processing
@@ -172,8 +172,8 @@ public:
 	//	for (int i=0;i<star.size();i++)
 	//	{
 	//		VertexType *v1=star[i];
-	//		ScalarType lenght=LengthPath(v,v1);//EstimateLenghtByParam<FaceType>(v0,v1,edgeF);
-	//		prior+=pow((lenght-averageLenght),(ScalarType)2);
+	//		ScalarType length=LengthPath(v,v1);//EstimateLengthByParam<FaceType>(v0,v1,edgeF);
+	//		prior+=pow((length-averageLength),(ScalarType)2);
 	//	}
 	//	std::vector<VertexType*> vertices;
 	//	std::vector<FaceType*> faces;
@@ -191,8 +191,8 @@ public:
 		std::vector<typename MeshType::VertexType*> star;
 		getVertexStar<MeshType>(v,star);
 		ScalarType priorL=0,priorA=0;
-		std::vector<ScalarType> Lenghts,Areas;
-		Lenghts.resize(star.size());
+		std::vector<ScalarType> Lengths,Areas;
+		Lengths.resize(star.size());
 	
 		std::vector<VertexType*> vertices;
 		std::vector<FaceType*> faces;
@@ -205,9 +205,9 @@ public:
 		for (unsigned int i=0;i<star.size();i++)
 		{
 			VertexType *v1=star[i];
-			ScalarType lenght=LengthPath(v,v1);//EstimateLenghtByParam<FaceType>(v0,v1,edgeF);
-			Lenghts[i]=lenght;
-			aveL+=lenght;
+			ScalarType length=LengthPath(v,v1);//EstimateLengthByParam<FaceType>(v0,v1,edgeF);
+			Lengths[i]=length;
+			aveL+=length;
 		}
 		aveL/=(ScalarType)star.size();
 
@@ -218,8 +218,8 @@ public:
 		}
 		aveA/=(ScalarType)faces.size();
 
-		for (unsigned int i=0;i<Lenghts.size();i++)
-			priorL+=pow((Lenghts[i]-aveL),(ScalarType)2);
+		for (unsigned int i=0;i<Lengths.size();i++)
+			priorL+=pow((Lengths[i]-aveL),(ScalarType)2);
 
 		for (unsigned int i=0;i<Areas.size();i++)
 			priorA+=pow((Areas[i]-aveA),(ScalarType)2);
@@ -228,7 +228,7 @@ public:
 	}
 
 	static void FindVarianceLenghtArea(MeshType &base_mesh,
-		const ScalarType &averageLenght,
+		const ScalarType &averageLength,
 		const ScalarType &averageArea,
 		ScalarType &varianceL,
 		ScalarType &varianceA)
@@ -252,8 +252,8 @@ public:
 				edgeF[1]=on_edge[1];*/
 				if (v0>v1)
 				{
-					ScalarType lenght=LengthPath(v0,v1);//EstimateLenghtByParam<FaceType>(v0,v1,edgeF);
-					varianceL+=pow((lenght-averageLenght),(ScalarType)2);
+					ScalarType length=LengthPath(v0,v1);//EstimateLengthByParam<FaceType>(v0,v1,edgeF);
+					varianceL+=pow((length-averageLength),(ScalarType)2);
 					num_edge++;
 				}
 			}
@@ -422,13 +422,13 @@ void OptimizePatches()
 		const ScalarType sqrtsrt3=(ScalarType)1.31607401;
 
 		averageArea=Area(final_mesh)/((ScalarType)base_mesh.fn*(ScalarType)2.0);
-		averageLenght=(ScalarType)2.0*sqrt(averageArea)/sqrtsrt3;
+		averageLength=(ScalarType)2.0*sqrt(averageArea)/sqrtsrt3;
 
 		ScalarType varianceL,varianceA;
-		FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL,varianceA);
+		FindVarianceLenghtArea(base_mesh,averageLength,averageArea,varianceL,varianceA);
 
 #ifndef _MESHLAB
-		printf("Variance lenght:%f\n",varianceL*100.f/averageLenght);
+		printf("Variance length:%f\n",varianceL*100.f/averageLength);
 		printf("Variance area:%f\n",varianceA*100.f/averageArea);
 #endif
 		//Initialize heap
@@ -462,8 +462,8 @@ void OptimizePatches()
 					temp_oper++;
 				}
 			}
-			FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL1,varianceA1);
-			ScalarType percL=(varianceL0-varianceL1)*100/averageLenght;
+			FindVarianceLenghtArea(base_mesh,averageLength,averageArea,varianceL1,varianceA1);
+			ScalarType percL=(varianceL0-varianceL1)*100/averageLength;
 			ScalarType percA=(varianceA0-varianceA1)*100/averageArea;
 			ScalarType curr_gap=percL+percA;
 #ifndef _MESHLAB
@@ -473,11 +473,11 @@ void OptimizePatches()
 			varianceA0=varianceA1;
 			continue_opt=curr_gap>gap;
 		}
-		FindVarianceLenghtArea(base_mesh,averageLenght,averageArea,varianceL,varianceA);
+		FindVarianceLenghtArea(base_mesh,averageLength,averageArea,varianceL,varianceA);
 
 #ifndef _MESHLAB
 		printf("Num Oper:%i\n",n_oper);
-		printf("Variance lenght:%f\n",varianceL*100.f/averageLenght);
+		printf("Variance length:%f\n",varianceL*100.f/averageLength);
 		printf("Variance area:%f\n",varianceA*100.f/averageArea);
 #endif
 

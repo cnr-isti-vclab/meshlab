@@ -106,7 +106,7 @@ public:
 	
 	enum Mode { ADD_POINT, MOVE_POINT, SELECT_POINT };
 	
-	//do soemthing with the point that was just picked(could be add,moving or select)
+	//do something with the point that was just picked(could be add,moving or select)
 	void addMoveSelectPoint(Point3m point, CMeshO::FaceType::NormalType faceNormal);
 	
 	//we need to move the point closest to this one or select it depending on the mode
@@ -129,7 +129,7 @@ public:
 	
 	bool drawNormalAsPin();
 	
-	//set flag that says the next value will overwite one we may want to jump back to
+	//set flag that says the next value will overwrite one we may want to jump back to
 	void recordNextPointForUndo();
 
 public slots:	
@@ -168,13 +168,13 @@ private:
 	//the current mode of the GUI
 	Mode currentMode;
 	
-	//QT patern - the ui pointer
+	//QT pattern - the ui pointer
 	Ui::pickpointsDialog ui;
 
 	//a map of the tree items to the points they represent
 	std::vector<PickedPointTreeWidgetItem*> pickedPointTreeWidgetItemVector; 
 	
-	//the parrent plugin
+	//the parent plugin
 	EditPickPointsPlugin *parentPlugin;
 	
 	//in MOVE_POINT Mode this holds a pointer to the item
@@ -230,7 +230,7 @@ private slots:
 	//save the points to a file
 	void savePointsToFile();
 	
-	//ask the user for the filename and then load the pionts
+	//ask the user for the filename and then load the points
 	void askUserForFileAndLoadPoints();
 	
 	//clear the points when the clear button is clicked
@@ -254,7 +254,7 @@ private slots:
 	void undo();
 };
 
-//because QT is really dumb and TreeWidgetItems can recieve signals
+//because QT is really dumb and TreeWidgetItems can receive signals
 class TreeCheckBox : public QCheckBox 
 {
 	Q_OBJECT

@@ -275,7 +275,7 @@ inline void getHresVertex(std::vector<FaceType*> &domain,
 }
 
 ///copy mesh low level & high level
-///putting the link between them toghether
+///putting the link between them together
 template <class MeshType>
 void CopySubMeshLevels(std::vector<typename MeshType::FaceType*> &faces,
                                              MeshType &Domain,MeshType &hlevMesh)

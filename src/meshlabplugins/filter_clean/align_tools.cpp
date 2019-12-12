@@ -110,7 +110,7 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, RichParameterSet & par)
 				}
 			} else
 			{
-				qDebug() << "stuck points file didnt exist: " << ppFileName;
+				qDebug() << "stuck points file didn't exist: " << ppFileName;
 				//Log(GLLogStream::WARNING, "No points were found for the Stuck mesh.");
 				return false;
 			}
@@ -141,7 +141,7 @@ bool AlignTools::setupThenAlign(MeshModel &/*mm*/, RichParameterSet & par)
 				}
 			} else
 			{
-				qDebug() << "model to move points file didnt exist: " << ppFileName;
+				qDebug() << "model to move points file didn't exist: " << ppFileName;
 				//Log(GLLogStream::WARNING, "No points were found for the mesh to move.");
 				return false;
 			}
@@ -303,7 +303,7 @@ bool AlignTools::align(MeshModel *stuckModel, PickedPoints *stuckPickedPoints,
 		transformHandle() = modelToMove->cm.Tr;
 		
 		//now translate all the points in the mesh
-		//TODO probably should call a function to do this so if meshlab changes we dont have to
+		//TODO probably should call a function to do this so if meshlab changes we don't have to
 		//taken from meshlab/src/meshlabplugins/meshfilter/meshfilter.cpp
 		//if (ID(filter) == (FP_FREEZE_TRANSFORM) ) {
 		vcg::tri::UpdatePosition<CMeshO>::Matrix(modelToMove->cm, modelToMove->cm.Tr);

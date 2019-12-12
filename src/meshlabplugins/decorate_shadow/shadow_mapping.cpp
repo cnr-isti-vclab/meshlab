@@ -99,7 +99,7 @@ void ShadowMapping::renderingFromLightSetup(MeshDocument& md, GLArea* gla){
     track.rot.ToMatrix(rotation);
     glMultMatrixf(rotation.transpose().V());
 
-    //traslate the model in the center
+    //translate the model to the center
     glTranslatef(-center[0],-center[1],-center[2]);
 }
 

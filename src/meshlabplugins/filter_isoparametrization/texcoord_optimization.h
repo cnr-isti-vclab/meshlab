@@ -1002,7 +1002,7 @@ template<class MESH_TYPE>
 class MIPSTexCoordFoldHealer:public MIPSTexCoordOptimization<MESH_TYPE>{
 public:
   
-  int maxStarSize; // max star size that is affected around a folded face.. Defualt: 3
+  int maxStarSize; // max star size that is affected around a folded face.. Default: 3
   
   typedef MESH_TYPE MeshType;
   typedef typename MESH_TYPE::VertexIterator VertexIterator;

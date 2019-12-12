@@ -39,7 +39,7 @@ CONFIG(system_glew) {
     linux: LIBS += -lGLEW
 }
                 
-INCLUDEPATH += ../../external
+INCLUDEPATH += ../../external/newuoa/include
 
 FORMS 	  += alignDialog.ui
 TARGET       = edit_align

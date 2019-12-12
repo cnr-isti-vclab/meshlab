@@ -75,7 +75,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 		}
 
 		if (edgeNonManifFFNum != 0) Log("Mesh has %i non two manifold edges and %i faces are incident on these edges\n", edgeNonManifFFNum, faceEdgeManif);
-		if (vertManifNum != 0) Log("Mesh has %i non two manifold vertexes and %i faces are incident on these vertices\n", vertManifNum, faceVertManif);
+		if (vertManifNum != 0) Log("Mesh has %i non two manifold vertices and %i faces are incident on these vertices\n", vertManifNum, faceVertManif);
 
 		// For Manifold meshes compute some other stuff
 		if (vertManifNum == 0 && edgeNonManifFFNum == 0)

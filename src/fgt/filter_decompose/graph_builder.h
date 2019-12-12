@@ -1,4 +1,4 @@
-#include "../../external/maxflow-v2.21.src/adjacency_list/graph.h"
+#include "adjacency_list/graph.h"
 #include <stdlib.h>
 
 #ifndef GRAPHBUILDER_H

@@ -1,5 +1,5 @@
 #include "point_matching_scale.h"
-#include <newuoa/include/newuoa.h>
+#include <newuoa.h>
 
 #include <vcg/space/point3.h>
 #include <vcg/space/box3.h>

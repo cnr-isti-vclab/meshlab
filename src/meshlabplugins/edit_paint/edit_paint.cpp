@@ -1331,7 +1331,7 @@ void drawPercentualPolyLine(GLArea * gla, QPoint &mid, MeshModel &m, GLfloat* pi
 		double pix_y = b2;
 		double pix_z = c2;
 
-		/** to search with quicksearch the nearset zbuffer value in the line */
+		/** to search with quicksearch the nearest zbuffer value in the line */
 		for (int k = 0; k < STEPS; k++)
 		{
 			double inv_yy = gla->height() - pix_y;

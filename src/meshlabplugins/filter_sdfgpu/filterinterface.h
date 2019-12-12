@@ -45,7 +45,7 @@ public:
       * @param name the name of the plugin.
       *
       * The name of the plugin is used in the Meshlab menus as well as in the source
-      * as a key to identify the plugin uniquely. Tipically your plugin will have to
+      * as a key to identify the plugin uniquely. Typically your plugin will have to
       * implement a construction like the following:
       * \code
       * MyPlugin::MyPlugin() : SingleMeshFilterInterface( "My Mesh Filter" ){

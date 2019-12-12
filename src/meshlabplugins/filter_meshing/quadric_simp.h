@@ -59,7 +59,7 @@ public:
 };
 
 } // end namespace tri
-} // end namepsace vcg
+} // end namespace vcg
 void QuadricSimplification   (CMeshO &m,int  TargetFaceNum,    bool Selected, vcg::tri::TriEdgeCollapseQuadricParameter &pp,    vcg::CallBackPos *cb);
 void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum,    bool Selected, vcg::tri::TriEdgeCollapseQuadricTexParameter &pp, vcg::CallBackPos *cb);
 

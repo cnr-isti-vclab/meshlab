@@ -202,7 +202,7 @@ void MeshTree::Process(vcg::AlignPair::Param &ap, MeshTree::Param &mtp)
 
   //if there are no valid arcs complain and return
   if(!hasValidAlign) {
-    cb(0,qUtf8Printable(buf.sprintf("\n Failure. No succesful arc among candidate Alignment arcs. Nothing Done.\n")));
+    cb(0,qUtf8Printable(buf.sprintf("\n Failure. No successful arc among candidate Alignment arcs. Nothing Done.\n")));
     return;
   }
 

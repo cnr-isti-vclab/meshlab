@@ -20,3 +20,4 @@ SOURCES       += filter_mutualglobal.cpp \
 		
 TARGET        = filter_mutualglobal
 
+INCLUDEPATH *= ../../external/levmar-2.3 ../../external/newuoa/include

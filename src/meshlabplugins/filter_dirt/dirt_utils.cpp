@@ -96,7 +96,7 @@ CMeshO::CoordType RandomBaricentric(){
     return interp;
 }
 /**
-@def This funcion calculate the cartesian coordinates of a point given from its barycentric coordinates
+@def This function calculate the cartesian coordinates of a point given from its barycentric coordinates
 
 @param Point3m bc       - barycentric coordinates of the point
 @param FacePointer f    - pointer to the face
@@ -438,7 +438,7 @@ void ComputeParticlesFallsPosition(MeshModel* base_mesh,MeshModel* cloud_mesh,CM
 
 
 /**
-@def This funcion
+@def This function
 
 @param
 @param
@@ -617,11 +617,11 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,Scalarm l,int t
 
 
 /**
-This function compute the repulsion beetwen particles
+This function compute the repulsion between particles
 @param MeshModel* b_m - base mesh
 @param MeshModel* c_m - cloud of points
 @param int k          - max number of particle to repulse
-@param Scalarm l        - lenght of the step
+@param Scalarm l        - length of the step
 @return nothing       - adhesion factor
 */
 void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,Scalarm /*l*/,Point3m g,Scalarm a){
@@ -650,7 +650,7 @@ void ComputeRepulsion(MeshModel* b_m,MeshModel *c_m,int k,Scalarm /*l*/,Point3m 
 
 @param MeshModel cloud  - Mesh of points
 @param Point3m   force  - Direction of the force
-@param Scalarm     l      - Lenght of the  movementstep
+@param Scalarm     l      - Length of the  movementstep
 @param Scalarm     t   - Time Step
 
 @return nothing

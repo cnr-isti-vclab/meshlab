@@ -20,4 +20,6 @@ SOURCES       += filter_mutualinfo.cpp \
 		
 TARGET        = filter_mutualinfo
 
+INCLUDEPATH *= ../../external/levmar-2.3 ../../external/newuoa/include
+
 include (../../shared_post.pri)

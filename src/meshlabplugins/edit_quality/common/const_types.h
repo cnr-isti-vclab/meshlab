@@ -51,7 +51,7 @@ typedef unsigned int		UINT32;
 #define NUMBER_OF_HISTOGRAM_BINS 50000
 #define NUMBER_OF_HISTOGRAM_BARS 100
 
-// The defalut percentile for clamping equalizer histogram
+// The default percentile for clamping equalizer histogram
 #define CLAMP_PERCENTILE 90
 
 

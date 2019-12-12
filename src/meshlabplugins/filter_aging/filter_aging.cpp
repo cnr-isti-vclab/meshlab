@@ -125,14 +125,14 @@ void GeometryAgingPlugin::initParameterSet(QAction *action, MeshModel &m, RichPa
                 "considered as 0."));
         params.addParam(new RichFloat("DisplacementSteps", 10, "Displacement steps",
                 "The whole displacement process is performed as a sequence of small <br>"
-                "offsets applyed on each vertex. This parameter represents the number <br>"
-                "of steps into which the displacement process will be splitted. <br>"
+                "offsets applied on each vertex. This parameter represents the number <br>"
+                "of steps into which the displacement process will be split. <br>"
                 "Useful to avoid the introduction of self intersections. <br>"
                 "Bigger number means better accuracy."));
         params.addParam(new RichBool("Selected", m.cm.sfn>0, "Affect only selected faces",
                 "The aging procedure will be applied to the selected faces only."));
-        params.addParam(new RichBool("StoreDisplacement", false, "Store erosion informations",
-                "Select this option if you want to store the erosion informations <br>"
+        params.addParam(new RichBool("StoreDisplacement", false, "Store erosion information",
+                "Select this option if you want to store the erosion information <br>"
                 "over the mesh. A new attribute will be added to each vertex <br>"
                 "to contain the displacement offset applied to that vertex."));
 }
@@ -218,8 +218,8 @@ bool GeometryAgingPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 
                 if(cb) (*cb)( (i+1)*100/dispSteps, "Aging...");
 
-                // blend toghether face normals and recompute vertex normal from these normals
-                // to get smoother offest directions
+                // blend together face normals and recompute vertex normal from these normals
+                // to get smoother offset directions
                 tri::Smooth<CMeshO>::FaceNormalLaplacianFF(m.cm, 3);
                 tri::UpdateNormal<CMeshO>::PerVertexFromCurrentFaceNormal(m.cm);
                 tri::UpdateNormal<CMeshO>::NormalizePerVertex(m.cm);

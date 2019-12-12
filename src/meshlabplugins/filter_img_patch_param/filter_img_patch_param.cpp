@@ -195,7 +195,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
     glContext->makeCurrent();
     if( glewInit() != GLEW_OK )
     {
-        this->errorMessage="Failed GLEW intialization";
+        this->errorMessage="Failed GLEW initialization";
         return false;
     }
 
@@ -488,7 +488,7 @@ void FilterImgPatchParamPlugin::boundaryOptimization( CMeshO &mesh,
                     }
 
 
-                    // If multiple neighboring reference images have the same number of occurences, the one with the highest
+                    // If multiple neighboring reference images have the same number of occurrences, the one with the highest
                     // weight with respect to the current face is chosen.
                     RasterModel *candidate = faceVis[f].ref();
 
@@ -899,7 +899,7 @@ void FilterImgPatchParamPlugin::patchBasedTextureParameterization( RasterPatchMa
     RichParameterSet &par )
 {
     // Computes the visibility set for all mesh faces. It contains the set of all images
-    // into which the face is visible, as well as a reference image, namely the one whith
+    // into which the face is visible, as well as a reference image, namely the one with
     // the most orthogonal viewing angle.
     QTime t; t.start();
     int weightMask = VisibleSet::W_ORIENTATION;

@@ -312,7 +312,7 @@
                <item row="1" column="1">
                 <widget class="QRadioButton" name="minWRBtn">
                  <property name="text">
-                  <string>Minimum Weigth</string>
+                  <string>Minimum Weight</string>
                  </property>
                 </widget>
                </item>

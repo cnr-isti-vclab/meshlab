@@ -272,7 +272,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 			                                               "The current implementation of these schemes don't handle vertices of valence > 12");
 		case FP_LOOP_SS                            : return tr("Apply Loop's Subdivision Surface algorithm. It is an approximant refinement method and it works for every triangle and has rules for extraordinary vertices.<br>");
 		case FP_BUTTERFLY_SS                       : return tr("Apply Butterfly Subdivision Surface algorithm. It is an interpolated refinement method, defined on arbitrary triangular meshes. The scheme is known to be C1 but not C2 on regular meshes<br>");
-		case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is splitted on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
+		case FP_MIDPOINT                           : return tr("Apply a plain subdivision scheme where every edge is split on its midpoint. Useful to uniformly refine a mesh substituting each triangle with four smaller triangles.");
 		case FP_REFINE_CATMULL                     : return tr("Apply the Catmull-Clark Subdivision Surfaces. Note that position of the new vertices is simply linearly interpolated. If the mesh is triangle based (no faux edges) it generates a quad mesh, otherwise it honores it the faux-edge bits");
 		case FP_REFINE_HALF_CATMULL                : return tr("Convert a tri mesh into a quad mesh by applying a 4-8 subdivision scheme."
 			                                               "It introduces less overhead than the plain Catmull-Clark Subdivision Surfaces"
@@ -284,7 +284,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 		case FP_CLUSTERING                         : return tr("Collapse vertices by creating a three dimensional grid enveloping the mesh and discretizes them based on the cells of this grid");
 		case FP_QUADRIC_SIMPLIFICATION             : return tr("Simplify a mesh using a Quadric based Edge Collapse Strategy; better than clustering but slower");
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION    : return tr("Simplify a textured mesh using a Quadric based Edge Collapse Strategy preserving UV parametrization; better than clustering but slower");
-		case FP_EXPLICIT_ISOTROPIC_REMESHING       : return tr("Perform a explict remeshing of a triangular mesh, by repeatedly applying edge flip, collapse, relax and refine to improve aspect ratio (triangle quality) and topological regularity.");
+		case FP_EXPLICIT_ISOTROPIC_REMESHING       : return tr("Perform a explicit remeshing of a triangular mesh, by repeatedly applying edge flip, collapse, relax and refine to improve aspect ratio (triangle quality) and topological regularity.");
 		case FP_REORIENT                           : return tr("Re-orient in a consistent way all the faces of the mesh. <br>"
 			                                               "The filter visits a mesh face to face, reorienting any unvisited face so that it is coherent "
 			                                               "to the already visited faces. If the surface is orientable it will end with a consistent orientation of "
@@ -331,7 +331,7 @@ QString ExtraMeshFilterPlugin::filterInfo(FilterIDType filterID) const
 	return QString();
 }
 
-// this function builds and intializes with the default values (that can depend on the current mesh or selection)
+// this function builds and initializes with the default values (that can depend on the current mesh or selection)
 // the list of parameters that a filter requires.
 // return
 //		true if has some parameters
@@ -389,7 +389,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		parlst.addParam(new RichInt  ("Iterations", lastisor_Iterations, "Iterations", "Number of iterations of the remeshing operations to repeat on the mesh."));
 
 		parlst.addParam(new RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
-		parlst.addParam(new RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applyed only to the selected faces."));
+		parlst.addParam(new RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applied only to the selected faces."));
 		maxVal = m.cm.bbox.Diag();
 		parlst.addParam(new RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
 		parlst.addParam(new RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Crease Angle", "Minimum angle between faces of the original to consider the shared edge as a feature to be preserved."));
@@ -414,7 +414,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		case FP_LOOP_SS:
 		case FP_REFINE_LS3_LOOP:
 			loopWeightLst << "Loop" << "Enhance regularity" << "Enhance continuity";
-		parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allow to optimize some beaviors in despite of others."));
+		parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allow to optimize some behaviors in despite of others."));
 		case FP_BUTTERFLY_SS:
 		case FP_MIDPOINT:
 			parlst.addParam(new RichInt("Iterations", 3, "Iterations", "Number of time the model is subdivided."));
@@ -516,10 +516,10 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		rotCenter.push_back("barycenter");
 		rotCenter.push_back("custom point");
 		parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-		parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enable this vaule is rounded according to the snap value"));
+		parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
 		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-		parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+		parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove any unreferenced vertex (for which curvature values are not defined)"));
 		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle (i.e. if the snapping value is 30, 227 becomes 210)."));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
@@ -560,7 +560,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		scaleCenter.push_back("custom point");
 		parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
 		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
-		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit lenght"));
+		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit length"));
 		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
 		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 	} break;
@@ -583,7 +583,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		break;
 
 	case FP_NORMAL_SMOOTH_POINTCLOUD:
-		parlst.addParam(new RichInt ("K",(int)10,"Number of neigbors","The number of neighbors used to smooth normals."));
+		parlst.addParam(new RichInt ("K",(int)10,"Number of neighbors","The number of neighbors used to smooth normals."));
 		parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
 		break;
 

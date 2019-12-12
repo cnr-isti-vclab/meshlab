@@ -47,7 +47,7 @@ QString DecorateBasePlugin::decorationInfo(FilterIDType filter) const
     case DP_SHOW_QUALITY_HISTOGRAM: return tr("Draw a (colored) Histogram of the per vertex/face quality");
     case DP_SHOW_QUALITY_CONTOUR:   return tr("Draw quality contours, e.g. the isolines of the quality field defined over the surface ");
     case DP_SHOW_CAMERA:            return tr("Draw the position of the mesh camera and raster cameras");
-    case DP_SHOW_TEXPARAM:          return tr("Draw an overlayed flattened version of the current mesh that show the current parametrization");
+    case DP_SHOW_TEXPARAM:          return tr("Draw an overlaid flattened version of the current mesh that show the current parametrization");
     case DP_SHOW_SELECTED_MESH:     return tr("Highlight the current mesh");
     }
     assert(0);
@@ -785,7 +785,7 @@ void DecorateBasePlugin::DisplayCamera(QString who, Shotm &ls, int cameraSourceI
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 1 - %1 %2 %3").arg(ax1[0]).arg(ax1[1]).arg(ax1[2]));
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("axis 2 - %1 %2 %3").arg(ax2[0]).arg(ax2[1]).arg(ax2[2]));
     //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Fov %1 ( %2 x %3) ").arg(fov).arg(ls.Intrinsics.ViewportPx[0]).arg(ls.Intrinsics.ViewportPx[1]));
-    //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Lenght %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
+    //  glLabel::render2D(painter,glLabel::TOP_LEFT,ln++, QString("Focal Length %1 (pxsize %2 x %3) ").arg(focal).arg(ls.Intrinsics.PixelSizeMm[0]).arg(ls.Intrinsics.PixelSizeMm[1]));
 
 
 	this->RealTimeLog("Camera Info", who,

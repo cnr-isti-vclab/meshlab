@@ -25,6 +25,8 @@ RESOURCES     = edit_mutualcorrs.qrc
 
 FORMS         = edit_mutualcorrsDialog.ui
 
+INCLUDEPATH *= ../../external/levmar-2.3 ../../external/newuoa/include
+
 win32-msvc:  LIBS += ../../external/lib/win32-msvc/levmar.lib
 win32-g++:LIBS += -L../../external -llevmar
 linux-g++:LIBS += -llevmar

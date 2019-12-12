@@ -141,10 +141,10 @@ public:
 		if (num==1)
 		{
 			//printf("D");
-			///tranform in UV space
+			///transform in UV space
 			vcg::Point2<ScalarType> UVDiam;
 			isoParam->GE1(I1,bary1,IndexDomain,UVDiam);
-			///then find bary coords wich respect to the first face
+			///then find bary coords which respect to the first face
 			vcg::Point2<ScalarType> bary2;
 			isoParam->inv_GE1_fixedI(IndexDomain,UVDiam,I0,bary2);
 			vect=bary0-bary2;
@@ -155,10 +155,10 @@ public:
 		if (num==2)
 		{
 			//printf("S");
-			///tranform in UV space
+			///transform in UV space
 			vcg::Point2<ScalarType> UVStar;
 			isoParam->GE0(I1,bary1,IndexDomain,UVStar);
-			///then find bary coords wich respect to the first face
+			///then find bary coords which respect to the first face
 			vcg::Point2<ScalarType> bary2;
 			isoParam->inv_GE0_fixedI(IndexDomain,UVStar,I0,bary2);
 			vect=bary0-bary2;

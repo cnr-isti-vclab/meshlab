@@ -26,8 +26,8 @@
 
 #include <vcg/space/point2.h>
 #include <vcg/space/point3.h>
-#include <eigenlib/Eigen/Dense>
-#include <eigenlib/Eigen/Eigenvalues>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 namespace vcg
 {

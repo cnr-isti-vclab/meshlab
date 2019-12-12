@@ -57,7 +57,7 @@ ACM Trans. Graphics, 32(3), 2013<br><br>
    </PARAM>
    <PARAM parName="iters" parType="Int" parIsImportant="false" parIsPersistent="false" parDefault="8">
      <PARAM_HELP><![CDATA[This integer value specifies the number of Gauss-Seidel relaxations to be performed at each
-     level of the hiearchy.
+     level of the hierarchy.
      The default value for this parameter is 8.]]></PARAM_HELP>
    <EDIT_GUI guiLabel="Gauss-Seidel Relaxations"/>
    </PARAM>

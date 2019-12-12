@@ -588,7 +588,7 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
         if(pickingId>=0)
             splitUpAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
 
-        //the viewer on top can be closed only if the splitter over the handle that orginated the event has one child
+        //the viewer on top can be closed only if the splitter over the handle that originated the event has one child
         bool unSplittabilityUp = true;
         Splitter * upSplitter = qobject_cast<Splitter *>(origin->widget(0));
         if(upSplitter)
@@ -600,7 +600,7 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
         if(pickingId>=0)
             splitDownAct->setEnabled(mvc->getViewer(pickingId)->size().width()/2 > mvc->getViewer(pickingId)->minimumSizeHint().width());
 
-        //the viewer below can be closed only if the splitter ounder the handle that orginated the event has one child
+        //the viewer below can be closed only if the splitter ounder the handle that originated the event has one child
         bool unSplittabilityDown = true;
         Splitter * downSplitter = qobject_cast<Splitter *>(origin->widget(1));
         if(downSplitter)
@@ -627,7 +627,7 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
         if(pickingId>=0)
             splitRightAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
 
-        //the viewer on the rigth can be closed only if the splitter on the right the handle that orginated the event has one child
+        //the viewer on the right can be closed only if the splitter on the right the handle that originated the event has one child
         bool unSplittabilityRight = true;
         Splitter * rightSplitter = qobject_cast<Splitter *>(origin->widget(1));
         if(rightSplitter)
@@ -639,7 +639,7 @@ void MainWindow::setHandleMenu(QPoint point, Qt::Orientation orientation, QSplit
         if(pickingId>=0)
             splitLeftAct->setEnabled(mvc->getViewer(pickingId)->size().height()/2 > mvc->getViewer(pickingId)->minimumSizeHint().height());
 
-        //the viewer on the left can be closed only if the splitter on the left of the handle that orginated the event has one child
+        //the viewer on the left can be closed only if the splitter on the left of the handle that originated the event has one child
         bool unSplittabilityLeft = true;
         Splitter * leftSplitter = qobject_cast<Splitter *>(origin->widget(0));
         if(leftSplitter)
@@ -1101,7 +1101,7 @@ void MainWindow::showTooltip(QAction* q)
 // /////////////////////////////////////////////////
 // The Very Important Procedure of applying a filter
 // /////////////////////////////////////////////////
-// It is splitted in two part
+// It is split in two part
 // - startFilter that setup the dialogs and asks for parameters
 // - executeFilter callback invoked when the params have been set up.
 
@@ -1156,7 +1156,7 @@ void MainWindow::startFilter()
             xmldialog = NULL;
         }
 
-        // (2) Ask for filter parameters and eventally directly invoke the filter
+        // (2) Ask for filter parameters and eventually directly invoke the filter
         // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
         // if no dialog is created the filter must be executed immediately
         if(! stddialog->showAutoDialog(iFilter, meshDoc()->mm(), (meshDoc()), action, this, GLA()) )
@@ -1235,7 +1235,7 @@ void MainWindow::startFilter()
                     delete stddialog;
                     stddialog = NULL;
                 }
-                // (2) Ask for filter parameters and eventally directly invoke the filter
+                // (2) Ask for filter parameters and eventually directly invoke the filter
                 // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
                 // if no dialog is created the filter must be executed immediatel
                 if(!xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()))
@@ -1431,7 +1431,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     iFilter->setLog(&meshDoc()->Log);
 
     // Ask for filter requirements (eg a filter can need topology, border flags etc)
-    // and statisfy them
+    // and satisfy them
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
     int req=iFilter->getRequirements(action);
@@ -1754,7 +1754,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         iFilter->setLog(&meshDoc()->Log);
 
     //// Ask for filter requirements (eg a filter can need topology, border flags etc)
-    //// and statisfy them
+    //// and satisfy them
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
     //int req=iFilter->getRequirements(action);
@@ -1989,7 +1989,7 @@ void MainWindow::scriptCodeExecuted( const QScriptValue& val,const int time,cons
     }
 }
 
-// Edit Mode Managment
+// Edit Mode Management
 // At any point there can be a single editing plugin active.
 // When a plugin is active it intercept the mouse actions.
 // Each active editing tools

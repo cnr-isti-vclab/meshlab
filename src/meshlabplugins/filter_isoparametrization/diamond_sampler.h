@@ -91,7 +91,7 @@ public:
         SaveMesh.vn=0;
         SaveMesh.fn=0;
 
-        ///suposed to be the same everywhere
+        ///supposed to be the same everywhere
         ///allocate space
         std::vector<std::vector<MyVertex*> > vertMatrix;
         vertMatrix.resize(sampleSize);

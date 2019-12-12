@@ -33,9 +33,9 @@
 #include "fgtBridge.h"
 #include "holeSetManager.h"
 
-/*  This class is the "model" of model-view architecture, so it implements methods to exposes data
- *  informations about holes as QAbstractItemModel says.
- *  It contains an istance of HoleSetManager to know and manipulate holes and bridges.
+/*  This class is the "model" of model-view architecture, so it implements methods to expose data
+ *  information about holes as QAbstractItemModel says.
+ *  It contains an instance of HoleSetManager to know and manipulate holes and bridges.
  */
 class HoleListModel : public QAbstractItemModel
 {

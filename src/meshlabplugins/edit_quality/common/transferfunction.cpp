@@ -250,7 +250,7 @@ TF_KEY* TfChannel::operator [](size_t i)
 
 //CODE USED FOR TESTING (define NOW_TESTING macro to use it)
 #ifdef NOW_TESTING
-//addes random key to channel
+//adds random key to channel
 void TfChannel::testInitChannel()
 {
     int num_of_keys = (rand() % 10) + 1;
@@ -533,12 +533,12 @@ Color4b TransferFunction::getColorByQuality (float absoluteQuality, float minQua
         if (absoluteQuality > maxQuality)
             percentageQuality = 1.0f;
         else
-            // calcultating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
+            // calculating relative quality and applying exponential function: rel(Q)^exp, exp=2*midHandleRelPos
             percentageQuality = pow( (absoluteQuality - minQuality) / (maxQuality - minQuality) , (float)(2.0f*midRelativeQuality));
 
     currentColor = getColorByQuality(percentageQuality);
 
-    if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normale brightness, 0=white, 2=black
+    if (brightness!=1.0f) //Applying brightness to each color channel, 0<brightness<2, 1=normal brightness, 0=white, 2=black
     {
         if (brightness<1.0f)
             for (int i=0; i<NUMBER_OF_CHANNELS; i++)
@@ -594,7 +594,7 @@ QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
     }
 
     //saving equalizer info too (only one line is needed)
-    outStream << CSV_FILE_COMMENT << "THE FOLLOWING 4 VALUES REPRESENT EQUALIZER SETTINGS - the first and the third values represent respectively the minimum and the maximum quality values used in histogram, the second one represent the position (in percentage) of the middle quality, and the last one represent the level of brightness as a floating point number (0 copletely dark, 1 original brightness, 2 completely white)" << endl;
+    outStream << CSV_FILE_COMMENT << "THE FOLLOWING 4 VALUES REPRESENT EQUALIZER SETTINGS - the first and the third values represent respectively the minimum and the maximum quality values used in histogram, the second one represent the position (in percentage) of the middle quality, and the last one represent the level of brightness as a floating point number (0 completely dark, 1 original brightness, 2 completely white)" << endl;
     outStream << info.minQualityVal << CSV_FILE_SEPARATOR << info.midQualityPercentage << CSV_FILE_SEPARATOR << info.maxQualityVal << CSV_FILE_SEPARATOR << info.brightness << CSV_FILE_SEPARATOR << endl;
 
     outFile.close();
@@ -603,7 +603,7 @@ QString TransferFunction::saveColorBand( QString fn, EQUALIZER_INFO& info  )
 }
 
 //"moving" the channel identified by ch_code to first plane.
-//This operation simply implies the circular shift of the channel_order pivot indexes untill the selected channel code is in the last position of the array
+//This operation simply implies the circular shift of the channel_order pivot indexes until the selected channel code is in the last position of the array
 void TransferFunction::moveChannelAhead(TF_CHANNELS ch_code)
 {
     int ch_code_int = (int)ch_code;

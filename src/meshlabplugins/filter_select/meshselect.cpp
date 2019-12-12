@@ -156,7 +156,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
     case FP_SELECT_CONNECTED:           return tr("Expand the current face selection so that it includes all the faces in the connected components where there is at least a selected face.");
 	case FP_SELECT_NONE :               return tr("Clear the current set of selected faces/vertices.");
 	case FP_SELECT_ALL :                return tr("Select all the faces/vertices of the current mesh.");
-	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertexes are deleted too.");
+	case FP_SELECT_DELETE_VERT :        return tr("Delete the current set of selected vertices; faces that share one of the deleted vertices are deleted too.");
 	case FP_SELECT_DELETE_ALL_FACE:     return tr("Delete ALL faces, turning the mesh into a pointcloud. May be applied also to all visible layers.");
 	case FP_SELECT_DELETE_FACE :        return tr("Delete the current set of selected faces, vertices that remains unreferenced are not deleted.");
 	case FP_SELECT_DELETE_FACEVERT :    return tr("Delete the current set of selected faces and all the vertices surrounded by that faces.");
@@ -165,7 +165,7 @@ QString SelectionFilterPlugin::filterInfo(FilterIDType filterId) const
 	case CP_SELFINTERSECT_SELECT :      return tr("Select only self intersecting faces.");
 	case FP_SELECT_FACE_FROM_VERT :     return tr("Select faces from selected vertices.");
 	case FP_SELECT_VERT_FROM_FACE :     return tr("Select vertices from selected faces.");
-	case FP_SELECT_FACES_BY_EDGE :      return tr("Select all triangles having an edge with lenght greater or equal than a given threshold.");     
+	case FP_SELECT_FACES_BY_EDGE :      return tr("Select all triangles having an edge with length greater or equal than a given threshold.");
 	case FP_SELECT_BORDER :             return tr("Select vertices and faces on the boundary.");
 	case FP_SELECT_BY_VERT_QUALITY :    return tr("Select all the faces/vertexes within the specified vertex quality range.");
 	case FP_SELECT_BY_FACE_QUALITY :    return tr("Select all the faces/vertexes with within the specified face quality range.");

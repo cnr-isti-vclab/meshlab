@@ -44,7 +44,7 @@
  *
  *  FgtHole uses meshe's additional data to mark interesting face, so surfing 
  *  the hole faces is driven by face-face ajacency and mark meaning.
- *  Additional data are accesible for an hole by parentManager (HoleSetManager)
+ *  Additional data are accessible for an hole by parentManager (HoleSetManager)
  *  which links hole to a mesh.
  *  Characteristic faces for an hole are marked as:
  *    - HoleBorderFace: face which initially (before filling) have 1 or 2 border edge.

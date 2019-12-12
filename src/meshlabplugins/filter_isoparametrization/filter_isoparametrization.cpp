@@ -124,7 +124,7 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
                                  "3: Regularity : stop at minimum number of irregular vertices<br>"
                                  "4: L2 : stop at minimum OneWay L2 Stretch Eff")));
     
-    par.addParam(new RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slighly better results"));
+    par.addParam(new RichInt("convergenceSpeed",1, "Convergence Precision", "This parameter controls the convergence speed/precision of the optimization of the texture coordinates. Larger the number slower the processing and ,eventually, slightly better results"));
     par.addParam(new RichBool("DoubleStep",true,"Double Step","Use this bool to divide the parameterization in 2 steps. Double step makes the overall process faster and robust."
                                                               "<br> Consider to disable this bool in case the object has topologycal noise or small handles."));
     par.addParam(new RichString("AbsLoadName", "", "Load AM", "The filename of the abstract mesh that has to be loaded. If empty, the abstract mesh will be computed according to the above parameters (suggested extension '.abs')."));
@@ -140,11 +140,11 @@ void FilterIsoParametrization::initParameterSet(QAction *a, MeshDocument& md, Ri
   {
     par.addParam(new RichDynamicFloat("BorderSize",0.1f,0.01f,0.5f,"BorderSize ratio",
                                       "This parameter controls the amount of space that must be left between each diamond when building the atlas."
-                                      "It directly affects how many triangle are splitted during this conversion. <br>"
+                                      "It directly affects how many triangle are split during this conversion. <br>"
                                       "In abstract parametrization mesh triangles can naturally cross the triangles of the abstract domain, so when converting "
                                       "to a standard parametrization we must cut all the triangles that protrudes outside each diamond more than the specified threshold."
                                       "The unit of the threshold is in percentage of the size of the diamond,"
-                                      "The bigger the threshold the less triangles are splitted, but the more UV space is used (wasted)."));
+                                      "The bigger the threshold the less triangles are split, but the more UV space is used (wasted)."));
     break;
   }
   case ISOP_TRANSFER:
@@ -239,7 +239,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
         switch(ret)
         {
         case IsoParametrizator::MultiComponent:
-          this->errorMessage="non possible parameterization because of multi componet mesh"; return false;
+          this->errorMessage="non possible parameterization because of multi component mesh"; return false;
         case IsoParametrizator::NonSizeCons:
           this->errorMessage="non possible parameterization because of non size consistent mesh"; return false;
         case IsoParametrizator::NonManifoldE:

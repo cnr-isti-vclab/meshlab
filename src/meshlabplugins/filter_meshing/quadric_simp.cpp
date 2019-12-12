@@ -79,6 +79,7 @@ void QuadricSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::Tri
       if ((*vi).IsS()) (*vi).ClearS();
     }
   }
+  tri::QHelper::TDp()=nullptr;
 }
 
 
@@ -139,5 +140,7 @@ void QuadricTexSimplification(CMeshO &m,int  TargetFaceNum, bool Selected, tri::
 	}
   }
 	
+  tri::QuadricTexHelper<CMeshO>::TDp3()=nullptr;
+  tri::QuadricTexHelper<CMeshO>::TDp()=nullptr;
 
 }

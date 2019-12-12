@@ -2,7 +2,7 @@
 #define MULTISCALE_ALIGN_H
 #include <common/meshmodel.h>
 
-#include <eigenlib/Eigen/Core>
+#include <Eigen/Core>
 #include "Patate/grenaille.h"
 
 //#include "localKdTree.h"

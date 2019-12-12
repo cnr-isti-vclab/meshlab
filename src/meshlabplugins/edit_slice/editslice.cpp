@@ -262,7 +262,7 @@ void ExtraMeshSlidePlugin::UpdateVal(SVGPro* sv,  SVGProperties * pr)
 		trackball_slice.center=centre;
 		trackball_slice.radius=edgeMax;
         glColor4f(1.0,0.0,0.0,0.8);
-	    int plane=1;  //number of planis, defult=1
+	    int plane=1;  //number of planes, default=1
 
  if(dialogsliceobj!=0) plane=dialogsliceobj->getPlaneNumber();
   glEnable(GL_BLEND); 

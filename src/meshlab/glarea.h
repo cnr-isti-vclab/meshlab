@@ -41,7 +41,7 @@
 #include "glarea_setting.h"
 #include "snapshotsetting.h"
 #include "multiViewer_Container.h"
-#include "ml_selection_buffers.h"
+#include <common/ml_selection_buffers.h>
 #include "ml_default_decorators.h"
 
 #define SSHOT_BYTES_PER_PIXEL 4
@@ -359,7 +359,7 @@ public:
 
     // the following pairs of slot/signal implements a very simple message passing mechanism.
     // a widget that has a pointer to the glarea call the sendViewDir() slot and
-    // setup a connect to recive the transmitViewDir signal that actually contains the point3f.
+    // setup a connect to receive the transmitViewDir signal that actually contains the point3f.
     // This mechanism is used to get the view direction/position and picking point on surface in the filter parameter dialog.
     // See the Point3fWidget code.
 signals :

@@ -554,7 +554,7 @@ signals:
 };
 
 // This class provide a modal dialog box for asking a generic parameter set
-// It can be used by anyone needing for some values in a structred form and having some integrated help
+// It can be used by anyone needing for some values in a structured form and having some integrated help
 class OldScriptingSystemXMLParamDialog: public QDialog
 {
     Q_OBJECT

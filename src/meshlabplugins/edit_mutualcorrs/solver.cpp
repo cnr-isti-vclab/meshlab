@@ -2,7 +2,7 @@
 #include <QTextStream>
 #include "edit_mutualcorrs.h"
 #include <vcg/math/shot.h>
-#include "../../external/newuoa/include/newuoa.h"
+#include "newuoa.h"
 
 
 #include "solver.h"
@@ -426,7 +426,7 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 
 double Solver::calculateError2( Shot &shot){
     //E' una pezza, andrebbe meglio pensato. Va a beccare direttamente le strutture dati PointCorrespondence di base.
-    //align già è sicuramente settato perchè lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
+    //align giï¿½ ï¿½ sicuramente settato perchï¿½ lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
     std::vector<Correspondence> correspList = align->correspList;
     double error = 0;
    

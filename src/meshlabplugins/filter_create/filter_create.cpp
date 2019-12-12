@@ -88,7 +88,7 @@ QString FilterCreate::filterInfo(FilterIDType filterId) const
 
 // This function define the needed parameters for each filter. Return true if the filter has some parameters
 // it is called every time, so you can set the default value of parameters according to the mesh
-// For each parmeter you need to define,
+// For each parameter you need to define,
 // - the name of the parameter,
 // - the string shown in the dialog
 // - the default value
@@ -122,7 +122,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
                                         "<b>Montecarlo</b>: The points are randomly generated with an uniform distribution.<br>"
                                         "<b>Poisson Disk</b>: The points are to follow a poisson disk distribution.<br>"
                                         "<b>Disco Ball</b> Dave Rusin's disco ball algorithm for the regular placement of points on a sphere is used. <br>"
-                                        "<b>Recursive Octahedron</b> Points are genereate on the vertex of a recursively subdivided octahedron <br>"
+                                        "<b>Recursive Octahedron</b> Points are generated on the vertex of a recursively subdivided octahedron <br>"
                                         "<b>Fibonacci</b> . "
                                         )));
 
@@ -145,7 +145,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
     break;
 
   case CR_FITPLANE:
-	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "Howe large is the plane, with respect to the size of the selction: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
+	  parlst.addParam(new RichFloat("extent", 1.0, "Extent (with respect to selection)", "How large is the plane, with respect to the size of the selection: 1.0 means as large as the selection, 1.1 means 10% larger thena the selection"));
 	  parlst.addParam(new RichInt("subdiv", 3, "Plane XY subivisions", "Subdivision steps of plane borders"));
 	  parlst.addParam(new RichBool("hasuv", false, "UV parametrized", "The created plane has an UV parametrization"));
 	  parlst.addParam(new RichEnum("orientation", 0,

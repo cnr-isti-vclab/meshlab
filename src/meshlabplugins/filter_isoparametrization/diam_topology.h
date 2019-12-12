@@ -95,7 +95,7 @@ class DiamTopology
 			if (f1<f0)
 				std::swap(f0,f1);
 
-			///then put in the map the variuos edge
+			///then put in the map the various edge
 			DiamEdge de[4];
 			de[0]=DiamEdge(v0,f0);
 			de[1]=DiamEdge(v1,f0);

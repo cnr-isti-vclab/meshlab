@@ -89,6 +89,8 @@ public:
     QVector<MeshLabFilterInterface*> meshlabXMLFilterPlug;
     QVector<QAction *> editActionList;
     QVector<QAction *> decoratorActionList;
+    // Used for unique destruction - this "owns" all IO, Filter, Render, and Decorate plugins
+    QVector<MeshCommonInterface *> ownerPlug;
 
     QStringList pluginsLoaded;
 

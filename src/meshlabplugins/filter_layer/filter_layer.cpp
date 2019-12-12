@@ -87,8 +87,8 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
 QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
-    case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transfered.");
-    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transfered.");
+    case FP_SPLITSELECTEDFACES :  return QString("Selected faces are moved (or duplicated) in a new layer. Warning! per-vertex and per-face user defined attributes will not be transferred.");
+    case FP_SPLITSELECTEDVERTICES :  return QString("Selected vertices are moved (or duplicated) in a new layer. Warning! per-vertex user defined attributes will not be transferred.");
     case FP_DELETE_MESH :  return QString("The current mesh layer is deleted");
     case FP_DELETE_NON_VISIBLE_MESH :  return QString("All the non visible mesh layers are deleted");
     case FP_DELETE_RASTER :  return QString("The current raster layer is deleted");
@@ -126,7 +126,7 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         break;
     case FP_FLATTEN :
         parlst.addParam(new RichBool ("MergeVisible", true, "Merge Only Visible Layers",
-            "If true, flatten only visible layers, othwerwise, all layers are used"));
+            "If true, flatten only visible layers, otherwise, all layers are used"));
         parlst.addParam(new RichBool ("DeleteLayer", true, "Delete Layers ",
             "Delete all the layers used as source in flattening. <br>If all layers are visible only a single layer will remain after the invocation of this filter"));
         parlst.addParam(new RichBool ("MergeVertices", true,  "Merge duplicate vertices",

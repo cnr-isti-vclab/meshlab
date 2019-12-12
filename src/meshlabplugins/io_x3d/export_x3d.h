@@ -104,7 +104,7 @@ namespace io {
 	
 	/*If separator is true create the following string:
 			list[0] + " " + list[1] + " " + list[2] + " -1 " + ...+ " -1 " +list[i] + " " + list[i+1] + " " + list[i+2] + " -1"
-		othewise:
+		otherwise:
 			list[0] + " " + list[1] + " " + ... + list[i]
 	*/
 	inline static void getString(const std::vector<QString>& list, QString& ret, bool separator = true)

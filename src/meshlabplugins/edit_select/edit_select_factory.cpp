@@ -58,7 +58,7 @@ MeshEditInterface* EditSelectFactory::getMeshEditInterface(QAction *action)
 	else if (action == editSelectArea)
 		return new EditSelectPlugin(EditSelectPlugin::SELECT_AREA_MODE);
 
-	assert(0); //should never be asked for an action that isnt here
+	assert(0); //should never be asked for an action that isn't here
 	return nullptr;
 }
 
