@@ -40,7 +40,16 @@ void MeshShaderRenderPlugin::initActionList() {
 
 	QDir shadersDir = QDir(qApp->applicationDirPath());
 #if defined(Q_OS_WIN)
-	if (shadersDir.dirName() == "debug" || shadersDir.dirName() == "release" || shadersDir.dirName() == "plugins")
+	QString d = shadersDir.dirName();
+	QString dLower = d.toLower();
+	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
+		dLower == "minsizerel") {
+		// This is a configuration directory for MS Visual Studio.
+		shadersDir.cdUp();
+	}
+	d = shadersDir.dirName();
+	if (shadersDir.dirName() == "plugins")
+
 		shadersDir.cdUp();
 #elif defined(Q_OS_MAC)
 	//	if (shadersDir.dirName() == "MacOS") {
