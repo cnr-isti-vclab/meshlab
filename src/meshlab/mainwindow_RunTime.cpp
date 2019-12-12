@@ -121,11 +121,12 @@ void MainWindow::createStdPluginWnd()
 void MainWindow::createXMLStdPluginWnd()
 {
     //checks if a MeshlabStdDialog is already open and closes it
-    if (xmldialog!=0){
+    if (xmldialog!=nullptr){
         xmldialog->close();
         delete xmldialog;
     }
     xmldialog = new MeshLabXMLStdDialog(this);
+    //Ask filterParametersEvaluated to add current filter to filterHistory
     connect(xmldialog,SIGNAL(filterParametersEvaluated(const QString&,const QMap<QString,QString>&)),meshDoc()->filterHistory,SLOT(addExecutedXMLFilter(const QString&,const QMap<QString,QString>& )));
     //connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
     xmldialog->setAllowedAreas (  Qt::NoDockWidgetArea);
@@ -818,13 +819,13 @@ void MainWindow::endEdit()
 
 void MainWindow::applyLastFilter()
 {
-    if(GLA()==0) return;
+    if(GLA()==nullptr) return;
     GLA()->getLastAppliedFilter()->activate(QAction::Trigger);
 }
 
 void MainWindow::showFilterScript()
 {
-    if (meshDoc()->filterHistory != NULL)
+    if (meshDoc()->filterHistory != nullptr)
     {
         FilterScriptDialog dialog(this);
 
@@ -839,13 +840,13 @@ void MainWindow::showFilterScript()
 
 void MainWindow::runFilterScript()
 {
-    if ((meshDoc() == NULL) || (meshDoc()->filterHistory == NULL))
+    if ((meshDoc() == nullptr) || (meshDoc()->filterHistory == nullptr))
         return;
     for(FilterScript::iterator ii= meshDoc()->filterHistory->filtparlist.begin();ii!= meshDoc()->filterHistory->filtparlist.end();++ii)
     {
         QString filtnm = (*ii)->filterName();
         int classes = 0;
-		int postCondMask = 0;
+        int postCondMask = 0;
         if (!(*ii)->isXMLFilter())
         {
             QAction *action = PM.actionFilterMap[ filtnm];
@@ -867,7 +868,7 @@ void MainWindow::runFilterScript()
                 if(parameter->val->isMesh())
                 {
                     RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
-                    if(	md->meshindex < meshDoc()->size() &&
+                    if( md->meshindex < meshDoc()->size() &&
                         md->meshindex >= 0  )
                     {
                         RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
@@ -1117,8 +1118,8 @@ void MainWindow::startFilter()
 
     // In order to avoid that a filter changes something assumed by the current editing tool,
     // before actually starting the filter we close the current editing tool (if any).
-	if (GLA()->getCurrentEditAction() != NULL)
-		endEdit();
+    if (GLA()->getCurrentEditAction() != NULL)
+        endEdit();
     updateMenus();
 
     QStringList missingPreconditions;
@@ -1153,11 +1154,11 @@ void MainWindow::startFilter()
         // just to be sure...
         createStdPluginWnd();
 
-        if (xmldialog != NULL)
+        if (xmldialog != nullptr)
         {
             xmldialog->close();
             delete xmldialog;
-            xmldialog = NULL;
+            xmldialog = nullptr;
         }
 
         // (2) Ask for filter parameters and eventually directly invoke the filter
@@ -1167,6 +1168,11 @@ void MainWindow::startFilter()
         {
             RichParameterSet dummyParSet;
             executeFilter(action, dummyParSet, false);
+
+            //Insert the filter to filterHistory
+            OldFilterNameParameterValuesPair* tmp = new OldFilterNameParameterValuesPair();
+            tmp->pair = qMakePair(action->text(), dummyParSet);
+            meshDoc()->filterHistory->filtparlist.append(tmp);
         }
     }
     else // NEW XML PHILOSOPHY
@@ -1233,11 +1239,11 @@ void MainWindow::startFilter()
                 }
                 // just to be sure...
                 createXMLStdPluginWnd();
-                if (stddialog != NULL)
+                if (stddialog != nullptr)
                 {
                     stddialog->close();
                     delete stddialog;
-                    stddialog = NULL;
+                    stddialog = nullptr;
                 }
                 // (2) Ask for filter parameters and eventually directly invoke the filter
                 // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
@@ -1263,8 +1269,9 @@ void MainWindow::startFilter()
         {
             meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
         }
-    }
-}
+    }//else
+
+}//void MainWindow::startFilter()
 
 
 void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated)
