@@ -133,7 +133,7 @@ public:
         // Opening files in a transparent form (IO plugins contribution is hidden to user)
         QStringList filters;
 
-        // HashTable storing all supported formats togheter with
+        // HashTable storing all supported formats together with
         // the (1-based) index  of first plugin which is able to open it
         QHash<QString, MeshIOInterface*> allKnownFormats;
 
@@ -145,7 +145,7 @@ public:
         QDir::setCurrent(fi.absolutePath());
 
         QString extension = fi.suffix();
-        qDebug("Opening a file with extention %s", qUtf8Printable(extension));
+        qDebug("Opening a file with extension %s", qUtf8Printable(extension));
         // retrieving corresponding IO plugin
         MeshIOInterface* pCurrentIOPlugin = PM.allKnowInputFormats[extension.toLower()];
         if (pCurrentIOPlugin == 0)
@@ -225,31 +225,6 @@ public:
         // optional saving parameters (like ascii/binary encoding)
         RichParameterSet savePar;
         pCurrentIOPlugin->initSaveParameter(extension, *mm, savePar);
-        
-/* The commented code below is me just hacking around getting a feel for
- * how to use RichParameter sets */
-
-/*        if(savePar.hasParameter("Binary")){
-            printf("Binary is a parameter\n");
-            if(savePar.getBool("Binary")){
-                    printf("Binary is set\n");
-                }
-                else{
-                printf("Binary is not set\n");
-                }
-  
-                }
-
-        printf("Got here\n");
-        if(writebinary){
-            printf("Write in binary\n");
-        }
-        else{
-            printf("Write ascii\n");
-            savePar.setValue("Binary",BoolValue(false));
-        }
-*/
-
         if(savePar.hasParameter("Binary")){
             savePar.setValue("Binary",BoolValue(writebinary));
         }
@@ -399,7 +374,7 @@ public:
                     }
                     assert(parameterSet.paramList.size() == required.paramList.size());
                     RichParameter* parameter = parameterSet.paramList[i];
-                    //if this is a mesh paramter and the index is valid
+                    //if this is a mesh parameter and the index is valid
                     if(parameter->val->isMesh())
                     {
                         RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
@@ -1087,7 +1062,7 @@ int main(int argc, char *argv[])
 		}
 		else
 			fprintf(logfp, "Invalid layer number %i. Last layer in the current document is the number %i. Output mesh %s will not be saved\n", outmeshlist[ii].layerposition, meshDocument.meshList.size() - 1, qUtf8Printable(outmeshlist[ii].filename));
-	}
+	}//for(int ii
 
 
     if((logfp != NULL) && (logfp != stdout))
