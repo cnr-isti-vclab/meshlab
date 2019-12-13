@@ -272,8 +272,27 @@ QString PluginManager::getBaseDirPath()
 QString PluginManager::getDefaultPluginDirPath()
 {
 	QDir pluginsDir(getBaseDirPath());
+#if defined(Q_OS_WIN)
+	QString d = pluginsDir.dirName();
+	QString dLower = d.toLower();
+	if (dLower == "release" || dLower == "relwithdebinfo" || dLower == "debug" ||
+		dLower == "minsizerel") {
+		// This is a configuration directory for MS Visual Studio.
+		pluginsDir.cdUp();
+	} else {
+		d.clear();
+	}
+#endif
 	if (pluginsDir.exists("plugins")) {
 		pluginsDir.cd("plugins");
+
+#if defined(Q_OS_WIN)
+		// Re-apply the configuration dir, if any.
+		if (!d.isEmpty() && pluginsDir.exists(d)) {
+			pluginsDir.cd(d);
+		}
+#endif
+
 		return pluginsDir.absolutePath();
 	}
 #if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)

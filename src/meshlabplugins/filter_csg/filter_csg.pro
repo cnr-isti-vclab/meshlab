@@ -20,4 +20,7 @@ win32-msvc2008:LIBS		 += ../../external/lib/win32-msvc2008/mpirxx.lib ../../exte
 win32-msvc2010:LIBS		 += ../../external/lib/win32-msvc2008/mpirxx.lib ../../external/lib/win32-msvc2008/mpir.lib
 win32-msvc2012:LIBS		 += ../../external/lib/win32-msvc2008/mpirxx.lib ../../external/lib/win32-msvc2008/mpir.lib
 win32-msvc2013:LIBS		 += ../../external/lib/win32-msvc2008/mpirxx.lib ../../external/lib/win32-msvc2008/mpir.lib
-linux:INCLUDEPATH += ../../external/inc/linux-g++/mpir-2.4.0
+
+# Linux can use GMP isntead, which is widely available
+linux:DEFINES += BUILD_WITH_GMP
+linux:LIBS += -lgmp

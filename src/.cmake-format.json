@@ -1,0 +1,16 @@
+{
+  "tab_size": 4,
+  "dangle_parens": false,
+  "dangle_align": "prefix",
+  "line_ending": "unix",
+  "command_case": "canonical",
+  "keyword_case": "upper",
+  "additional_commands": {
+  },
+  "always_wrap": [
+    "set_source_files_properties",
+    "install"
+  ],
+  "first_comment_is_literal": true,
+  "line_width": 120
+}

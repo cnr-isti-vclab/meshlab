@@ -14,7 +14,7 @@ jobs:
       run: |
        sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
        sudo apt update
-       sudo apt install -y qt512base qt512script qt512xmlpatterns mesa-common-dev libglu1-mesa-dev
+       sudo apt install -y qt512base qt512script qt512xmlpatterns mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev
        cd ..
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
        cd meshlab
@@ -25,7 +25,7 @@ jobs:
         echo '::set-env name=QTDIR::/opt/qt512'
         echo '::add-path::/opt/qt512/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/opt/qt512/lib/x86_64-linux-gnu:/opt/qt512/lib:${{env.LD_LIBRARY_PATH}}'
-        echo '::set-env name=PKG_CONFIG_PATH::/opt/qt512/lib/pkgconfig:${{env.PKG_CONFIG_PATH}}'       
+        echo '::set-env name=PKG_CONFIG_PATH::/opt/qt512/lib/pkgconfig:${{env.PKG_CONFIG_PATH}}'
     - name: Compiling external
       run: |
         cd src/external
@@ -36,3 +36,25 @@ jobs:
         cd src/
         qmake meshlab_full.pro
         make -j4
+
+  ubuntu_build_cmake:
+    name: Build MeshLab (Ubuntu - CMake)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Installing dependencies
+      run: |
+       sudo apt update
+       sudo apt install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build 
+       cd ..
+       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       cd meshlab
+    - name: Configuring
+      run: |
+        mkdir -p src/build
+        cd src/build
+        cmake .. -G Ninja
+    - name: Compiling meshlab
+      run: ninja -C src/build
+
