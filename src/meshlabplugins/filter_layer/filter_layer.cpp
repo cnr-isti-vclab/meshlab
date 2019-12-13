@@ -76,8 +76,8 @@ QString FilterLayerPlugin::filterName(FilterIDType filterId) const
     case FP_RENAME_RASTER :  return QString("Rename Current Raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer");
     case FP_MESH_VISIBILITY :  return QString("Change Visibility of layer(s)");
-	case FP_EXPORT_CAMERAS:  return QString("Export active rasters cameras to file");
-	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
+    case FP_EXPORT_CAMERAS:  return QString("Export active rasters cameras to file");
+    case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from file");
     default : assert(0);
     }
 	return NULL;
@@ -100,8 +100,8 @@ QString FilterLayerPlugin::filterInfo(FilterIDType filterId) const
     case FP_RENAME_RASTER :  return QString("Explicitly change the label shown for a given raster");
     case FP_SELECTCURRENT :  return QString("Change the current layer to a chosen one");
     case FP_MESH_VISIBILITY :  return QString("Make layer(s) visible/invisible. Useful for scripting.");
-	case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
-	case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
+    case FP_EXPORT_CAMERAS:  return QString("Export active cameras to file, in the .out or Agisoft .xml formats");
+    case FP_IMPORT_CAMERAS:  return QString("Import cameras for active rasters from .out or Agisoft .xml formats");
     default : assert(0);
     }
 	return NULL;
@@ -144,7 +144,7 @@ void FilterLayerPlugin::initParameterSet(QAction *action, MeshDocument &md, Rich
         break;
     case FP_RENAME_RASTER :
         parlst.addParam(new RichString ("newName",
-            rm->label(),
+            rm?rm->label():"",
             "New Label",
             "New Label for the raster"));
         break;
@@ -182,7 +182,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
  {
 	case  FP_RENAME_MESH:     md.mm()->setLabel(par.getString("newName")); break;
 
-	case  FP_RENAME_RASTER:   md.rm()->setLabel(par.getString("newName")); break;
+	case  FP_RENAME_RASTER:   if (md.rm()) {md.rm()->setLabel(par.getString("newName"))}; break;
 
 	case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("layer")); break;
 
