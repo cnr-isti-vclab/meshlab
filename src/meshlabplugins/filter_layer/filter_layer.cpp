@@ -182,7 +182,19 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
  {
 	case  FP_RENAME_MESH:     md.mm()->setLabel(par.getString("newName")); break;
 
-	case  FP_RENAME_RASTER:   if (md.rm()) {md.rm()->setLabel(par.getString("newName"))}; break;
+	case  FP_RENAME_RASTER:
+	{
+    if (md.rm()) 
+    {
+      md.rm()->setLabel(par.getString("newName"));
+    }
+    else
+    {
+      this->errorMessage = "Error: Call to Rename Current Raster with no valid raster.";
+      return false;
+    }
+    
+	} break;
 
 	case  FP_SELECTCURRENT:   md.setCurrent(par.getMesh("layer")); break;
 
@@ -613,7 +625,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 			sscanf(line, "%d %d", &num_cams, &num_points);
 			
 			///// Check if the number of active rasters and cameras is the same
-			int active = 0;
+			unsigned active = 0;
 			for (int i = 0; i < md.rasterList.size(); i++)
 			{
 				if (md.rasterList[i]->visible)
@@ -622,8 +634,7 @@ bool FilterLayerPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParam
 
 			if (active != num_cams)
 			{
-				this->errorMessage = "Error!";
-				errorMessage = "Wait! The number of active rasters and the number of cams in the Bundler file is not the same!";
+				this->errorMessage = "Wait! The number of active rasters and the number of cams in the Bundler file is not the same!";
 				return false;
 			}
 
