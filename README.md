@@ -14,6 +14,6 @@ The system is aimed to help the processing of the typical not-so-small unstructu
 
 MeshLab is mostly based on the open source c++ mesh processing library [VCGlib](http://www.vcglib.net) developed at the [Visual Computing Lab](http://vcg.isti.cnr.it) of [ISTI - CNR](http://www.isti.cnr.it), for all the core mesh processing tasks and it is available for Windows, MacOSX, and Linux. 
 
-Compiling instruction can be found in the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder or simply looking at the continous integration setup on [Github Actions](https://github.com/cnr-isti-vclab/meshlab/actions), [travis](https://travis-ci.org/cnr-isti-vclab/meshlab/builds) and [appveyor](https://ci.appveyor.com/project/cignoni/meshlab/history).
+Compiling instructions can be found in the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder or simply looking at the continous integration setup on [Github Actions](https://github.com/cnr-isti-vclab/meshlab/actions), [travis](https://travis-ci.org/cnr-isti-vclab/meshlab/builds) and [appveyor](https://ci.appveyor.com/project/cignoni/meshlab/history).
  
 
