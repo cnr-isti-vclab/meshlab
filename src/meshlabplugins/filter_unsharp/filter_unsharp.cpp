@@ -105,12 +105,19 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   switch(filterId)
   {
   case FP_LAPLACIAN_SMOOTH :          return tr("Laplacian smooth of the mesh: for each vertex it calculates the average position with nearest vertex");
-  case FP_HC_LAPLACIAN_SMOOTH :       return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing, based on the paper of Vollmer, Mencl, and Muller");
-  case FP_SD_LAPLACIAN_SMOOTH :       return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing, based on the Fujiwara extended umbrella operator");
-  case FP_TWO_STEP_SMOOTH :           return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where similar normals are averaged together and a step where the vertices are fitted on the new normals. Based on: <br>"
+  case FP_HC_LAPLACIAN_SMOOTH :       return tr("HC Laplacian Smoothing, extended version of Laplacian Smoothing based on the paper<br>"
+                                                "<b>Improved Laplacian Smoothing of Noisy Surface Meshes</b> "
+                                                "by <i>Vollmer, Mencl and Müller</i>. EUROGRAPHICS Volume 18 (1999), Number 3, 131-138.<br>"
+                                                "<a href='https://doi.org/10.1111/1467-8659.00334'>doi:10.1111/1467-8659.00334</a>");
+  case FP_SD_LAPLACIAN_SMOOTH :       return tr("Scale Dependent Laplacian Smoothing, extended version of Laplacian Smoothing based on the Fujiwara extended umbrella operator.<br>"
+                                                "<b>Implicit Fairing of Irregular Meshes using Diffusion and Curvature Flow</b> "
+                                                "by <i>Desbrun, Meyer, Schroeder and Barr</i>. SIGGRAPH 1999<br>"
+                                                "<a href='https://doi.org/10.1145/311535.311576'>doi:10.1145/311535.311576</a>");
+  case FP_TWO_STEP_SMOOTH :           return tr("Two Step Smoothing, a feature preserving/enhancing fairing filter. It is based on a Normal Smoothing step where "
+                                                "similar normals are averaged together and a step where the vertices are fitted on the new normals. Based on: <br>"
                                                 "<i>A. Belyaev and Y. Ohtake</i>, <b>A Comparison of Mesh Smoothing Methods</b>, Proc. Israel-Korea Bi-National Conf. Geometric Modeling and Computer Graphics, pp. 83-87, 2003.");
   case FP_TAUBIN_SMOOTH :             return tr("The &lambda;-&mu; Taubin smoothing, it make two steps of smoothing, forth and back, for each iteration. Based on:<br>"
-                                                "Gabriel Taubin,<br><b>A signal processing approach to fair surface design</b><br>Siggraph 1995" );
+                                                "<b>A signal processing approach to fair surface design</b><br>by <i>Gabriel Taubin</i>, Siggraph 1995" );
   case FP_DEPTH_SMOOTH :              return tr("A laplacian smooth that is constrained to move vertices only along the view direction.");
   case FP_DIRECTIONAL_PRESERVATION :  return tr("Store and Blend the current geometry with the result of another previous smoothing processing step. It is useful to limit the influence of any smoothing algorithm along the viewing direction. This is import to cope with the biased distribution of the error in many scanning devices. TOF scanner usually have very good <b>x,y</b> accuracy but suffer of great depth errors.");
   case FP_CREASE_CUT:                 return tr("Cut the mesh along crease edges, duplicating the vertices as necessary. Crease edges are defined according to the variation of normal of the adjacent faces");
@@ -146,7 +153,7 @@ QString FilterUnsharp::filterInfo(FilterIDType filterId) const
   {
             case FP_CREASE_CUT :
             return MeshFilterInterface::FilterClass( 	MeshFilterInterface::Normal | MeshFilterInterface::Remeshing);
-        case FP_SD_LAPLACIAN_SMOOTH:
+            case FP_SD_LAPLACIAN_SMOOTH:
             case FP_HC_LAPLACIAN_SMOOTH:
             case FP_LAPLACIAN_SMOOTH:
             case FP_TWO_STEP_SMOOTH:
@@ -484,10 +491,10 @@ bool FilterUnsharp::applyFilter(QAction *filter, MeshDocument &md, RichParameter
         break;
     case FP_HC_LAPLACIAN_SMOOTH:
       {
-      tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
+            tri::UpdateFlags<CMeshO>::FaceBorderFromNone(m.cm);
             size_t cnt=tri::UpdateSelection<CMeshO>::VertexFromFaceStrict(m.cm);
-      tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
-      m.UpdateBoxAndNormals();
+            tri::Smooth<CMeshO>::VertexCoordLaplacianHC(m.cm,1,cnt>0);
+            m.UpdateBoxAndNormals();
       }
         break;
   case FP_TWO_STEP_SMOOTH:
