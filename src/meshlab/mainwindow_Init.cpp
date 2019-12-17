@@ -392,15 +392,18 @@ connectRenderModeActionList(rendlist);*/
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
-	viewFromFileAct = new QAction(tr("View from file"), this);
+	viewFromFileAct = new QAction(tr("Read camera settings from file"), this);
+	viewFromFileAct->setToolTip(tr("Restore camera settings from a XML description stored in a file."));
 	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 
-	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
+	copyShotToClipboardAct = new QAction(tr("Copy camera settings to clipboard"), this);
+	copyShotToClipboardAct->setToolTip(tr("Save current camera settings to clipboard as a XML document that you can share or restore anytime."));
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
 
-	pasteShotFromClipboardAct = new QAction(tr("Paste shot"), this);
+	pasteShotFromClipboardAct = new QAction(tr("Paste clipboard to camera settings"), this);
+	pasteShotFromClipboardAct->setToolTip(tr("Restore camera settings from a XML description stored in the clipboard."));
 	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
@@ -618,6 +621,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	windowsMenu->setToolTipsVisible(true);
     updateWindowMenu();
 	menuBar()->addSeparator();
 
@@ -938,9 +942,9 @@ void MainWindow::fillFilterMenu()
 				//    filterToolBar->addAction(filterAction);
 			}
 		}
-		catch (ParsingException e)
+		catch (ParsingException &e)
 		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what());
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what(), "");
 		}
 	}
 }
