@@ -124,6 +124,7 @@ void MeshlabStdDialog::loadFrameContent(MeshDocument *mdPt)
 	QLabel *ql = new QLabel("<i>" + curmfi->filterInfo(curAction) + "</i>", qf);
 	ql->setTextFormat(Qt::RichText);
 	ql->setWordWrap(true);
+  ql->setOpenExternalLinks(true);
 	gridLayout->addWidget(ql, 0, 0, 1, 2, Qt::AlignTop); // this widgets spans over two columns.
 
 	stdParFrame = new StdParFrame(this, curgla);
