@@ -26,6 +26,13 @@ jobs:
         cd src/
         qmake meshlab_full.pro
         make -j4
+    - name: Creating Build
+      run : |
+         cd src/install/linux
+         ./linux_install.sh
+         echo "------ Completed!!!"
+         #todo create 
+         
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)
