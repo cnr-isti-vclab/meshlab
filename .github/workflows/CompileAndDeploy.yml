@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Installing dependencies
       run: |
        sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
@@ -44,7 +44,7 @@ jobs:
     runs-on: macos
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Installing dependencies
       run: |
         brew install llvm libomp qt
@@ -90,7 +90,7 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
