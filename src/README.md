@@ -1,6 +1,6 @@
 ## Compiling MeshLab
 
-1. install Qt5.9, be sure to select additional packages "script" and "xmlpatterns"
+1. install Qt >= 5.9, be sure to select additional packages "script" and "xmlpatterns"
 2. clone meshlab repo
 3. clone vcglib repo (_devel_ branch) at the same level of meshlab 
 4. compile `src/external/external.pro`, 
