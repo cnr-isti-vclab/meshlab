@@ -20,7 +20,6 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#include <Qt>
 #include "filter_unsharp.h"
 
 #include <vcg/complex/algorithms/clean.h>
