@@ -32,7 +32,7 @@ $INSTALL_PATH/linuxdeployqt meshlab -appimage
 #at this moment, the distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
 
-export MESHLAB_NAME = MeshLab$(date +%Y-%m)
+export MESHLAB_NAME=MeshLab$(date +%Y-%m)
 
 cd ..
 mv distrib $MESHLAB_NAME
