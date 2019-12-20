@@ -306,6 +306,7 @@ endforeach()
 
 ### Copy/install other files
 
+# This variable keeps track of the output filenames that need to be copied at build time
 set(COPIED_FILES)
 
 # shaders
@@ -331,31 +332,25 @@ foreach(FN ${SHADERS})
     list(APPEND COPIED_FILES "${OUTFN}")
 endforeach()
 
-if(${INSTALL_SAMPLE_MESHES})
-    #Copy sample meshes files to distrib directory
-    if(NOT ${CMAKE_CURRENT_SOURCE_DIR}/distrib EQUAL ${MESHLAB_BUILD_DISTRIB_DIR} )
-        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample 
-             DESTINATION ${MESHLAB_BUILD_DISTRIB_DIR} 
-             PATTERN "*/rangemaps" EXCLUDE )
-        if(${INSTALL_SAMPLE_RANGEMAPS} )
-            file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample/rangemaps DESTINATION ${MESHLAB_SAMPLE_OUTPUT_DIR} )
-        endif()    
-    endif()
-        
-    #Rules to install sample files from distrib/sample directory
-    install(
-        DIRECTORY ${MESHLAB_SAMPLE_OUTPUT_DIR}
-        DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
-        COMPONENT Samples)
-    file(GLOB_RECURSE SAMPLE 
-         LIST_DIRECTORIES false
-         ${MESHLAB_SAMPLE_OUTPUT_DIR}/* )
-    list(APPEND COPIED_FILES ${SAMPLE} )
-endif()
-
-# Custom target
+# Custom target - to trigger the execution of the custom commands above.
 add_custom_target(copy-distrib-files ALL DEPENDS ${COPIED_FILES})
 set_property(TARGET copy-distrib-files PROPERTY FOLDER Core)
+
+if(INSTALL_SAMPLE_MESHES)
+    # Install sample files from distrib/sample directory (except for the rangemaps)
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample
+        DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
+        COMPONENT Samples
+        PATTERN "*/rangemaps" EXCLUDE)
+endif()
+if(INSTALL_SAMPLE_RANGEMAPS)
+    # Install sample rangemaps
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample/rangemaps
+        DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}/sample
+        COMPONENT Samples)
+endif()
 
 if(NOT WIN32 AND NOT APPLE)
     install(FILES install/meshlab.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
