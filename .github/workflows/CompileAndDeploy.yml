@@ -173,7 +173,7 @@ jobs:
         asset_path: MeshLab${{steps.envs.outputs.date}}-portable.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-portable.zip
         asset_content_type: MeshLab Portable for Windows 
-- name: Downloading MeshLab Linux
+    - name: Downloading MeshLab Linux
       uses: actions/download-artifact@v1
       with:
         name: meshlab_zip
