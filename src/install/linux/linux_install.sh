@@ -26,9 +26,9 @@ rm -r plugins/U3D_W32/
 $INSTALL_PATH/linuxdeployqt meshlab -appimage
 
 mv libcommon.so.1.0.0 lib/libcommon.so.1.0.0
-ln -s lib/libcommon.so.1.0.0 lib/libcommon.so.1.0
-ln -s lib/libcommon.so.1.0.0 lib/libcommon.so.1
-ln -s lib/libcommon.so.1.0.0 lib/libcommon.so
+cp lib/libcommon.so.1.0.0 lib/libcommon.so.1.0
+cp lib/libcommon.so.1.0.0 lib/libcommon.so.1
+cp lib/libcommon.so.1.0.0 lib/libcommon.so
 
 rm libcommon*
 
