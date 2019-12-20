@@ -1,7 +1,5 @@
 config += debug_and_release
 
-CONFIG += c++11
-
 TEMPLATE      = subdirs
 
 SUBDIRS	= 	muparser_v225/src \

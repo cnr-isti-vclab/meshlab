@@ -1,8 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=Meshlab
+Name=MeshLab
+GenericName=Mesh processing
+Comment=View and process meshes
 Exec=AppRun %F
 Icon=meshlab.png
-Comment=View and process meshes
 Terminal=false
-Categories=Graphics
+MimeType=model/mesh;application/x-3ds;image/x-3ds;application/sla;
+Categories=Graphics;3DGraphics;Viewer;Qt;
