@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Meshlab
+Exec=AppRun %F
+Icon=meshlab.png
+Comment=View and process meshes
+Terminal=false
+Categories=Graphics

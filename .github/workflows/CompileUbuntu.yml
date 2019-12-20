@@ -16,6 +16,11 @@ jobs:
        cd ..
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
        cd meshlab
+    - name: Setting env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(date +%Y-%m)"   
     - name: Compiling external
       run: |
         cd src/external
@@ -26,12 +31,16 @@ jobs:
         cd src/
         qmake meshlab_full.pro
         make -j4
-    - name: Creating Build
+    - name: Creating ZIP
       run : |
          cd src/install/linux
          ./linux_install.sh
          echo "------ Completed!!!"
-         #todo create 
+    - name: Uploading ZIP
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_zip
+        path: src/MeshLab${{steps.envs.outputs.date}}/
          
 
   ubuntu_build_cmake:
