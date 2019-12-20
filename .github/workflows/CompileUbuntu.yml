@@ -33,9 +33,10 @@ jobs:
         make -j4
     - name: Creating ZIP
       run : |
-         cd src/install/linux
-         ./linux_install.sh
-         echo "------ Completed!!!"
+        ls -al src/distrib/
+        cd src/install/linux
+        ./linux_install.sh
+        echo "------ Completed!!!"
     - name: Uploading ZIP
       uses: actions/upload-artifact@v1
       with:
