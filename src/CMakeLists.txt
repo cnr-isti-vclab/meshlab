@@ -102,6 +102,13 @@ else()
     set(INSTALL_TO_UNIX_LAYOUT ON)
 endif()
 
+option(INSTALL_SAMPLE_MESHES
+       "Should the sample meshes in src/distrib/samples be installed? It will increase the build size in 14 Mb."
+       ON)
+option(INSTALL_SAMPLE_RANGEMAPS
+       "Should the sample rangemaps in src/distrib/samples/rangemaps be installed? It will increase the build size in 67 Mb."
+       OFF)
+
 ### Settings needed for both "external" and internal code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -324,19 +331,27 @@ foreach(FN ${SHADERS})
     list(APPEND COPIED_FILES "${OUTFN}")
 endforeach()
 
-#Copy sample meshes files to distrib directory
-if(NOT ${CMAKE_CURRENT_SOURCE_DIR}/distrib EQUAL ${MESHLAB_BUILD_DISTRIB_DIR} )
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample DESTINATION ${MESHLAB_BUILD_DISTRIB_DIR} )
+if(${INSTALL_SAMPLE_MESHES})
+    #Copy sample meshes files to distrib directory
+    if(NOT ${CMAKE_CURRENT_SOURCE_DIR}/distrib EQUAL ${MESHLAB_BUILD_DISTRIB_DIR} )
+        file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample 
+             DESTINATION ${MESHLAB_BUILD_DISTRIB_DIR} 
+             PATTERN "*/rangemaps" EXCLUDE )
+        if(${INSTALL_SAMPLE_RANGEMAPS} )
+            file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample/rangemaps DESTINATION ${MESHLAB_SAMPLE_OUTPUT_DIR} )
+        endif()    
+    endif()
+        
+    #Rules to install sample files from distrib/sample directory
+    install(
+        DIRECTORY ${MESHLAB_SAMPLE_OUTPUT_DIR}
+        DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
+        COMPONENT Samples)
+    file(GLOB_RECURSE SAMPLE 
+         LIST_DIRECTORIES false
+         ${MESHLAB_SAMPLE_OUTPUT_DIR}/* )
+    list(APPEND COPIED_FILES ${SAMPLE} )
 endif()
-    
-install(
-    DIRECTORY ${MESHLAB_BUILD_DISTRIB_DIR}/sample
-    DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
-    COMPONENT Samples)
-file(GLOB_RECURSE SAMPLE 
-     LIST_DIRECTORIES false
-     ${MESHLAB_BUILD_DISTRIB_DIR}/sample/* )
-list(APPEND COPIED_FILES ${SAMPLE} )
 
 # Custom target
 add_custom_target(copy-distrib-files ALL DEPENDS ${COPIED_FILES})
