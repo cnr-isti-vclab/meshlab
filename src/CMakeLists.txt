@@ -103,11 +103,12 @@ else()
 endif()
 
 option(INSTALL_SAMPLE_MESHES
-       "Should the sample meshes in src/distrib/samples be installed? It will increase the build size in 14 Mb."
-       ON)
-option(INSTALL_SAMPLE_RANGEMAPS
-       "Should the sample rangemaps in src/distrib/samples/rangemaps be installed? It will increase the build size in 67 Mb."
+       "Should the sample meshes in src/distrib/samples be installed? It will increase the installed size by 14 MiB."
        OFF)
+option(
+    INSTALL_SAMPLE_RANGEMAPS
+    "Should the sample rangemaps in src/distrib/samples/rangemaps be installed? It will increase the installed size by 67 MiB."
+    OFF)
 
 ### Settings needed for both "external" and internal code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
