@@ -12,8 +12,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Installing dependencies
       run: |
-       sudo apt update && sudo apt dist-upgrade -y
-       sudo apt install -y build-essential qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
+       sudo apt install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
        cd ..
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
        cd meshlab
