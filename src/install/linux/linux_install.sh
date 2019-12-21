@@ -25,12 +25,10 @@ rm -r plugins/U3D_W32/
 
 $INSTALL_PATH/linuxdeployqt meshlab -appimage
 
-mv libcommon.so.1.0.0 lib/libcommon.so.1.0.0
+cp libcommon.so.1.0.0 lib/libcommon.so.1.0.0
 cp lib/libcommon.so.1.0.0 lib/libcommon.so.1.0
 cp lib/libcommon.so.1.0.0 lib/libcommon.so.1
 cp lib/libcommon.so.1.0.0 lib/libcommon.so
-
-rm libcommon*
 
 #at this moment, the distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"
