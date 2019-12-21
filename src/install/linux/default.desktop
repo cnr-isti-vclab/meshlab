@@ -2,7 +2,7 @@
 Type=Application
 Name=MeshLab
 GenericName=Mesh processing
-Comment=View and process meshes
+Comment=Processor and editor of large 3D triangular meshes
 Exec=AppRun %F
 Icon=meshlab
 Terminal=false
