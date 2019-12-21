@@ -26,15 +26,14 @@ jobs:
         cd src/
         qmake meshlab_full.pro
         make -j4
-    - name: Creating ZIP
+    - name: Creating Meshlab Portable ZIP
       run : |
         cd src/install/linux
         ./linux_install.sh
-        echo "------ Completed!!!"
-    - name: Uploading ZIP
+    - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_zip
+        name: meshlab_portable_linux
         path: src/distrib/
          
 

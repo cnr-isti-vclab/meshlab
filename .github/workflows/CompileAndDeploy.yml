@@ -28,15 +28,14 @@ jobs:
         cd src/
         qmake meshlab_full.pro
         make -j4
-    - name: Creating ZIP
+    - name: Creating Meshlab Portable ZIP
       run : |
         cd src/install/linux
         ./linux_install.sh
-        echo "------ Completed!!!"
-    - name: Uploading ZIP
+    - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_zip
+        name: meshlab_portable_linux
         path: src/distrib/
   
   macos_build:
@@ -49,7 +48,6 @@ jobs:
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-        export COLUMNS=80
         cd ..
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
         cd meshlab 
@@ -76,14 +74,14 @@ jobs:
       run: |
          cd src/install/macx
          ./macinstall_latest.sh
-         echo "------ Completed!!! We should have a dmg here "
          cd ../../..
          ls -la src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+         mv src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_dmg
-        path: src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+        name: meshlab_macos
+        path: src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
         
   windows_build:
     name: Build MeshLab (Windows)
@@ -111,14 +109,14 @@ jobs:
         cd src\
         qmake meshlab_full.pro -r
         nmake
-    - name: Creating MeshLab Portable
+    - name: Creating MeshLab Portable ZIP
       run: |
         cd src\distrib
         windeployqt --no-translations meshlab.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable
+        name: meshlab_portable_windows
         path: src\distrib
         
          
@@ -141,27 +139,29 @@ jobs:
         release_name: MeshLab-${{steps.envs.outputs.date}}-beta
         draft: false
         prerelease: true
-    - name: Downloading DMG
+    
+    - name: Downloading MacOS DMG
       uses: actions/download-artifact@v1
       with:
-        name: meshlab_dmg
+        name: meshlab_macos
     - name: Uploading PreReleaseMacOS
       id: upload-prerelease-macos
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: meshlab_dmg/MeshLab${{steps.envs.outputs.date}}.dmg
-        asset_name: MeshLab${{steps.envs.outputs.date}}.dmg
+        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} 
+        asset_path: meshlab_macos/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.dmg
         asset_content_type: MeshLab for MacOS
-    - name: Downloading MeshLab Portable
+    
+    - name: Downloading Windows ZIP
       uses: actions/download-artifact@v1
       with:
-        name: meshlab_portable
+        name: meshlab_portable_windows
     - name: Creating Meshlab Portable Archive
       run: |
-        zip -r MeshLab${{steps.envs.outputs.date}}-portable.zip meshlab_portable/
+        zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_portable_windows/
         ls
     - name: Uploading PreReleaseWindowsPortable
       id: upload-prerelease-windows-portable
@@ -169,17 +169,18 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: MeshLab${{steps.envs.outputs.date}}-portable.zip
-        asset_name: MeshLab${{steps.envs.outputs.date}}-portable.zip
+        upload_url: ${{ steps.create_prerelease.outputs.upload_url }}
+        asset_path: MeshLab${{steps.envs.outputs.date}}-windows.zip
+        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.zip
         asset_content_type: MeshLab Portable for Windows 
-    - name: Downloading MeshLab Linux
+    
+    - name: Downloading Linux ZIP
       uses: actions/download-artifact@v1
       with:
-        name: meshlab_zip
+        name: meshlab_portable_linux
     - name: Creating Meshlab Linux Archive
       run: |
-        zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_zip/
+        zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_portable_linux/
         ls
     - name: Uploading PreReleaseLinuxPortable
       id: upload-prerelease-linux-portable
@@ -187,7 +188,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} 
         asset_path: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_content_type: MeshLab Portable for Linux
