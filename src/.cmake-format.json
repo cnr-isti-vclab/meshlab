@@ -12,5 +12,6 @@
     "install"
   ],
   "first_comment_is_literal": true,
-  "line_width": 120
+  "line_width": 120,
+  "enable_markup": false
 }
