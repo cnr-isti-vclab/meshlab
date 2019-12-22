@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MeshLab
+GenericName=Mesh processing
+Comment=Processor and editor of large 3D triangular meshes
+Exec=AppRun %F
+Icon=meshlab
+Terminal=false
+MimeType=model/mesh;application/x-3ds;image/x-3ds;application/sla;
+Categories=Graphics;3DGraphics;Viewer;Qt;

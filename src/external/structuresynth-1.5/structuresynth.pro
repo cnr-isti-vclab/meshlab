@@ -1,5 +1,8 @@
 EXTERNAL_BASE_PATH = ../
 include($$EXTERNAL_BASE_PATH/ext_common.pri)
+
+CONFIG += c++11
+
 TEMPLATE = lib
 TARGET = ssynth
 CONFIG += staticlib

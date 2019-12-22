@@ -9,15 +9,13 @@ jobs:
     runs-on: macos
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Installing dependencies
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-        export COLUMNS=80
         cd ..
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
-        cd meshlab 
     - name: Setting env variables
       id: envs
       shell: bash
@@ -41,11 +39,11 @@ jobs:
       run: |
          cd src/install/macx
          ./macinstall_latest.sh
-         echo "------ Completed!!! We should have a dmg here "
          cd ../../..
          ls -la src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+         mv src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_dmg
-        path: src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+        name: meshlab_macos
+        path: src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
