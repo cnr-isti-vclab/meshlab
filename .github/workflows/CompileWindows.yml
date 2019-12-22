@@ -45,26 +45,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
-
     - name: Installing QT
       uses: jurplel/install-qt-action@v2
       with:
         modules: qtscript xmlpatterns
-
     - name: Installing dependencies
       run: |
         cd ..
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
-
     - name: Configure
       run: |
         cd $env:GITHUB_WORKSPACE
         cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install
         # -DBUILD_MINI=ON
-
     - name: Build
       run: |
         cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
@@ -72,5 +67,5 @@ jobs:
     - name: Uploading MeshLab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable_cmake
+        name: meshlab_portable__windows_cmake
         path: install

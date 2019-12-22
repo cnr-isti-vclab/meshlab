@@ -16,7 +16,6 @@ jobs:
         npm install -g appdmg
         cd ..
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
-        cd meshlab 
     - name: Setting env variables
       id: envs
       shell: bash
