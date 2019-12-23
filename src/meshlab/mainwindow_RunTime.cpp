@@ -212,6 +212,7 @@ void MainWindow::updateWindowMenu()
 
         // View From File act
         windowsMenu->addAction(viewFromFileAct);
+        windowsMenu->addAction(viewToFileAct);
         windowsMenu->addAction(viewFromMeshAct);
         windowsMenu->addAction(viewFromRasterAct);
 
@@ -733,8 +734,13 @@ void MainWindow::trackballStep(QAction *qa)
 
 void MainWindow::readViewFromFile()
 {
-    if(GLA()) GLA()->viewFromFile();
+    if(GLA()) GLA()->readViewFromFile();
     updateMenus();
+}
+
+void MainWindow::saveViewToFile()
+{
+    if(GLA()) GLA()->saveViewToFile();
 }
 
 void MainWindow::viewFromCurrentMeshShot()

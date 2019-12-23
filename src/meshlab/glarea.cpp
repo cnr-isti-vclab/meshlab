@@ -1985,7 +1985,7 @@ void GLArea::initializeShot(Shotm &shot)
     shot.Extrinsics.SetIdentity();
 }
 
-bool GLArea::viewFromFile()
+bool GLArea::readViewFromFile()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
 
@@ -2011,6 +2011,52 @@ bool GLArea::viewFromFile()
     qDebug("End file reading");
     qf.close();
 
+    return true;
+}
+
+bool GLArea::saveViewToFile()
+{
+    QFileDialog* saveDiag = new QFileDialog(this,tr("Save View To File"), "./", tr("View file (*.xml)"));
+
+#if defined(Q_OS_WIN)
+    saveDiag->setOption(QFileDialog::DontUseNativeDialog);
+#endif
+    saveDiag->setAcceptMode(QFileDialog::AcceptSave);
+    saveDiag->exec();
+    QStringList files = saveDiag->selectedFiles();
+    if (files.size() != 1)
+        return;
+    QString fileName = files[0];
+    QFileInfo fi(fileName);
+    if (fi.isDir())
+        return;
+    if (fi.suffix().isEmpty())
+    {
+        QRegExp reg("\\.\\w+");
+        saveDiag->selectedNameFilter().indexOf(reg);
+        QString ext = reg.cap();
+        fileName.append(ext);
+        fi.setFile(fileName);
+    }
+    QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+    bool ret = false;
+	qDebug("Saving a file %s\n", qUtf8Printable(fileName));
+    if (fileName.isEmpty()) return;
+    else
+    {
+        QFile qFile(fileName);
+        if (qFile.open(QIODevice::WriteOnly)) {
+          QTextStream out(&qFile); out << this->viewToText();
+          qFile.close();
+          ret = true;
+        }
+    }
+
+    if(!ret)
+      QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save view file %1\n").arg(fileName));
+    
+    
     return true;
 }
 

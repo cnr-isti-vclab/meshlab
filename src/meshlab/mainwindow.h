@@ -217,9 +217,10 @@ private slots:
     void setUnsplit();
     void linkViewers();
     void viewFrom(QAction *qa);
-	void toggleOrtho();
-	void trackballStep(QAction *qa);
+    void toggleOrtho();
+    void trackballStep(QAction *qa);
     void readViewFromFile();
+    void saveViewToFile();
     void viewFromCurrentMeshShot();
     void viewFromCurrentRasterShot();
     void copyViewToClipBoard();
@@ -507,6 +508,7 @@ private:
     QAction *viewFromMeshAct;
     QAction *viewFromRasterAct;
     QAction *viewFromFileAct;
+    QAction *viewToFileAct;
 
 	QAction *toggleOrthoAct;
 

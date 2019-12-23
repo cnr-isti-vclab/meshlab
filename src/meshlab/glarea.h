@@ -523,16 +523,17 @@ private:
 public:
     QPair<Shotm, float > shotFromTrackball();
     void viewFromCurrentShot(QString kind);
-    bool viewFromFile();
+    bool saveViewToFile();
+    bool readViewFromFile();
     void createOrthoView(QString);
-	void toggleOrtho();
-	void trackballStep(QString);
+    void toggleOrtho();
+    void trackballStep(QString);
     void viewToClipboard();
     QString viewToText();
     void viewFromClipboard();
     void loadShot(const QPair<Shotm, float> &) ;
-	void loadShotFromTextAlignFile(const QDomDocument &doc);
-	void loadViewFromViewStateFile(const QDomDocument &doc);
+    void loadShotFromTextAlignFile(const QDomDocument &doc);
+    void loadViewFromViewStateFile(const QDomDocument &doc);
 
 private:
 

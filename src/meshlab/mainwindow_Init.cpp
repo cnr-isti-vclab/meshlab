@@ -392,10 +392,12 @@ connectRenderModeActionList(rendlist);*/
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
-	viewFromFileAct = new QAction(tr("View from file"), this);
-	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+	viewFromFileAct = new QAction(tr("Read view from file"), this);
+	viewToFileAct = new QAction(tr("Save view to file"), this);
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
+	connect(viewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
+	connect(viewToFileAct, SIGNAL(triggered()), this, SLOT(saveViewToFile()));
 
 	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
