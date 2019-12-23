@@ -2025,11 +2025,11 @@ bool GLArea::saveViewToFile()
     saveDiag.exec();
     QStringList files = saveDiag.selectedFiles();
     if (files.size() != 1)
-        return;
+        return false;
     QString fileName = files[0];
     QFileInfo fi(fileName);
     if (fi.isDir())
-        return;
+        return false;
     if (fi.suffix().isEmpty())
     {
         QRegExp reg("\\.\\w+");
@@ -2042,7 +2042,7 @@ bool GLArea::saveViewToFile()
 
     bool ret = false;
 	qDebug("Saving a file %s\n", qUtf8Printable(fileName));
-    if (fileName.isEmpty()) return;
+    if (fileName.isEmpty()) return false;
     else
     {
         QFile qFile(fileName);
@@ -2053,7 +2053,7 @@ bool GLArea::saveViewToFile()
         }
     }
 
-    if(!ret)
+    if (!ret)
       QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save view file %1\n").arg(fileName));
     
     return true;
