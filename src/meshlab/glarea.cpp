@@ -2016,14 +2016,14 @@ bool GLArea::readViewFromFile()
 
 bool GLArea::saveViewToFile()
 {
-    QFileDialog* saveDiag = new QFileDialog(this,tr("Save View To File"), "./", tr("View file (*.xml)"));
+    QFileDialog saveDiag(this, tr("Save View To File"), "./", tr("View file (*.xml)"));
 
 #if defined(Q_OS_WIN)
-    saveDiag->setOption(QFileDialog::DontUseNativeDialog);
+    saveDiag.setOption(QFileDialog::DontUseNativeDialog);
 #endif
-    saveDiag->setAcceptMode(QFileDialog::AcceptSave);
-    saveDiag->exec();
-    QStringList files = saveDiag->selectedFiles();
+    saveDiag.setAcceptMode(QFileDialog::AcceptSave);
+    saveDiag.exec();
+    QStringList files = saveDiag.selectedFiles();
     if (files.size() != 1)
         return;
     QString fileName = files[0];
@@ -2033,7 +2033,7 @@ bool GLArea::saveViewToFile()
     if (fi.suffix().isEmpty())
     {
         QRegExp reg("\\.\\w+");
-        saveDiag->selectedNameFilter().indexOf(reg);
+        saveDiag.selectedNameFilter().indexOf(reg);
         QString ext = reg.cap();
         fileName.append(ext);
         fi.setFile(fileName);
@@ -2055,7 +2055,6 @@ bool GLArea::saveViewToFile()
 
     if(!ret)
       QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save view file %1\n").arg(fileName));
-    
     
     return true;
 }

@@ -507,8 +507,8 @@ private:
 	QAction *viewBackYAct;
     QAction *viewFromMeshAct;
     QAction *viewFromRasterAct;
-    QAction *viewFromFileAct;
-    QAction *viewToFileAct;
+    QAction *readViewFromFileAct;
+    QAction *saveViewToFileAct;
 
 	QAction *toggleOrthoAct;
 

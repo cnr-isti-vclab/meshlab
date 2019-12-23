@@ -211,8 +211,8 @@ void MainWindow::updateWindowMenu()
 			trackballStepMenu->addAction(ac);
 
         // View From File act
-        windowsMenu->addAction(viewFromFileAct);
-        windowsMenu->addAction(viewToFileAct);
+        windowsMenu->addAction(readViewFromFileAct);
+        windowsMenu->addAction(saveViewToFileAct);
         windowsMenu->addAction(viewFromMeshAct);
         windowsMenu->addAction(viewFromRasterAct);
 
