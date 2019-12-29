@@ -2756,24 +2756,32 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
         return false;
     }
 
+    // the original directory path before we switch it
+    QString origDir = QDir::current().path();
+    
     // this change of dir is needed for subsequent textures/materials loading
     QDir::setCurrent(fi.absoluteDir().absolutePath());
 
+    // Adjust the file name after changing the directory
+    QString fileNameSansDir = fi.fileName();
+    
     // retrieving corresponding IO plugin
     if (pCurrentIOPlugin == 0)
     {
         QString errorMsgFormat = "Error encountered while opening file:\n\"%1\"\n\nError details: The \"%2\" file extension does not correspond to any supported format.";
         QMessageBox::critical(this, tr("Opening Error"), errorMsgFormat.arg(fileName, extension));
+        QDir::setCurrent(origDir); // undo the change of directory before leaving
         return false;
     }
     meshDoc()->setBusy(true);
     pCurrentIOPlugin->setLog(&meshDoc()->Log);
 
-    if (!pCurrentIOPlugin->open(extension, fileName, *mm ,mask,*prePar,QCallBack,this /*gla*/))
+    if (!pCurrentIOPlugin->open(extension, fileNameSansDir, *mm ,mask,*prePar,QCallBack,this /*gla*/))
     {
         QMessageBox::warning(this, tr("Opening Failure"), QString("While opening: '%1'\n\n").arg(fileName)+pCurrentIOPlugin->errorMsg()); // text+
         pCurrentIOPlugin->clearErrorString();
         meshDoc()->setBusy(false);
+        QDir::setCurrent(origDir); // undo the change of directory before leaving
         return false;
     }
 
@@ -2843,6 +2851,8 @@ bool MainWindow::loadMesh(const QString& fileName, MeshIOInterface *pCurrentIOPl
 
 
     meshDoc()->setBusy(false);
+
+    QDir::setCurrent(origDir); // undo the change of directory before leaving
 
     return true;
 }
