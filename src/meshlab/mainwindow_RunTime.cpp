@@ -3626,7 +3626,9 @@ void MainWindow::showEvent(QShowEvent * event)
 		checkForUpdates(false);
 		settings.setValue(versioncheckeddatestring, todayStr);
 	}
-	sendUsAMail();
+
+	// Turn off the periodic pop-up asking to send email to developers
+	// sendUsAMail();
 }
 
 void MainWindow::meshAdded(int mid)
