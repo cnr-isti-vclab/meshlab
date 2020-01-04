@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     app.installEventFilter(filterObj);
     app.processEvents();
 
+    // Can load multiple meshes and projects, and also a camera view
     if(argc>1)
     {
         QString helpOpt1="-h";
@@ -66,13 +67,23 @@ int main(int argc, char *argv[])
             "for a longer documentation\n"
             );
 
+        std::vector<QString> cameraViews;
         for (int i = 1; i < argc; ++i)
         {
             QString arg = QString::fromLocal8Bit(argv[i]);
             if(arg.endsWith("mlp",Qt::CaseInsensitive) || arg.endsWith("mlb",Qt::CaseInsensitive) || arg.endsWith("aln",Qt::CaseInsensitive) || arg.endsWith("out",Qt::CaseInsensitive) || arg.endsWith("nvm",Qt::CaseInsensitive))
                 window.openProject(arg);
+            else if(arg.endsWith("xml",Qt::CaseInsensitive))
+                cameraViews.push_back(arg); 
             else
                 window.importMeshWithLayerManagement(arg);
+        }
+        
+        // Load the view after everything else
+        if (!cameraViews.empty()) {
+          if (cameraViews.size() > 1) 
+            printf("Multiple views specified. Loading the last one.\n");
+          window.readViewFromFile(cameraViews.back());
         }
     }
     //else 	if(filterObj->noEvent) window.open();

@@ -409,10 +409,10 @@ void MainWindow::updateMenus()
     renderMenu->setEnabled(!renderMenu->actions().isEmpty());
     updateMenuItems(renderMenu,activeDoc);
     fullScreenAct->setEnabled(activeDoc);
-	showLayerDlgAct->setEnabled(activeDoc);
-	showTrackBallAct->setEnabled(activeDoc);
-	resetTrackBallAct->setEnabled(activeDoc);
-	showInfoPaneAct->setEnabled(activeDoc);
+    showLayerDlgAct->setEnabled(activeDoc);
+    showTrackBallAct->setEnabled(activeDoc);
+    resetTrackBallAct->setEnabled(activeDoc);
+    showInfoPaneAct->setEnabled(activeDoc);
     windowsMenu->setEnabled(activeDoc);
     preferencesMenu->setEnabled(activeDoc);
 
@@ -3267,6 +3267,11 @@ bool MainWindow::save(const bool saveAllPossibleAttributes)
 bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
 {
     return exportMesh(fileName,meshDoc()->mm(),saveAllPossibleAttributes);
+}
+
+void MainWindow::readViewFromFile(QString const& filename){
+      if(GLA() != 0)
+          GLA()->readViewFromFile(filename);
 }
 
 bool MainWindow::saveSnapshot()

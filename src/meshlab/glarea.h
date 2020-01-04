@@ -415,8 +415,8 @@ protected:
     void hideEvent(QHideEvent * event);
 
 private:
-	void renderingFacilityString();
-	QString renderfacility;
+    void renderingFacilityString();
+    QString renderfacility;
     void setLightingColors(const MLPerViewGLOptions& opts);
 
     QMap<QString,QCursor> curMap;
@@ -525,6 +525,7 @@ public:
     void viewFromCurrentShot(QString kind);
     bool saveViewToFile();
     bool readViewFromFile();
+    bool readViewFromFile(QString const& filename);
     void createOrthoView(QString);
     void toggleOrtho();
     void trackballStep(QString);

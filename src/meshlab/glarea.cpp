@@ -1655,14 +1655,14 @@ void GLArea::updateFps(float deltaTime)
 
 void GLArea::resetTrackBall()
 {
-	makeCurrent();
+    makeCurrent();
     trackball.Reset();
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
     trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
-	if (!isRaster())
-		fov=fovDefault();
+    if (!isRaster())
+        fov=fovDefault();
     update();
 }
 
@@ -1988,7 +1988,11 @@ void GLArea::initializeShot(Shotm &shot)
 bool GLArea::readViewFromFile()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
+    return GLArea::readViewFromFile(filename);
+}
 
+bool GLArea::readViewFromFile(QString const& filename)
+{
     QFile qf(filename);
     QFileInfo qfInfo(filename);
 
@@ -2008,7 +2012,7 @@ bool GLArea::readViewFromFile()
     //View State file
     else if(type == "ViewState") loadViewFromViewStateFile(doc);
 
-    qDebug("End file reading");
+    // qDebug("End file reading");
     qf.close();
 
     return true;

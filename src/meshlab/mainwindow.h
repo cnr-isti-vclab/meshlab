@@ -166,9 +166,10 @@ public:
     void getRenderingData(int mid,MLRenderingData& dt) const;
     void setRenderingData(int mid,const MLRenderingData& dt);
 
-	unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
+    unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
 
     void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
+    void readViewFromFile(QString const& filename);
 
 private slots:
 	void closeCurrentDocument();
