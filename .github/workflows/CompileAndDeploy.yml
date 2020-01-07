@@ -133,7 +133,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        tag_name: Meshlab-${{steps.envs.outputs.date}}-${{github.sha}}
+        tag_name: Meshlab-${{steps.envs.outputs.date}}
         release_name: MeshLab-${{steps.envs.outputs.date}}-beta
         draft: false
         prerelease: true
