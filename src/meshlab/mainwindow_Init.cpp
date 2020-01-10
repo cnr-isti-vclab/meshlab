@@ -1157,19 +1157,48 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
   QString answer = reply->readAll();
+
+  QSettings settings;
+  QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+  // Check if the user specified not to be reminded to upgrade
+  const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+  bool dontRemindMeAboutUpgradeVal = false;
+  if (settings.contains(dontRemindMeAboutUpgradeVar))
+      dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+
+  // This block is for debugging. Uncomment the lines below
+  // to force the message box to appear.
+  // answer = QString("NEW You must upgrade.");
+  // dontRemindMeAboutUpgradeVal = false;
+  
+  if (dontRemindMeAboutUpgradeVal) 
+    return;
+
+  // Set up a message box for the user
+  QMessageBox msgBox(this);
+  msgBox.setWindowTitle("MeshLab Version Checking");
+  msgBox.addButton(QMessageBox::Ok);
+  QCheckBox dontShowCheckBox("Don't show this message again.");
+  dontShowCheckBox.blockSignals(true);
+  msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);                
+
   if (answer.left(3) == QString("NEW"))
-    QMessageBox::information(this, "MeshLab Version Checking", answer.remove(0, 3));
+      msgBox.setText(answer.remove(0, 3));
   else 
     if (VerboseCheckingFlag)
     {
       if (answer.left(2) == QString("ok"))
-        QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
+          msgBox.setText("Your MeshLab version is the most recent one.");
       else 
-        QMessageBox::warning(this, "Warning. Update Checking server did not answer correctly",answer);
+          msgBox.setText("Warning. Update Checking server did not answer correctly: " + answer);
     }
   reply->deleteLater();
   
-  QSettings settings;
+  int userReply = msgBox.exec();
+  if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
+	settings.setValue(dontRemindMeAboutUpgradeVar, true);
+
   int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
   settings.setValue("lastComunicatedValue", loadedMeshCounter);
 }
