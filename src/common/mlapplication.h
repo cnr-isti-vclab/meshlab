@@ -20,7 +20,7 @@ public:
     static const QString appVer() 
 	{
 		const QDate dt = QDate::currentDate();
-		return QString::number(dt.year()) + "." + QString::number(dt.month()); 
+		return QString::number(dt.year()) + "." + (dt.month() < 10 ? "0" + QString::number(dt.month()) : QString::number(dt.month()));
 	}
 
 	static const QString shortName() { return appName() + " " + appVer(); }
