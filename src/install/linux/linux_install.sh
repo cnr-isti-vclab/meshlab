@@ -15,6 +15,7 @@ else
   exit 1
 fi
 
+rm -r sample/
 mkdir lib
 cp libcommon.so.1.0.0 lib/libcommon.so.1.0.0
 cp lib/libcommon.so.1.0.0 lib/libcommon.so.1.0

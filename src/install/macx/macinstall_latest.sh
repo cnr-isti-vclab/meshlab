@@ -56,27 +56,10 @@ do
  install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $x
 done
 
-echo 'Copying samples and other files'
+echo 'Copying other files'
 
 cp ../../LICENSE.txt $BUNDLE
 cp ../../docs/readme.txt $BUNDLE
-
-mkdir $BUNDLE/sample
-mkdir $BUNDLE/sample/images
-mkdir $BUNDLE/sample/normalmap
-
-cp sample/texturedknot.ply $BUNDLE/sample
-cp sample/texturedknot.obj $BUNDLE/sample
-cp sample/texturedknot.mtl $BUNDLE/sample
-cp sample/TextureDouble_A.png $BUNDLE/sample
-cp sample/Laurana50k.ply $BUNDLE/sample
-cp sample/duck_triangulate.dae $BUNDLE/sample
-cp sample/images/duckCM.jpg $BUNDLE/sample/images
-cp sample/seashell.gts $BUNDLE/sample
-cp sample/chameleon4k.pts $BUNDLE/sample
-cp sample/normalmap/laurana500.* $BUNDLE/sample/normalmap
-cp sample/normalmap/matteonormb.* $BUNDLE/sample/normalmap
-
 
 mkdir $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX  
 cp plugins/U3D_OSX/IDTFConverter.out  $BUNDLE/$APPNAME/Contents/plugins/U3D_OSX
