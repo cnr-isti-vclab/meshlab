@@ -21,7 +21,7 @@ jobs:
       id: envs
       shell: bash
       run: |
-        echo  ::set-output name=date::"$(date +%Y-%m)"   
+        echo  ::set-output name=date::"$(date +%Y-%m)"
     - name: Compiling external
       run: |
         cd src/external
@@ -36,11 +36,8 @@ jobs:
       run : |
         cd src/install/linux
         ./linux_install.sh
-        cd ../..
-        cd distrib/
-        mv *.AppImage ../
-        cd ..
-        mv *.AppImage MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        cd ../../distrib/
+        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
@@ -176,7 +173,6 @@ jobs:
     - name: Creating Meshlab Portable Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_portable_windows/
-        ls
     - name: Uploading PreReleaseWindowsPortable
       id: upload-prerelease-windows-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -195,12 +191,10 @@ jobs:
     - name: Creating Meshlab Linux Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_portable_linux/
-        cd ..
     - name: Downloading Linux AppImage
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_appimage
-
     - name: Uploading PreReleaseLinuxPortable
       id: upload-prerelease-linux-portable
       uses: actions/upload-release-asset@v1.0.1

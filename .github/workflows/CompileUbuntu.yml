@@ -19,7 +19,7 @@ jobs:
       id: envs
       shell: bash
       run: |
-        echo  ::set-output name=date::"$(date +%Y-%m)"   
+        echo  ::set-output name=date::"$(date +%Y-%m)"
     - name: Compiling external
       run: |
         cd src/external
@@ -35,9 +35,7 @@ jobs:
         cd src/install/linux
         ./linux_install.sh
         cd ../../distrib/
-        mv *.AppImage ../
-        cd ..
-        mv *.AppImage MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
