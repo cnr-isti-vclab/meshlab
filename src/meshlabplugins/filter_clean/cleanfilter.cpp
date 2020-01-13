@@ -21,11 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
-#include <QDomDocument>
-#include <QDomElement>
-#include <QDomNode>
-
 #include "cleanfilter.h"
 #include "align_tools.h"
 
