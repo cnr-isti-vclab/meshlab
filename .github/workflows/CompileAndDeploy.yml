@@ -21,7 +21,7 @@ jobs:
       id: envs
       shell: bash
       run: |
-        echo  ::set-output name=date::"$(date +%Y-%m)"
+        echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Compiling external
       run: |
         cd src/external
@@ -69,7 +69,7 @@ jobs:
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
-        echo  ::set-output name=date::"$(date +%Y-%m)"   
+        echo  ::set-output name=date::"$(date +%Y.%m)"   
     - name: Compiling external
       run: |
         cd src/external
@@ -139,7 +139,7 @@ jobs:
     - name: Setting env variables
       id: envs
       run: |
-        echo ::set-output name=date::"$(date +%Y-%m)"
+        echo ::set-output name=date::"$(date +%Y.%m)"
     - name: Publishing PreRelease 
       id: create_prerelease
       uses: actions/create-release@v1.0.0
