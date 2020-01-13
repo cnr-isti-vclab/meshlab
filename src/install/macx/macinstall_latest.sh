@@ -99,4 +99,4 @@ cd ../install/macx
 # appdmg is installed with 'npm install -g appdmg'",
 
 rm -f ../../distrib/MeshLab*.dmg  
-appdmg meshlab_dmg_latest.json ../../distrib/MeshLab$(date +%Y-%m).dmg
+appdmg meshlab_dmg_latest.json ../../distrib/MeshLab$(date +%Y.%m).dmg
