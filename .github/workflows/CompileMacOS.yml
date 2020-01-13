@@ -24,7 +24,7 @@ jobs:
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
-        echo  ::set-output name=date::"$(date +%Y-%m)"   
+        echo  ::set-output name=date::"$(date +%Y.%m)"   
     - name: Compiling external
       run: |
         cd src/external

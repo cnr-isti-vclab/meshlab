@@ -17,6 +17,11 @@ jobs:
        sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
        cd ..
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+    - name: Setting env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Compiling external
       run: |
         cd src/external
@@ -31,11 +36,18 @@ jobs:
       run : |
         cd src/install/linux
         ./linux_install.sh
+        cd ../../distrib/
+        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_linux
         path: src/distrib/
+    - name: Uploading Meshlab AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_appimage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
   
   macos_build:
     name: Build MeshLab (MacOS)
@@ -57,7 +69,7 @@ jobs:
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
-        echo  ::set-output name=date::"$(date +%Y-%m)"   
+        echo  ::set-output name=date::"$(date +%Y.%m)"   
     - name: Compiling external
       run: |
         cd src/external
@@ -110,6 +122,7 @@ jobs:
     - name: Creating MeshLab Portable ZIP
       run: |
         cd src\distrib
+        Remove-Item sample\ -recurse
         windeployqt --no-translations meshlab.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
@@ -126,7 +139,7 @@ jobs:
     - name: Setting env variables
       id: envs
       run: |
-        echo ::set-output name=date::"$(date +%Y-%m)"
+        echo ::set-output name=date::"$(date +%Y.%m)"
     - name: Publishing PreRelease 
       id: create_prerelease
       uses: actions/create-release@v1.0.0
@@ -160,7 +173,6 @@ jobs:
     - name: Creating Meshlab Portable Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_portable_windows/
-        ls
     - name: Uploading PreReleaseWindowsPortable
       id: upload-prerelease-windows-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -176,12 +188,13 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_portable_linux
-    - name: Creating Meshlab Linux Archive and AppImage
+    - name: Creating Meshlab Linux Archive
       run: |
-        mv meshlab_portable_linux/*.AppImage ../
         zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_portable_linux/
-        cd ..
-        mv *.AppImage MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+    - name: Downloading Linux AppImage
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_linux_appimage
     - name: Uploading PreReleaseLinuxPortable
       id: upload-prerelease-linux-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -199,6 +212,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_prerelease.outputs.upload_url }} 
-        asset_path: ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux

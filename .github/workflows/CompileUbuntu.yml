@@ -15,6 +15,11 @@ jobs:
        sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
        cd ..
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+    - name: Setting env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Compiling external
       run: |
         cd src/external
@@ -29,11 +34,18 @@ jobs:
       run : |
         cd src/install/linux
         ./linux_install.sh
+        cd ../../distrib/
+        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_linux
         path: src/distrib/
+    - name: Uploading Meshlab AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
   ubuntu_build_cmake:
