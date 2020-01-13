@@ -47,7 +47,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux
-        path: src/*.AppImage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
   ubuntu_build_cmake:

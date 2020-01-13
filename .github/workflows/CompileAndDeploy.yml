@@ -49,8 +49,8 @@ jobs:
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux
-        path: src/*.AppImage
+        name: meshlab_linux_appimage
+        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
   
   macos_build:
     name: Build MeshLab (MacOS)
@@ -199,17 +199,7 @@ jobs:
     - name: Downloading Linux AppImage
       uses: actions/download-artifact@v1
       with:
-        name: meshlab_linux
-    - name: Uploading PreReleaseLinux
-      id: upload-prerelease-linux
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_prerelease.outputs.upload_url }} 
-        asset_path: meshlab_linux/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-        asset_content_type: MeshLab for Linux
+        name: meshlab_linux_appimage
 
     - name: Uploading PreReleaseLinuxPortable
       id: upload-prerelease-linux-portable
@@ -228,6 +218,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_prerelease.outputs.upload_url }} 
-        asset_path: ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
