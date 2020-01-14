@@ -166,9 +166,10 @@ public:
     void getRenderingData(int mid,MLRenderingData& dt) const;
     void setRenderingData(int mid,const MLRenderingData& dt);
 
-	unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
+    unsigned int viewsRequiringRenderingActions(int meshid,MLRenderingAction* act);
 
     void updateSharedContextDataAfterFilterExecution(int postcondmask,int fclasses,bool& newmeshcreated);
+    void readViewFromFile(QString const& filename);
 
 private slots:
 	void closeCurrentDocument();
@@ -217,9 +218,10 @@ private slots:
     void setUnsplit();
     void linkViewers();
     void viewFrom(QAction *qa);
-	void toggleOrtho();
-	void trackballStep(QAction *qa);
+    void toggleOrtho();
+    void trackballStep(QAction *qa);
     void readViewFromFile();
+    void saveViewToFile();
     void viewFromCurrentMeshShot();
     void viewFromCurrentRasterShot();
     void copyViewToClipBoard();
@@ -506,7 +508,8 @@ private:
 	QAction *viewBackYAct;
     QAction *viewFromMeshAct;
     QAction *viewFromRasterAct;
-    QAction *viewFromFileAct;
+    QAction *readViewFromFileAct;
+    QAction *saveViewToFileAct;
 
 	QAction *toggleOrthoAct;
 

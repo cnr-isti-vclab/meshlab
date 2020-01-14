@@ -211,7 +211,8 @@ void MainWindow::updateWindowMenu()
 			trackballStepMenu->addAction(ac);
 
         // View From File act
-        windowsMenu->addAction(viewFromFileAct);
+        windowsMenu->addAction(readViewFromFileAct);
+        windowsMenu->addAction(saveViewToFileAct);
         windowsMenu->addAction(viewFromMeshAct);
         windowsMenu->addAction(viewFromRasterAct);
 
@@ -408,10 +409,10 @@ void MainWindow::updateMenus()
     renderMenu->setEnabled(!renderMenu->actions().isEmpty());
     updateMenuItems(renderMenu,activeDoc);
     fullScreenAct->setEnabled(activeDoc);
-	showLayerDlgAct->setEnabled(activeDoc);
-	showTrackBallAct->setEnabled(activeDoc);
-	resetTrackBallAct->setEnabled(activeDoc);
-	showInfoPaneAct->setEnabled(activeDoc);
+    showLayerDlgAct->setEnabled(activeDoc);
+    showTrackBallAct->setEnabled(activeDoc);
+    resetTrackBallAct->setEnabled(activeDoc);
+    showInfoPaneAct->setEnabled(activeDoc);
     windowsMenu->setEnabled(activeDoc);
     preferencesMenu->setEnabled(activeDoc);
 
@@ -733,8 +734,13 @@ void MainWindow::trackballStep(QAction *qa)
 
 void MainWindow::readViewFromFile()
 {
-    if(GLA()) GLA()->viewFromFile();
+    if(GLA()) GLA()->readViewFromFile();
     updateMenus();
+}
+
+void MainWindow::saveViewToFile()
+{
+    if(GLA()) GLA()->saveViewToFile();
 }
 
 void MainWindow::viewFromCurrentMeshShot()
@@ -3271,6 +3277,11 @@ bool MainWindow::save(const bool saveAllPossibleAttributes)
 bool MainWindow::saveAs(QString fileName,const bool saveAllPossibleAttributes)
 {
     return exportMesh(fileName,meshDoc()->mm(),saveAllPossibleAttributes);
+}
+
+void MainWindow::readViewFromFile(QString const& filename){
+      if(GLA() != 0)
+          GLA()->readViewFromFile(filename);
 }
 
 bool MainWindow::saveSnapshot()

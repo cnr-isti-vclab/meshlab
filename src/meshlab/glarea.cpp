@@ -1655,14 +1655,14 @@ void GLArea::updateFps(float deltaTime)
 
 void GLArea::resetTrackBall()
 {
-	makeCurrent();
+    makeCurrent();
     trackball.Reset();
     float newScale= 3.0f/this->md()->bbox().Diag();
     trackball.track.sca = newScale;
     trackball.track.tra.Import(-this->md()->bbox().Center());
     clipRatioNear = clipRatioNearDefault();
-	if (!isRaster())
-		fov=fovDefault();
+    if (!isRaster())
+        fov=fovDefault();
     update();
 }
 
@@ -1985,10 +1985,14 @@ void GLArea::initializeShot(Shotm &shot)
     shot.Extrinsics.SetIdentity();
 }
 
-bool GLArea::viewFromFile()
+bool GLArea::readViewFromFile()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Load Project"), "./", tr("Xml Files (*.xml)"));
+    return GLArea::readViewFromFile(filename);
+}
 
+bool GLArea::readViewFromFile(QString const& filename)
+{
     QFile qf(filename);
     QFileInfo qfInfo(filename);
 
@@ -2008,9 +2012,54 @@ bool GLArea::viewFromFile()
     //View State file
     else if(type == "ViewState") loadViewFromViewStateFile(doc);
 
-    qDebug("End file reading");
+    // qDebug("End file reading");
     qf.close();
 
+    return true;
+}
+
+bool GLArea::saveViewToFile()
+{
+    QFileDialog saveDiag(this, tr("Save View To File"), "./", tr("View file (*.xml)"));
+
+#if defined(Q_OS_WIN)
+    saveDiag.setOption(QFileDialog::DontUseNativeDialog);
+#endif
+    saveDiag.setAcceptMode(QFileDialog::AcceptSave);
+    saveDiag.exec();
+    QStringList files = saveDiag.selectedFiles();
+    if (files.size() != 1)
+        return false;
+    QString fileName = files[0];
+    QFileInfo fi(fileName);
+    if (fi.isDir())
+        return false;
+    if (fi.suffix().isEmpty())
+    {
+        QRegExp reg("\\.\\w+");
+        saveDiag.selectedNameFilter().indexOf(reg);
+        QString ext = reg.cap();
+        fileName.append(ext);
+        fi.setFile(fileName);
+    }
+    QDir::setCurrent(fi.absoluteDir().absolutePath());
+
+    bool ret = false;
+	qDebug("Saving a file %s\n", qUtf8Printable(fileName));
+    if (fileName.isEmpty()) return false;
+    else
+    {
+        QFile qFile(fileName);
+        if (qFile.open(QIODevice::WriteOnly)) {
+          QTextStream out(&qFile); out << this->viewToText();
+          qFile.close();
+          ret = true;
+        }
+    }
+
+    if (!ret)
+      QMessageBox::critical(this, tr("Meshlab Saving Error"), QString("Unable to save view file %1\n").arg(fileName));
+    
     return true;
 }
 
