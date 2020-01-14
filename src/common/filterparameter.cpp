@@ -406,11 +406,11 @@ bool RichParameterAdapter::create( const QDomElement& np,RichParameter** par )
     QString desc=np.attribute("description");
     QString tooltip=np.attribute("tooltip");
 
-	QString isxml = np.attribute("isxmlparam");
-	if (isxml.isNull())
-		isxml = QString("0");
-
-    qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(type));
+    QString isxml = np.attribute("isxmlparam");
+    if (isxml.isNull())
+      isxml = QString("0");
+    
+    // qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(type));
 
     bool corrconv = false;
     if(type=="RichBool")
@@ -605,7 +605,7 @@ bool RichParameterAdapter::create(const QString& namepreamble, const MLXMLPlugin
 	QString desc = xmlparam[MLXMLElNames::guiLabel];
 	QString tooltip = xmlparam[MLXMLElNames::paramHelpTag];
 
-	qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(xmlparam[MLXMLElNames::paramDefExpr]));
+	// qDebug("    Reading Param with name %s : %s", qUtf8Printable(name), qUtf8Printable(xmlparam[MLXMLElNames::paramDefExpr]));
 
 	*par = new RichString(name, xmlparam[MLXMLElNames::paramDefExpr], desc, tooltip);
 	if (par != NULL)
