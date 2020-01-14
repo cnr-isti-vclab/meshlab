@@ -21,8 +21,6 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <Qt>
-
 #include "filter_fractal.h"
 
 using namespace std;

@@ -392,17 +392,21 @@ connectRenderModeActionList(rendlist);*/
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
-	readViewFromFileAct = new QAction(tr("Read view from file"), this);
-	saveViewToFileAct = new QAction(tr("Save view to file"), this);
+  readViewFromFileAct = new QAction(tr("Read camera settings from file"), this);
+	readViewFromFileAct->setToolTip(tr("Restore camera settings from a XML description stored in a file."));
+	saveViewToFileAct = new QAction(tr("Save camera settings from file"), this);
+	saveViewToFileAct->setToolTip(tr("Save camera settings to a XML description stored in a file."));
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 	connect(readViewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
 	connect(saveViewToFileAct, SIGNAL(triggered()), this, SLOT(saveViewToFile()));
 
-	copyShotToClipboardAct = new QAction(tr("Copy shot"), this);
+	copyShotToClipboardAct = new QAction(tr("Copy camera settings to clipboard"), this);
+	copyShotToClipboardAct->setToolTip(tr("Save current camera settings to clipboard as a XML document that you can share or restore anytime."));
 	connect(copyShotToClipboardAct, SIGNAL(triggered()), this, SLOT(copyViewToClipBoard()));
 
-	pasteShotFromClipboardAct = new QAction(tr("Paste shot"), this);
+	pasteShotFromClipboardAct = new QAction(tr("Paste clipboard to camera settings"), this);
+	pasteShotFromClipboardAct->setToolTip(tr("Restore camera settings from a XML description stored in the clipboard."));
 	connect(pasteShotFromClipboardAct, SIGNAL(triggered()), this, SLOT(pasteViewFromClipboard()));
 
 	//////////////Action Menu Filters /////////////////////////////////////////////////////////////////////
@@ -620,6 +624,7 @@ void MainWindow::createMenus()
 
 	//////////////////// Menu Windows /////////////////////////////////////////////////////////////////////////
 	windowsMenu = menuBar()->addMenu(tr("&Windows"));
+	windowsMenu->setToolTipsVisible(true);
     updateWindowMenu();
 	menuBar()->addSeparator();
 
@@ -940,9 +945,9 @@ void MainWindow::fillFilterMenu()
 				//    filterToolBar->addAction(filterAction);
 			}
 		}
-		catch (ParsingException e)
+		catch (ParsingException &e)
 		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what());
+			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what(), "");
 		}
 	}
 }
@@ -1159,19 +1164,48 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
   QString answer = reply->readAll();
+
+  QSettings settings;
+  QSettings::setDefaultFormat(QSettings::NativeFormat);
+
+  // Check if the user specified not to be reminded to upgrade
+  const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+  bool dontRemindMeAboutUpgradeVal = false;
+  if (settings.contains(dontRemindMeAboutUpgradeVar))
+      dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+
+  // This block is for debugging. Uncomment the lines below
+  // to force the message box to appear.
+  // answer = QString("NEW You must upgrade.");
+  // dontRemindMeAboutUpgradeVal = false;
+  
+  if (dontRemindMeAboutUpgradeVal) 
+    return;
+
+  // Set up a message box for the user
+  QMessageBox msgBox(this);
+  msgBox.setWindowTitle("MeshLab Version Checking");
+  msgBox.addButton(QMessageBox::Ok);
+  QCheckBox dontShowCheckBox("Don't show this message again.");
+  dontShowCheckBox.blockSignals(true);
+  msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);                
+
   if (answer.left(3) == QString("NEW"))
-    QMessageBox::information(this, "MeshLab Version Checking", answer.remove(0, 3));
+      msgBox.setText(answer.remove(0, 3));
   else 
     if (VerboseCheckingFlag)
     {
       if (answer.left(2) == QString("ok"))
-        QMessageBox::information(this, "MeshLab Version Checking", "Your MeshLab version is the most recent one.");
+          msgBox.setText("Your MeshLab version is the most recent one.");
       else 
-        QMessageBox::warning(this, "Warning. Update Checking server did not answer correctly",answer);
+          msgBox.setText("Warning. Update Checking server did not answer correctly: " + answer);
     }
   reply->deleteLater();
   
-  QSettings settings;
+  int userReply = msgBox.exec();
+  if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
+	settings.setValue(dontRemindMeAboutUpgradeVar, true);
+
   int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
   settings.setValue("lastComunicatedValue", loadedMeshCounter);
 }

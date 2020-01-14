@@ -60,12 +60,15 @@ int main(int argc, char *argv[])
         QString helpOpt1="-h";
         QString helpOpt2="--help";
         if( (helpOpt1==argv[1]) || (helpOpt2==argv[1]) )
+          {
             printf(
             "usage:\n"
             "meshlab <meshfile>\n"
             "Look at http://www.meshlab.net\n"
             "for a longer documentation\n"
             );
+            return 0;
+          }
 
         std::vector<QString> cameraViews;
         for (int i = 1; i < argc; ++i)
