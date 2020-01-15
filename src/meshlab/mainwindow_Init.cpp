@@ -392,10 +392,10 @@ connectRenderModeActionList(rendlist);*/
 	viewFromMeshAct = new QAction(tr("View from Mesh Camera"), this);
 	viewFromRasterAct = new QAction(tr("View from Raster Camera"), this);
 	viewFromRasterAct->setShortcut(Qt::CTRL + Qt::Key_J);
-  readViewFromFileAct = new QAction(tr("Read camera settings from file"), this);
-	readViewFromFileAct->setToolTip(tr("Restore camera settings from a XML description stored in a file."));
-	saveViewToFileAct = new QAction(tr("Save camera settings from file"), this);
-	saveViewToFileAct->setToolTip(tr("Save camera settings to a XML description stored in a file."));
+	readViewFromFileAct = new QAction(tr("Read camera settings from file"), this);
+	readViewFromFileAct->setToolTip(tr("Restore camera settings from an XML description stored in a file."));
+	saveViewToFileAct = new QAction(tr("Save camera settings to file"), this);
+	saveViewToFileAct->setToolTip(tr("Save camera settings to a file as an XML description."));
 	connect(viewFromMeshAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentMeshShot()));
 	connect(viewFromRasterAct, SIGNAL(triggered()), this, SLOT(viewFromCurrentRasterShot()));
 	connect(readViewFromFileAct, SIGNAL(triggered()), this, SLOT(readViewFromFile()));
