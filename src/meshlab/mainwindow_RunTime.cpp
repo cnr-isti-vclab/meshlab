@@ -1187,6 +1187,7 @@ void MainWindow::startFilter()
         {
             MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
             QString fname = action->text();
+            fname.replace("&","");
             MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
 
             if ((iXMLFilter == NULL) || (filt.xmlInfo == NULL) || (filt.act == NULL))
@@ -1753,6 +1754,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         throw MLException("A not-C++ and not-JaveScript filter has been invoked.There is something really wrong in MeshLab.");
 
     QString fname = mfc->act->text();
+    fname.replace("&","");
     QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
     QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
     int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
@@ -1892,6 +1894,7 @@ void MainWindow::postFilterExecution()
     if (mfc == PM.stringXMLFilterMap.constEnd())
         return;
     QString fname = mfc->act->text();
+    fname.replace("&","");
     // at the end for filters that change the color, or selection set the appropriate rendering mode
     QString filterClasses = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
     QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);

@@ -387,9 +387,12 @@ public:
 
 	virtual FilterIDType ID(QAction *a) const
 	{
+	QString aa=a->text();
 		foreach(FilterIDType tt, types())
 			if (a->text() == this->filterName(tt)) return tt;
-
+		aa.replace("&","");
+		foreach(FilterIDType tt, types())
+			if (aa == this->filterName(tt)) return tt;
 
 		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
 		assert(0);
@@ -404,9 +407,13 @@ public:
 
 	virtual QAction *AC(QString idName)
 	{
+	QString i=idName;
 		foreach(QAction *tt, actionList)
 			if (idName == tt->text()) return tt;
-
+		i.replace("&","");
+		foreach(QAction *tt, actionList)
+			if (i == tt->text()) return tt;
+		
 		qDebug("unable to find the action corresponding to action  '%s'", qUtf8Printable(idName));
 		assert(0);
 		return 0;
@@ -544,16 +551,26 @@ protected:
 	QList <FilterIDType> typeList;
 	virtual FilterIDType ID(QAction *a) const
 	{
+		QString aa=a->text();
 		foreach(FilterIDType tt, types())
 			if (a->text() == this->decorationName(tt)) return tt;
+		aa.replace("&","");
+		foreach(FilterIDType tt, types())
+			if (aa == this->decorationName(tt)) return tt;
+
 		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(a->text()));
 		assert(0);
 		return -1;
 	}
 	virtual FilterIDType ID(QString name) const
 	{
+		QString n = name;
 		foreach(FilterIDType tt, types())
 			if (name == this->decorationName(tt)) return tt;
+		n.replace("&","");
+		foreach(FilterIDType tt, types())
+			if (n == this->decorationName(tt)) return tt;
+
 		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
 		assert(0);
 		return -1;
@@ -561,8 +578,13 @@ protected:
 public:
 	virtual QAction *action(QString name) const
 	{
+		QString n = name;
 		foreach(QAction *tt, actions())
 			if (name == this->decorationName(ID(tt))) return tt;
+		n.replace("&","");
+		foreach(QAction *tt, actions())
+			if (n == this->decorationName(ID(tt))) return tt;
+
 		qDebug("unable to find the id corresponding to action  '%s'", qUtf8Printable(name));
 		return 0;
 	}
