@@ -89,12 +89,10 @@ echo "Changing the paths of the qt component frameworks using the qt tool macdep
 if [ -e $QTDIR/bin/macdeployqt ]
 then
 echo
-$QTDIR/bin/macdeployqt $BUNDLE/$APPNAME -verbose=2 -executable=$BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
+$QTDIR/bin/macdeployqt $BUNDLE/$APPNAME -executable=$BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
 else
-macdeployqt $BUNDLE/$APPNAME -verbose=2 -executable=$BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
+macdeployqt $BUNDLE/$APPNAME -executable=$BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
 fi
-
-otool -L $BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
 
 cd ../install/macx
 # final step create the dmg using appdmg
