@@ -48,6 +48,7 @@ CleanFilter::CleanFilter()
 	<< FP_REMOVE_DUPLICATE_FACE
 	<< FP_REMOVE_FOLD_FACE
 	<< FP_REMOVE_NON_MANIF_EDGE
+    << FP_REMOVE_NON_MANIF_EDGE_SPLIT
 	<< FP_REMOVE_NON_MANIF_VERT
 	<< FP_REMOVE_UNREFERENCED_VERTEX
 	<< FP_REMOVE_DUPLICATED_VERTEX
@@ -84,6 +85,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
 	case FP_REMOVE_DUPLICATE_FACE:        return QString("Remove Duplicate Faces");
 	case FP_REMOVE_FOLD_FACE:             return QString("Remove Isolated Folded Faces by Edge Flip");
 	case FP_REMOVE_NON_MANIF_EDGE:        return QString("Repair non Manifold Edges by removing faces");
+	case FP_REMOVE_NON_MANIF_EDGE_SPLIT:  return QString("Repair non Manifold Edges by splitting vertices");
 	case FP_REMOVE_NON_MANIF_VERT:        return QString("Repair non Manifold Vertices by splitting");
 	case FP_REMOVE_UNREFERENCED_VERTEX:   return QString("Remove Unreferenced Vertices");
 	case FP_REMOVE_DUPLICATED_VERTEX:     return QString("Remove Duplicate Vertices");
@@ -120,6 +122,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
     case FP_REMOVE_DUPLICATE_FACE :     return QString("Delete all the duplicate faces. Two faces are considered equal if they are composed by the same set of vertices, regardless of the order of the vertices.");
     case FP_REMOVE_FOLD_FACE :          return QString("Delete all the single folded faces. A face is considered folded if its normal is opposite to all the adjacent faces. It is removed by flipping it against the face f adjacent along the edge e such that the vertex opposite to e fall inside f");
     case FP_REMOVE_NON_MANIF_EDGE :     return QString("For each non Manifold edge it iteratively deletes the smallest area face until it becomes 2-Manifold.");
+	case FP_REMOVE_NON_MANIF_EDGE_SPLIT:return QString("Remove all non manifold edges splitting vertices. Each non manifold edges chain will become a border");
     case FP_REMOVE_NON_MANIF_VERT :     return QString("Split non Manifold vertices until it becomes 2-Manifold.");
 	case FP_REMOVE_UNREFERENCED_VERTEX: return QString("Check for every vertex on the mesh: if it is NOT referenced by a face, removes it");
 	case FP_REMOVE_DUPLICATED_VERTEX:   return QString("Check for every vertex on the mesh: if there are two vertices with same coordinates they are merged into a single one.");
@@ -145,6 +148,7 @@ QString CleanFilter::filterName(FilterIDType filter) const
 		case FP_REMOVE_DUPLICATE_FACE:
 		case FP_SNAP_MISMATCHED_BORDER:
 		case FP_REMOVE_NON_MANIF_EDGE:
+		case FP_REMOVE_NON_MANIF_EDGE_SPLIT:
 		case FP_REMOVE_NON_MANIF_VERT:
 		case FP_REMOVE_FACE_ZERO_AREA:
 		case FP_REMOVE_UNREFERENCED_VERTEX:
@@ -171,6 +175,7 @@ int CleanFilter::getRequirements(QAction *action)
 		case FP_REMOVE_TVERTEX_COLLAPSE:      return MeshModel::MM_VERTMARK;
 		case FP_REMOVE_TVERTEX_FLIP:          return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_REMOVE_NON_MANIF_EDGE:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
+		case FP_REMOVE_NON_MANIF_EDGE_SPLIT:  return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_REMOVE_NON_MANIF_VERT:        return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
 		case FP_SNAP_MISMATCHED_BORDER:       return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK| MeshModel::MM_FACEMARK;
 		case FP_REMOVE_FOLD_FACE:             return MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTMARK;
@@ -201,6 +206,7 @@ int CleanFilter::postCondition(QAction* action) const
 		case FP_REMOVE_DUPLICATE_FACE:
 		case FP_REMOVE_FOLD_FACE:
 		case FP_REMOVE_NON_MANIF_EDGE:
+		case FP_REMOVE_NON_MANIF_EDGE_SPLIT:
 		case FP_REMOVE_NON_MANIF_VERT:
 		case FP_REMOVE_UNREFERENCED_VERTEX:
 		case FP_REMOVE_DUPLICATED_VERTEX:
@@ -385,6 +391,13 @@ bool CleanFilter::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
 		Log("Successfully removed %d non-manifold faces", total);
 		m.UpdateBoxAndNormals();
 	} break;
+
+	 case FP_REMOVE_NON_MANIF_EDGE_SPLIT :
+	 {
+		 int total = tri::Clean<CMeshO>::SplitManifoldComponents(m.cm);
+		 Log("Successfully split the mesh into %d edge manifold components", total);
+		 m.UpdateBoxAndNormals();
+	 } break;
 
 	case FP_REMOVE_NON_MANIF_VERT :
 	{
