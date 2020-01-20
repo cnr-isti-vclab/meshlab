@@ -110,7 +110,7 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		converterCommandLine = "\""+converterPath +"/IDTFConverter.sh"+ "\" \"" + converterPath+"\"";
 		converterPath = converterPath +"/IDTFConverter.sh";
         #elif defined(Q_OS_LINUX)
-                converterPath = "/usr/bin/IDTFConverter";
+		converterPath += "/bin/IDTFConverter";
 		converterCommandLine = converterPath;
 	#endif
 		if (settings.contains("U3D/converter"))
