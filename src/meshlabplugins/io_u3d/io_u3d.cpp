@@ -106,11 +106,13 @@ bool U3DIOPlugin::save(const QString &formatName, const QString &fileName, MeshM
 		converterPath += "/IDTFConverter.exe";
 		converterCommandLine = converterPath;
 	#elif defined(Q_OS_MAC)
-		converterPath.replace(QString(" "),QString("\\ "));
-		converterCommandLine = "\""+converterPath +"/IDTFConverter.sh"+ "\" \"" + converterPath+"\"";
-		converterPath = converterPath +"/IDTFConverter.sh";
+        //converterPath.replace(QString(" "),QString("\\ "));
+        //converterCommandLine = "\""+converterPath +"/IDTFConverter.sh"+ "\" \"" + converterPath+"\"";
+        //converterPath = converterPath +"/IDTFConverter.sh";
+        converterPath += "/bin/IDTFConverter";
+        converterCommandLine = converterPath;
         #elif defined(Q_OS_LINUX)
-                converterPath = "/usr/bin/IDTFConverter";
+		converterPath += "/bin/IDTFConverter";
 		converterCommandLine = converterPath;
 	#endif
 		if (settings.contains("U3D/converter"))
