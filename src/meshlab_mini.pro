@@ -10,7 +10,8 @@ CONFIG       += ordered
 
 
                            # the common framework, used by all the plugins,
-SUBDIRS       = common \
+SUBDIRS       = external \
+                common \
                 meshlab \                         # the GUI framework
                 meshlabserver \
                 meshlabplugins/io_base\           # a few basic file formats (ply, obj, off), without this you cannot open anything
@@ -39,3 +40,13 @@ SUBDIRS       = common \
 #                meshlabplugins/io_collada \
 #                meshlabplugins/io_x3d \
 
+!equals(PWD, $${OUT_PWD}) {
+
+    #copying the "shaders" folder inside the build directory
+    copydata.commands = $(COPY_DIR) $$PWD/distrib/shaders $$OUT_PWD/distrib
+    first.depends = $(first) copydata
+    export(first.depends)
+    export(copydata.commands)
+    QMAKE_EXTRA_TARGETS += first copydata
+
+}
