@@ -83,11 +83,19 @@ SUBDIRS       = external \
 
 !equals(PWD, $${OUT_PWD}) {
 
-    #copying the "shaders" folder inside the build directory
-    copydata.commands = $(COPY_DIR) $$PWD/distrib/shaders $$OUT_PWD/distrib
-    first.depends = $(first) copydata
+    #copying the "plugins" folder inside the build directory.
+    #this should be removed after fixing U3D compilation
+    plugins.commands = $(COPY_DIR) $$PWD/distrib/plugins $$OUT_PWD/distrib
+    first.depends = $(first) plugins
     export(first.depends)
-    export(copydata.commands)
-    QMAKE_EXTRA_TARGETS += first copydata
+    export(plugins.commands)
 
+    QMAKE_EXTRA_TARGETS += first plugins
+
+    #copying the "shaders" folder inside the build directory
+    shaders.commands = $(COPY_DIR) $$PWD/distrib/shaders $$OUT_PWD/distrib
+    first.depends += $(first) shaders
+    export(first.depends)
+    export(shaders.commands)
+    QMAKE_EXTRA_TARGETS += first shaders
 }
