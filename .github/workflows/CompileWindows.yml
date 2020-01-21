@@ -19,11 +19,6 @@ jobs:
       run: |
         cd ..
         git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
-    - name: Compiling external
-      run: |
-        cd src\external
-        qmake external.pro -r
-        nmake
     - name: Compiling MeshLab
       run: |
         cd src\

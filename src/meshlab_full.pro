@@ -1,7 +1,9 @@
 #config += debug_and_release
+
 TEMPLATE      = subdirs
 CONFIG += ordered
-SUBDIRS       = common \
+SUBDIRS       = external \
+                common \
                 meshlab \
                 meshlabserver \
 # IO plugins
@@ -79,3 +81,13 @@ SUBDIRS       = common \
 				sampleplugins/sample_filtergpu \
 
 
+!equals(PWD, $${OUT_PWD}) {
+
+    #copying the "shaders" folder inside the build directory
+    copydata.commands = $(COPY_DIR) $$PWD/distrib/shaders $$OUT_PWD/distrib
+    first.depends = $(first) copydata
+    export(first.depends)
+    export(copydata.commands)
+    QMAKE_EXTRA_TARGETS += first copydata
+
+}

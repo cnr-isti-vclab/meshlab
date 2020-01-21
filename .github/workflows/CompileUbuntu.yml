@@ -20,11 +20,6 @@ jobs:
       shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Compiling external
-      run: |
-        cd src/external
-        qmake external.pro
-        make -j4
     - name: Compiling MeshLab
       run: |
         cd src/
