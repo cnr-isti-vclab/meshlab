@@ -13,9 +13,13 @@ MeshLab is an open source, portable, and extensible system for the processing an
 
 MeshLab is mostly based on the open source C++ mesh processing library [VCGlib](http://www.vcglib.net) developed at the [Visual Computing Lab](http://vcg.isti.cnr.it) of [ISTI - CNR](http://www.isti.cnr.it). VCG can be used as a stand-alone large-scale automated mesh processing pipeline, while MeshLab makes it easy to experiment with its algorithms interactively.
 
-MeshLab is available for Windows, MacOSX, and Linux. The source is released under the [GPL License](LICENSE.txt).
+MeshLab is available for Windows, MacOSX, and Linux.
 
 Compiling instructions can be found in the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder or simply looking at the continous integration setup on [Github Actions](https://github.com/cnr-isti-vclab/meshlab/actions), [travis](https://travis-ci.org/cnr-isti-vclab/meshlab/builds) and [appveyor](https://ci.appveyor.com/project/cignoni/meshlab/history).
+ 
+# License
+
+ The Meshlab source is released under the [GPL License](LICENSE.txt).
  
 # Copyright
 
