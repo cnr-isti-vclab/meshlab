@@ -1,12 +1,13 @@
 config += debug_and_release
 
-TEMPLATE      = subdirs
+TEMPLATE = subdirs
 
-SUBDIRS	= 	muparser_v225/src \
-			levmar-2.3/levmar-2.3.pro \
-			structuresynth-1.5/structuresynth.pro \
-			jhead-3.04/jhead-3.04.pro \
-#			openkinect/openkinect.pro
+SUBDIRS	= \
+    muparser_v225/src/muParser.pro \
+    levmar-2.3/levmar-2.3.pro \
+    structuresynth-1.5/structuresynth.pro \
+    jhead-3.04/jhead-3.04.pro
+#   openkinect/openkinect.pro
 
 !CONFIG(system_bzip2)   SUBDIRS	+= 	bzip2-1.0.5/bzip2-1.0.5.pro
 !CONFIG(system_openctm) SUBDIRS	+= 	OpenCTM-1.0.3/openctm.pro
