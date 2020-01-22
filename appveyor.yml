@@ -77,7 +77,7 @@ build_script:
   - dir
   # Run qmake for the REAL project
   # - qmake meshlab_mini.pro -r -spec %SPEC% "CONFIG+=%CONFIGURATION%"
-  - qmake meshlab_full_appveyor.pro -r 
+  - qmake meshlab.pro
   - dir
   # Run compiler
   #- '%COMPILER%'

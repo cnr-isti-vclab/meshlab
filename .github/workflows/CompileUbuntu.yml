@@ -23,7 +23,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         cd src/
-        qmake meshlab_full.pro
+        qmake 
         make -j4
     - name: Creating Meshlab Portable ZIP
       run : |

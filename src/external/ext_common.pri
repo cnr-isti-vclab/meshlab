@@ -6,3 +6,6 @@ win32-msvc:DESTDIR       = $$EXTERNAL_BASE_PATH/lib/win32-msvc
 unix:CONFIG(release, debug|release) {
 	DEFINES *= NDEBUG
 }
+
+QMAKE_CXXFLAGS+=-w
+QMAKE_CFLAGS+=-w

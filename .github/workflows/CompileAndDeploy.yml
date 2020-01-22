@@ -25,7 +25,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         cd src/
-        qmake meshlab_full.pro
+        qmake
         make -j4
     - name: Creating Meshlab Portable ZIP
       run : |
@@ -68,7 +68,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         cd src/
-        qmake meshlab_full.pro
+        qmake
         make -j4
     - name: Creating DMG
       run: |
@@ -102,7 +102,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         cd src\
-        qmake meshlab_full.pro -r
+        qmake
         nmake
     - name: Creating MeshLab Portable ZIP
       run: |
