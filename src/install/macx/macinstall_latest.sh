@@ -61,19 +61,7 @@ echo 'Copying other files'
 cp ../../LICENSE.txt $BUNDLE
 cp ../../docs/readme.txt $BUNDLE
 
-mkdir $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX  
-cp plugins/U3D_OSX/IDTFConverter.out  $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX
-cp plugins/U3D_OSX/IDTFConverter.sh  $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX
-cp plugins/U3D_OSX/libIFXCore.so  $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX
-mkdir $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX/Plugins
-cp plugins/U3D_OSX/Plugins/libIFXExporting.so  $BUNDLE/$APPNAME/Contents/PlugIns/U3D_OSX/Plugins
-
-mkdir $BUNDLE/$APPNAME/Contents/textures   
-cp textures/*.png $BUNDLE/$APPNAME/Contents/textures/
-mkdir $BUNDLE/$APPNAME/Contents/textures/cubemaps   
-cp textures/cubemaps/uffizi*.jpg $BUNDLE/$APPNAME/Contents/textures/cubemaps
-mkdir $BUNDLE/$APPNAME/Contents/textures/litspheres   
-cp textures/litspheres/*.png $BUNDLE/$APPNAME/Contents/textures/litspheres
+cp -r plugins/U3D_OSX  $BUNDLE/$APPNAME/Contents/PlugIns/
 
 mkdir $BUNDLE/$APPNAME/Contents/shaders   
 cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
