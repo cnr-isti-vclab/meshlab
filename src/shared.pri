@@ -13,14 +13,9 @@ QT += xmlpatterns
 QT += script
 
 mac:LIBS += ../../common/libcommon.dylib
-
-#correct qmake syntax requires CONFIG(option, list of options)
-
-win32-msvc:  LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
+win32-msvc:LIBS += ../../distrib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -L../../distrib -lcommon -lopengl32 -lGLU32
 linux-g++:LIBS += -L../../distrib -lcommon -lGL -lGLU
-linux-g++-32:LIBS += -L../../distrib -lcommon -lGL -lGLU
-linux-g++-64:LIBS += -L../../distrib -lcommon -lGL -lGLU
 
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 

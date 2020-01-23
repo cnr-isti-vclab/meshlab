@@ -5,9 +5,19 @@
 #
 # If you want to compile meshlab_mini (just a subset of plugins):
 # - qmake "CONFIG += meshlab_mini"
+#
+# MeshLab qmake config uses the following variables:
+# MESHLAB_SOURCE_DIRECTORY: the directory where is placed the main meshlab.pro
+# MESHLAB_BUILD_DIRECTORY: the directory where the meshlab build files are placed
+# MESHLAB_DISTRIB_DIRECTORY: the directory that will contain all the files necessary
+#                            for a portable version (after a build)
+#                            (if shadow build, will be MESHLAB_BUILD_DIRECTORY/distrib)
+#
 
 TEMPLATE = subdirs
 CONFIG  += ordered
+
+#message("Master DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
 
 SUBDIRS  = external \
            common \
