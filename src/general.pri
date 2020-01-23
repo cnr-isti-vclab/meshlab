@@ -21,8 +21,7 @@ macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
 macx:QMAKE_CXXFLAGS += -fopenmp -I/usr/local/opt/llvm/include
 macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib -lomp
 
-
-MACLIBDIR = ../../external/lib/macx64
+MACLIBDIR = $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64
 
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
@@ -31,7 +30,9 @@ win32:DEFINES += NOMINMAX
 linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
 
 # Set up library search paths
-linux:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux
-linux-g++:QMAKE_LFLAGS+=-L$$PWD/external/lib/linux-g++
-linux-g++-32:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-32
-linux-g++-64:QMAKE_LFLAGS += -L$$PWD/external/lib/linux-g++-64
+linux:QMAKE_RPATHDIR += $${MESHLAB_DISTRIB_DIRECTORY}/lib
+linux:QMAKE_LFLAGS+= -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/linux -L$${MESHLAB_DISTRIB_DIRECTORY}/lib
+linux-g++:QMAKE_LFLAGS+= -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/linux-g++ -L$${MESHLAB_DISTRIB_DIRECTORY}/lib
+macx:QMAKE_LFLAGS+= -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/macx64 -L$${MESHLAB_DISTRIB_DIRECTORY}/lib
+win32-msvc:QMAKE_LFLAGS+= -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-msvc -L$${MESHLAB_DISTRIB_DIRECTORY}/lib
+win32-gcc:QMAKE_LFLAGS+= -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-gcc -L$${MESHLAB_DISTRIB_DIRECTORY}/lib
