@@ -5,8 +5,8 @@ VCGDIR = ../$$VCGDIR
 # only adjust relative path if we're not using system Eigen
 !CONFIG(system_eigen3):EIGENDIR = ../$$EIGENDIR
 
-TEMPLATE      = lib
-CONFIG       += plugin
+TEMPLATE = lib
+CONFIG += plugin
 QT += opengl
 QT += xml
 QT += xmlpatterns
