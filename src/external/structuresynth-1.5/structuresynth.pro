@@ -1,5 +1,4 @@
-EXTERNAL_BASE_PATH = ../
-include($$EXTERNAL_BASE_PATH/ext_common.pri)
+include(../ext_common.pri)
 
 CONFIG += c++11
 

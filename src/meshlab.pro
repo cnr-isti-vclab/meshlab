@@ -7,6 +7,7 @@
 # - qmake "CONFIG += meshlab_mini"
 #
 # MeshLab qmake config uses the following variables:
+#
 # MESHLAB_SOURCE_DIRECTORY: the directory where is placed the main meshlab.pro
 # MESHLAB_BUILD_DIRECTORY: the directory where the meshlab build files are placed
 # MESHLAB_DISTRIB_DIRECTORY: the directory that will contain all the files necessary
@@ -17,7 +18,7 @@
 TEMPLATE = subdirs
 CONFIG  += ordered
 
-#message("Master DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
+message("DISTRIB_DIRECTORY: "$$MESHLAB_DISTRIB_DIRECTORY)
 
 SUBDIRS  = external \
            common \
@@ -112,20 +113,29 @@ SUBDIRS += \
 !equals(PWD, $${OUT_PWD}) {
 
 !meshlab_mini{
-    #copying the "plugins" folder inside the build directory.
+    #copying the "plugins" folder inside the build directory/distrib
     #this should be removed after fixing U3D compilation
-    plugins.commands = $(COPY_DIR) $$PWD/distrib/plugins $$OUT_PWD/distrib
+    plugins.commands = $(COPY_DIR) $$PWD/../distrib/plugins $$OUT_PWD/distrib
     first.depends = $(first) plugins
     export(first.depends)
     export(plugins.commands)
-}
 
     QMAKE_EXTRA_TARGETS += first plugins
+}
 
-    #copying the "shaders" folder inside the build directory
-    shaders.commands = $(COPY_DIR) $$PWD/distrib/shaders $$OUT_PWD/distrib
+    #copying the "shaders" folder inside the build directory/distrib
+    shaders.commands = $(COPY_DIR) $$PWD/../distrib/shaders $$OUT_PWD/distrib
     first.depends += $(first) shaders
     export(first.depends)
     export(shaders.commands)
+
     QMAKE_EXTRA_TARGETS += first shaders
+
+    #copying the "textures" folder inside the build directory/distrib
+    textures.commands = $(COPY_DIR) $$PWD/../distrib/textures $$OUT_PWD/distrib
+    first.depends += $(first) textures
+    export(first.depends)
+    export(textures.commands)
+
+    QMAKE_EXTRA_TARGETS += first textures
 }
