@@ -34,7 +34,6 @@ src/install/snap20????/*.snap
 .DS_Store
 
 *.lproj
-*.plist
 *.icns
 *.a
 *.dmg
