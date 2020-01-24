@@ -82,7 +82,7 @@ macx:QMAKE_POST_LINK = "\
     else  \
         mkdir -p $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS;  \
     fi;   \
-    cp libcommon.* $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS/ ;\
+    cp lib/libcommon.* $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS/ ;\
 #    if [ -d ../external/ ];\
 #    then \
 #        echo "ok shader dir exists"; \

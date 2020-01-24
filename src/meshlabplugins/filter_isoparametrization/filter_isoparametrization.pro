@@ -27,7 +27,7 @@ SOURCES += \
 TARGET = filter_isoparametrization
 INCLUDEPATH  += \
     ./ \
-    ${MESHLAB_EXTERNAL_DIRECTORY}/levmar-2.3/
+    $${MESHLAB_EXTERNAL_DIRECTORY}/levmar-2.3/
 				
 win32-msvc:QMAKE_CXXFLAGS += /openmp -D_USE_OMP
 win32-g++:QMAKE_LFLAGS += -fopenmp
