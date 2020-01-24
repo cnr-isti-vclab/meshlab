@@ -20,5 +20,4 @@ SOURCES += \
     $$VCGDIR//wrap/openfbx/src/ofbx.cpp \
     $$VCGDIR//wrap/openfbx/src/miniz.c
 
-
 TARGET = io_base

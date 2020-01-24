@@ -1,9 +1,12 @@
 include (../../shared.pri)
 
-HEADERS       += io_u3d.h \
-        $$VCGDIR/wrap/io_trimesh/export_u3d.h
-SOURCES       += io_u3d.cpp
+HEADERS += \
+    io_u3d.h \
+    $$VCGDIR/wrap/io_trimesh/export_u3d.h
 
-TARGET        = io_u3d
+SOURCES += \
+    io_u3d.cpp
+
+TARGET = io_u3d
 
 CONFIG += STL

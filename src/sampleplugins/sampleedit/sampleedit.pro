@@ -1,12 +1,17 @@
 include (../../shared.pri)
 
 
-HEADERS       = edit_sample_factory.h \
-				sampleedit.h
+HEADERS += \
+    edit_sample_factory.h \
+    sampleedit.h
 				 
-SOURCES       = edit_sample_factory.cpp \
-				sampleedit.cpp 
+SOURCES += \
+    edit_sample_factory.cpp \
+    sampleedit.cpp
 
-TARGET        = sampleedit
+RESOURCES += \
+    sampleedit.qrc
 
-RESOURCES     = sampleedit.qrc
+TARGET = sampleedit
+
+

@@ -1,15 +1,18 @@
 include (../../shared.pri)
 
-HEADERS       = meshrender.h \
-                textfile.h \
-                shaderStructs.h \
-                shaderDialog.h 
+HEADERS += \
+    meshrender.h \
+    textfile.h \
+    shaderStructs.h \
+    shaderDialog.h
 
-SOURCES       = meshrender.cpp \
-		textfile.cpp \  
-        shaderDialog.cpp 
+SOURCES += \
+    meshrender.cpp \
+    textfile.cpp \
+    shaderDialog.cpp
 
-TARGET        = render_gdp
+FORMS += \
+    shaderDialog.ui
 
-FORMS		= shaderDialog.ui
+TARGET = render_gdp
 

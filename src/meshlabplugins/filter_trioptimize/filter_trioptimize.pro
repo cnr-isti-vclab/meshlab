@@ -1,11 +1,13 @@
 include (../../shared.pri)
 
 
-HEADERS       += filter_trioptimize.h \
-		curvedgeflip.h \
-		curvdata.h 
+HEADERS += \
+    filter_trioptimize.h \
+    curvedgeflip.h \
+    curvdata.h
 
-SOURCES       += filter_trioptimize.cpp  
+SOURCES += \
+    filter_trioptimize.cpp
 		 
 
-TARGET        = filter_trioptimize
+TARGET = filter_trioptimize
