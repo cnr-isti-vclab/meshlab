@@ -27,7 +27,7 @@ jobs:
         make -j4
     - name: Creating Meshlab Portable ZIP
       run : |
-        cd src/install/linux
+        cd install/linux
         ./linux_install.sh
         cd ../../distrib/
         mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
@@ -35,12 +35,12 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_linux
-        path: src/distrib/
+        path: distrib/
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux
-        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
   ubuntu_build_cmake:
