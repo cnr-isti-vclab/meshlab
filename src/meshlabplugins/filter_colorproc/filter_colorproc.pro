@@ -1,8 +1,9 @@
 include (../../shared.pri)
 
-HEADERS       += filter_colorproc.h 
+HEADERS += \
+    filter_colorproc.h
 
-SOURCES       += filter_colorproc.cpp 
+SOURCES += \
+    filter_colorproc.cpp
 				
-
-TARGET        = filter_colorproc
+TARGET = filter_colorproc

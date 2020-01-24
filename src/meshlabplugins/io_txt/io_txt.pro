@@ -1,7 +1,9 @@
 include (../../shared.pri)
 
-HEADERS       += io_txt.h \
+HEADERS +=\
+     io_txt.h \
 				
-SOURCES       += io_txt.cpp \
+SOURCES += \
+    io_txt.cpp \
 				
-TARGET        = io_txt
+TARGET = io_txt

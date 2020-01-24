@@ -4,7 +4,7 @@
 # it can be double or float according to user needs.
 DEFINES += MESHLAB_SCALAR=float
 
-VCGDIR   = ../../../vcglib
+VCGDIR = ../../../vcglib
 CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
 !CONFIG(system_eigen3):EIGENDIR = $$VCGDIR/eigenlib
 !CONFIG(system_glew):  GLEWDIR = ../external/glew-2.1.0

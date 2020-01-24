@@ -13,6 +13,7 @@
 # MESHLAB_DISTRIB_DIRECTORY: the directory that will contain all the files necessary
 #                            for a portable version (after a build)
 #                            (if shadow build, will be MESHLAB_BUILD_DIRECTORY/distrib)
+# MESHLAB_EXTERNAL_DIRECTORY: the directory where external libraries are placed
 #
 
 TEMPLATE = subdirs
