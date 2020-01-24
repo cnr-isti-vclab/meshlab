@@ -39,7 +39,7 @@ mkdir $BUNDLE
 cp -r $APPFOLDER $BUNDLE
 mkdir $BUNDLE/$APPNAME/Contents/PlugIns
 # copy the files icons into the app.
-cp ../meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
+cp ../src/meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
 
 for x in $BUILDPATH/distrib/plugins/*.dylib
 do
@@ -58,8 +58,8 @@ done
 
 echo 'Copying other files'
 
-cp ../../LICENSE.txt $BUNDLE
-cp ../../docs/readme.txt $BUNDLE
+cp ../LICENSE.txt $BUNDLE
+cp ../docs/readme.txt $BUNDLE
 
 cp -r plugins/U3D_OSX  $BUNDLE/$APPNAME/Contents/PlugIns/
 
