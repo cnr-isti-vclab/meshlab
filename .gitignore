@@ -1,3 +1,4 @@
+## MeshLab GitIgnore ##
 *.ipch
 *.pdb
 *.sdf
@@ -14,30 +15,17 @@
 *.opendb
 *.db-shm
 *.db-wal
-Debug/
-Release/
-src/external/lib/win32-msvc20??/*.lib
-src/external/lib/win32-msvc/*.lib
-src/distrib/plugins/*.lib
-src/distrib/plugins/*.dll
-src/distrib/plugins/*.xml
-src/distrib/common.lib
-src/distrib/meshlab.exe
-src/distrib/meshlabserver.exe
-src/distrib/meshlab
-src/distrib/meshlabserver
-src/distrib/MeshLabBundle
-src/install/snap20????/prime
-src/install/snap20????/parts
-src/install/snap20????/stage
-src/install/snap20????/*.snap
 .DS_Store
+distrib/meshlab.app/*
+distrib/meshlab
+distrib/meshlabserver
+distrib/plugins/*.xml
+install/macx/meshlab_dmg_final.json
+install/snap20????/prime
+install/snap20????/parts
+install/snap20????/stage
+install/snap20????/*.snap
 
-*.lproj
-*.icns
-*.a
-*.dmg
-src/distrib/meshlab.app/*
 
 ##standard Qt and C++ gitignore##
 # C++ objects and libs
