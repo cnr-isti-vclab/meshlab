@@ -1,26 +1,38 @@
 #!/bin/bash
-# this is a script shell for setting up the application bundle for the mac
-# It should be run (not sourced) in the meshlab/src/install/macx dir.
+# this is a script shell for setting up the application bundle for MacOS
+# Default directories (BUILD_PATH and SOURCE_PATH) are set in order to work if
+# you did not use shadow build and you are running (not sourcing) this script
+# from the install/macx directory.
+# If you built MeshLab with shadow build, run this script with the path to the
+# build directory as a parameter:
+# sh macinstall_latest.sh /path/to/shadow/build
 #
-# It does all the dirty work of moving all the needed plugins and frameworks into the package and runs the 
-# install_tool on them to change the linking path to the local version of qt
+# This script does all the dirty work of moving all the needed plugins and
+# frameworks into the package and runs the install_tool on them to change the
+# linking path to the local version of qt.
 #
 # The env variable $QTDIR should be correctly set, and all the stuff to be copied
-# should be in the 'distrib' folder.
+# should be in the '$BUILD_PATH/distrib' folder.
  
-cd ../../distrib
+#checking for parameters
+if [ "$#" -eq 0 ]
+then
+    BUILD_PATH="../.."
+else
+    BUILD_PATH=$1
+fi
 
-# change this according to the shadow build dir.
-# is the root of the build e.g. where the meshlab_full.pro it can be something like 
-BUILDPATH="../../build-meshlab_full-Desktop_Qt_5_9_4_clang_64bit2-Release"
+echo "Build path is: " $BUILD_PATH
+
+# change this if this script is not in the directory meshlab/install/macx
+SOURCE_PATH="../../src"
 
 APPNAME="meshlab.app"
 
-BUILDPATH=..
-echo "Hopefully I should find" $BUILDPATH/distrib/$APPNAME
+echo "Hopefully I should find" $BUILD_PATH/distrib/$APPNAME
 
-APPFOLDER=$BUILDPATH/distrib/$APPNAME
-BUNDLE="MeshLabBundle"
+APPFOLDER=$BUILD_PATH/distrib/$APPNAME
+BUNDLE=$BUILD_PATH/distrib/MeshLabBundle
 
 
 if [ -e $APPFOLDER -a -d $APPFOLDER ]
@@ -39,16 +51,16 @@ mkdir $BUNDLE
 cp -r $APPFOLDER $BUNDLE
 mkdir $BUNDLE/$APPNAME/Contents/PlugIns
 # copy the files icons into the app.
-cp ../src/meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
+cp $SOURCE_PATH/meshlab/images/meshlab_obj.icns $BUNDLE/$APPNAME/Contents/Resources
 
-for x in $BUILDPATH/distrib/plugins/*.dylib
+for x in $BUILD_PATH/distrib/plugins/*.dylib
 do
-cp ./$x $BUNDLE/meshlab.app/Contents/PlugIns/
+cp $x $BUNDLE/meshlab.app/Contents/PlugIns/
 done
 
-for x in $BUILDPATH/distrib/plugins/*.xml
+for x in $BUILD_PATH/distrib/plugins/*.xml
 do
-cp ./$x $BUNDLE/meshlab.app/Contents/PlugIns/
+cp $x $BUNDLE/meshlab.app/Contents/PlugIns/
 done
 
 for x in $BUNDLE/meshlab.app/Contents/PlugIns/*.dylib
@@ -58,19 +70,19 @@ done
 
 echo 'Copying other files'
 
-cp ../LICENSE.txt $BUNDLE
-cp ../docs/readme.txt $BUNDLE
+cp $SOURCE_PATH/../LICENSE.txt $BUNDLE
+cp $SOURCE_PATH/../docs/readme.txt $BUNDLE
 
-cp -r plugins/U3D_OSX  $BUNDLE/$APPNAME/Contents/PlugIns/
+cp -r $BUILD_PATH/distrib/plugins/U3D_OSX  $BUNDLE/$APPNAME/Contents/PlugIns/
 
 mkdir $BUNDLE/$APPNAME/Contents/shaders   
-cp shaders/*.gdp shaders/*.vert shaders/*.frag shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
+cp $BUILD_PATH/distrib/shaders/*.gdp $BUILD_PATH/distrib/shaders/*.vert $BUILD_PATH/distrib/shaders/*.frag $BUILD_PATH/distrib/shaders/*.txt  $BUNDLE/$APPNAME/Contents/shaders
 
 #added rendermonkey shaders
 mkdir $BUNDLE/$APPNAME/Contents/shaders/shadersrm   
-cp shaders/shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shaders/shadersrm
+cp $BUILD_PATH/distrib/shaders/shadersrm/*.rfx $BUNDLE/$APPNAME/Contents/shaders/shadersrm
 #added shadowmapping shaders
-cp -r shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
+cp -r $BUILD_PATH/distrib/shaders/decorate_shadow $BUNDLE/$APPNAME/Contents/shaders
 
 echo "Changing the paths of the qt component frameworks using the qt tool macdeployqt"
 
@@ -82,9 +94,12 @@ else
 macdeployqt $BUNDLE/$APPNAME -executable=$BUNDLE/$APPNAME/Contents/MacOS/meshlabserver
 fi
 
-cd ../install/macx
 # final step create the dmg using appdmg
 # appdmg is installed with 'npm install -g appdmg'",
+sed "s%BUILD_PATH%$BUILD_PATH%g" meshlab_dmg_latest.json > meshlab_dmg_final.json
+sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" meshlab_dmg_final.json
 
-rm -f ../../distrib/MeshLab*.dmg  
-appdmg meshlab_dmg_latest.json ../../distrib/MeshLab$(date +%Y.%m).dmg
+rm -f $BUILD_PATH/distrib/*.dmg
+
+echo "Running appdmg"
+appdmg meshlab_dmg_final.json $BUILD_PATH/distrib/MeshLab$(date +%Y.%m).dmg
