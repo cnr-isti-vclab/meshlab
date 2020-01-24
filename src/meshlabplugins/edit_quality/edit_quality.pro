@@ -1,29 +1,33 @@
 include (../../shared.pri)
 
-HEADERS       = common/const_types.h \
-		edit_quality_factory.h \
-		qualitymapper.h \
-		qualitymapperdialog.h \
-		common/transferfunction.h \
-		common/util.h \
-		common/meshmethods.h\
-		handle.h \
-		eqhandle.h \
-		tfhandle.h
+HEADERS += \
+    common/const_types.h \
+    edit_quality_factory.h \
+    qualitymapper.h \
+    qualitymapperdialog.h \
+    common/transferfunction.h \
+    common/util.h \
+    common/meshmethods.h\
+    handle.h \
+    eqhandle.h \
+    tfhandle.h
 
-SOURCES       = edit_quality_factory.cpp \
-		qualitymapper.cpp\
-		qualitymapperdialog.cpp\
-		common/transferfunction.cpp\
-		common/util.cpp \
-		common/meshmethods.cpp\
-		handle.cpp\
-		eqhandle.cpp \
-		tfhandle.cpp 
+SOURCES += \
+    edit_quality_factory.cpp \
+    qualitymapper.cpp\
+    qualitymapperdialog.cpp\
+    common/transferfunction.cpp\
+    common/util.cpp \
+    common/meshmethods.cpp\
+    handle.cpp\
+    eqhandle.cpp \
+    tfhandle.cpp
 
-TARGET        = edit_quality
+FORMS += \
+    qualitymapperdialog.ui
 
-RESOURCES = qualitymapper.qrc
+RESOURCES += \
+    qualitymapper.qrc
 
-FORMS		  = qualitymapperdialog.ui
+TARGET = edit_quality
 

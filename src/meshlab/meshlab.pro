@@ -129,7 +129,7 @@ win32-g++:LIBS += \
 
 macx:LIBS += \
     -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/macx64 -ljhead \
-    $${MESHLAB_DISTRIB_DIRECTORY}/libcommon.dylib
+    $${MESHLAB_DISTRIB_DIRECTORY}/lib/libcommon.dylib
 
 macx:QMAKE_POST_LINK = "\
     cp -P $${MESHLAB_DISTRIB_DIRECTORY}/lib/libcommon.1.dylib $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS; \

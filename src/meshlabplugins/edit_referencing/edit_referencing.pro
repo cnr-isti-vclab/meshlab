@@ -1,16 +1,19 @@
 include (../../shared.pri)
 
-
-HEADERS       = edit_referencing_factory.h \
-                edit_referencing.h \
-                edit_referencingDialog.h
+HEADERS += \
+    edit_referencing_factory.h \
+    edit_referencing.h \
+    edit_referencingDialog.h
 				 
-SOURCES       = edit_referencing_factory.cpp \
-                edit_referencing.cpp \
-                edit_referencingDialog.cpp
+SOURCES += \
+    edit_referencing_factory.cpp \
+    edit_referencing.cpp \
+    edit_referencingDialog.cpp
 
-TARGET        = edit_referencing
+FORMS += \
+    edit_referencingDialog.ui
 
-RESOURCES     = edit_referencing.qrc
+RESOURCES += \
+    edit_referencing.qrc
 
-FORMS         = edit_referencingDialog.ui
+TARGET = edit_referencing
