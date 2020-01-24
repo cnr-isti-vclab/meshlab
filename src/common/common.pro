@@ -76,13 +76,13 @@ SOURCES += \
     ml_selection_buffers.cpp
 
 macx:QMAKE_POST_LINK = "\
-    if [ -d  $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS/ ]; \
+    if [ -d  $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ]; \
     then  \
         echo "Copying";  \
     else  \
-        mkdir -p $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS;  \
+        mkdir -p $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS;  \
     fi;   \
-    cp $${MESHLAB_DISTRIB_DIRECTORY}/lib/libcommon.* $${MESHLAB_DISTRIB_DIRECTORY}/meshlab.app/Contents/MacOS/ ;\
+    cp $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.* $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ;\
 #    if [ -d ../external/ ];\
 #    then \
 #        echo "ok external dir exists"; \
@@ -90,7 +90,7 @@ macx:QMAKE_POST_LINK = "\
 #        ln -s ../../meshlab/src/external ../external;\
 #        echo "linked external dir"; \
 #    fi;\
-#    if [ -d $${MESHLAB_DISTRIB_DIRECTORY}/shaders/ ];\
+#    if [ -d $$MESHLAB_DISTRIB_DIRECTORY/shaders/ ];\
 #    then \
 #        echo "ok shader dir exists"; \
 #    else \

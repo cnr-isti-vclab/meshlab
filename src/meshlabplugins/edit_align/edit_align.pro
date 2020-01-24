@@ -1,7 +1,7 @@
 include (../../shared.pri)
 
 INCLUDEPATH += \
-    $${MESHLAB_EXTERNAL_DIRECTORY}/newuoa/include
+    $$MESHLAB_EXTERNAL_DIRECTORY/newuoa/include
 
 HEADERS += \
     edit_align_factory.h \

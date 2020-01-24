@@ -113,7 +113,7 @@ SUBDIRS += \
     sampleplugins/sample_filtergpu
 }
 
-!equals(PWD, $${OUT_PWD}) {
+!equals(PWD, $$OUT_PWD) {
 
 !meshlab_mini{
     #copying the "plugins" folder inside the build directory/distrib

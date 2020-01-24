@@ -26,16 +26,15 @@ SOURCES += \
 
 TARGET = filter_isoparametrization
 INCLUDEPATH  += \
-    ./ \
-    $${MESHLAB_EXTERNAL_DIRECTORY}/levmar-2.3/
+    $$MESHLAB_EXTERNAL_DIRECTORY/levmar-2.3/
 				
 win32-msvc:QMAKE_CXXFLAGS += /openmp -D_USE_OMP
 win32-g++:QMAKE_LFLAGS += -fopenmp
 linux-g++:QMAKE_CXXFLAGS += -fopenmp -D_USE_OMP
 
-win32-msvc:LIBS	+= $${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-msvc/levmar.lib
-win32-g++:LIBS += -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-gcc -llevmar
-macx:LIBS += $${MESHLAB_DISTRIB_DIRECTORY}/lib/macx64/liblevmar.a
+win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/levmar.lib
+win32-g++:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -llevmar
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/liblevmar.a
 linux-g++:LIBS += -llevmar
 
 # Please never ever uncomment this...

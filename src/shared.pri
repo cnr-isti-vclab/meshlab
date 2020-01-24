@@ -12,8 +12,8 @@ QT += xml
 QT += xmlpatterns
 QT += script
 
-mac:LIBS += $${MESHLAB_DISTRIB_DIRECTORY}/lib/libcommon.dylib
-win32-msvc:LIBS += $${MESHLAB_DISTRIB_DIRECTORY}/lib/common.lib -lopengl32 -lGLU32
+mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.dylib
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -lcommon -lopengl32 -lGLU32
 linux-g++:LIBS += -lcommon -lGL -lGLU
 
@@ -28,7 +28,7 @@ CONFIG(release,debug | release){
 #DEFINES += NDEBUG
  }
 
-DESTDIR = $${MESHLAB_DISTRIB_DIRECTORY}/plugins
+DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/plugins
 # uncomment in you local copy only in emergency cases.
 # We should never be too permissive
 # win32-g++:QMAKE_CXXFLAGS += -fpermissive

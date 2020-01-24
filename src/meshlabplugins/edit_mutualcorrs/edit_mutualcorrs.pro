@@ -30,10 +30,10 @@ FORMS += \
 TARGET = edit_mutualcorrs
 
 INCLUDEPATH *= \
-    $${MESHLAB_EXTERNAL_DIRECTORY}/levmar-2.3 \
-    $${MESHLAB_EXTERNAL_DIRECTORY}/newuoa/include
+    $$MESHLAB_EXTERNAL_DIRECTORY/levmar-2.3 \
+    $$MESHLAB_EXTERNAL_DIRECTORY/newuoa/include
 
-win32-msvc:LIBS += $${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-msvc/levmar.lib
-win32-g++:LIBS += -L$${MESHLAB_DISTRIB_DIRECTORY}/lib/win32-gcc -llevmar
-macx:LIBS+= $${MESHLAB_DISTRIB_DIRECTORY}/lib/macx64/liblevmar.a
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/levmar.lib
+win32-g++:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -llevmar
+macx:LIBS+= $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/liblevmar.a
 linux-g++:LIBS += -llevmar
