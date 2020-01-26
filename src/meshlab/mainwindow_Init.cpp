@@ -1091,6 +1091,15 @@ void MainWindow::saveRecentFileList(const QString &fileName)
 void MainWindow::sendUsAMail()
 {
 	QSettings settings;
+
+	// Check if the user specified not to be reminded to send email
+	const QString dontRemindMeToSendEmailVar("dontRemindMeToSendEmail");
+	bool dontRemindMeToSendEmailVal = false;
+	if (settings.contains(dontRemindMeToSendEmailVar))
+		dontRemindMeToSendEmailVal = settings.value(dontRemindMeToSendEmailVar).toBool();
+	if (dontRemindMeToSendEmailVal) 
+		return;
+
 	int loadedMeshCounter = settings.value("loadedMeshCounter").toInt();
 	//int connectionInterval = settings.value("connectionInterval", 20).toInt();
 	//int lastComunicatedValue = settings.value("lastComunicatedValue", 0).toInt();
@@ -1102,11 +1111,18 @@ void MainWindow::sendUsAMail()
 		Ui::CongratsDialog temp;
 		temp.setupUi(congratsDialog);
 		temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+		QCheckBox dontRemindMeCheckBox("Don't show this message again.");
+		dontRemindMeCheckBox.blockSignals(true);
+		temp.buttonBox->addButton(&dontRemindMeCheckBox, QDialogButtonBox::ActionRole);
 		congratsDialog->exec();
 		if (congratsDialog->result() == QDialog::Accepted)
 			QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
 		// This preference values store when you did the last request for a mail
 		settings.setValue("congratsMeshCounter", congratsMeshCounter * 2);
+
+		// See if the user checked the box to not be reminded again
+		if (dontRemindMeCheckBox.checkState() == Qt::Checked)
+		settings.setValue(dontRemindMeToSendEmailVar, true);
 	}
 }
 
