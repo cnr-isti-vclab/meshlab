@@ -12,11 +12,15 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
        sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
-       cd ..
-       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Setting env variables
       id: envs
       shell: bash
@@ -50,12 +54,16 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-        cd ..
-        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Setting env variables
       id: envs
       shell: bash
@@ -89,16 +97,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
       uses: jurplel/install-qt-action@v2
       with:
         modules: qtscript xmlpatterns
-    - name: Installing dependencies
-      run: |
-        cd ..
-        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Compiling MeshLab
       run: |
         cd src\

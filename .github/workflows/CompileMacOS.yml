@@ -10,12 +10,16 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-        cd ..
-        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Setting env variables
       id: envs
       shell: bash

@@ -9,16 +9,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
       uses: jurplel/install-qt-action@v2
       with:
         modules: qtscript xmlpatterns
-    - name: Installing dependencies
-      run: |
-        cd ..
-        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Compiling MeshLab
       run: |
         cd src\
@@ -40,16 +42,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
       uses: jurplel/install-qt-action@v2
       with:
         modules: qtscript xmlpatterns
-    - name: Installing dependencies
-      run: |
-        cd ..
-        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Configure
       run: |
         cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install

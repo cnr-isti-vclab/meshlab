@@ -16,8 +16,8 @@ HEADERS += \
 
 SOURCES += \
     baseio.cpp \
-    $$VCGDIR//wrap/ply/plylib.cpp\
-    $$VCGDIR//wrap/openfbx/src/ofbx.cpp \
-    $$VCGDIR//wrap/openfbx/src/miniz.c
+    $$VCGDIR/wrap/ply/plylib.cpp \
+    $$VCGDIR/wrap/openfbx/src/ofbx.cpp \
+    $$VCGDIR/wrap/openfbx/src/miniz.c
 
 TARGET = io_base

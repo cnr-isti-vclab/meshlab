@@ -11,7 +11,7 @@ endif()
 
 ### vcglib
 if(NOT VCGDIR)
-    get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/../../vcglib" ABSOLUTE)
+    get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/../vcglib" ABSOLUTE)
     if(NOT EXISTS ${VCGDIR})
         set(VCGDIR NOTFOUND)
     endif()

@@ -1,9 +1,6 @@
 # This is the common include for all the plugins
 
 include (general.pri)
-VCGDIR = ../$$VCGDIR
-# only adjust relative path if we're not using system Eigen
-!CONFIG(system_eigen3):EIGENDIR = ../$$EIGENDIR
 
 TEMPLATE = lib
 CONFIG += plugin
@@ -19,7 +16,7 @@ linux-g++:LIBS += -lcommon -lGL -lGLU
 
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
-INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR
+INCLUDEPATH *= ../.. $$VCGDIR $$EIGENDIR
 !CONFIG(system_glew): INCLUDEPATH *=  $$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
 
