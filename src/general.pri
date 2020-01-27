@@ -21,8 +21,7 @@ CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
 #Eigen and glew dirs
 CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
 !CONFIG(system_eigen3):EIGENDIR = $$VCGDIR/eigenlib
-!CONFIG(system_glew):  GLEWDIR = ../external/glew-2.1.0
-
+!CONFIG(system_glew):  GLEWDIR = $$MESHLAB_EXTERNAL_DIRECTORY/glew-2.1.0
 
 ######## WINDOWS SETTINGS ##########
 

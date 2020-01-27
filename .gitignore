@@ -39,6 +39,10 @@ install/snap20????/*.snap
 *.so.*
 *.dll
 *.dylib
+*.lib
+*.exe
+*.obj
+*.res
 
 # Qt-es
 object_script.*.Release

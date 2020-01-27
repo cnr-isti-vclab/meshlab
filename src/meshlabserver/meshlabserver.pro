@@ -23,7 +23,7 @@ macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_p
 
 mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libcommon.dylib
 
-win32-msvc: LIBS += -lcommon -lopengl32 -lGLU32
+win32-msvc: LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lcommon
 win32-g++: LIBS += -lcommon
 linux:  LIBS += -lcommon
 
