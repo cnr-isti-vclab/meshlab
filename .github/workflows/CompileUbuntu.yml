@@ -57,9 +57,7 @@ jobs:
        git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
     - name: Configuring
       run: |
-        mkdir -p src/build
-        cd src/build
-        cmake .. -G Ninja
+        cmake src/ -G Ninja
     - name: Compiling meshlab
-      run: ninja -C src/build
+      run: ninja -C .
 

@@ -25,11 +25,11 @@ jobs:
     - name: Compiling MeshLab
       run: |
         cd src/
-        qmake
+        qmake 
         make -j4
     - name: Creating Meshlab Portable ZIP
       run : |
-        cd src/install/linux
+        cd install/linux
         ./linux_install.sh
         cd ../../distrib/
         mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
@@ -37,12 +37,12 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_linux
-        path: src/distrib/
+        path: distrib/
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
-        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
   
   macos_build:
     name: Build MeshLab (MacOS)
@@ -72,21 +72,21 @@ jobs:
         make -j4
     - name: Creating DMG
       run: |
-         cd src/install/macx
+         cd install/macx
          ./macinstall_latest.sh
-         cd ../../..
-         ls -la src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg
-         mv src/distrib/MeshLab${{steps.envs.outputs.date}}.dmg src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+         cd ../..
+         ls -la distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos
-        path: src/distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
         
   windows_build:
     name: Build MeshLab (Windows)
     runs-on: windows-latest
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Setting MSVC
@@ -106,14 +106,13 @@ jobs:
         nmake
     - name: Creating MeshLab Portable ZIP
       run: |
-        cd src\distrib
-        Remove-Item sample\ -recurse
+        cd distrib
         windeployqt --no-translations meshlab.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_windows
-        path: src\distrib
+        path: distrib
         
          
   create_prerelease:
