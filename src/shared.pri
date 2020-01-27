@@ -20,7 +20,7 @@ linux-g++:LIBS += -lcommon -lGL -lGLU
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 
 INCLUDEPATH  *= ../.. $$VCGDIR $$EIGENDIR
-!CONFIG(system_glew): INCLUDEPATH *=  ../$$GLEWDIR/include
+!CONFIG(system_glew): INCLUDEPATH *=  $$GLEWDIR/include
 DEPENDPATH += ../.. $$VCGDIR
 
 CONFIG(release,debug | release){
