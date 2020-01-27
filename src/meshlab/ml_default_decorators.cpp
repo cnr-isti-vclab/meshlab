@@ -316,7 +316,7 @@ void MLDefaultMeshDecorators::drawQuotedLine(const vcg::Point3d &a,const vcg::Po
     glDisable(GL_LIGHT0);
     glDisable(GL_NORMALIZE);
     float labelMargin =tickScalarDistance /4.0;
-    float firstTick;
+    float firstTick = 0.0;
     // fmod returns the floating-point remainder of numerator/denominator (with the sign of the dividend)
     // fmod ( 104.5 , 10) returns 4.5     --> aVal - fmod(aval/tick) = 100
     // fmod ( -104.5 , 10) returns -4.5
@@ -333,7 +333,7 @@ void MLDefaultMeshDecorators::drawQuotedLine(const vcg::Point3d &a,const vcg::Po
 
 
     float tickDistTen=tickScalarDistance /10.0f;
-    float firstTickTen;
+    float firstTickTen = 0.0;
     if(aVal > 0) firstTickTen = aVal - fmod(aVal,tickDistTen) + tickDistTen;
     else firstTickTen = aVal - fmod(aVal,tickDistTen);
 
