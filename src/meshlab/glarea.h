@@ -325,7 +325,7 @@ public slots:
 		}
 	}
 
-	void updatePerMeshDecorators(int mesh_id)
+	void updatePerMeshDecorators(int)
 	{
 		update();
 	}
