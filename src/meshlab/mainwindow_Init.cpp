@@ -1097,7 +1097,7 @@ void MainWindow::sendUsAMail()
 	bool dontRemindMeToSendEmailVal = false;
 	if (settings.contains(dontRemindMeToSendEmailVar))
 		dontRemindMeToSendEmailVal = settings.value(dontRemindMeToSendEmailVar).toBool();
-	if (dontRemindMeToSendEmailVal) 
+	if (dontRemindMeToSendEmailVal)
 		return;
 
 	int loadedMeshCounter = settings.value("loadedMeshCounter").toInt();
@@ -1111,9 +1111,11 @@ void MainWindow::sendUsAMail()
 		Ui::CongratsDialog temp;
 		temp.setupUi(congratsDialog);
 		temp.buttonBox->addButton("Send Mail", QDialogButtonBox::AcceptRole);
+
 		QCheckBox dontRemindMeCheckBox("Don't show this message again.");
 		dontRemindMeCheckBox.blockSignals(true);
 		temp.buttonBox->addButton(&dontRemindMeCheckBox, QDialogButtonBox::ActionRole);
+
 		congratsDialog->exec();
 		if (congratsDialog->result() == QDialog::Accepted)
 			QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
@@ -1122,7 +1124,7 @@ void MainWindow::sendUsAMail()
 
 		// See if the user checked the box to not be reminded again
 		if (dontRemindMeCheckBox.checkState() == Qt::Checked)
-		settings.setValue(dontRemindMeToSendEmailVar, true);
+			settings.setValue(dontRemindMeToSendEmailVar, true);
 	}
 }
 
