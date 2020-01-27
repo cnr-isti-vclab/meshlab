@@ -26,14 +26,13 @@ jobs:
         nmake
     - name: Creating MeshLab Portable ZIP
       run: |
-        cd src\distrib
-        Remove-Item sample\ -recurse
+        cd distrib
         windeployqt --no-translations meshlab.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_portable_windows
-        path: src\distrib
+        path: distrib
 
   windows_build_cmake:
     name: Build MeshLab (Windows, CMake)

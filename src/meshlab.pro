@@ -118,7 +118,8 @@ SUBDIRS += \
 !meshlab_mini{
     #copying the "plugins" folder inside the build directory/distrib
     #this should be removed after fixing U3D compilation
-    plugins.commands = $(COPY_DIR) $$PWD/../distrib/plugins $$OUT_PWD/distrib
+    !win32-msvc:plugins.commands = $(COPY_DIR) $$PWD/../distrib/plugins $$OUT_PWD/distrib
+    win32-msvc:plugins.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/plugins)\" \"$$shell_path($$OUT_PWD/distrib/plugins)\"
     first.depends = $(first) plugins
     export(first.depends)
     export(plugins.commands)
@@ -127,7 +128,8 @@ SUBDIRS += \
 }
 
     #copying the "lib" folder inside the build directory/distrib
-    lib.commands = $(COPY_DIR) $$PWD/../distrib/lib $$OUT_PWD/distrib
+    !win32-msvc:lib.commands = $(COPY_DIR) $$PWD/../distrib/lib $$OUT_PWD/distrib
+    win32-msvc:lib.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/lib)\" \"$$shell_path($$OUT_PWD/distrib/lib)\"
     first.depends += $(first) lib
     export(first.depends)
     export(lib.commands)
@@ -135,7 +137,8 @@ SUBDIRS += \
     QMAKE_EXTRA_TARGETS += first lib
 
     #copying the "shaders" folder inside the build directory/distrib
-    shaders.commands = $(COPY_DIR) $$PWD/../distrib/shaders $$OUT_PWD/distrib
+    !win32-msvc:shaders.commands = $(COPY_DIR) $$PWD/../distrib/shaders $$OUT_PWD/distrib
+    win32-msvc:shaders.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/shaders)\" \"$$shell_path($$OUT_PWD/distrib/shaders)\"
     first.depends += $(first) shaders
     export(first.depends)
     export(shaders.commands)
@@ -143,10 +146,12 @@ SUBDIRS += \
     QMAKE_EXTRA_TARGETS += first shaders
 
     #copying the "textures" folder inside the build directory/distrib
-    textures.commands = $(COPY_DIR) $$PWD/../distrib/textures $$OUT_PWD/distrib
+    !win32-msvc:textures.commands = $(COPY_DIR) $$PWD/../distrib/textures $$OUT_PWD/distrib
+    win32-msvc:textures.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib/textures)\" \"$$shell_path($$OUT_PWD/distrib/)\"
     first.depends += $(first) textures
     export(first.depends)
     export(textures.commands)
 
     QMAKE_EXTRA_TARGETS += first textures
+
 }
