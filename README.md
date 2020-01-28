@@ -20,7 +20,7 @@ MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with `script` and `xmlpatterns
 After setting up the Qt environment:
 
 	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	cd src
+	cd meshlab/src
 	qmake
 	make
 	
