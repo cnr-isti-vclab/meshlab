@@ -1,7 +1,5 @@
 # ![MeshLab Logo](src/meshlab/images/eye64.png) MeshLab
 
-[![Build Status](https://travis-ci.org/cnr-isti-vclab/meshlab.svg?branch=master)](https://travis-ci.org/cnr-isti-vclab/meshlab)
-[![Build status](https://ci.appveyor.com/api/projects/status/bdxm2m4n5ud7vm47?svg=true)](https://ci.appveyor.com/project/cignoni/meshlab)
 
 [![Actions Status](https://github.com/cnr-isti-vclab/meshlab/workflows/CompileUbuntu/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions)
 [![Actions Status](https://github.com/cnr-isti-vclab/meshlab/workflows/CompileMacOS/badge.svg)](https://github.com/cnr-isti-vclab/meshlab/actions)
@@ -14,6 +12,17 @@ MeshLab is an open source, portable, and extensible system for the processing an
 MeshLab is mostly based on the open source C++ mesh processing library [VCGlib](http://www.vcglib.net) developed at the [Visual Computing Lab](http://vcg.isti.cnr.it) of [ISTI - CNR](http://www.isti.cnr.it). VCG can be used as a stand-alone large-scale automated mesh processing pipeline, while MeshLab makes it easy to experiment with its algorithms interactively.
 
 MeshLab is available for Windows, MacOSX, and Linux.
+
+# Build instructions
+
+MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with "script" and "xmlpatterns" as additional packages.
+
+After setting up the Qt environment:
+
+	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
+	cd src
+	qmake
+	make
 
 Compiling instructions can be found in the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder or simply looking at the continous integration setup on [Github Actions](https://github.com/cnr-isti-vclab/meshlab/actions), [travis](https://travis-ci.org/cnr-isti-vclab/meshlab/builds) and [appveyor](https://ci.appveyor.com/project/cignoni/meshlab/history).
  
@@ -69,5 +78,6 @@ DOI = {10.2312/LocalChapterEvents/ItalChap/ItalianChapConf2008/129-136}
 For documented and repeatable bugs, feature requests, etc., please use the [GitHub issues](https://github.com/cnr-isti-vclab/meshlab/issues).
 
 For general questions use [StackOverflow](http://stackoverflow.com/questions/tagged/meshlab).
+
 
 
