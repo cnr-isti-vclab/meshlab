@@ -15,7 +15,7 @@ MeshLab is available for Windows, MacOSX, and Linux.
 
 # Build instructions
 
-MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with "script" and "xmlpatterns" as additional packages.
+MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with `script` and `xmlpatterns` as additional packages.
 
 After setting up the Qt environment:
 
@@ -23,8 +23,31 @@ After setting up the Qt environment:
 	cd src
 	qmake
 	make
+	
+Then, a meshlab executable can be found inside the `distrib` folder.
 
-Compiling instructions can be found in the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder or simply looking at the continous integration setup on [Github Actions](https://github.com/cnr-isti-vclab/meshlab/actions), [travis](https://travis-ci.org/cnr-isti-vclab/meshlab/builds) and [appveyor](https://ci.appveyor.com/project/cignoni/meshlab/history).
+You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
+
+1. Install QtCreator and Qt >= 5.9 with `script` and `xmlpatterns` as additional packages;
+2. Open `meshlab.pro` inside `src`;
+3. Select your favourite shadow build directory;
+4. Before the build, deactive the `QtQuickCompiler` option from the qmake call in the project options;
+5. Build meshlab.
+
+A compilation with `cmake` is also supported. 
+
+We provide a set of scripts that allows to compile and deploy meshlab for every platform. You can find these scripts in the `install` folder.
+
+# Structure of the Repository
+
+The MeshLab repository is organized as follows:
+
+* `distrib`
+* `docs`
+* `install`
+* `sample`
+* `src`
+* `vcglib`
  
 # License
 
