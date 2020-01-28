@@ -14,11 +14,11 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x000000
 
 INCLUDEPATH *= \
     . \
-	.. \
-	../.. \
+    .. \
+    ../.. \
     $$VCGDIR \
     $$EIGENDIR \
-	$$EXIF_DIR
+    $$EXIF_DIR
 
 !CONFIG(system_glew): INCLUDEPATH *= $$GLEWDIR/include
 
@@ -41,25 +41,25 @@ HEADERS = \
     changetexturename.h \
     layerDialog.h \
     stdpardialog.h \
-	ml_std_par_dialog.h \
-	xmlstdpardialog.h \
-	additionalgui.h \
-	xmlgeneratorgui.h \
-	snapshotsetting.h \
-	ml_render_gui.h \
-	ml_rendering_actions.h \
-	ml_default_decorators.h \
+    ml_std_par_dialog.h \
+    xmlstdpardialog.h \
+    additionalgui.h \
+    xmlgeneratorgui.h \
+    snapshotsetting.h \
+    ml_render_gui.h \
+    ml_rendering_actions.h \
+    ml_default_decorators.h \
     $$VCGDIR/wrap/gui/trackball.h \
     $$VCGDIR/wrap/gui/trackmode.h \
-	$$VCGDIR/wrap/gl/trimesh.h \
-	filterthread.h 
+    $$VCGDIR/wrap/gl/trimesh.h \
+    filterthread.h
 
 SOURCES = \
     main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
     glarea.cpp \
-	multiViewer_Container.cpp \
+    multiViewer_Container.cpp \
     plugindialog.cpp \
     customDialog.cpp \
     filterScriptDialog.cpp \
@@ -68,18 +68,18 @@ SOURCES = \
     savemaskexporter.cpp \
     changetexturename.cpp \
     stdpardialog.cpp \
-	ml_std_par_dialog.cpp \
+    ml_std_par_dialog.cpp \
     xmlstdpardialog.cpp \
-	additionalgui.cpp \
-	xmlgeneratorgui.cpp \
-	ml_render_gui.cpp \
-	ml_rendering_actions.cpp \
-	ml_default_decorators.cpp \
-	$$VCGDIR/wrap/gui/trackball.cpp \
+    additionalgui.cpp \
+    xmlgeneratorgui.cpp \
+    ml_render_gui.cpp \
+    ml_rendering_actions.cpp \
+    ml_default_decorators.cpp \
+    $$VCGDIR/wrap/gui/trackball.cpp \
     $$VCGDIR/wrap/gui/trackmode.cpp \
-	$$VCGDIR/wrap/gui/coordinateframe.cpp \
+    $$VCGDIR/wrap/gui/coordinateframe.cpp \
     glarea_setting.cpp \
-	filterthread.cpp 
+    filterthread.cpp
 
 FORMS += \
     ui/layerDialog.ui \
@@ -90,8 +90,8 @@ FORMS += \
     ui/renametexture.ui \
     ui/savemaskexporter.ui \
     ui/congratsDialog.ui \
-	ui/filtergui.ui \
-	ui/filtercreatortab.ui
+    ui/filtergui.ui \
+    ui/filtercreatortab.ui
 	
 RESOURCES = meshlab.qrc
 

@@ -19,7 +19,9 @@ QT += script
 
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
 macx:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/
-macx:QMAKE_POST_LINK ="install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver"
+macx:QMAKE_POST_LINK = " \
+    install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
+"
 
 mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libcommon.dylib
 

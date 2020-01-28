@@ -9,4 +9,7 @@ TARGET        = sample_xmlfilter
 #INSTALLS += sample_xmlfilter.xml
 
 PRE_TARGETDEPS += sample_xmlfilter.xml
-macx:QMAKE_POST_LINK = "rsync -u "$$TARGET".xml ../../distrib/plugins/"$$TARGET".xml; rsync -u ../../distrib/plugins/"$$TARGET".xml "$$TARGET".xml"
+macx:QMAKE_POST_LINK = "\
+    rsync -u "$$TARGET".xml $$MESHLAB_DISTRIB_DIRECTORY/plugins/"$$TARGET".xml; \
+    rsync -u $$MESHLAB_DISTRIB_DIRECTORYb/plugins/"$$TARGET".xml "$$TARGET".xml \
+"
