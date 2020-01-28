@@ -42,12 +42,12 @@ We provide a set of scripts that allows to compile and deploy meshlab for every 
 
 The MeshLab repository is organized as follows:
 
-* `distrib`
-* `docs`
-* `install`
-* `sample`
-* `src`
-* `vcglib`
+* `distrib`: this folder contains a set of prebuilt libraries, shaders and plugins that will be used by MeshLab once it is compiled. Binaries and plugins will be placed in this folder after MeshLab is built, or a copy of this folder will be placed in the chosen shadow build directory. For more details, check the readme file inside the folder;
+* `docs`: doxygen scripts for generating MeshLab documentation. For more details, check the readme file inside the folder;
+* `install`: in this folder there are a set of platform-dependent script to build and deploy MeshLab. For more details, check the readme file inside the folder;
+* `sample`: a set of files (meshes, images) used for tests;
+* `src`: this folder contains all the source code of MeshLab, its plugins and the external libraries that it requires. For more details, check the readme file inside the folder; 
+* `vcglib`: submodule of [VCGLib](https://github.com/cnr-isti-vclab/vcglib).
  
 # License
 
