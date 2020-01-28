@@ -220,7 +220,7 @@ Section -Prerequisites
 	${If} $1 == "1"
 		Goto endPrerequisites
 	${Else}
-		ExecWait "$INSTDIR\vc_redist.x64.exe"
+		ExecWait '"$INSTDIR\vc_redist.x64.exe" /q /norestart'
 	${EndIf}
 	endPrerequisites:
 SectionEnd
