@@ -12,14 +12,19 @@
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH="../.."
+    BUILD_PATH="../../src"
 else
     BUILD_PATH=$1
 fi
 
-echo "Build path is: " $BUILD_PATH
-SOURCE_PATH="../../src"
+if ! [[-d $BUILD_PATH]]
+then
+    mkdir $BUILD_PATH
+fi
 
-cd BUILD_PATH
-qmake SOURCE_PATH
-make
+echo "Build path is: " $BUILD_PATH
+SOURCE_PATH=$PWD/../../src
+
+cd $BUILD_PATH
+qmake $SOURCE_PATH/meshlab.pro
+make -j4

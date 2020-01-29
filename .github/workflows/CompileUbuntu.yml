@@ -18,7 +18,8 @@ jobs:
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
-       sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
+       #sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
+       sh install/linux/linux_setup_env_ubuntu.sh
     - name: Setting env variables
       id: envs
       shell: bash
@@ -26,15 +27,11 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Compiling MeshLab
       run: |
-        cd src/
-        qmake 
-        make -j4
+        sh install/linux/linux_build.sh
     - name: Creating Meshlab Portable ZIP
       run : |
-        cd install/linux
-        ./linux_install.sh
-        cd ../../distrib/
-        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        sh install/linux/linux_install.sh
+        mv distrib/*.AppImage .
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
