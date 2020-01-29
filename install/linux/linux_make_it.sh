@@ -13,6 +13,8 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries and
 # AppImage will be then placed inside BUILD_PATH/distrib.
 
+cd "${0%/*}" #move to script directory
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then

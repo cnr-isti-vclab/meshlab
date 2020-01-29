@@ -11,6 +11,8 @@
 # 
 # You can give as argument the DISTRIB_PATH.
 
+cd "${0%/*}" #move to script directory
+
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
