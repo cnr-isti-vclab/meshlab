@@ -34,7 +34,7 @@ You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
 4. Before the build, deactive the `QtQuickCompiler` option from the qmake call in the project options;
 5. Build meshlab.
 
-A compilation with `cmake` is also supported. 
+A compilation with `cmake` is also supported. For more details and compilation settings, see `src`.
 
 We provide a set of scripts that allows to compile and deploy meshlab for every platform. You can find these scripts in the `install` folder.
 
