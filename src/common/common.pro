@@ -41,6 +41,7 @@ INCLUDEPATH *= \
 
 # Input
 HEADERS += 	\
+    compile_time_version.h \
     filterparameter.h \
     filterscript.h \
     GLLogStream.h \
