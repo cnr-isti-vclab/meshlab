@@ -36,7 +36,7 @@ jobs:
         make -j4
     - name: Creating DMG
       run: |
-         cd install/macx
+         cd install/macos
          ./macinstall_latest.sh
          cd ../..
          ls -la distrib/MeshLab${{steps.envs.outputs.date}}.dmg

@@ -1,6 +1,6 @@
 #!/bin/bash
-# this is a script shell for compiling meshlab in a Linux environment.
-# Requires a Qt environment which is set-up properly, and an accessible
+# this is a script shell for compiling meshlab in a MacOS environment.
+# Requires a Qt environment which is set-up properly from brew, and an accessible
 # qmake binary.
 #
 # Without given arguments, MeshLab will be built in the meshlab/src
@@ -9,12 +9,13 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries will be
 # then placed inside BUILD_PATH/distrib.
 
-cd "${0%/*}" #move to script directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
 
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    BUILD_PATH="../../src"
+    BUILD_PATH=$PWD/../../src
 else
     BUILD_PATH=$1
 fi
@@ -28,5 +29,5 @@ echo "Build path is: " $BUILD_PATH
 SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
-qmake $SOURCE_PATH/meshlab.pro
+qmake $SOURCE_PATH/meshlab.pro "CONFIG+=meshlab_mini"
 make -j4

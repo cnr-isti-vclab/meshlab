@@ -33,7 +33,7 @@ jobs:
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable_windows
+        name: meshlab_windows_portable
         path: distrib
 
   windows_build_cmake:
@@ -62,8 +62,8 @@ jobs:
       run: |
         cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
         cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
-    - name: Uploading MeshLab Portable
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_portable_windows_cmake
-        path: install
+#    - name: Uploading MeshLab Portable
+#      uses: actions/upload-artifact@v1
+#      with:
+#        name: meshlab_portable_windows_cmake
+#        path: install

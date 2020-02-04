@@ -1,8 +1,5 @@
 #!/bin/bash
-# this is a script shell for compiling and deploying meshlab in a Linux environment.
-#
-# This script can be run only in the oldest supported linux distro that you are using
-# due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
+# this is a script shell for compiling and deploying meshlab in a MacOS environment.
 #
 # Requires a Qt environment which is set-up properly, and an accessible
 # qmake binary.
@@ -13,7 +10,8 @@
 # You can give as argument the BUILD_PATH, and meshlab binaries and
 # AppImage will be then placed inside BUILD_PATH/distrib.
 
-cd "${0%/*}" #move to script directory
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd $DIR #move to script directory
 
 #checking for parameters
 if [ "$#" -eq 0 ]
@@ -23,5 +21,6 @@ else
     BUILD_PATH=$1
 fi
 
-sh linux_build.sh $BUILD_PATH
-sh linux_appimage.sh $BUILD_PATH/distrib
+sh macos_build.sh $BUILD_PATH
+sh macos_deploy.sh $BUILD_PATH/distrib
+sh macos_dmg.sh $BUILD_PATH/distrib

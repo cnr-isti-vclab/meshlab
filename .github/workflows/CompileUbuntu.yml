@@ -18,7 +18,6 @@ jobs:
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
-       #sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
        sh install/linux/linux_setup_env_ubuntu.sh
     - name: Setting env variables
       id: envs
@@ -30,17 +29,17 @@ jobs:
         sh install/linux/linux_build.sh
     - name: Creating Meshlab Portable ZIP
       run : |
-        sh install/linux/linux_install.sh
+        sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable_linux
+        name: meshlab_linux_portable
         path: distrib/
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux
+        name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
