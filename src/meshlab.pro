@@ -119,10 +119,11 @@ SUBDIRS += \
 !equals(PWD, $$OUT_PWD) {
 
     #copying the "lib" folder inside the $$OUT_PWD/distrib
-    distrib.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD/distrib)\"
-    first.depends += $(first) distrib
+    win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD/distrib)\"
+    !win32:copydir.commands = $(COPY_DIR) \"$$shell_path($$PWD/../distrib)\" \"$$shell_path($$OUT_PWD)\"
+    first.depends += $(first) copydir
     export(first.depends)
-    export(distrib.commands)
+    export(copydir.commands)
 
-    QMAKE_EXTRA_TARGETS += first distrib
+    QMAKE_EXTRA_TARGETS += first copydir
 }
