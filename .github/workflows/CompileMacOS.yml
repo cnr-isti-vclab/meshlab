@@ -24,6 +24,8 @@ jobs:
       id: envs
       shell: bash
       run: |
+        #sh install/macos/macos_setup_env.sh
+        #necessary here on github actions:
         echo '::set-env name=QTDIR::/usr/local/opt/qt'
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
@@ -35,12 +37,20 @@ jobs:
     - name: Deploying MeshLab
       run: |
         sh install/macos/macos_deploy.sh
+    - name: Creating MeshLab Portable APP
+      run: |
+        zip -r distrib/MeshLab${{steps.envs.outputs.date}}-macos.app.zip distrib/meshlab.app
     - name: Creating DMG
       run: |
          sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+    - name: Uploading APP
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_macos_portable
+        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.app.zip
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_macos
+        name: meshlab_macos_dmg
         path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg

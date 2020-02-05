@@ -27,19 +27,19 @@ jobs:
     - name: Compiling MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Creating Meshlab Portable ZIP
+    - name: Creating MeshLab Portable ZIP
       run : |
         sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_portable
+        name: meshlab_portable_linux
         path: distrib/
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux_appimage
+        name: meshlab_appimage_linux
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
