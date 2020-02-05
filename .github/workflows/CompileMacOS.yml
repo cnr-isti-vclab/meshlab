@@ -37,9 +37,6 @@ jobs:
     - name: Deploying MeshLab
       run: |
         sh install/macos/macos_deploy.sh
-    - name: Creating MeshLab Portable APP
-      run: |
-        zip -r distrib/MeshLab${{steps.envs.outputs.date}}-macos.app.zip distrib/meshlab.app
     - name: Creating DMG
       run: |
          sh install/macos/macos_dmg.sh
@@ -48,7 +45,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_portable
-        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.app.zip
+        path: distrib/meshlab.app/
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:

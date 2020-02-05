@@ -1,9 +1,9 @@
-name: CompileAndDeploy
+name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test the deployment
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test the deployment
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   ubuntu_build:
@@ -64,6 +64,8 @@ jobs:
       id: envs
       shell: bash
       run: |
+        #sh install/macos/macos_setup_env.sh
+        #necessary here on github actions:
         echo '::set-env name=QTDIR::/usr/local/opt/qt'
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
@@ -71,16 +73,19 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"   
     - name: Compiling MeshLab
       run: |
-        cd src/
-        qmake
-        make -j4
+        sh install/macos/macos_build.sh
+    - name: Deploying MeshLab
+      run: |
+        sh install/macos/macos_deploy.sh
     - name: Creating DMG
       run: |
-         cd install/macx
-         ./macinstall_latest.sh
-         cd ../..
-         ls -la distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+         sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+    - name: Uploading APP
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_macos_portable
+        path: distrib/meshlab.app/
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
@@ -117,7 +122,7 @@ jobs:
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable_windows
+        name: meshlab_windows_portable
         path: distrib
         
 #after building MeshLab for the three platforms, we create a release in github       
@@ -175,28 +180,28 @@ jobs:
         asset_content_type: MeshLab AppImage for Linux
 
     #MacOS Release
-#    - name: Downloading MacOS APP
-#      uses: actions/download-artifact@v1
-#      with:
-#        name: meshlab_macos_portable
-#    - name: Renaming MacOS APP
-#      run: |
-#        mv meshlab_macos_portable MeshLab${{steps.envs.outputs.date}}-macos.app
-#        zip -r MeshLab${{steps.envs.outputs.date}}-macos.app.zip MeshLab${{steps.envs.outputs.date}}-macos.app
+    - name: Downloading MacOS APP
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_macos_portable
+    - name: Renaming MacOS APP
+      run: |
+        mv meshlab_macos_portable MeshLab${{steps.envs.outputs.date}}-macos.app
+        zip -r MeshLab${{steps.envs.outputs.date}}-macos.app.zip MeshLab${{steps.envs.outputs.date}}-macos.app
     - name: Downloading MacOS DMG
       uses: actions/download-artifact@v1
       with:
         name: meshlab_macos_dmg
-#    - name: Uploading ReleaseMacOSAPP
-#      id: upload-release-macos_app
-#      uses: actions/upload-release-asset@v1.0.1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-#        asset_path: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
-#        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
-#        asset_content_type: MeshLab for MacOS
+    - name: Uploading ReleaseMacOSAPP
+      id: upload-release-macos_app
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
+        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
+        asset_content_type: MeshLab for MacOS
     - name: Uploading ReleaseMacOSDMG
       id: upload-release-macos
       uses: actions/upload-release-asset@v1.0.1
