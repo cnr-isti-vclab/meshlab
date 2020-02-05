@@ -31,15 +31,13 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"   
     - name: Compiling MeshLab
       run: |
-        cd src/
-        qmake
-        make -j4
+        sh install/macos/macos_build.sh
+    - name: Deploying MeshLab
+      run: |
+        sh install/macos/macos_deploy.sh
     - name: Creating DMG
       run: |
-         cd install/macx
-         ./macinstall_latest.sh
-         cd ../..
-         ls -la distrib/MeshLab${{steps.envs.outputs.date}}.dmg
+         sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
