@@ -8,7 +8,7 @@ The follwing scripts are provided:
 * `linux_build.sh`: this script compiles MeshLab in a Linux environment:
 	* it requires a properly set Qt environment (see `linux_setup_env_ubuntu.sh`); 
 	* without given arguments, all the binaries will be placed in the `meshlab/distrib` folder. You can give as argument the `BUILD_PATH`, and meshlab binaries will be then placed inside `BUILD_PATH/distrib`;
-* `linux_build_meshlab_mini.sh`: this script compiles MeshLab mini in a Linux environment. Works in the same way as the `macos_build.sh` script;
+* `linux_build_meshlab_mini.sh`: this script compiles MeshLab mini in a Linux environment. Works in the same way as the `linux_build.sh` script;
 * `linux_deploy.sh`: makes the `distrib` folder a portable version of MeshLab (no Qt and other libraries dependencies):
 	* it requires a properly built meshlab `distrib` directory (see `linux_build.sh`);
 	* without given arguments, the folder that will be deployed is `meshlab/distrib`. You can give as argument the `DISTRIB_PATH`;
