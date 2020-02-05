@@ -3,7 +3,16 @@ TEMPLATE = lib
 TARGET = qhull
 CONFIG += staticlib
 
-INCLUDEPATH += src/
+HEADERS += \
+    src/geom.h \
+    src/io.h \
+    src/mem.h \
+    src/merge.h \
+    src/qhull.h \
+    src/qhull_a.h \
+    src/qset.h \
+    src/stat.h \
+    src/user.h
 
 SOURCES += \
     src/geom.c \
