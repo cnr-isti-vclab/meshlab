@@ -103,7 +103,7 @@ win32:RC_FILE = meshlab.rc
 
 # ## the xml info list
 # ## the next time the app open a new extension
-QMAKE_INFO_PLIST = $$MESHLAB_SOURCE_DIRECTORY/../install/macx/Info.plist
+QMAKE_INFO_PLIST = Info.plist
 
 # to add MacOS icon
 ICON = images/meshlab.icns

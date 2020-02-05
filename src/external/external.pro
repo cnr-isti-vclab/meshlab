@@ -6,7 +6,8 @@ SUBDIRS	= \
     muparser_v225/muParser.pro \
     levmar-2.3/levmar-2.3.pro \
     structuresynth-1.5/structuresynth.pro \
-    jhead-3.04/jhead-3.04.pro
+    jhead-3.04/jhead-3.04.pro \
+    qhull-2003.1/qhull2003.1.pro
 #   openkinect/openkinect.pro
 
 !CONFIG(system_bzip2)   SUBDIRS	+= 	bzip2-1.0.5/bzip2-1.0.5.pro

@@ -11,21 +11,9 @@ SOURCES += \
 INCLUDEPATH += \
     $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src
 
-#TODO: compile qhull in external and then link it here
-#      instead of including all the sources
-SOURCES += \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/geom.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/geom2.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/global.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/io.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/mem.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/merge.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/poly.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/poly2.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/qconvex.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/qhull.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/qset.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/stat.c \
-    $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src/user.c
+win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/qhull.lib
+win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libqhull.a
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libqhull.a
+linux-g++:LIBS += -lqhull
 
 TARGET = filter_qhull
