@@ -27,7 +27,7 @@ OTHER_FILES += \
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/ssynth.lib
 win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libssynth.a
 macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libssynth.a
-linux-g++:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++ -lssynth
+linux:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++ -lssynth
 
 TARGET = filter_ssynth
 

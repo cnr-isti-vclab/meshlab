@@ -18,4 +18,4 @@ INCLUDEPATH += $$MESHLAB_EXTERNAL_DIRECTORY/muparser_v225/include
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/muparser.lib
 win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libmuparser.a
 macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/libmuparser.a
-linux-g++:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++ -lmuparser
+linux:LIBS += -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++ -lmuparser

@@ -21,7 +21,7 @@ linux:CONFIG += dll
 # The following lines are necessary to avoid that when you re-compile everything you still find old dll in the plugins dir
 macx:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.dylib
 win32:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.dll
-linux-g++:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.so
+linux:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.so
 
 INCLUDEPATH *= \
     ../.. \
