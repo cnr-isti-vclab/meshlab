@@ -1,4 +1,4 @@
-linux:DESTDIR      = $$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++
+linux:DESTDIR      = $$MESHLAB_DISTRIB_DIRECTORY/lib/linux
 macx:DESTDIR       = $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64
 win32-g++:DESTDIR  = $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc
 win32-msvc:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc

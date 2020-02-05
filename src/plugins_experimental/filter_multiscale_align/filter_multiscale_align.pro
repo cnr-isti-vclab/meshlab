@@ -22,8 +22,8 @@ CONFIG(system_eigen3):  INCLUDEPATH *= $$EIGENDIR   #needed by Grenaille
 unix: QMAKE_CXXFLAGS += -DQ_OS_LINUX
 
 # OpenMP
-LIBS += -fopenmp 
+linux:LIBS += -fopenmp
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS += -fopenmp
+linux:QMAKE_CXXFLAGS += -fopenmp
 #QMAKE_CXXFLAGS_RELEASE += -g
 #QMAKE_CXXFLAGS_RELEASE -= -O2

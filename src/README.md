@@ -10,21 +10,23 @@ The source code of MeshLab is structured in the following folders:
  * meshlabserver: a tool that allows to compute mesh operations through command line
  * meshlabplugins: all the plugins that can be added to MeshLab.
  
- There are also a set of sample plugins:
+There are also a set of sample plugins:
  
  * sampleplugins.
  
- The following folders are used by `cmake`:
+The following folders are used by `cmake`:
  
  * cmake;
  * templates.
  
- There are also two folders that contains MeshLab plugins that are no longer supported or are experimental, and these plugins are not compiled in any of MeshLab configurations:
+There are also two folders that contains MeshLab plugins that are no longer supported or are experimental, and these plugins are not compiled in any of MeshLab configurations:
  
  * plugins_experimental;
  * plugins_unsupported.
  
 ## Compiling MeshLab
+
+MeshLab compiles with the three major compilers: `gcc`, `clang`, and `msvc`.
 
 MeshLab requires [Qt](https://www.qt.io/) >= 5.9, with `script` and `xmlpatterns` as additional packages.
 

@@ -12,7 +12,7 @@ QT += script
 mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.dylib
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -lcommon -lopengl32 -lGLU32
-linux-g++:LIBS += -lcommon -lGL -lGLU
+linux:LIBS += -lcommon -lGL -lGLU
 
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 

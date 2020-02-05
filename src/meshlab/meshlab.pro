@@ -144,7 +144,7 @@ macx:QMAKE_POST_LINK = "\
 
 linux:LIBS += \
     -lcommon -lGLU \
-    -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux-g++ -ljhead
+    -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
 !CONFIG(system_glew) {
 	INCLUDEPATH *= $$GLEWDIR/include

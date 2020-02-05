@@ -27,6 +27,6 @@ TARGET = io_3ds
 win32-msvc:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/3ds.lib
 win32-g++:LIBS	+= $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/lib3ds.a
 macx:LIBS       += $$MESHLAB_DISTRIB_DIRECTORY/lib/macx64/lib3ds.a
-linux-g++:LIBS  += -l3ds
+linux:LIBS  += -l3ds
 
 
