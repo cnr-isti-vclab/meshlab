@@ -47,6 +47,13 @@ SUBDIRS += \
     meshlabplugins/io_pdb \
     meshlabplugins/io_txt \
     meshlabplugins/io_u3d \
+# Filter samples
+    sampleplugins/sampleedit \
+    sampleplugins/samplefilter \
+    sampleplugins/samplefilterdyn \
+    sampleplugins/filter_createiso \
+    sampleplugins/filter_geodesic \
+    sampleplugins/sample_filtergpu \
 # Filter plugins
     meshlabplugins/filter_ao \
     meshlabplugins/filter_camera \
@@ -99,18 +106,6 @@ SUBDIRS += \
 #no longer needed# meshlabplugins/filter_colorize \
 #no longer supported#   meshlabplugins/edit_pickpoints \
 
-}
-
-meshlab_samples {
-
-SUBDIRS += \
-# Sample Plugins
-    sampleplugins/sampleedit \
-    sampleplugins/samplefilter \
-    sampleplugins/samplefilterdyn \
-    sampleplugins/filter_createiso \
-    sampleplugins/filter_geodesic \
-    sampleplugins/sample_filtergpu
 }
 
 # if distrib folder is not in $$PWD/../distrib (shadow build case),
