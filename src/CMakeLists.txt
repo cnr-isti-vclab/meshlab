@@ -354,7 +354,7 @@ if(INSTALL_SAMPLE_RANGEMAPS)
 endif()
 
 if(NOT WIN32 AND NOT APPLE)
-    install(FILES ../install/meshlab.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+    install(FILES ../install/linux/resources/meshlab.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
     install(FILES ../install/meshlab.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor)
 endif()
 

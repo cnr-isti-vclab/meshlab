@@ -5,7 +5,7 @@ HEADERS = \
     render_helper.h \
     floatbuffer.h \
     pushpull.h \
-    rastering.h \
+    rastering.h
 
 SOURCES = \
     filter_color_projection.cpp
