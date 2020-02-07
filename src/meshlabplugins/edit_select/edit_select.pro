@@ -8,7 +8,7 @@ SOURCES += \
     edit_select_factory.cpp \
     edit_select.cpp
 
-RESOURCES +=
+RESOURCES += \
     edit_select.qrc
 
 TARGET = edit_select
