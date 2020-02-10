@@ -103,7 +103,7 @@ win32:RC_FILE = meshlab.rc
 
 # ## the xml info list
 # ## the next time the app open a new extension
-QMAKE_INFO_PLIST = Info.plist
+#QMAKE_INFO_PLIST = Info.plist
 
 # to add MacOS icon
 ICON = images/meshlab.icns
@@ -139,7 +139,7 @@ macx:QMAKE_POST_LINK = "\
 #CONFIG(release,debug | release) {
 #	win32-msvc2005:release:LIBS     += -L../common/release -lcommon
 #	win32-msvc2008:release:LIBS     += -L../common/release -lcommon
-#	win32-g++:release:LIBS 			+= -L../common/release -lcommon
+#	win32-g++:release:LIBS 		+= -L../common/release -lcommon
 #}
 
 linux:LIBS += \
