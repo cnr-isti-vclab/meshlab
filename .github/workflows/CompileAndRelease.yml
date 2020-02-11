@@ -1,9 +1,9 @@
 name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   ubuntu_build:
