@@ -41,7 +41,7 @@ rm -r plugins/U3D_OSX/
 rm -r plugins/U3D_W32/
 
 $INSTALL_PATH/resources/linuxdeployqt meshlab -appimage
-mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage
+mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage -executable=meshlabserver
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo "distrib folder is now a self contained meshlab application"

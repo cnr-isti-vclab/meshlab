@@ -118,7 +118,7 @@ jobs:
     - name: Creating MeshLab Portable ZIP
       run: |
         cd distrib
-        windeployqt --no-translations meshlab.exe
+        windeployqt --no-translations meshlab.exe -executable=meshlabserver.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
