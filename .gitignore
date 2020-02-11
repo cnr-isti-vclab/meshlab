@@ -20,7 +20,7 @@ distrib/meshlab.app/*
 distrib/meshlab
 distrib/meshlabserver
 distrib/plugins/*.xml
-install/macx/meshlab_dmg_final.json
+install/macos/resources/meshlab_dmg_final.json
 install/snap20????/prime
 install/snap20????/parts
 install/snap20????/stage
