@@ -1,7 +1,9 @@
 include (../../shared.pri)
 
-HEADERS       += samplefilter.h
+HEADERS += \
+    samplefilter.h
 
-SOURCES       += samplefilter.cpp
+SOURCES += \
+    samplefilter.cpp
 		
-TARGET        = samplefilter
+TARGET = samplefilter

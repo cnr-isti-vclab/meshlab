@@ -1181,51 +1181,56 @@ void MainWindow::checkForUpdates(bool verboseFlag)
 
 void MainWindow::connectionDone(QNetworkReply *reply)
 {
-  QString answer = reply->readAll();
+    QString answer = reply->readAll();
 
-  QSettings settings;
-  QSettings::setDefaultFormat(QSettings::NativeFormat);
+    QSettings settings;
+    QSettings::setDefaultFormat(QSettings::NativeFormat);
 
-  // Check if the user specified not to be reminded to upgrade
-  const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
-  bool dontRemindMeAboutUpgradeVal = false;
-  if (settings.contains(dontRemindMeAboutUpgradeVar))
-      dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
+    // Check if the user specified not to be reminded to upgrade
+    const QString dontRemindMeAboutUpgradeVar("dontRemindMeAboutUpgrade");
+    bool dontRemindMeAboutUpgradeVal = false;
+    if (settings.contains(dontRemindMeAboutUpgradeVar))
+        dontRemindMeAboutUpgradeVal = settings.value(dontRemindMeAboutUpgradeVar).toBool();
 
-  // This block is for debugging. Uncomment the lines below
-  // to force the message box to appear.
-  // answer = QString("NEW You must upgrade.");
-  // dontRemindMeAboutUpgradeVal = false;
-  
-  if (dontRemindMeAboutUpgradeVal) 
-    return;
+    // This block is for debugging. Uncomment the lines below
+    // to force the message box to appear.
+    // answer = QString("NEW You must upgrade.");
+    // dontRemindMeAboutUpgradeVal = false;
 
-  // Set up a message box for the user
-  QMessageBox msgBox(this);
-  msgBox.setWindowTitle("MeshLab Version Checking");
-  msgBox.addButton(QMessageBox::Ok);
-  QCheckBox dontShowCheckBox("Don't show this message again.");
-  dontShowCheckBox.blockSignals(true);
-  msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);                
+    if (dontRemindMeAboutUpgradeVal)
+        return;
 
-  if (answer.left(3) == QString("NEW"))
-      msgBox.setText(answer.remove(0, 3));
-  else 
-    if (VerboseCheckingFlag)
+    // Set up a message box for the user
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("MeshLab Version Checking");
+    msgBox.addButton(QMessageBox::Ok);
+    QCheckBox dontShowCheckBox("Don't show this message again.");
+    dontShowCheckBox.blockSignals(true);
+    msgBox.addButton(&dontShowCheckBox, QMessageBox::ResetRole);
+
+    if (answer.left(3) == QString("NEW"))
     {
-      if (answer.left(2) == QString("ok"))
-          msgBox.setText("Your MeshLab version is the most recent one.");
-      else 
-          msgBox.setText("Warning. Update Checking server did not answer correctly: " + answer);
+        msgBox.setText(answer.remove(0, 3));
     }
-  reply->deleteLater();
-  
-  int userReply = msgBox.exec();
-  if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
-	settings.setValue(dontRemindMeAboutUpgradeVar, true);
+    else if (VerboseCheckingFlag)
+    {
+        if (answer.left(2) == QString("ok"))
+            msgBox.setText("Your MeshLab version is the most recent one.");
+        else
+            msgBox.setText("Warning. Update Checking server did not answer correctly: " + answer);
+    }
+    reply->deleteLater();
 
-  int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
-  settings.setValue("lastComunicatedValue", loadedMeshCounter);
+    // Showing the dialog only if there is a new version or if we are verbose
+    if (answer.left(3) == QString("NEW") || VerboseCheckingFlag)
+    {
+        int userReply = msgBox.exec();
+        if (userReply == QMessageBox::Ok && dontShowCheckBox.checkState() == Qt::Checked)
+            settings.setValue(dontRemindMeAboutUpgradeVar, true);
+    }
+
+    int loadedMeshCounter = settings.value("loadedMeshCounter", 0).toInt();
+    settings.setValue("lastComunicatedValue", loadedMeshCounter);
 }
 
 

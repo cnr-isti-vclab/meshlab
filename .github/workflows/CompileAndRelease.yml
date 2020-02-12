@@ -1,0 +1,210 @@
+name: CompileAndRelease
+
+on:
+  #[push, pull_request] #just for test release scripts
+  schedule:
+    - cron:  '0 0 1 * *' #every first day of the month at midnight
+
+jobs:
+  ubuntu_build:
+    name: Build MeshLab (Ubuntu)
+    runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Installing dependencies
+      run: |
+       sh install/linux/linux_setup_env_ubuntu.sh
+    - name: Setting env variables
+      id: envs
+      shell: bash
+      run: |
+        echo  ::set-output name=date::"$(date +%Y.%m)"
+    - name: Compiling MeshLab
+      run: |
+        sh install/linux/linux_build.sh
+    - name: Creating Meshlab Portable ZIP
+      run : |
+        sh install/linux/linux_appimage.sh
+        mv distrib/*.AppImage .
+    - name: Uploading Meshlab Portable
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_portable
+        path: distrib/
+    - name: Uploading Meshlab AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_linux_appimage
+        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+  
+  macos_build:
+    name: Build MeshLab (MacOS)
+    runs-on: macos
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Installing dependencies
+      run: |
+        brew install llvm libomp qt
+        npm install -g appdmg
+    - name: Setting env variables
+      id: envs
+      shell: bash
+      run: |
+        #sh install/macos/macos_setup_env.sh
+        #necessary here on github actions:
+        echo '::set-env name=QTDIR::/usr/local/opt/qt'
+        echo '::add-path::/usr/local/opt/qt/bin'
+        echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
+        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
+        echo  ::set-output name=date::"$(date +%Y.%m)"   
+    - name: Compiling MeshLab
+      run: |
+        sh install/macos/macos_build.sh
+    - name: Deploying MeshLab
+      run: |
+        sh install/macos/macos_deploy.sh
+    - name: Creating DMG
+      run: |
+         sh install/macos/macos_dmg.sh
+         mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+    - name: Uploading DMG
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_macos_dmg
+        path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        
+  windows_build:
+    name: Build MeshLab (Windows)
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Setting MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Installing QT
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: qtscript xmlpatterns
+    - name: Compiling MeshLab
+      run: |
+        cd src\
+        qmake
+        nmake
+    - name: Creating MeshLab Portable ZIP
+      run: |
+        cd distrib
+        windeployqt --no-translations meshlab.exe
+    - name: Uploading Meshlab Portable 
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_portable
+        path: distrib
+        
+#after building MeshLab for the three platforms, we create a release in github       
+  create_release:
+    name: Creating Release
+    needs: [ubuntu_build, macos_build, windows_build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setting env variables
+      id: envs
+      run: |
+        echo ::set-output name=date::"$(date +%Y.%m)"
+    - name: Publishing Release 
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      with:
+        tag_name: Meshlab-${{steps.envs.outputs.date}}
+        release_name: MeshLab-${{steps.envs.outputs.date}}
+        draft: false
+        prerelease: false
+    
+    #Linux Release
+    - name: Downloading Linux ZIP
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_linux_portable
+    - name: Creating Meshlab Linux Archive
+      run: |
+        zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_linux_portable/
+    - name: Downloading Linux AppImage
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_linux_appimage
+    - name: Uploading ReleaseLinuxPortable
+      id: upload-release-linux-portable
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: MeshLab${{steps.envs.outputs.date}}-linux.zip
+        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.zip
+        asset_content_type: MeshLab Portable for Linux
+    - name: Uploading ReleaseLinuxAppImage
+      id: upload-release-linux-appimage
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        asset_content_type: MeshLab AppImage for Linux
+
+    #MacOS Release
+    - name: Downloading MacOS DMG
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_macos_dmg
+    - name: Uploading ReleaseMacOSDMG
+      id: upload-release-macos
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: meshlab_macos_dmg/MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.dmg
+        asset_content_type: MeshLab for MacOS
+    
+    #Windows Release
+    - name: Downloading Windows ZIP
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_windows_portable
+    - name: Creating Meshlab Portable Archive
+      run: |
+        zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
+    - name: Uploading ReleaseWindowsPortable
+      id: upload-release-windows-portable
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: MeshLab${{steps.envs.outputs.date}}-windows.zip
+        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.zip
+        asset_content_type: MeshLab Portable for Windows 

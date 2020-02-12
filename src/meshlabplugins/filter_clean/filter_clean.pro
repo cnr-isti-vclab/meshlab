@@ -1,8 +1,10 @@
 include (../../shared.pri)
 
-HEADERS       += cleanfilter.h
+HEADERS += \
+    cleanfilter.h
 
-SOURCES       += cleanfilter.cpp	
+SOURCES += \
+    cleanfilter.cpp
 
-TARGET        = filter_clean
+TARGET = filter_clean
 

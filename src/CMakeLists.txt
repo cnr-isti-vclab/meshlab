@@ -11,7 +11,7 @@ endif()
 
 ### vcglib
 if(NOT VCGDIR)
-    get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/../../vcglib" ABSOLUTE)
+    get_filename_component(VCGDIR "${CMAKE_CURRENT_SOURCE_DIR}/../vcglib" ABSOLUTE)
     if(NOT EXISTS ${VCGDIR})
         set(VCGDIR NOTFOUND)
     endif()
@@ -315,8 +315,8 @@ set(COPIED_FILES)
 file(
     GLOB SHADERS
     LIST_DIRECTORIES false
-    "${CMAKE_CURRENT_SOURCE_DIR}/distrib/shaders/*.vert" "${CMAKE_CURRENT_SOURCE_DIR}/distrib/shaders/*.frag"
-    "${CMAKE_CURRENT_SOURCE_DIR}/distrib/shaders/*.gdp")
+    "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.vert" "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.frag"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../distrib/shaders/*.gdp")
 foreach(FN ${SHADERS})
     get_filename_component(NAME_ONLY ${FN} NAME)
     set(OUTFN ${MESHLAB_SHADER_OUTPUT_DIR}/${NAME_ONLY})
@@ -340,7 +340,7 @@ set_property(TARGET copy-distrib-files PROPERTY FOLDER Core)
 if(INSTALL_SAMPLE_MESHES)
     # Install sample files from distrib/sample directory (except for the rangemaps)
     install(
-        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../sample
         DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}
         COMPONENT Samples
         PATTERN "*/rangemaps" EXCLUDE)
@@ -348,14 +348,14 @@ endif()
 if(INSTALL_SAMPLE_RANGEMAPS)
     # Install sample rangemaps
     install(
-        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/distrib/sample/rangemaps
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../sample/rangemaps
         DESTINATION ${MESHLAB_SAMPLE_INSTALL_DIR}/sample
         COMPONENT Samples)
 endif()
 
 if(NOT WIN32 AND NOT APPLE)
-    install(FILES install/meshlab.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-    install(FILES install/meshlab.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor)
+    install(FILES ../install/linux/resources/meshlab.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+    install(FILES ../install/meshlab.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor)
 endif()
 
 if(Qt5_windeployqt_EXECUTABLE AND BUILD_WITH_WINDEPLOYQT_POST_BUILD)

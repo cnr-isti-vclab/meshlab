@@ -1,7 +1,9 @@
 include (../../shared.pri)
 
-HEADERS += io_json.h
+HEADERS += \
+    io_json.h
 
-SOURCES += io_json.cpp
+SOURCES += \
+    io_json.cpp
 
-TARGET   = io_json
+TARGET = io_json

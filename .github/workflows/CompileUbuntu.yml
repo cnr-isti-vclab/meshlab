@@ -10,42 +10,37 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
-       sudo apt install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev
-       cd ..
-       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       sh install/linux/linux_setup_env_ubuntu.sh
     - name: Setting env variables
       id: envs
       shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Compiling external
-      run: |
-        cd src/external
-        qmake external.pro
-        make -j4
     - name: Compiling MeshLab
       run: |
-        cd src/
-        qmake meshlab_full.pro
-        make -j4
+        sh install/linux/linux_build.sh
     - name: Creating Meshlab Portable ZIP
       run : |
-        cd src/install/linux
-        ./linux_install.sh
-        cd ../../distrib/
-        mv *.AppImage ../MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        sh install/linux/linux_appimage.sh
+        mv distrib/*.AppImage .
     - name: Uploading Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_portable_linux
-        path: src/distrib/
+        name: meshlab_linux_portable
+        path: distrib/
     - name: Uploading Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
-        name: meshlab_linux
-        path: src/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
+        name: meshlab_linux_appimage
+        path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
          
 
   ubuntu_build_cmake:
@@ -54,17 +49,19 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Installing dependencies
       run: |
-       sudo apt update
-       sudo apt install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build 
-       cd ..
-       git clone --depth=1 --branch=devel https://github.com/cnr-isti-vclab/vcglib.git
+       sudo apt-get update
+       sudo apt-get install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build 
     - name: Configuring
       run: |
-        mkdir -p src/build
-        cd src/build
-        cmake .. -G Ninja
+        cmake src/ -G Ninja
     - name: Compiling meshlab
-      run: ninja -C src/build
+      run: ninja -C .
 
