@@ -81,11 +81,6 @@ jobs:
       run: |
          sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
-    - name: Uploading APP
-      uses: actions/upload-artifact@v1
-      with:
-        name: meshlab_macos_portable
-        path: distrib/meshlab.app/
     - name: Uploading DMG
       uses: actions/upload-artifact@v1
       with:
@@ -180,28 +175,10 @@ jobs:
         asset_content_type: MeshLab AppImage for Linux
 
     #MacOS Release
-    - name: Downloading MacOS APP
-      uses: actions/download-artifact@v1
-      with:
-        name: meshlab_macos_portable
-    - name: Renaming MacOS APP
-      run: |
-        mv meshlab_macos_portable MeshLab${{steps.envs.outputs.date}}-macos.app
-        zip -r MeshLab${{steps.envs.outputs.date}}-macos.app.zip MeshLab${{steps.envs.outputs.date}}-macos.app
     - name: Downloading MacOS DMG
       uses: actions/download-artifact@v1
       with:
         name: meshlab_macos_dmg
-    - name: Uploading ReleaseMacOSAPP
-      id: upload-release-macos_app
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
-        asset_name: MeshLab${{steps.envs.outputs.date}}-macos.app.zip
-        asset_content_type: MeshLab for MacOS
     - name: Uploading ReleaseMacOSDMG
       id: upload-release-macos
       uses: actions/upload-release-asset@v1.0.1
