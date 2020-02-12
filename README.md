@@ -23,18 +23,18 @@ Right now, the portable version of meshlab won't start if doesn't find a Visual 
 
 # Build instructions
 
-We provide a set of scripts that build and deploy automatically MeshLab. All the scripts can be found in the `meshlab/install` folder. 
-For specific build instructions see the `meshlab/src` folder.
+We provide a set of scripts that build and deploy automatically MeshLab. All the scripts can be found in the [install](https://github.com/cnr-isti-vclab/meshlab/tree/master/install) folder. 
+For specific build instructions see the [src](https://github.com/cnr-isti-vclab/meshlab/tree/master/src) folder.
 
 # Structure of the Repository
 
 The MeshLab repository is organized as follows:
 
-* `distrib`: this folder contains a set of prebuilt libraries, shaders and plugins that will be used by MeshLab once it is compiled. Binaries and plugins will be placed in this folder after MeshLab is built, or a copy of this folder will be placed in the chosen shadow build directory. For more details, check the readme file inside the folder;
-* `docs`: doxygen scripts for generating MeshLab documentation. For more details, check the readme file inside the folder;
-* `install`: in this folder there are a set of platform-dependent script to build and deploy MeshLab. For more details, check the readme file inside the folder;
+* `distrib`: this folder contains a set of prebuilt libraries, shaders and plugins that will be used by MeshLab once it is compiled. Binaries and plugins will be placed in this folder after MeshLab is built, or a copy of this folder will be placed in the chosen shadow build directory. For more details, check the readme [here](https://github.com/cnr-isti-vclab/meshlab/tree/master/distrib);
+* `docs`: doxygen scripts for generating MeshLab documentation. For more details, check the readme [here](https://github.com/cnr-isti-vclab/meshlab/tree/master/docs);
+* `install`: in this folder there are a set of platform-dependent script to build and deploy MeshLab. For more details, check the readme [here](https://github.com/cnr-isti-vclab/meshlab/tree/master/install);
 * `sample`: a set of files (meshes, images) used for tests;
-* `src`: this folder contains all the source code of MeshLab, its plugins and the external libraries that it requires. For more details, check the readme file inside the folder; 
+* `src`: this folder contains all the source code of MeshLab, its plugins and the external libraries that it requires. For more details, check the readme [here](https://github.com/cnr-isti-vclab/meshlab/tree/master/src); 
 * `vcglib`: submodule of [VCGLib](https://github.com/cnr-isti-vclab/vcglib).
  
 # License

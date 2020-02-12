@@ -24,13 +24,13 @@ The follwing scripts are provided:
 Building meshlab on a clean MacOS environment (compiled MeshLab in `meshlab/distrib`):
 
 	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	bash meshlab/install/macos/macos_setup_env.sh
-	bash meshlab/install/macos/macos_build.sh
+	sh meshlab/install/macos/macos_setup_env.sh
+	sh meshlab/install/macos/macos_build.sh
 
 Building and generating DMG on a clean MacOS environment, build directory in `~/build_meshlab`:
 
 	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	bash meshlab/install/macos/macos_setup_env.sh
-	bash meshlab/install/macos/macos_make_it.sh ~/build_meshlab
+	sh meshlab/install/macos/macos_setup_env.sh
+	sh meshlab/install/macos/macos_make_it.sh ~/build_meshlab
 	
 Meshlab*.dmg can be found in `~/build_meshlab/distrib/`.

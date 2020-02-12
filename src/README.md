@@ -4,15 +4,11 @@ In the `src` folder there are several folders containing all the source code and
 
 The source code of MeshLab is structured in the following folders:
 
- * external: it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding systme library is not found and then linked; some other libraries are just included by some plugins.
- * common: a series of utility functions used by MeshLab and its plugins.
- * meshlab: the GUI of the MeshLab application.
- * meshlabserver: a tool that allows to compute mesh operations through command line
- * meshlabplugins: all the plugins that can be added to MeshLab.
- 
-There are also a set of sample plugins:
- 
- * sampleplugins.
+ * [external](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/external): it contains a series of external libraries needed by several plugins. Some of these libraries are compiled before the compilation of meshlab, if a corresponding systme library is not found and then linked; some other libraries are just included by some plugins.
+ * [common](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/common): a series of utility functions used by MeshLab and its plugins.
+ * [meshlab](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlab): GUI and core of MeshLab.
+ * [meshlabserver](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabserver): a tool that allows to compute mesh operations through command line
+ * [meshlabplugins](https://github.com/cnr-isti-vclab/meshlab/tree/master/src/meshlabplugins): all the plugins that can be added to MeshLab.
  
 The following folders are used by `cmake`:
  
@@ -60,7 +56,6 @@ MeshLab has a plugin architecture and therefore all the plugins are compiled sep
 	make	
 	
 This configuration contains the info for building meshlab with a minimal set of plugins.
-[//]: # (TODO: jhead does not allow to add this: with no external dependencies and usually compile with no problem.)
 
 Some plugins of MeshLab need external libraries. All the required libraries are included in the `meshlab/src/external` folder, that are automatically compiled before MeshLab in all its configurations.
 
