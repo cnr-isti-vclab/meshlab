@@ -27,7 +27,7 @@ DEPENDPATH += \
     $$VCGDIR/vcg \
     $$VCGDIR/wrap
 
-HEADERS = \
+HEADERS += \
     ../common/interfaces.h \
     mainwindow.h \
     glarea.h \
@@ -54,7 +54,7 @@ HEADERS = \
     $$VCGDIR/wrap/gl/trimesh.h \
     filterthread.h
 
-SOURCES = \
+SOURCES += \
     main.cpp \
     mainwindow_Init.cpp \
     mainwindow_RunTime.cpp \
@@ -93,7 +93,8 @@ FORMS += \
     ui/filtergui.ui \
     ui/filtercreatortab.ui
 	
-RESOURCES = meshlab.qrc
+RESOURCES += \
+    meshlab.qrc
 
 win32-msvc2005: RCC_DIR = $(ConfigurationName)
 win32-msvc2008: RCC_DIR = $(ConfigurationName)
@@ -131,7 +132,7 @@ macx:LIBS += \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -ljhead \
     $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.dylib
 
-macx:QMAKE_POST_LINK = "\
+macx:QMAKE_POST_LINK += "\
     cp -P $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS; \
     install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
     "
