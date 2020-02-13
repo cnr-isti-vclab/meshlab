@@ -115,8 +115,7 @@ jobs:
         nmake
     - name: Deploying MeshLab
       run: |
-        cd distrib
-        windeployqt --no-translations meshlab.exe
+        .\install\windows\windows_deploy.ps1
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
