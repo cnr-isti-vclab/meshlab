@@ -29,7 +29,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Creating Meshlab Portable ZIP
+    - name: Deploying MeshLab
       run : |
         sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
@@ -105,15 +105,17 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         modules: qtscript xmlpatterns
+    - name: Setting Env
+      run: |
+        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
     - name: Compiling MeshLab
       run: |
         cd src\
         qmake
         nmake
-    - name: Creating MeshLab Portable ZIP
+    - name: Deploying MeshLab
       run: |
-        cd distrib
-        windeployqt --no-translations meshlab.exe
+        .\install\windows\windows_deploy.ps1
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:

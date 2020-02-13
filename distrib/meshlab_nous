@@ -1,9 +1,0 @@
-#!/bin/bash
-
-oldval = echo $LC_NUMERIC
-export LC_NUMERIC="en_US.UTF-8"
-chmod 744 ./meshlab
-./meshlab &
-export LC_NUMERIC=$oldval
-
-

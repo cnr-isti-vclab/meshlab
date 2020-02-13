@@ -16,10 +16,12 @@ cd "${0%/*}" #move to script directory
 #checking for parameters
 if [ "$#" -eq 0 ]
 then
-    DISTRIB_PATH="../../distrib"
+    DISTRIB_PATH=$PWD/../../distrib
 else
     DISTRIB_PATH=$1
 fi
+
+SOURCE_PATH=$PWD/../../src
 
 INSTALL_PATH=$(pwd)
 cd $DISTRIB_PATH
@@ -34,14 +36,15 @@ fi
 
 cp $INSTALL_PATH/../meshlab.png .
 cp $INSTALL_PATH/resources/default.desktop .
-cp ../LICENSE.txt .
-cp ../docs/readme.txt .
+cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
+cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
 
 rm -r plugins/U3D_OSX/
 rm -r plugins/U3D_W32/
+rm -r README.md
 
 $INSTALL_PATH/resources/linuxdeployqt meshlab -appimage -executable=meshlabserver
 mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage 
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo "distrib folder is now a self contained meshlab application"
+echo MeshLab$(date +%Y.%m)-linux.AppImage generated

@@ -27,7 +27,7 @@ jobs:
     - name: Compiling MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Creating Meshlab Portable ZIP
+    - name: Deploying MeshLab
       run : |
         sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
