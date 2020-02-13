@@ -34,6 +34,11 @@ if ($args.Count -gt 0){
 
 cd $DISTRIB_PATH
 
+if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
+    cd $DIR
+	throw 'meshlab.exe not found in ' + ($DISTRIB_PATH) + '. Exiting.'
+}
+
 Copy-Item (Join-Path $INSTALL_PATH ..\meshlab.png) .
 Copy-Item (Join-Path $SOURCE_PATH ..\LICENSE.txt) .
 Copy-Item (Join-Path $SOURCE_PATH ..\docs\readme.txt) .
