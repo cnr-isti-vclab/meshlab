@@ -20,6 +20,12 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 (http://www.gnu.org/licenses/gpl.txt) for more details.
 
+--- Windows Note ---
+
+If you are running MeshLab portable and you are getting the error “MSVCP140.dll not found” 
+or related, please install Visual C++ Redist by executing the vc_redist.exe file contained 
+in the meshlab portable archive. 
+
 --- References ----
 
 Please, when using this tool, cite the following reference:
