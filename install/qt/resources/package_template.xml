@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>MeshLab</DisplayName>
+    <Description>The open source system for processing and editing 3D triangular meshes.</Description>
+    <Version>MESHLAB_VERSION</Version>
+    <ReleaseDate>MESHLAB_DATE</ReleaseDate>
+    <Licenses>
+        <License name="GNU GENERAL PUBLIC LICENSE 3" file="LICENSE.txt" />
+    </Licenses>
+	<Name>com.vcg.meshlab</Name>
+    <Default>true</Default>
+</Package>

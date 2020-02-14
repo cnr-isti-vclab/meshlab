@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>MeshLab</Name>
+    <Version>MESHLAB_VERSION</Version>
+    <Title>MeshLab MESHLAB_VERSION Installer</Title>
+    <Publisher>VCG</Publisher>
+	<ProductUrl>http://www.meshlab.net/</ProductUrl>
+	<InstallerWindowIcon>meshlab.png</InstallerWindowIcon>
+    <InstallerApplicationIcon>meshlab.ico</InstallerApplicationIcon>
+    <Logo>logo.png</Logo>
+    <TargetDir>@ApplicationsDir@/MeshLab</TargetDir>
+	<StartMenuDir>MeshLab</StartMenuDir>
+	<RunProgram>@TargetDir@/meshlab.exe</RunProgram>
+	<RunProgramDescription>Run MeshLab</RunProgramDescription>
+</Installer>
