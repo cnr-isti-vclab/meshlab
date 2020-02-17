@@ -24,6 +24,10 @@ jobs:
     - name: Setting Env
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo  ::set-output name=date::"$(Get-Date -Format "yyyy.MM")"
+    - name: print date
+      run: |
+        echo ${{steps.envs.outputs.date}}
     - name: Compiling MeshLab
       run: |
         cd src\
@@ -48,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
-        path: install/windows/resources/MeshLab$(Get-Date -Format "yyyy.MM").exe
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe
 
   windows_build_cmake:
     name: Build MeshLab (Windows, CMake)
