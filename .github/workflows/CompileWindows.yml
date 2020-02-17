@@ -27,10 +27,11 @@ jobs:
         echo '::set-env name=date::$(Get-Date -Format "yyyy.MM")'
     - name: print env
       run: |
+        echo install/windows/resources/MeshLab$(Get-Date -Format "yyyy.MM").exe
         echo "date:"
-        echo ${{steps.envs.outputs.date}}
+        echo $env:date
         echo "VCINSTALLDIR:"
-        echo ${{steps.envs.outputs.VCINSTALLDIR}}
+        echo $env:VCINSTALLDIR
     - name: Compiling MeshLab
       run: |
         cd src\
