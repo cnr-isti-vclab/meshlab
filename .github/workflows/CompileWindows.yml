@@ -15,41 +15,41 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
-    - name: Setting MSVC
+    - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Installing QT
+    - name: Install QT
       uses: ouuan/install-qt-action@v2.3.1
       with:
         modules: qtscript xmlpatterns
-    - name: Compiling MeshLab
+    - name: Build MeshLab
       run: |
         cd src\
         qmake
         nmake
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
-    - name: Creating NSIS script
+    - name: NSIS script
       run: |
         .\install\windows\windows_nsis_script.ps1
-    - name: Creating installer
+    - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:
         script-file: "install/windows/resources/meshlab_final.nsi"
-    - name: Renaming installer
+    - name: Rename Installer
       run: |
         Rename-Item -Path install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe -NewName install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
-    - name: Uploading Meshlab Portable 
+    - name: Upload Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
         path: distrib
-    - name: Uploading Meshlab Installer
+    - name: Upload Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
@@ -67,9 +67,9 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Setting MSVC
+    - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Installing QT
+    - name: Install QT
       uses: ouuan/install-qt-action@v2.3.1
       with:
         modules: qtscript xmlpatterns
@@ -77,7 +77,7 @@ jobs:
       run: |
         cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install
         # -DBUILD_MINI=ON
-    - name: Build
+    - name: Build MeshLab
       run: |
         cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo -j 4
         cmake --build $env:GITHUB_WORKSPACE/build --config RelWithDebInfo --target INSTALL
