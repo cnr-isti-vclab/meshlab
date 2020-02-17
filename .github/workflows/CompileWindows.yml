@@ -22,6 +22,7 @@ jobs:
       with:
         modules: qtscript xmlpatterns
     - name: Setting Env
+      id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo  ::set-output name=date::"$(Get-Date -Format "yyyy.MM")"
