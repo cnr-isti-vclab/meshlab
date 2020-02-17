@@ -21,7 +21,6 @@ jobs:
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         $d = Get-Date -Format "yyyy.MM"
         echo '::set-output name=date::'$d
-        echo ${{steps.envs.outputs.date}}
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
