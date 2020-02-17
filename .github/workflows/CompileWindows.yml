@@ -39,13 +39,13 @@ jobs:
     - name: Creating installer
       uses: joncloud/makensis-action@v1
       with:
-        script-file: ".\install\windows\resources\meshlab_final.nsi"
+        script-file: "install/windows/resources/meshlab_final.nsi"
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
         path: distrib
-        - name: Uploading Meshlab Installer
+    - name: Uploading Meshlab Installer
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
