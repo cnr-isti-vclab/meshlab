@@ -28,7 +28,6 @@ jobs:
         modules: qtscript xmlpatterns
     - name: Compiling MeshLab
       run: |
-        echo ${{steps.envs.outputs.date}}
         cd src\
         qmake
         nmake
