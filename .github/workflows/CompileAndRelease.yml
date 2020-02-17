@@ -1,9 +1,9 @@
 name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   ubuntu_build:
@@ -99,15 +99,17 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Setting env variables
+      id: envs
+      run: |
+        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
-      uses: jurplel/install-qt-action@v2
+      uses: ouuan/install-qt-action@v2.3.1
       with:
         modules: qtscript xmlpatterns
-    - name: Setting Env
-      run: |
-        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
     - name: Compiling MeshLab
       run: |
         cd src\
@@ -116,11 +118,26 @@ jobs:
     - name: Deploying MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
+    - name: Creating NSIS script
+      run: |
+        .\install\windows\windows_nsis_script.ps1
+    - name: Creating installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: "install/windows/resources/meshlab_final.nsi"
+    - name: Renaming installer
+      run: |
+        Rename-Item -Path install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe -NewName install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
         path: distrib
+    - name: Uploading Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
         
 #after building MeshLab for the three platforms, we create a release in github       
   create_release:
@@ -197,6 +214,10 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_windows_portable
+    - name: Downloading Windows Installer
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_windows_installer
     - name: Creating Meshlab Portable Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
@@ -209,4 +230,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: MeshLab${{steps.envs.outputs.date}}-windows.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-windows.zip
-        asset_content_type: MeshLab Portable for Windows 
+        asset_content_type: MeshLab Portable for Windows
+    - name: Uploading ReleaseWindowsInstaller
+      id: upload-release-windows-installer
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: meshlab_windows_installer/MeshLab${{steps.envs.outputs.date}}-windows.exe
+        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.exe
+        asset_content_type: MeshLab Portable for Windows  

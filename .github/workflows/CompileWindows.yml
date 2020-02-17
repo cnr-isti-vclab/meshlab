@@ -41,6 +41,9 @@ jobs:
       uses: joncloud/makensis-action@v1
       with:
         script-file: "install/windows/resources/meshlab_final.nsi"
+    - name: Renaming installer
+      run: |
+        Rename-Item -Path install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe -NewName install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
@@ -50,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_installer
-        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
 
   windows_build_cmake:
     name: Build MeshLab (Windows, CMake)
