@@ -43,7 +43,7 @@ jobs:
         script-file: "install/windows/resources/meshlab_final.nsi"
     - name: Rename Installer
       run: |
-        Rename-Item -Path install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe -NewName install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
+        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
     - name: Upload Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
