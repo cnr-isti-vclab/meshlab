@@ -42,6 +42,7 @@ if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
 Copy-Item (Join-Path $INSTALL_PATH ..\meshlab.png) .
 Copy-Item (Join-Path $SOURCE_PATH ..\LICENSE.txt) .
 Copy-Item (Join-Path $SOURCE_PATH ..\docs\readme.txt) .
+Copy-Item (Join-Path $SOURCE_PATH ..\docs\privacy.txt) .
 
 rm -r plugins/U3D_OSX/
 rm -r plugins/U3D_LINUX/

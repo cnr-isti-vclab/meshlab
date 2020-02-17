@@ -18,27 +18,27 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Installing dependencies
+    - name: Install dependencies
       run: |
        sh install/linux/linux_setup_env_ubuntu.sh
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Compiling MeshLab
+    - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run : |
         sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
-    - name: Uploading Meshlab Portable
+    - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable
         path: distrib/
-    - name: Uploading Meshlab AppImage
+    - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
@@ -56,11 +56,11 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Installing dependencies
+    - name: Install dependencies
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       shell: bash
       run: |
@@ -71,17 +71,17 @@ jobs:
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(date +%Y.%m)"   
-    - name: Compiling MeshLab
+    - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run: |
         sh install/macos/macos_deploy.sh
-    - name: Creating DMG
+    - name: Create DMG
       run: |
          sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
-    - name: Uploading DMG
+    - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg
@@ -99,40 +99,57 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Setting MSVC
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Installing QT
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: qtscript xmlpatterns
-    - name: Setting Env
+    - name: Setup env variables
+      id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-    - name: Compiling MeshLab
+        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Install QT
+      uses: ouuan/install-qt-action@v2.3.1
+      with:
+        modules: qtscript xmlpatterns
+    - name: Build MeshLab
       run: |
         cd src\
         qmake
         nmake
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
-    - name: Uploading Meshlab Portable 
+    - name: NSIS script
+      run: |
+        .\install\windows\windows_nsis_script.ps1
+    - name: Create Installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: "install/windows/resources/meshlab_final.nsi"
+    - name: Rename Installer
+      run: |
+        Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
+    - name: Upload Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
         path: distrib
+    - name: Upload Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
         
 #after building MeshLab for the three platforms, we create a release in github       
   create_release:
-    name: Creating Release
+    name: Create Release
     needs: [ubuntu_build, macos_build, windows_build]
     runs-on: ubuntu-latest
     steps:
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       run: |
         echo ::set-output name=date::"$(date +%Y.%m)"
-    - name: Publishing Release 
+    - name: Publish Release 
       id: create_release
       uses: actions/create-release@v1.0.0
       env:
@@ -144,18 +161,18 @@ jobs:
         prerelease: false
     
     #Linux Release
-    - name: Downloading Linux ZIP
+    - name: Download Linux ZIP
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_portable
-    - name: Creating Meshlab Linux Archive
+    - name: Create Meshlab Linux Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-linux.zip meshlab_linux_portable/
-    - name: Downloading Linux AppImage
+    - name: Download Linux AppImage
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_appimage
-    - name: Uploading ReleaseLinuxPortable
+    - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -165,7 +182,7 @@ jobs:
         asset_path: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_content_type: MeshLab Portable for Linux
-    - name: Uploading ReleaseLinuxAppImage
+    - name: Upload ReleaseLinuxAppImage
       id: upload-release-linux-appimage
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -177,11 +194,11 @@ jobs:
         asset_content_type: MeshLab AppImage for Linux
 
     #MacOS Release
-    - name: Downloading MacOS DMG
+    - name: Download MacOS DMG
       uses: actions/download-artifact@v1
       with:
         name: meshlab_macos_dmg
-    - name: Uploading ReleaseMacOSDMG
+    - name: Upload ReleaseMacOSDMG
       id: upload-release-macos
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -193,14 +210,18 @@ jobs:
         asset_content_type: MeshLab for MacOS
     
     #Windows Release
-    - name: Downloading Windows ZIP
+    - name: Download Windows ZIP
       uses: actions/download-artifact@v1
       with:
         name: meshlab_windows_portable
-    - name: Creating Meshlab Portable Archive
+    - name: Download Windows Installer
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlab_windows_installer
+    - name: Create Meshlab Portable Archive
       run: |
         zip -r MeshLab${{steps.envs.outputs.date}}-windows.zip meshlab_windows_portable/
-    - name: Uploading ReleaseWindowsPortable
+    - name: Upload ReleaseWindowsPortable
       id: upload-release-windows-portable
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -209,4 +230,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: MeshLab${{steps.envs.outputs.date}}-windows.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-windows.zip
-        asset_content_type: MeshLab Portable for Windows 
+        asset_content_type: MeshLab Portable for Windows
+    - name: Upload ReleaseWindowsInstaller
+      id: upload-release-windows-installer
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: meshlab_windows_installer/MeshLab${{steps.envs.outputs.date}}-windows.exe
+        asset_name: MeshLab${{steps.envs.outputs.date}}-windows.exe
+        asset_content_type: MeshLab Portable for Windows  

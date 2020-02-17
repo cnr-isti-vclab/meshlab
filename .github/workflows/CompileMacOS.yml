@@ -16,11 +16,11 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Installing dependencies
+    - name: Install dependencies
       run: |
         brew install llvm libomp qt
         npm install -g appdmg
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       shell: bash
       run: |
@@ -31,17 +31,17 @@ jobs:
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(date +%Y.%m)"   
-    - name: Compiling MeshLab
+    - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run: |
         sh install/macos/macos_deploy.sh
-    - name: Creating DMG
+    - name: Create DMG
       run: |
          sh install/macos/macos_dmg.sh
          mv distrib/MeshLab${{steps.envs.outputs.date}}.dmg distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
-    - name: Uploading DMG
+    - name: Upload DMG
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_macos_dmg

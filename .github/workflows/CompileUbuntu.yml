@@ -16,27 +16,27 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Installing dependencies
+    - name: Install dependencies
       run: |
        sh install/linux/linux_setup_env_ubuntu.sh
-    - name: Setting env variables
+    - name: Setup env variables
       id: envs
       shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Compiling MeshLab
+    - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
-    - name: Deploying MeshLab
+    - name: Deploy MeshLab
       run : |
         sh install/linux/linux_appimage.sh
         mv distrib/*.AppImage .
-    - name: Uploading Meshlab Portable
+    - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_portable
         path: distrib/
-    - name: Uploading Meshlab AppImage
+    - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_linux_appimage
@@ -55,13 +55,13 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
-    - name: Installing dependencies
+    - name: Instal dependencies
       run: |
        sudo apt-get update
        sudo apt-get install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build 
-    - name: Configuring
+    - name: Configure
       run: |
         cmake src/ -G Ninja
-    - name: Compiling meshlab
+    - name: Build MeshLab
       run: ninja -C .
 

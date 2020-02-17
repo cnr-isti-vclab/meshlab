@@ -21,10 +21,12 @@ distrib/meshlab
 distrib/meshlabserver
 distrib/plugins/*.xml
 install/macos/resources/meshlab_dmg_final.json
-install/snap20????/prime
-install/snap20????/parts
-install/snap20????/stage
-install/snap20????/*.snap
+install/windows/resources/meshlab_final.nsi
+install/windows/resources/MeshLab*.exe
+#install/snap20????/prime
+#install/snap20????/parts
+#install/snap20????/stage
+#install/snap20????/*.snap
 
 
 ##standard Qt and C++ gitignore##
