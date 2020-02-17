@@ -15,20 +15,22 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Setting env variables
+      id: envs
+      run: |
+        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        $d = Get-Date -Format "yyyy.MM"
+        echo '::set-output name=date::'$d
+        echo ${{steps.envs.outputs.date}}
     - name: Setting MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Installing QT
       uses: ouuan/install-qt-action@v2.3.1
       with:
         modules: qtscript xmlpatterns
-    - name: Setting Env
-      id: envs
-      run: |
-        echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        $d = Get-Date -Format "yyyy.MM"
-        echo '::set-output name=date::$d'
     - name: Compiling MeshLab
       run: |
+        echo ${{steps.envs.outputs.date}}
         cd src\
         qmake
         nmake
