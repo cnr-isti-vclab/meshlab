@@ -24,6 +24,7 @@ jobs:
     - name: Setting Env
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Compiling MeshLab
       run: |
         cd src\
@@ -32,11 +33,23 @@ jobs:
     - name: Deploying MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
+    - name: Creating NSIS script
+      run: |
+        .\install\windows\windows_nsis_script.ps1
+    - name: Creating installer
+      uses: joncloud/makensis-action@v1
+      with:
+        script-file: ".\install\windows\resources\meshlab_final.nsi"
     - name: Uploading Meshlab Portable 
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
         path: distrib
+        - name: Uploading Meshlab Installer
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlab_windows_installer
+        path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}.exe
 
   windows_build_cmake:
     name: Build MeshLab (Windows, CMake)
