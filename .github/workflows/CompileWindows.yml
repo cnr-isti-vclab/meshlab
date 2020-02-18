@@ -22,11 +22,12 @@ jobs:
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         cd jom
         ls
+        echo "::add-path::$(Get-Location)"
     - name: Setup env variables
       id: envs
       run: |
+        echo $env:Path
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-env name=Path::$(Get-Location)\jom;$Path"
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -36,7 +37,6 @@ jobs:
         modules: qtscript xmlpatterns
     - name: Build MeshLab
       run: |
-        echo $env:Path
         cd src\
         qmake
         jom -j4
