@@ -26,7 +26,7 @@ jobs:
       id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-env name=Path::$Path;$(Get-Location)\jom"
+        echo "::set-env name=Path::$(Get-Location)\jom;$Path"
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
