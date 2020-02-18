@@ -28,6 +28,18 @@ install/windows/resources/MeshLab*.exe
 #install/snap20????/stage
 #install/snap20????/*.snap
 
+##Standard cmake gitignore##
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
 ##standard Qt and C++ gitignore##
 # C++ objects and libs
@@ -59,6 +71,7 @@ object_script.*.Debug
 *.qbs.user.*
 *.moc
 moc_*.cpp
+mocs_*.cpp
 moc_*.h
 qrc_*.cpp
 ui_*.h
