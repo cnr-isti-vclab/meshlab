@@ -26,6 +26,7 @@ jobs:
       id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
+        echo "::set-env name=Path::$Path;$(Get-Location)\jom"
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -35,9 +36,10 @@ jobs:
         modules: qtscript xmlpatterns
     - name: Build MeshLab
       run: |
+        echo $env:Path
         cd src\
         qmake
-        nmake -j4
+        jom -j4
     - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
