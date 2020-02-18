@@ -99,6 +99,12 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Downlaod Jom
+      run: |
+        Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
+        New-Item -Name "jom" -ItemType "directory"
+        Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
+        echo "::add-path::$(Get-Location)\jom"
     - name: Setup env variables
       id: envs
       run: |
@@ -114,7 +120,7 @@ jobs:
       run: |
         cd src\
         qmake
-        nmake
+        jom -j4 #Qt nmake for parallel build
     - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1

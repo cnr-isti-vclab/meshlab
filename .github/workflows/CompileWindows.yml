@@ -20,13 +20,10 @@ jobs:
         Invoke-WebRequest -Uri "http://download.qt.io/official_releases/jom/jom_1_1_3.zip" -OutFile "jom_1_1_3.zip"
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
-        cd jom
-        ls
-        echo "::add-path::$(Get-Location)"
+        echo "::add-path::$(Get-Location)\jom"
     - name: Setup env variables
       id: envs
       run: |
-        echo $env:Path
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setup MSVC
@@ -39,7 +36,7 @@ jobs:
       run: |
         cd src\
         qmake
-        jom -j4
+        jom -j4 #Qt nmake for parallel build
     - name: Deploy MeshLab
       run: |
         .\install\windows\windows_deploy.ps1
