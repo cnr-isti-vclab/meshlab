@@ -17,7 +17,7 @@ jobs:
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Downlaod Jom
       run: |
-        Invoke-WebRequest -Uri https://download.qt.io/official_releases/jom/jom_1_1_3.zip
+        Invoke-WebRequest -UseBasicParsing https://download.qt.io/official_releases/jom/jom_1_1_3.zip
         New-Item -Name "jom" -ItemType "directory"
         Expand-Archive -Path jom_1_1_3.zip -DestinationPath .\jom
         cd jom
