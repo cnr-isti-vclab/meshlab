@@ -38,8 +38,8 @@ Then, a meshlab executable can be found inside the `distrib` folder.
 You can also use `cmake`:
 
 	git clone --recursive https://github.com/cnr-isti-vclab/meshlab
-	cd meshlab/src
-	cmake
+	cd meshlab
+	cmake src/
 	make
 
 You can also use [QtCreator](https://www.qt.io/product) to build meshlab:
