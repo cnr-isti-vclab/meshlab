@@ -1,15 +1,15 @@
 #!/bin/bash
-# this is a script shell for setting up the application bundle for linux
-# Requires a properly built meshlab (does not require to run the 
-# linux_deploy.sh script).
+# this is a script shell for setting up the application bundle of meshlabserver for linux
+# Requires a properly built meshlab (does not require to run the linux_deploy.sh script).
 #
 # This script can be run only in the oldest supported linux distro that you are using
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
 #
-# Without given arguments, MeshLab AppImage will be placed in the meshlab/distrib
+# Without given arguments, MeshLabServer AppImage will be placed in the meshlab
 # directory.
 # 
-# You can give as argument the DISTRIB_PATH.
+# You can give as argument the DISTRIB_PATH, and the output AppImage will be placed
+# in the directory DISTRIB_PATH/../
 
 cd "${0%/*}" #move to script directory
 
