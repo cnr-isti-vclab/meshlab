@@ -13,9 +13,11 @@ RESOURCES = \
 # to add windows icon 
 RC_FILE = ../meshlab/meshlab.rc
 
-QT += xml opengl
-QT += xmlpatterns
-QT += script
+QT += \
+    xml \
+    opengl \
+    xmlpatterns \
+    script
 
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
 macx:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/
@@ -23,11 +25,11 @@ macx:QMAKE_POST_LINK = " \
     install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
 "
 
-mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libcommon.dylib
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libcommon.dylib
 
-win32-msvc: LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lcommon
-win32-g++: LIBS += -lcommon
-linux:  LIBS += -lcommon
+win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lcommon
+win32-g++:LIBS += -lcommon
+linux:LIBS += -lcommon
 
 win32-msvc:DEFINES += GLEW_STATIC
 

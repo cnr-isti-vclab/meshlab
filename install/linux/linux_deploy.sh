@@ -37,8 +37,14 @@ cp $INSTALL_PATH/resources/default.desktop .
 cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
 cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
 
+rm -r lib/macx64/
+rm -r lib/win32-msvc/
+rm -r lib/win32-msvc2008/
+rm -r lib/win32-msvc2015/
+rm -r lib/readme.txt
 rm -r plugins/U3D_OSX/
 rm -r plugins/U3D_W32/
+rm -r plugins/plugins.txt
 rm -r README.md
 
 $INSTALL_PATH/resources/linuxdeployqt meshlab -bundle-non-qt-libs -executable=meshlabserver

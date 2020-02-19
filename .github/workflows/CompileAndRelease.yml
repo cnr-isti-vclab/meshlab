@@ -29,6 +29,9 @@ jobs:
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
+    - name: Deploy MeshLabServer
+      run : |
+        sh install/linux/linux_meshlabserver_appimage.sh
     - name: Deploy MeshLab
       run : |
         sh install/linux/linux_appimage.sh
@@ -38,6 +41,11 @@ jobs:
       with:
         name: meshlab_linux_portable
         path: distrib/
+    - name: Upload MeshlabServer AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlabserver_linux_appimage
+        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
@@ -178,6 +186,10 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: meshlab_linux_appimage
+    - name: Download Linux MeshLabServer AppImage
+      uses: actions/download-artifact@v1
+      with:
+        name: meshlabserver_linux_appimage
     - name: Upload ReleaseLinuxPortable
       id: upload-release-linux-portable
       uses: actions/upload-release-asset@v1.0.1
@@ -198,6 +210,16 @@ jobs:
         asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
+    - name: Upload ReleaseLinuxMeshLabServerAppImage
+      id: upload-release-linux-meshlabserver-appimage
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        asset_path: meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        asset_name: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
+        asset_content_type: MeshLabServer AppImage for Linux
 
     #MacOS Release
     - name: Download MacOS DMG

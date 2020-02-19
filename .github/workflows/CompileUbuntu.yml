@@ -27,6 +27,9 @@ jobs:
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
+    - name: Deploy MeshLabServer
+      run : |
+        sh install/linux/linux_meshlabserver_appimage.sh
     - name: Deploy MeshLab
       run : |
         sh install/linux/linux_appimage.sh
@@ -36,6 +39,11 @@ jobs:
       with:
         name: meshlab_linux_portable
         path: distrib/
+    - name: Upload MeshlabServer AppImage
+      uses: actions/upload-artifact@v1
+      with:
+        name: meshlabserver_linux_appimage
+        path: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
     - name: Upload Meshlab AppImage
       uses: actions/upload-artifact@v1
       with:
