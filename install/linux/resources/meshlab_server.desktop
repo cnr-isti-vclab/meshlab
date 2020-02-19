@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=MeshLab
+Name=MeshLabServer
 GenericName=Mesh processing
-Comment=Processor and editor of large 3D triangular meshes
+Comment=Batch Processor MeshLab
 Exec=AppRun %F
 Icon=meshlab
 Terminal=false
