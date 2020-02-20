@@ -14,6 +14,10 @@ VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/../vcglib
 # MeshLab requires C++11
 CONFIG += c++11
 
+# MeshLab requires OpenMP
+#win32-msvc:QMAKE_CXXFLAGS+=/openmp TODO fix this for vcglib
+!win32-msvc:QMAKE_CXXFLAGS+= -fopenmp
+
 #Debug and Release configs
 CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O3 -DNDEBUG
 CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
@@ -22,6 +26,7 @@ CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
 CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
 !CONFIG(system_eigen3):EIGENDIR = $$VCGDIR/eigenlib
 !CONFIG(system_glew):  GLEWDIR = $$MESHLAB_EXTERNAL_DIRECTORY/glew-2.1.0
+
 
 ######## WINDOWS SETTINGS ##########
 
@@ -44,8 +49,8 @@ macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
 macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
 macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib
 
-# MeshLab requires a compiler that supports OpenMP
-macx:QMAKE_CXXFLAGS += -Xpreprocessor -fopenmp
+# Other flags for OpenMP
+macx:QMAKE_CXXFLAGS += -Xpreprocessor
 macx:QMAKE_LFLAGS += -lomp
 
 # Set up library search paths
