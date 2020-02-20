@@ -16,7 +16,7 @@ CONFIG += c++11
 
 # MeshLab requires OpenMP
 #win32-msvc:QMAKE_CXXFLAGS+=/openmp TODO fix this for vcglib
-!win32-msvc:QMAKE_CXXFLAGS+= -fopenmp
+QMAKE_CXXFLAGS+= -fopenmp
 
 #Debug and Release configs
 CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O3 -DNDEBUG
