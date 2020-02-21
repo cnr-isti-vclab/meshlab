@@ -603,9 +603,9 @@ private:
     vcg::Shot<T> track2ShotCPU(vcg::Shot<T> &refCamera, vcg::Trackball *track){
         vcg::Shot<T> view;
 
-        double _near, _far;
-        _near = 0.1;
-        _far = 100;
+        //double _near, _far;
+        //_near = 0.1;
+        //_far = 100;
 
         //get shot extrinsics matrix
         vcg::Matrix44<T> shotExtr;

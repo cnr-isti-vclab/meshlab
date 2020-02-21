@@ -13,14 +13,14 @@
 #include <QDebug>
 
 MLRenderingToolbar::MLRenderingToolbar(QWidget* parent )
-    :QToolBar(parent),_meshid(-1),_previoussel(NULL),_actgroup(NULL),_additionalacts(),_colpicks()
+    :QToolBar(parent),_meshid(-1),_previoussel(nullptr),_additionalacts(),_colpicks(),_actgroup(nullptr)
 {
     _actgroup = new QActionGroup(this);
     connect(this,SIGNAL(actionTriggered(QAction*)),this,SLOT(toggle(QAction*)));
 }
 
 MLRenderingToolbar::MLRenderingToolbar(int meshid,QWidget* parent )
-    :QToolBar(parent),_meshid(meshid),_previoussel(NULL),_actgroup(NULL), _additionalacts(),_colpicks()
+    :QToolBar(parent),_meshid(meshid),_previoussel(nullptr), _additionalacts(),_colpicks(),_actgroup(nullptr)
 {
     _actgroup = new QActionGroup(this);
     connect(this,SIGNAL(actionTriggered(QAction*)),this,SLOT(toggle(QAction*)));
@@ -1114,7 +1114,7 @@ void MLRenderingParametersTab::getCurrentRenderingDataAccordingToGUI( MLRenderin
             it.value()->getCurrentRenderingDataAccordingToGUI(dt);
 }
 
-MLRenderingColorPicker::MLRenderingColorPicker(int meshid, MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
+MLRenderingColorPicker::MLRenderingColorPicker(int, MLRenderingUserDefinedGeneralColorAction* colact, QWidget *p)
     :QPushButton(p),_act(colact)
 {
     //_act->setColor(vcg::ColorConverter::ToColor4b(def));

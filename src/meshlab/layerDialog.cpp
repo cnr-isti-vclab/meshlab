@@ -641,9 +641,8 @@ void LayerDialog::updateTable(const MLSceneGLSharedDataContext::PerMeshRendering
     _docitem = new QTreeWidgetItem();
     _docitem->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
 	MLRenderingData projdt;
-	MLSceneGLSharedDataContext::PerMeshRenderingDataMap::const_iterator projit = dtf.find(-1);
 
-   updateProjectName(md->docLabel());
+    updateProjectName(md->docLabel());
     
     QList<QTreeWidgetItem*> itms;
 	foreach(MeshModel* mmd, md->meshList)
@@ -1139,30 +1138,28 @@ void LayerDialog::updateRenderingDataAccordingToActions(int meshid,const QList<M
 {
     if (mw == NULL)
         return;
-	if (!_applytovis->isChecked())
-		mw->updateRenderingDataAccordingToActions(meshid,acts);
-	else
-	{
-		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
-		/*a MLRenderingSideToolBar is not mutual exclusive (except if the control modifier is pressed). in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
-		if ((sidetool == NULL) || ((sidetool != NULL) && (QApplication::queryKeyboardModifiers() & Qt::ControlModifier)))
-			mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
-	}
+    if (!_applytovis->isChecked())
+        mw->updateRenderingDataAccordingToActions(meshid,acts);
+    else {
+        MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
+        /*a MLRenderingSideToolBar is not mutual exclusive (except if the control modifier is pressed). in this case i have not to consider  the call to this function and instead rely on the signal calling the updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act) function */
+        if ((sidetool == NULL) || ((sidetool != NULL) && (QApplication::queryKeyboardModifiers() & Qt::ControlModifier)))
+            mw->updateRenderingDataAccordingToActionsToAllVisibleLayers(acts);
+    }
 }
 
 void LayerDialog::updateRenderingDataAccordingToAction( int meshid,MLRenderingAction* act)
 {
     if (mw == NULL)
         return;
-	if (!_applytovis->isChecked())
-	{
-		MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
-		/*in the normal case a MLRenderingSideToolBar should be managed by the updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts) function*/
-		if (sidetool == NULL)
-			mw->updateRenderingDataAccordingToAction(meshid, act);
-	}
-	else
-			mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
+    if (!_applytovis->isChecked()) {
+        MLRenderingSideToolbar* sidetool = qobject_cast<MLRenderingSideToolbar*>(sender());
+        /*in the normal case a MLRenderingSideToolBar should be managed by the updateRenderingDataAccordingToActions(int meshid,const QList<MLRenderingAction*>& acts) function*/
+        if (sidetool == NULL)
+            mw->updateRenderingDataAccordingToAction(meshid, act);
+    }
+    else
+        mw->updateRenderingDataAccordingToActionToAllVisibleLayers(act);
 }
 
 MeshTreeWidgetItem::MeshTreeWidgetItem(MeshModel* meshmodel,QTreeWidget* tree,MLRenderingToolbar* rendertoolbar)

@@ -40,17 +40,17 @@ void ParamGeneratorGUI::collectInfo( MLXMLParamSubTree& param )
     param.paraminfo[MLXMLElNames::paramName] = pname->text();
     param.paraminfo[MLXMLElNames::paramDefExpr] = pdefault->text();
     
-	QString isimp("false");
+    QString isimp("false");
     if (pisimp->isChecked())
         isimp = "true";
-	param.paraminfo[MLXMLElNames::paramIsImportant] = isimp;
+    param.paraminfo[MLXMLElNames::paramIsImportant] = isimp;
 
-	QString ispers("false");
-	if (pispers->isChecked())
-		isimp = "true";
-	param.paraminfo[MLXMLElNames::paramIsPersistent] = ispers;
+    QString ispers("false");
+    if (pispers->isChecked())
+        isimp = "true";
+    param.paraminfo[MLXMLElNames::paramIsPersistent] = ispers;
     
-	param.paraminfo[MLXMLElNames::paramHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(phel->toPlainText());
+    param.paraminfo[MLXMLElNames::paramHelpTag] = UsefulGUIFunctions::avoidProblemsWithHTMLTagInsideXML(phel->toPlainText());
     param.gui.guiinfo[MLXMLElNames::guiType] = pguitype->currentText();
     param.gui.guiinfo[MLXMLElNames::guiLabel] = pguilab->text();
     param.gui.guiinfo[MLXMLElNames::guiMinExpr] = pguimin->text();

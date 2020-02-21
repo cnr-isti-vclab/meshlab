@@ -1295,7 +1295,6 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
             {
                 if (mm == NULL)
                     continue;
-                bool currentmeshnewlycreated = false;
                 //Just to be sure that the filter author didn't forget to add changing tags to the postCondition field
                 if ((mm->hasDataMask(MeshModel::MM_FACECOLOR)) && (fclasses & MeshFilterInterface::FaceColoring ))
                     postcondmask = postcondmask | MeshModel::MM_FACECOLOR;
@@ -1320,7 +1319,7 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
                     shared->getRenderInfoPerMeshView(mm->id(),GLA()->context(),dttoberendered);
                     int updatemask = MeshModel::MM_NONE;
 					bool connectivitychanged = false;
-                    if ((mm->cm.VN() != existit->_nvert) || (mm->cm.FN() != existit->_nface) ||
+                    if (((unsigned int)mm->cm.VN() != existit->_nvert) || ((unsigned int)mm->cm.FN() != existit->_nface) ||
                         bool(postcondmask & MeshModel::MM_UNKNOWN) || bool(postcondmask & MeshModel::MM_VERTNUMBER) || 
                         bool(postcondmask & MeshModel::MM_FACENUMBER) || bool(postcondmask & MeshModel::MM_FACEVERT) ||
                         bool(postcondmask & MeshModel::MM_VERTFACETOPO) || bool(postcondmask & MeshModel::MM_FACEFACETOPO))
@@ -1403,13 +1402,11 @@ void MainWindow::updateSharedContextDataAfterFilterExecution(int postcondmask,in
 
 
                     shared->setRenderingDataPerMeshView(mm->id(),GLA()->context(),curr);
-                    currentmeshnewlycreated = false;
                 }
                 else 
                 {
                     //A new mesh has been created by the filter. I have to add it in the shared context data structure
                     newmeshcreated = true;
-                    currentmeshnewlycreated = true;
                     MLPoliciesStandAloneFunctions::suggestedDefaultPerViewRenderingData(mm,dttoberendered,mwsettings.minpolygonpersmoothrendering);
 					if (mm == meshDoc()->mm())
 					{
@@ -1792,7 +1789,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 
 
 
-    bool ret = true;
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
     bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
 
@@ -1872,7 +1868,6 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
     catch(MLException& e)
     {
         meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
-        ret = false;
     }
 
 }
@@ -2628,6 +2623,11 @@ void MainWindow::updateGPUMemBar(int nv_allmem, int nv_currentallocated, int ati
 		}
     }
 #else
+    //avoid unused parameter warning
+    (void) nv_allmem;
+    (void) nv_currentallocated;
+    (void) ati_free_tex;
+    (void) ati_free_vbo;
     nvgpumeminfo->hide();
 #endif
 }

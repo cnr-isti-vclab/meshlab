@@ -58,7 +58,7 @@ public:
 	void Logf(int Level, const char * f, Ts&&... ts )
 	{
 		char buf[buf_size];
-		int chars_written = snprintf(buf, buf_size, f, std::forward<Ts>(ts)...);   
+        int chars_written = snprintf(buf, buf_size, "%s", f, std::forward<Ts>(ts)...);
 		Log(Level, buf);
 
 		if(chars_written >= static_cast<int>(buf_size)){

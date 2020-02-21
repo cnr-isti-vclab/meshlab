@@ -108,27 +108,27 @@ void FilterScriptDialog::openScript()
 
 void FilterScriptDialog::moveSelectedFilterUp()
 {
-	//NOTE if this class gets to complex using the QT model/view may be a good idea
-	//however, i found it to be over complicated and not too helpful for reording
-	
-	int currentRow = ui->scriptListWidget->currentRow();
+    //NOTE if this class gets to complex using the QT model/view may be a good idea
+    //however, i found it to be over complicated and not too helpful for reording
+
+    int currentRow = ui->scriptListWidget->currentRow();
     if ((currentRow == -1) || (currentRow == 0))
         return;
 
-	//move item up in list
-	FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
+    //move item up in list
+    FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.takeAt(currentRow);
     QString filtername = ui->scriptListWidget->currentItem()->text();
-	if (pair->filterName() == filtername)
+    if (pair->filterName() == filtername)
         scriptPtr->filtparlist.insert(currentRow-1, pair);
     else
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
-	
-	//move item up on ui
-	QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
-	ui->scriptListWidget->insertItem(currentRow-1, item);
-	
-	//set selected 
-	ui->scriptListWidget->setCurrentItem(item);
+
+    //move item up on ui
+    QListWidgetItem * item = ui->scriptListWidget->takeItem(currentRow);
+    ui->scriptListWidget->insertItem(currentRow-1, item);
+
+    //set selected
+    ui->scriptListWidget->setCurrentItem(item);
 }
 
 void FilterScriptDialog::moveSelectedFilterDown()

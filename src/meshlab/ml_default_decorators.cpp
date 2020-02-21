@@ -104,22 +104,22 @@ bool MLDefaultMeshDecorators::initMeshDecorationData( MeshModel& m,const MLRende
     if (!valid)
         return false;
 
-	//if (opts._peredge_extra_enabled)
-	//{
-	initBoundaryDecoratorData(m, opts._peredge_edgeboundary_enabled, opts._peredge_faceboundary_enabled);
+    //if (opts._peredge_extra_enabled)
+    //{
+    initBoundaryDecoratorData(m, opts._peredge_edgeboundary_enabled, opts._peredge_faceboundary_enabled);
 
-	if (opts._peredge_edgemanifold_enabled)
-		initNonManifEdgeDecoratorData(m);
+    if (opts._peredge_edgemanifold_enabled)
+        initNonManifEdgeDecoratorData(m);
 
-	if (opts._peredge_vertmanifold_enabled)
-		initNonManifVertDecoratorData(m);
+    if (opts._peredge_vertmanifold_enabled)
+        initNonManifVertDecoratorData(m);
 
-	if (opts._peredge_text_boundary_enabled)
-		initBoundaryTextDecoratorData(m);
-	//}
-	
-	initSelectionDecoratorData(m, opts._vertex_sel, opts._face_sel);
-	
+    if (opts._peredge_text_boundary_enabled)
+        initBoundaryTextDecoratorData(m);
+    //}
+
+    initSelectionDecoratorData(m, opts._vertex_sel, opts._face_sel);
+
 
     return true;
 }
@@ -483,8 +483,8 @@ void MLDefaultMeshDecorators::chooseZ(Box3m &box,double *mm,double *mp,GLint *vp
 
 bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLRenderingData& dt )
 {
-	if (_mw == NULL)
-		return false;
+    if (_mw == NULL)
+        return false;
 
     MLPerViewGLOptions opts;
     bool valid = dt.get(opts);
@@ -497,14 +497,14 @@ bool MLDefaultMeshDecorators::cleanMeshDecorationData( MeshModel& mesh,const MLR
     if (opts._peredge_edgemanifold_enabled)
         cleanNonManifEdgeDecoratorData(mesh);
 
-	if (opts._peredge_vertmanifold_enabled)
-		cleanNonManifVertDecoratorData(mesh);
+    if (opts._peredge_vertmanifold_enabled)
+        cleanNonManifVertDecoratorData(mesh);
 
     if (opts._peredge_text_boundary_enabled)
         cleanBoundaryTextDecoratorData(mesh);
 
-	if (opts._vertex_sel || opts._face_sel)
-		cleanSelectionDecoratorData(mesh, !opts._vertex_sel, !opts._face_sel);
+    if (opts._vertex_sel || opts._face_sel)
+        cleanSelectionDecoratorData(mesh, !opts._vertex_sel, !opts._face_sel);
     return true;
 }
 

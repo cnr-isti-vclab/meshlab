@@ -16,7 +16,7 @@ static void updateRenderingData(GLArea* glarea, MeshModel* curmodel)
 }
 
 MeshLabXMLStdDialog::MeshLabXMLStdDialog(QWidget *p)
-    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),showHelp(false),previewCB(NULL)
+    :QDockWidget(QString("Plugin"), p),isfilterexecuting(false),env(),previewCB(nullptr),showHelp(false)
 {
     curmask = 0;
     qf = NULL;
@@ -239,10 +239,10 @@ void MeshLabXMLStdDialog::applyClick()
 
     if(curmask)
         meshState.create(curmask, curModel);
-	if (this->curgla)
-	{
-		this->curgla->update();
-	}
+    if (this->curgla)
+    {
+        this->curgla->update();
+    }
 }
 
 void MeshLabXMLStdDialog::closeClick()
@@ -309,24 +309,24 @@ void MeshLabXMLStdDialog::applyDynamic()
     if(!previewCB->isChecked())
         return;
 
-	QMap<QString, QString> parvalue;
+    QMap<QString, QString> parvalue;
 
-	for (int ii = 0; ii < curParMap.size(); ++ii)
-	{
-		if (curParMap[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
-		{
-			QString exp;
+    for (int ii = 0; ii < curParMap.size(); ++ii)
+    {
+        if (curParMap[ii][MLXMLElNames::paramIsPersistent] != QString("true"))
+        {
+            QString exp;
 
-			bool valid = stdParFrame->getValue(curParMap[ii][MLXMLElNames::paramName], exp);
-			if (!valid)
-			{
-				QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
-				throw MLException(err.toLocal8Bit());
-			}
+            bool valid = stdParFrame->getValue(curParMap[ii][MLXMLElNames::paramName], exp);
+            if (!valid)
+            {
+                QString err = QString("MeshLabXMLStdDialog: the widget corresponding to the parameter ") + curParMap[ii][MLXMLElNames::paramName] + " has not been found!";
+                throw MLException(err.toLocal8Bit());
+            }
 
-			parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
-		}
-	}
+            parvalue[curParMap[ii][MLXMLElNames::paramName]] = exp;
+        }
+    }
     //two different executions give the identical result if the two contexts (with the filter's parameters inside) are identical
     //previewContext = env.currentContext()->toString();
 
