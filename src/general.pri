@@ -15,7 +15,7 @@ VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/../vcglib
 CONFIG += c++11
 
 # MeshLab requires OpenMP
-#win32-msvc:QMAKE_CXXFLAGS+=/openmp TODO fix this for vcglib
+win32-msvc:QMAKE_CXXFLAGS+=/openmp #Just for cl, flag is /openmp instead of -fopenmp
 !win32-msvc:QMAKE_CXXFLAGS+= -fopenmp
 
 #Debug and Release configs
