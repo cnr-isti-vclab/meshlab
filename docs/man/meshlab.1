@@ -1,0 +1,30 @@
+.TH MeshLab 1 "21 Feb 2020" "2020.02"
+.SH NAME
+MeshLab \- The open source mesh processing system
+.SH SYNOPSIS
+.B meshlab
+file1.obj file2.ply view.xml ...
+.SH DESCRIPTION
+.B meshlab
+opens the list of given files, to view and edit them.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Show a brief help.
+.SH EXAMPLES
+.B meshlab
+mesh.obj
+.TP
+.R Run MeshLab opening the file mesh.obj
+.P
+.B meshlab
+mesh1.obj mesh2.obj view.xml
+.TP
+.R Run MeshLab opening the files mesh1.obj and mesh2.obj with camera view set in view.xml
+.P
+.B meshlab
+project.mlp
+.TP
+.R Run MeshLab opening the MeshLab project project.mlp
+.SH AUTHOR
+Paolo Cignoni - Visual Computing Lab - ISTI - CNR

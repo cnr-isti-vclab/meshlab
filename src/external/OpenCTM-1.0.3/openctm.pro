@@ -5,12 +5,12 @@ CONFIG += staticlib
 DEPENDPATH += .
 INCLUDEPATH += ./lib ./lib/liblzma
 
-win32-msvc:QMAKE_CXXFLAGS += /nologo /Ox /W3 /c /DOPENCTM_STATIC /D_CRT_SECURE_NO_WARNINGS
+win32-msvc:QMAKE_CXXFLAGS += /nologo /Ox /c /DOPENCTM_STATIC /D_CRT_SECURE_NO_WARNINGS
 win32-msvc:DEFINES += OPENCTM_STATIC
 
-win32-g++:QMAKE_CXXFLAGS += -O3 -W -Wall -c -std=c99 -pedantic
+win32-g++:QMAKE_CXXFLAGS += -O3 -c -std=c99 -pedantic
 win32-g++:DEFINES += OPENCTM_STATIC
-linux-g++:QMAKE_CXXFLAGS += -O3 -W -Wall -c -std=c99 -pedantic
+linux-g++:QMAKE_CXXFLAGS += -O3 -c -std=c99 -pedantic
 linux-g++:DEFINES += OPENCTM_STATIC
 
 # Input
