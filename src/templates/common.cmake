@@ -33,7 +33,7 @@ target_link_libraries({{name}}
 {% block install %}
 if(NOT WIN32)
     install(TARGETS {{name}}
-        DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
 
 {% endblock %}
