@@ -248,7 +248,7 @@ class ImporterExpePTS
 				}
 				else
 				{
-					std::cerr << "Unknow command " << command.data() << " (skip)" << "\n";
+					std::cerr << "Unknown command " << command.data() << " (skip)" << "\n";
 				}
 				stream >> command;
 			}

@@ -40,7 +40,7 @@ EditMeasurePlugin::EditMeasurePlugin()
 
 const QString EditMeasurePlugin::Info()
 {
-    return tr("Allow to measure distances between points of a model");
+    return tr("Allows one to measure distances between points of a model");
 }
 
 void EditMeasurePlugin::mousePressEvent(QMouseEvent *, MeshModel &, GLArea * gla)

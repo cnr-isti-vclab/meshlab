@@ -117,7 +117,7 @@ public:
         }
     }
 
-    ///then return pointer to hight level faces
+    ///then return pointer to high level faces
     getSharedFace<BaseMesh>(HiVertex,HiFace);
   }
 
@@ -364,7 +364,7 @@ public:
                 f0->FFi(indexopp0)=-1;
                 printf("border");
             }
-            else///otherwise attache two other faces
+            else///otherwise attach two other faces
             {
                 ///the reassing adiacency
                 f0->FFp(indexopp0)=f1;
@@ -444,7 +444,7 @@ void AphaBetaToUV(VertexPair &pos,
         FaceType *test_face=orderedFaces[index];
         FaceType *parametric_face=&param.face[index];
 
-        ///fro each vertex belonging to such face
+        ///for each vertex belonging to such face
         for (unsigned int i=0;i<test_face->vertices_bary.size();i++)
         {
             ///get brother vertex

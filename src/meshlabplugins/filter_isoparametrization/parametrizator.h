@@ -154,7 +154,7 @@ private:
             father->vertices_bary.push_back(std::pair<BaseVertex*,vcg::Point3f>(&final_mesh.vert[i],bary));
         }
 
-        ///testing everithing is ok
+        ///testing everything is ok
         for (unsigned int i=0;i<final_mesh.vert.size();i++)
         {
             final_mesh.vert[i].RPos=final_mesh.vert[i].P();

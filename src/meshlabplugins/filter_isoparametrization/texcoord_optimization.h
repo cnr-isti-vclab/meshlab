@@ -629,7 +629,7 @@ public:
 };
 
 
-#if 0  // Temporarly commented out. It still have to be thoroughly tested...
+#if 0  // Temporarily commented out. It still have to be thoroughly tested...
 
 template<class MESH_TYPE> 
 class WachspressTexCoordOptimization:public TexCoordOptimization<MESH_TYPE>{

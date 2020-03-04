@@ -415,7 +415,7 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 		case FP_LOOP_SS:
 		case FP_REFINE_LS3_LOOP:
 			loopWeightLst << "Loop" << "Enhance regularity" << "Enhance continuity";
-		parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allow to optimize some behaviors in despite of others."));
+		parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allows one to optimize some behaviors over others."));
 		case FP_BUTTERFLY_SS:
 		case FP_MIDPOINT:
 			parlst.addParam(new RichInt("Iterations", 3, "Iterations", "Number of time the model is subdivided."));

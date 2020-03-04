@@ -1,7 +1,7 @@
 
 
 /*
-stupid class to allow to run over a list of containers with the same type in a single "for" cycle
+stupid class to allow running over a list of containers with the same type in a single "for" cycle
 
 example:
 
