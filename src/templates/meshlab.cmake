@@ -16,11 +16,10 @@
 
 {% block add_target %}
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
-if(APPLE)
-    list(APPEND SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/../install/macx/info.plist
-        images/meshlab.icns)
-endif()
+#if(APPLE)
+#    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../install/macx/info.plist
+#                images/meshlab.icns)
+#endif()
 
 if(WIN32)
     list(APPEND SOURCES meshlab.rc)
