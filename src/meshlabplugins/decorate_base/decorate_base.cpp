@@ -714,12 +714,14 @@ void DecorateBasePlugin::DrawFaceLabel(MeshModel &m, QPainter *painter)
     glDisable(GL_LIGHTING);
     glColor3f(.4f,.4f,.4f);
     for(size_t i=0;i<m.cm.face.size();++i)
+    {
         if(!m.cm.face[i].IsD())
         {
             Point3m bar=Barycenter(m.cm.face[i]);
             glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
         }
-        glPopAttrib();
+    }
+    glPopAttrib();
 }
 
 void DecorateBasePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
@@ -729,12 +731,14 @@ void DecorateBasePlugin::DrawEdgeLabel(MeshModel &m,QPainter *painter)
     glDisable(GL_LIGHTING);
     glColor3f(.4f,.4f,.4f);
     for(size_t i=0;i<m.cm.edge.size();++i)
+    {
         if(!m.cm.edge[i].IsD())
         {
             Point3m bar=(m.cm.edge[i].V(0)->P()+m.cm.edge[i].V(0)->P())/2.0f;
             glLabel::render(painter, bar,tr("%1").arg(i),glLabel::Mode(textColor));
         }
-        glPopAttrib();
+    }
+    glPopAttrib();
 }
 
 

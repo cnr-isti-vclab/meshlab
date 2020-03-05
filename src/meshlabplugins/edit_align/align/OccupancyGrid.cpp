@@ -158,7 +158,7 @@ void OccupancyGrid::ComputeTotalArea()
     for(int i=0;i<sz;++i)
         if(!G.grid[i].Empty()) {
             ccnt++;
-            if(G.grid[i].Count()>MaxCount) MaxCount=G.grid[i].Count();
+            if(G.grid[i].Count()>(unsigned int)MaxCount) MaxCount=G.grid[i].Count();
         }
 
     TotalArea=ccnt;

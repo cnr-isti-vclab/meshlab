@@ -306,7 +306,7 @@ void MlsPlugin::initParameterSet(QAction* action, MeshDocument& md, RichParamete
     }
 }
 
- int MlsPlugin::getRequirements(QAction *action)
+ int MlsPlugin::getRequirements(QAction *)
 {
     return 0;
 }
@@ -338,7 +338,7 @@ void UpdateFaceNormalFromVertex(MeshType& m)
 {
     typedef typename MeshType::VertexType     VertexType;
     typedef typename VertexType::NormalType   NormalType;
-    typedef typename VertexType::ScalarType   ScalarType;
+    //typedef typename VertexType::ScalarType   ScalarType;
     typedef typename MeshType::FaceIterator   FaceIterator;
 
     for (FaceIterator f=m.face.begin(); f!=m.face.end(); ++f)

@@ -84,7 +84,7 @@ void BaseMeshIOPlugin::initPreOpenParameter(const QString &formatName, const QSt
 
 bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, MeshModel &m, int& mask, const RichParameterSet &parlst, CallBackPos *cb, QWidget * /*parent*/)
 {
-	bool normalsUpdated = false;
+    //bool normalsUpdated = false;
     QString errorMsgFormat = "Error encountered while loading file:\n\"%1\"\n\nError details: %2";
 
     if(!QFile::exists(fileName))
@@ -163,8 +163,8 @@ bool BaseMeshIOPlugin::open(const QString &formatName, const QString &fileName, 
 			}
 		}
 
-		if (oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
-			normalsUpdated = true;
+//		if (oi.mask & tri::io::Mask::IOM_WEDGNORMAL)
+//			normalsUpdated = true;
 		m.Enable(oi.mask);
 		if (m.hasDataMask(MeshModel::MM_POLYGONAL)) qDebug("Mesh is Polygonal!");
 		mask = oi.mask;

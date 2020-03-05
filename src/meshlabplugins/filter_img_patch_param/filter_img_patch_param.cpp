@@ -840,7 +840,7 @@ void FilterImgPatchParamPlugin::patchPacking( RasterPatchMap &patches,
 
 
         // Performs the packing.
-        vcg::Point2f coveredArea;
+        vcg::Point2f coveredArea(0,0);
         vcg::RectPacker<float>::Pack( patchRect, vcg::Point2i(edgeLen,edgeLen), patchPackingTr, coveredArea );
 
 
