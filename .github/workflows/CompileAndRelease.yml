@@ -121,7 +121,7 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v2.4.1
       with:
         modules: qtscript xmlpatterns
     - name: Build MeshLab
