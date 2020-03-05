@@ -58,8 +58,8 @@ void ComputeScalingMatchMatrix(Matrix44d &res,
 }
 
 
-double errorRotoTranslationScale(int, double *x){
-  assert(n==7);
+double errorRotoTranslationScale(int n, double *x){
+  assert(n==7); (void)n;
   double dist = 0;
   std::vector<Point3d>::iterator i = mov->begin();
   std::vector<Point3d>::iterator ifix = fix->begin();
