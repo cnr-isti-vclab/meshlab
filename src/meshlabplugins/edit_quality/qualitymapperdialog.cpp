@@ -41,7 +41,8 @@ void TFDoubleClickCatcher::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event
 
 
 //class constructor
-QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont) : QDockWidget(parent), mesh(m),_cont(cont)
+QualityMapperDialog::QualityMapperDialog(QWidget *parent, MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont) :
+	QDockWidget(parent), _cont(cont), mesh(m)
 {
 	ui.setupUi(this);
 

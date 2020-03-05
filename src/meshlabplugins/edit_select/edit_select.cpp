@@ -163,7 +163,7 @@ void EditSelectPlugin::doSelection(MeshModel &m, GLArea *gla, int mode)
   bufQImg.fill(Qt::white);
   QPainter bufQPainter(&bufQImg);
   vector<QPointF> qpoints;
-  for(int i=0;i<selPolyLine.size();++i)
+  for(size_t i=0;i<selPolyLine.size();++i)
     qpoints.push_back(QPointF(selPolyLine[i][0],selPolyLine[i][1]));    
   bufQPainter.setBrush(QBrush(Qt::black));
   bufQPainter.drawPolygon(&qpoints[0],qpoints.size(), Qt::WindingFill); 
@@ -382,7 +382,7 @@ void EditSelectPlugin::DrawXORPolyLine(GLArea * gla)
 	else
 	{
 		glBegin(GL_LINE_LOOP);
-		for (int ii = 0; ii < selPolyLine.size(); ii++)
+		for (size_t ii = 0; ii < selPolyLine.size(); ii++)
 			glVertex(selPolyLine[ii]);
 	}
 	glEnd();

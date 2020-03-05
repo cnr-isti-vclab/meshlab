@@ -242,7 +242,7 @@ TF_KEY* TfChannel::operator [](float xVal)
 //operator redefinition. Returns the key in the key list whose index equals i
 TF_KEY* TfChannel::operator [](size_t i)
 {
-    if ((i >= 0) && (i<KEYS.size()))
+    if (i<KEYS.size())
         return KEYS[i];
 
     return 0;
