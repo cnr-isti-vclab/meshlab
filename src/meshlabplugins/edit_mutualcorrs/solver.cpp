@@ -430,7 +430,7 @@ double Solver::calculateError2( Shot &shot){
     std::vector<Correspondence> correspList = align->correspList;
     double error = 0;
    
-    for( int i=0; i<correspList.size(); i++){
+    for( size_t i=0; i<correspList.size(); i++){
         Correspondence corr = correspList[i];
         vcg::Point2f projected = shot.Project(corr.Point3D);
         
@@ -450,7 +450,7 @@ bool Solver::levmar(AlignSet *_align, Shot &shot){
    // QList<PointCorrespondence*> *correspList = align->correspList;
 
     std::list<LevmarCorrelation> *corrs = new std::list<LevmarCorrelation>();
-	for (int i = 0; i<align->correspList.size(); i++){
+    for (size_t i = 0; i<align->correspList.size(); i++){
         //PointCorrespondence *corr = correspList->at(i);
         //PointOnLayer currentPointOnLayer1= corr->getPointAt(0);
         //PointOnLayer currentPointOnLayer2= corr->getPointAt(1);

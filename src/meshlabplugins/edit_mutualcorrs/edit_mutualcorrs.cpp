@@ -96,7 +96,6 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
     // draw picked & reference points
     if(true)
     {
-        int pindex;
         Point3m currpoint;
 		Point2m currim;
         QString buf;
@@ -107,9 +106,9 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
 
         glDisable(GL_LIGHTING);
 
-        for(pindex=0; pindex<usePoint.size(); pindex++)
+        for(size_t pindex=0; pindex<usePoint.size(); pindex++)
         {
-            if(pindex == cindex)            //if current
+            if(pindex == (size_t)cindex)            //if current
                 glColor3ub(255, 255, 0);
             else if(usePoint[pindex])       //if active
                 glColor3ub(150, 150, 0);
@@ -130,9 +129,9 @@ void EditMutualCorrsPlugin::Decorate(MeshModel &m, GLArea *gla, QPainter *p)
             vcg::glLabel::render(p,currpoint,buf);       
         }
 
-		for (pindex = 0; pindex < usePoint.size(); pindex++)
+		for (size_t pindex = 0; pindex < usePoint.size(); pindex++)
 		{
-			if (pindex == cindex)            //if current
+			if (pindex == (size_t)cindex)            //if current
 				glColor3ub(255, 255, 0);
 			else if (usePoint[pindex])       //if active
 				glColor3ub(150, 150, 0);
@@ -268,7 +267,6 @@ void EditMutualCorrsPlugin::EndEdit(MeshModel &/*m*/, GLArea * /*gla*/, MLSceneG
 void EditMutualCorrsPlugin::addNewPoint()
 {
     status_error = "";
-    int pindex;
     bool alreadyThere;
     QString newname;
 
@@ -284,7 +282,7 @@ void EditMutualCorrsPlugin::addNewPoint()
     {
         alreadyThere = false;
         newname = "PP" + QString::number(lastname++);
-        for(pindex=0; pindex<pointID.size(); pindex++)
+        for(size_t pindex=0; pindex<pointID.size(); pindex++)
         {
             if(pointID[pindex] == newname)
                alreadyThere=true;
@@ -456,7 +454,6 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
 {
     status_error = "";
     // saving
-    int pindex;
 
     QString openFileName = "";
     openFileName = QFileDialog::getSaveFileName(NULL, "Save Correspondences list", QDir::currentPath(), "Text file (*.txt)");
@@ -475,7 +472,7 @@ void EditMutualCorrsPlugin::saveToFile() // export reference list + picked point
 			openFileTS << "Raster: " << glArea->md()->rm()->currentPlane->fullPathFileName << "\n";
 
             // writing reference
-            for(pindex=0; pindex<usePoint.size(); pindex++)
+            for(size_t pindex=0; pindex<usePoint.size(); pindex++)
             {
                 if(usePoint[pindex] == true)
                 {
@@ -508,7 +505,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 	Correspondence corr;
 	
-	for (int i = 0; i < imagePoints.size(); i++)
+	for (size_t i = 0; i < imagePoints.size(); i++)
 	{
 		if (usePoint[i])
 		{
@@ -610,7 +607,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 		if (solver.mIweight == 0.0)
 		{
-			for (int i = 0; i < align.correspList.size(); i++)
+			for (size_t i = 0; i < align.correspList.size(); i++)
 			{
 				pointError[align.correspList[i].index] = align.correspList[i].error;
 			}
@@ -652,7 +649,7 @@ void EditMutualCorrsPlugin::applyMutual()
 
 
 	}
-	for (int i = 0; i < align.correspList.size(); i++)
+	for (size_t i = 0; i < align.correspList.size(); i++)
 	{
 		pointError[align.correspList[i].index] = align.correspList[i].error;
 	}

@@ -89,7 +89,7 @@ void EditMeasurePlugin::Decorate(MeshModel & m, GLArea * gla,QPainter* p)
 	this->Log(GLLogStream::FILTER, "Distance %s: %f", newM.ID.toStdString().c_str(), measuredDistance);
   }
 
-  for (int mind = 0; mind<measures.size(); mind++)
+  for (size_t mind = 0; mind<measures.size(); mind++)
   {
 	  rubberband.RenderLine(gla, measures[mind].startP, measures[mind].endP);
 	  vcg::glLabel::render(p, measures[mind].endP, QString("%1: %2").arg(measures[mind].ID).arg(measures[mind].length));
@@ -99,7 +99,7 @@ void EditMeasurePlugin::Decorate(MeshModel & m, GLArea * gla,QPainter* p)
   instructions = "C to clear, P to print, S to save";
 
   QString savedmeasure = "<br>";
-  for (int mind = 0; mind<measures.size(); mind++)
+  for (size_t mind = 0; mind<measures.size(); mind++)
   {
 	  savedmeasure.append(QString("%1 - %2<br>").arg(measures[mind].ID).arg(measures[mind].length));
   }
@@ -129,7 +129,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 	{
 		this->Log(GLLogStream::FILTER, "------- Distances -------");
 		this->Log(GLLogStream::FILTER, "ID: Dist [pointA][pointB]");
-		for (int mind = 0; mind<measures.size(); mind++)
+		for (size_t mind = 0; mind<measures.size(); mind++)
 		{
 			this->Log(GLLogStream::FILTER, "%s: %f [%f,%f,%f][%f,%f,%f]", measures[mind].ID.toStdString().c_str(), measures[mind].length,
 				measures[mind].startP[0], measures[mind].startP[1], measures[mind].startP[2], measures[mind].endP[0], measures[mind].endP[1], measures[mind].endP[2]);
@@ -154,7 +154,7 @@ void EditMeasurePlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &mod, GLArea *gl
 			openFileTS << mod.shortName().toStdString().c_str() << "\n\n";
 
 			openFileTS << "ID : Dist [pointA][pointB]" << "\n";
-			for (int mind = 0; mind<measures.size(); mind++)
+			for (size_t mind = 0; mind<measures.size(); mind++)
 			{
 				openFileTS << measures[mind].ID.toStdString().c_str() << " : " << measures[mind].length << " [" <<	
 					measures[mind].startP[0] << ", " << measures[mind].startP[1] << ", " << measures[mind].startP[2] << "] [" << 

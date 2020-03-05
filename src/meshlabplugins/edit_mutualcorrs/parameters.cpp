@@ -261,9 +261,9 @@ void Parameters::scramble(double *_p, bool rescale) {
     fcenter[0] = 0; fcenter[1] = 0;
     fcenter = reference.ConvertCameraToWorldCoordinates(fcenter);
 
-    Point3f view = reference.Extrinsics.Tra();
-    //view = center + (view - center)*ratio;
-    Point3f diff = view - (center + (view - center)*ratio);
+//    Point3f view = reference.Extrinsics.Tra();
+//    view = center + (view - center)*ratio;
+//    Point3f diff = view - (center + (view - center)*ratio);
 
     _p[2] += ratio*dist; 
 

@@ -1069,6 +1069,7 @@ void EditManipulatorsPlugin::Decorate(MeshModel &model, GLArea *gla, QPainter* /
     case EditManipulatorsPlugin::ManMove   : HelpString1 = "<br> LEFT CLICK and DRAG to move"; break;
     case EditManipulatorsPlugin::ManRotate : HelpString1 = "<br> LEFT CLICK and DRAG to rotate"; break;
     case EditManipulatorsPlugin::ManScale  : HelpString1 = "<br> LEFT CLICK and DRAG to scale"; break;
+    case EditManipulatorsPlugin::ManNone   : break;
     }
 
     if((current_manip != EditManipulatorsPlugin::ManMove) || (current_manip_mode != EditManipulatorsPlugin::ModNone))

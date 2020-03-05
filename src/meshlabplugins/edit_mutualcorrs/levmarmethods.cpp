@@ -56,7 +56,7 @@ CREATE DATA SET
 Modify data,x, opts and info(?)
 *********************************************/
 //TOGLIERE SHOT DAI PARAMETRI!
-bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<float>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double info[LM_INFO_SZ])
+bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<float>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double /*info*/[LM_INFO_SZ])
 {	
 	bool my_ret_val=false;
 	
@@ -221,7 +221,7 @@ void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *d
 }
 
 //Estimate only the focal.
-void LevmarMethods::estimateFocal(double *p, double *x, int m, int n, void *data)
+void LevmarMethods::estimateFocal(double *p, double *x, int /*m*/, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
 	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;

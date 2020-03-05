@@ -38,8 +38,7 @@ void edit_mutualcorrsDialog::updateTable()
     this->ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    int pindex =0;
-    for(pindex=0; pindex < this->mutualcorrsPlugin->usePoint.size(); pindex++)
+    for(size_t pindex=0; pindex < this->mutualcorrsPlugin->usePoint.size(); pindex++)
     {
         QTableWidgetItem* useIt = new QTableWidgetItem();
         if(this->mutualcorrsPlugin->usePoint[pindex])
