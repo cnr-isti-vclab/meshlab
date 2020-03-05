@@ -182,7 +182,7 @@ bool AmbientOcclusionPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md,
     processGL(m,viewDirVec);
     fbo.release();
     err = glGetError();
-    const GLubyte* errname = gluErrorString(err);
+    const GLubyte* errname = gluErrorString(err); (void)errname;
     qDebug("End Painting");
     this->glContext->doneCurrent();
     return !errInit;
