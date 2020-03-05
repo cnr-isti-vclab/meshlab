@@ -27,9 +27,9 @@ static std::vector<Point3d> *fix;
 static std::vector<Point3d> *mov;
 static vcg::Box3d b;
 
-double errorScale(int, double *x)
+double errorScale(int n, double *x)
 {
-  assert(n==1);
+  assert(n==1); (void)n;
   double dist = 0;
   std::vector<Point3d>::iterator i = mov->begin();
   std::vector<Point3d>::iterator ifix = fix->begin();
