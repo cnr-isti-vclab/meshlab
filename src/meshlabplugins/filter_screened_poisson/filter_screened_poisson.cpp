@@ -33,7 +33,6 @@
 #include "Src/SparseMatrix.h"
 #include "Src/CmdLineParser.h"
 #include "Src/PPolynomial.h"
-#include "Src/Ply.h"
 void DumpOutput( const char* format , ... );
 void DumpOutput2( char* str , const char* format , ... );
 

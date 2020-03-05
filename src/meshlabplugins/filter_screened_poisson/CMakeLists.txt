@@ -4,7 +4,7 @@
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
 set(SOURCES
-    filter_screened_poisson.cpp Src/MarchingCubes.cpp Src/PlyFile.cpp
+    filter_screened_poisson.cpp Src/MarchingCubes.cpp
     # Src/CmdLineParser.cpp
     Src/Factor.cpp Src/Geometry.cpp)
 
@@ -25,8 +25,7 @@ set(HEADERS
     Src/MyTime.h
     Src/Octree.h
     Src/PPolynomial.h
-    Src/Ply.h
-    Src/PlyFile.h
+    Src/PlyVertexMini.h
     Src/PointStream.h
     Src/Polynomial.h
     Src/SparseMatrix.h

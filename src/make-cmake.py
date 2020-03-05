@@ -84,7 +84,7 @@ class CMaker:
             if not plugins_dir.exists():
                 continue
             for d in plugins_dir.iterdir():
-                if d.is_dir():
+                if d.is_dir() and d.name != "fgt":
                     self.handle_dir(d)
 
 

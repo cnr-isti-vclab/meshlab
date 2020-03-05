@@ -91,10 +91,24 @@ template< class C > ConstArray< C > GetPointer( const C* c , int sz ) { return C
 #define AlignedFreePointer( ... ) { if( __VA_ARGS__ ) aligned_free( __VA_ARGS__ ) ,                   __VA_ARGS__ = NULL; }
 #define      DeletePointer( ... ) { if( __VA_ARGS__ )      delete[] __VA_ARGS__ ,                     __VA_ARGS__ = NULL; }
 
+// [BL] Added memory clear here to avoid uninitialized memory read in SparseMatrix.
 template< class C > C*          NewPointer(        size_t size ,                    const char* name=NULL ){ return new C[size]; }
-template< class C > C*        AllocPointer(        size_t size ,                    const char* name=NULL ){ return (C*)        malloc(        sizeof(C) * size             ); }
-template< class C > C* AlignedAllocPointer(        size_t size , size_t alignment , const char* name=NULL ){ return (C*)aligned_malloc(        sizeof(C) * size , alignment ); }
-template< class C > C*      ReAllocPointer( C* c , size_t size ,                    const char* name=NULL ){ return (C*)       realloc( c    , sizeof(C) * size             ); }
+
+template< class C > C*        AllocPointer(        size_t size ,                    const char* name=NULL ){
+    return (C*) calloc(size, sizeof(C));
+}
+
+template< class C > C* AlignedAllocPointer(        size_t size , size_t alignment , const char* name=NULL ){
+    C* result = (C*)aligned_malloc(        sizeof(C) * size , alignment );
+    memset(result, 0, sizeof(C)*size);
+    return result;
+}
+
+template< class C > C*      ReAllocPointer( C* c , size_t size ,                    const char* name=NULL ){
+    C* result = (C*)realloc( c    , sizeof(C) * size             );
+    // [BL] cannot clear memory here, because I do not know what the previous size was...
+    return result;
+}
 
 //template< class C > C* NullPointer( void ){ return NULL; }
 
