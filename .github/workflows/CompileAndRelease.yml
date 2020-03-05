@@ -120,9 +120,10 @@ jobs:
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
-    - name: Install QT
-      uses: ouuan/install-qt-action@v2.3.1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
       with:
+        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
         modules: qtscript xmlpatterns
     - name: Build MeshLab
       run: |
