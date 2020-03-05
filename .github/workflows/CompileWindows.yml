@@ -31,7 +31,6 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
         modules: qtscript xmlpatterns
     - name: Build MeshLab
       run: |
@@ -79,7 +78,6 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
         modules: qtscript xmlpatterns
     - name: Configure
       run: |
