@@ -27,7 +27,7 @@ static std::vector<Point3d> *fix;
 static std::vector<Point3d> *mov;
 static vcg::Box3d b;
 
-double errorScale(int n, double *x)
+double errorScale(int, double *x)
 {
   assert(n==1);
   double dist = 0;
@@ -58,7 +58,7 @@ void ComputeScalingMatchMatrix(Matrix44d &res,
 }
 
 
-double errorRotoTranslationScale(int n, double *x){
+double errorRotoTranslationScale(int, double *x){
   assert(n==7);
   double dist = 0;
   std::vector<Point3d>::iterator i = mov->begin();

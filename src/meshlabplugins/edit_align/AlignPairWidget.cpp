@@ -185,7 +185,7 @@ void AlignPairWidget::paintEvent(QPaintEvent *)
 				{
 					int bestInd = -1;
 					double bestDist = 10e100;
-					for (int i = 0; i < curVec.size(); ++i)
+					for (size_t i = 0; i < curVec.size(); ++i)
 						if (Distance(pp, curVec[i]) < bestDist)
 						{
 							bestDist = Distance(pp, curVec[i]);
@@ -351,7 +351,7 @@ void AlignPairWidget::mouseReleaseEvent(QMouseEvent * e)
 void AlignPairWidget::wheelEvent(QWheelEvent * e)
 {
 	const int WHEEL_STEP = 120;
-	AlignPairDialog * dd = qobject_cast<AlignPairDialog *>(parent());
+	//AlignPairDialog * dd = qobject_cast<AlignPairDialog *>(parent());
 	if (allowscaling)
 	{
 		int index = e->x() < (width() / 2) ? 0 : 1;

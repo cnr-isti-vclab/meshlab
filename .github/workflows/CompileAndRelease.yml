@@ -124,6 +124,7 @@ jobs:
       uses: jurplel/install-qt-action@v2.4.1
       with:
         modules: qtscript xmlpatterns
+        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab
       run: |
         cd src\

@@ -41,7 +41,7 @@ QList<QAction *> EditAlignFactory::actions() const
 }
 
 //get the edit tool for the given action
-MeshEditInterface* EditAlignFactory::getMeshEditInterface(QAction *action)
+MeshEditInterface* EditAlignFactory::getMeshEditInterface(QAction *)
 {
   assert(action == editAlign);
   return new EditAlignPlugin();
