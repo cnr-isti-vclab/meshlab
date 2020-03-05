@@ -131,7 +131,10 @@ void EditPaintPlugin::EndEdit(MeshModel &/* m*/, GLArea * /*parent*/, MLSceneGLS
 	QObject::disconnect(paintbox, SIGNAL(undo()), this, SLOT(update()));
 	QObject::disconnect(paintbox, SIGNAL(redo()), this, SLOT(update()));
 	glarea->setMouseTracking(false);
-	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
+	if (zbuffer != NULL) {
+		delete zbuffer;
+		zbuffer = NULL;
+	}
 	delete paintbox;
 	delete selection;
 	delete dock;
@@ -140,7 +143,10 @@ void EditPaintPlugin::EndEdit(MeshModel &/* m*/, GLArea * /*parent*/, MLSceneGLS
 void EditPaintPlugin::mousePressEvent(QMouseEvent * event, MeshModel &, GLArea * gla)
 {
 	// start a new stroke: init zbuffer and update brush
-	if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
+	if (zbuffer != NULL) {
+		delete zbuffer;
+		zbuffer = NULL;
+	}
 
 	current_brush.size = paintbox->getSize();
 	current_brush.opacity = paintbox->getOpacity();
@@ -175,7 +181,10 @@ void EditPaintPlugin::tabletEvent(QTabletEvent * event, MeshModel &, GLArea * gl
 	// if event is down, start a new stroke: clean zbuff
 	if (event->type() == QEvent::TabletPress)
 	{
-		if (zbuffer != NULL) delete zbuffer; zbuffer = NULL;
+		if (zbuffer != NULL) {
+			delete zbuffer;
+			zbuffer = NULL;
+		}
 		current_brush.size = paintbox->getSize();
 		current_brush.opacity = paintbox->getOpacity();
 		current_brush.hardness = paintbox->getHardness();
@@ -524,8 +533,7 @@ void EditPaintPlugin::Decorate(MeshModel &m, GLArea * gla)
 				break;
 
 			case COLOR_CLONE:
-				if (latest_event.modifiers & Qt::ControlModifier ||
-					latest_event.button == Qt::RightButton) {
+				if (latest_event.modifiers & Qt::ControlModifier || latest_event.button == Qt::RightButton) {
 					capture(); break;
 				}
 				else
@@ -864,13 +872,13 @@ inline void EditPaintPlugin::fill(MeshModel &, CFaceO * face)
 	Color4b color(newcol.red(), newcol.green(), newcol.blue(), newcol.alpha());
 
 	paintbox->getUndoStack()->beginMacro("Fill Color");
-	MLSceneGLSharedDataContext* shared = NULL;
-	int meshid;
-	if ((glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
-	{
-		shared = glarea->mvc()->sharedDataContext();
-		meshid = glarea->md()->mm()->id();
-	}
+//	MLSceneGLSharedDataContext* shared = NULL;
+//	int meshid;
+//	if ((glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
+//	{
+//		shared = glarea->mvc()->sharedDataContext();
+//		meshid = glarea->md()->mm()->id();
+//	}
 	for (unsigned int lauf2 = 0; lauf2 < temp_po.size(); lauf2++) {
 		CFaceO * fac = temp_po.at(lauf2);
 		if (who == fac->IsS()) {
@@ -928,20 +936,20 @@ inline void EditPaintPlugin::gradient(MeshModel & m, GLArea * gla) {
 	float radius = sqrt((float)(p.x()*p.x() + p.y()*p.y()));
 
 	paintbox->getUndoStack()->beginMacro("Gradient");
-	MLSceneGLSharedDataContext* shared = NULL;
-	int meshid;
+//	MLSceneGLSharedDataContext* shared = NULL;
+//	int meshid;
 
-	if ((glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
-	{
-		shared = glarea->mvc()->sharedDataContext();
-		meshid = glarea->md()->mm()->id();
-	}
+//	if ((glarea != NULL) && (glarea->mvc() != NULL) && (glarea->md() != NULL) && (glarea->md()->mm() != NULL))
+//	{
+//		shared = glarea->mvc()->sharedDataContext();
+//		meshid = glarea->md()->mm()->id();
+//	}
 
 
 	int gradient_type = paintbox->getGradientType();
 	int gradient_form = paintbox->getGradientForm();
-	for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi)
-		if (!(*fi).IsD() && (tutti || (*fi).IsS()))
+	for (fi = m.cm.face.begin(); fi != m.cm.face.end(); ++fi) {
+		if (!(*fi).IsD() && (tutti || (*fi).IsS())){
 			for (int lauf = 0; lauf < 3; lauf++) {
 				if (!temp.contains((*fi).V(lauf))) {
 					vertex = (*fi).V(lauf);
@@ -998,6 +1006,8 @@ inline void EditPaintPlugin::gradient(MeshModel & m, GLArea * gla) {
 					}
 				}
 			}
+		}
+	}
 	paintbox->getUndoStack()->endMacro();
 }
 

@@ -109,7 +109,7 @@ public:
 static void Dijkstra(_MyMeshType& m, VertexType& v, int numOfNeighbours, float maxHopDist, std::vector<VertexType*> &notReachableVect)
 {
     bool hasKNNGraph = tri::HasPerVertexAttribute(m, "KNNGraph");
-    bool hasDistParam = tri::HasPerVertexAttribute(m, "DistParam");
+//    bool hasDistParam = tri::HasPerVertexAttribute(m, "DistParam");
 
     notReachableVect.clear();
 

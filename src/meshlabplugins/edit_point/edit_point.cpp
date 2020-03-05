@@ -46,7 +46,7 @@ const QString EditPointPlugin::Info() {
     return tr("Select a region of the point cloud thought to be in the same connected component.");
 }
 
-void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter *p)
+void EditPointPlugin::Decorate(MeshModel &m, GLArea * gla, QPainter */*p*/)
 {
   this->RealTimeLog("Point Selection",m.shortName(),
                     "<table>"
@@ -197,7 +197,7 @@ void EditPointPlugin::EndEdit(MeshModel & m, GLArea * /*parent*/, MLSceneGLShare
     tri::ComponentFinder<CMeshO>::DeletePerVertexAttribute(m.cm);
 }
 
-void EditPointPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt)
+void EditPointPlugin::suggestedRenderingData(MeshModel & /*m*/, MLRenderingData & dt)
 {
 	MLPerViewGLOptions opts;
 	dt.get(opts);
@@ -206,7 +206,7 @@ void EditPointPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData & dt
 	dt.set(opts);
 }
 
-void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
+void EditPointPlugin::mousePressEvent(QMouseEvent *ev, MeshModel &m, GLArea * /*gla*/) {
 
     cur = ev->pos();
 
@@ -261,7 +261,7 @@ void EditPointPlugin::mouseMoveEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla 
     }
 }
 
-void EditPointPlugin::mouseReleaseEvent(QMouseEvent *ev, MeshModel &m, GLArea *gla) {
+void EditPointPlugin::mouseReleaseEvent(QMouseEvent */*ev*/, MeshModel &/*m*/, GLArea *gla) {
     this->isMousePressed = false;
 
     gla->update();
@@ -358,13 +358,13 @@ void EditPointPlugin::keyPressEvent(QKeyEvent *ev, MeshModel &m, GLArea *gla) {
 void EditPointPlugin::wheelEvent(QWheelEvent* ev, MeshModel &m, GLArea *gla)
 {
   bool hopDistModified = false;
-  bool distModified = false;
+//  bool distModified = false;
 
   int wheelDirection = ev->delta();
   if (startingVertex != NULL && (ev->modifiers() & Qt::AltModifier))
   {
     this->dist *= pow(1.1f, wheelDirection / 120.f);
-    distModified = true;
+//    distModified = true;
   }
 
   if (!(ev->modifiers() & Qt::AltModifier))
