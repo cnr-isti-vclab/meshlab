@@ -30,6 +30,7 @@ set(HEADERS
     GLLogStream.h
     filterparameter.h
     filterscript.h
+    gl_defs.h
     interfaces.h
     meshlabdocumentbundler.h
     meshlabdocumentxml.h
@@ -63,7 +64,7 @@ target_link_libraries(
            Qt5::Widgets
            Qt5::Xml
            Qt5::XmlPatterns
-           external-glew
+           external-opengl
     PRIVATE external-jhead)
 
 set_property(TARGET common PROPERTY FOLDER Core)

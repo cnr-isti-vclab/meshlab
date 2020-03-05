@@ -40,6 +40,7 @@ set(BUILD_ADDITIONAL_PLUGINS
 
 option(ALLOW_BUNDLED_EIGEN "Allow use of bundled Eigen source" ON)
 option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
+option(ALLOW_BUNDLED_GLAD "Allow use of bundled glad source" ON)
 option(ALLOW_BUNDLED_NEWUOA "Allow use of bundled newuoa source" ON)
 option(ALLOW_BUNDLED_LEVMAR "Allow use of bundled levmar source" ON)
 option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
@@ -56,6 +57,8 @@ option(ALLOW_SYSTEM_GMP "Allow use of system-provided GMP" ON)
 option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
+
+option(BUILD_PREFER_GLAD "If both glew and glad are available, prefer to use glad" OFF)
 
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
