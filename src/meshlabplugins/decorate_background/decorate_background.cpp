@@ -358,6 +358,7 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* share
     //    qDebug("BG Grid boxF %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minP[0],minP[1],minP[2],maxP[0],maxP[1],maxP[2]);
     //    qDebug("BG Grid boxG %7.3f %7.3f %7.3f # %7.3f %7.3f %7.3f",minG[0],minG[1],minG[2],maxG[0],maxG[1],maxG[2]);
     for (int ii=0;ii<3;++ii)
+    {
         for(int jj=0;jj<2;++jj)
         {
             bool front = FrontFacing(viewPos,ii,jj,minP,maxP);
@@ -374,12 +375,12 @@ void DecorateBackgroundPlugin::DrawGriddedCube(MLSceneGLSharedDataContext* share
                 }
             }
         }
-
-        glDisable(GL_BLEND);
-        glPopAttrib();
+    }
+    glDisable(GL_BLEND);
+    glPopAttrib();
 }
 
-void  DecorateBackgroundPlugin::setValue(QString name, Shotm val) 
+void  DecorateBackgroundPlugin::setValue(QString, Shotm val)
 {
     curShot=val;
 }
