@@ -255,7 +255,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
         }
       }
       
-      // At this point we are sure that everithing went ok so we can allocate surely the abstract
+      // At this point we are sure that everything went ok so we can allocate surely the abstract
       AbstractMesh *abs_mesh = new AbstractMesh();
       ParamMesh *para_mesh = new ParamMesh();
       Parametrizator.ExportMeshes(*para_mesh,*abs_mesh);
@@ -275,7 +275,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
       bool Done=isoPHandle().LoadBaseDomain<CMeshO>(qUtf8Printable(AbsLoadName),mesh,para_mesh,abs_mesh,true);
       if (!Done)
       {
-        this->errorMessage="Abstract domain doesnt fit well with the parametrized mesh";
+        this->errorMessage="Abstract domain doesn't fit well with the parametrized mesh";
         delete para_mesh;
         delete abs_mesh;
         return false;
@@ -380,7 +380,7 @@ bool FilterIsoParametrization::applyFilter(QAction *filter, MeshDocument& md, Ri
 //    bool Done=isoPHandle().LoadBaseDomain<CMeshO>(path,mesh,para_mesh,abs_mesh,true);
 //    if (!Done)
 //    {
-//      this->errorMessage="Abstract domain doesnt fit well with the parametrized mesh";
+//      this->errorMessage="Abstract domain doesn't fit well with the parametrized mesh";
 //      delete para_mesh;
 //      delete abs_mesh;
 //      return false;

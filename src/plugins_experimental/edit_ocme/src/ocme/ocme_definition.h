@@ -367,7 +367,7 @@ struct OCME{
 	// selection frustum in view space
 	vcg::Point4f sel_corners[8];
 
-	// returns the cells selected by the user and lock them (do not allow to be drop)
+	// returns the cells selected by the user and lock them (do not allow them to be dropped)
 	void Select(std::vector<Cell*> & selected);
 	// deselect previously locked cells
 	void DeSelect(std::vector<Cell*> & selected);

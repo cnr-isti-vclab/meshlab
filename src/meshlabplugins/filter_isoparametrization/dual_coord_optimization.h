@@ -40,7 +40,7 @@ public:
     std::vector<MeshType*> HRES_meshes;
     std::vector<std::vector<VertexType*> > Ord_HVert;
 
-    ///hight resolution mesh and domain mesh
+    ///high resolution mesh and domain mesh
     MeshType *domain;
     MeshType *h_res_mesh;
 

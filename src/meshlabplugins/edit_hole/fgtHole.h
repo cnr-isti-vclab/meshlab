@@ -40,7 +40,7 @@
 
 /** An hole type, extends vcg::tri::Hole<MESH>::Info adding more information
  *  as filling, selection, filing autocompenetration and non manifoldness. 
- *  This class also allow to fill (and restore) an hole using different criteria.
+ *  This class also allows one to fill (and restore) an hole using different criteria.
  *
  *  FgtHole uses meshe's additional data to mark interesting face, so surfing 
  *  the hole faces is driven by face-face ajacency and mark meaning.

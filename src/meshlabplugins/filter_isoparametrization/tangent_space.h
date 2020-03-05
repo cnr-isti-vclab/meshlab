@@ -48,7 +48,7 @@ public:
 	
 	///given an initial position in parametric space (I0,bary0)
 	///and a 2D vector (vect) expressed in parametric space modify the final 
-	///position (I1,bary1) abd return true if everithing was ok, false otherwise
+	///position (I1,bary1) and return true if everything was ok, false otherwise
 	bool Sum(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const vcg::Point2<ScalarType> &vect,
 			 int &I1,vcg::Point2<ScalarType> &bary1,int &domain) const
@@ -121,7 +121,7 @@ public:
 	}
 	
 	///given two positions in parametric space (I0,bary0) and (I1,bary1)
-	///modify the 2D vector (vect) and return true if everithing was ok, false otherwise
+	///modify the 2D vector (vect) and return true if everything was ok, false otherwise
 	bool Sub(const int &I0,const vcg::Point2<ScalarType> &bary0,
 			 const int &I1,const vcg::Point2<ScalarType> &bary1,
 			 vcg::Point2<ScalarType> &vect,int &num) const

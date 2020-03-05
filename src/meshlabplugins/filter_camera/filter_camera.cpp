@@ -68,8 +68,8 @@ QString FilterCameraPlugin::filterName(FilterIDType filterId) const
 QString FilterCameraPlugin::filterInfo(FilterIDType filterId) const
 {
     switch(filterId) {
-    case FP_SET_MESH_CAMERA :     return QString("This filter allow to set a shot for the current mesh");
-    case FP_SET_RASTER_CAMERA :   return QString("This filter allow to set a shot for the current mesh");
+    case FP_SET_MESH_CAMERA :     return QString("This filter allows one to set a shot for the current mesh");
+    case FP_SET_RASTER_CAMERA :   return QString("This filter allows one to set a shot for the current mesh");
     case FP_QUALITY_FROM_CAMERA : return QString("Compute vertex quality using the camera definition, according to viewing angle or distance");
     case FP_CAMERA_ROTATE :       return QString("Rotate the camera, or all the cameras of the project. The selected raster is the reference if viewpoint rotation is selected.");
     case FP_CAMERA_SCALE :        return QString("Scale the camera, or all the cameras of the project. The selected raster is the reference if viewpoint scaling is selected.");
@@ -161,11 +161,11 @@ void FilterCameraPlugin::initParameterSet(QAction *action, MeshDocument &/*m*/, 
 
         }
         break;  case FP_SET_RASTER_CAMERA :
-        parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current raster."));
+        parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current raster."));
         break;
 
         case FP_SET_MESH_CAMERA :
-            parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allow to set a shot for the current mesh."));
+            parlst.addParam(new RichShotf ("Shot", defShot, "New shot", "This filter allows one to set a shot for the current mesh."));
             break;
         case FP_QUALITY_FROM_CAMERA :
             parlst.addParam(new RichBool ("Depth", true, "Depth", "Use depth as a factor."));

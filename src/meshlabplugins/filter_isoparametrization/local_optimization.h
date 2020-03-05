@@ -73,7 +73,7 @@ typename MeshType::ScalarType StarDistorsion(typename MeshType::VertexType *v)
 	CreateMeshVertexStar(starCenter,ordered_faces,star_domain);
 	ParametrizeStarEquilateral<MeshType>(star_domain);
 
-	///get all the vertices in H definition that shuld be optimized
+	///get all the vertices in H definition that should be optimized
 	///and initialize vertices with u,v coordinates
 	for (unsigned int index=0;index<ordered_faces.size();index++)
 	{
@@ -132,7 +132,7 @@ void OptimizeStar(typename MeshType::VertexType *v,MeshType &domain,int accuracy
 	ParametrizeStarEquilateral<MeshType>(star_domain);
 	assert(testParamCoords(star_domain));
 
-	///get all the vertices in H definition that shuld be optimized
+	///get all the vertices in H definition that should be optimized
 	///and initialize vertices with u,v coordinates
 	for (unsigned int index=0;index<ordered_faces.size();index++)
 	{
