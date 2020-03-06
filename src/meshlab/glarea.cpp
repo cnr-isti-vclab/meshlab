@@ -723,16 +723,16 @@ void GLArea::displayRealTimeLog(QPainter *painter)
     doc.setDefaultFont(qFont);
     int startingpoint = border;
     //mQMultiMap<QString,std::pair<QString,QString> >::const_iterator it = md()->Log.RealTimeLogText.constBegin();it != md()->Log.RealTimeLogText.constEnd();++it)
-    foreach(QString keyIt, md()->Log.RealTimeLogText.uniqueKeys() )
+    for (QString keyIt : md()->Log.realTimeLogMultiMap().uniqueKeys() )
     {
-        QList< QPair<QString,QString> > valueList = md()->Log.RealTimeLogText.values(keyIt);
+        QList< QPair<QString,QString> > valueList = md()->Log.realTimeLogMultiMap().values(keyIt);
         QPair<QString,QString> itVal;
         // the map contains pairs of meshname, text
         // the meshname is used only to disambiguate when there are more than two boxes with the same title
-        foreach(itVal,  valueList)
+        for(const QPair<QString,QString>& itVal: valueList)
         {
             QString HeadName = keyIt;
-            if(md()->Log.RealTimeLogText.count(keyIt)>1)
+            if(md()->Log.realTimeLogMultiMap().count(keyIt)>1)
                 HeadName += " - "+itVal.first;
             doc.clear();
             doc.setDocumentMargin(margin*0.75);
@@ -755,7 +755,7 @@ void GLArea::displayRealTimeLog(QPainter *painter)
     }
 
     // After the rederaw we clear the RealTimeLog buffer!
-    md()->Log.RealTimeLogText.clear();
+    md()->Log.clearRealTimeLog();
     painter->restore();
     painter->beginNativePainting();
 }

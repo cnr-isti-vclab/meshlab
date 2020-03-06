@@ -31,12 +31,12 @@ using namespace std;
 GLLogStream::GLLogStream()
 	:QObject()
 {
-  ClearBookmark();
+	ClearBookmark();
 }
 
 void GLLogStream::RealTimeLog(const QString& Id, const QString &meshName, const QString& text)
 {
-  this->RealTimeLogText.insert(Id,qMakePair(meshName,text) );
+	this->RealTimeLogText.insert(Id,qMakePair(meshName,text) );
 }
 
 
@@ -45,31 +45,46 @@ void GLLogStream::Save(int /*Level*/, const char * filename )
 	FILE *fp=fopen(filename,"wb");
 	QList<pair <int,QString> > ::iterator li;
 	for(li=S.begin();li!=S.end();++li)
-        fprintf(fp,"%s", qUtf8Printable((*li).second));
+		fprintf(fp,"%s", qUtf8Printable((*li).second));
 }
 
 void GLLogStream::ClearBookmark()
 {
-  bookmark = -1;
+	bookmark = -1;
 }
 
 void GLLogStream::SetBookmark()
 {
-  bookmark=S.size();
+	bookmark=S.size();
 }
 
 void GLLogStream::BackToBookmark()
 {
-  if(bookmark<0) return;
-  while(S.size() > bookmark )
-    S.removeLast();
+	if(bookmark<0) return;
+	while(S.size() > bookmark )
+		S.removeLast();
 }
-void GLLogStream::print(QStringList &out)
+
+const QList<std::pair<int, QString> >& GLLogStream::logStringList() const
 {
-  out.clear();
-  QList<pair <int,QString> > ::const_iterator li;
-  for(li=S.begin();li!=S.end();++li)
-        out.push_back((*li).second);
+	return S;
+}
+
+const QMultiMap<QString, QPair<QString, QString> >& GLLogStream::realTimeLogMultiMap() const
+{
+	return RealTimeLogText;
+}
+
+void GLLogStream::clearRealTimeLog()
+{
+	RealTimeLogText.clear();
+}
+
+void GLLogStream::print(QStringList &out) const
+{
+	out.clear();
+	for (const pair <int,QString>& p : S)
+		out.push_back(p.second);
 }
 
 void GLLogStream::Clear()

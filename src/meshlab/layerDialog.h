@@ -113,7 +113,7 @@ class LayerDialog : public QDockWidget
 public:
     LayerDialog(QWidget *parent = 0);
     ~LayerDialog();
-	void updateLog(GLLogStream &Log);
+    void updateLog(const GLLogStream& Log);
     void updateDecoratorParsView();
     void updateRenderingParametersTab(int meshid,const MLRenderingData& dt);
     void reset();
