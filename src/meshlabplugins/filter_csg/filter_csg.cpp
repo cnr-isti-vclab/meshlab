@@ -156,13 +156,13 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             secondMesh->updateDataMask(MeshModel::MM_FACENORMAL | MeshModel::MM_FACEQUALITY);
 
 			MeshModel tmpfirstmesh(firstMesh);
-			for (size_t ii = 0; ii < tmpfirstmesh.cm.VN(); ++ii)
+			for (size_t ii = 0; ii < (size_t)tmpfirstmesh.cm.VN(); ++ii)
 				tmpfirstmesh.cm.vert[ii].P() = tmpfirstmesh.cm.Tr * tmpfirstmesh.cm.vert[ii].P();
 			vcg::tri::UpdateBounding<CMeshO>::Box(tmpfirstmesh.cm);
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(tmpfirstmesh.cm);
 
 			MeshModel tmpsecondmesh(secondMesh);
-			for (size_t ii = 0; ii < tmpsecondmesh.cm.VN(); ++ii)
+			for (size_t ii = 0; ii < (size_t)tmpsecondmesh.cm.VN(); ++ii)
 				tmpsecondmesh.cm.vert[ii].P() = tmpsecondmesh.cm.Tr * tmpsecondmesh.cm.vert[ii].P();
 			vcg::tri::UpdateBounding<CMeshO>::Box(tmpsecondmesh.cm);
 			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFaceNormalized(tmpfirstmesh.cm);

@@ -207,8 +207,8 @@ public:
     ScalarType remainder;           // octaves remainder
 
 protected:
-    virtual inline void init(ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise) = 0;
-    virtual inline void update(int oct, ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise) = 0;
+    virtual void init(ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise) = 0;
+    virtual void update(int oct, ScalarType&x, ScalarType& y, ScalarType& z, ScalarType& noise) = 0;
 
 private:
     /* precomputes spectral weights to be used in noise algorithm */

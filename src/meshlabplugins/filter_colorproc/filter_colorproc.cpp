@@ -365,549 +365,549 @@ void FilterColorProc::initParameterSet(QAction *a, MeshDocument& md, RichParamet
 
 bool FilterColorProc::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet &par, vcg::CallBackPos *cb)
 {
-MeshModel *m = md.mm();  //get current mesh from document
+	MeshModel *m = md.mm();  //get current mesh from document
 
-switch(ID(filter))
-{
-	case CP_FILLING:
+	switch(ID(filter))
 	{
-		QColor temp = par.getColor("color1");
-		Color4b new_col = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexConstant(m->cm, new_col, selected);
-		return true;
-	}
-
-	case CP_THRESHOLDING:
-	{
-		float threshold = math::Clamp<float>(par.getDynamicFloat("threshold"), 0.0f, 255.0f);
-		QColor temp = par.getColor("color1");
-		Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-		temp = par.getColor("color2");
-		Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexThresholding(m->cm, threshold, c1, c2, selected);
-		return true;
-	}
-
-	case CP_CONTR_BRIGHT:
-	{
-		float brightness = par.getDynamicFloat("brightness");
-		float contrast = par.getDynamicFloat("contrast");
-		float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
-		vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0f,contrast/256.0f , selected);
-		return true;
-	}
-
-	case CP_INVERT :
-	{
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexInvert(m->cm, selected);
-		return true;
-	}
-
-	case CP_LEVELS:
-	{
-		float gamma = par.getDynamicFloat("gamma");
-		float  in_min = par.getDynamicFloat("in_min")/255;
-		float  in_max = par.getDynamicFloat("in_max")/255;
-		float  out_min = par.getDynamicFloat("out_min")/255;
-		float  out_max = par.getDynamicFloat("out_max")/255;
-		bool all_levels = par.getBool("apply_to_all");
-		bool selected = par.getBool("onSelected");
-
-		//builds incrementally a bitmask that indicates on which channels the filter works...
-		unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
-		if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
-		if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
-		if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
-		//if no channels are checked, we intend to work on all rgb channels, so...
-		if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
-
-		if (all_levels)
+		case CP_FILLING:
 		{
-		foreach(MeshModel *mm, md.meshList)
-			if (mm->isVisible())
-			vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+			QColor temp = par.getColor("color1");
+			Color4b new_col = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexConstant(m->cm, new_col, selected);
+			return true;
 		}
-		else
+
+		case CP_THRESHOLDING:
 		{
-		vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+			float threshold = math::Clamp<float>(par.getDynamicFloat("threshold"), 0.0f, 255.0f);
+			QColor temp = par.getColor("color1");
+			Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+			temp = par.getColor("color2");
+			Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexThresholding(m->cm, threshold, c1, c2, selected);
+			return true;
 		}
-		return true;
-	}
 
-	case CP_COLOURISATION:
-	{
-		//reads parameters and normalizes their values in [0,1]
-		float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
-		float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
-		float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
-		float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
-		bool selected = par.getBool("onSelected");
-
-		double r, g, b;   //converts color from HSL to RGB....
-		ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
-		Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 255);
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexColourisation(m->cm, color, intensity, selected);
-		return true;
-	}
-
-	case CP_DESATURATION:
-	{
-		int method = par.getEnum("method");
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexDesaturation(m->cm, method, selected);
-		return true;
-	}
-
-	case CP_EQUALIZE:
-	{
-		//builds incrementally a bitmask that indicates on which channels the filter works...
-		unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
-		if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
-		if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
-		if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexEqualize(m->cm, rgbMask, selected);
-		return true;
-	}
-
-	case CP_WHITE_BAL:
-	{
-		QColor tempColor = par.getColor("color");
-		Color4b color = Color4b(tempColor.red(),tempColor.green(),tempColor.blue(), 255);
-		bool selected = par.getBool("onSelected");
-
-		vcg::tri::UpdateColor<CMeshO>::PerVertexWhiteBalance(m->cm, color, selected);
-		return true;
-	}
-
-	case CP_SCATTER_PER_MESH:
-	{
-		int seed=par.getInt("seed");
-
-		if(seed==0) seed = time(NULL);
-		math::MarsenneTwisterRNG myrnd(seed);
-		int numOfMeshes = md.meshList.size();
-		int id = myrnd.generate(numOfMeshes);
-		foreach(MeshModel *mm, md.meshList)
+		case CP_CONTR_BRIGHT:
 		{
-			if (mm->isVisible())
-				mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
-			id=(id+1)%numOfMeshes;
+			float brightness = par.getDynamicFloat("brightness");
+			float contrast = par.getDynamicFloat("contrast");
+			float gamma = math::Clamp(par.getDynamicFloat("gamma"), 0.1f, 5.0f);
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexGamma(m->cm, gamma, selected);
+			vcg::tri::UpdateColor<CMeshO>::PerVertexBrightnessContrast(m->cm, brightness/256.0f,contrast/256.0f , selected);
+			return true;
 		}
-		return true;
-	}
 
-	case CP_PERLIN_COLOR:
-	{
-		QColor temp = par.getColor("color1");
-		Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-		temp = par.getColor("color2");
-		Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
-		float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document
-		float period = md.bbox().Diag() / freq;
-		Point3m offset = par.getPoint3m("offset");
-		bool selected = par.getBool("onSelected");
-
-		tri::UpdateColor<CMeshO>::PerVertexPerlinColoring(m->cm, period, offset, c1, c2, selected);
-		return true;
-	}
-
-	case CP_COLOR_NOISE:
-	{
-		int noiseBits = par.getInt("noiseBits");
-		bool selected = par.getBool("onSelected");
-
-		tri::UpdateColor<CMeshO>::PerVertexAddNoise(m->cm, noiseBits, selected);
-		return true;
-	}
-
-	case CP_SATURATE_QUALITY:
-	{
-		m->updateDataMask(MeshModel::MM_VERTFACETOPO);
-		tri::UpdateQuality<CMeshO>::VertexSaturate(m->cm, par.getFloat("gradientThr"));
-		if (par.getBool("updateColor"))
+		case CP_INVERT :
 		{
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexInvert(m->cm, selected);
+			return true;
+		}
+
+		case CP_LEVELS:
+		{
+			float gamma = par.getDynamicFloat("gamma");
+			float  in_min = par.getDynamicFloat("in_min")/255;
+			float  in_max = par.getDynamicFloat("in_max")/255;
+			float  out_min = par.getDynamicFloat("out_min")/255;
+			float  out_max = par.getDynamicFloat("out_max")/255;
+			bool all_levels = par.getBool("apply_to_all");
+			bool selected = par.getBool("onSelected");
+
+			//builds incrementally a bitmask that indicates on which channels the filter works...
+			unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
+			if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
+			if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
+			if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
+			//if no channels are checked, we intend to work on all rgb channels, so...
+			if(rgbMask == vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS) rgbMask = vcg::tri::UpdateColor<CMeshO>::ALL_CHANNELS;
+
+			if (all_levels)
+			{
+			foreach(MeshModel *mm, md.meshList)
+				if (mm->isVisible())
+				vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(mm->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+			}
+			else
+			{
+			vcg::tri::UpdateColor<CMeshO>::PerVertexLevels(m->cm, gamma, in_min, in_max, out_min, out_max, rgbMask, selected);
+			}
+			return true;
+		}
+
+		case CP_COLOURISATION:
+		{
+			//reads parameters and normalizes their values in [0,1]
+			float luminance = math::Clamp(par.getDynamicFloat("luminance")/100, 0.0f, 1.0f);
+			float saturation = math::Clamp(par.getDynamicFloat("saturation")/100, 0.0f, 1.0f);
+			float hue = math::Clamp(par.getDynamicFloat("hue")/360, 0.0f, 1.0f);
+			float intensity = math::Clamp(par.getDynamicFloat("intensity")/100, 0.0f, 1.0f);
+			bool selected = par.getBool("onSelected");
+
+			double r, g, b;   //converts color from HSL to RGB....
+			ColorSpace<unsigned char>::HSLtoRGB( (double)hue, (double)saturation, (double)luminance, r, g, b);
+			Color4b color = Color4b((int)(r*255), (int)(g*255), (int)(b*255), 255);
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexColourisation(m->cm, color, intensity, selected);
+			return true;
+		}
+
+		case CP_DESATURATION:
+		{
+			int method = par.getEnum("method");
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexDesaturation(m->cm, method, selected);
+			return true;
+		}
+
+		case CP_EQUALIZE:
+		{
+			//builds incrementally a bitmask that indicates on which channels the filter works...
+			unsigned char rgbMask = vcg::tri::UpdateColor<CMeshO>::NO_CHANNELS;
+			if(par.getBool("rCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::RED_CHANNEL;
+			if(par.getBool("gCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::GREEN_CHANNEL;
+			if(par.getBool("bCh")) rgbMask = rgbMask | vcg::tri::UpdateColor<CMeshO>::BLUE_CHANNEL;
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexEqualize(m->cm, rgbMask, selected);
+			return true;
+		}
+
+		case CP_WHITE_BAL:
+		{
+			QColor tempColor = par.getColor("color");
+			Color4b color = Color4b(tempColor.red(),tempColor.green(),tempColor.blue(), 255);
+			bool selected = par.getBool("onSelected");
+
+			vcg::tri::UpdateColor<CMeshO>::PerVertexWhiteBalance(m->cm, color, selected);
+			return true;
+		}
+
+		case CP_SCATTER_PER_MESH:
+		{
+			int seed=par.getInt("seed");
+
+			if(seed==0) seed = time(NULL);
+			math::MarsenneTwisterRNG myrnd(seed);
+			int numOfMeshes = md.meshList.size();
+			int id = myrnd.generate(numOfMeshes);
+			foreach(MeshModel *mm, md.meshList)
+			{
+				if (mm->isVisible())
+					mm->cm.C()=Color4b::Scatter(numOfMeshes,id);
+				id=(id+1)%numOfMeshes;
+			}
+			return true;
+		}
+
+		case CP_PERLIN_COLOR:
+		{
+			QColor temp = par.getColor("color1");
+			Color4b c1 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+			temp = par.getColor("color2");
+			Color4b c2 = Color4b(temp.red(), temp.green(), temp.blue(), temp.alpha());
+			float freq = par.getDynamicFloat("freq");//default frequency; grant to be the same for all mesh in the document
+			float period = md.bbox().Diag() / freq;
+			Point3m offset = par.getPoint3m("offset");
+			bool selected = par.getBool("onSelected");
+
+			tri::UpdateColor<CMeshO>::PerVertexPerlinColoring(m->cm, period, offset, c1, c2, selected);
+			return true;
+		}
+
+		case CP_COLOR_NOISE:
+		{
+			int noiseBits = par.getInt("noiseBits");
+			bool selected = par.getBool("onSelected");
+
+			tri::UpdateColor<CMeshO>::PerVertexAddNoise(m->cm, noiseBits, selected);
+			return true;
+		}
+
+		case CP_SATURATE_QUALITY:
+		{
+			m->updateDataMask(MeshModel::MM_VERTFACETOPO);
+			tri::UpdateQuality<CMeshO>::VertexSaturate(m->cm, par.getFloat("gradientThr"));
+			if (par.getBool("updateColor"))
+			{
+				Histogramf H;
+				tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
+				m->updateDataMask(MeshModel::MM_VERTCOLOR);
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
+			}
+			Log("Saturated Vertex Quality");
+			return true;
+		}
+
+		case CP_MAP_VQUALITY_INTO_COLOR:
+		{
+			m->updateDataMask(MeshModel::MM_VERTCOLOR);
+
+			float RangeMin = par.getFloat("minVal");
+			float RangeMax = par.getFloat("maxVal");
+			bool usePerc = par.getDynamicFloat("perc")>0;
+
 			Histogramf H;
 			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
-			m->updateDataMask(MeshModel::MM_VERTCOLOR);
-			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
-		}
-		Log("Saturated Vertex Quality");
-		return true;
-	}
 
-	case CP_MAP_VQUALITY_INTO_COLOR:
-	{
-		m->updateDataMask(MeshModel::MM_VERTCOLOR);
+			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
+			float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
 
-		float RangeMin = par.getFloat("minVal");
-		float RangeMax = par.getFloat("maxVal");
-		bool usePerc = par.getDynamicFloat("perc")>0;
-
-		Histogramf H;
-		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
-
-		float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
-		float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
-
-		if (par.getBool("zeroSym"))
-		{
-			RangeMin = min(RangeMin, -math::Abs(RangeMax));
-			RangeMax = max(math::Abs(RangeMin), RangeMax);
-			PercLo = min(PercLo, -math::Abs(PercHi));
-			PercHi = max(math::Abs(PercLo), PercHi);
-		}
-
-		if (usePerc)
-		{
-			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi);
-			Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
-		}
-		else {
-			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
-			Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
-		}
-		return true;
-	}
-
-	case CP_CLAMP_QUALITY:
-	{
-		float RangeMin = par.getFloat("minVal");
-		float RangeMax = par.getFloat("maxVal");
-		bool usePerc = par.getDynamicFloat("perc")>0;
-
-		Histogramf H;
-		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
-
-		float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
-		float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
-
-		if (par.getBool("zeroSym"))
-		{
-			RangeMin = min(RangeMin, -math::Abs(RangeMax));
-			RangeMax = max(math::Abs(RangeMin), RangeMax);
-			PercLo = min(PercLo, -math::Abs(PercHi));
-			PercHi = max(math::Abs(PercLo), PercHi);
-		}
-
-		if (usePerc)
-		{
-			tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, PercLo, PercHi);
-			Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
-		}
-		else {
-			tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, RangeMin, RangeMax);
-			Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
-		}
-		return true;
-	}
-
-	case CP_MAP_FQUALITY_INTO_COLOR: 
-	{
-		m->updateDataMask(MeshModel::MM_FACECOLOR);
-		float RangeMin = par.getFloat("minVal");
-		float RangeMax = par.getFloat("maxVal");
-		float perc = par.getDynamicFloat("perc");
-		bool usePerc = perc>0;
-
-		Histogramf H;
-		tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m->cm, H);
-		float PercLo = H.Percentile(perc / 100.f);
-		float PercHi = H.Percentile(1.0 - perc / 100.f);
-
-		// Make the range and percentile symmetric w.r.t. zero, so that
-		// the value zero is always colored in yellow
-		if (par.getBool("zeroSym")){
-			RangeMin = min(RangeMin, -math::Abs(RangeMax));
-			RangeMax = max(math::Abs(RangeMin), RangeMax);
-			PercLo = min(PercLo, -math::Abs(PercHi));
-			PercHi = max(math::Abs(PercLo), PercHi);
-		}
-
-		if (usePerc){
-			tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi);
-			Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
-				H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100 - perc);
-		}
-		else {
-			tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
-			Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
-		}
-		return true;
-	}
-
-	case CP_DISCRETE_CURVATURE:
-	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);
-		m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
-		tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m->cm);
-
-		if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m->cm) > 0) {
-			errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
-			return false; // can't continue, mesh can't be processed
-		}
-
-		int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
-		if (delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
-		tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
-		tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m->cm);
-		int curvType = par.getEnum("CurvatureType");
-
-		switch (curvType)
-		{
-			case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        Log("Computed Mean Curvature");      break;
-			case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    Log("Computed Gaussian Curvature"); break;
-			case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         Log("Computed RMS Curvature"); break;
-			case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    Log("Computed ABS Curvature"); break;
-			default: assert(0);
-		}
-
-		Histogramf H;
-		tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
-		tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
-		Log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
-		return true;
-	}
-
-	case CP_TRIANGLE_QUALITY:
-	{
-		m->updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
-		CMeshO::FaceIterator fi;
-		Distribution<float> distrib;
-		float minV = 0;
-		float maxV = 1.0;
-		int metric = par.getEnum("Metric");
-		if (metric == 4 || metric == 5)
-		{
-			if (!m->hasDataMask(MeshModel::MM_VERTTEXCOORD) && !m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+			if (par.getBool("zeroSym"))
 			{
-				this->errorMessage = "This metric need Texture Coordinate";
+				RangeMin = min(RangeMin, -math::Abs(RangeMax));
+				RangeMax = max(math::Abs(RangeMin), RangeMax);
+				PercLo = min(PercLo, -math::Abs(PercHi));
+				PercHi = max(math::Abs(PercLo), PercHi);
+			}
+
+			if (usePerc)
+			{
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, PercLo, PercHi);
+				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+			}
+			else {
+				tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, RangeMin, RangeMax);
+				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+			}
+			return true;
+		}
+
+		case CP_CLAMP_QUALITY:
+		{
+			float RangeMin = par.getFloat("minVal");
+			float RangeMax = par.getFloat("maxVal");
+			bool usePerc = par.getDynamicFloat("perc")>0;
+
+			Histogramf H;
+			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
+
+			float PercLo = H.Percentile(par.getDynamicFloat("perc") / 100.f);
+			float PercHi = H.Percentile(1.0 - par.getDynamicFloat("perc") / 100.f);
+
+			if (par.getBool("zeroSym"))
+			{
+				RangeMin = min(RangeMin, -math::Abs(RangeMax));
+				RangeMax = max(math::Abs(RangeMin), RangeMax);
+				PercLo = min(PercLo, -math::Abs(PercHi));
+				PercHi = max(math::Abs(PercLo), PercHi);
+			}
+
+			if (usePerc)
+			{
+				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, PercLo, PercHi);
+				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ", H.MinV(), H.MaxV(), PercLo, PercHi, par.getDynamicFloat("perc"), 100 - par.getDynamicFloat("perc"));
+			}
+			else {
+				tri::UpdateQuality<CMeshO>::VertexClamp(m->cm, RangeMin, RangeMax);
+				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+			}
+			return true;
+		}
+
+		case CP_MAP_FQUALITY_INTO_COLOR:
+		{
+			m->updateDataMask(MeshModel::MM_FACECOLOR);
+			float RangeMin = par.getFloat("minVal");
+			float RangeMax = par.getFloat("maxVal");
+			float perc = par.getDynamicFloat("perc");
+			bool usePerc = perc>0;
+
+			Histogramf H;
+			tri::Stat<CMeshO>::ComputePerFaceQualityHistogram(m->cm, H);
+			float PercLo = H.Percentile(perc / 100.f);
+			float PercHi = H.Percentile(1.0 - perc / 100.f);
+
+			// Make the range and percentile symmetric w.r.t. zero, so that
+			// the value zero is always colored in yellow
+			if (par.getBool("zeroSym")){
+				RangeMin = min(RangeMin, -math::Abs(RangeMax));
+				RangeMax = max(math::Abs(RangeMin), RangeMax);
+				PercLo = min(PercLo, -math::Abs(PercHi));
+				PercHi = max(math::Abs(PercLo), PercHi);
+			}
+
+			if (usePerc){
+				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, PercLo, PercHi);
+				Log("Quality Range: %f %f; Used (%f %f) percentile (%f %f) ",
+					H.MinV(), H.MaxV(), PercLo, PercHi, perc, 100 - perc);
+			}
+			else {
+				tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, RangeMin, RangeMax);
+				Log("Quality Range: %f %f; Used (%f %f)", H.MinV(), H.MaxV(), RangeMin, RangeMax);
+			}
+			return true;
+		}
+
+		case CP_DISCRETE_CURVATURE:
+		{
+			m->updateDataMask(MeshModel::MM_FACEFACETOPO | MeshModel::MM_VERTCURV);
+			m->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+			tri::UpdateFlags<CMeshO>::FaceBorderFromFF(m->cm);
+
+			if (tri::Clean<CMeshO>::CountNonManifoldEdgeFF(m->cm) > 0) {
+				errorMessage = "Mesh has some not 2-manifold faces, Curvature computation requires manifoldness"; // text
+				return false; // can't continue, mesh can't be processed
+			}
+
+			int delvert = tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
+			if (delvert) Log("Pre-Curvature Cleaning: Removed %d unreferenced vertices", delvert);
+			tri::Allocator<CMeshO>::CompactVertexVector(m->cm);
+			tri::UpdateCurvature<CMeshO>::MeanAndGaussian(m->cm);
+			int curvType = par.getEnum("CurvatureType");
+
+			switch (curvType)
+			{
+				case 0: tri::UpdateQuality<CMeshO>::VertexFromMeanCurvatureHG(m->cm);        Log("Computed Mean Curvature");      break;
+				case 1: tri::UpdateQuality<CMeshO>::VertexFromGaussianCurvatureHG(m->cm);    Log("Computed Gaussian Curvature"); break;
+				case 2: tri::UpdateQuality<CMeshO>::VertexFromRMSCurvature(m->cm);         Log("Computed RMS Curvature"); break;
+				case 3: tri::UpdateQuality<CMeshO>::VertexFromAbsoluteCurvature(m->cm);    Log("Computed ABS Curvature"); break;
+				default: assert(0);
+			}
+
+			Histogramf H;
+			tri::Stat<CMeshO>::ComputePerVertexQualityHistogram(m->cm, H);
+			tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m->cm, H.Percentile(0.1f), H.Percentile(0.9f));
+			Log("Curvature Range: %f %f (Used 90 percentile %f %f) ", H.MinV(), H.MaxV(), H.Percentile(0.1f), H.Percentile(0.9f));
+			return true;
+		}
+
+		case CP_TRIANGLE_QUALITY:
+		{
+			m->updateDataMask(MeshModel::MM_FACECOLOR | MeshModel::MM_FACEQUALITY);
+			CMeshO::FaceIterator fi;
+			Distribution<float> distrib;
+			float minV = 0;
+			float maxV = 1.0;
+			int metric = par.getEnum("Metric");
+			if (metric == 4 || metric == 5)
+			{
+				if (!m->hasDataMask(MeshModel::MM_VERTTEXCOORD) && !m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+				{
+					this->errorMessage = "This metric need Texture Coordinate";
+					return false;
+				}
+			}
+			if ((metric == 6 || metric == 7) && !m->hasDataMask(MeshModel::MM_POLYGONAL))
+			{
+				this->errorMessage = "This metric is meaningless for triangle only meshes (all faces are planar by definition)";
 				return false;
 			}
-		}
-		if ((metric == 6 || metric == 7) && !m->hasDataMask(MeshModel::MM_POLYGONAL))
-		{
-			this->errorMessage = "This metric is meaningless for triangle only meshes (all faces are planar by definition)";
-			return false;
-		}
-		switch (metric){
+			switch (metric){
 
-		case 0: { //area / max edge
-					minV = 0;
-					maxV = sqrt(3.0f) / 2.0f;
-					for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-						(*fi).Q() = vcg::Quality((*fi).P(0), (*fi).P(1), (*fi).P(2));
-		} break;
-
-		case 1: { //inradius / circumradius
-					for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-						(*fi).Q() = vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2));
-		} break;
-
-		case 2: { //Mean Ratio = area/(a*a + b*b + c*c). See vcg::QualityMeanRatio.
-					for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-						(*fi).Q() = vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2));
-		} break;
-
-		case 3: { // Area of triangle
-					for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-						(*fi).Q() = vcg::DoubleArea((*fi))*0.5f;
-					tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm, minV, maxV);
-		} break;
-
-		case 4: { //TEXTURE Angle Distortion
-					if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-					{
+			case 0: { //area / max edge
+						minV = 0;
+						maxV = sqrt(3.0f) / 2.0f;
 						for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-							(*fi).Q() = Distortion<CMeshO, true>::AngleDistortion(&*fi);
-					}
-					else {
+							(*fi).Q() = vcg::Quality((*fi).P(0), (*fi).P(1), (*fi).P(2));
+			} break;
+
+			case 1: { //inradius / circumradius
 						for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-							(*fi).Q() = Distortion<CMeshO, false>::AngleDistortion(&*fi);
-					}
-					tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
-					minV = distrib.Percentile(CMeshO::ScalarType(0.05));
-					maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
-		} break;
+							(*fi).Q() = vcg::QualityRadii((*fi).P(0), (*fi).P(1), (*fi).P(2));
+			} break;
 
-		case 5: { //TEXTURE Area Distortion
-					CMeshO::ScalarType areaScaleVal, edgeScaleVal;
-					if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
-					{
-						Distortion<CMeshO, true>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+			case 2: { //Mean Ratio = area/(a*a + b*b + c*c). See vcg::QualityMeanRatio.
 						for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-							(*fi).Q() = Distortion<CMeshO, true>::AreaDistortion(&*fi, areaScaleVal);
-					}
-					else {
-						Distortion<CMeshO, false>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+							(*fi).Q() = vcg::QualityMeanRatio((*fi).P(0), (*fi).P(1), (*fi).P(2));
+			} break;
+
+			case 3: { // Area of triangle
 						for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-							(*fi).Q() = Distortion<CMeshO, false>::AreaDistortion(&*fi, areaScaleVal);
+							(*fi).Q() = vcg::DoubleArea((*fi))*0.5f;
+						tri::Stat<CMeshO>::ComputePerFaceQualityMinMax(m->cm, minV, maxV);
+			} break;
 
-					}
-					tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
-					minV = distrib.Percentile(CMeshO::ScalarType(0.05));
-					maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
-		} break;
-		case 6:
-		case 7: { // polygonal planarity
-					tri::UpdateFlags<CMeshO>::FaceClearV(m->cm);
-					std::vector<CMeshO::VertexPointer> vertVec;
-					std::vector<CMeshO::FacePointer> faceVec;
-					for (size_t i = 0; i<m->cm.face.size(); ++i)
-					if (!m->cm.face[i].IsV())
-					{
-						tri::PolygonSupport<CMeshO, CMeshO>::ExtractPolygon(&(m->cm.face[i]), vertVec, faceVec);
-						//assert(faceVec.size()==vertVec.size()-2);
-
-						std::vector<CMeshO::CoordType> pointVec;
-						for (size_t j = 0; j<vertVec.size(); ++j)
-							pointVec.push_back(vertVec[j]->P());
-
-						Plane3m pl;
-						vcg::FitPlaneToPointSet(pointVec, pl);
-						float maxDist = 0, sumDist = 0, halfPerim = 0;
-						for (size_t j = 0; j<vertVec.size(); ++j)
+			case 4: { //TEXTURE Angle Distortion
+						if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
 						{
-							float d = fabs(SignedDistancePlanePoint(pl, pointVec[j]));
-							sumDist += d;
-							maxDist = max(maxDist, d);
-							halfPerim += Distance(pointVec[j], pointVec[(j + 1) % vertVec.size()]);
+							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
+								(*fi).Q() = Distortion<CMeshO, true>::AngleDistortion(&*fi);
 						}
+						else {
+							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
+								(*fi).Q() = Distortion<CMeshO, false>::AngleDistortion(&*fi);
+						}
+						tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
+						minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+						maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
+			} break;
 
-						float avgDist = sumDist / float(vertVec.size());
-						for (size_t j = 0; j<faceVec.size(); ++j)
-						if (metric == 6)
-							faceVec[j]->Q() = maxDist;
-						else
-							faceVec[j]->Q() = avgDist / halfPerim;
+			case 5: { //TEXTURE Area Distortion
+						CMeshO::ScalarType areaScaleVal, edgeScaleVal;
+						if (m->hasDataMask(MeshModel::MM_WEDGTEXCOORD))
+						{
+							Distortion<CMeshO, true>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
+								(*fi).Q() = Distortion<CMeshO, true>::AreaDistortion(&*fi, areaScaleVal);
+						}
+						else {
+							Distortion<CMeshO, false>::MeshScalingFactor(m->cm, areaScaleVal, edgeScaleVal);
+							for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
+								(*fi).Q() = Distortion<CMeshO, false>::AreaDistortion(&*fi, areaScaleVal);
 
+						}
+						tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
+						minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+						maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
+			} break;
+			case 6:
+			case 7: { // polygonal planarity
+						tri::UpdateFlags<CMeshO>::FaceClearV(m->cm);
+						std::vector<CMeshO::VertexPointer> vertVec;
+						std::vector<CMeshO::FacePointer> faceVec;
+						for (size_t i = 0; i<m->cm.face.size(); ++i)
+						if (!m->cm.face[i].IsV())
+						{
+							tri::PolygonSupport<CMeshO, CMeshO>::ExtractPolygon(&(m->cm.face[i]), vertVec, faceVec);
+							//assert(faceVec.size()==vertVec.size()-2);
+
+							std::vector<CMeshO::CoordType> pointVec;
+							for (size_t j = 0; j<vertVec.size(); ++j)
+								pointVec.push_back(vertVec[j]->P());
+
+							Plane3m pl;
+							vcg::FitPlaneToPointSet(pointVec, pl);
+							float maxDist = 0, sumDist = 0, halfPerim = 0;
+							for (size_t j = 0; j<vertVec.size(); ++j)
+							{
+								float d = fabs(SignedDistancePlanePoint(pl, pointVec[j]));
+								sumDist += d;
+								maxDist = max(maxDist, d);
+								halfPerim += Distance(pointVec[j], pointVec[(j + 1) % vertVec.size()]);
+							}
+
+							float avgDist = sumDist / float(vertVec.size());
+							for (size_t j = 0; j<faceVec.size(); ++j)
+							if (metric == 6)
+								faceVec[j]->Q() = maxDist;
+							else
+								faceVec[j]->Q() = avgDist / halfPerim;
+
+						}
+						tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
+						minV = distrib.Percentile(CMeshO::ScalarType(0.05));
+						maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
+			} break;
+
+			default: assert(0);
+			}
+			tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, minV, maxV, false);
+			return true;
+		}
+
+
+		case CP_RANDOM_CONNECTED_COMPONENT:
+		{
+			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
+			vcg::tri::UpdateColor<CMeshO>::PerFaceRandomConnectedComponent(m->cm);
+			return true;
+		}
+
+		case CP_RANDOM_FACE:
+		{
+			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
+			vcg::tri::UpdateColor<CMeshO>::PerFaceRandom(m->cm);
+			return true;
+		}
+
+		case CP_VERTEX_SMOOTH:
+		{
+			int iteration = par.getInt("iteration");
+			tri::Smooth<CMeshO>::VertexColorLaplacian(m->cm, iteration, false, cb);
+			return true;
+		}
+
+		case CP_FACE_SMOOTH:
+		{
+			m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+			int iteration = par.getInt("iteration");
+			tri::Smooth<CMeshO>::FaceColorLaplacian(m->cm, iteration, false, cb);
+			return true;
+		}
+
+		case CP_FACE_TO_VERTEX:
+		{
+			m->updateDataMask(MeshModel::MM_VERTCOLOR);
+			tri::UpdateColor<CMeshO>::PerVertexFromFace(m->cm);
+			return true;
+		}
+
+		case CP_MESH_TO_FACE:
+		{
+			QList<MeshModel *> meshList;
+			foreach(MeshModel *mmi, md.meshList)
+			{
+				if (mmi->visible)
+				{
+					mmi->updateDataMask(MeshModel::MM_FACECOLOR);
+					tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm, mmi->cm.C());
+				}
+			}
+			return true;
+		}
+
+		case CP_VERTEX_TO_FACE:
+		{
+			m->updateDataMask(MeshModel::MM_FACECOLOR);
+			tri::UpdateColor<CMeshO>::PerFaceFromVertex(m->cm);
+			return true;
+		}
+
+		case CP_TEXTURE_TO_VERTEX:
+		{
+			m->updateDataMask(MeshModel::MM_VERTCOLOR);
+			if (!HasPerWedgeTexCoord(m->cm)) break;
+			CMeshO::FaceIterator fi;
+
+			vector <QImage> srcImgs;
+			srcImgs.resize(m->cm.textures.size());
+			QString path;
+
+			for (size_t textInd = 0; textInd < m->cm.textures.size(); textInd++)
+			{
+				path = m->fullName();
+				path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(m->cm.textures[textInd].c_str());
+				CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
+				CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
+			}
+
+			for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
+			{
+				for (int i = 0; i<3; i++)
+				{
+					// note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
+					vcg::Point2f newcoord((*fi).WT(i).P().X() - floor((*fi).WT(i).P().X()), (*fi).WT(i).P().Y() - floor((*fi).WT(i).P().Y()));
+					int textIndex = (*fi).WT(i).N();
+					if ((textIndex >= 0) && (textIndex < (int)m->cm.textures.size()))
+					{
+						QRgb val = srcImgs[textIndex].pixel(newcoord[0] * srcImgs[textIndex].width(), (1 - newcoord[1])*srcImgs[textIndex].height() - 1);
+						(*fi).V(i)->C() = Color4b(qRed(val), qGreen(val), qBlue(val), 255);
 					}
-					tri::Stat<CMeshO>::ComputePerFaceQualityDistribution(m->cm, distrib);
-					minV = distrib.Percentile(CMeshO::ScalarType(0.05));
-					maxV = distrib.Percentile(CMeshO::ScalarType(0.95));
-		} break;
+					else
+					{
+						(*fi).V(i)->C() = Color4b(255, 255, 255, 255);
+					}
+				}
+			}
+			return true;
+		}
 
 		default: assert(0);
-		}
-		tri::UpdateColor<CMeshO>::PerFaceQualityRamp(m->cm, minV, maxV, false);
-		return true;
 	}
-
-
-	case CP_RANDOM_CONNECTED_COMPONENT:
-	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
-		vcg::tri::UpdateColor<CMeshO>::PerFaceRandomConnectedComponent(m->cm);
-		return true;
-	}
-
-	case CP_RANDOM_FACE:
-	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		m->updateDataMask(MeshModel::MM_FACEMARK | MeshModel::MM_FACECOLOR);
-		vcg::tri::UpdateColor<CMeshO>::PerFaceRandom(m->cm);
-		return true;
-	}
-
-	case CP_VERTEX_SMOOTH:
-	{
-		int iteration = par.getInt("iteration");
-		tri::Smooth<CMeshO>::VertexColorLaplacian(m->cm, iteration, false, cb);
-		return true;
-	}
-
-	case CP_FACE_SMOOTH:
-	{
-		m->updateDataMask(MeshModel::MM_FACEFACETOPO);
-		int iteration = par.getInt("iteration");
-		tri::Smooth<CMeshO>::FaceColorLaplacian(m->cm, iteration, false, cb);
-		return true;
-	}
-
-	case CP_FACE_TO_VERTEX:
-	{
-		m->updateDataMask(MeshModel::MM_VERTCOLOR);
-		tri::UpdateColor<CMeshO>::PerVertexFromFace(m->cm);
-		return true;
-	}
-
-	case CP_MESH_TO_FACE:
-	{
-		QList<MeshModel *> meshList;
-		foreach(MeshModel *mmi, md.meshList)
-		{
-			if (mmi->visible)
-			{
-				mmi->updateDataMask(MeshModel::MM_FACECOLOR);
-				tri::UpdateColor<CMeshO>::PerFaceConstant(mmi->cm, mmi->cm.C());
-			}
-		}
-		return true;
-	}
-
-	case CP_VERTEX_TO_FACE:
-	{
-		m->updateDataMask(MeshModel::MM_FACECOLOR);
-		tri::UpdateColor<CMeshO>::PerFaceFromVertex(m->cm);
-		return true;
-	}
-
-	case CP_TEXTURE_TO_VERTEX:
-	{
-		m->updateDataMask(MeshModel::MM_VERTCOLOR);
-		if (!HasPerWedgeTexCoord(m->cm)) break;
-		CMeshO::FaceIterator fi;
-
-		vector <QImage> srcImgs;
-		srcImgs.resize(m->cm.textures.size());
-		QString path;
-
-		for (size_t textInd = 0; textInd < m->cm.textures.size(); textInd++)
-		{
-			path = m->fullName();
-			path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(m->cm.textures[textInd].c_str());
-			CheckError(!QFile(path).exists(), QString("Source texture \"").append(path).append("\" doesn't exists"));
-			CheckError(!srcImgs[textInd].load(path), QString("Source texture \"").append(path).append("\" cannot be opened"));
-		}
-
-		for (fi = m->cm.face.begin(); fi != m->cm.face.end(); ++fi) if (!(*fi).IsD())
-		{
-			for (int i = 0; i<3; i++)
-			{
-				// note the trick for getting only the fractional part of the uv with the correct wrapping (e.g. 1.5 -> 0.5 and -0.3 -> 0.7)
-				vcg::Point2f newcoord((*fi).WT(i).P().X() - floor((*fi).WT(i).P().X()), (*fi).WT(i).P().Y() - floor((*fi).WT(i).P().Y()));
-				int textIndex = (*fi).WT(i).N();
-				if ((textIndex >= 0) && (textIndex < m->cm.textures.size()))
-				{
-					QRgb val = srcImgs[textIndex].pixel(newcoord[0] * srcImgs[textIndex].width(), (1 - newcoord[1])*srcImgs[textIndex].height() - 1);
-					(*fi).V(i)->C() = Color4b(qRed(val), qGreen(val), qBlue(val), 255);
-				}
-				else
-				{
-					(*fi).V(i)->C() = Color4b(255, 255, 255, 255);
-				}
-			}
-		}
-								 return true;
-	}
-
-default: assert(0);
-}
-return false;
+	return false;
 }
 
  MeshFilterInterface::FilterClass FilterColorProc::getClass(QAction *a)
