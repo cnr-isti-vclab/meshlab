@@ -308,7 +308,7 @@ bool FilterCameraPlugin::applyFilter(QAction *filter, MeshDocument &md, RichPara
     case FP_CAMERA_SCALE :
         {
             Matrix44m trScale; trScale.SetIdentity();
-            Point3m tranVec;
+            Point3m tranVec(0,0,0);
             Matrix44m trTran,trTranInv;
 
             float Scale= par.getFloat("scale");

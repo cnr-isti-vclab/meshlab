@@ -121,10 +121,10 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v2.4.1
       with:
-        mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
         modules: qtscript xmlpatterns
+        #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
     - name: Build MeshLab
       run: |
         cd src\

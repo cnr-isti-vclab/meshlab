@@ -582,57 +582,59 @@ int SnapVertexBorder(CMeshO &m, float threshold, vcg::CallBackPos * cb)
 //       i
 //
 
-  int  DeleteCollinearBorder(CMeshO &m, float threshold)
-  {
+int  DeleteCollinearBorder(CMeshO &m, float threshold)
+{
     int total=0;
     CMeshO::FaceIterator fi;
     for(fi=m.face.begin();fi!=m.face.end();++fi)
-      if(!(*fi).IsD())
+    {
+        if(!(*fi).IsD())
         {
-          for(int i=0;i<3;++i)
-          {
-            if(face::IsBorder(*fi,i) && !face::IsBorder(*fi,(i+1)%3))
+            for(int i=0;i<3;++i)
             {
-              CMeshO::VertexPointer V0= (*fi).V0(i);
-              CMeshO::VertexPointer V1= (*fi).V1(i);
-              CMeshO::VertexPointer V2=0;
-              CMeshO::FacePointer fadj = (*fi).FFp((i+1)%3);
-              int adjBordInd =  (*fi).FFi((i+1)%3);
-              if(fadj->V1(adjBordInd) == V1)
-                V2 = fadj->V2(adjBordInd);
-              else
-                continue; // non coerent face ordering.
-              if(face::IsBorder(*fadj,(adjBordInd+1)%3))
-              {
-                // the colinearity test;
-                Point3m pp;
-                CMeshO::ScalarType dist;
-                SegmentPointDistance(Segment3m(V0->cP(),V2->cP()),V1->cP(),pp,dist);
-                if(dist* threshold <  Distance(V0->cP(),V2->cP()) )
+                if(face::IsBorder(*fi,i) && !face::IsBorder(*fi,(i+1)%3))
                 {
-                  (*fi).V1(i)=V2;
-                  if(face::IsBorder(*fadj,(adjBordInd+2)%3))
-                  {
-                    (*fi).FFp((i+1)%3)=&*fi;
-                    (*fi).FFi((i+1)%3)=(i+1)%3;
-                  }
-                  else
-                  {
-                    CMeshO::FacePointer fj = fadj->FFp((adjBordInd+2)%3);
-                    int ij = fadj->FFi((adjBordInd+2)%3);
-                    (*fi).FFp((i+1)%3)= fj;
-                    (*fi).FFi((i+1)%3)= ij;
-                    fj->FFp(ij)=&*fi;
-                    fj->FFi(ij)=(i+1)%3;
-                  }
-                  tri::Allocator<CMeshO>::DeleteFace(m,*fadj);
-                  total++;
+                    CMeshO::VertexPointer V0= (*fi).V0(i);
+                    CMeshO::VertexPointer V1= (*fi).V1(i);
+                    CMeshO::VertexPointer V2=0;
+                    CMeshO::FacePointer fadj = (*fi).FFp((i+1)%3);
+                    int adjBordInd =  (*fi).FFi((i+1)%3);
+                    if(fadj->V1(adjBordInd) == V1)
+                        V2 = fadj->V2(adjBordInd);
+                    else
+                        continue; // non coerent face ordering.
+                    if(face::IsBorder(*fadj,(adjBordInd+1)%3))
+                    {
+                        // the colinearity test;
+                        Point3m pp;
+                        CMeshO::ScalarType dist;
+                        SegmentPointDistance(Segment3m(V0->cP(),V2->cP()),V1->cP(),pp,dist);
+                        if(dist* threshold <  Distance(V0->cP(),V2->cP()) )
+                        {
+                            (*fi).V1(i)=V2;
+                            if(face::IsBorder(*fadj,(adjBordInd+2)%3))
+                            {
+                                (*fi).FFp((i+1)%3)=&*fi;
+                                (*fi).FFi((i+1)%3)=(i+1)%3;
+                            }
+                            else
+                            {
+                                CMeshO::FacePointer fj = fadj->FFp((adjBordInd+2)%3);
+                                int ij = fadj->FFi((adjBordInd+2)%3);
+                                (*fi).FFp((i+1)%3)= fj;
+                                (*fi).FFi((i+1)%3)= ij;
+                                fj->FFp(ij)=&*fi;
+                                fj->FFi(ij)=(i+1)%3;
+                            }
+                            tri::Allocator<CMeshO>::DeleteFace(m,*fadj);
+                            total++;
+                        }
+                    }
                 }
-              }
             }
-          }
         }
-      return total;
-
+    }
+    return total;
 }
+
 MESHLAB_PLUGIN_NAME_EXPORTER(CleanFilter)

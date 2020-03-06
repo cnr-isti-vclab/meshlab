@@ -20,9 +20,12 @@
 
 using namespace std;
 
-AlignSet::AlignSet(): mode(COMBINE),
-target(NULL), render(NULL),
-vbo(0), nbo(0), cbo(0), ibo(0), error(0){
+AlignSet::AlignSet():
+    error(0),
+    vbo(0), nbo(0), cbo(0), ibo(0),
+    mode(COMBINE),
+    target(NULL), render(NULL)
+    {
 
   box.SetNull();
   //correspList = new QList<PointCorrespondence*>();

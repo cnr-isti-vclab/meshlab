@@ -38,8 +38,7 @@ void edit_referencingDialog::updateTable()
     this->ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    int pindex =0;
-    for(pindex=0; pindex < this->referencingPlugin->usePoint.size(); pindex++)
+    for(size_t pindex=0; pindex < this->referencingPlugin->usePoint.size(); pindex++)
     {
         QTableWidgetItem* useIt = new QTableWidgetItem();
         if(this->referencingPlugin->usePoint[pindex])
@@ -249,8 +248,7 @@ void edit_referencingDialog::updateTableDist()
     this->ui->tableWidgetDist->setSelectionMode(QAbstractItemView::SingleSelection);
     this->ui->tableWidgetDist->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    int pindex =0;
-    for(pindex=0; pindex < this->referencingPlugin->useDistance.size(); pindex++)
+    for(size_t pindex=0; pindex < this->referencingPlugin->useDistance.size(); pindex++)
     {
         QTableWidgetItem* useIt = new QTableWidgetItem();
         if(this->referencingPlugin->useDistance[pindex])

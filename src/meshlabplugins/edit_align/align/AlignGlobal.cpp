@@ -100,34 +100,33 @@ int AlignGlobal::ComputeConnectedComponents()
 //
 bool AlignGlobal::VirtAlign::Check()
 {
-	int i;
 	if(FixP.size()!=MovP.size()) return false;
 	Point3d mp,fp;
 	double md=0,fd=0;
 	double md2=0,fd2=0;
 	Matrix44d &MovTr=Mov->M;
 	Matrix44d &FixTr=Fix->M;
-	for(i=0;i<FixP.size();++i)
-		{
-			mp=MovTr*MovP[i];
-	  fp=FixTr*FixP[i];
+	for(size_t i=0; i<FixP.size(); ++i)
+	{
+		mp=MovTr*MovP[i];
+		fp=FixTr*FixP[i];
 
-			md +=       Distance(fp,M2F*mp);
-			md2+=SquaredDistance(fp,M2F*mp);
+		md +=       Distance(fp,M2F*mp);
+		md2+=SquaredDistance(fp,M2F*mp);
 
-			fd +=       Distance(mp,F2M*fp);
-			fd2+=SquaredDistance(mp,F2M*fp);
-		}
-  int nn = int(MovP.size());
+		fd +=       Distance(mp,F2M*fp);
+		fd2+=SquaredDistance(mp,F2M*fp);
+	}
+	int nn = int(MovP.size());
 
-    printf("Arc %3i -> %3i : %i pt\n",Fix->id,Mov->id,nn);
-  printf("SquaredSum Distance %7.3f %7.3f Avg %7.3f %7.3f\n",fd2, md2, fd2/nn, md2/nn);
-  printf("       Sum Distance %7.3f %7.3f Avg %7.3f %7.3f\n",fd , md ,  fd/nn, md/nn);
-/*  printf("Fix->M:\n");print(Fix->M);
-	printf("Mov->M:\n");print(Mov->M);
-	printf("\nM2F->M:\n");print(M2F);
-	printf("F2M->M:\n");print(F2M);
-*/	return true;
+	printf("Arc %3i -> %3i : %i pt\n",Fix->id,Mov->id,nn);
+	printf("SquaredSum Distance %7.3f %7.3f Avg %7.3f %7.3f\n",fd2, md2, fd2/nn, md2/nn);
+	printf("       Sum Distance %7.3f %7.3f Avg %7.3f %7.3f\n",fd , md ,  fd/nn, md/nn);
+//	printf("Fix->M:\n");print(Fix->M);
+//	printf("Mov->M:\n");print(Mov->M);
+//	printf("\nM2F->M:\n");print(M2F);
+//	printf("F2M->M:\n");print(F2M);
+	return true;
 }
 
 
@@ -172,8 +171,8 @@ bool AlignGlobal::CheckGraph()
 					st.push((*li)->Adj(cur));
 				}
 		}
-	int cnt=count(Visited.begin(),Visited.end(),true);
-	printf("Nodes that can be reached from root %i on %i \n",cnt,N.size());
+	size_t cnt=count(Visited.begin(),Visited.end(),true);
+	printf("Nodes that can be reached from root %zu on %zu \n",cnt, N.size());
 	return cnt==N.size();
 }
 
@@ -320,7 +319,7 @@ double AlignGlobal::Node::AlignWithActiveAdj(bool Rigid)
       //print((*li)->N2A(this));
       Point3d pf,nf;
       Point3d pm;
-      for(int i=0;i<AP.size();++i)
+      for(size_t i=0;i<AP.size();++i)
       {
         pf=(*li)->Adj(this)->M*AP[i]; // i punti fissi sono quelli sulla sup degli adiacenti messi nella loro pos corrente
         FixP.push_back(pf);
@@ -400,10 +399,12 @@ double AlignGlobal::Node::MatrixNorm(Matrix44d &NewM) const
 	Matrix44d diff;
 	diff.SetIdentity();
 	diff=diff-NewM;
-	for(int i=0;i<4;++i)
-		for(int j=0;j<4;++j)
+	for(int i=0;i<4;++i) {
+		for(int j=0;j<4;++j) {
 			maxdiff+=(diff[i][j]*diff[i][j]);
-		return maxdiff;
+		}
+	}
+	return maxdiff;
 }
 
 void AlignGlobal::Clear()
@@ -431,81 +432,81 @@ Per ogni componente connessa,
 
 bool AlignGlobal::GlobalAlign(const std::map<int,string> &Names, 	const double epsilon, int maxiter, bool Rigid, FILE *elfp, CallBackPos* cb )
 {
-  double change;
-  int step, localmaxiter;
-  cb(0,"Global Alignment...");
-  LOG(elfp,"----------------\n----------------\nGlobalAlignment (target eps %7.3f)\n",epsilon);
+    double change;
+    int step = 0, localmaxiter;
+    cb(0,"Global Alignment...");
+    LOG(elfp,"----------------\n----------------\nGlobalAlignment (target eps %7.3f)\n",epsilon);
 
-  queue<AlignGlobal::Node *>	Q;
-  MakeAllDormant();
-  AlignGlobal::Node *curr=ChooseDormantWithMostDormantLink();
-  curr->Active=true;
-  int cursid=curr->sid;
-  LOG(elfp,"Root node %i '%s' with %i dormant link\n", curr->id, Names.find(curr->id)->second.c_str(),curr->DormantAdjNum());
-
-  while(DormantNum()>0)
-  {
-    LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
-
-		curr=ChooseDormantWithMostActiveLink ();
-		if(!curr) {
-			// la componente connessa e' finita e si passa alla successiva cercando un dormant con tutti dormant.
-			LOG(elfp,"\nCompleted Connected Component %i\n",cursid);
-			LOG(elfp,"\nDormant Num: %i\n",DormantNum());
-
-			curr=ChooseDormantWithMostDormantLink ();
-			if(curr==0) {
-										LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, chosen id:%i\n" ,0);
-										break; // non ci sono piu' componenti connesse composte da piu' di una singola mesh.
-									}
-				   else LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, chosen id:%i\n" ,curr->id);
-	  curr->Active=true;
-			cursid=curr->sid;
-			curr=ChooseDormantWithMostActiveLink ();
-			if(curr==0) LOG(elfp,"\nFailed    ChooseDormantWithMostActiveLink, chosen id:%i\n" ,0);
-				else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, chosen id:%i\n" ,curr->id);
-		}
-
-    LOG(elfp,"\nAdded node %i '%s' with %i/%i Active link\n",curr->id,Names.find(curr->id)->second.c_str(),curr->ActiveAdjNum(),curr->Adj.size());
+    queue<AlignGlobal::Node *>	Q;
+    MakeAllDormant();
+    AlignGlobal::Node *curr=ChooseDormantWithMostDormantLink();
     curr->Active=true;
+    int cursid=curr->sid;
+    LOG(elfp,"Root node %i '%s' with %i dormant link\n", curr->id, Names.find(curr->id)->second.c_str(),curr->DormantAdjNum());
+
+    while(DormantNum()>0)
+    {
+        LOG(elfp,"---------\nGlobalAlignment loop DormantNum = %i\n",DormantNum());
+
+        curr=ChooseDormantWithMostActiveLink ();
+        if(!curr) {
+            // la componente connessa e' finita e si passa alla successiva cercando un dormant con tutti dormant.
+            LOG(elfp,"\nCompleted Connected Component %i\n",cursid);
+            LOG(elfp,"\nDormant Num: %i\n",DormantNum());
+
+            curr=ChooseDormantWithMostDormantLink ();
+            if(curr==0) {
+                LOG(elfp,"\nFailed ChooseDormantWithMostDormantLink, chosen id:%i\n" ,0);
+                break; // non ci sono piu' componenti connesse composte da piu' di una singola mesh.
+            }
+            else LOG(elfp,"\nCompleted ChooseDormantWithMostDormantLink, chosen id:%i\n" ,curr->id);
+            curr->Active=true;
+            cursid=curr->sid;
+            curr=ChooseDormantWithMostActiveLink ();
+            if(curr==0) LOG(elfp,"\nFailed    ChooseDormantWithMostActiveLink, chosen id:%i\n" ,0);
+            else  LOG(elfp,"\nCompleted ChooseDormantWithMostActiveLink, chosen id:%i\n" ,curr->id);
+        }
+
+        LOG(elfp,"\nAdded node %i '%s' with %i/%i Active link\n",curr->id,Names.find(curr->id)->second.c_str(),curr->ActiveAdjNum(),curr->Adj.size());
+        curr->Active=true;
         curr->Queued=true;
         localmaxiter=ActiveNum()*10;  // Si suppone, ad occhio, che per risistemare un insieme di n mesh servano al piu' 10n passi;
         Q.push(curr);
         step=0;
-    // ciclo interno di allineamento
-    //
+        // ciclo interno di allineamento
+        //
         while(!Q.empty())
         {
-         curr=Q.front();
-         Q.pop();
-         curr->Queued=false;
-         change=curr->AlignWithActiveAdj(Rigid);
-         step++;
-         LOG(elfp,"     Step %5i Queue size %5i Moved %4i  err %10.4f\n",step,Q.size(),curr->id,change);
-         if(change>epsilon)
-                {
-                        curr->PushBackActiveAdj(Q);
-                        LOG(elfp,"         Large Change pushing back active nodes adj to %i to Q (new size %i)\n",curr->id,Q.size());
-                        if(change>epsilon*1000)  printf("Large Change Warning\n\n");
-                }
-     if(step>localmaxiter) return false;
-         if(step>maxiter) return false;
+            curr=Q.front();
+            Q.pop();
+            curr->Queued=false;
+            change=curr->AlignWithActiveAdj(Rigid);
+            step++;
+            LOG(elfp,"     Step %5i Queue size %5i Moved %4i  err %10.4f\n",step,Q.size(),curr->id,change);
+            if(change>epsilon)
+            {
+                curr->PushBackActiveAdj(Q);
+                LOG(elfp,"         Large Change pushing back active nodes adj to %i to Q (new size %i)\n",curr->id,Q.size());
+                if(change>epsilon*1000)  printf("Large Change Warning\n\n");
+            }
+            if(step>localmaxiter) return false;
+            if(step>maxiter) return false;
         }
     }
     if(!curr)
-        {
-            LOG(elfp,"Alignment failed for %i meshes:\n",DormantNum());
-            list<AlignGlobal::Node>::iterator li;
-
-			for(li=N.begin();li!=N.end();++li)
-				if(!(*li).Active){
-					//(*li).M.SetIdentity();
-					(*li).Discarded=true;
-					LOG(elfp,"%5i\n",(*li).id);
-				}
-		}
-	LOG(elfp,"Completed Alignment in %i steps with error %f\n",step,epsilon);
-	return true;
+    {
+        LOG(elfp,"Alignment failed for %i meshes:\n",DormantNum());
+        list<AlignGlobal::Node>::iterator li;
+        for(li=N.begin();li!=N.end();++li){
+            if(!(*li).Active){
+                //(*li).M.SetIdentity();
+                (*li).Discarded=true;
+                LOG(elfp,"%5i\n",(*li).id);
+            }
+        }
+    }
+    LOG(elfp,"Completed Alignment in %i steps with error %f\n",step,epsilon);
+    return true;
 }
 
 // riempie un vettore di matrici con le matrici risultato dell'allineamento globale.
@@ -519,7 +520,7 @@ bool AlignGlobal::GetMatrixVector(std::vector<Matrix44d> &Tr, std::vector<int> &
       Id2N[(*li).id]=&*li;
 
   Tr.resize(Id.size());
-  for(int i=0;i<Id.size();++i)
+  for(size_t i=0;i<Id.size();++i)
   {
     if( Id2N[Id[i]] ==0 ) return false;
     Tr[i]=Id2N[Id[i]]->M;
@@ -552,7 +553,7 @@ void AlignGlobal::BuildGraph(std::vector<AlignPair::Result *> &Res, vector<Matri
 			Id2I[rgn.id]=i;
 		}
 
-		printf("building %i graph arcs\n",Res.size());
+		printf("building %zu graph arcs\n",Res.size());
 		VirtAlign *tv;
 
     // Ciclo principale in cui si costruiscono i vari archi

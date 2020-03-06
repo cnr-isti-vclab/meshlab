@@ -375,9 +375,12 @@ void DecorateBasePlugin::drawQuotedLine(const Point3d &a,const Point3d &b, float
     // fmod ( -104.5 , 10) returns -4.5
     // So it holds that
 
-    if(aVal > 0 ) firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
-    if(aVal ==0 ) firstTick = tickScalarDistance;
-    if(aVal < 0 ) firstTick = aVal + fmod(fabs(aVal),tickScalarDistance);
+    if (aVal > 0 )
+        firstTick = aVal - fmod(aVal,tickScalarDistance) + tickScalarDistance;
+    else if(aVal ==0 )
+        firstTick = tickScalarDistance;
+    else //aVal < 0
+        firstTick = aVal + fmod(fabs(aVal),tickScalarDistance);
 
     // now we are sure that aVal < firstTick
     // let also be sure that there is enough space
