@@ -28,9 +28,11 @@ CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
 !CONFIG(system_glew):  GLEWDIR = $$MESHLAB_EXTERNAL_DIRECTORY/glew-2.1.0
 
 ## Warnings Settings ##
-#not showing warnings from external libraries
-QMAKE_CXXFLAGS+=-Wno-unused-result #warning on unused result from fscanf...
-QMAKE_CFLAGS+=-Wno-unused-result
+#warning on unused result from fscanf...
+!win32-msvc {
+    QMAKE_CXXFLAGS+=-Wno-unused-result
+    QMAKE_CFLAGS+=-Wno-unused-result
+}
 
 
 ######## WINDOWS SETTINGS ##########
