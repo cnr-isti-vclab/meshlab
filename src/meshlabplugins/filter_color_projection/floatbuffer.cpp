@@ -318,24 +318,23 @@ int floatbuffer::distancefield()
 
 int floatbuffer::dumppfm(QString filename)
 {
- FILE* miofile;
- int res;
+	FILE* miofile;
 
- miofile = fopen(filename.toUtf8().data(), "wb");
+	miofile = fopen(filename.toUtf8().data(), "wb");
 
- fprintf(miofile,"PF\n");
- fprintf(miofile,"%i %i\n",sx,sy);
- fprintf(miofile,"-1.000000\n",sx,sy);
+	fprintf(miofile,"PF\n");
+	fprintf(miofile,"%i %i\n",sx,sy);
+	fprintf(miofile,"-1.000000\n");
 
- for(int kk=0; kk< sx*sy; kk++)
- {
-  res = fwrite(&(data[kk]), sizeof(float), 1, miofile);
-  res = fwrite(&(data[kk]), sizeof(float), 1, miofile);
-  res = fwrite(&(data[kk]), sizeof(float), 1, miofile);
- }
+	for(int kk=0; kk< sx*sy; kk++)
+	{
+		fwrite(&(data[kk]), sizeof(float), 1, miofile);
+		fwrite(&(data[kk]), sizeof(float), 1, miofile);
+		fwrite(&(data[kk]), sizeof(float), 1, miofile);
+	}
 
- fclose(miofile);
+	fclose(miofile);
 
- return 1;
+	return 1;
 }
 

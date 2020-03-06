@@ -915,8 +915,8 @@ namespace vcg {
             }
 
             template <const int coord>
-                    void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
-                assert (p2 == p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2));
+            void GetIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) {
+                assert (p2 == p1 + vcg::Point3i(coord == 0, coord == 1, coord == 2)); (void)p2;
                 assert (_volume->IsIn(p1) != _volume->IsIn(p2));
 
                 const InterceptType& i = _volume->template GetIntercept<coord>(p1);
@@ -930,8 +930,10 @@ namespace vcg {
                     p->N() = i.norm();
                     p->Q() = i.quality();
                     _vertices[&i] = p - &_mesh->vert[0];
-                } else /* a vertex is already associated with the intercept. reuse it */
+                }
+                else {/* a vertex is already associated with the intercept. reuse it */
                     p = &_mesh->vert[v->second];
+                }
             }
 
             inline void GetXIntercept(const vcg::Point3i &p1, const vcg::Point3i &p2, VertexPointer& p) { GetIntercept<0>(p1, p2, p); }

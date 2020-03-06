@@ -165,7 +165,7 @@ void FilterCreate::initParameterSet(QAction *action, MeshModel & /*m*/, RichPara
 bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & par, CallBackPos * /*cb*/)
 {
 	MeshModel *currM = md.mm();
-	MeshModel *m;
+	MeshModel *m = nullptr;
 
 	switch(ID(filter))	 
 	{
@@ -173,7 +173,7 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Tetrahedron<CMeshO>(m->cm);
 		break;
-    case CR_ICOSAHEDRON:
+	case CR_ICOSAHEDRON:
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Icosahedron<CMeshO>(m->cm);
 		break;
@@ -189,17 +189,17 @@ bool FilterCreate::applyFilter(QAction *filter, MeshDocument &md, RichParameterS
 	case CR_ANNULUS:
 		m = md.addNewMesh("", this->filterName(ID(filter)));
 		tri::Annulus<CMeshO>(m->cm,par.getFloat("internalRadius"), par.getFloat("externalRadius"), par.getInt("sides"));
-      break;
-
+		break;
 	case CR_TORUS:
-    {
-		m = md.addNewMesh("", this->filterName(ID(filter)));
-		float hRadius=par.getFloat("hRadius");
-		float vRadius=par.getFloat("vRadius");
-		int hSubdiv=par.getInt("hSubdiv");
-		int vSubdiv=par.getInt("vSubdiv");
-		tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
-	} break;
+		{
+			m = md.addNewMesh("", this->filterName(ID(filter)));
+			float hRadius=par.getFloat("hRadius");
+			float vRadius=par.getFloat("vRadius");
+			int hSubdiv=par.getInt("hSubdiv");
+			int vSubdiv=par.getInt("vSubdiv");
+			tri::Torus(m->cm,hRadius,vRadius,hSubdiv,vSubdiv);
+		}
+		break;
 
 	case CR_FITPLANE:
 	{

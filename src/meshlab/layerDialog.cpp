@@ -572,9 +572,9 @@ void LayerDialog::showContextMenu(const QPoint& pos)
     }
 }
 
-void LayerDialog::updateLog(GLLogStream &log)
+void LayerDialog::updateLog(const GLLogStream &log)
 {
-    QList< pair<int,QString> > &logStringList=log.S;
+    const QList< pair<int,QString> > &logStringList=log.logStringList();
     ui->logPlainTextEdit->clear();
     //ui->logPlainTextEdit->setFont(QFont("Courier",10));
 
@@ -585,7 +585,7 @@ void LayerDialog::updateLog(GLLogStream &log)
 
     QString post   = "</font>";
     QString logText;
-    foreach(logElem, logStringList){
+    for(const pair<int, QString>& logElem : logStringList){
         logText += logElem.second;
         if(logElem.first == GLLogStream::SYSTEM)
             logText = preSystem + logText + post;

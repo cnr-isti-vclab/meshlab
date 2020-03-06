@@ -51,9 +51,10 @@ public:
 
 	GLLogStream();
 	~GLLogStream() {}
-	void print(QStringList &list);		// Fills a QStringList with the log entries
+	void print(QStringList &list) const;		// Fills a QStringList with the log entries
 	void Save(int Level, const char *filename);
 	void Clear();
+
 	template <typename... Ts>
 	void Logf(int Level, const char * f, Ts&&... ts )
 	{
@@ -67,18 +68,13 @@ public:
 	}
 
 	void Log(int Level, const char * buf);
-
 	void SetBookmark();
 	void ClearBookmark();
 	void BackToBookmark();
+	const QList<std::pair<int, QString> >& logStringList() const;
 
-	//private:
-	QList<std::pair<int, QString> > S;
-
-	// The list of strings used in realtime display of info over the mesh.
-	// Each box is identified by the title, name of the mesh and text.
-	// the name of the mesh is shown only if two or more box with the same title are shown.
-	QMultiMap<QString, QPair<QString, QString> > RealTimeLogText;
+	const QMultiMap<QString, QPair<QString, QString> >& realTimeLogMultiMap() const;
+	void clearRealTimeLog();
 
 	template <typename... Ts>
 	void RealTimeLogf(const QString& Id, const QString &meshName, const char * f, Ts&&... ts )
@@ -98,7 +94,12 @@ signals:
 
 private:
 	int bookmark; /// this field is used to place a bookmark for restoring the log. Useful for previeweing
+	QList<std::pair<int, QString> > S;
 
+	// The list of strings used in realtime display of info over the mesh.
+	// Each box is identified by the title, name of the mesh and text.
+	// the name of the mesh is shown only if two or more box with the same title are shown.
+	QMultiMap<QString, QPair<QString, QString> > RealTimeLogText;
 };
 
 #endif //GLLOGSTREAM_H

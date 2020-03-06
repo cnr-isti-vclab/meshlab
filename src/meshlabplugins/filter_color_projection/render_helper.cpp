@@ -219,7 +219,7 @@ void RenderHelper::renderScene(Shotm &view, MeshModel *mesh, RenderingMode mode,
 
   assert(_near <= _far);
 
-  GLenum err = glGetError();
+  GLenum err = glGetError(); (void) err;
 
   //render to FBO
   fbo.bind();

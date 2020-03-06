@@ -105,9 +105,9 @@ CMeshO::CoordType RandomBaricentric(){
 */
 CMeshO::CoordType fromBarCoords(Point3m bc,CMeshO::FacePointer f){
     CMeshO::CoordType p;
-    Point3m p0=f->P(0);
-    Point3m p1=f->P(1);
-    Point3m p2=f->P(2);
+//    Point3m p0=f->P(0);
+//    Point3m p1=f->P(1);
+//    Point3m p2=f->P(2);
     p=f->P(0)*bc[0]+f->P(1)*bc[1]+f->P(2)*bc[2];
     return p;
 }
@@ -365,7 +365,7 @@ void ComputeSurfaceExposure(MeshModel* m, int /*r*/, int n_ray){
 	Scalarm di = Scalarm(0);
 	Scalarm xi = Scalarm(0);
 
-    CMeshO::FacePointer face;
+//    CMeshO::FacePointer face;
     CMeshO::CoordType p_c;
     MetroMeshFaceGrid f_grid;
     f_grid.Set(m->cm.face.begin(),m->cm.face.end());
@@ -384,8 +384,8 @@ void ComputeSurfaceExposure(MeshModel* m, int /*r*/, int n_ray){
             p_c=p_c+TriangleNormal(*fi).Normalize()*0.1f;
             Ray3<Scalarm> ray=Ray3<Scalarm>(p_c,fi->N());
             di=0;
-            face=0;
-            face=f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,1000,di);
+//            face=0;
+            /*face=*/f_grid.DoRay<RayTriangleIntersectionFunctor<false>,MarkerFace>(RSectFunct,markerFunctor,ray,1000,di);
 
             if(di!=0){
                 xi=xi+(dh/(dh-di));
@@ -587,7 +587,7 @@ void MoveParticle(Particle<CMeshO> &info,CMeshO::VertexPointer p,Scalarm l,int t
     while(!IsOnFace(new_pos,current_face)){
         int edge=ComputeIntersection(current_pos,new_pos,current_face,new_face,int_pos);
         if(edge!=-1){
-            Point3m n = new_face->N();
+//            Point3m n = new_face->N();
             if(CheckFallPosition(new_face,g,a))  p->SetS();
             Scalarm elapsed_time=GetElapsedTime(current_pos,int_pos,new_pos,time);
             info.v=GetNewVelocity(info.v,current_face,new_face,g+dir,g,info.mass,elapsed_time);
