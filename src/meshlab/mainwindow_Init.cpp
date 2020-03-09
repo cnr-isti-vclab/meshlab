@@ -947,7 +947,7 @@ void MainWindow::fillFilterMenu()
 		}
 		catch (ParsingException &e)
 		{
-			meshDoc()->Log.Logf(GLLogStream::SYSTEM, e.what(), "");
+			meshDoc()->Log.Log(GLLogStream::SYSTEM, e.what());
 		}
 	}
 }

@@ -1263,18 +1263,18 @@ void MainWindow::startFilter()
                     meshDoc()->filterHistory->addExecutedXMLFilter(fname,mock);
 
                     executeFilter(&filt, mock, false);
-                    meshDoc()->Log.Logf(GLLogStream::SYSTEM,"OUT OF SCOPE\n");
+                    meshDoc()->Log.Log(GLLogStream::SYSTEM,"OUT OF SCOPE\n");
                 }
                 //delete env;
             }
             catch (MLException& e)
             {
-                meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
+                meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
             }
         }
         catch(ParsingException e)
         {
-            meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
+            meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
         }
     }//else
 
@@ -1867,7 +1867,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
     }
     catch(MLException& e)
     {
-        meshDoc()->Log.Logf(GLLogStream::SYSTEM,e.what());
+        meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
     }
 
 }
@@ -3768,7 +3768,7 @@ void MainWindow::addRenderingSystemLogInfo(unsigned mmid)
                 QString data = QString(deb._currentlyallocated.c_str()) + "\n" + QString(deb._tobedeallocated.c_str()) + "\n" + QString(deb._tobeallocated.c_str()) + "\n" + QString(deb._tobeupdated.c_str()) + "\n";
                 for(std::vector<std::string>::iterator it = deb._perviewdata.begin();it != deb._perviewdata.end();++it)
                     data += QString((*it).c_str()) + "<br>";
-                meshDoc()->Log.Logf(0,data.toAscii());
+                meshDoc()->Log.Log(GLLogStream::SYSTEM, data);
             }
         }
     }

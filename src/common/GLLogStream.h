@@ -68,6 +68,8 @@ public:
 	}
 
 	void Log(int Level, const char * buf);
+	void Log(int Level, const std::string& logMessage);
+	void Log(int Level, const QString& logMessage);
 	void SetBookmark();
 	void ClearBookmark();
 	void BackToBookmark();
