@@ -280,8 +280,8 @@ class ImporterExpePTS
 			xtrimming.indexIn(str);
 			QString trimmed = xtrimming.cap(1);
 			QList<QString> elements = trimmed.split(QRegExp("[ \t]+|[ \t]*,[ \t]*"));
-			int expectedSize = v.size();
-			if (elements.size() != expectedSize)
+			size_t expectedSize = v.size();
+			if ((unsigned int)elements.size() != expectedSize)
 				return false;
 			for (uint k=0 ; k<expectedSize && ok ; ++k)
 				v[k] = elements[k].toDouble(&ok);

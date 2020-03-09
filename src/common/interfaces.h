@@ -151,6 +151,14 @@ public:
 		}
 	}
 
+	void RealTimeLog(QString Id, const QString &meshName, const char * f)
+	{
+		if(log != nullptr)
+		{
+			log->RealTimeLog(Id, meshName, f);
+		}
+	}
+
 	template <typename... Ts>
 	void RealTimeLog(QString Id, const QString &meshName, const char * f, Ts&&... ts )
 	{
