@@ -140,6 +140,14 @@ public:
         }
     }
 
+    void Log(int Level, const char * f)
+    {
+        makeCurrent();
+        if( this->md() != nullptr){
+            this->md()->Log.Log(Level, f);
+        }
+    }
+
     GLAreaSetting glas;
     QSize minimumSizeHint() const;
     QSize sizeHint() const;

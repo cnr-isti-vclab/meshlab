@@ -111,15 +111,15 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 			CMeshO & mesh = md.mm()->cm;
 			if ((mesh.vn < 3) || (mesh.fn < 1)) return false;
 
-			const unsigned char * p0      = (const unsigned char *)(&(mesh.vert[0].P()));
-			const unsigned char * p1      = (const unsigned char *)(&(mesh.vert[1].P()));
-			const void *          pbase   = p0;
-			GLsizei               pstride = GLsizei(p1 - p0);
+//			const unsigned char * p0      = (const unsigned char *)(&(mesh.vert[0].P()));
+//			const unsigned char * p1      = (const unsigned char *)(&(mesh.vert[1].P()));
+//			const void *          pbase   = p0;
+//			GLsizei               pstride = GLsizei(p1 - p0);
 
-			const unsigned char * n0      = (const unsigned char *)(&(mesh.vert[0].N()));
-			const unsigned char * n1      = (const unsigned char *)(&(mesh.vert[1].N()));
-			const void *          nbase   = n0;
-			GLsizei               nstride = GLsizei(n1 - n0);
+//			const unsigned char * n0      = (const unsigned char *)(&(mesh.vert[0].N()));
+//			const unsigned char * n1      = (const unsigned char *)(&(mesh.vert[1].N()));
+//			const void *          nbase   = n0;
+//			GLsizei               nstride = GLsizei(n1 - n0);
 
 			glContext->makeCurrent();
 			glewInit();

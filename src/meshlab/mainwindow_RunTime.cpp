@@ -2094,7 +2094,7 @@ void MainWindow::applyRenderMode()
             if (!initsupport)
             {
                 QString msg = "The selected shader is not supported by your graphic hardware!";
-                GLA()->Logf(GLLogStream::SYSTEM,qUtf8Printable(msg));
+                GLA()->Log(GLLogStream::SYSTEM,qUtf8Printable(msg));
             }
             iRenderTemp->Finalize(action,meshDoc(),GLA());
         }
@@ -2104,7 +2104,7 @@ void MainWindow::applyRenderMode()
     if ((action->parent() == this) || (!initsupport))
     {
         QString msg("No Shader.");
-        GLA()->Logf(GLLogStream::SYSTEM,qUtf8Printable(msg));
+        GLA()->Log(GLLogStream::SYSTEM,qUtf8Printable(msg));
         GLA()->setRenderer(0,0); //default opengl pipeline or vertex and fragment programs not supported
     }
     GLA()->update();

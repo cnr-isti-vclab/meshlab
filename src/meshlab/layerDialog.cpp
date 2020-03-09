@@ -492,6 +492,7 @@ void LayerDialog::rasterItemClicked (QTreeWidgetItem * item , int col)
                     mw->GLA()->updateRasterSetVisibilities( );
                     updatePerRasterItemVisibility();
                 }
+                // fall through
             case 1 :
             case 2 :
             case 3 :
@@ -894,7 +895,7 @@ void LayerDialog::updateDecoratorParsView()
         MeshDecorateInterface* decPlug =  qobject_cast<MeshDecorateInterface *>(decList[ii]->parent());
         if (!decPlug)
         {
-            mw->GLA()->Logf(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
+            mw->GLA()->Log(GLLogStream::SYSTEM,"MeshLab System Error: A Decorator Plugin has been expected.");
             return;
         }
         else

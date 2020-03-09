@@ -348,104 +348,103 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 	{
 		case FP_COMPUTE_PRINC_CURV_DIR:
 			curvCalcMethods.push_back("Taubin approximation");
-		curvCalcMethods.push_back("Principal Component Analysis");
-		curvCalcMethods.push_back("Normal Cycles");
-		curvCalcMethods.push_back("Pseudoinverse Quadric Fitting");
-		curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
-		parlst.addParam(new RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
-		parlst.addParam(new RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
-		parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
+			curvCalcMethods.push_back("Principal Component Analysis");
+			curvCalcMethods.push_back("Normal Cycles");
+			curvCalcMethods.push_back("Pseudoinverse Quadric Fitting");
+			curvColorMethods << "Mean Curvature"<<"Gaussian Curvature"<<"Min Curvature"<<"Max Curvature" << "Shape Index"<< "CurvedNess" <<"None";
+			parlst.addParam(new RichEnum("Method", 3, curvCalcMethods, tr("Method:"), tr("Choose a method")));
+			parlst.addParam(new RichEnum("CurvColorMethod", 0, curvColorMethods, tr("Quality/Color Mapping"), QString("Choose the curvature that is mapped into quality and visualized as per vertex color.")));
+			parlst.addParam(new RichBool("Autoclean",true,"Remove Unreferenced Vertices","If selected, before starting the filter will remove anyy unreference vertex (for which curvature values are not defined)"));
 			break;
 
 		case FP_QUADRIC_SIMPLIFICATION:
 			parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces", "The desired final number of faces."));
-		parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."));
-		parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-		parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries to do not affect mesh boundaries during simplification"));
-		parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
-		parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
-		parlst.addParam(new RichBool ("PreserveTopology",lastq_PreserveTopology,"Preserve Topology","Avoid all the collapses that should cause a topology change in the mesh (like closing holes, squeezing handles, etc). If checked the genus of the mesh should stay unchanged."));
-		parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
-		parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh, as a side effect, more triangles will be preserved in flat areas (allowing better shaped triangles)."));
-		parlst.addParam(new RichFloat("PlanarWeight",lastq_PlanarWeight,"Planar Simp. Weight","How much we should try to preserve the triangles in the planar regions. If you lower this value planar areas will be simplified more."));
-		parlst.addParam(new RichBool ("QualityWeight",lastq_QualityWeight,"Weighted Simplification","Use the Per-Vertex quality as a weighting factor for the simplification. The weight is used as a error amplification value, so a vertex with a high quality value will not be simplified and a portion of the mesh with low quality values will be aggressively simplified."));
-		parlst.addParam(new RichBool ("AutoClean",true,"Post-simplification cleaning","After the simplification an additional set of steps is performed to clean the mesh (unreferenced vertices, bad faces, etc)"));
-		parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
+			parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."));
+			parlst.addParam(new RichFloat("QualityThr",lastq_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
+			parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries to do not affect mesh boundaries during simplification"));
+			parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
+			parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
+			parlst.addParam(new RichBool ("PreserveTopology",lastq_PreserveTopology,"Preserve Topology","Avoid all the collapses that should cause a topology change in the mesh (like closing holes, squeezing handles, etc). If checked the genus of the mesh should stay unchanged."));
+			parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
+			parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh, as a side effect, more triangles will be preserved in flat areas (allowing better shaped triangles)."));
+			parlst.addParam(new RichFloat("PlanarWeight",lastq_PlanarWeight,"Planar Simp. Weight","How much we should try to preserve the triangles in the planar regions. If you lower this value planar areas will be simplified more."));
+			parlst.addParam(new RichBool ("QualityWeight",lastq_QualityWeight,"Weighted Simplification","Use the Per-Vertex quality as a weighting factor for the simplification. The weight is used as a error amplification value, so a vertex with a high quality value will not be simplified and a portion of the mesh with low quality values will be aggressively simplified."));
+			parlst.addParam(new RichBool ("AutoClean",true,"Post-simplification cleaning","After the simplification an additional set of steps is performed to clean the mesh (unreferenced vertices, bad faces, etc)"));
+			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
 			break;
 
 		case FP_QUADRIC_TEXCOORD_SIMPLIFICATION:
 			parlst.addParam(new RichInt  ("TargetFaceNum", (m.cm.sfn>0) ? m.cm.sfn/2 : m.cm.fn/2,"Target number of faces"));
-		parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial mesh."));
-		parlst.addParam(new RichFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-		parlst.addParam(new RichFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex"));
-		parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries"));
-		parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
-		parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
-		parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
-		parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh."));
-		parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
+			parlst.addParam(new RichFloat("TargetPerc", 0,"Percentage reduction (0..1)", "If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial mesh."));
+			parlst.addParam(new RichFloat("QualityThr",lastqtex_QualityThr,"Quality threshold","Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
+			parlst.addParam(new RichFloat("Extratcoordw",lastqtex_extratw,"Texture Weight","Additional weight for each extra Texture Coordinates for every (selected) vertex"));
+			parlst.addParam(new RichBool ("PreserveBoundary",lastq_PreserveBoundary,"Preserve Boundary of the mesh","The simplification process tries not to destroy mesh boundaries"));
+			parlst.addParam(new RichFloat("BoundaryWeight",lastq_BoundaryWeight,"Boundary Preserving Weight","The importance of the boundary during simplification. Default (1.0) means that the boundary has the same importance of the rest. Values greater than 1.0 raise boundary importance and has the effect of removing less vertices on the border. Admitted range of values (0,+inf). "));
+			parlst.addParam(new RichBool ("OptimalPlacement",lastq_OptimalPlacement,"Optimal position of simplified vertices","Each collapsed vertex is placed in the position minimizing the quadric error.\n It can fail (creating bad spikes) in case of very flat areas. \nIf disabled edges are collapsed onto one of the two original vertices and the final mesh is composed by a subset of the original vertices. "));
+			parlst.addParam(new RichBool ("PreserveNormal",lastq_PreserveNormal,"Preserve Normal","Try to avoid face flipping effects and try to preserve the original orientation of the surface"));
+			parlst.addParam(new RichBool ("PlanarQuadric",lastq_PlanarQuadric,"Planar Simplification","Add additional simplification constraints that improves the quality of the simplification of the planar portion of the mesh."));
+			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Simplify only selected faces","The simplification is applied only to the selected set of faces.\n Take care of the target number of faces!"));
 			break;
 
 		case FP_EXPLICIT_ISOTROPIC_REMESHING:
-		parlst.addParam(new RichInt  ("Iterations", lastisor_Iterations, "Iterations", "Number of iterations of the remeshing operations to repeat on the mesh."));
+			parlst.addParam(new RichInt  ("Iterations", lastisor_Iterations, "Iterations", "Number of iterations of the remeshing operations to repeat on the mesh."));
 
-		parlst.addParam(new RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
-		parlst.addParam(new RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applied only to the selected faces."));
-		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(new RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
-		parlst.addParam(new RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Crease Angle", "Minimum angle between faces of the original to consider the shared edge as a feature to be preserved."));
-		parlst.addParam(new RichBool ("CheckSurfDist", lastisor_CheckSurfDist, "Check Surface Distance", "If toggled each local operation must deviate from original mesh by [Max. surface distance]"));
-		parlst.addParam(new RichAbsPerc ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
-		parlst.addParam(new RichBool ("SplitFlag", lastisor_RefineFlag, "Refine Step", "If checked the remeshing operations will include a refine step."));
-		parlst.addParam(new RichBool ("CollapseFlag", lastisor_CollapseFlag, "Collapse Step", "If checked the remeshing operations will include a collapse step."));
-		parlst.addParam(new RichBool ("SwapFlag", lastisor_SwapFlag, "Edge-Swap Step", "If checked the remeshing operations will include a edge-swap step, aimed at improving the vertex valence of the resulting mesh."));
-		parlst.addParam(new RichBool ("SmoothFlag", lastisor_SmoothFlag, "Smooth Step", "If checked the remeshing operations will include a smoothing step, aimed at relaxing the vertex positions in a Laplacian sense."));
-		parlst.addParam(new RichBool ("ReprojectFlag", lastisor_ProjectFlag, "Reproject Step", "If checked the remeshing operations will include a step to reproject the mesh vertices on the original surface."));
-
-
+			parlst.addParam(new RichBool ("Adaptive", lastisor_RemeshingAdaptivity, "Adaptive remeshing", "Toggles adaptive isotropic remeshing." ));
+			parlst.addParam(new RichBool ("SelectedOnly", lastisor_SelectedOnly, "Remesh only selected faces", "If checked the remeshing operations will be applied only to the selected faces."));
+			maxVal = m.cm.bbox.Diag();
+			parlst.addParam(new RichAbsPerc("TargetLen",maxVal*0.01,0,maxVal,"Target Length", "Sets the target length for the remeshed mesh edges."));
+			parlst.addParam(new RichFloat  ("FeatureDeg", lastisor_FeatureDeg, "Crease Angle", "Minimum angle between faces of the original to consider the shared edge as a feature to be preserved."));
+			parlst.addParam(new RichBool ("CheckSurfDist", lastisor_CheckSurfDist, "Check Surface Distance", "If toggled each local operation must deviate from original mesh by [Max. surface distance]"));
+			parlst.addParam(new RichAbsPerc ("MaxSurfDist", maxVal*0.01,0,maxVal, "Max. Surface Distance", "Maximal surface deviation allowed for each local operation"));
+			parlst.addParam(new RichBool ("SplitFlag", lastisor_RefineFlag, "Refine Step", "If checked the remeshing operations will include a refine step."));
+			parlst.addParam(new RichBool ("CollapseFlag", lastisor_CollapseFlag, "Collapse Step", "If checked the remeshing operations will include a collapse step."));
+			parlst.addParam(new RichBool ("SwapFlag", lastisor_SwapFlag, "Edge-Swap Step", "If checked the remeshing operations will include a edge-swap step, aimed at improving the vertex valence of the resulting mesh."));
+			parlst.addParam(new RichBool ("SmoothFlag", lastisor_SmoothFlag, "Smooth Step", "If checked the remeshing operations will include a smoothing step, aimed at relaxing the vertex positions in a Laplacian sense."));
+			parlst.addParam(new RichBool ("ReprojectFlag", lastisor_ProjectFlag, "Reproject Step", "If checked the remeshing operations will include a step to reproject the mesh vertices on the original surface."));
 
 			break;
 		case FP_CLOSE_HOLES:
 			parlst.addParam(new RichInt ("MaxHoleSize",(int)30,"Max size to be closed ","The size is expressed as number of edges composing the hole boundary"));
-		parlst.addParam(new RichBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed"));
-		parlst.addParam(new RichBool("NewFaceSelected",true,"Select the newly created faces","After closing a hole the faces that have been created are left selected. Any previous selection is lost. Useful for example for smoothing the newly created holes."));
-		parlst.addParam(new RichBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete."));
+			parlst.addParam(new RichBool("Selected",m.cm.sfn>0,"Close holes with selected faces","Only the holes with at least one of the boundary faces selected are closed"));
+			parlst.addParam(new RichBool("NewFaceSelected",true,"Select the newly created faces","After closing a hole the faces that have been created are left selected. Any previous selection is lost. Useful for example for smoothing the newly created holes."));
+			parlst.addParam(new RichBool("SelfIntersection",true,"Prevent creation of selfIntersecting faces","When closing an holes it tries to prevent the creation of faces that intersect faces adjacent to the boundary of the hole. It is an heuristic, non intersetcting hole filling can be NP-complete."));
 			break;
 
 		case FP_LOOP_SS:
 		case FP_REFINE_LS3_LOOP:
 			loopWeightLst << "Loop" << "Enhance regularity" << "Enhance continuity";
-		parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allows one to optimize some behaviors over others."));
+			parlst.addParam(new RichEnum("LoopWeight", 0, loopWeightLst, "Weighting scheme", "Change the weights used. Allows one to optimize some behaviors over others."));
+			// fall through
 		case FP_BUTTERFLY_SS:
 		case FP_MIDPOINT:
 			parlst.addParam(new RichInt("Iterations", 3, "Iterations", "Number of time the model is subdivided."));
-		maxVal = m.cm.bbox.Diag();
-		parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
-		parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+			maxVal = m.cm.bbox.Diag();
+			parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Edge Threshold", "All the edges <b>longer</b> than this threshold will be refined.<br>Setting this value to zero will force an uniform refinement."));
+			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 			break;
 
 
 		case FP_CLUSTERING:
 			maxVal = m.cm.bbox.Diag();
-		parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
-		parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
+			parlst.addParam(new RichAbsPerc("Threshold",maxVal*0.01,0,maxVal,"Cell Size", "The size of the cell of the clustering grid. Smaller the cell finer the resulting mesh. For obtaining a very coarse mesh use larger values."));
+			parlst.addParam(new RichBool ("Selected",m.cm.sfn>0,"Affect only selected faces","If selected the filter affect only the selected faces"));
 			break;
 
 		case FP_CYLINDER_UNWRAP:
 			parlst.addParam(new RichFloat("startAngle", 0,"Start angle (deg)", "The starting angle of the unrolling process."));
-		parlst.addParam(new RichFloat("endAngle",360,"End angle (deg)","The ending angle of the unrolling process. Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
-		parlst.addParam(new RichFloat("radius", 0,"Projection Radius", "If non zero, this parameter specifies the desired radius of the reference cylinder used for the projection. Changing this parameter affect the <b>X</b> horizontal scaling of the resulting mesh. If zero (default) the average distance of the mesh from the axis is chosen."));
+			parlst.addParam(new RichFloat("endAngle",360,"End angle (deg)","The ending angle of the unrolling process. Quality threshold for penalizing bad shaped faces.<br>The value is in the range [0..1]\n 0 accept any kind of face (no penalties),\n 0.5  penalize faces with quality < 0.5, proportionally to their shape\n"));
+			parlst.addParam(new RichFloat("radius", 0,"Projection Radius", "If non zero, this parameter specifies the desired radius of the reference cylinder used for the projection. Changing this parameter affect the <b>X</b> horizontal scaling of the resulting mesh. If zero (default) the average distance of the mesh from the axis is chosen."));
 			break;
 
 		case FP_FLIP_AND_SWAP:
 			parlst.addParam(new RichBool ("flipX",false,"Flip X axis","If selected the axis will be swapped (mesh mirrored along the YZ plane"));
-		parlst.addParam(new RichBool ("flipY",false,"Flip Y axis","If selected the axis will be swapped (mesh mirrored along the XZ plane"));
-		parlst.addParam(new RichBool ("flipZ",false,"Flip Z axis","If selected the axis will be swapped (mesh mirrored along the XY plane"));
-		parlst.addParam(new RichBool ("swapXY",false,"Swap X-Y axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
-		parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
-		parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			parlst.addParam(new RichBool ("flipY",false,"Flip Y axis","If selected the axis will be swapped (mesh mirrored along the XZ plane"));
+			parlst.addParam(new RichBool ("flipZ",false,"Flip Z axis","If selected the axis will be swapped (mesh mirrored along the XY plane"));
+			parlst.addParam(new RichBool ("swapXY",false,"Swap X-Y axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+			parlst.addParam(new RichBool ("swapXZ",false,"Swap X-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+			parlst.addParam(new RichBool ("swapYZ",false,"Swap Y-Z axis","If selected the two axis will be swapped. All the swaps are performed in this order"));
+			parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+			parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 			break;
 
 		case FP_RESET_TRANSFORM:
@@ -456,169 +455,176 @@ void ExtraMeshFilterPlugin::initParameterSet(QAction * action, MeshModel & m, Ri
 			parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 			break;
 
-	case FP_INVERT_TRANSFORM:
-		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible mesh layers"));
-		break;
+		case FP_INVERT_TRANSFORM:
+			parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+			parlst.addParam(new RichBool("allLayers", false, "Apply to all visible Layers", "If selected the filter will be applied to all visible mesh layers"));
+			break;
 
-	case FP_SET_TRANSFORM_MATRIX:
-	{
-		Matrix44m mat; mat.SetIdentity();
-		parlst.addParam(new RichMatrix44f("TransformMatrix", mat, ""));
-		parlst.addParam(new RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
-		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected, the filter will be applied to all visible mesh layers"));
-	}break;
+		case FP_SET_TRANSFORM_MATRIX:
+			{
+				Matrix44m mat; mat.SetIdentity();
+				parlst.addParam(new RichMatrix44f("TransformMatrix", mat, ""));
+				parlst.addParam(new RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
+				parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected, the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
-	case FP_SET_TRANSFORM_PARAMS:
-	{
-		parlst.addParam(new RichFloat("translationX", 0, "X Translation", "Translation factor on X axis"));
-		parlst.addParam(new RichFloat("translationY", 0, "Y Translation", "Translation factor on Y axis"));
-		parlst.addParam(new RichFloat("translationZ", 0, "Z Translation", "Translation factor on Z axis"));
-		parlst.addParam(new RichFloat("rotationX", 0, "X Rotation", "Rotation angle on X axis"));
-		parlst.addParam(new RichFloat("rotationY", 0, "Y Rotation", "Rotation angle on Y axis"));
-		parlst.addParam(new RichFloat("rotationZ", 0, "Z Rotation", "Rotation angle on Z axis"));
-		parlst.addParam(new RichFloat("scaleX", 1, "X Scale", "Scaling factor on X axis"));
-		parlst.addParam(new RichFloat("scaleY", 1, "Y Scale", "Scaling factor on Y axis"));
-		parlst.addParam(new RichFloat("scaleZ", 1, "Z Scale", "Scaling factor on Z axis"));
-		parlst.addParam(new RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
-		parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
-	} break;
+		case FP_SET_TRANSFORM_PARAMS:
+			{
+				parlst.addParam(new RichFloat("translationX", 0, "X Translation", "Translation factor on X axis"));
+				parlst.addParam(new RichFloat("translationY", 0, "Y Translation", "Translation factor on Y axis"));
+				parlst.addParam(new RichFloat("translationZ", 0, "Z Translation", "Translation factor on Z axis"));
+				parlst.addParam(new RichFloat("rotationX", 0, "X Rotation", "Rotation angle on X axis"));
+				parlst.addParam(new RichFloat("rotationY", 0, "Y Rotation", "Rotation angle on Y axis"));
+				parlst.addParam(new RichFloat("rotationZ", 0, "Z Rotation", "Rotation angle on Z axis"));
+				parlst.addParam(new RichFloat("scaleX", 1, "X Scale", "Scaling factor on X axis"));
+				parlst.addParam(new RichFloat("scaleY", 1, "Y Scale", "Scaling factor on Y axis"));
+				parlst.addParam(new RichFloat("scaleZ", 1, "Z Scale", "Scaling factor on Z axis"));
+				parlst.addParam(new RichBool("compose", false, "Compose with current", "If selected, the new matrix will be composed with the current one (matrix=new*old)"));
+				parlst.addParam(new RichBool("Freeze", true, "Freeze Matrix", "The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
 		case FP_ROTATE_FIT:
-	{
-		QStringList planes;
-		planes.push_back("XY plane");
-		planes.push_back("YZ plane");
-		planes.push_back("ZX plane");
-		parlst.addParam(new RichEnum("targetPlane", 0, planes, "Rotate to fit:", "Choose the plane where the selection will fit"));
-		QStringList raxis;
-		raxis.push_back("any axis");
-		raxis.push_back("X axis");
-		raxis.push_back("Y axis");
-		raxis.push_back("Z axis");
-		parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
-		parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
-		parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
-	} break;
+			{
+				QStringList planes;
+				planes.push_back("XY plane");
+				planes.push_back("YZ plane");
+				planes.push_back("ZX plane");
+				parlst.addParam(new RichEnum("targetPlane", 0, planes, "Rotate to fit:", "Choose the plane where the selection will fit"));
+				QStringList raxis;
+				raxis.push_back("any axis");
+				raxis.push_back("X axis");
+				raxis.push_back("Y axis");
+				raxis.push_back("Z axis");
+				parlst.addParam(new RichEnum("rotAxis", 0, raxis, "Rotate on:", "Choose on which axis do the rotation: 'any axis' guarantee the best fit of the selection to the plane, only use X,Y or Z it if you want to preserve that specific axis."));
+				parlst.addParam(new RichBool("ToOrigin", true, "Move to Origin", "Also apply a translation, such that the centroid of selection rests on the Origin"));
+				parlst.addParam(new RichBool("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
 		case FP_ROTATE:
-	{
-		QStringList rotMethod;
-		rotMethod.push_back("X axis");
-		rotMethod.push_back("Y axis");
-		rotMethod.push_back("Z axis");
-		rotMethod.push_back("custom axis");
-		parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
-		QStringList rotCenter;
-		rotCenter.push_back("origin");
-		rotCenter.push_back("barycenter");
-		rotCenter.push_back("custom point");
-		parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
-		parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
-		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
-		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
-		parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove any unreferenced vertex (for which curvature values are not defined)"));
-		parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle (i.e. if the snapping value is 30, 227 becomes 210)."));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
-	} break;
+			{
+				QStringList rotMethod;
+				rotMethod.push_back("X axis");
+				rotMethod.push_back("Y axis");
+				rotMethod.push_back("Z axis");
+				rotMethod.push_back("custom axis");
+				parlst.addParam(new RichEnum("rotAxis", 0, rotMethod, tr("Rotation on:"), tr("Choose a method")));
+				QStringList rotCenter;
+				rotCenter.push_back("origin");
+				rotCenter.push_back("barycenter");
+				rotCenter.push_back("custom point");
+				parlst.addParam(new RichEnum("rotCenter", 0, rotCenter, tr("Center of rotation:"), tr("Choose a method")));
+				parlst.addParam(new RichDynamicFloat("angle",0,-360,360,"Rotation Angle","Angle of rotation (in <b>degree</b>). If snapping is enabled this value is rounded according to the snap value"));
+				parlst.addParam(new RichPoint3f("customAxis",Point3f(0,0,0),"Custom axis","This rotation axis is used only if the 'custom axis' option is chosen."));
+				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This rotation center is used only if the 'custom point' option is chosen."));
+				parlst.addParam(new RichBool("snapFlag", false, "Snap angle", "If selected, before starting the filter will remove any unreferenced vertex (for which curvature values are not defined)"));
+				parlst.addParam(new RichFloat("snapAngle",30,"Snapping Value","This value is used to snap the rotation angle (i.e. if the snapping value is 30, 227 becomes 210)."));
+				parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
 		case FP_PRINCIPAL_AXIS:
-		parlst.addParam(new RichBool("pointsFlag",true,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			parlst.addParam(new RichBool("pointsFlag",true,"Use vertex","If selected, only the vertices of the mesh are used to compute the Principal Axis. Mandatory for point clouds or for non water tight meshes"));
+			parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+			parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
 			break;
 
 		case FP_CENTER:
-	{
-		QStringList traslMethod;
-		traslMethod.push_back("XYZ translation");
-		traslMethod.push_back("Center on Scene BBox");
-		traslMethod.push_back("Center on Layer BBox");
-		traslMethod.push_back("Set new Origin");
-		parlst.addParam(new RichEnum("traslMethod", 0, traslMethod, tr("Transformation:"), tr("[XYZ translation] adds X,Y and Z offset to Layer transformation, [Center on BBox] moves Layer Origin to the Bounding Box center, [Set new Origin] moves Layer Origin to a specific point")));
-		Box3m &bb=m.cm.bbox;
-		parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","when using [XYZ translation], amount of translation along the X axis (in model units)"));
-		parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","when using [XYZ translation], amount of translation along the Y axis (in model units)"));
-		parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","when using [XYZ translation], amount of translation along the Z axis (in model units)"));
-		parlst.addParam(new RichPoint3f("newOrigin", Point3f(0, 0, 0), "New Origin:", "when using [Set new Origin], this is the location of the new Origin."));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
-	} break;
+			{
+				QStringList traslMethod;
+				traslMethod.push_back("XYZ translation");
+				traslMethod.push_back("Center on Scene BBox");
+				traslMethod.push_back("Center on Layer BBox");
+				traslMethod.push_back("Set new Origin");
+				parlst.addParam(new RichEnum("traslMethod", 0, traslMethod, tr("Transformation:"), tr("[XYZ translation] adds X,Y and Z offset to Layer transformation, [Center on BBox] moves Layer Origin to the Bounding Box center, [Set new Origin] moves Layer Origin to a specific point")));
+				Box3m &bb=m.cm.bbox;
+				parlst.addParam(new RichDynamicFloat("axisX",0,-5.0*bb.Diag(),5.0*bb.Diag(),"X Axis","when using [XYZ translation], amount of translation along the X axis (in model units)"));
+				parlst.addParam(new RichDynamicFloat("axisY",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Y Axis","when using [XYZ translation], amount of translation along the Y axis (in model units)"));
+				parlst.addParam(new RichDynamicFloat("axisZ",0,-5.0*bb.Diag(),5.0*bb.Diag(),"Z Axis","when using [XYZ translation], amount of translation along the Z axis (in model units)"));
+				parlst.addParam(new RichPoint3f("newOrigin", Point3f(0, 0, 0), "New Origin:", "when using [Set new Origin], this is the location of the new Origin."));
+				parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
 		case FP_SCALE:
-	{
-		parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
-		parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
-		parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
-		parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
-		QStringList scaleCenter;
-		scaleCenter.push_back("origin");
-		scaleCenter.push_back("barycenter");
-		scaleCenter.push_back("custom point");
-		parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
-		parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
-		parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit length"));
-		parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
-		parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
-	} break;
+			{
+				parlst.addParam(new RichFloat("axisX",1,"X Axis","Scaling"));
+				parlst.addParam(new RichFloat("axisY",1,"Y Axis","Scaling"));
+				parlst.addParam(new RichFloat("axisZ",1,"Z Axis","Scaling"));
+				parlst.addParam(new RichBool("uniformFlag",true,"Uniform Scaling","If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"));
+				QStringList scaleCenter;
+				scaleCenter.push_back("origin");
+				scaleCenter.push_back("barycenter");
+				scaleCenter.push_back("custom point");
+				parlst.addParam(new RichEnum("scaleCenter", 0, scaleCenter, tr("Center of scaling:"), tr("Choose a method")));
+				parlst.addParam(new RichPoint3f("customCenter",Point3f(0,0,0),"Custom center","This scaling center is used only if the 'custom point' option is chosen."));
+				parlst.addParam(new RichBool("unitFlag",false,"Scale to Unit bbox","If selected, the object is scaled to a box whose sides are at most 1 unit length"));
+				parlst.addParam(new RichBool ("Freeze",true,"Freeze Matrix","The transformation is explicitly applied, and the vertex coordinates are actually changed"));
+				parlst.addParam(new RichBool ("allLayers",false,"Apply to all visible Layers","If selected the filter will be applied to all visible mesh layers"));
+			}
+			break;
 
-	case FP_INVERT_FACES:
-		parlst.addParam(new RichBool("forceFlip", true, "Force Flip", "If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
-		parlst.addParam(new RichBool("onlySelected", false, "Flip only selected faces", "If selected, only selected faces will be affected"));
-		break;
+		case FP_INVERT_FACES:
+			parlst.addParam(new RichBool("forceFlip", true, "Force Flip", "If selected, the normals will always be flipped; otherwise, the filter tries to set them outside"));
+			parlst.addParam(new RichBool("onlySelected", false, "Flip only selected faces", "If selected, only selected faces will be affected"));
+			break;
 
 		case FP_FAUX_CREASE:
-		parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease. If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
-		parlst.addParam(new RichFloat ("AngleDegPos", 45.0f,"Convex Angle Thr. (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
-		break;
+			parlst.addParam(new RichFloat ("AngleDegNeg",-45.0f,"Concave Angle Thr. (deg)","Concave Dihedral Angle threshold for considering an edge a crease. If the normals between two faces forms an concave diheadral angle smaller than the threshold the edge is considered a crease."));
+			parlst.addParam(new RichFloat ("AngleDegPos", 45.0f,"Convex Angle Thr. (deg)","The angle threshold for considering an edge a crease. If the normals between two faces forms an angle larger than the threshold the edge is considered a crease."));
+			break;
 
 		case FP_NORMAL_EXTRAPOLATION:
-		parlst.addParam(new RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
-		parlst.addParam(new RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
-		parlst.addParam(new RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
-		parlst.addParam(new RichPoint3f("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
-		break;
+			parlst.addParam(new RichInt ("K",(int)10,"Neighbour num","The number of neighbors used to estimate normals."));
+			parlst.addParam(new RichInt ("smoothIter",0,"Smooth Iteration","The number of smoothing iteration done on the p used to estimate and propagate normals."));
+			parlst.addParam(new RichBool("flipFlag",false,"Flip normals w.r.t. viewpoint","If the 'viewpoint' (i.e. scanner position) is known, it can be used to disambiguate normals orientation, so that all the normals will be oriented in the same direction."));
+			parlst.addParam(new RichPoint3f("viewPos",m.cm.shot.Extrinsics.Tra(),"Viewpoint Pos.","The viewpoint position can be set by hand (i.e. getting the current viewpoint) or it can be retrieved from mesh camera, if the viewpoint position is stored there."));
+			break;
 
-	case FP_NORMAL_SMOOTH_POINTCLOUD:
-		parlst.addParam(new RichInt ("K",(int)10,"Number of neighbors","The number of neighbors used to smooth normals."));
-		parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
-		break;
+		case FP_NORMAL_SMOOTH_POINTCLOUD:
+			parlst.addParam(new RichInt ("K",(int)10,"Number of neighbors","The number of neighbors used to smooth normals."));
+			parlst.addParam(new RichBool("useDist",false,"Weight using neighbour distance","If selected, the neighbour normals are waighted according to their distance"));
+			break;
 
 		case FP_VATTR_SEAM:
-	{
-			QStringList normalMethod; normalMethod << "None" << "Vertex" << "Wedge" << "Face";
-	  parlst.addParam(new RichEnum("NormalMode", 0, normalMethod, tr("Normal Source:"), tr("Choose a method")));
-	  QStringList colorMethod; colorMethod << "None" << "Vertex" << "Wedge" << "Face";
-	  parlst.addParam(new RichEnum("ColorMode", 0, colorMethod, tr("Color Source:"), tr("Choose a method")));
-	  QStringList texcoordMethod;texcoordMethod << "None" << "Vertex" << "Wedge";
-	  parlst.addParam(new RichEnum("TexcoordMode", 0, texcoordMethod, tr("Texcoord Source:"), tr("Choose a method")));
-		} break;
+			{
+				QStringList normalMethod; normalMethod << "None" << "Vertex" << "Wedge" << "Face";
+				parlst.addParam(new RichEnum("NormalMode", 0, normalMethod, tr("Normal Source:"), tr("Choose a method")));
+				QStringList colorMethod; colorMethod << "None" << "Vertex" << "Wedge" << "Face";
+				parlst.addParam(new RichEnum("ColorMode", 0, colorMethod, tr("Color Source:"), tr("Choose a method")));
+				QStringList texcoordMethod;texcoordMethod << "None" << "Vertex" << "Wedge";
+				parlst.addParam(new RichEnum("TexcoordMode", 0, texcoordMethod, tr("Texcoord Source:"), tr("Choose a method")));
+			}
+			break;
 
-	case FP_PERIMETER_POLYLINE:
-	{
+		case FP_PERIMETER_POLYLINE:
+			break;
 
-	} break;
+		case FP_SLICE_WITH_A_PLANE:
+			{
+				QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
+				parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
+				parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
+				parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
+				parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
+				parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
+				parlst.addParam(new RichBool("splitSurfaceWithSection",false,"Create also split surfaces","If selected, it will create two layers with the portion of the mesh under and over the section plane. It requires manifoldness of the mesh."));
+			}
+			break;
 
-	case FP_SLICE_WITH_A_PLANE:
-	{
-		QStringList axis = QStringList() <<"X Axis"<<"Y Axis"<<"Z Axis"<<"Custom Axis";
-		parlst.addParam(new RichEnum   ("planeAxis", 0, axis, tr("Plane perpendicular to"), tr("The Slicing plane will be done perpendicular to the axis")));
-		parlst.addParam(new RichPoint3f("customAxis",Point3f(0,1,0),"Custom axis","Specify a custom axis, this is only valid if the above parameter is set to Custom"));
-		parlst.addParam(new RichFloat  ("planeOffset", 0.0, "Cross plane offset", "Specify an offset of the cross-plane. The offset corresponds to the distance from the point specified in the plane reference parameter. By default (Cross plane offset == 0)"));
-		parlst.addParam(new RichEnum   ("relativeTo",2,QStringList()<<"Bounding box center"<<"Bounding box min"<<"Origin","plane reference","Specify the reference from which the planes are shifted"));
-		parlst.addParam(new RichBool("createSectionSurface",false,"Create also section surface","If selected, in addition to a layer with the section polyline, it will be created also a layer with a triangulated version of the section polyline. This only works if the section polyline is closed"));
-		parlst.addParam(new RichBool("splitSurfaceWithSection",false,"Create also split surfaces","If selected, it will create two layers with the portion of the mesh under and over the section plane. It requires manifoldness of the mesh."));
-	} break;
-
-	case FP_QUAD_DOMINANT:
-	{
-		QStringList opt = QStringList() <<"Fewest triangles"<< "(in between)" <<"Better quad shape";
-		parlst.addParam(new RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
-	} break;
+		case FP_QUAD_DOMINANT:
+			{
+				QStringList opt = QStringList() <<"Fewest triangles"<< "(in between)" <<"Better quad shape";
+				parlst.addParam(new RichEnum   ("level", 0, opt, tr("Optimize For:"), tr("Choose any of three different greedy strategies.")));
+			}
+			break;
 
 		default:
 			break;
@@ -1429,7 +1435,9 @@ switch(ID(filter))
 					{
 						int endIt = min(2,numLoop-loopIndex);
 						for(int ii0=0;ii0<endIt;ii0++)
+						{
 							for(int ii1=0;ii1<endIt;ii1++)
+							{
 								for(int ii2=0;ii2<endIt;ii2++)
 								{
 									int i0 = VertRefLoop[loopIndex+ii0][(*fi).V(0)-&m.cm.vert[0]];
@@ -1449,7 +1457,9 @@ switch(ID(filter))
 										}
 									}
 								}
-						        loopIndex++;
+							}
+						}
+						loopIndex++;
 					}
 				}
 		m.UpdateBoxAndNormals();

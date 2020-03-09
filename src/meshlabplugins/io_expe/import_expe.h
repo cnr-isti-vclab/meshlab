@@ -44,9 +44,9 @@ namespace tri
 namespace io
 {
 
-static const char * Header_EPSB01 = "[Expe/PointSet/Binary/0.1]";
-static const char * Header_EPSB02 = "[Expe/PointSet/Binary/0.2]";
-static const char * Header_EPSA02 = "[Expe/PointSet/Ascii/0.2]";
+//static const char * Header_EPSB01 = "[Expe/PointSet/Binary/0.1]";
+//static const char * Header_EPSB02 = "[Expe/PointSet/Binary/0.2]";
+//static const char * Header_EPSA02 = "[Expe/PointSet/Ascii/0.2]";
 
 // /** \addtogroup  */
 // /* @{ */

@@ -166,17 +166,18 @@ static int readPoint(FILE* fp, bool TRIInverseBytes, float &x,float &y, float &z
   }
   return 0;
 }
-static int readTexel(FILE* fp, bool TRIInverseBytes, float &s, float &t) {
-  if (TRIInverseBytes) {
-    //printf("!!! Warning : not implemented\n");
-    readOtherE(&s,sizeof(float),1,fp);
-    readOtherE(&t,sizeof(float),1,fp);
-  } else {
-    fread(&s,sizeof(float),1,fp);
-    fread(&t,sizeof(float),1,fp);
-  }
-  return 0;
-}
+
+//static int readTexel(FILE* fp, bool TRIInverseBytes, float &s, float &t) {
+//  if (TRIInverseBytes) {
+//    //printf("!!! Warning : not implemented\n");
+//    readOtherE(&s,sizeof(float),1,fp);
+//    readOtherE(&t,sizeof(float),1,fp);
+//  } else {
+//    fread(&s,sizeof(float),1,fp);
+//    fread(&t,sizeof(float),1,fp);
+//  }
+//  return 0;
+//}
 
 static int readFace(FILE *fp, bool TRIInverseBytes, int &p1, int &p2, int &p3) {
   if (TRIInverseBytes) {
