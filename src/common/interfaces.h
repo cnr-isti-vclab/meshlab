@@ -98,6 +98,7 @@ public:
 
 	/// Standard stuff that usually should not be redefined.
 	void setLog(GLLogStream *log) { this->log = log; }
+
 	// This function must be used to communicate useful information collected in the parsing/saving of the files.
 	// NEVER EVER use a msgbox to say something to the user.
 	template <typename... Ts>
@@ -109,12 +110,52 @@ public:
 		}
 	}
 
+	void Log(const char * s)
+	{
+		if(log != nullptr)
+		{
+			log->Log(GLLogStream::FILTER, s);
+		}
+	}
+
+	void Log(const std::string& s)
+	{
+		if(log != nullptr)
+		{
+			log->Log(GLLogStream::FILTER, s);
+		}
+	}
+
 	template <typename... Ts>
-	void Log(int Level, const char * f, Ts&&... ts )
+	void Log(GLLogStream::Levels Level, const char * f, Ts&&... ts )
 	{
 		if(log != nullptr)
 		{
 			log->Logf(Level, f, std::forward<Ts>(ts)...);
+		}
+	}
+
+	void Log(GLLogStream::Levels level, const char * s)
+	{
+		if(log != nullptr)
+		{
+			log->Log(level, s);
+		}
+	}
+
+	void Log(GLLogStream::Levels  level, const std::string& s)
+	{
+		if(log != nullptr)
+		{
+			log->Log(level, s);
+		}
+	}
+
+	void RealTimeLog(QString Id, const QString &meshName, const char * f)
+	{
+		if(log != nullptr)
+		{
+			log->RealTimeLog(Id, meshName, f);
 		}
 	}
 

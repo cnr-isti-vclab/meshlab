@@ -909,6 +909,9 @@ namespace io {
 							for (size_t i = 0; i < textureFile.size(); i++)
 								info->textureFile.push_back(textureFile.at(i));
 						//}
+						if (!copyTextureFile){
+							qDebug() << "Warning: Some error occurred on saving texture file\n";
+						}
 					}
 					geometry = geometry.nextSiblingElement();
 				}
@@ -2563,7 +2566,7 @@ namespace io {
 										textureInfo[j].isValid = (mode == "COORD") || (mode == "SPHERE");
 										textureInfo[j].isCoordGenerator = true;
 									}
-									if ( i < textureTransformList.size())										
+									if ( i < (size_t)textureTransformList.size())
 										textureInfo[j].textureTransform = createTextureTrasformMatrix(textureTransformList.at(i).toElement());
 									j++;
 								}

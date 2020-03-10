@@ -78,25 +78,27 @@ public:
         CMeshO::CoordType interp;
         bool ret = InterpolationParameters(*nearestF, nearestF->cN(), closestPt, interp);
         assert(ret);
-        interp[2]=1.0-interp[1]-interp[0];
+        if (ret) {
+            interp[2]=1.0-interp[1]-interp[0];
 
-		int tIndex = nearestF->cWT(0).N();
-		if ((tIndex >= 0) && (tIndex < srcImgs.size()))
-		{
-			int w = srcImgs[tIndex].width(), h = srcImgs[tIndex].height();
-			int x, y;
-			x = w * (interp[0] * nearestF->cWT(0).U() + interp[1] * nearestF->cWT(1).U() + interp[2] * nearestF->cWT(2).U());
-			y = h * (1.0 - (interp[0] * nearestF->cWT(0).V() + interp[1] * nearestF->cWT(1).V() + interp[2] * nearestF->cWT(2).V()));
-			// repeat mode
-			x = (x%w + w) % w;
-			y = (y%h + h) % h;
-			QRgb px = srcImgs[tIndex].pixel(x, y);
-			v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
-		}
-		else
-		{
-			v.C() = CMeshO::VertexType::ColorType(255, 255, 255, 255);
-		}
+            int tIndex = nearestF->cWT(0).N();
+            if ((tIndex >= 0) && ((size_t)tIndex < srcImgs.size()))
+            {
+                int w = srcImgs[tIndex].width(), h = srcImgs[tIndex].height();
+                int x, y;
+                x = w * (interp[0] * nearestF->cWT(0).U() + interp[1] * nearestF->cWT(1).U() + interp[2] * nearestF->cWT(2).U());
+                y = h * (1.0 - (interp[0] * nearestF->cWT(0).V() + interp[1] * nearestF->cWT(1).V() + interp[2] * nearestF->cWT(2).V()));
+                // repeat mode
+                x = (x%w + w) % w;
+                y = (y%h + h) % h;
+                QRgb px = srcImgs[tIndex].pixel(x, y);
+                v.C() = CMeshO::VertexType::ColorType(qRed(px), qGreen(px), qBlue(px), 255);
+            }
+            else
+            {
+                v.C() = CMeshO::VertexType::ColorType(255, 255, 255, 255);
+            }
+        }
     }
 };
 
@@ -254,7 +256,7 @@ public:
             if (p[0] <.0) {alpha = 254+p[0]*128; bary[0] = 0.;} else
                 if (p[1] <.0) {alpha = 254+p[1]*128; bary[1] = 0.;} else
                     if (p[2] <.0) {alpha = 254+p[2]*128; bary[2] = 0.;}*/
-        int rr,gg,bb;
+        int rr=0,gg=0,bb=0;
         CMeshO::CoordType bary = p;
         int alpha = 255;
         if (edgeDist != 0.0)
@@ -346,7 +348,7 @@ public:
             else
             {
                 // Calculate and set color
-                CMeshO::VertexType::ColorType c;
+                CMeshO::VertexType::ColorType c(0);
                 switch(vertexMode)
                 {
                 case 0 : // Color

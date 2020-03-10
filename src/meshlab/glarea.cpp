@@ -646,7 +646,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
 
     QString error = checkGLError::makeString("There are gl errors: ");
     if(!error.isEmpty()) {
-        Logf(GLLogStream::WARNING, qUtf8Printable(error));
+        Log(GLLogStream::WARNING, qUtf8Printable(error));
     }
     //check if viewers are linked
     MainWindow *window = qobject_cast<MainWindow *>(QApplication::activeWindow());

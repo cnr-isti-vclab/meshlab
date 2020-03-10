@@ -527,22 +527,24 @@ void MLRenderingNoShadingAction::updateRenderingData(MLRenderingData& rd )
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                opts._perpoint_noshading = isChecked();
+            case (MLRenderingData::PR_POINTS):
+                {
+                    opts._perpoint_noshading = isChecked();
+                    break;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    opts._perwire_noshading = isChecked();
+                    break;
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    opts._persolid_noshading = isChecked();
+                    break;
+                }
+            default:
                 break;
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                opts._perwire_noshading = isChecked();
-                break;
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                opts._persolid_noshading = isChecked();
-                break;
-            }
         }
         rd.set(opts);
     }
@@ -556,19 +558,21 @@ bool MLRenderingNoShadingAction::isRenderingDataEnabled( const MLRenderingData& 
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                return opts._perpoint_noshading;
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                return opts._perwire_noshading;
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                return opts._persolid_noshading;
-            }
+            case (MLRenderingData::PR_POINTS):
+                {
+                    return opts._perpoint_noshading;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    return opts._perwire_noshading;
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    return opts._persolid_noshading;
+                }
+            default:
+                break;
         }
     }
     return false;
@@ -639,22 +643,24 @@ void MLRenderingPerMeshColorAction::updateRenderingData(MLRenderingData& rd)
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                opts._perpoint_mesh_color_enabled = isChecked();
+            case (MLRenderingData::PR_POINTS):
+                {
+                    opts._perpoint_mesh_color_enabled = isChecked();
+                    break;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    opts._perwire_mesh_color_enabled = isChecked();
+                    break;
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    opts._persolid_mesh_color_enabled = isChecked();
+                    break;
+                }
+            default:
                 break;
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                opts._perwire_mesh_color_enabled = isChecked();
-                break;
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                opts._persolid_mesh_color_enabled = isChecked();
-                break;
-            }
         }
         rd.set(opts);
     }
@@ -668,21 +674,23 @@ bool MLRenderingPerMeshColorAction::isRenderingDataEnabled( const MLRenderingDat
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                return opts._perpoint_mesh_color_enabled;
+            case (MLRenderingData::PR_POINTS):
+                {
+                    return opts._perpoint_mesh_color_enabled;
 
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                return opts._perwire_mesh_color_enabled;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    return opts._perwire_mesh_color_enabled;
 
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                return opts._persolid_mesh_color_enabled;
-            }
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    return opts._persolid_mesh_color_enabled;
+                }
+            default:
+                break;
         }
     }
     return false;
@@ -850,25 +858,27 @@ void MLRenderingUserDefinedColorAction::updateRenderingData( MLRenderingData& rd
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                opts._perpoint_fixed_color_enabled = isChecked();
-                opts._perpoint_fixed_color = _coluser;
+            case (MLRenderingData::PR_POINTS):
+                {
+                    opts._perpoint_fixed_color_enabled = isChecked();
+                    opts._perpoint_fixed_color = _coluser;
+                    break;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    opts._perwire_fixed_color_enabled = isChecked();
+                    opts._perwire_fixed_color = _coluser;
+                    break;
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    opts._persolid_fixed_color_enabled = isChecked();
+                    opts._persolid_fixed_color = _coluser;
+                    break;
+                }
+            default:
                 break;
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                opts._perwire_fixed_color_enabled = isChecked();
-                opts._perwire_fixed_color = _coluser;
-                break;
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                opts._persolid_fixed_color_enabled = isChecked();
-                opts._persolid_fixed_color = _coluser;
-                break;
-            }
         }
         rd.set(opts);
     }
@@ -882,21 +892,22 @@ bool MLRenderingUserDefinedColorAction::isRenderingDataEnabled( const MLRenderin
     {
         switch (_pm)
         {
-        case (MLRenderingData::PR_POINTS):
-            {
-                return opts._perpoint_fixed_color_enabled;
-                
-            }
-        case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-        case (MLRenderingData::PR_WIREFRAME_EDGES):
-            {
-                return opts._perwire_fixed_color_enabled;
-                
-            }
-        case (MLRenderingData::PR_SOLID):
-            {
-                return opts._persolid_fixed_color_enabled;
-            }
+            case (MLRenderingData::PR_POINTS):
+                {
+                    return opts._perpoint_fixed_color_enabled;
+                }
+            case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+            case (MLRenderingData::PR_WIREFRAME_EDGES):
+                {
+                    return opts._perwire_fixed_color_enabled;
+
+                }
+            case (MLRenderingData::PR_SOLID):
+                {
+                    return opts._persolid_fixed_color_enabled;
+                }
+            default:
+                break;
         }
     }
     return false;
@@ -910,22 +921,24 @@ void MLRenderingUserDefinedColorAction::readColor(const MLRenderingData& rd, vcg
 	{
 		switch (_pm)
 		{
-		case (MLRenderingData::PR_POINTS):
-		{
-			col = opts._perpoint_fixed_color;
-			break;
-		}
-		case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
-		case (MLRenderingData::PR_WIREFRAME_EDGES):
-		{
-			col = opts._perwire_fixed_color;
-			break;
-		}
-		case (MLRenderingData::PR_SOLID):
-		{
-			col = opts._persolid_fixed_color;
-			break;
-		}
+			case (MLRenderingData::PR_POINTS):
+				{
+					col = opts._perpoint_fixed_color;
+					break;
+				}
+			case (MLRenderingData::PR_WIREFRAME_TRIANGLES):
+			case (MLRenderingData::PR_WIREFRAME_EDGES):
+				{
+					col = opts._perwire_fixed_color;
+					break;
+				}
+			case (MLRenderingData::PR_SOLID):
+				{
+					col = opts._persolid_fixed_color;
+					break;
+				}
+			default:
+				break;
 		}
 	}
 }

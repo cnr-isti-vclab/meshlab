@@ -49,7 +49,7 @@ bool IOMPlugin::open(const QString & /*formatName*/, const QString &fileName, Me
     return true;
 }
 
-bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos *cb, QWidget *parent)
+bool IOMPlugin::save(const QString & /*formatName*/, const QString &fileName, MeshModel &m, const int mask,const RichParameterSet & par,  vcg::CallBackPos * /*cb*/, QWidget *parent)
 {
     bool lossLessFlag = par.findParameter("LossLess")->val->getBool();
     float relativePrecisionParam = par.findParameter("relativePrecisionParam")->val->getFloat();

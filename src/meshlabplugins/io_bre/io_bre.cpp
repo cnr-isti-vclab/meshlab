@@ -571,7 +571,7 @@ bool vcg::tri::io::VertexGrid::IsValid( int col, int row)
 //function reads in the BreElements, writes them in a VertexGrid and creates a mesh
 int vcg::tri::io::ReadBreElementsInGrid( QFile &file, VertexGrid &grid, CMeshO &m, int dataType, int numberElements, vcg::CallBackPos *cb) 
 {
-  CMeshO::PerMeshAttributeHandle<Point3f> test_index = tri::Allocator<CMeshO>::GetPerMeshAttribute<Point3f>(m, "Camera Position");
+  /*CMeshO::PerMeshAttributeHandle<Point3f> test_index =*/ tri::Allocator<CMeshO>::GetPerMeshAttribute<Point3f>(m, "Camera Position");
   Point3f curPoint;
   QPoint curPixel;
   GLbyte curRed, curGreen, curBlue;

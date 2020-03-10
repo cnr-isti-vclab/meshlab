@@ -497,7 +497,7 @@ void SdfGpuPlugin::vertexDataToTexture(MeshModel &m)
     delete [] vertexPosition;
 }
 
-void SdfGpuPlugin::releaseGL(MeshModel &m)
+void SdfGpuPlugin::releaseGL(MeshModel &/*m*/)
 {
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
