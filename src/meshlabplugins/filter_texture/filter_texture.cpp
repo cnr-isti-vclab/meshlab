@@ -434,12 +434,12 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
             int sideDim = par.getInt("sidedim");
             int textDim = par.getInt("textdim");
             int pxBorder = par.getInt("border");
-            bool adv;
+            bool adv = false;
             switch(par.getEnum("method")) {
-            case 0 : adv = false; break; // Basic
-            case 1 : adv = true; break;  // Advanced
-            default : assert(0);
-        };
+                case 0 : adv = false; break; // Basic
+                case 1 : adv = true; break;  // Advanced
+                default : assert(0);
+            };
 
             // Pre checks
             CheckError(textDim <= 0, "Texture Dimension has an incorrect value");
@@ -1056,7 +1056,7 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		srcImgs.resize(srcMesh->cm.textures.size());
 		QString path;
 
-		for (int textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
+		for (size_t textInd = 0; textInd < srcMesh->cm.textures.size(); textInd++)
 		{
 			path = m.fullName();
 			path = path.left(std::max<int>(path.lastIndexOf('\\'), path.lastIndexOf('/')) + 1).append(srcMesh->cm.textures[textInd].c_str());

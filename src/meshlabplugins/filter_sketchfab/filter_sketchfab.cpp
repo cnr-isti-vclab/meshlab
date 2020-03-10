@@ -60,7 +60,7 @@ int saveMeshZip(string fileName, string internalName, string zipName) {
     }
     
     mz_zip_writer_finalize_archive(&zip_archive);
-    qDebug("Compressed %i",zip_archive.m_archive_size);
+    qDebug("Compressed %llu",zip_archive.m_archive_size);
     return 1;
 }
 

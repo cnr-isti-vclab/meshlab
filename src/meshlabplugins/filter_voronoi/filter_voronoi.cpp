@@ -198,10 +198,10 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     CMeshO::ScalarType sampleSurfRadius = env.evalFloat("sampleSurfRadius");
     CMeshO::ScalarType poissonRadius = env.evalFloat("poissonRadius");
     int sampleVolNum = env.evalInt("sampleVolNum");
-    int poissonFlag = env.evalBool("poissonFiltering");
+    /*int poissonFlag = */env.evalBool("poissonFiltering");
 
     MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
-    MeshModel  *pVm= md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
+    /*MeshModel  *pVm= */md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
     MeshModel  *pSm= md.addOrGetMesh("Surface Sampling","Surface Sampling",false);
     mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
     pSm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
@@ -223,7 +223,7 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     m->updateDataMask(MeshModel::MM_FACEMARK);
     MeshModel   *pm= md.addOrGetMesh("Poisson-disk Samples","Poisson-disk Samples",false);
     MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
-    MeshModel  *vsm= md.addOrGetMesh("Voronoi Seeds","Voronoi Seeds",false);
+    /*MeshModel  *vsm= */md.addOrGetMesh("Voronoi Seeds","Voronoi Seeds",false);
     MeshModel   *sm= md.addOrGetMesh("Scaffolding","Scaffolding",false);
 
     pm->updateDataMask(m);
@@ -259,8 +259,8 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
     cb(90, "Final Smoothing...");
     tri::Smooth<CMeshO>::VertexCoordLaplacian(sm->cm, smoothStep);
     sm->UpdateBoxAndNormals();
-   tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
-   tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
+    tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
+    tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
     return true;
   }
 
