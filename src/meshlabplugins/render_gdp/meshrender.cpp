@@ -248,7 +248,7 @@ void MeshShaderRenderPlugin::initActionList() {
 	}
 }
 
-void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
+void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	if (sDialog) {
 		sDialog->close();
@@ -404,7 +404,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &md, MLSceneGLSharedD
 }
 
 
-void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& mp, GLArea *gla)
+void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLSharedDataContext::PerMeshRenderingDataMap& /*mp*/, GLArea *gla)
 {
 	//  MeshModel &mm
 	if (shaders.find(a->text()) != shaders.end()) {
@@ -483,7 +483,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLShare
 	if ((gla != NULL) && (gla->mvc() != NULL))
 	{
 		MLSceneGLSharedDataContext* shared = gla->mvc()->sharedDataContext();
-		foreach(MeshModel * mp, md.meshList)
+		for(MeshModel * mp : md.meshList)
 		{
 			if ((mp != NULL) && (gla->meshVisibilityMap[mp->id()]))
 				shared->draw(mp->id(),gla->context());
