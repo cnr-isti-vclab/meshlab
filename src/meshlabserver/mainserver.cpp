@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
 #include <common/interfaces.h>
@@ -745,8 +745,7 @@ int main(int argc, char *argv[])
 
 	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000,100000);
 	shared.makeCurrent();
-	GLenum err = glewInit();
-	if (err != GLEW_NO_ERROR)
+	if (!initializeGLextensions_notThrowing())
 	{
 		printf("GLEW Init: failed!\n");
 		//system("pause");

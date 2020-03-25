@@ -21,6 +21,7 @@
  *                                                                           *
  ****************************************************************************/
 #include "edit_paint.h"
+#include <common/gl_defs.h>
 
 #include <vcg/math/perlin_noise.h>
 
@@ -69,8 +70,7 @@ void EditPaintPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
 
 bool EditPaintPlugin::StartEdit(MeshModel & m, GLArea * parent, MLSceneGLSharedDataContext* /*cont*/)
 {
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
+	if (!initializeGLextensions_notThrowing())
 		return false;
 	dock = new QDockWidget(parent->window());
 	paintbox = new Paintbox(dock);

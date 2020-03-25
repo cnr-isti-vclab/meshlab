@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+#include <common/gl_defs.h>
 #include "splat_pyramid.h"
 
 #include <QGLWidget>
@@ -28,7 +29,7 @@ using namespace vcg;
 void PyramidPointRendererPlugin::Init(QAction *, MeshDocument &md, RenderMode &, QGLWidget *gla)
 {
 	gla->makeCurrent();
-	glewInit();
+	initializeGLextensions();
 
 	const char* rs = (const char*)glGetString(GL_RENDERER);
 	

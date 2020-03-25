@@ -25,6 +25,7 @@
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/bitquad_support.h>
+#include <common/gl_defs.h>
 #include <meshlab/glarea.h>
 #include <wrap/qt/checkGLError.h>
 #include <wrap/qt/gl_label.h>
@@ -569,7 +570,7 @@ bool DecorateBasePlugin::startDecorate(QAction * action, MeshDocument &, RichPar
         return true;
     case DP_SHOW_SELECTED_MESH :
         {
-            return (glewInit() == GLEW_OK);
+            return initializeGLextensions_notThrowing();
         }
     
     }

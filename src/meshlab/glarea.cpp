@@ -24,6 +24,7 @@
 
 
 #include <common/interfaces.h>
+#include <common/gl_defs.h>
 
 #include "glarea.h"
 #include "mainwindow.h"
@@ -173,10 +174,7 @@ void GLArea::initializeGL()
 
     trackball_light.center=Point3f(0, 0, 0);
     trackball_light.radius= 1;
-    GLenum err = glewInit();
-    if (err != GLEW_OK ) {
-        assert(0);
-    }
+    initializeGLextensions();
 	//doneCurrent();
 }
 

@@ -24,6 +24,7 @@
 //#include <GL/glew.h>
 
 
+#include <common/gl_defs.h>
 #include "edit_align.h"
 #include <QGLWidget>
 #include "AlignPairWidget.h"
@@ -75,7 +76,7 @@ void AlignPairWidget::initializeGL()
 	if (shared == NULL)
 		return;
 
-	glewInit();  //needed to init extensions, used by the aligner GL window while rendering
+	initializeGLextensions();  //needed to init extensions, used by the aligner GL window while rendering
 
 	shared->addView(context());
 	glClearColor(0, 0, 0, 0);
