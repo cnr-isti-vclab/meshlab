@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include <common/gl_defs.h>
 #include "meshrender.h"
 #include <QGLWidget>
 #include <QTextStream>
@@ -257,8 +258,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSha
 	}
 
 	gla->makeCurrent();
-	GLenum err = glewInit();
-	if (GLEW_OK == err) {
+	if (initializeGLextensions_notThrowing()) {
 		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
 			supported = true;
 			if (shaders.find(a->text()) != shaders.end()) {

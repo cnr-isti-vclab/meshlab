@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "decorate_raster_proj.h"
+#include <common/gl_defs.h>
 #include <wrap/gl/shot.h>
 #include <common/pluginmanager.h>
 #include <meshlab/glarea.h>
@@ -535,10 +536,9 @@ bool DecorateRasterProjPlugin::startDecorate( QAction          *act,
             }
             glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-            GLenum err = glewInit();
-            if( err != GLEW_OK )
+            if( !initializeGLextensions_notThrowing() )
             {
-                qWarning("Impossible to load GLEW library. %s",(const char *)glewGetErrorString(err));
+                qWarning("Impossible to load GLEW library.");
                 return false;
             }
 

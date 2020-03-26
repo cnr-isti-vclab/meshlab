@@ -2,6 +2,7 @@
 #define ML_EXCEPTION_H
 
 #include <exception>
+#include <QString>
 
 class MLException : public std::exception
 {

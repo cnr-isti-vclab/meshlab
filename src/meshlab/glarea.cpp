@@ -24,6 +24,7 @@
 
 
 #include <common/interfaces.h>
+#include <common/gl_defs.h>
 
 #include "glarea.h"
 #include "mainwindow.h"
@@ -173,10 +174,7 @@ void GLArea::initializeGL()
 
     trackball_light.center=Point3f(0, 0, 0);
     trackball_light.radius= 1;
-    GLenum err = glewInit();
-    if (err != GLEW_OK ) {
-        assert(0);
-    }
+    initializeGLextensions();
 	//doneCurrent();
 }
 
@@ -441,9 +439,9 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
         hasToUpdateTexture=false;
     }*/
 
-    glClearColor(1.0,1.0,1.0,0.0);
+    ::glClearColor(1.0,1.0,1.0,0.0);
     if (takeSnapTile && (ss.background == 3))
-        glClearColor(0.0, 0.0, 0.0, 0.0);
+        ::glClearColor(0.0, 0.0, 0.0, 0.0);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

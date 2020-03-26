@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <common/gl_defs.h>
 #include <meshlab/glarea.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
@@ -698,9 +699,8 @@ Point2m EditMutualCorrsPlugin::fromImageToGL(Point2m picked)
 
 bool EditMutualCorrsPlugin::initGL()
 {
-	GLenum err = glewInit();
 	Log(0, "GL Initialization");
-	if (GLEW_OK != err) {
+	if (!initializeGLextensions_notThrowing()) {
 		Log(0, "GLEW initialization error!");
 		return false;
 	}

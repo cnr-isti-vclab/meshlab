@@ -22,7 +22,7 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QFile>
 #include <QImage>
 #include <cassert>
@@ -101,9 +101,8 @@ protected:
       * @return true if no errors happened during the setup, false otherwise.
       */
     bool initGlew()
-	{
-        GLenum err = glewInit();
-		return (err == GLEW_OK);
+    {
+      return initializeGLextensions_notThrowing();
     }
 
     /**

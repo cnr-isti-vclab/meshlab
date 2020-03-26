@@ -1,4 +1,5 @@
 #include "filter_sdfgpu.h"
+#include <common/gl_defs.h>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
@@ -262,10 +263,9 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glClearColor(0,0,0,0);
     glClearDepth(1.0);
 
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
+    if (!initializeGLextensions_notThrowing())
     {
-        Log(0,(const char*)glewGetErrorString(err));
+        Log(0, "Error initializing OpenGL extensions.");
         return false;
     }
 

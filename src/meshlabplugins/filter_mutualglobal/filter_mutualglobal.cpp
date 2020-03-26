@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "filter_mutualglobal.h"
+#include <common/gl_defs.h>
 #include <QtScript>
 
 #include "alignset.h"
@@ -259,9 +260,8 @@ float FilterMutualInfoPlugin::calcShotsDifference(MeshDocument &md, std::vector<
 
 void FilterMutualInfoPlugin::initGL()
 {
-  GLenum err = glewInit();
   Log(0, "GL Initialization");
-  if (GLEW_OK != err) {
+  if (!initializeGLextensions_notThrowing()) {
     Log(0, "GLEW initialization error!");
     exit(-1);
   }

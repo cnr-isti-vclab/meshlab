@@ -22,6 +22,7 @@
  ****************************************************************************/
 
 #include "edit_select.h"
+#include <common/gl_defs.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/device_to_logical.h>
 #include <meshlab/glarea.h>
@@ -590,9 +591,7 @@ bool EditSelectPlugin::StartEdit(MeshModel & m, GLArea * gla, MLSceneGLSharedDat
 {
 	if (gla == NULL)
 		return false;
-	GLenum err = glewInit();
-
-	if (err != GLEW_OK)
+	if (!initializeGLextensions_notThrowing())
 		return false;
 	gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 

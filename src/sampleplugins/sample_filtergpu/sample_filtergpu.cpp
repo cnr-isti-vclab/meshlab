@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "sample_filtergpu.h"
+#include <common/gl_defs.h>
 #include <wrap/glw/glw.h>
 #include <QImage>
 
@@ -122,7 +123,7 @@ bool ExtraSampleGPUPlugin::applyFilter(QAction * a, MeshDocument & md , RichPara
 //			GLsizei               nstride = GLsizei(n1 - n0);
 
 			glContext->makeCurrent();
-			glewInit();
+			initializeGLextensions();
 
 			glPushAttrib(GL_ALL_ATTRIB_BITS);
 
