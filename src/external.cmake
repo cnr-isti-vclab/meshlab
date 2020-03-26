@@ -354,5 +354,6 @@ elseif(ALLOW_BUNDLED_QHULL AND EXISTS "${QHULL_DIR}/src/qhull.h")
         "${QHULL_DIR}/src/geom.h"
         "${QHULL_DIR}/src/user.c"
         "${QHULL_DIR}/src/user.h")
+    target_include_directories(external-qhull INTERFACE "${QHULL_DIR}/src")
     set_property(TARGET external-qhull PROPERTY FOLDER External)
 endif()
