@@ -65,5 +65,5 @@ target_link_libraries(
 set_property(TARGET common PROPERTY FOLDER Core)
 
 if(NOT WIN32)
-    install(TARGETS common DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(TARGETS common DESTINATION ${MESHLAB_LIB_INSTALL_DIR})
 endif()
