@@ -23,7 +23,6 @@ set(SOURCES
 
 set(HEADERS
     GLLogStream.h
-    compile_time_version.h
     filterparameter.h
     filterscript.h
     interfaces.h
