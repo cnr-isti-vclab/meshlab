@@ -33,7 +33,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > distrib/VERSION
+        echo ${{steps.envs.outputs.date}} > VERSION
     - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh

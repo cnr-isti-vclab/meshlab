@@ -25,10 +25,9 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > distrib/VERSION
+        echo ${{steps.envs.outputs.date}} > VERSION
     - name: Build MeshLab
       run: |
-        cat distrib/VERSION
         sh install/linux/linux_build.sh
     - name: Deploy MeshLabServer
       run : |
@@ -76,7 +75,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > distrib/VERSION
+        echo ${{steps.envs.outputs.date}} > VERSION
     - name: Configure
       run: |
         cmake src/ -G Ninja

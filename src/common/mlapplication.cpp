@@ -30,16 +30,11 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 
 const QString MeshLabApplication::appVer()
 {
-	static QString version = "";
-	if (version == ""){
-		QFile f("VERSION");
-		if (!f.open(QFile::ReadOnly | QFile::Text)) version = "2020.02";
-		else {
-			QTextStream in(&f);
-			version = in.readAll();
-			version.chop(1);
-		}
-	}
-	return version;
+	// very very very bad shortcut.
+	// need a better solution...
+	const char* version =
+		#include "../../VERSION"
+			;
+	return QString(version);
 }
 

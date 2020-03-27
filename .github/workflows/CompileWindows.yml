@@ -28,7 +28,7 @@ jobs:
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Update MeshLab version
       run : |
-        Set-Content -Path distrib\VERSION -Value ${{steps.envs.outputs.date}} -Force
+        Set-Content -Path VERSION -Value ${{steps.envs.outputs.date}} -Force
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
@@ -90,7 +90,7 @@ jobs:
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Update MeshLab version
       run : |
-        Set-Content -Path distrib\VERSION -Value ${{steps.envs.outputs.date}} -Force
+        Set-Content -Path VERSION -Value ${{steps.envs.outputs.date}} -Force
     - name: Configure
       run: |
         cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
