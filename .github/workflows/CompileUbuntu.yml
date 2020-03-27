@@ -26,7 +26,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        cat ${{steps.envs.outputs.date}} > distrib/VERSION
+        echo ${{steps.envs.outputs.date}} > distrib/VERSION
         echo "VERSION: "
         cat distrib/VERSION
     - name: Build MeshLab
