@@ -7,7 +7,7 @@ jobs:
   ubuntu_build:
     name: Build MeshLab (Ubuntu)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -24,6 +24,11 @@ jobs:
       shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
+    - name: Update MeshLab version
+      run : |
+        cat ${{steps.envs.outputs.date}} > distrib/VERSION
+        echo "VERSION: "
+        cat distrib/VERSION
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
@@ -49,12 +54,12 @@ jobs:
       with:
         name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-         
+
 
   ubuntu_build_cmake:
     name: Build MeshLab (Ubuntu - CMake)
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -66,10 +71,9 @@ jobs:
     - name: Instal dependencies
       run: |
        sudo apt-get update
-       sudo apt-get install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build 
+       sudo apt-get install -y qt5-default qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev cmake ninja-build
     - name: Configure
       run: |
         cmake src/ -G Ninja
     - name: Build MeshLab
       run: ninja -C .
-
