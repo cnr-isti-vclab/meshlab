@@ -28,6 +28,7 @@ jobs:
         echo ${{steps.envs.outputs.date}} > distrib/VERSION
     - name: Build MeshLab
       run: |
+        cat distrib/VERSION
         sh install/linux/linux_build.sh
     - name: Deploy MeshLabServer
       run : |
