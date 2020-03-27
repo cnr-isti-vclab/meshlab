@@ -27,7 +27,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > VERSION
+        echo \"${{steps.envs.outputs.date}}\" > VERSION
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
@@ -83,7 +83,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > VERSION
+        echo \"${{steps.envs.outputs.date}}\" > VERSION
     - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
@@ -125,7 +125,7 @@ jobs:
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
     - name: Update MeshLab version
       run : |
-        Set-Content -Path VERSION -Value ${{steps.envs.outputs.date}} -Force
+        Set-Content -Path VERSION -Value \`"${{steps.envs.outputs.date}}\`" -Force
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
