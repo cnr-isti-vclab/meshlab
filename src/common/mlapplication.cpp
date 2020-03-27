@@ -2,8 +2,8 @@
 #include "mlexception.h"
 #include <vcg/complex/complex.h>
 
-#include <QFile>
-#include <QTextStream>
+#define xstr(a) str(a)
+#define str(a) #a
 
 bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 {
@@ -30,11 +30,6 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 
 const QString MeshLabApplication::appVer()
 {
-	// very very very bad shortcut.
-	// need a better solution...
-	const char* version =
-		#include "../../VERSION"
-			;
-	return QString(version);
+	return QString(xstr(MESHLAB_VERSION));
 }
 

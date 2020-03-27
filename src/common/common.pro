@@ -39,6 +39,13 @@ INCLUDEPATH *= \
     DEFINES += GLEW_STATIC
 }
 
+# defining meshlab version
+exists(../../VERSION){
+    MESHLAB_VERSION = $$cat(../../VERSION)
+    message(MeshLab Version: $$MESHLAB_VERSION)
+    DEFINES += "MESHLAB_VERSION=$$MESHLAB_VERSION"
+}
+
 # Input
 HEADERS += 	\
     filterparameter.h \

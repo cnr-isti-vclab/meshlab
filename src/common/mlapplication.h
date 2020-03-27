@@ -7,6 +7,10 @@
 #include <wrap/gl/gl_mesh_attributes_info.h>
 #include "ml_mesh_type.h"
 
+#ifndef MESHLAB_VERSION
+#define MESHLAB_VERSION 2020.02
+#endif
+
 class MeshLabApplication : public QApplication
 {
 public:
