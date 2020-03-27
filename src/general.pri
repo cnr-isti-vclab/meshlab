@@ -51,7 +51,7 @@ win32-gcc:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -L$$MESHLAB
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
 # using brew install clang from llvm and libomp
-# uncomment these three lines for using default OSX compiler
+# comment these three lines for using default OSX compiler
 macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
 macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
 macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib

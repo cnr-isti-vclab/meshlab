@@ -3,6 +3,11 @@
 
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
+if (EXISTS ../../ML_VERSION)
+    file(READ ../../ML_VERSION MESHLAB_VERSION)
+    add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
+endif()
+
 set(SOURCES
     GLLogStream.cpp
     filterparameter.cpp
@@ -23,7 +28,6 @@ set(SOURCES
 
 set(HEADERS
     GLLogStream.h
-    compile_time_version.h
     filterparameter.h
     filterscript.h
     interfaces.h

@@ -31,31 +31,11 @@ SUBDIRS = \ #sub projects names
     filter_measure \
     filter_meshing
 
-## where to find the sub projects - give the folders ##
-external.subdir = external
-common.subdir = common
-meshlab.subdir = meshlab
-meshlabserver.subdir = meshlabserver
-io_base.subdir = meshlabplugins/io_base
-decorate_base.subdir = meshlabplugins/decorate_base
-filter_measure.subdir = meshlabplugins/filter_measure
-filter_meshing.subdir = meshlabplugins/filter_meshing
-
-## what subproject depends on others ##
-common.depends = external
-meshlab.depends = common
-meshlabserver.depends = common
-io_base.depends = common
-decorate_base.depends = common
-filter_measure.depends = common
-filter_meshing.depends = common
-
-meshlab_mini {
-    message(Compiling only MeshLab Mini!)
-}
 !meshlab_mini {
-
-#Other sub project, compiled only when config is not MeshLab Mini
+# Other sub project, compiled only when config is not MeshLab Mini
+# If you want to compile someone of these sub project with the meshlab_mini
+# configuration, just copy-paste the name of the filter in the
+# meshlab_mini SUBDIRS
 SUBDIRS += \ #sub projects names
 # IO plugins
     io_3ds \
@@ -123,7 +103,21 @@ SUBDIRS += \ #sub projects names
     edit_quality \
     edit_select
 
+}
+meshlab_mini {
+    message(Compiling only MeshLab Mini!)
+}
+
 ## where to find the sub projects - give the folders ##
+# meshlab_mini subdirs:
+external.subdir = external
+common.subdir = common
+meshlab.subdir = meshlab
+meshlabserver.subdir = meshlabserver
+io_base.subdir = meshlabplugins/io_base
+decorate_base.subdir = meshlabplugins/decorate_base
+filter_measure.subdir = meshlabplugins/filter_measure
+filter_meshing.subdir = meshlabplugins/filter_meshing
 # IO plugins
 io_3ds.subdir = meshlabplugins/io_3ds
 io_bre.subdir = meshlabplugins/io_bre
@@ -191,6 +185,14 @@ edit_quality.subdir = meshlabplugins/edit_quality
 edit_select.subdir = meshlabplugins/edit_select
 
 ## what subproject depends on others ##
+# meshlab_mini subdirs
+common.depends = external
+meshlab.depends = common
+meshlabserver.depends = common
+io_base.depends = common
+decorate_base.depends = common
+filter_measure.depends = common
+filter_meshing.depends = common
 # IO plugins
 io_3ds.depends = common
 io_bre.depends = common
@@ -261,8 +263,6 @@ edit_select.depends = common
 #no longer needed# meshlabplugins/filter_bnpts \
 #no longer needed# meshlabplugins/filter_colorize \
 #no longer supported#   meshlabplugins/edit_pickpoints \
-
-}
 
 
 # if distrib folder is not in $$PWD/../distrib (shadow build case),

@@ -1,6 +1,10 @@
 #include "mlapplication.h"
 #include "mlexception.h"
 #include <vcg/complex/complex.h>
+
+#define xstr(a) str(a)
+#define str(a) #a
+
 bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
 {
   try
@@ -21,5 +25,11 @@ bool MeshLabApplication::notify( QObject * rec, QEvent * ev )
     qCritical("Something really bad happened!!!!!!!!!!!!!");
     abort();
   }
-  return false;
+	return false;
 }
+
+const QString MeshLabApplication::appVer()
+{
+	return QString(xstr(MESHLAB_VERSION));
+}
+

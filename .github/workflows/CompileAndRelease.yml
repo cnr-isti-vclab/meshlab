@@ -9,7 +9,7 @@ jobs:
   ubuntu_build:
     name: Build MeshLab (Ubuntu)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -23,9 +23,11 @@ jobs:
        sh install/linux/linux_setup_env_ubuntu.sh
     - name: Setup env variables
       id: envs
-      shell: bash
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
+    - name: Update MeshLab version
+      run : |
+        echo ${{steps.envs.outputs.date}} > ML_VERSION
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
@@ -51,11 +53,11 @@ jobs:
       with:
         name: meshlab_linux_appimage
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
-  
+
   macos_build:
     name: Build MeshLab (MacOS)
     runs-on: macos
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -78,7 +80,10 @@ jobs:
         echo '::add-path::/usr/local/opt/qt/bin'
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
-        echo  ::set-output name=date::"$(date +%Y.%m)"   
+        echo  ::set-output name=date::"$(date +%Y.%m)"
+    - name: Update MeshLab version
+      run : |
+        echo ${{steps.envs.outputs.date}} > ML_VERSION
     - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
@@ -94,7 +99,7 @@ jobs:
       with:
         name: meshlab_macos_dmg
         path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
-        
+
   windows_build:
     name: Build MeshLab (Windows)
     runs-on: windows-latest
@@ -118,6 +123,9 @@ jobs:
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+    - name: Update MeshLab version
+      run : |
+        Set-Content -Path ML_VERSION -Value ${{steps.envs.outputs.date}} -Force
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
@@ -143,7 +151,7 @@ jobs:
     - name: Rename Installer
       run: |
         Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
-    - name: Upload Meshlab Portable 
+    - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
@@ -153,8 +161,8 @@ jobs:
       with:
         name: meshlab_windows_installer
         path: install/windows/resources/MeshLab${{steps.envs.outputs.date}}-windows.exe
-        
-#after building MeshLab for the three platforms, we create a release in github       
+
+#after building MeshLab for the three platforms, we create a release in github
   create_release:
     name: Create Release
     needs: [ubuntu_build, macos_build, windows_build]
@@ -164,17 +172,17 @@ jobs:
       id: envs
       run: |
         echo ::set-output name=date::"$(date +%Y.%m)"
-    - name: Publish Release 
+    - name: Publish Release
       id: create_release
       uses: actions/create-release@v1.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: Meshlab-${{steps.envs.outputs.date}}
         release_name: MeshLab-${{steps.envs.outputs.date}}
         draft: false
         prerelease: false
-    
+
     #Linux Release
     - name: Download Linux ZIP
       uses: actions/download-artifact@v1
@@ -197,7 +205,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.zip
         asset_content_type: MeshLab Portable for Linux
@@ -207,7 +215,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_linux_appimage/MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLab AppImage for Linux
@@ -217,7 +225,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlabserver_linux_appimage/MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
         asset_name: MeshLabServer${{steps.envs.outputs.date}}-linux.AppImage
         asset_content_type: MeshLabServer AppImage for Linux
@@ -233,11 +241,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_macos_dmg/MeshLab${{steps.envs.outputs.date}}-macos.dmg
         asset_name: MeshLab${{steps.envs.outputs.date}}-macos.dmg
         asset_content_type: MeshLab for MacOS
-    
+
     #Windows Release
     - name: Download Windows ZIP
       uses: actions/download-artifact@v1
@@ -269,4 +277,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: meshlab_windows_installer/MeshLab${{steps.envs.outputs.date}}-windows.exe
         asset_name: MeshLab${{steps.envs.outputs.date}}-windows.exe
-        asset_content_type: MeshLab Portable for Windows  
+        asset_content_type: MeshLab Portable for Windows
