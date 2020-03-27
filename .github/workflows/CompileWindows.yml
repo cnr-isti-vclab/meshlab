@@ -26,6 +26,11 @@ jobs:
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+    - name: Update MeshLab version
+      run : |
+        Set-Content -Path distrib\VERSION -Value ${{steps.envs.outputs.date}} -Force
+        echo "VERSION:"
+        Get-Content -Path distrib\VERSION
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
@@ -51,7 +56,7 @@ jobs:
     - name: Rename Installer
       run: |
         Rename-Item -Path install\windows\resources\MeshLab${{steps.envs.outputs.date}}.exe -NewName MeshLab${{steps.envs.outputs.date}}-windows.exe
-    - name: Upload Meshlab Portable 
+    - name: Upload Meshlab Portable
       uses: actions/upload-artifact@v1
       with:
         name: meshlab_windows_portable
@@ -81,9 +86,16 @@ jobs:
       with:
         modules: qtscript xmlpatterns
         #mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+    - name: Update MeshLab version
+      run : |
+        Set-Content -Path distrib\VERSION -Value ${{steps.envs.outputs.date}} -Force
     - name: Configure
       run: |
-        cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON 
+        cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
         # -DBUILD_MINI=ON
     - name: Build MeshLab
       run: |
