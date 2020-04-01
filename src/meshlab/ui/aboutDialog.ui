@@ -110,10 +110,19 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>300</height>
+           </size>
+          </property>
           <property name="text">
            <string>&lt;p&gt;&lt;strong&gt;General Info:&amp;nbsp;&lt;a href=&quot;http://www.meshlab.net&quot;&gt;www.meshlab.net&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;MeshLab is the most used open source system for processing and editing 3D triangular meshes. It provides a set of tools for editing, cleaning, healing, inspecting, rendering, texturing and converting meshes. It offers features for processing raw data produced by 3D digitization tools/devices and for preparing models for 3D printing. The system is heavily based on the &lt;a href=&quot;http://www.vcglib.net&quot;&gt;VCG library&lt;/a&gt;. &lt;br /&gt;Source code is available on &lt;a href=&quot;https://github.com/cnr-isti-vclab/meshlab&quot;&gt;GitHub &lt;/a&gt;(protected by GPL).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;br /&gt;Remember that the simplest way to show your appreciation of the MeshLab system is to remember citing it whenever you have used some of its functionalities. Please check the &lt;a href=&quot;http://www.meshlab.net/#references&quot;&gt;list of the many publications&lt;/a&gt; related with MeshLab.&lt;/p&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
