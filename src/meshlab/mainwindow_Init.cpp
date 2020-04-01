@@ -1118,7 +1118,7 @@ void MainWindow::sendUsAMail()
 
 		congratsDialog->exec();
 		if (congratsDialog->result() == QDialog::Accepted)
-			QDesktopServices::openUrl(QUrl("mailto:p.cignoni@isti.cnr.it;g.ranzuglia@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage"));
+			QDesktopServices::openUrl(QUrl("mailto:paolo.cignoni@isti.cnr.it;alessandro.muntoni@isti.cnr.it?subject=[MeshLab] Reporting Info on MeshLab Usage - V"+MeshLabApplication::appVer()));
 		// This preference values store when you did the last request for a mail
 		settings.setValue("congratsMeshCounter", congratsMeshCounter * 2);
 
