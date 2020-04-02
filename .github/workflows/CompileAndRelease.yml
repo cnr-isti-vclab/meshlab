@@ -9,6 +9,7 @@ jobs:
   update_ml_version:
     name: Update ML_VERSION
     runs-on: ubuntu-latest
+    steps:
     - name: Setup env variables
       id: envs
       run: |
