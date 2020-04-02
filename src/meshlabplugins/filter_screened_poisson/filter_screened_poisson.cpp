@@ -582,15 +582,21 @@ bool HasGoodNormal(CMeshO &m)
 
 bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
+  bool currDirChanged=false;
+  QDir currDir = QDir::current();
+  
   if (filterName == "Surface Reconstruction: Screened Poisson")
   {
 	//check if folder is writable
 	QTemporaryFile file("./_tmp_XXXXXX.tmp");
 	if (!file.open())
 	{
-		Log("ERROR - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
-		errorMessage = "current folder is not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
-		return false;
+      currDirChanged=true;
+      QTemporaryDir tmpdir;
+      QDir::setCurrent(tmpdir.path());
+      Log("Warning - current folder is not writable. Screened Poisson Merging needs to save intermediate files in the current working folder. Project and meshes must be in a write-enabled folder. Please save your data in a suitable folder before applying.");
+      //errorMessage = "current folder is not writable.<br> Screened Poisson Merging needs to save intermediate files in the current working folder.<br> Project and meshes must be in a write-enabled folder.<br> Please save your data in a suitable folder before applying.";
+      //return false;
 	}
 
     PoissonParam<Scalarm> pp;
@@ -657,7 +663,7 @@ bool FilterScreenedPoissonPlugin::applyFilter( const QString& filterName,MeshDoc
     pm->UpdateBoxAndNormals();
     md.setVisible(pm->id(),true);
 	md.setCurrentMesh(pm->id());
-
+    if(currDirChanged) QDir::setCurrent(currDir.path());
     return true;
   }
   return false;
