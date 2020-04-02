@@ -6,7 +6,31 @@ on:
     - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
+  update_ml_version:
+    name: Update ML_VERSION
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Setup env variables
+      id: envs
+      run: |
+        echo  ::set-output name=date::"$(date +%Y.%m)"
+    - name: Update MeshLab version
+      run : |
+        echo ${{steps.envs.outputs.date}} > ML_VERSION
+    - name: commit ML_VERSION change
+      uses: stefanzweifel/git-auto-commit-action@v4.1.1
+      with:
+        commit_message: Apply automatic ML_VERSION change
+
   ubuntu_build:
+    needs: [update_ml_version]
     name: Build MeshLab (Ubuntu)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
@@ -25,9 +49,6 @@ jobs:
       id: envs
       run: |
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Update MeshLab version
-      run : |
-        echo ${{steps.envs.outputs.date}} > ML_VERSION
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
@@ -55,6 +76,7 @@ jobs:
         path: MeshLab${{steps.envs.outputs.date}}-linux.AppImage
 
   macos_build:
+    needs: [update_ml_version]
     name: Build MeshLab (MacOS)
     runs-on: macos
 
@@ -81,9 +103,6 @@ jobs:
         echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
         echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
         echo  ::set-output name=date::"$(date +%Y.%m)"
-    - name: Update MeshLab version
-      run : |
-        echo ${{steps.envs.outputs.date}} > ML_VERSION
     - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
@@ -101,6 +120,7 @@ jobs:
         path: distrib/MeshLab${{steps.envs.outputs.date}}-macos.dmg
 
   windows_build:
+    needs: [update_ml_version]
     name: Build MeshLab (Windows)
     runs-on: windows-latest
 
@@ -123,9 +143,6 @@ jobs:
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
         echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
-    - name: Update MeshLab version
-      run : |
-        Set-Content -Path ML_VERSION -Value ${{steps.envs.outputs.date}} -Force
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
