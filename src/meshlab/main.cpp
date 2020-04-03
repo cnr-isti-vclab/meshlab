@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
 
     MeshLabApplication app(argc, argv);
-	std::setlocale(LC_ALL, "C");
+    std::setlocale(LC_ALL, "C");
     QLocale::setDefault(QLocale::C);
     QCoreApplication::setOrganizationName(MeshLabApplication::organization());
 #if QT_VERSION >= 0x050100
@@ -46,11 +46,21 @@ int main(int argc, char *argv[])
     fmt.setAlphaBufferSize(8);
     QGLFormat::setDefaultFormat(fmt);
 
-    MainWindow window;
-    window.showMaximized();
+    std::unique_ptr<MainWindow> window;
+    try {
+        window = std::unique_ptr<MainWindow>(new MainWindow());
+    }
+    catch (const MLException& exc) {
+        QMessageBox messageBox;
+        messageBox.critical(0,"Critical Error","MeshLab was not able to start.\nPlease check your Graphics drivers.\n\n" + QString::fromStdString(exc.what()));
+        messageBox.setFixedSize(500,200);
+        messageBox.show();
+        return -1;
+    }
+    window->showMaximized();
 
     // This event filter is installed to intercept the open events sent directly by the Operative System.
-    FileOpenEater *filterObj=new FileOpenEater(&window);
+    FileOpenEater *filterObj=new FileOpenEater(window.get());
     app.installEventFilter(filterObj);
     app.processEvents();
 
@@ -72,18 +82,18 @@ int main(int argc, char *argv[])
         for (int i = 1; i < argc; ++i) {
             QString arg = QString::fromLocal8Bit(argv[i]);
             if(arg.endsWith("mlp",Qt::CaseInsensitive) || arg.endsWith("mlb",Qt::CaseInsensitive) || arg.endsWith("aln",Qt::CaseInsensitive) || arg.endsWith("out",Qt::CaseInsensitive) || arg.endsWith("nvm",Qt::CaseInsensitive))
-                window.openProject(arg);
+                window->openProject(arg);
             else if(arg.endsWith("xml",Qt::CaseInsensitive))
                 cameraViews.push_back(arg);
             else
-                window.importMeshWithLayerManagement(arg);
+                window->importMeshWithLayerManagement(arg);
         }
-        
+
         // Load the view after everything else
         if (!cameraViews.empty()) {
             if (cameraViews.size() > 1)
                 printf("Multiple views specified. Loading the last one.\n");
-            window.readViewFromFile(cameraViews.back());
+            window->readViewFromFile(cameraViews.back());
         }
     }
     //else 	if(filterObj->noEvent) window.open();
