@@ -23,7 +23,7 @@ jobs:
         echo  ::set-output name=date::"$(date +%Y.%m)"
     - name: Update MeshLab version
       run : |
-        echo ${{steps.envs.outputs.date}} > ML_VERSION
+        echo ${{steps.envs.outputs.date}} | tr -d '\n'> ML_VERSION
     - name: commit ML_VERSION change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
