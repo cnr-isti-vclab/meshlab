@@ -27,6 +27,13 @@
 #include <QString>
 #include <clocale>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <tchar.h>
+#endif //_WIN32
+
+void handleCriticalError(const MLException& exc);
+
 int main(int argc, char *argv[])
 {
 
@@ -51,10 +58,7 @@ int main(int argc, char *argv[])
         window = std::unique_ptr<MainWindow>(new MainWindow());
     }
     catch (const MLException& exc) {
-        QMessageBox messageBox;
-        messageBox.critical(0,"Critical Error","MeshLab was not able to start.\nPlease check your Graphics drivers.\n\n" + QString::fromStdString(exc.what()));
-        messageBox.setFixedSize(500,200);
-        messageBox.show();
+        handleCriticalError(exc);
         return -1;
     }
     window->showMaximized();
@@ -98,4 +102,36 @@ int main(int argc, char *argv[])
     }
     //else 	if(filterObj->noEvent) window.open();
     return app.exec();
+}
+
+void handleCriticalError(const MLException& exc){
+    QMessageBox messageBox(
+                QMessageBox::Critical,
+                "Critical Error",
+                "MeshLab was not able to start.\nPlease check your Graphics drivers.\n\n" + QString::fromStdString(exc.what()));
+    messageBox.addButton(QMessageBox::Ok);
+
+    #ifdef _WIN32
+    QCheckBox *cb = new QCheckBox("Use CPU OpenGL and restart MeshLab");
+    messageBox.setCheckBox(cb);
+    #endif //_WIN32
+
+    messageBox.exec();
+
+    #ifdef _WIN32
+    if (cb->isChecked()){
+        //start a new process "UseCPUOpenGL.exe" to copy opengl32.dll
+        SHELLEXECUTEINFO sei;
+
+        ZeroMemory(&sei, sizeof(SHELLEXECUTEINFO));
+
+        sei.cbSize = sizeof(SHELLEXECUTEINFO);
+        sei.lpVerb = _T("runas");
+        sei.lpFile = _T("UseCPUOpenGL.exe"); //obviously not the actual file name
+                          //but it can be substituted and will work just fine in windows 7
+        sei.lpParameters = _T("1");
+
+        ShellExecuteEx(&sei);
+    }
+    #endif //_WIN32
 }
