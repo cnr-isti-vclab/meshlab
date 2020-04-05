@@ -53,7 +53,8 @@ int main(int argc, char* argv[])
                                "This is necessary only if your graphic driver does not support new OpenGL "
                                "versions (and MeshLab does not start).\n\n"
                                "Before clicking YES, be sure that your graphic card drivers are up to date. "
-                               "To undo this, just delete the 'opengl32.dll' file inside the MeshLab folder.",
+                               "To undo this, just rename the 'opengl32.dll' file inside the MeshLab folder "
+                               "to 'opengl32sw.dll'.",
                                QMessageBox::Yes | QMessageBox::No);
 
         int button = messageBox.exec();
