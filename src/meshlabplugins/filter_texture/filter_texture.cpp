@@ -849,20 +849,21 @@ bool FilterTexturePlugin::applyFilter(QAction *filter, MeshDocument &md, RichPar
 		assert (srcMesh != NULL);
 		assert (trgMesh != NULL);
 		CheckError(!QFile(trgMesh->fullName()).exists(), "Save the target mesh before creating a texture");
-		CheckError(srcMesh->cm.fn == 0 || trgMesh->cm.fn == 0, "Both meshes require to have faces");
-		CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh doesn't have Per Wedge Texture Coordinates");
+        CheckError(trgMesh->cm.fn == 0, "Target mesh needs to have faces");
+        CheckError(!trgMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Target mesh does not have Per-Wedge Texture Coordinates");
 		CheckError(textW <= 0, "Texture Width has an incorrect value");
 		CheckError(textH <= 0, "Texture Height has an incorrect value");
 
 		if (vertexSampling) {
-			if (vertexMode == 0) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per Vertex Color"); }
-			if (vertexMode == 1) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per Vertex Normal"); }
-			if (vertexMode == 2) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTQUALITY), "Source mesh doesn't have Per Vertex Quality"); }
+            if (vertexMode == 0) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTCOLOR), "Source mesh doesn't have Per-Vertex Color"); }
+            if (vertexMode == 1) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTNORMAL), "Source mesh doesn't have Per-Vertex Normal"); }
+            if (vertexMode == 2) { CheckError(!srcMesh->hasDataMask(MeshModel::MM_VERTQUALITY), "Source mesh doesn't have Per-Vertex Quality"); }
 		}
 		else
 		{
-			CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh doesn't have Per Wedge Texture Coordinates");
-			CheckError(srcMesh->cm.textures.empty(), "Source mesh doesn't have any associated texture");
+            CheckError(srcMesh->cm.fn == 0, "Source mesh needs to have faces");
+            CheckError(!srcMesh->hasDataMask(MeshModel::MM_WEDGTEXCOORD), "Source mesh does not have Per-Wedge Texture Coordinates");
+            CheckError(srcMesh->cm.textures.empty(), "Source mesh does not have any associated texture");
 		}
 
 		if (overwrite)
