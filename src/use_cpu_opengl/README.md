@@ -7,3 +7,5 @@ This binary is useful when MeshLab cannot start due to some graphic drivers that
 This binary must be run inside the MeshLab folder, and: 
 - it renames the file `opengl32sw.dll` if present inside the MeshLab folder, or
 - it generates a `opengl32.dll` file that will be used by MeshLab instead of the system one.
+
+Running meshlab, if `glewInit()` fails, `UseCPUOpenGL.exe` will be executed and the new `opengl32.dll` file will be placed in the MeshLab folder, overriding the system one just for MeshLab.
