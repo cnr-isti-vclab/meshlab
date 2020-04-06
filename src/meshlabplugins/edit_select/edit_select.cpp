@@ -154,7 +154,37 @@ void EditSelectPlugin::keyReleaseEvent(QKeyEvent *e, MeshModel &m, GLArea *gla)
 		}
         gla->setCursor(QCursor(QPixmap(":/images/sel_area.png"), 1, 1));
 	}
-
+    else
+    {
+        gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
+        Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
+        if(selectionMode == SELECT_VERT_MODE)
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+        }
+        else
+        {
+            if (mod & Qt::AltModifier)
+            {
+                if (mod & Qt::ControlModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+                else if (mod & Qt::ShiftModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+                else
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
+            }
+            else
+            {
+                if (mod & Qt::ControlModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+                else if (mod & Qt::ShiftModifier)
+                    gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+            }
+        }
+    }
 	
 }
 
@@ -238,25 +268,34 @@ void EditSelectPlugin::keyPressEvent(QKeyEvent * /*event*/, MeshModel & /*m*/, G
 	if (selectionMode == SELECT_AREA_MODE)
 		return;
 
+    gla->setCursor(QCursor(QPixmap(":/images/sel_rect.png"), 1, 1));
 	Qt::KeyboardModifiers mod = QApplication::queryKeyboardModifiers();
-	if (mod == Qt::AltModifier && selectionMode != SELECT_VERT_MODE)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
-	if (mod == (Qt::AltModifier + Qt::ControlModifier))
-	{
-		if (selectionMode != SELECT_VERT_MODE)
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
-		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
-	}
-	if (mod == (Qt::AltModifier + Qt::ShiftModifier))
-	{
-		if (selectionMode != SELECT_VERT_MODE)
-			gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
-		else gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
-	}
-	if (mod == Qt::ControlModifier)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
-	if (mod == Qt::ShiftModifier)
-		gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+    if(selectionMode == SELECT_VERT_MODE)
+    {
+        if (mod & Qt::ControlModifier)
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+        else if (mod & Qt::ShiftModifier)
+            gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+    }
+    else
+    {
+        if (mod & Qt::AltModifier)
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus_eye.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus_eye.png"), 1, 1));
+            else
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_eye.png"), 1, 1));
+        }
+        else
+        {
+            if (mod & Qt::ControlModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_plus.png"), 1, 1));
+            else if (mod & Qt::ShiftModifier)
+                gla->setCursor(QCursor(QPixmap(":/images/sel_rect_minus.png"), 1, 1));
+        }
+    }
 }
 
 void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea *gla)
@@ -285,9 +324,9 @@ void EditSelectPlugin::mousePressEvent(QMouseEvent * event, MeshModel &m, GLArea
 	}
 
 	composingSelMode = SMClear;
-	if (event->modifiers() & Qt::ControlModifier)
+    if (event->modifiers() & Qt::ControlModifier)
 		composingSelMode = SMAdd;
-	if (event->modifiers() & Qt::ShiftModifier)
+    else if (event->modifiers() & Qt::ShiftModifier)
 		composingSelMode = SMSub;
 
 	if (event->modifiers() & Qt::AltModifier)
