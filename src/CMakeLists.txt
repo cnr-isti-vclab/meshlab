@@ -169,6 +169,9 @@ add_subdirectory(common)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
+if (WIN32)
+    add_subdirectory(use_cpu_opengl)
+endif()
 set(CMAKE_INSTALL_RPATH)
 
 ### Plugin subdirectories
