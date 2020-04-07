@@ -12,13 +12,13 @@
 #saving location where script has been runned
 $DIR = Get-Location
 
-$INSTALL_PATH = $PSScriptRoot
-$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\src
+$INSTALL_PATH = Join-Path $PSScriptRoot ..\
+$SOURCE_PATH = Join-Path $PSScriptRoot ..\..\..\src
 
 if ($args.Count -gt 0){
     $DISTRIB_PATH = $args[0]
 } else {
-    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\distrib #default distrib
+    $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\..\distrib #default distrib
 }
 
 cd $DISTRIB_PATH

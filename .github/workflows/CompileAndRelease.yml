@@ -160,7 +160,7 @@ jobs:
         .\install\windows\windows_deploy.ps1
     - name: NSIS script
       run: |
-        .\install\windows\windows_nsis_script.ps1
+        .\install\windows\resources\windows_nsis_script.ps1
     - name: Create Installer
       uses: joncloud/makensis-action@v1
       with:

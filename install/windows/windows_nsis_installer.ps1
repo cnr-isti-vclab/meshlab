@@ -20,7 +20,7 @@ if ($args.Count -gt 0){
     $DISTRIB_PATH = Join-Path $PSScriptRoot ..\..\distrib #default distrib
 }
 
-.\windows_nsis_script.ps1 $DISTRIB_PATH
+.\resources\windows_nsis_script.ps1 $DISTRIB_PATH
 
 cd $INSTALL_PATH
 
