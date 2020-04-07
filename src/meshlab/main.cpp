@@ -105,21 +105,33 @@ int main(int argc, char *argv[])
 }
 
 void handleCriticalError(const MLException& exc){
+
+    bool openGLProblem = false;
+    QString message = "MeshLab was not able to start.\n";
+    if (QString::fromStdString(exc.what()).contains("GLEW initialization failed")){
+        openGLProblem = true;
+        message.append("Please check your Graphics drivers.\n");
+    }
+    message.append("\nError: " + QString::fromStdString(exc.what()));
+
     QMessageBox messageBox(
                 QMessageBox::Critical,
                 "Critical Error",
-                "MeshLab was not able to start.\nPlease check your Graphics drivers.\n\n" + QString::fromStdString(exc.what()));
+                message);
     messageBox.addButton(QMessageBox::Ok);
 
     #ifdef _WIN32
-    QCheckBox *cb = new QCheckBox("Use CPU OpenGL and restart MeshLab");
-    messageBox.setCheckBox(cb);
+    QCheckBox *cb = nullptr;
+    if (openGLProblem) {
+        cb = new QCheckBox("Use CPU OpenGL and restart MeshLab");
+        messageBox.setCheckBox(cb);
+    }
     #endif //_WIN32
 
     messageBox.exec();
 
     #ifdef _WIN32
-    if (cb->isChecked()){
+    if (openGLProblem && cb->isChecked()) {
         //start a new process "UseCPUOpenGL.exe" to copy opengl32.dll
         SHELLEXECUTEINFO sei;
 
