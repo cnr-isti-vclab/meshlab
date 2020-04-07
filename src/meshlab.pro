@@ -108,6 +108,11 @@ meshlab_mini {
     message(Compiling only MeshLab Mini!)
 }
 
+win32 {
+    SUBDIRS+= \
+        use_cpu_opengl
+}
+
 ## where to find the sub projects - give the folders ##
 # meshlab_mini subdirs:
 external.subdir = external
@@ -118,6 +123,7 @@ io_base.subdir = meshlabplugins/io_base
 decorate_base.subdir = meshlabplugins/decorate_base
 filter_measure.subdir = meshlabplugins/filter_measure
 filter_meshing.subdir = meshlabplugins/filter_meshing
+use_cpu_opengl.subdir = use_cpu_opengl
 # IO plugins
 io_3ds.subdir = meshlabplugins/io_3ds
 io_bre.subdir = meshlabplugins/io_bre
