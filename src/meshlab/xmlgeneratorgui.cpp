@@ -688,7 +688,7 @@ void PluginGeneratorGUI::executeCurrentCode()
         FilterGeneratorTab* ftab = tab(tabs->currentIndex());
         if (ftab != NULL)
         {
-            QTime t;
+            QElapsedTimer t;
             t.start();
             QScriptValue result = env.evaluate(ftab->getCode());
             int time = t.elapsed();

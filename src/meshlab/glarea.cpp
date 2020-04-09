@@ -430,7 +430,7 @@ void GLArea::paintEvent(QPaintEvent* /*event*/)
     if(!isValid())
         return;
 
-    QTime time;
+    QElapsedTimer time;
     time.start();
 
     /*if(!this->md()->isBusy())

@@ -18,8 +18,8 @@ FilterThread::FilterThread(const QString& fname,const QMap<QString,QString>& par
 bool FilterThread::localCallBack(const int pos, const char * str)
 {
     QString st(str);
-    static QTime currTime;
-    if(currTime.elapsed()< 100) return true;
+    static QElapsedTimer currTime;
+    if(currTime.isValid() && currTime.elapsed()< 100) return true;
     emit _cur->threadCB(pos,st);
     currTime.start();
     return true;

@@ -195,7 +195,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
 
 	checkGLError::debugInfo("start");
     int tInitElapsed = 0;
-    QTime tInit, tAll;
+    QElapsedTimer tInit, tAll;
     tInit.start();
     tAll.start();
 

@@ -151,7 +151,7 @@ bool ColladaIOPlugin::open(const QString &formatName, const QString &fileName, M
 
 void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QString &filename, RichParameterSet & parlst)
 {
-	QTime t;
+	QElapsedTimer t;
 	t.start();
 	
 	QDomDocument* doc = new QDomDocument(filename);

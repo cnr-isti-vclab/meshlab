@@ -1462,7 +1462,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     // (4) Apply the Filter
     bool ret;
     qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-    QTime tt; tt.start();
+    QElapsedTimer tt; tt.start();
     meshDoc()->setBusy(true);
     RichParameterSet mergedenvironment(params);
     mergedenvironment.join(currentGlobalParams);
@@ -1850,7 +1850,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
         }
         else
         {
-            QTime t;
+            QElapsedTimer t;
             t.start();
             Env env;
 			QMap<QString, QString> persistentparam;
@@ -2954,7 +2954,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         lastUsedDirectory.setPath(path);
     }
 
-    QTime allFileTime;
+    QElapsedTimer allFileTime;
     allFileTime.start();
     foreach(fileName,fileNameList)
     {
@@ -2983,7 +2983,7 @@ bool MainWindow::importMesh(QString fileName,bool isareload)
         QFileInfo info(fileName);
 		MeshModel *mm = meshDoc()->addNewMesh(fileName, info.fileName());
         qb->show();
-		QTime t;
+        QElapsedTimer t;
 		t.start();
 		Matrix44m mtr;
 		mtr.SetIdentity();
@@ -3064,7 +3064,7 @@ bool MainWindow::loadMeshWithStandardParams(QString& fullPath, MeshModel* mm, co
         pCurrentIOPlugin->initPreOpenParameter(extension, fullPath,prePar);
 		prePar = prePar.join(currentGlobalParams);
         int mask = 0;
-        QTime t;t.start();
+        QElapsedTimer t;t.start();
         bool open = loadMesh(fullPath,pCurrentIOPlugin,mm,mask,&prePar,mtr,isreload, rendOpt);
         if(open)
         {
@@ -3232,7 +3232,7 @@ bool MainWindow::exportMesh(QString fileName,MeshModel* mod,const bool saveAllPo
 
         qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
         qb->show();
-        QTime tt; tt.start();
+        QElapsedTimer tt; tt.start();
         ret = pCurrentIOPlugin->save(extension, fileName, *mod ,mask,savePar,QCallBack,this);
         qb->reset();
 		if (ret)
@@ -3406,14 +3406,20 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     else e->ignore();
 }
 
+/**
+ * @brief static function that updates the progress bar
+ * @param pos: an int value between 0 and 100
+ * @param str
+ * @return
+ */
 bool MainWindow::QCallBack(const int pos, const char * str)
 {
 	int static lastPos = -1;
 	if (pos == lastPos) return true;
 	lastPos = pos;
 
-	static QTime currTime = QTime::currentTime();
-	if (currTime.elapsed() < 100) 
+	static QElapsedTimer currTime;
+	if (currTime.isValid() && currTime.elapsed() < 100)
 		return true;
 	currTime.start();
 	MainWindow::globalStatusBar()->showMessage(str, 5000);

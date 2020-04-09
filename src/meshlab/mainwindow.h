@@ -382,7 +382,7 @@ public:
 private:
     //the xml filters run in a different thread. The xmlfiltertimer starts on executeFilter and stops on postFilterExecution
     //function linked to the thread finished signal.
-    QTime xmlfiltertimer;
+    QElapsedTimer xmlfiltertimer;
     WordActionsMapAccessor wama;
     //////// ToolBars ///////////////
     QToolBar *mainToolBar;

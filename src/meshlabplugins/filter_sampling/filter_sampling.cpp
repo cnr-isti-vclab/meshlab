@@ -980,7 +980,7 @@ switch(ID(action))
 			else
 				presampledMesh=&MontecarloMesh;
 
-			QTime tt;tt.start();
+			QElapsedTimer tt;tt.start();
 			BaseSampler sampler(presampledMesh);
 			sampler.qualitySampling=true;
 			if(pp.adaptiveRadiusFlag)

@@ -170,7 +170,7 @@ bool MeshLabXMLStdDialog::showAutoDialog(MeshLabXMLFilterContainer& mfc,PluginMa
 	else
 		env.loadMLScriptEnv(*md, pm);
 
-    QTime tt;
+    QElapsedTimer tt;
     tt.start();
     createFrame();
     loadFrameContent();

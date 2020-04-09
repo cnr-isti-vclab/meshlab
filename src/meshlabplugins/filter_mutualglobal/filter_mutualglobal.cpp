@@ -156,14 +156,14 @@ void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md,
 // Move Vertex of a random quantity
 bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	QTime filterTime;
+	QElapsedTimer filterTime;
 	filterTime.start();
 
 	float thresDiff=par.getFloat("Threshold for refinement convergence");
 
 	std::vector<vcg::Point3f> myVec;
 	int leap=(int)((float)md.mm()->cm.vn/1000.0f);
-	CMeshO::VertexIterator vi;
+	//CMeshO::VertexIterator vi;
 	for(int i=0;i<=md.mm()->cm.vn;i=i+leap) 
 	{
 		myVec.push_back(md.mm()->cm.vert[i].P());
