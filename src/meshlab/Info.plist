@@ -5,56 +5,56 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>obj</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>meshlab.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>OBJ 3D File</string>
 			<key>CFBundleTypeOSTypes</key>
 			<array>
 				<string>OBJ</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleTypeIconFile</key>
-			<string>meshlab.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>OBJ 3D File</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>obj</string>
-			</array>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 		</dict>
 		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>stl</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>meshlab.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>STL 3D File</string>
 			<key>CFBundleTypeOSTypes</key>
 			<array>
 				<string>STL</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleTypeIconFile</key>
-			<string>meshlab.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>STL 3D File</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>stl</string>
-			</array>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 		</dict>
 		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ply</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>meshlab.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>PLY 3D File</string>
 			<key>CFBundleTypeOSTypes</key>
 			<array>
 				<string>PLY</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleTypeIconFile</key>
-			<string>meshlab.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>PLY 3D File</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>ply</string>
-			</array>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 		</dict>
@@ -69,8 +69,12 @@
 	<string>com.vcg.meshlab</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2020.03</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>2020.03</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>NOTE</key>
