@@ -61,8 +61,6 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>meshlab</string>
-	<key>CFBundleGetInfoString</key>
-	<string>MeshLab VCG-ISTI-CNR</string>
 	<key>CFBundleIconFile</key>
 	<string>meshlab.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -79,6 +77,10 @@
 	<string>10.12</string>
 	<key>NOTE</key>
 	<string>This file was generated for MeshLab.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Created by Paolo Cignoni - VCG-ISTI-CNR
+	Copyright © 2005-2020. All rights reserved.
+	</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
