@@ -1,14 +1,14 @@
 name: CompileAndRelease
 
 on:
-  #[push, pull_request] #just for test release scripts
-  schedule:
-    - cron:  '0 0 1 * *' #every first day of the month at midnight
+  [push, pull_request] #just for test release scripts
+  #schedule:
+  #  - cron:  '0 0 1 * *' #every first day of the month at midnight
 
 jobs:
   update_ml_version:
     name: Update ML_VERSION
-    runs-on: ubuntu-latest
+    runs-on: macos
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -24,6 +24,10 @@ jobs:
     - name: Update MeshLab version
       run : |
         echo ${{steps.envs.outputs.date}} | tr -d '\n'> ML_VERSION
+    - name: Update Info.plist
+      run: |
+        /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+/usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
     - name: commit ML_VERSION change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
