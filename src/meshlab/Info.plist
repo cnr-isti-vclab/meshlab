@@ -78,9 +78,7 @@
 	<key>NOTE</key>
 	<string>This file was generated for MeshLab.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Created by Paolo Cignoni - VCG-ISTI-CNR
-	Copyright © 2005-2020. All rights reserved.
-	</string>
+	<string>Copyright VCG-ISTI-CNR © 2005-2020. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
