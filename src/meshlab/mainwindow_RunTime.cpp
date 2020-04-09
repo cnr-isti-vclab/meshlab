@@ -1619,7 +1619,9 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
     {
         meshDoc()->setBusy(false);
         qApp->restoreOverrideCursor();
-        QMessageBox::warning(this, tr("Filter Failure"), QString("Operating system was not able to allocate the requested memory.<br><b>Failure of filter <font color=red>: '%1'</font><br>We warmly suggest you to try a 64-bit version of MeshLab.<br>").arg(action->text())+bdall.what()); // text
+        QMessageBox::warning(this, tr("Filter Failure"),
+                             QString("Operating system was not able to allocate the requested memory.<br><b>"
+                                     "Failure of filter <font color=red>: '%1'</font><br>").arg(action->text())+bdall.what()); // text
         MainWindow::globalStatusBar()->showMessage("Filter failed...",2000);
     }
     qb->reset();
