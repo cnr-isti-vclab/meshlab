@@ -27,7 +27,7 @@ jobs:
     - name: Update Info.plist
       run: |
         /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
-/usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+        /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
     - name: commit ML_VERSION change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
