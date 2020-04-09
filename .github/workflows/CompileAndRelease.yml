@@ -7,8 +7,8 @@ on:
 
 jobs:
   update_ml_version:
-    name: Update ML_VERSION
-    runs-on: ubuntu-latest
+    name: Update ML_VERSION and Info.plist
+    runs-on: macos
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -24,10 +24,14 @@ jobs:
     - name: Update MeshLab version
       run : |
         echo ${{steps.envs.outputs.date}} | tr -d '\n'> ML_VERSION
-    - name: commit ML_VERSION change
+    - name: Update Info.plist
+      run: |
+        /usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+        /usr/libexec/PlistBuddy -c "Set CFBundleVersion ${{steps.envs.outputs.date}}" src/meshlab/Info.plist
+    - name: commit ML_VERSION and Info.plist change
       uses: stefanzweifel/git-auto-commit-action@v4.1.1
       with:
-        commit_message: Apply automatic ML_VERSION change
+        commit_message: Apply automatic ML_VERSION and Info.plist change
 
   ubuntu_build:
     needs: [update_ml_version]
