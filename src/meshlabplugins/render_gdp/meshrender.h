@@ -24,7 +24,7 @@
 #ifndef SHADERRENDERPLUGIN_H
 #define SHADERRENDERPLUGIN_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <common/interfaces.h>
 #include "textfile.h"
 #include "shaderStructs.h"

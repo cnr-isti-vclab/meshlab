@@ -266,21 +266,21 @@ void FilterMutualInfoPlugin::initGL()
     exit(-1);
   }
 
-  if (!glewIsSupported("GL_EXT_framebuffer_object")) {
+  if (!glExtensionHasEXT_framebuffer_object()) {
     Log(0, "Graphics hardware does not support FBOs");
     exit(0);
   }
-  if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
-      !glewIsSupported("GL_ARB_shader_objects") || !glewIsSupported("GL_ARB_shading_language")) {
+  if (!glExtensionHasARB_vertex_shader() || !glExtensionHasARB_fragment_shader() ||
+      !glExtensionHasARB_shader_objects() || !glExtensionHasARB_shading_language()) {
     //QMessageBox::warning(this, "Danger, Will Robinson!",
 //                         "Graphics hardware does not fully support Shaders");
   }
 
-  if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
+  if (!glExtensionHasARB_texture_non_power_of_two()) {
     Log(0,"Graphics hardware does not support non-power-of-two textures");
     exit(0);
   }
-  if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
+  if (!glExtensionHasARB_vertex_buffer_object()) {
     Log(0, "Graphics hardware does not support vertex buffer objects");
     exit(0);
   }

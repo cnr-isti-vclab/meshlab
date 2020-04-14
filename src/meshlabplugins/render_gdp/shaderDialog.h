@@ -25,7 +25,7 @@
 #define SHADERDIALOG_H
 
 #include <map>
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <common/meshmodel.h>
 #include <QLabel>
 #include <QDockWidget>

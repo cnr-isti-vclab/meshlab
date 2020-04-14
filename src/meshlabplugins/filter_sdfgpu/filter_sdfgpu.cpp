@@ -270,23 +270,23 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     }
 
     //CHECK HARDWARE CAPABILITIES
-    if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
+    if (!glExtensionsHasARB_vertex_shader() || !glExtensionsHasARB_fragment_shader())
     {
-        if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
+        if (!glExtensionsHasEXT_vertex_shader() || !glExtensionsHasEXT_fragment_shader())
         {
             Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
             return false;
         }
     }
-    if ( !glewIsSupported("GL_EXT_framebuffer_object") )
+    if ( !glExtensionHasEXT_framebuffer_object() )
     {
         Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
         return false;
     }
 
-    if ( glewIsSupported("GL_ARB_texture_float") )
+    if ( glExtensionHasARB_texture_float() )
     {
-        if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
+        if ( !glExtensionsHasEXT_gpu_shader4() )   //Only DX10-grade cards support FP32 blending
         {
             Log(0,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
             return false;

@@ -26,13 +26,41 @@
 
 #include "mlexception.h"
 
-#include <GL/glew.h>
+// This string is searched for by an error handler, so it must be included
+// verbatim in all graphics-related errors.
+static const char MESHLAB_GL_ERROR_MSG[] =
+    "OpenGL extension initialization failed";
+#ifdef MESHLAB_USE_GLAD
+
+#include <glad/glad.h>
+
+static inline bool initializeGLextensions_notThrowing() {
+    if (!gladLoadGL()) {
+        qWarning(MESHLAB_GL_ERROR_MSG);
+        return false;
+    }
+    return true;
+}
+
+static inline void initializeGLextensions() {
+    if (!gladLoadGL()) {
+        throw MLException(QString("%1\n").arg(MESHLAB_GL_ERROR_MSG));
+    }
+}
+
+//! @todo not sure how to define these more accurately - maybe take a
+//! corresponding GL version in to the macro as well, and check that for glad?
+#define MESHLAB_MAKE_EXTENSION_CHECKER(EXT)                                    \
+    static inline bool glExtensionsHas##EXT() { return true; }
+#else
+
+#include <common/gl_defs.h>
 
 static inline bool initializeGLextensions_notThrowing() {
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        qWarning("GLEW initialization failed: %s",
+        qWarning("%s: %s", MESHLAB_GL_ERROR_MSG,
                  (const char *)glewGetErrorString(err));
     }
     return err == GLEW_OK;
@@ -42,9 +70,32 @@ static inline void initializeGLextensions() {
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        throw MLException(QString("GLEW initialization failed: %1\n")
+        throw MLException(QString("%1: %2\n")
+                              .arg(MESHLAB_GL_ERROR_MSG)
                               .arg((const char *)glewGetErrorString(err)));
     }
 }
+
+#define MESHLAB_MAKE_EXTENSION_CHECKER(EXT)                                    \
+    static inline bool glExtensionsHas##EXT() { return GLEW_##EXT; }
+
+#endif
+
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_draw_buffers)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_fragment_program)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_fragment_shader)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_shader_objects)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_shading_language)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_cube_map)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_float)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_non_power_of_two)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_vertex_program)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_vertex_shader)
+MESHLAB_MAKE_EXTENSION_CHECKER(EXT_fragment_shader)
+MESHLAB_MAKE_EXTENSION_CHECKER(EXT_framebuffer_object)
+MESHLAB_MAKE_EXTENSION_CHECKER(EXT_gpu_shader4)
+MESHLAB_MAKE_EXTENSION_CHECKER(EXT_vertex_shader)
+
+#undef MESHLAB_MAKE_EXTENSION_CHECKER
 
 #endif // !GL_DEFS_H

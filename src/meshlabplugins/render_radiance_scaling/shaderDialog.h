@@ -23,7 +23,7 @@
 #ifndef SHADERDIALOG_H
 #define SHADERDIALOG_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QGLWidget>
 #include <QDockWidget>
 #include "ui_shaderDialog.h"

@@ -107,7 +107,7 @@ bool GPUShader::createShader() {
   switch(_type) {
 
   case VERT:
-    if(GLEW_ARB_vertex_shader)
+    if(glExtensionsHasARB_vertex_shader())
       _shaderId = glCreateShader(GL_VERTEX_SHADER);
     else { 
       cout << "Warning : vertex shader not supported !" << endl; 
@@ -116,7 +116,7 @@ bool GPUShader::createShader() {
     break;
       
   case FRAG:
-    if(GLEW_ARB_fragment_shader){
+    if(glExtensionsHasARB_fragment_shader()){
       _shaderId = glCreateShader(GL_FRAGMENT_SHADER);
     }
     else { 

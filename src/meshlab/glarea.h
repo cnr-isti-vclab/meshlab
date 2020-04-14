@@ -23,7 +23,7 @@
 
 #ifndef GLAREA_H
 #define GLAREA_H
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include <vcg/space/plane3.h>
 #include <vcg/space/line3.h>

@@ -24,7 +24,7 @@
 #ifndef TEXTURE_FORMAT_H
 #define TEXTURE_FORMAT_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 class TextureFormat {
  public:

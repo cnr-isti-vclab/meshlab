@@ -196,7 +196,7 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
 bool ShadowMapping::setup()
 {
-    if (!GLEW_EXT_framebuffer_object) {
+    if (!glExtensionHasEXT_framebuffer_object()) {
         qWarning("FBO not supported!");
         return false;
     }

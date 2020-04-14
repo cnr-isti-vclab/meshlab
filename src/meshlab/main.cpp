@@ -108,7 +108,7 @@ void handleCriticalError(const MLException& exc){
 
     bool openGLProblem = false;
     QString message = "MeshLab was not able to start.\n";
-    if (QString::fromStdString(exc.what()).contains("GLEW initialization failed")){
+    if (QString::fromStdString(exc.what()).contains(MESHLAB_GL_ERROR_MSG)){
         openGLProblem = true;
         message.append("Please check your Graphics drivers.\n");
     }

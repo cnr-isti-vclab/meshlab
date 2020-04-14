@@ -23,7 +23,7 @@
 #ifndef FRAMEBUFFER_OBJECT
 #define FRAMEBUFFER_OBJECT
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <vector> 
 
 class FramebufferObject {

@@ -22,6 +22,8 @@
 ****************************************************************************/
 
 #include "ml_default_decorators.h"
+#include <common/gl_defs.h>
+#include "GL/glu.h"
 #include <vector>
 #include <wrap/gl/gl_type_name.h>
 #include <wrap/gui/coordinateframe.h>

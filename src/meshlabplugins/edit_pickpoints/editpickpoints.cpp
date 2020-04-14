@@ -27,7 +27,7 @@
  * @author Oscar Barney
  */
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include "editpickpoints.h"
 #include <meshlab/mainwindow.h>

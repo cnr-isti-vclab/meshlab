@@ -24,7 +24,7 @@
 #ifndef __ML_SHARED_DATA_CONTEXT_H
 #define __ML_SHARED_DATA_CONTEXT_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QTimer>
 
 #include "ml_mesh_type.h"

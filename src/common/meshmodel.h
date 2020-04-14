@@ -23,7 +23,7 @@
 
 #ifndef MESHMODEL_H
 #define MESHMODEL_H
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include <stdio.h>
 #include <time.h>

@@ -66,11 +66,11 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSha
 
 	GL_TEST_ERR
 
-		if (!GLEW_ARB_vertex_program ||
-			!GLEW_ARB_fragment_program ||
-			!GLEW_ARB_texture_float ||
-			!GLEW_ARB_draw_buffers ||
-			!GLEW_EXT_framebuffer_object) {
+		if (!glExtensionsHasARB_vertex_program() ||
+			!glExtensionsHasARB_fragment_program() ||
+			!glExtensionsHasARB_texture_float() ||
+			!glExtensionsHasARB_draw_buffers() ||
+			!glExtensionsHasEXT_framebuffer_object()) {
 
 			_supported = false;
 			return;
