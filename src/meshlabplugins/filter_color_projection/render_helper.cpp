@@ -89,7 +89,7 @@ int RenderHelper::initializeGL(vcg::CallBackPos *cb)
     return -1;
   }
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  ::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   GLfloat light_position[] = {-600.0f, 500.0f, 700.0f, 0.0f};
   GLfloat light_ambient[]  = {0.1f,  0.1f, 0.1f, 1.0f};

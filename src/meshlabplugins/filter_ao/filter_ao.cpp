@@ -221,7 +221,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    ::glClearColor(0.0, 0.0, 0.0, 0.0);
 
     //if (useVBO)
     //{
