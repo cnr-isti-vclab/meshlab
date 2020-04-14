@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 #include "filter_ao.h"
 #include <QGLFramebufferObject>
 #include <vcg/math/gen_normal.h>
