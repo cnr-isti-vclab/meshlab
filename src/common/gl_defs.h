@@ -48,10 +48,9 @@ static inline void initializeGLextensions() {
     }
 }
 
-//! @todo not sure how to define these more accurately - maybe take a
-//! corresponding GL version in to the macro as well, and check that for glad?
 #define MESHLAB_MAKE_EXTENSION_CHECKER(EXT)                                    \
-    static inline bool glExtensionsHas##EXT() { return true; }
+    static inline bool glExtensionsHas##EXT() { return GLAD_GL_##EXT; }
+
 #else
 
 #include <common/gl_defs.h>
@@ -85,13 +84,13 @@ MESHLAB_MAKE_EXTENSION_CHECKER(ARB_draw_buffers)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_fragment_program)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_fragment_shader)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_shader_objects)
-MESHLAB_MAKE_EXTENSION_CHECKER(ARB_shading_language)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_shading_language_100)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_cube_map)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_float)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_texture_non_power_of_two)
+MESHLAB_MAKE_EXTENSION_CHECKER(ARB_vertex_buffer_object)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_vertex_program)
 MESHLAB_MAKE_EXTENSION_CHECKER(ARB_vertex_shader)
-MESHLAB_MAKE_EXTENSION_CHECKER(EXT_fragment_shader)
 MESHLAB_MAKE_EXTENSION_CHECKER(EXT_framebuffer_object)
 MESHLAB_MAKE_EXTENSION_CHECKER(EXT_gpu_shader4)
 MESHLAB_MAKE_EXTENSION_CHECKER(EXT_vertex_shader)

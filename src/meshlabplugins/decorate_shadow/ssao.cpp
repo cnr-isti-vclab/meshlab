@@ -245,7 +245,7 @@ void SSAO::runShader(MeshDocument& md, GLArea* gla)
 
 bool SSAO::setup()
 {
-    if (!glExtensionHasEXT_framebuffer_object()) {
+    if (!glExtensionsHasEXT_framebuffer_object()) {
         qWarning("FBO not supported!");
         return false;
     }

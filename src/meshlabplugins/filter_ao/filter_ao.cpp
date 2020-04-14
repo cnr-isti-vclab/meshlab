@@ -412,21 +412,21 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     {
         if (!glExtensionsHasARB_vertex_shader() || !glExtensionsHasARB_fragment_shader())
         {
-            if (!glExtensionsHasEXT_vertex_shader() || !glExtensionsHasEXT_fragment_shader())
+            if (!glExtensionsHasEXT_vertex_shader())
             {
                 Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
                 errInit = true;
                 return;
             }
         }
-        if ( !glExtensionHasEXT_framebuffer_object() )
+        if ( !glExtensionsHasEXT_framebuffer_object() )
         {
             Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
             errInit = true;
             return;
         }
 
-        if ( glExtensionHasARB_texture_float() )
+        if ( glExtensionsHasARB_texture_float() )
         {
             if ( !glExtensionsHasEXT_gpu_shader4() )   //Only DX10-grade cards support FP32 blending
             {

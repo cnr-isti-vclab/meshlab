@@ -142,21 +142,21 @@ bool MutualInfoPlugin::initGL()
         return false;
     }
 
-    if (!glExtensionHasEXT_framebuffer_object()) {
+    if (!glExtensionsHasEXT_framebuffer_object()) {
         Log(0, "Graphics hardware does not support FBOs");
         return false;
     }
-    if (!glExtensionHasARB_vertex_shader() || !glExtensionHasARB_fragment_shader() ||
-        !glExtensionHasARB_shader_objects() || !glExtensionHasARB_shading_language()) {
+    if (!glExtensionsHasARB_vertex_shader() || !glExtensionsHasARB_fragment_shader() ||
+        !glExtensionsHasARB_shader_objects() || !glExtensionsHasARB_shading_language_100()) {
             //QMessageBox::warning(this, "Danger, Will Robinson!",
             //                         "Graphics hardware does not fully support Shaders");
     }
 
-    if (!glExtensionHasARB_texture_non_power_of_two()) {
+    if (!glExtensionsHasARB_texture_non_power_of_two()) {
         Log(0,"Graphics hardware does not support non-power-of-two textures");
         return false;
     }
-    if (!glExtensionHasARB_vertex_buffer_object()) {
+    if (!glExtensionsHasARB_vertex_buffer_object()) {
         Log(0, "Graphics hardware does not support vertex buffer objects");
         return false;
     }
