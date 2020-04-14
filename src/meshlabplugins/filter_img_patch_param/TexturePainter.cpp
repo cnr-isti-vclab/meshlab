@@ -203,7 +203,7 @@ void TexturePainter::paint( RasterPatchMap &patches )
     m_Context.bindReadDrawFramebuffer( m_TexFB );
     glViewport( 0, 0, m_TexImg->width(), m_TexImg->height() );
 
-    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+    ::glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT );
 
     glActiveTexture( GL_TEXTURE0_ARB );
@@ -303,7 +303,7 @@ void TexturePainter::pushPullInit( RasterPatchMap &patches,
     p->setUniform( "u_PixelSize", 1.0f/m_TexImg->width(), 1.0f/m_TexImg->height() );
 
     glViewport( 0, 0, diffTex->width(), diffTex->height() );
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    ::glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glClear( GL_COLOR_BUFFER_BIT );
 
     //glBegin( GL_TRIANGLES );

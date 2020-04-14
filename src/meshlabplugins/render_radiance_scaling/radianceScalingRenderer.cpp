@@ -112,7 +112,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, MLSceneG
 	// first pass: buffers
 	_fbo->bind();
 	glDrawBuffers(3, FramebufferObject::buffers(0));
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	::glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	vcg::glColor(vcg::Color4b(vcg::Color4b::LightGray));
 	_buffPass->enable();
