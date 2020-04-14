@@ -24,6 +24,7 @@
 #define GPUPROGRAM_H
 
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 #include <iostream>
 #include "gpuShader.h"
 #include <string>
