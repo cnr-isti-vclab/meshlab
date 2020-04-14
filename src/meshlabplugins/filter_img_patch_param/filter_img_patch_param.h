@@ -27,6 +27,7 @@
 
 
 
+#include <common/gl_defs.h>
 #include <QObject>
 #include <common/interfaces.h>
 #include <vcg/math/similarity2.h>

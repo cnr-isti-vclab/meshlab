@@ -21,8 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "filter_img_patch_param.h"
 #include <common/gl_defs.h>
+#include "filter_img_patch_param.h"
 #include <QtGui>
 #include <wrap/gl/shot.h>
 #include <vcg/space/rect_packer.h>
