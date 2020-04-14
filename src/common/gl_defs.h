@@ -21,6 +21,9 @@
  *                                                                           *
  ****************************************************************************/
 
+#ifndef GL_DEFS_H
+#define GL_DEFS_H
+
 #include "mlexception.h"
 
 #include <GL/glew.h>
@@ -43,3 +46,5 @@ static inline void initializeGLextensions() {
                               .arg((const char *)glewGetErrorString(err)));
     }
 }
+
+#endif // !GL_DEFS_H
