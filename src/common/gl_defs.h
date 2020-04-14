@@ -51,6 +51,11 @@ static inline void initializeGLextensions() {
 #define MESHLAB_MAKE_EXTENSION_CHECKER(EXT)                                    \
     static inline bool glExtensionsHas##EXT() { return GLAD_GL_##EXT; }
 
+// Work around GLEW-specific code in vcglib
+
+#define GLEW_ARB_uniform_buffer_object GLAD_GL_ARB_uniform_buffer_object
+#define GLEW_EXT_transform_feedback GLAD_GL_EXT_transform_feedback 
+
 #else
 
 #include <common/gl_defs.h>
