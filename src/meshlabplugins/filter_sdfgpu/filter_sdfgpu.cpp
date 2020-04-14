@@ -1,5 +1,6 @@
 #include "filter_sdfgpu.h"
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
@@ -260,7 +261,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_NORMALIZE);
     glDisable(GL_COLOR_MATERIAL);
-    glClearColor(0,0,0,0);
+    ::glClearColor(0,0,0,0);
     glClearDepth(1.0);
 
     if (!initializeGLextensions_notThrowing())
