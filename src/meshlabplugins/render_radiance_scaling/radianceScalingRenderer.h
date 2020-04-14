@@ -24,6 +24,7 @@
 #define RADIANCESCALINGRENDERER_H
 
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 #include <common/interfaces.h>
 
 #include <QAction>
