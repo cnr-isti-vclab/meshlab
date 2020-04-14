@@ -28,6 +28,7 @@
  */
 
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 
 #include "editpickpoints.h"
 #include <meshlab/mainwindow.h>

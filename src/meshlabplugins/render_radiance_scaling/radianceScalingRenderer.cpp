@@ -21,10 +21,13 @@
 *                                                                           *
 ****************************************************************************/
 #include "radianceScalingRenderer.h"
+
+#include <common/gl_defs.h>
+#include <GL/glu.h>
+
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
-#include <common/gl_defs.h>
 #include <QGLWidget>
 #include <QTextStream>
 #include <QResource>

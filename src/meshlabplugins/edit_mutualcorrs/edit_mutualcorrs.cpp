@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 #include <meshlab/glarea.h>
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
