@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include <common/interfaces.h>
-
+#include <GL/glu.h>
 #include <gpuProgram.h>
 #include <framebufferObject.h>
 #include <texture2D.h>
