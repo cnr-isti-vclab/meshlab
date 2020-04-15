@@ -3,23 +3,11 @@
 
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
-set(SOURCES
-    decorate_shadow.cpp
-    shadow_mapping.cpp
-    ssao.cpp
-    variance_shadow_mapping.cpp
-    variance_shadow_mapping_blur.cpp
-    ${VCGDIR}/wrap/gui/trackball.cpp
-    ${VCGDIR}/wrap/gui/trackmode.cpp)
+set(SOURCES decorate_shadow.cpp shadow_mapping.cpp ssao.cpp
+            variance_shadow_mapping.cpp variance_shadow_mapping_blur.cpp)
 
-set(HEADERS
-    decorate_shader.h
-    decorate_shadow.h
-    shadow_mapping.h
-    ssao.h
-    variance_shadow_mapping.h
-    variance_shadow_mapping_blur.h
-    ${VCGDIR}/wrap/gui/trackball.h)
+set(HEADERS decorate_shader.h decorate_shadow.h shadow_mapping.h ssao.h
+            variance_shadow_mapping.h variance_shadow_mapping_blur.h)
 
 set(RESOURCES noise.qrc)
 
@@ -29,6 +17,8 @@ target_include_directories(decorate_shadow PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(decorate_shadow PUBLIC common)
 
 target_link_libraries(decorate_shadow PRIVATE OpenGL::GLU)
+
+target_link_libraries(decorate_shadow PRIVATE vcglib_trackball)
 
 set_property(TARGET decorate_shadow PROPERTY FOLDER Plugins)
 

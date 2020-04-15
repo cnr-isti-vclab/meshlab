@@ -19,8 +19,6 @@ if(TARGET external-newuoa)
         meshtree.cpp
         point_matching_scale.cpp
         ../../meshlab/stdpardialog.cpp
-        ${VCGDIR}/wrap/gui/trackball.cpp
-        ${VCGDIR}/wrap/gui/trackmode.cpp
         ${VCGDIR}/wrap/ply/plylib.cpp)
 
     set(HEADERS
@@ -35,8 +33,6 @@ if(TARGET external-newuoa)
         edit_align.h
         meshtree.h
         ../../meshlab/stdpardialog.h
-        ${VCGDIR}/wrap/gui/trackball.h
-        ${VCGDIR}/wrap/gui/trackmode.h
         ${VCGDIR}/wrap/gl/trimesh.h)
 
     set(RESOURCES edit_align.qrc)
@@ -48,7 +44,8 @@ if(TARGET external-newuoa)
     target_include_directories(edit_align PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(edit_align PUBLIC common)
 
-    target_link_libraries(edit_align PRIVATE external-newuoa OpenGL::GLU)
+    target_link_libraries(edit_align PRIVATE external-newuoa OpenGL::GLU
+                                             vcglib_trackball)
     if(OpenMP_CXX_FOUND)
         target_link_libraries(edit_align PRIVATE OpenMP::OpenMP_CXX)
     endif()

@@ -2,15 +2,11 @@
 
 {% block sources %}
 {{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.cpp
-    ${VCGDIR}/wrap/gui/trackmode.cpp
     ${VCGDIR}/wrap/gui/coordinateframe.cpp
 {% endblock %}
 
 {% block headers %}
 {{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.h
-    ${VCGDIR}/wrap/gui/trackmode.h 
     ${VCGDIR}/wrap/gl/trimesh.h
 {% endblock %}
 
@@ -44,7 +40,8 @@ target_link_libraries({{name}}
     OpenGL::GLU
     Qt5::Network
     PRIVATE
-    external-jhead)
+    external-jhead
+    vcglib_trackball)
 
 {% endblock %}
 {% block install %}

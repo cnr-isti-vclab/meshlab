@@ -91,6 +91,8 @@ else()
         FATAL_ERROR
             "glew or glad is required - at least one of ALLOW_SYSTEM_GLEW, ALLOW_BUNDLED_GLEW, or ALLOW_BUNDLED_GLAD must be enabled and found.")
 endif()
+set(MESHLAB_USE_GLAD "${USE_GLAD}" CACHE INTERNAL "" FORCE)
+set(MESHLAB_USE_GLEW "${USE_GLEW}" CACHE INTERNAL "" FORCE)
 
 if(USE_GLAD)
     message(STATUS "  - Using glad as OpenGL loader and extension handler")

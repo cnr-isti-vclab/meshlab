@@ -172,10 +172,23 @@ add_subdirectory(common)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
-if (WIN32)
+if(WIN32)
     add_subdirectory(use_cpu_opengl)
 endif()
 set(CMAKE_INSTALL_RPATH)
+
+### Bits of vcglib directly included
+add_library(vcglib_trackball STATIC ${VCGDIR}/wrap/gui/trackball.cpp ${VCGDIR}/wrap/gui/trackmode.cpp
+                                    ${VCGDIR}/wrap/gui/trackball.h ${VCGDIR}/wrap/gui/trackmode.h)
+target_link_libraries(vcglib_trackball PUBLIC external-opengl PRIVATE Qt5::Core Qt5::OpenGL)
+if(MESHLAB_USE_GLAD)
+    # Force include to use GLAD instead of GLEW without modifying vcglib.
+    if(MSVC)
+        target_compile_options(vcglib_trackball PRIVATE /FI"glad/glad.h")
+    else()
+        target_compile_options(vcglib_trackball PRIVATE -include "glad/glad.h")
+    endif()
+endif()
 
 ### Plugin subdirectories
 if(BUILD_MINI)
