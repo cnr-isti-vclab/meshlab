@@ -50,9 +50,6 @@ public:
     void keyPressEvent(QKeyEvent *, MeshModel &/*m*/, GLArea *);
     void wheelEvent(QWheelEvent*, MeshModel &/*m*/, GLArea * );
 
-signals:
-    void setSelectionRendering(bool);
-
 private:
         // How the selections are composed
         typedef enum {SMAdd, SMClear,SMSub} ComposingSelMode;
