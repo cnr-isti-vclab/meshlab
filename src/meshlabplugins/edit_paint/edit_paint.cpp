@@ -22,6 +22,7 @@
  ****************************************************************************/
 #include "edit_paint.h"
 #include <common/gl_defs.h>
+#include <GL/glu.h>
 
 #include <vcg/math/perlin_noise.h>
 

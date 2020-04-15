@@ -21,6 +21,8 @@
 *                                                                           *
 ****************************************************************************/
 
+#include <common/gl_defs.h>
+#include <GL/glu.h>
 #include "renderarea.h"
 #include "textureeditor.h"
 #include <wrap/qt/trackball.h>
