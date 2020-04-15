@@ -25,7 +25,7 @@
 
 #include <common/interfaces.h>
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 
 #include "glarea.h"
 #include "mainwindow.h"

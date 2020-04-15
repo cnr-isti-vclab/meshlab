@@ -25,7 +25,7 @@
 
 
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 #include "edit_align.h"
 #include <QGLWidget>
 #include "AlignPairWidget.h"

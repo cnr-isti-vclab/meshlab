@@ -25,7 +25,7 @@
 #define EDITPAINT_H
 
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 #include <QObject>
 #include <QDockWidget>
 

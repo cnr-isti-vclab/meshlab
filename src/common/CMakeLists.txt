@@ -31,6 +31,7 @@ set(HEADERS
     filterparameter.h
     filterscript.h
     gl_defs.h
+    glu_defs.h
     interfaces.h
     meshlabdocumentbundler.h
     meshlabdocumentxml.h

@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include <meshlab/glarea.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
 #include <common/pluginmanager.h>

@@ -23,7 +23,7 @@
 
 #include "sample_filtergpu.h"
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 #include <wrap/glw/glw.h>
 #include <QImage>
 

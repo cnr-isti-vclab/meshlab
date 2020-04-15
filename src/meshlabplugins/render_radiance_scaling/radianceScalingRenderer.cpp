@@ -23,7 +23,7 @@
 #include "radianceScalingRenderer.h"
 
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 
 #include <math.h>
 #include <stdlib.h>

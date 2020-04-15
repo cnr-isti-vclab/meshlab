@@ -26,7 +26,7 @@ $Log: editmeasure.cpp,v $
 ****************************************************************************/
 
 #include <meshlab/glarea.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 #include "edit_measure.h"
 #include <wrap/qt/gl_label.h>
 

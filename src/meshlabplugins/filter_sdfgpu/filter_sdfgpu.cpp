@@ -1,6 +1,6 @@
 #include "filter_sdfgpu.h"
 #include <common/gl_defs.h>
-#include <GL/glu.h>
+#include <common/glu_defs.h>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
