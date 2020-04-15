@@ -53,8 +53,8 @@ done
 
 echo 'Copying other files'
 
-cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
-cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
 
 #plugins
 cp -r $DISTRIB_PATH/plugins/U3D_OSX  $DISTRIB_PATH/$APPNAME/Contents/PlugIns/

@@ -34,10 +34,10 @@ then
   exit 1
 fi
 
-cp $INSTALL_PATH/../meshlab.png .
+#cp $INSTALL_PATH/../meshlab.png .
 cp $INSTALL_PATH/resources/default.desktop .
-cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
-cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
 
 rm -r lib/macx64/
 rm -r lib/win32-msvc/
