@@ -1,6 +1,6 @@
 #!/bin/bash
 # this is a script shell for setting up the application bundle for linux
-# Requires a properly built meshlab (does not require to run the 
+# Requires a properly built meshlab (does not require to run the
 # linux_deploy.sh script).
 #
 # This script can be run only in the oldest supported linux distro that you are using
@@ -8,7 +8,7 @@
 #
 # Without given arguments, MeshLab AppImage will be placed in the meshlab/distrib
 # directory.
-# 
+#
 # You can give as argument the DISTRIB_PATH.
 
 cd "${0%/*}" #move to script directory
@@ -49,8 +49,11 @@ rm -r plugins/U3D_W32/
 rm -r plugins/plugins.txt
 rm -r README.md
 
+mkdir -p usr/share/icons/hicolor/512x512/apps/
+mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
+
 $INSTALL_PATH/resources/linuxdeployqt meshlab -appimage -executable=meshlabserver
-mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage 
+mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo MeshLab$(date +%Y.%m)-linux.AppImage generated
