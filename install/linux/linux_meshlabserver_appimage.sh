@@ -39,11 +39,11 @@ mkdir $ACTUAL_DISTRIB
 cp -R $DISTRIB_PATH/. $ACTUAL_DISTRIB
 cd $ACTUAL_DISTRIB
 
-cp $INSTALL_PATH/../meshlab.png .
+#cp $INSTALL_PATH/../meshlab.png .
 cp $INSTALL_PATH/resources/meshlab_server.desktop .
 mv meshlab_server.desktop default.desktop
-cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
-cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
+#cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
 
 rm -r lib/macx64/
 rm -r lib/win32-msvc/
