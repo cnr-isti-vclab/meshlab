@@ -21,8 +21,10 @@
  *                                                                           *
  ****************************************************************************/
 
-#include <meshlab/glarea.h>
 #include "edit_manipulators.h"
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
+#include <meshlab/glarea.h>
 #include <wrap/qt/gl_label.h>
 #include <wrap/gui/trackball.h>
 

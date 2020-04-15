@@ -3,7 +3,7 @@
 
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
-if (EXISTS ../../ML_VERSION)
+if(EXISTS ../../ML_VERSION)
     file(READ ../../ML_VERSION MESHLAB_VERSION)
     add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
 endif()
@@ -30,6 +30,8 @@ set(HEADERS
     GLLogStream.h
     filterparameter.h
     filterscript.h
+    gl_defs.h
+    glu_defs.h
     interfaces.h
     meshlabdocumentbundler.h
     meshlabdocumentxml.h
@@ -63,7 +65,7 @@ target_link_libraries(
            Qt5::Widgets
            Qt5::Xml
            Qt5::XmlPatterns
-           external-glew
+           external-opengl
     PRIVATE external-jhead)
 
 set_property(TARGET common PROPERTY FOLDER Core)

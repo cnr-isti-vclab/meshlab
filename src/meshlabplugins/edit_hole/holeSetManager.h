@@ -24,6 +24,8 @@
 #ifndef HOLESETMANAGER_H
 #define HOLESETMANAGER_H
 
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include "fgtHole.h"
 #include "fgtBridge.h"
 #include "vcg/complex/algorithms/hole.h"

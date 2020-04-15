@@ -1,11 +1,5 @@
 {% extends "CMakeLists.template.cmake" %}
-{% block sources %}
+{% block linking %}
 {{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.cpp
-    ${VCGDIR}/wrap/gui/trackmode.cpp
-{% endblock %}
-
-{% block headers %}
-{{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.h
+target_link_libraries({{name}} PRIVATE vcglib_trackball)
 {% endblock %}

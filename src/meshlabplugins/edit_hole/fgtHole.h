@@ -28,7 +28,7 @@
 #include <vector>
 #include <qstring.h>
 #include <float.h>
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include "vcg/simplex/face/pos.h"
 #include "vcg/space/point3.h"
 #include "vcg/complex/algorithms/clean.h"

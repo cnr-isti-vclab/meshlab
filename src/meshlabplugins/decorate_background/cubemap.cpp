@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include<GL/glew.h>
+#include <common/gl_defs.h>
 #include<vcg/space/point3.h>
 #include<vcg/math/matrix44.h>
 #include<wrap/gl/space.h>
@@ -68,7 +68,7 @@ static float tex_vert[4][2] =
 
 void CICubeMap::DrawEnvCube(Matrix44f &tr)
 {
-	if(!GLEW_ARB_texture_cube_map)
+	if(!glExtensionsHasARB_texture_cube_map())
 				 DrawEnvCubeOld(tr);
 	else  DrawEnvCubeExt(tr);
 }
@@ -206,7 +206,7 @@ bool CICubeMap::Load(const char *basename)
 {
   if(basename==0) return false;
     bool ret;
-    if(!GLEW_ARB_texture_cube_map)
+    if(!glExtensionsHasARB_texture_cube_map())
         ret= LoadOld(basename);
     else ret =LoadExt(basename);
     if(!ret) SetInvalid();

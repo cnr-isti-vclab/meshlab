@@ -1,4 +1,11 @@
 {% extends "CMakeLists.template.cmake" %}
+
+{% block before_vars %}
+if (EXISTS ../../ML_VERSION)
+    file(READ ../../ML_VERSION MESHLAB_VERSION)
+    add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
+endif()
+{% endblock %}
 {% block outputdir %}{%endblock%}
 {% block add_target %}
 set(TARGET_TYPE SHARED)
@@ -23,7 +30,7 @@ target_link_libraries({{name}}
     Qt5::Widgets
     Qt5::Xml
     Qt5::XmlPatterns
-    external-glew
+    external-opengl
     PRIVATE
     external-jhead)
 {% endblock %}

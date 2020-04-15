@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "decorate_base.h"
+#include <common/glu_defs.h>
 #include <wrap/gl/addons.h>
 #include <vcg/complex/algorithms/stat.h>
 #include <vcg/complex/algorithms/bitquad_support.h>

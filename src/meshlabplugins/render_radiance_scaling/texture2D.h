@@ -23,7 +23,7 @@
 #ifndef TEXTURE_2D_H
 #define TEXTURE_2D_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include <string>
 #include "textureFormat.h"

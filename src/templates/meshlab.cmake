@@ -2,24 +2,20 @@
 
 {% block sources %}
 {{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.cpp
-    ${VCGDIR}/wrap/gui/trackmode.cpp
     ${VCGDIR}/wrap/gui/coordinateframe.cpp
 {% endblock %}
 
 {% block headers %}
 {{ super() }}
-    ${VCGDIR}/wrap/gui/trackball.h
-    ${VCGDIR}/wrap/gui/trackmode.h 
     ${VCGDIR}/wrap/gl/trimesh.h
 {% endblock %}
 
 {% block add_target %}
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
-if(APPLE)
-    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
-                images/meshlab.icns)
-endif()
+# if(APPLE)
+#     list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+#                 images/meshlab.icns)
+# endif()
 
 if(WIN32)
     list(APPEND SOURCES meshlab.rc)
@@ -44,7 +40,8 @@ target_link_libraries({{name}}
     OpenGL::GLU
     Qt5::Network
     PRIVATE
-    external-jhead)
+    external-jhead
+    vcglib_trackball)
 
 {% endblock %}
 {% block install %}

@@ -159,7 +159,7 @@ void VarianceShadowMapping::runShader(MeshDocument& md, GLArea* gla)
 
 bool VarianceShadowMapping::setup()
 {
-        if (!GLEW_EXT_framebuffer_object) {
+        if (!glExtensionsHasEXT_framebuffer_object()) {
                 qWarning("FBO not supported!");
                 return false;
         }

@@ -130,7 +130,7 @@ void VisibilityCheck_VMV2002::init( std::vector<unsigned char> &visBuffer )
     // Prepare the OpenGL states for the rendering during the subsequent iterative steps of vibility check.
     glEnable( GL_BLEND );
     glBlendFunc( GL_ONE, GL_ZERO );
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    ::glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glDisable( GL_POLYGON_OFFSET_FILL );
     glDepthMask( GL_FALSE );
     glPointSize( 1.0f );

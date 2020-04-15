@@ -23,7 +23,7 @@
 #ifndef TEXTURE_PARAMS_H
 #define TEXTURE_PARAMS_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 class TextureParams {
  public:

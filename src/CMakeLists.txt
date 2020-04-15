@@ -40,6 +40,7 @@ set(BUILD_ADDITIONAL_PLUGINS
 
 option(ALLOW_BUNDLED_EIGEN "Allow use of bundled Eigen source" ON)
 option(ALLOW_BUNDLED_GLEW "Allow use of bundled GLEW source" ON)
+option(ALLOW_BUNDLED_GLAD "Allow use of bundled glad source" ON)
 option(ALLOW_BUNDLED_NEWUOA "Allow use of bundled newuoa source" ON)
 option(ALLOW_BUNDLED_LEVMAR "Allow use of bundled levmar source" ON)
 option(ALLOW_BUNDLED_LIB3DS "Allow use of bundled lib3ds source" ON)
@@ -56,6 +57,8 @@ option(ALLOW_SYSTEM_GMP "Allow use of system-provided GMP" ON)
 option(ALLOW_SYSTEM_MUPARSER "Allow use of system-provided muparser" ON)
 option(ALLOW_SYSTEM_OPENCTM "Allow use of system-provided OpenCTM" ON)
 option(ALLOW_SYSTEM_QHULL "Allow use of system-provided QHull" ON)
+
+option(BUILD_PREFER_GLAD "If both glew and glad are available, prefer to use glad" OFF)
 
 ### Dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -169,10 +172,23 @@ add_subdirectory(common)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../${MESHLAB_LIB_INSTALL_DIR};$ORIGIN/../${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(meshlab)
 add_subdirectory(meshlabserver)
-if (WIN32)
+if(WIN32)
     add_subdirectory(use_cpu_opengl)
 endif()
 set(CMAKE_INSTALL_RPATH)
+
+### Bits of vcglib directly included
+add_library(vcglib_trackball STATIC ${VCGDIR}/wrap/gui/trackball.cpp ${VCGDIR}/wrap/gui/trackmode.cpp
+                                    ${VCGDIR}/wrap/gui/trackball.h ${VCGDIR}/wrap/gui/trackmode.h)
+target_link_libraries(vcglib_trackball PUBLIC external-opengl PRIVATE Qt5::Core Qt5::OpenGL)
+if(MESHLAB_USE_GLAD)
+    # Force include to use GLAD instead of GLEW without modifying vcglib.
+    if(MSVC)
+        target_compile_options(vcglib_trackball PRIVATE /FI"glad/glad.h")
+    else()
+        target_compile_options(vcglib_trackball PRIVATE -include "glad/glad.h")
+    endif()
+endif()
 
 ### Plugin subdirectories
 if(BUILD_MINI)

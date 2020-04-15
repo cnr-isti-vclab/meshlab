@@ -27,7 +27,7 @@
 #include <vector>
 
 #include <vcg/math/base.h>
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QHash>
 #include <QUndoStack>
 #include <QUndoGroup>

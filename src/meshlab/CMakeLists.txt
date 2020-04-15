@@ -26,8 +26,6 @@ set(SOURCES
     stdpardialog.cpp
     xmlgeneratorgui.cpp
     xmlstdpardialog.cpp
-    ${VCGDIR}/wrap/gui/trackball.cpp
-    ${VCGDIR}/wrap/gui/trackmode.cpp
     ${VCGDIR}/wrap/gui/coordinateframe.cpp)
 
 set(HEADERS
@@ -54,8 +52,6 @@ set(HEADERS
     stdpardialog.h
     xmlgeneratorgui.h
     xmlstdpardialog.h
-    ${VCGDIR}/wrap/gui/trackball.h
-    ${VCGDIR}/wrap/gui/trackmode.h
     ${VCGDIR}/wrap/gl/trimesh.h)
 
 set(RESOURCES meshlab.qrc)
@@ -73,10 +69,10 @@ set(UI
     ui/savesnapshotDialog.ui)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
-#if(APPLE)
-#    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../install/macx/info.plist
-#                images/meshlab.icns)
-#endif()
+# if(APPLE)
+#     list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+#                 images/meshlab.icns)
+# endif()
 
 if(WIN32)
     list(APPEND SOURCES meshlab.rc)
@@ -90,7 +86,7 @@ target_include_directories(meshlab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
     meshlab
     PUBLIC common OpenGL::GLU Qt5::Network
-    PRIVATE external-jhead)
+    PRIVATE external-jhead vcglib_trackball)
 
 set_property(TARGET meshlab PROPERTY FOLDER Core)
 

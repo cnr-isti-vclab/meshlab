@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include "filter_ao.h"
 #include <QGLFramebufferObject>
 #include <vcg/math/gen_normal.h>
@@ -220,7 +221,7 @@ bool AmbientOcclusionPlugin::processGL(MeshModel &m, vector<Point3f> &posVect)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    ::glClearColor(0.0, 0.0, 0.0, 0.0);
 
     //if (useVBO)
     //{
@@ -410,25 +411,25 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
     //******* CHECK THAT EVERYTHING IS SUPPORTED **********/
     if (useGPU)
     {
-        if (!glewIsSupported("GL_ARB_vertex_shader GL_ARB_fragment_shader"))
+        if (!glExtensionsHasARB_vertex_shader() || !glExtensionsHasARB_fragment_shader())
         {
-            if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
+            if (!glExtensionsHasEXT_vertex_shader())
             {
                 Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
                 errInit = true;
                 return;
             }
         }
-        if ( !glewIsSupported("GL_EXT_framebuffer_object") )
+        if ( !glExtensionsHasEXT_framebuffer_object() )
         {
             Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
             errInit = true;
             return;
         }
 
-        if ( glewIsSupported("GL_ARB_texture_float") )
+        if ( glExtensionsHasARB_texture_float() )
         {
-            if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
+            if ( !glExtensionsHasEXT_gpu_shader4() )   //Only DX10-grade cards support FP32 blending
             {
                 //colorFormat = GL_RGB16F_ARB;
                 //dataTypeFP = GL_HALF_FLOAT_ARB;

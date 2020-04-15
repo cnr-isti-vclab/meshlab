@@ -23,7 +23,8 @@
 #ifndef GPUPROGRAM_H
 #define GPUPROGRAM_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include <iostream>
 #include "gpuShader.h"
 #include <string>

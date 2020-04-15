@@ -27,7 +27,7 @@
 //None of this should happen if we are compiling c, not c++
 #ifdef __cplusplus
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include "../common/pluginmanager.h"
 #include "../common/scriptinterface.h"

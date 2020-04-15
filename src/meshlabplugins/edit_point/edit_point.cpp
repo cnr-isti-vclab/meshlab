@@ -23,6 +23,8 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include <meshlab/glarea.h>
 #include "edit_point.h"
 #include <wrap/gl/pick.h>

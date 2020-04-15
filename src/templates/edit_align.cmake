@@ -22,8 +22,6 @@ edit_align.cpp
 meshtree.cpp
 point_matching_scale.cpp
 ../../meshlab/stdpardialog.cpp
-${VCGDIR}/wrap/gui/trackball.cpp
-${VCGDIR}/wrap/gui/trackmode.cpp
 ${VCGDIR}/wrap/ply/plylib.cpp
 {% endblock %}
 
@@ -39,14 +37,12 @@ edit_align_factory.h
 edit_align.h
 meshtree.h
 ../../meshlab/stdpardialog.h
-${VCGDIR}/wrap/gui/trackball.h
-${VCGDIR}/wrap/gui/trackmode.h
 ${VCGDIR}/wrap/gl/trimesh.h
 {% endblock %}
 
 {% block linking %}
 {{ super() }}
-target_link_libraries({{name}} PRIVATE external-newuoa OpenGL::GLU)
+target_link_libraries({{name}} PRIVATE external-newuoa OpenGL::GLU vcglib_trackball)
 if(OpenMP_CXX_FOUND)
     target_link_libraries({{name}} PRIVATE OpenMP::OpenMP_CXX)
 endif()

@@ -24,7 +24,7 @@
 #ifndef __VCG_ALIGNPAIRWIDGET
 #define __VCG_ALIGNPAIRWIDGET
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QObject>
 #include <QDialog>
 #include <QGLWidget>

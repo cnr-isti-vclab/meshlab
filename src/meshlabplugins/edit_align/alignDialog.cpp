@@ -27,7 +27,7 @@ $Log: stdpardialog.cpp,v $
 
 ****************************************************************************/
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <QDockWidget>
 #include "edit_align.h"
 

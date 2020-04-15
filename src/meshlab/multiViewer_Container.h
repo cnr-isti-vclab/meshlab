@@ -23,7 +23,7 @@
 #ifndef __MULTIVIEWER_CONTAINER_H__
 #define __MULTIVIEWER_CONTAINER_H__
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 #include <QWidget>
 #include <QGLWidget>

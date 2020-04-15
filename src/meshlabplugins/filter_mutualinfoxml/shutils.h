@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <iostream>
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 
 
 namespace ShaderUtils

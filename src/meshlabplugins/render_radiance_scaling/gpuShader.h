@@ -23,7 +23,7 @@
 #ifndef GPUSHADER_H
 #define GPUSHADER_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
 #include <string>
 
 enum SHADER_TYPE {VERT,FRAG,GEOM};

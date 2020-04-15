@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include "decorate_shadow.h"
+#include <common/glu_defs.h>
 
 using namespace vcg;
 

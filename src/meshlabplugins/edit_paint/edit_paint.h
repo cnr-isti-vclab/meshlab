@@ -24,7 +24,8 @@
 #ifndef EDITPAINT_H
 #define EDITPAINT_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include <QObject>
 #include <QDockWidget>
 

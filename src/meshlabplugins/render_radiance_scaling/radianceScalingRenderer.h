@@ -23,7 +23,8 @@
 #ifndef RADIANCESCALINGRENDERER_H
 #define RADIANCESCALINGRENDERER_H
 
-#include <GL/glew.h>
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include <common/interfaces.h>
 
 #include <QAction>

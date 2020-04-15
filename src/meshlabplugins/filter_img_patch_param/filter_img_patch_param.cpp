@@ -21,10 +21,11 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "filter_img_patch_param.h"
 #include <common/gl_defs.h>
-#include <QtGui>
+// Must come before Qt OpenGL includes
 #include <wrap/gl/shot.h>
+#include "filter_img_patch_param.h"
+#include <QtGui>
 #include <vcg/space/rect_packer.h>
 #include "VisibleSet.h"
 #include "VisibilityCheck.h"

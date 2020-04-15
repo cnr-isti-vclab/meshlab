@@ -22,6 +22,7 @@
 ****************************************************************************/
 
 #include <meshlab/glarea.h>
+#include <common/glu_defs.h>
 #include "decorate_shader.h"
 #include "shadow_mapping.h"
 #include <common/pluginmanager.h>
@@ -196,7 +197,7 @@ void ShadowMapping::runShader(MeshDocument& md, GLArea* gla){
 
 bool ShadowMapping::setup()
 {
-    if (!GLEW_EXT_framebuffer_object) {
+    if (!glExtensionsHasEXT_framebuffer_object()) {
         qWarning("FBO not supported!");
         return false;
     }

@@ -266,26 +266,26 @@ void FilterMutualInfoPlugin::initGL()
     exit(-1);
   }
 
-  if (!glewIsSupported("GL_EXT_framebuffer_object")) {
+  if (!glExtensionsHasEXT_framebuffer_object()) {
     Log(0, "Graphics hardware does not support FBOs");
     exit(0);
   }
-  if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
-      !glewIsSupported("GL_ARB_shader_objects") || !glewIsSupported("GL_ARB_shading_language")) {
+  if (!glExtensionsHasARB_vertex_shader() || !glExtensionsHasARB_fragment_shader() ||
+      !glExtensionsHasARB_shader_objects() || !glExtensionsHasARB_shading_language_100()) {
     //QMessageBox::warning(this, "Danger, Will Robinson!",
 //                         "Graphics hardware does not fully support Shaders");
   }
 
-  if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
+  if (!glExtensionsHasARB_texture_non_power_of_two()) {
     Log(0,"Graphics hardware does not support non-power-of-two textures");
     exit(0);
   }
-  if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
+  if (!glExtensionsHasARB_vertex_buffer_object()) {
     Log(0, "Graphics hardware does not support vertex buffer objects");
     exit(0);
   }
 
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  ::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   GLfloat light_position[] = {-600.0f, 500.0f, 700.0f, 0.0f};
   GLfloat light_ambient[]  = {0.1f,  0.1f, 0.1f, 1.0f};

@@ -259,7 +259,7 @@ void MeshShaderRenderPlugin::Init(QAction *a, MeshDocument &/*md*/, MLSceneGLSha
 
 	gla->makeCurrent();
 	if (initializeGLextensions_notThrowing()) {
-		if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program) {
+		if (glExtensionsHasARB_vertex_program() && glExtensionsHasARB_fragment_program()) {
 			supported = true;
 			if (shaders.find(a->text()) != shaders.end()) {
 
@@ -450,7 +450,7 @@ void MeshShaderRenderPlugin::Render(QAction *a, MeshDocument &md, MLSceneGLShare
 			case DEPTH_FUNC: glDepthFunc(j->second.toInt()); break;
 				//case CLAMP_NEAR:
 				//case CLAMP_FAR:
-			case CLEAR_COLOR_R: glClearColor(j->second.toFloat(),
+			case CLEAR_COLOR_R: ::glClearColor(j->second.toFloat(),
 				(si.glStatus[CLEAR_COLOR_G]).toFloat(),
 				(si.glStatus[CLEAR_COLOR_B]).toFloat(),
 				(si.glStatus[CLEAR_COLOR_A]).toFloat()); break;

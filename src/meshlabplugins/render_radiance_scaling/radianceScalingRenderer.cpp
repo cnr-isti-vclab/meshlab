@@ -21,10 +21,13 @@
 *                                                                           *
 ****************************************************************************/
 #include "radianceScalingRenderer.h"
+
+#include <common/gl_defs.h>
+#include <common/glu_defs.h>
+
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
-#include <common/gl_defs.h>
 #include <QGLWidget>
 #include <QTextStream>
 #include <QResource>
@@ -66,11 +69,11 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSha
 
 	GL_TEST_ERR
 
-		if (!GLEW_ARB_vertex_program ||
-			!GLEW_ARB_fragment_program ||
-			!GLEW_ARB_texture_float ||
-			!GLEW_ARB_draw_buffers ||
-			!GLEW_EXT_framebuffer_object) {
+		if (!glExtensionsHasARB_vertex_program() ||
+			!glExtensionsHasARB_fragment_program() ||
+			!glExtensionsHasARB_texture_float() ||
+			!glExtensionsHasARB_draw_buffers() ||
+			!glExtensionsHasEXT_framebuffer_object()) {
 
 			_supported = false;
 			return;
@@ -112,7 +115,7 @@ void RadianceScalingRendererPlugin::Render(QAction *, MeshDocument &md, MLSceneG
 	// first pass: buffers
 	_fbo->bind();
 	glDrawBuffers(3, FramebufferObject::buffers(0));
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	::glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	vcg::glColor(vcg::Color4b(vcg::Color4b::LightGray));
 	_buffPass->enable();

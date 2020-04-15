@@ -25,6 +25,7 @@
 
 
 #include <common/gl_defs.h>
+#include <common/glu_defs.h>
 #include "edit_align.h"
 #include <QGLWidget>
 #include "AlignPairWidget.h"
@@ -79,7 +80,7 @@ void AlignPairWidget::initializeGL()
 	initializeGLextensions();  //needed to init extensions, used by the aligner GL window while rendering
 
 	shared->addView(context());
-	glClearColor(0, 0, 0, 0);
+	::glClearColor(0, 0, 0, 0);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_NORMALIZE);
