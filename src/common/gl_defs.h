@@ -24,16 +24,24 @@
 #ifndef GL_DEFS_H
 #define GL_DEFS_H
 
+#ifdef MESHLAB_USE_GLAD
+#include <glad/glad.h>
+
+// Block loading of GLEW
+// #define __glew_h__
+
+#else
+#include <GL/glew.h>
+#endif
+
 #include "mlexception.h"
 
 // This string is searched for by an error handler, so it must be included
 // verbatim in all graphics-related errors.
 static const char MESHLAB_GL_ERROR_MSG[] =
     "OpenGL extension initialization failed";
+
 #ifdef MESHLAB_USE_GLAD
-
-#include <glad/glad.h>
-
 static inline bool initializeGLextensions_notThrowing() {
     if (!gladLoadGL()) {
         qWarning(MESHLAB_GL_ERROR_MSG);
@@ -54,11 +62,9 @@ static inline void initializeGLextensions() {
 // Work around GLEW-specific code in vcglib
 
 #define GLEW_ARB_uniform_buffer_object GLAD_GL_ARB_uniform_buffer_object
-#define GLEW_EXT_transform_feedback GLAD_GL_EXT_transform_feedback 
+#define GLEW_EXT_transform_feedback GLAD_GL_EXT_transform_feedback
 
 #else
-
-#include <GL/glew.h>
 
 static inline bool initializeGLextensions_notThrowing() {
     glewExperimental = GL_TRUE;
