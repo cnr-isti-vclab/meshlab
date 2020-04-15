@@ -58,7 +58,7 @@ static inline void initializeGLextensions() {
 
 #else
 
-#include <common/gl_defs.h>
+#include <GL/glew.h>
 
 static inline bool initializeGLextensions_notThrowing() {
     glewExperimental = GL_TRUE;
