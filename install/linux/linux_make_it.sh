@@ -24,4 +24,4 @@ else
 fi
 
 sh linux_build.sh $BUILD_PATH
-sh linux_appimage.sh $BUILD_PATH/distrib
+sh linux_appimages.sh $BUILD_PATH/distrib

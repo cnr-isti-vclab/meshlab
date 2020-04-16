@@ -1,12 +1,14 @@
 #!/bin/bash
-# this is a script shell for deploying a meshlab-portable folder.
-# Requires a properly built meshlab.
+# this is a script shell for setting up the application bundle for linux
+# Requires a properly built meshlab (does not require to run the
+# linux_deploy.sh script).
 #
 # This script can be run only in the oldest supported linux distro that you are using
 # due to linuxdeployqt tool choice (see https://github.com/probonopd/linuxdeployqt/issues/340).
 #
-# Without given arguments, the folder that will be deployed is meshlab/distrib.
-# 
+# Without given arguments, MeshLab AppImage will be placed in the meshlab/distrib
+# directory.
+#
 # You can give as argument the DISTRIB_PATH.
 
 cd "${0%/*}" #move to script directory
@@ -49,9 +51,8 @@ mkdir -p usr/share/meshlab
 mkdir -p usr/share/doc/meshlab
 mkdir -p usr/share/icons/hicolor/512x512/apps/
 
-cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
+cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
 mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
-mv meshlab usr/bin
 mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
@@ -61,10 +62,24 @@ mv plugins/ usr/lib/meshlab/
 mv shaders/ usr/share/meshlab/
 mv textures/ usr/share/meshlab/
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
+mv *.AppImage ../MeshLabServer$(date +%Y.%m)-linux.AppImage
+
+rm AppRun
+rm *.desktop
+rm *.png
+rm usr/share/applications/meshlab_server.desktop
+cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
+mv usr/bin/meshlabserver .
+mv meshlab usr/bin
+
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
+mv *.AppImage ../MeshLab$(date +%Y.%m)-linux.AppImage
+
+cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
+mv meshlabserver usr/bin/
 
 rm -r lib
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo "distrib folder is now a self contained meshlab application"
-
+echo MeshLab$(date +%Y.%m)-linux.AppImage generated

@@ -1,10 +1,13 @@
 [Desktop Entry]
+Version=1.0
 Type=Application
 Name=MeshLabServer
-GenericName=Mesh processing
+Name[en_GB]=MeshLabServer
+GenericName=Batch mesh processing
+GenericName[en_GB]=Batch mesh processing
 Comment=Batch Processor MeshLab
-Exec=AppRun %F
+Exec=usr/bin/meshlabserver
 Icon=meshlab
 Terminal=false
-MimeType=model/mesh;application/x-3ds;image/x-3ds;application/sla;
-Categories=Graphics;3DGraphics;Viewer;Qt;
+MimeType=model/mesh;application/x-3ds;image/x-3ds;model/x-ply;application/sla;model/x-quad-object;model/x-geomview-off;application/x-cyclone-ptx;application/x-vmi;application/x-bre;model/vnd.collada+xml;model/openctm;application/x-expe-binary;application/x-expe-ascii;application/x-xyz;application/x-gts;chemical/x-pdb;application/x-tri;application/x-asc;model/x3d+xml;model/x3d+vrml;model/vrml;model/u3d;model/idtf;
+Categories=Graphics;3DGraphics;Qt;
