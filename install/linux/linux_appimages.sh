@@ -11,7 +11,7 @@
 #
 # You can give as argument the DISTRIB_PATH.
 
-#cd "${0%/*}" #move to script directory
+cd "${0%/*}" #move to script directory
 
 #checking for parameters
 if [ "$#" -eq 0 ]
@@ -34,25 +34,6 @@ then
   exit 1
 fi
 
-#cp $INSTALL_PATH/../meshlab.png .
-cp $INSTALL_PATH/resources/default.desktop .
-#cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
-#cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
-
-mkdir -p usr/bin
-mkdir -p usr/lib/meshlab
-mkdir -p usr/share/applications
-mkdir -p usr/share/icons/hicolor/512x512/apps/
-
-mv default.desktop usr/share/applications/meshlab.desktop
-mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
-mv meshlab usr/bin
-mv meshlabserver usr/bin
-mv lib/libcommon* usr/lib/
-mv plugins/ usr/lib/meshlab/
-mv shaders/ usr/lib/meshlab/
-mv textures/ usr/lib/meshlab/
-
 rm -r lib/macx64/
 rm -r lib/win32-msvc/
 rm -r lib/win32-msvc2008/
@@ -63,10 +44,42 @@ rm -r plugins/U3D_W32/
 rm -r plugins/plugins.txt
 rm -r README.md
 
+mkdir -p usr/bin
+mkdir -p usr/lib/meshlab
+mkdir -p usr/share/applications
+mkdir -p usr/share/meshlab
+mkdir -p usr/share/doc/meshlab
+mkdir -p usr/share/icons/hicolor/512x512/apps/
 
+cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
+mv meshlab.png usr/share/icons/hicolor/512x512/apps/meshlab.png
+mv meshlabserver usr/bin
+mv LICENSE.txt usr/share/doc/meshlab/
+mv privacy.txt usr/share/doc/meshlab/
+mv readme.txt usr/share/doc/meshlab/
+mv lib/libcommon* usr/lib/
+mv plugins/ usr/lib/meshlab/
+mv shaders/ usr/share/meshlab/
+mv textures/ usr/share/meshlab/
 
-$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -appimage
-mv *.AppImage MeshLab$(date +%Y.%m)-linux.AppImage
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
+mv *.AppImage ../MeshLabServer$(date +%Y.%m)-linux.AppImage
+
+rm AppRun
+rm *.desktop
+rm *.png
+rm usr/share/applications/meshlab_server.desktop
+cp $INSTALL_PATH/resources/default.desktop usr/share/applications/meshlab.desktop
+mv usr/bin/meshlabserver .
+mv meshlab usr/bin
+
+$INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
+mv *.AppImage ../MeshLab$(date +%Y.%m)-linux.AppImage
+
+cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
+mv meshlabserver usr/bin/
+
+rm -r lib
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
 echo MeshLab$(date +%Y.%m)-linux.AppImage generated
