@@ -34,6 +34,7 @@ jobs:
         commit_message: Apply automatic ML_VERSION and Info.plist change
 
   ubuntu_build:
+    needs: [update_ml_version]
     name: Build MeshLab (Ubuntu)
     runs-on: ubuntu-16.04 #in order to deploy, need to use oldest supported version
 
