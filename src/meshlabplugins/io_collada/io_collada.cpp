@@ -175,7 +175,7 @@ void ColladaIOPlugin::initPreOpenParameter(const QString &/*format*/, const QStr
 		qDebug("Node %i geom id = '%s'",i,qUtf8Printable(idVal));
 	}
 	parlst.addParam(new RichEnum("geomnode",0, idList, tr("geometry nodes"),  tr("dsasdfads")));
-	qDebug("Time elapsed: %d ms", t.elapsed());
+	qDebug("Time elapsed: %llu ms", t.elapsed());
 }
 
 
