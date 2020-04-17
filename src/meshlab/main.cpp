@@ -119,8 +119,9 @@ void handleCriticalError(const MLException& exc){
     messageBox.addButton(QMessageBox::Ok);
 
     #ifdef _WIN32
+    bool openGLProblem = QString::fromStdString(exc.what()).contains("GLEW initialization failed");
     QCheckBox *cb = nullptr;
-    if (QString::fromStdString(exc.what()).contains("GLEW initialization failed")) {
+    if (openGLProblem) {
         cb = new QCheckBox("Use CPU OpenGL and restart MeshLab");
         messageBox.setCheckBox(cb);
     }
