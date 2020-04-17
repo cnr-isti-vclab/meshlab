@@ -1404,6 +1404,16 @@ void GLArea::updateDecorator(QString name, bool toggle, bool stateToSet)
 {
 	makeCurrent();
     MeshDecorateInterface *iDecorateTemp = this->mw()->PM.getDecoratorInterfaceByName(name);
+    if (!iDecorateTemp) {
+        this->Logf(GLLogStream::SYSTEM,"Could not get Decorate interface %s", qUtf8Printable(name));
+        this->Log(GLLogStream::SYSTEM,"Known decorate interfaces:");
+        for (auto tt : this->mw()->PM.meshDecoratePlugins()) {
+            for (auto action : tt->actions()) {
+                this->Logf(GLLogStream::SYSTEM,"- %s", qUtf8Printable(tt->decorationName(action)));
+            }
+        }
+        return;
+    }
     QAction *action = iDecorateTemp->action(name);
 
     if(iDecorateTemp->getDecorationClass(action)== MeshDecorateInterface::PerDocument)
