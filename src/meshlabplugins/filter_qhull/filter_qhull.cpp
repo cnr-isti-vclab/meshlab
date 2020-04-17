@@ -204,6 +204,7 @@ bool QhullPlugin::applyFilter(QAction *filter, MeshDocument &md, RichParameterSe
                 pm.updateDataMask(MeshModel::MM_FACEFACETOPO);
                 bool result = vcg::tri::ConvexHull<CMeshO, CMeshO>::ComputeConvexHull(m.cm, pm.cm);
                 pm.clearDataMask(MeshModel::MM_FACEFACETOPO);
+                pm.UpdateBoxAndNormals();
                 return result;
             }
         case FP_QHULL_DELAUNAY_TRIANGULATION:
