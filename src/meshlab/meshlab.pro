@@ -122,19 +122,19 @@ CONFIG += stl
 
 win32-msvc:LIBS += \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc -ljhead \
-    -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lcommon -lopengl32 -lGLU32
+    -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlabcommon -lopengl32 -lGLU32
 
 win32-g++:LIBS += \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -ljhead \
-    -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lcommon -lopengl32 -lGLU32
+    -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlabcommon -lopengl32 -lGLU32
 
 macx:LIBS += \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -ljhead \
-    $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.dylib
+    $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlabcommon.dylib
 
 macx:QMAKE_POST_LINK += "\
-    cp -P $$MESHLAB_DISTRIB_DIRECTORY/lib/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS; \
-    install_name_tool -change libcommon.1.dylib @executable_path/libcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
+    cp -P $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlabcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS; \
+    install_name_tool -change libmeshlabcommon.1.dylib @executable_path/libmeshlabcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
     "
 
 #CONFIG(release,debug | release) {
@@ -144,7 +144,7 @@ macx:QMAKE_POST_LINK += "\
 #}
 
 linux:LIBS += \
-    -lcommon -lGLU \
+    -lmeshlabcommon -lGLU \
     -L$$MESHLAB_DISTRIB_DIRECTORY/lib/linux -ljhead
 
 !CONFIG(system_glew) {
