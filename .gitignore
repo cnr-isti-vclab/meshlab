@@ -17,11 +17,7 @@
 *.db-wal
 *.AppImage
 .DS_Store
-distrib/meshlab.app/*
-distrib/meshlab
-distrib/meshlabserver
-distrib/plugins/*.xml
-distrib/usr/*
+distrib*
 install/macos/resources/meshlab_dmg_final.json
 install/windows/resources/meshlab_final.nsi
 install/windows/resources/MeshLab*.exe

@@ -35,7 +35,7 @@ sed -i '' "s%SOURCE_PATH%$SOURCE_PATH%g" resources/meshlab_dmg_final.json
 rm -f $DISTRIB_PATH/*.dmg
 
 echo "Running appdmg"
-appdmg resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$(date +%Y.%m).dmg
+appdmg resources/meshlab_dmg_final.json $DISTRIB_PATH/MeshLab$(cat ../../ML_VERSION).dmg
 
 #at this point, distrib folder contains a DMG MeshLab file
 echo "distrib folder now contains a DMG file"
