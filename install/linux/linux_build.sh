@@ -28,5 +28,5 @@ echo "Build path is: " $BUILD_PATH
 SOURCE_PATH=$PWD/../../src
 
 cd $BUILD_PATH
-qmake $SOURCE_PATH/meshlab.pro "CONFIG+= system_eigen3 system_glew system_openctm system_lib3ds"
+qmake $SOURCE_PATH/meshlab.pro
 make -j4

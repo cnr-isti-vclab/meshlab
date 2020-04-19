@@ -285,3 +285,24 @@ edit_select.depends = common
 
     QMAKE_EXTRA_TARGETS += first copydir
 }
+
+#
+# this is just for project info
+# prints all the system libraries that meshlab is using instead of
+# the ones placed in the external folder.
+# The libraris are included effectively in general.pri and
+# in external.pro
+#
+include(find_system_libs.pri)
+system_eigen3 {
+    message("Using system eigen3")
+}
+system_glew {
+    message("Using system glew")
+}
+system_openctm {
+    message("Using system openctm")
+}
+system_lib3ds {
+    message("Using system lib3ds")
+}
