@@ -22,14 +22,14 @@ QT += \
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
 macx:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/
 macx:QMAKE_POST_LINK = " \
-    install_name_tool -change libcommon.1.dylib @executable_path/libmeshlabcommon.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
+    install_name_tool -change libmeshlab-common.1.dylib @executable_path/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
 "
 
-macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libmeshlabcommon.dylib
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libmeshlab-common.dylib
 
-win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlabcommon
+win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common
 win32-g++:LIBS += -lmeshlabcommon
-linux:LIBS += -lmeshlabcommon
+linux:LIBS += -lmeshlab-common
 
 win32-msvc:DEFINES += GLEW_STATIC
 

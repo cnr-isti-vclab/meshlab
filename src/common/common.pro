@@ -7,7 +7,7 @@ QT += xmlpatterns
 QT += script
 
 TEMPLATE = lib
-TARGET = meshlabcommon
+TARGET = meshlab-common
 DEPENDPATH += .
 
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/lib
@@ -89,7 +89,7 @@ macx:QMAKE_POST_LINK = "\
     else  \
         mkdir -p $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS;  \
     fi;   \
-    cp $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlabcommon.* $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ;\
+    cp $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.* $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ;\
 #    if [ -d ../external/ ];\
 #    then \
 #        echo "ok external dir exists"; \
