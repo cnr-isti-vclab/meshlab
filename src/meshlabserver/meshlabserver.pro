@@ -28,7 +28,7 @@ macx:QMAKE_POST_LINK = " \
 macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libmeshlab-common.dylib
 
 win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common
-win32-g++:LIBS += -lmeshlabcommon
+win32-g++:LIBS += -lmeshlab-common
 linux:LIBS += -lmeshlab-common
 
 win32-msvc:DEFINES += GLEW_STATIC
