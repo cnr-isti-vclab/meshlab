@@ -10,6 +10,8 @@ SUBDIRS	= \
     qhull-2003.1/qhull2003.1.pro
 #   openkinect/openkinect.pro
 
+include(../find_system_libs.pri)
+
 !CONFIG(system_bzip2)   SUBDIRS	+= 	bzip2-1.0.5/bzip2-1.0.5.pro
 !CONFIG(system_openctm) SUBDIRS	+= 	OpenCTM-1.0.3/openctm.pro
 !CONFIG(system_lib3ds)  SUBDIRS	+= 	lib3ds-1.3.0/lib3ds.pro
