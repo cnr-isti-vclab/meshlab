@@ -11,6 +11,8 @@ DEFINES += MESHLAB_SCALAR=float
 # VCG directory
 VCGDIR = $$MESHLAB_SOURCE_DIRECTORY/../vcglib
 
+include(find_system_libs.pri)
+
 # MeshLab requires C++11
 CONFIG += c++11
 

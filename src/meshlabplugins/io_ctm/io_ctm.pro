@@ -1,5 +1,4 @@
 include (../../shared.pri)
-include(../../find_system_libs.pri)
 
 HEADERS += \
     io_ctm.h \
