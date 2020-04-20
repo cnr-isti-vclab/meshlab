@@ -28,7 +28,7 @@ if(! (Test-Path meshlab.exe)){ #meshlab.exe not found inside $DISTRIB_PATH
 	throw 'meshlab.exe not found in ' + ($DISTRIB_PATH) + '. Exiting.'
 }
 
-$VERSION = Get-Date -Format "yyyy.MM"
+$VERSION = type (Join-Path $SOURCE_PATH ..\ML_VERSION)
 
 cd $INSTALL_PATH
 

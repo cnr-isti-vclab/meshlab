@@ -62,10 +62,10 @@ mv plugins/ usr/lib/meshlab/
 mv shaders/ usr/share/meshlab/
 mv textures/ usr/share/meshlab/
 
-export VERSION=$(cat ../ML_VERSION)
+export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab_server.desktop -appimage
-mv *.AppImage ../MeshLabServer$(cat ../ML_VERSION)-linux.AppImage
+mv *.AppImage ../MeshLabServer$VERSION-linux.AppImage
 
 rm AppRun
 rm *.desktop
@@ -76,7 +76,7 @@ mv usr/bin/meshlabserver .
 mv meshlab usr/bin
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -appimage
-mv *.AppImage ../MeshLab$(cat ../ML_VERSION)-linux.AppImage
+mv *.AppImage ../MeshLab$VERSION-linux.AppImage
 
 cp $INSTALL_PATH/resources/meshlab_server.desktop usr/share/applications/
 mv meshlabserver usr/bin/
@@ -84,4 +84,4 @@ mv meshlabserver usr/bin/
 rm -r lib
 
 #at this point, distrib folder contains all the files necessary to execute meshlab
-echo MeshLab$(cat ../ML_VERSION)-linux.AppImage generated
+echo MeshLab$VERSION-linux.AppImage generated

@@ -3,8 +3,8 @@
 
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
-if (EXISTS ../../ML_VERSION)
-    file(READ ../../ML_VERSION MESHLAB_VERSION)
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
     add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
 endif()
 
