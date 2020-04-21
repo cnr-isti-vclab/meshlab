@@ -12,7 +12,7 @@ The follwing scripts are provided:
 * `linux_deploy.sh`: makes the `distrib` folder a portable version of MeshLab (no Qt and other libraries dependencies):
 	* it requires a properly built meshlab `distrib` directory (see `linux_build.sh`);
 	* without given arguments, the folder that will be deployed is `meshlab/distrib`. You can give as argument the `DISTRIB_PATH`;
-* `linux_appimage.sh`: this script makes the `distrib` folder a portable version of MeshLab (no Qt and other libraries dependencies), and generates an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies; 
+* `linux_appimages.sh`: this script makes the `distrib` folder a portable version of MeshLab (no Qt and other libraries dependencies), and generates an [AppImage](https://appimage.org/) that can be run in a Linux Environment without dependencies; 
 	* it requires a properly built meshlab `distrib` directory (see `linux_build.sh`);
 	* without given arguments, the folder that will be deployed is `meshlab/distrib`. You can give as argument the `DISTRIB_PATH`.
 * `linux_meshlabserver_appimage.sh`: this script generates an [AppImage](https://appimage.org/) of [MeshLabServer](https://github.com/cnr-isti-vclab/meshlab/blob/master/src/meshlabserver/README.md) that can be run in a Linux Environment without dependencies; 
