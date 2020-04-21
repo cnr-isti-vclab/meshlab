@@ -31,9 +31,9 @@ linux {
     #}
 
     #qhull
-    #exists(/usr/lib/x86_64-linux-gnu/libqhull.so){
-    #    CONFIG += system_qhull
-    #}
+    exists(/usr/lib/x86_64-linux-gnu/libqhull.so){
+        CONFIG += system_qhull
+    }
 
 
     #### header only libs ####
