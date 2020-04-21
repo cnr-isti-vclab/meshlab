@@ -25,10 +25,10 @@ linux {
         CONFIG += system_lib3ds
     }
 
-    #muparser
-    exists(/usr/lib/x86_64-linux-gnu/libmuparser.so){
-        CONFIG += system_muparser
-    }
+    #muparser #cannot due to _UNICODE define
+    #exists(/usr/lib/x86_64-linux-gnu/libmuparser.so){
+    #    CONFIG += system_muparser
+    #}
 
 
     #### header only libs ####
