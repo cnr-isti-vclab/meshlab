@@ -306,3 +306,6 @@ system_openctm {
 system_lib3ds {
     message("Using system lib3ds")
 }
+system_muparser {
+    message("Using system muparser")
+}

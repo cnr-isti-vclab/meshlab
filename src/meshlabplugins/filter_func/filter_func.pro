@@ -10,7 +10,7 @@ TARGET = filter_func
 
 DEFINES += _UNICODE
 
-INCLUDEPATH += $$MESHLAB_EXTERNAL_DIRECTORY/muparser_v225/include
+!CONFIG(system_muparser) INCLUDEPATH += $$MESHLAB_EXTERNAL_DIRECTORY/muparser_v225/include
 
 # Note: we need static libs so when building muparser lib use 
 # ./configure --enable-shared=no
