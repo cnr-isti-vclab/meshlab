@@ -58,6 +58,7 @@ mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
 mv lib/libmeshlab-common* usr/lib/
+mv lib/* usr/lib/meshlab/
 mv plugins/ usr/lib/meshlab/
 mv shaders/ usr/share/meshlab/
 
