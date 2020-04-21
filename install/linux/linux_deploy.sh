@@ -57,8 +57,8 @@ mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
 mv lib/libmeshlab-common* usr/lib/
-mv lib/* usr/lib/meshlab/
 mv plugins/ usr/lib/meshlab/
+mv lib/linux/* usr/lib/meshlab/plugins
 mv shaders/ usr/share/meshlab/
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
