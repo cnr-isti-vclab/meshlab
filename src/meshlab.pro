@@ -50,8 +50,8 @@ SUBDIRS += \ #sub projects names
     io_txt \
     io_u3d \
 # Filter samples
-    sampleedit \
-    samplefilter \
+    edit_sample \
+    filter_sample \
     samplefilterdyn \
     filter_createiso \
     filter_geodesic \
@@ -137,8 +137,8 @@ io_pdb.subdir = meshlabplugins/io_pdb
 io_txt.subdir = meshlabplugins/io_txt
 io_u3d.subdir = meshlabplugins/io_u3d
 # Filter samples
-sampleedit.subdir = sampleplugins/sampleedit
-samplefilter.subdir = sampleplugins/samplefilter
+edit_sample.subdir = meshlabplugins/edit_sample
+filter_sample.subdir = meshlabplugins/filter_sample
 samplefilterdyn.subdir = sampleplugins/samplefilterdyn
 filter_createiso.subdir = sampleplugins/filter_createiso
 filter_geodesic.subdir = sampleplugins/filter_geodesic
@@ -212,8 +212,8 @@ io_pdb.depends = common
 io_txt.depends = common
 io_u3d.depends = common
 # Filter samples
-sampleedit.depends = common
-samplefilter.depends = common
+edit_sample.depends = common
+filter_sample.depends = common
 samplefilterdyn.depends = common
 filter_createiso.depends = common
 filter_geodesic.depends = common

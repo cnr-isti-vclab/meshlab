@@ -260,8 +260,8 @@ else()
         # meshlabplugins/edit_texture # not in qmake file?
 
         # Sample Plugins
-        sampleplugins/sampleedit
-        sampleplugins/samplefilter
+        meshlabplugins/edit_sample
+        meshlabplugins/filter_sample
         sampleplugins/samplefilterdyn
         sampleplugins/filter_createiso
         sampleplugins/filter_geodesic
