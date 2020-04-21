@@ -6,3 +6,4 @@
 
 sudo apt-get update 
 sudo apt-get install -y qt5-default qttools5-dev-tools qtscript5-dev libqt5xmlpatterns5-dev mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev #libmuparser-dev
+sudo apt-get install -y chrpath
