@@ -59,7 +59,6 @@ mv readme.txt usr/share/doc/meshlab/
 mv lib/libcommon* usr/lib/
 mv plugins/ usr/lib/meshlab/
 mv shaders/ usr/share/meshlab/
-mv textures/ usr/share/meshlab/
 
 $INSTALL_PATH/resources/linuxdeployqt usr/share/applications/meshlab.desktop -bundle-non-qt-libs -executable=usr/bin/meshlabserver
 

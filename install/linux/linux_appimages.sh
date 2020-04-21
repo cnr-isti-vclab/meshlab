@@ -60,7 +60,6 @@ mv readme.txt usr/share/doc/meshlab/
 mv lib/libcommon* usr/lib/
 mv plugins/ usr/lib/meshlab/
 mv shaders/ usr/share/meshlab/
-mv textures/ usr/share/meshlab/
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 
