@@ -57,10 +57,11 @@ mv meshlabserver usr/bin
 mv LICENSE.txt usr/share/doc/meshlab/
 mv privacy.txt usr/share/doc/meshlab/
 mv readme.txt usr/share/doc/meshlab/
-mv lib/libcommon* usr/lib/
+mv lib/libmeshlab-common* usr/lib/
 mv plugins/ usr/lib/meshlab/
+mv lib/linux/* usr/lib/meshlab/plugins
+chrpath -r ../lib/ usr/lib/meshlab/plugins/*.so
 mv shaders/ usr/share/meshlab/
-mv textures/ usr/share/meshlab/
 
 export VERSION=$(cat $INSTALL_PATH/../../ML_VERSION)
 
