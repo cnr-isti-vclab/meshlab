@@ -8,8 +8,14 @@ SOURCES += \
     filter_qhull.cpp \
     qhull_tools.cpp
 
+system_qhull {
+    INCLUDEPATH += /usr/include/libqhull
+    DEFINES += SYSTEM_QHULL
+}
+!system_qhull {
 INCLUDEPATH += \
     $$MESHLAB_EXTERNAL_DIRECTORY/qhull-2003.1/src
+}
 
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-msvc/qhull.lib
 win32-g++:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc/libqhull.a

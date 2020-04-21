@@ -309,3 +309,6 @@ system_lib3ds {
 system_muparser {
     message("Using system muparser")
 }
+system_qhull {
+    message("Using system qhull")
+}

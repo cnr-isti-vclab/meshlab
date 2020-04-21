@@ -57,7 +57,11 @@ extern "C"
 #include <stdlib.h>
 
 // qhull includes - qhull/ omitted to support both system and bundled libs.
+#ifdef SYSTEM_QHULL
+#include "libqhull.h"
+#else
 #include "qhull.h"
+#endif
 #include "mem.h"
 #include "qset.h"
 #include "geom.h"
