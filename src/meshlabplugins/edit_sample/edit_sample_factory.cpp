@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "edit_sample_factory.h"
-#include "sampleedit.h"
+#include "edit_sample.h"
 
 SampleEditFactory::SampleEditFactory()
 {

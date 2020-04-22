@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "samplefilter.h"
+#include "filter_sample.h"
 #include <QtScript>
 
 // Constructor usually performs only two simple tasks of filling the two lists 
@@ -41,7 +41,7 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Random vertex displacement"); 
+        case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
 		default : assert(0); 
 	}
   return QString();
