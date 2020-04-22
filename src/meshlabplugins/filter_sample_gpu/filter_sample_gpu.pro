@@ -1,9 +1,9 @@
 include (../../shared.pri)
 
 HEADERS += \
-    sample_filtergpu.h
+    filter_sample_gpu.h
 
 SOURCES +=\
-    sample_filtergpu.cpp \
-		
-TARGET = sample_filtergpu
+    filter_sample_gpu.cpp
+
+TARGET = filter_sample_gpu

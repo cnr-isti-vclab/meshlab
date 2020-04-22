@@ -3,24 +3,24 @@
 
 ### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
 
-set(SOURCES sample_filtergpu.cpp)
+set(SOURCES filter_sample_gpu.cpp)
 
-set(HEADERS sample_filtergpu.h)
+set(HEADERS filter_sample_gpu.h)
 
-add_library(sample_filtergpu MODULE ${SOURCES} ${HEADERS})
+add_library(filter_sample_gpu MODULE ${SOURCES} ${HEADERS})
 
-target_include_directories(sample_filtergpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(sample_filtergpu PUBLIC common)
+target_include_directories(filter_sample_gpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(filter_sample_gpu PUBLIC common)
 
-target_link_libraries(sample_filtergpu PRIVATE OpenGL::GLU)
+target_link_libraries(filter_sample_gpu PRIVATE OpenGL::GLU)
 
-set_property(TARGET sample_filtergpu PROPERTY FOLDER Plugins)
+set_property(TARGET filter_sample_gpu PROPERTY FOLDER Plugins)
 
-set_property(TARGET sample_filtergpu PROPERTY RUNTIME_OUTPUT_DIRECTORY
+set_property(TARGET filter_sample_gpu PROPERTY RUNTIME_OUTPUT_DIRECTORY
                                               ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-set_property(TARGET sample_filtergpu PROPERTY LIBRARY_OUTPUT_DIRECTORY
+set_property(TARGET filter_sample_gpu PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                               ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS sample_filtergpu DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+install(TARGETS filter_sample_gpu DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
                 COMPONENT Plugins)

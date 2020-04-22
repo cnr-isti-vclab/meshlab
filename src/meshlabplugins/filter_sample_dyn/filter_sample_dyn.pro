@@ -1,9 +1,9 @@
 include (../../shared.pri)
 
 HEADERS += \
-    samplefilterdyn.h
+    filter_sample_dyn.h
 
 SOURCES += \
-    samplefilterdyn.cpp
+    filter_sample_dyn.cpp
 		
-TARGET = samplefilterdyn
+TARGET = filter_sample_dyn

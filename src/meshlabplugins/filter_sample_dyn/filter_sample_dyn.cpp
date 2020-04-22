@@ -26,7 +26,7 @@
 #include <wrap/qt/col_qt_convert.h>
 
 
-#include "samplefilterdyn.h"
+#include "filter_sample_dyn.h"
 
 using namespace vcg;
 
