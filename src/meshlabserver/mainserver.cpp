@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <common/mlapplication.h>
 #include <common/mlexception.h>
 #include <common/interfaces.h>
@@ -691,6 +691,7 @@ struct OutProject
 
 int main(int argc, char *argv[])
 {
+    GLExtensionsManager::init();
     FILE* logfp = stdout;
     FILE* dumpfp = NULL;
     MeshLabApplication app(argc, argv);
@@ -745,7 +746,7 @@ int main(int argc, char *argv[])
 
 	MLSceneGLSharedDataContext shared(meshDocument, gpumeminfo, MeshLabScalarTest<MESHLAB_SCALAR>::doublePrecision(), 100000,100000);
 	shared.makeCurrent();
-	if (!initializeGLextensions_notThrowing())
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 	{
 		printf("GLEW Init: failed!\n");
 		//system("pause");

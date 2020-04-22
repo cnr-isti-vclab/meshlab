@@ -1,5 +1,5 @@
 #include "filter_sdfgpu.h"
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/intersection.h>
@@ -263,7 +263,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     glClearColor(0,0,0,0);
     glClearDepth(1.0);
 
-    if (!initializeGLextensions_notThrowing())
+    if (!GLExtensionsManager::initializeGLextensions_notThrowing())
     {
         Log(0, "Error initializing OpenGL extensions.");
         return false;

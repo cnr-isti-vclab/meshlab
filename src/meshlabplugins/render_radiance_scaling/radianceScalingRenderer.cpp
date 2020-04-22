@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <QGLWidget>
 #include <QTextStream>
 #include <QResource>
@@ -62,7 +62,7 @@ void RadianceScalingRendererPlugin::Init(QAction *, MeshDocument &, MLSceneGLSha
 	}
 
 	gla->makeCurrent();
-	initializeGLextensions();
+	GLExtensionsManager::initializeGLextensions();
 
 	GL_TEST_ERR
 

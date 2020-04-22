@@ -28,7 +28,7 @@ FIRST RELEASE
 ****************************************************************************/
 
 #include <limits>
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
 #include "qualitymapper.h"
 #include <vcg/space/triangle3.h> //for quality
@@ -48,7 +48,7 @@ const QString QualityMapperPlugin::Info()
 
 bool QualityMapperPlugin::StartEdit(MeshModel& m, GLArea *gla,MLSceneGLSharedDataContext* cont )
 { 
-	if (!initializeGLextensions_notThrowing())
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
 	if(!m.hasDataMask(MeshModel::MM_VERTQUALITY))
 	{

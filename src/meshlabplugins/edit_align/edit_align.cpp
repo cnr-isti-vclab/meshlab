@@ -26,7 +26,7 @@ $Log: meshedit.cpp,v $
 ****************************************************************************/
 
 #include "edit_align.h"
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <meshlab/glarea.h>
 #include <meshlab/stdpardialog.h>
 #include <wrap/qt/trackball.h>
@@ -138,7 +138,7 @@ bool EditAlignPlugin::StartEdit(MeshDocument& md, GLArea * gla, MLSceneGLSharedD
     _gla->setCursor(QCursor(QPixmap(":/images/cur_align.png"),1,1));
     if(alignDialog==0)
     {
-		if (!initializeGLextensions_notThrowing())
+        if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 			return false;
 
         alignDialog=new AlignDialog(_gla->window(),this);

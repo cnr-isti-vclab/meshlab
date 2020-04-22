@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 
 #include <QObject>
 #include <QGLContext>
@@ -60,7 +60,7 @@ int RenderHelper::initializeGL(vcg::CallBackPos *cb)
 {
   if(cb) cb( 0, "GL Initialization");
 
-  if (!initializeGLextensions_notThrowing())
+  if (!GLExtensionsManager::initializeGLextensions_notThrowing())
   {
     //Log(0, "GLEW initialization error!");
     return -1;

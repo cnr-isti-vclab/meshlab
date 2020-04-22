@@ -21,25 +21,44 @@
  *                                                                           *
  ****************************************************************************/
 
-#include "mlexception.h"
+#include "GLExtensionsManager.h"
 
-#include <GL/glew.h>
+bool GLExtensionsManager::glewInitialized;
 
-static inline bool initializeGLextensions_notThrowing() {
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        qWarning("GLEW initialization failed: %s",
-                 (const char *)glewGetErrorString(err));
-    }
-    return err == GLEW_OK;
+void GLExtensionsManager::init()
+{
+    glewInitialized = false;
 }
 
-static inline void initializeGLextensions() {
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        throw MLException(QString("GLEW initialization failed: %1\n")
-                              .arg((const char *)glewGetErrorString(err)));
+bool GLExtensionsManager::initializeGLextensions_notThrowing()
+{
+    GLenum err = GLEW_OK;
+    if (!glewInitialized) {
+        glewExperimental = GL_TRUE;
+        err = glewInit();
+        if (err != GLEW_OK) {
+            qWarning("GLEW initialization failed: %s",
+                     (const char *)glewGetErrorString(err));
+        }
+        else {
+            glewInitialized = true;
+        }
+    }
+    return err == GLEW_OK;
+
+}
+
+void GLExtensionsManager::initializeGLextensions()
+{
+    if (!glewInitialized) {
+        glewExperimental = GL_TRUE;
+        GLenum err = glewInit();
+        if (err != GLEW_OK) {
+            throw MLException(QString("GLEW initialization failed: %1\n")
+                                  .arg((const char *)glewGetErrorString(err)));
+        }
+        else {
+            glewInitialized = true;
+        }
     }
 }

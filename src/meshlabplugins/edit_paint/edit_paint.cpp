@@ -21,7 +21,7 @@
  *                                                                           *
  ****************************************************************************/
 #include "edit_paint.h"
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 
 #include <vcg/math/perlin_noise.h>
 
@@ -70,7 +70,7 @@ void EditPaintPlugin::suggestedRenderingData(MeshModel & m, MLRenderingData& dt)
 
 bool EditPaintPlugin::StartEdit(MeshModel & m, GLArea * parent, MLSceneGLSharedDataContext* /*cont*/)
 {
-	if (!initializeGLextensions_notThrowing())
+	if (!GLExtensionsManager::initializeGLextensions_notThrowing())
 		return false;
 	dock = new QDockWidget(parent->window());
 	paintbox = new Paintbox(dock);

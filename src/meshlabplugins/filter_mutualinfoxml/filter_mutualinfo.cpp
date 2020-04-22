@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_mutualinfo.h"
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include "solver.h"
 #include "mutual.h"
 #include <wrap/gl/shot.h>
@@ -137,7 +137,7 @@ bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,E
 bool MutualInfoPlugin::initGL()
 {
     Log(0, "GL Initialization");
-    if (!initializeGLextensions_notThrowing()) {
+    if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
         Log(0, "GLEW initialization error!");
         return false;
     }
