@@ -50,12 +50,12 @@ SUBDIRS += \ #sub projects names
     io_txt \
     io_u3d \
 # Filter samples
-    sampleedit \
-    samplefilter \
-    samplefilterdyn \
+    edit_sample \
+    filter_sample \
+    filter_sample_dyn \
     filter_createiso \
     filter_geodesic \
-    sample_filtergpu \
+    filter_sample_gpu \
 # Filter plugins
     filter_ao \
     filter_camera \
@@ -137,12 +137,12 @@ io_pdb.subdir = meshlabplugins/io_pdb
 io_txt.subdir = meshlabplugins/io_txt
 io_u3d.subdir = meshlabplugins/io_u3d
 # Filter samples
-sampleedit.subdir = sampleplugins/sampleedit
-samplefilter.subdir = sampleplugins/samplefilter
-samplefilterdyn.subdir = sampleplugins/samplefilterdyn
-filter_createiso.subdir = sampleplugins/filter_createiso
-filter_geodesic.subdir = sampleplugins/filter_geodesic
-sample_filtergpu.subdir = sampleplugins/sample_filtergpu
+edit_sample.subdir = meshlabplugins/edit_sample
+filter_sample.subdir = meshlabplugins/filter_sample
+filter_sample_dyn.subdir = meshlabplugins/filter_sample_dyn
+filter_createiso.subdir = meshlabplugins/filter_createiso
+filter_geodesic.subdir = meshlabplugins/filter_geodesic
+filter_sample_gpu.subdir = meshlabplugins/filter_sample_gpu
 # Filter plugins
 filter_ao.subdir = meshlabplugins/filter_ao
 filter_camera.subdir = meshlabplugins/filter_camera
@@ -212,12 +212,12 @@ io_pdb.depends = common
 io_txt.depends = common
 io_u3d.depends = common
 # Filter samples
-sampleedit.depends = common
-samplefilter.depends = common
-samplefilterdyn.depends = common
+edit_sample.depends = common
+filter_sample.depends = common
+filter_sample_dyn.depends = common
 filter_createiso.depends = common
 filter_geodesic.depends = common
-sample_filtergpu.depends = common
+filter_sample_gpu.depends = common
 # Filter plugins
 filter_ao.depends = common
 filter_camera.depends = common

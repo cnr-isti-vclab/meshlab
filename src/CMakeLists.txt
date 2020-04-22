@@ -260,12 +260,12 @@ else()
         # meshlabplugins/edit_texture # not in qmake file?
 
         # Sample Plugins
-        sampleplugins/sampleedit
-        sampleplugins/samplefilter
-        sampleplugins/samplefilterdyn
-        sampleplugins/filter_createiso
-        sampleplugins/filter_geodesic
-        sampleplugins/sample_filtergpu)
+        meshlabplugins/edit_sample
+        meshlabplugins/filter_sample
+        meshlabplugins/filter_sample_dyn
+        meshlabplugins/filter_createiso
+        meshlabplugins/filter_geodesic
+        meshlabplugins/filter_sample_gpu)
 endif()
 
 function(meshlab_install_plugin_xml FN OUTVAR)

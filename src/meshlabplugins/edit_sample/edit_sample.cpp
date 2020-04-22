@@ -28,7 +28,7 @@ $Log: meshedit.cpp,v $
 #include <math.h>
 #include <stdlib.h>
 #include <meshlab/glarea.h>
-#include "sampleedit.h"
+#include "edit_sample.h"
 #include <wrap/gl/pick.h>
 #include <wrap/qt/gl_label.h>
 #include <wrap/qt/device_to_logical.h>

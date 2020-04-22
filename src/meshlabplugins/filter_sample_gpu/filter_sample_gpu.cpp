@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "sample_filtergpu.h"
+#include "filter_sample_gpu.h"
 #include <common/gl_defs.h>
 #include <wrap/glw/glw.h>
 #include <QImage>
