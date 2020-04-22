@@ -22,7 +22,7 @@
 ****************************************************************************/
 
 #include "filter_img_patch_param.h"
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <QtGui>
 #include <wrap/gl/shot.h>
 #include <vcg/space/rect_packer.h>
@@ -194,7 +194,7 @@ bool FilterImgPatchParamPlugin::applyFilter( QAction *act,
 
     
     glContext->makeCurrent();
-    if( !initializeGLextensions_notThrowing() )
+    if( !GLExtensionsManager::initializeGLextensions_notThrowing() )
     {
         this->errorMessage="Failed GLEW initialization";
         return false;

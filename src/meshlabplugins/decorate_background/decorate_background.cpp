@@ -28,7 +28,7 @@
 #include <wrap/gl/addons.h>
 
 #include <meshlab/glarea.h>
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <common/pluginmanager.h>
 
 
@@ -81,7 +81,7 @@ void DecorateBackgroundPlugin::initGlobalParameterSet(QAction *action, RichParam
 
 bool DecorateBackgroundPlugin::startDecorate( QAction * action, MeshDocument &/*m*/, RichParameterSet * parset, GLArea * gla)
 {
-    if (!initializeGLextensions_notThrowing()) {
+    if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
         return false;
     }
     switch(ID(action))
@@ -108,7 +108,7 @@ void DecorateBackgroundPlugin::decorateDoc(QAction *a, MeshDocument &m, RichPara
             if(!cm.IsValid() || (lastname != cubemapFileName ) )
             {
                 qDebug( "Current CubeMapPath Dir: %s ",qUtf8Printable(cubemapFileName));
-                initializeGLextensions();
+                GLExtensionsManager::initializeGLextensions();
                 bool ret = cm.Load(qUtf8Printable(cubemapFileName));
                 lastname=cubemapFileName;
                 if(! ret ) return;

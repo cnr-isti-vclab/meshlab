@@ -48,6 +48,7 @@ exists(../../ML_VERSION){
 
 # Input
 HEADERS += 	\
+    GLExtensionsManager.h \
     filterparameter.h \
     filterscript.h \
     GLLogStream.h \
@@ -66,6 +67,7 @@ HEADERS += 	\
     meshlabdocumentxml.h
 
 SOURCES += \
+    GLExtensionsManager.cpp \
     filterparameter.cpp \
     interfaces.cpp \
     filterscript.cpp \

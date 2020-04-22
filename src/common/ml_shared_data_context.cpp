@@ -1,5 +1,5 @@
 #include "ml_shared_data_context.h"
-#include "gl_defs.h"
+#include "GLExtensionsManager.h"
 #include "mlexception.h"
 #include <vector>
 
@@ -51,7 +51,7 @@ MLSceneGLSharedDataContext::PerMeshMultiViewManager* MLSceneGLSharedDataContext:
 void MLSceneGLSharedDataContext::initializeGL()
 {
     QGLContext *ctx = makeCurrentGLContext();
-    initializeGLextensions();
+    GLExtensionsManager::initializeGLextensions();
     doneCurrentGLContext(ctx);
 }
 

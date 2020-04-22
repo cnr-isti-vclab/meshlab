@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include "filter_ao.h"
 #include <QGLFramebufferObject>
 #include <vcg/math/gen_normal.h>
@@ -378,7 +378,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 {
     //******* INIT GLEW ********/
     cb(0, "Initializing: Glew and Hardware Capabilities");
-    if (initializeGLextensions_notThrowing())
+    if (GLExtensionsManager::initializeGLextensions_notThrowing())
     {
         Log(0, "Error initializing OpenGL extensions");
         errInit = true;

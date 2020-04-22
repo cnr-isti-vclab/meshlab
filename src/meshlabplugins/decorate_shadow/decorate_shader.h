@@ -22,7 +22,7 @@
 ****************************************************************************/
 #ifndef DECORATE_SHADER_H
 #define DECORATE_SHADER_H
-#include <common/gl_defs.h>
+#include <common/GLExtensionsManager.h>
 #include <QFile>
 #include <QImage>
 #include <cassert>
@@ -102,7 +102,7 @@ protected:
       */
     bool initGlew()
     {
-      return initializeGLextensions_notThrowing();
+      return GLExtensionsManager::initializeGLextensions_notThrowing();
     }
 
     /**

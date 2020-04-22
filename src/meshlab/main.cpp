@@ -21,6 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 #include <common/mlapplication.h>
+#include <common/GLExtensionsManager.h>
 #include <QMessageBox>
 #include "mainwindow.h"
 #include <QGLFormat>
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
     fmt.setAlphaBufferSize(8);
     QGLFormat::setDefaultFormat(fmt);
 
+    GLExtensionsManager::init();
     std::unique_ptr<MainWindow> window;
     try {
         window = std::unique_ptr<MainWindow>(new MainWindow());

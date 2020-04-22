@@ -9,6 +9,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
 endif()
 
 set(SOURCES
+    GLExtensionsManager.cpp
     GLLogStream.cpp
     filterparameter.cpp
     filterscript.cpp
@@ -27,6 +28,7 @@ set(SOURCES
     xmlfilterinfo.cpp)
 
 set(HEADERS
+    GLExtensionsManager.h
     GLLogStream.h
     filterparameter.h
     filterscript.h
