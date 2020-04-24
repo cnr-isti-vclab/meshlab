@@ -27,35 +27,16 @@
 #include <common/interfaces.h>
 //class QScriptEngine;
 
-class FilterScreenedPoissonPlugin : public QObject, public MeshFilterInterface
+class FilterScreenedPoissonPlugin : public MeshLabFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshLabFilterInterface)
 public:
 
-	enum {
-		FP_SCREENED_POISSON
-	};
+    FilterScreenedPoissonPlugin();
 
-	FilterScreenedPoissonPlugin();
-	~FilterScreenedPoissonPlugin();
-
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
-
-	FilterClass getClass(QAction* a);
-	int getRequirements(QAction* a);
-
-	bool applyFilter(
-			QAction* filter,
-			MeshDocument& md,
-			RichParameterSet& params,
-			vcg::CallBackPos* cb) ;
-
-	void initParameterSet(QAction* a,MeshModel& m, RichParameterSet& parent);
-	int postCondition(QAction* filter) const;
-	FILTER_ARITY filterArity(QAction*) const;
+    bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) ;
 };
 
 
