@@ -30,6 +30,7 @@ DAMAGE.
 #endif // FAST_SET_UP
 #include <cmath>
 #include "PointStream.h"
+#include "MemoryUsage.h"
 
 #define MEMORY_ALLOCATOR_BLOCK_SIZE 1<<12
 //#define MEMORY_ALLOCATOR_BLOCK_SIZE 0

@@ -29,7 +29,6 @@
 #endif
 #include <cstdio>
 #include "Src/MyTime.h"
-#include "Src/MemoryUsage.h"
 #include "Src/MarchingCubes.h"
 #include "Src/Octree.h"
 #include "Src/SparseMatrix.h"
@@ -439,7 +438,7 @@ int _Execute(
 		}
 
 		DumpOutput( "Leaf Nodes / Active Nodes / Ghost Nodes: %d / %d / %d\n" , (int)tree.leaves() , (int)tree.nodes() , (int)tree.ghostNodes() );
-		DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
+		//DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage())/(1<<20) );
 
 		// Solve the linear system
 		{
@@ -490,7 +489,7 @@ int _Execute(
 
 	cb(90,"Creating Mesh");
 	mesh.resetIterator();
-	int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
+	//int vm = mesh.outOfCorePointCount()+mesh.inCorePoints.size();
 	for(auto pt=mesh.inCorePoints.begin();pt!=mesh.inCorePoints.end();++pt) {
 		Point3D<Real> pp = iXForm*pt->point;
 		vcg::tri::Allocator<CMeshO>::AddVertex(pm,Point3m(pp[0],pp[1],pp[2]));
