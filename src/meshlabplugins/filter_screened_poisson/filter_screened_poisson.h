@@ -53,7 +53,7 @@ public:
 			RichParameterSet& params,
 			vcg::CallBackPos* cb) ;
 
-	void initParameterSet(QAction* a,MeshModel& m, RichParameterSet& parent);
+	void initParameterSet(QAction* a, MeshModel&, RichParameterSet& parlist);
 	int postCondition(QAction* filter) const;
 	FILTER_ARITY filterArity(QAction*) const;
 };
