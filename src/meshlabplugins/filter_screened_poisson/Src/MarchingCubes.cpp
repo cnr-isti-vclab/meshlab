@@ -303,7 +303,7 @@ int	Cube::EdgeReflectEdgeIndex( int edgeIndex )
 // MarchingSquares //
 /////////////////////
 #if NEW_ORDERING
-#pragma message ( "[WARNING] Not clear if MarchingSquares::edgeMask and MarchingSquares::edges are set correctly" )
+//#pragma message ( "[WARNING] Not clear if MarchingSquares::edgeMask and MarchingSquares::edges are set correctly" )
 const int MarchingSquares::cornerMap[] = { 0 , 1 , 3 , 2 };
 bool MarchingSquares::HasEdgeRoots( unsigned char mcIndex , int edgeIndex )
 {
