@@ -241,7 +241,7 @@ public:
 				_totalSize+=m->cm.vn;
 			}
 		} while(m);
-		qDebug("TotalSize %i",_totalSize);
+		qDebug("TotalSize %lu",_totalSize);
 	}
 
 	~MeshDocumentPointStream( void ){}
@@ -253,14 +253,14 @@ public:
 		Point3m nn(0,0,0);
 		//    do
 		{
-			if((_curMesh==0) || (_curPos >= _curMesh->cm.vn) ) {
+			if((_curMesh==0) || (_curPos >= (std::size_t)_curMesh->cm.vn) ) {
 				_curMesh = _md.nextVisibleMesh(_curMesh);
 				_curPos = 0;
 			}
 
 			if(_curMesh==0)
 				return false;
-			if(_curPos < _curMesh->cm.vn) {
+			if(_curPos < (std::size_t)_curMesh->cm.vn) {
 				nn = _curMesh->cm.vert[_curPos].N();
 				Point3m tp = _curMesh->cm.Tr * _curMesh->cm.vert[_curPos].P();
 				Point4m np = _curMesh->cm.Tr *  Point4m(nn[0],nn[1],nn[2],0);
@@ -458,7 +458,7 @@ int _Execute(
 		double valueSum = 0 , weightSum = 0;
 		typename Octree< Real >::template MultiThreadedEvaluator< Degree , BType > evaluator( &tree , solution , pp.ThreadsVal );
 		#pragma omp parallel for num_threads( pp.ThreadsVal ) reduction( + : valueSum , weightSum )
-		for( int j=0 ; j<samples->size() ; j++ ) {
+		for( unsigned int j=0 ; j<samples->size() ; j++ ) {
 			ProjectiveData< OrientedPoint3D< Real > , Real >& sample = (*samples)[j].sample;
 			Real w = sample.weight;
 			if( w>0 ) weightSum += w , valueSum += evaluator.value( sample.data.p / sample.weight , omp_get_thread_num() , (*samples)[j].node ) * w;

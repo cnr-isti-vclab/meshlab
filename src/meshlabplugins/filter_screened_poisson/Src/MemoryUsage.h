@@ -72,6 +72,11 @@ class MemoryInfo
 			,&pid ,s ,&c ,&d ,&d ,&d ,&d ,&d ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&ld ,&ld ,&ld ,&ld ,&d ,&ld ,&llu ,&vm ,&ld ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&d ,&d ,&lu ,&lu );
 
 		fclose(f);
+
+		if (n >= 23)
+			return vm;
+		else
+			return 0;
 /*
 pid %d 
 comm %s 
@@ -115,7 +120,6 @@ processor %d
 rt_priority %lu (since kernel 2.5.19) 
 policy %lu (since kernel 2.5.19) 
 */
-		return vm;
 	}
 
 };

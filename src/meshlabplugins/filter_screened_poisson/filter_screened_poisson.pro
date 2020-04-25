@@ -11,6 +11,7 @@ HEADERS += \
 SOURCES += \
     filter_screened_poisson.cpp \
     Src/MarchingCubes.cpp \
+    Src/Factor.cpp \
     Src/Geometry.cpp
 
 
