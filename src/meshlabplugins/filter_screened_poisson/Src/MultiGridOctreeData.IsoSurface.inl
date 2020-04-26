@@ -26,6 +26,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 */
 
+#include "MultiGridOctreeData.h"
+
 #include "Octree.h"
 #include "MyTime.h"
 #include "MemoryUsage.h"
@@ -762,11 +764,11 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 		if( inBounds && !IsActiveNode( leaf->children ) )
 		{
 			edges.clear();
-			unsigned char mcIndex = ( bValues.mcIndices[ i - bValues.sliceData.nodeOffset ] ) | ( fValues.mcIndices[ i - fValues.sliceData.nodeOffset ]<<4 );
+			//unsigned char mcIndex = ( bValues.mcIndices[ i - bValues.sliceData.nodeOffset ] ) | ( fValues.mcIndices[ i - fValues.sliceData.nodeOffset ]<<4 );
 			// [WARNING] Just because the node looks empty doesn't mean it doesn't get eges from finer neighbors
 			{
 				// Gather the edges from the faces (with the correct orientation)
-				for( int f=0 ; f<Cube::FACES ; f++ )
+				for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 				{
 					int d , o;
 					Cube::FactorFaceIndex( f , d , o );
@@ -825,8 +827,9 @@ void Octree< Real >::_setIsoSurface( LocalDepth depth , int offset , const _Slic
 					long long start = edge[0] , current = edge[1];
 					while( current!=start )
 					{
-						int idx;
-						for( idx=0 ; idx<(int)edges.size() ; idx++ ) if( edges[idx][0]==current ) break;
+						unsigned int idx;
+						for( idx=0 ; idx<edges.size() ; idx++ )
+							if( edges[idx][0]==current ) break;
 						if( idx==edges.size() )
 						{
 							typename std::unordered_map< long long, long long >::const_iterator iter;

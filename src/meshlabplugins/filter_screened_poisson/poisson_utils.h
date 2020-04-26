@@ -458,7 +458,7 @@ int _Execute(
 		double valueSum = 0 , weightSum = 0;
 		typename Octree< Real >::template MultiThreadedEvaluator< Degree , BType > evaluator( &tree , solution , pp.ThreadsVal );
 		#pragma omp parallel for num_threads( pp.ThreadsVal ) reduction( + : valueSum , weightSum )
-		for( unsigned int j=0 ; j<samples->size() ; j++ ) {
+        for( int j=0 ; j<(int)samples->size() ; j++ ) {
 			ProjectiveData< OrientedPoint3D< Real > , Real >& sample = (*samples)[j].sample;
 			Real w = sample.weight;
 			if( w>0 ) weightSum += w , valueSum += evaluator.value( sample.data.p / sample.weight , omp_get_thread_num() , (*samples)[j].node ) * w;

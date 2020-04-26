@@ -187,18 +187,30 @@ template< class Real >
 struct _PointDataAccumulator_< Real , false >
 {
 #if POINT_DATA_RES
-	static inline void _AddToPointData_( PointData< Real , false >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Point3D< Real > center , Real width , Real weight ){ pData.addPoint( SinglePointData< Real , false >( position , value , weight ) , center , width ); }
+	static inline void _AddToPointData_( PointData< Real , false >& pData , Point3D< Real > position , Real value , Point3D< Real > , Point3D< Real > center , Real width , Real weight )
+	{
+		pData.addPoint( SinglePointData< Real , false >( position , value , weight ) , center , width );
+	}
 #else // !POINT_DATA_RES
-	static inline void _AddToPointData_( PointData< Real , false >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Real weight ){ pData.position += position , pData.value += value , pData.weight += weight; }
+	static inline void _AddToPointData_( PointData< Real , false >& pData , Point3D< Real > position , Real value , Point3D< Real > , Real weight )
+	{
+		pData.position += position , pData.value += value , pData.weight += weight;
+	}
 #endif // POINT_DATA_RES
 };
 template< class Real >
 struct _PointDataAccumulator_< Real , true >
 {
 #if POINT_DATA_RES
-	static inline void _AddToPointData_( PointData< Real , true >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Point3D< Real > center , Real width , Real weight ){ pData.addPoint( SinglePointData< Real , true >( position , value , gradient , weight ) , center , width ); }
+	static inline void _AddToPointData_( PointData< Real , true >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Point3D< Real > center , Real width , Real weight )
+	{
+		pData.addPoint( SinglePointData< Real , true >( position , value , gradient , weight ) , center , width );
+	}
 #else // !POINT_DATA_RES
-	static inline void _AddToPointData_( PointData< Real , true >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Real weight ){ pData.position += position , pData.value += value , pData.gradient += gradient , pData.weight += weight; }
+	static inline void _AddToPointData_( PointData< Real , true >& pData , Point3D< Real > position , Real value , Point3D< Real > gradient , Real weight )
+	{
+		pData.position += position , pData.value += value , pData.gradient += gradient , pData.weight += weight;
+	}
 #endif // POINT_DATA_RES
 };
 
@@ -294,7 +306,7 @@ typename Octree< Real >::template DensityEstimator< DensityDegree >* Octree< Rea
 #ifdef FAST_SET_UP
 	std::vector< int > sampleMap( NodeCount() , -1 );
 #pragma omp parallel for num_threads( threads )
-	for( unsigned int i=0 ; i<samples.size() ; i++ )
+        for( int i=0 ; i<(int)samples.size() ; i++ )
 		if( samples[i].sample.weight>0 )
 			sampleMap[ samples[i].node->nodeData.nodeIndex ] = i;
 	std::function< ProjectiveData< OrientedPoint3D< Real > , Real > ( TreeOctNode* ) > SetDensity = [&] ( TreeOctNode* node )
@@ -328,7 +340,7 @@ typename Octree< Real >::template DensityEstimator< DensityDegree >* Octree< Rea
 	};
 	SetDensity( _spaceRoot );
 #else // !FAST_SET_UP
-	for( unsigned int i=0 ; i<samples.size() ; i++ )
+        for( int i=0 ; i<(int)samples.size() ; i++ )
 	{
 		const TreeOctNode* node = samples[i].node;
 		const ProjectiveData< OrientedPoint3D< Real > , Real >& sample = samples[i].sample;

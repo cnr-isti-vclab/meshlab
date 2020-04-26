@@ -119,8 +119,8 @@ template< class C > const C* GetPointer( const C& c ){ return &c; }
 template< class C >       C* GetPointer(       std::vector< C >& v ){ return &v[0]; }
 template< class C > const C* GetPointer( const std::vector< C >& v ){ return &v[0]; }
 
-template< class C >       C* GetPointer(       C* c , int sz ) { return c; }
-template< class C > const C* GetPointer( const C* c , int sz ) { return c; }
+template< class C >       C* GetPointer(       C* c , int ) { return c; }
+template< class C > const C* GetPointer( const C* c , int ) { return c; }
 
 #endif // ARRAY_DEBUG
 #endif // ARRAY_INCLUDED
