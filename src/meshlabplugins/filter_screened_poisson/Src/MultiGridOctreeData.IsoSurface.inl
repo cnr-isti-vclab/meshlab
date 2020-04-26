@@ -318,7 +318,7 @@ void Octree< Real >::_setSliceIsoVertices( const BSplineData< ColorDegree , BTyp
 				neighborKey.getNeighbors( leaf );
 				if( densityWeights ) weightKey.getNeighbors( leaf );
 				if( colorData ) colorKey.getNeighbors( leaf );
-				for( int e=0 ; e<Square::EDGES ; e++ )
+				for( unsigned int e=0 ; e<Square::EDGES ; e++ )
 					if( MarchingSquares::HasEdgeRoots( sValues.mcIndices[idx] , e ) )
 					{
 						int vIndex = eIndices[e];
@@ -346,7 +346,7 @@ void Octree< Real >::_setSliceIsoVertices( const BSplineData< ColorDegree , BTyp
 							if( stillOwner )
 							{
 								// We only need to pass the iso-vertex down if the edge it lies on is adjacent to a coarser leaf
-								bool isNeeded;
+								bool isNeeded = false;
 								switch( o )
 								{
 								case 0: isNeeded = ( !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][1] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][2*y][2*z] ) || !_isValidSpaceNode( neighborKey.neighbors[ _localToGlobal( depth ) ].neighbors[1][1][2*z] ) ) ; break;
@@ -1053,12 +1053,14 @@ int Octree< Real >::_addIsoPolygons( CoredMeshData< Vertex >& mesh , std::vector
 		std::vector< int > triangle( 3 );
 
 		if( addBarycenter )
-			for( int i=0 ; i<(int)polygon.size() ; i++ )
-				for( int j=0 ; j<i ; j++ )
+			for( unsigned int i=0 ; i<polygon.size() ; i++ )
+				for( unsigned int j=0 ; j<i ; j++ )
 					if( (i+1)%polygon.size()!=j && (j+1)%polygon.size()!=i )
 					{
 						Vertex v1 = polygon[i].second , v2 = polygon[j].second;
-						for( int k=0 ; k<3 ; k++ ) if( v1.point[k]==v2.point[k] ) isCoplanar = true;
+						for( int k=0 ; k<3 ; k++ )
+							if( v1.point[k]==v2.point[k] )
+								isCoplanar = true;
 					}
 		if( isCoplanar )
 		{
