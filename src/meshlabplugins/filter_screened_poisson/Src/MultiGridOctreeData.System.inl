@@ -58,7 +58,7 @@ struct _ConstraintCalculator_< Real , Degree , false >
 		return (Real)( px( q[0] ) * py( q[1] ) * pz( q[2] ) * p.weight * p.value ) * valueWeight;
 #endif // POINT_DATA_RES
 	}
-	static inline Real _CalculateConstraint_( const PointData< Real , false >& p , const Polynomial< Degree >& px , const Polynomial< Degree >& py , const Polynomial< Degree >& pz , const Polynomial< Degree >& dpx , const Polynomial< Degree >& dpy , const Polynomial< Degree >& dpz )
+	static inline Real _CalculateConstraint_( const PointData< Real , false >& p , const Polynomial< Degree >& px , const Polynomial< Degree >& py , const Polynomial< Degree >& pz , const Polynomial< Degree >& , const Polynomial< Degree >& , const Polynomial< Degree >& )
 	{
 #if POINT_DATA_RES
 		Real constraint = 0;
@@ -74,9 +74,15 @@ struct _ConstraintCalculator_< Real , Degree , false >
 #endif // POINT_DATA_RES
 	}
 #if POINT_DATA_RES
-	static inline void _CalculateCoarser_( int c , PointData< Real , false >& p , Real value , Point3D< Real > gradient , Real valueWeight , Real gradientWeight ){ p[c]._value = value * valueWeight * p[c].weight; }
+	static inline void _CalculateCoarser_( int c , PointData< Real , false >& p , Real value , Point3D< Real > , Real valueWeight , Real )
+	{
+		p[c]._value = value * valueWeight * p[c].weight;
+	}
 #else // !POINT_DATA_RES
-	static inline void _CalculateCoarser_( PointData< Real , false >& p , Real value , Point3D< Real > gradient , Real valueWeight , Real gradientWeight ){ p._value = value * valueWeight * p.weight; }
+	static inline void _CalculateCoarser_( PointData< Real , false >& p , Real value , Point3D< Real > , Real valueWeight , Real )
+	{
+		p._value = value * valueWeight * p.weight;
+	}
 #endif // POINT_DATA_RES
 };
 template< class Real , int Degree >
@@ -738,7 +744,7 @@ Real Octree< Real >::_coarserFunctionValue( Point3D< Real > p , const PointSuppo
 {
 	static const int SupportSize = BSplineSupportSizes< FEMDegree >::SupportSize;
 	static const int  LeftSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int  LeftPointSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
 
@@ -783,7 +789,7 @@ Point3D< Real > Octree< Real >::_coarserFunctionGradient( Point3D< Real > p , co
 {
 	static const int SupportSize = BSplineSupportSizes< FEMDegree >::SupportSize;
 	static const int  LeftSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int  LeftPointSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
 
@@ -843,7 +849,7 @@ Real Octree< Real >::_finerFunctionValue( Point3D< Real > p , const PointSupport
 	static const int  LeftPointSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
 	static const int  LeftSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 
 	double pointValue = 0;
 	LocalDepth depth = _localDepth( pointNode );
@@ -874,7 +880,7 @@ Point3D< Real > Octree< Real >::_finerFunctionGradient( Point3D< Real > p , cons
 	static const int  LeftPointSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
 	static const int  LeftSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 
 	Point3D< double > pointGradient = 0;
 	LocalDepth depth = _localDepth( pointNode );
@@ -1128,8 +1134,8 @@ int Octree< Real >::_setMatrixRow( const FEMSystemFunctor& F , const Interpolati
 					const TreeOctNode* _node = neighbors.neighbors[i+OverlapRadius][j+OverlapRadius][k+OverlapRadius];
 					if( _isValidSpaceNode( _node ) && (*interpolationInfo)( _node ) )
 					{
-						const PointData< Real , HasGradients >& pData = *( (*interpolationInfo)( _node ) );
 #if POINT_DATA_RES
+						const PointData< Real , HasGradients >& pData = *( (*interpolationInfo)( _node ) );
 						for( int c=0 ; c<PointData< Real , HasGradients >::SAMPLES ; c++ ) if( pData[c].weight )
 #endif // POINT_DATA_RES
 						{
@@ -1545,10 +1551,10 @@ template< int FEMDegree , BoundaryType BType >
 int Octree< Real >::_getMatrixRowSize( const typename TreeOctNode::Neighbors< BSplineOverlapSizes< FEMDegree , FEMDegree >::OverlapSize >& neighbors ) const
 {
 	static const int OverlapSize   =   BSplineOverlapSizes< FEMDegree , FEMDegree >::OverlapSize;
-	static const int OverlapRadius = - BSplineOverlapSizes< FEMDegree , FEMDegree >::OverlapStart;
+	//static const int OverlapRadius = - BSplineOverlapSizes< FEMDegree , FEMDegree >::OverlapStart;
 
 	int count = 0;
-	int nodeIndex = neighbors.neighbors[OverlapRadius][OverlapRadius][OverlapRadius]->nodeData.nodeIndex;
+	//int nodeIndex = neighbors.neighbors[OverlapRadius][OverlapRadius][OverlapRadius]->nodeData.nodeIndex;
 	const TreeOctNode* const * _nodes = &neighbors.neighbors[0][0][0];
 	for( int i=0 ; i<OverlapSize*OverlapSize*OverlapSize ; i++ ) if( _isValidFEMNode( _nodes[i] ) ) count++;
 	return count;
@@ -1651,7 +1657,7 @@ void Octree< Real >::_updateCumulativeIntegralConstraintsFromFiner( const FEMSys
 	// Get the stencil describing the Laplacian relating coefficients @(depth) with coefficients @(depth-1)
 	Stencil< double , OverlapSize > stencils[2][2][2];
 	SystemCoefficients< FEMDegree , BType , FEMDegree , BType >::SetCentralSystemStencils( F , childIntegrator , stencils );
-	size_t start = _sNodesBegin( highDepth) , end = _sNodesEnd(highDepth) ;
+	//size_t start = _sNodesBegin( highDepth) , end = _sNodesEnd(highDepth) ;
 	//int lStart = _sNodesBegin(highDepth-1);
 
 	// Iterate over the nodes @( depth )

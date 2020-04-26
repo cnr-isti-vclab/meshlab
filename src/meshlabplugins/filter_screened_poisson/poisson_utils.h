@@ -200,7 +200,7 @@ public:
 
 	bool nextPoint( OrientedPoint3D< Real >& pt, Point3m &d)
 	{
-		if(_curPos>=_m.vn)
+		if(_curPos>=(unsigned int)_m.vn)
 			return false;
 		Point3m &nn = _m.vert[_curPos].N();
 		Point3m tp = _m.Tr * _m.vert[_curPos].P();
