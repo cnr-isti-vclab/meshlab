@@ -545,7 +545,7 @@ void Octree< Real >::_upSample( LocalDepth highDepth , DenseNodeData< C , FEMDeg
 	static const int DownSampleSize = BSplineSupportSizes< FEMDegree >::DownSample0Size > BSplineSupportSizes< FEMDegree >::DownSample1Size ? BSplineSupportSizes< FEMDegree >::DownSample0Size : BSplineSupportSizes< FEMDegree >::DownSample1Size;
 	Stencil< double , DownSampleSize > downSampleStencils[ Cube::CORNERS ];
 	int lowCenter = ( 1<<lowDepth )>>1;
-	for( int c=0 ; c<Cube::CORNERS ; c++ )
+	for( unsigned int c=0 ; c<Cube::CORNERS ; c++ )
 	{
 		int cx , cy , cz;
 		Cube::FactorCornerIndex( c , cx , cy , cz );
@@ -943,14 +943,14 @@ void Octree< Real >::_updateCumulativeInterpolationConstraintsFromFiner( const I
 	static const int  LeftPointSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
 	static const int  LeftSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 
 	// Note: We can't iterate over the finer point nodes as the point weights might be
 	// scaled incorrectly, due to the adaptive exponent. So instead, we will iterate
 	// over the coarser nodes and evaluate the finer solution at the associated points.
 	LocalDepth  lowDepth = highDepth-1;
 	if( lowDepth<0 ) return;
-	size_t start = _sNodesBegin(lowDepth) , end = _sNodesEnd(lowDepth);
+	//size_t start = _sNodesBegin(lowDepth) , end = _sNodesEnd(lowDepth);
 	std::vector< PointSupportKey< FEMDegree > > neighborKeys( std::max< int >( 1 , threads ) );
 	for( size_t i=0 ; i<neighborKeys.size() ; i++ ) neighborKeys[i].set( _localToGlobal( lowDepth ) );
 #pragma omp parallel for num_threads( threads )
@@ -1293,7 +1293,7 @@ int Octree< Real >::_getSliceMatrixAndUpdateConstraints( const FEMSystemFunctor&
 		}
 	}
 #if !defined( _WIN32 ) && !defined( _WIN64 )
-#pragma message( "[WARNING] I'm not sure how expensive this system call is on non-Windows system. (You may want to comment this out.)" )
+//#pragma message( "[WARNING] I'm not sure how expensive this system call is on non-Windows system. (You may want to comment this out.)" )
 #endif // !_WIN32 && !_WIN64
 	memoryUsage();
 	return 1;
@@ -1638,7 +1638,7 @@ void Octree< Real >::_updateConstraintsFromCoarser( const FEMSystemFunctor& F , 
 // Given the solution @( depth ) add to the met constraints @( depth-1 )
 template< class Real >
 template< int FEMDegree , BoundaryType BType , class FEMSystemFunctor >
-void Octree< Real >::_updateCumulativeIntegralConstraintsFromFiner( const FEMSystemFunctor& F , const BSplineData< FEMDegree , BType >& bsData , LocalDepth highDepth , const DenseNodeData< Real , FEMDegree >& fineSolution , DenseNodeData< Real , FEMDegree >& coarseConstraints ) const
+void Octree< Real >::_updateCumulativeIntegralConstraintsFromFiner( const FEMSystemFunctor& F , const BSplineData< FEMDegree , BType >& , LocalDepth highDepth , const DenseNodeData< Real , FEMDegree >& fineSolution , DenseNodeData< Real , FEMDegree >& coarseConstraints ) const
 {
 	typename BSplineIntegrationData< FEMDegree , BType , FEMDegree , BType >::FunctionIntegrator::template ChildIntegrator< DERIVATIVES( FEMDegree ) , DERIVATIVES( FEMDegree ) > childIntegrator;
 	BSplineIntegrationData< FEMDegree , BType , FEMDegree , BType >::SetChildIntegrator( childIntegrator , highDepth-1 );
@@ -1651,8 +1651,8 @@ void Octree< Real >::_updateCumulativeIntegralConstraintsFromFiner( const FEMSys
 	// Get the stencil describing the Laplacian relating coefficients @(depth) with coefficients @(depth-1)
 	Stencil< double , OverlapSize > stencils[2][2][2];
 	SystemCoefficients< FEMDegree , BType , FEMDegree , BType >::SetCentralSystemStencils( F , childIntegrator , stencils );
-	size_t start = _sNodesBegin( highDepth) , end = _sNodesEnd(highDepth) , range = end-start;
-	int lStart = _sNodesBegin(highDepth-1);
+	size_t start = _sNodesBegin( highDepth) , end = _sNodesEnd(highDepth) ;
+	//int lStart = _sNodesBegin(highDepth-1);
 
 	// Iterate over the nodes @( depth )
 	std::vector< SupportKey > neighborKeys( std::max< int >( 1 , threads ) );
@@ -1926,7 +1926,7 @@ void Octree< Real >::_addFEMConstraints( const FEMConstraintFunctor& F , const C
 	// Compute the contribution from all coarser depths
 	for( LocalDepth d=1 ; d<=maxDepth ; d++ )
 	{
-		size_t start = _sNodesBegin( d ) , end = _sNodesEnd( d );
+		//size_t start = _sNodesBegin( d ) , end = _sNodesEnd( d );
 		Stencil< _D , CFEMOverlapSize > stencils[2][2][2];
 		typename SystemCoefficients< CDegree , CBType , FEMDegree , FEMBType >::ChildIntegrator childIntegrator;
 		BSplineIntegrationData< CDegree , CBType , FEMDegree , FEMBType >::SetChildIntegrator( childIntegrator , d-1 );

@@ -30,6 +30,7 @@ DAMAGE.
 #define ALLOCATOR_INCLUDED
 
 #include <vector>
+#include <iostream>
 
 class AllocatorState
 {
@@ -148,7 +149,7 @@ public:
 		if( elements>blockSize ) fprintf( stderr , "[ERROR] Allocator: elements bigger than block-size: %d>%d\n" , elements , blockSize ) , exit( 0 );
 		if( remains<elements )
 		{
-			if( index==memory.size()-1 )
+			if( index==(int)memory.size()-1 )
 			{
 				mem = new T[blockSize];
 				if( !mem ) fprintf( stderr , "[ERROR] Failed to allocate memory\n" ) , exit(0);

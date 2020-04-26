@@ -57,7 +57,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The face stencil
-		for( int f=0 ; f<Cube::FACES ; f++ )
+		for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 		{
 			int dir , off;
 			Cube::FactorFaceIndex( f , dir , off );
@@ -94,7 +94,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The edge stencil
-		for( int e=0 ; e<Cube::EDGES ; e++ )
+		for( unsigned int e=0 ; e<Cube::EDGES ; e++ )
 		{
 			int orientation , i1 , i2;
 			Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
@@ -131,7 +131,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 		}
 
 		//// The corner stencil
-		for( int c=0 ; c<Cube::CORNERS ; c++ )
+		for( unsigned int c=0 ; c<Cube::CORNERS ; c++ )
 		{
 			int cx , cy  ,cz;
 			Cube::FactorCornerIndex( c , cx , cy , cz );
@@ -170,7 +170,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The face stencil
-			for( int f=0 ; f<Cube::FACES ; f++ )
+			for( unsigned int f=0 ; f<Cube::FACES ; f++ )
 			{
 				int dir , off;
 				Cube::FactorFaceIndex( f , dir , off );
@@ -207,7 +207,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The edge stencil
-			for( int e=0 ; e<Cube::EDGES ; e++ )
+			for( unsigned int e=0 ; e<Cube::EDGES ; e++ )
 			{
 				int orientation , i1 , i2;
 				Cube::FactorEdgeIndex( e , orientation , i1 , i2 );
@@ -244,7 +244,7 @@ void Octree< Real >::_Evaluator< FEMDegree , BType >::set( LocalDepth depth )
 			}
 
 			//// The corner stencil
-			for( int c=0 ; c<Cube::CORNERS ; c++ )
+			for( unsigned int c=0 ; c<Cube::CORNERS ; c++ )
 			{
 				int cx , cy  ,cz;
 				Cube::FactorCornerIndex( c , cx , cy , cz );
@@ -269,7 +269,7 @@ V Octree< Real >::_getValue( const ConstPointSupportKey< FEMDegree >& neighborKe
 {
 	static const int SupportSize = BSplineSupportSizes< FEMDegree >::SupportSize;
 	static const int  LeftSupportRadius = -BSplineSupportSizes< FEMDegree >::SupportStart;
-	static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
+	//static const int RightSupportRadius =  BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int  LeftPointSupportRadius =   BSplineSupportSizes< FEMDegree >::SupportEnd;
 	static const int RightPointSupportRadius = - BSplineSupportSizes< FEMDegree >::SupportStart;
 
