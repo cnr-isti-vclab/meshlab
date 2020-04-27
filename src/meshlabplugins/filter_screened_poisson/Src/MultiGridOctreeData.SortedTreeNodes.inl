@@ -250,7 +250,7 @@ void SortedTreeNodes::setSliceTableData( SliceTableData& sData , int depth , int
 	for( size_t i=0 ; i<sData.nodeCount * Square::CORNERS ; i++ ) if( sData._cMap[i] ) sData._cMap[i] = cCount++;
 	for( size_t i=0 ; i<sData.nodeCount * Square::EDGES   ; i++ ) if( sData._eMap[i] ) sData._eMap[i] = eCount++;
 	for( size_t i=0 ; i<sData.nodeCount * Square::FACES   ; i++ ) if( sData._fMap[i] ) sData._fMap[i] = fCount++;
-	//#pragma omp parallel for num_threads( threads )
+    #pragma omp parallel for num_threads( threads )
 	for( int i=0 ; i<sData.nodeCount ; i++ )
 	{
 		for( unsigned int j=0 ; j<Square::CORNERS ; j++ ) sData.cTable[i][j] = sData._cMap[ sData.cTable[i][j] ];
