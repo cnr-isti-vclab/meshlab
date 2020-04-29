@@ -46,9 +46,14 @@ jobs:
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: qtscript xmlpatterns
     - name: Install dependencies
       run: |
-       sh install/linux/linux_setup_env_ubuntu.sh
+       sudo apt-get install -y mesa-common-dev libglu1-mesa-dev libglew-dev libeigen3-dev libgmp-dev
+       sudo apt-get install -y libxkbcommon-x11-0 chrpath
     - name: Setup env variables
       id: envs
       run: |
