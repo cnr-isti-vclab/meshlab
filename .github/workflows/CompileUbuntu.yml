@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
        sudo apt-get install -y mesa-common-dev libglu1-mesa-dev lib3ds-dev libglew-dev libeigen3-dev libopenctm-dev libgmp-dev libqhull-dev #libmuparser-dev
-       sudo apt-get install -y chrpath
+       sudo apt-get install -y libxkbcommon-x11-0 chrpath
     - name: Setup env variables
       id: envs
       run: |
