@@ -16,10 +16,6 @@ include(find_system_libs.pri)
 # MeshLab requires C++11
 CONFIG += c++11
 
-# MeshLab requires OpenMP
-win32-msvc:QMAKE_CXXFLAGS+=/openmp #Just for cl, flag is /openmp instead of -fopenmp
-!win32-msvc:QMAKE_CXXFLAGS+= -fopenmp
-
 #Debug and Release configs
 CONFIG(release, debug|release):QMAKE_CXXFLAGS += -O3 -DNDEBUG
 CONFIG(debug, debug|release):QMAKE_CXXFLAGS += -O0 -g
@@ -39,6 +35,9 @@ CONFIG(system_eigen3): EIGENDIR = /usr/include/eigen3
 
 ######## WINDOWS SETTINGS ##########
 
+# Flags for OpenMP
+win32-msvc:QMAKE_CXXFLAGS+=/openmp #Just for cl, flag is /openmp instead of -fopenmp
+
 # the following line is needed to avoid mismatch between
 # the awful min/max macros of windows and the limits max
 win32:DEFINES += NOMINMAX
@@ -52,15 +51,16 @@ win32-gcc:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -L$$MESHLAB
 
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
-# using brew install clang from llvm and libomp
+# using brew install libomp
 # comment these three lines for using default OSX compiler
-macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
-macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
-macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib
+#macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
+#macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
+#macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib
 
-# Other flags for OpenMP
-macx:QMAKE_CXXFLAGS += -Xpreprocessor
-macx:QMAKE_LFLAGS += -lomp
+# Flags for OpenMP
+macx:QMAKE_CXXFLAGS += -Xpreprocessor -fopenmp
+macx:QMAKE_LFLAGS += -L/usr/local/opt/libomp/lib/ -lomp
+macx:INCLUDEPATH += /usr/local/include/
 
 # Set up library search paths
 macx:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -L$$MESHLAB_DISTRIB_DIRECTORY/lib
@@ -68,7 +68,8 @@ macx:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -L$$MESHLAB_DISTRIB
 
 ######## LINUX SETTINGS ##########
 
-#linux-g++:QMAKE_CXXFLAGS+=-Wno-unknown-pragmas
+# Flags for OpenMP
+linux:QMAKE_CXXFLAGS+= -fopenmp
 
 # Set up library search paths
 linux:QMAKE_RPATHDIR += $$MESHLAB_DISTRIB_DIRECTORY/lib
