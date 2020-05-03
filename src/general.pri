@@ -51,15 +51,9 @@ win32-gcc:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -L$$MESHLAB
 
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
-# using brew install libomp
-# comment these three lines for using default OSX compiler
-#macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
-#macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
-#macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib
-
 # Flags for OpenMP
 macx:QMAKE_CXXFLAGS += -Xpreprocessor -fopenmp
-macx:QMAKE_LFLAGS += -L/usr/local/opt/libomp/lib/ -lomp
+macx:QMAKE_LFLAGS += -L/usr/local/opt/libomp/lib/ -lomp #brew install libomp
 macx:INCLUDEPATH += /usr/local/include/
 
 # Set up library search paths
