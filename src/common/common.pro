@@ -17,12 +17,6 @@ win32-g++:DLLDESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/lib
 
 linux:CONFIG += dll
 
-
-# The following lines are necessary to avoid that when you re-compile everything you still find old dll in the plugins dir
-macx:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.dylib
-win32:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.dll
-linux:QMAKE_CLEAN +=  $$MESHLAB_DISTRIB_DIRECTORY/plugins/*.so
-
 INCLUDEPATH *= \
     ../.. \
     $$VCGDIR \
@@ -85,13 +79,13 @@ SOURCES += \
     ml_selection_buffers.cpp
 
 macx:QMAKE_POST_LINK = "\
-    if [ -d  $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ]; \
+    if [ -d  $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/Frameworks/ ]; \
     then  \
         echo "Copying";  \
     else  \
-        mkdir -p $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS;  \
+        mkdir -p $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/Frameworks;  \
     fi;   \
-    cp $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.* $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/ ;\
+    cp $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.* $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/Frameworks/ ;\
 #    if [ -d ../external/ ];\
 #    then \
 #        echo "ok external dir exists"; \

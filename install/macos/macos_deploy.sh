@@ -48,7 +48,7 @@ done
 
 for x in $DISTRIB_PATH/$APPNAME/Contents/PlugIns/*.dylib
 do
- install_name_tool -change libmeshlab-common.1.dylib @executable_path/libmeshlab-common.1.dylib $x
+ install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $x
 done
 
 echo 'Copying other files'

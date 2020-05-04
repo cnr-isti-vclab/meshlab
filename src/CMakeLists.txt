@@ -221,7 +221,7 @@ else()
         meshlabplugins/filter_meshing
         meshlabplugins/filter_mls
         meshlabplugins/filter_mutualglobal
-        meshlabplugins/filter_mutualinfoxml # TODO rename dir - actually named filter_mutualinfo
+        meshlabplugins/filter_mutualinfo 
         meshlabplugins/filter_plymc
         meshlabplugins/filter_qhull
         meshlabplugins/filter_quality

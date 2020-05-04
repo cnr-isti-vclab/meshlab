@@ -296,7 +296,7 @@ QString PluginManager::getDefaultPluginDirPath()
 		return pluginsDir.absolutePath();
 	}
 #if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
-	if (pluginsDir.dirName() == "bin") {
+    else if (pluginsDir.dirName() == "bin") {
 		pluginsDir.cdUp();
 		pluginsDir.cd("lib");
 		pluginsDir.cd("meshlab");
