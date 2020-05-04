@@ -46,17 +46,9 @@ do
 cp $x $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
 done
 
-for x in $DISTRIB_PATH/$APPNAME/Contents/PlugIns/*.dylib
-do
- install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $x
-done
-
 echo 'Copying other files'
 
-#cp $SOURCE_PATH/../LICENSE.txt $DISTRIB_PATH
-#cp $SOURCE_PATH/../docs/readme.txt $DISTRIB_PATH
-
-#plugins
+#u3d
 cp -r $DISTRIB_PATH/plugins/U3D_OSX  $DISTRIB_PATH/$APPNAME/Contents/PlugIns/
 
 #shaders
