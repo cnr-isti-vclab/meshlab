@@ -6,7 +6,7 @@
 #
 # Requires: homebrew
 
-brew install libomp qt
+brew install llvm libomp qt
 npm install -g appdmg
 
 echo "export QTDIR=/usr/local/opt/qt" >> ~/.bash_profile
