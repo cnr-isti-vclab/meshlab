@@ -51,15 +51,15 @@ win32-gcc:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -L$$MESHLAB
 
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
-# LLVM Compiler (HomeBrew)
+# LLVM Compiler (HomeBrew) and omp
 macx:QMAKE_CXX = /usr/local/opt/llvm/bin/clang++
-macx:QMAKE_CXXFLAGS += -I/usr/local/opt/llvm/include
-#macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib
+macx:QMAKE_CXXFLAGS += -fopenmp -I/usr/local/opt/llvm/include -Xpreprocessor
+macx:QMAKE_LFLAGS += -L/usr/local/opt/llvm/lib -lomp
 
-# Flags for OpenMP
-macx:QMAKE_CXXFLAGS += -Xpreprocessor -fopenmp
-macx:QMAKE_LFLAGS += -L/usr/local/opt/libomp/lib/ -lomp #brew install libomp
-macx:INCLUDEPATH += /usr/local/include/
+# Use these flags if you want use the Apple default clang compiler
+#macx:QMAKE_CXXFLAGS += -Xpreprocessor -fopenmp
+#macx:QMAKE_LFLAGS += -L/usr/local/opt/libomp/lib/ -lomp #brew install libomp
+#macx:INCLUDEPATH += /usr/local/include/
 
 # Set up library search paths
 macx:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/macx64 -L$$MESHLAB_DISTRIB_DIRECTORY/lib
