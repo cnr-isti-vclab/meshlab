@@ -20,12 +20,13 @@ QT += \
     script
 
 DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY
+
+
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 macx:DESTDIR = $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/
 macx:QMAKE_POST_LINK = " \
-    install_name_tool -change libmeshlab-common.1.dylib @executable_path/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
+    install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlabserver \
 "
-
-macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/libmeshlab-common.dylib
 
 win32-msvc:LIBS += -lopengl32 -lGLU32 -L$$MESHLAB_DISTRIB_DIRECTORY/lib -lmeshlab-common
 win32-g++:LIBS += -lmeshlab-common

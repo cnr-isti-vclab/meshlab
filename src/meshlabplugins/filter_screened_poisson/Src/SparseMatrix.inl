@@ -29,6 +29,7 @@ DAMAGE.
 #include <float.h>
 #include <string.h>
 
+#include "SparseMatrix.h"
 
 ///////////////////
 //  SparseMatrix //

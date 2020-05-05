@@ -133,8 +133,8 @@ macx:LIBS += \
     $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 
 macx:QMAKE_POST_LINK += "\
-    cp -P $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS; \
-    install_name_tool -change libmeshlab-common.1.dylib @executable_path/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
+    cp -P $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/Frameworks; \
+    install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/meshlab.app/Contents/MacOS/meshlab \
     "
 
 #CONFIG(release,debug | release) {

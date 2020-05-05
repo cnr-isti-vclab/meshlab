@@ -9,10 +9,14 @@ QT += xml
 QT += xmlpatterns
 QT += script
 
-mac:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
 win32-msvc:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/meshlab-common.lib -lopengl32 -lGLU32
 win32-g++:LIBS += -lmeshlab-common -lopengl32 -lGLU32
 linux:LIBS += -lmeshlab-common -lGL -lGLU
+
+macx:LIBS += $$MESHLAB_DISTRIB_DIRECTORY/lib/libmeshlab-common.dylib
+macx:QMAKE_POST_LINK = " \ #every plugin needs to point to meshlab-common placed in the appbundle
+    install_name_tool -change libmeshlab-common.1.dylib @rpath/libmeshlab-common.1.dylib $$MESHLAB_DISTRIB_DIRECTORY/plugins/lib$${TARGET}.dylib; \
+"
 
 win32-msvc:DEFINES += GLEW_STATIC _USE_MATH_DEFINES
 

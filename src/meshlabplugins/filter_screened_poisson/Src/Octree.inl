@@ -30,6 +30,7 @@ DAMAGE.
 #include <math.h>
 #include <algorithm>
 #include <functional>
+#include "Octree.h"
 
 /////////////
 // OctNode //
@@ -268,7 +269,7 @@ int OctNode< NodeData >::maxDepth(void) const{
 	if(!children){return 0;}
 	else{
 		int c,d;
-		for(int i=0;i<Cube::CORNERS;i++){
+		for(unsigned int i=0;i<Cube::CORNERS;i++){
 			d=children[i].maxDepth();
 			if(!i || d>c){c=d;}
 		}
@@ -293,7 +294,7 @@ size_t OctNode< NodeData >::leaves( void ) const
 	else
 	{
 		size_t c=0;
-		for( int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].leaves();
+		for( unsigned int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].leaves();
 		return c;
 	}
 }
@@ -305,7 +306,7 @@ size_t OctNode< NodeData >::maxDepthLeaves( int maxDepth ) const
 	else
 	{
 		size_t c=0;
-		for( int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].maxDepthLeaves(maxDepth);
+		for( unsigned int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].maxDepthLeaves(maxDepth);
 		return c;
 	}
 }
@@ -644,7 +645,12 @@ template< unsigned int Width >
 OctNode< NodeData >::Neighbors< Width >::Neighbors( void ){ clear(); }
 template< class NodeData >
 template< unsigned int Width >
-void OctNode< NodeData >::Neighbors< Width >::clear( void ){ for( int i=0 ; i<Width ; i++ ) for( int j=0 ; j<Width ; j++ ) for( int k=0 ; k<Width ; k++ ) neighbors[i][j][k]=NULL; }
+void OctNode< NodeData >::Neighbors< Width >::clear( void ){
+	for( unsigned int i=0 ; i<Width ; i++ )
+		for( unsigned int j=0 ; j<Width ; j++ )
+			for( unsigned int k=0 ; k<Width ; k++ )
+				neighbors[i][j][k]=NULL;
+}
 
 /////////////////////////////
 // OctNode::ConstNeighbors //
@@ -654,7 +660,12 @@ template< unsigned int Width >
 OctNode< NodeData >::ConstNeighbors< Width >::ConstNeighbors( void ){ clear(); }
 template< class NodeData >
 template< unsigned int Width >
-void OctNode< NodeData >::ConstNeighbors< Width >::clear( void ){ for( int i=0 ; i<Width ; i++ ) for( int j=0 ; j<Width ; j++ ) for( int k=0 ; k<Width ; k++ ) neighbors[i][j][k]=NULL; }
+void OctNode< NodeData >::ConstNeighbors< Width >::clear( void ){
+	for( unsigned int i=0 ; i<Width ; i++ )
+		for( unsigned int j=0 ; j<Width ; j++ )
+			for( unsigned int k=0 ; k<Width ; k++ )
+				neighbors[i][j][k]=NULL;
+}
 
 //////////////////////////
 // OctNode::NeighborKey //

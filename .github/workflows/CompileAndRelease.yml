@@ -57,7 +57,7 @@ jobs:
     - name: Setup env variables
       id: envs
       run: |
-        echo  ::set-output name=date::"$(date +%Y.%m)"
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
         sh install/linux/linux_build.sh
@@ -95,19 +95,23 @@ jobs:
         git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Install dependencies
       run: |
-        brew install libomp qt
+        brew install libomp
         npm install -g appdmg
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        modules: qtscript xmlpatterns
     - name: Setup env variables
       id: envs
       shell: bash
       run: |
         #sh install/macos/macos_setup_env.sh
         #necessary here on github actions:
-        echo '::set-env name=QTDIR::/usr/local/opt/qt'
-        echo '::add-path::/usr/local/opt/qt/bin'
-        echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
-        echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
-        echo  ::set-output name=date::"$(date +%Y.%m)"
+        #echo '::set-env name=QTDIR::/usr/local/opt/qt'
+        #echo '::add-path::/usr/local/opt/qt/bin'
+        #echo '::set-env name=LD_LIBRARY_PATH::/usr/local/opt/qt/lib:${{env.LD_LIBRARY_PATH}}'
+        #echo '::set-env name=PKG_CONFIG_PATH::/usr/local/opt/qt/lib:${{env.PKG_CONFIG_PATH}}'
+        echo  ::set-output name=date::"$(cat ML_VERSION)"
     - name: Build MeshLab
       run: |
         sh install/macos/macos_build.sh
@@ -147,7 +151,7 @@ jobs:
       id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+        echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt

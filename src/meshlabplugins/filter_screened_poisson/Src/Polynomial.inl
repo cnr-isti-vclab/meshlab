@@ -67,7 +67,7 @@ Polynomial<Degree+1> Polynomial<Degree>::integral(void) const{
 	for(int i=0;i<=Degree;i++){p.coefficients[i+1]=coefficients[i]/(i+1);}
 	return p;
 }
-template<> double Polynomial< 0 >::operator() ( double t ) const { return coefficients[0]; }
+template<> double Polynomial< 0 >::operator() ( double ) const { return coefficients[0]; }
 template<> double Polynomial< 1 >::operator() ( double t ) const { return coefficients[0]+coefficients[1]*t; }
 template<> double Polynomial< 2 >::operator() ( double t ) const { return coefficients[0]+(coefficients[1]+coefficients[2]*t)*t; }
 template<int Degree>
@@ -308,7 +308,7 @@ int Polynomial<Degree>::getSolutions( double c , double* roots , double EPS ) co
 }
 // The 0-th order B-spline
 template< >
-Polynomial< 0 > Polynomial< 0 >::BSplineComponent( int i )
+Polynomial< 0 > Polynomial< 0 >::BSplineComponent( int )
 {
 	Polynomial p;
 	p.coefficients[0] = 1.;
@@ -338,7 +338,7 @@ Polynomial< Degree > Polynomial< Degree >::BSplineComponent( int i )
 
 
 // The 0-th order B-spline values
-template< > void Polynomial< 0 >::BSplineComponentValues( double x , double* values ){ values[0] = 1.; }
+template< > void Polynomial< 0 >::BSplineComponentValues( double , double* values ){ values[0] = 1.; }
 // The Degree-th order B-spline
 template< int Degree > void Polynomial< Degree >::BSplineComponentValues( double x , double* values )
 {

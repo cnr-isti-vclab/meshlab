@@ -25,7 +25,7 @@ jobs:
       id: envs
       run: |
         echo '::set-env name=VCINSTALLDIR::C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC'
-        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+        echo "::set-output name=date::$(type ML_VERSION)"
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Install Qt
@@ -84,7 +84,7 @@ jobs:
     - name: Setup env variables
       id: envs
       run: |
-        echo "::set-output name=date::$(Get-Date -Format "yyyy.MM")"
+        echo "::set-output name=date::$(type ML_VERSION)"
     - name: Configure
       run: |
         cmake -S ./src -B ./build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=install -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON

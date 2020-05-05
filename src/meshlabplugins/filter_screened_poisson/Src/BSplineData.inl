@@ -458,10 +458,22 @@ BSplineElements< Degree >::BSplineElements( int res , int offset , BoundaryType 
 		_addPeriodic< true >( _ReflectLeft( offset , res ) , bType==BOUNDARY_DIRICHLET ) , _addPeriodic< false >( _ReflectRight( offset , res ) , bType==BOUNDARY_DIRICHLET );
 	}
 }
-template< int Degree > int BSplineElements< Degree >::_ReflectLeft ( int offset , int res ){ return (Degree&1) ?      -offset :      -1-offset; }
-template< int Degree > int BSplineElements< Degree >::_ReflectRight( int offset , int res ){ return (Degree&1) ? 2*res-offset : 2*res-1-offset; }
-template< int Degree > int BSplineElements< Degree >::_RotateLeft  ( int offset , int res ){ return offset-2*res; }
-template< int Degree > int BSplineElements< Degree >::_RotateRight ( int offset , int res ){ return offset+2*res; }
+template< int Degree > int BSplineElements< Degree >::_ReflectLeft ( int offset , int )
+{
+	return (Degree&1) ?      -offset :      -1-offset;
+}
+template< int Degree > int BSplineElements< Degree >::_ReflectRight( int offset , int res )
+{
+	return (Degree&1) ? 2*res-offset : 2*res-1-offset;
+}
+template< int Degree > int BSplineElements< Degree >::_RotateLeft  ( int offset , int res )
+{
+	return offset-2*res;
+}
+template< int Degree > int BSplineElements< Degree >::_RotateRight ( int offset , int res )
+{
+	return offset+2*res;
+}
 
 template< int Degree >
 template< bool Left >

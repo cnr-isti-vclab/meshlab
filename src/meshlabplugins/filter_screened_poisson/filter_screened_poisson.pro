@@ -5,17 +5,17 @@ macx:QMAKE_CXXFLAGS_RELEASE+= -O3 -DRELEASE -funroll-loops -ffast-math  -Wno-sig
 linux:QMAKE_LFLAGS += -fopenmp -lgomp
 
 HEADERS += \
-    filter_screened_poisson.h
+    filter_screened_poisson.h \
+    poisson_utils.h
 
 SOURCES += \
     filter_screened_poisson.cpp \
     Src/MarchingCubes.cpp \
-    #Src/CmdLineParser.cpp \
     Src/Factor.cpp \
     Src/Geometry.cpp
+
 
 TARGET = filter_screened_poisson
 DEFINES += BRUNO_LEVY_FIX 
 DEFINES += FOR_RELEASE
 
-include (../../shared_post.pri)

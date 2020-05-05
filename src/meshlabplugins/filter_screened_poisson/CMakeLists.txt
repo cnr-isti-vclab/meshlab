@@ -31,11 +31,8 @@ set(HEADERS
     Src/SparseMatrix.h
     Src/Time.h
     Src/Vector.h
+    poisson_utils.h
     filter_screened_poisson.h)
-
-set(XML filter_screened_poisson.xml)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
 
 add_library(filter_screened_poisson MODULE ${SOURCES} ${HEADERS})
 
