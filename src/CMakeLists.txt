@@ -251,7 +251,7 @@ else()
         meshlabplugins/edit_measure
         meshlabplugins/edit_mutualcorrs
         meshlabplugins/edit_paint
-        # meshlabplugins/edit_pickpoints # not in qmake file?
+        meshlabplugins/edit_pickpoints
         meshlabplugins/edit_point
         meshlabplugins/edit_referencing
         meshlabplugins/edit_quality
