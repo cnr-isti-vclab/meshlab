@@ -910,10 +910,10 @@ MLRenderingData::MLRenderingData()
     _glopts = new MLPerViewGLOptions();
 }
 
-MLRenderingData::MLRenderingData( const MLRenderingData& dt )
-    :PerViewData<MLPerViewGLOptions>(dt)
-{
-}
+//MLRenderingData::MLRenderingData( const MLRenderingData& dt )
+//    :PerViewData<MLPerViewGLOptions>(dt)
+//{
+//}
 
 bool MLRenderingData::set( MLRenderingData::PRIMITIVE_MODALITY pm,const MLRenderingData::RendAtts& atts )
 {

@@ -250,7 +250,7 @@ class MLRenderingData : public vcg::PerViewData<MLPerViewGLOptions>
 {
 public:
  	MLRenderingData();
-	MLRenderingData(const MLRenderingData& dt);
+    //MLRenderingData(const MLRenderingData& dt);
 
 	bool set(MLRenderingData::PRIMITIVE_MODALITY pm, const MLRenderingData::RendAtts& atts);
 	bool set(MLRenderingData::PRIMITIVE_MODALITY pm, MLRenderingData::ATT_NAMES att, bool onoff);

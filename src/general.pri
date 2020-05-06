@@ -49,6 +49,8 @@ win32-gcc:QMAKE_LFLAGS+= -L$$MESHLAB_DISTRIB_DIRECTORY/lib/win32-gcc -L$$MESHLAB
 
 ######## MACOS SETTINGS ##########
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.12
+
 macx:QMAKE_CXXFLAGS += -Wno-inconsistent-missing-override
 
 # Flags for OpenMP
