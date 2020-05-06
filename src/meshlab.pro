@@ -101,7 +101,8 @@ SUBDIRS += \ #sub projects names
     edit_point \
     edit_referencing \
     edit_quality \
-    edit_select
+    edit_select \
+    edit_pickpoints
 
 }
 meshlab_mini {
@@ -264,11 +265,11 @@ edit_point.depends = common
 edit_referencing.depends = common
 edit_quality.depends = common
 edit_select.depends = common
+edit_pickpoints.depends = common
 
 #no longer needed# meshlabplugins/filter_aging \
 #no longer needed# meshlabplugins/filter_bnpts \
 #no longer needed# meshlabplugins/filter_colorize \
-#no longer supported#   meshlabplugins/edit_pickpoints \
 
 
 # if distrib folder is not in $$PWD/../distrib (shadow build case),
