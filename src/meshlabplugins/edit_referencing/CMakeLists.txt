@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/edit_referencing.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES edit_referencing.cpp edit_referencingDialog.cpp
             edit_referencing_factory.cpp)
@@ -28,5 +30,7 @@ set_property(TARGET edit_referencing PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET edit_referencing PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                               ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS edit_referencing DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-                COMPONENT Plugins)
+install(
+    TARGETS edit_referencing
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

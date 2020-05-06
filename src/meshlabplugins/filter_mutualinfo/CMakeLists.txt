@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/filter_mutualinfo.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 # Only build if we have newuoa and levmar
 if(TARGET external-newuoa AND TARGET external-levmar)
@@ -47,8 +49,10 @@ if(TARGET external-newuoa AND TARGET external-levmar)
     set_property(TARGET filter_mutualinfo PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                                    ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-    install(TARGETS filter_mutualinfo DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-                    COMPONENT Plugins)
+    install(
+        TARGETS filter_mutualinfo
+        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+        COMPONENT Plugins)
 
 else()
     message(

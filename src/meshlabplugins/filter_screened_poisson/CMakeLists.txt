@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/filter_screened_poisson.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES
     filter_screened_poisson.cpp Src/MarchingCubes.cpp
@@ -31,13 +33,13 @@ set(HEADERS
     Src/SparseMatrix.h
     Src/Time.h
     Src/Vector.h
-    poisson_utils.h
-    filter_screened_poisson.h)
+    filter_screened_poisson.h
+    poisson_utils.h)
 
 add_library(filter_screened_poisson MODULE ${SOURCES} ${HEADERS})
 
 target_compile_definitions(filter_screened_poisson PRIVATE BRUNO_LEVY_FIX
-                           FOR_RELEASE)
+                                                           FOR_RELEASE)
 
 if(OpenMP_CXX_FOUND)
     target_link_libraries(filter_screened_poisson PRIVATE OpenMP::OpenMP_CXX)
@@ -55,5 +57,7 @@ set_property(TARGET filter_screened_poisson
 set_property(TARGET filter_screened_poisson
              PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS filter_screened_poisson DESTINATION
-                ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT Plugins)
+install(
+    TARGETS filter_screened_poisson
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

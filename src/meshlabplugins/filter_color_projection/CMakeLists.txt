@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/filter_color_projection.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES filter_color_projection.cpp)
 
@@ -22,5 +24,7 @@ set_property(TARGET filter_color_projection
 set_property(TARGET filter_color_projection
              PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS filter_color_projection DESTINATION
-                ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT Plugins)
+install(
+    TARGETS filter_color_projection
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

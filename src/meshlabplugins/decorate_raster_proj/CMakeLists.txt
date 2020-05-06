@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/decorate_raster_proj.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES decorate_raster_proj.cpp ${VCGDIR}/wrap/gui/trackball.cpp
             ${VCGDIR}/wrap/gui/trackmode.cpp)
@@ -22,5 +24,7 @@ set_property(TARGET decorate_raster_proj PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET decorate_raster_proj PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                                   ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS decorate_raster_proj DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-                COMPONENT Plugins)
+install(
+    TARGETS decorate_raster_proj
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

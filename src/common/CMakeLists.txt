@@ -1,9 +1,11 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/common.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
     file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
     add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
 endif()

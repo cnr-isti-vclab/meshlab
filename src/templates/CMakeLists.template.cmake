@@ -1,8 +1,15 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/{{template}},
+{% if assumed_custom_template_name -%}
+### or create a derived template in src/templates/{{assumed_custom_template_name}},
+{% endif -%}
+### then re-run ./make-cmake.py
 
+{# To customize this for just one or a few directories, you create a derived template: see any other template for examples. #}
+{# Templates are chosen based on the leaf directory name: e.g. src/meshlabplugins/filter_qhull uses templates/filter_qhull.cmake if available. #}
 {% block whole_build %}
 {% block before_vars %}{% endblock %}
 

@@ -1,7 +1,10 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
+### or create a derived template in src/templates/editrgbtri.cmake,
+### then re-run ./make-cmake.py
 
 set(SOURCES
     controlPoint.cpp
@@ -42,5 +45,7 @@ set_property(TARGET editrgbtri PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET editrgbtri PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                         ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS editrgbtri DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT
-                Plugins)
+install(
+    TARGETS editrgbtri
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)
