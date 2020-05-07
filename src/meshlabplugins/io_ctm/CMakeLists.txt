@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/io_ctm.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 # Only build if we have OpenCTM
 if(TARGET external-openctm)
@@ -25,8 +27,10 @@ if(TARGET external-openctm)
     set_property(TARGET io_ctm PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                         ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-    install(TARGETS io_ctm DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT
-                    Plugins)
+    install(
+        TARGETS io_ctm
+        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+        COMPONENT Plugins)
 
 else()
     message(STATUS "Skipping io_ctm - missing OpenCTM.")

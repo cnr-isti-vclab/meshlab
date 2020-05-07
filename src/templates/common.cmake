@@ -1,4 +1,11 @@
 {% extends "CMakeLists.template.cmake" %}
+
+{% block before_vars %}
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION")
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../../ML_VERSION" MESHLAB_VERSION)
+    add_definitions(-DMESHLAB_VERSION=${MESHLAB_VERSION})
+endif()
+{% endblock %}
 {% block outputdir %}{%endblock%}
 {% block add_target %}
 set(TARGET_TYPE SHARED)

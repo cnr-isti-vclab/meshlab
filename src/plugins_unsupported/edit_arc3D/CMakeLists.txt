@@ -1,7 +1,10 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
+### or create a derived template in src/templates/edit_arc3D.cmake,
+### then re-run ./make-cmake.py
 
 set(SOURCES
     arc3D_camera.cpp
@@ -47,5 +50,7 @@ set_property(TARGET edit_arc3D PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET edit_arc3D PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                         ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS edit_arc3D DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT
-                Plugins)
+install(
+    TARGETS edit_arc3D
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

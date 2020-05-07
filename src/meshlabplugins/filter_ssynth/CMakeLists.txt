@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/filter_ssynth.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 # Only build if we have structure-synth
 if(TARGET external-ssynth)
@@ -37,8 +39,10 @@ if(TARGET external-ssynth)
     set_property(TARGET filter_ssynth PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                                ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-    install(TARGETS filter_ssynth DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-                    COMPONENT Plugins)
+    install(
+        TARGETS filter_ssynth
+        DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+        COMPONENT Plugins)
 
 else()
     message(STATUS "Skipping filter_ssynth - missing structure-synth sources.")

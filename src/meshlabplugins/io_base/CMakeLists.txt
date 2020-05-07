@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/io_base.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES baseio.cpp ${VCGDIR}/wrap/openfbx/src/miniz.c
             ${VCGDIR}/wrap/openfbx/src/ofbx.cpp ${VCGDIR}/wrap/ply/plylib.cpp)
@@ -35,5 +37,7 @@ set_property(TARGET io_base PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET io_base PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                      ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS io_base DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT
-                Plugins)
+install(
+    TARGETS io_base
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)
