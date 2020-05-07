@@ -190,6 +190,7 @@ edit_point.subdir = meshlabplugins/edit_point
 edit_referencing.subdir = meshlabplugins/edit_referencing
 edit_quality.subdir = meshlabplugins/edit_quality
 edit_select.subdir = meshlabplugins/edit_select
+edit_pickpoints.subdir = meshlabplugins/edit_pickpoints
 
 ## what subproject depends on others ##
 # meshlab_mini subdirs
