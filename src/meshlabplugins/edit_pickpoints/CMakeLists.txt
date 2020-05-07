@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: BSL-1.0
 
 ### Generated file! Edit the templates in src/templates,
-### specifically src/templates/edit_pickpoints.cmake (custom for this directory),
+### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
+### or create a derived template in src/templates/edit_pickpoints.cmake,
 ### then re-run ./make-cmake.py
 
 set(SOURCES
