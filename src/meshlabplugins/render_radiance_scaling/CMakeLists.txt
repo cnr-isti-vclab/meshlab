@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/render_radiance_scaling.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES
     framebufferObject.cpp
@@ -43,5 +45,7 @@ set_property(TARGET render_radiance_scaling
 set_property(TARGET render_radiance_scaling
              PROPERTY LIBRARY_OUTPUT_DIRECTORY ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS render_radiance_scaling DESTINATION
-                ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT Plugins)
+install(
+    TARGETS render_radiance_scaling
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

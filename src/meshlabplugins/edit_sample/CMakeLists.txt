@@ -1,11 +1,13 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/edit_sample.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
-set(SOURCES edit_sample_factory.cpp edit_sample.cpp)
+set(SOURCES edit_sample.cpp edit_sample_factory.cpp)
 
-set(HEADERS edit_sample_factory.h edit_sample.h)
+set(HEADERS edit_sample.h edit_sample_factory.h)
 
 set(RESOURCES edit_sample.qrc)
 
@@ -19,10 +21,12 @@ target_link_libraries(edit_sample PRIVATE OpenGL::GLU)
 set_property(TARGET edit_sample PROPERTY FOLDER Plugins)
 
 set_property(TARGET edit_sample PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                        ${MESHLAB_PLUGIN_OUTPUT_DIR})
+                                         ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
 set_property(TARGET edit_sample PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                        ${MESHLAB_PLUGIN_OUTPUT_DIR})
+                                         ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS edit_sample DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR} COMPONENT
-                Plugins)
+install(
+    TARGETS edit_sample
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)

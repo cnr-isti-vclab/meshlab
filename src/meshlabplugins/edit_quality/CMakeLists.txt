@@ -1,7 +1,9 @@
-# Copyright 2019 Collabora, Ltd.
+# Copyright 2019-2020, Collabora, Ltd.
 # SPDX-License-Identifier: BSL-1.0
 
-### Generated file! Edit the templates in src/templates then re-run ./make-cmake.py
+### Generated file! Edit the templates in src/templates,
+### specifically src/templates/edit_quality.cmake (custom for this directory),
+### then re-run ./make-cmake.py
 
 set(SOURCES
     common/meshmethods.cpp
@@ -50,5 +52,7 @@ set_property(TARGET edit_quality PROPERTY RUNTIME_OUTPUT_DIRECTORY
 set_property(TARGET edit_quality PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                           ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-install(TARGETS edit_quality DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
-                COMPONENT Plugins)
+install(
+    TARGETS edit_quality
+    DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
+    COMPONENT Plugins)
