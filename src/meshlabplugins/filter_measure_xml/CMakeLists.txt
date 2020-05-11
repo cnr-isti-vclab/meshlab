@@ -6,28 +6,28 @@
 ### or create a derived template in src/templates/filter_measure.cmake,
 ### then re-run ./make-cmake.py
 
-set(SOURCES filter_measure.cpp)
+set(SOURCES filter_measure_xml.cpp)
 
-set(HEADERS filter_measure.h)
+set(HEADERS filter_measure_xml.h)
 
-set(XML filter_measure.xml)
+set(XML filter_measure_xml.xml)
 meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
 list(APPEND SOURCES ${XML_OUT})
 
-add_library(filter_measure MODULE ${SOURCES} ${HEADERS})
+add_library(filter_measure_xml MODULE ${SOURCES} ${HEADERS})
 
-target_include_directories(filter_measure PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(filter_measure PUBLIC common)
+target_include_directories(filter_measure_xml PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(filter_measure_xml PUBLIC common)
 
-set_property(TARGET filter_measure PROPERTY FOLDER Plugins)
+set_property(TARGET filter_measure_xml PROPERTY FOLDER Plugins)
 
-set_property(TARGET filter_measure PROPERTY RUNTIME_OUTPUT_DIRECTORY
+set_property(TARGET filter_measure_xml PROPERTY RUNTIME_OUTPUT_DIRECTORY
                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
-set_property(TARGET filter_measure PROPERTY LIBRARY_OUTPUT_DIRECTORY
+set_property(TARGET filter_measure_xml PROPERTY LIBRARY_OUTPUT_DIRECTORY
                                             ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
 install(
-    TARGETS filter_measure
+    TARGETS filter_measure_xml
     DESTINATION ${MESHLAB_PLUGIN_INSTALL_DIR}
     COMPONENT Plugins)

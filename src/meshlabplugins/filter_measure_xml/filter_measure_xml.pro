@@ -1,12 +1,12 @@
 include (../../shared.pri)
 
 HEADERS += \
-    filter_measure.h
+    filter_measure_xml.h
 
 SOURCES += \
-    filter_measure.cpp
+    filter_measure_xml.cpp
 
 TARGET = \
-    filter_measure
+    filter_measure_xml
 
 include (../../shared_post.pri)
