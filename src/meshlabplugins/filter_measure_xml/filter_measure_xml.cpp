@@ -33,7 +33,7 @@
 #include<vcg/complex/algorithms/bitquad_support.h>
 #include<vcg/complex/algorithms/mesh_to_matrix.h>
 #include<vcg/complex/algorithms/bitquad_optimization.h>
-#include "filter_measure.h"
+#include "filter_measure_xml.h"
 
 using namespace std;
 using namespace vcg;
