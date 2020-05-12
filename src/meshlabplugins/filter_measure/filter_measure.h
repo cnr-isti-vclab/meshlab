@@ -50,13 +50,23 @@ public:
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *);
-	FILTER_ARITY filterArity(QAction *) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	FilterClass getClass(QAction*);
+	FILTER_ARITY filterArity(QAction*) const;
+	void initParameterSet(QAction* , MeshModel& m, RichParameterSet& parlst);
+	bool applyFilter(QAction* filter, MeshDocument& md, RichParameterSet& parlst, vcg::CallBackPos*) ;
 	int postCondition( QAction* ) const;
 
 private:
+	bool computeTopologicalMeasures(MeshDocument& md);
+	bool computeTopologicalMeasuresForQuadMeshes(MeshDocument& md);
+	bool computeGeometricMeasures(MeshDocument& md);
+	bool computeAreaPerimeterOfSelection(MeshDocument& md);
+	bool perVertexQualityStat(MeshDocument& md);
+	bool perFaceQualityStat(MeshDocument& md);
+	bool perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
+	bool perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
+
+
 	Matrix33m computePrincipalAxisCloud(CMeshO & m);
 
 };
