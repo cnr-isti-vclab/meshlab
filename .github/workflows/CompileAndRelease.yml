@@ -8,7 +8,7 @@ on:
 jobs:
   update_ml_version:
     name: Update ML_VERSION and Info.plist
-    runs-on: macos
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -83,7 +83,7 @@ jobs:
   macos_build:
     needs: [update_ml_version]
     name: Build MeshLab (MacOS)
-    runs-on: macos
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
