@@ -484,7 +484,7 @@ Matrix33m FilterMeasurePluginXML::computePrincipalAxisCloud(CMeshO & m)
 }
 
 
-MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasureXMLPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePluginXML)
 
 //case FP_MEASURE_GAUSSCURV :
 //	{
