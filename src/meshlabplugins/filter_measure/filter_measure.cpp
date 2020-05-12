@@ -38,58 +38,90 @@ FilterMeasurePlugin::FilterMeasurePlugin()
 			 << PER_FACE_QUALITY_STAT
 			 << PER_VERTEX_QUALITY_HISTOGRAM
 			 << PER_FACE_QUALITY_HISTOGRAM;
-  
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+
+	for(FilterIDType tt : types())
+		actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
-// (this string is used also to define the menu entry)
 QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
-//	switch(filterId) {
-//		case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
-//		default : assert(0);
-//	}
-//	return QString();
+	switch (filterId) {
+	case COMPUTE_TOPOLOGICAL_MEASURES:
+		return "Compute Topological Measures";
+		break;
+	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
+		return "Compute Topological Measures for Quad Meshes";
+		break;
+	case COMPUTE_GEOMETRIC_MEASURES:
+		return "Compute Geometric Measures";
+		break;
+	case COMPUTE_AREA_PERIMETER_SELECTION:
+		return "Compute Area/Perimeter of selection";
+		break;
+	case PER_VERTEX_QUALITY_STAT:
+		return "Per Vertex Quality Stat";
+		break;
+	case PER_FACE_QUALITY_STAT:
+		return "Per Face Quality Stat";
+		break;
+	case PER_VERTEX_QUALITY_HISTOGRAM:
+		return "Per Vertex Quality Histogram";
+		break;
+	case PER_FACE_QUALITY_HISTOGRAM:
+		return "Per Face Quality Histogram";
+		break;
+	default:
+		assert(0);
+		return "";
+	}
 }
 
-// Info() must return the longer string describing each filtering action 
-// (this string is used in the About plugin dialog)
  QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
 {
-//	switch(filterId) {
-//		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity.");
-//		default : assert(0);
-//	}
-//	return QString("Unknown Filter");
+	switch (filterId) {
+	case COMPUTE_TOPOLOGICAL_MEASURES:
+		return "Compute a set of topological measures over a mesh.";
+		break;
+	case COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES:
+		return "Compute a set of topological measures over a quad mesh.";
+		break;
+	case COMPUTE_GEOMETRIC_MEASURES:
+		return "Compute a set of geometric measures of a mesh/pointcloud. Bounding box extents and diagonal, principal axis, thin shell barycenter (mesh only), vertex barycenter and quality-weighted barycenter (pointcloud only), surface area (mesh only), volume (closed mesh) and Inertia tensor Matrix (closed mesh). Open the layer dialog to see the results.";
+		break;
+	case COMPUTE_AREA_PERIMETER_SELECTION:
+		return "Compute area and perimeter of the FACE selection. Open the layer dialog to see the results.";
+		break;
+	case PER_VERTEX_QUALITY_STAT:
+		return "Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance.";
+		break;
+	case PER_FACE_QUALITY_STAT:
+		return "Compute some aggregate statistics over the per vertex quality, like Min, Max, Average, StdDev and Variance.";
+		break;
+	case PER_VERTEX_QUALITY_HISTOGRAM:
+		return "Compute an histogram of the values of the per-vertex quality. It can be useful to evaluate the distribution of the quality value over the surface. It can be discrete (e.g. based on vertex count or area weighted).";
+		break;
+	case PER_FACE_QUALITY_HISTOGRAM:
+		return "Compute an histogram of the values of the per-face quality.";
+		break;
+	default:
+		assert(0);
+		return "";
+	}
 }
 
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be chosen.
-FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
+FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *)
 {
-//	switch(ID(a))
-//	{
-//		case FP_MOVE_VERTEX :  return MeshFilterInterface::Smoothing;
-//		default : assert(0);
-//	}
-//	return MeshFilterInterface::Generic;
+    return MeshFilterInterface::Measure;
 }
 
-MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(QAction* a) const
+MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(QAction*) const
 {
     return SINGLE_MESH;
 }
 
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void FilterMeasurePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 //	 switch(ID(action))	 {
