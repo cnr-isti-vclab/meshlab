@@ -127,7 +127,22 @@ FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *)
 
 MeshFilterInterface::FILTER_ARITY FilterMeasurePlugin::filterArity(QAction*) const
 {
-    return SINGLE_MESH;
+	return SINGLE_MESH;
+}
+
+int FilterMeasurePlugin::getPreConditions(QAction* action) const
+{
+	switch (ID(action)) {
+	case PER_VERTEX_QUALITY_STAT:
+	case PER_VERTEX_QUALITY_HISTOGRAM:
+		return MeshModel::MM_VERTQUALITY;
+		break;
+	case PER_FACE_QUALITY_STAT:
+	case PER_FACE_QUALITY_HISTOGRAM:
+		return  MeshModel::MM_FACEQUALITY;
+	default:
+		return  MeshModel::MM_NONE;
+	}
 }
 
 void FilterMeasurePlugin::initParameterSet(QAction *action, MeshModel &m, RichParameterSet & parlst)
