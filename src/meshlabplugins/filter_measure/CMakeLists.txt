@@ -6,9 +6,9 @@
 ### or create a derived template in src/templates/filter_sample.cmake,
 ### then re-run ./make-cmake.py
 
-set(SOURCES filter_sample.cpp)
+set(SOURCES filter_measure.cpp)
 
-set(HEADERS filter_sample.h)
+set(HEADERS filter_measure.h)
 
 add_library(filter_measure MODULE ${SOURCES} ${HEADERS})
 
