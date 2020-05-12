@@ -21,56 +21,22 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTER_MEASURE_H
-#define FILTER_MEASURE_H
+#ifndef FILTER_MEASURE_XML_H
+#define FILTER_MEASURE_XML_H
 
 #include <common/interfaces.h>
 
-class FilterMeasurePlugin : public QObject, public MeshFilterInterface
+class FilterMeasurePluginXML : public MeshLabFilterInterface
 {
-	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
+    Q_OBJECT
+    MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
+    Q_INTERFACES(MeshLabFilterInterface)
 
 public:
-	enum {
-			COMPUTE_TOPOLOGICAL_MEASURES,
-			COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES,
-			COMPUTE_GEOMETRIC_MEASURES,
-			COMPUTE_AREA_PERIMETER_SELECTION,
-			PER_VERTEX_QUALITY_STAT,
-			PER_FACE_QUALITY_STAT,
-			PER_VERTEX_QUALITY_HISTOGRAM,
-			PER_FACE_QUALITY_HISTOGRAM
-		 } ;
-
-	FilterMeasurePlugin();
-
-	virtual QString pluginName(void) const { return "FilterMeasure"; }
-
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction*);
-	FILTER_ARITY filterArity(QAction*) const;
-	int getPreConditions(QAction *action) const;
-	void initParameterSet(QAction* , MeshModel& m, RichParameterSet& parlst);
-	bool applyFilter(QAction* filter, MeshDocument& md, RichParameterSet& parlst, vcg::CallBackPos*) ;
-	int postCondition( QAction* ) const;
+    bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
 
 private:
-	bool computeTopologicalMeasures(MeshDocument& md);
-	bool computeTopologicalMeasuresForQuadMeshes(MeshDocument& md);
-	bool computeGeometricMeasures(MeshDocument& md);
-	bool computeAreaPerimeterOfSelection(MeshDocument& md);
-	bool perVertexQualityStat(MeshDocument& md);
-	bool perFaceQualityStat(MeshDocument& md);
-	bool perVertexQualityHistogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
-	bool perFaceQualityHostogram(MeshDocument& md, float RangeMin, float RangeMax, int binNum, bool areaFlag);
-
-
 	Matrix33m computePrincipalAxisCloud(CMeshO & m);
-
 };
-
 
 #endif

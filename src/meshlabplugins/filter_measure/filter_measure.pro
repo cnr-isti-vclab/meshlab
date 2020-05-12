@@ -5,8 +5,5 @@ HEADERS += \
 
 SOURCES += \
     filter_measure.cpp
-
-TARGET = \
-    filter_measure
-
-include (../../shared_post.pri)
+		
+TARGET = filter_measure

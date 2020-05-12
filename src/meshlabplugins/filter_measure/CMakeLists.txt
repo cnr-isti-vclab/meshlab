@@ -10,10 +10,6 @@ set(SOURCES filter_measure.cpp)
 
 set(HEADERS filter_measure.h)
 
-set(XML filter_measure.xml)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
-
 add_library(filter_measure MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_measure PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
