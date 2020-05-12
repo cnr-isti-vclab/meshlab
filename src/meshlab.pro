@@ -29,6 +29,7 @@ SUBDIRS = \ #sub projects names
     io_base \        # a few basic file formats (ply, obj, off), without this you cannot open anything
     decorate_base \
     filter_measure_xml \
+    filter_measure \
     filter_meshing
 
 !meshlab_mini {
@@ -123,6 +124,7 @@ meshlabserver.subdir = meshlabserver
 io_base.subdir = meshlabplugins/io_base
 decorate_base.subdir = meshlabplugins/decorate_base
 filter_measure_xml.subdir = meshlabplugins/filter_measure_xml
+filter_measure.subdir = meshlabplugins/filter_measure
 filter_meshing.subdir = meshlabplugins/filter_meshing
 use_cpu_opengl.subdir = use_cpu_opengl
 # IO plugins
@@ -200,6 +202,7 @@ meshlabserver.depends = common
 io_base.depends = common
 decorate_base.depends = common
 filter_measure_xml.depends = common
+filter_measure.depends = common
 filter_meshing.depends = common
 # IO plugins
 io_3ds.depends = common
