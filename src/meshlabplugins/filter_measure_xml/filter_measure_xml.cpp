@@ -40,7 +40,7 @@ using namespace vcg;
 
 
 // Core Function doing the actual mesh processing.
-bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
+bool FilterMeasurePluginXML::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * /*cb*/ )
 {
 	if (filterName == "Compute Topological Measures")
 	{
@@ -457,7 +457,7 @@ bool FilterMeasurePlugin::applyFilter( const QString& filterName,MeshDocument& m
 }
 
 // function to calculate principal axis for pointclouds or non-watertight meshes
-Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO & m)
+Matrix33m FilterMeasurePluginXML::computePrincipalAxisCloud(CMeshO & m)
 {
 	Matrix33m cov;
 	Point3m bp(0, 0, 0);
@@ -484,7 +484,7 @@ Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO & m)
 }
 
 
-MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasureXMLPlugin)
 
 //case FP_MEASURE_GAUSSCURV :
 //	{
