@@ -33,19 +33,28 @@ class FilterMeasurePlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_MOVE_VERTEX  } ;
+	enum {
+			COMPUTE_TOPOLOGICAL_MEASURES,
+			COMPUTE_TOPOLOGICAL_MEASURES_QUAD_MESHES,
+			COMPUTE_GEOMETRIC_MEASURES,
+			COMPUTE_AREA_PERIMETER_SELECTION,
+			PER_VERTEX_QUALITY_STAT,
+			PER_FACE_QUALITY_STAT,
+			PER_VERTEX_QUALITY_HISTOGRAM,
+			PER_FACE_QUALITY_HISTOGRAM
+		 } ;
 
 	FilterMeasurePlugin();
 
-	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
+	virtual QString pluginName(void) const { return "FilterMeasure"; }
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
     bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
+    int postCondition( QAction* ) const;
     FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+    FILTER_ARITY filterArity(QAction *a) const;
 };
 
 
