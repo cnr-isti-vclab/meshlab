@@ -22,11 +22,19 @@
 ****************************************************************************/
 
 #include "filter_measure.h"
-#include <QtScript>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <vcg/complex/algorithms/clean.h>
+#include <vcg/complex/algorithms/inertia.h>
+#include <vcg/complex/algorithms/stat.h>
 
-// Constructor usually performs only two simple tasks of filling the two lists 
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
+#include <vcg/complex/algorithms/update/selection.h>
+#include <vcg/complex/append.h>
+#include <vcg/simplex/face/pos.h>
+#include <vcg/complex/algorithms/bitquad_support.h>
+#include <vcg/complex/algorithms/mesh_to_matrix.h>
+#include <vcg/complex/algorithms/bitquad_optimization.h>
 
 FilterMeasurePlugin::FilterMeasurePlugin()
 { 
@@ -171,6 +179,32 @@ bool FilterMeasurePlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, Ri
 int FilterMeasurePlugin::postCondition(QAction*) const
 {
 	return MeshModel::MM_NONE;
+}
+
+Matrix33m FilterMeasurePlugin::computePrincipalAxisCloud(CMeshO& m)
+{
+	Matrix33m cov;
+	Point3m bp(0, 0, 0);
+	std::vector<Point3m> PtVec;
+	for (CMeshO::VertexIterator vi = m.vert.begin(); vi != m.vert.end(); ++vi)
+	if (!(*vi).IsD())
+	{
+		PtVec.push_back((*vi).cP());
+		bp += (*vi).cP();
+	}
+
+	bp /= m.vn;
+
+	cov.Covariance(PtVec, bp);
+
+	Matrix33m eigenvecMatrix;
+	Eigen::Matrix3d em;
+	cov.ToEigenMatrix(em);
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eig(em);
+	Eigen::Matrix3d c_vec = eig.eigenvectors();
+	eigenvecMatrix.FromEigenMatrix(c_vec);
+
+	return eigenvecMatrix;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePlugin)
