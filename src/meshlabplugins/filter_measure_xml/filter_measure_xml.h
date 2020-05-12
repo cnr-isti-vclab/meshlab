@@ -21,12 +21,12 @@
 *                                                                           *
 ****************************************************************************/
 
-#ifndef FILTER_MEASURE_H
-#define FILTER_MEASURE_H
+#ifndef FILTER_MEASURE_XML_H
+#define FILTER_MEASURE_XML_H
 
 #include <common/interfaces.h>
 
-class FilterMeasurePlugin : public MeshLabFilterInterface
+class FilterMeasurePluginXML : public MeshLabFilterInterface
 {
     Q_OBJECT
     MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)

@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,23 +20,13 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-/****************************************************************************
-  History
-$Log: sampleplugins.h,v $
-Revision 1.2  2006/11/29 00:59:21  cignoni
-Cleaned plugins interface; changed useless help class into a plain string
 
-Revision 1.1  2006/09/25 09:24:39  e_cerisoli
-add sampleplugins
-
-****************************************************************************/
-
-#ifndef SAMPLEFILTERSPLUGIN_H
-#define SAMPLEFILTERSPLUGIN_H
+#ifndef FILTER_MEASURE_H
+#define FILTER_MEASURE_H
 
 #include <common/interfaces.h>
 
-class ExtraSamplePlugin : public QObject, public MeshFilterInterface
+class FilterMeasurePlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
@@ -45,7 +35,7 @@ class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_MOVE_VERTEX  } ;
 
-	ExtraSamplePlugin();
+	FilterMeasurePlugin();
 
 	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
 

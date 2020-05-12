@@ -28,7 +28,7 @@
 //  - typeList: with all the possible id of the filtering actions
 //  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
-ExtraSamplePlugin::ExtraSamplePlugin() 
+FilterMeasurePlugin::FilterMeasurePlugin()
 { 
 	typeList << FP_MOVE_VERTEX;
   
@@ -38,7 +38,7 @@ ExtraSamplePlugin::ExtraSamplePlugin()
 
 // ST() must return the very short string describing each filtering action 
 // (this string is used also to define the menu entry)
-QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
+QString FilterMeasurePlugin::filterName(FilterIDType filterId) const
 {
   switch(filterId) {
         case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
@@ -49,7 +49,7 @@ QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
 
 // Info() must return the longer string describing each filtering action 
 // (this string is used in the About plugin dialog)
- QString ExtraSamplePlugin::filterInfo(FilterIDType filterId) const
+ QString FilterMeasurePlugin::filterInfo(FilterIDType filterId) const
 {
   switch(filterId) {
 		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 
@@ -61,7 +61,7 @@ QString ExtraSamplePlugin::filterName(FilterIDType filterId) const
 // The FilterClass describes in which generic class of filters it fits. 
 // This choice affect the submenu in which each filter will be placed 
 // More than a single class can be chosen.
-ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
+FilterMeasurePlugin::FilterClass FilterMeasurePlugin::getClass(QAction *a)
 {
   switch(ID(a))
 	{
@@ -78,7 +78,7 @@ ExtraSamplePlugin::FilterClass ExtraSamplePlugin::getClass(QAction *a)
 // - the string shown in the dialog 
 // - the default value
 // - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
-void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst) 
+void FilterMeasurePlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
 		case FP_MOVE_VERTEX :  
@@ -99,7 +99,7 @@ void ExtraSamplePlugin::initParameterSet(QAction *action,MeshModel &m, RichParam
 
 // The Real Core Function doing the actual mesh processing.
 // Move Vertex of a random quantity
-bool ExtraSamplePlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+bool FilterMeasurePlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
 	CMeshO &m = md.mm()->cm;
 	srand(time(NULL)); 
