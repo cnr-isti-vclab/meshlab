@@ -140,6 +140,7 @@ int FilterMeasurePlugin::getPreConditions(QAction* action) const
 	case PER_FACE_QUALITY_STAT:
 	case PER_FACE_QUALITY_HISTOGRAM:
 		return  MeshModel::MM_FACEQUALITY;
+		break;
 	default:
 		return  MeshModel::MM_NONE;
 	}
