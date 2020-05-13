@@ -24,108 +24,107 @@
 #include "filter_voronoi.h"
 #include <QtScript>
 
-// Constructor usually performs only two simple tasks of filling the two lists 
-//  - typeList: with all the possible id of the filtering actions
-//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
-
 FilterVoronoiPlugin::FilterVoronoiPlugin()
 { 
-	typeList << FP_MOVE_VERTEX;
-  
-  foreach(FilterIDType tt , types())
-	  actionList << new QAction(filterName(tt), this);
+	typeList
+		<< VORONOI_SAMPLING
+		<< VOLUME_SAMPLING
+		<< VORONOI_SCAFFOLDING
+		<< BUILD_SHELL
+		<< CROSS_FIELD_CREATION
+		<< CROSS_FIELD_SMOOTHING;
+
+	for (FilterIDType tt : types())
+		actionList << new QAction(filterName(tt), this);
 }
 
-// ST() must return the very short string describing each filtering action 
-// (this string is used also to define the menu entry)
 QString FilterVoronoiPlugin::filterName(FilterIDType filterId) const
 {
-  switch(filterId) {
-        case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
-		default : assert(0); 
+	switch(filterId) {
+	case VORONOI_SAMPLING :
+		return "Random Vertex Displacement";
+	case VOLUME_SAMPLING:
+		return "Volumetric Sampling";
+	case VORONOI_SCAFFOLDING:
+		return "Voronoi Scaffolding";
+	case BUILD_SHELL:
+		return "Create Solid Wireframe";
+	case CROSS_FIELD_CREATION:
+		return "Cross Field Creation";
+	case CROSS_FIELD_SMOOTHING:
+		return "Cross Field Smoothing";
+	default :
+		assert(0);
+		return "";
 	}
-  return QString();
 }
 
-// Info() must return the longer string describing each filtering action 
-// (this string is used in the About plugin dialog)
- QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
+
+QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
 {
-  switch(filterId) {
-		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 
-		default : assert(0); 
+	switch(filterId) {
+	case VORONOI_SAMPLING :
+		return "Compute a sampling over a mesh and perform a Lloyd relaxation.";
+	case VOLUME_SAMPLING:
+		return "Compute a volumetric sampling over a watertight mesh.";
+	case VORONOI_SCAFFOLDING:
+		return "Compute a volumetric sampling over a watertight mesh.";
+	case BUILD_SHELL:
+		return "";
+	case CROSS_FIELD_CREATION:
+		return "";
+	case CROSS_FIELD_SMOOTHING:
+		return "";
+	default :
+		assert(0);
+		return "";
 	}
-	return QString("Unknown Filter");
 }
 
-// The FilterClass describes in which generic class of filters it fits. 
-// This choice affect the submenu in which each filter will be placed 
-// More than a single class can be chosen.
 FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(QAction *a)
 {
-  switch(ID(a))
-	{
-		case FP_MOVE_VERTEX :  return MeshFilterInterface::Smoothing; 
-		default : assert(0); 
+	switch(ID(a)) {
+	case VORONOI_SAMPLING :
+		return MeshFilterInterface::Sampling;
+	case VOLUME_SAMPLING:
+		return MeshFilterInterface::Sampling;
+	case VORONOI_SCAFFOLDING:
+		return MeshFilterInterface::Sampling;
+	case BUILD_SHELL:
+		return MeshFilterInterface::Remeshing;
+	case CROSS_FIELD_CREATION:
+		return MeshFilterInterface::Normal;
+	case CROSS_FIELD_SMOOTHING:
+		return MeshFilterInterface::Smoothing;
+	default :
+		assert(0);
+		return MeshFilterInterface::Generic;
 	}
-	return MeshFilterInterface::Generic;
 }
 
-// This function define the needed parameters for each filter. Return true if the filter has some parameters
-// it is called every time, so you can set the default value of parameters according to the mesh
-// For each parameter you need to define, 
-// - the name of the parameter, 
-// - the string shown in the dialog 
-// - the default value
-// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
 void FilterVoronoiPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
 {
 	 switch(ID(action))	 {
-		case FP_MOVE_VERTEX :  
- 		  parlst.addParam(new RichBool ("UpdateNormals",
-											true,
-											"Recompute normals",
-											"Toggle the recomputation of the normals after the random displacement.\n\n"
-											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
-			parlst.addParam(new RichAbsPerc("Displacement",
-												m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(),
-												"Max displacement",
-												"The vertex are displaced of a vector whose norm is bounded by this value"));
-											break;
-											
-		default : assert(0); 
+	 case VORONOI_SAMPLING :
+		 break;
+	 case VOLUME_SAMPLING:
+		 break;
+	 case VORONOI_SCAFFOLDING:
+		 break;
+	 case BUILD_SHELL:
+		 break;
+	 case CROSS_FIELD_CREATION:
+		 break;
+	 case CROSS_FIELD_SMOOTHING:
+		 break;
+	 default :
+		 assert(0);
 	}
 }
 
-// The Real Core Function doing the actual mesh processing.
-// Move Vertex of a random quantity
 bool FilterVoronoiPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
 {
-	CMeshO &m = md.mm()->cm;
-	srand(time(NULL)); 
-	const float max_displacement =par.getAbsPerc("Displacement");
 
-	for(unsigned int i = 0; i< m.vert.size(); i++){
-		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
-		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
-		  cb(100*i/m.vert.size(), "Randomly Displacing...");
-
-		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
-		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
-	}
-	
-	// Log function dump textual info in the lower part of the MeshLab screen. 
-	Log("Successfully displaced %i vertices",m.vn);
-	
-	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
-	if(par.getBool("UpdateNormals"))	
-			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
-	
-	vcg::tri::UpdateBounding<CMeshO>::Box(m);
-  
-	return true;
 }
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterVoronoiPlugin)
