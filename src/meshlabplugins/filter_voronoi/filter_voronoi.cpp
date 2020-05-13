@@ -141,7 +141,7 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 		 par.addParam(new RichFloat("radiusVariance", 1, "Radius Variance", "The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality."));
 		 par.addParam(new RichEnum("colorStrategy", 1, {"None", "Seed_Distance", "Border_Distance", "Region_Area"}, "Color Strategy"));
 		 par.addParam(new RichEnum("distanceType", 0, {"Euclidean", "QualityWeighted", "Anisotropic"}, "Distance Type"));
-		 par.addParam(new RichBool("preprocessFlag", false, "Preprocessing", ""));
+		 par.addParam(new RichBool("preprocessFlag", false, "Preprocessing"));
 		 par.addParam(new RichInt("refineFactor", 10, "Refinement Factor", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
 		 par.addParam(new RichFloat("perturbProbability", 0, "Perturbation Probability", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
 		 par.addParam(new RichFloat("perturbAmount", 0.001, "Perturbation Amount", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));

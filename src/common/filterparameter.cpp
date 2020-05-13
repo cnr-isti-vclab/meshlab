@@ -732,17 +732,9 @@ RichParameter::~RichParameter()
 {
     delete val;delete pd;
 }
-/*
-RichBool::RichBool( const QString nm,const bool defval) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),"",""))
-{
 
-}
-RichBool::RichBool( const QString nm,const bool defval,const QString desc) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,""))
-{
 
-}
-*/
-RichBool::RichBool( const QString& nm,const bool defval,const QString& desc/*=QString()*/,const QString& tltip/*=QString()*/ ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
+RichBool::RichBool( const QString& nm,const bool defval,const QString& desc,const QString& tltip ) : RichParameter(nm,new BoolValue(defval),new BoolDecoration(new BoolValue(defval),desc,tltip))
 {}
 
 
