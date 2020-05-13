@@ -44,16 +44,30 @@ public:
 
 	FilterVoronoiPlugin();
 
-	virtual QString pluginName(void) const { return "VoronoiTechniques"; }
-
+	QString pluginName() const;
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
+	FilterClass getClass(QAction* a);
+	FILTER_ARITY filterArity(QAction* a) const;
+	void initParameterSet(QAction* action, MeshModel& m, RichParameterSet& par);
+	int getPreConditions(QAction* action) const;
+	bool applyFilter(QAction* action, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb) ;
+	int postCondition(QAction* ) const;
 
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+private:
+	bool voronoiSampling(MeshDocument &md,
+			vcg::CallBackPos* cb,
+			int iterNum,
+			int sampleNum,
+			float radiusVariance,
+			int distanceType,
+			int randomSeed,
+			int relaxType,
+			int colorStrategy,
+			int refineFactor,
+			float perturbProbability,
+			float perturbAmount,
+			bool preprocessingFlag);
 };
 
 
