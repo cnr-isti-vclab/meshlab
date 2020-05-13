@@ -21,7 +21,7 @@
 *                                                                           *
 ****************************************************************************/
 
-#include "filter_voronoi.h"
+#include "filter_voronoi_xml.h"
 #include<vcg/complex/algorithms/voronoi_processing.h>
 #include<vcg/complex/algorithms/update/curvature.h>
 #include<vcg/complex/algorithms/update/curvature_fitting.h>
@@ -36,7 +36,7 @@
 using namespace vcg;
 using namespace std;
 
-bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
+bool FilterVoronoiPluginXML::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb)
 {
   if(filterName == "Cross Field Coloring")
   {
@@ -297,4 +297,4 @@ bool FilterVoronoiPlugin::applyFilter( const QString& filterName,MeshDocument& m
   return false;
 }
 
-MESHLAB_PLUGIN_NAME_EXPORTER(FilterVoronoiPlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterVoronoiPluginXML)

@@ -20,12 +20,12 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef _FILTER_VORONOI_H_
-#define _FILTER_VORONOI_H_
+#ifndef _FILTER_VORONOI_XML_H_
+#define _FILTER_VORONOI_XML_H_
 
 #include <common/interfaces.h>
 
-class FilterVoronoiPlugin : public MeshLabFilterInterface
+class FilterVoronoiPluginXML : public MeshLabFilterInterface
 {
     Q_OBJECT
     MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
