@@ -179,8 +179,8 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
     std::vector<Point3f> unifDirVec;
     GenNormal<float>::Fibonacci(numViews,unifDirVec);
 
-    Log(0, "Number of rays: %i ", unifDirVec.size() );
-    Log(0, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
+    Log(GLLogStream::SYSTEM, "Number of rays: %i ", unifDirVec.size() );
+    Log(GLLogStream::SYSTEM, "Number of rays for GPU outliers removal: %i ", coneDirVec.size() );
 
     coneDirVec.clear();
 
@@ -221,14 +221,14 @@ bool SdfGpuPlugin::applyFilter(QAction */*filter*/, MeshDocument &md, RichParame
 
 
 
-    Log(0, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
+    Log(GLLogStream::SYSTEM, "Mesh depth complexity %i (The accuracy of the result depends on the value you provided for the max number of peeling iterations, \n if you get warnings try increasing"
         " the peeling iteration parameter)\n", mDepthComplexity );
 
     //Depth complexity distribution log. Useful to know which is the probability to find a number of layers looking at the mesh or scene.
-    Log(0, "Depth complexity             NumberOfViews\n", mDepthComplexity );
+    Log(GLLogStream::SYSTEM, "Depth complexity             NumberOfViews\n", mDepthComplexity );
     for(int j = 0; j < peel; j++)
     {
-        Log(0, "   %i                             %i\n", j, mDepthDistrib[j] );
+        Log(GLLogStream::SYSTEM, "   %i                             %i\n", j, mDepthDistrib[j] );
     }
 
     //Clean & Exit
@@ -265,7 +265,7 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     if (!GLExtensionsManager::initializeGLextensions_notThrowing())
     {
-        Log(0, "Error initializing OpenGL extensions.");
+        Log(GLLogStream::SYSTEM, "Error initializing OpenGL extensions.");
         return false;
     }
 
@@ -274,13 +274,13 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     {
         if (!glewIsSupported("GL_EXT_vertex_shader GL_EXT_fragment_shader"))
         {
-            Log(0, "Your hardware doesn't support Shaders, which are required for hw occlusion");
+            Log(GLLogStream::SYSTEM, "Your hardware doesn't support Shaders, which are required for hw occlusion");
             return false;
         }
     }
     if ( !glewIsSupported("GL_EXT_framebuffer_object") )
     {
-        Log(0, "Your hardware doesn't support FBOs, which are required for hw occlusion");
+        Log(GLLogStream::SYSTEM, "Your hardware doesn't support FBOs, which are required for hw occlusion");
         return false;
     }
 
@@ -288,13 +288,13 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
     {
         if ( !glewIsSupported("GL_EXT_gpu_shader4") )   //Only DX10-grade cards support FP32 blending
         {
-            Log(0,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
+            Log(GLLogStream::SYSTEM,"Your hardware can't do FP32 blending, and currently the FP16 version is not yet implemented.");
             return false;
         }
     }
     else
     {
-        Log(0,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
+        Log(GLLogStream::SYSTEM,"Your hardware doesn't support floating point textures, which are required for hw occlusion");
         return false;
     }
 
@@ -313,12 +313,12 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     unsigned int maxTexSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, reinterpret_cast<GLint*>(&maxTexSize) );
-    Log(0, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
+    Log(GLLogStream::SYSTEM, "QUERY HARDWARE FOR: MAX TEX SIZE: %i ", maxTexSize );
 
     //CHECK MODEL SIZE
     if ((maxTexSize*maxTexSize) < numElems)
     {
-        Log(0, "That's a really huge model, I can't handle it in hardware, sorry..");
+        Log(GLLogStream::SYSTEM, "That's a really huge model, I can't handle it in hardware, sorry..");
         return false;
     }
 
@@ -326,10 +326,10 @@ bool SdfGpuPlugin::initGL(MeshModel& mm)
 
     mNumberOfTexRows = ceil( ((float)numElems) / ((float)mResTextureDim));
 
-    Log(0, "Mesh has %i vertices\n", numVertices );
-    Log(0, "Mesh has %i faces\n", numFaces);
-    Log(0, "Number of tex rows used %i",mNumberOfTexRows);
-    Log(0, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
+    Log(GLLogStream::SYSTEM, "Mesh has %i vertices\n", numVertices );
+    Log(GLLogStream::SYSTEM, "Mesh has %i faces\n", numFaces);
+    Log(GLLogStream::SYSTEM, "Number of tex rows used %i",mNumberOfTexRows);
+    Log(GLLogStream::SYSTEM, "Result texture is %i X %i = %i", mResTextureDim, mResTextureDim, mResTextureDim*mResTextureDim);
 
     mVertexCoordsTexture  = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
     mVertexNormalsTexture = new FloatTexture2D( TextureFormat( GL_TEXTURE_2D, mResTextureDim, mResTextureDim, GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT ), TextureParams( GL_NEAREST, GL_NEAREST ) );
@@ -1036,7 +1036,7 @@ void SdfGpuPlugin::TraceRay(int peelingIteration,const Point3f& dir, MeshModel* 
             return;
         else
             if(i==(peelingIteration-1))
-                Log(0,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
+                Log(GLLogStream::SYSTEM,"WARNING: You may have underestimated the depth complexity of the mesh. Run the filter with a higher number of peeling iteration.");
 
         mFboArray[j]->unbind();
         //we use 3 FBOs to avoid z-fighting (Inspired from Woo's shadow mapping method)

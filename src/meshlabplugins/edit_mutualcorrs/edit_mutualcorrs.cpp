@@ -699,14 +699,14 @@ Point2m EditMutualCorrsPlugin::fromImageToGL(Point2m picked)
 
 bool EditMutualCorrsPlugin::initGL()
 {
-	Log(0, "GL Initialization");
+    Log(GLLogStream::SYSTEM, "GL Initialization");
 	if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-		Log(0, "GLEW initialization error!");
+        Log(GLLogStream::SYSTEM, "GLEW initialization error!");
 		return false;
 	}
 
 	if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-		Log(0, "Graphics hardware does not support FBOs");
+        Log(GLLogStream::SYSTEM, "Graphics hardware does not support FBOs");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
@@ -716,11 +716,11 @@ bool EditMutualCorrsPlugin::initGL()
 	}
 
 	if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-		Log(0, "Graphics hardware does not support non-power-of-two textures");
+        Log(GLLogStream::SYSTEM, "Graphics hardware does not support non-power-of-two textures");
 		return false;
 	}
 	if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-		Log(0, "Graphics hardware does not support vertex buffer objects");
+        Log(GLLogStream::SYSTEM, "Graphics hardware does not support vertex buffer objects");
 		return false;
 	}
 
@@ -737,6 +737,6 @@ bool EditMutualCorrsPlugin::initGL()
 	align.resize(800);
 	//assert(glGetError() == 0);
 
-	Log(0, "GL Initialization done");
+    Log(GLLogStream::SYSTEM, "GL Initialization done");
 	return true;
 }

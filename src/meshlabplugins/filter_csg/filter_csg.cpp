@@ -172,27 +172,27 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
             const Scalarm d = par.getFloat("Delta");
             const Point3m delta(d, d, d);
             const int subFreq = par.getInt("SubDelta");
-            Log(0, "Rasterizing first volume...");
+            Log(GLLogStream::SYSTEM, "Rasterizing first volume...");
             InterceptVolume<intercept> v = InterceptSet3<intercept>(tmpfirstmesh.cm, delta, subFreq, cb);
-            Log(0, "Rasterizing second volume...");
+            Log(GLLogStream::SYSTEM, "Rasterizing second volume...");
             InterceptVolume<intercept> tmp = InterceptSet3<intercept>(tmpsecondmesh.cm, delta, subFreq, cb);
 
             MeshModel *mesh;
             switch(par.getEnum("Operator")){
             case CSG_OPERATION_INTERSECTION:
-                Log(0, "Intersection...");
+                Log(GLLogStream::SYSTEM, "Intersection...");
                 v &= tmp;
                 mesh = md.addNewMesh("","intersection");
                 break;
 
             case CSG_OPERATION_UNION:
-                Log(0, "Union...");
+                Log(GLLogStream::SYSTEM, "Union...");
                 v |= tmp;
                 mesh = md.addNewMesh("","union");
                 break;
 
             case CSG_OPERATION_DIFFERENCE:
-                Log(0, "Difference...");
+                Log(GLLogStream::SYSTEM, "Difference...");
                 v -= tmp;
                 mesh = md.addNewMesh("","difference");
                 break;
@@ -202,13 +202,13 @@ bool FilterCSG::applyFilter(QAction *filter, MeshDocument &md, RichParameterSet 
                 return true;
             }
 
-            Log(0, "Building mesh...");
+            Log(GLLogStream::SYSTEM, "Building mesh...");
             typedef vcg::intercept::Walker<CMeshO, intercept> MyWalker;
             typedef vcg::tri::MarchingCubes<CMeshO, MyWalker> MyMarchingCubes;
             MyWalker walker;
             MyMarchingCubes mc(mesh->cm, walker);
             walker.BuildMesh<MyMarchingCubes>(mesh->cm, v, mc, cb);
-            Log(0, "Done");
+            Log(GLLogStream::SYSTEM, "Done");
 
             vcg::tri::UpdateBounding<CMeshO>::Box(mesh->cm);
             vcg::tri::UpdateNormal<CMeshO>::PerFaceFromCurrentVertexNormal(mesh->cm);
