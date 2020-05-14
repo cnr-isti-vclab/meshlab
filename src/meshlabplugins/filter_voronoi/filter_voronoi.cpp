@@ -139,23 +139,27 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 		 par.addParam(new RichInt("iterNum", 10, "Iteration", "number of iterations"));
 		 par.addParam(new RichInt("sampleNum", 10, "Sample Num.", "Number of samples"));
 		 par.addParam(new RichFloat("radiusVariance", 1, "Radius Variance", "The distance metric will vary along the surface between 1/x and x, linearly according to the scalar field specified by the quality."));
-		 par.addParam(new RichEnum("colorStrategy", 1, {"None", "Seed_Distance", "Border_Distance", "Region_Area"}, "Color Strategy"));
-		 par.addParam(new RichEnum("distanceType", 0, {"Euclidean", "QualityWeighted", "Anisotropic"}, "Distance Type"));
+		 par.addParam(new RichEnum("colorStrategy", 1, {"None", "Seed Distance", "Border Distance", "Region Area"}, "Color Strategy"));
+		 par.addParam(new RichEnum("distanceType", 0, {"Euclidean", "Quality Weighted", "Anisotropic"}, "Distance Type"));
 		 par.addParam(new RichBool("preprocessFlag", false, "Preprocessing"));
 		 par.addParam(new RichInt("refineFactor", 10, "Refinement Factor", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
 		 par.addParam(new RichFloat("perturbProbability", 0, "Perturbation Probability", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
 		 par.addParam(new RichFloat("perturbAmount", 0.001, "Perturbation Amount", "To ensure good convergence the mesh should be more complex than the voronoi partitioning. This number affect how much the mesh is refined according to the required number of samples."));
 		 par.addParam(new RichInt("randomSeed", 0, "Random seed", "To ensure repeatability you can specify the random seed used. If 0 the random seed is tied to the current clock."));
-		 par.addParam(new RichEnum("relaxType", 1, {"Geodesic", "SquaredDistance", "Restricted"}, "Relax Type",
-									  "At each relaxation step we search for each voronoi region the new position of the seed. "
-									  "According to the classical LLoyd relaxation strategy it should have been placed onto the "
-									  "barycenter of the region. Over a surface we have two different strategies: <ul>"
-									  "<li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>"
-									  "<li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>"
-									  "<li> Restricted: the seed is placed in the barycenter of current voronoi region. Even if it is outside the surface. During the relaxation process the seed is free to move off the surface in a continuos way. Re-association to vertex is done at the end..</li>"
-									  "</ul>"));
+		 par.addParam(new RichEnum("relaxType", 1, {"Geodesic", "Squared Distance", "Restricted"}, "Relax Type",
+									"At each relaxation step we search for each voronoi region the new position of the seed. "
+									"According to the classical LLoyd relaxation strategy it should have been placed onto the "
+									"barycenter of the region. Over a surface we have two different strategies: <ul>"
+									"<li> Geodesic: the seed is placed onto the vertex that maximize the geodesic distance from the border of the region </li>"
+									"<li> Squared Distance: the seed is placed in the vertex that minimize the squared sum of the distances from all the pints of the region.</li>"
+									"<li> Restricted: the seed is placed in the barycenter of current voronoi region. Even if it is outside the surface. During the relaxation process the seed is free to move off the surface in a continuos way. Re-association to vertex is done at the end..</li>"
+									"</ul>"));
 		 break;
 	 case VOLUME_SAMPLING:
+		 par.addParam(new RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 500.0, 0, m.cm.bbox.Diag(),"Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		 par.addParam(new RichInt("sampleVolNum", 200000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
+		 par.addParam(new RichBool("poissonFiltering", true, "Poisson Filtering", "If true the base montecarlo sampling of the volume is filtered to get a poisson disk volumetric distribution."));
+		 par.addParam(new RichAbsPerc("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
 		 break;
 	 case VORONOI_SCAFFOLDING:
 		 break;
@@ -174,9 +178,8 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
-		return MeshModel::MM_NONE;
 	case VOLUME_SAMPLING:
-		break;
+		return MeshModel::MM_NONE;
 	case VORONOI_SCAFFOLDING:
 		break;
 	case BUILD_SHELL:
@@ -202,6 +205,12 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, RichPa
 					par.getEnum("colorStrategy"), par.getInt("refineFactor"), par.getFloat("perturbProbability"),
 					par.getFloat("perturbAmount"), par.getBool("preprocessFlag"));
 	case VOLUME_SAMPLING:
+		return volumeSampling(
+					md, cb,
+					par.getFloat("sampleSurfRadius"),
+					par.getInt("sampleVolNum"),
+					par.getBool("poissonFiltering"),
+					par.getFloat("poissonRadius"));
 		break;
 	case VORONOI_SCAFFOLDING:
 		break;
@@ -221,9 +230,8 @@ int FilterVoronoiPlugin::postCondition(QAction* action) const
 {
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
-		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case VOLUME_SAMPLING:
-		break;
+		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case VORONOI_SCAFFOLDING:
 		break;
 	case BUILD_SHELL:
@@ -346,6 +354,40 @@ bool FilterVoronoiPlugin::voronoiSampling(
 		(*vi)->SetS();
 
 	om->UpdateBoxAndNormals();
+	return true;
+}
+
+bool FilterVoronoiPlugin::volumeSampling(
+		MeshDocument& md,
+		vcg::CallBackPos* cb,
+		float sampleSurfRadius,
+		int sampleVolNum,
+		bool poissonFiltering,
+		float poissonRadius)
+{
+	MeshModel* m= md.mm();
+	m->updateDataMask(MeshModel::MM_FACEMARK);
+
+	MeshModel* mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
+	MeshModel* pVm = nullptr;
+	if (poissonFiltering)
+		pVm = md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
+	MeshModel* pSm= md.addOrGetMesh("Surface Sampling","Surface Sampling",false);
+
+	mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+	pSm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
+	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
+	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	cb(1, "Init");
+	vvs.Init(sampleSurfRadius);
+	cb(30, "Sampling Volume...");
+	vvs.BuildVolumeSampling(sampleVolNum,poissonRadius,0);
+	tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
+	tri::UpdateColor<CMeshO>::PerVertexQualityRamp(mcVm->cm);
+	//vvs.ThicknessEvaluator();
+	tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.psd.poissonSurfaceMesh);
+
+	//TODO: compute poisson filtered volume mesh
 	return true;
 }
 

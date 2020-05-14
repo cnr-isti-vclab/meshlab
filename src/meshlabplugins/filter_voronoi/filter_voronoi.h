@@ -68,6 +68,12 @@ private:
 			float perturbProbability,
 			float perturbAmount,
 			bool preprocessingFlag);
+
+	bool volumeSampling(MeshDocument& md,
+			vcg::CallBackPos* cb,
+			float sampleSurfRadius,
+			int sampleVolNum, bool poissonFiltering,
+			float poissonRadius);
 };
 
 
