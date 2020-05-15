@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,19 +20,98 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef _FILTER_VORONOI_H_
-#define _FILTER_VORONOI_H_
+
+#ifndef FILTER_VORONOI_H
+#define FILTER_VORONOI_H
 
 #include <common/interfaces.h>
 
-class FilterVoronoiPlugin : public MeshLabFilterInterface
+class FilterVoronoiPlugin : public QObject, public MeshFilterInterface
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshLabFilterInterface)
-public:
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+	Q_INTERFACES(MeshFilterInterface)
 
-    bool applyFilter(const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos* cb) ;
+public:
+	enum {
+		VORONOI_SAMPLING,
+		VOLUME_SAMPLING,
+		VORONOI_SCAFFOLDING,
+		BUILD_SHELL,
+		CROSS_FIELD_CREATION,
+		CROSS_FIELD_SMOOTHING
+		};
+
+	FilterVoronoiPlugin();
+
+	QString pluginName() const;
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction* a);
+	FILTER_ARITY filterArity(QAction* a) const;
+	void initParameterSet(QAction* action, MeshModel& m, RichParameterSet& par);
+	int getPreConditions(QAction* action) const;
+	bool applyFilter(QAction* action, MeshDocument& md, RichParameterSet& par, vcg::CallBackPos* cb) ;
+	int postCondition(QAction* ) const;
+
+private:
+	bool voronoiSampling(
+			MeshDocument &md,
+			vcg::CallBackPos* cb,
+			int iterNum,
+			int sampleNum,
+			float radiusVariance,
+			int distanceType,
+			int randomSeed,
+			int relaxType,
+			int colorStrategy,
+			int refineFactor,
+			float perturbProbability,
+			float perturbAmount,
+			bool preprocessingFlag);
+
+	bool volumeSampling(
+			MeshDocument& md,
+			vcg::CallBackPos* cb,
+			float sampleSurfRadius,
+			int sampleVolNum, bool poissonFiltering,
+			float poissonRadius);
+
+	bool voronoiScaffolding(
+			MeshDocument& md,
+			vcg::CallBackPos* cb,
+			float sampleSurfRadius,
+			int sampleVolNum,
+			int voxelRes,
+			float isoThr,
+			int smoothStep,
+			int relaxStep,
+			bool surfFlag,
+			int elemType);
+
+	bool createSolidWireframe(
+			MeshDocument& md,
+			bool edgeCylFlag,
+			float edgeCylRadius,
+			bool vertCylFlag,
+			float vertCylRadius,
+			bool vertSphFlag,
+			float vertSphRadius,
+			bool faceExtFlag,
+			float faceExtHeight,
+			float faceExtInset,
+			bool /*edgeFauxFlag*/,
+			int cylinderSideNum);
+
+	bool crossFieldCreation(
+			MeshDocument& md,
+			int crossType);
+
+	bool crossFieldColoring(MeshDocument& md);
+
+//	bool crossFieldSmoothing(
+//			MeshDocument& md,
+//			bool preprocessFlag);
 };
 
 

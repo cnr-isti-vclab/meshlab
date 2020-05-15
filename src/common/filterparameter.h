@@ -529,9 +529,7 @@ private:
 class RichBool : public RichParameter
 {
 public:
-	RichBool(const QString nm, const bool defval);
-	RichBool(const QString nm, const bool defval, const QString desc);
-	RichBool(const QString& nm, const bool defval, const QString& desc, const QString& tltip);
+	RichBool(const QString& nm, const bool defval, const QString& desc = QString(), const QString& tltip = QString());
 	RichBool(const QString& nm, const bool val, const bool defval, const QString& desc, const QString& tltip, bool isxmlpar = false);
 	void accept(Visitor& v);
 	bool operator==(const RichParameter& rb);

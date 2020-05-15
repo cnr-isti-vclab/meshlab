@@ -5,7 +5,5 @@ HEADERS += \
 
 SOURCES += \
     filter_voronoi.cpp
-
+		
 TARGET = filter_voronoi
-
-include (../../shared_post.pri)
