@@ -172,6 +172,17 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 		 par.addParam(new RichEnum("elemType", 1, {"Seed", "Edge", "Face"}, "Voronoi Element"));
 		 break;
 	 case BUILD_SHELL:
+		 par.addParam(new RichBool("edgeCylFlag", true, "Edge -> Cyl.", "If True all the edges are converted into cylinders."));
+		 par.addParam(new RichAbsPerc("edgeCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Edge Cylinder Rad.", "The radius of the cylinder replacing each edge."));
+		 par.addParam(new RichBool("vertCylFlag", false, "Vertex -> Cyl.", "If True all the vertices are converted into cylinders."));
+		 par.addParam(new RichAbsPerc("vertCylRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Cylinder Rad.", "The radius of the cylinder replacing each vertex."));
+		 par.addParam(new RichBool("vertSphFlag", true, "Vertex -> Sph.", "If True all the vertices are converted into sphere."));
+		 par.addParam(new RichAbsPerc("vertSphRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Vertex Sphere Rad.", "The radius of the sphere replacing each vertex."));
+		 par.addParam(new RichBool("faceExtFlag", true, "Face -> Prism", "If True all the faces are converted into prism."));
+		 par.addParam(new RichAbsPerc("faceExtHeight", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Height", "The Height of the prism that is substitued with each face."));
+		 par.addParam(new RichAbsPerc("faceExtInset", m.cm.bbox.Diag() / 200.0, 0, m.cm.bbox.Diag(), "Face Prism Inset", "The inset radius of each prism, e.g. how much it is moved toward the inside each vertex on the border of the prism."));
+		 par.addParam(new RichBool("edgeFauxFlag", true, "Ignore faux edges", "If true only the Non-Faux edges will be considered for conversion."));
+		 par.addParam(new RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
 		 break;
 	 case CROSS_FIELD_CREATION:
 		 break;
@@ -188,8 +199,8 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	case VORONOI_SAMPLING :
 	case VOLUME_SAMPLING:
 	case VORONOI_SCAFFOLDING:
-		return MeshModel::MM_NONE;
 	case BUILD_SHELL:
+		return MeshModel::MM_NONE;
 		break;
 	case CROSS_FIELD_CREATION:
 		break;
@@ -219,12 +230,20 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, RichPa
 					par.getBool("poissonFiltering"),
 					par.getFloat("poissonRadius"));
 	case VORONOI_SCAFFOLDING:
-		return voronoiScaffolding(md, cb,
-								  par.getFloat("sampleSurfRadius"), par.getInt("sampleVolNum"),
-								  par.getInt("voxelRes"), par.getFloat("isoThr"), par.getInt("smoothStep"),
-								  par.getInt("relaxStep"), par.getBool("surfFlag"), par.getInt("elemType"));
+		return voronoiScaffolding(
+					md, cb,
+					par.getFloat("sampleSurfRadius"), par.getInt("sampleVolNum"),
+					par.getInt("voxelRes"), par.getFloat("isoThr"), par.getInt("smoothStep"),
+					par.getInt("relaxStep"), par.getBool("surfFlag"), par.getInt("elemType"));
 	case BUILD_SHELL:
-		break;
+		return createSolidWireframe(
+					md,
+					par.getBool("edgeCylFlag"), par.getFloat("edgeCylRadius"),
+					par.getBool("vertCylFlag"), par.getFloat("vertCylRadius"),
+					par.getBool("vertSphFlag"), par.getFloat("vertSphRadius"),
+					par.getBool("faceExtFlag"), par.getFloat("faceExtHeight"),
+					par.getFloat("faceExtInset"), par.getBool("edgeFauxFlag"),
+					par.getInt("cylinderSideNum"));
 	case CROSS_FIELD_CREATION:
 		break;
 	case CROSS_FIELD_SMOOTHING:
@@ -243,6 +262,7 @@ int FilterVoronoiPlugin::postCondition(QAction* action) const
 	case VORONOI_SCAFFOLDING:
 		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case BUILD_SHELL:
+		return MeshModel::MM_NONE;
 		break;
 	case CROSS_FIELD_CREATION:
 		break;
@@ -377,9 +397,9 @@ bool FilterVoronoiPlugin::volumeSampling(
 	m->updateDataMask(MeshModel::MM_FACEMARK);
 
 	MeshModel* mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
-	MeshModel* pVm = nullptr;
+	//MeshModel* pVm = nullptr;
 	if (poissonFiltering)
-		pVm = md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
+		/*pVm =*/ md.addOrGetMesh("Poisson Sampling","Poisson Sampling",false);
 	MeshModel* pSm= md.addOrGetMesh("Surface Sampling","Surface Sampling",false);
 
 	mcVm->updateDataMask(MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY);
@@ -445,6 +465,41 @@ bool FilterVoronoiPlugin::voronoiScaffolding(
 	sm->UpdateBoxAndNormals();
 	tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
 	tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
+	return true;
+}
+
+bool FilterVoronoiPlugin::createSolidWireframe(
+		MeshDocument& md,
+		bool edgeCylFlag,
+		float edgeCylRadius,
+		bool vertCylFlag,
+		float vertCylRadius,
+		bool vertSphFlag,
+		float vertSphRadius,
+		bool faceExtFlag,
+		float faceExtHeight,
+		float faceExtInset,
+		bool /*edgeFauxFlag*/,
+		int cylinderSideNum)
+{
+	//ToDo: consider edge faux flag
+
+	MeshModel *m= md.mm();
+	m->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	MeshModel *sm= md.addOrGetMesh("Shell Mesh","Shell Mesh",false);
+
+	sm->cm.Clear();
+	sm->updateDataMask(MeshModel::MM_FACEFACETOPO);
+	tri::RequireFFAdjacency(sm->cm);
+	tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m->cm);
+	tri::Clean<CMeshO>::RemoveUnreferencedVertex(m->cm);
+	tri::Allocator<CMeshO>::CompactEveryVector(m->cm);
+	if(edgeCylFlag) tri::BuildCylinderEdgeShell(m->cm,sm->cm,edgeCylRadius,cylinderSideNum);
+	if(vertCylFlag) tri::BuildCylinderVertexShell(m->cm,sm->cm,vertCylRadius,edgeCylRadius,cylinderSideNum);
+	if(vertSphFlag) tri::BuildSphereVertexShell(m->cm,sm->cm,vertSphRadius);
+	if(faceExtFlag) tri::BuildPrismFaceShell(m->cm,sm->cm,faceExtHeight,faceExtInset);
+
+	sm->UpdateBoxAndNormals();
 	return true;
 }
 

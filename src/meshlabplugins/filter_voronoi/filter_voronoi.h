@@ -88,6 +88,20 @@ private:
 			int relaxStep,
 			bool surfFlag,
 			int elemType);
+
+	bool createSolidWireframe(
+			MeshDocument& md,
+			bool edgeCylFlag,
+			float edgeCylRadius,
+			bool vertCylFlag,
+			float vertCylRadius,
+			bool vertSphFlag,
+			float vertSphRadius,
+			bool faceExtFlag,
+			float faceExtHeight,
+			float faceExtInset,
+			bool /*edgeFauxFlag*/,
+			int cylinderSideNum);
 };
 
 
