@@ -55,7 +55,8 @@ public:
 	int postCondition(QAction* ) const;
 
 private:
-	bool voronoiSampling(MeshDocument &md,
+	bool voronoiSampling(
+			MeshDocument &md,
 			vcg::CallBackPos* cb,
 			int iterNum,
 			int sampleNum,
@@ -69,11 +70,24 @@ private:
 			float perturbAmount,
 			bool preprocessingFlag);
 
-	bool volumeSampling(MeshDocument& md,
+	bool volumeSampling(
+			MeshDocument& md,
 			vcg::CallBackPos* cb,
 			float sampleSurfRadius,
 			int sampleVolNum, bool poissonFiltering,
 			float poissonRadius);
+
+	bool voronoiScaffolding(
+			MeshDocument& md,
+			vcg::CallBackPos* cb,
+			float sampleSurfRadius,
+			int sampleVolNum,
+			int voxelRes,
+			float isoThr,
+			int smoothStep,
+			int relaxStep,
+			bool surfFlag,
+			int elemType);
 };
 
 

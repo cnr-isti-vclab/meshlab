@@ -162,6 +162,14 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 		 par.addParam(new RichAbsPerc("poissonRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Poisson Radius", "Number of voxel per side in the volumetric representation."));
 		 break;
 	 case VORONOI_SCAFFOLDING:
+		 par.addParam(new RichAbsPerc("sampleSurfRadius", m.cm.bbox.Diag() / 100.0, 0, m.cm.bbox.Diag(), "Surface Sampling Radius", "Surface Sampling is used only as an optimization."));
+		 par.addParam(new RichInt("sampleVolNum", 100000, "Volume Sample Num.", "Number of volumetric samples scattered inside the mesh and used for choosing the voronoi seeds and performing the Lloyd relaxation for having a centroidal voronoi diagram."));
+		 par.addParam(new RichInt("voxelRes", 50, "Volume Side Resolution", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(new RichFloat("isoThr", 1, "Width of the entity (in voxel)", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(new RichInt("smoothStep", 3, "Smooth Step", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(new RichInt("relaxStep", 5, "Lloyd Relax Step", "Number of Lloyd relaxation step to get a better distribution of the voronoi seeds."));
+		 par.addParam(new RichBool("surfFlag", true, "Add original surface", "Number of voxel per side in the volumetric representation."));
+		 par.addParam(new RichEnum("elemType", 1, {"Seed", "Edge", "Face"}, "Voronoi Element"));
 		 break;
 	 case BUILD_SHELL:
 		 break;
@@ -179,9 +187,8 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
 	case VOLUME_SAMPLING:
-		return MeshModel::MM_NONE;
 	case VORONOI_SCAFFOLDING:
-		break;
+		return MeshModel::MM_NONE;
 	case BUILD_SHELL:
 		break;
 	case CROSS_FIELD_CREATION:
@@ -211,9 +218,11 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, RichPa
 					par.getInt("sampleVolNum"),
 					par.getBool("poissonFiltering"),
 					par.getFloat("poissonRadius"));
-		break;
 	case VORONOI_SCAFFOLDING:
-		break;
+		return voronoiScaffolding(md, cb,
+								  par.getFloat("sampleSurfRadius"), par.getInt("sampleVolNum"),
+								  par.getInt("voxelRes"), par.getFloat("isoThr"), par.getInt("smoothStep"),
+								  par.getInt("relaxStep"), par.getBool("surfFlag"), par.getInt("elemType"));
 	case BUILD_SHELL:
 		break;
 	case CROSS_FIELD_CREATION:
@@ -231,9 +240,8 @@ int FilterVoronoiPlugin::postCondition(QAction* action) const
 	switch(ID(action))	 {
 	case VORONOI_SAMPLING :
 	case VOLUME_SAMPLING:
-		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case VORONOI_SCAFFOLDING:
-		break;
+		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case BUILD_SHELL:
 		break;
 	case CROSS_FIELD_CREATION:
@@ -388,6 +396,55 @@ bool FilterVoronoiPlugin::volumeSampling(
 	tri::Append<CMeshO,CMeshO>::MeshCopy(pSm->cm,vvs.psd.poissonSurfaceMesh);
 
 	//TODO: compute poisson filtered volume mesh
+	return true;
+}
+
+bool FilterVoronoiPlugin::voronoiScaffolding(
+		MeshDocument& md,
+		vcg::CallBackPos* cb,
+		float sampleSurfRadius,
+		int sampleVolNum,
+		int voxelRes,
+		float isoThr,
+		int smoothStep,
+		int relaxStep,
+		bool surfFlag,
+		int elemType)
+{
+	MeshModel *m= md.mm();
+	m->updateDataMask(MeshModel::MM_FACEMARK);
+	MeshModel   *pm= md.addOrGetMesh("Poisson-disk Samples","Poisson-disk Samples",false);
+	MeshModel *mcVm= md.addOrGetMesh("Montecarlo Volume","Montecarlo Volume",false);
+	/*MeshModel  *vsm= */md.addOrGetMesh("Voronoi Seeds","Voronoi Seeds",false);
+	MeshModel   *sm= md.addOrGetMesh("Scaffolding","Scaffolding",false);
+
+	pm->updateDataMask(m);
+	cb(10, "Sampling Surface...");
+
+	VoronoiVolumeSampling<CMeshO> vvs(m->cm);
+	VoronoiVolumeSampling<CMeshO>::Param par;
+
+	Log("Sampling Surface at a radius %f ",sampleSurfRadius);
+	vvs.Init(sampleSurfRadius);
+	cb(30, "Sampling Volume...");
+	CMeshO::ScalarType poissonVolumeRadius=0;
+	vvs.BuildVolumeSampling(sampleVolNum,poissonVolumeRadius,0);
+	Log("Base Poisson volume sampling at a radius %f ",poissonVolumeRadius);
+
+	cb(40, "Relaxing Volume...");
+	vvs.BarycentricRelaxVoronoiSamples(relaxStep);
+
+	cb(50, "Building Scaffloding Volume...");
+	par.isoThr = isoThr;
+	par.surfFlag = surfFlag;
+	par.elemType = elemType;
+	par.voxelSide = voxelRes;
+	vvs.BuildScaffoldingMesh(sm->cm,par);
+	cb(90, "Final Smoothing...");
+	tri::Smooth<CMeshO>::VertexCoordLaplacian(sm->cm, smoothStep);
+	sm->UpdateBoxAndNormals();
+	tri::Append<CMeshO,CMeshO>::MeshCopy(mcVm->cm,vvs.montecarloVolumeMesh);
+	tri::Append<CMeshO,CMeshO>::MeshCopy(pm->cm,vvs.psd.poissonSurfaceMesh);
 	return true;
 }
 
