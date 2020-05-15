@@ -25,5 +25,3 @@ TARGET = filter_mutualinfo
 INCLUDEPATH *= \
     $$MESHLAB_EXTERNAL_DIRECTORY/levmar-2.3 \
     $$MESHLAB_EXTERNAL_DIRECTORY/newuoa/include
-
-include (../../shared_post.pri)

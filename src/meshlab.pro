@@ -73,6 +73,7 @@ SUBDIRS += \ #sub projects names
     filter_mls \
     filter_mutualglobal \
     filter_mutualinfo \
+    filter_mutualinfo_xml \
     filter_plymc \
     filter_qhull \
     filter_quality \
@@ -161,6 +162,7 @@ filter_layer.subdir = meshlabplugins/filter_layer
 filter_mls.subdir = meshlabplugins/filter_mls
 filter_mutualglobal.subdir = meshlabplugins/filter_mutualglobal
 filter_mutualinfo.subdir = meshlabplugins/filter_mutualinfo
+filter_mutualinfo_xml.subdir = meshlabplugins/filter_mutualinfo_xml
 filter_plymc.subdir = meshlabplugins/filter_plymc
 filter_qhull.subdir = meshlabplugins/filter_qhull
 filter_quality.subdir = meshlabplugins/filter_quality
@@ -237,6 +239,7 @@ filter_layer.depends = common
 filter_mls.depends = common
 filter_mutualglobal.depends = common
 filter_mutualinfo.depends = common
+filter_mutualinfo_xml.depends = common
 filter_plymc.depends = common
 filter_qhull.depends = common
 filter_quality.depends = common

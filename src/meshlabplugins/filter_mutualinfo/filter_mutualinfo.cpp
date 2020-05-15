@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -22,159 +22,110 @@
 ****************************************************************************/
 
 #include "filter_mutualinfo.h"
-#include <common/GLExtensionsManager.h>
-#include "solver.h"
-#include "mutual.h"
-#include <wrap/gl/shot.h>
-#include <wrap/gl/camera.h>
+#include <QtScript>
 
-bool MutualInfoPlugin::applyFilter( const QString& filterName,MeshDocument& md,EnvWrap&env, vcg::CallBackPos * /*cb*/ )
-{
-    if (md.mm() == NULL)
-        return false;
-    if (filterName == "Image alignment: Mutual Information")
-    {
-        Solver solver;
-        MutualInfo mutual;
-        if (md.rasterList.size()==0)
-        {
-            Log(GLLogStream::SYSTEM, "You need a Raster Model to apply this filter!");
-            return false;
-        }
-        else
-            align.image=&md.rm()->currentPlane->image;
+// Constructor usually performs only two simple tasks of filling the two lists 
+//  - typeList: with all the possible id of the filtering actions
+//  - actionList with the corresponding actions. If you want to add icons to your filtering actions you can do here by construction the QActions accordingly
 
-        align.mesh=&md.mm()->cm;
-        align.meshid = md.mm()->id();
-
-        int rendmode = env.evalEnum("RenderingMode");
-        solver.optimize_focal = env.evalBool("EstimateFocal");
-        solver.fine_alignment = env.evalBool("Fine");
-        solver.variance = env.evalFloat("ExpectedVariance");
-        solver.tolerance = env.evalFloat("Tolerance");
-        solver.maxiter = env.evalInt("NumOfIterations");
-        mutual.bweight = env.evalInt("BackgroundWeight");
-
-        switch(rendmode)
-        {
-        case 0:
-            align.mode=AlignSet::COMBINE;
-            break;
-        case 1:
-            align.mode=AlignSet::NORMALMAP;
-            break;
-        case 2:
-            align.mode=AlignSet::COLOR;
-            break;
-        case 3:
-            align.mode=AlignSet::SPECULAR;
-            break;
-        case 4:
-            align.mode=AlignSet::SILHOUETTE;
-            break;
-        case 5:
-            align.mode=AlignSet::SPECAMB;
-            break;
-        default:
-            align.mode=AlignSet::COMBINE;
-            break;
-        }
-
-///// Loading geometry
-
-        align.shot = vcg::Shotf::Construct(env.evalShot("Shot"));
-
-        align.shot.Intrinsics.ViewportPx[0]=int((double)align.shot.Intrinsics.ViewportPx[1]*align.image->width()/align.image->height());
-        align.shot.Intrinsics.CenterPx[0]=(int)(align.shot.Intrinsics.ViewportPx[0]/2);
-
-///// Initialize GLContext
-
-        Log( "Initialize GL");
-        align.setGLContext(glContext);
-        glContext->makeCurrent(); 
-        if (this->initGL() == false)
-            return false;
-
-        Log( "Done");
-
-///// Mutual info calculation: every 30 iterations, the mail glarea is updated
-        int rounds=(int)(solver.maxiter/30);
-        for (int i=0; i<rounds; i++)
-        {
-            Log( "Step %i of %i.", i+1, rounds );
-
-            solver.maxiter=30;
-
-            if (solver.fine_alignment)
-                solver.optimize(&align, &mutual, align.shot);
-            else
-                solver.iterative(&align, &mutual, align.shot);
-
-            md.rm()->shot = Shotm::Construct(align.shot);
-            float ratio=(float)md.rm()->currentPlane->image.height()/(float)align.shot.Intrinsics.ViewportPx[1];
-            md.rm()->shot.Intrinsics.ViewportPx[0]=md.rm()->currentPlane->image.width();
-            md.rm()->shot.Intrinsics.ViewportPx[1]=md.rm()->currentPlane->image.height();
-            md.rm()->shot.Intrinsics.PixelSizeMm[1]/=ratio;
-            md.rm()->shot.Intrinsics.PixelSizeMm[0]/=ratio;
-            md.rm()->shot.Intrinsics.CenterPx[0]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[0]/2.0);
-            md.rm()->shot.Intrinsics.CenterPx[1]=(int)((float)md.rm()->shot.Intrinsics.ViewportPx[1]/2.0);
-
-            QList<int> rl;
-            rl << md.rm()->id();
-
-            //md.updateRenderStateRasters(rl,RasterModel::RM_ALL);
-
-            md.documentUpdated();
-        }
-		this->glContext->doneCurrent();
-
-
-        return true;
-    }
-    return false;
+FilterMutualInfoPlugin::FilterMutualInfoPlugin()
+{ 
+	typeList << FP_MOVE_VERTEX;
+  
+  foreach(FilterIDType tt , types())
+	  actionList << new QAction(filterName(tt), this);
 }
 
-bool MutualInfoPlugin::initGL()
+// ST() must return the very short string describing each filtering action 
+// (this string is used also to define the menu entry)
+QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
-    Log(GLLogStream::SYSTEM, "GL Initialization");
-    if (!GLExtensionsManager::initializeGLextensions_notThrowing()) {
-        Log(GLLogStream::SYSTEM, "GLEW initialization error!");
-        return false;
-    }
-
-    if (!glewIsSupported("GL_EXT_framebuffer_object")) {
-        Log(GLLogStream::SYSTEM, "Graphics hardware does not support FBOs");
-        return false;
-    }
-    if (!glewIsSupported("GL_ARB_vertex_shader") || !glewIsSupported("GL_ARB_fragment_shader") ||
-        !glewIsSupported("GL_ARB_shader_objects") || !glewIsSupported("GL_ARB_shading_language")) {
-            //QMessageBox::warning(this, "Danger, Will Robinson!",
-            //                         "Graphics hardware does not fully support Shaders");
-    }
-
-    if (!glewIsSupported("GL_ARB_texture_non_power_of_two")) {
-        Log(GLLogStream::SYSTEM,"Graphics hardware does not support non-power-of-two textures");
-        return false;
-    }
-    if (!glewIsSupported("GL_ARB_vertex_buffer_object")) {
-        Log(GLLogStream::SYSTEM, "Graphics hardware does not support vertex buffer objects");
-        return false;
-    }
-
-    glEnable(GL_NORMALIZE);
-    glDepthRange (0.0, 1.0);
-
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_POLYGON_SMOOTH);
-    glShadeModel(GL_SMOOTH);
-    glDisable(GL_POLYGON_SMOOTH);
-
-    //AlignSet &align = Autoreg::instance().align;
-    align.initializeGL();
-    align.resize(800);
-    //assert(glGetError() == 0);
-
-    Log(GLLogStream::SYSTEM, "GL Initialization done");
-    return true;
+  switch(filterId) {
+        case FP_MOVE_VERTEX :  return QString("Random Vertex Displacement");
+		default : assert(0); 
+	}
+  return QString();
 }
-MESHLAB_PLUGIN_NAME_EXPORTER(MutualInfoPlugin)
+
+// Info() must return the longer string describing each filtering action 
+// (this string is used in the About plugin dialog)
+ QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
+{
+  switch(filterId) {
+		case FP_MOVE_VERTEX :  return QString("Move the vertices of the mesh of a random quantity."); 
+		default : assert(0); 
+	}
+	return QString("Unknown Filter");
+}
+
+// The FilterClass describes in which generic class of filters it fits. 
+// This choice affect the submenu in which each filter will be placed 
+// More than a single class can be chosen.
+FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
+{
+  switch(ID(a))
+	{
+		case FP_MOVE_VERTEX :  return MeshFilterInterface::Smoothing; 
+		default : assert(0); 
+	}
+	return MeshFilterInterface::Generic;
+}
+
+// This function define the needed parameters for each filter. Return true if the filter has some parameters
+// it is called every time, so you can set the default value of parameters according to the mesh
+// For each parameter you need to define, 
+// - the name of the parameter, 
+// - the string shown in the dialog 
+// - the default value
+// - a possibly long string describing the meaning of that parameter (shown as a popup help in the dialog)
+void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshModel &m, RichParameterSet & parlst)
+{
+	 switch(ID(action))	 {
+		case FP_MOVE_VERTEX :  
+ 		  parlst.addParam(new RichBool ("UpdateNormals",
+											true,
+											"Recompute normals",
+											"Toggle the recomputation of the normals after the random displacement.\n\n"
+											"If disabled the face normals will remains unchanged resulting in a visually pleasant effect."));
+			parlst.addParam(new RichAbsPerc("Displacement",
+												m.cm.bbox.Diag()/100.0f,0.0f,m.cm.bbox.Diag(),
+												"Max displacement",
+												"The vertex are displaced of a vector whose norm is bounded by this value"));
+											break;
+											
+		default : assert(0); 
+	}
+}
+
+// The Real Core Function doing the actual mesh processing.
+// Move Vertex of a random quantity
+bool FilterMutualInfoPlugin::applyFilter(QAction * /*filter*/, MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb)
+{
+	CMeshO &m = md.mm()->cm;
+	srand(time(NULL)); 
+	const float max_displacement =par.getAbsPerc("Displacement");
+
+	for(unsigned int i = 0; i< m.vert.size(); i++){
+		 // Typical usage of the callback for showing a nice progress bar in the bottom. 
+		 // First parameter is a 0..100 number indicating percentage of completion, the second is an info string.
+		  cb(100*i/m.vert.size(), "Randomly Displacing...");
+
+		Scalarm rndax = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		Scalarm rnday = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		Scalarm rndaz = (Scalarm(2.0*rand())/RAND_MAX - 1.0 ) *max_displacement;
+		m.vert[i].P() += Point3m(rndax,rnday,rndaz);
+	}
+	
+	// Log function dump textual info in the lower part of the MeshLab screen. 
+	Log("Successfully displaced %i vertices",m.vn);
+	
+	// to access to the parameters of the filter dialog simply use the getXXXX function of the FilterParameter Class
+	if(par.getBool("UpdateNormals"))	
+			vcg::tri::UpdateNormal<CMeshO>::PerVertexNormalizedPerFace(m);
+	
+	vcg::tri::UpdateBounding<CMeshO>::Box(m);
+  
+	return true;
+}
+
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterMutualInfoPlugin)

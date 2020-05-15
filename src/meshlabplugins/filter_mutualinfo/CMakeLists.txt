@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: BSL-1.0
 
 ### Generated file! Edit the templates in src/templates,
-### specifically src/templates/filter_mutualinfo.cmake (custom for this directory),
+### specifically src/templates/CMakeLists.template.cmake (shared with all other directories),
+### or create a derived template in src/templates/filter_mutualinfo.cmake,
 ### then re-run ./make-cmake.py
 
 # Only build if we have newuoa and levmar
 if(TARGET external-newuoa AND TARGET external-levmar)
 
     set(SOURCES
-        alignset.cpp
         filter_mutualinfo.cpp
+        alignset.cpp
         levmarmethods.cpp
         mutual.cpp
         parameters.cpp
@@ -18,8 +19,8 @@ if(TARGET external-newuoa AND TARGET external-levmar)
         solver.cpp)
 
     set(HEADERS
-        alignset.h
         filter_mutualinfo.h
+        alignset.h
         levmarmethods.h
         mutual.h
         parameters.h
@@ -28,14 +29,9 @@ if(TARGET external-newuoa AND TARGET external-levmar)
         shutils.h
         solver.h)
 
-    set(XML filter_mutualinfo.xml)
-    meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-    list(APPEND SOURCES ${XML_OUT})
-
     add_library(filter_mutualinfo MODULE ${SOURCES} ${HEADERS})
 
-    target_include_directories(filter_mutualinfo
-                               PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(filter_mutualinfo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filter_mutualinfo PUBLIC common)
 
     target_link_libraries(filter_mutualinfo PRIVATE external-newuoa
@@ -44,10 +40,10 @@ if(TARGET external-newuoa AND TARGET external-levmar)
     set_property(TARGET filter_mutualinfo PROPERTY FOLDER Plugins)
 
     set_property(TARGET filter_mutualinfo PROPERTY RUNTIME_OUTPUT_DIRECTORY
-                                                   ${MESHLAB_PLUGIN_OUTPUT_DIR})
+                                               ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
     set_property(TARGET filter_mutualinfo PROPERTY LIBRARY_OUTPUT_DIRECTORY
-                                                   ${MESHLAB_PLUGIN_OUTPUT_DIR})
+                                               ${MESHLAB_PLUGIN_OUTPUT_DIR})
 
     install(
         TARGETS filter_mutualinfo
