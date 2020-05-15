@@ -41,8 +41,8 @@ FilterVoronoiPlugin::FilterVoronoiPlugin()
 		<< VOLUME_SAMPLING
 		<< VORONOI_SCAFFOLDING
 		<< BUILD_SHELL
-		<< CROSS_FIELD_CREATION
-		<< CROSS_FIELD_SMOOTHING;
+		<< CROSS_FIELD_CREATION;
+//		<< CROSS_FIELD_SMOOTHING;
 
 	for (FilterIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
@@ -66,8 +66,8 @@ QString FilterVoronoiPlugin::filterName(FilterIDType filterId) const
 		return "Create Solid Wireframe";
 	case CROSS_FIELD_CREATION:
 		return "Cross Field Creation";
-	case CROSS_FIELD_SMOOTHING:
-		return "Cross Field Smoothing";
+//	case CROSS_FIELD_SMOOTHING:
+//		return "Cross Field Smoothing";
 	default :
 		assert(0);
 		return "";
@@ -88,8 +88,8 @@ QString FilterVoronoiPlugin::filterInfo(FilterIDType filterId) const
 		return "";
 	case CROSS_FIELD_CREATION:
 		return "";
-	case CROSS_FIELD_SMOOTHING:
-		return "";
+//	case CROSS_FIELD_SMOOTHING:
+//		return "";
 	default :
 		assert(0);
 		return "";
@@ -107,8 +107,8 @@ FilterVoronoiPlugin::FilterClass FilterVoronoiPlugin::getClass(QAction* a)
 		return MeshFilterInterface::Remeshing;
 	case CROSS_FIELD_CREATION:
 		return MeshFilterInterface::Normal;
-	case CROSS_FIELD_SMOOTHING:
-		return MeshFilterInterface::Smoothing;
+//	case CROSS_FIELD_SMOOTHING:
+//		return MeshFilterInterface::Smoothing;
 	default :
 		assert(0);
 		return MeshFilterInterface::Generic;
@@ -121,7 +121,7 @@ MeshFilterInterface::FILTER_ARITY FilterVoronoiPlugin::filterArity(QAction* a) c
 	case VORONOI_SAMPLING :
 	case VORONOI_SCAFFOLDING :
 	case CROSS_FIELD_CREATION :
-	case CROSS_FIELD_SMOOTHING :
+//	case CROSS_FIELD_SMOOTHING :
 		return SINGLE_MESH;
 	case VOLUME_SAMPLING :
 	case BUILD_SHELL :
@@ -185,9 +185,11 @@ void FilterVoronoiPlugin::initParameterSet(QAction* action, MeshModel& m, RichPa
 		 par.addParam(new RichInt("cylinderSideNum", 16, "Cylinder Side", "Number of sides of the cylinder (both edge and vertex)."));
 		 break;
 	 case CROSS_FIELD_CREATION:
+		 par.addParam(new RichEnum("crossType", 0, {"Linear Y", "Radial", "Curvature"}, "Cross Type", ""));
 		 break;
-	 case CROSS_FIELD_SMOOTHING:
-		 break;
+//	 case CROSS_FIELD_SMOOTHING:
+//		 par.addParam(new RichBool("preprocessFlag", true, "Preprocessing"));
+//		 break;
 	 default :
 		 assert(0);
 	 }
@@ -200,12 +202,10 @@ int FilterVoronoiPlugin::getPreConditions(QAction* action) const
 	case VOLUME_SAMPLING:
 	case VORONOI_SCAFFOLDING:
 	case BUILD_SHELL:
-		return MeshModel::MM_NONE;
-		break;
 	case CROSS_FIELD_CREATION:
-		break;
-	case CROSS_FIELD_SMOOTHING:
-		break;
+		return MeshModel::MM_NONE;
+//	case CROSS_FIELD_SMOOTHING:
+//		return MeshModel::MM_VERTCURVDIR;
 	default :
 		assert(0);
 		return 0;
@@ -245,9 +245,9 @@ bool FilterVoronoiPlugin::applyFilter(QAction * action, MeshDocument &md, RichPa
 					par.getFloat("faceExtInset"), par.getBool("edgeFauxFlag"),
 					par.getInt("cylinderSideNum"));
 	case CROSS_FIELD_CREATION:
-		break;
-	case CROSS_FIELD_SMOOTHING:
-		break;
+		return crossFieldCreation(md, par.getEnum("crossType"));
+//	case CROSS_FIELD_SMOOTHING:
+//		return crossFieldSmoothing(md, par.getBool("preprocessFlag"));
 	default :
 		assert(0);
 		return false;
@@ -263,11 +263,10 @@ int FilterVoronoiPlugin::postCondition(QAction* action) const
 		return MeshModel::MM_VERTCOLOR | MeshModel::MM_VERTQUALITY;
 	case BUILD_SHELL:
 		return MeshModel::MM_NONE;
-		break;
 	case CROSS_FIELD_CREATION:
-		break;
-	case CROSS_FIELD_SMOOTHING:
-		break;
+		return MeshModel::MM_VERTCURVDIR;
+//	case CROSS_FIELD_SMOOTHING:
+//		return MeshModel::MM_VERTCOLOR;
 	default :
 		assert(0);
 		return 0;
@@ -502,5 +501,57 @@ bool FilterVoronoiPlugin::createSolidWireframe(
 	sm->UpdateBoxAndNormals();
 	return true;
 }
+
+bool FilterVoronoiPlugin::crossFieldCreation(
+		MeshDocument& md,
+		int crossType)
+{
+	MeshModel &m=*md.mm();
+	m.updateDataMask(MeshModel::MM_VERTCURVDIR + MeshModel::MM_FACECURVDIR + MeshModel::MM_FACEQUALITY + MeshModel::MM_FACECOLOR);
+
+	if(crossType == 0) { //Linear Y
+		float range = m.cm.bbox.DimY();
+		for(size_t i=0;i<m.cm.vert.size();++i) {
+			CMeshO::ScalarType q01 = .25f+(m.cm.vert[i].P().Y() - m.cm.bbox.min.Y())/(2.0f*range);
+			m.cm.vert[i].PD1().Import(Point3m(1,0,0)*q01);
+			m.cm.vert[i].PD2().Import(Point3m(0,1,0)*(sqrt(1-q01*q01)));
+		}
+	}
+
+	if(crossType == 1) { // Radial
+		tri::UpdateCurvature<CMeshO>::PerVertexBasicRadialCrossField(m.cm,2.0);
+	}
+
+	if(crossType == 2) { // Curvature
+		m.updateDataMask(MeshModel::MM_VERTFACETOPO);
+		m.updateDataMask(MeshModel::MM_FACEFACETOPO);
+		//      tri::FieldSmoother<CMeshO>::InitByCurvature(m.cm);
+		//      tri::FieldSmoother<CMeshO>::SmoothParam par;
+		//      tri::FieldSmoother<CMeshO>::SmoothDirections(m.cm,par);
+	}
+
+	return true;
+}
+
+bool FilterVoronoiPlugin::crossFieldColoring(MeshDocument& md)
+{
+	//ToDo: Filter not used
+	MeshModel &m=*md.mm();
+	m.updateDataMask(MeshModel::MM_VERTCOLOR);
+	m.updateDataMask(MeshModel::MM_VERTQUALITY);
+	for(CMeshO::VertexIterator vi=m.cm.vert.begin();vi!=m.cm.vert.end();++vi) {
+		vi->Q() = Norm(vi->PD1()) / Norm(vi->PD2());
+	}
+
+	tri::UpdateColor<CMeshO>::PerVertexQualityRamp(m.cm);
+	return true;
+}
+
+//bool FilterVoronoiPlugin::crossFieldSmoothing(
+//		MeshDocument& md,
+//		bool preprocessFlag)
+//{
+//
+//}
 
 MESHLAB_PLUGIN_NAME_EXPORTER(FilterVoronoiPlugin)

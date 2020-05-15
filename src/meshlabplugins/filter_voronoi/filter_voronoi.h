@@ -102,6 +102,16 @@ private:
 			float faceExtInset,
 			bool /*edgeFauxFlag*/,
 			int cylinderSideNum);
+
+	bool crossFieldCreation(
+			MeshDocument& md,
+			int crossType);
+
+	bool crossFieldColoring(MeshDocument& md);
+
+//	bool crossFieldSmoothing(
+//			MeshDocument& md,
+//			bool preprocessFlag);
 };
 
 
