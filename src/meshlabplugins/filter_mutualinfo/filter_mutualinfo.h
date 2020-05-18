@@ -41,7 +41,7 @@ class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 
 public:
 
-	enum { FP_IMAGE_GLOBALIGN} ;
+	enum {FP_IMAGE_GLOBALIGN, FP_IMAGE_MUTUALINFO} ;
 
 	FilterMutualInfoPlugin();
 
@@ -57,7 +57,7 @@ public:
 	QString filterScriptFunctionName(FilterIDType filterID);
 
 private:
-	bool imageGlobalAlagin(
+	bool imageGlobalAlign(
 			MeshDocument &md,
 			float thresDiff,
 			bool preAlign,
@@ -65,6 +65,9 @@ private:
 			bool estimateFocal,
 			bool fine,
 			int rendmode);
+
+	bool imageMutualInfoAlign(
+			MeshDocument &md);
 
 	bool preAlignment(
 			MeshDocument &md,

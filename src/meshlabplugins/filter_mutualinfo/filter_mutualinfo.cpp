@@ -39,7 +39,7 @@ AlignSet alignset;
 
 FilterMutualInfoPlugin::FilterMutualInfoPlugin() 
 {
-	typeList << FP_IMAGE_GLOBALIGN;
+	typeList << FP_IMAGE_GLOBALIGN << FP_IMAGE_MUTUALINFO;
 
 	for(FilterIDType tt : types())
 		actionList << new QAction(filterName(tt), this);
@@ -53,29 +53,40 @@ QString FilterMutualInfoPlugin::pluginName() const
 QString FilterMutualInfoPlugin::filterName(FilterIDType filterId) const
 {
 	switch(filterId) {
-	case FP_IMAGE_GLOBALIGN :  return QString("Image Registration: Global refinement using Mutual Information");
-	default : assert(0);
+	case FP_IMAGE_GLOBALIGN :
+		return "Image Registration: Global refinement using Mutual Information";
+	case FP_IMAGE_MUTUALINFO:
+		return "Image alignment: Mutual Information";
+	default :
+		assert(0);
+		return "";
 	}
-	return QString();
 }
 
 QString FilterMutualInfoPlugin::filterInfo(FilterIDType filterId) const
 {
 	switch(filterId) {
-	case FP_IMAGE_GLOBALIGN :  return QString("Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!");
-	default : assert(0);
+	case FP_IMAGE_GLOBALIGN :
+		return "Calculate a global refinement of image registration, in order to obtain a better alignment of fine detail. It will refine only the shots associated to the active rasters, the non-active ones will be used but not refined. This filter is an implementation of Dellepiane et al. 'Global refinement of image-to-geometry registration for color projection', 2013, and it was used in Corsini et al 'Fully Automatic Registration of Image Sets on Approximate Geometry', 2013. Please cite!";
+	case FP_IMAGE_MUTUALINFO:
+		return "Register an image on a 3D model using Mutual Information. This filter is an implementation of Corsini et al. 'Image-to-geometry registration: a mutual information method exploiting illumination-related geometric properties', 2009, <a href=\"http://vcg.isti.cnr.it/Publications/2009/CDPS09/\" target=\"_blank\">Get link</a>";
+	default :
+		assert(0);
+		return "Unknown Filter";
 	}
-	return QString("Unknown Filter");
 }
 
 FilterMutualInfoPlugin::FilterClass FilterMutualInfoPlugin::getClass(QAction *a)
 {
-	switch(ID(a))
-	{
-	case FP_IMAGE_GLOBALIGN :  return MeshFilterInterface::Camera;
-	default : assert(0);
+	switch(ID(a)) {
+	case FP_IMAGE_GLOBALIGN :
+		return MeshFilterInterface::Camera;
+	case FP_IMAGE_MUTUALINFO:
+		return MeshFilterInterface::Camera;
+	default :
+		assert(0);
+		return MeshFilterInterface::Generic;
 	}
-	return MeshFilterInterface::Generic;
 }
 
 MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(QAction*) const
@@ -86,22 +97,30 @@ MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(QAction*) 
 void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterSet & parlst) 
 {
 	QStringList rendList;
+	rendList.push_back("Combined");
+	rendList.push_back("Normal map");
+	rendList.push_back("Color per vertex");
+	rendList.push_back("Specular");
+	rendList.push_back("Silhouette");
+	rendList.push_back("Specular combined");
 	switch(ID(action))	 {
 	case FP_IMAGE_GLOBALIGN :
-		rendList.push_back("Combined");
-		rendList.push_back("Normal map");
-		rendList.push_back("Color per vertex");
-		rendList.push_back("Specular");
-		rendList.push_back("Silhouette");
-		rendList.push_back("Specular combined");
-
-		parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"), QString("Rendering modes")));
+		parlst.addParam(new RichEnum("RenderingMode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
 		parlst.addParam(new RichInt ("Max number of refinement steps", 5, "Maximum number of minimizations step", "Maximum number of minimizations step on the global graph"));
 		parlst.addParam(new RichFloat("Threshold for refinement convergence", 1.2, "Threshold for refinement convergence (in pixels)", "The threshold (average quadratic variation in the projection on image plane of some samples of the mesh before and after each step of refinement) that stops the refinement"));
 		parlst.addParam(new RichBool("Pre-alignment",false,"Pre-alignment step","Pre-alignment step"));
 		parlst.addParam(new RichBool("Estimate Focal",true,"Estimate focal length","Estimate focal length"));
 		parlst.addParam(new RichBool("Fine",true,"Fine Alignment","Fine alignment"));
 		break;
+	case FP_IMAGE_MUTUALINFO:
+		parlst.addParam(new RichEnum("Rendering Mode", 0, rendList, tr("Rendering mode:"), "Rendering modes"));
+		parlst.addParam(new RichShotf("Shot", vcg::Shotf(), "Starting shot", "If the point of view has been set by hand, it must be retrieved from current trackball"));
+		parlst.addParam(new RichBool("Estimate Focal", false, "Estimate focal length", "Estimate focal length: if not checked, only extrinsic parameters are estimated"));
+		parlst.addParam(new RichBool("Fine", true, "Fine Alignment", "Fine alignment: the perturbations applied to reach the alignment are smaller"));
+		parlst.addParam(new RichInt("NumOfIterations", 100, "Max iterations", "Maximum number of iterations"));
+		parlst.addParam(new RichFloat("Tolerance", 0.1, "Tolerance", "Threshold to stop convergence"));
+		parlst.addParam(new RichFloat("ExpectedVariance", 2.0, "Expected Variance", "Expected Variance"));
+		parlst.addParam(new RichInt("BackgroundWeight", 2, "Background Weight", "Weight of background pixels (1, as all the other pixels; 2, one half of the other pixels etc etc)"));
 	default :
 		assert(0);
 	}
@@ -111,13 +130,14 @@ bool FilterMutualInfoPlugin::applyFilter(QAction *action, MeshDocument &md, Rich
 {
 	switch(ID(action))	 {
 	case FP_IMAGE_GLOBALIGN :
-		return imageGlobalAlagin(
+		return imageGlobalAlign(
 					md,
 					par.getFloat("Threshold for refinement convergence"), par.getBool("Pre-alignment"),
 					par.getInt("Max number of refinement steps"), par.getBool("Estimate Focal"),
 					par.getBool("Fine"), par.getEnum("RenderingMode"));
+	case FP_IMAGE_MUTUALINFO :
+		return imageMutualInfoAlign(md);
 		break;
-		
 	default :
 		assert(0);
 		return false;
@@ -129,16 +149,20 @@ int FilterMutualInfoPlugin::postCondition(QAction*) const
 	return MeshModel::MM_NONE;
 }
 
-QString FilterMutualInfoPlugin::filterScriptFunctionName( FilterIDType filterID )
+QString FilterMutualInfoPlugin::filterScriptFunctionName(FilterIDType filterID)
 {
 	switch(filterID) {
-	case FP_IMAGE_GLOBALIGN :  return QString("imagealignment");
-	default : assert(0);
+	case FP_IMAGE_GLOBALIGN :
+		return "imagealignment";
+	case FP_IMAGE_MUTUALINFO:
+		return "";
+	default :
+		assert(0);
+		return "";
 	}
-	return QString();
 }
 
-bool FilterMutualInfoPlugin::imageGlobalAlagin(
+bool FilterMutualInfoPlugin::imageGlobalAlign(
 		MeshDocument &md,
 		float thresDiff,
 		bool preAlign,
@@ -149,7 +173,6 @@ bool FilterMutualInfoPlugin::imageGlobalAlagin(
 {
 	QElapsedTimer filterTime;
 	filterTime.start();
-
 
 	std::vector<vcg::Point3f> myVec;
 	int leap=(int)((float)md.mm()->cm.vn/1000.0f);
@@ -170,7 +193,6 @@ bool FilterMutualInfoPlugin::imageGlobalAlagin(
 	if (md.rasterList.size()==0) {
 		Log(0, "You need a Raster Model to apply this filter!");
 		return false;
-
 	}
 
 	this->glContext->makeCurrent();
@@ -202,6 +224,11 @@ bool FilterMutualInfoPlugin::imageGlobalAlagin(
 	Log(0, "Done!");
 	Log(0,"Filter completed in %i sec",(int)((float)filterTime.elapsed()/1000.0f));
 	return true;
+}
+
+bool FilterMutualInfoPlugin::imageMutualInfoAlign(MeshDocument& md)
+{
+
 }
 
 bool FilterMutualInfoPlugin::preAlignment(
