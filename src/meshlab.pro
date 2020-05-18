@@ -71,7 +71,6 @@ SUBDIRS += \ #sub projects names
     filter_isoparametrization \
     filter_layer \
     filter_mls \
-    filter_mutualglobal \
     filter_mutualinfo \
     filter_mutualinfo_xml \
     filter_plymc \
@@ -160,7 +159,6 @@ filter_img_patch_param.subdir = meshlabplugins/filter_img_patch_param
 filter_isoparametrization.subdir = meshlabplugins/filter_isoparametrization
 filter_layer.subdir = meshlabplugins/filter_layer
 filter_mls.subdir = meshlabplugins/filter_mls
-filter_mutualglobal.subdir = meshlabplugins/filter_mutualglobal
 filter_mutualinfo.subdir = meshlabplugins/filter_mutualinfo
 filter_mutualinfo_xml.subdir = meshlabplugins/filter_mutualinfo_xml
 filter_plymc.subdir = meshlabplugins/filter_plymc
@@ -237,7 +235,6 @@ filter_img_patch_param.depends = common
 filter_isoparametrization.depends = common
 filter_layer.depends = common
 filter_mls.depends = common
-filter_mutualglobal.depends = common
 filter_mutualinfo.depends = common
 filter_mutualinfo_xml.depends = common
 filter_plymc.depends = common

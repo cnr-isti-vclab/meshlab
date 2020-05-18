@@ -24,7 +24,14 @@
 #ifndef FILTER_MUTUALINFO_H
 #define FILTER_MUTUALINFO_H
 
+#include <QObject>
+
 #include <common/interfaces.h>
+#include "alignset.h"
+
+
+
+class QScriptEngine;
 
 class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 {
@@ -33,19 +40,48 @@ class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
-	enum { FP_MOVE_VERTEX  } ;
+
+	enum { FP_IMAGE_GLOBALIGN} ;
 
 	FilterMutualInfoPlugin();
 
-	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
+	virtual QString pluginName() const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
-    FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
+	FilterClass getClass(QAction *a);
+	FILTER_ARITY filterArity(QAction *) const;
+	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+	int postCondition(QAction*) const;
+	QString filterScriptFunctionName(FilterIDType filterID);
+
+private:
+	bool imageGlobalAlagin(
+			MeshDocument &md,
+			float thresDiff,
+			bool preAlign,
+			int maxRefinementSteps,
+			bool estimateFocal,
+			bool fine,
+			int rendmode);
+
+	bool preAlignment(
+			MeshDocument &md,
+			bool estimateFocal,
+			bool fine,
+			int rendmode);
+
+	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
+	std::vector<AlignPair> calcPairs(MeshDocument &md, bool globalign=true);
+	std::vector<SubGraph> createGraphs(MeshDocument &md, std::vector<AlignPair> arcs);
+	bool alignGlobal(MeshDocument &md, std::vector<SubGraph> graphs);
+	int getTheRightNode(SubGraph graph);
+	bool alignNode(MeshDocument &md, Node node);
+	bool allActive(SubGraph graph);
+	bool updateGraph(MeshDocument &md, SubGraph graph, int n);
+	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
+	void initGL();
 };
 
 
