@@ -66,7 +66,7 @@ int saveMeshZip(string fileName, string internalName, string zipName) {
 
 
 // Core Function doing the actual mesh processing.
-bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument& md, EnvWrap& env, vcg::CallBackPos * cb )
+bool FilterSketchFabPluginXML::applyFilter( const QString& filterName, MeshDocument& md, EnvWrap& env, vcg::CallBackPos * cb )
 {
     if (filterName == "Export to Sketchfab")
     {
@@ -118,14 +118,14 @@ bool FilterSketchFabPlugin::applyFilter( const QString& filterName, MeshDocument
       return false;
 }
 
-void FilterSketchFabPlugin::uploadProgress(qint64 bytesSent, qint64 bytesTotal)
+void FilterSketchFabPluginXML::uploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
   qDebug("Upload progress %i on %i",int(bytesSent),int(bytesTotal));
   char buf[1024]; sprintf(buf,"Upload progress %i on %i",int(bytesSent),int(bytesTotal));
   if(bytesTotal) this->fcb(100*int(bytesSent)/int(bytesTotal),buf);
 }
 
-void FilterSketchFabPlugin::finished()
+void FilterSketchFabPluginXML::finished()
 {
   qDebug("FilterSketchFabPlugin::finished()");
   
@@ -141,7 +141,7 @@ QHttpPart part_parameter(QString key, QString value) {
 
 
 
-bool FilterSketchFabPlugin::upload()
+bool FilterSketchFabPluginXML::upload()
 {
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -211,4 +211,4 @@ void FilterSketchFabPlugin::initGlobalParameterSet(QAction *action, RichParamete
 */
 
 
-MESHLAB_PLUGIN_NAME_EXPORTER(FilterMeasurePlugin)
+MESHLAB_PLUGIN_NAME_EXPORTER(FilterSketchFabPluginXML)

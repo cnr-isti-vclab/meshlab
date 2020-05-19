@@ -36,7 +36,7 @@ add sampleplugins
 
 #include <common/interfaces.h>
 
-class ExtraSamplePlugin : public QObject, public MeshFilterInterface
+class FilterSketchFabPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
@@ -45,7 +45,7 @@ class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_MOVE_VERTEX  } ;
 
-	ExtraSamplePlugin();
+	FilterSketchFabPlugin();
 
 	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
 

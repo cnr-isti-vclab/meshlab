@@ -28,7 +28,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-class FilterSketchFabPlugin : public MeshLabFilterInterface
+class FilterSketchFabPluginXML : public MeshLabFilterInterface
 {
     Q_OBJECT
     MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
