@@ -145,8 +145,13 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 {
 	Solver solver;
 	MutualInfo mutual;
+	if (!shot.IsValid()){
+		Log(GLLogStream::FILTER, "Error: shot not valid. Press 'Get Shot' button before applying!");
+		return false;
+	}
+
 	if (md.rasterList.size()==0) {
-		Log(0, "You need a Raster Model to apply this filter!");
+		Log(GLLogStream::FILTER, "You need a Raster Model to apply this filter!");
 		return false;
 	}
 	else {
@@ -187,8 +192,6 @@ bool FilterMutualInfoPlugin::imageMutualInfoAlign(
 		align.mode=AlignSet::COMBINE;
 		break;
 	}
-
-	///// Loading geometry
 
 	align.shot = vcg::Shotf::Construct(shot);
 
