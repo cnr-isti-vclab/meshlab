@@ -4,9 +4,6 @@ HEADERS += \
     filter_sketchfab.h
 
 SOURCES += \
-    filter_sketchfab.cpp \
-    $$VCGDIR//wrap/ply/plylib.cpp
-
+    filter_sketchfab.cpp
+		
 TARGET = filter_sketchfab
-
-include (../../shared_post.pri)

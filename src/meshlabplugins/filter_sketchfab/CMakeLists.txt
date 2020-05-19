@@ -9,10 +9,6 @@ set(SOURCES filter_sketchfab.cpp ${VCGDIR}/wrap/ply/plylib.cpp)
 
 set(HEADERS filter_sketchfab.h)
 
-set(XML filter_sketchfab.xml)
-meshlab_install_plugin_xml(${CMAKE_CURRENT_SOURCE_DIR}/${XML} XML_OUT)
-list(APPEND SOURCES ${XML_OUT})
-
 add_library(filter_sketchfab MODULE ${SOURCES} ${HEADERS})
 
 target_include_directories(filter_sketchfab PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -81,6 +81,7 @@ SUBDIRS += \ #sub projects names
     filter_sdfgpu \
     filter_select \
     filter_sketchfab \
+    filter_sketchfab_xml \
     filter_ssynth \
     filter_texture \
     filter_trioptimize \
@@ -169,6 +170,7 @@ filter_screened_poisson.subdir = meshlabplugins/filter_screened_poisson
 filter_sdfgpu.subdir = meshlabplugins/filter_sdfgpu
 filter_select.subdir = meshlabplugins/filter_select
 filter_sketchfab.subdir = meshlabplugins/filter_sketchfab
+filter_sketchfab_xml.subdir = meshlabplugins/filter_sketchfab_xml
 filter_ssynth.subdir = meshlabplugins/filter_ssynth
 filter_texture.subdir = meshlabplugins/filter_texture
 filter_trioptimize.subdir = meshlabplugins/filter_trioptimize
@@ -245,6 +247,7 @@ filter_screened_poisson.depends = common
 filter_sdfgpu.depends = common
 filter_select.depends = common
 filter_sketchfab.depends = common
+filter_sketchfab_xml.depends = common
 filter_ssynth.depends = common
 filter_texture.depends = common
 filter_trioptimize.depends = common
