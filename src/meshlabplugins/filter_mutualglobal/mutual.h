@@ -6,7 +6,7 @@ class MutualInfo {
   int bweight;
   bool use_background;
   //bweight: weithg of boundary pixels in mutual information (1/bweight is weighting function)
-  MutualInfo(unsigned int nbins = 128, int bweight = 2, bool use_background = true);
+  MutualInfo(unsigned int nbins = 128, int bweight = 8, bool use_background = false);
   ~MutualInfo();
 
   void setBins(unsigned int nbins);

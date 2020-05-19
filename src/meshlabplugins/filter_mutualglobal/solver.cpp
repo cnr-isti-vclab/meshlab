@@ -1,6 +1,6 @@
 #include <QFile>
 #include <QTextStream>
-#include "filter_mutualinfo.h"
+#include "filter_mutualglobal.h"
 #include <vcg/math/shot.h>
 #include "newuoa.h"
 
@@ -17,7 +17,7 @@ using namespace vcg;
 
 Solver::Solver():
   align(NULL), mutual(NULL), optimize_focal(true),
-  variance(2), tolerance(0.01), maxiter(600), mIweight(1) {
+  variance(4), tolerance(0.01), maxiter(200), mIweight(1) {
 
   start = 1e20; end = 0;
   f_evals = 0;
@@ -84,6 +84,7 @@ double Solver::operator()(int ndim, double *x) {
    if (mIweight!=0){
    switch(align->mode) {
 
+	   
    case AlignSet::NORMALMAP:
    case AlignSet::COMBINE:
    case AlignSet::SPECULAR:
@@ -99,7 +100,9 @@ double Solver::operator()(int ndim, double *x) {
          double m = 2 - mutual->info(w, h, align->target, align->render, i, iend, j, jend);
          info += m;
        }
-     }
+     } 
+	 break;
+	
    case AlignSet::COLOR:
    case AlignSet::SILHOUETTE: {
     align->renderScene(shot,0);
@@ -113,7 +116,106 @@ double Solver::operator()(int ndim, double *x) {
          info += m;
        }
      }
+	break;
    }
+   case AlignSet::NODE: {
+		assert(glGetError() == 0);
+		//QImage comb; std::vector<QImage> projimg;
+		/*align->mode=AlignSet::COMBINE;
+		align->renderScene(shot,1,true);
+		assert(glGetError() == 0);
+		comb=align->rend;*/
+		align->mode=AlignSet::PROJMULTIIMG;
+		
+		//for (int n=0; n<align->arcShots.size(); n++)
+		{
+			/*align->imagePro=align->arcImages[0];
+			align->shotPro=*align->arcShots[0];*/
+			//align->ProjectedMultiImageChanged();
+			align->RenderMultiShadowMap();
+			align->renderScene(shot,2,true);
+			//projimg.push_back(align->rend);
+			//align->rend.save("combi.jpg");
+		}
+		/*for (int x=0; x<align->wt; x++)
+			for (int y=0; y<align->ht; y++)
+			{
+				float totMI=0.0;
+				QColor color;
+				color.setRgb(comb.pixel(x,y));
+				if (color!=qRgb(0,0,0))
+				{
+					std::vector<QColor> cols;
+					QColor c;
+					for (int n=0; n<projimg.size(); n++)
+					{
+						
+						QColor color2;
+						color2.setRgb(projimg[n].pixel(x,y));
+						if (color!=color2)
+						{
+							totMI+=align->arcMI[n];
+							cols.push_back(color2);
+						}
+					}
+					if (totMI!=0.0)
+					{	
+						float red=0.0;
+						float green=0.0;
+						float blue=0.0;
+						for (int i=0; i<cols.size(); i++)
+						{
+							red+=cols[i].red()*(align->arcMI[i]/totMI);
+							green+=cols[i].green()*(align->arcMI[i]/totMI);
+							blue+=cols[i].blue()*(align->arcMI[i]/totMI);
+						}
+						comb.setPixel(x,y,qRgb((int)red,(int)green,(int)blue));
+	
+					}
+
+						
+
+
+				}
+
+			}*/
+
+		align->mode=AlignSet::NODE;
+		//comb.save("combi.jpg");
+		/*for (int n=0; n<projimg.size(); n++)
+		{
+			delete projimg[n];
+			
+		}*/
+////////
+		QColor color;
+		int offset = 0;
+		//equalize image
+		int histo[256];
+		memset(histo, 0, 256*sizeof(int));
+		for (int y = h-1; y >= 0; y--) {
+		for (int x = 0; x < w; x++) {
+		color.setRgb(align->rend.pixel(x, y));
+		unsigned char c = (unsigned char)(color.red() * 0.3f + color.green() * 0.59f + color.blue() * 0.11f);
+		align->render[offset] = c;
+		histo[c]++;
+		offset++;
+			}
+		  }
+///////
+	}
+    //align->renderScene(shot,0);
+    for(int i = 0; i < w; i+= wstep) {
+       int iend = i + wstep;
+       if(iend > w) iend = w;
+       for(int j =0; j < h; j+= hstep) {
+         int jend = j+hstep;
+         if(jend > h) jend = h;
+         double m =8-mutual->info(w, h, align->target, align->render, i, iend, j, jend);
+         info += m;
+       }
+     }
+   
   }
   }
 #endif
@@ -127,7 +229,7 @@ double Solver::operator()(int ndim, double *x) {
   double k = mIweight;
   double error =0;
   if(align->correspList->size()>0)
-    error = calculateError2(shot);
+	error = calculateError2(shot);
   align->error = error;
 
   double result = k*info + (1-k)*error;
@@ -431,9 +533,8 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
   for(int i = 0; i < p.size(); i++) p[i] = _p[i];
   align->shot = p.toShot();
 
-  delete []x;
-  delete []_p;
-
+  delete [] x;
+  delete [] _p;
 
   return niter;
 }
@@ -543,41 +644,43 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 template<class Correlation>
 double Solver::calculateError(std::list<Correlation> *corrs, Shot &shot){
         typename std::list<Correlation>::iterator it_c;
+	Correlation* c;
 
-    //shot.Intrinsics.ViewportPx.X()/(double) shot.Intrinsics.ViewportPx.Y();
-
+    double ratio = shot.Intrinsics.ViewportPx.X()/(double) shot.Intrinsics.ViewportPx.Y();
+	vcg::Point3f *p1;
+	vcg::Point2d *p2;
     int count=0;
 
-    double error = 0;
+	double error = 0;
 // OKKIO!!
  //   for ( it_c= corrs->begin() ; it_c !=corrs->end(); it_c++ ){
-    //	c=&*it_c;
-    //	p1=&(c->point3d);
-    //	p2=&(c->point2d);
+	//	c=&*it_c;
+	//	p1=&(c->point3d);
+	//	p2=&(c->point2d);
 
-    //	if(p1!=NULL && p2!=NULL)
-    //	{
-    //		//Adjust 2D point
-    //		vcg::Point2d p2adj(((p2->X()/ratio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((p2->Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
-    //		//Project 3D point
-    //		vcg::Point2f p1proj = shot.Project(*p1);
-    //		//Calculate disntance
-    //		float dist = vcg::Distance<float>(p1proj,p2adj);
-    //		error += dist;
-    //		count++;
-    //	}
-    //}//all corrs
+	//	if(p1!=NULL && p2!=NULL)
+	//	{
+	//		//Adjust 2D point
+	//		vcg::Point2d p2adj(((p2->X()/ratio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((p2->Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
+	//		//Project 3D point
+	//		vcg::Point2f p1proj = shot.Project(*p1);
+	//		//Calculate disntance
+	//		float dist = vcg::Distance<float>(p1proj,p2adj);
+	//		error += dist;
+	//		count++;
+	//	}
+	//}//all corrs
 
-    ////Normalize error
-    return error /= count;
+	////Normalize error
+	return error /= count;
 }
 
 double Solver::calculateError2( Shot &shot){
-    //E' una pezza, andrebbe meglio pensato. Va a beccare direttamente le strutture dati PointCorrespondence di base.
-    //align gi� � sicuramente settato perch� lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
-    QList<PointCorrespondence*> *correspList = align->correspList;
-    double error = 0;
-    int count=0;
+	//E' una pezza, andrebbe meglio pensato. Va a beccare direttamente le strutture dati PointCorrespondence di base.
+	//align gi� � sicuramente settato perch� lo chiami da optimize (poi dovrai distinguere le due cose, p.e. fare un optimize2)
+	QList<PointCorrespondence*> *correspList = align->correspList;
+	double error = 0;
+	int count=0;
 
     for( int i=0; i<correspList->count(); i++){
         PointCorrespondence *corr = correspList->at(i);
@@ -587,129 +690,129 @@ double Solver::calculateError2( Shot &shot){
         vcg::Point3f currentPoint1(currentPointOnLayer1.pX, currentPointOnLayer1.pY,currentPointOnLayer1.pZ );
         vcg::Point3f currentPoint2(currentPointOnLayer2.pX, currentPointOnLayer2.pY,currentPointOnLayer2.pZ );
         vcg::Point2f p2adj;
-        vcg::Point2f p1proj;
+		vcg::Point2f p1proj;
         if(type1==_3D_POINT){
             //Adjust 2D point
-            p2adj = vcg::Point2f(((currentPoint2.X()/align->imageRatio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((currentPoint2.Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
-            //Project 3D point
-            p1proj = shot.Project(currentPoint1);
+			p2adj = vcg::Point2f(((currentPoint2.X()/align->imageRatio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((currentPoint2.Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
+			//Project 3D point
+			p1proj = shot.Project(currentPoint1);
         }
         else{
            //Adjust 2D point
-            p2adj = vcg::Point2f(((currentPoint1.X()/align->imageRatio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((currentPoint1.Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
-            //Project 3D point
-            p1proj = shot.Project(currentPoint2);
+			p2adj = vcg::Point2f(((currentPoint1.X()/align->imageRatio) +1)/2.0 * shot.Intrinsics.CenterPx.X()*2.0,((currentPoint1.Y())+1)/2.0 * shot.Intrinsics.CenterPx.Y()*2.0);
+			//Project 3D point
+			p1proj = shot.Project(currentPoint2);
         }
 
-        float dist = vcg::Distance<float>(p1proj,p2adj);
-        error += dist;
-        count++;
-    }
+		float dist = vcg::Distance<float>(p1proj,p2adj);
+		error += dist;
+		count++;
+	}
 
-    //Normalize error
-    return error /= count;
+	//Normalize error
+	return error /= count;
 
 }
 
 bool Solver::levmar(AlignSet *_align, Shot &shot){
-    align = _align;
+	align = _align;
     QList<PointCorrespondence*> *correspList = align->correspList;
 
-    std::list<LevmarCorrelation> *corrs = new std::list<LevmarCorrelation>();
-    for( int i=0; i<correspList->count(); i++){
-        PointCorrespondence *corr = correspList->at(i);
-        PointOnLayer currentPointOnLayer1= corr->getPointAt(0);
-        PointOnLayer currentPointOnLayer2= corr->getPointAt(1);
-        PointType type1 = currentPointOnLayer1.getType();
-        LevmarCorrelation *corrLevmar = new LevmarCorrelation();
-        if(type1==_3D_POINT){
-            vcg::Point3f currentPoint3d(currentPointOnLayer1.pX, currentPointOnLayer1.pY,currentPointOnLayer1.pZ );
-            corrLevmar->point3d = currentPoint3d;
-            vcg::Point2d currentPoint2d(currentPointOnLayer2.pX, currentPointOnLayer2.pY);
-            corrLevmar->point2d = currentPoint2d;
-        }
-        else{
-            vcg::Point3f currentPoint3d(currentPointOnLayer2.pX, currentPointOnLayer2.pY,currentPointOnLayer2.pZ );
-            corrLevmar->point3d = currentPoint3d;
-            vcg::Point2d currentPoint2d(currentPointOnLayer1.pX, currentPointOnLayer1.pY);
-            corrLevmar->point2d = currentPoint2d;
-        }
-        qDebug("Point3d %f %f %f",(float)corrLevmar->point3d.X(),(float)corrLevmar->point3d.Y(),(float)(float)corrLevmar->point3d.Z());
-        qDebug("Point2d %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
+	std::list<LevmarCorrelation> *corrs = new std::list<LevmarCorrelation>();
+	for( int i=0; i<correspList->count(); i++){
+		PointCorrespondence *corr = correspList->at(i);
+		PointOnLayer currentPointOnLayer1= corr->getPointAt(0);
+		PointOnLayer currentPointOnLayer2= corr->getPointAt(1);
+		PointType type1 = currentPointOnLayer1.getType();
+		LevmarCorrelation *corrLevmar = new LevmarCorrelation();
+		if(type1==_3D_POINT){
+			vcg::Point3f currentPoint3d(currentPointOnLayer1.pX, currentPointOnLayer1.pY,currentPointOnLayer1.pZ );
+			corrLevmar->point3d = currentPoint3d;
+			vcg::Point2d currentPoint2d(currentPointOnLayer2.pX, currentPointOnLayer2.pY);
+			corrLevmar->point2d = currentPoint2d;
+		}
+		else{
+			vcg::Point3f currentPoint3d(currentPointOnLayer2.pX, currentPointOnLayer2.pY,currentPointOnLayer2.pZ );
+			corrLevmar->point3d = currentPoint3d;
+			vcg::Point2d currentPoint2d(currentPointOnLayer1.pX, currentPointOnLayer1.pY);
+			corrLevmar->point2d = currentPoint2d;
+		}
+		qDebug("Point3d %f %f %f",(float)corrLevmar->point3d.X(),(float)corrLevmar->point3d.Y(),(float)(float)corrLevmar->point3d.Z());
+		qDebug("Point2d %f %f",(float)corrLevmar->point2d.X(),(float)corrLevmar->point2d.Y());
 
-        corrs->push_back(*corrLevmar);
-    }
+		corrs->push_back(*corrLevmar);
+	}
 
-    vcg::Camera<float> &cam = shot.Intrinsics;
+	vcg::Camera<float> &cam = shot.Intrinsics;
 
-    //DEBUG
-    qDebug("\n TEST BEFORE CALIBRATION \n");
-    qDebug("Focal %f",cam.FocalMm);
-    qDebug("ViewportPx.X %i",cam.ViewportPx.X());
-    qDebug("ViewportPx.Y %i",cam.ViewportPx.Y());
-    qDebug("CenterPx.X %f",cam.CenterPx[0]);
-    qDebug("CenterPx.Y %f",cam.CenterPx[1]);
-    qDebug("DistorntedCenterPx.X %f",cam.DistorCenterPx[0]);
-    qDebug("DistorntedCenterPx.Y %f",cam.DistorCenterPx[1]);
-    qDebug("PixelSizeMm.X %f",cam.PixelSizeMm[0]);
-    qDebug("PixelSizeMm.Y %f",cam.PixelSizeMm[1]);
-    qDebug("k1 %f",cam.k[0]);
-    qDebug("k2 %f",cam.k[1]);
-    qDebug("Tra %f %f %f",shot.Extrinsics.Tra().X(),shot.Extrinsics.Tra().Y(),shot.Extrinsics.Tra().Z());
-    for(int i=0;i<4;i++)
-        qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0],(shot.Extrinsics.Rot())[i][1],(shot.Extrinsics.Rot())[i][2],(shot.Extrinsics.Rot())[i][3] );
+	//DEBUG
+	qDebug("\n TEST BEFORE CALIBRATION \n");
+	qDebug("Focal %f",cam.FocalMm);
+	qDebug("ViewportPx.X %i",cam.ViewportPx.X());
+	qDebug("ViewportPx.Y %i",cam.ViewportPx.Y());
+	qDebug("CenterPx.X %f",cam.CenterPx[0]);
+	qDebug("CenterPx.Y %f",cam.CenterPx[1]);
+	qDebug("DistorntedCenterPx.X %f",cam.DistorCenterPx[0]);
+	qDebug("DistorntedCenterPx.Y %f",cam.DistorCenterPx[1]);
+	qDebug("PixelSizeMm.X %f",cam.PixelSizeMm[0]);
+	qDebug("PixelSizeMm.Y %f",cam.PixelSizeMm[1]);
+	qDebug("k1 %f",cam.k[0]);
+	qDebug("k2 %f",cam.k[1]);
+	qDebug("Tra %f %f %f",shot.Extrinsics.Tra().X(),shot.Extrinsics.Tra().Y(),shot.Extrinsics.Tra().Z());
+	for(int i=0;i<4;i++)
+		qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0],(shot.Extrinsics.Rot())[i][1],(shot.Extrinsics.Rot())[i][2],(shot.Extrinsics.Rot())[i][3] );
 
-    Shot previousShot = shot;
-    //First calculate only extrinsics
-    bool result = LevmarMethods::calibrate(&shot,corrs,false);
-    //If user wants calibrate the focal (these have to be two different steps)
-    if(optimize_focal)
-        result = LevmarMethods::calibrate(&shot,corrs,optimize_focal);
+	Shot previousShot = shot;
+	//First calculate only extrinsics
+	bool result = LevmarMethods::calibrate(&shot,corrs,false);
+	//If user wants calibrate the focal (these have to be two different steps)
+	if(optimize_focal)
+		result = LevmarMethods::calibrate(&shot,corrs,optimize_focal);
 
-    qDebug("End calibration");
-    
-    align->error = calculateError(corrs,shot);
+	qDebug("End calibration");
+	
+	align->error = calculateError(corrs,shot);
 
-    //DA SPEIGARE PERCHE'
-    //cam.CenterPx[0] = cam.CenterPx[0] + (cam.CenterPx[0] - cam.DistorCenterPx[0]);
-    //cam.CenterPx[1] = cam.CenterPx[1] + (cam.CenterPx[1] - cam.DistorCenterPx[1]);
+	//DA SPEIGARE PERCHE'
+	//cam.CenterPx[0] = cam.CenterPx[0] + (cam.CenterPx[0] - cam.DistorCenterPx[0]);
+	//cam.CenterPx[1] = cam.CenterPx[1] + (cam.CenterPx[1] - cam.DistorCenterPx[1]);
 
-    //    //PAOLO BRIVIO
-    //    Shot idShot;
-    //        idShot.Intrinsics = shot.Intrinsics;
-    //    idShot.Extrinsics.SetTra(Point3d(0,0,1000));
-    //        //idShot = shot;
-    //    Shot2Track<Shot::ScalarType>(shot,idShot,track);
-    //    //shot.Extrinsics.SetIdentity();
-    //        shot = idShot;
+	//    //PAOLO BRIVIO
+	//    Shot idShot;
+	//        idShot.Intrinsics = shot.Intrinsics;
+	//    idShot.Extrinsics.SetTra(Point3d(0,0,1000));
+	//        //idShot = shot;
+	//    Shot2Track<Shot::ScalarType>(shot,idShot,track);
+	//    //shot.Extrinsics.SetIdentity();
+	//        shot = idShot;
 
-    //     //PAOLO BRIVIO
-    //     Shot idShot;
-    //     idShot.Intrinsics = shot.Intrinsics;
-    //
-    //     Shot2Track<Shot::ScalarType>(shot,previousShot,track);
-    //      shot = idShot;
+	//     //PAOLO BRIVIO
+	//     Shot idShot;
+	//     idShot.Intrinsics = shot.Intrinsics;
+	//
+	//     Shot2Track<Shot::ScalarType>(shot,previousShot,track);
+	//      shot = idShot;
 
 
-    //DEBUG
-    //vcg::Camera<double> &cam = shot.Intrinsics;
-    qDebug("\n TEST AFTER CALIBRATION \n");
-    qDebug("Focal %f",cam.FocalMm);
-    qDebug("ViewportPx.X %i",cam.ViewportPx.X());
-    qDebug("ViewportPx.Y %i",cam.ViewportPx.Y());
-    qDebug("CenterPx.X %f",cam.CenterPx[0]);
-    qDebug("CenterPx.Y %f",cam.CenterPx[1]);
-    qDebug("DistortedCenterPx.X %f",cam.DistorCenterPx[0]);
-    qDebug("DistortedCenterPx.Y %f",cam.DistorCenterPx[1]);
-    qDebug("PixelSizeMm.X %f",cam.PixelSizeMm[0]);
-    qDebug("PixelSizeMm.Y %f",cam.PixelSizeMm[1]);
-    qDebug("k1 %f",cam.k[0]);
-    qDebug("k2 %f",cam.k[1]);
-    qDebug("Tra %f %f %f",shot.Extrinsics.Tra().X(),shot.Extrinsics.Tra().Y(),shot.Extrinsics.Tra().Z());
-    for(int i=0;i<4;i++)
-        qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0],(shot.Extrinsics.Rot())[i][1],(shot.Extrinsics.Rot())[i][2],(shot.Extrinsics.Rot())[i][3] );
-    
-    align->shot=shot;
-    return result;
+	//DEBUG
+	//vcg::Camera<double> &cam = shot.Intrinsics;
+	qDebug("\n TEST AFTER CALIBRATION \n");
+	qDebug("Focal %f",cam.FocalMm);
+	qDebug("ViewportPx.X %i",cam.ViewportPx.X());
+	qDebug("ViewportPx.Y %i",cam.ViewportPx.Y());
+	qDebug("CenterPx.X %f",cam.CenterPx[0]);
+	qDebug("CenterPx.Y %f",cam.CenterPx[1]);
+	qDebug("DistortedCenterPx.X %f",cam.DistorCenterPx[0]);
+	qDebug("DistortedCenterPx.Y %f",cam.DistorCenterPx[1]);
+	qDebug("PixelSizeMm.X %f",cam.PixelSizeMm[0]);
+	qDebug("PixelSizeMm.Y %f",cam.PixelSizeMm[1]);
+	qDebug("k1 %f",cam.k[0]);
+	qDebug("k2 %f",cam.k[1]);
+	qDebug("Tra %f %f %f",shot.Extrinsics.Tra().X(),shot.Extrinsics.Tra().Y(),shot.Extrinsics.Tra().Z());
+	for(int i=0;i<4;i++)
+		qDebug("Rot %f %f %f %f", (shot.Extrinsics.Rot())[i][0],(shot.Extrinsics.Rot())[i][1],(shot.Extrinsics.Rot())[i][2],(shot.Extrinsics.Rot())[i][3] );
+	
+	align->shot=shot;
+	return result;
 }
 

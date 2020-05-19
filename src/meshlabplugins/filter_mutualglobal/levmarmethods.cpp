@@ -28,17 +28,17 @@ bool LevmarMethods::calibrate( vcg::Shot<float>* shot,std::list<LevmarCorrelatio
 
     if(createDataSet(corr,shot,data,x,opts,info))
 	{
-//		int n= corr->size()*2;
-//		if(!p_foc){
-//			int m=6;
+		int n= corr->size()*2;
+		if(!p_foc){
+			int m=6;
 
-//			//my_ret_val = dlevmar_dif(estimateExtr, p,x,m,n,1000,opts,info,NULL,NULL,data); OKKIO
-//		}
-//		else{
-//			int m=1;
+			//my_ret_val = dlevmar_dif(estimateExtr, p,x,m,n,1000,opts,info,NULL,NULL,data); OKKIO
+		}
+		else{
+			int m=1;
 
-//			//my_ret_val = dlevmar_dif(estimateFocal, p,x,m,n,100000,opts,info,NULL,NULL,data); OKKIO
-//		}
+			//my_ret_val = dlevmar_dif(estimateFocal, p,x,m,n,100000,opts,info,NULL,NULL,data); OKKIO
+		}
 
 		Levmar2Shot(shot,p,p_foc);
 		vcg::Matrix44f rot = shot->Extrinsics.Rot();
