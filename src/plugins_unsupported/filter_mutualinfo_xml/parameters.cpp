@@ -206,7 +206,7 @@ vcg::Shot<float> Parameters::toShot(bool scale) {
   Shot shot = reference;
   if(use_focal) {
     double fov = reference.Intrinsics.FocalMm;  
-    //double h = reference.Intrinsics.ViewportPx[0]*reference.Intrinsics.PixelSizeMm[0];
+    double h = reference.Intrinsics.ViewportPx[0]*reference.Intrinsics.PixelSizeMm[0];
     //double f = h/fov;
     //f += _p[6]/100;
     //shot.Intrinsics.FocalMm = h/f;
@@ -249,7 +249,7 @@ void Parameters::scramble(double *_p, bool rescale) {
     double dist = (center - reference.Extrinsics.Tra()).Norm();
     //initial fov
     double fov = reference.Intrinsics.FocalMm;
-    //double h = reference.Intrinsics.ViewportPx[0]*reference.Intrinsics.PixelSizeMm[0];
+    double h = reference.Intrinsics.ViewportPx[0]*reference.Intrinsics.PixelSizeMm[0];
 
     /*double f = h/fov;
     f += _p[6]/100;
@@ -262,9 +262,9 @@ void Parameters::scramble(double *_p, bool rescale) {
     fcenter[0] = 0; fcenter[1] = 0;
     fcenter = reference.ConvertCameraToWorldCoordinates(fcenter);
 
-    //Point3f view = reference.Extrinsics.Tra();
+    Point3f view = reference.Extrinsics.Tra();
     //view = center + (view - center)*ratio;
-    //Point3f diff = view - (center + (view - center)*ratio);
+    Point3f diff = view - (center + (view - center)*ratio);
 
     _p[2] += ratio*dist; 
 

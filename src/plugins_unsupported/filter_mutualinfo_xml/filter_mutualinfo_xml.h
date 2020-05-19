@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -23,55 +23,20 @@
 
 #ifndef FILTER_MUTUALINFO_H
 #define FILTER_MUTUALINFO_H
-
 #include <QObject>
-
 #include <common/interfaces.h>
 #include "alignset.h"
 
-
-
-class QScriptEngine;
-
-class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
+class FilterMutualInfoPluginXML	: public MeshLabFilterInterface
 {
 	Q_OBJECT
-	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
-	Q_INTERFACES(MeshFilterInterface)
-
+	MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
+	Q_INTERFACES(MeshLabFilterInterface)
 public:
-
-	enum {FP_IMAGE_MUTUALINFO} ;
-
-	FilterMutualInfoPlugin();
-
-	virtual QString pluginName() const;
-
-	QString filterName(FilterIDType filter) const;
-	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
-	FILTER_ARITY filterArity(QAction *) const;
-	void initParameterSet(QAction *, MeshDocument &, RichParameterSet & /*parent*/);
-	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const;
-
+	FilterMutualInfoPluginXML(): MeshLabFilterInterface(),align() {}
+	bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
+	bool initGL();
 private:
 	AlignSet align;
-
-	//mutualInfo
-	bool imageMutualInfoAlign(
-			MeshDocument &md,
-			int rendmode,
-			bool estimateFocal,
-			bool fine,
-			float expectedVariance,
-			float tolerance,
-			int numIterations,
-			int backGroundWeight,
-			vcg::Shotf shot);
-
-	bool initGLMutualInfo();
 };
-
-
 #endif

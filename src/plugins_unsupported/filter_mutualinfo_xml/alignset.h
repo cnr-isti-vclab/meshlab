@@ -34,7 +34,7 @@ class AlignSet {
   vcg::Shot<float> shot;
   vcg::Box3<float> box;
   QList<PointCorrespondence*> *correspList; //List that includes corresponces involving the model
-
+  double error; //alignment error in px
 
   //GLuint vbo, nbo, cbo, ibo;  // vertex buffer object (vertices, normals, colors indices)
 
@@ -44,7 +44,6 @@ class AlignSet {
   RenderingMode mode;
 
   unsigned char *target, *render; //buffers for rendered images 
-  double error; //alignment error in px
 
   AlignSet();
   ~AlignSet();

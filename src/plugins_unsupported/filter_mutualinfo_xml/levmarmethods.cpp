@@ -56,7 +56,7 @@ CREATE DATA SET
 Modify data,x, opts and info(?)
 *********************************************/
 //TOGLIERE SHOT DAI PARAMETRI!
-bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* /*corr*/,vcg::Shot<float>* /*s*/, LevmarData* /*data*/, double* /*x*/,double /*opts*/[LM_OPTS_SZ],double /*info*/[LM_INFO_SZ])
+bool LevmarMethods::createDataSet(std::list<LevmarCorrelation>* corr,vcg::Shot<float>* s, LevmarData* data, double* x,double opts[LM_OPTS_SZ],double info[LM_INFO_SZ])
 {	
 	bool my_ret_val=false;
 	// OKKIO!!!
@@ -174,7 +174,7 @@ void LevmarMethods::Levmar2Shot(vcg::Shot<float>* shot,  double *p,bool p_foc) {
 		shot->Intrinsics.FocalMm=p[0];
 }
 
-void LevmarMethods::Cam2Levmar(vcg::Shot<float> */*s*/){
+void LevmarMethods::Cam2Levmar(vcg::Shot<float> *s){
 	
 	//cp.Ncx = s->Intrinsics.ViewportPx.X();	// [sel]     Number of sensor elements in camera's x direction //
 	//cp.Nfx = s->Intrinsics.ViewportPx.X();	// [pix]     Number of pixels in frame grabber's x direction   //
@@ -194,7 +194,7 @@ void LevmarMethods::Cam2Levmar(vcg::Shot<float> */*s*/){
 }
 
 //Estimate only extrinsics.
-void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *data)
+void LevmarMethods::estimateExtr(double *p, double *x, int m, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
 	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;
@@ -221,7 +221,7 @@ void LevmarMethods::estimateExtr(double *p, double *x, int /*m*/, int n, void *d
 }
 
 //Estimate only the focal.
-void LevmarMethods::estimateFocal(double *p, double *x, int /*m*/, int n, void *data)
+void LevmarMethods::estimateFocal(double *p, double *x, int m, int n, void *data)
 {
 	vcg::Point3f** ptr = ((LevmarData*) data)->points3d;
 	vcg::Shot<float>* levmarCam = ((LevmarData*) data)->levmarCam;
