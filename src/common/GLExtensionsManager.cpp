@@ -30,6 +30,10 @@ void GLExtensionsManager::init()
     glewInitialized = false;
 }
 
+/**
+ * @brief initializes the GL extensions context, without thorwing any exception
+ * @return true if the context has been correctly initializes, false otherwise
+ */
 bool GLExtensionsManager::initializeGLextensions_notThrowing()
 {
     GLenum err = GLEW_OK;
@@ -48,6 +52,10 @@ bool GLExtensionsManager::initializeGLextensions_notThrowing()
 
 }
 
+/**
+ * @brief initializes the GL extensions context, thorwing a MLException if something
+ * wrong happens during the initialization.
+ */
 void GLExtensionsManager::initializeGLextensions()
 {
     if (!glewInitialized) {

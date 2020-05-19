@@ -378,7 +378,7 @@ void AmbientOcclusionPlugin::initGL(vcg::CallBackPos *cb, unsigned int numVertic
 {
     //******* INIT GLEW ********/
     cb(0, "Initializing: Glew and Hardware Capabilities");
-    if (GLExtensionsManager::initializeGLextensions_notThrowing())
+    if (!GLExtensionsManager::initializeGLextensions_notThrowing())
     {
         Log(GLLogStream::SYSTEM, "Error initializing OpenGL extensions");
         errInit = true;
