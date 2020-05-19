@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *   
+* This program is free software; you can redistribute it and/or modify      *
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,68 +20,68 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+/****************************************************************************
+  History
+$Log: sampleplugins.h,v $
+Revision 1.2  2006/11/29 00:59:21  cignoni
+Cleaned plugins interface; changed useless help class into a plain string
 
-#ifndef FILTER_MUTUALGLOBAL_H
-#define FILTER_MUTUALGLOBAL_H
+Revision 1.1  2006/09/25 09:24:39  e_cerisoli
+add sampleplugins
+
+****************************************************************************/
+
+#ifndef FILTER_MUTUALINFO_H
+#define FILTER_MUTUALINFO_H
 
 #include <QObject>
 
 #include <common/interfaces.h>
 #include "alignset.h"
 
+
+
 class QScriptEngine;
 
-class FilterMutualGlobalPlugin : public QObject, public MeshFilterInterface
+class FilterMutualInfoPlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
 	Q_INTERFACES(MeshFilterInterface)
 
 public:
+	enum { FP_IMAGE_GLOBALIGN} ;
 
-	enum {FP_IMAGE_GLOBALIGN} ;
+	FilterMutualInfoPlugin();
 
-	FilterMutualGlobalPlugin();
-
-	virtual QString pluginName() const;
+	virtual QString pluginName(void) const { return "FilterMutualInfoPlugin"; }
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
-	FilterClass getClass(QAction *a);
-	FILTER_ARITY filterArity(QAction *) const;
 	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
 	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition(QAction*) const;
+	int postCondition(QAction*) const { return MeshModel::MM_NONE; };
+	FilterClass getClass(QAction *a);
 	QString filterScriptFunctionName(FilterIDType filterID);
-
-private:
-	//mutualGlobal
-	bool imageGlobalAlign(
-			MeshDocument &md,
-			float thresDiff,
-			bool preAlign,
-			int maxRefinementSteps,
-			bool estimateFocal,
-			bool fine,
-			int rendmode);
-
-	//mutualGlobal utility functions
-	bool preAlignment(
-			MeshDocument &md,
-			bool estimateFocal,
-			bool fine,
-			int rendmode);
-
+	bool preAlignment(MeshDocument &md, RichParameterSet & par, vcg::CallBackPos *cb);
 	std::vector<SubGraph> buildGraph(MeshDocument &md, bool globalign=true);
-	std::vector<AlignPair> calcPairs(MeshDocument &md, bool globalign=true);
-	std::vector<SubGraph> createGraphs(MeshDocument &md, std::vector<AlignPair> arcs);
-	bool alignGlobal(MeshDocument &md, std::vector<SubGraph> graphs);
+	std::vector<AlignPair> CalcPairs(MeshDocument &md, bool globalign=true);
+	std::vector<SubGraph> CreateGraphs(MeshDocument &md, std::vector<AlignPair> arcs);
+	bool AlignGlobal(MeshDocument &md, std::vector<SubGraph> graphs);
 	int getTheRightNode(SubGraph graph);
-	bool alignNode(MeshDocument &md, Node node);
+	bool AlignNode(MeshDocument &md, Node node);
 	bool allActive(SubGraph graph);
-	bool updateGraph(MeshDocument &md, SubGraph graph, int n);
+	bool UpdateGraph(MeshDocument &md, SubGraph graph, int n);
 	float calcShotsDifference(MeshDocument &md, std::vector<vcg::Shotf> oldShots, std::vector<vcg::Point3f> points);
-	bool initGLGlobalAlign();
+	FILTER_ARITY filterArity(QAction *) const { return SINGLE_MESH; }
+
+
+
+
+
+
+	void initGL();
+
 };
 
 
