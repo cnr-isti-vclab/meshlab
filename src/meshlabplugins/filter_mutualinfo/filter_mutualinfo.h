@@ -51,7 +51,7 @@ public:
 	QString filterInfo(FilterIDType filter) const;
 	FilterClass getClass(QAction *a);
 	FILTER_ARITY filterArity(QAction *) const;
-	void initParameterSet(QAction *,MeshDocument & md, RichParameterSet & /*parent*/);
+	void initParameterSet(QAction *, MeshDocument &, RichParameterSet & /*parent*/);
 	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
 	int postCondition(QAction*) const;
 

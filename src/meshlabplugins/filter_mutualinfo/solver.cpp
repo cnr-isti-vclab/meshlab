@@ -100,6 +100,7 @@ double Solver::operator()(int ndim, double *x) {
          info += m;
        }
      }
+       break;
    case AlignSet::COLOR:
    case AlignSet::SILHOUETTE: {
     align->renderScene(shot,0);
@@ -356,6 +357,7 @@ void Solver::value(double *_p, double *x, int m, int n, void *data) {
          //cout << "info: " << info << endl;
        }
      }
+      break;
    case AlignSet::COLOR:
    case AlignSet::SILHOUETTE: {
     align->renderScene(shot,0);
@@ -541,7 +543,7 @@ int Solver::levmar(AlignSet *_align, MutualInfo *_mutual, Shot &shot) {
 //}
 
 template<class Correlation>
-double Solver::calculateError(std::list<Correlation> *corrs, Shot &shot){
+double Solver::calculateError(std::list<Correlation> */*corrs*/, Shot &/*shot*/){
         typename std::list<Correlation>::iterator it_c;
 
     //shot.Intrinsics.ViewportPx.X()/(double) shot.Intrinsics.ViewportPx.Y();

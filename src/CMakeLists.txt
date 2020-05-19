@@ -222,7 +222,6 @@ else()
         meshlabplugins/filter_mls
         meshlabplugins/filter_mutualglobal
         meshlabplugins/filter_mutualinfo
-        meshlabplugins/filter_mutualinfo_xml
         meshlabplugins/filter_plymc
         meshlabplugins/filter_qhull
         meshlabplugins/filter_quality

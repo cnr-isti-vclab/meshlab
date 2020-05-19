@@ -86,7 +86,7 @@ MeshFilterInterface::FILTER_ARITY FilterMutualInfoPlugin::filterArity(QAction*) 
 	return SINGLE_MESH;
 }
 
-void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & md, RichParameterSet & parlst) 
+void FilterMutualInfoPlugin::initParameterSet(QAction *action,MeshDocument & /*md*/, RichParameterSet & parlst)
 {
 	QStringList rendList;
 	rendList.push_back("Combined");
