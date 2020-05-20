@@ -43,9 +43,7 @@ HEADERS += \
     layerDialog.h \
     stdpardialog.h \
     ml_std_par_dialog.h \
-    xmlstdpardialog.h \
     additionalgui.h \
-    xmlgeneratorgui.h \
     snapshotsetting.h \
     ml_render_gui.h \
     ml_rendering_actions.h \
@@ -70,9 +68,7 @@ SOURCES += \
     changetexturename.cpp \
     stdpardialog.cpp \
     ml_std_par_dialog.cpp \
-    xmlstdpardialog.cpp \
     additionalgui.cpp \
-    xmlgeneratorgui.cpp \
     ml_render_gui.cpp \
     ml_rendering_actions.cpp \
     ml_default_decorators.cpp \

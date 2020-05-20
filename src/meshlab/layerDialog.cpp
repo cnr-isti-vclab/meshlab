@@ -36,6 +36,7 @@ $Log: stdpardialog.cpp,v $
 #include "mainwindow.h"
 #include "ui_layerDialog.h"
 #include "layerDialog.h"
+#include "../common/mlexception.h"
 
 using namespace std;
 

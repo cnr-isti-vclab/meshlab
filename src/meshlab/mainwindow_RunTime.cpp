@@ -32,7 +32,6 @@
 #include "savemaskexporter.h"
 #include "alnParser.h"
 #include <exception>
-#include "xmlgeneratorgui.h"
 #include "filterthread.h"
 #include "ml_default_decorators.h"
 
@@ -50,6 +49,7 @@
 #include "../common/meshlabdocumentbundler.h"
 #include "../common/mlapplication.h"
 #include "../common/filterscript.h"
+#include "../common/mlexception.h"
 
 extern "C" {
 #include "jhead.h"
@@ -118,27 +118,6 @@ void MainWindow::createStdPluginWnd()
     connect(GLA(),SIGNAL(glareaClosed()),stddialog,SLOT(closeClick()));
 }
 
-void MainWindow::createXMLStdPluginWnd()
-{
-    //checks if a MeshlabStdDialog is already open and closes it
-    if (xmldialog!=nullptr){
-        xmldialog->close();
-        delete xmldialog;
-    }
-    xmldialog = new MeshLabXMLStdDialog(this);
-    //Ask filterParametersEvaluated to add current filter to filterHistory
-    connect(xmldialog,SIGNAL(filterParametersEvaluated(const QString&,const QMap<QString,QString>&)),meshDoc()->filterHistory,SLOT(addExecutedXMLFilter(const QString&,const QMap<QString,QString>& )));
-    //connect(xmldialog,SIGNAL(dialogEvaluateExpression(const Expression&,Value**)),this,SLOT(evaluateExpression(const Expression&,Value**)),Qt::DirectConnection);
-    xmldialog->setAllowedAreas (  Qt::NoDockWidgetArea);
-    //addDockWidget(Qt::RightDockWidgetArea,xmldialog);
-    //stddialog->setAttribute(Qt::WA_DeleteOnClose,true);
-    xmldialog->setFloating(true);
-    xmldialog->hide();
-    connect(GLA(),SIGNAL(glareaClosed()),this,SLOT(updateStdDialog()));
-    connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(closeClick()));
-    //connect(GLA(),SIGNAL(glareaClosed()),xmldialog,SLOT(close()));
-}
-
 // When we switch the current model (and we change the active window)
 // we have to close the stddialog.
 // this one is called when user switch current window.
@@ -149,21 +128,6 @@ void MainWindow::updateStdDialog()
             if(stddialog->curModel != meshDoc()->mm()){
                 stddialog->curgla=0; // invalidate the curgla member that is no more valid.
                 stddialog->close();
-            }
-        }
-    }
-}
-
-// When we switch the current model (and we change the active window)
-// we have to close the stddialog.
-// this one is called when user switch current window.
-void MainWindow::updateXMLStdDialog()
-{
-    if(xmldialog!=0){
-        if(GLA()!=0){
-            if(xmldialog->curModel != meshDoc()->mm()){
-                xmldialog->resetPointers(); // invalidate the curgla member that is no more valid.
-                xmldialog->close();
             }
         }
     }
@@ -448,41 +412,6 @@ void MainWindow::updateMenus()
 
         showInfoPaneAct->setChecked(GLA()->infoAreaVisible);
         showTrackBallAct->setChecked(GLA()->isTrackBallVisible());
-
-//WARNING!!!! It may be useful
-/* RenderMode rendtmp;
-if (meshDoc()->meshList.size() > 0)
-{
-    QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->meshList[0]->id());
-    if (it == GLA()->rendermodemap.end())
-        throw MeshLabException("Something really bad happened. Mesh id has not been found in rendermodemap.");
-    rendtmp = it.value();
-}
-bool checktext = (rendtmp.textureMode != GLW::TMNone);
-int ii = 0;
-while(ii < meshDoc()->meshList.size())
-{
-    if (meshDoc()->meshList[ii] == NULL)
-        return;
-    QMap<int,RenderMode>::iterator it = GLA()->rendermodemap.find(meshDoc()->meshList[ii]->id());
-    if (it == GLA()->rendermodemap.end())
-        throw MeshLabException("Something really bad happened. Mesh id has not been found in rendermodemap.");
-    RenderMode& rm = it.value();
-    if (rendtmp.drawMode != rm.drawMode)
-        rendtmp.setDrawMode(vcg::GLW::DMNone);
-
-    if (rendtmp.colorMode != rm.colorMode)
-        rendtmp.setColorMode(vcg::GLW::CMNone);
-
-    checktext &= (rm.textureMode != GLW::TMNone);
-
-    rendtmp.setLighting(rendtmp.lighting && rm.lighting);
-    rendtmp.setFancyLighting(rendtmp.fancyLighting && rm.fancyLighting);
-    rendtmp.setDoubleFaceLighting(rendtmp.doubleSideLighting && rm.doubleSideLighting);
-    rendtmp.setBackFaceCull(rendtmp.backFaceCull || rm.backFaceCull);
-    ++ii;
-}*/
-/////////////////////////////
 
         // Decorator Menu Checking and unChecking
         // First uncheck and disable all the decorators
@@ -1160,13 +1089,6 @@ void MainWindow::startFilter()
         // just to be sure...
         createStdPluginWnd();
 
-        if (xmldialog != nullptr)
-        {
-            xmldialog->close();
-            delete xmldialog;
-            xmldialog = nullptr;
-        }
-
         // (2) Ask for filter parameters and eventually directly invoke the filter
         // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
         // if no dialog is created the filter must be executed immediately
@@ -1181,102 +1103,6 @@ void MainWindow::startFilter()
             meshDoc()->filterHistory->filtparlist.append(tmp);
         }
     }
-    else // NEW XML PHILOSOPHY
-    {
-        try
-        {
-            MeshLabFilterInterface *iXMLFilter = qobject_cast<MeshLabFilterInterface *>(action->parent());
-            QString fname = action->text();
-            fname.replace("&","");
-            MeshLabXMLFilterContainer& filt  = PM.stringXMLFilterMap[fname];
-
-            if ((iXMLFilter == NULL) || (filt.xmlInfo == NULL) || (filt.act == NULL))
-                throw MLException("An invalid MLXMLPluginInfo handle has been detected in startFilter function.");
-            QString filterClasses = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterClass);
-            QStringList filterClassesList = filterClasses.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-            if(filterClassesList.contains("MeshCreation"))
-            {
-                qDebug("MeshCreation");
-                meshDoc()->addNewMesh("","untitled.ply");
-            }
-            else
-            {
-                QString preCond = filt.xmlInfo->filterAttribute(fname,MLXMLElNames::filterPreCond);
-                QStringList preCondList = preCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-                int preCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(preCondList);
-                if (!MeshLabFilterInterface::arePreCondsValid(preCondMask,(*meshDoc()->mm()),missingPreconditions))
-                {
-                    QString enstr = missingPreconditions.join(",");
-                    QMessageBox::warning(this, tr("PreConditions' Failure"), QString("Warning the filter <font color=red>'" + fname + "'</font> has not been applied.<br>"
-                        "Current mesh does not have <i>" + enstr + "</i>."));
-                    return;
-                }
-            }
-            //INIT PARAMETERS WITH EXPRESSION : Both are defined inside the XML file
-
-            //Inside the MapList there are QMap<QString,QString> containing info about parameters. In particular:
-            // "type" - "Boolean","Real" etc
-            // "name" - "parameter name"
-            // "defaultExpression" - "defExpression"
-            // "help" - "parameter help"
-            // "typeGui" - "ABSPERC_GUI" "CHECKBOX_GUI" etc
-            // "label" - "gui label"
-            // Depending to the typeGui could be inside the map other info:
-            // for example for ABSPERC_GUI there are also
-            // "minExpr" - "minExpr"
-            // "maxExpr" - "maxExpr"
-
-            MLXMLPluginInfo::XMLMapList params = filt.xmlInfo->filterParametersExtendedInfo(fname);
-
-
-            /*****IMPORTANT NOTE******/
-            //the popContext will be called:
-            //- or in the executeFilter if the filter will be executed
-            //- or in the close Event of stdDialog window if the filter will NOT be executed
-            //- or in the catch exception if something went wrong during parsing/scanning
-
-            try
-            {
-
-                if(currentViewContainer())
-                {
-                    if (iXMLFilter)
-                        iXMLFilter->setLog(currentViewContainer()->LogPtr());
-                    currentViewContainer()->LogPtr()->SetBookmark();
-                }
-                // just to be sure...
-                createXMLStdPluginWnd();
-                if (stddialog != nullptr)
-                {
-                    stddialog->close();
-                    delete stddialog;
-                    stddialog = nullptr;
-                }
-                // (2) Ask for filter parameters and eventually directly invoke the filter
-                // showAutoDialog return true if a dialog have been created (and therefore the execution is demanded to the apply event)
-                // if no dialog is created the filter must be executed immediatel
-                if(!xmldialog->showAutoDialog(filt,PM,meshDoc(),  this, GLA()))
-                {
-                    /*Mock Parameters (there are no ones in the filter indeed) for the filter history.The filters with parameters are inserted by the applyClick of the XMLStdParDialog.
-                    That is the only place where I can easily evaluate the parameter values without writing a long, boring and horrible if on the filter type for the correct evaluation of the expressions contained inside the XMLWidgets*/
-                    QMap<QString,QString> mock;
-                    meshDoc()->filterHistory->addExecutedXMLFilter(fname,mock);
-
-                    executeFilter(&filt, mock, false);
-                    meshDoc()->Log.Log(GLLogStream::SYSTEM,"OUT OF SCOPE\n");
-                }
-                //delete env;
-            }
-            catch (const MLException& e)
-            {
-                meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
-            }
-        }
-        catch(const ParsingException& e)
-        {
-            meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
-        }
-    }//else
 
 }//void MainWindow::startFilter()
 
@@ -1634,244 +1460,6 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
 		mvc->updateAllDecoratorsForAllViewers();
 		mvc->updateAllViewers();
 	}
-}
-
-void MainWindow::initDocumentMeshRenderState(MeshLabXMLFilterContainer* /*mfc*/)
-{
-    /* if (env.isNull())
-    throw MeshLabException("Critical error in initDocumentMeshRenderState: Env object inside the QSharedPointer is NULL");*/
-    //if (meshDoc() == NULL)
-    //    return;
-
-    //QString fname = mfc->act->text();
-    //QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity);
-
-    //if ((ar == MLXMLElNames::singleMeshArity)&& (meshDoc()->mm() != NULL))
-    //{
-
-    //    QTime tt;
-    //    tt.start();
-    //    meshDoc()->renderState().add(meshDoc()->mm()->id(),meshDoc()->mm()->cm);
-    //    GLA()->Logf(0,"Elapsed time %d\n",tt.elapsed());
-    //    return;
-    //}
-
-    //if (ar == MLXMLElNames::fixedArity)
-    //{
-    //    Env env;
-    //    QScriptValue val = env.loadMLScriptEnv(*meshDoc(),PM);
-    //    EnvWrap envwrap(env);
-    //    //I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
-    //    MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
-    //    for(int ii = 0;ii < params.size();++ii)
-    //    {
-    //        if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
-    //        {
-    //            try
-    //            {
-    //                MeshModel* tmp = envwrap.evalMesh(params[ii][MLXMLElNames::paramName]);
-    //                if (tmp != NULL)
-    //                    meshDoc()->renderState().add(tmp->id(),tmp->cm);
-    //            }
-    //            catch (ExpressionHasNotThisTypeException&)
-    //            {
-    //                QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-    //                meshDoc()->Log.Logf(GLLogStream::FILTER, qUtf8Printable(st));
-    //            }
-    //        }
-    //    }
-    //    return;
-    //}
-
-    ////In this case I can only copy all the meshes in the document!
-    //if (ar == MLXMLElNames::variableArity)
-    //{
-    //    for(int ii = 0;ii<meshDoc()->meshList.size();++ii)
-    //        meshDoc()->renderState().add(meshDoc()->meshList[ii]->id(),meshDoc()->meshList[ii]->cm);
-    //    return;
-    //}
-}
-
-void MainWindow::initDocumentRasterRenderState(MeshLabXMLFilterContainer* /*mfc*/)
-{
-    //if (meshDoc() == NULL)
-    //    return;
-    //QString fname = mfc->act->text();
-    //QString ar = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterRasterArity);
-
-    //if ((ar == MLXMLElNames::singleRasterArity)&& (meshDoc()->rm() != NULL))
-    //{
-    //    meshDoc()->renderState().add(meshDoc()->rm()->id(),*meshDoc()->rm());
-    //    return;
-    //}
-
-    //if (ar == MLXMLElNames::fixedRasterArity)
-    //{
-    //    // TO DO!!!!!! I have to add RasterType in order to understand which are the parameters working on Raster!!!
-
-    //    //	//I have to check which are the meshes requested as parameters by the filter. It's disgusting but there is not other way.
-    //    //	MLXMLPluginInfo::XMLMapList params = mfc->xmlInfo->filterParameters(fname);
-    //    //	for(int ii = 0;ii < params.size();++ii)
-    //    //	{
-    //    //		if (params[ii][MLXMLElNames::paramType] == MLXMLElNames::meshType)
-    //    //		{
-    //    //			try
-    //    //			{
-    //    //				MeshModel* tmp = env.evalMesh(params[ii][MLXMLElNames::paramName]);
-    //    //				if (tmp != NULL)
-    //    //					meshDoc()->renderState().add(tmp->id(),tmp->cm);
-    //    //			}
-    //    //			catch (ExpressionHasNotThisTypeException& e)
-    //    //			{
-    //    //				QString st = "parameter " + params[ii][MLXMLElNames::paramName] + "declared of type mesh contains a not mesh value.\n";
-    //    //				meshDoc()->Log.Logf(GLLogStream::FILTER, qUtf8Printable(st));
-    //    //			}
-    //    //		}
-    //    //	}
-    //    return;
-    //}
-
-    ////In this case I can only copy all the meshes in the document!
-    //if (ar == MLXMLElNames::variableRasterArity)
-    //{
-    //    for(int ii = 0;meshDoc()->rasterList.size();++ii)
-    //        if (meshDoc()->rasterList[ii] != NULL)
-    //            meshDoc()->renderState().add(meshDoc()->rasterList[ii]->id(),*meshDoc()->rasterList[ii]);
-    //    return;
-    //}
-}
-
-void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString,QString>& parexpval , bool  ispreview)
-{
-    if (mfc == NULL)
-        return;
-    MeshLabFilterInterface         *iFilter    = mfc->filterInterface;
-    bool jscode = (mfc->xmlInfo->filterScriptCode(mfc->act->text()) != "");
-    bool filtercpp = (iFilter != NULL) && (!jscode);
-
-    if ((!filtercpp) && (!jscode))
-        throw MLException("A not-C++ and not-JaveScript filter has been invoked.There is something really wrong in MeshLab.");
-
-    QString fname = mfc->act->text();
-    fname.replace("&","");
-    QString postCond = mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterPostCond);
-    QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-    int postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-    /*if (postCondMask != MeshModel::MM_NONE)
-    initDocumentMeshRenderState(mfc);
-
-    initDocumentRasterRenderState(mfc);
-    */
-    if(!ispreview)
-        meshDoc()->Log.ClearBookmark();
-    else
-        meshDoc()->Log.BackToBookmark();
-
-    qb->show();
-    if (filtercpp)
-        iFilter->setLog(&meshDoc()->Log);
-
-    //// Ask for filter requirements (eg a filter can need topology, border flags etc)
-    //// and satisfy them
-    qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-    MainWindow::globalStatusBar()->showMessage("Starting Filter...",5000);
-    //int req=iFilter->getRequirements(action);
-    meshDoc()->mm()->updateDataMask(postCondMask);
-    qApp->restoreOverrideCursor();
-
-    //// (3) save the current filter and its parameters in the history
-    //if(!isPreview)
-    //{
-    //	meshDoc()->filterHistory.actionList.append(qMakePair(action->text(),params));
-    //	meshDoc()->Log.ClearBookmark();
-    //}
-    //else
-    //	meshDoc()->Log.BackToBookmark();
-    //// (4) Apply the Filter
-
-
-
-    qApp->setOverrideCursor(QCursor(Qt::WaitCursor));
-    bool isinter = (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterIsInterruptible) == "true");
-
-    if(!isinter) meshDoc()->setBusy(true);
-
-    //RichParameterSet MergedEnvironment(params);
-    //MergedEnvironment.join(currentGlobalParams);
-
-    ////GLA() is only the parent
-    xmlfiltertimer.restart();
-
-    /*if (filtercpp)
-    {
-    QGLWidget* filterWidget = new QGLWidget(GLA());
-    QGLFormat defForm = QGLFormat::defaultFormat();
-    iFilter->glContext = new QGLContext(defForm,filterWidget->context()->device());
-    iFilter->glContext->create(filterWidget->context());
-    }*/
-    try
-    {
-        MLXMLPluginInfo::XMLMapList ml = mfc->xmlInfo->filterParametersExtendedInfo(fname);
-		QString funcall = MLXMLUtilityFunctions::completeFilterProgrammingName(MLXMLUtilityFunctions::pluginsNameSpace(), mfc->xmlInfo->pluginAttribute(MLXMLElNames::pluginScriptName), mfc->xmlInfo->filterAttribute(fname, MLXMLElNames::filterScriptFunctName)) + "(";
-        if (mfc->xmlInfo->filterAttribute(fname,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity && !jscode)
-        {
-            funcall = funcall + QString::number(meshDoc()->mm()->id());
-            if (ml.size() != 0)
-                funcall = funcall + ",";
-        }
-        for(int ii = 0;ii < ml.size();++ii)
-        {
-            funcall = funcall + parexpval[ml[ii][MLXMLElNames::paramName]];
-            if (ii != ml.size() - 1)
-                funcall = funcall + ",";
-        }
-        funcall = funcall + ");";
-        
-        meshDoc()->xmlhistory << funcall;
-		meshDoc()->meshDocStateData().clear();
-		meshDoc()->meshDocStateData().create(*meshDoc());
-
-        if (filtercpp)
-        {
-            enableDocumentSensibleActionsContainer(false);
-            FilterThread* ft = new FilterThread(fname,parexpval,PM,*(meshDoc()),this);
-
-            connect(ft,SIGNAL(finished()),this,SLOT(postFilterExecution()));
-            connect(ft,SIGNAL(threadCB(const int, const QString&)),this,SLOT(updateProgressBar(const int,const QString&)));
-            connect(xmldialog,SIGNAL(filterInterrupt(const bool)),PM.stringXMLFilterMap[fname].filterInterface,SLOT(setInterrupt(const bool)));
-            
-            /*if ((_mw != NULL) && (_mw->currentViewContainer() != NULL))
-            {    
-                QGLWidget* tmpglwid = new QGLWidget(NULL,currentViewContainer()->sharedDataContext());
-                filtercpp->glContext = new MLPluginGLContext(QGLFormat::defaultFormat(),tmpglwid->context()->device(),(*currentViewContainer()->sharedDataContext()));
-                bool res = it->filterInterface->glContext->create(tmpglwid->context());
-            }*/
-            ft->start();
-        }
-        else
-        {
-            QElapsedTimer t;
-            t.start();
-            Env env;
-			QMap<QString, QString> persistentparam;
-			foreach(RichParameter* rp, currentGlobalPars().paramList)
-			{
-				if (rp != NULL)
-					persistentparam[rp->name] = RichParameterAdapter::convertToStringValue(*rp);
-			}
-
-			env.loadMLScriptEnv(*meshDoc(), PM, persistentparam);
-            QScriptValue result = env.evaluate(funcall);
-            scriptCodeExecuted(result,t.elapsed(),"");
-            postFilterExecution();
-
-        }
-    }
-    catch(const MLException& e)
-    {
-        meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
-    }
-
 }
 
 void MainWindow::postFilterExecution()
@@ -3350,12 +2938,6 @@ void MainWindow::showLayerDlg(bool visible)
         showLayerDlgAct->setChecked(visible);
     }
 }
-void MainWindow::showXMLPluginEditorGui()
-{
-    if(GLA() != 0)
-        plugingui->setVisible( !plugingui->isVisible() );
-}
-
 
 void MainWindow::setCustomize()
 {
@@ -3504,50 +3086,6 @@ void MainWindow::updateTexture(int meshid)
 void MainWindow::updateProgressBar( const int pos,const QString& text )
 {
     this->QCallBack(pos,qUtf8Printable(text));
-}
-
-//void MainWindow::evaluateExpression(const Expression& exp,Value** res )
-//{
-//	try
-//	{
-//		PM.env.pushContext();
-//		*res = exp.eval(&PM.env);
-//		PM.env.popContext();
-//	}
-//	catch (ParsingException& e)
-//	{
-//		GLA()->Logf(GLLogStream::WARNING,e.what());
-//	}
-//}
-void MainWindow::updateDocumentScriptBindings()
-{
-    if(currentViewContainer())
-    {
-        plugingui->setDocument(meshDoc());
-        //PM.updateDocumentScriptBindings(*meshDoc());
-    }
-}
-
-void MainWindow::loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname)
-{
-    if ((xmldialog != NULL) && (xmldialog->isVisible()))
-        this->xmldialog->close();
-    PM.deleteXMLPlugin(scriptname);
-    try
-    {
-        PM.loadXMLPlugin(xmlpath);
-    }
-    catch (MeshLabXMLParsingException& e)
-    {
-        qDebug() << e.what();
-    }
-    fillFilterMenu();
-    initSearchEngine();
-}
-
-void MainWindow::sendHistory()
-{
-    plugingui->getHistory(meshDoc()->xmlhistory);
 }
 
 //WARNING!!!! Probably it's useless
@@ -4048,8 +3586,6 @@ void MainWindow::switchCurrentContainer(QMdiSubWindow * subwin)
 		updateLayerDialog();
 		updateMenus();		
 		updateStdDialog();
-		updateXMLStdDialog();
-		updateDocumentScriptBindings();
 	}
 }
 

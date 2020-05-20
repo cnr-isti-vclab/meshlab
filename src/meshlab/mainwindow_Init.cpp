@@ -26,6 +26,7 @@
 #include "../common/xmlfilterinfo.h"
 #include "../common/searcher.h"
 #include "../common/mlapplication.h"
+#include "../common/mlexception.h"
 
 #include <QToolBar>
 #include <QProgressBar>
@@ -102,7 +103,6 @@ MainWindow::MainWindow()
 	createMenus();
 	gpumeminfo = new vcg::QtThreadSafeMemoryInfo(mwsettings.maxgpumem);
 	stddialog = 0;
-	xmldialog = 0;
 	setAcceptDrops(true);
 	mdiarea->setAcceptDrops(true);
 	setWindowTitle(MeshLabApplication::shortName());
@@ -118,23 +118,9 @@ MainWindow::MainWindow()
     nvgpumeminfo->setStyleSheet(" QProgressBar { background-color: #d0d0d0; border: 2px solid grey; border-radius: 0px; text-align: center; }"
                                 " QProgressBar::chunk {background-color: #80c080; width: 1px;}");
 	statusBar()->addPermanentWidget(nvgpumeminfo, 0);
-	//updateMenus();
 	newProject();
-	//PM should be initialized before passing it to PluginGeneratorGUI
-	plugingui = new PluginGeneratorGUI(PM, this);
-	plugingui->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::LeftDockWidgetArea, plugingui);
 	updateCustomSettings();
-	connect(plugingui, SIGNAL(scriptCodeExecuted(const QScriptValue&, const int, const QString&)), this, SLOT(scriptCodeExecuted(const QScriptValue&, const int, const QString&)));
-	connect(plugingui, SIGNAL(insertXMLPluginRequested(const QString&, const QString&)), this, SLOT(loadAndInsertXMLPlugin(const QString&, const QString&)));
-	connect(plugingui, SIGNAL(historyRequest()), this, SLOT(sendHistory()));
-	//QWidget* wid = reinterpret_cast<QWidget*>(ar->parent());
-	//wid->showMaximized();
-	//ar->update();
 
-	//qb->setAutoClose(true);
-	//qb->setMinimumDuration(0);
-	//qb->reset();
 	connect(this, SIGNAL(updateLayerTable()), this, SLOT(updateLayerDialog()));
 	connect(layerDialog, SIGNAL(removeDecoratorRequested(QAction*)), this, SLOT(switchOffDecorator(QAction*)));
 }

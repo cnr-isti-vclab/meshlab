@@ -26,8 +26,6 @@ set(SOURCES
     saveSnapshotDialog.cpp
     savemaskexporter.cpp
     stdpardialog.cpp
-    xmlgeneratorgui.cpp
-    xmlstdpardialog.cpp
     ${VCGDIR}/wrap/gui/trackball.cpp
     ${VCGDIR}/wrap/gui/trackmode.cpp
     ${VCGDIR}/wrap/gui/coordinateframe.cpp)
@@ -54,8 +52,6 @@ set(HEADERS
     savemaskexporter.h
     snapshotsetting.h
     stdpardialog.h
-    xmlgeneratorgui.h
-    xmlstdpardialog.h
     ${VCGDIR}/wrap/gui/trackball.h
     ${VCGDIR}/wrap/gui/trackmode.h
     ${VCGDIR}/wrap/gl/trimesh.h)

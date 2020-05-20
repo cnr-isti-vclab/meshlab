@@ -26,9 +26,7 @@
 #include "ui_filterScriptDialog.h"
 #include "filterScriptDialog.h"
 #include "mainwindow.h"
-
-//using namespace vcg;
-
+#include "../common/mlexception.h"
 
 FilterScriptDialog::FilterScriptDialog(QWidget * parent)
 		:QDialog(parent)
@@ -181,13 +179,14 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	
 	QString filtername = ui->scriptListWidget->currentItem()->text();
     FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.at(currentRow);
-    if (pair->filterName() == filtername)
-        if (!pair->isXMLFilter())
+    if (pair->filterName() == filtername) {
+        if (!pair->isXMLFilter()) {
             editOldParameters(currentRow);
-        else 
-            editXMLParameters(currentRow);
-    else
+        }
+    }
+    else {
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
+    }
 }
 
 FilterScriptDialog::~FilterScriptDialog()
@@ -244,27 +243,4 @@ void FilterScriptDialog::editOldParameters( const int row )
         //keep the changes	
         old->pair.second = newParameterSet;
     }
-}
-
-void FilterScriptDialog::editXMLParameters( const int row )
-{
-    if(row == -1)
-        return;
-    MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
-
-    if(NULL == mainWindow)
-        throw MLException("FilterScriptDialog::editXMLParameters : problem casting parent of filterscriptdialog to main window");
-    
-    QString fname = ui->scriptListWidget->currentItem()->text();
-    XMLFilterNameParameterValuesPair* xmlparval = reinterpret_cast<XMLFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
-
-    QMap<QString,MeshLabXMLFilterContainer>::iterator it = mainWindow->PM.stringXMLFilterMap.find(fname);
-    if (it == mainWindow->PM.stringXMLFilterMap.end())
-    {
-        QString err = "FilterScriptDialog::editXMLParameters : filter " + fname + " has not been found.";
-        throw MLException(err);
-    }
-
-    OldScriptingSystemXMLParamDialog xmldialog(xmlparval->pair.second,it.value(),mainWindow->PM,mainWindow->meshDoc(),mainWindow,this,mainWindow->GLA());
-    xmldialog.exec();
 }
