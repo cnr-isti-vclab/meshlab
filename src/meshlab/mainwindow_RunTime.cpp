@@ -1267,12 +1267,12 @@ void MainWindow::startFilter()
                 }
                 //delete env;
             }
-            catch (MLException& e)
+            catch (const MLException& e)
             {
                 meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
             }
         }
-        catch(ParsingException e)
+        catch(const ParsingException& e)
         {
             meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
         }
@@ -1615,7 +1615,7 @@ void MainWindow::executeFilter(QAction *action, RichParameterSet &params, bool i
         updateSharedContextDataAfterFilterExecution(postCondMask,fclasses,newmeshcreated);
         meshDoc()->meshDocStateData().clear();
     }
-    catch (std::bad_alloc& bdall)
+    catch (const std::bad_alloc& bdall)
     {
         meshDoc()->setBusy(false);
         qApp->restoreOverrideCursor();
@@ -1867,7 +1867,7 @@ void MainWindow::executeFilter(MeshLabXMLFilterContainer* mfc,const QMap<QString
 
         }
     }
-    catch(MLException& e)
+    catch(const MLException& e)
     {
         meshDoc()->Log.Log(GLLogStream::SYSTEM,e.what());
     }
