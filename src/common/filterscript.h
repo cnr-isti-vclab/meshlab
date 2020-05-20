@@ -34,25 +34,17 @@ class QDomElement;
 class FilterNameParameterValuesPair
 {
 public:
-	virtual QString filterName() const = 0;
-	virtual ~FilterNameParameterValuesPair() {}
-};
-
-class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
-{
-public:
-	~XMLFilterNameParameterValuesPair() {}
-	QString filterName() const { return pair.first; }
-	QPair< QString, QMap<QString, QString> > pair;
-};
-
-class OldFilterNameParameterValuesPair : public FilterNameParameterValuesPair
-{
-public:
-	~OldFilterNameParameterValuesPair() {}
-	QString filterName() const { return pair.first; }
+	virtual QString filterName() const { return pair.first; }
 	QPair< QString, RichParameterSet > pair;
 };
+
+//class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
+//{
+//public:
+//	~XMLFilterNameParameterValuesPair() {}
+//	QString filterName() const { return pair.first; }
+//	QPair< QString, QMap<QString, QString> > pair;
+//};
 
 /*
 The filterscipt class abstract the concept of history of processing.
@@ -73,8 +65,8 @@ public:
 	QList< FilterNameParameterValuesPair* > filtparlist;
 	typedef QList< FilterNameParameterValuesPair* >::iterator iterator;
 
-public slots:
-	void addExecutedXMLFilter(const QString& name, const QMap<QString, QString>& parvalue);
+//public slots:
+	//void addExecutedXMLFilter(const QString& name, const QMap<QString, QString>& parvalue);
 };
 
 #endif

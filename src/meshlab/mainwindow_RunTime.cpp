@@ -789,7 +789,7 @@ void MainWindow::runFilterScript()
         if (meshDoc()->mm() != NULL)
             meshDoc()->mm()->updateDataMask(req);
         iFilter->setLog(&meshDoc()->Log);
-        OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
+        FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         RichParameterSet &parameterSet = old->pair.second;
 
         for(int i = 0; i < parameterSet.paramList.size(); i++)
@@ -978,7 +978,7 @@ void MainWindow::startFilter()
             executeFilter(action, dummyParSet, false);
 
             //Insert the filter to filterHistory
-            OldFilterNameParameterValuesPair* tmp = new OldFilterNameParameterValuesPair();
+            FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();
             tmp->pair = qMakePair(action->text(), dummyParSet);
             meshDoc()->filterHistory->filtparlist.append(tmp);
         }

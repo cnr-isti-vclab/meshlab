@@ -199,7 +199,7 @@ void MeshlabStdDialog::applyClick()
 	//we don't need to reapply the filter to the mesh
 	if ((q != nullptr) && (curMeshDoc != nullptr) && (curMeshDoc->filterHistory != nullptr))
 	{
-		OldFilterNameParameterValuesPair* oldpair = new OldFilterNameParameterValuesPair();
+		FilterNameParameterValuesPair* oldpair = new FilterNameParameterValuesPair();
 		oldpair->pair = qMakePair(q->text(), curParSet);
 		curMeshDoc->filterHistory->filtparlist.append(oldpair);
 	}

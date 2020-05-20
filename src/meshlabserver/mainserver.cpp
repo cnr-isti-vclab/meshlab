@@ -352,7 +352,7 @@ public:
             //defined in the script file.
             RichParameterSet required;
             iFilter->initParameterSet(action,meshDocument,required);
-            OldFilterNameParameterValuesPair* pairold = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
+            FilterNameParameterValuesPair* pairold = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
             RichParameterSet &parameterSet = pairold->pair.second;
 
             //The parameters in the script file are more than the required parameters of the filter. The script file is not correct.

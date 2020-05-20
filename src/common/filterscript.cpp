@@ -52,7 +52,7 @@ QDomDocument FilterScript::xmlDoc()
 
     for(FilterScript::iterator ii=filtparlist.begin();ii!= filtparlist.end();++ii)
     {
-        OldFilterNameParameterValuesPair* oldpv = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
+        FilterNameParameterValuesPair* oldpv = reinterpret_cast<FilterNameParameterValuesPair*>(*ii);
         QDomElement tag = doc.createElement("filter");
         QPair<QString,RichParameterSet>& pair = oldpv->pair;
         tag.setAttribute(QString("name"),pair.first);
@@ -121,32 +121,11 @@ bool FilterScript::open(QString filename)
                 //FilterParameter::addQDomElement(par,np);
                 par.paramList.push_back(rp);
             }
-            OldFilterNameParameterValuesPair* tmp = new OldFilterNameParameterValuesPair();
+            FilterNameParameterValuesPair* tmp = new FilterNameParameterValuesPair();
             tmp->pair = qMakePair(name,par);
-            filtparlist.append(tmp);
-        }        
-        else
-        {
-            QString name=nf.attribute("name");
-            qDebug("Reading filter with name %s", qUtf8Printable(name));
-            QMap<QString,QString> map;
-            for(QDomElement np = nf.firstChildElement("xmlparam"); !np.isNull(); np = np.nextSiblingElement("xmlparam"))
-                map[np.attribute("name")] = np.attribute("value");
-            XMLFilterNameParameterValuesPair* tmp = new XMLFilterNameParameterValuesPair();
-            tmp->pair = qMakePair(name,map);
             filtparlist.append(tmp);
         }
     }
 
     return true;
 }
-
-void FilterScript::addExecutedXMLFilter( const QString& name,const QMap<QString,QString>& parvalue )
-{
-    XMLFilterNameParameterValuesPair* tmp = new XMLFilterNameParameterValuesPair();
-    tmp->pair = qMakePair(name,parvalue);
-    filtparlist.append(tmp);
-}
-
-
-

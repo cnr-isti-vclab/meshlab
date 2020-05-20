@@ -198,7 +198,7 @@ void FilterScriptDialog::editOldParameters( const int row )
         return;
     QString actionName = ui->scriptListWidget->currentItem()->text();
 
-    OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
+    FilterNameParameterValuesPair* old = reinterpret_cast<FilterNameParameterValuesPair*>(scriptPtr->filtparlist.at(row));
      RichParameterSet oldParameterSet = old->pair.second;
     //get the main window
     MainWindow *mainWindow = qobject_cast<MainWindow*>(parentWidget());
