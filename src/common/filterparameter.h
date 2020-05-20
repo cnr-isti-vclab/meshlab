@@ -35,46 +35,8 @@
 #include <vcg/math/shot.h>
 #include <wrap/callback.h>
 
-#include "xmlfilterinfo.h"
-
 class MeshModel;
 class MeshDocument;
-
-//enum TypeId {BOOL,INT,FLOAT,STRING,MATRIX44F,POINT3F,COLOR,ENUM,MESH,GROUP,FILENAME};
-//
-//class Binding
-//{
-//public:
-//	TypeId tid;
-//	QString name;
-//	QString value;
-//};
-//
-//class BindingSet
-//{
-//public:
-//	QList<Binding> binds;
-//
-//	bool declare(const TypeId id,const QString& nm,const QString& val);
-//};
-//
-//class Environment
-//{
-//public:
-//	BindingSet globals;
-//	BindingSet locals;
-//
-//	int evalInt(const QString& val,bool& conv) const;
-//	float evalFloat(const QString& val,bool& conv) const;
-//	bool evalBool(const QString& val,bool& conv) const;
-//};
-//
-//class Decoration
-//{
-//public:
-//	QString fieldDesc;
-//	QString tooltip;
-//};
 
 class Value
 {
@@ -292,38 +254,6 @@ private:
 };
 
 /*************************/
-
-//class ParameterDeclaration
-//{
-//public:
-//	const QString name;
-//	Value* val;
-//
-//	virtual void accept(Visitor& v) = 0;
-//	virtual bool operator==(const ParameterDeclaration& rp) = 0;
-//	virtual ~RichParameter();
-//};
-//
-//class BoolDeclaration
-//{
-//public:
-//	BoolDeclaration(const QString nm,const bool defval);
-//	bool operator==(const ParameterDeclaration& rp);
-//	void accept(Visitor& v);
-//	~BoolDeclaration();
-//};
-//
-//class IntDeclaration
-//{
-//public:
-//	IntDeclaration(const QString nm,const bool defval);
-//	bool operator==(const ParameterDeclaration& rp);
-//	void accept(Visitor& v);
-//	~IntDeclaration();
-//};
-
-
-/******************************/
 
 class ParameterDecoration
 {
@@ -630,10 +560,6 @@ public:
 class RichMesh : public RichParameter
 {
 public:
-
-	//lastCreated = new RichMesh(pd.name, pd.val->getMesh(), dec->defVal->getMesh(), dec->meshdoc, dec->fieldDesc, dec->tooltip, pd.isDerivedFromXMLParam());
-	//else
-	//	lastCreated = new RichMesh(pd.name, dec->meshindex, pd.isDerivedFromXMLParam());
 	RichMesh(const QString& nm, MeshModel* defval, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
 	RichMesh(const QString& nm, MeshModel* val, MeshModel* defval, MeshDocument* doc, const QString& desc = QString(), const QString& tltip = QString());
 
