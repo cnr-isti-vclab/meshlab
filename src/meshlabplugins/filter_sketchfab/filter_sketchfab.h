@@ -8,7 +8,7 @@
 *                                                                    \      *
 * All rights reserved.                                                      *
 *                                                                           *
-* This program is free software; you can redistribute it and/or modify      *
+* This program is free software; you can redistribute it and/or modify      *   
 * it under the terms of the GNU General Public License as published by      *
 * the Free Software Foundation; either version 2 of the License, or         *
 * (at your option) any later version.                                       *
@@ -20,38 +20,70 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
-#ifndef FILTER_SKETCHFAB_H
-#define FILTER_SKETCHFAB_H
+
+#ifndef FILTERSKETCHFAB_H
+#define FILTERSKETCHFAB_H
 
 #include <common/interfaces.h>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include <QHttpPart>
 
-class FilterSketchFabPlugin : public MeshLabFilterInterface
+class FilterSketchFabPlugin : public QObject, public MeshFilterInterface
 {
-    Q_OBJECT
-    MESHLAB_PLUGIN_IID_EXPORTER(MESHLAB_FILTER_INTERFACE_IID)
-    Q_INTERFACES(MeshLabFilterInterface)
+	Q_OBJECT
+	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
+	Q_INTERFACES(MeshFilterInterface)
 
 public:
-    bool applyFilter( const QString& filterName,MeshDocument& md,EnvWrap& env, vcg::CallBackPos * cb );
-    bool upload();
-    bool uploadCompleteFlag;
+	enum { FP_SKETCHFAB  } ;
+
+	FilterSketchFabPlugin();
+
+	virtual QString pluginName(void) const;
+	QString filterName(FilterIDType filter) const;
+	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *a);
+	FILTER_ARITY filterArity(QAction *a) const;
+	int getPreConditions(QAction *) const;
+	int postCondition( QAction* ) const;
+	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
+	bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
+
 public slots:
-    void finished();
-    void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
+	void finished();
+	void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 private:
-    QString apiToken;
-    QString description;
-    QString name;
-    QString tags;
-    QString zipFileName;
-    QString sketchfabModelUrl;
-    QString isPrivate;
-    QString isPublished;
-    vcg::CallBackPos * fcb;
+	bool sketchfab(
+			MeshDocument &md,
+			vcg::CallBackPos* cb,
+			const QString& apiToken,
+			const QString&,
+			const QString&,
+			const QString&,
+			bool,
+			bool,
+			bool);
+
+	bool upload(
+			const QString& zipFileName,
+			const QString& apiToken,
+			const QString& name,
+			const QString& description,
+			const QString& tags,
+			const QString& isPrivate,
+			const QString& isPublished,
+			std::string& urlModel);
+
+	QHttpPart part_parameter(QString key, QString value);
+
+	int saveMeshZip(
+			const std::string& fileName,
+			const std::string& internalName,
+			const std::string& zipName);
+
+	bool uploadCompleteFlag;
+	vcg::CallBackPos * fcb;
+
 };
 
-#endif
+#endif //FILTERSKETCHFAB_H
