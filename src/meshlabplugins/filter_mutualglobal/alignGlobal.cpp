@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "alignGlobal.h"
-#include <QtScript>
 
 #include "alignset.h"
 #include "solver.h"

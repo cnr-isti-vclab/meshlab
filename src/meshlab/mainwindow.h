@@ -42,7 +42,6 @@
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"
 
-#include <QtScript>
 #include <QDir>
 #include <QMainWindow>
 #include <QMdiArea>

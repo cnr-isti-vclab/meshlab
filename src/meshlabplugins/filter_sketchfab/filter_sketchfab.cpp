@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "filter_sketchfab.h"
-#include <QtScript>
 #include <QHttpMultiPart>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>

@@ -23,7 +23,6 @@
 
 #include "filter_mutualinfo.h"
 #include <common/GLExtensionsManager.h>
-#include <QtScript>
 
 #include "alignset.h"
 

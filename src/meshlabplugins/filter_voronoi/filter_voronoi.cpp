@@ -22,7 +22,6 @@
 ****************************************************************************/
 
 #include "filter_voronoi.h"
-#include <QtScript>
 
 #include<vcg/complex/algorithms/voronoi_processing.h>
 #include<vcg/complex/algorithms/update/curvature.h>
