@@ -29,7 +29,7 @@
 #include "GLLogStream.h"
 //#include "meshmodel.h"
 #include "scriptinterface.h"
-#include "xmlfilterinfo.h"
+//#include "xmlfilterinfo.h"
 
 #include <QtCore>
 #include <QApplication>

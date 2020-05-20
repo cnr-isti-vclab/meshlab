@@ -52,38 +52,19 @@ QDomDocument FilterScript::xmlDoc()
 
     for(FilterScript::iterator ii=filtparlist.begin();ii!= filtparlist.end();++ii)
     {
-        if (!(*ii)->isXMLFilter())
+        OldFilterNameParameterValuesPair* oldpv = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
+        QDomElement tag = doc.createElement("filter");
+        QPair<QString,RichParameterSet>& pair = oldpv->pair;
+        tag.setAttribute(QString("name"),pair.first);
+        RichParameterSet &par=pair.second;
+        QList<RichParameter*>::iterator jj;
+        RichParameterXMLVisitor v(doc);
+        for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
         {
-            OldFilterNameParameterValuesPair* oldpv = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
-            QDomElement tag = doc.createElement("filter");
-            QPair<QString,RichParameterSet>& pair = oldpv->pair;
-            tag.setAttribute(QString("name"),pair.first);
-            RichParameterSet &par=pair.second;
-            QList<RichParameter*>::iterator jj;
-            RichParameterXMLVisitor v(doc);
-            for(jj=par.paramList.begin();jj!=par.paramList.end();++jj)
-            {
-                (*jj)->accept(v);
-                tag.appendChild(v.parElem);
-            }
-            root.appendChild(tag);
+            (*jj)->accept(v);
+            tag.appendChild(v.parElem);
         }
-        else
-        {   
-            XMLFilterNameParameterValuesPair* xmlpv = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
-            QDomElement tag = doc.createElement("xmlfilter");
-            QPair<QString, QMap<QString,QString> >& pair = xmlpv->pair;
-            tag.setAttribute(QString("name"),pair.first);
-            QMap<QString,QString>& tmpmap = pair.second;
-            for(QMap<QString,QString>::const_iterator itm = tmpmap.constBegin();itm != tmpmap.constEnd();++itm)
-            {
-                QDomElement partag = doc.createElement("xmlparam");
-                partag.setAttribute("name",itm.key());
-                partag.setAttribute("value",itm.value());
-                tag.appendChild(partag);
-            }
-            root.appendChild(tag);
-        }
+        root.appendChild(tag);
     }
     return doc;
 }

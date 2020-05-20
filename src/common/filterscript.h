@@ -35,7 +35,6 @@ class FilterNameParameterValuesPair
 {
 public:
 	virtual QString filterName() const = 0;
-	virtual bool isXMLFilter() const = 0;
 	virtual ~FilterNameParameterValuesPair() {}
 };
 
@@ -43,7 +42,6 @@ class XMLFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
 	~XMLFilterNameParameterValuesPair() {}
-	bool isXMLFilter() const { return true; }
 	QString filterName() const { return pair.first; }
 	QPair< QString, QMap<QString, QString> > pair;
 };
@@ -52,7 +50,6 @@ class OldFilterNameParameterValuesPair : public FilterNameParameterValuesPair
 {
 public:
 	~OldFilterNameParameterValuesPair() {}
-	bool isXMLFilter() const { return false; }
 	QString filterName() const { return pair.first; }
 	QPair< QString, RichParameterSet > pair;
 };
