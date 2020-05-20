@@ -782,216 +782,96 @@ void MainWindow::runFilterScript()
         QString filtnm = (*ii)->filterName();
         int classes = 0;
         int postCondMask = 0;
-        if (!(*ii)->isXMLFilter())
+        QAction *action = PM.actionFilterMap[ filtnm];
+        MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+
+        int req=iFilter->getRequirements(action);
+        if (meshDoc()->mm() != NULL)
+            meshDoc()->mm()->updateDataMask(req);
+        iFilter->setLog(&meshDoc()->Log);
+        OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
+        RichParameterSet &parameterSet = old->pair.second;
+
+        for(int i = 0; i < parameterSet.paramList.size(); i++)
         {
-            QAction *action = PM.actionFilterMap[ filtnm];
-            MeshFilterInterface *iFilter = qobject_cast<MeshFilterInterface *>(action->parent());
+            //get a modifieable reference
+            RichParameter* parameter = parameterSet.paramList[i];
 
-            int req=iFilter->getRequirements(action);
-            if (meshDoc()->mm() != NULL)
-                meshDoc()->mm()->updateDataMask(req);
-            iFilter->setLog(&meshDoc()->Log);
-            OldFilterNameParameterValuesPair* old = reinterpret_cast<OldFilterNameParameterValuesPair*>(*ii);
-            RichParameterSet &parameterSet = old->pair.second;
-
-            for(int i = 0; i < parameterSet.paramList.size(); i++)
+            //if this is a mesh paramter and the index is valid
+            if(parameter->val->isMesh())
             {
-                //get a modifieable reference
-                RichParameter* parameter = parameterSet.paramList[i];
-
-                //if this is a mesh paramter and the index is valid
-                if(parameter->val->isMesh())
-                {
-                    RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
-                    if( md->meshindex < meshDoc()->size() &&
+                RichMesh* md = reinterpret_cast<RichMesh*>(parameter);
+                if( md->meshindex < meshDoc()->size() &&
                         md->meshindex >= 0  )
-                    {
-                        RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
-                        parameterSet.paramList.replace(i,rmesh);
-                    } else
-                    {
-                        printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
-                        printf("One of the filters in the script needs more meshes than you have loaded.\n");
-                        return;
-                    }
-                    delete parameter;
+                {
+                    RichMesh* rmesh = new RichMesh(parameter->name,md->meshindex,meshDoc());
+                    parameterSet.paramList.replace(i,rmesh);
+                } else
+                {
+                    printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), md->meshindex );
+                    printf("One of the filters in the script needs more meshes than you have loaded.\n");
+                    return;
+                }
+                delete parameter;
+            }
+        }
+        //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
+
+        bool created = false;
+        MLSceneGLSharedDataContext* shar = NULL;
+        if (currentViewContainer() != NULL)
+        {
+            shar = currentViewContainer()->sharedDataContext();
+            //GLA() is only the parent
+            QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
+            QGLFormat defForm = QGLFormat::defaultFormat();
+            iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
+            created = iFilter->glContext->create(filterWidget->context());
+            shar->addView(iFilter->glContext);
+            MLRenderingData dt;
+            MLRenderingData::RendAtts atts;
+            atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
+            atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
+
+
+            if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+            {
+                MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
+                if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+                {
+                    dt.set(pm,atts);
+                    shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
                 }
             }
-            //iFilter->applyFilter( action, *(meshDoc()->mm()), (*ii).second, QCallBack );
-
-            bool created = false;
-            MLSceneGLSharedDataContext* shar = NULL;
-            if (currentViewContainer() != NULL)
+            else
             {
-                shar = currentViewContainer()->sharedDataContext();
-                //GLA() is only the parent
-                QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
-                QGLFormat defForm = QGLFormat::defaultFormat();
-                iFilter->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-                created = iFilter->glContext->create(filterWidget->context());
-                shar->addView(iFilter->glContext);    
-                MLRenderingData dt;
-                MLRenderingData::RendAtts atts;
-                atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-                atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-
-                
-                if (iFilter->filterArity(action) == MeshFilterInterface::SINGLE_MESH)
+                for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
                 {
-                    MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-                    if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
+                    MeshModel* mm = meshDoc()->meshList[ii];
+                    MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
+                    if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
                     {
                         dt.set(pm,atts);
-                        shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),iFilter->glContext,dt);
+                        shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
                     }
                 }
-                else
-                {
-                    for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
-                    {
-                        MeshModel* mm = meshDoc()->meshList[ii];
-                        MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-                        if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-                        {
-                            dt.set(pm,atts);
-                            shar->setRenderingDataPerMeshView(mm->id(),iFilter->glContext,dt);
-                        }
-                    }
-                }
-
             }
-            if ((!created) || (!iFilter->glContext->isValid()))
-                throw MLException("A valid GLContext is required by the filter to work.\n");
-            meshDoc()->setBusy(true);
-            //WARNING!!!!!!!!!!!!
-            /* to be changed */
-            iFilter->applyFilter( action, *meshDoc(), old->pair.second, QCallBack );
-			for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
-				vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-            meshDoc()->setBusy(false);
-            if (shar != NULL)
-                shar->removeView(iFilter->glContext); 
-            delete iFilter->glContext;
-            classes = int(iFilter->getClass(action));
-			postCondMask = iFilter->postCondition(action);
+
         }
-        else
-        {
-            MeshLabXMLFilterContainer& cont = PM.stringXMLFilterMap[ filtnm];
-            MLXMLPluginInfo* info = cont.xmlInfo;
-            MeshLabFilterInterface* cppfilt = cont.filterInterface;
-            try
-            {
-                if (cppfilt != NULL)
-                {
-                    cppfilt->setLog(&meshDoc()->Log);
-
-                    Env env ;
-					QMap<QString, QString> persistentparam;
-					foreach(RichParameter* rp, currentGlobalPars().paramList)
-					{
-						if (rp != NULL)
-							persistentparam[rp->name] = RichParameterAdapter::convertToStringValue(*rp);
-					}
-
-					QScriptValue val = env.loadMLScriptEnv(*meshDoc(), PM, persistentparam);
-                    XMLFilterNameParameterValuesPair* xmlfilt = reinterpret_cast<XMLFilterNameParameterValuesPair*>(*ii);
-                    QMap<QString,QString>& parmap = xmlfilt->pair.second;
-                    for(QMap<QString,QString>::const_iterator it = parmap.constBegin();it != parmap.constEnd();++it)
-                        env.insertExpressionBinding(it.key(),it.value());
-
-                    EnvWrap envwrap(env);
-                    MLXMLPluginInfo::XMLMapList params = info->filterParameters(filtnm);
-                    for(int i = 0; i < params.size(); ++i)
-                    {
-                        MLXMLPluginInfo::XMLMap& parinfo = params[i];
-
-                        //if this is a mesh parameter and the index is valid
-                        if(parinfo[MLXMLElNames::paramType]  == MLXMLElNames::meshType)
-                        {
-                            QString& parnm = parinfo[MLXMLElNames::paramName];
-                            MeshModel* meshmdl = envwrap.evalMesh(parnm);
-                            if( meshmdl == NULL)
-                            {
-                                //parnm is associated with ,
-                                printf("Meshes loaded: %i, meshes asked for: %i \n", meshDoc()->size(), envwrap.evalInt(parnm) );
-                                printf("One of the filters in the script needs more meshes than you have loaded.\n");
-                                return;
-                            }
-                        }
-                    }
-                    disconnect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
-                    MLSceneGLSharedDataContext* shar = NULL;
-                    bool created = false;
-                    if (currentViewContainer() != NULL)
-                    {
-                        shar = currentViewContainer()->sharedDataContext();
-                        //GLA() is only the parent
-                        QGLWidget* filterWidget = new QGLWidget(GLA(),shar);
-                        QGLFormat defForm = QGLFormat::defaultFormat();
-                        cppfilt->glContext = new MLPluginGLContext(defForm,filterWidget->context()->device(),*shar);
-                        created = cppfilt->glContext->create(filterWidget->context());
-                        
-                        MLRenderingData dt;
-                        MLRenderingData::RendAtts atts;
-                        atts[MLRenderingData::ATT_NAMES::ATT_VERTPOSITION] = true;
-                        atts[MLRenderingData::ATT_NAMES::ATT_VERTNORMAL] = true;
-
-
-                        if (info->filterAttribute(filtnm,MLXMLElNames::filterArity) == MLXMLElNames::singleMeshArity)
-                        {
-                            MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(meshDoc()->mm());
-                            if ((pm != MLRenderingData::PR_ARITY) && (meshDoc()->mm() != NULL))
-                            {
-                                dt.set(pm,atts);
-                                shar->setRenderingDataPerMeshView(meshDoc()->mm()->id(),cppfilt->glContext,dt);
-                            }
-                        }
-                        else
-                        {
-                            for(int ii = 0;ii < meshDoc()->meshList.size();++ii)
-                            {
-                                MeshModel* mm = meshDoc()->meshList[ii];
-                                MLRenderingData::PRIMITIVE_MODALITY pm = MLPoliciesStandAloneFunctions::bestPrimitiveModalityAccordingToMesh(mm);
-                                if ((pm != MLRenderingData::PR_ARITY) && (mm != NULL))
-                                {
-                                    dt.set(pm,atts);
-                                    shar->setRenderingDataPerMeshView(mm->id(),cppfilt->glContext,dt);
-                                }
-                            }
-                        }
-                    }
-                    if ((!created) || (!cppfilt->glContext->isValid()))
-                        throw MLException("A valid GLContext is required by the filter to work.\n");
-
-
-                    //WARNING!!!!!!!!!!!!
-                    /* IT SHOULD INVOKE executeFilter function. Unfortunately this function create a different thread for each invoked filter, and the MeshLab synchronization mechanisms are quite naive. Better to invoke the filters list in the same thread*/
-                    meshDoc()->setBusy(true);
-                    cppfilt->applyFilter( filtnm, *meshDoc(), envwrap, QCallBack );
-					for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
-						vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
-                    meshDoc()->setBusy(false);
-                    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    if ((currentViewContainer() != NULL) && (currentViewContainer()->sharedDataContext() != NULL))
-                        currentViewContainer()->sharedDataContext()->removeView(cppfilt->glContext); 
-                    delete cppfilt->glContext;
-                    GLA()->completeUpdateRequested();
-                    connect(meshDoc(),SIGNAL(documentUpdated()),GLA(),SLOT(completeUpdateRequested()));
-                    QStringList filterClassesList = cont.xmlInfo->filterAttribute(filtnm,MLXMLElNames::filterClass).split(QRegExp("\\W+"), QString::SkipEmptyParts);
-                    classes = MeshLabFilterInterface::convertStringListToCategoryEnum(filterClassesList);
-					QString postCond = cont.xmlInfo->filterAttribute(filtnm, MLXMLElNames::filterPostCond);
-					QStringList postCondList = postCond.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-					postCondMask = MeshLabFilterInterface::convertStringListToMeshElementEnum(postCondList);
-                }
-                else
-                    throw MLException("WARNING! The MeshLab Script System is able to manage just the C++ XML filters.");
-            }
-            catch (MLException& e)
-            {
-                meshDoc()->Log.Log(GLLogStream::WARNING,e.what());
-            }
-        }
+        if ((!created) || (!iFilter->glContext->isValid()))
+            throw MLException("A valid GLContext is required by the filter to work.\n");
+        meshDoc()->setBusy(true);
+        //WARNING!!!!!!!!!!!!
+        /* to be changed */
+        iFilter->applyFilter( action, *meshDoc(), old->pair.second, QCallBack );
+        for (MeshModel* mm = meshDoc()->nextMesh(); mm != NULL; mm = meshDoc()->nextMesh(mm))
+            vcg::tri::Allocator<CMeshO>::CompactEveryVector(mm->cm);
+        meshDoc()->setBusy(false);
+        if (shar != NULL)
+            shar->removeView(iFilter->glContext);
+        delete iFilter->glContext;
+        classes = int(iFilter->getClass(action));
+        postCondMask = iFilter->postCondition(action);
         if (meshDoc()->mm() != NULL)
         {
             if(classes & MeshFilterInterface::FaceColoring )
@@ -999,7 +879,7 @@ void MainWindow::runFilterScript()
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_FACECOLOR);
             }
             if(classes & MeshFilterInterface::VertexColoring )
-			{
+            {
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_VERTCOLOR);
             }
             if(classes & MeshModel::MM_COLOR)
@@ -1010,11 +890,11 @@ void MainWindow::runFilterScript()
                 meshDoc()->mm()->updateDataMask(MeshModel::MM_CAMERA);
         }
 
-		bool newmeshcreated = false;
-		if (classes & MeshFilterInterface::MeshCreation)
-			newmeshcreated = true;
-		updateSharedContextDataAfterFilterExecution(postCondMask, classes, newmeshcreated);
-		meshDoc()->meshDocStateData().clear();
+        bool newmeshcreated = false;
+        if (classes & MeshFilterInterface::MeshCreation)
+            newmeshcreated = true;
+        updateSharedContextDataAfterFilterExecution(postCondMask, classes, newmeshcreated);
+        meshDoc()->meshDocStateData().clear();
 
         if(classes & MeshFilterInterface::MeshCreation)
             GLA()->resetTrackBall();
@@ -1023,8 +903,8 @@ void MainWindow::runFilterScript()
         qb->reset();
         GLA()->update();
         GLA()->Logf(GLLogStream::SYSTEM,"Re-Applied filter %s",qUtf8Printable((*ii)->filterName()));
-		if (_currviewcontainer != NULL)
-			_currviewcontainer->updateAllDecoratorsForAllViewers();
+        if (_currviewcontainer != NULL)
+            _currviewcontainer->updateAllDecoratorsForAllViewers();
     }
 }
 

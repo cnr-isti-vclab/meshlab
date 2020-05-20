@@ -180,9 +180,7 @@ void FilterScriptDialog::editSelectedFilterParameters()
 	QString filtername = ui->scriptListWidget->currentItem()->text();
     FilterNameParameterValuesPair* pair = scriptPtr->filtparlist.at(currentRow);
     if (pair->filterName() == filtername) {
-        if (!pair->isXMLFilter()) {
-            editOldParameters(currentRow);
-        }
+        editOldParameters(currentRow);
     }
     else {
         throw MLException("Something bad happened: A filter item has been selected in filterScriptDialog being NOT a XML filter or old-fashioned c++ filter.");
