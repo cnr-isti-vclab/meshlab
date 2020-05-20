@@ -7,7 +7,7 @@
 
 set(SOURCES filter_sketchfab.cpp ${VCGDIR}/wrap/ply/plylib.cpp)
 
-set(HEADERS filter_sketchfab.h)
+set(HEADERS filter_sketchfab.h miniz.h)
 
 add_library(filter_sketchfab MODULE ${SOURCES} ${HEADERS})
 
