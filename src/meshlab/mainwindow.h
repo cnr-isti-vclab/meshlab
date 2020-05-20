@@ -37,8 +37,6 @@
 #include "glarea.h"
 #include "layerDialog.h"
 #include "ml_std_par_dialog.h"
-#include "xmlstdpardialog.h"
-#include "xmlgeneratorgui.h"
 #include "multiViewer_Container.h"
 #include "ml_render_gui.h"
 
@@ -94,10 +92,6 @@ class MainWindow : public QMainWindow, public MainWindowInterface
 public:
     // callback function to execute a filter
     void executeFilter(QAction *action, RichParameterSet &srcpar, bool isPreview = false);
-    //parexpval is a string map containing the parameter expression values set in the filter's dialog.
-    //These parameter expression values will be evaluated when the filter will start.
-    void executeFilter(MeshLabXMLFilterContainer*,const QMap<QString,QString>& parexpval , bool  isPreview = false);
-
 
     MainWindow();
     ~MainWindow();
@@ -146,10 +140,7 @@ private slots:
 	void documentUpdateRequested();
     bool importMesh(QString fileName=QString(), bool isareload = false);
     void endEdit();
-    void updateDocumentScriptBindings();
-    void loadAndInsertXMLPlugin(const QString& xmlpath,const QString& scriptname);
-    void postFilterExecution(/*MeshLabXMLFilterContainer* mfc*/);
-    //void evaluateExpression(const Expression& exp,Value** res);
+    void postFilterExecution();
     void updateProgressBar(const int pos,const QString& text);
     void updateTexture(int meshid);
 public:
@@ -189,7 +180,6 @@ private slots:
     void applyLastFilter();
     void runFilterScript();
     void showFilterScript();
-    void showXMLPluginEditorGui();
     void showTooltip(QAction*);
 
     void applyRenderMode();
@@ -210,9 +200,7 @@ private slots:
     void updateSubFiltersMenu(const bool createmenuenabled,const bool validmeshdoc);
     void updateMenuItems(QMenu* menu,const bool enabled);
     void updateStdDialog();
-    void updateXMLStdDialog();
     void enableDocumentSensibleActionsContainer(const bool enable);
-    //void updatePerViewApplicationStatus();
     void setSplit(QAction *qa);
     void setUnsplit();
     void linkViewers();
@@ -239,12 +227,10 @@ private slots:
     void submitBug();
 	void sendUsAMail();
 	void checkForUpdates(bool verboseFlag=true);
-    //void updatePerViewApplicationStatus();
 
     void dropEvent ( QDropEvent * event );
     void dragEnterEvent(QDragEnterEvent *);
     void connectionDone(QNetworkReply *reply);
-    void sendHistory();
     ///////////Solt Wrapper for QMdiArea //////////////////
     void wrapSetActiveSubWindow(QWidget* window);
 	void switchCurrentContainer(QMdiSubWindow *);
@@ -259,7 +245,6 @@ private:
     int longestActionWidthInMenu( QMenu* m);
     int longestActionWidthInAllMenus();
     void createStdPluginWnd(); // this one is
-    void createXMLStdPluginWnd();
     void initGlobalParameters();
     void createActions();
     void createMenus();
@@ -272,7 +257,6 @@ private:
     void fillEditMenu();
     void createToolBars();
     void loadMeshLabSettings();
-    // void loadPlugins();
     void keyPressEvent(QKeyEvent *);
     void updateRecentFileActions();
     void updateRecentProjActions();
@@ -280,29 +264,22 @@ private:
     void saveRecentProjectList(const QString &projName);
     void addToMenu(QList<QAction *>, QMenu *menu, const char *slot);
 
-    void initDocumentMeshRenderState(MeshLabXMLFilterContainer* mfc);
-    void initDocumentRasterRenderState(MeshLabXMLFilterContainer* mfc);
 	void setCurrentMeshBestTab();
 
 
     QNetworkAccessManager *httpReq;
-    /*QBuffer myLocalBuf;*/
     int idHost;
     int idGet;
     bool VerboseCheckingFlag;
 
     MeshlabStdDialog *stddialog;
-    MeshLabXMLStdDialog* xmldialog;
     static QProgressBar *qb;
 
     QMdiArea *mdiarea;
     LayerDialog *layerDialog;
-    PluginGeneratorGUI* plugingui;
     QSignalMapper *windowMapper;
     vcg::QtThreadSafeMemoryInfo* gpumeminfo;
     QProgressBar* nvgpumeminfo;
-
-    //QMap<QThread*,Env*> envtobedeleted;
 
     /*
     Note this part should be detached from MainWindow just like the loading plugin part.
@@ -319,9 +296,6 @@ private:
 
     QDir lastUsedDirectory;  //This will hold the last directory that was used to load/save a file/project in
 
-
-    //vcg::GLW::TextureMode getBestTextureRenderModePerMesh(const int meshid);
-    //void setBestTextureModePerMesh(RenderModeAction* textact,const int meshid, RenderMode& rm);
 public:
     PluginManager PM;
 

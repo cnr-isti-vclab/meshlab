@@ -4,6 +4,7 @@
 #include "../common/scriptinterface.h"
 #include "../common/meshlabdocumentxml.h"
 #include "../common/meshlabdocumentbundler.h"
+#include "../common/mlexception.h"
 #include "filterthread.h"
 
 FilterThread* FilterThread::_cur = NULL;
