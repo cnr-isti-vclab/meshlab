@@ -20,9 +20,14 @@
 * for more details.                                                         *
 *                                                                           *
 ****************************************************************************/
+
 /****************************************************************************
-  History
+History
 $Log: sampleplugins.h,v $
+
+Revision 1,3 2020/05/20
+Reorganization of the filter, comments in doxygen format
+
 Revision 1.2  2006/11/29 00:59:21  cignoni
 Cleaned plugins interface; changed useless help class into a plain string
 
@@ -31,12 +36,12 @@ add sampleplugins
 
 ****************************************************************************/
 
-#ifndef SAMPLEFILTERSPLUGIN_H
-#define SAMPLEFILTERSPLUGIN_H
+#ifndef FILTERSAMPLE_PLUGIN_H
+#define FILTERSAMPLE_PLUGIN_H
 
 #include <common/interfaces.h>
 
-class ExtraSamplePlugin : public QObject, public MeshFilterInterface
+class FilterSamplePlugin : public QObject, public MeshFilterInterface
 {
 	Q_OBJECT
 	MESHLAB_PLUGIN_IID_EXPORTER(MESH_FILTER_INTERFACE_IID)
@@ -45,18 +50,25 @@ class ExtraSamplePlugin : public QObject, public MeshFilterInterface
 public:
 	enum { FP_MOVE_VERTEX  } ;
 
-	ExtraSamplePlugin();
+	FilterSamplePlugin();
 
-	virtual QString pluginName(void) const { return "ExtraSamplePlugin"; }
+	virtual QString pluginName(void) const;
 
 	QString filterName(FilterIDType filter) const;
 	QString filterInfo(FilterIDType filter) const;
+	FilterClass getClass(QAction *a);
+	FILTER_ARITY filterArity(QAction *) const;
+	int getPreConditions(QAction *) const;
+	int postCondition( QAction* ) const;
 	void initParameterSet(QAction *,MeshModel &/*m*/, RichParameterSet & /*parent*/);
-    bool applyFilter(QAction *filter, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb) ;
-	int postCondition( QAction* ) const {return MeshModel::MM_VERTCOORD | MeshModel::MM_FACENORMAL | MeshModel::MM_VERTNORMAL;};
-    FilterClass getClass(QAction *a);
-    FILTER_ARITY filterArity(QAction *) const {return SINGLE_MESH;}
-};
+	bool applyFilter(QAction *action, MeshDocument &md, RichParameterSet & /*parent*/, vcg::CallBackPos * cb);
 
+private:
+	bool vertexDisplacement(
+			MeshDocument &md,
+			vcg::CallBackPos *cb,
+			bool updateNormals,
+			float max_displacement);
+};
 
 #endif
